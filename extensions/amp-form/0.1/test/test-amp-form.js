@@ -152,6 +152,62 @@ describes.repeated('', {
           });
         });
       });
+
+      it('should server side render templates if enabled', () => {
+        return getAmpForm(getForm()).then(ampForm => {
+          const form = ampForm.form_;
+          const template = createElement('template');
+          template.setAttribute('type', 'amp-mustache');
+          template.content.appendChild(createTextNode('Some {{template}}'));
+          form.id = 'registration';
+          const event = {
+            stopImmediatePropagation: sandbox.spy(),
+            target: form,
+            preventDefault: sandbox.spy(),
+          };
+          let successTemplateContainer = createElement('div');
+          successTemplateContainer.setAttribute('submit-success');
+          successTemplateContainer.appendChild(template);
+
+          const emailInput = createElement('input');
+          emailInput.setAttribute('name', 'email');
+          emailInput.setAttribute('type', 'email');
+          emailInput.setAttribute('value', 'j@hnmiller.com');
+          form.appendChild(emailInput);
+          form.appendChild(successTemplateContainer);
+
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = 'https://www.xhr-action.org';
+          sandbox.stub(form, 'submit');
+          sandbox.stub(form, 'checkValidity').returns(true);
+          sandbox.stub(ampForm, 'analyticsEvent_');
+          sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(true);
+          ampForm.handleSubmitEvent_(event);
+          sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
+              .returns(
+                  Promise.resolve({
+                    response: {
+                      status: 200,
+                      json() {
+                        return Promise.resolve({
+                          renderedHtml: '<div>much success</div>'});
+                      },
+                    },
+                  }));
+          const findTemplateStub = ampForm.templates_.findAndRenderTemplate;
+          return ampForm.xhrSubmitPromiseForTesting().catch(() => {
+            expect(findTemplateStub).to.be.called;
+            // Template should have rendered an error
+            expect(findTemplateStub).to.have.been.calledWith(
+                successTemplateContainer, '<div>much success</div>');
+            // Check that form has a rendered div with class
+            // .submit-success.
+            successTemplateContainer =
+               form.querySelector('[i-amphtml-rendered]');
+            expect(successTemplateContainer).to.not.be.null;
+          });
+        });
+      });
     });
 
     it('should assert valid action-xhr when provided', () => {
