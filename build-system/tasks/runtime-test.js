@@ -32,7 +32,7 @@ const webserver = require('gulp-webserver');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {app} = require('../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {exec} = require('../exec');
+const {exec, getStdout} = require('../exec');
 const {gitDiffNameOnlyMaster} = require('../git');
 
 const {green, yellow, cyan, red, bold} = colors;
@@ -520,7 +520,7 @@ function runTests() {
     c.reporters = c.reporters.concat(['coverage-istanbul']);
     c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reports: ['html', 'text', 'text-summary', 'lcov'],
+      reports: process.env.TRAVIS ? ['lcov'] : ['html', 'text', 'text-summary'],
     };
   }
 
@@ -564,9 +564,21 @@ function runTests() {
     }
     if (argv.coverage) {
       if (process.env.TRAVIS) {
-        log(green('INFO: ') + 'Uploading code coverage report to' +
+        log(green('INFO: ') + 'Uploading code coverage report to ' +
             cyan('https://codecov.io/gh/ampproject/amphtml') + '...');
-        exec('./node_modules/.bin/codecov');
+        const codecovCmd =
+            './node_modules/.bin/codecov --file=test/coverage/lcov.info';
+        const output = getStdout(codecovCmd);
+        const viewReportPrefix = 'View report at: ';
+        const viewReport = output.match(viewReportPrefix + '.*');
+        if (viewReport && viewReport.length > 0) {
+          log(green('INFO: ') + viewReportPrefix +
+              cyan(viewReport[0].replace(viewReportPrefix, '')));
+        } else {
+          log(yellow('WARNING: ') +
+              'Code coverage report upload may have failed:\n' +
+              yellow(output));
+        }
       } else {
         const coverageReportUrl =
             'file://' + path.resolve('test/coverage/index.html');
