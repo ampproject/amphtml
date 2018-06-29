@@ -395,8 +395,8 @@ export class AmpStory extends AMP.BaseElement {
   updateViewportSizeStyles_() {
     this.vsync_.run({
       measure: state => {
-        state.vh = this.activePage_.element.clientHeight / 100;
-        state.vw = this.activePage_.element.clientWidth / 100;
+        state.vh = this.activePage_.element./*OK*/clientHeight / 100;
+        state.vw = this.activePage_.element./*OK*/clientWidth / 100;
         state.vmin = Math.min(state.vh, state.vw);
         state.vmax = Math.max(state.vh, state.vw);
       },
