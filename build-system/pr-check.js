@@ -323,7 +323,7 @@ const command = {
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
   },
-  runIntegrationTests: function(compiled) {
+  runIntegrationTests: function(compiled, coverage) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --integration --nobuild';
     if (argv.files) {
@@ -333,10 +333,13 @@ const command = {
       cmd += ' --compiled';
     }
     if (process.env.TRAVIS) {
-      timedExecOrDie(cmd + ' --coverage');
-      startSauceConnect();
-      timedExecOrDie(cmd + ' --saucelabs');
-      stopSauceConnect();
+      if (coverage) {
+        timedExecOrDie(cmd + ' --coverage');
+      } else {
+        startSauceConnect();
+        timedExecOrDie(cmd + ' --saucelabs');
+        stopSauceConnect();
+      }
     } else {
       timedExecOrDie(cmd + ' --headless');
     }
@@ -399,6 +402,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
+    command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
     // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -409,7 +413,7 @@ function runAllCommands() {
     command.buildRuntimeMinified(/* extensions */ true);
     command.runBundleSizeCheck();
     command.runPresubmitTests();
-    command.runIntegrationTests(/* compiled */ true);
+    command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
   }
 }
 
@@ -433,7 +437,7 @@ function runAllCommandsLocally() {
   command.runPresubmitTests();
   command.runVisualDiffTests();
   command.runUnitTests();
-  command.runIntegrationTests(/* compiled */ false);
+  command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
   // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
 
   // Validator tests.
@@ -582,7 +586,7 @@ function main() {
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM')) {
-      command.runIntegrationTests(/* compiled */ false);
+      command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
     }
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
