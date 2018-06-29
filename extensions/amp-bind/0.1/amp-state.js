@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -26,6 +27,10 @@ import {isJsonScriptTag} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
+import {AmpEvents} from '../../../src/amp-events';
+
+/** @type {string} */
+const TAG = 'amp-state';
 
 export class AmpState extends AMP.BaseElement {
   /** @override */
@@ -157,6 +162,8 @@ export class AmpState extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     return this.fetch_(ampdoc, this.element, isInit).then(json => {
       this.updateState_(json, isInit);
+    }, error => {
+      Services.actionServiceForDoc(this.element).trigger(this.element, 'error', AmpEvents.ERROR, ActionTrust.HIGH);
     });
   }
 
