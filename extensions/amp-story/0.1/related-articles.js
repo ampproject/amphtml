@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev, user} from '../../../src/log';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+import {getSourceOrigin, isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 
 const TAG = 'amp-story';
@@ -54,13 +54,22 @@ function buildArticleFromJson_(articleJson) {
     return null;
   }
 
-  user().assert(isProtocolValid(articleJson['url']),
-      `Unsupported protocol for article URL ${articleJson['url']}`);
+  const articleUrl = dev().assert(articleJson['url']);
+  user().assert(isProtocolValid(articleUrl),
+      `Unsupported protocol for article URL ${articleUrl}`);
+
+  let domain;
+  try {
+    domain = parseUrlDeprecated(getSourceOrigin(articleUrl)).hostname;
+  } catch (e) {
+    // Unknown path prefix in url.
+    domain = parseUrlDeprecated(articleUrl).hostname;
+  }
 
   const article = {
     title: dev().assert(articleJson['title']),
-    url: dev().assert(articleJson['url']),
-    domainName: parseUrlDeprecated(dev().assert(articleJson['url'])).hostname,
+    url: articleUrl,
+    domainName: domain,
   };
 
   if (articleJson['image']) {
@@ -84,7 +93,7 @@ export function relatedArticlesFromJson(opt_articleSetsResponse) {
         articles:
               opt_articleSetsResponse[headingKey]
                   .map(buildArticleFromJson_)
-                  .filter(a => !!a),
+                  .filter(valid => !!valid),
       };
 
       if (headingKey.trim().length) {
@@ -108,7 +117,7 @@ export function parseArticlesToClassicApi(bookendComponents) {
       articleSet.articles.push(buildArticleFromJson_(component));
     } else if (NEW_COMPONENTS.includes(component['type'])) {
       user().warn(TAG, component['type'] + ' is not supported in ' +
-      'amp-story-0.1, upgrade to v1.0 to use this feature.,');
+      'amp-story-0.1, upgrade to v1.0 to use this feature.');
     } else {
       user().warn(TAG, component['type'] + ' is not valid, ' +
       'skipping invalid.');
