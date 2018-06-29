@@ -29,6 +29,8 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
     1. If you are using iframe transport, add a new block to ANALYTICS_IFRAME_TRANSPORT_CONFIG in iframe-transport-vendors.js containing ```"transport": { "iframe": *url* }```
     1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
 reference.
+    1. A test in the [extensions/amp-analytics/0.1/test/vendor-requests.json
+    ](../../extensions/amp-analytics/0.1/test/vendor-requests.json) file.
     1. A new batch plugin if required. Please refer to [Add Batch Plugin](#add-batch-plugin) for instructions.
 1. Test the new example you put in [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html) to ensure the hits from the example are working as expected. For example, the data needed is being collected and displayed in your analytics dashboard.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
