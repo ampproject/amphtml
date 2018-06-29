@@ -73,6 +73,7 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
+  isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {
@@ -311,6 +312,11 @@ export class AmpStory extends AMP.BaseElement {
   buildCallback() {
     if (this.element.hasAttribute(Attributes.STANDALONE)) {
       this.initializeStandaloneStory_();
+    }
+
+    // Check if story is RTL.
+    if (isRTL(this.win.document)) {
+      this.storeService_.dispatch(Action.TOGGLE_RTL, true);
     }
 
     const pageEl = this.element.querySelector('amp-story-page');
@@ -939,13 +945,14 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+
     switch (e.keyCode) {
-      // TODO(newmuis): This will need to be flipped for RTL.
       case KeyCodes.LEFT_ARROW:
-        this.previous_();
+        rtlState ? this.next_() : this.previous_();
         break;
       case KeyCodes.RIGHT_ARROW:
-        this.next_();
+        rtlState ? this.previous_() : this.next_();
         break;
     }
   }
