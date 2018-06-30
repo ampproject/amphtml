@@ -224,7 +224,7 @@ function adoptShared(global, callback) {
   /**
    * @param {!./log.LogLevel} level
    */
-  global.AMP.setLogLevel = overrideLogLevel.bind(null, global);
+  global.AMP.setLogLevel = overrideLogLevel.bind(null);
 
   /**
    * Sets the function to forward tick events to.
