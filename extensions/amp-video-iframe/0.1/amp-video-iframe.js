@@ -167,6 +167,8 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @private */
   removeIframe_() {
+    this.canPlay_ = false;
+
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;

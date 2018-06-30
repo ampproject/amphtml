@@ -161,7 +161,7 @@ describes.realWin('amp-video-iframe', {
   });
 
   describe('#createPlaceholderCallback', () => {
-    it('creates an amp-img with the poster as src', function* () {
+    it('creates an amp-img with the poster as src', () => {
       const videoIframe = createVideoIframe();
 
       const placeholder =
