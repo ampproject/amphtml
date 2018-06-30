@@ -59,7 +59,7 @@ describes.realWin('amp-video-iframe', {
 
   function createVideoIframe() {
     const el = htmlFor(doc)`<amp-video-iframe layout=fill></amp-video-iframe>`;
-    addAttributesToElement(el, {src: getIframeSrc()});
+    addAttributesToElement(el, {src: getIframeSrc(), poster: 'poster.html'});
     doc.body.appendChild(el);
     return el;
   }
@@ -112,6 +112,21 @@ describes.realWin('amp-video-iframe', {
       dummySpy(tryParseJson(name));
 
       expect(dummySpy.withArgs(sinon.match(metadata))).to.have.been.calledOnce;
+    });
+  });
+
+  describe('#createPlaceholderCallback', () => {
+    it('creates an amp-img with the poster as src', function* () {
+      const videoIframe = createVideoIframe();
+
+      const placeholder =
+          videoIframe.implementation_.createPlaceholderCallback();
+
+      expect(placeholder).to.have.attribute('placeholder');
+      expect(placeholder.tagName.toLowerCase()).to.equal('amp-img');
+      expect(placeholder.getAttribute('layout')).to.equal('fill');
+      expect(placeholder.getAttribute('src')).to.equal(
+          videoIframe.getAttribute('poster'));
     });
   });
 
