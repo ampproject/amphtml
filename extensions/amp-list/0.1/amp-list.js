@@ -60,7 +60,7 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
-     * @private {?{items:!Array, resolver:!Function, rejecter:!Function}}
+     * @private {?{items:!Array, resolver:!Function, rejecter:!Function, mutate:boolean}}
      */
     this.renderItems_ = null;
 
@@ -125,7 +125,6 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.layoutCompleted_ = true;
-
     return this.fetchList_();
   }
 
@@ -133,7 +132,6 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     const state = mutations['state'];
-
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
@@ -143,7 +141,7 @@ export class AmpList extends AMP.BaseElement {
         }
       } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
-        this.scheduleRender_(items);
+        this.scheduleRender_(items, /* mutate */ true);
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
       } else {
@@ -151,7 +149,7 @@ export class AmpList extends AMP.BaseElement {
       }
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
-      this.scheduleRender_(items);
+      this.scheduleRender_(items, /* mutate */ true);
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
     }
   }
@@ -246,10 +244,11 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Schedules a fetch result to be rendered in the near future.
    * @param {!Array} items
+   * @param {boolean} mutate If true, performs DOM changes in a mutate context.
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(items) {
+  scheduleRender_(items, mutate = false) {
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
 
@@ -257,7 +256,7 @@ export class AmpList extends AMP.BaseElement {
     if (!this.renderItems_) {
       this.renderPass_.schedule();
     }
-    this.renderItems_ = {items, resolver, rejecter};
+    this.renderItems_ = {items, resolver, rejecter, mutate};
     return promise;
   }
 
@@ -277,15 +276,16 @@ export class AmpList extends AMP.BaseElement {
         this.renderItems_ = null;
       }
     };
-    this.templates_.findAndRenderTemplateArray(this.element, current.items)
+    const {items, resolver, rejecter, mutate} = current;
+    this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindingsForElements_(elements))
-        .then(elements => this.rendered_(elements))
+        .then(elements => this.render_(elements, mutate))
         .then(/* onFulfilled */ () => {
           scheduleNextPass();
-          current.resolver();
+          resolver();
         }, /* onRejected */ () => {
           scheduleNextPass();
-          current.rejecter();
+          rejecter();
         });
   }
 
@@ -331,29 +331,35 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {!Array<!Element>} elements
+   * @param {boolean} mutate If true, performs DOM changes in a mutate context.
    * @private
    */
-  rendered_(elements) {
-    removeChildren(dev().assertElement(this.container_));
-    elements.forEach(element => {
-      if (!element.hasAttribute('role')) {
-        element.setAttribute('role', 'listitem');
-      }
-      this.container_.appendChild(element);
+  render_(elements, mutate) {
+    const render = () => {
+      removeChildren(dev().assertElement(this.container_));
+      elements.forEach(element => {
+        if (!element.hasAttribute('role')) {
+          element.setAttribute('role', 'listitem');
+        }
+        this.container_.appendChild(element);
+      });
+      const event = createCustomEvent(this.win,
+          AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
+      this.container_.dispatchEvent(event);
+      // Change height if needed.
+      this.getVsync().measure(() => {
+        const scrollHeight = this.container_./*OK*/scrollHeight;
+        const height = this.element./*OK*/offsetHeight;
+        if (scrollHeight > height) {
+          this.attemptChangeHeight(scrollHeight).catch(() => {});
+        }
     });
 
-    const event = createCustomEvent(this.win,
-        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
-    this.container_.dispatchEvent(event);
-
-    // Change height if needed.
-    this.getVsync().measure(() => {
-      const scrollHeight = this.container_./*OK*/scrollHeight;
-      const height = this.element./*OK*/offsetHeight;
-      if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight).catch(() => {});
-      }
-    });
+    if (mutate) {
+      this.mutateElement(this.container_, render);
+    } else {
+      render();
+    }
   }
 
   /**
