@@ -77,7 +77,6 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
-  fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
@@ -228,33 +227,13 @@ function compile(entryModuleFilenames, outputDir,
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
-    if (options.includeOnlyESMLevelPolyfills) {
-      const polyfillsShadowList = [
-        'array-includes.js',
-        'document-contains.js',
-        'domtokenlist-toggle.js',
-        'math-sign.js',
-        'object-assign.js',
-        'promise.js',
-      ];
+    if (options.includePolyfills) {
       srcs.push(
           '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/src/polyfills.js',
-          '!src/polyfills/*.js',
-          'build/fake-polyfills/**/*.js');
-      polyfillsShadowList.forEach(polyfillFile => {
-        fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
-            'export function install() {}');
-      });
-    } else if (options.includePolyfills) {
-      srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/**/*.js',
+          '!build/fake-module/src/polyfills/**/*.js'
       );
     } else {
-      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
+      srcs.push('!src/polyfills.js');
       unneededFiles.push('build/fake-module/src/polyfills.js');
     }
     unneededFiles.forEach(function(fake) {
@@ -303,7 +282,6 @@ function compile(entryModuleFilenames, outputDir,
           'node_modules/',
           'build/patched-module/',
           'build/fake-module/',
-          'build/fake-polyfills/',
         ],
         entry_point: entryModuleFilenames,
         process_common_js_modules: true,
