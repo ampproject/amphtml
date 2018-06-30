@@ -57,8 +57,19 @@ describes.realWin('amp-video-iframe', {
       `http://iframe.localhost:${port}/test/fixtures/served/video-iframe.html`);
   }
 
-  function createVideoIframe() {
-    const el = htmlFor(doc)`<amp-video-iframe layout=fill></amp-video-iframe>`;
+  function createVideoIframe(size = null) {
+    const el = htmlFor(doc)`<amp-video-iframe></amp-video-iframe>`;
+
+    if (!size) {
+      addAttributesToElement(el, {'layout': 'fill'});
+    } else {
+      addAttributesToElement(el, {
+        'layout': 'fixed',
+        'width': size[0],
+        'height': size[1],
+      });
+    }
+
     addAttributesToElement(el, {src: getIframeSrc(), poster: 'poster.html'});
     doc.body.appendChild(el);
     return el;
@@ -112,6 +123,40 @@ describes.realWin('amp-video-iframe', {
       dummySpy(tryParseJson(name));
 
       expect(dummySpy.withArgs(sinon.match(metadata))).to.have.been.calledOnce;
+    });
+
+    it('rejects ads', () => {
+      const adSizes = [
+        [300, 250],
+        [320, 50],
+        [300, 50],
+        [320, 100],
+      ];
+
+      adSizes.forEach(size => {
+        const videoIframe = createVideoIframe(size);
+        expect(whenLoaded(videoIframe)).to.eventually.be.rejected;
+      });
+    });
+
+    it('rejects tracking iframes', () => {
+      const trackingSizes = [
+        [10, 10],
+        [9, 9],
+        [8, 8],
+        [7, 7],
+        [6, 6],
+        [5, 5],
+        [4, 4],
+        [3, 3],
+        [2, 2],
+        [1, 1],
+      ];
+
+      trackingSizes.forEach(size => {
+        const videoIframe = createVideoIframe(size);
+        expect(whenLoaded(videoIframe)).to.eventually.be.rejected;
+      });
     });
   });
 

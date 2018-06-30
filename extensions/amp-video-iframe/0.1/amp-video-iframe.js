@@ -160,6 +160,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    this.canPlay_ = false;
     this.removeIframe_();
     return true; // layout again.
   }
@@ -173,7 +174,6 @@ class AmpVideoIframe extends AMP.BaseElement {
     if (this.unlistenFrame_) {
       this.unlistenFrame_();
       this.unlistenFrame_ = null;
-      this.canPlay_ = false;
     }
   }
 
