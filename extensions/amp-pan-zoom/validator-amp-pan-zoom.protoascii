@@ -44,6 +44,10 @@ tags: {  # <amp-pan-zoom>
     name: "max-scale"
     value_regex: "[0-9]+(\\.[0-9]+)?"
   }
+  attrs: {
+    name: "reset-on-resize"
+    value: ""
+  }
   attr_lists: "extended-amp-global"
    amp_layout: {
     supported_layouts: FILL

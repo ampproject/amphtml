@@ -61,6 +61,9 @@ Specifies a default zoom scale, otherwise set to 1.
 ##### initial-x, initial-y (optional)
 Specifies default translation coordinates, otherwise both set to 0. Expected to be a whole number.
 
+##### reset-on-resize (optional)
+Reset refers to centering the image and setting it back to scale = 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.
+
 ## Events and Actions
 #### transformEnd (event)
 The `<amp-pan-zoom>` component triggers the `transformEnd` event whenever the pan or zoom animation is complete. This event will emit the parameters `scale`, `x`, and `y`. `scale` contains the current scale of the child content being zoomed. `x` and `y` respectively contain the `x` and `y` translation of the child content from center in pixels.
