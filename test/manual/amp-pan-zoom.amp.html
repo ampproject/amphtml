@@ -8,8 +8,12 @@
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script>
+    (self.AMP=self.AMP||[]).push(function(AMP){
+        AMP.toggleExperiment('amp-pan-zoom', true);
+    });
+  </script>
   <style amp-custom>
-
     .container {
       height: 600;
       width: 600;
