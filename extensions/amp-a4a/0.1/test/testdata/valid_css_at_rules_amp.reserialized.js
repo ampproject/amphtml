@@ -81,6 +81,7 @@ export const data = {
   </head>
   <body>
     <template type="amp-mustache">
+      <p>ipsum lorem</p>
       <a href="{{url}}">Click for ad!</a>
     </template>
     <script amp-ad-metadata type=application/json>

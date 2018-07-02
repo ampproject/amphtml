@@ -31,9 +31,9 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
               creativeData.templateData.data,
               this.iframe.contentWindow.document.body)
           .then(renderedElement => {
-            const {analyticsConfig} = creativeData.templateData;
-            if (analyticsConfig) {
-              templateHelper.insertAnalytics(renderedElement, analyticsConfig);
+            const {analytics} = creativeData.templateData;
+            if (analytics) {
+              templateHelper.insertAnalytics(renderedElement, analytics);
             }
             this.iframe.contentWindow.document.body./*OK*/innerHTML =
                 renderedElement./*OK*/outerHTML;
