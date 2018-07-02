@@ -647,7 +647,7 @@ function renderCloseButtonHeader(win, ampAdParent, ampLightbox) {
 function triggerLightboxClose(win, target, caller) {
   const event = createCustomEvent(win, 'tap', /* detail */ {});
   const method = 'close';
-  const args = {};
+  const args = null;
   const trust = ActionTrust.HIGH;
   Services.actionServiceForDoc(target)
       .execute(target, method, args, caller, caller, event, trust);
