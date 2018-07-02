@@ -99,6 +99,10 @@ describes.realWin('amp-list component', {
     const render = Promise.resolve(rendered);
     templatesMock.expects('findAndRenderTemplateArray')
         .withExactArgs(element, itemsToRender).returns(render).atLeast(1);
+
+    listMock.expects('mutateElement')
+        .callsFake(mutator => mutator())
+        .atLeast(1);
   }
 
   describe('without amp-bind', () => {
@@ -417,25 +421,6 @@ describes.realWin('amp-list component', {
 
         element.setAttribute('src', 'https://new.com/list.json');
         list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
-      });
-    });
-
-    it('should render in a mutate context', function*() {
-      listMock.expects('mutateElement')
-          .withArgs(sinon.match.func, list.container_)
-          .once();
-
-      const items = [{title: 'foo'}];
-      const foo = doc.createElement('div');
-      expectFetchAndRender(items, [foo]);
-
-      // Pretend that layoutCallback() was called already since amp-list will
-      // normally refuse to refetch until it happens.
-      list.layoutCompleted_ = true;
-
-      element.setAttribute('src', 'https://new.com/list.json');
-      yield list.mutatedAttributesCallback({
-        'src': 'https://new.com/list.json',
       });
     });
 

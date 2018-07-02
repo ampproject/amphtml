@@ -60,7 +60,7 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
-     * @private {?{items:!Array, resolver:!Function, rejecter:!Function, mutate:boolean}}
+     * @private {?{items:!Array, resolver:!Function, rejecter:!Function}}
      */
     this.renderItems_ = null;
 
@@ -137,20 +137,20 @@ export class AmpList extends AMP.BaseElement {
       if (typeOfSrc === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
-          return this.fetchList_(/* mutate */ true);
+          return this.fetchList_();
         }
       } else if (typeOfSrc === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
         const items = isArray(src) ? src : [src];
-        return this.scheduleRender_(items, /* mutate */ true);
+        return this.scheduleRender_(items);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
       const items = isArray(state) ? state : [state];
-      return this.scheduleRender_(items, /* mutate */ true);
+      return this.scheduleRender_(items);
     }
     return Promise.resolve();
   }
@@ -189,11 +189,10 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Request list data from `src` and return a promise that resolves when
    * the list has been populated with rendered list items.
-   * @param {boolean} mutate If true, performs DOM changes in a mutate context.
    * @return {!Promise}
    * @private
    */
-  fetchList_(mutate = false) {
+  fetchList_() {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -222,7 +221,7 @@ export class AmpList extends AMP.BaseElement {
       if (maxLen < items.length) {
         items = items.slice(0, maxLen);
       }
-      return this.scheduleRender_(items, mutate);
+      return this.scheduleRender_(items);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
     }).then(() => {
@@ -246,11 +245,10 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Schedules a fetch result to be rendered in the near future.
    * @param {!Array} items
-   * @param {boolean} mutate If true, performs DOM changes in a mutate context.
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(items, mutate = false) {
+  scheduleRender_(items) {
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
 
@@ -258,7 +256,7 @@ export class AmpList extends AMP.BaseElement {
     if (!this.renderItems_) {
       this.renderPass_.schedule();
     }
-    this.renderItems_ = {items, resolver, rejecter, mutate};
+    this.renderItems_ = {items, resolver, rejecter};
     return promise;
   }
 
@@ -278,10 +276,10 @@ export class AmpList extends AMP.BaseElement {
         this.renderItems_ = null;
       }
     };
-    const {items, resolver, rejecter, mutate} = current;
+    const {items, resolver, rejecter} = current;
     this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindingsForElements_(elements))
-        .then(elements => this.render_(elements, mutate))
+        .then(elements => this.render_(elements))
         .then(/* onFulfilled */ () => {
           scheduleNextPass();
           resolver();
@@ -333,11 +331,10 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {!Array<!Element>} elements
-   * @param {boolean} mutate If true, performs DOM changes in a mutate context.
    * @private
    */
-  render_(elements, mutate) {
-    const render = () => {
+  render_(elements) {
+    this.mutateElement(() => {
       removeChildren(dev().assertElement(this.container_));
       elements.forEach(element => {
         if (!element.hasAttribute('role')) {
@@ -356,13 +353,7 @@ export class AmpList extends AMP.BaseElement {
           this.attemptChangeHeight(scrollHeight).catch(() => {});
         }
       });
-    };
-
-    if (mutate) {
-      this.mutateElement(render, this.container_);
-    } else {
-      render();
-    }
+    }, this.container_);
   }
 
   /**
