@@ -197,8 +197,10 @@ export class Bind {
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
 
-    // Expose for debugging in the console.
-    global.AMP.printState = this.printState_.bind(this);
+    // AMP.printState() for debugging in the console.
+    if (!self.AMP.printState) {
+      self.AMP.printState = this.printState_.bind(this);
+    }
   }
 
   /** @override */
@@ -1307,6 +1309,11 @@ export class Bind {
    */
   printState_(opt_expression) {
     if (opt_expression) {
+      if (typeof opt_expression !== 'string') {
+        user().error(TAG, 'Invalid JSON expression. Example: ' +
+            'AMP.printState("foo.bar") to print current value of "foo.bar".');
+        return;
+      }
       const value = getValueForExpr(this.state_, opt_expression);
       user().info(TAG, value);
     } else {
