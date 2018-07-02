@@ -4011,9 +4011,16 @@ function validateAttrDeclaration(
           context.getRules().getStylesSpecUrl(), validationResult);
     } else {
       const cssDeclaration = cssDeclarationByName[declarationName];
-      if (cssDeclaration.valueCasei !== null) {
+      if (cssDeclaration.valueCasei.length > 0) {
+        let has_valid_value = false;
         const firstIdent = declaration.firstIdent();
-        if (firstIdent.toLowerCase() !== cssDeclaration.valueCasei) {
+        for (const value of cssDeclaration.valueCasei) {
+          if (firstIdent.toLowerCase() === value) {
+            has_valid_value = true;
+            break;
+          }
+        }
+        if (!has_valid_value) {
           // Declaration value not allowed.
           if (amp.validator.LIGHT) {
             validationResult.status =

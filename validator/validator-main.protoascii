@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 334
+min_validator_revision_required: 337
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 670
+spec_file_revision: 671
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -2719,21 +2719,9 @@ attr_lists: {
     css_declaration: {
       name: "position"
       value_casei: "absolute"
-    }
-    css_declaration: {
-      name: "position"
       value_casei: "inherit"
-    }
-    css_declaration: {
-      name: "position"
       value_casei: "initial"
-    }
-    css_declaration: {
-      name: "position"
       value_casei: "relative"
-    }
-    css_declaration: {
-      name: "position"
       value_casei: "static"
     }
     css_declaration: { name: "quotes" }
