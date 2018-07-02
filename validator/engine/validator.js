@@ -3430,8 +3430,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   // Does the tag support the computed layout?
   if (spec.ampLayout.supportedLayouts.indexOf(layout) === -1) {
     const code = layoutAttr === undefined ?
-        amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
-        amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
+      amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
+      amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
     context.addError(
         code, context.getLineCol(),
         /* params */[layout, getTagSpecName(spec)], getTagSpecUrl(spec),
@@ -3500,8 +3500,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   if (heightsAttr !== undefined &&
       layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
     const code = layoutAttr === undefined ?
-        amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
-        amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
+      amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
+      amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
     context.addError(
         code, context.getLineCol(),
         /* params */['heights', getTagSpecName(spec), layout],
@@ -4298,7 +4298,7 @@ class ParsedValidatorRules {
     this.isTagSpecCorrectHtmlFormat_ = function(tagSpec) {
       const castedHtmlFormat =
           /** @type {amp.validator.HtmlFormat.Code<string>} */ (
-              /** @type {*} */ (htmlFormat));
+          /** @type {*} */ (htmlFormat));
       return tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
     };
 
@@ -4309,7 +4309,7 @@ class ParsedValidatorRules {
     this.isCssLengthSpecCorrectHtmlFormat_ = function(cssLengthSpec) {
       const castedHtmlFormat =
           /** @type {amp.validator.HtmlFormat.Code<string>} */ (
-              /** @type {*} */ (htmlFormat));
+          /** @type {*} */ (htmlFormat));
       return cssLengthSpec.htmlFormat == castedHtmlFormat;
     };
 
@@ -5154,7 +5154,7 @@ amp.validator.Terminal = class {
  * @param {string=} opt_errorCategoryFilter
  */
 amp.validator.ValidationResult.prototype.outputToTerminal = function(
-    url, opt_terminal, opt_errorCategoryFilter) {
+  url, opt_terminal, opt_errorCategoryFilter) {
   const terminal = opt_terminal || new amp.validator.Terminal();
   const errorCategoryFilter = opt_errorCategoryFilter || null;
 
