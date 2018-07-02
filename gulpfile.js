@@ -415,7 +415,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
       // If there is a sync JS error during initial load,
       // at least try to unhide the body.
-      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+      wrapper: 'self.AMP=self.AMP||[];try{(function(_){<%= contents %>})(AMP._={})}catch(e){' +
           'setTimeout(function(){' +
           'var s=document.body.style;' +
           's.opacity=1;' +
@@ -713,7 +713,7 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
       : `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
-      `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
+      `v:"${internalRuntimeVersion}",f:(function(AMP,_){<%= contents %>\n})});`,
   }));
 }
 
