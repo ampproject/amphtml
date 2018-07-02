@@ -137,21 +137,22 @@ export class AmpList extends AMP.BaseElement {
       if (typeOfSrc === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
-          this.fetchList_();
+          return this.fetchList_(/* mutate */ true);
         }
       } else if (typeOfSrc === 'object') {
-        const items = isArray(src) ? src : [src];
-        this.scheduleRender_(items, /* mutate */ true);
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
+        const items = isArray(src) ? src : [src];
+        return this.scheduleRender_(items, /* mutate */ true);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
-      const items = isArray(state) ? state : [state];
-      this.scheduleRender_(items, /* mutate */ true);
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
+      const items = isArray(state) ? state : [state];
+      return this.scheduleRender_(items, /* mutate */ true);
     }
+    return Promise.resolve();
   }
 
   /**
@@ -188,10 +189,11 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Request list data from `src` and return a promise that resolves when
    * the list has been populated with rendered list items.
+   * @param {boolean} mutate If true, performs DOM changes in a mutate context.
    * @return {!Promise}
    * @private
    */
-  fetchList_() {
+  fetchList_(mutate = false) {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -220,7 +222,7 @@ export class AmpList extends AMP.BaseElement {
       if (maxLen < items.length) {
         items = items.slice(0, maxLen);
       }
-      return this.scheduleRender_(items);
+      return this.scheduleRender_(items, mutate);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
     }).then(() => {
@@ -353,10 +355,11 @@ export class AmpList extends AMP.BaseElement {
         if (scrollHeight > height) {
           this.attemptChangeHeight(scrollHeight).catch(() => {});
         }
-    });
+      });
+    };
 
     if (mutate) {
-      this.mutateElement(this.container_, render);
+      this.mutateElement(render, this.container_);
     } else {
       render();
     }

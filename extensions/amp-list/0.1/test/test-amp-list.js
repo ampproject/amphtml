@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
@@ -416,6 +418,25 @@ describes.realWin('amp-list component', {
 
         element.setAttribute('src', 'https://new.com/list.json');
         list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+      });
+    });
+
+    it('should render in a mutate context', function*() {
+      listMock.expects('mutateElement')
+          .withArgs(sinon.match.func, list.container_)
+          .once();
+
+      const items = [{title: 'foo'}];
+      const foo = doc.createElement('div');
+      expectFetchAndRender(items, [foo]);
+
+      // Pretend that layoutCallback() was called already since amp-list will
+      // normally refuse to refetch until it happens.
+      list.layoutCompleted_ = true;
+
+      element.setAttribute('src', 'https://new.com/list.json');
+      yield list.mutatedAttributesCallback({
+        'src': 'https://new.com/list.json',
       });
     });
 
