@@ -101,7 +101,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       return renderer.render(context, containerElement, validatorOutput)
-          .then(() => { debugger;
+          .then(() => {
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
             expect(iframe.contentWindow.document.body.innerHTML)
