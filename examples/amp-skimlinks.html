@@ -9,12 +9,18 @@
     <meta name="amp-ad-enable-refresh" content="doubleclick=30">
     <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
     <script async custom-element="amp-skimlinks" src="/dist/v0/amp-skimlinks-0.1.max.js"></script>
+    <!-- Import the `amp-list` component ... -->
+    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+    <!-- ... and the `amp-mustache` component in the header -->
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
     <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 
 <body>
 
-    <amp-skimlinks layout="container">
+    <amp-skimlinks width="auto" height="100" layout="fixed-height" layout="container" reset-on-refresh>
     </amp-skimlinks>
     <h1> Simple affiliated link </h1>
     <a id="merchant-link" href="http://test-merchant.skimlinks.com/merchant_test.html">
@@ -25,9 +31,20 @@
     <a id="non-merchant-link" href="https://skimjs-e2e-resources.storage.googleapis.com/publisher_test.html">
         Just a random non-merchant site.
     </a>
-    <div id="c">
 
-    </div>
+    <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
+        <template type="amp-mustache" id="amp-template-id">
+            <div>
+                <a href="{{url}}">{{title}}</a>
+            </div>
+        </template>
+    </amp-list>
+    <script>
+        window.addEventListener("DOMContentLoaded", () => { console.log("DOMContentLoaded")})
+        window.addEventListener("load", () => { console.log("load") })
+
+    </script>
+
 </body>
 
 </html>

@@ -57,6 +57,7 @@ function attachClickHandler() {
           elt.href = originalHref;
         }, 300);
       } else {
+        e.preventDefault()
         // Send beacon
         console.log('NA CLICK');
       }
@@ -77,11 +78,18 @@ function isAffiliateDomain(a) {
  * @param {Object} context
  */
 export function startSkimcore(context) {
-  attachClickHandler();
+
+  setTimeout(() => {
+    console.log('TRACK ANALYTICS');
+    context.analytics.trigger('page_impressions', {test: 'Hello world'});
+  }, 3000);
+
+
+  // attachClickHandler();
   const domainsOnPage = getDomainsOnPage();
-  callBeacon(context.xhr, domainsOnPage).then(data => {
-    affiliateDomains = data.merchant_domains;
-  });
+  // callBeacon(context.xhr, domainsOnPage).then(data => {
+  //   affiliateDomains = data.merchant_domains;
+  // });
   // if (isPostPageLoad()) {
   //   // Skim js was loaded late, the page is already loaded
   //   window.setTimeout(onPageLoad, 0);
