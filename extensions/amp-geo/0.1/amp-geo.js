@@ -38,6 +38,16 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+
+/**
+ * GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT
+ * DO NOT GUARANTEE THE ACCURACY OR COMPLETENESS OF ANY INFORMATION CONTAINED
+ * HEREIN. THIS INFORMATION IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+import {ampGeoPresets} from './amp-geo-presets';
+
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
@@ -106,7 +116,7 @@ export class AmpGeo extends AMP.BaseElement {
     const {children} = this.element;
 
     if (children.length) {
-      user().assert(children.length === 1 &&
+      this.assertWithErrorReturn_(children.length === 1 &&
         isJsonScriptTag(children[0]),
       `${TAG} can only have one <script type="application/json"> child`);
     }
@@ -114,7 +124,8 @@ export class AmpGeo extends AMP.BaseElement {
     const config = children.length ?
       tryParseJson(
           children[0].textContent,
-          e => user().error(TAG,'Unable to parse JSON', e)
+          () => this.assertWithErrorReturn_(false,
+              `${TAG} Unable to parse JSON`)
       ) : {};
 
     /** @type {!Promise<!Object<string, (string|Array<string>)>>} */
@@ -122,6 +133,24 @@ export class AmpGeo extends AMP.BaseElement {
 
     /* resolve the service promise singleton we stashed earlier */
     geoDeferred.resolve(geo);
+  }
+
+  /**
+   * resolves geoDeferred with null if not shouldBeTrueish and then calls
+   * user().assert() to deal with the error as normal.
+   * @param {T} shouldBeTrueish The value to assert.
+   *  The assert fails if it does not evaluate to true.
+   * @param {string=} opt_message The assertion message
+   * @return {T} The value of shouldBeTrueish.
+   * @template T
+   * @private
+   */
+  assertWithErrorReturn_(shouldBeTrueish, opt_message) {
+    if (!shouldBeTrueish) {
+      geoDeferred.resolve(null);
+      return user().assert(shouldBeTrueish, opt_message);
+    }
+    return shouldBeTrueish;
   }
 
 
@@ -158,36 +187,57 @@ export class AmpGeo extends AMP.BaseElement {
       this.country_ = getMode(this.win).geoOverride.toLowerCase();
     }
   }
+
   /**
    * Find matching country groups
    * @param {Object} config
    */
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
-    const ISOCountryGroups = /** @type {!Object<string, Array<string>>} */(
+    const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */(
       config.ISOCountryGroups);
-    const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
-
+    const errorPrefix = `<${TAG}> ISOCountryGroups`; // code size
     if (ISOCountryGroups) {
-      user().assert(
+      this.assertWithErrorReturn_(
           isObject(ISOCountryGroups),
           `${errorPrefix} must be an object`);
       this.definedGroups_ = Object.keys(ISOCountryGroups);
       this.definedGroups_.forEach(group => {
-        user().assert(
+        this.assertWithErrorReturn_(
             /^[a-z]+[a-z0-9]*$/i.test(group) &&
             !/^amp/.test(group),
             `${errorPrefix}[${group}] name is invalid`);
-        user().assert(
+        this.assertWithErrorReturn_(
             isArray(ISOCountryGroups[group]),
             `${errorPrefix}[${group}] must be an array`);
-        ISOCountryGroups[group] = ISOCountryGroups[group]
-            .map(country => country.toLowerCase());
-        if (ISOCountryGroups[group].includes(this.country_)) {
+
+        if (this.checkGroup_(ISOCountryGroups[group])) {
           this.matchedGroups_.push(group);
         }
       });
     }
+  }
+
+  /**
+   * checkGroup_() does this.country_  match the group
+   * @param {!Array<string>} countryGroup The group to match against
+   * @return {boolean}
+   */
+  checkGroup_(countryGroup) {
+    let presetCountries = [];
+    countryGroup = countryGroup.map((country, idx) => {
+      if (/^preset-/.test(country)) {
+        user().assert(
+            isArray(ampGeoPresets[country]),
+            `<${TAG}> preset ${country} not found`);
+        delete countryGroup[idx];
+        presetCountries = presetCountries.concat(ampGeoPresets[country]);
+        return;
+      }
+      return country.toLowerCase();
+    }).concat(presetCountries.map(c => c.toLowerCase()));
+
+    return countryGroup.includes(this.country_);
   }
 
   /**

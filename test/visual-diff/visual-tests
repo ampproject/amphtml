@@ -134,7 +134,8 @@
       "loading_complete_css": [
         ".list1",
         ".list2"
-      ]
+      ],
+      "loading_incomplete_css": [".i-amphtml-loading-container"]
     },
     {
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
@@ -186,6 +187,9 @@
       "name": "amp-anim - Amp By Example"
     },
     {
+      "flaky": true,
+      // Browser video controls occasionally appear
+      // e.g., https://percy.io/ampproject/amphtml/builds/805265/view/45400623/411?mode=diff&browser=firefox&snapshot=45400623
       "url": "examples/visual-tests/amp-by-example/components/amp-app-banner/index.html",
       "name": "amp-app-banner - Amp By Example"
     },
@@ -219,6 +223,9 @@
       "name": "amp-brightcove - Amp By Example"
     },
     {
+      "flaky": true,
+      // The phone number sometimes takes a while to replace the placeholder.
+      // e.g., https://percy.io/ampproject/amphtml/builds/805397/view/45409686/1400?mode=diff&browser=firefox&snapshot=45409686
       "url": "examples/visual-tests/amp-by-example/components/amp-call-tracking/index.html",
       "name": "amp-call-tracking - Amp By Example"
     },
@@ -330,6 +337,9 @@
       "name": "amp-img - Amp By Example"
     },
     {
+      "flaky": true,
+      // Height change
+      // e.g., https://percy.io/ampproject/amphtml/builds/808487/view/45649729/1400?mode=diff&browser=firefox&snapshot=45649729
       "url": "examples/visual-tests/amp-by-example/components/amp-instagram/index.html",
       "name": "amp-instagram - Amp By Example"
     },
@@ -354,6 +364,9 @@
       "name": "amp-lightbox-gallery - Amp By Example"
     },
     {
+      "flaky": true,
+      // Loading indicator sometimes takes longer to disappear
+      // e.g., https://percy.io/ampproject/amphtml/builds/805535/view/45418485/1400?mode=diff&browser=firefox&snapshot=45418485
       "url": "examples/visual-tests/amp-by-example/components/amp-list/index.html",
       "name": "amp-list - Amp By Example"
     },
@@ -362,6 +375,9 @@
       "name": "amp-live-list - Amp By Example"
     },
     {
+      "flaky": true,
+      // Loading indicator sometimes takes longer to disappear
+      // e.g., https://percy.io/ampproject/amphtml/builds/808263/view/45629509/1400?mode=diff&browser=firefox&snapshot=45629509
       "url": "examples/visual-tests/amp-by-example/components/amp-mustache/index.html",
       "name": "amp-mustache - Amp By Example"
     },
@@ -390,6 +406,9 @@
       "name": "amp-selector - Amp By Example"
     },
     {
+      "flaky": true,
+      // Height change
+      // e.g., https://percy.io/ampproject/amphtml/builds/808417/view/45644238/1400?mode=diff&browser=firefox&snapshot=45644238
       "url": "examples/visual-tests/amp-by-example/components/amp-sidebar/index.html",
       "name": "amp-sidebar - Amp By Example"
     },
@@ -402,6 +421,9 @@
       "name": "amp-soundcloud - Amp By Example"
     },
     {
+      "flaky": true,
+      // Embedded video occasionally takes too long to load
+      // e.g., https://percy.io/ampproject/amphtml/builds/805397/view/45410014/1400?mode=diff&browser=firefox&snapshot=45410014
       "url": "examples/visual-tests/amp-by-example/components/amp-springboard-player/index.html",
       "name": "amp-springboard-player - Amp By Example"
     },
@@ -443,6 +465,9 @@
       "name": "amp-vine - Amp By Example"
     },
     {
+      "flaky": true,
+      // The YouTube embed errors out, sometimes the error does not appear with the text
+      // e.g., https://percy.io/ampproject/amphtml/builds/808263/view/45630008/375?mode=diff&browser=firefox&snapshot=45630008
       "url": "examples/visual-tests/amp-by-example/components/amp-youtube/index.html",
       "name": "amp-youtube - Amp By Example"
     }

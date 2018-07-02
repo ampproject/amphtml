@@ -41,8 +41,18 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
+      // DEPRECATED! Do not extend this whitelist. Use src/purifier.js instead.
+      // Contact @choumx for questions.
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
-      'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/purifier.js',
+    whitelist: [
+      'src/sanitizer.js->src/purifier.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
+      'extensions/amp-bind/0.1/bind-impl.js->src/purifier.js',
     ],
   },
   {
@@ -58,7 +68,7 @@ exports.rules = [
     whitelist: [
       'extensions/amp-crypto-polyfill/**/*.js->' +
           'third_party/closure-library/sha384-generated.js',
-      'extensions/amp-mustache/0.1/amp-mustache.js->' +
+      'extensions/amp-mustache/**/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/' +
           'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
@@ -139,16 +149,12 @@ exports.rules = [
       'ads/google/a4a/**->src/dom.js',
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
-      'ads/google/a4a/performance.js->src/services.js',
-      'ads/google/a4a/performance.js->src/service/variable-source.js',
-      'ads/google/a4a/performance.js->src/common-signals.js',
-      'ads/google/a4a/performance.js->src/analytics.js',
+      'ads/google/a4a/utils.js->src/service/variable-source.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
-      'ads/google/a4a/google-data-reporter.js->src/extension-analytics.js',
     ],
   },
   {
@@ -169,12 +175,6 @@ exports.rules = [
           'extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config.js',
       'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config.js',
-      'ads/google/a4a/google-data-reporter.js->' +
-          'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
-      'ads/google/a4a/google-data-reporter.js->' +
-          'extensions/amp-ad-network-doubleclick-impl/0.1/' +
-          'doubleclick-a4a-config.js',
-      'ads/google/a4a/performance.js->extensions/amp-a4a/0.1/amp-a4a.js',
     ],
   },
   // Rules for extensions and main src.

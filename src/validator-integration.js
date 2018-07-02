@@ -42,6 +42,13 @@ export function maybeValidate(win) {
   }
 }
 
+/**
+ * Loads script
+ *
+ * @param {Document} doc
+ * @param {string} url
+ * @return {!Promise}
+ */
 function loadScript(doc, url) {
   const script = doc.createElement('script');
   script.src = url;

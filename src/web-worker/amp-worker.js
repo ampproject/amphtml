@@ -35,7 +35,7 @@ let PendingMessageDef;
  * If `opt_localWin` is provided, method will be executed in a scope limited
  * to other invocations with `opt_localWin`.
  *
- * @note Currently only works in a single entry point (amp-bind.js).
+ * Note: Currently only works in a single entry point (amp-bind.js).
  *
  * @param {!Window} win
  * @param {string} method
@@ -128,6 +128,7 @@ class AmpWorker {
    * Sends a method invocation request to the worker and returns a Promise.
    * @param {string} method
    * @param {!Array} args
+   * @param {Window=} opt_localWin
    * @return {!Promise}
    * @private
    */

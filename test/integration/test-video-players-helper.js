@@ -350,7 +350,8 @@ export function runVideoPlayerIntegrationTests(
       });
 
       // TODO(aghassemi, #9379): Flaky on Safari 9.
-      it('should play/pause when video enters/exits viewport', function() {
+      // TODO(aghassemi): Flaky on Chrome 67 on Windows 7.
+      it.skip('should play/pause when video enters/exits viewport', function() {
         let video;
         let viewport;
         return getVideoPlayer({outsideView: true, autoplay: true}).then(r => {
