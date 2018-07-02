@@ -19,6 +19,7 @@ import {
   TemplateValidator,
   getAmpAdTemplateHelper,
 } from '../template-validator';
+import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {TemplateRenderer} from '../template-renderer';
 import {ValidatorResult} from '../amp-ad-type-defs';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
@@ -166,8 +167,9 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
           .then(() => {
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
-            expect(iframe.contentWindow.document.body.innerHTML)
-                .to.equal('');
+            expect(iframe.contentWindow.document.body.innerHTML).to.equal(
+                '<a href="https://buy.com/buy-1" target="_top">' +
+                'Click for ad!</a>');
           });
     });
   });
