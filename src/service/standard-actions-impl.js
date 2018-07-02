@@ -280,33 +280,22 @@ export class StandardActions {
       return null;
     }
 
-    const target = dev().assertElement(invocation.node);
-    const classNames = user().assertString(invocation.args['class']);
-    const opt_force = !!invocation.args['opt_force'];
-
-    // class may be a list of classes
-    const classList = classNames.trim().split(/\s+/);
-
-    // TODO(kqian): is Set polyfilled?
-    const classSet = new Set();
-    classList.forEach(name => {
-      classSet.add(name);
-    });
+    const {node: target, args} = invocation;
+    dev().assertElement(target);
+    const className = user().assertString(args['class'],
+        'toggled class should be a string');
 
     this.resources_.mutateElement(target, () => {
-      const origClassList = [].slice.call(target.classList);
-
-      // merge class lists
-      origClassList.forEach(name => {
-        if (classSet.has(name)) {
-          classSet.delete(name);
-        } else {
-          classSet.add(name);
-        }
-      });
-
-      target.className = Array.from(classSet).join(' ');
+      if (args.hasOwnProperty('opt_force')) {
+        // must be boolean, won't do type conversion
+        const shouldForce = user().assertBoolean(args['opt_force']);
+        target.classList.toggle(className, shouldForce);
+      } else {
+        target.classList.toggle(className);
+      }
     });
+
+    return null;
   }
 }
 
