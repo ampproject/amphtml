@@ -41,6 +41,15 @@ export class AmpSkimlinks extends AMP.BaseElement {
     const analyticsBuilder = new CustomEventReporterBuilder(this.element);
     analyticsBuilder.track('page_impressions', `${TRACKING_API_URL}/page?\${test}`);
     analyticsBuilder.track('link_impressions', `${TRACKING_API_URL}/link?\${test}`);
+    // Mutate config since it doesn't seem like we can provide a config in the custructor.
+    // Force the request to be a GET request.
+    analyticsBuilder.config_['transport'] = {
+      'image': true,
+      'xhrpost': false,
+      'beacon': false,
+      'suppressWarnings': true,
+    };
+
     this.analytics_ = analyticsBuilder.build();
   }
 
