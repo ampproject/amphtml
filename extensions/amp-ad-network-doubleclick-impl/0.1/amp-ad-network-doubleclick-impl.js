@@ -131,8 +131,8 @@ let sraRequests = null;
 
 /** @typedef {{
       adUrl: !Promise<string>,
-      lineItemId: string,
-      creativeId: string,
+      lineItemId: ?string,
+      creativeId: ?string,
       slotId: string,
       slotIndex: string,
     }} */
@@ -968,7 +968,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {string} impressions
+   * @param {?string} impressions
    * @param {boolean=} scrubReferer
    * @visibleForTesting
    */
