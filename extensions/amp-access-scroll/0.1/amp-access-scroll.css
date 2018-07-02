@@ -15,21 +15,20 @@
  */
 
 .amp-access-scroll-bar {
-    height: 44px;
-    position: fixed;
-    left: 0;
-    width: 100%;
-    background: transparent;
-    z-index: 2147483647;
-    bottom: 0;
+  height: 44px;
+  position: fixed;
+  left: 0;
+  width: 100%;
+  background: transparent;
+  z-index: 2147483647;
+  bottom: 0;
 }
 
 .amp-access-scroll-placeholder {
-  padding-top: 8px;
+  padding-top: 7px;
   padding-left: 8px;
   background-color: #fff;
-  z-index: 11;
-  height: 100%;
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
+  box-sizing: border-box;
 }
