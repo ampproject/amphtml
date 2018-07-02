@@ -179,6 +179,34 @@ describes.realWin('HighlightHandler', {
         'ed text</div>');
   });
 
+  it('initialize with amp-access', () => {
+    // Inject <script id="amp-access"> to emulate pages with <amp-access>.
+    const {document} = env.win;
+    const script = document.createElement('script');
+    script.id = 'amp-access';
+    document.body.appendChild(script);
+
+    const {ampdoc} = env;
+    const scrollStub = sandbox.stub(
+        Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
+    scrollStub.returns(Promise.reject());
+    const sendMsgStub = sandbox.stub(
+        Services.viewerForDoc(ampdoc), 'sendMessage');
+
+    new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
+
+    expect(scrollStub).not.to.be.called;
+
+    // For some reason, expect(args).to.deep.equal does not work.
+    expect(sendMsgStub.callCount).to.equal(1);
+    expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+    expect(sendMsgStub.firstCall.args[1]).to.deep.equal(
+        {state: 'has_amp_access'});
+
+    expect(root.innerHTML).to.equal(
+        '<div>text in amp doc</div><div>highlighted text</div>');
+  });
+
   it('calcTopToCenterHighlightedNodes_ center elements', () => {
     const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
     expect(handler.highlightedNodes_).not.to.be.null;
