@@ -355,7 +355,32 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {	
       'endpoint': 'https://r.3gl.net/hawklogserver/r.p', 
       'pageview': 'https://r.3gl.net/hawklogserver/r.p' +
-		'?'+	'data={"v":2,"y":"load","ui":${UserID},"si":${SessionID},"pi":092934,"di":${AccountID},"pc":1,"dn":${dns},"fc":7,"wt":${wait},"Id":${load},"de":${domInteractive},"dl":${domLoaded},"dc":${docComplete},"rp":1338,"cl":${contentLoad},"dc":${docComplete},"rp":${response},"cl":${contentLoad},"rd":0,"jsc":0,"dh":1200,"dw":1920,"el":193,"rf":"${canonicalUrl}","cv":${isConversion},"rv":${revenue},"ri":${revenue_items}}'
+		'?'+	'data={"v":2,
+	    "y":"load",
+	    "ui":${UserID},
+	    "si":${SessionID},
+	    "pi":092934,
+	    "di":${AccountID},
+	    "pc":1,"dn":${dns},
+	    "fc":7,"wt":${wait},
+	    "Id":${load},
+	    "de":${domInteractive},
+	    "dl":${domLoaded},
+            "dc":${docComplete},
+            "rp":1338,
+	    "cl":${contentLoad},
+            "dc":${docComplete},
+            "rp":${response},
+            "cl":${contentLoad},
+            "rd":0,
+            "jsc":0,
+            "dh":1200,
+            "dw":1920,
+	    "el":193,
+            "rf":"${canonicalUrl}",
+            "cv":${isConversion},
+            "rv":${revenue},
+            "ri":${revenue_items}}'
     },
 	
 	'vars': {
