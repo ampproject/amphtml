@@ -282,11 +282,10 @@ export class StandardActions {
 
     const target = dev().assertElement(invocation.node);
     const {args} = invocation;
-    const className = user().assertString(args['class'],
-        'toggled class should be a string');
+    const className = user().assertString(args['class']);
 
     this.resources_.mutateElement(target, () => {
-      if ({}.hasOwnProperty.call(args, ('opt_force'))) {
+      if ({}.hasOwnProperty.call(args, 'opt_force')) {
         // must be boolean, won't do type conversion
         const shouldForce = user().assertBoolean(args['opt_force']);
         target.classList.toggle(className, shouldForce);
