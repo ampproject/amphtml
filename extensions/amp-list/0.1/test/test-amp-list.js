@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
