@@ -96,7 +96,7 @@ declareExtension('amp-byside-content', '0.1', {hasCss: true});
 declareExtension('amp-kaltura-player', '0.1');
 declareExtension('amp-call-tracking', '0.1');
 declareExtension('amp-carousel', '0.1', {hasCss: true});
-declareExtension('amp-compare-slider', '0.1');
+declareExtension('amp-compare-slider', '0.1', {hasCss: true});
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
