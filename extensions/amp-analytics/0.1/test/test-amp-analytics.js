@@ -221,8 +221,7 @@ describes.realWin('amp-analytics', {
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', function* () {
-            const urlReplacements =
-                Services.urlReplacementsForDoc(ampdoc);
+            const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             sandbox.stub(urlReplacements.getVariableSource(),
                 'get').callsFake(
@@ -1016,8 +1015,7 @@ describes.realWin('amp-analytics', {
             'qp_foo': '${queryParam(foo)}',
           },
         }]});
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
           function(name) {
             return {sync: param => {
@@ -1485,8 +1483,7 @@ describes.realWin('amp-analytics', {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 0});
 
@@ -1501,8 +1498,7 @@ describes.realWin('amp-analytics', {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: false});
 
@@ -1517,8 +1513,7 @@ describes.realWin('amp-analytics', {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: null});
 
@@ -1533,8 +1528,7 @@ describes.realWin('amp-analytics', {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: NaN});
 
@@ -1549,8 +1543,7 @@ describes.realWin('amp-analytics', {
       config.triggers.conditional.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: undefined});
 
@@ -1576,8 +1569,7 @@ describes.realWin('amp-analytics', {
       config.enabled = '${pageViewId}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
@@ -1612,8 +1604,7 @@ describes.realWin('amp-analytics', {
       config.enabled = '${queryParam(undefinedParam)}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1630,8 +1621,7 @@ describes.realWin('amp-analytics', {
 
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1646,8 +1636,7 @@ describes.realWin('amp-analytics', {
       config.triggers.conditional.enabled = '${foo}';
       const analytics = getAnalyticsTag(config);
 
-      const urlReplacements =
-          Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns('page');
 
       return waitForNoSendRequest(analytics).then(() => {
@@ -1926,8 +1915,7 @@ describes.realWin('amp-analytics', {
         'sandbox': 'true',
       }, true);
 
-      const urlReplacements =
-        Services.urlReplacementsForDoc(analytics.element);
+      const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005))
