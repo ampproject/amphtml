@@ -20,6 +20,8 @@ import {StateProperty} from './amp-story-store-service';
 import {copyChildren, removeChildren} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
+import {isArray, isObject} from '../../../src/types';
+import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -74,11 +76,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     this.element.appendChild(drawerEl);
 
-    // Allow <amp-access> actions in STAMP (defaults to no actions allowed).
-    this.actions_.addToWhitelist('SCRIPT.login');
-
-    // TODO(gmajoulet): allow wildcard actions to enable login namespaces.
-    // this.actions_.addToWhitelist('SCRIPT.login.*');
+    this.whitelistActions_();
 
     this.initializeListeners_();
   }
@@ -136,5 +134,62 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     this.element.getResources()
         .measureMutateElement(this.element, measurer, mutator);
+  }
+
+  /**
+   * Whitelists the <amp-access> actions.
+   * Depending on the publisher configuration, actions can be:
+   *   - login
+   *   - login-<namespace>
+   *   - login-<namespace>-<type>
+   *
+   * Publishers can provide one (object) or multiple (array) configurations,
+   * identified by their "namespace" property.
+   * Each configuration can have one or multiple login URLs, called "type".
+   * All the namespace/type pairs have to be whitelisted.
+   * @private
+   */
+  whitelistActions_() {
+    const accessEl =
+        dev().assertElement(
+            this.win.document.getElementById('amp-access'),
+            'Cannot find the amp-access configuration');
+
+    // Configuration validation is handled by the amp-access extension.
+    let accessConfig =
+        /** @type {!Array|!Object} */ (parseJson(accessEl.textContent));
+
+    if (!isArray(accessConfig)) {
+      accessConfig = [accessConfig];
+
+      // If there is only one configuration and the publisher provided a
+      // namespace, we want to allow actions with or without namespace.
+      if (accessConfig[0].namespace) {
+        accessConfig.push(
+            Object.assign({}, accessConfig[0], {namespace: undefined}));
+      }
+    }
+
+    accessConfig.forEach(config => {
+      const {login, namespace} = /** @type {{login, namespace}} */ (config);
+
+      if (isObject(login)) {
+        const types = Object.keys(login);
+        types.forEach(type => this.whitelistAction_(namespace, type));
+      } else {
+        this.whitelistAction_(namespace);
+      }
+    });
+  }
+
+  /**
+   * Whitelists an action for the given namespace / type pair.
+   * @param {string=} namespace
+   * @param {string=} type
+   * @private
+   */
+  whitelistAction_(namespace = undefined, type = undefined) {
+    const action = ['login', namespace, type].filter(s => !!s).join('-');
+    this.actions_.addToWhitelist(`SCRIPT.${action}`);
   }
 }
