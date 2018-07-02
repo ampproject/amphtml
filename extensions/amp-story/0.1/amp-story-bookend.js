@@ -16,10 +16,10 @@
 import {Action, StateProperty} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-bookend-0.1.css';
+import {DEPRECATED_SHARE_PROVIDERS_KEY, SHARE_PROVIDERS_KEY, ScrollableShareWidget} from './amp-story-share';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from './localization';
-import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
@@ -34,8 +34,18 @@ import {parseUrlDeprecated} from '../../../src/url';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
+/**
+ * Key for omponents in bookend config.
+ * @private @const {string}
+ */
+const BOOKEND_VERSION_KEY = 'bookendVersion';
 const BOOKEND_VERSION_1 = 'v1.0';
-const BOOKEND_VERSION_KEY = 'bookend-version';
+
+/**
+ * Deprecated key for components in bookend config.
+ * @private @const {string}
+ */
+const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 
 /**
  * @typedef {{
@@ -413,6 +423,23 @@ export class Bookend {
   }
 
   /**
+   * Reads the bookend version from the bookend JSON config.
+   * @param {!JsonObject} config
+   * @return {?string}
+   * @private
+   */
+  readBookendVersion_(config) {
+    if (config[DEPRECATED_BOOKEND_VERSION_KEY]) {
+      user().warn('AMP-STORY-BOOKEND', '`bookend-version` and ' +
+      '`share-providers` keys in the bookend config are deprecated, please ' +
+      '`bookendVersion` and `shareProviders` keys');
+    }
+
+    return config[DEPRECATED_BOOKEND_VERSION_KEY] ||
+      config[BOOKEND_VERSION_KEY] || null;
+  }
+
+  /**
    * Retrieves the publisher bookend configuration. Applying the configuration
    * will prerender the bookend DOM, but there are cases where we need it before
    * the component is built. Eg: the desktop share button needs the providers.
@@ -432,12 +459,12 @@ export class Bookend {
           if (!response) {
             return null;
           }
-
-          if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
+          if (this.readBookendVersion_(response) === BOOKEND_VERSION_1) {
             this.config_ = {
               shareProviders:
                 this.shareWidget_.parseProvidersToClassicApi(
-                    response['share-providers']),
+                    response[SHARE_PROVIDERS_KEY] ||
+                    response[DEPRECATED_SHARE_PROVIDERS_KEY]),
               relatedArticles:
                 parseArticlesToClassicApi(response['components']),
             };

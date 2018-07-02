@@ -137,8 +137,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /** @override */
-  onLayoutMeasure() {
-    // TODO (14936): refactor resize logic to go in onMeasureChange
+  onMeasureChanged() {
     if (this.loadPromise_) {
       this.loadPromise_.then(() => this.resetImageDimensions_());
     }
@@ -196,11 +195,6 @@ export class AmpImageViewer extends AMP.BaseElement {
     return layout == Layout.FILL;
   }
 
-  /** @override */
-  isRelayoutNeeded() {
-    return true;
-  }
-
   /**
    * Returns the boundaries of the image element.
    * @return {?../../../src/layout-rect.LayoutRectDef}
@@ -223,7 +217,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @return {?../../../src/layout-rect.LayoutRectDef}
    */
   getImageBoxWithOffset() {
-    if (this.posX_ == 0 && this.posY_ == 0 || !this.imageBox_) {
+    if ((this.posX_ == 0 && this.posY_ == 0) || !this.imageBox_) {
       return this.imageBox_;
     }
     const expansionScale = (this.scale_ - 1) / 2;
@@ -415,8 +409,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.gestures_.onGesture(DoubletapRecognizer, e => {
       event.preventDefault();
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-      const deltaX = this.elementBox_.width / 2 - e.data.clientX;
-      const deltaY = this.elementBox_.height / 2 - e.data.clientY;
+      const deltaX = (this.elementBox_.width / 2) - e.data.clientX;
+      const deltaY = (this.elementBox_.height / 2) - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
         return this.onZoomRelease_();
       });
@@ -529,7 +523,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   updatePanZoomBounds_(scale) {
     let maxY = 0;
     let minY = 0;
-    const dh = this.elementBox_.height - this.imageBox_.height * scale;
+    const dh = this.elementBox_.height - (this.imageBox_.height * scale);
     if (dh >= 0) {
       minY = maxY = 0;
     } else {
@@ -539,7 +533,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     let maxX = 0;
     let minX = 0;
-    const dw = this.elementBox_.width - this.imageBox_.width * scale;
+    const dw = this.elementBox_.width - (this.imageBox_.width * scale);
     if (dw >= 0) {
       minX = maxX = 0;
     } else {
@@ -648,10 +642,10 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (dir == 0) {
       return;
     }
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const newScale = this.startScale_ * (1 + dir * dist / 100);
-    const deltaCenterX = this.elementBox_.width / 2 - centerClientX;
-    const deltaCenterY = this.elementBox_.height / 2 - centerClientY;
+    const dist = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+    const newScale = this.startScale_ * (1 + (dir * dist / 100));
+    const deltaCenterX = (this.elementBox_.width / 2) - centerClientX;
+    const deltaCenterY = (this.elementBox_.height / 2) - centerClientY;
     deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
     deltaY = Math.min(deltaCenterY, deltaCenterY * (dist / 100));
     this.onZoom_(newScale, deltaX, deltaY, false);
@@ -674,8 +668,8 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     this.updatePanZoomBounds_(newScale);
 
-    const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
-    const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
+    const newPosX = this.boundX_(this.startX_ + (deltaX * newScale), false);
+    const newPosY = this.boundY_(this.startY_ + (deltaY * newScale), false);
     return /** @type {!Promise|undefined} */ (
       this.set_(newScale, newPosX, newPosY, animate));
   }
@@ -744,7 +738,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     const ds = newScale - this.scale_;
     const dx = newPosX - this.posX_;
     const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = Math.sqrt((dx * dx) + (dy * dy));
 
     let dur = 0;
     if (animate) {

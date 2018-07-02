@@ -205,6 +205,10 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.sendCommandWhenReady_('toggleAmpPlay', true);
   }
 
+  /**
+   * Sends `setSize` command when ready
+   *
+   */
   onLayoutMeasure() {
     const box = this.getLayoutBox();
     this.sendCommandWhenReady_(
