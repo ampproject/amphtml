@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Layout} from '../../../src/layout';
 import {allocateVariant} from './variant';
 import {dev, user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {registerServiceBuilder} from '../../../src/service';
 import {waitForBodyPromise} from '../../../src/dom';
 
 const TAG = 'amp-experiment';
@@ -44,15 +44,12 @@ export class AmpExperiment extends AMP.BaseElement {
           });
     });
 
-
     /** @private @const {!Promise<!Object<string, ?string>>} */
     const experimentVariants = Promise.all(variants)
         .then(() => results)
         .then(this.addToBody_.bind(this));
 
-    registerServiceBuilder(this.win, 'variant', function() {
-      return experimentVariants;
-    });
+    serviceDeferred.resolve(experimentVariants);
   }
 
   /** @return {!JsonObject} [description] */
@@ -91,7 +88,15 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 }
 
+/**
+ * Create the service promise at load time to prevent race between extensions
+ */
+
+/** singleton */
+let serviceDeferred = null;
 
 AMP.extension(TAG, '0.1', AMP => {
+  serviceDeferred = new Deferred();
   AMP.registerElement(TAG, AmpExperiment);
+  AMP.registerServiceForDoc('variant', () => serviceDeferred.promise);
 });

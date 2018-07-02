@@ -313,7 +313,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns assigned variant name for the given experiment.
     this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
-      return this.getVairiantsValue_(variants => {
+      return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
@@ -325,7 +325,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns all assigned experiment variants in a serialized form.
     this.setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
-      return this.getVairiantsValue_(variants => {
+      return this.getVariantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
           const variant = variants[experiment];
@@ -678,7 +678,7 @@ export class GlobalVariableSource extends VariableSource {
    * @template T
    * @private
    */
-  getVairiantsValue_(getter, expr) {
+  getVariantsValue_(getter, expr) {
     if (!this.variants_) {
       this.variants_ = Services.variantForOrNull(this.ampdoc.win);
     }
