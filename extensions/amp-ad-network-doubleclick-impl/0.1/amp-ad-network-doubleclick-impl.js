@@ -194,7 +194,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
+    /** @protected {!Deferred<?Response>} */
     this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
@@ -1086,7 +1086,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     // Construct pseudo fetch response to be passed down the A4A
                     // promise chain for this block.
                     const headers =
-                  /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
+                  /** @type {?Headers} */
                   ({
                     get: name => {
                       // TODO(keithwrightbos) - fix upstream so response writes
@@ -1100,7 +1100,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     has: name => !!headersObj[name.toLowerCase()],
                   });
                     const fetchResponse =
-                  /** @type {?../../../src/service/xhr-impl.FetchResponse} */
+                  /** @type {?Response} */
                   ({
                     headers,
                     arrayBuffer: () => tryResolve(() => utf8Encode(creative)),

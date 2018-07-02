@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {XMLHttpRequestDef} from '../service/xhr-impl';
 import {dev, user} from '../log';
 import {parseJson} from '../json';
 import {utf8Encode} from '../utils/bytes';
@@ -32,9 +31,9 @@ const allowedFetchTypes_ = {
  * Notice that the "fetch" method itself is not exported as that would require
  * us to immediately support a much wide API.
  *
- * @param {string} input
- * @param {!FetchInitDef} init
- * @return {!Promise<!FetchResponse>}
+ * @param {Request|string} input
+ * @param {!Object|RequestInit=} init
+ * @return {!Promise<!Response>}
  * @private Visible for testing
  */
 function fetchPolyfill(input, init) {
@@ -94,10 +93,10 @@ function fetchPolyfill(input, init) {
  */
 class FetchResponse {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
 
     /** @const {number} */
@@ -118,7 +117,7 @@ class FetchResponse {
 
   /**
    * Create a copy of the response and return it.
-   * @return {!Response}
+   * @return {!FetchResponse}
    */
   clone() {
     dev().assert(!this.bodyUsed, 'Body already used');
@@ -187,10 +186,10 @@ class FetchResponse {
  */
 class FetchResponseHeaders {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
   }
 
@@ -236,13 +235,13 @@ function createXhrRequest(method, url) {
 * @param {!Window} win
 */
 export function install(win) {
-  if (!win.fetch) {
-    win.fetch = fetchPolyfill;
+  if (!'fetch' in win) {
+    win['fetch'] = fetchPolyfill;
   }
-  if (!win.Response) {
-    win.Response = FetchResponse;
+  if (!'Response' in win) {
+    win['Response'] = FetchResponse;
   }
-  if (!win.Headers) {
-    win.Response = FetchResponseHeaders;
+  if (!'Headers' in win) {
+    win['Headers'] = FetchResponseHeaders;
   }
 }

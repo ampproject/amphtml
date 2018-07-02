@@ -62,20 +62,6 @@ export let FetchInitDef;
  */
 export let FetchInitJsonDef;
 
-/**
- * A record version of `XMLHttpRequest` that has all the necessary properties
- * and methods of `XMLHttpRequest` to construct a `Response` from a
- * serialized response returned by the viewer.
- * @typedef {{
- *   status: number,
- *   statusText: string,
- *   responseText: string,
- *   responseXML: ?Document,
- *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
- * }}
- */
-let XMLHttpRequestDef;
-
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
