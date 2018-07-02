@@ -36,7 +36,7 @@ export class Renderer {
 
     // Initial state is "unknown".
     this.setGrantState(null);
-    this.getRootElement_().classList.add(`${CSS_PREFIX}-ready`);
+    this.getRootElement_().body.classList.add(`${CSS_PREFIX}-ready`);
 
     // Check and add progress bar.
     this.addLoadingBar();
@@ -58,13 +58,13 @@ export class Renderer {
    */
   setState_(type, state) {
     this.resources_.mutateElement(this.ampdoc_.getBody() , () => {
-      this.getRootElement_().classList.toggle(
+      this.getRootElement_().body.classList.toggle(
           `${CSS_PREFIX}-${type}-unk`,
           state === null);
-      this.getRootElement_().classList.toggle(
+      this.getRootElement_().body.classList.toggle(
           `${CSS_PREFIX}-${type}-yes`,
           state === true);
-      this.getRootElement_().classList.toggle(
+      this.getRootElement_().body.classList.toggle(
           `${CSS_PREFIX}-${type}-no`,
           state === false);
     });
@@ -98,7 +98,7 @@ export class Renderer {
    */
   toggleState_(type, state) {
     this.resources_.mutateElement(this.ampdoc_.getBody(), () => {
-      this.getRootElement_().classList.toggle(`${CSS_PREFIX}-${type}`, state);
+      this.getRootElement_().body.classList.toggle(`${CSS_PREFIX}-${type}`, state);
     });
   }
 
