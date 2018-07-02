@@ -310,8 +310,8 @@ const command = {
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
-    // Unit tests with Travis' default chromium
-    timedExecOrDie(cmd + ' --headless');
+    // Unit tests with Travis' default chromium in coverage mode.
+    timedExecOrDie(cmd + ' --headless --coverage');
     if (process.env.TRAVIS) {
       // A subset of unit tests on other browsers via sauce labs
       cmd = cmd + ' --saucelabs_lite';
@@ -323,7 +323,7 @@ const command = {
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
   },
-  runIntegrationTests: function(compiled) {
+  runIntegrationTests: function(compiled, coverage) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --integration --nobuild';
     if (argv.files) {
@@ -333,13 +333,15 @@ const command = {
       cmd += ' --compiled';
     }
     if (process.env.TRAVIS) {
-      startSauceConnect();
-      cmd += ' --saucelabs';
-      timedExecOrDie(cmd);
-      stopSauceConnect();
+      if (coverage) {
+        timedExecOrDie(cmd + ' --coverage');
+      } else {
+        startSauceConnect();
+        timedExecOrDie(cmd + ' --saucelabs');
+        stopSauceConnect();
+      }
     } else {
-      cmd += ' --headless';
-      timedExecOrDie(cmd);
+      timedExecOrDie(cmd + ' --headless');
     }
   },
   runVisualDiffTests: function(opt_mode) {
@@ -400,6 +402,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
+    command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
     // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -410,7 +413,7 @@ function runAllCommands() {
     command.buildRuntimeMinified(/* extensions */ true);
     command.runBundleSizeCheck();
     command.runPresubmitTests();
-    command.runIntegrationTests(/* compiled */ true);
+    command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
   }
 }
 
@@ -434,7 +437,7 @@ function runAllCommandsLocally() {
   command.runPresubmitTests();
   command.runVisualDiffTests();
   command.runUnitTests();
-  command.runIntegrationTests(/* compiled */ false);
+  command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
   // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
 
   // Validator tests.
@@ -484,57 +487,12 @@ function runYarnLockfileCheck() {
 }
 
 /**
- * Returns true if this is a PR build for a greenkeeper branch.
- */
-function isGreenkeeperPrBuild() {
-  return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-      (process.env.TRAVIS_PULL_REQUEST_BRANCH.startsWith('greenkeeper/'));
-}
-
-/**
- * Returns true if this is a push build for a greenkeeper branch.
- */
-function isGreenkeeperPushBuild() {
-  return (process.env.TRAVIS_EVENT_TYPE == 'push') &&
-      (process.env.TRAVIS_BRANCH.startsWith('greenkeeper/'));
-}
-
-/**
- * Returns true if this is a push build for a lockfile update on a greenkeeper
- * branch.
- */
-function isGreenkeeperLockfilePushBuild() {
-  return isGreenkeeperPushBuild() &&
-      (process.env.TRAVIS_COMMIT_MESSAGE.startsWith(
-          'chore(package): update lockfile'));
-}
-
-/**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
  * @return {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
-
-  if (isGreenkeeperPrBuild()) {
-    console.log(fileLogPrefix,
-        'This is a greenkeeper PR build. Tests will be run for the push ' +
-        'build with the lockfile update.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
-
-  if (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild()) {
-    console.log(fileLogPrefix,
-        'This is a greenkeeper push build. Updating and uploading lockfile...');
-    timedExec('./node_modules/.bin/greenkeeper-lockfile-update');
-    timedExec('./node_modules/.bin/greenkeeper-lockfile-upload');
-    console.log(fileLogPrefix, 'Lockfile updated and uploaded. Tests will be ' +
-        'run for the subsequent push build with the lockfile update.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
 
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   runYarnIntegrityCheck();
@@ -628,7 +586,7 @@ function main() {
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM')) {
-      command.runIntegrationTests(/* compiled */ false);
+      command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
     }
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||

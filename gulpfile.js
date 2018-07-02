@@ -100,6 +100,7 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
+declareExtension('amp-date-countdown', '0.1');
 declareExtension('amp-google-document-embed', '0.1');
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
@@ -130,7 +131,7 @@ declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
 declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
-declareExtension('amp-mustache', '0.1');
+declareExtension('amp-mustache', ['0.1', '0.2']);
 declareExtension('amp-next-page', '0.1', {hasCss: true});
 declareExtension('amp-nexxtv-player', '0.1');
 declareExtension('amp-o2-player', '0.1');
@@ -145,21 +146,7 @@ declareExtension('amp-sidebar', '0.1', {hasCss: true});
 declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
-declareExtension('amp-story', '0.1', {
-  hasCss: true,
-  cssBinaries: [
-    'amp-story-bookend',
-    'amp-story-consent',
-    'amp-story-hint',
-    'amp-story-unsupported-browser-layer',
-    'amp-story-viewport-warning-layer',
-    'amp-story-info-dialog',
-    'amp-story-share',
-    'amp-story-share-menu',
-    'amp-story-system-layer',
-  ],
-});
-declareExtension('amp-story', '1.0', {
+declareExtension('amp-story', ['0.1', '1.0'], {
   hasCss: true,
   cssBinaries: [
     'amp-story-bookend',
@@ -178,6 +165,7 @@ declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
 declareExtension('amp-position-observer', '0.1');
+declareExtension('amp-orientation-observer', '0.1');
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
@@ -212,6 +200,7 @@ declareExtension('amp-video-service', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-vk', '0.1');
+declareExtension('amp-yotpo', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
@@ -267,14 +256,16 @@ const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 
 /**
  * @param {string} name
- * @param {string} version E.g. 0.1
+ * @param {string|!Array<string>} version E.g. 0.1
  * @param {!ExtensionOption} options extension options object.
  */
 function declareExtension(name, version, options) {
   const defaultOptions = {hasCss: false};
-  const extensionKey = `${name}-${version}`;
-  extensions[extensionKey] = Object.assign(
-      {name, version}, defaultOptions, options);
+  const versions = Array.isArray(version) ? version : [version];
+  versions.forEach(v => {
+    extensions[`${name}-${v}`] =
+        Object.assign({name, version: v}, defaultOptions, options);
+  });
 }
 
 /**
@@ -551,6 +542,9 @@ function compileCss(watch, opt_compileAll) {
           fs.writeFileSync(`build/css/${cssFilename}`, css);
         }));
   }
+
+  // Used by `gulp test --local-changes` to map CSS files to JS files.
+  fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')

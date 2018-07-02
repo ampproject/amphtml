@@ -29,6 +29,12 @@ const rules = [
 ];
 const webviewRegExp = new RegExp('(' + rules.join('|') + ')', 'ig');
 
+/**
+ * Returns if ua belongs to a webview
+ *
+ * @param {string} ua
+ * @return {boolean}
+ */
 function isWebview(ua) {
   return !!ua.match(webviewRegExp);
 }
@@ -44,7 +50,7 @@ export function getPlatform() {
 
 /**
  * Extracts tags from a given element .
- * @param element
+ * @param {!Element} element
  */
 function extractElementTags(element) {
   const tagsAttribute = element.getAttribute('data-apester-tags');
@@ -56,7 +62,7 @@ function extractElementTags(element) {
 
 /**
  * Extracts tags from a given element and document.
- * @param element
+ * @param {!Element} element
  * @return {Array<string>}
  */
 export function extractTags(element) {
@@ -69,7 +75,7 @@ export function extractTags(element) {
 
 /**
  * Adds fullscreen class to an element
- * @param element
+ * @param {!Element} element
  */
 export function setFullscreenOn(element) {
   element.classList.add('amp-apester-fullscreen');
@@ -77,7 +83,7 @@ export function setFullscreenOn(element) {
 
 /**
  * removes fullscreen class from an element
- * @param element
+ * @param {!Element} element
  */
 export function setFullscreenOff(element) {
   element.classList.remove('amp-apester-fullscreen');
@@ -85,9 +91,11 @@ export function setFullscreenOff(element) {
 
 /**
  * Registers to an event
- * @param eventName
- * @param callback
- * @param unlisteners
+ * @param {string} eventName
+ * @param {!Function} callback
+ * @param {!EventTarget} win
+ * @param {!Element} iframe
+ * @param {!Array} unlisteners
  */
 export function registerEvent(eventName, callback, win, iframe, unlisteners) {
   const unlisten = events.listen(win, 'message', event => {

@@ -409,7 +409,7 @@ export class RequestHandler {
   }
 
   /**
-   * Handle reportWindow
+   * Initializes report window.
    */
   initReportWindow_() {
     if (this.reportWindow_) {
