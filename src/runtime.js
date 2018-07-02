@@ -18,6 +18,7 @@ import * as config from './config';
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
+import {LogLevel, overrideLogLevel} from './log'; // eslint-disable-line no-unused-vars
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
 import {childElementsByTag, isConnectedNode} from './dom';
@@ -69,7 +70,6 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from './experiments';
-import {overrideLogLevel} from './log';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
@@ -222,7 +222,7 @@ function adoptShared(global, callback) {
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
-   * @param {!./log.LogLevel} level
+   * @param {!LogLevel} level
    */
   global.AMP.setLogLevel = overrideLogLevel.bind(null);
 
