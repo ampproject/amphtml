@@ -280,8 +280,8 @@ export class StandardActions {
       return null;
     }
 
-    const {node: target, args} = invocation;
-    dev().assertElement(target);
+    const target = dev().assertElement(invocation.node);
+    const {args} = invocation;
     const className = user().assertString(args['class'],
         'toggled class should be a string');
 
