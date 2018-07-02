@@ -30,15 +30,19 @@ describes.realWin('amp-list component', {
   let element;
   let list;
   let listMock;
+  let viewerMock;
   let setBindService;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-
+    ampdoc.isSingleDoc = () => true;
     const templates = Services.templatesFor(win);
     templatesMock = sandbox.mock(templates);
+
+    const viewer = Services.viewerForDoc(ampdoc);
+    viewerMock = sandbox.mock(viewer);
 
     element = doc.createElement('div');
     element.setAttribute('src', 'https://data.com/list.json');
@@ -59,6 +63,7 @@ describes.realWin('amp-list component', {
 
   afterEach(() => {
     templatesMock.verify();
+    viewerMock.verify();
     listMock.verify();
   });
 
@@ -103,20 +108,87 @@ describes.realWin('amp-list component', {
         .atLeast(1);
   }
 
-  describe('without amp-bind', () => {
-    beforeEach(() => {
-      setBindService(null);
+  /**
+   * @param {!Array|!Object} fetched
+   * @param {!Array<!Element>} rendered
+   * @param {Object=} opts
+   * @return {!Promise}
+   */
+  function expectViewerProxiedFetchAndRender(
+    fetched, rendered, opts = DEFAULT_LIST_OPTS) {
+    const fetch = Promise.resolve(fetched);
+    viewerMock.expects('canRenderTemplates').returns(true).twice();
+    viewerMock.expects('fetchAndRenderTemplate')
+        .withExactArgs(element, 'amp-list').returns(fetch).once();
+    if (opts.resetOnRefresh) {
+      listMock.expects('togglePlaceholder').withExactArgs(true).once();
+      listMock.expects('toggleLoading').withExactArgs(true, true).once();
+    }
+    listMock.expects('toggleLoading').withExactArgs(false).once();
+    listMock.expects('togglePlaceholder').withExactArgs(false).once();
+    const render = Promise.resolve(rendered);
+    templatesMock.expects('renderHtml')
+        .withExactArgs(element, fetched.renderedHtml)
+        .returns(render).once(1);
+
+
+    return Promise.all([fetch, render]);
+  }
+
+  it('should fetch and render', () => {
+    const items = [
+      {title: 'Title1'},
+    ];
+    const itemElement = doc.createElement('div');
+    const rendered = expectFetchAndRender(items, [itemElement]);
+    return list.layoutCallback().then(() => rendered).then(() => {
+      expect(list.container_.contains(itemElement)).to.be.true;
     });
 
-    it('should fetch and render', () => {
-      const items = [
-        {title: 'Title1'},
-      ];
+  describe('Viewer render template', () => {
+    it('should proxy rendering to viewer', () => {
+      const resp = {renderedHtml: '<div>Rendered template</div>'};
       const itemElement = doc.createElement('div');
-      expectFetchAndRender(items, [itemElement]);
-      return list.layoutCallback().then(() => {
+      const rendered = expectViewerProxiedFetchAndRender(resp, [itemElement]);
+      return list.layoutCallback().then(() => rendered).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
       });
+    });
+
+    it('should error if viewer does not define response renderedHtml', () => {
+      viewerMock.expects('canRenderTemplates').returns(true);
+      viewerMock.expects('fetchAndRenderTemplate').returns(Promise.resolve({}));
+      templatesMock.expects('renderHtml').never();
+      listMock.expects('toggleLoading').withExactArgs(false).once();
+      return expect(list.layoutCallback()).to.eventually.be
+          .rejectedWith(/Response must define the rendered html/);
+    });
+  });
+
+  it('should attemptChangeHeight after render', () => {
+    const items = [
+      {title: 'Title1'},
+    ];
+    const itemElement = doc.createElement('div');
+    itemElement.style.height = '1337px';
+
+    const rendered = expectFetchAndRender(items, [itemElement]);
+
+    let measureFunc;
+    listMock.expects('getVsync').returns({
+      measure: func => {
+        measureFunc = func;
+      },
+    }).once();
+
+    listMock.expects('attemptChangeHeight')
+        .withExactArgs(1337)
+        .returns(Promise.resolve());
+
+    return list.layoutCallback().then(() => rendered).then(() => {
+      expect(list.container_.contains(itemElement)).to.be.true;
+      expect(measureFunc).to.exist;
+      measureFunc();
     });
 
     it('should attemptChangeHeight after render', () => {

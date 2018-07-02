@@ -18,7 +18,7 @@ import {Deferred} from '../utils/promise';
 import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
-import {getService, registerServiceBuilder} from '../service';
+import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
 
 /**
  * @fileoverview
@@ -76,6 +76,15 @@ export class BaseTemplate {
   }
 
   /**
+   * To be implemented by subclasses.
+   * @param {!JsonObject|string} unusedData
+   * @return {!Element}
+   */
+  renderHtml(unusedData) {
+    throw new Error('Not implemented');
+  }
+
+  /**
    * Helps the template implementation to unwrap the root element. The root
    * element can be unwrapped only when it contains a single element or a
    * single element surrounded by empty text nodes.
@@ -107,6 +116,15 @@ export class BaseTemplate {
       }
     }
     return singleElement || root;
+  }
+
+  /**
+   * @protected @final
+   * @return {boolean}
+   */
+  viewerCanRenderTemplates() {
+    return getServiceForDoc(this.win.document, 'viewer')
+        .hasCapability('viewerRenderTemplate');
   }
 }
 
@@ -175,7 +193,7 @@ export class Templates {
    */
   findAndRenderTemplate(parent, data, opt_querySelector) {
     return this.renderTemplate(
-        this.findTemplate_(parent, opt_querySelector),
+        this.findTemplate(parent, opt_querySelector),
         data);
   }
 
@@ -192,7 +210,7 @@ export class Templates {
    */
   findAndRenderTemplateArray(parent, array, opt_querySelector) {
     return this.renderTemplateArray(
-        this.findTemplate_(parent, opt_querySelector),
+        this.findTemplate(parent, opt_querySelector),
         array);
   }
 
@@ -212,9 +230,8 @@ export class Templates {
    * @param {!Element} parent
    * @param {string=} opt_querySelector
    * @return {!Element}
-   * @private
    */
-  findTemplate_(parent, opt_querySelector) {
+  findTemplate(parent, opt_querySelector) {
     const templateElement = this.maybeFindTemplate_(parent, opt_querySelector);
     user().assert(templateElement, 'Template not found for %s', parent);
     user().assert(templateElement.tagName == 'TEMPLATE',
@@ -328,10 +345,21 @@ export class Templates {
   /**
    * @param {!BaseTemplate} impl
    * @param {!JsonObject} data
+   * @return {!Element}
    * @private
    */
   render_(impl, data) {
     return impl.render(data);
+  }
+
+  /**
+   * @param {!BaseTemplate} parent
+   * @param {!HTML} html
+   * @return {!Promise}
+   */
+  renderHtml(parent, html) {
+    return this.getImplementation_(this.findTemplate(parent))
+        .then(impl => impl.renderHtml(html));
   }
 }
 

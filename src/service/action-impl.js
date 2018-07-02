@@ -245,7 +245,6 @@ export class ActionService {
      * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
      */
     this.globalMethodHandlers_ = map();
-
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
@@ -293,6 +292,8 @@ export class ActionService {
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
+        // For get requests, the delegating to the viewer needs to happen
+        // before this.
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
@@ -390,10 +391,10 @@ export class ActionService {
   installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
-    const debugid = target.tagName + '#' + targetId;
+    const debugId = target.tagName + '#' + targetId;
     dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
-    'AMP element or a whitelisted target element is expected: %s', debugid);
+    'AMP element or a whitelisted target element is expected: %s', debugId);
 
     if (target[ACTION_HANDLER_]) {
       dev().error(TAG_, `Action handler already installed for ${target}`);
@@ -776,7 +777,7 @@ export function parseActionMap(s, context) {
   do {
     tok = toks.next();
     if (tok.type == TokenType.EOF ||
-            tok.type == TokenType.SEPARATOR && tok.value == ';') {
+            (tok.type == TokenType.SEPARATOR && tok.value == ';')) {
       // Expected, ignore.
     } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
 
@@ -1081,8 +1082,8 @@ class ParserTokenizer {
 
     // A numeric. Notice that it steals the `.` from separators.
     if (convertValues && (isNum(c) ||
-            c == '.' && newIndex + 1 < this.str_.length &&
-            isNum(this.str_[newIndex + 1]))) {
+            ((c == '.') && (newIndex + 1 < this.str_.length) &&
+            isNum(this.str_[newIndex + 1])))) {
       let hasFraction = c == '.';
       let end = newIndex + 1;
       for (; end < this.str_.length; end++) {

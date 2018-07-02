@@ -38,6 +38,11 @@ import {tryResolve} from '../utils/promise';
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
 
+/** @enum {string} */
+export const Capability = {
+  VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
+};
+
 /**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
  * string is returned.
@@ -203,11 +208,17 @@ export class Viewer {
     /** @private {?time} */
     this.lastVisibleTime_ = null;
 
+    /** @private {!XMLSerializer} */
+    this.xmls_ = new XMLSerializer();
+
     /** @private {?Function} */
     this.messagingReadyResolver_ = null;
 
     /** @private {?Function} */
     this.viewerOriginResolver_ = null;
+
+    /** @const @private {!template-impl.Templates} */
+    this.templates_ = Services.templatesFor(this.win);
 
     /** @private {?Function} */
     this.trustedViewerResolver_ = null;
@@ -506,6 +517,14 @@ export class Viewer {
     }
     // TODO(@cramforce): Consider caching the split.
     return capabilities.split(',').indexOf(name) != -1;
+  }
+
+  /**
+   * Whether the viewer can render templates.
+   * @return {boolean}
+   */
+  canRenderTemplates() {
+    return this.hasCapability('viewerRenderTemplate');
   }
 
   /**
@@ -1160,8 +1179,87 @@ export class Viewer {
       dev().error(TAG_, 'replaceUrl failed', e);
     }
   }
+
+  /**
+   * Proxies xhr and template rendering to the viewer and renders
+   * the response.
+   * @param {!Element} element
+   * @param {string} sourceComponent The amp component, this is used by the
+   *     viewer to determine the component responsible for proxying the
+   *     request.
+   * @param {?function():Promise<?>} renderTemplateSuccessCallback
+   * @param {?function():Promise<?>} renderTemplateFailureCallback
+   * return {!Promise}
+   */
+  fetchAndRenderTemplate(
+    element,
+    sourceComponent,
+    renderTemplateSuccessCallback,
+    renderTemplateFailureCallback) {
+    const inputsAsJson = getElementInputsAsJson_(element);
+    const elementAttrsAsJson = getElementAttributesAsJson_(element);
+    elementAttrsAsJson.inputData = inputsAsJson;
+    const mustacheTemplate = this.xmls_.serializeToString(
+        this.templates_.findTemplate(element));
+    return this.sendMessageAwaitResponse(
+        Capability.VIEWER_RENDER_TEMPLATE,
+        {
+          data: elementAttrsAsJson,
+          mustacheTemplate,
+          'sourceAmpComponent': sourceComponent,
+        })
+        .then(resp => {
+          if (renderTemplateSuccessCallback) {
+            renderTemplateSuccessCallback()
+                .then(() => {
+                  this.templates_.renderHtml(element, resp.renderedHtml);
+                });
+          } else {
+            return resp;
+          }
+        }, errorResponseJson => {
+          if (renderTemplateFailureCallback) {
+            renderTemplateFailureCallback()
+                .then(() => {
+                  this.templates_.renderHtml(element, errorResponseJson || {});
+                });
+          } else {
+            return errorResponseJson;
+          }
+        });
+  }
 }
 
+/**
+ * Returns the element's contained inputs and values in json format.
+ * @param {!HtmlElement} element
+ * @return {!JsonObject}
+ */
+function getElementInputsAsJson_(element) {
+  const inputs = element.querySelectorAll('input');
+  const inputsAsJson = {};
+  inputs.forEach(input => {
+    inputsAsJson[input.name] = input.value;
+  });
+  return inputsAsJson;
+}
+
+/**
+ * Returns the element's attributes in json format.
+ * @param {!HtmlElement} element
+ * @return {!JsonObject}
+ */
+function getElementAttributesAsJson_(element) {
+  const attrsAsJson = {};
+  if (element.attributes) {
+    const {attributes} = element;
+    for (let i = 0, len = attributes.length; i < len; i++) {
+      const keyValue = attributes[i];
+      attrsAsJson[keyValue.name] = keyValue.value;
+    }
+  }
+  return attrsAsJson;
+}
 
 /**
  * Parses the viewer parameters as a string.

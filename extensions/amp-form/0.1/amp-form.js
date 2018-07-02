@@ -139,8 +139,11 @@ export class AmpForm {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
-    /** @const @private */
+    /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
+
+    /** @const @private {boolean} */
+    this.viewerCanRenderTemplate_ = this.viewer_.canRenderTemplates();
 
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
@@ -268,23 +271,25 @@ export class AmpForm {
       this.validator_.onBlur(e);
     }, true);
 
-    const afterVerifierCommit = () => {
-      // Move from the VERIFYING state back to INITIAL
-      if (this.state_ === FormState_.VERIFYING) {
-        this.setState_(FormState_.INITIAL);
-      }
-    };
-    this.form_.addEventListener('change', e => {
-      this.verifier_.onCommit()
-          .then(updatedElements => {
-            updatedElements.forEach(checkUserValidityAfterInteraction_);
-            this.validator_.onBlur(e);
-          }, () => {
-            checkUserValidityAfterInteraction_(dev().assertElement(e.target));
-          })
-          .then(afterVerifierCommit, afterVerifierCommit);
-    });
-
+    // If the viewer can render templates, then form verifier is not applicable.
+    if (!this.viewerCanRenderTemplate_) {
+      const afterVerifierCommit = () => {
+        // Move from the VERIFYING state back to INITIAL
+        if (this.state_ === FormState_.VERIFYING) {
+          this.setState_(FormState_.INITIAL);
+        }
+      };
+      this.form_.addEventListener('change', e => {
+        this.verifier_.onCommit()
+            .then(updatedElements => {
+              updatedElements.forEach(checkUserValidityAfterInteraction_);
+              this.validator_.onBlur(e);
+            }, () => {
+              checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+            })
+            .then(afterVerifierCommit, afterVerifierCommit);
+      });
+    }
     this.form_.addEventListener('input', e => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
@@ -294,14 +299,17 @@ export class AmpForm {
   /**
    * Triggers 'amp-form-submit' event in 'amp-analytics' and
    * generates variables for form fields to be accessible in analytics
+   * Not applicable if viewer can render template.
    *
    * @param {string} eventType
    * @private
    */
   triggerFormSubmitInAnalytics_(eventType) {
+    if (this.viewerCanRenderTemplate_) {
+      return;
+    }
     const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
-
 
     for (const k in formObject) {
       if (Object.prototype.hasOwnProperty.call(formObject, k)) {
@@ -326,7 +334,6 @@ export class AmpForm {
     // `submit` has the same trust level as the AMP Action that caused it.
     this.submit_(invocation.trust);
     if (this.method_ == 'GET' && !this.xhrAction_) {
-      // Trigger the actual submit of GET non-XHR.
       this.form_.submit();
     }
   }
@@ -385,18 +392,19 @@ export class AmpForm {
       event.preventDefault();
     }
     // Submits caused by user input have high trust.
-    this.submit_(ActionTrust.HIGH);
+    this.submit_(event, ActionTrust.HIGH);
   }
 
   /**
    * Helper method that actual handles the different cases (post, get, xhr...).
+   * @param {!Event} event
    * @param {ActionTrust} trust
    * @private
    */
-  submit_(trust) {
+  submit_(event, trust) {
     const varSubsFields = this.getVarSubsFields_();
     if (this.xhrAction_) {
-      this.handleXhrSubmit_(varSubsFields, trust);
+      this.handleXhrSubmit_(varSubsFields, event, trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
@@ -436,27 +444,68 @@ export class AmpForm {
    */
   handleXhrSubmit_(varSubsFields, trust) {
     this.setState_(FormState_.SUBMITTING);
-
-    const p = this.doVarSubs_(varSubsFields)
-        .then(() => {
-          this.triggerFormSubmitInAnalytics_('amp-form-submit');
-          this.actions_.trigger(
-              this.form_, 'submit', /* event */ null, trust);
-          // After variable substitution
-          const values = this.getFormAsObject_();
-          // At the form submitting state, we want to display any template
-          // messages with the submitting attribute.
-          this.renderTemplate_(values);
-        })
-        .then(() => this.doActionXhr_())
-        .then(response => this.handleXhrSubmitSuccess_(response),
-            error => {
-              return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-            });
-
-    if (getMode().test) {
-      this.xhrSubmitPromise_ = p;
+    const varSubPromise = this.doVarSubs_(varSubsFields);
+    if (this.viewerCanRenderTemplate_) {
+      varSubPromise.then(() => {
+        this.actions_.trigger(
+            this.form_, 'submit', /* event */ null, trust);
+      }).then(() => {
+        return this.viewer_.fetchAndRenderTemplate(
+            this.form_,
+            TAG,
+            this.handleProxyRenderTemplateSuccess_,
+            this.handleProxyRenderTemplateFailure_
+        );
+      });
+    } else {
+      const p = varSubPromise
+          .then(() => {
+            this.handleFormSubmitting_(trust);
+          })
+          .then(() => this.doActionXhr_())
+          .then(response => this.handleXhrSubmitSuccess_(response),
+              error => {
+                return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+              });
+      if (getMode().test) {
+        this.xhrSubmitPromise_ = p;
+      }
     }
+  }
+
+  /**
+   * Handles viewer render template success.
+   * @param {!JsonObject} response
+   */
+  handleProxyRenderTemplateSuccess_(response) {
+    this.setState_(FormState_.SUBMIT_SUCCESS);
+    this.renderTemplate_(response.renderedHtml || {});
+  }
+
+  /**
+   * Handles viewer render template failure.
+   * @param {!JsonObject} error
+   */
+  handleProxyRenderTemplateFailure_(error) {
+    this.triggerAction_(/* success */ false, error); // do we need this?
+    this.setState_(FormState_.SUBMIT_ERROR);
+    this.renderTemplate_(error || {});
+    user().error(TAG, `Form submission failed: ${error}`);
+  }
+
+  /**
+   * Triggers the analytics and renders any template for submitting state.
+   * @param {ActionTrust} trust
+   */
+  handleFormSubmitting_(trust) {
+    this.triggerFormSubmitInAnalytics_();
+    this.actions_.trigger(
+        this.form_, 'submit', /* event */ null, trust);
+    // After variable substitution
+    const values = this.getFormAsObject_();
+    // At the form submitting state, we want to display any template
+    // messages with the submitting attribute.
+    this.renderTemplate_(values);
   }
 
   /**
@@ -502,6 +551,10 @@ export class AmpForm {
    * @private
    */
   doXhr_(url, method, opt_extraFields) {
+    if (this.viewerCanRenderTemplate_) {
+      dev().error(TAG, 'Viewer has renderTemplate capabilities. XHRs should '
+          + 'be proxied to the viewer.');
+    }
     let xhrUrl, body;
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
@@ -532,14 +585,14 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
-   * @param {!../../../src/service/xhr-impl.FetchResponse} response
+   * @param {!../../../src/service/xhr-impl.FetchResponse|!Object} response
    * @return {!Promise}
    * @private visible for testing
    */
   handleXhrSubmitSuccess_(response) {
     return response.json().then(json => {
       this.triggerAction_(/* success */ true, json);
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
+      this.analyticsEvent_('amp-form-submit-success');
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
       this.maybeHandleRedirect_(response);
@@ -585,6 +638,11 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
+    if (this.viewerCanRenderTemplate_) {
+      dev().error(TAG,
+          'Non-XHR requests are not supported for viewers with renderTemplate '
+          + 'capabilities.');
+    }
     this.assertNoSensitiveFields_();
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
@@ -607,8 +665,8 @@ export class AmpForm {
   }
 
   /**
-   * @private
    * @return {boolean} False if the form is invalid.
+   * @private
    */
   checkValidity_() {
     if (isCheckValiditySupported(this.win_.document)) {
@@ -625,10 +683,14 @@ export class AmpForm {
 
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
+   * Not applicable if viewer can render templates.
    * @param {../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   maybeHandleRedirect_(response) {
+    if (this.viewerCanRenderTemplate_) {
+      return;
+    }
     if (!response || !response.headers) {
       return;
     }
@@ -726,20 +788,22 @@ export class AmpForm {
       container.setAttribute('role', 'alert');
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
-
       if (this.templates_.hasTemplate(container)) {
+        /**
+         * @param {!HTML} rendered The rendered amp mustache.
+         */
+        const renderedCallback = function(rendered) {
+          rendered.setAttribute('i-amphtml-rendered', '');
+          container.appendChild(rendered);
+          const renderedEvent = createCustomEvent(
+              this.win_,
+              AmpEvents.DOM_UPDATE,
+              /* detail */ null,
+              {bubbles: true});
+          container.dispatchEvent(renderedEvent);
+        };
         p = this.templates_.findAndRenderTemplate(container, data)
-            .then(rendered => {
-              rendered.id = messageId;
-              rendered.setAttribute('i-amphtml-rendered', '');
-              container.appendChild(rendered);
-              const renderedEvent = createCustomEvent(
-                  this.win_,
-                  AmpEvents.DOM_UPDATE,
-                  /* detail */ null,
-                  {bubbles: true});
-              container.dispatchEvent(renderedEvent);
-            });
+            .then(renderedCallback.bind(this));
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
         // this container are now visible so they get scheduled for layout.

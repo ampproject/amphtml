@@ -60,7 +60,7 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
-     * @private {?{items:!Array, resolver:!Function, rejecter:!Function}}
+     * @private {?{data:{!HTML|!Array}, resolver:!Function, rejecter:!Function}}
      */
     this.renderItems_ = null;
 
@@ -87,6 +87,9 @@ export class AmpList extends AMP.BaseElement {
         this.fetchList_();
       }
     }, ActionTrust.HIGH);
+
+    /** @private */
+    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
   }
 
   /** @override */
@@ -189,7 +192,9 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Request list data from `src` and return a promise that resolves when
-   * the list has been populated with rendered list items.
+   * the list has been populated with rendered list items. If the viewer is
+   * capable of rendering the templates, then the fetching of the list and
+   * transformation of the template is handled by the viewer.
    * @return {!Promise}
    * @private
    */
@@ -204,48 +209,46 @@ export class AmpList extends AMP.BaseElement {
       // Remove any previous items before the reload
       removeChildren(dev().assertElement(this.container_));
     }
-
-    const itemsExpr = this.element.getAttribute('items') || 'items';
-    return this.fetch_(itemsExpr).then(items => {
-      if (this.element.hasAttribute('single-item')) {
-        user().assert(typeof items !== 'undefined' ,
-            'Response must contain an array or object at "%s". %s',
-            itemsExpr, this.element);
-        if (!isArray(items)) {
-          items = [items];
+    if (this.viewer_.canRenderTemplates()) {
+      return this.viewer_.fetchAndRenderTemplate(
+          this.element, TAG).then(resp => {
+        user().assert(
+            resp && (typeof resp.renderedHtml !== 'undefined'),
+            'Response must define the rendered html');
+        return this.scheduleRender_(resp.renderedHtml);
+      }, error => {
+        throw user().createError('Error proxying amp-list templates', error);
+      }).then(
+          handleFallbackSuccess_.bind(this), handleFallbackError_.bind(this));
+    } else {
+      const itemsExpr = this.element.getAttribute('items') || 'items';
+      return this.fetch_(itemsExpr).then(items => {
+        if (this.element.hasAttribute('single-item')) {
+          user().assert(typeof items !== 'undefined',
+              'Response must contain an array or object at "%s". %s',
+              itemsExpr, this.element);
+          if (!isArray(items)) {
+            items = [items];
+          }
         }
-      }
-      user().assert(isArray(items),
-          'Response must contain an array at "%s". %s',
-          itemsExpr, this.element);
-      const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
-      if (maxLen < items.length) {
-        items = items.slice(0, maxLen);
-      }
-      return this.scheduleRender_(items);
-    }, error => {
-      throw user().createError('Error fetching amp-list', error);
-    }).then(() => {
-      if (this.getFallback()) {
-        // Hide in case fallback was displayed for a previous fetch.
-        this.toggleFallbackInMutate_(false);
-      }
-      this.togglePlaceholder(false);
-      this.toggleLoading(false);
-    }, error => {
-      this.toggleLoading(false);
-      if (this.getFallback()) {
-        this.toggleFallbackInMutate_(true);
-        this.togglePlaceholder(false);
-      } else {
-        throw error;
-      }
-    });
+        user().assert(isArray(items),
+            'Response must contain an array at "%s". %s',
+            itemsExpr, this.element);
+        const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
+        if (maxLen < items.length) {
+          items = items.slice(0, maxLen);
+        }
+        return this.scheduleRender_(items);
+      }, error => {
+        throw user().createError('Error fetching amp-list', error);
+      }).then(handleFallbackSuccess_.bind(this),
+          handleFallbackError_.bind(this));
+    }
   }
 
   /**
    * Schedules a fetch result to be rendered in the near future.
-   * @param {!Array} items
+   * @param {!Array|!HTML} data
    * @return {!Promise}
    * @private
    */
@@ -257,7 +260,7 @@ export class AmpList extends AMP.BaseElement {
     if (!this.renderItems_) {
       this.renderPass_.schedule();
     }
-    this.renderItems_ = {items, resolver, rejecter};
+    this.renderItems_ = {data, resolver, rejecter};
     return promise;
   }
 
@@ -278,17 +281,31 @@ export class AmpList extends AMP.BaseElement {
         this.renderItems_ = null;
       }
     };
-    const {items, resolver, rejecter} = current;
-    this.templates_.findAndRenderTemplateArray(this.element, items)
-        .then(elements => this.updateBindingsForElements_(elements))
-        .then(elements => this.render_(elements))
-        .then(/* onFulfilled */ () => {
-          scheduleNextPass();
-          resolver();
-        }, /* onRejected */ () => {
-          scheduleNextPass();
-          rejecter();
-        });
+    if (this.viewer_.canRenderTemplates()) {
+      // TODO(alabiaga): should call updatebindings as below?
+      this.templates_.renderHtml(
+          this.element, /** @type {!HTML} */ (current.data))
+          .then(element => this.container_.appendChild(element))
+          .then(/* onFulfilled */ () => {
+            scheduleNextPass();
+            current.resolver();
+          }, /* onRejected */ () => {
+            scheduleNextPass();
+            current.rejecter();
+          });
+    } else {
+      this.templates_.findAndRenderTemplateArray(
+          this.element, /** @type {!Array} */ (current.data))
+          .then(elements => this.updateBindingsForElements_(elements))
+          .then(elements => this.render_(elements))
+          .then(/* onFulfilled */ () => {
+            scheduleNextPass();
+            current.resolver();
+          }, /* onRejected */ () => {
+            scheduleNextPass();
+            current.rejecter();
+          });
+    }
   }
 
   /**
@@ -362,12 +379,13 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {string} itemsExpr
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
+   *     result or rejected if response is invalid.
    * @private
    */
   fetch_(itemsExpr) {
     const ampdoc = this.getAmpDoc();
     const src = this.element.getAttribute('src');
-
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     let policy = UrlReplacementPolicy.OPT_IN;
@@ -376,6 +394,31 @@ export class AmpList extends AMP.BaseElement {
       policy = UrlReplacementPolicy.ALL;
     }
     return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
+  }
+}
+
+
+/**` @private */
+function handleFallbackSuccess_() {
+  if (this.getFallback()) {
+    // Hide in case fallback was displayed for a previous fetch.
+    this.toggleFallbackInMutate_(false);
+  }
+  this.togglePlaceholder(false);
+  this.toggleLoading(false);
+}
+
+/**
+ * @param {!Error} error
+ * @private
+ */
+function handleFallbackError_(error) {
+  this.toggleLoading(false);
+  if (this.getFallback()) {
+    this.toggleFallbackInMutate_(true);
+    this.togglePlaceholder(false);
+  } else {
+    throw error;
   }
 }
 
