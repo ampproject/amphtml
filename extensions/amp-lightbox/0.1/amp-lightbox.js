@@ -39,7 +39,6 @@ const LightboxEvents = {
   CLOSE: 'lightboxClose',
 };
 
-
 class AmpLightbox extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -180,6 +179,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
+
     this.getViewport().enterLightboxMode(this.element)
         .then(() => this.finalizeOpen_());
   }
@@ -418,10 +418,17 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    if (this.getAmpDoc().win != this.win) { // in FIE
-      setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
-        dev().assert(this.win.document.body)));
+    if (!this.inFie_()) { // Not a FIE.
+      return;
     }
+
+    setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
+      dev().assert(this.win.document.body)));
+  }
+
+  /** @private */
+  inFie_() {
+    return this.getAmpDoc().win != this.win;
   }
 
   /**

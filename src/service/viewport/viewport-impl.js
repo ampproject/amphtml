@@ -644,7 +644,7 @@ export class Viewport {
           'Lightbox mode for A4A is only available when ' +
           `'${A4A_LIGHTBOX_EXPERIMENT}' experiment is on`);
 
-      dev().assert(fieOptional).enterFullOverlayMode();
+      dev().assert(fieOptional).enterFullOverlayMode(requestingElement);
     }
   }
 
