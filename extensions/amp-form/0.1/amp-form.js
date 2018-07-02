@@ -308,11 +308,7 @@ export class AmpForm {
    * @private
    */
   triggerFormSubmitInAnalytics_(eventType) {
-    // Not applicable if viewer can render template.
-    if (this.ssrTemplateHelper_.isSupported()) {
-      this.assertSsrTemplate_('Analytics not supported for viewers with '
-          + 'viewerRenderTemplate capability');
-    }
+    this.assertSsrTemplate_(false, 'Form analytics not supported');
     const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
 
@@ -464,9 +460,9 @@ export class AmpForm {
     } else {
       p = varSubPromise
           .then(() => {
-            this.handleFormSubmitting_(trust);
+            this.submittingWithTrust_(trust);
+            this.doActionXhr_();
           })
-          .then(() => this.doActionXhr_())
           .then(response => this.handleXhrSubmitSuccess_(response),
               error => {
                 return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
@@ -506,7 +502,7 @@ export class AmpForm {
    * Triggers the analytics and renders any template for submitting state.
    * @param {ActionTrust} trust
    */
-  handleFormSubmitting_(trust) {
+  submittingWithTrust_(trust) {
     this.triggerFormSubmitInAnalytics_();
     this.actions_.trigger(
         this.form_, 'submit', /* event */ null, trust);
@@ -560,10 +556,7 @@ export class AmpForm {
    * @private
    */
   doXhr_(url, method, opt_extraFields) {
-    if (this.ssrTemplateHelper_.isSupported()) {
-      this.assertSsrTemplate_('Viewer has viewerRenderTemplate capabilities. '
-          + 'XHRs should be proxied to the viewer.');
-    }
+    this.assertSsrTemplate_(false, 'XHRs should be proxied.');
     let xhrUrl, body;
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
@@ -648,11 +641,7 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
-    if (this.ssrTemplateHelper_.isSupported()) {
-      this.assertSsrTemplate_('Non-XHR requests are not supported for viewers '
-          + 'with renderTemplate capabilities');
-      return;
-    }
+    this.assertSsrTemplate_(false, 'Non-XHR GETs not supported.');
     this.assertNoSensitiveFields_();
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
@@ -664,11 +653,14 @@ export class AmpForm {
   /**
    * Throws an error related to viewer render template handling.
    * supported.
+   * @param {boolean} value
    * @param {string} msg
    * @private
    */
-  assertSsrTemplate_(msg) {
-    user().assert(false, msg);
+  assertSsrTemplate_(value, msg) {
+    const supported = this.ssrTemplateHelper_.isSupported();
+    user().assert(
+        supported === value, `[${TAG}]: viewerRenderTemplate | ${msg}`);
   }
 
   /**
@@ -708,11 +700,7 @@ export class AmpForm {
    * @private
    */
   maybeHandleRedirect_(response) {
-    if (this.ssrTemplateHelper_.isSupported()) {
-      this.assertSsrTemplate_(
-          'Redirects not supported for viewerRenderTemplate capability');
-      return;
-    }
+    this.assertSsrTemplate_(false, 'Redirects not supported.');
     if (!response || !response.headers) {
       return;
     }

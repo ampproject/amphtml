@@ -251,7 +251,7 @@ export class AmpList extends AMP.BaseElement {
         this.element).then(resp => {
       user().assert(
           resp && (typeof resp.renderedHtml !== 'undefined'),
-          'Response must define the rendered html');
+          'Response missing the \'renderedHtml\' field');
       return this.scheduleRender_(resp.renderedHtml);
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);

@@ -17,8 +17,8 @@
 import {Capability} from './service/viewer-impl';
 import {getMode} from './mode';
 
-/** The attributes we allow to be sent in the XHR payload. */
-const WHITELISTED_ATTRS = {
+/** The attributes we allow to be sent to the viewer. */
+const ATTRS_TO_SEND_TO_VIEWER = {
   'amp-list': ['src', 'single-item', 'max-items'],
   'amp-form': ['action-xhr'],
 };
@@ -64,14 +64,14 @@ export class SsrTemplateHelper {
    * @param {!Element} element
    *     viewer to determine the component responsible for proxying the
    *     request.
-   * @param {?function():Promise<?>} renderTemplateSuccessCallback
-   * @param {?function():Promise<?>} renderTemplateFailureCallback
+   * @param {?function():Promise<?>} onSuccess
+   * @param {?function():Promise<?>} onFailure
    * return {!Promise}
    */
   fetchAndRenderTemplate(
     element,
-    renderTemplateSuccessCallback,
-    renderTemplateFailureCallback) {
+    onSuccess,
+    onFailure) {
     const inputsAsJson = this.getElementInputsAsJson_(element);
     const elementAttrsAsJson =
         this.getElementAttributesAsJson_(this.sourceComponent, element);
@@ -87,28 +87,26 @@ export class SsrTemplateHelper {
           'sourceAmpComponent': this.sourceComponent,
         })
         .then(resp => {
-          if (renderTemplateSuccessCallback) {
-            renderTemplateSuccessCallback(resp)
-                .then(() => {
-                  p = this.templates_.findAndRenderTemplate(
-                      element, resp.renderedHtml);
-                  if (getMode().test) {
-                    this.renderTemplatePromise_ = p;
-                  }
-                });
+          if (onSuccess) {
+            onSuccess(resp).then(() => {
+              p = this.templates_.findAndRenderTemplate(
+                  element, resp.renderedHtml);
+              if (getMode().test) {
+                this.renderTemplatePromise_ = p;
+              }
+            });
           } else {
             return resp;
           }
         }, errorResponseJson => {
-          if (renderTemplateFailureCallback) {
-            renderTemplateFailureCallback(errorResponseJson)
-                .then(() => {
-                  p = this.templates_.findAndRenderTemplate(
-                      element, errorResponseJson || {});
-                  if (getMode().test) {
-                    this.renderTemplatePromise_ = p;
-                  }
-                });
+          if (onFailure) {
+            onFailure(errorResponseJson).then(() => {
+              p = this.templates_.findAndRenderTemplate(
+                  element, errorResponseJson || {});
+              if (getMode().test) {
+                this.renderTemplatePromise_ = p;
+              }
+            });
           } else {
             return errorResponseJson;
           }
@@ -149,7 +147,7 @@ export class SsrTemplateHelper {
     if (element.attributes) {
       const {attributes} = element;
       // Include commonly shared allowed attributes.
-      const whiteList = WHITELISTED_ATTRS[sourceComponent]
+      const whiteList = ATTRS_TO_SEND_TO_VIEWER[sourceComponent]
           .concat('inputData', 'mustacheTemplate');
       for (let i = 0, len = attributes.length; i < len; i++) {
         const keyValue = attributes[i];
