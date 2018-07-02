@@ -189,7 +189,6 @@ describes.fakeWin('runtime', {
       extensionRegistrationTest);
 
   it('should not maybePumpEarlyFrame when body not yet present', () => {
-    toggleExperiment(win, 'pump-early-frame', true);
     // Make document.body be null on first invocation to simulate
     // JS executing before the rest of the doc has been parsed.
     const {body} = win.document;
@@ -208,14 +207,12 @@ describes.fakeWin('runtime', {
 
   it('should not maybePumpEarlyFrame ' +
       'when a renderDelayingExtension is present', () => {
-    toggleExperiment(win, 'pump-early-frame', true);
     win.document.body.appendChild(
         document.createElement('amp-experiment'));
     extensionRegistrationTest();
   });
 
   it('should maybePumpEarlyFrame and delay extension execution', () => {
-    toggleExperiment(win, 'pump-early-frame', true);
     let progress = '';
     const queueExtensions = win.AMP;
     const highPriority = regularExtension(amp => {
@@ -393,7 +390,6 @@ describes.fakeWin('runtime', {
     self.AMP_MODE = {
       rtvVersion: 'test-version',
     };
-    toggleExperiment(win, 'version-locking', true);
     function addExisting(index) {
       const s = document.createElement('script');
       s.setAttribute('custom-element', 'amp-test-element' + index);

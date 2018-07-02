@@ -89,12 +89,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
-    id: 'amp-auto-ads',
-    name: 'AMP Auto Ads',
-    spec: 'https://github.com/ampproject/amphtml/issues/6196',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
-  },
-  {
     id: 'amp-auto-ads-adsense-holdout',
     name: 'AMP Auto Ads AdSense Holdout',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
@@ -108,85 +102,14 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'no-auth-in-prerender',
-    name: 'Delay amp-access auth request until doc becomes visible.',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
-  },
-  {
-    id: 'amp-share-tracking',
-    name: 'AMP Share Tracking',
-    spec: 'https://github.com/ampproject/amphtml/issues/3135',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
-  },
-  {
-    id: 'amp-viz-vega',
-    name: 'AMP Visualization using Vega grammar',
-    spec: 'https://github.com/ampproject/amphtml/issues/3991',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
-  },
-  {
-    id: 'amp-apester-media',
-    name: 'AMP extension for Apester media (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/3233',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
-  },
-  {
-    id: 'cache-service-worker',
-    name: 'AMP Cache Service Worker',
-    spec: 'https://github.com/ampproject/amphtml/issues/1199',
-  },
-  {
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz items (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/6106',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'ios-embed-wrapper',
-    name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root (launched)',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
-  },
-  {
-    id: 'chunked-amp',
-    name: 'Split AMP\'s loading phase into chunks',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
-  },
-  {
     id: 'font-display-swap',
     name: 'Use font-display: swap as the default for fonts.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
-  },
-  {
-    id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP (launched).',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-animation/amp-animation.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
-    id: 'pump-early-frame',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
-  },
-  {
-    id: 'version-locking',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
-  },
-  {
-    id: 'web-worker',
-    name: 'Web worker for background processing',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
   },
   {
     id: 'jank-meter',
@@ -197,31 +120,14 @@ const EXPERIMENTS = [
     name: 'Use slot width/height attribute for AdSense size format',
   },
   {
-    id: 'input-debounced',
-    name: 'A debounced input event for AMP actions',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
-    spec: 'https://github.com/ampproject/amphtml/issues/9277',
-  },
-  {
     id: 'user-error-reporting',
     name: 'Report error to publishers',
     spec: 'https://github.com/ampproject/amphtml/issues/6415',
   },
   {
-    id: 'disable-rtc',
-    name: 'Disable AMP RTC',
-    spec: 'https://github.com/ampproject/amphtml/issues/8551',
-  },
-  {
     id: 'inabox-position-api',
     name: 'Position API for foreign iframe',
     spec: 'https://github.com/ampproject/amphtml/issues/10995',
-  },
-  {
-    id: 'amp-story',
-    name: 'Visual storytelling in AMP (v0.1)',
-    spec: 'https://github.com/ampproject/amphtml/issues/11329',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
     id: 'amp-story-scaling',
@@ -263,14 +169,8 @@ const EXPERIMENTS = [
     name: 'Extensions layout independent of viewport location if inabox.',
   },
   {
-    id: 'amp-live-list-sorting',
-    name: 'Allows "newest last" insertion algorithm to be used',
-    spec: 'https://github.com/ampproject/amphtml/issues/5396',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
-  },
-  {
     id: 'amp-consent',
-    name: 'Enables the amp-consent extension',
+    name: 'Enables the amp-consent extension (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
   },
   {

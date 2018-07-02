@@ -49,12 +49,9 @@ import {
   removeFragment,
 } from '../../../src/url';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
-/** @const */
-const EXPERIMENT = 'amp-playbuzz';
 
 class AmpPlaybuzz extends AMP.BaseElement {
 
@@ -103,11 +100,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // EXPERIMENT
-    // AMP.toggleExperiment(EXPERIMENT, true); //for dev
-    user().assert(isExperimentOn(this.win, EXPERIMENT),
-        `Enable ${EXPERIMENT} experiment`);
-
     const e = this.element;
     const src = e.getAttribute('src');
     const itemId = e.getAttribute('data-item');

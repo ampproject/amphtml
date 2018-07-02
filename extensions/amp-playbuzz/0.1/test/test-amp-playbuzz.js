@@ -15,7 +15,6 @@
  */
 
 import '../amp-playbuzz';
-import {toggleExperiment} from '../../../../src/experiments';
 
 
 function startsWith(string, searchString) {
@@ -32,7 +31,6 @@ describes.realWin('amp-playbuzz', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    toggleExperiment(win, 'amp-playbuzz', true);
   });
 
   function createOptionalParams(displayInfo, displayShareBar, displayComments) {
