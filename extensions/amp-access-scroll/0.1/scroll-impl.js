@@ -129,15 +129,9 @@ class ScrollElement {
     this.ampdoc_ = ampdoc;
 
     /** @const {!Element} */
-    this.wrapper_ = document.createElement('div');
-    this.wrapper_.classList.add('amp-access-scroll-bar');
-    ampdoc.getBody().appendChild(this.wrapper_);
-
-    /** @const {!Element} */
     this.placeholder_ = document.createElement('div');
+    this.placeholder_.classList.add('amp-access-scroll-bar');
     this.placeholder_.classList.add('amp-access-scroll-placeholder');
-    this.wrapper_.appendChild(this.placeholder_);
-
     const img = document.createElement('img');
     img.setAttribute('src',
         'https://static.scroll.com/assets/icn-scroll-logo.svg');
@@ -145,7 +139,12 @@ class ScrollElement {
     img.setAttribute('width', 26);
     img.setAttribute('height', 26);
     this.placeholder_.appendChild(img);
+    ampdoc.getBody().appendChild(this.placeholder_);
 
+
+    /** @const {!Element} */
+    this.scrollBar_ = document.createElement('div');
+    this.scrollBar_.classList.add('amp-access-scroll-bar');
     /** @const {!Element} */
     this.iframe_ = document.createElement('iframe');
     this.iframe_.setAttribute('scrolling', 'no');
@@ -157,18 +156,19 @@ class ScrollElement {
     this.iframe_.setAttribute('sandbox', 'allow-scripts allow-same-origin ' +
                                          'allow-top-navigation allow-popups ' +
                                          'allow-popups-to-escape-sandbox');
-    this.wrapper_.appendChild(this.iframe_);
-
+    this.scrollBar_.appendChild(this.iframe_);
+    ampdoc.getBody().appendChild(this.scrollBar_);
   }
 
   /**
    * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
    */
   show(accessService) {
-    accessService.getAccessReaderId()
+    Services.viewportForDoc(this.ampdoc_).addToFixedLayer(this.scrollBar_)
+        .then(() => accessService.getAccessReaderId())
         .then(readerId => {
           this.iframe_.onload = () => {
-            this.wrapper_.removeChild(this.placeholder_);
+            this.ampdoc_.getBody().removeChild(this.placeholder_);
           };
           const docInfo = Services.documentInfoForDoc(this.ampdoc_);
           this.iframe_.setAttribute('src',
