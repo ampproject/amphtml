@@ -23,7 +23,6 @@ import {
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
-import {Capability} from '../../../../src/service/viewer-impl';
 import {FormDataWrapper} from '../../../../src/form-data-wrapper';
 import {Services} from '../../../../src/services';
 import {
@@ -165,8 +164,8 @@ describes.repeated('', {
             target: form,
             preventDefault: sandbox.spy(),
           };
-          let successTemplateContainer = createElement('div');
-          successTemplateContainer.setAttribute('submit-success');
+          const successTemplateContainer = createElement('div');
+          successTemplateContainer.setAttribute('submit-success', '');
           successTemplateContainer.appendChild(template);
 
           const emailInput = createElement('input');
@@ -182,30 +181,32 @@ describes.repeated('', {
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm, 'analyticsEvent_');
           sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(true);
-          ampForm.handleSubmitEvent_(event);
           sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
               .returns(
                   Promise.resolve({
-                    response: {
-                      status: 200,
-                      json() {
-                        return Promise.resolve({
-                          renderedHtml: '<div>much success</div>'});
-                      },
-                    },
+                    renderedHtml: '<div>much success</div>',
                   }));
-          const findTemplateStub = ampForm.templates_.findAndRenderTemplate;
-          return ampForm.xhrSubmitPromiseForTesting().catch(() => {
-            expect(findTemplateStub).to.be.called;
-            // Template should have rendered an error
-            expect(findTemplateStub).to.have.been.calledWith(
-                successTemplateContainer, '<div>much success</div>');
-            // Check that form has a rendered div with class
-            // .submit-success.
-            successTemplateContainer =
-               form.querySelector('[i-amphtml-rendered]');
-            expect(successTemplateContainer).to.not.be.null;
-          });
+          const renderedTemplate = createElement('div');
+          renderedTemplate.innerText = 'much success';
+          sandbox.stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
+              .returns(template);
+          const fetchAndRenderTemplate = sandbox.stub(
+              ampForm.ssrTemplateHelper_, 'fetchAndRenderTemplate');
+          sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
+              .onFirstCall().returns(Promise.resolve(renderedTemplate))
+              .onSecondCall().returns(Promise.resolve(template));
+          ampForm.handleSubmitEvent_(event);
+          return whenCalled(fetchAndRenderTemplate)
+              .then(() => {
+                return ampForm.ssrTemplateHelper_
+                    .renderTemplatePromiseForTesting();
+              }).then(() => {
+                expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate)
+                    .to.have.been.called;
+                expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate)
+                    .to.have.been.calledWith(
+                        form, sinon.match.func, sinon.match.func);
+              });
         });
       });
     });
@@ -641,7 +642,6 @@ describes.repeated('', {
         messageContainer.setAttribute('submit-success', '');
         messageContainer.setAttribute('template', 'successTemplate');
         form.appendChild(messageContainer);
-
         sandbox.stub(ampForm.xhr_, 'fetch')
             .returns(Promise.resolve({
               json: () => {

@@ -15,6 +15,7 @@
  */
 
 import {Capability} from './service/viewer-impl';
+import {getMode} from './mode';
 
 /** The attributes we allow to be sent in the XHR payload. */
 const WHITELISTED_ATTRS = {
@@ -44,6 +45,9 @@ export class SsrTemplateHelper {
     this.xmls_ = new XMLSerializer();
 
     this.sourceComponent = sourceComponent;
+
+    /** @private {?Promise} */
+    this.renderTemplatePromise_ = null;
   }
 
   /**
@@ -74,6 +78,7 @@ export class SsrTemplateHelper {
     elementAttrsAsJson.inputData = inputsAsJson;
     const mustacheTemplate = this.xmls_.serializeToString(
         this.templates_.findTemplate(element));
+    let p = null;
     return this.viewer_.sendMessageAwaitResponse(
         Capability.VIEWER_RENDER_TEMPLATE,
         {
@@ -83,25 +88,40 @@ export class SsrTemplateHelper {
         })
         .then(resp => {
           if (renderTemplateSuccessCallback) {
-            renderTemplateSuccessCallback()
+            renderTemplateSuccessCallback(resp)
                 .then(() => {
-                  this.templates_.findAndRenderTemplate(
+                  p = this.templates_.findAndRenderTemplate(
                       element, resp.renderedHtml);
+                  if (getMode().test) {
+                    this.renderTemplatePromise_ = p;
+                  }
                 });
           } else {
             return resp;
           }
         }, errorResponseJson => {
           if (renderTemplateFailureCallback) {
-            renderTemplateFailureCallback()
+            renderTemplateFailureCallback(errorResponseJson)
                 .then(() => {
-                  this.templates_.findAndRenderTemplate(
+                  p = this.templates_.findAndRenderTemplate(
                       element, errorResponseJson || {});
+                  if (getMode().test) {
+                    this.renderTemplatePromise_ = p;
+                  }
                 });
           } else {
             return errorResponseJson;
           }
         });
+  }
+
+  /**
+   * Returns a promise that resolves when tempalte render finishes. The promise
+   * will be null if the template render has not started.
+   * @visibleForTesting
+   */
+  renderTemplatePromiseForTesting() {
+    return this.renderTemplatePromise_;
   }
 
   /**

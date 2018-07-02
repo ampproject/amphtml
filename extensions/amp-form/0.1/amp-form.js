@@ -57,6 +57,7 @@ import {
 } from '../../../src/dom';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryResolve} from '../../../src/utils/promise';
 
 
 /** @type {string} */
@@ -448,19 +449,20 @@ export class AmpForm {
   handleXhrSubmit_(varSubsFields, trust) {
     this.setState_(FormState_.SUBMITTING);
     const varSubPromise = this.doVarSubs_(varSubsFields);
+    let p;
     if (this.ssrTemplateHelper_.isSupported()) {
-      varSubPromise.then(() => {
+      p = varSubPromise.then(() => {
         this.actions_.trigger(
             this.form_, 'submit', /* event */ null, trust);
       }).then(() => {
-        return this.templateRendererHelper_.fetchAndRenderTemplate(
+        return this.ssrTemplateHelper_.fetchAndRenderTemplate(
             this.form_,
-            this.handleSsrTemplateSuccess_,
-            this.handleSsrTemplateFailure_
+            this.handleSsrTemplateSuccess_.bind(this),
+            this.handleSsrTemplateFailure_.bind(this)
         );
       });
     } else {
-      const p = varSubPromise
+      p = varSubPromise
           .then(() => {
             this.handleFormSubmitting_(trust);
           })
@@ -469,19 +471,22 @@ export class AmpForm {
               error => {
                 return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
               });
-      if (getMode().test) {
-        this.xhrSubmitPromise_ = p;
-      }
+    }
+    if (getMode().test) {
+      this.xhrSubmitPromise_ = p;
     }
   }
 
   /**
    * Handles viewer render template success.
    * @param {!JsonObject} response
+   * @return {!Promise}
    */
   handleSsrTemplateSuccess_(response) {
     this.setState_(FormState_.SUBMIT_SUCCESS);
-    this.renderTemplate_(response.renderedHtml || {});
+    return tryResolve(() => {
+      this.renderTemplate_(response.renderedHtml || {});
+    });
   }
 
   /**
@@ -491,8 +496,10 @@ export class AmpForm {
   handleSsrTemplateFailure_(error) {
     this.triggerAction_(/* success */ false, error); // do we need this?
     this.setState_(FormState_.SUBMIT_ERROR);
-    this.renderTemplate_(error || {});
     user().error(TAG, `Form submission failed: ${error}`);
+    return tryResolve(() => {
+      this.renderTemplate_(error || {});
+    });
   }
 
   /**
@@ -606,6 +613,7 @@ export class AmpForm {
   /**
    * Transition the form the the submit error state.
    * @param {!Error} error
+   * @return {!Promise}
    * @private
    */
   handleXhrSubmitFailure_(error) {
