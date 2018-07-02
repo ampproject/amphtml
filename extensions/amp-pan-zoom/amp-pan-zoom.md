@@ -61,7 +61,34 @@ Specifies a default zoom scale, otherwise set to 1.
 ##### initial-x, initial-y (optional)
 Specifies default translation coordinates, otherwise both set to 0. Expected to be a whole number.
 
-## Events and Actions
-The `<amp-pan-zoom>` component triggers the `transformEnd` event whenever the pan or zoom animation is complete. This event will emit the parameters `scale`, `x`, and `y`. `scale` contains the current scale of the child content being zoomed. `x` and `y` respectively contain the `x` and `y` translation of the child content in pixels.
+##### reset-on-resize (optional)
+Reset refers to centering the image and setting it back to scale = 1. Setting this attribute causes the component to reset the zoomable content on resize of the image itself.
 
-We also have the `transform` action, which takes `scale`, `x`, `y` as paramters and sets the CSS transform property of the child content.
+## Events and Actions
+#### transformEnd (event)
+The `<amp-pan-zoom>` component triggers the `transformEnd` event whenever the pan or zoom animation is complete. This event will emit the parameters `scale`, `x`, and `y`. `scale` contains the current scale of the child content being zoomed. `x` and `y` respectively contain the `x` and `y` translation of the child content from center in pixels.
+
+##### Example
+This example contains an amp-pan-zoom component that will update `amp-state` on `transformEnd`.
+```
+  <amp-state id="transform">
+    <script type="application/json">
+      {
+        "scale": 1,
+        "y": 0,
+        "x": 0
+      }
+    </script>
+  </amp-state>
+  <p [text]="'Current scale: ' + transform.scale + ', x: ' + transform.x + ', y: ' + transform.y">Current scale: 1</p>
+  <amp-pan-zoom layout="responsive" width="1" height="1" id="pan-zoom"
+    on="transformEnd:AMP.setState({transform: {scale: event.scale, x: event.x, y: event.y}})">
+    ...
+  </amp-pan-zoom>
+```
+
+#### transform (action)
+We also have the `transform` action, which takes `scale`, `x`, `y` as paramters and sets the CSS transform property of the child content. If no `x` or `y` is specified, it zooms to center.
+
+##### Example
+Assuming that there is an `<amp-pan-zoom>` component with the id `pan-zoom` on the page, a button with `on="tap:pan-zoom.transform(scale=3)"` will zoom to scale 3x at the center of the content, a button with `on="tap:pan-zoom.transform(scale=3, x=50, y=10)"` will first scale the content to 3x scale, and then shift the content 50 pixels towards the left, and 10 pixels upwards. Consider the `scale`, `x`, and `y` attributes directly applied to the content's CSS transform attribute after animation.

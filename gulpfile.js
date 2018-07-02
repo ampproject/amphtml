@@ -165,6 +165,7 @@ declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
 declareExtension('amp-position-observer', '0.1');
+declareExtension('amp-orientation-observer', '0.1');
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
@@ -541,6 +542,9 @@ function compileCss(watch, opt_compileAll) {
           fs.writeFileSync(`build/css/${cssFilename}`, css);
         }));
   }
+
+  // Used by `gulp test --local-changes` to map CSS files to JS files.
+  fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
