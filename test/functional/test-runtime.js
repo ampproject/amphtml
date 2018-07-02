@@ -335,6 +335,65 @@ describes.fakeWin('runtime', {
     }, 0);
   });
 
+  it('support lazy loading of intermediate modules', () => {
+    let progress = '';
+    const queueExtensions = win.AMP;
+
+    // Queue mode.
+    win.AMP.push(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '1';
+    });
+    win.AMP.push({
+      n: 'ext2',
+      p: 'high',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'HIGH';
+      },
+    });
+    expect(queueExtensions).to.have.length(2);
+    expect(progress).to.equal('');
+    adopt(win);
+    expect(queueExtensions).to.have.length(0);
+    return setTimeout(() => {
+      expect(progress).to.equal('1HIGH');
+      win.AMP.push({
+        n: 'ext1',
+        f: amp => {
+          expect(amp).to.equal(win.AMP);
+          progress += 'A';
+        },
+      });
+      runChunksForTesting(win.document);
+      expect(progress).to.equal('1HIGHA');
+
+      // Runtime mode.
+      win.AMP.push(amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += '2';
+      });
+      win.AMP.push({
+        n: 'ext2',
+        f: amp => {
+          expect(amp).to.equal(win.AMP);
+          progress += 'B';
+        },
+      });
+      return setTimeout(() => {
+        expect(queueExtensions).to.have.length(0);
+
+        expect(progress).to.equal('1HIGHAB2');
+
+        ext.installExtensionsService(win);
+        const extensions = Services.extensionsFor(win);
+        const ext1 = extensions.waitForExtension(win, 'ext1');
+        const ext2 = extensions.waitForExtension(win, 'ext2');
+        return Promise.all([ext1, ext2]);
+      }, 0);
+    }, 0);
+  });
+
   it('should wait for body before processing extensions', function* () {
     let bodyResolver;
     const bodyPromise = new Promise(resolve => {
