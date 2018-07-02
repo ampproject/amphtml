@@ -34,6 +34,6 @@ FAIL
 |  Hello, world.
 |  <div style="replace_inline_style"></div>
 >> ^~~~~~~~~
-feature_tests/css_length.html:34:0 The inline 'style' attribute is not allowed in AMP documents. Use 'style amp-custom' tag instead. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/css_length.html:34:0 CSS syntax error in tag 'div' - incomplete declaration. [GENERIC]
 |  </body>
 |  </html>

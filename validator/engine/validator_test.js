@@ -346,12 +346,7 @@ describe('ValidatorCssLengthValidation', () => {
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('.replace_amp_custom {}', stylesheet)
             .replace('replace_inline_style', '');
-    // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-    test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:5034:0 The inline \'style\' attribute ' +
-        'is not allowed in AMP documents. Use \'style amp-custom\' tag ' +
-        'instead. (see https://www.ampproject.org/docs/guides/author-develop/' +
-        'responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]';
+    test.expectedOutput = 'PASS';
     test.run();
   });
 
@@ -366,18 +361,12 @@ describe('ValidatorCssLengthValidation', () => {
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '');
         test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
         test.expectedOutput = 'FAIL\n' +
            'feature_tests/css_length.html:28:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - we saw ' +
            '50001 bytes whereas the limit is 50000 bytes. ' +
            '(see https://www.ampproject.org/docs/reference/spec' +
-           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]\n' +
-           'feature_tests/css_length.html:5034:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
         test.run();
       });
 
@@ -392,18 +381,12 @@ describe('ValidatorCssLengthValidation', () => {
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '');
         test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
         test.expectedOutput = 'FAIL\n' +
            'feature_tests/css_length.html:28:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - we saw ' +
            '50002 bytes whereas the limit is 50000 bytes. ' +
            '(see https://www.ampproject.org/docs/reference/spec' +
-           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]\n' +
-           'feature_tests/css_length.html:5033:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
         test.run();
       });
 
@@ -416,13 +399,7 @@ describe('ValidatorCssLengthValidation', () => {
         test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:34:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+        test.expectedOutput = 'PASS';
         test.run();
       });
 
@@ -436,13 +413,7 @@ describe('ValidatorCssLengthValidation', () => {
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
         test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
         test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:34:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]\n' +
            'feature_tests/css_length.html:36:6 The author stylesheet ' +
            'specified in tag \'style amp-custom\' and the combined inline ' +
            'styles is too large - we saw 50001 bytes whereas the limit is ' +
@@ -461,13 +432,7 @@ describe('ValidatorCssLengthValidation', () => {
            test.ampHtmlFileContents
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', 'display:block;');
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
         test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:5034:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]\n' +
            'feature_tests/css_length.html:5036:6 The author stylesheet ' +
            'specified in tag \'style amp-custom\' and the combined inline ' +
            'styles is too large - we saw 50014 bytes whereas the limit is ' +

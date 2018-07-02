@@ -214,7 +214,7 @@ describe('ValidatorCssLengthValidation', () => {
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '');
         test.expectedOutputFile = null;
-        test.expectedOutput = 'FAIL';
+        test.expectedOutput = 'PASS';
         test.run();
       });
 
@@ -255,7 +255,7 @@ describe('ValidatorCssLengthValidation', () => {
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
         test.expectedOutputFile = null;
-        test.expectedOutput = 'FAIL';
+        test.expectedOutput = 'PASS';
         test.run();
       });
 
