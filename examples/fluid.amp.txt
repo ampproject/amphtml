@@ -1,4 +1,0 @@
-AMP Static Image DFP Reservation.
-Tests a static image ad in an AMP page.
-
-
