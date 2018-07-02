@@ -81,6 +81,8 @@ export class StandardActions {
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
+        'toggleClass', this.handleToggleClass.bind(this));
+    actionService.addGlobalMethodHandler(
         'toggleVisibility', this.handleToggle.bind(this));
     actionService.addGlobalMethodHandler(
         'scrollTo', this.handleScrollTo.bind(this));
@@ -266,6 +268,45 @@ export class StandardActions {
     } else {
       return this.handleHide(invocation);
     }
+  }
+
+  /**
+   * Handles "toggleClass" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   */
+  handleToggleClass(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
+
+    const target = dev().assertElement(invocation.node);
+    const classNames = user().assertString(invocation.args['class']);
+    const opt_force = !!invocation.args['opt_force'];
+
+    // class may be a list of classes
+    const classList = classNames.trim().split(/\s+/);
+
+    // TODO(kqian): is Set polyfilled?
+    const classSet = new Set();
+    classList.forEach(name => {
+      classSet.add(name);
+    });
+
+    this.resources_.mutateElement(target, () => {
+      const origClassList = [].slice.call(target.classList);
+
+      // merge class lists
+      origClassList.forEach(name => {
+        if (classSet.has(name)) {
+          classSet.delete(name);
+        } else {
+          classSet.add(name);
+        }
+      });
+
+      target.className = Array.from(classSet).join(' ');
+    });
   }
 }
 
