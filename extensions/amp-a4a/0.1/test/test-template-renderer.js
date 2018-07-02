@@ -93,27 +93,15 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
 
   afterEach(() => sandbox.restore());
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   it('should append iframe child with correct template values', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
     return validatorPromise.then(validatorOutput => {
 
       // Sanity check. This behavior is tested in test-template-validator.js.
-=======
-  it('should have AMP validator result', () => { debugger;
-=======
-  it('should have AMP validator result', () => {
->>>>>>> Tests + more.
-    return validatorPromise.then(validatorOutput => {
-
-      // Sanity check. This behavior is tested in teest-template-validator.js.
->>>>>>> init
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       return renderer.render(context, containerElement, validatorOutput)
           .then(() => {
-<<<<<<< HEAD
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
             expect(iframe.contentWindow.document.body.innerHTML.trim()).to
@@ -175,19 +163,11 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       return renderer.render(context, containerElement, validatorOutput)
-<<<<<<< HEAD
           .then(() => {
-            expect(insertAnalyticsSpy).to.be.calledOnce;
-=======
-            expect(false).to.be.ok;
->>>>>>> init
-=======
-          .then(() => { debugger;
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
             expect(iframe.contentWindow.document.body.innerHTML)
                 .to.equal('');
->>>>>>> Tests + more.
           });
     });
   });
