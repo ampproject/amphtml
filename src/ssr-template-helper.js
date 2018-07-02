@@ -31,7 +31,7 @@ export class SsrTemplateHelper {
   /**
    * @param {string} sourceComponent
    * @param {!./service/viewer-impl.Viewer} viewer
-   * @param {!./service/templates-impl.Templates} templates
+   * @param {!./service/template-impl.Templates} templates
    */
   constructor(sourceComponent, viewer, templates) {
 

@@ -145,7 +145,10 @@ export class AmpForm {
     /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
 
-    /** @private {!../../../src/service/ssr-template-helper.SsrTemplateHelper}*/
+    /**
+     * {!../../../src/service/ssr-template-helper.SsrTemplateHelper}
+     * @const @private
+     */
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, this.viewer_, this.templates_);
 
