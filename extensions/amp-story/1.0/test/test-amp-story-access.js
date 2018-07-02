@@ -20,17 +20,30 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-access', {amp: true}, env => {
   let win;
+  let accessConfigurationEl;
+  let defaultConfig;
   let storeService;
   let storyAccess;
+
+  const setConfig = config => {
+    accessConfigurationEl.textContent = JSON.stringify(config);
+  };
 
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
+    accessConfigurationEl = win.document.createElement('script');
+    accessConfigurationEl.setAttribute('id', 'amp-access');
+    accessConfigurationEl.setAttribute('type', 'application/json');
+    defaultConfig = {login: 'https://example.com'};
+    setConfig(defaultConfig);
+
     const storyAccessEl = win.document.createElement('amp-story-access');
     storyAccessEl.getResources = () => win.services.resources.obj;
 
+    win.document.body.appendChild(accessConfigurationEl);
     win.document.body.appendChild(storyAccessEl);
 
     storyAccess = new AmpStoryAccess(storyAccessEl);
@@ -67,7 +80,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     });
   });
 
-  it('should whitelist the <amp-access> actions', () => {
+  it('should whitelist the default <amp-access> actions', () => {
     const addToWhitelistStub =
         sandbox.stub(storyAccess.actions_, 'addToWhitelist');
 
@@ -75,5 +88,64 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     expect(addToWhitelistStub).to.have.been.calledOnce;
     expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login');
+  });
+
+  it('should whitelist the typed <amp-access> actions', () => {
+    defaultConfig.login = {
+      typefoo: 'https://example.com',
+      typebar: 'https://example.com',
+    };
+    setConfig(defaultConfig);
+
+    const addToWhitelistStub =
+        sandbox.stub(storyAccess.actions_, 'addToWhitelist');
+
+    storyAccess.buildCallback();
+
+    expect(addToWhitelistStub).to.have.been.calledTwice;
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login-typefoo');
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login-typebar');
+  });
+
+  it('should whitelist the namespaced and default <amp-access> actions', () => {
+    defaultConfig.namespace = 'foo';
+    setConfig(defaultConfig);
+
+    const addToWhitelistStub =
+        sandbox.stub(storyAccess.actions_, 'addToWhitelist');
+
+    storyAccess.buildCallback();
+
+    expect(addToWhitelistStub).to.have.been.calledTwice;
+    // Both namespaced and default actions are allowed.
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login');
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login-foo');
+  });
+
+  it('should whitelist namespaced and typed <amp-access> actions', () => {
+    const config = [{
+      namespace: 'namespace1',
+      login: {
+        type1: 'https://example.com',
+        type2: 'https://example.com',
+      },
+    }, {
+      namespace: 'namespace2',
+      login: 'https://example.com',
+    }];
+    setConfig(config);
+
+    const addToWhitelistStub =
+        sandbox.stub(storyAccess.actions_, 'addToWhitelist');
+
+    storyAccess.buildCallback();
+
+    expect(addToWhitelistStub).to.have.callCount(3);
+    expect(addToWhitelistStub)
+        .to.have.been.calledWith('SCRIPT.login-namespace1-type1');
+    expect(addToWhitelistStub)
+        .to.have.been.calledWith('SCRIPT.login-namespace1-type2');
+    expect(addToWhitelistStub)
+        .to.have.been.calledWith('SCRIPT.login-namespace2');
   });
 });
