@@ -106,8 +106,8 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
           .then(() => {
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
-            expect(iframe.contentWindow.document.body.innerHTML).to.equal(
-                '<div>\n      <p>ipsum lorem</p>\n      <a href=' +
+            expect(iframe.contentWindow.document.body.innerHTML.trim()).to
+	      .equal('<div>\n      <p>ipsum lorem</p>\n      <a href=' +
                 '"https://buy.com/buy-1" target="_top">Click for ad!</a>' +
                 '\n    <amp-analytics class="i-amphtml-element i-amphtml-' +
                 'notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml-' +

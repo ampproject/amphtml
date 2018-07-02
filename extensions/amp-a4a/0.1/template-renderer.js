@@ -35,9 +35,14 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
             if (analytics) {
               templateHelper.insertAnalytics(renderedElement, analytics);
             }
-            this.iframe.contentWindow.document.body./*OK*/innerHTML =
-                renderedElement./*OK*/outerHTML;
-          });
+	    // This element must exist, or #render() would have thrown.
+            const templateElement = this.iframe.contentWindow.document
+                .getElementsByTagName('template')[0];
+	    this.iframe.contentWindow.document.body
+                .removeChild(templateElement);
+	    this.iframe.contentWindow.document.body
+                .appendChild(renderedElement);
+	  });
     });
   }
 }
