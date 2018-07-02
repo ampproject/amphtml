@@ -19,7 +19,6 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
-import {toggleExperiment} from '../../../../src/experiments';
 
 
 describes.realWin('amp-live-list', {

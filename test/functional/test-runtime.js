@@ -37,7 +37,6 @@ import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {runChunksForTesting} from '../../src/chunk';
-import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
 
