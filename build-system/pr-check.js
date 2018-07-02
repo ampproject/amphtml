@@ -587,6 +587,7 @@ function main() {
         buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM')) {
       command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
+      command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
     }
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
