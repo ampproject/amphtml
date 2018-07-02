@@ -324,6 +324,7 @@ function applyAmpConfig(config) {
  */
 async function generateSnapshots(percy, page, webpages) {
   if (argv.master) {
+    await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
     await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
   cleanupAmpConfig();
