@@ -20,6 +20,7 @@ import {
   TemplateValidator,
   getAmpAdTemplateHelper,
 } from '../template-validator';
+import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {TemplateRenderer} from '../template-renderer';
 import {ValidatorResult} from '../amp-ad-type-defs';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
@@ -94,18 +95,20 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
 
   afterEach(() => sandbox.restore());
 
-  it('should have AMP validator result', () => {
+  it('should append iframe child', () => {
+    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
     return validatorPromise.then(validatorOutput => {
 
-      // Sanity check. This behavior is tested in teest-template-validator.js.
+      // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       return renderer.render(context, containerElement, validatorOutput)
           .then(() => {
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
-            expect(iframe.contentWindow.document.body.innerHTML)
-                .to.equal('');
+            expect(iframe.contentWindow.document.body.innerHTML).to.equal(
+                '<a href="https://buy.com/buy-1" target="_top">' +
+                'Click for ad!</a>');
           });
     });
   });

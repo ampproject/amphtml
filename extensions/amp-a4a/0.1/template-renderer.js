@@ -36,7 +36,7 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
               templateHelper.insertAnalytics(renderedElement, analyticsConfig);
             }
             this.iframe.contentWindow.document.body./*OK*/innerHTML =
-                renderedElement./*OK*/innerHTML;
+                renderedElement./*OK*/outerHTML;
           });
     });
   }
