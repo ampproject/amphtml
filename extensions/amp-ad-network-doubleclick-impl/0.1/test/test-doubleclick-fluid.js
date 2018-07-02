@@ -39,6 +39,46 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
+const rawCreative = `
+  <script>
+  parent./*OK*/postMessage(
+      JSON.stringify(/** @type {!JsonObject} */ ({
+        e: 'sentinel',
+        c: '1234',
+      })), '*');
+  parent./*OK*/postMessage(
+      JSON.stringify(/** @type {!JsonObject} */ ({
+        s: 'creative_geometry_update',
+        p: '{"width":"1px","height":"250px","sentinel":"sentinel"}',
+      })), '*');
+  </script>`;
+
+/**
+ * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
+ * tests.
+ * @param {!AmpAdNetworkDoubleclickImpl} impl
+ * @param {!Object} sandbox Sinon sandbox to mock out properties.
+ */
+function createScaffoldingForFluidRendering(impl, sandbox) {
+  impl.getVsync = () => {
+    return {
+      run: runArgs => {
+        runArgs.mutate();
+      },
+    };
+  };
+  impl.buildCallback();
+  impl.attemptChangeHeight = () => Promise.resolve();
+  sandbox.stub(impl, 'sendXhrRequest').returns(Promise.resolve({
+    arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
+    headers: {has: () => false, get: () => undefined},
+  }));
+  impl.sentinel = 'sentinel';
+  impl.initiateAdRequest();
+  impl.safeframeApi_ = new SafeframeHostApi(
+      impl, true, impl.creativeSize_);
+  sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
+}
 
 describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   let impl;
@@ -176,37 +216,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should fire delayed impression ping', () => {
-    impl.getVsync = () => {
-      return {
-        run: runArgs => {
-          runArgs.mutate();
-        },
-      };
-    };
-    impl.buildCallback();
-    const rawCreative = `
-        <script>
-        parent./*OK*/postMessage(
-            JSON.stringify(/** @type {!JsonObject} */ ({
-              e: 'sentinel',
-              c: '1234',
-            })), '*');
-        parent./*OK*/postMessage(
-            JSON.stringify(/** @type {!JsonObject} */ ({
-              s: 'creative_geometry_update',
-              p: '{"width":"1px","height":"1px","sentinel":"sentinel"}',
-            })), '*');
-        </script>`;
-    impl.attemptChangeHeight = () => Promise.resolve();
-    sandbox.stub(impl, 'sendXhrRequest').returns(Promise.resolve({
-      arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
-      headers: {has: () => false, get: () => undefined},
-    }));
-    impl.sentinel = 'sentinel';
-    impl.initiateAdRequest();
-    impl.safeframeApi_ = new SafeframeHostApi(
-        impl, true, impl.creativeSize_);
-    sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
+    createScaffoldingForFluidRendering(impl, sandbox);
     const connectMessagingChannelSpy =
           sandbox./*OK*/spy(impl.safeframeApi_,
               'connectMessagingChannel');
@@ -220,4 +230,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
+  it('should set height on iframe', () => {
+    createScaffoldingForFluidRendering(impl, sandbox);
+    return impl.adPromise_.then(() => {
+      return impl.layoutCallback().then(() => {
+        expect(impl.iframe.style.height).to.equal('250px');
+      });
+    });
+  });
 });
