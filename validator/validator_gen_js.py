@@ -333,30 +333,6 @@ def ValueToString(descriptor, field_desc, value):
     return 'null'
   return str(value)
 
-
-# For the validator-light version, skip these fields.This works by
-# putting them inside a conditional with !amp.validator.LIGHT.
-# The Closure compiler will then leave them out via dead code elimination.
-SKIP_FIELDS_FOR_LIGHT = [
-    'also_requires_tag_warning',
-    'deprecation_url',
-    'deprecated_versions',
-    'error_formats',
-    'error_specificity',
-    'errors',
-    'deprecated_recommends_usage_of_tag',
-    'html_format',
-    'max_bytes_spec_url',
-    'min_validator_revision_required',
-    'spec_file_revision',
-    'spec_url',
-    'template_spec_url',
-    'unique_warning',
-    'validator_revision',
-    'blacklisted_cdata_regex',
-]
-SKIP_CLASSES_FOR_LIGHT = ['amp.validator.ValidationError',
-                          'amp.validator.ErrorFormat']
 EXPORTED_CLASSES = [
     'amp.validator.ValidationResult', 'amp.validator.ValidationError'
 ]
@@ -411,47 +387,7 @@ SYNTHETIC_REFERENCE_FIELD = [
 ]
 
 
-class GenerateNonLightSectionIf(object):
-  """Wraps output lines in a condition for a light validator.
-
-     For example, the code:
-     ----------------------
-     with GenerateNonLightSectionIf(true, out):
-       out.Line('DoStuff()')
-     ----------------------
-
-     Will generate the output:
-     ----------------------
-     if (!amp.validator.LIGHT) {
-       DoStuff();
-     }
-     ----------------------
-  """
-
-  def __init__(self, condition, out):
-    """Constructor.
-
-    Args:
-      condition: If true, this with generator will indent upon entering and
-          unindent upon exiting.
-      out: a list of lines to output (without the newline characters) wrapped as
-          an OutputFormatter instance, to which this function will append.
-    """
-    self.condition = condition
-    self.out = out
-
-  def __enter__(self):
-    if self.condition:
-      self.out.Line('if (!amp.validator.LIGHT) {')
-      self.out.PushIndent(2)
-
-  def __exit__(self, exception_type, value, traceback):
-    if self.condition:
-      self.out.PopIndent()
-      self.out.Line('}')
-
-
-def PrintClassFor(descriptor, msg_desc, light, out):
+def PrintClassFor(descriptor, msg_desc, out):
   """Prints a Javascript class for the given proto message.
 
   This method emits a Javascript class (Closure-style) for the given
@@ -461,141 +397,112 @@ def PrintClassFor(descriptor, msg_desc, light, out):
     descriptor: The descriptor module from the protobuf package, e.g.
         google.protobuf.descriptor.
     msg_desc: The descriptor for a particular message type.
-    light: A bool indicating whether or not to generate a light validator,
-        that is, one which is configured to not emit detailed errors, only
-        supports a single html_format, and will not export the full API for
-        the Node.js library / tool.
     out: a list of lines to output (without the newline characters) wrapped as
         an OutputFormatter instance, to which this function will append.
   """
-  with GenerateNonLightSectionIf(msg_desc.full_name
-                                 in SKIP_CLASSES_FOR_LIGHT, out):
-    constructor_arg_fields = []
-    constructor_arg_field_names = {}
-    for field in msg_desc.fields:
-      if field.full_name in CONSTRUCTOR_ARG_FIELDS:
-        constructor_arg_fields.append(field)
-        constructor_arg_field_names[field.name] = 1
-    out.Line('/**')
-    for field in constructor_arg_fields:
-      out.Line(' * @param {%s} %s' % (FieldTypeFor(
-          descriptor, field, nullable=False),
-                                      UnderscoreToCamelCase(field.name)))
-    out.Line(' * @constructor')
-    out.Line(' * @struct')
-    out.Line(' */')
-    arguments = ','.join(
-        [UnderscoreToCamelCase(f.name) for f in constructor_arg_fields])
-    out.Line('%s = function(%s) {' % (msg_desc.full_name, arguments))
-    out.PushIndent(2)
+  constructor_arg_fields = []
+  constructor_arg_field_names = {}
+  for field in msg_desc.fields:
+    if field.full_name in CONSTRUCTOR_ARG_FIELDS:
+      constructor_arg_fields.append(field)
+      constructor_arg_field_names[field.name] = 1
+  out.Line('/**')
+  for field in constructor_arg_fields:
+    out.Line(' * @param {%s} %s' % (FieldTypeFor(
+        descriptor, field, nullable=False), UnderscoreToCamelCase(field.name)))
+  out.Line(' * @constructor')
+  out.Line(' * @struct')
+  out.Line(' */')
+  arguments = ','.join(
+      [UnderscoreToCamelCase(f.name) for f in constructor_arg_fields])
+  out.Line('%s = function(%s) {' % (msg_desc.full_name, arguments))
+  out.PushIndent(2)
 
-    export_or_empty = ''
-    export_class = not light and msg_desc.full_name in EXPORTED_CLASSES
-    if export_class:
-      export_or_empty = ' @export'
+  export_or_empty = ''
+  export_class = msg_desc.full_name in EXPORTED_CLASSES
+  if export_class:
+    export_or_empty = ' @export'
 
-    for field in msg_desc.fields:
-      # We generate ValidatorRules.directAttrLists, ValidatorRules.globalAttrs,
-      # and validator.ampLayoutAttrs instead.
-      if field.full_name == 'amp.validator.ValidatorRules.attr_lists':
-        continue
-      assigned_value = 'null'
-      if field.name in constructor_arg_field_names:
-        # field.name is also the parameter name.
-        assigned_value = UnderscoreToCamelCase(field.name)
-      elif field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-        # ValidationResult instances may be mutated by validator.js,
-        # so we can't share the empty arrays. But for all other
-        # instances, we do share.
-        if msg_desc.full_name == 'amp.validator.ValidationResult':
-          assigned_value = '[]'
-        else:
-          assigned_value = 'EMPTY_%s_ARRAY' % (
-              ElementTypeFor(descriptor, field).replace('.', '_'))
-      elif field.type == descriptor.FieldDescriptor.TYPE_BOOL:
-        assigned_value = str(field.default_value).lower()
-      elif field.type == descriptor.FieldDescriptor.TYPE_INT32:
-        assigned_value = str(field.default_value)
-      # TODO(johannes): Increase coverage for default values, e.g. enums.
-      type_name = FieldTypeFor(
-          descriptor, field, nullable=assigned_value == 'null')
-      with GenerateNonLightSectionIf(field.name in SKIP_FIELDS_FOR_LIGHT, out):
-        out.Line('/**%s @type {%s} */' % (export_or_empty, type_name))
-        out.Line('this.%s = %s;' % (UnderscoreToCamelCase(field.name),
-                                    assigned_value))
-    if msg_desc.full_name == 'amp.validator.CdataSpec':
-      out.Line('/** @type {?number} */')
-      out.Line('this.combinedBlacklistedCdataRegex = null;')
-    if msg_desc.full_name == 'amp.validator.ValidatorRules':
-      out.Line('/** @type {!Array<!string>} */')
-      out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
-      out.Line('/** @type {!Array<!string>} */')
-      out.Line('this.internedStrings = [];')
-      out.Line('/** @type {!Array<!amp.validator.AttrSpec>} */')
-      out.Line('this.attrs = [];')
-      out.Line('/** @type {!Array<!Array<number>>} */')
-      out.Line('this.directAttrLists = [];')
-      out.Line('/** @type {!Array<number>} */')
-      out.Line('this.globalAttrs = [];')
-      out.Line('/** @type {!Array<number>} */')
-      out.Line('this.ampLayoutAttrs = [];')
-    out.PopIndent()
-    out.Line('};')
+  for field in msg_desc.fields:
+    # We generate ValidatorRules.directAttrLists, ValidatorRules.globalAttrs,
+    # and validator.ampLayoutAttrs instead.
+    if field.full_name == 'amp.validator.ValidatorRules.attr_lists':
+      continue
+    assigned_value = 'null'
+    if field.name in constructor_arg_field_names:
+      # field.name is also the parameter name.
+      assigned_value = UnderscoreToCamelCase(field.name)
+    elif field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+      # ValidationResult instances may be mutated by validator.js,
+      # so we can't share the empty arrays. But for all other
+      # instances, we do share.
+      if msg_desc.full_name == 'amp.validator.ValidationResult':
+        assigned_value = '[]'
+      else:
+        assigned_value = 'EMPTY_%s_ARRAY' % (
+            ElementTypeFor(descriptor, field).replace('.', '_'))
+    elif field.type == descriptor.FieldDescriptor.TYPE_BOOL:
+      assigned_value = str(field.default_value).lower()
+    elif field.type == descriptor.FieldDescriptor.TYPE_INT32:
+      assigned_value = str(field.default_value)
+    # TODO(johannes): Increase coverage for default values, e.g. enums.
+    type_name = FieldTypeFor(
+        descriptor, field, nullable=assigned_value == 'null')
+    out.Line('/**%s @type {%s} */' % (export_or_empty, type_name))
+    out.Line(
+        'this.%s = %s;' % (UnderscoreToCamelCase(field.name), assigned_value))
+  if msg_desc.full_name == 'amp.validator.CdataSpec':
+    out.Line('/** @type {?number} */')
+    out.Line('this.combinedBlacklistedCdataRegex = null;')
+  if msg_desc.full_name == 'amp.validator.ValidatorRules':
+    out.Line('/** @type {!Array<!string>} */')
+    out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
+    out.Line('/** @type {!Array<!string>} */')
+    out.Line('this.internedStrings = [];')
+    out.Line('/** @type {!Array<!amp.validator.AttrSpec>} */')
+    out.Line('this.attrs = [];')
+    out.Line('/** @type {!Array<!Array<number>>} */')
+    out.Line('this.directAttrLists = [];')
+    out.Line('/** @type {!Array<number>} */')
+    out.Line('this.globalAttrs = [];')
+    out.Line('/** @type {!Array<number>} */')
+    out.Line('this.ampLayoutAttrs = [];')
+  out.PopIndent()
+  out.Line('};')
 
-    if export_class:
-      out.Line('goog.exportSymbol("%s", %s);' % (msg_desc.full_name,
-                                                 msg_desc.full_name))
+  if export_class:
+    out.Line('goog.exportSymbol("%s", %s);' % (msg_desc.full_name,
+                                               msg_desc.full_name))
 
 
-SKIP_ENUMS_FOR_LIGHT = [
-    'amp.validator.ValidationError.Code',
-    'amp.validator.ValidationError.Severity',
-    'amp.validator.ErrorCategory.Code',
-]
-
-
-def PrintEnumFor(enum_desc, light, out):
+def PrintEnumFor(enum_desc, out):
   """Prints a Javascript enum for the given enum descriptor.
 
   Args:
     enum_desc: The descriptor for a particular enum type.
-    light: A bool indicating whether or not to generate a light validator,
-        that is, one which is configured to not emit detailed errors, only
-        supports a single html_format, and will not export the full API for
-        the Node.js library / tool.
     out: a list of lines to output (without the newline characters) wrapped as
         an OutputFormatter instance, to which this function will append.
   """
-  with GenerateNonLightSectionIf(enum_desc.full_name
-                                 in SKIP_ENUMS_FOR_LIGHT, out):
-    out.Line('/**')
-    if light:
-      out.Line(' * @enum {number}')
-    else:
-      out.Line(' * @enum {string}')
-    out.Line(' */')
-    out.Line('%s = {' % enum_desc.full_name)
-    out.PushIndent(2)
-    names = []
-    for v in enum_desc.values:
-      names.append('%s' % v.name)
-      if light:
-        out.Line('%s: %d,' % (v.name, v.number))
-      else:
-        out.Line("%s: '%s'," % (v.name, v.name))
-    out.PopIndent()
-    out.Line('};')
+  out.Line('/**')
+  out.Line(' * @enum {string}')
+  out.Line(' */')
+  out.Line('%s = {' % enum_desc.full_name)
+  out.PushIndent(2)
+  names = []
+  for v in enum_desc.values:
+    names.append('%s' % v.name)
+    out.Line("%s: '%s'," % (v.name, v.name))
+  out.PopIndent()
+  out.Line('};')
 
-    if not light:
-      out.Line('goog.exportSymbol("%s", %s);' % (enum_desc.full_name,
-                                                 enum_desc.full_name))
-    out.Line('/** @type {!Array<string>} */')
-    out.Line('%s_NamesByIndex = ["%s"];' % (enum_desc.full_name,
-                                            '","'.join(names)))
-    out.Line('/** @type {!Array<!%s>} */' % enum_desc.full_name)
-    out.Line('%s_ValuesByIndex = [%s];' % (
-        enum_desc.full_name, ','.join(
-            ['%s.%s' % (enum_desc.full_name, n)for n in names])))
+  out.Line('goog.exportSymbol("%s", %s);' % (enum_desc.full_name,
+                                             enum_desc.full_name))
+  out.Line('/** @type {!Array<string>} */')
+  out.Line(
+      '%s_NamesByIndex = ["%s"];' % (enum_desc.full_name, '","'.join(names)))
+  out.Line('/** @type {!Array<!%s>} */' % enum_desc.full_name)
+  out.Line('%s_ValuesByIndex = [%s];' % (enum_desc.full_name, ','.join(
+      ['%s.%s' % (enum_desc.full_name, n) for n in names])))
 
 
 def TagSpecName(tag_spec):
@@ -615,7 +522,7 @@ def TagSpecName(tag_spec):
   return tag_spec.tag_name.lower()
 
 
-def MaybePrintMessageValue(descriptor, field_val, registry, light, out):
+def MaybePrintMessageValue(descriptor, field_val, registry, out):
   """Print field_val if necessary, and return its message reference.
 
   Args:
@@ -624,10 +531,6 @@ def MaybePrintMessageValue(descriptor, field_val, registry, light, out):
     field_val: The value of a field, a proto message.
     registry: an instance of MessageRegistry, used for mapping from
         messages to message keys.
-    light: A bool indicating whether or not to generate a light validator,
-        that is, one which is configured to not emit detailed errors, only
-        supports a single html_format, and will not export the full API for
-        the Node.js library / tool.
     out: a list of lines to output (without the newline characters) wrapped as
         an OutputFormatter instance, to which this function will append.
   Returns:
@@ -636,7 +539,7 @@ def MaybePrintMessageValue(descriptor, field_val, registry, light, out):
   """
   message_key = MessageKey(field_val)
   if not registry.IsPrinted(message_key):
-    PrintObject(descriptor, field_val, registry, light, out)
+    PrintObject(descriptor, field_val, registry, out)
   return registry.MessageReferenceForKey(message_key)
 
 
@@ -652,7 +555,7 @@ def IsTrivialAttrSpec(attr):
           attr.HasField('name') and len(attr.ListFields()) == 1)
 
 
-def AssignedValueFor(descriptor, field_desc, field_val, registry, light, out):
+def AssignedValueFor(descriptor, field_desc, field_val, registry, out):
   """Helper function for PrintObject: computes / assigns a value for a field.
 
   Note that if the field is a complex field (a message), this function
@@ -665,10 +568,6 @@ def AssignedValueFor(descriptor, field_desc, field_val, registry, light, out):
     field_val: The value for a particular field.
     registry: an instance of MessageRegistry, used for mapping from
         messages to message keys.
-    light: A bool indicating whether or not to generate a light validator,
-        that is, one which is configured to not emit detailed errors, only
-        supports a single html_format, and will not export the full API for
-        the Node.js library / tool.
     out: a list of lines to output (without the newline characters) wrapped as
         an OutputFormatter instance, to which this function will append.
   Returns:
@@ -693,7 +592,7 @@ def AssignedValueFor(descriptor, field_desc, field_val, registry, light, out):
     render_value = InternOrReference
   elif field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
     render_value = (
-        lambda v: MaybePrintMessageValue(descriptor, v, registry, light, out))
+        lambda v: MaybePrintMessageValue(descriptor, v, registry, out))
   else:
     render_value = (lambda v: ValueToString(descriptor, field_desc, v))  # pylint: disable=cell-var-from-loop
 
@@ -705,7 +604,7 @@ def AssignedValueFor(descriptor, field_desc, field_val, registry, light, out):
   return render_value(field_val)
 
 
-def PrintObject(descriptor, msg, registry, light, out):
+def PrintObject(descriptor, msg, registry, out):
   """Prints an object, by recursively constructing it.
 
   This routine emits Javascript which will construct an object modeling
@@ -718,10 +617,6 @@ def PrintObject(descriptor, msg, registry, light, out):
     msg: A protocol message instance.
     registry: an instance of MessageRegistry, used for mapping from
         messages to message keys.
-    light: A bool indicating whether or not to generate a light validator,
-        that is, one which is configured to not emit detailed errors, only
-        supports a single html_format, and will not export the full API for
-        the Node.js library / tool.
     out: a list of lines to output (without the newline characters) wrapped as
         an OutputFormatter instance, to which this function will append.
   Returns:
@@ -737,10 +632,9 @@ def PrintObject(descriptor, msg, registry, light, out):
     # and validator.ampLayoutAttrs instead.
     if field_desc.full_name == 'amp.validator.ValidatorRules.attr_lists':
       continue
-    if light and field_desc.name in SKIP_FIELDS_FOR_LIGHT:
-      continue
-    field_and_assigned_values.append((field_desc, AssignedValueFor(
-        descriptor, field_desc, field_val, registry, light, out)))
+    field_and_assigned_values.append(
+        (field_desc,
+         AssignedValueFor(descriptor, field_desc, field_val, registry, out)))
 
   # Constructor with the appropriate arguments.
   constructor_arg_values = [
@@ -754,8 +648,6 @@ def PrintObject(descriptor, msg, registry, light, out):
   fields = []
   fields_string = ''
   for (field, value) in field_and_assigned_values:
-    if light and field.name in SKIP_FIELDS_FOR_LIGHT:
-      continue
     if field.full_name in CONSTRUCTOR_ARG_FIELDS:
       continue
     fields.append('%s : %s' %  (UnderscoreToCamelCase(field.name), value))
@@ -810,8 +702,8 @@ def DispatchKeyForTagSpecOrNone(tag_spec):
 
 
 def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
-                                 generate_spec_only, text_format, light,
-                                 html_format, descriptor, out):
+                                 generate_spec_only, text_format, html_format,
+                                 descriptor, out):
   """Main method for the code generator.
 
   This method reads the specfile and emits Javascript to sys.stdout.
@@ -824,8 +716,6 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     generate_spec_only: If true, then only generate spec.
     text_format: The text_format module from the protobuf package, e.g.
         google.protobuf.text_format.
-    light: If true, then no detailed errors will be emitted by the validator,
-        and the rules will be pre-filtered for html_format.
     html_format: Either a TagSpec.HtmlFormat enum value indicating which
         HTML format the generated validator code should support,
         or None indicating that all formats should be supported.
@@ -840,13 +730,6 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
 
   if generate_spec_only:
     assert specfile is not None
-
-  if light and generate_spec_only:
-    # If we generate a light validator, we require that the rules be filtered
-    # for a specific format (in practice thus far 'AMP' or 'AMP4ADS').
-    assert html_format is not None
-  else:
-    assert html_format is None
 
   # First, find the descriptors and enums and generate Javascript
   # classes and enums.
@@ -889,9 +772,9 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
 
     for name in all_names:
       if name in msg_desc_by_name:
-        PrintClassFor(descriptor, msg_desc_by_name[name], light, out)
+        PrintClassFor(descriptor, msg_desc_by_name[name], out)
       elif name in enum_desc_by_name:
-        PrintEnumFor(enum_desc_by_name[name], light, out)
+        PrintEnumFor(enum_desc_by_name[name], out)
 
   if generate_spec_only:
     # Read the rules file, validator.protoascii by parsing it as a text
@@ -925,7 +808,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     out.Line(' */')
     out.Line('amp.validator.createRules = function() {')
     out.PushIndent(2)
-    PrintObject(descriptor, rules, registry, light, out)
+    PrintObject(descriptor, rules, registry, out)
 
     # We use this below to reference the variable holding the rules instance.
     rules_reference = registry.MessageReferenceForKey(MessageKey(rules))
@@ -952,7 +835,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     # Emit the attr specs, then assign a list of references to them to
     # Rules.attrs.
     for attr in sorted_attrs:
-      PrintObject(descriptor, attr, registry, light, out)
+      PrintObject(descriptor, attr, registry, out)
     out.Line('%s.attrs = [%s];' % (rules_reference, ','.join([
         registry.MessageReferenceForKey(MessageKey(a)) for a in sorted_attrs
     ])))
