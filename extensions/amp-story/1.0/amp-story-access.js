@@ -156,7 +156,8 @@ export class AmpStoryAccess extends AMP.BaseElement {
             'Cannot find the amp-access configuration');
 
     // Configuration validation is handled by the amp-access extension.
-    let accessConfig = parseJson(accessEl.textContent);
+    let accessConfig =
+        /** @type {!Array|!Object} */ (parseJson(accessEl.textContent));
 
     if (!isArray(accessConfig)) {
       accessConfig = [accessConfig];
@@ -170,12 +171,11 @@ export class AmpStoryAccess extends AMP.BaseElement {
     }
 
     accessConfig.forEach(config => {
-      const namespace = config.namespace;
+      const {login, namespace} = /** @type {{login, namespace}} */ (config);
 
-      if (isObject(config.login)) {
-        Object.keys(config.login).forEach(type => {
-          this.whitelistAction_(namespace, type);
-        })
+      if (isObject(login)) {
+        const types = Object.keys(login);
+        types.forEach(type => this.whitelistAction_(namespace, type));
       } else {
         this.whitelistAction_(namespace);
       }

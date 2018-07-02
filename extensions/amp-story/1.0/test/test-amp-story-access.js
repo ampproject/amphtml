@@ -37,9 +37,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     accessConfigurationEl = win.document.createElement('script');
     accessConfigurationEl.setAttribute('id', 'amp-access');
     accessConfigurationEl.setAttribute('type', 'application/json');
-    defaultConfig = {
-      login: 'https://example.com'
-    };
+    defaultConfig = {login: 'https://example.com'};
     setConfig(defaultConfig);
 
     const storyAccessEl = win.document.createElement('amp-story-access');
