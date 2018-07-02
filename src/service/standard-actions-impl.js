@@ -81,13 +81,13 @@ export class StandardActions {
     actionService.addGlobalMethodHandler('hide', this.handleHide.bind(this));
     actionService.addGlobalMethodHandler('show', this.handleShow.bind(this));
     actionService.addGlobalMethodHandler(
-        'toggleClass', this.handleToggleClass.bind(this));
-    actionService.addGlobalMethodHandler(
         'toggleVisibility', this.handleToggle.bind(this));
     actionService.addGlobalMethodHandler(
         'scrollTo', this.handleScrollTo.bind(this));
     actionService.addGlobalMethodHandler(
         'focus', this.handleFocus.bind(this));
+    actionService.addGlobalMethodHandler(
+        'toggleClass', this.handleToggleClass.bind(this));
   }
 
   /**
@@ -286,7 +286,7 @@ export class StandardActions {
         'toggled class should be a string');
 
     this.resources_.mutateElement(target, () => {
-      if (args.hasOwnProperty('opt_force')) {
+      if ({}.hasOwnProperty.call(args, ('opt_force'))) {
         // must be boolean, won't do type conversion
         const shouldForce = user().assertBoolean(args['opt_force']);
         target.classList.toggle(className, shouldForce);
