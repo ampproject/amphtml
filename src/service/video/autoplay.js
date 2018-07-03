@@ -15,10 +15,13 @@
  */
 
 import {
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoEvents,
+} from '../../video-interface';
+import {
   PositionObserverFidelity,
 } from '../position-observer/position-observer-worker';
 import {Services} from '../../services';
-import {VideoEvents} from '../../video-interface';
 import {VideoServiceSignals} from '../video-service-interface';
 import {VideoUtils} from '../../utils/video';
 import {dev} from '../../log';
@@ -40,14 +43,6 @@ export const AutoplayEvents = {
   PLAY: 'amp:autoplay',
   PAUSE: 'amp:autopause',
 };
-
-
-/**
- * Minimum visibility ratio required to trigger autoplay.
- * @private @const {number}
- */
-const MIN_RATIO = 0.5;
-
 
 /**
  * @param {!Element} node
@@ -323,7 +318,8 @@ export class AutoplayEntry {
   /** @private */
   triggerByVisibility_() {
     const ratio = this.element_.getIntersectionChangeEntry().intersectionRatio;
-    const isVisible = (!isFiniteNumber(ratio) ? 0 : ratio) >= MIN_RATIO;
+    const isVisible = (!isFiniteNumber(ratio) ? 0 : ratio) >=
+        MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
     if (this.isVisible_ == isVisible) {
       return;
     }
