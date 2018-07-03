@@ -39,5 +39,6 @@
   "font-display-swap": 1,
   "adsense-delay-request": 0.01,
   "doubleclick-delay-request":0.01,
-  "amp-date-picker": 1
+  "amp-date-picker": 1,
+  "inline-styles": 1
 }
