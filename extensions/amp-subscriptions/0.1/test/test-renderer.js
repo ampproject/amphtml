@@ -31,6 +31,7 @@ function isDisplayed(el) {
 describes.realWin('amp-subscriptions renderer before initialized', {
   amp: {},
 }, env => {
+  console.log('hi');
   let win, doc;
   let unrelated;
   let section, action, dialog;
