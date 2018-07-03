@@ -92,7 +92,7 @@ export class AmpList extends AMP.BaseElement {
     /** @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
 
-    /** @private {!../../../src/SsrTemplateHelper} */
+    /** @private {!../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, this.viewer_, this.templates_);
   }
