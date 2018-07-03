@@ -419,16 +419,12 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    const {element} = this;
-
+    const {win, element} = this;
     if (!isInFie(element)) {
       return;
     }
-
-    setTransparentBody(
-        this.getAmpDoc().win,
-        element,
-        /** @type {!HTMLBodyElement} */ (dev().assert(this.win.document.body)));
+    const body = dev().assertElement(win.document.body);
+    setTransparentBody(win, element, /** @type {!HTMLBodyElement} */ (body));
   }
 
   /**
