@@ -125,7 +125,6 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.layoutCompleted_ = true;
-
     return this.fetchList_();
   }
 
@@ -133,27 +132,27 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     const state = mutations['state'];
-
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
-          this.fetchList_();
+          return this.fetchList_();
         }
       } else if (typeOfSrc === 'object') {
-        const items = isArray(src) ? src : [src];
-        this.scheduleRender_(items);
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
+        const items = isArray(src) ? src : [src];
+        return this.scheduleRender_(items);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
-      const items = isArray(state) ? state : [state];
-      this.scheduleRender_(items);
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
+      const items = isArray(state) ? state : [state];
+      return this.scheduleRender_(items);
     }
+    return Promise.resolve();
   }
 
   /**
@@ -277,15 +276,16 @@ export class AmpList extends AMP.BaseElement {
         this.renderItems_ = null;
       }
     };
-    this.templates_.findAndRenderTemplateArray(this.element, current.items)
+    const {items, resolver, rejecter} = current;
+    this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindingsForElements_(elements))
-        .then(elements => this.rendered_(elements))
+        .then(elements => this.render_(elements))
         .then(/* onFulfilled */ () => {
           scheduleNextPass();
-          current.resolver();
+          resolver();
         }, /* onRejected */ () => {
           scheduleNextPass();
-          current.rejecter();
+          rejecter();
         });
   }
 
@@ -333,27 +333,27 @@ export class AmpList extends AMP.BaseElement {
    * @param {!Array<!Element>} elements
    * @private
    */
-  rendered_(elements) {
-    removeChildren(dev().assertElement(this.container_));
-    elements.forEach(element => {
-      if (!element.hasAttribute('role')) {
-        element.setAttribute('role', 'listitem');
-      }
-      this.container_.appendChild(element);
-    });
-
-    const event = createCustomEvent(this.win,
-        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
-    this.container_.dispatchEvent(event);
-
-    // Change height if needed.
-    this.getVsync().measure(() => {
-      const scrollHeight = this.container_./*OK*/scrollHeight;
-      const height = this.element./*OK*/offsetHeight;
-      if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight).catch(() => {});
-      }
-    });
+  render_(elements) {
+    this.mutateElement(() => {
+      removeChildren(dev().assertElement(this.container_));
+      elements.forEach(element => {
+        if (!element.hasAttribute('role')) {
+          element.setAttribute('role', 'listitem');
+        }
+        this.container_.appendChild(element);
+      });
+      const event = createCustomEvent(this.win,
+          AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
+      this.container_.dispatchEvent(event);
+      // Change height if needed.
+      this.getVsync().measure(() => {
+        const scrollHeight = this.container_./*OK*/scrollHeight;
+        const height = this.element./*OK*/offsetHeight;
+        if (scrollHeight > height) {
+          this.attemptChangeHeight(scrollHeight).catch(() => {});
+        }
+      });
+    }, this.container_);
   }
 
   /**
