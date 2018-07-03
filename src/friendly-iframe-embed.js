@@ -480,9 +480,9 @@ export class FriendlyIframeEmbed {
 
   /**
    * @return {!HTMLBodyElement}
-   * @visibleForTesting
+   * @private
    */
-  getBodyElement() {
+  getBodyElement_() {
     return /** @type {!HTMLBodyElement} */ (
       (this.iframe.contentDocument || this.iframe.contentWindow.document)
           .body);
@@ -490,9 +490,9 @@ export class FriendlyIframeEmbed {
 
   /**
    * @return {!./service/resources-impl.Resources}
-   * @visibleForTesting
+   * @private
    */
-  getResources() {
+  getResources_() {
     return Services.resourcesForDoc(this.iframe);
   }
 
@@ -505,7 +505,7 @@ export class FriendlyIframeEmbed {
    * @private
    */
   runVsyncOnIframe_(task, opt_state) {
-    return this.getResources().measureMutateElement(this.iframe,
+    return this.getResources_().measureMutateElement(this.iframe,
         task.measure || null, task.mutate);
   }
 
@@ -559,7 +559,7 @@ export class FriendlyIframeEmbed {
           height,
         } = this.iframe./*OK*/getBoundingClientRect();
 
-        const headerHeight = header./*OK*/getBoundingClientRect().height;
+        const headerHeight = this.getHeaderHeight_(header);
 
         Object.assign(iframeStyle, {
           'top': px(headerHeight),
@@ -571,7 +571,7 @@ export class FriendlyIframeEmbed {
           'top': px(top - headerHeight),
           'left': px(left),
           'width': px(width),
-          'height': px(height),
+          'height': px(height - headerHeight),
         });
       },
       mutate: () => {
@@ -582,9 +582,18 @@ export class FriendlyIframeEmbed {
         header.classList.add('amp-ad-close-header');
 
         // We need to override runtime-level !important rules
-        setImportantStyles(this.getBodyElement(), bodyStyle);
+        setImportantStyles(this.getBodyElement_(), bodyStyle);
       },
     });
+  }
+
+  /**
+   * Stubbed in tests.
+   * @param {!Element} element
+   * @private
+   */
+  getHeaderHeight_(element) {
+    return element./*OK*/getBoundingClientRect().height;
   }
 
   /**
@@ -605,7 +614,7 @@ export class FriendlyIframeEmbed {
 
         // we're not resetting background here as we need to set it to
         // transparent permanently.
-        resetStyles(this.getBodyElement(), [
+        resetStyles(this.getBodyElement_(), [
           'position',
           'top',
           'left',

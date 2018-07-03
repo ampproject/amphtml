@@ -726,23 +726,18 @@ describe('friendly-iframe-embed', () => {
 
       parent.appendChild(iframe);
 
-      sandbox./*OK*/stub(iframe, 'getBoundingClientRect').callsFake(() => ({
-        right: x + w,
-        left: x,
-        top: y,
-        bottom: y + h,
-        width: w,
-        height: h,
-      }));
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect')
+          .returns(layoutRectLtwh(x, y, w, h));
 
       const fie = new FriendlyIframeEmbed(iframe, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
       }, Promise.resolve());
 
-      sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
-      sandbox.stub(fie, 'win').callsFake(win);
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      sandbox.stub(fie, 'getResources_').returns(resourcesMock);
+      sandbox.stub(fie, 'getBodyElement_').returns(bodyElementMock);
+
+      fie.win = win;
 
       return fie;
     }
