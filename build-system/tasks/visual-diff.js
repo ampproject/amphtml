@@ -43,6 +43,7 @@ const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 12000;
 const CONFIGS = ['canary', 'prod'];
 const CSS_SELECTOR_TIMEOUT_MS = 5000;
+const PAGE_REST_TIMEOUT_MS = 100; // TODO(danielrozenberg): remove once our expectations regarding page.waitForSelector are met.
 const AMP_RUNTIME_TARGET_FILES = [
   'dist/amp.js', 'dist.3p/current/integration.js'];
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
@@ -324,6 +325,7 @@ function applyAmpConfig(config) {
  */
 async function generateSnapshots(percy, page, webpages) {
   if (argv.master) {
+    await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
     await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
   cleanupAmpConfig();
@@ -362,6 +364,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
 
     await verifyCssElements(page, url, webpage.forbidden_css,
         webpage.loading_incomplete_css, webpage.loading_complete_css);
+    await sleep(PAGE_REST_TIMEOUT_MS);
     await percy.snapshot(name, page, SNAPSHOT_OPTIONS);
     await clearExperiments(page);
   }
@@ -496,6 +499,9 @@ async function createEmptyBuild(page) {
 
 /**
  * Simple wrapper around the JS (Percy-Puppeteer) based visual diff tests.
+ *
+ * This is the current default mode, which is actively deprecating the Ruby
+ * (Capybara) implementation.
  */
 async function visualDiffPuppeteer() {
   if (argv.verify) {
@@ -538,8 +544,7 @@ async function visualDiffPuppeteer() {
 /**
  * Simple wrapper around the ruby (Percy-Capybara) based visual diff tests.
  *
- * This is the current default mode, which is actively being replaced with a
- * pure JS implementation.
+ * This mode is being actively deprecated and will be removed soon.
  */
 function visualDiffCapybara() {
   let cmd = 'ruby build-system/tasks/visual-diff.rb';
@@ -557,7 +562,7 @@ function visualDiffCapybara() {
 async function visualDiff() {
   setPercyBranch();
 
-  if (argv.puppeteer) {
+  if (!argv.capybara) {
     await visualDiffPuppeteer();
   } else {
     visualDiffCapybara();
@@ -578,7 +583,7 @@ gulp.task(
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
-        'puppeteer': '  [EXPERIMENTAL] Use Percy-Puppeteer (work in progress)',
+        'capybara': '  [DEPRECATED] Use Capybara (Ruby) instead of Puppeteer',
       },
     }
 );
