@@ -424,7 +424,7 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     const body = dev().assertElement(win.document.body);
-    setTransparentBody(win, element, /** @type {!HTMLBodyElement} */ (body));
+    setTransparentBody(win, /** @type {!HTMLBodyElement} */ (body));
   }
 
   /**
@@ -443,14 +443,14 @@ class AmpLightbox extends AMP.BaseElement {
 /**
  * Sets the document body to transparent to allow for frame "merging".
  * @param {!Window} win
- * @param {!Element} ctx
  * @param {!HTMLBodyElement} body
  * @private
  */
-function setTransparentBody(win, ctx, body) {
+function setTransparentBody(win, body) {
   const state = {};
+  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
 
-  Services.resourcesForDoc(ctx).measureMutateElement(body,
+  Services.resourcesForDoc(ampdoc).measureMutateElement(body,
       function measure() {
         state.alreadyTransparent =
             computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
@@ -471,14 +471,13 @@ function setTransparentBody(win, ctx, body) {
 }
 
 
-// TODO(alanorozco): refactor this somehow so we don't need to do a direct
-// getMode check
-if (getMode().runtime == 'inabox') {
-  setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
-    dev().assert(document.body)));
-}
-
-
 AMP.extension(TAG, '0.1', AMP => {
+  // TODO(alanorozco): refactor this somehow so we don't need to do a direct
+  // getMode check
+  if (getMode().runtime == 'inabox') {
+    setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
+      dev().assert(document.body)));
+  }
+
   AMP.registerElement(TAG, AmpLightbox, CSS);
 });
