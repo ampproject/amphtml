@@ -311,7 +311,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-timeago', version: '0.1', type: TYPES.MISC},
-  {name: 'amp-twitter', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-twitter',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
   {
     name: 'amp-user-notification',
     version: '0.1',
