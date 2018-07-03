@@ -1294,12 +1294,10 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when one or more attributes are mutated.
-     * Note Must be called inside a mutate context.
-     * Note Boolean attributes have a value of `true` and `false` when
-     *       present and missing, respectively.
-     * @param {
-     *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
-     * } mutations
+     * Note: Must be called inside a mutate context.
+     * Note: Boolean attributes have a value of `true` and `false` when
+     *     present and missing, respectively.
+     * @param {!JsonObject<string, (null|boolean|string|number|Array|Object)>} mutations
      */
     mutatedAttributesCallback(mutations) {
       this.implementation_.mutatedAttributesCallback(mutations);
