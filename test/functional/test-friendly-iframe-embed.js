@@ -719,15 +719,12 @@ describe('friendly-iframe-embed', () => {
     };
 
     let win;
-    let iframe;
-    let fie;
 
-    beforeEach(() => {
-      win = {
-        innerWidth: winW,
-        innerHeight: winH,
-      };
-      iframe = document.createElement('iframe');
+    function createFie(bodyElementMock, parentType = 'amp-ad') {
+      const iframe = document.createElement('iframe');
+      const parent = document.createElement(parentType);
+
+      parent.appendChild(iframe);
 
       sandbox./*OK*/stub(iframe, 'getBoundingClientRect').callsFake(() => ({
         right: x + w,
@@ -738,19 +735,44 @@ describe('friendly-iframe-embed', () => {
         height: h,
       }));
 
-      fie = new FriendlyIframeEmbed(iframe, {
+      const fie = new FriendlyIframeEmbed(iframe, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
       }, Promise.resolve());
 
       sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
       sandbox.stub(fie, 'win').callsFake(win);
+      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+
+      return fie;
+    }
+
+
+    beforeEach(() => {
+      win = {
+        innerWidth: winW,
+        innerHeight: winH,
+      };
+    });
+
+    it('should not throw if inside an amp-ad', () => {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'amp-ad');
+
+      expect(() => fie.enterFullOverlayMode()).to.not.throw();
+    });
+
+    it('should throw if not inside an amp-ad', () => {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'not-an-amp-ad');
+
+      expect(() => fie.enterFullOverlayMode())
+          .to.throw(/Only .?amp-ad.? is allowed/);
     });
 
     it('should resize body and fixed container when entering', function* () {
       const bodyElementMock = document.createElement('div');
-
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      const fie = createFie(bodyElementMock);
 
       yield fie.enterFullOverlayMode();
 
@@ -763,19 +785,18 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.right).to.equal('auto');
       expect(bodyElementMock.style.bottom).to.equal('auto');
 
-      expect(iframe.style.position).to.equal('fixed');
-      expect(iframe.style.left).to.equal('0px');
-      expect(iframe.style.right).to.equal('0px');
-      expect(iframe.style.top).to.equal('0px');
-      expect(iframe.style.bottom).to.equal('0px');
-      expect(iframe.style.width).to.equal('100vw');
-      expect(iframe.style.height).to.equal('100vh');
+      expect(fie.iframe.style.position).to.equal('fixed');
+      expect(fie.iframe.style.left).to.equal('0px');
+      expect(fie.iframe.style.right).to.equal('0px');
+      expect(fie.iframe.style.top).to.equal('0px');
+      expect(fie.iframe.style.bottom).to.equal('0px');
+      expect(fie.iframe.style.width).to.equal('100vw');
+      expect(fie.iframe.style.height).to.equal('calc(100vh - 0px)');
     });
 
     it('should reset body and fixed container when leaving', function* () {
       const bodyElementMock = document.createElement('div');
-
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      const fie = createFie(bodyElementMock);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();
@@ -788,13 +809,13 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.right).to.be.empty;
       expect(bodyElementMock.style.bottom).to.be.empty;
 
-      expect(iframe.style.position).to.be.empty;
-      expect(iframe.style.left).to.be.empty;
-      expect(iframe.style.right).to.be.empty;
-      expect(iframe.style.top).to.be.empty;
-      expect(iframe.style.bottom).to.be.empty;
-      expect(iframe.style.width).to.be.empty;
-      expect(iframe.style.height).to.be.empty;
+      expect(fie.iframe.style.position).to.be.empty;
+      expect(fie.iframe.style.left).to.be.empty;
+      expect(fie.iframe.style.right).to.be.empty;
+      expect(fie.iframe.style.top).to.be.empty;
+      expect(fie.iframe.style.bottom).to.be.empty;
+      expect(fie.iframe.style.width).to.be.empty;
+      expect(fie.iframe.style.height).to.be.empty;
     });
   });
 });
