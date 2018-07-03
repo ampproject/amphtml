@@ -419,12 +419,16 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    if (!isInFie(this.element)) {
+    const {element} = this;
+
+    if (!isInFie(element)) {
       return;
     }
 
-    setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
-      dev().assert(this.win.document.body)));
+    setTransparentBody(
+        this.getAmpDoc().win,
+        element,
+        /** @type {!HTMLBodyElement} */ (dev().assert(this.win.document.body)));
   }
 
   /**
@@ -443,30 +447,31 @@ class AmpLightbox extends AMP.BaseElement {
 /**
  * Sets the document body to transparent to allow for frame "merging".
  * @param {!Window} win
+ * @param {!Element} ctx
  * @param {!HTMLBodyElement} body
  * @private
  */
-function setTransparentBody(win, body) {
-  Services.vsyncFor(win).run({
-    measure(state) {
-      state.alreadyTransparent =
-          computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
-    },
-    mutate(state) {
-      if (!state.alreadyTransparent && !getMode().test) {
+function setTransparentBody(win, ctx, body) {
+  const state = {};
 
-        // TODO(alanorozco): Create documentation page and link it here once the
-        // A4A lightbox experiment is turned on.
-        user().warn(TAG,
-            'The background of the <body> element has been forced to ' +
-            'transparent. If you need to set background, use an intermediate ' +
-            'container.');
-      }
+  Services.resourcesForDoc(ctx).measureMutateElement(body,
+      function measure() {
+        state.alreadyTransparent =
+            computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
+      },
+      function mutate() {
+        if (!state.alreadyTransparent && !getMode().test) {
+          // TODO(alanorozco): Create documentation page and link it here once
+          // the A4A lightbox experiment is turned on.
+          user().warn(TAG,
+              'The background of the <body> element has been forced to ' +
+              'transparent. If you need to set background, use an ' +
+              'intermediate container.');
+        }
 
-      // set as !important regardless to prevent changes
-      setImportantStyles(body, {background: 'transparent'});
-    },
-  }, {});
+        // set as !important regardless to prevent changes
+        setImportantStyles(body, {background: 'transparent'});
+      });
 }
 
 
