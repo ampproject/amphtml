@@ -20,6 +20,9 @@ import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {
+  ViewportBindingIosEmbedShadowRoot_,
+} from './viewport-binding-ios-embed-sd';
+import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
@@ -1127,7 +1130,12 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
+    if (isExperimentOn(ampdoc.win, 'ios-embed-sd') &&
+        ampdoc.win.Element.prototype.attachShadow) {
+      binding = new ViewportBindingIosEmbedShadowRoot_(ampdoc.win);
+    } else {
+      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
+    }
   } else {
     binding = new ViewportBindingNatural_(ampdoc);
   }

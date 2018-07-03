@@ -148,11 +148,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
-    id: 'ios-embed-wrapper',
+    id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root (launched)',
+      ' shadow root',
     spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
     id: 'chunked-amp',
