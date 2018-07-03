@@ -19,10 +19,10 @@ import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {closestBySelector, escapeHtml, removeElement} from './dom';
 import {createCustomEvent, listenOnce, loadPromise} from './event-helper';
 import {dev, rethrowAsync, user} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
-import {escapeHtml, removeElement} from './dom';
 import {htmlFor} from './static-template';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
@@ -674,4 +674,12 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
         });
         return Promise.all(promises);
       });
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInFie(element) {
+  return !!closestBySelector(element, '.i-amphtml-fie');
 }

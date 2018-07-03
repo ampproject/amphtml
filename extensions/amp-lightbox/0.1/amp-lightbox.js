@@ -27,6 +27,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isInFie} from '../../../src/friendly-iframe-embed';
 import {toArray} from '../../../src/types';
 import {tryFocus} from '../../../src/dom';
 
@@ -418,17 +419,12 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    if (!this.inFie_()) { // Not a FIE.
+    if (!isInFie(this.element)) {
       return;
     }
 
     setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
       dev().assert(this.win.document.body)));
-  }
-
-  /** @private */
-  inFie_() {
-    return this.getAmpDoc().win != this.win;
   }
 
   /**
