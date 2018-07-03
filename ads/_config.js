@@ -684,6 +684,7 @@ export const adConfig = {
     preconnect: [
       'https://odb.outbrain.com',
     ],
+    consentHandlingOverride: true,
   },
 
   pixels: {
