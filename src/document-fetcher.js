@@ -72,7 +72,7 @@ export function fetchDocument(input, init) {
             'responseXML should exist. Make sure to return ' +
             'Content-Type: text/html header.');
         const doc = /** @type {!Document} */(dev().assert(xhr.responseXML));
-        return Promise.resolve(doc);
+        return resolve(doc);
       }
     };
     xhr.onerror = () => {
