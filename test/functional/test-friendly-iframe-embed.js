@@ -768,7 +768,7 @@ describe('friendly-iframe-embed', () => {
           .to.throw(/Only .?amp-ad.? is allowed/);
     });
 
-    it.skip('should resize body and fixed container when entering', function* () {
+    it.skip('resizes body and fixed container when entering', function* () {
       const bodyElementMock = document.createElement('div');
       const fie = createFie(bodyElementMock);
       const headerHeight = 60;
