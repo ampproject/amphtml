@@ -90,6 +90,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
     isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
   });
 
+  afterEach(() => env.sandbox.restore());
+
   /**
    * Instantiates element and impl, adding the former to the document of the
    * iframe.
@@ -840,6 +842,17 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(element.offsetHeight).to.equal(300);
         expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
       });
+    });
+
+    it('should call divertExperiments after isResponsive', () => {
+      constructImpl({
+        width: '320',
+        height: '150',
+      });
+      const isResponsiveSpy = env.sandbox.spy(impl, 'isResponsive_');
+      const divertExperimentsSpy = env.sandbox.spy(impl, 'divertExperiments');
+      impl.buildCallback();
+      expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
     });
   });
 
