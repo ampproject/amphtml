@@ -240,7 +240,7 @@ following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
 ##### Prompt Actions from External Consent UI
 
-When using iframes as consent prompt UI. Iframes can send a `consent-response` message to the parent AMP page to inform [prompt actions](prompt-actions) on the current consent. Note the message must come from the `<amp-iframe>` created iframe. Messages from nested iframes will be ignored.
+When using iframes as consent prompt UI. Iframes can send a `consent-response` message to the parent AMP page to inform [prompt actions](#prompt-actions) on the current consent. Note the message must come from the `<amp-iframe>` created iframe. Messages from nested iframes will be ignored.
 
 *Example: iframe `consent-response` request*
 
