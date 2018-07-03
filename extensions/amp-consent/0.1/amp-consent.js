@@ -546,7 +546,12 @@ export class AmpConsent extends AMP.BaseElement {
     user().assert(isJsonScriptTag(script),
         `${TAG} consent instance config should be put in a <script>` +
         'tag with type= "application/json"');
-    const config = parseJson(script.textContent);
+    let config;
+    try {
+      config = parseJson(script.textContent);
+    } catch (err) {
+      user().assert(false, `${TAG}: Error parsing config`);
+    }
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     user().assert(Object.keys(consents).length != 0,
