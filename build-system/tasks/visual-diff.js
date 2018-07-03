@@ -499,6 +499,9 @@ async function createEmptyBuild(page) {
 
 /**
  * Simple wrapper around the JS (Percy-Puppeteer) based visual diff tests.
+ *
+ * This is the current default mode, which is actively deprecating the Ruby
+ * (Capybara) implementation.
  */
 async function visualDiffPuppeteer() {
   if (argv.verify) {
@@ -541,8 +544,7 @@ async function visualDiffPuppeteer() {
 /**
  * Simple wrapper around the ruby (Percy-Capybara) based visual diff tests.
  *
- * This is the current default mode, which is actively being replaced with a
- * pure JS implementation.
+ * This mode is being actively deprecated and will be removed soon.
  */
 function visualDiffCapybara() {
   let cmd = 'ruby build-system/tasks/visual-diff.rb';
@@ -560,7 +562,7 @@ function visualDiffCapybara() {
 async function visualDiff() {
   setPercyBranch();
 
-  if (argv.puppeteer) {
+  if (!argv.capybara) {
     await visualDiffPuppeteer();
   } else {
     visualDiffCapybara();
@@ -581,7 +583,7 @@ gulp.task(
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
-        'puppeteer': '  [EXPERIMENTAL] Use Percy-Puppeteer (work in progress)',
+        'capybara': '  [DEPRECATED] Use Capybara (Ruby) instead of Puppeteer',
       },
     }
 );
