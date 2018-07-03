@@ -737,7 +737,7 @@ describe('friendly-iframe-embed', () => {
       }, Promise.resolve());
 
       sandbox.stub(fie, 'getResources_').returns(resourcesMock);
-      sandbox.stub(fie, 'getBodyElement_').returns(bodyElementMock);
+      sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
 
       fie.win = win;
 

@@ -480,9 +480,9 @@ export class FriendlyIframeEmbed {
 
   /**
    * @return {!HTMLBodyElement}
-   * @private
+   * @visibleForTesting
    */
-  getBodyElement_() {
+  getBodyElement() {
     return /** @type {!HTMLBodyElement} */ (
       (this.iframe.contentDocument || this.iframe.contentWindow.document)
           .body);
@@ -581,7 +581,7 @@ export class FriendlyIframeEmbed {
         header.classList.add('amp-ad-close-header');
 
         // We need to override runtime-level !important rules
-        setImportantStyles(this.getBodyElement_(), bodyStyle);
+        setImportantStyles(this.getBodyElement(), bodyStyle);
       },
     });
   }
@@ -613,7 +613,7 @@ export class FriendlyIframeEmbed {
 
         // we're not resetting background here as we need to set it to
         // transparent permanently.
-        resetStyles(this.getBodyElement_(), [
+        resetStyles(this.getBodyElement(), [
           'position',
           'top',
           'left',
