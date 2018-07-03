@@ -29,7 +29,6 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
 
 /**
  * Properties:
- *     - url: The doc's url.
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
