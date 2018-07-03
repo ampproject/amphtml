@@ -28,7 +28,8 @@ amp-compare-slider {
 .i-amphtml-compare-slider-mask-left {
   position: relative;
   width: 100%;
-  right: 50%;
+  /* right: 50%; */
+  transform: translateX(-50%);
   height: 100%;
   overflow: hidden;
   z-index: 1;
@@ -42,7 +43,8 @@ amp-compare-slider {
 .i-amphtml-compare-slider-image-left img {
   overflow: hidden;
   z-index: 1;
-  left: 50% !important; /* hack! */
+  transform: translateX(50%);
+  /* left: 50% !important; */
 }
 
 .i-amphtml-compare-slider-image-right img {
@@ -53,7 +55,8 @@ amp-compare-slider {
 .i-amphtml-compare-slider-bar-wrapper {
   position: absolute;
   height: 100%;
-  left: 50%;
+  transform: translateX(50%);
+  /* left: 50%; */
   overflow: visible;
   z-index: 2;
 }
@@ -86,4 +89,22 @@ amp-compare-slider {
   color: gray;
 
   z-index: 3;
+}
+
+@keyframes i-amphtml-compare-slider-hint-fadein {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes i-amphtml-compare-slider-hint-fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
 }

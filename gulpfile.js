@@ -121,6 +121,7 @@ declareExtension('amp-hulu', '0.1');
 declareExtension('amp-iframe', '0.1');
 declareExtension('amp-ima-video', '0.1');
 declareExtension('amp-image-lightbox', '0.1', {hasCss: true});
+declareExtension('amp-image-slider', '0.1', {hasCss: true});
 declareExtension('amp-imgur', '0.1');
 declareExtension('amp-instagram', '0.1', {hasCss: true});
 declareExtension('amp-install-serviceworker', '0.1');

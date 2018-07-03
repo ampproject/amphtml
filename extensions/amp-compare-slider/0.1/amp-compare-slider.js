@@ -65,6 +65,11 @@ export class AmpCompareSlider extends AMP.BaseElement {
     /** @private {?Document} */
     this.doc_ = this.win.document;
 
+    /** @private {boolean} */
+    this.isChrome_ = !!this.win.chrome;
+    // chrome has an interesting glitch with transform
+    // using non-hardware accelerated left/right instead for it
+
     // Binds
     this.initDrag = this.initDrag.bind(this);
     this.initTouch = this.initTouch.bind(this);
@@ -190,10 +195,15 @@ export class AmpCompareSlider extends AMP.BaseElement {
         Math.min(this.splitOffset_ + moveX, rightBound));
     const newPercentage = ((newPos - leftBound) * 100 / width).toPrecision(4);
 
-    setStyle(this.barWrapper_, 'left', `${newPercentage}%`);
-    setStyle(this.leftMask_, 'right', `${100 - newPercentage}%`);
+    // setStyle(this.barWrapper_, 'left', `${newPercentage}%`);
+    // setStyle(this.leftMask_, 'right', `${100 - newPercentage}%`);
+    // // circumvent !import setting limitation
+    // setStyle(this.leftImage_.firstChild, 'cssText', `left: ${100 - newPercentage}% !important`);
+
+    setStyle(this.barWrapper_, 'transform', `translateX(${newPercentage}%)`);
+    setStyle(this.leftMask_, 'transform', `translateX(-${100 - newPercentage}%)`);
     // circumvent !import setting limitation
-    setStyle(this.leftImage_.firstChild, 'cssText', `left: ${100 - newPercentage}% !important`);
+    setStyle(this.leftImage_.firstChild, 'cssText', `transform: translateX(${100 - newPercentage}%) !important`);
   }
 
   /**
