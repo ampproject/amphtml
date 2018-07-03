@@ -2191,7 +2191,51 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       },
     },
   },
-
+  'oracleInfinityAnalytics': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    },
+    'requests': {
+      'host': 'https://dc.oracleinfinity.io/${guid}/dcs.gif?',
+      'basePrefix': 'dcssip=${dcssip}&dcsuri=${dcsuri}&WT.ti=${ti}&dcsdat=${timestamp}&dcsref=${documentReferrer}&WT.es=${sourceHost}${sourcePath}',
+      'browserMeasures': '&WT.bs=${availableScreenWidth}x${availableScreenHeight}&WT.sr=${screenWidth}x${screenHeight}&WT.cd=${screenColorDepth}&WT.ul=${browserLanguage}&WT.le=${documentCharset}&WT.js=Yes',
+      'sessionization': '&WT.co_f=${clientId(WT_AMP)}&WT.vtid=${clientId(WT_AMP)}&WT.tv=1.0.0&ora.apm_ver=${ampVersion}&dcscfg=3',
+      'pageview': '${host}${basePrefix}${browserMeasures}${sessionization}&WT.dl=${dl}',
+      'event': '${host}${basePrefix}${browserMeasures}${sessionization}&WT.dl=${dl}'
+    },
+    'vars': {
+      'dcssip': '${sourceHost}',
+      'dcsuri': '${sourcePath}',
+      'dl': '0',
+      'ti': '${title}'
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      },
+      'trackAnchorClicks': {
+        'on': 'click',
+        'selector': 'a',
+        'request': 'event',
+        'vars': {
+          'dl': '99',
+          'ti': 'Link Click'
+        }
+      },
+    },
+    'trackDownloadClicks': {
+      'on': 'click',
+      'selector': 'a[href$=".pdf"],a[href$=".xls"],a[href$=".ppt"],a[href$=".zip"],a[href$=".txt"],a[href$=".rtf"],a[href$=".xml"],a[href$=".xml"]',
+      'request': 'event',
+      'vars': {
+        'dl': '20',
+        'ti': 'Download Click'
+      }
+    }
+  },
 });
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

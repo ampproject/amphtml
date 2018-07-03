@@ -208,6 +208,12 @@
     "pathPrefix": "load/",
     "trackurl": "https://loadeu.exelator.com/load/?p=$pubId&g=$siteId&j=0"
   },
+  "oracleInfinityAnalytics": {
+    "host":"https://dc.oracleinfinity.io",
+    "base": "https://dc.oracleinfinity.io/_guid_/dcs.gif?dcssip=_dcssip_&dcsuri=_dcsuri_&WT.ti=_ti_&dcsdat=_timestamp_&dcsref=_documentReferrer_&WT.es=_sourceHost__sourcePath_",
+    "pageview": "https://dc.oracleinfinity.io/_guid_/dcs.gif?dcssip=_dcssip_&dcsuri=_dcsuri_&WT.ti=_ti_&dcsdat=_timestamp_&dcsref=_documentReferrer_&WT.es=_sourceHost__sourcePath_&WT.bs=_availableScreenWidth_x_availableScreenHeight_&WT.sr=_screenWidth_x_screenHeight_&WT.cd=_screenColorDepth_&WT.ul=_browserLanguage_&WT.le=_documentCharset_&WT.js=Yes&WT.co_f=_clientId(WT_AMP)_&WT.vtid=_clientId(WT_AMP)_&WT.tv=1.0.0&ora.apm_ver=_ampVersion_&dcscfg=3&WT.dl=_dl_",
+    "event": "https://dc.oracleinfinity.io/_guid_/dcs.gif?dcssip=_dcssip_&dcsuri=_dcsuri_&WT.ti=_ti_&dcsdat=_timestamp_&dcsref=_documentReferrer_&WT.es=_sourceHost__sourcePath_&WT.bs=_availableScreenWidth_x_availableScreenHeight_&WT.sr=_screenWidth_x_screenHeight_&WT.cd=_screenColorDepth_&WT.ul=_browserLanguage_&WT.le=_documentCharset_&WT.js=Yes&WT.co_f=_clientId(WT_AMP)_&WT.vtid=_clientId(WT_AMP)_&WT.tv=1.0.0ira.apm_ver=_ampVersion_&dcscfg=3&WT.dl=_dl_"
+  },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
     "basePrefix": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_",
