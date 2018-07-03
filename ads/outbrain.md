@@ -44,6 +44,17 @@ For details on the configuration semantics, please contact Outbrain’s Account 
 - `ampURL`: The URL of the AMP version of the page.
 - `styleFile`: Provide publisher an option to pass CSS file in order to inherit the design for the AMP displayed widget. **Consult with Account Manager regarding CSS options**.
 
+### User Consent
+
+The widget will check for user consent to decide whether personalized or non-personalized recommendations should be displayed.
+
+The following rules will be apllied:
+
+* CONSENT_POLICY_STATE.SUFFICIENT - Show personalized recommendations
+* CONSENT_POLICY_STATE.INSUFFICIENT - Show non-personalized recommendations only
+* CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED - Show personalized recommendations
+* CONSENT_POLICY_STATE.UNKNOWN - Show non-personalized recommendations only
+
 ## Troubleshooting 
 
 ### Widget is cut off
