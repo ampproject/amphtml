@@ -114,6 +114,9 @@ describes.realWin('amp-experiment', {
       addConfigElement('script', 'application/json', '{not json}');
       experiment.buildCallback();
     }).to.throw();
+    return Services.variantForOrNull(win).then(variants => {
+      expect(variants).to.be.null;
+    });
   });
 
   it('should add attributes to body element for the allocated variants', () => {
