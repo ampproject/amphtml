@@ -249,7 +249,15 @@ function adoptShared(global, callback) {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
-          extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
+          if (fnOrStruct.i) {
+            if (Array.isArray(fnOrStruct.i)) {
+            } else if (typeof fnOrStruct.i == 'string') {
+              //extensions.preloadExtension('_base_element
+            }
+          } else {
+            extensions.registerExtension(
+                fnOrStruct.n, fnOrStruct.f, global.AMP);
+          }
         }
       });
     };
