@@ -500,11 +500,10 @@ export class FriendlyIframeEmbed {
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
    * @param {{measure: (function()|undefined), mutate: function()}} task
-   * @param {!Object=} opt_state
    * @return {!Promise}
    * @private
    */
-  runVsyncOnIframe_(task, opt_state) {
+  runVsyncOnIframe_(task) {
     return this.getResources_().measureMutateElement(this.iframe,
         task.measure || null, task.mutate);
   }
