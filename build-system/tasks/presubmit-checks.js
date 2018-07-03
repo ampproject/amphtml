@@ -583,6 +583,7 @@ const forbiddenTerms = {
     whitelist: [
       'ads/google/imaVideo.js',
       'dist.3p/current/integration.js',
+      'src/video-iframe-integration.js',
     ],
   },
   '\\.defer\\(\\)': {

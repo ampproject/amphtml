@@ -19,7 +19,6 @@ import * as sinon from 'sinon';
 import {ActionTrust} from '../../../../src/action-constants';
 import {
   AmpIframe,
-  isAdLike,
   setTrackingIframeTimeoutForTesting,
 } from '../amp-iframe';
 import {CommonSignals} from '../../../../src/common-signals';
@@ -29,6 +28,7 @@ import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
+import {isAdLike} from '../../../../src/iframe-helper';
 import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
