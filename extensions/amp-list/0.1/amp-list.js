@@ -414,8 +414,10 @@ export class AmpList extends AMP.BaseElement {
     this.element.removeChild(sizer);
     this.container_.classList.remove('i-amphtml-fill-content');
     this.container_.classList.remove('i-amphtml-replaced-content');
-    this.overflowElement_ = this.element.querySelector('[overflow]');
-    toggle(this.overflowElement_, false);
+    const overflowElement = this.element.querySelector('[overflow]');
+    if (overflowElement) {
+      toggle(overflowElement, false);
+    }
   }
 
   /**
