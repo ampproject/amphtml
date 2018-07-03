@@ -25,6 +25,8 @@ const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const through = require('through2');
 const TopologicalSort = require('topological-sort');
+const {extensionBundles, TYPES} = require('../bundles.config');
+const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
@@ -127,15 +129,20 @@ exports.getBundleFlags = function(g) {
   // Build up the weird flag structure that closure compiler calls
   // modules and we call bundles.
   const bundleKeys = Object.keys(g.bundles).sort();
+  // TODO(erwinm): special case src/amp.js and _base for now. add a propert sort
+  // comparator here.
+  const indexOfBase = bundleKeys.indexOf('_base');
+  bundleKeys.splice(indexOfBase, 1);
+  bundleKeys.splice(0, 0, '_base');
   const indexOfAmp = bundleKeys.indexOf('src/amp.js');
   bundleKeys.splice(indexOfAmp, 1);
   bundleKeys.splice(1, 0, 'src/amp.js');
-  console.log(bundleKeys);
 
   bundleKeys.forEach(function(originalName) {
     const isBase = originalName == '_base';
     const isMain = originalName == 'src/amp.js';
     let extraModules = 0;
+    // TODO(erwinm): This access will break 
     const bundle = g.bundles[originalName];
     if (isBase || bundleKeys.length == 1) {
       flagsArray.push('--js', relativePath(process.cwd(),
@@ -167,14 +174,13 @@ exports.getBundleFlags = function(g) {
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend on _base.
     if (!isBase && g.bundles._base) {
-      if (media.includes(originalName)) {
-        cmd += ':_base_media';
-      } else if (ads.includes(originalName)) {
-        cmd += ':_base_ads';
-      } else if (/extensions/.test(originalName)) {
-        cmd += ':_base_ext';
+      const basename = path.basename(originalName, '.js');
+      const configEntry = extensionBundles.filter(x => x.name == basename)[0];
+      if (configEntry) {
+        cmd += `:${configEntry.type}`;
       } else {
-        if (/_base_ext|_base_media|_base_ads/.test(name)) {
+        // All lower tier bundles depend on src-amp (v0.js)
+        if (name.includes(TYPES_VALUES)) {
           cmd += ':src-amp';
         } else {
           cmd += ':_base';
@@ -232,31 +238,18 @@ exports.getGraph = function(entryModules, config) {
         // The modules in the bundle.
         modules: [],
       },
-      _base_ext: {
-        isBase: true,
-        name: '_base_ext',
-        // The modules in the bundle.
-        modules: [],
-      },
-      _base_media: {
-        isBase: true,
-        name: '_base_media',
-        modules: [],
-      },
-      _base_social_media: {
-        isBase: true,
-        name: '_base_social_media',
-        modules: [],
-      },
-      _base_ads: {
-        isBase: true,
-        name: '_base_ads',
-        modules: [],
-      },
     },
     packages: {},
     browserMask: {},
   };
+
+  TYPES_VALUES.forEach(type => {
+    graph.bundles[type] = {
+      isBase: true,
+      name: type,
+      modules: [],
+    };
+  });
 
   config.babel = config.babel || {};
 
@@ -395,7 +388,6 @@ function buildUpCommon(graph) {
 }
 
 function inAnyBundle(name, dependencyList) {
-  console.log(dependencyList);
   return dependencyList.some(deps => name in deps);
 }
 
@@ -540,127 +532,28 @@ exports.bundleWrapper = '(self.AMP=self.AMP||[]).push({n:"%basename%", ' +
     '//# sourceMappingURL=%basename%.map\n';
 
 
-const common = [
-  'extensions/amp-ad/0.1/amp-ad.js',
-  'extensions/amp-accordion/0.1/amp-accordion.js',
-  'extensions/amp-carousel/0.1/amp-carousel.js',
-];
+function buildFullPathFromConfig(ext) {
+  function getPath(version) {
+    return `extensions/${ext.name}/${version}/${ext.name}.js`;
+  }
 
-const ads = [
-  'extensions/amp-ad-exit/0.1/amp-ad-exit.js',
-  'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-  'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js',
-  'extensions/amp-ad-network-cloudflare-impl/0.1/' +
-      'amp-ad-network-cloudflare-impl.js',
-  'extensions/amp-ad-network-doubleclick-impl/0.1/' +
-      'amp-ad-network-doubleclick-impl.js',
-  'extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js',
-  'extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js',
-  'extensions/amp-ad-network-triplelift-impl/0.1/' +
-      'amp-ad-network-triplelift-impl.js',
-  'extensions/amp-auto-ads/0.1/amp-auto-ads.js',
-];
+  if (Array.isArray(ext.version)) {
+    return ext.version.map(ver => getPath(ver));
+  }
+  return getPath(ext.version);
+}
 
-const media = [
-  'extensions/amp-brightcove/0.1/amp-brightcove.js',
-  'extensions/amp-dailymotion/0.1/amp-dailymotion.js',
-  'extensions/amp-ima-video/0.1/amp-ima-video.js',
-  'extensions/amp-video-service/0.1/amp-video-service.js',
-  'extensions/amp-video/0.1/amp-video.js',
-  'extensions/amp-3q-player/0.1/amp-3q-player.js',
-  'extensions/amp-brid-player/0.1/amp-brid-player.js',
-  'extensions/amp-jwplayer/0.1/amp-jwplayer.js',
-  'extensions/amp-kaltura-player/0.1/amp-kaltura-player.js',
-  'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js',
-  'extensions/amp-o2-player/0.1/amp-o2-player.js',
-  'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js',
-  'extensions/amp-reach-player/0.1/amp-reach-player.js',
-  'extensions/amp-springboard-player/0.1/amp-springboard-player.js',
-  'extensions/amp-wistia-player/0.1/amp-wistia-player.js',
-  'extensions/amp-youtube/0.1/amp-youtube.js',
-  'extensions/amp-gfycat/0.1/amp-gfycat.js',
-  'extensions/amp-3d-gltf/0.1/amp-3d-gltf.js',
-  'extensions/amp-apester-media/0.1/amp-apester-media.js',
-  'extensions/amp-google-vrview-image/0.1/amp-google-vrview-image.js',
-  'extensions/amp-hulu/0.1/amp-hulu.js',
-  'extensions/amp-anim/0.1/amp-anim.js',
-  'extensions/amp-imgur/0.1/amp-imgur.js',
-  'extensions/amp-izlesene/0.1/amp-izlesene.js',
-  'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
-  'extensions/amp-soundcloud/0.1/amp-soundcloud.js',
-  'extensions/amp-audio/0.1/amp-audio.js',
-  'extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js',
-  'extensions/amp-vimeo/0.1/amp-vimeo.js',
-];
-
-const all = [
-  'extensions/amp-a4a/0.1/amp-a4a.js',
-  'extensions/amp-access-laterpay/0.1/amp-access-laterpay.js',
-  'extensions/amp-access-scroll/0.1/amp-access-scroll.js',
-  'extensions/amp-access/0.1/amp-access.js',
-  'extensions/amp-addthis/0.1/amp-addthis.js',
-  'extensions/amp-analytics/0.1/amp-analytics.js',
-  'extensions/amp-animation/0.1/amp-animation.js',
-  'extensions/amp-app-banner/0.1/amp-app-banner.js',
-  'extensions/amp-beopinion/0.1/amp-beopinion.js',
-  'extensions/amp-bind/0.1/amp-bind.js',
-  'extensions/amp-byside-content/0.1/amp-byside-content.js',
-  'extensions/amp-call-tracking/0.1/amp-call-tracking.js',
-  'extensions/amp-compare-slider/0.1/amp-compare-slider.js',
-  'extensions/amp-consent/0.1/amp-consent.js',
-  'extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js',
-  'extensions/amp-date-picker/0.1/amp-date-picker.js',
-  'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
-  'extensions/amp-experiment/0.1/amp-experiment.js',
-  'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js',
-  'extensions/amp-facebook-like/0.1/amp-facebook-like.js',
-  'extensions/amp-facebook-page/0.1/amp-facebook-page.js',
-  'extensions/amp-facebook/0.1/amp-facebook.js',
-  'extensions/amp-fit-text/0.1/amp-fit-text.js',
-  'extensions/amp-font/0.1/amp-font.js',
-  'extensions/amp-form/0.1/amp-form.js',
-  'extensions/amp-fx-collection/0.1/amp-fx-collection.js',
-  'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
-  'extensions/amp-geo/0.1/amp-geo.js',
-  'extensions/amp-gist/0.1/amp-gist.js',
-  'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
-  'extensions/amp-iframe/0.1/amp-iframe.js',
-  'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
-  'extensions/amp-image-viewer/0.1/amp-image-viewer.js',
-  'extensions/amp-instagram/0.1/amp-instagram.js',
-  'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
-  'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
-  'extensions/amp-lightbox/0.1/amp-lightbox.js',
-  'extensions/amp-list/0.1/amp-list.js',
-  'extensions/amp-live-list/0.1/amp-live-list.js',
-  'extensions/amp-mathml/0.1/amp-mathml.js',
-  'extensions/amp-mustache/0.1/amp-mustache.js',
-  'extensions/amp-next-page/0.1/amp-next-page.js',
-  'extensions/amp-pinterest/0.1/amp-pinterest.js',
-  'extensions/amp-position-observer/0.1/amp-position-observer.js',
-  'extensions/amp-reddit/0.1/amp-reddit.js',
-  'extensions/amp-riddle-quiz/0.1/amp-riddle-quiz.js',
-  'extensions/amp-selector/0.1/amp-selector.js',
-  'extensions/amp-share-tracking/0.1/amp-share-tracking.js',
-  'extensions/amp-sidebar/0.1/amp-sidebar.js',
-  'extensions/amp-slides/0.1/amp-slides.js',
-  'extensions/amp-social-share/0.1/amp-social-share.js',
-  'extensions/amp-sticky-ad/1.0/amp-sticky-ad.js',
-  'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js',
-  'extensions/amp-story/0.1/amp-story.js',
-  'extensions/amp-timeago/0.1/amp-timeago.js',
-  'extensions/amp-twitter/0.1/amp-twitter.js',
-  'extensions/amp-user-notification/0.1/amp-user-notification.js',
-  'extensions/amp-viewer-integration/0.1/amp-viewer-integration.js',
-  'extensions/amp-vine/0.1/amp-vine.js',
-  'extensions/amp-viz-vega/0.1/amp-viz-vega.js',
-  'extensions/amp-vk/0.1/amp-vk.js',
-  'extensions/amp-web-push/0.1/amp-web-push.js',
-];
-
+function unsupportedExtensions(name) {
+  return name;
+}
+let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
+  return buildFullPathFromConfig(ext);
+});
+// Flatten nested arrays to support multiple versions
+extensions = [].concat.apply([], extensions);
 
 exports.getFlags({
-  modules: ['src/amp.js'].concat(all, ads, common, media),
+  modules: ['src/amp.js'].concat(extensions),
   writeTo: './out/',
   externs,
 })
@@ -670,7 +563,6 @@ exports.getFlags({
 
 function compile(flagsArray) {
   return new Promise(function(resolve, reject) {
-    //console.log(flagsArray);
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
       if (exitCode == 0) {
         resolve({
