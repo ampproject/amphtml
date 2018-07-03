@@ -20,6 +20,7 @@ import {
   getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
+  renderCloseButtonHeader,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
@@ -30,6 +31,7 @@ import {getStyle} from '../../src/style';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
+import { ActionTrust } from '../../src/action-constants';
 
 
 describe('friendly-iframe-embed', () => {
@@ -818,6 +820,53 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.bottom).to.be.empty;
       expect(iframe.style.width).to.be.empty;
       expect(iframe.style.height).to.be.empty;
+    });
+  });
+
+  describe('#renderCloseButtonHeader', () => {
+
+    const win = document.defaultView;
+
+    it('renders', () => {
+      const ampAdParentMock = document.createElement('div');
+      const ampLightboxMock = document.createElement('div');
+
+      const el = renderCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
+
+      expect(el.tagName.toLowerCase()).to.equal('i-amphtml-ad-close-header');
+      expect(el.getAttribute('role')).to.equal('button');
+
+      expect(el.firstElementChild.textContent).to.equal('Ad');
+
+      const closeButton = el.lastElementChild;
+
+      expect(closeButton.tagName.toLowerCase())
+          .to.equal('i-amphtml-ad-close-button');
+
+      expect(closeButton).to.have.class('amp-ad-close-button');
+    });
+
+    it('triggers action', () => {
+      const ampAdParentMock = document.createElement('div');
+      const ampLightboxMock = document.createElement('div');
+
+      const el = renderCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
+
+      const execute = sandbox.spy();
+      const actionServiceMock = {execute};
+
+      sandbox.stub(Services, 'actionServiceForDoc').returns(actionServiceMock);
+
+      el.click();
+
+      expect(execute.withArgs(
+          /* target */ ampLightboxMock,
+          /* method */ 'close',
+          /* args   */ sinon.match.any,
+          /* source */ ampAdParentMock,
+          /* caller */ ampAdParentMock,
+          /* event  */ sinon.match.any,
+          /* trust  */ ActionTrust.HIGH)).to.be.calledOnce;
     });
   });
 });

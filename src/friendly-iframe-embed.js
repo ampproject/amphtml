@@ -631,14 +631,15 @@ export class FriendlyIframeEmbed {
  * @param {!Window} win
  * @param {!Element} ampAdParent
  * @param {!Element} ampLightbox
+ * @visibleForTesting
  */
-function renderCloseButtonHeader(win, ampAdParent, ampLightbox) {
+export function renderCloseButtonHeader(win, ampAdParent, ampLightbox) {
   const el = htmlFor(ampAdParent)`
     <i-amphtml-ad-close-header role=button>
       <div>Ad</div>
-      <i-amphtml-ad-close-button class="amp-ad-close-button" role=button>
+      <i-amphtml-ad-close-button class="amp-ad-close-button">
       </i-amphtml-ad-close-button>
-    <i-amphtml-ad-close-header>`;
+    </i-amphtml-ad-close-header>`;
 
   listenOnce(el, 'click', () => {
     triggerLightboxClose(win, ampLightbox, /* caller */ ampAdParent);
