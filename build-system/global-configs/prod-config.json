@@ -40,5 +40,6 @@
   "adsense-delay-request": 0.01,
   "doubleclick-delay-request":0.01,
   "amp-date-picker": 1,
-  "url-replacement-v2": 0.1
+  "url-replacement-v2": 0.1,
+  "inline-styles": 1
 }
