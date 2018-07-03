@@ -57,16 +57,18 @@ describes.realWin('amp-video-iframe', {
       `http://iframe.localhost:${port}/test/fixtures/served/video-iframe.html`);
   }
 
-  function createVideoIframe(size = null) {
+  function createVideoIframe(opt_size) {
     const el = htmlFor(doc)`<amp-video-iframe></amp-video-iframe>`;
 
-    if (!size) {
-      addAttributesToElement(el, {'layout': 'fill'});
-    } else {
+    if (opt_size) {
       addAttributesToElement(el, {
         'layout': 'fixed',
-        'width': size[0],
-        'height': size[1],
+        'width': opt_size[0],
+        'height': opt_size[1],
+      });
+    } else {
+      addAttributesToElement(el, {
+        'layout': 'fill',
       });
     }
 
