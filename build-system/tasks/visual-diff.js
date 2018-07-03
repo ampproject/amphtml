@@ -43,6 +43,7 @@ const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 12000;
 const CONFIGS = ['canary', 'prod'];
 const CSS_SELECTOR_TIMEOUT_MS = 5000;
+const PAGE_REST_TIMEOUT_MS = 100; // TODO(danielrozenberg): remove once our expectations regarding page.waitForSelector are met.
 const AMP_RUNTIME_TARGET_FILES = [
   'dist/amp.js', 'dist.3p/current/integration.js'];
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
@@ -363,6 +364,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
 
     await verifyCssElements(page, url, webpage.forbidden_css,
         webpage.loading_incomplete_css, webpage.loading_complete_css);
+    await sleep(PAGE_REST_TIMEOUT_MS);
     await percy.snapshot(name, page, SNAPSHOT_OPTIONS);
     await clearExperiments(page);
   }
