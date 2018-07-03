@@ -29,8 +29,10 @@ import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import {toggle} from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -389,13 +391,31 @@ export class AmpList extends AMP.BaseElement {
 
       // Change height if needed.
       this.measureElement(() => {
-        const scrollHeight = this.container_./*OK*/scrollHeight;
-        const height = this.element./*OK*/offsetHeight;
-        if (scrollHeight > height) {
-          this.attemptChangeHeight(scrollHeight).catch(() => {});
+        if (isExperimentOn(this.getWin(), 'amp-list-resize')) {
+          this.changeToLayoutContainer_();
+        } else {
+          const scrollHeight = this.container_./*OK*/scrollHeight;
+          const height = this.element./*OK*/offsetHeight;
+          if (scrollHeight > height) {
+            this.attemptChangeHeight(scrollHeight).catch(() => {});
+          }
         }
       });
     }, this.container_);
+  }
+
+  /**
+   * Converts the amp-list to de facto layout container.
+   * @private
+   */
+  changeToLayoutContainer_() {
+    this.element.setAttribute('layout', 'container');
+    const sizer = this.element.querySelector('i-amphtml-sizer');
+    this.element.removeChild(sizer);
+    this.container_.classList.remove('i-amphtml-fill-content');
+    this.container_.classList.remove('i-amphtml-replaced-content');
+    this.overflowElement_ = this.element.querySelector('[overflow]');
+    toggle(this.overflowElement_, false);
   }
 
   /**
