@@ -34,22 +34,28 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const config = this.getConfig_();
-    const results = Object.create(null);
-    const variants = Object.keys(config).map(experimentName => {
-      return allocateVariant(
-          this.getAmpDoc(), experimentName, config[experimentName])
-          .then(variantName => {
-            results[experimentName] = variantName;
-          });
-    });
+    try {
+      const config = this.getConfig_();
+      const results = Object.create(null);
+      const variants = Object.keys(config).map(experimentName => {
+        return allocateVariant(
+            this.getAmpDoc(), experimentName, config[experimentName])
+            .then(variantName => {
+              results[experimentName] = variantName;
+            });
+      });
 
-    /** @private @const {!Promise<!Object<string, ?string>>} */
-    const experimentVariants = Promise.all(variants)
-        .then(() => results)
-        .then(this.addToBody_.bind(this));
+      /** @private @const {!Promise<!Object<string, ?string>>} */
+      const experimentVariants = Promise.all(variants)
+          .then(() => results)
+          .then(this.addToBody_.bind(this));
 
-    serviceDeferred.resolve(experimentVariants);
+      serviceDeferred.resolve(experimentVariants);
+    } catch (e) {
+      // Ensure downstream consumers don't wait for the promise forever.
+      serviceDeferred.resolve(null);
+      throw e;
+    }
   }
 
   /** @return {!JsonObject} [description] */
