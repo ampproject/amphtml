@@ -203,11 +203,11 @@ exports.aliasBundles = [
 ];
 
 exports.extensionBundles.forEach(c => {
-  console.assert('name' in c, 'name key must exist');
-  console.assert('version' in c, 'version key must exist');
+  console./*OK*/assert('name' in c, 'name key must exist');
+  console./*OK*/assert('version' in c, 'version key must exist');
 });
 exports.aliasBundles.forEach(c => {
-  console.assert('name' in c, 'name key must exist');
-  console.assert('version' in c, 'version key must exist');
-  console.assert('latestVersion' in c, 'latestVersion key must exist');
+  console./*OK*/assert('name' in c, 'name key must exist');
+  console./*OK*/assert('version' in c, 'version key must exist');
+  console./*OK*/assert('latestVersion' in c, 'latestVersion key must exist');
 });
