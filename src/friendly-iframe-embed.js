@@ -432,6 +432,7 @@ export class FriendlyIframeEmbed {
     let rect;
     if (this.host) {
       rect = this.host.getLayoutBox();
+    } else {
       rect = layoutRectLtwh(
           0, 0,
           this.win./*OK*/innerWidth,
