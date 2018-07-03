@@ -19,7 +19,6 @@ import {parseJson} from '../json';
 import {utf8Encode} from '../utils/bytes';
 /** @private @enum {number} Allowed fetch responses. */
 const allowedFetchTypes_ = {
-  document: 1,
   text: 2,
 };
 
@@ -235,13 +234,13 @@ function createXhrRequest(method, url) {
 * @param {!Window} win
 */
 export function install(win) {
-  if (!'fetch' in win) {
+  if (!('fetch' in win)) {
     win['fetch'] = fetchPolyfill;
   }
-  if (!'Response' in win) {
+  if (!('Response' in win)) {
     win['Response'] = FetchResponse;
   }
-  if (!'Headers' in win) {
+  if (!('Headers' in win)) {
     win['Headers'] = FetchResponseHeaders;
   }
 }

@@ -111,6 +111,10 @@ export class Xhr {
    */
   fetch_(input, init) {
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
+    if ('responseType' in init) {
+      dev().assert(init.responseType !== 'document', 'Document fetch should not'
+        + ' be done using the service, please use Documentfetcher instead');
+    }
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
     const creds = init.credentials;

@@ -24,6 +24,7 @@ import {
 } from '../../../src/service';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
+import {fetchDocument} from '../../../src/document-fetcher';
 
 const SERVICE_ID = 'liveListManager';
 
@@ -130,11 +131,9 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
-    return Services.xhrFor(this.ampdoc.win)
-        // TODO(erwinm): add update time here when possible.
-        .fetchDocument(url, {
-          requireAmpResponseSourceOrigin: false,
-        }).then(this.getLiveLists_.bind(this));
+    return fetchDocument(url, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(this.getLiveLists_.bind(this));
   }
 
   /**

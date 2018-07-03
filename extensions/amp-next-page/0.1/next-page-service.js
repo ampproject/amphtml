@@ -28,7 +28,7 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-
+import {fetchDocument} from "../../../src/document-fetcher";
 // TODO(emarchiori): Make this a configurable parameter.
 const SEPARATOR_RECOS = 3;
 
@@ -256,8 +256,7 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      Services.xhrFor(/** @type {!Window} */ (this.win_))
-          .fetchDocument(next.ampUrl, {ampCors: false})
+      fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
             if (documentRef.cancelled) {
               // User has reached the end of the document already, don't render.
