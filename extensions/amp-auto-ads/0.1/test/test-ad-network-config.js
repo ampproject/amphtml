@@ -135,8 +135,7 @@ describes.realWin('ad-network-config', {
 
     const TARGETING_JSON = {'Categories': 'A'};
 
-    const EXPERIMENT_SETTINGS =
-        {'layout': 'fixed', 'width': 300, 'height': 250};
+    const EXPERIMENT_SETTINGS = {'width': 300, 'height': 250};
 
     const AD_SLOT = '1234/example.com/SLOT_1';
 
@@ -203,9 +202,6 @@ describes.realWin('ad-network-config', {
         'type': 'doubleclick',
         'json': JSON.stringify(TARGETING_JSON),
         'data-slot': AD_SLOT,
-        'layout': 'fixed',
-        'width': 300,
-        'height': 250,
       });
     });
 

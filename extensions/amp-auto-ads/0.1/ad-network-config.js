@@ -25,6 +25,9 @@ import {parseUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
 
+/** @typedef {{width: string, height: string}} */
+export let SizeInfoDef;
+
 /**
  * An interface intended to be implemented by any ad-networks wishing to support
  * amp-auto-ads.
@@ -56,6 +59,12 @@ class AdNetworkConfigDef {
    * @return {!./ad-tracker.AdConstraints}
    */
   getDefaultAdConstraints() {}
+
+  /**
+   * Network specific sizing information.
+   * @return {!SizeInfoDef}
+   */
+  getSizing() {}
 }
 
 /**
@@ -126,6 +135,11 @@ class AdSenseNetworkConfig {
       maxAdCount: 8,
     };
   }
+
+  /** @override */
+  getSizing() {
+    return {};
+  }
 }
 
 
@@ -167,19 +181,6 @@ class DoubleclickNetworkConfig {
       'data-slot': this.autoAmpAdsElement_.getAttribute('data-slot'),
       'json': this.autoAmpAdsElement_.getAttribute('data-json'),
     });
-    const experimentJson = tryParseJson(
-        this.autoAmpAdsElement_.getAttribute('data-experiment'));
-    if (experimentJson) {
-      if (experimentJson['height']) {
-        attributes['height'] = experimentJson['height'];
-      }
-      if (experimentJson['width']) {
-        attributes['width'] = experimentJson['width'];
-      }
-      if (experimentJson['layout']) {
-        attributes['layout'] = experimentJson['layout'];
-      }
-    }
     return attributes;
   }
 
@@ -195,5 +196,18 @@ class DoubleclickNetworkConfig {
       ],
       maxAdCount: 8,
     };
+  }
+
+  /** @override */
+  getSizing() {
+    const experimentJson = tryParseJson(
+        this.autoAmpAdsElement_.getAttribute('data-experiment'));
+    if (experimentJson) {
+      return {
+        height: experimentJson['height'] ? experimentJson['height'] : '250',
+        width: experimentJson['width'],
+      };
+    }
+    return {};
   }
 }
