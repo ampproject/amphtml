@@ -726,7 +726,9 @@ class VideoEntry {
       const {video} = this;
       const {element} = video;
       this.firstPlayEventOrNoop_();
-      video.showControls();
+      if (video.isInteractive()) {
+        video.showControls();
+      }
       video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();

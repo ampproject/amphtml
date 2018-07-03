@@ -15,7 +15,6 @@
  */
 
 import {Autoplay, AutoplayEvents} from './video/autoplay';
-import {Deferred} from '../utils/promise';
 import {PlayingStates, VideoAttributes, VideoEvents} from '../video-interface';
 import {Services} from '../services';
 import {VideoServiceSignals} from './video-service-interface';
