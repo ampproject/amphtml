@@ -38,11 +38,11 @@ const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
+const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
 const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 const {transpileTs} = require('./build-system/typescript');
-const {extensionBundles, aliasBundles} = require('./bundles.config');
 
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});

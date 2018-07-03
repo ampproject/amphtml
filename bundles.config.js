@@ -197,7 +197,7 @@ exports.aliasBundles = [
   {
     name: 'amp-sticky-ad',
     version: '0.1',
-    latestVersion '1.0',
+    latestVersion: '1.0',
     options: {hasCss: true},
   },
 ];
