@@ -15,6 +15,8 @@
  */
 
 import * as sinon from 'sinon';
+
+import {ActionTrust} from '../../src/action-constants';
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -31,7 +33,6 @@ import {getStyle} from '../../src/style';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import { ActionTrust } from '../../src/action-constants';
 
 
 describe('friendly-iframe-embed', () => {
