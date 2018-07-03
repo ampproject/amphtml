@@ -303,12 +303,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'svg-in-mustache',
-    name: 'Enables SVG support in amp-mustache templates',
-    spec: 'https://github.com/ampproject/amphtml/issues/15123',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15360',
-  },
-  {
     id: 'disable-faster-amp-list',
     name: 'Disables new default behavior where <amp-list> will not evaluate ' +
        'bindings on rendered children before first setState() mutation.',
@@ -321,6 +315,12 @@ const EXPERIMENTS = [
         ' which is a wrapper around the Google Drive document viewer embed.',
     spec: 'TODO',
     cleanupIssue: 'TODO',
+  },
+  {
+    id: 'amp-orientation-observer',
+    name: 'Enables actions based on the orientation of a mobile device',
+    spec: 'https://github.com/ampproject/amphtml/issues/14740',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/16075',
   },
 ];
 

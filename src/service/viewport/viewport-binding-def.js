@@ -89,13 +89,13 @@ export class ViewportBindingDef {
    */
   showViewerHeader(unusedTransient, unusedPaddingTop) {}
 
-  /*
+  /**
    * Disable the scrolling by setting overflow: hidden.
    * Should only be used for temporarily disabling scroll.
    */
   disableScroll() {}
 
-  /*
+  /**
    * Reset the scrolling by removing overflow: hidden.
    */
   resetScroll() {}
