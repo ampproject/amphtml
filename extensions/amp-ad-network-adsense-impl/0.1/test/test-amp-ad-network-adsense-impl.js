@@ -90,6 +90,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
     isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
   });
 
+  afterEach(() => sandbox.restore());
+
   /**
    * Instantiates element and impl, adding the former to the document of the
    * iframe.
