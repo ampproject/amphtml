@@ -52,6 +52,5 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-    - .gem
   pip: true
   bundler: true
