@@ -773,25 +773,30 @@ describe('friendly-iframe-embed', () => {
     it('should resize body and fixed container when entering', function* () {
       const bodyElementMock = document.createElement('div');
       const fie = createFie(bodyElementMock);
+      const headerHeight = 60;
+
+      sandbox.stub(fie, 'getHeaderHeight_').returns(headerHeight);
 
       yield fie.enterFullOverlayMode();
 
       expect(bodyElementMock.style.background).to.equal('transparent');
       expect(bodyElementMock.style.position).to.equal('absolute');
       expect(bodyElementMock.style.width).to.equal(`${w}px`);
-      expect(bodyElementMock.style.height).to.equal(`${h}px`);
-      expect(bodyElementMock.style.top).to.equal(`${y}px`);
+      expect(bodyElementMock.style.height).to.equal(`${h - headerHeight}px`);
+      expect(bodyElementMock.style.top).to.equal(`${y - headerHeight}px`);
       expect(bodyElementMock.style.left).to.equal(`${x}px`);
       expect(bodyElementMock.style.right).to.equal('auto');
       expect(bodyElementMock.style.bottom).to.equal('auto');
 
-      expect(fie.iframe.style.position).to.equal('fixed');
-      expect(fie.iframe.style.left).to.equal('0px');
-      expect(fie.iframe.style.right).to.equal('0px');
-      expect(fie.iframe.style.top).to.equal('0px');
-      expect(fie.iframe.style.bottom).to.equal('0px');
-      expect(fie.iframe.style.width).to.equal('100vw');
-      expect(fie.iframe.style.height).to.equal('calc(100vh - 0px)');
+      const {iframe} = fie;
+
+      expect(iframe.style.position).to.equal('fixed');
+      expect(iframe.style.left).to.equal('0px');
+      expect(iframe.style.right).to.equal('0px');
+      expect(iframe.style.top).to.equal(`${headerHeight}px`);
+      expect(iframe.style.bottom).to.equal('0px');
+      expect(iframe.style.width).to.equal('100vw');
+      expect(iframe.style.height).to.equal(`calc(100vh - ${headerHeight}px)`);
     });
 
     it('should reset body and fixed container when leaving', function* () {
@@ -809,13 +814,15 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.right).to.be.empty;
       expect(bodyElementMock.style.bottom).to.be.empty;
 
-      expect(fie.iframe.style.position).to.be.empty;
-      expect(fie.iframe.style.left).to.be.empty;
-      expect(fie.iframe.style.right).to.be.empty;
-      expect(fie.iframe.style.top).to.be.empty;
-      expect(fie.iframe.style.bottom).to.be.empty;
-      expect(fie.iframe.style.width).to.be.empty;
-      expect(fie.iframe.style.height).to.be.empty;
+      const {iframe} = fie;
+
+      expect(iframe.style.position).to.be.empty;
+      expect(iframe.style.left).to.be.empty;
+      expect(iframe.style.right).to.be.empty;
+      expect(iframe.style.top).to.be.empty;
+      expect(iframe.style.bottom).to.be.empty;
+      expect(iframe.style.width).to.be.empty;
+      expect(iframe.style.height).to.be.empty;
     });
   });
 });
