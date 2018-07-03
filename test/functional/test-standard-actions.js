@@ -210,20 +210,20 @@ describes.sandboxed('StandardActions', {}, () => {
       expectElementToDropClass(element, dummyClass);
     });
 
-    it('should add class when not in classList, when opt_force=true', () => {
+    it('should add class when not in classList, when force=true', () => {
       const element = createElement();
       const invocation = {
         node: element,
         satisfiesTrust: () => true,
         args: {
           'class': dummyClass,
-          'opt_force': true,
+          'force': true,
         }};
       standardActions.handleToggleClass(invocation);
       expectElementToHaveClass(element, dummyClass);
     });
 
-    it('should keep class when in classList, when opt_force=true', () => {
+    it('should keep class when in classList, when force=true', () => {
       const element = createElement();
       element.classList.add(dummyClass);
       const invocation = {
@@ -231,26 +231,26 @@ describes.sandboxed('StandardActions', {}, () => {
         satisfiesTrust: () => true,
         args: {
           'class': dummyClass,
-          'opt_force': true,
+          'force': true,
         }};
       standardActions.handleToggleClass(invocation);
       expectElementToHaveClass(element, dummyClass);
     });
 
-    it('should not add when not in classList, when opt_force=false', () => {
+    it('should not add when not in classList, when force=false', () => {
       const element = createElement();
       const invocation = {
         node: element,
         satisfiesTrust: () => true,
         args: {
           'class': dummyClass,
-          'opt_force': false,
+          'force': false,
         }};
       standardActions.handleToggleClass(invocation);
       expectElementToDropClass(element, dummyClass);
     });
 
-    it('should delete class when in classList, when opt_force=false', () => {
+    it('should delete class when in classList, when force=false', () => {
       const element = createElement();
       element.classList.add(dummyClass);
       const invocation = {
@@ -258,7 +258,7 @@ describes.sandboxed('StandardActions', {}, () => {
         satisfiesTrust: () => true,
         args: {
           'class': dummyClass,
-          'opt_force': false,
+          'force': false,
         }};
       standardActions.handleToggleClass(invocation);
       expectElementToDropClass(element, dummyClass);

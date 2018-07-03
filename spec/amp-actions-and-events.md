@@ -318,8 +318,8 @@ event.response</pre></td>
     <td>Toggles the visibility of the target element.</td>
   </tr>
   <tr>
-    <td><code>toggleClass(class=STRING, opt_force=BOOLEAN)</code></td>
-    <td>Toggles class of the target element. If defined, <code>opt_force</code> ensures that class would only be added but not removed if set to <code>true</code>, and only removed but not added if set to <code>false</code>.</td>
+    <td><code>toggleClass(class=STRING, force=BOOLEAN)</code></td>
+    <td>Toggles class of the target element. <code>force</code> is optional, and if defined, it ensures that class would only be added but not removed if set to <code>true</code>, and only removed but not added if set to <code>false</code>.</td>
   </tr>
   <tr>
     <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>

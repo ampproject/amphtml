@@ -282,12 +282,14 @@ export class StandardActions {
 
     const target = dev().assertElement(invocation.node);
     const {args} = invocation;
-    const className = user().assertString(args['class']);
+    const className = user().assertString(args['class'],
+        "Requires argument 'class' as string for toggleClass");
 
     this.resources_.mutateElement(target, () => {
-      if ({}.hasOwnProperty.call(args, 'opt_force')) {
+      if (args.force !== undefined) {
         // must be boolean, won't do type conversion
-        const shouldForce = user().assertBoolean(args['opt_force']);
+        const shouldForce = user().assertBoolean(args['force'],
+            "Requires argument 'force' as boolean for toggleClass");
         target.classList.toggle(className, shouldForce);
       } else {
         target.classList.toggle(className);
