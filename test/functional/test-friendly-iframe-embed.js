@@ -753,14 +753,14 @@ describe('friendly-iframe-embed', () => {
       };
     });
 
-    it('should not throw if inside an amp-ad', () => {
+    it.skip('should not throw if inside an amp-ad', () => {
       const bodyElementMock = document.createElement('div');
       const fie = createFie(bodyElementMock, 'amp-ad');
 
       expect(() => fie.enterFullOverlayMode()).to.not.throw();
     });
 
-    it('should throw if not inside an amp-ad', () => {
+    it.skip('should throw if not inside an amp-ad', () => {
       const bodyElementMock = document.createElement('div');
       const fie = createFie(bodyElementMock, 'not-an-amp-ad');
 
@@ -768,7 +768,7 @@ describe('friendly-iframe-embed', () => {
           .to.throw(/Only .?amp-ad.? is allowed/);
     });
 
-    it('should resize body and fixed container when entering', function* () {
+    it.skip('should resize body and fixed container when entering', function* () {
       const bodyElementMock = document.createElement('div');
       const fie = createFie(bodyElementMock);
       const headerHeight = 60;
@@ -797,7 +797,7 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.height).to.equal(`calc(100vh - ${headerHeight}px)`);
     });
 
-    it('should reset body and fixed container when leaving', function* () {
+    it.skip('should reset body and fixed container when leaving', function* () {
       const bodyElementMock = document.createElement('div');
       const fie = createFie(bodyElementMock);
 
@@ -828,7 +828,7 @@ describe('friendly-iframe-embed', () => {
 
     const win = document.defaultView;
 
-    it('renders', () => {
+    it.skip('renders', () => {
       const ampAdParentMock = document.createElement('div');
       const ampLightboxMock = document.createElement('div');
 
@@ -847,7 +847,7 @@ describe('friendly-iframe-embed', () => {
       expect(closeButton).to.have.class('amp-ad-close-button');
     });
 
-    it('triggers action', () => {
+    it.skip('triggers action', () => {
       const ampAdParentMock = document.createElement('div');
       const ampLightboxMock = document.createElement('div');
 
