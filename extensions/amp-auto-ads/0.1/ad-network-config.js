@@ -25,7 +25,7 @@ import {parseUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
 
-/** @typedef {{width: string, height: string}} */
+/** @typedef {{width: (number|undefined), height: (number|undefined)}} */
 export let SizeInfoDef;
 
 /**
@@ -204,8 +204,10 @@ class DoubleclickNetworkConfig {
         this.autoAmpAdsElement_.getAttribute('data-experiment'));
     if (experimentJson) {
       return {
-        height: experimentJson['height'] ? experimentJson['height'] : '250',
-        width: experimentJson['width'],
+        height: experimentJson['height'] ?
+          Number(experimentJson['height']) : 250,
+        width: experimentJson['width'] ?
+          Number(experimentJson['width']) : undefined,
       };
     }
     return {};
