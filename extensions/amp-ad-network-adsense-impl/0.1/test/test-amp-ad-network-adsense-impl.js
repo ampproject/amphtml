@@ -69,13 +69,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    sandbox.stub(
+    env.sandbox.stub(
         AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames').callsFake(
         () => {
           return ['google'];
         });
     viewer = win.services.viewer.obj;
-    sandbox.stub(viewer, 'getReferrerUrl').callsFake(
+    env.sandbox.stub(viewer, 'getReferrerUrl').callsFake(
         () => Promise.resolve('https://acme.org/'));
     element = createAdsenseImplElement({
       'data-ad-client': 'ca-adsense',
@@ -83,11 +83,11 @@ describes.realWin('amp-ad-network-adsense-impl', {
       'height': '50',
       'data-experiment-id': '8675309',
     }, doc);
-    sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
+    env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
     doc.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.win['goog_identity_prom'] = Promise.resolve({});
-    isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
+    isResponsiveStub = env.sandbox.stub(impl, 'isResponsive_');
   });
 
   /**
@@ -105,7 +105,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     // amp-ad.
     const iframe = doc.createElement('iframe');
     element.appendChild(iframe);
-    sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
+    env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
     doc.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.buildCallback();
@@ -174,9 +174,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'layout': 'fixed',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+      env.sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       const extensions = Services.extensionsFor(impl.win);
-      preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
+      preloadExtensionSpy = env.sandbox.spy(extensions, 'preloadExtension');
     });
 
     it('without analytics', () => {
@@ -232,8 +232,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.getA4aAnalyticsConfig = () => {};
       impl.buildCallback();
-      sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
-      sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
+      env.sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+      env.sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
     });
 
     [true, false].forEach(exp => {
@@ -321,7 +321,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       const ev1 = new Event('click', {bubbles: true});
       ev1.pageX = 10;
       ev1.pageY = 20;
-      sandbox.stub(impl, 'getResource').returns(
+      env.sandbox.stub(impl, 'getResource').returns(
           {
             getUpgradeDelayMs: () => 1,
           });
@@ -352,7 +352,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       const ev1 = new Event('click', {bubbles: true});
       ev1.pageX = 10;
       ev1.pageY = 20;
-      sandbox.stub(impl, 'getResource').returns(
+      env.sandbox.stub(impl, 'getResource').returns(
           {
             getUpgradeDelayMs: () => 1,
           });
@@ -1002,7 +1002,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
   describe('#preconnect', () => {
     it('should preload nameframe', () => {
-      const preloadSpy = sandbox.spy(Preconnect.prototype, 'preload');
+      const preloadSpy = env.sandbox.spy(Preconnect.prototype, 'preload');
       expect(impl.getPreconnectUrls()).to.deep.equal(
           ['https://googleads.g.doubleclick.net']);
       expect(preloadSpy).to.be.calledOnce;
