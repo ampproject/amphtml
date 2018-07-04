@@ -18,11 +18,10 @@ import {Animation} from '../../../src/animation';
 import {bezierCurve} from '../../../src/curve';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
-import {/*getStyle, */setStyle, getStyle} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 
 export class AmpImageSlider extends AMP.BaseElement {
 
@@ -65,8 +64,20 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.handleHover = this.handleHover.bind(this);
     this.handleClickImage = this.handleClickImage.bind(this);
+    this.handleTapImage = this.handleTapImage.bind(this);
+
+    this.dragStart = this.dragStart.bind(this);
+    this.dragMove = this.dragMove.bind(this);
+    this.dragEnd = this.dragEnd.bind(this);
+
+    this.touchStart = this.touchStart.bind(this);
+    this.touchMove = this.touchMove.bind(this);
+    this.touchEnd = this.touchEnd.bind(this);
 
     this.vsync_ = this.getVsync();
+
+    this.moveOffset_ = 0;
+    this.splitOffset_ = 0;
   }
 
   /** @override */
@@ -140,7 +151,8 @@ export class AmpImageSlider extends AMP.BaseElement {
   buildTapSliderBar() {
     this.barButton_ = this.win.document.createElement('div');
     this.barButton_.classList.add('i-amphtml-image-slider-bar-button');
-    this.barButton_.appendChild(htmlFor(this.win.document)`<div>&lt;~&gt;</div>`);
+    this.barButton_.appendChild(
+        htmlFor(this.win.document)`<div>&lt;~&gt;</div>`);
 
     this.container_.appendChild(this.bar_);
     this.barStick_.appendChild(this.barButton_);
@@ -181,7 +193,25 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.isFollowSlider_) {
       this.container_.addEventListener('mousemove', this.handleHover);
     } else {
-      this.container_.addEventListener('click', this.handleClickImage);
+      // Use container_ for drag operation instead
+      this.element.addEventListener('click', this.handleClickImage);
+      this.element.addEventListener('touchend', this.handleTapImage);
+      this.barButton_.addEventListener('mousedown', this.dragStart);
+      this.barButton_.addEventListener('touchstart', this.touchStart);
+    }
+  }
+
+  /**
+   * Unregister event handlers
+   */
+  unregisterEvents() {
+    if (this.isFollowSlider_) {
+      this.container_.removeEventListener('mousemove', this.handleHover);
+    } else {
+      this.element.removeEventListener('click', this.handleClickImage);
+      this.element.addEventListener('touchend', this.handleTapImage);
+      this.dragEnd();
+      this.touchEnd();
     }
   }
 
@@ -212,47 +242,133 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Animated, update element positions based on percentage
-   * @param {number} leftPercentage
+   * Handle tap on the image
+   * @param {Event} e
    */
-  animateUpdatePositions(leftPercentage) {
+  handleTapImage(e) {
+    const {left, right} = this.container_.getBoundingClientRect();
+    const leftPercentage = (e.touches[0].pageX - left) / (right - left);
+    this.animateUpdatePositions(leftPercentage);
+  }
+
+  /**
+   * Animated, update element positions based on percentage
+   * @param {number} toPercentage
+   */
+  animateUpdatePositions(toPercentage) {
     // TODO(kqian): this part of the code is very fragile
     // TOO implementation specific. Seek for improvement and replacement
     const {left: containerLeft, width: containerWidth}
         = this.container_.getBoundingClientRect();
     const {left: barLeft} = this.bar_.getBoundingClientRect();
-    let currentPercentage = (barLeft - containerLeft) / containerWidth;
-    this.animateUpdateTranslateX(this.bar_, currentPercentage, leftPercentage);
 
+    const fromPercentage = (barLeft - containerLeft) / containerWidth;
     const wrappedImage = this.leftAmpImage_.firstChild;
-    if (wrappedImage) {
-      const {right: maskRight} = this.mask_.getBoundingClientRect();
-      currentPercentage = (maskRight - containerLeft) / containerWidth;
-      this.animateUpdateTranslateX(this.mask_, currentPercentage - 1, leftPercentage - 1);
-      const {left: imageLeft} = wrappedImage.getBoundingClientRect();
-      const {left: maskLeft} = this.mask_.getBoundingClientRect();
-      currentPercentage = (imageLeft - maskLeft) / containerWidth;
-      this.animateUpdateTranslateX(wrappedImage, currentPercentage, 1 - leftPercentage);
-    }
-  }
-
-  /**
-   * Animated version to update translate
-   * @param {Element} element
-   * @param {number} fromPercentage
-   * @param {number} toPercentage
-   */
-  animateUpdateTranslateX(element, fromPercentage, toPercentage) {
-    if (fromPercentage == toPercentage) {
-      return Promise.resolve();
-    }
-    /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromPercentage, toPercentage);
     const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
     const duration = 100;
-    return Animation.animate(element, pos => {
-      setStyle(element, 'transform', `translateX(${interpolate(pos) * 100}%)`);
+    // Using this.bar_ as a standard element
+    // to hack and create non-delayed animations on all 3 elements
+    return Animation.animate(this.bar_, pos => {
+      setStyle(this.bar_, 'transform',
+          `translateX(${interpolate(pos) * 100}%)`);
+      if (wrappedImage) {
+        setStyle(this.mask_, 'transform',
+            `translateX(${(interpolate(pos) - 1) * 100}%)`);
+        setStyle(wrappedImage, 'transform',
+            `translateX(${(1 - interpolate(pos)) * 100}%)`);
+      }
     }, duration, curve).thenAlways();
+  }
+
+  /**
+   * TODO
+   * @param {Event} e
+   */
+  dragStart(e) {
+    e.preventDefault();
+
+    this.container_.addEventListener('mousemove', this.dragMove);
+    this.container_.addEventListener('mouseup', this.dragEnd);
+    this.container_.addEventListener('mouseleave', this.dragEnd);
+
+    this.moveOffset_ = e.clientX;
+    this.splitOffset_ = this.bar_.getBoundingClientRect().left;
+  }
+  /**
+   * TODO
+   * @param {Event} e
+   */
+  dragMove(e) {
+    e.preventDefault();
+    e.stopPropagation(); // avoid clashing with clickImage
+
+    const currX = e.clientX;
+
+    const width = this.container_.offsetWidth;
+    const {left: leftBound, right: rightBound}
+        = this.container_.getBoundingClientRect();
+
+    const moveX = currX - this.moveOffset_;
+    const newPos = Math.max(leftBound,
+        Math.min(this.splitOffset_ + moveX, rightBound));
+    const newPercentage = (newPos - leftBound) / width;
+    this.updatePositions(newPercentage);
+  }
+  /**
+   * TODO
+   */
+  dragEnd() {
+    this.container_.removeEventListener('mousemove', this.dragMove);
+    this.container_.removeEventListener('mouseup', this.dragEnd);
+    this.container_.removeEventListener('mouseleave', this.dragEnd);
+
+    this.moveOffset_ = 0;
+    this.splitOffset_ = 0;
+  }
+  /**
+   * TODO
+   * @param {Event} e
+   */
+  touchStart(e) {
+    this.container_.addEventListener('touchmove', this.touchMove);
+    this.container_.addEventListener('touchend', this.touchEnd);
+
+    this.moveOffset_ = e.touches[0].pageX;
+    this.splitOffset_ = this.bar_.getBoundingClientRect().left;
+  }
+  /**
+   * TODO
+   * @param {Event} e
+   */
+  touchMove(e) {
+    e.stopPropagation(); // avoid clashing with clickImage
+
+    const currX = e.touches[0].pageX;
+
+    const width = this.container_.offsetWidth;
+    const {left: leftBound, right: rightBound}
+        = this.container_.getBoundingClientRect();
+
+    const moveX = currX - this.moveOffset_;
+    const newPos = Math.max(leftBound,
+        Math.min(this.splitOffset_ + moveX, rightBound));
+    const newPercentage = (newPos - leftBound) / width;
+    this.updatePositions(newPercentage);
+  }
+  /**
+   * TODO
+   * @param {?Event} e
+   */
+  touchEnd(e) {
+    if (e) {
+      e.stopPropagation();
+    }
+    this.container_.removeEventListener('touchmove', this.touchMove);
+    this.container_.removeEventListener('touchend', this.touchEnd);
+
+    this.moveOffset_ = 0;
+    this.splitOffset_ = 0;
   }
 
   /** @override */
@@ -273,11 +389,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.isFollowSlider_) {
-      this.container_.removeEventListener('mousemove', this.handleHover);
-    } else {
-
-    }
+    this.unregisterEvents();
   }
 }
 
