@@ -74,6 +74,7 @@ In the following example, tapping the button changes the `<p>` element's text fr
 
 1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button.  After tapping the button, the state is `{foo: 'amp-bind'}`.
 2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello' + foo`, which concatenates the string literal `'Hello '` and the variable state `foo`.
+There is a limit of 100 operands what can be used in an expression.
 3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
 
 {% call callout('Note', type='note') %}
