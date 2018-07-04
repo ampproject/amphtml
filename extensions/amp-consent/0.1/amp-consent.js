@@ -39,8 +39,8 @@ import {dict, map} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {parseJson} from '../../../src/json';
 import {setImportantStyles, toggle} from '../../../src/style';
+import {tryParseJson} from '../../../src/json';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -546,12 +546,9 @@ export class AmpConsent extends AMP.BaseElement {
     user().assert(isJsonScriptTag(script),
         `${TAG} consent instance config should be put in a <script>` +
         'tag with type= "application/json"');
-    let config;
-    try {
-      config = parseJson(script.textContent);
-    } catch (err) {
+    const config = tryParseJson(script.textContent, () => {
       user().assert(false, `${TAG}: Error parsing config`);
-    }
+    });
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     user().assert(Object.keys(consents).length != 0,
