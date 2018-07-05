@@ -98,8 +98,7 @@ class AdSenseNetworkConfig {
    * @param {!Window} win
    */
   isEnabled(win) {
-    const branch = getAdSenseAmpAutoAdsExpBranch(win);
-    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
+    return true;
   }
 
   /** @override */
