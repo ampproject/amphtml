@@ -95,9 +95,9 @@ class AdSenseNetworkConfig {
   }
 
   /**
-   * @param {!Window} win
+   * @param {!Window} unused
    */
-  isEnabled(win) {
+  isEnabled(unused) {
     return true;
   }
 
