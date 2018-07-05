@@ -180,11 +180,11 @@ export class Placement {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = this.createAdElement_(baseAttributes, sizing);
+        this.adElement_ = this.createAdElement_(baseAttributes, sizing.width);
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
             sizing.height || TARGET_AD_HEIGHT_PX,
-            sizing.width, this.margins_)
+            undefined, this.margins_)
             .then(() => {
               this.state_ = PlacementState.PLACED;
               return this.state_;
@@ -198,15 +198,15 @@ export class Placement {
 
   /**
    * @param {!JsonObject<string, string>} baseAttributes
-   * @param {!./ad-network-config.SizeInfoDef} sizing
+   * @param {number|undefined} width
    * @return {!Element}
    * @private
    */
-  createAdElement_(baseAttributes, sizing) {
+  createAdElement_(baseAttributes, width) {
     const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
-      'layout': sizing.width ? 'fixed' : 'fixed-height',
+      'layout': width ? 'fixed' : 'fixed-height',
       'height': '0',
-      'width': sizing.width ? sizing.width : 'auto',
+      'width': width ? width : 'auto',
       'class': 'i-amphtml-layout-awaiting-size',
     }), baseAttributes, this.attributes_));
     return createElementWithAttributes(
