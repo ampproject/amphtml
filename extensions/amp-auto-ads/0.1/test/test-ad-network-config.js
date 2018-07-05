@@ -147,29 +147,9 @@ describes.realWin('ad-network-config', {
       ampAutoAdsElem.setAttribute('data-slot', AD_SLOT);
     });
 
-    it('should report enabled when holdout experiment not on', () => {
-      toggleExperiment(
-          env.win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME, false);
+    it('should report enabled always', () => {
       const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
       expect(adNetwork.isEnabled(env.win)).to.equal(true);
-    });
-
-    it('should report enabled when holdout experiment on and experiment ' +
-        'branch picked', () => {
-      forceExperimentBranch(env.win,
-          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
-      const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
-      expect(adNetwork.isEnabled(env.win)).to.equal(true);
-    });
-
-    it('should report disabled when holdout experiment on and control ' +
-        'branch picked', () => {
-      forceExperimentBranch(env.win,
-          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
-      const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
-      expect(adNetwork.isEnabled(env.win)).to.equal(false);
     });
 
     it('should generate the config fetch URL', () => {

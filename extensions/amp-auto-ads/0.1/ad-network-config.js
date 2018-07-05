@@ -95,10 +95,11 @@ class AdSenseNetworkConfig {
   }
 
   /**
-   * @param {!Window} unused
+   * @param {!Window} win
    */
-  isEnabled(unused) {
-    return true;
+  isEnabled(win) {
+    const branch = getAdSenseAmpAutoAdsExpBranch(win);
+    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
   }
 
   /** @override */
@@ -154,11 +155,10 @@ class DoubleclickNetworkConfig {
   }
 
   /**
-   * @param {!Window} win
+   * @param {!Window} unused
    */
-  isEnabled(win) {
-    const branch = getAdSenseAmpAutoAdsExpBranch(win);
-    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
+  isEnabled(unused) {
+    return true;
   }
 
   /** @override */
