@@ -2201,7 +2201,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'host': 'https://dc.oracleinfinity.io/${guid}/dcs.gif?',
       'basePrefix': 'dcssip=${dcssip}&dcsuri=${dcsuri}&WT.ti=${ti}&dcsdat=${timestamp}&dcsref=${documentReferrer}&WT.es=${sourceHost}${sourcePath}',
       'browserMeasures': '&WT.bs=${availableScreenWidth}x${availableScreenHeight}&WT.sr=${screenWidth}x${screenHeight}&WT.cd=${screenColorDepth}&WT.ul=${browserLanguage}&WT.le=${documentCharset}&WT.js=Yes',
-      'sessionization': '&WT.co_f=${clientId(WT_AMP)}&ora.tv_amp=1.0.0&ora.apm_ver=${ampVersion}&dcscfg=3',
+      'sessionization': '&WT.co_f=${clientId(WT_AMP)}&ora.tv_amp=1.0.0&ora.amp_ver=${ampVersion}&dcscfg=3',
       'pageview': '${host}${basePrefix}${browserMeasures}${sessionization}&WT.dl=${dl}',
       'event': '${host}${basePrefix}${browserMeasures}${sessionization}&WT.dl=${dl}'
     },
