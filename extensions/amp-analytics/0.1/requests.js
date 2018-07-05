@@ -50,11 +50,11 @@ export class RequestHandler {
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
 
-    /** @private {string} */
-    this.requestBody_ = JSON.stringify(request['body']) || '';
-
     /** @private {Array<number>|number|undefined} */
     this.batchInterval_ = request['batchInterval']; //unit is sec
+
+    /** @private {?boolean} */
+    this.useBody_ = request['useBody']; //unit is sec
 
     /** @private {?number} */
     this.reportWindow_ = Number(request['reportWindow']) || null; // unit is sec
@@ -86,12 +86,6 @@ export class RequestHandler {
 
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
-
-    /** @private {?Promise<string>} */
-    this.requestBodyPromise_ = null;
-
-    /** @private {?Promise<string>} */
-    this.requestBodyTemplatePromise_ = null;
 
     /** @private {!Array<!Promise<string>>}*/
     this.extraUrlParamsPromise_ = [];
@@ -165,24 +159,13 @@ export class RequestHandler {
       });
     }
 
-    if (!this.requestBodyPromise_) {
-      this.requestBodyTemplatePromise_ =
-        this.variableService_.expandTemplate(
-            this.requestBody_, expansionOption);
-      this.requestBodyPromise_ =
-        this.requestBodyTemplatePromise_.then(requestBody => {
-          return this.urlReplacementService_.expandUrlAsync(
-              requestBody, bindings, this.whiteList_);
-        });
-    }
-
     const extraUrlParamsPromise = this.expandExtraUrlParams_(
         configParams, triggerParams, expansionOption)
         .then(expandExtraUrlParams => {
-          // Construct the extraUrlParamsString: Remove null param and encode
-          // component
-          const expandedExtraUrlParamsStr =
-              this.getExtraUrlParamsString_(expandExtraUrlParams);
+          const expandedExtraUrlParamsStr = this.useBody_ ?
+            JSON.stringify(expandExtraUrlParams) :
+            this.getExtraUrlParamsString_(expandExtraUrlParams);
+
           return this.urlReplacementService_.expandUrlAsync(
               expandedExtraUrlParamsStr, bindings, this.whiteList_);
         });
@@ -194,8 +177,12 @@ export class RequestHandler {
         'extraUrlParams': null,
       });
       this.batchSegmentPromises_.push(extraUrlParamsPromise.then(str => {
-        batchSegment['extraUrlParams'] =
-                parseQueryString(str);
+        if (!this.useBody_) {
+          batchSegment['extraUrlParams'] =
+            parseQueryString(str);
+        } else {
+          batchSegment['extraUrlParams'] = str;
+        }
         return batchSegment;
       }));
     }
@@ -267,10 +254,9 @@ export class RequestHandler {
             this.constructExtraUrlParamStrs_(baseUrl,
                 extraUrlParamsPromise);
         }
-        Promise.all([requestUrlPromise, this.requestBodyPromise_])
-            .then(data => {
-              this.handler_(data[0], lastTrigger, data[1]);
-            });
+        requestUrlPromise.then(({requestUrl, requestBody}) => {
+          this.handler_(requestUrl, lastTrigger, requestBody);
+        });
       });
     });
   }
@@ -282,15 +268,26 @@ export class RequestHandler {
    */
   constructExtraUrlParamStrs_(baseUrl, extraUrlParamStrsPromise) {
     return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
-      filterSplice(paramStrs, item => {return !!item;});
-      const extraUrlParamsStr = paramStrs.join('&');
+      const extraUrlParamStrs = {
+        requestUrl: baseUrl,
+        requestBody: '',
+      };
       let requestUrl;
-      if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
-        requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
+      if (!this.useBody_) {
+        filterSplice(paramStrs, item => {return !!item;});
+        const extraUrlParams = paramStrs.join('&');
+        if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
+          requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParams);
+        } else {
+          requestUrl =
+            appendEncodedParamStringToUrl(baseUrl, extraUrlParams);
+        }
+        extraUrlParamStrs.requestUrl = requestUrl;
       } else {
-        requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
+        extraUrlParamStrs.requestBody = paramStrs[0];
       }
-      return requestUrl;
+
+      return extraUrlParamStrs;
     });
   }
 
@@ -305,12 +302,26 @@ export class RequestHandler {
         'constructBatchSegments_ with invalid batchingPlugin function');
 
     return Promise.all(batchSegmentsPromise).then(batchSegments => {
+      const batchSegmentsStrs = {
+        requestUrl: '',
+      };
       try {
-        return this.batchingPlugin_(baseUrl, batchSegments);
+        if (!this.useBody_) {
+          batchSegmentsStrs.requestUrl =
+            this.batchingPlugin_(baseUrl, batchSegments);
+        } else {
+          batchSegmentsStrs.requestBody = [];
+          for (let i = 0; i < batchSegments.length; i++) {
+            batchSegmentsStrs.requestBody
+                .push(batchSegments[i]['extraUrlParams']);
+          }
+        }
+
+        return batchSegmentsStrs;
       } catch (e) {
         dev().error(TAG,
             `Error: batchPlugin function ${this.batchPluginId_}`, e);
-        return '';
+        return batchSegmentsStrs;
       }
     });
   }

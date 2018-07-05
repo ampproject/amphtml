@@ -37,6 +37,7 @@ const TAG_ = 'amp-analytics.Transport';
 export function sendRequest(win, request, transportOptions, body) {
   assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
+
   if (transportOptions['beacon'] &&
     Transport.sendRequestUsingBeacon(win, request, body)) {
     return;

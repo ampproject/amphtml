@@ -975,11 +975,6 @@ describes.realWin('amp-analytics', {
         'requests': {
           'pageview': {
             'baseUrl': 'https://example.com/test1=${var1}&test2=${var2}&title=TITLE',
-            'body': {
-              'bodyAttr': '${var1}',
-              'bodyAttr2': '${var2}',
-              'bodyAttr3': 'TITLE',
-            },
           },
         },
         'triggers': [{
@@ -997,10 +992,6 @@ describes.realWin('amp-analytics', {
             'https://example.com/test1=x&' +
             'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
             '&title=Test%20Title');
-        expect(sendRequestSpy.args[0][2]).to.equal(
-            '{"bodyAttr":"x",' +
-          '"bodyAttr2":"http%3A%2F%2Flocalhost%3A9876%2Fcontext.html",' +
-          '"bodyAttr3":"Test%20Title"}');
       });
     });
 

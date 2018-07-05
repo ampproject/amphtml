@@ -424,6 +424,36 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
         expect(spy).to.be.calledWith('testFinalUrl');
       });
+
+      it('should pass correct batchSegments body when useBody is set',
+          function* () {
+            const spy = sandbox.spy();
+            const r = {
+              'baseUrl': 'r',
+              'batchInterval': 1,
+              'useBody': true,
+              'batchPlugin': '_ping_',
+            };
+            const handler = new RequestHandler(
+                analyticsMock, r, preconnect, spy, false);
+            // Overwrite batchPlugin function
+            const expansionOptions = new ExpansionOptions({});
+            handler.send({}, {'on': 'timer', 'extraUrlParams': {'e1': 'e1'}},
+                expansionOptions);
+            clock.tick(5);
+            // Test that we decode when pass to batchPlugin function
+            handler.send({}, {'on': 'click', 'extraUrlParams': {'e2': '&e2'}},
+                expansionOptions);
+            clock.tick(5);
+            handler.send({}, {'on': 'visible', 'extraUrlParams': {'e3': ''}},
+                expansionOptions);
+            clock.tick(1000);
+            yield macroTask();
+            expect(spy).to.be.calledOnce;
+            expect(spy.args[0][2][0]).to.equal('{"e1":"e1"}');
+            expect(spy.args[0][2][1]).to.equal('{"e2":"&e2"}');
+            expect(spy.args[0][2][2]).to.equal('{"e3":""}');
+          });
     });
   });
 
@@ -469,11 +499,6 @@ describes.realWin('Requests', {amp: 1}, env => {
     const spy = sandbox.spy();
     const r = {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE',
-      'body': {
-        'testAttr': '${param1}',
-        'testAttr2': '${param3}',
-        'testAttr3': 'BASE_VALUE',
-      },
     };
     const handler = new RequestHandler(
         analyticsMock, r, preconnect, spy, false);
@@ -500,8 +525,6 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledOnce;
     expect(spy.args[0][0]).to.equal(
         'r1&key1=val1&key2=val2&key3=val3&val_base');
-    expect(spy.args[0][2]).to.equal(
-        '{"testAttr":"val1","testAttr2":"val3","testAttr3":"val_base"}');
   });
 
   it('should replace bindings with v2 flag', function* () {
@@ -509,10 +532,6 @@ describes.realWin('Requests', {amp: 1}, env => {
     const spy = sandbox.spy();
     const r = {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
-      'body': {
-        'testAttr': 'BASE_VALUE',
-        'testAttr2': '${foo}',
-      },
     };
     const handler = new RequestHandler(
         analyticsMock, r, preconnect, spy, false);
@@ -540,8 +559,74 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledOnce;
     expect(spy.args[0][0]).to.equal(
         'r1&key1=val1&key2=val2&key3=val3&val_base&foo=ZM9V');
-    expect(spy.args[0][2]).to.equal(
-        '{"testAttr":"val_base","testAttr2":"ZM9V"}');
     toggleExperiment(env.win, REPLACEMENT_EXP_NAME);
   });
+
+  it('should send empty body when useBody is not set',
+      function* () {
+        const spy = sandbox.spy();
+        const r = {
+          'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE',
+        };
+        const handler = new RequestHandler(
+            analyticsMock, r, preconnect, spy, false);
+        const expansionOptions = new ExpansionOptions({
+          'param1': 'PARAM_1',
+          'param2': 'PARAM_2',
+          'param3': 'PARAM_3',
+        });
+        const bindings = {
+          'PARAM_1': 'val1',
+          'PARAM_2': () => 'val2',
+          'PARAM_3': Promise.resolve('val3'),
+          'BASE_VALUE': 'val_base',
+        };
+        const params = {
+          'extraUrlParams': {
+            'key1': '${param1}',
+            'key2': '${param2}',
+            'key3': '${param3}',
+          },
+        };
+        handler.send({}, params, expansionOptions, bindings);
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+        expect(spy.args[0][2]).to.equal('');
+      });
+
+  it('should send expanded extraUrlParams as body when useBody is set to true',
+      function* () {
+        const spy = sandbox.spy();
+        const r = {
+          'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
+          'useBody': true,
+        };
+        const handler = new RequestHandler(
+            analyticsMock, r, preconnect, spy, false);
+        const expansionOptions = new ExpansionOptions({
+          'param1': 'PARAM_1',
+          'param2': 'PARAM_2',
+          'param3': 'PARAM_3',
+          'foo': 'TOUPPERCASE(BASE64(foo))',
+        });
+        const bindings = {
+          'PARAM_1': 'val1',
+          'PARAM_2': () => 'val2',
+          'PARAM_3': Promise.resolve('val3'),
+          'BASE_VALUE': 'val_base',
+        };
+        const params = {
+          'extraUrlParams': {
+            'key1': '${param1}',
+            'key2': '${param2}',
+            'key3': '${param3}',
+            'base': 'BASE_VALUE',
+          },
+        };
+        handler.send({}, params, expansionOptions, bindings);
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+        expect(spy.args[0][2]).to.equal(
+            '{"key1":"val1","key2":"val2","key3":"val3","base":"val_base"}');
+      });
 });
