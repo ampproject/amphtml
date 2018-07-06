@@ -127,12 +127,6 @@ export const RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES = {
 };
 
 /**
- * @const {string}
- * @visibleForTesting
- */
-export const TFCD = 'tagForChildDirectedTreatment';
-
-/**
  * Map of pageview tokens to the instances they belong to.
  * @private {!Object{string: !AmpAdNetworkDoubleclickImpl}
  */
@@ -159,7 +153,6 @@ let windowLocationQueryParameters;
  */
 let LayoutRectOrDimsDef;
 
-/* eslint-enable jsdoc/require-param */
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
