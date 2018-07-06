@@ -33,6 +33,7 @@ import {
   StateProperty,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -73,10 +74,12 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
+  isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {
   computedStyle,
+  px,
   resetStyles,
   setImportantStyles,
   setStyle,
@@ -309,13 +312,19 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (this.element.hasAttribute(Attributes.STANDALONE)) {
+    if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
+    }
+
+    // Check if story is RTL.
+    if (isRTL(this.win.document)) {
+      this.storeService_.dispatch(Action.TOGGLE_RTL, true);
     }
 
     const pageEl = this.element.querySelector('amp-story-page');
     pageEl && pageEl.setAttribute('active', '');
 
+    this.initializeStyles_();
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
@@ -347,6 +356,59 @@ export class AmpStory extends AMP.BaseElement {
     }, html);
   }
 
+
+  /** @private */
+  initializeStyles_() {
+    const styleEl = document.querySelector('style[amp-custom]');
+    if (!styleEl) {
+      return;
+    }
+
+    this.rewriteStyles_(styleEl);
+  }
+
+
+  /**
+   * @param {!Element} styleEl
+   * @private
+   */
+  rewriteStyles_(styleEl) {
+    if (!isExperimentOn(this.win, 'amp-story-responsive-units')) {
+      return;
+    }
+
+    // TODO(#15955): Update this to use CssContext from
+    // ../../../extensions/amp-animation/0.1/web-animations.js
+    this.mutateElement(() => {
+      styleEl.textContent = styleEl.textContent
+          .replace(/([\d.]+)vh/gmi, 'calc($1 * var(--i-amphtml-story-vh))')
+          .replace(/([\d.]+)vw/gmi, 'calc($1 * var(--i-amphtml-story-vw))')
+          .replace(/([\d.]+)vmin/gmi, 'calc($1 * var(--i-amphtml-story-vmin))')
+          .replace(/([\d.]+)vmax/gmi, 'calc($1 * var(--i-amphtml-story-vmax))');
+    });
+  }
+
+
+  /**
+   * @private
+   */
+  updateViewportSizeStyles_() {
+    this.vsync_.run({
+      measure: state => {
+        state.vh = this.activePage_.element./*OK*/clientHeight / 100;
+        state.vw = this.activePage_.element./*OK*/clientWidth / 100;
+        state.vmin = Math.min(state.vh, state.vw);
+        state.vmax = Math.max(state.vh, state.vw);
+      },
+      mutate: state => {
+        this.element.setAttribute('style',
+            `--i-amphtml-story-vh: ${px(state.vh)};` +
+            `--i-amphtml-story-vw: ${px(state.vw)};` +
+            `--i-amphtml-story-vmin: ${px(state.vmin)};` +
+            `--i-amphtml-story-vmax: ${px(state.vmax)};`);
+      },
+    }, {});
+  }
 
   /**
    * Builds the system layer DOM.  This is dependent on the pages_ array having
@@ -588,6 +650,7 @@ export class AmpStory extends AMP.BaseElement {
           });
         })
         .then(() => this.switchTo_(initialPageId))
+        .then(() => this.updateViewportSizeStyles_())
         .then(() => this.preloadPagesByDistance_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
@@ -818,8 +881,7 @@ export class AmpStory extends AMP.BaseElement {
     this.activePage_ = targetPage;
 
     this.systemLayer_.resetDeveloperLogs();
-    this.systemLayer_.setDeveloperLogContextString(
-        this.activePage_.element.id);
+    this.systemLayer_.setDeveloperLogContextString(this.activePage_.element.id);
 
     return targetPage.beforeVisible().then(() => {
       this.triggerActiveEventForPage_();
@@ -939,13 +1001,14 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+
     switch (e.keyCode) {
-      // TODO(newmuis): This will need to be flipped for RTL.
       case KeyCodes.LEFT_ARROW:
-        this.previous_();
+        rtlState ? this.next_() : this.previous_();
         break;
       case KeyCodes.RIGHT_ARROW:
-        this.next_();
+        rtlState ? this.previous_() : this.next_();
         break;
     }
   }
@@ -999,6 +1062,8 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
+    this.updateViewportSizeStyles_();
+
     const isDesktop = this.isDesktop_();
     this.storeService_.dispatch(Action.TOGGLE_DESKTOP, isDesktop);
 
@@ -1067,6 +1132,14 @@ export class AmpStory extends AMP.BaseElement {
   isDesktop_() {
     return this.desktopMedia_.matches && !this.platform_.isBot() &&
         !isExperimentOn(this.win, 'disable-amp-story-desktop');
+  }
+
+  /**
+   * @return {boolean} true if this is a standalone story (i.e. this story is
+   *     the only content of the document).
+   */
+  isStandalone_() {
+    return this.element.hasAttribute(Attributes.STANDALONE);
   }
 
   /**
@@ -1698,9 +1771,10 @@ export class AmpStory extends AMP.BaseElement {
 
 AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
-  AMP.registerElement('amp-story-page', AmpStoryPage);
-  AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
-  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
+  AMP.registerElement('amp-story-access', AmpStoryAccess);
   AMP.registerElement('amp-story-bookend', AmpStoryBookend);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
+  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
+  AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
+  AMP.registerElement('amp-story-page', AmpStoryPage);
 });

@@ -407,13 +407,18 @@ export function getErrorReportData(message, filename, line, col, error,
     return;
   }
 
+  const detachedWindow = !(self && self.window);
   const throttleBase = Math.random();
+
   // We throttle load errors and generic "Script error." errors
   // that have no information and thus cannot be acted upon.
   if (isLoadErrorMessage(message) ||
     // See https://github.com/ampproject/amphtml/issues/7353
     // for context.
-    message == 'Script error.') {
+    message == 'Script error.' ||
+    // Window has become detached, really anything can happen
+    // at this point.
+    detachedWindow) {
     expected = true;
 
     if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
@@ -441,6 +446,7 @@ export function getErrorReportData(message, filename, line, col, error,
   // Errors are tagged with "ex" ("expected") label to allow loggers to
   // classify these errors as benchmarks and not exceptions.
   data['ex'] = expected ? '1' : '0';
+  data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
   if (self.context && self.context.location) {
