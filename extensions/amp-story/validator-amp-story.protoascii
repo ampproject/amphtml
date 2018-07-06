@@ -222,6 +222,8 @@ tags: {
                  "fly-in-left|"
                  "fly-in-right|"
                  "fly-in-top|"
+                 "grow-horizontal|"
+                 "grow-vertical|"
                  "pan-down|"
                  "pan-left|"
                  "pan-right|"

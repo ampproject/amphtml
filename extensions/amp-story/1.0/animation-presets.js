@@ -224,6 +224,22 @@ export const PRESETS = {
       return whooshIn(offsetX, 0, 0, 0);
     },
   },
+  'grow-horizontal': {
+    duration: 500,
+    easing: 'linear',
+    keyframes: [
+      {transform: 'scale(0,1)'},
+      {transform: 'scale(1,1)'},
+    ],
+  },
+  'grow-vertical': {
+    duration: 500,
+    easing: 'linear',
+    keyframes: [
+      {transform: 'scale(1,0)'},
+      {transform: 'scale(1,1)'},
+    ],
+  },
   'pan-left': {
     duration: 1000,
     easing: 'linear',
