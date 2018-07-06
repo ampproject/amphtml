@@ -456,7 +456,9 @@
 
     Viewer.prototype.ssrRenderAmpListTemplate_ = function(data) {
       // Mocked response.
-      return Promise.resolve({renderedHtml: "<div>Server side rendered response</div>"});
+      return Promise.resolve({
+        data: "[{title: 'test'}, {title: 'test1'}, {title: 'test2'}]"
+      });
     };
 
     Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {

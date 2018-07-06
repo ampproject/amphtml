@@ -15,7 +15,8 @@
  */
 
 import {Capability} from './service/viewer-impl';
-import {getMode} from './mode';
+import {isArray} from './types';
+import {map} from './utils/object';
 
 /** The attributes we allow to be sent to the viewer. */
 const ATTRS_TO_SEND_TO_VIEWER = {
@@ -35,19 +36,17 @@ export class SsrTemplateHelper {
    */
   constructor(sourceComponent, viewer, templates) {
 
-    /** @private */
+    /** @private @const */
     this.viewer_ = viewer;
 
-    /** @private */
+    /** @private @const */
     this.templates_ = templates;
 
-    /** @private {!XMLSerializer} */
+    /** @private @const {!XMLSerializer} */
     this.xmls_ = new XMLSerializer();
 
-    this.sourceComponent = sourceComponent;
-
-    /** @private {?Promise} */
-    this.renderTemplatePromise_ = null;
+    /** @private @const */
+    this.sourceComponent_ = sourceComponent;
   }
 
   /**
@@ -74,52 +73,29 @@ export class SsrTemplateHelper {
     onFailure) {
     const inputsAsJson = this.getElementInputsAsJson_(element);
     const elementAttrsAsJson =
-        this.getElementAttributesAsJson_(this.sourceComponent, element);
+        this.getElementAttributesAsJson_(element);
     elementAttrsAsJson.inputData = inputsAsJson;
-    const mustacheTemplate = this.xmls_.serializeToString(
-        this.templates_.findTemplate(element));
-    let p = null;
+    const template = this.templates_.maybeFindTemplate(element);
+    let mustacheTemplate;
+    if (template) {
+      // The document fragment can't be used in the message channel API thus
+      // serializeToString for a string representation of the dom tree.
+      mustacheTemplate = this.xmls_.serializeToString(
+          this.templates_.findTemplate(element));
+    }
     return this.viewer_.sendMessageAwaitResponse(
         Capability.VIEWER_RENDER_TEMPLATE,
         {
           data: elementAttrsAsJson,
           mustacheTemplate,
-          'sourceAmpComponent': this.sourceComponent,
+          'sourceAmpComponent': this.sourceComponent_,
         })
         .then(resp => {
-          if (onSuccess) {
-            onSuccess(resp).then(() => {
-              p = this.templates_.findAndRenderTemplate(
-                  element, resp.renderedHtml);
-              if (getMode().test) {
-                this.renderTemplatePromise_ = p;
-              }
-            });
-          } else {
-            return resp;
-          }
+          return onSuccess ? onSuccess(resp) : resp;
         }, errorResponseJson => {
-          if (onFailure) {
-            onFailure(errorResponseJson).then(() => {
-              p = this.templates_.findAndRenderTemplate(
-                  element, errorResponseJson || {});
-              if (getMode().test) {
-                this.renderTemplatePromise_ = p;
-              }
-            });
-          } else {
-            return errorResponseJson;
-          }
+          return onFailure ?
+            onFailure(errorResponseJson) : errorResponseJson;
         });
-  }
-
-  /**
-   * Returns a promise that resolves when tempalte render finishes. The promise
-   * will be null if the template render has not started.
-   * @visibleForTesting
-   */
-  renderTemplatePromiseForTesting() {
-    return this.renderTemplatePromise_;
   }
 
   /**
@@ -129,7 +105,7 @@ export class SsrTemplateHelper {
    */
   getElementInputsAsJson_(element) {
     const inputs = element.querySelectorAll('input');
-    const inputsAsJson = {};
+    const inputsAsJson = map();
     inputs.forEach(input => {
       inputsAsJson[input.name] = input.value;
     });
@@ -138,18 +114,16 @@ export class SsrTemplateHelper {
 
   /**
    * Returns the element's attributes in json format.
-   * @param {string} sourceComponent
    * @param {!HtmlElement} element
    * @return {!JsonObject}
    */
-  getElementAttributesAsJson_(sourceComponent, element) {
+  getElementAttributesAsJson_(element) {
     const attrsAsJson = {};
-    if (element.attributes) {
+    if (isArray(element.attributes)) {
       const {attributes} = element;
       // Include commonly shared allowed attributes.
-      const whiteList = ATTRS_TO_SEND_TO_VIEWER[sourceComponent]
-          .concat('inputData', 'mustacheTemplate');
-      for (let i = 0, len = attributes.length; i < len; i++) {
+      const whiteList = ATTRS_TO_SEND_TO_VIEWER[this.sourceComponent_];
+      for (let i = 0; i < attributes.length; i++) {
         const keyValue = attributes[i];
         if (whiteList.includes(keyValue.name)) {
           attrsAsJson[keyValue.name] = keyValue.value;

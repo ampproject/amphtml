@@ -61,7 +61,7 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
-     * @private {?{data:{!HTML|!Array}, resolver:!Function, rejecter:!Function}}
+     * @private {?{data:(string|!Array), resolver:!Function, rejecter:!Function}}
      */
     this.renderItems_ = null;
 
@@ -89,10 +89,13 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    /** @private {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
 
-    /** @private {!../../../src/ssr-template-helper.SsrTemplateHelper} */
+    /**
+     * @const {!../../../src/ssr-template-helper.SsrTemplateHelper}
+     * @private
+     */
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, this.viewer_, this.templates_);
   }
@@ -250,9 +253,9 @@ export class AmpList extends AMP.BaseElement {
     return this.ssrTemplateHelper_.fetchAndRenderTemplate(
         this.element).then(resp => {
       user().assert(
-          resp && (typeof resp.renderedHtml !== 'undefined'),
-          'Response missing the \'renderedHtml\' field');
-      return this.scheduleRender_(resp.renderedHtml);
+          resp && (typeof resp.data !== 'undefined'),
+          'Response missing the \'data\' field');
+      return this.scheduleRender_(resp.data);
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
     }).then(
@@ -261,7 +264,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Schedules a fetch result to be rendered in the near future.
-   * @param {!Array|!HTML} data
+   * @param {!Array} data
    * @return {!Promise}
    * @private
    */
@@ -302,6 +305,7 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
+<<<<<<< HEAD
     if (this.ssrTemplateHelper_.isSupported()) {
       // TODO(alabiaga): should call updatebindings as below?
       this.templates_.findAndRenderTemplate(
@@ -324,6 +328,13 @@ export class AmpList extends AMP.BaseElement {
             current.rejecter();
           });
     }
+=======
+    this.templates_.findAndRenderTemplateArray(
+        this.element, /** @type {!Array} */ (current.data))
+        .then(elements => this.updateBindingsForElements_(elements))
+        .then(elements => this.render_(elements))
+        .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+>>>>>>> address most of jridgewell comments
   }
 
   /**

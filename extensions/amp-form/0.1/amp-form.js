@@ -146,8 +146,8 @@ export class AmpForm {
     this.viewer_ = Services.viewerForDoc(this.form_);
 
     /**
-     * {!../../../src/service/ssr-template-helper.SsrTemplateHelper}
-     * @const @private
+     * @const {!../../../src/service/ssr-template-helper.SsrTemplateHelper}
+     * @private
      */
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, this.viewer_, this.templates_);
@@ -396,7 +396,7 @@ export class AmpForm {
       event.preventDefault();
     }
     // Submits caused by user input have high trust.
-    this.submit_(event, ActionTrust.HIGH);
+    this.submit_(ActionTrust.HIGH);
   }
 
   /**
@@ -453,10 +453,11 @@ export class AmpForm {
       p = varSubPromise.then(() => {
         this.actions_.trigger(
             this.form_, 'submit', /* event */ null, trust);
-      }).then(() => {
+        // Note that we do not render templates for the submitting state
+        // and only deal with submit-success or submit-error.
         return this.ssrTemplateHelper_.fetchAndRenderTemplate(
             this.form_,
-            this.handleSsrTemplateSuccess_.bind(this),
+            this.handleSubmitSuccess_.bind(this),
             this.handleSsrTemplateFailure_.bind(this)
         );
       });
@@ -464,9 +465,9 @@ export class AmpForm {
       p = varSubPromise
           .then(() => {
             this.submittingWithTrust_(trust);
-            this.doActionXhr_();
+            return this.doActionXhr_();
           })
-          .then(response => this.handleXhrSubmitSuccess_(response),
+          .then(response => this.handleSubmitSuccess_(response),
               error => {
                 return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
               });
@@ -474,18 +475,6 @@ export class AmpForm {
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
     }
-  }
-
-  /**
-   * Handles viewer render template success.
-   * @param {!JsonObject} response
-   * @return {!Promise}
-   */
-  handleSsrTemplateSuccess_(response) {
-    this.setState_(FormState_.SUBMIT_SUCCESS);
-    return tryResolve(() => {
-      this.renderTemplate_(response.renderedHtml || {});
-    });
   }
 
   /**
@@ -594,13 +583,20 @@ export class AmpForm {
    * @return {!Promise}
    * @private visible for testing
    */
-  handleXhrSubmitSuccess_(response) {
-    return response.json().then(json => {
+  handleSubmitSuccess_(response) {
+    const isSsrSupported = this.ssrTemplateHelper_.isSupported();
+    const jsonPromise = isSsrSupported
+      ? Promise.resolve(response.renderedHtml) : response.json();
+
+    return jsonPromise.then(json => {
       this.triggerAction_(/* success */ true, json);
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
-      this.maybeHandleRedirect_(response);
+
+      if (!isSsrSupported) {
+        this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
+        this.maybeHandleRedirect_(response);
+      }
     }, error => {
       user().error(TAG, `Failed to parse response JSON: ${error}`);
     });
@@ -848,21 +844,21 @@ export class AmpForm {
   }
 
   /**
-   * Returns a promise that resolves when xhr submit finishes. The promise
-   * will be null if xhr submit has not started.
-   * @visibleForTesting
-   */
-  xhrSubmitPromiseForTesting() {
-    return this.xhrSubmitPromise_;
-  }
-
-  /**
    * Returns a promise that resolves when tempalte render finishes. The promise
    * will be null if the template render has not started.
    * @visibleForTesting
    */
   renderTemplatePromiseForTesting() {
     return this.renderTemplatePromise_;
+  }
+
+  /**
+   * Returns a promise that resolves when xhr submit finishes. The promise
+   * will be null if xhr submit has not started.
+   * @visibleForTesting
+   */
+  xhrSubmitPromiseForTesting() {
+    return this.xhrSubmitPromise_;
   }
 }
 

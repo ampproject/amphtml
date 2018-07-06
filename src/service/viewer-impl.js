@@ -518,7 +518,7 @@ export class Viewer {
    * @return {boolean}
    */
   canRenderTemplates() {
-    return this.hasCapability('viewerRenderTemplate');
+    return this.hasCapability(Capability.VIEWER_RENDER_TEMPLATE);
   }
 
   /**

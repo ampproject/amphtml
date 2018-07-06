@@ -114,8 +114,7 @@ export class BaseTemplate {
    * @return {boolean}
    */
   viewerCanRenderTemplates() {
-    return getServiceForDoc(this.win.document, 'viewer')
-        .hasCapability('viewerRenderTemplate');
+    return getServiceForDoc(this.win.document, 'viewer').canRenderTemplates();
   }
 }
 
@@ -212,7 +211,7 @@ export class Templates {
    * @return {boolean}
    */
   hasTemplate(parent, opt_querySelector) {
-    return !!this.maybeFindTemplate_(parent, opt_querySelector);
+    return !!this.maybeFindTemplate(parent, opt_querySelector);
   }
 
   /**
@@ -223,7 +222,7 @@ export class Templates {
    * @return {!Element}
    */
   findTemplate(parent, opt_querySelector) {
-    const templateElement = this.maybeFindTemplate_(parent, opt_querySelector);
+    const templateElement = this.maybeFindTemplate(parent, opt_querySelector);
     user().assert(templateElement, 'Template not found for %s', parent);
     user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
@@ -238,9 +237,8 @@ export class Templates {
    * @param {!Element} parent
    * @param {string=} opt_querySelector
    * @return {?Element}
-   * @private
    */
-  maybeFindTemplate_(parent, opt_querySelector) {
+  maybeFindTemplate(parent, opt_querySelector) {
     const templateId = parent.getAttribute('template');
     if (templateId) {
       return rootNodeFor(parent).getElementById(templateId);
