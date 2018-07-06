@@ -914,6 +914,8 @@ The following animation effects are available as presets for AMP stories:
 | `twirl-in`        | 1000                  | 0 |
 | `whoosh-in-left`  | 500                   | 0 |
 | `whoosh-in-right` | 500                   | 0 |
+| `grow-horizontal` | 500                   | 0 |
+| `grow-vertical`   | 500                   | 0 |
 | `pan-left`        | 1000                  | 0 |
 | `pan-right`       | 1000                  | 0 |
 | `pan-down`        | 1000                  | 0 |
