@@ -551,12 +551,11 @@ export class FriendlyIframeEmbed {
 
     return this.runVsyncOnIframe_({
       measure: () => {
-        const {
-          top,
-          left,
-          width,
-          height,
-        } = this.iframe./*OK*/getBoundingClientRect();
+        const rect = this.host ?
+          this.host.getLayoutBox() :
+          this.iframe./*OK*/getBoundingClientRect();
+
+        const {top, left, width, height} = rect;
 
         const headerHeight = this.getHeaderHeight_(header);
 
