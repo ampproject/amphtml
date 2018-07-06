@@ -252,7 +252,7 @@ function adoptShared(global, callback) {
           if (fnOrStruct.i) {
             if (Array.isArray(fnOrStruct.i)) {
             } else if (typeof fnOrStruct.i == 'string') {
-              //extensions.preloadExtension('_base_element
+              //extensions.preloadExtension('_base_element');
             }
           } else {
             extensions.registerExtension(
