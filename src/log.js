@@ -77,6 +77,19 @@ export function setReportError(fn) {
 }
 
 /**
+ * @type {!LogLevel|undefined}
+ * @private
+ */
+let levelOverride_ = undefined;
+
+/**
+ * @param {!LogLevel} level
+ */
+export function overrideLogLevel(level) {
+  levelOverride_ = level;
+}
+
+/**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
  * errors because errors could be rethrown by some native code as a new error,
  * and only a message would survive. Also, some browser don’t support a 5th
@@ -110,7 +123,7 @@ export class Log {
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
-    this.level_ = this.calcLevel_();
+    this.level_ = this.defaultLevel_();
 
     /** @private @const {string} */
     this.suffix_ = opt_suffix || '';
@@ -120,7 +133,15 @@ export class Log {
    * @return {!LogLevel}
    * @private
    */
-  calcLevel_() {
+  getLevel_() {
+    return (levelOverride_ !== undefined) ? levelOverride_ : this.level_;
+  }
+
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
+  defaultLevel_() {
     // No console - can't enable logging.
     if (!this.win.console || !this.win.console.log) {
       return LogLevel.OFF;
@@ -151,7 +172,7 @@ export class Log {
    * @param {!Array} messages
    */
   msg_(tag, level, messages) {
-    if (this.level_ != LogLevel.OFF) {
+    if (this.getLevel_() != LogLevel.OFF) {
       let fn = this.win.console.log;
       if (level == 'ERROR') {
         fn = this.win.console.error || fn;
@@ -172,7 +193,7 @@ export class Log {
    * @return {boolean}
    */
   isEnabled() {
-    return this.level_ != LogLevel.OFF;
+    return this.getLevel_() != LogLevel.OFF;
   }
 
   /**
@@ -181,7 +202,7 @@ export class Log {
    * @param {...*} var_args
    */
   fine(tag, var_args) {
-    if (this.level_ >= LogLevel.FINE) {
+    if (this.getLevel_() >= LogLevel.FINE) {
       this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -192,7 +213,7 @@ export class Log {
    * @param {...*} var_args
    */
   info(tag, var_args) {
-    if (this.level_ >= LogLevel.INFO) {
+    if (this.getLevel_() >= LogLevel.INFO) {
       this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -203,7 +224,7 @@ export class Log {
    * @param {...*} var_args
    */
   warn(tag, var_args) {
-    if (this.level_ >= LogLevel.WARN) {
+    if (this.getLevel_() >= LogLevel.WARN) {
       this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -217,7 +238,7 @@ export class Log {
    * @private
    */
   error_(tag, var_args) {
-    if (this.level_ >= LogLevel.ERROR) {
+    if (this.getLevel_() >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     } else {
       const error = createErrorVargs.apply(null,

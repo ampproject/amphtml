@@ -18,6 +18,7 @@ import * as config from './config';
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
+import {LogLevel, overrideLogLevel} from './log'; // eslint-disable-line no-unused-vars
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
 import {childElementsByTag, isConnectedNode} from './dom';
@@ -212,12 +213,18 @@ function adoptShared(global, callback) {
    * @return {boolean}
    */
   global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
+
   /**
    * @param {string} experimentId
    * @param {boolean=} opt_on
    * @return {boolean}
    */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
+
+  /**
+   * @param {!LogLevel} level
+   */
+  global.AMP.setLogLevel = overrideLogLevel.bind(null);
 
   /**
    * Sets the function to forward tick events to.
