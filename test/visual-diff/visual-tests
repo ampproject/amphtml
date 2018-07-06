@@ -42,20 +42,22 @@
    *   // Name used to identify snapshots of webpage on Percy.
    *   "name": "Foo test",
    *
-   *   // [optional] CSS elements that must never appear on the webpage.
+   *   // [optional] CSS selectors for elements that must never appear on the
+   *   // webpage.
    *   "forbidden_css": [
    *     ".invalid-css-class",
    *     ".another-invalid-css-class"
    *   ],
    *
-   *   // [optional] CSS elements that may initially appear on the page, but must
-   *   // eventually disappear.
+   *   // [optional] CSS selectors for elements that may initially appear on the
+   *   // page, but must eventually be removed from it or become invisible.
    *   "loading_incomplete_css": [
    *     ".loading-in-progress-css-class",
    *     ".another-loading-in-progress-css-class"
    *   ],
    *
-   *   // [optional] CSS elements that must eventually appear on the page.
+   *   // [optional] CSS selectors for elements that must eventually exist on
+   *   // the page and be visible.
    *   "loading_complete_css": [
    *     ".loading-complete-css-class",
    *     ".another-loading-complete-css-class"
@@ -76,12 +78,8 @@
     {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",
-      "loading_complete_css": [
-        ".login-section"
-      ],
-      "loading_incomplete_css": [
-        ".article-body"
-      ]
+      "loading_incomplete_css": [".article-body"],
+      "loading_complete_css": [".login-section"]
     },
     {
       "url": "examples/visual-tests/font.amp/font.amp.html",
@@ -134,8 +132,7 @@
       "loading_complete_css": [
         ".list1",
         ".list2"
-      ],
-      "loading_incomplete_css": [".i-amphtml-loading-container"]
+      ]
     },
     {
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
