@@ -933,6 +933,7 @@ app.get('/adzerk/*', (req, res) => {
   fs.readFileAsync(filePath).then(file => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+    res.setHeader('AMP-Ad-Response-Type', 'template');
     res.end(file);
   }).error(() => {
     res.status(404);

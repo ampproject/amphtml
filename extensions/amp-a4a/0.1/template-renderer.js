@@ -22,8 +22,7 @@ import {getAmpAdTemplateHelper} from './template-validator';
  */
 export class TemplateRenderer extends FriendlyFrameRenderer {
   /** @override */
-  render(context, element, validatorData) {
-    const {creativeData} = validatorData;
+  render(context, element, creativeData) {
     return super.render(context, element, creativeData).then(() => {
       const templateHelper = getAmpAdTemplateHelper(context.win);
       return templateHelper

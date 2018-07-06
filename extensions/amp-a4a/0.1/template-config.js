@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-import {TemplateRenderer} from './template-renderer';
-import {TemplateValidator} from './template-validator';
+/** @typedef {{
+      requestUrl: string,
+    }} */
+export let NetworkRegistryEntryDef;
 
-// These should be re-used for each instance.
-const validator = new TemplateValidator();
-const renderer = new TemplateRenderer();
+/** @typedef {Object<string, !NetworkRegistryEntryDef>} */
+export let NetworkRegistryDef;
 
-/**
- * @abstract
- */
-export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
-  /**
-   * @param {!Element} element
-   */
-  constructor(element) {
-    super(element);
-
-    this.registerValidator(validator);
-    this.registerRenderer(renderer, ValidatorResult.AMP);
-    
-    this.getContext().win = this.win;
-  }
-}
+/** @const {!NetworkRegistryDef} */
+export const NetworkRegistry = {
+  test: {
+    requestUrl: '/adzerk/1',
+  },
+};
