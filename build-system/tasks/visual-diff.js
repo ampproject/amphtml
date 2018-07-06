@@ -434,10 +434,6 @@ async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
       }
     }
   }
-
-  // Again, wait for all loader dots to disappear. Sometimes components are
-  // still loading images, videos, etc.
-  await waitForLoaderDot(page);
 }
 
 /**
