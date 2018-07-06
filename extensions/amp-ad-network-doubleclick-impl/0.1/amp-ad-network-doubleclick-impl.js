@@ -1396,7 +1396,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Sets the pageview state token associated with the slot. Token does not
    * expire.
-   * @param {?string} token
+   * @param {string} token
    */
   setPageviewStateToken(token) {
     pageviewStateTokens[token] = this;
@@ -1418,10 +1418,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getA4aAnalyticsVars(analyticsTrigger) {
     return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
-    }
+  }
 
-    /** @override */
-    getA4aAnalyticsConfig() { return getCsiAmpAnalyticsConfig(); }
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return getCsiAmpAnalyticsConfig();
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
