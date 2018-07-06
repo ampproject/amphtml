@@ -841,6 +841,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
       });
     });
+
+    it('should call divertExperiments after isResponsive', () => {
+      // No op.
+    });
   });
 
   describe('#onLayoutMeasure', () => {
