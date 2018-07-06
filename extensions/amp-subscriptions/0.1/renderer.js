@@ -48,7 +48,6 @@ export class Renderer {
    */
   getBodyElement_() {
     const root = this.ampdoc_.getBody();
-    return dev().assertElement(root.documentElement || root.body || root);
   }
 
   /**
