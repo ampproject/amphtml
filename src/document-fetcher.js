@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-import {FetchInitDef, setupInit} from './service/xhr-impl';
+import {FetchInitDef, fetchPolyfill} from './fetch-polyfill.js';
 import {Services} from './services';
-import {fetchPolyfill} from './fetch-polyfill.js';
-
-/** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = {
-  document: 1,
-  text: 2,
-};
-
+import {setupInit} from './service/xhr-impl';
 
 export class DocumentFetcher {
   /**

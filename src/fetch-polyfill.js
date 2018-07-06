@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {FetchInitDef} from './service/xhr-impl';
 import {dev, user} from './log';
 import {parseJson} from './json';
 import {utf8Encode} from './utils/bytes';
@@ -25,6 +24,24 @@ const allowedFetchTypes_ = {
   text: 2,
 };
 
+/**
+ * The "init" argument of the Fetch API. Currently, only "credentials: include"
+ * is implemented.  Note ampCors with explicit false indicates that
+ * __amp_source_origin should not be appended to the URL to allow for
+ * potential caching or response across pages.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
+ * @typedef {{
+ *   body: (!Object|!Array|undefined|string),
+ *   credentials: (string|undefined),
+ *   headers: (!Object|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+export let FetchInitDef;
 
 /**
  * A minimal polyfill of Fetch API. It only polyfills what we currently use.

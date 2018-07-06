@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FetchInitDef} from '../fetch-polyfill.js';
 import {Services} from '../services';
 import {dev, user} from '../log';
 import {dict, map} from '../utils/object';
@@ -29,25 +30,6 @@ import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
-
-/**
- * The "init" argument of the Fetch API. Currently, only "credentials: include"
- * is implemented.  Note ampCors with explicit false indicates that
- * __amp_source_origin should not be appended to the URL to allow for
- * potential caching or response across pages.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- *
- * @typedef {{
- *   body: (!Object|!Array|undefined|string),
- *   credentials: (string|undefined),
- *   headers: (!Object|undefined),
- *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
- * }}
- */
-export let FetchInitDef;
 
 /**
  * Special case for fetchJson
