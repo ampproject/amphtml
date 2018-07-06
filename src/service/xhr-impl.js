@@ -111,10 +111,7 @@ export class Xhr {
    */
   fetch_(input, init) {
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
-    if ('responseType' in init) {
-      dev().assert(init.responseType !== 'document', 'Document fetch should not'
-        + ' be done using the service, please use Documentfetcher instead');
-    }
+
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
     const creds = init.credentials;
@@ -132,8 +129,18 @@ export class Xhr {
           if (isFormDataWrapper(init.body)) {
             init.body = init.body.getFormData();
           }
-          return (this.win.fetch).apply(null, arguments);
+          return (this.fetchOverride_ || this.win.fetch).apply(null, arguments);
         });
+  }
+
+  /**
+   * Sets the override function used for fetch.
+   *
+   * @param {function(string, ?FetchInitDef=): Response} fetchOverride
+   * @memberof Xhr
+   */
+  setFetchOverride(fetchOverride) {
+    this.fetchOverride_ = fetchOverride;
   }
 
   /**
