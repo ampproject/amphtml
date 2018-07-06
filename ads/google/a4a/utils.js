@@ -438,7 +438,7 @@ export function getCorrelator(win, elementOrAmpDoc, opt_cid) {
     win.ampAdPageCorrelator = isExperimentOn(win, 'exp-new-correlator') ?
       Math.floor(4503599627370496 * Math.random()) :
       makeCorrelator(
-          Services.documentInfoForDoc(nodeOrDoc).pageViewId, opt_cid);
+          Services.documentInfoForDoc(elementOrAmpDoc).pageViewId, opt_cid);
   }
   return win.ampAdPageCorrelator;
 }
