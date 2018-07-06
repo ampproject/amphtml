@@ -674,7 +674,7 @@ describes.realWin('amp-ad-exit', {
 
   it('getAmpAdResourceId_ should reference AMP top window', () => {
     const frame = win.document.createElement('iframe');
-    win.document.body. appendChild(frame);
+    win.document.body.appendChild(frame);
     const doc = frame.contentDocument;
     const ampAd = doc.createElement('amp-ad');
     ampAd.getResourceId = () => 12345;
