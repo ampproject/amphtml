@@ -51,7 +51,7 @@ amp-image-slider > amp-img > img {
 }
 
 .i-amphtml-image-slider-bar-button {
-  cursor: pointer;
+  cursor: ew-resize;
   position: absolute;
 
   margin: auto;

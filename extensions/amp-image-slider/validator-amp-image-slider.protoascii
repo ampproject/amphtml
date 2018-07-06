@@ -57,9 +57,18 @@ tags: {  # <amp-image-slider>
   tag_name: "AMP-IMAGE-SLIDER"
   satisfies: "amp-image-slider"
   requires: "amp-image-slider extension .js script"
+  attrs: {
+    name: "type"
+    value_regex: "follow|drag"
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
   amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }
