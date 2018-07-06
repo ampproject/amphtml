@@ -515,7 +515,7 @@ function normalizeMethod_(method) {
  * @param {string=} opt_accept The HTTP Accept header value.
  * @return {!FetchInitDef}
  */
-function setupInit(opt_init, opt_accept) {
+export function setupInit(opt_init, opt_accept) {
   const init = opt_init || {};
   init.method = normalizeMethod_(init.method);
   init.headers = init.headers || {};

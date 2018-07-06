@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {FetchInitDef} from './service/xhr-impl';
+import {FetchInitDef, setupInit} from './service/xhr-impl';
+import {Services} from '../../../src/services';
 import {dev, user} from './log';
-import {getCorsUrl, getWinOrigin, parseUrlDeprecated} from './url';
+
 
 /** @private @enum {number} Allowed fetch responses. */
 const allowedFetchTypes_ = {
@@ -31,6 +32,24 @@ export class DocumentFetcher {
    */
   constructor(win) {
     this.win_ = win;
+
+    this.xhr_ = Services.xhrFor(this.win_);
+
+    this.xhr_.setFetchOverride(this.fetchDocument_);
+  }
+
+  /**
+   *
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {FetchResponse}
+   */
+  fetchDocument(input, opt_init) {
+    const init = setupInit(opt_init, 'text/html');
+    init.responseType = 'document';
+    return this.fetch(input, init)
+        .then(response => response.document_());
   }
 
   /**
@@ -44,8 +63,9 @@ export class DocumentFetcher {
    * @param {Request|string} input
    * @param {!FetchInitDef} init
    * @return {!Promise<!Response>}
+   * @private
    */
-  fetchDocument(input, init) {
+  fetchDocument_(input, init) {
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     return new Promise((resolve, reject) => {
       const xhr = this.createXhrRequest_(init.method || 'GET', input);
@@ -54,18 +74,12 @@ export class DocumentFetcher {
         xhr.withCredentials = true;
       }
 
-      if (init.ampCors !== false) {
-        input = getCorsUrl(this.win_, input);
-      }
-
       if (('responseType' in init) &&
         !(init.responseType in allowedFetchTypes_)) {
         throw new Error('Document fetcher should only be used for responseType=document, please use Services.xhr for any other use case.');
       } else {
         xhr.responseType = 'document';
       }
-
-      init = this.sanitizeInit_(input, init);
 
       if (init.headers) {
         Object.keys(init.headers).forEach(function(header) {
@@ -127,33 +141,5 @@ export class DocumentFetcher {
       throw dev().createExpectedError('CORS is not supported');
     }
     return xhr;
-  }
-
-  /**
-   * Sanitizes the init object for xhr's use.
-   *
-   * @param {string} input
-   * @param {!FetchInitDef} init
-   * @return {!FetchInitDef}
-   * @private
-   */
-  sanitizeInit_(input, init) {
-    init.headers = init.headers || {};
-    init.headers['Accept'] = 'text/html';
-    const currentOrigin = getWinOrigin(this.win_);
-    const targetOrigin = parseUrlDeprecated(input).origin;
-    if (currentOrigin == targetOrigin) {
-      init['headers'] = init['headers'] || {};
-      init['headers']['AMP-Same-Origin'] = 'true';
-    }
-    // In edge a `TypeMismatchError` is thrown when body is set to null.
-    dev().assert(init.body !== null, 'fetch `body` can not be `null`');
-    // In particular, Firefox does not tolerate `null` values for
-    // `credentials`.
-    const creds = init.credentials;
-    dev().assert(
-        creds === undefined || creds == 'include' || creds == 'omit',
-        'Only credentials=include|omit support: %s', creds);
-    return init;
   }
 }
