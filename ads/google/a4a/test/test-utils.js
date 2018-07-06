@@ -26,6 +26,7 @@ import {
   extractAmpAnalyticsConfig,
   extractHost,
   getAmpRuntimeTypeParameter,
+  getCorrelator,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
@@ -47,6 +48,7 @@ import {
   installExtensionsService,
 } from '../../../../src/service/extensions-impl';
 import {installXhrService} from '../../../../src/service/xhr-impl';
+import {toggleExperiment} from '../../../../src/experiments';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
@@ -787,6 +789,41 @@ describe('Google A4A utils', () => {
       {in: '', out: ''},
     ].forEach(test =>
       it(test.in, () => expect(extractHost(test.in)).to.equal(test.out)));
+  });
+
+  describes.realWin('#getCorrelator', {}, env => {
+    let win;
+
+    beforeEach(() => {
+      win = env.win;
+    });
+
+    afterEach(() => {
+      toggleExperiment(win, 'exp-new-correlator', false);
+    });
+
+    it('should return cached value if it exists', () => {
+      const correlator = '12345678910';
+      win.ampAdPageCorrelator = correlator;
+      expect(getCorrelator(win, win.document)).to.equal(correlator);
+    });
+
+    it('should calculate correlator from PVID and CID if possible', () => {
+      const pageViewId = '818181';
+      sandbox.stub(Services, 'documentInfoForDoc').callsFake(() => {
+        return {pageViewId};
+      });
+      const cid = '12345678910';
+      const correlator = getCorrelator(win, win.document, cid);
+      expect(String(correlator).includes(pageViewId)).to.be.true;
+    });
+
+    it('should calculate randomly if experiment on', () => {
+      toggleExperiment(win, 'exp-new-correlator', true);
+      const correlator = getCorrelator(win, win.document);
+      expect(correlator).to.be.below(2 ** 52);
+      expect(correlator).to.be.above(0);
+    });
   });
 });
 
