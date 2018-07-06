@@ -800,46 +800,55 @@ describes.realWin('amp-ad-network-adsense-impl', {
     let iframe;
 
     function constructImpl(config) {
-      iframe = env.win.document.createElement('iframe');
-
       config.type = 'adsense';
       element = createElementWithAttributes(doc, 'amp-ad', config);
+      iframe = env.win.document.createElement('iframe');
       element.appendChild(iframe);
-      document.body.appendChild(element);
-      impl = new AmpAdNetworkAdsenseImpl(element);
+      doc.body.appendChild(element);
+      const impl = new AmpAdNetworkAdsenseImpl(element);
       impl.element.style.display = 'block';
       impl.element.style.position = 'relative';
       impl.element.style.top = '101vh';
-
       // Fix the viewport to a consistent size to that the test doesn't depend
       // on the actual browser window opened.
       impl.getViewport().getSize =
           () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+      return impl;
     }
 
     it('should do nothing for non-responsive', () => {
-      constructImpl({
+      const adsense = constructImpl({
         width: '320',
         height: '150',
       });
-      expect(impl.buildCallback()).to.be.undefined;
+      expect(adsense.buildCallback()).to.be.undefined;
     });
 
-    it('should schedule a resize for responsive', () => {
-      constructImpl({
+    it('should schedule a resize for responsive', function *() {
+      const adsense = constructImpl({
         width: '100vw',
         height: '100',
         'data-auto-format': 'rspv',
       });
+      env.sandbox.stub(adsense, 'attemptChangeSize').returns(Promise.resolve());
 
-      const callback = impl.buildCallback();
-      expect(callback).to.exist;
+      const promise = adsense.buildCallback();
+      expect(promise).to.exist;
+      yield promise;
 
-      // The returned promise fails for some reason.
-      return callback.then(() => {
-        expect(element.offsetHeight).to.equal(300);
-        expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+      expect(adsense.attemptChangeSize).to.be.calledWith(300, VIEWPORT_WIDTH);
+    });
+
+    it('should call divertExperiments after isResponsive', () => {
+      const adsense = constructImpl({
+        width: '320',
+        height: '150',
       });
+      const isResponsiveSpy = env.sandbox.spy(adsense, 'isResponsive_');
+      const divertExperimentsSpy = env.sandbox.spy(
+          adsense, 'divertExperiments');
+      adsense.buildCallback();
+      expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
     });
   });
 
