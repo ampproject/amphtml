@@ -448,7 +448,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 **AMP-to-AMP linking**
 
-You can use AMP-to-AMP linking in the components that support a url by including `'amphtml': true` inside the component linking to another AMP document. For example:
+For documents displayed in an AMP viewer, links typically navigate _top or open in a new window. Links to AMP pages, however, may continue to be displayed in the viewer. To enable this behavior, add "amphtml": true to a component that supports links. For example:
 
 ```json
 ...
