@@ -24,7 +24,7 @@ import {
 } from '../../../src/service';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
-import {fetchDocument} from '../../../src/document-fetcher';
+import {DocumentFetcher} from '../../../src/document-fetcher';
 
 const SERVICE_ID = 'liveListManager';
 
@@ -43,6 +43,8 @@ export class LiveListManager {
   constructor(ampdoc) {
     /** @const */
     this.ampdoc = ampdoc;
+
+    this.win_ = ampdoc.win;
 
     /** @private @const {!Object<string, !./amp-live-list.AmpLiveList>} */
     this.liveLists_ = Object.create(null);
@@ -70,6 +72,9 @@ export class LiveListManager {
 
     /** @private @const {function(): Promise} */
     this.work_ = this.fetchDocument_.bind(this);
+
+    /** @private @const {DocumentFetcher} */
+    this.docFetcher_ = new DocumentFetcher(this.win_);
 
     // Only start polling when doc is ready and when the viewer is visible.
     this.whenDocReady_().then(() => {
@@ -131,7 +136,7 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
-    return fetchDocument(url, {
+    return this.docFetcher_.fetchDocument(url, {
       requireAmpResponseSourceOrigin: false,
     }).then(this.getLiveLists_.bind(this));
   }
