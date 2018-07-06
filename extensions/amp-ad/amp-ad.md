@@ -353,6 +353,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 ## Supported embed types
 
 - [24smi](../../ads/24smi.md)
+- [AJA](../../ads/aja.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
