@@ -207,7 +207,6 @@ def GenValidatorProtoGeneratedJs(out_dir):
       generate_spec_only=False,
       text_format=text_format,
       html_format=None,
-      light=False,
       descriptor=descriptor,
       out=out)
   out.append('')
@@ -244,85 +243,10 @@ def GenValidatorGeneratedJs(out_dir):
       generate_spec_only=True,
       text_format=text_format,
       html_format=None,
-      light=False,
       descriptor=descriptor,
       out=out)
   out.append('')
   f = open('%s/validator-generated.js' % out_dir, 'w')
-  f.write('\n'.join(out))
-  f.close()
-  logging.info('... done')
-
-
-def GenValidatorProtoGeneratedLightAmpJs(out_dir):
-  """Calls validator_gen_js to generate validator-proto-generated-light-amp.js.
-
-  Args:
-    out_dir: directory name of the output directory. Must not have slashes,
-      dots, etc.
-  """
-  logging.info('entering ...')
-  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
-
-  # These imports happen late, within this method because they don't necessarily
-  # exist when the module starts running, and the ones that probably do
-  # are checked by CheckPrereqs.
-  # pylint: disable=g-import-not-at-top
-  from google.protobuf import text_format
-  from google.protobuf import descriptor
-  from dist import validator_pb2
-  import validator_gen_js
-  # pylint: enable=g-import-not-at-top
-  out = []
-  validator_gen_js.GenerateValidatorGeneratedJs(
-      specfile=None,
-      validator_pb2=validator_pb2,
-      generate_proto_only=True,
-      generate_spec_only=False,
-      text_format=text_format,
-      html_format=None,
-      light=True,
-      descriptor=descriptor,
-      out=out)
-  out.append('')
-  f = open('%s/validator-proto-generated-light-amp.js' % out_dir, 'w')
-  f.write('\n'.join(out))
-  f.close()
-  logging.info('... done')
-
-
-def GenValidatorGeneratedLightAmpJs(out_dir):
-  """Calls validator_gen_js to generate validator-generated-light-amp.js.
-
-  Args:
-    out_dir: directory name of the output directory. Must not have slashes,
-      dots, etc.
-  """
-  logging.info('entering ...')
-  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
-
-  # These imports happen late, within this method because they don't necessarily
-  # exist when the module starts running, and the ones that probably do
-  # are checked by CheckPrereqs.
-  # pylint: disable=g-import-not-at-top
-  from google.protobuf import text_format
-  from google.protobuf import descriptor
-  from dist import validator_pb2
-  import validator_gen_js
-  # pylint: enable=g-import-not-at-top
-  out = []
-  validator_gen_js.GenerateValidatorGeneratedJs(
-      specfile='%s/validator.protoascii' % out_dir,
-      validator_pb2=validator_pb2,
-      generate_proto_only=False,
-      generate_spec_only=True,
-      text_format=text_format,
-      html_format=validator_pb2.HtmlFormat.AMP,
-      light=True,
-      descriptor=descriptor,
-      out=out)
-  out.append('')
-  f = open('%s/validator-generated-light-amp.js' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
   logging.info('... done')
@@ -372,7 +296,7 @@ def CompileValidatorMinified(out_dir):
           '%s/validator-proto-generated.js' % out_dir,
           'engine/validator-in-browser.js', 'engine/validator.js',
           'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
-          'light/dom-walker.js', 'engine/htmlparser-interface.js'
+          'engine/htmlparser-interface.js'
       ],
       definitions=[],
       entry_points=[
@@ -457,38 +381,11 @@ def CompileValidatorTestMinified(out_dir):
           '%s/validator-proto-generated.js' % out_dir,
           'engine/validator-in-browser.js', 'engine/validator.js',
           'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
-          'engine/htmlparser-interface.js', 'light/dom-walker.js',
-          'engine/validator_test.js'
+          'engine/htmlparser-interface.js', 'engine/validator_test.js'
       ],
       definitions=[],
       entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
-  logging.info('... success')
-
-
-def CompileValidatorLightTestMinified(out_dir):
-  """Runs closure compiler for validator-light_test.js.
-
-  Args:
-    out_dir: directory name of the output directory. Must not have slashes,
-      dots, etc.
-  """
-  logging.info('entering ...')
-  CompileWithClosure(
-      js_files=[
-          'engine/definitions.js', 'engine/htmlparser.js',
-          'engine/parse-css.js', 'engine/parse-srcset.js',
-          'engine/parse-url.js', 'engine/tokenize-css.js',
-          '%s/validator-generated-light-amp.js' % out_dir,
-          '%s/validator-proto-generated-light-amp.js' % out_dir,
-          'engine/validator-in-browser.js', 'engine/validator.js',
-          'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
-          'engine/htmlparser-interface.js', 'light/dom-walker.js',
-          'light/validator-light_test.js'
-      ],
-      definitions=['--define="amp.validator.LIGHT=true"'],
-      entry_points=['amp.validator.ValidatorTest'],
-      output_file='%s/validator-light_test_minified.js' % out_dir)
   logging.info('... success')
 
 
@@ -644,7 +541,6 @@ def GenerateTestRunner(out_dir):
              var jasmine = new JasmineRunner();
              process.env.TESTDATA_ROOTS = 'testdata:%s'
              require('./validator_test_minified');
-             require('./validator-light_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
              require('./parse-url_test_minified');
@@ -690,13 +586,10 @@ def Main(parsed_args):
   GenValidatorPb2Py(out_dir='dist')
   GenValidatorProtoGeneratedJs(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
-  GenValidatorProtoGeneratedLightAmpJs(out_dir='dist')
-  GenValidatorGeneratedLightAmpJs(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
   RunSmokeTest(out_dir='dist')
   RunIndexTest()
   CompileValidatorTestMinified(out_dir='dist')
-  CompileValidatorLightTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
   CompileParseUrlTestMinified(out_dir='dist')
