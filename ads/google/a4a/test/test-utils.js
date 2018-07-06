@@ -815,7 +815,7 @@ describe('Google A4A utils', () => {
       });
       const cid = '12345678910';
       const correlator = getCorrelator(win, win.document, cid);
-      expect(String(correlator)).to.match(pageViewId);
+      expect(String(correlator).includes(pageViewId)).to.be.true;
     });
 
     it('should calculate randomly if experiment on', () => {
