@@ -518,10 +518,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
         this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
+      this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
+      this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
     opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
