@@ -39,5 +39,6 @@
   "adsense-delay-request": 0.01,
   "doubleclick-delay-request":0.01,
   "amp-date-picker": 1,
-  "inline-styles": 1
+  "inline-styles": 1,
+  "exp-new-correlator": 1
 }
