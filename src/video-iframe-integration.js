@@ -303,10 +303,10 @@ export class AmpVideoIntegration {
 
   /**
    * @param {!JsonObject} data
-   * @param {function()|undefined|null} optCallback
+   * @param {function()=} opt_callback
    * @private
    */
-  postToParent_(data, optCallback = null) {
+  postToParent_(data, opt_callback) {
     const id = this.callCounter_++;
     const completeData = Object.assign({id}, data);
 
@@ -314,8 +314,8 @@ export class AmpVideoIntegration {
       this.win_.parent./*OK*/postMessage(completeData, '*');
     }
 
-    if (optCallback) {
-      this.callbacks_[id] = optCallback;
+    if (opt_callback) {
+      this.callbacks_[id] = opt_callback;
     }
     return id;
   }
