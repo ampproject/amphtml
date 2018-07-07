@@ -64,6 +64,7 @@ import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
+import {googleplus} from './googleplus';
 import {twitter} from './twitter';
 import {yotpo} from './yotpo';
 
@@ -348,6 +349,7 @@ register('genieessp', genieessp);
 register('giraff', giraff);
 register('github', github);
 register('gmossp', gmossp);
+register('googleplus', googleplus);
 register('gumgum', gumgum);
 register('holder', holder);
 register('ibillboard', ibillboard);
@@ -460,6 +462,7 @@ const defaultAllowedTypesInCustomFrame = [
   // Each custom iframe can override this through the second argument to
   // draw3p. See amp-ad docs.
   'facebook',
+  'googleplus',
   'twitter',
   'doubleclick',
   'yieldbot',

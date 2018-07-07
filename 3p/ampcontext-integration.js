@@ -70,6 +70,7 @@ export class IntegrationAmpContext extends AbstractAmpContext {
     return (this.embedType_ === 'facebook'
         || this.embedType_ === 'twitter'
         || this.embedType_ === 'github'
+        || this.embedType_ === 'googleplus'
         || this.embedType_ === 'mathml'
         || this.embedType_ === 'reddit'
         || this.embedType_ === 'yotpo');

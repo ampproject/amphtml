@@ -81,6 +81,7 @@ exports.extensionBundles = [
   {name: 'amp-geo', version: '0.1'},
   {name: 'amp-gfycat', version: '0.1'},
   {name: 'amp-gist', version: '0.1'},
+  {name: 'amp-googleplus', version: '0.1'},
   {name: 'amp-gwd-animation', version: '0.1', options: {hasCss: true}},
   {name: 'amp-hulu', version: '0.1'},
   {name: 'amp-iframe', version: '0.1'},
