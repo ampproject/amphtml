@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@import './amp-story-access.css';
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
 
@@ -59,6 +60,7 @@ amp-story {
 
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
+  font-size: calc(2 * var(--i-amphtml-story-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -68,6 +70,31 @@ html.i-amphtml-story-standalone body {
       touch feedback on mobile, like a flashing overlay on page transitions. */
   cursor: auto !important;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+}
+
+amp-story p,
+amp-story h4 {
+  font-size: 1rem;
+}
+
+amp-story h1 {
+  font-size: 2rem;
+}
+
+amp-story h2 {
+  font-size: 1.5rem;
+}
+
+amp-story h3 {
+  font-size: 1.17rem;
+}
+
+amp-story h5 {
+  font-size: 0.83rem;
+}
+
+amp-story h6 {
+  font-size: 0.67rem;
 }
 
 html.i-amphtml-story-standalone body {
