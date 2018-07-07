@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 import {dev} from '../../../src/log';
 import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {tryResolve} from '../../../src/utils/promise';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /**
  * @const {string}
@@ -295,3 +298,63 @@ function serializeItem_(key, value) {
     (Array.isArray(value) ? value : [value]).map(encodeURIComponent).join();
   return `${encodeURIComponent(key)}=${serializedValue}`;
 }
+
+/**
+ * @param {string} creative
+ * @param {!Object<string,string>} headersObj
+ * @param {boolean} done
+ * @param {!Array<function(?../../../src/service/xhr-impl.FetchResponse)>} sraRequestAdUrlResolvers
+ */
+export function sraBlockCallbackHandler(
+    creative, headersObj, done, sraRequestAdUrlResolvers) {
+  const headerNames = Object.keys(headersObj);
+  if (headerNames.length == 1 &&
+      isObject(headersObj[headerNames[0]])) {
+    // TODO(keithwrightbos) - fix upstream so response does
+    // not improperly place headers under key.
+    headersObj =
+      /** @type {!Object} */(headersObj)[headerNames[0]];
+    headersObj = Object.keys(headersObj).reduce(
+        (newObj, key) => {
+          newObj[key.toLowerCase()] = headersObj[key];
+          return newObj;
+        }, {});
+  }
+  // Force safeframe rendering method.
+  headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
+      XORIGIN_MODE.SAFEFRAME;
+  // Construct pseudo fetch response to be passed down the A4A
+  // promise chain for this block.
+  const headers =
+/** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
+({
+  get: name => {
+    // TODO(keithwrightbos) - fix upstream so response writes
+    // all metadata values as strings.
+    let header = headersObj[name.toLowerCase()];
+    if (header && typeof header != 'string') {
+      header = JSON.stringify(header);
+    }
+    return header;
+  },
+  has: name => !!headersObj[name.toLowerCase()],
+});
+  const fetchResponse =
+/** @type {?../../../src/service/xhr-impl.FetchResponse} */
+({
+  headers,
+  arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
+});
+  // Pop head off of the array of resolvers as the response
+  // should match the order of blocks declared in the ad url.
+  // This allows the block to start rendering while the SRA
+  // response is streaming back to the client.
+  dev().assert(sraRequestAdUrlResolvers.shift())(
+      fetchResponse);
+  // If done, expect array to be empty (ensures ad response
+  // included data for all slots).
+  if (done && sraRequestAdUrlResolvers.length) {
+    dev().warn(TAG, 'Premature end of SRA response',
+        sraRequestAdUrlResolvers.length, sraUrl);
+  }
+};

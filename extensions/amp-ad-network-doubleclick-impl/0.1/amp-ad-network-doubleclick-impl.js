@@ -24,7 +24,6 @@ import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
-  RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
@@ -62,6 +61,7 @@ import {
   TFCD,
   constructSRABlockParameters,
   serializeTargeting,
+  sraBlockCallbackHandler,
 } from './sra-utils';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
@@ -97,8 +97,6 @@ import {
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
-import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -1064,60 +1062,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // such that its resolver will be called.
               const sraRequestAdUrlResolvers =
               typeInstances.map(instance => instance.sraDeferred.resolve);
-              const slotCallback = metaJsonCreativeGrouper(
-                  (creative, headersObj, done) => {
-                    checkStillCurrent();
-                    const headerNames = Object.keys(headersObj);
-                    if (headerNames.length == 1 &&
-                        isObject(headersObj[headerNames[0]])) {
-                      // TODO(keithwrightbos) - fix upstream so response does
-                      // not improperly place headers under key.
-                      headersObj =
-                        /** @type {!Object} */(headersObj)[headerNames[0]];
-                      headersObj = Object.keys(headersObj).reduce(
-                          (newObj, key) => {
-                            newObj[key.toLowerCase()] = headersObj[key];
-                            return newObj;
-                          }, {});
-                    }
-                    // Force safeframe rendering method.
-                    headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
-                        XORIGIN_MODE.SAFEFRAME;
-                    // Construct pseudo fetch response to be passed down the A4A
-                    // promise chain for this block.
-                    const headers =
-                  /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
-                  ({
-                    get: name => {
-                      // TODO(keithwrightbos) - fix upstream so response writes
-                      // all metadata values as strings.
-                      let header = headersObj[name.toLowerCase()];
-                      if (header && typeof header != 'string') {
-                        header = JSON.stringify(header);
-                      }
-                      return header;
-                    },
-                    has: name => !!headersObj[name.toLowerCase()],
-                  });
-                    const fetchResponse =
-                  /** @type {?../../../src/service/xhr-impl.FetchResponse} */
-                  ({
-                    headers,
-                    arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
-                  });
-                    // Pop head off of the array of resolvers as the response
-                    // should match the order of blocks declared in the ad url.
-                    // This allows the block to start rendering while the SRA
-                    // response is streaming back to the client.
-                    dev().assert(sraRequestAdUrlResolvers.shift())(
-                        fetchResponse);
-                    // If done, expect array to be empty (ensures ad response
-                    // included data for all slots).
-                    if (done && sraRequestAdUrlResolvers.length) {
-                      dev().warn(TAG, 'Premature end of SRA response',
-                          sraRequestAdUrlResolvers.length, sraUrl);
-                    }
-                  });
+              const slotCallback = metaJsonCreativeGrouper(() =>
+                checkStillCurrent() && sraBlockCallbackHandler(
+                  creative, headersObj, done, sraRequestAdUrlResolvers));
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
               let sraUrl;
               return constructSRARequest_(this, typeInstances)
