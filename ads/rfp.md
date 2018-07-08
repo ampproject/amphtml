@@ -29,8 +29,11 @@ limitations under the License.
 
 For configuration details and to generate your tags, please contact https://www.fout.co.jp/freakout/contact/.
 
-Supported parameters:
+### Required parameters
 
 - `data-adspot-id`
+
+### Optional parameters
+
 - `data-stylesheet-url`
 - `data-country`
