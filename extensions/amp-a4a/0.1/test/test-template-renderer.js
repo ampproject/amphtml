@@ -30,7 +30,7 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('TemplateValidator', realWinConfig, env => {
+describes.realWin('TemplateRenderer', realWinConfig, env => {
 
   const templateUrl = 'https://adnetwork.com/amp-template.html';
   const headers = {
@@ -67,12 +67,12 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
     });
     containerElement.getIntersectionChangeEntry = () => ({});
     containerElement.isInViewport = () => true;
+    containerElement.getAmpDoc = () => env.ampdoc;
     document.body.appendChild(containerElement);
 
     context = {
       win: env.win,
-      ampDoc: env.ampdoc,
-      requestUrl: 'http://www.google.com',
+      adUrl: 'http://www.google.com',
       size: {width: '320', height: '50'},
       sentinel: 's-1234',
     };
@@ -100,17 +100,20 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      return renderer.render(context, containerElement, validatorOutput)
+      const {creativeData} = validatorOutput;
+      expect(creativeData).to.be.ok;
+      return renderer.render(context, containerElement, creativeData)
           .then(() => {
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
             expect(iframe.contentWindow.document.body.innerHTML.trim()).to
-	      .equal('<div>\n      <p>ipsum lorem</p>\n      <a href=' +
-                '"https://buy.com/buy-1" target="_top">Click for ad!</a>' +
-                '\n    <amp-analytics class="i-amphtml-element i-amphtml-' +
-                'notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml-' +
-                'layout-size-defined amp-unresolved i-amphtml-unresolved" ' +
-                'style="width: 1px; height: 1px;"></amp-analytics></div>');
+                .equal('<div>\n      <p>ipsum lorem</p>\n      <a href=' +
+                    '"https://buy.com/buy-1" target="_top">Click for ad!</a>' +
+                    '\n    <amp-analytics class="i-amphtml-element i-amphtml' +
+                    '-notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml' +
+                    '-layout-size-defined amp-unresolved i-amphtml-' +
+                    'unresolved" style="width: 1px; height: 1px;">' +
+                    '</amp-analytics></div>');
           });
     });
   });
@@ -122,7 +125,9 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      return renderer.render(context, containerElement, validatorOutput)
+      const {creativeData} = validatorOutput;
+      expect(creativeData).to.be.ok;
+      return renderer.render(context, containerElement, creativeData)
           .then(() => {
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
@@ -143,7 +148,9 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      return renderer.render(context, containerElement, validatorOutput)
+      const {creativeData} = validatorOutput;
+      expect(creativeData).to.be.ok;
+      return renderer.render(context, containerElement, creativeData)
           .then(() => {
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;
@@ -162,7 +169,9 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      return renderer.render(context, containerElement, validatorOutput)
+      const {creativeData} = validatorOutput;
+      expect(creativeData).to.be.ok;
+      return renderer.render(context, containerElement, creativeData)
           .then(() => {
             const iframe = containerElement.querySelector('iframe');
             expect(iframe).to.be.ok;

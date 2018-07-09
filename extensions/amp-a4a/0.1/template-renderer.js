@@ -24,13 +24,18 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
   /** @override */
   render(context, element, creativeData) {
     return super.render(context, element, creativeData).then(() => {
+      const templateData =
+          /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+              creativeData.templateData);
+      const {data} = templateData;
+      if (!data) {
+        return Promise.resolve();
+      }
       const templateHelper = getAmpAdTemplateHelper(context.win);
       return templateHelper
-          .render(
-              creativeData.templateData.data,
-              this.iframe.contentWindow.document.body)
+          .render(data, this.iframe.contentWindow.document.body)
           .then(renderedElement => {
-            const {analytics} = creativeData.templateData;
+            const {analytics} = templateData;
             if (analytics) {
               templateHelper.insertAnalytics(renderedElement, analytics);
             }
