@@ -93,7 +93,7 @@ export function embedly(global, data) {
 
   const container = global.document.getElementById('c');
 
-  // Adds support embedly dark theme not set by the sdk
+  // Adds support to embedly dark theme not set by the sdk
   if (data['cardTheme'] === 'dark') {
     setStyle(container, 'background', 'rgba(51, 51, 51)');
   }
