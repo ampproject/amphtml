@@ -51,7 +51,7 @@ export let FetchInitDef;
  * Notice that the "fetch" method itself is not exported as that would require
  * us to immediately support a much wide API.
  *
- * @param {Request|string} input
+ * @param {string} input
  * @param {!Object|RequestInit=} init
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing

@@ -538,10 +538,10 @@ export class AmpForm {
    */
   handleXhrSubmitSuccess_(response) {
     return response.json().then(json => {
-      this.triggerAction_(/* success */ true, json);
+      this.triggerAction_(/* success */ true, /** @type {?JsonObject} */(json));
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.setState_(FormState_.SUBMIT_SUCCESS);
-      this.renderTemplate_(json || {});
+      this.renderTemplate_(/** @type {?JsonObject} */(json || {}));
       this.maybeHandleRedirect_(response);
     }, error => {
       user().error(TAG, `Failed to parse response JSON: ${error}`);

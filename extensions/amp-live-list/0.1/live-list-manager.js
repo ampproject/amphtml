@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {DocumentFetcher} from '../../../src/document-fetcher';
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
@@ -24,7 +25,6 @@ import {
 } from '../../../src/service';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
-import {DocumentFetcher} from '../../../src/document-fetcher';
 
 const SERVICE_ID = 'liveListManager';
 
