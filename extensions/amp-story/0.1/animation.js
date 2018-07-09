@@ -48,8 +48,8 @@ const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /**
  * @param {!Element} element
  * @return {boolean}
+ * TODO(alanorozco): maybe memoize?
  */
-// TODO(alanorozco): maybe memoize?
 export function hasAnimations(element) {
   return !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR);
 }
@@ -241,8 +241,8 @@ class AnimationRunner {
   /** @return {boolean} */
   hasStarted() {
     return this.isActivityScheduled_(PlaybackActivity.START) ||
-        !!this.runner_ && dev().assert(this.runner_)
-            .getPlayState() == WebAnimationPlayState.RUNNING;
+        (!!this.runner_ && dev().assert(this.runner_)
+            .getPlayState() == WebAnimationPlayState.RUNNING);
   }
 
   /** Force-finishes all animations. */
@@ -540,6 +540,9 @@ export class AnimationManager {
 
 /** Bus for animation sequencing. */
 class AnimationSequence {
+  /**
+   * @public
+   */
   constructor() {
     /** @private @const {!Object<string, !Promise>} */
     this.subscriptionPromises_ = map();

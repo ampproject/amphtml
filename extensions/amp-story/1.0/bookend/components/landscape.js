@@ -42,7 +42,7 @@ export let LandscapeComponentDef;
  *   meta: !Element,
  * }}
  */
-let landscapeElsDef;
+let landscapeElementsDef;
 
 /**
  * Builder class for the landscape component.
@@ -52,10 +52,15 @@ export class LandscapeComponent {
 
   /** @override */
   assertValidity(landscapeJson, element) {
-    user().assert('category' in landscapeJson && 'image' in landscapeJson &&
-      'url' in landscapeJson && 'title' in landscapeJson, 'landscape ' +
-      'component must contain `title`, `category`, `image`, and `url` fields,' +
-      ' skipping invalid.');
+
+    const requiredFields = ['title', 'image', 'url'];
+    const hasAllRequiredFields =
+        !requiredFields.some(field => !(field in landscapeJson));
+    user().assert(
+        hasAllRequiredFields,
+        'Landscape component must contain ' +
+        requiredFields.map(field => '`' + field + '`').join(', ') +
+        ' fields, skipping invalid.');
 
     userAssertValidProtocol(element, landscapeJson['url']);
     userAssertValidProtocol(element, landscapeJson['image']);
@@ -66,7 +71,7 @@ export class LandscapeComponent {
     const url = landscapeJson['url'];
     const {hostname: domainName} = Services.urlForDoc(element).parse(url);
 
-    return {
+    const landscape = {
       url,
       domainName,
       type: landscapeJson['type'],
@@ -74,10 +79,16 @@ export class LandscapeComponent {
       category: landscapeJson['category'],
       image: landscapeJson['image'],
     };
+
+    if (landscapeJson['amphtml']) {
+      landscape.amphtml = landscapeJson['amphtml'];
+    }
+
+    return landscape;
   }
 
   /** @override */
-  buildTemplate(landscapeData, doc) {
+  buildElement(landscapeData, doc) {
     const html = htmlFor(doc);
     const el =
         html`
@@ -88,12 +99,17 @@ export class LandscapeComponent {
             ref="category"></h2>
           <h2 class="i-amphtml-story-bookend-article-heading"
             ref="title"></h2>
-          <amp-img class="i-amphtml-story-bookend-landscape-image"
-            layout="fixed" width="0" height="0" ref="image"></amp-img>
+          <div class="i-amphtml-story-bookend-landscape-image">
+            <img ref="image"></img>
+          </div>
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
     addAttributesToElement(el, dict({'href': landscapeData.url}));
+
+    if (landscapeData['amphtml'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
+    }
 
     const landscapeEls = htmlRefs(el);
     const {
@@ -101,7 +117,7 @@ export class LandscapeComponent {
       title,
       image,
       meta,
-    } = /** @type {!landscapeElsDef} */ (landscapeEls);
+    } = /** @type {!landscapeElementsDef} */ (landscapeEls);
 
     category.textContent = landscapeData.category;
     title.textContent = landscapeData.title;

@@ -26,9 +26,10 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
+  DELAY_REQUEST_EXP,
+  DELAY_REQUEST_EXP_BRANCHES,
   resetSharedState,
-} from '../amp-ad-network-adsense-impl';
-import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
+} from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
@@ -43,6 +44,7 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -228,6 +230,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.getA4aAnalyticsConfig = () => {};
+      impl.buildCallback();
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
     });
@@ -478,6 +482,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('has correct format when as-use-attr-for-format is on', () => {
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+      impl.divertExperiments();
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       return impl.getAdUrl().then(url =>
@@ -487,11 +492,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('has experiment eid in adsense frmt exp and width/height numeric',
         () => {
           forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+          impl.divertExperiments();
           return impl.getAdUrl().then(
               url => expect(url).to.match(/eid=[^&]*21062004/));
         });
     it('has control eid in adsense frmt exp and width/height numeric', () => {
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
+      impl.divertExperiments();
       return impl.getAdUrl().then(
           url => expect(url).to.match(/eid=[^&]*21062003/));
     });
@@ -499,6 +506,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
           AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+      impl.divertExperiments();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.CONTROL}`));
@@ -960,9 +968,24 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    it('should return true', () => {
-      expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
-          .to.be.true;
+    it('should return true', () =>
+      expect(impl.delayAdRequestEnabled()).to.be.true);
+
+    it('should set experiment when diverted', () => {
+      toggleExperiment(impl.win, DELAY_REQUEST_EXP, true);
+      impl.divertExperiments();
+      let inExp;
+      Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(exp =>
+        inExp = inExp || isInExperiment(impl.element, exp));
+      expect(inExp).to.be.true;
+    });
+    Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(expId => {
+      it(`should return ${DELAY_REQUEST_EXP_BRANCHES[expId]} for ${expId}`,
+          () => {
+            forceExperimentBranch(impl.win, DELAY_REQUEST_EXP, expId);
+            expect(impl.delayAdRequestEnabled()).to.equal(
+                DELAY_REQUEST_EXP_BRANCHES[expId]);
+          });
     });
   });
 
@@ -979,5 +1002,23 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#getConsentPolicy', () => {
     it('should return null', () =>
       expect(AmpAdNetworkAdsenseImpl.prototype.getConsentPolicy()).to.be.null);
+  });
+
+  describe('#isXhrAllowed', () => {
+    beforeEach(() => {
+      impl.win = {
+        location: {},
+      };
+    });
+
+    it('should return false on a canonical page', () => {
+      impl.win.location.origin = 'https://www.somesite.com';
+      expect(impl.isXhrAllowed()).to.be.false;
+    });
+
+    it('should return true on a non-canonical page', () => {
+      impl.win.location.origin = 'https://www-somesite.cdn.ampproject.org';
+      expect(impl.isXhrAllowed()).to.be.true;
+    });
   });
 });

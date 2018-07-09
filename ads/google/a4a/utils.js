@@ -19,20 +19,17 @@ import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  escapeCssSelectorIdent,
-  scopedQuerySelector,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
 import {getBinaryType} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {getTimingDataSync} from '../../../src/service/variable-source';
 import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
 import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -44,6 +41,7 @@ const MAX_URL_LENGTH = 16384;
 const AmpAdImplementation = {
   AMP_AD_XHR_TO_IFRAME: '2',
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
+  AMP_AD_IFRAME_GET: '5',
 };
 
 /** @const {!Object} */
@@ -155,7 +153,7 @@ export function isReportingEnabled(ampElement) {
   const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
-  if (getMode().localDev) {
+  if (getMode(ampElement.win).localDev && !getMode(ampElement.win).test) {
     toggleExperiment(win, experimentName, true, true);
   }
   return (type == 'doubleclick' || type == 'adsense') &&
@@ -203,6 +201,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // TODO(keithwrightbos): what about slots that become measured due to removal
   // of display none (e.g. user resizes viewport and media selector makes
   // visible).
+  const ampAdSelector =
+      r => r.element./*OK*/querySelector(`amp-ad[type=${type}]`);
   return Services.resourcesForDoc(win.document).getMeasuredResources(win,
       r => {
         const isAmpAdType = r.element.tagName == 'AMP-AD' &&
@@ -212,8 +212,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
         }
         const isAmpAdContainerElement =
           Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!scopedQuerySelector(
-              r.element, escapeCssSelectorIdent(`amp-ad[type=${type}]`));
+          !!ampAdSelector(r);
         return isAmpAdContainerElement;
       })
       // Need to wait on any contained element resolution followed by build
@@ -226,10 +225,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
             // Must be container element so need to wait for child amp-ad to
             // be upgraded.
             return whenUpgradedToCustomElement(
-                dev().assertElement(
-                    scopedQuerySelector(
-                        resource.element,
-                        escapeCssSelectorIdent(`amp-ad[type=${type}]`))));
+                dev().assertElement(ampAdSelector(resource)));
           })))
       // Group by networkId.
       .then(elements => elements.reduce((result, element) => {
@@ -240,32 +236,35 @@ export function groupAmpAdsByType(win, type, groupFn) {
 }
 
 /**
- * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {number} startTime
  * @return {!Promise<!Object<string,null|number|string>>}
  */
-export function googlePageParameters(win, nodeOrDoc, startTime) {
+export function googlePageParameters(a4a, startTime) {
+  const {win} = a4a;
+  const ampDoc = a4a.getAmpDoc();
   return Promise.all([
-    getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga'),
-    Services.viewerForDoc(nodeOrDoc).getReferrerUrl()])
+    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
+    Services.viewerForDoc(ampDoc).getReferrerUrl()])
       .then(promiseResults => {
         const clientId = promiseResults[0];
-        const documentInfo = Services.documentInfoForDoc(nodeOrDoc);
+        const documentInfo = Services.documentInfoForDoc(ampDoc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
         {cid: clientId, hid: documentInfo.pageViewId};
         const {screen} = win;
-        const viewport = Services.viewportForDoc(nodeOrDoc);
+        const viewport = Services.viewportForDoc(ampDoc);
         const viewportRect = viewport.getRect();
         const viewportSize = viewport.getSize();
-        const visibilityState = Services.viewerForDoc(nodeOrDoc)
+        const visibilityState = Services.viewerForDoc(ampDoc)
             .getVisibilityState();
         return {
-          'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
+          'is_amp': a4a.isXhrAllowed() ?
+            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
+            AmpAdImplementation.AMP_AD_IFRAME_GET,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
-          'c': getCorrelator(win, clientId, nodeOrDoc),
+          'c': getCorrelator(win, clientId, ampDoc),
           'ga_cid': win.gaGlobal.cid || null,
           'ga_hid': win.gaGlobal.hid || null,
           'dt': startTime,
@@ -310,7 +309,7 @@ export function googleAdUrl(
   a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
-  return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
+  return googlePageParameters(a4a, startTime)
       .then(pageLevelParameters => {
         Object.assign(parameters, blockLevelParameters, pageLevelParameters);
         return truncAndTimeUrl(baseUrl, parameters, startTime);
@@ -653,26 +652,25 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * @param {!JsonObject} config The original config object.
  * @param {?string} qqid
  * @param {boolean} isVerifiedAmpCreative
- * @param {number} deltaTime The time difference, in ms, between the lifecycle
- *   reporter's initialization and now.
- * @param {number} initTime The initialization time, in ms, of the lifecycle
- *   reporter.
  * @return {?JsonObject} config or null if invalid/missing.
  */
-export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
-  qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+export function addCsiSignalsToAmpAnalyticsConfig(
+  win, element, config, qqid, isVerifiedAmpCreative) {
   // Add CSI pingbacks.
   const correlator = getCorrelator(win);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
   const eids = encodeURIComponent(
       element.getAttribute(EXPERIMENT_ATTRIBUTE));
   const adType = element.getAttribute('type');
+  const initTime =
+      Number(getTimingDataSync(win, 'navigationStart') || Date.now());
+  const deltaTime = Math.round(win.performance && win.performance.now ?
+    win.performance.now() : (Date.now() - initTime));
   const baseCsiUrl = 'https://csi.gstatic.com/csi?s=a4a' +
       `&c=${correlator}&slotId=${slotId}&qqid.${slotId}=${qqid}` +
       `&dt=${initTime}` +
       (eids != 'null' ? `&e.${slotId}=${eids}` : '') +
       `&rls=$internalRuntimeVersion$&adt.${slotId}=${adType}`;
-  deltaTime = Math.round(deltaTime);
   const isAmpSuffix = isVerifiedAmpCreative ? 'Friendly' : 'CrossDomain';
   config['triggers']['continuousVisibleIniLoad'] = {
     'on': 'ini-load',

@@ -20,8 +20,10 @@
 
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
+import {LocalizationService} from '../localization';
 import {PRESETS} from '../animation-presets';
 import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-presets-utils';
+import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-full-bleed-animations', {
   amp: {
@@ -37,6 +39,10 @@ describes.realWin('amp-story-full-bleed-animations', {
     win = env.win;
     storyElem = win.document.createElement('amp-story');
     win.document.body.appendChild(storyElem);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
+
     AmpStory.isBrowserSupported = () => true;
     ampStory = new AmpStory(storyElem);
   });
@@ -45,6 +51,12 @@ describes.realWin('amp-story-full-bleed-animations', {
     storyElem.remove();
   });
 
+  /**
+   * @param {!Element} container
+   * @param {number} count
+   * @param {Array<string>=} opt_ids
+   * @return {!Array<!Element>}
+   */
   function createPages(container, count, opt_ids) {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
@@ -55,6 +67,11 @@ describes.realWin('amp-story-full-bleed-animations', {
     });
   }
 
+  /**
+   * @param {!Element} container
+   * @param {string} animationName
+   * @param {string=} opt_gridLayerTempalate
+   */
   function addAnimationToImage(container, animationName,
     opt_gridLayerTempalate) {
     const img = win.document.createElement('amp-img');
@@ -149,6 +166,13 @@ describes.realWin('amp-story-animations-utils', {
     extensions: ['amp-story'],
   },
 }, () => {
+  /**
+   * @param {number} pageW
+   * @param {number} pageH
+   * @param {number} targetW
+   * @param {number} targetH
+   * @return {!StoryAnimationDimsDef}
+   */
   function setDimensions(pageW, pageH, targetW, targetH) {
     return /** @type {!StoryAnimationDimsDef} */ ({
       pageWidth: pageW,

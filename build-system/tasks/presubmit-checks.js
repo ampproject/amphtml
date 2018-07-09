@@ -283,6 +283,7 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
       'src/service/video/docking.js',
+      'src/service/video/autoplay.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -322,6 +323,7 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-viewer-integration/0.1/highlight-handler.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
@@ -355,9 +357,10 @@ const forbiddenTerms = {
       'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
-      'extensions/amp-subscriptions/0.1/local-subscription-platform.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   'getBaseCid': {
@@ -424,7 +427,9 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-access/0.1/access-vars.js',
       'extensions/amp-access-scroll/0.1/scroll-impl.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
   },
@@ -433,6 +438,8 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-access/0.1/access-vars.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
   },
@@ -854,6 +861,10 @@ function isInTestFolder(path) {
   return dirs.indexOf('test') >= 0;
 }
 
+/**
+ * Strip Comments
+ * @param {string} contents
+ */
 function stripComments(contents) {
   // Multi-line comments
   contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
@@ -890,8 +901,9 @@ function matchTerms(file, terms) {
     const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
-    if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
-        isInTestFolder(relative) && !checkInTestFolder)) {
+    if (Array.isArray(whitelist) &&
+      (whitelist.indexOf(relative) != -1 ||
+      (isInTestFolder(relative) && !checkInTestFolder))) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build
