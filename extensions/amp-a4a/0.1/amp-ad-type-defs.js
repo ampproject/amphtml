@@ -69,6 +69,13 @@ export let ValidatorOutput;
     }} */
 export let CreativeMetaDataDef;
 
+/** @typedef {{
+      templateUrl: string,
+      data: (JsonObject|undefined),
+      analytics: (JsonObject|undefined),
+    }} */
+export let AmpTemplateCreativeDef;
+
 /**
  * @abstract
  */

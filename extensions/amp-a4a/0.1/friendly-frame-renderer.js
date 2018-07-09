@@ -29,7 +29,7 @@ import {setStyle} from '../../../src/style';
 
 /**
  * @typedef {{
- *   creativeMetaData: ./amp-ad-type-defs.CreativeMetaDataDef,
+ *   creativeMetadata: ./amp-ad-type-defs.CreativeMetaDataDef,
  * }}
  */
 export let CreativeData;
