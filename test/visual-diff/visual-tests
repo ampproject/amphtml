@@ -276,6 +276,8 @@
       "name": "amp-facebook-like - Amp By Example"
     },
     {
+      "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-facebook-page/index.html",
       "name": "amp-facebook-page - Amp By Example"
     },
