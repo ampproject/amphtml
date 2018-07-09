@@ -27,7 +27,6 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
@@ -105,8 +104,8 @@ const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/
  * @return {number}
  */
 function getNavStart(win) {
-  return win['performance'] && win['performance']['timing'] &&
-      win['performance']['timing']['navigationStart'] || 0;
+  return (win['performance'] && win['performance']['timing'] &&
+      win['performance']['timing']['navigationStart']) || 0;
 }
 
 /**
@@ -264,7 +263,7 @@ export function googlePageParameters(a4a, startTime) {
             AmpAdImplementation.AMP_AD_IFRAME_GET,
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
-          'c': getCorrelator(win, clientId, ampDoc),
+          'c': getCorrelator(win, ampDoc, clientId),
           'ga_cid': win.gaGlobal.cid || null,
           'ga_hid': win.gaGlobal.hid || null,
           'dt': startTime,
@@ -285,7 +284,8 @@ export function googlePageParameters(a4a, startTime) {
           'scr_y': viewport.getScrollTop(),
           'bc': getBrowserCapabilitiesBitmap(win) || null,
           'debug_experiment_id':
-              (/(?:#|,)deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
+              (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] ||
+                  null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
@@ -427,19 +427,40 @@ function elapsedTimeWithCeiling(time, start) {
 }
 
 /**
+ * `nodeOrDoc` must be passed for correct behavior in shadow AMP (PWA) case.
  * @param {!Window} win
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string=} opt_cid
- * @param {(!Node|!../../../src/service/ampdoc-impl.AmpDoc)=} opt_nodeOrDoc
  * @return {number} The correlator.
  */
-export function getCorrelator(win, opt_cid, opt_nodeOrDoc) {
+export function getCorrelator(win, elementOrAmpDoc, opt_cid) {
   if (!win.ampAdPageCorrelator) {
-    win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid,
-        Services.documentInfoForDoc(opt_nodeOrDoc || win.document).pageViewId);
+    win.ampAdPageCorrelator = isExperimentOn(win, 'exp-new-correlator') ?
+      Math.floor(4503599627370496 * Math.random()) :
+      makeCorrelator(
+          Services.documentInfoForDoc(elementOrAmpDoc).pageViewId, opt_cid);
   }
   return win.ampAdPageCorrelator;
 }
+
+/**
+ * @param {string} pageViewId
+ * @param {string=} opt_clientId
+ * @return {number}
+ */
+function makeCorrelator(pageViewId, opt_clientId) {
+  const pageViewIdNumeric = Number(pageViewId || 0);
+  if (opt_clientId) {
+    return pageViewIdNumeric + ((opt_clientId.replace(/\D/g, '') % 1e6) * 1e6);
+  } else {
+    // In this case, pageViewIdNumeric is only 4 digits => too low entropy
+    // to be useful as a page correlator.  So synthesize one from scratch.
+    // 4503599627370496 == 2^52.  The guaranteed range of JS Number is at least
+    // 2^53 - 1.
+    return Math.floor(4503599627370496 * Math.random());
+  }
+}
+
 
 /**
  * Collect additional dimensions for the brdim parameter.
@@ -550,10 +571,12 @@ export function getCsiAmpAnalyticsConfig() {
  *     yet.
  */
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
-  const viewer = Services.viewerForDoc(a4a.getAmpDoc());
-  const navStart = getNavStart(a4a.win);
+  const {win} = a4a;
+  const ampdoc = a4a.getAmpDoc();
+  const viewer = Services.viewerForDoc(ampdoc);
+  const navStart = getNavStart(win);
   const vars = {
-    'correlator': getCorrelator(a4a.win),
+    'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
     'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
   };
@@ -657,7 +680,7 @@ export function mergeExperimentIds(newIds, currentIdString) {
 export function addCsiSignalsToAmpAnalyticsConfig(
   win, element, config, qqid, isVerifiedAmpCreative) {
   // Add CSI pingbacks.
-  const correlator = getCorrelator(win);
+  const correlator = getCorrelator(win, element);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
   const eids = encodeURIComponent(
       element.getAttribute(EXPERIMENT_ATTRIBUTE));
@@ -766,26 +789,26 @@ export let IdentityToken;
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Promise<!IdentityToken>}
  */
-export function getIdentityToken(win, nodeOrDoc) {
+export function getIdentityToken(win, elementOrAmpDoc) {
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
-      executeIdentityTokenFetch(win, nodeOrDoc);
+      executeIdentityTokenFetch(win, elementOrAmpDoc);
   return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
 }
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {number=} redirectsRemaining (default 1)
  * @param {string=} domain
  * @param {number=} startTime
  * @return {!Promise<!IdentityToken>}
  */
-function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
+function executeIdentityTokenFetch(win, elementOrAmpDoc, redirectsRemaining = 1,
   domain = undefined, startTime = Date.now()) {
-  const url = getIdentityTokenRequestUrl(win, nodeOrDoc, domain);
+  const url = getIdentityTokenRequestUrl(win, elementOrAmpDoc, domain);
   return Services.xhrFor(win).fetchJson(url, {
     mode: 'cors',
     method: 'GET',
@@ -806,7 +829,7 @@ function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
             return {fetchTimeMs};
           }
           return executeIdentityTokenFetch(
-              win, nodeOrDoc, redirectsRemaining, altDomain, startTime);
+              win, elementOrAmpDoc, redirectsRemaining, altDomain, startTime);
         } else if (freshLifetimeSecs > 0 && validLifetimeSecs > 0 &&
             typeof token == 'string') {
           return {token, jar, pucrd, freshLifetimeSecs, validLifetimeSecs,
@@ -823,12 +846,13 @@ function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string=} domain
  * @return {string} url
  * @visibleForTesting
  */
-export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
+export function getIdentityTokenRequestUrl(win, elementOrAmpDoc,
+  domain = undefined) {
   if (!domain && win != win.top && win.location.ancestorOrigins) {
     const matches = IDENTITY_DOMAIN_REGEXP_.exec(
         win.location.ancestorOrigins[win.location.ancestorOrigins.length - 1]);
@@ -836,7 +860,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   }
   domain = domain || '.google.com';
   const canonical =
-    extractHost(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl);
+    extractHost(Services.documentInfoForDoc(elementOrAmpDoc).canonicalUrl);
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 
