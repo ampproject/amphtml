@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
+import {DocumentFetcher} from '../../../src/document-fetcher';
 import {MultidocManager} from '../../../src/runtime';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
@@ -28,7 +29,6 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-
 // TODO(emarchiori): Make this a configurable parameter.
 const SEPARATOR_RECOS = 3;
 
@@ -102,6 +102,9 @@ export class NextPageService {
 
     /** @private {function(!Element): !Promise} */
     this.appendPageHandler_ = () => {};
+
+    /** @private {?DocumentFetcher} */
+    this.documentFetcher_ = null;
   }
 
   /** Returns true if the service has already been initialized. */
@@ -130,6 +133,7 @@ export class NextPageService {
     this.win_ = win;
     this.separator_ = separator || this.createDefaultSeparator_();
     this.element_ = element;
+    this.documentFetcher_ = new DocumentFetcher(this.win_);
 
     if (this.config_.hideSelectors) {
       this.hideSelector_ = this.config_.hideSelectors.join(',');
@@ -256,8 +260,9 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      Services.xhrFor(/** @type {!Window} */ (this.win_))
-          .fetchDocument(next.ampUrl, {ampCors: false})
+
+      dev().assert(this.documentFetcher_, 'Document is not initialized');
+      this.documentFetcher_.fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
             if (documentRef.cancelled) {
               // User has reached the end of the document already, don't render.

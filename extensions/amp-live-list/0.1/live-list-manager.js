@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {DocumentFetcher} from '../../../src/document-fetcher';
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
@@ -43,6 +44,8 @@ export class LiveListManager {
     /** @const */
     this.ampdoc = ampdoc;
 
+    this.win_ = ampdoc.win;
+
     /** @private @const {!Object<string, !./amp-live-list.AmpLiveList>} */
     this.liveLists_ = Object.create(null);
 
@@ -69,6 +72,9 @@ export class LiveListManager {
 
     /** @private @const {function(): Promise} */
     this.work_ = this.fetchDocument_.bind(this);
+
+    /** @private @const {DocumentFetcher} */
+    this.docFetcher_ = new DocumentFetcher(this.win_);
 
     // Only start polling when doc is ready and when the viewer is visible.
     this.whenDocReady_().then(() => {
@@ -130,11 +136,9 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
-    return Services.xhrFor(this.ampdoc.win)
-        // TODO(erwinm): add update time here when possible.
-        .fetchDocument(url, {
-          requireAmpResponseSourceOrigin: false,
-        }).then(this.getLiveLists_.bind(this));
+    return this.docFetcher_.fetchDocument(url, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(this.getLiveLists_.bind(this));
   }
 
   /**

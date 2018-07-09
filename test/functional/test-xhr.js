@@ -475,98 +475,98 @@ describe.configure().skipSafari().run('XHR', function() {
       });
     });
 
-    describe('#fetchDocument', () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+    // describe('#fetchDocument', () => {
+    //   beforeEach(() => xhr = xhrServiceForTesting(test.win));
 
-      it('should be able to fetch a document', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html').then(doc => {
-          expect(doc.nodeType).to.equal(9);
-        });
-        xhrCreated.then(xhr => {
-          expect(xhr.requestHeaders['Accept']).to.equal('text/html');
-          xhr.respond(
-              200, {
-                'Content-Type': 'text/xml',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>');
-          expect(xhr.responseType).to.equal('document');
-        });
-        return promise;
-      });
+    //   it('should be able to fetch a document', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html').then(doc => {
+    //       expect(doc.nodeType).to.equal(9);
+    //     });
+    //     xhrCreated.then(xhr => {
+    //       expect(xhr.requestHeaders['Accept']).to.equal('text/html');
+    //       xhr.respond(
+    //           200, {
+    //             'Content-Type': 'text/xml',
+    //             'Access-Control-Expose-Headers':
+    //                 'AMP-Access-Control-Allow-Source-Origin',
+    //             'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+    //           },
+    //           '<html></html>');
+    //       expect(xhr.responseType).to.equal('document');
+    //     });
+    //     return promise;
+    //   });
 
-      it('should mark 400 as not retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                400, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.be.undefined;
-          expect(e.retriable).to.not.equal(true);
-        });
-      });
+    //   it('should mark 400 as not retriable', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html');
+    //     xhrCreated.then(
+    //         xhr => xhr.respond(
+    //             400, {
+    //               'Content-Type': 'text/xml',
+    //             },
+    //             '<html></html>'));
+    //     return promise.catch(e => {
+    //       expect(e.retriable).to.be.undefined;
+    //       expect(e.retriable).to.not.equal(true);
+    //     });
+    //   });
 
-      it('should mark 415 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
+    //   it('should mark 415 as retriable', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html');
+    //     xhrCreated.then(
+    //         xhr => xhr.respond(
+    //             415, {
+    //               'Content-Type': 'text/xml',
+    //               'Access-Control-Expose-Headers':
+    //                   'AMP-Access-Control-Allow-Source-Origin',
+    //               'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+    //             },
+    //             '<html></html>'));
+    //     return promise.catch(e => {
+    //       expect(e.retriable).to.exist;
+    //       expect(e.retriable).to.be.true;
+    //     });
+    //   });
 
-      it('should mark 500 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
+    //   it('should mark 500 as retriable', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html');
+    //     xhrCreated.then(
+    //         xhr => xhr.respond(
+    //             415, {
+    //               'Content-Type': 'text/xml',
+    //               'Access-Control-Expose-Headers':
+    //                   'AMP-Access-Control-Allow-Source-Origin',
+    //               'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+    //             },
+    //             '<html></html>'));
+    //     return promise.catch(e => {
+    //       expect(e.retriable).to.exist;
+    //       expect(e.retriable).to.be.true;
+    //     });
+    //   });
 
-      it('should error on non truthy responseXML', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                200, {
-                  'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '{"hello": "world"}'));
-        return promise.catch(e => {
-          expect(e.message)
-              .to.contain('responseXML should exist');
-        });
-      });
-    });
+    //   it('should error on non truthy responseXML', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html');
+    //     xhrCreated.then(
+    //         xhr => xhr.respond(
+    //             200, {
+    //               'Content-Type': 'application/json',
+    //               'Access-Control-Expose-Headers':
+    //                   'AMP-Access-Control-Allow-Source-Origin',
+    //               'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+    //             },
+    //             '{"hello": "world"}'));
+    //     return promise.catch(e => {
+    //       expect(e.message)
+    //           .to.contain('responseXML should exist');
+    //     });
+    //   });
+    // });
 
     describe('#fetchText', () => {
       const TEST_TEXT = 'test text';
