@@ -22,39 +22,52 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
     <script async custom-element="amp-viqeo-player" data-amp-report-test="amp-viqeo-player" src="https://cdn.ampproject.org/v0/amp-viqeo-player-0.1.js"></script>
+    <style amp-custom>
+        body {
+            max-width: 527px;
+            font-family: 'Questrial', Arial;
+        }
+        [fallback] {
+            display: block;
+            /* @alternative */ display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+        .spacer {
+            height: 100vh;
+        }
+        p, h1, h2, h3 {
+            padding: 10px;
+        }
+    </style>
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-<p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nisl nunc, scelerisque sit amet magna ut, faucibus congue ligula. Nam bibendum at massa ut volutpat. Nulla tincidunt sagittis est, sed rutrum purus convallis a. Suspendisse iaculis volutpat varius. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Praesent in libero hendrerit, venenatis justo ut, mattis massa. Cras id feugiat neque. Vestibulum nec blandit turpis, a bibendum urna. Donec in nibh metus. Phasellus dapibus mi id lectus blandit, in iaculis mi malesuada.
-    Praesent id mi a lacus hendrerit bibendum. Aenean leo ipsum, aliquet id ullamcorper nec, ornare vitae eros. Donec ut interdum ipsum. Sed augue odio, tristique ac pretium vel, semper et tellus. Quisque pulvinar metus in pretium mollis. Etiam imperdiet elit quis mauris porta, sed dignissim tortor fringilla. Sed blandit et nibh non lacinia. Cras purus orci, mollis vel odio a, elementum maximus nibh. Duis turpis enim, tempus in nisl nec, hendrerit egestas orci. Vivamus a mattis nisl. Curabitur at velit id mi pharetra tempus. Nunc ut odio tempus, tincidunt diam id, hendrerit libero. Donec in rhoncus ex, vel semper sapien. Donec congue nunc vel erat faucibus condimentum.
-</p>
-<p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nisl nunc, scelerisque sit amet magna ut, faucibus congue ligula. Nam bibendum at massa ut volutpat. Nulla tincidunt sagittis est, sed rutrum purus convallis a. Suspendisse iaculis volutpat varius. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Praesent in libero hendrerit, venenatis justo ut, mattis massa. Cras id feugiat neque. Vestibulum nec blandit turpis, a bibendum urna. Donec in nibh metus. Phasellus dapibus mi id lectus blandit, in iaculis mi malesuada.
-    Praesent id mi a lacus hendrerit bibendum. Aenean leo ipsum, aliquet id ullamcorper nec, ornare vitae eros. Donec ut interdum ipsum. Sed augue odio, tristique ac pretium vel, semper et tellus. Quisque pulvinar metus in pretium mollis. Etiam imperdiet elit quis mauris porta, sed dignissim tortor fringilla. Sed blandit et nibh non lacinia. Cras purus orci, mollis vel odio a, elementum maximus nibh. Duis turpis enim, tempus in nisl nec, hendrerit egestas orci. Vivamus a mattis nisl. Curabitur at velit id mi pharetra tempus. Nunc ut odio tempus, tincidunt diam id, hendrerit libero. Donec in rhoncus ex, vel semper sapien. Donec congue nunc vel erat faucibus condimentum.
-</p>
-<h2>Viqeo</h2>
-<h3>Responsive layout</h3>
+<h1>amp-viqeo-player</h1>
 <amp-viqeo-player
+        id="myVideo"
         width="640"
         height="400"
         data-profileid="184"
         data-tag-settings="paddingBottom:57%"
-        data-videoid="b51b70cdbb06248f4438"
+        data-videoid="922d04f30b66f1a32eb2"
         layout="responsive"
-        autoplay>
+        autoplay
+        rotate-to-fullscreen>
 </amp-viqeo-player>
-<p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nisl nunc, scelerisque sit amet magna ut, faucibus congue ligula. Nam bibendum at massa ut volutpat. Nulla tincidunt sagittis est, sed rutrum purus convallis a. Suspendisse iaculis volutpat varius. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Praesent in libero hendrerit, venenatis justo ut, mattis massa. Cras id feugiat neque. Vestibulum nec blandit turpis, a bibendum urna. Donec in nibh metus. Phasellus dapibus mi id lectus blandit, in iaculis mi malesuada.
-    Praesent id mi a lacus hendrerit bibendum. Aenean leo ipsum, aliquet id ullamcorper nec, ornare vitae eros. Donec ut interdum ipsum. Sed augue odio, tristique ac pretium vel, semper et tellus. Quisque pulvinar metus in pretium mollis. Etiam imperdiet elit quis mauris porta, sed dignissim tortor fringilla. Sed blandit et nibh non lacinia. Cras purus orci, mollis vel odio a, elementum maximus nibh. Duis turpis enim, tempus in nisl nec, hendrerit egestas orci. Vivamus a mattis nisl. Curabitur at velit id mi pharetra tempus. Nunc ut odio tempus, tincidunt diam id, hendrerit libero. Donec in rhoncus ex, vel semper sapien. Donec congue nunc vel erat faucibus condimentum.
-</p>
-<p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nisl nunc, scelerisque sit amet magna ut, faucibus congue ligula. Nam bibendum at massa ut volutpat. Nulla tincidunt sagittis est, sed rutrum purus convallis a. Suspendisse iaculis volutpat varius. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Praesent in libero hendrerit, venenatis justo ut, mattis massa. Cras id feugiat neque. Vestibulum nec blandit turpis, a bibendum urna. Donec in nibh metus. Phasellus dapibus mi id lectus blandit, in iaculis mi malesuada.
-    Praesent id mi a lacus hendrerit bibendum. Aenean leo ipsum, aliquet id ullamcorper nec, ornare vitae eros. Donec ut interdum ipsum. Sed augue odio, tristique ac pretium vel, semper et tellus. Quisque pulvinar metus in pretium mollis. Etiam imperdiet elit quis mauris porta, sed dignissim tortor fringilla. Sed blandit et nibh non lacinia. Cras purus orci, mollis vel odio a, elementum maximus nibh. Duis turpis enim, tempus in nisl nec, hendrerit egestas orci. Vivamus a mattis nisl. Curabitur at velit id mi pharetra tempus. Nunc ut odio tempus, tincidunt diam id, hendrerit libero. Donec in rhoncus ex, vel semper sapien. Donec congue nunc vel erat faucibus condimentum.
-</p>
-<h2>Viqeo</h2>
-<h3>Responsive layout</h3>
+<h3>Actions</h3>
+<button on="tap:myVideo.play">Play</button>
+<button on="tap:myVideo.pause">Pause</button>
+<button on="tap:myVideo.mute">Mute</button>
+<button on="tap:myVideo.unmute">Unmute</button>
+<button on="tap:myVideo.fullscreen">Fullscreen</button>
+
+<h2>Autoplay</h2>
 <amp-viqeo-player
         width="640"
         height="400"
@@ -64,15 +77,18 @@
         layout="responsive"
         autoplay>
 </amp-viqeo-player>
-<p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nisl nunc, scelerisque sit amet magna ut, faucibus congue ligula. Nam bibendum at massa ut volutpat. Nulla tincidunt sagittis est, sed rutrum purus convallis a. Suspendisse iaculis volutpat varius. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Praesent in libero hendrerit, venenatis justo ut, mattis massa. Cras id feugiat neque. Vestibulum nec blandit turpis, a bibendum urna. Donec in nibh metus. Phasellus dapibus mi id lectus blandit, in iaculis mi malesuada.
-    Praesent id mi a lacus hendrerit bibendum. Aenean leo ipsum, aliquet id ullamcorper nec, ornare vitae eros. Donec ut interdum ipsum. Sed augue odio, tristique ac pretium vel, semper et tellus. Quisque pulvinar metus in pretium mollis. Etiam imperdiet elit quis mauris porta, sed dignissim tortor fringilla. Sed blandit et nibh non lacinia. Cras purus orci, mollis vel odio a, elementum maximus nibh. Duis turpis enim, tempus in nisl nec, hendrerit egestas orci. Vivamus a mattis nisl. Curabitur at velit id mi pharetra tempus. Nunc ut odio tempus, tincidunt diam id, hendrerit libero. Donec in rhoncus ex, vel semper sapien. Donec congue nunc vel erat faucibus condimentum.
-</p>
-<p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nisl nunc, scelerisque sit amet magna ut, faucibus congue ligula. Nam bibendum at massa ut volutpat. Nulla tincidunt sagittis est, sed rutrum purus convallis a. Suspendisse iaculis volutpat varius. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Praesent in libero hendrerit, venenatis justo ut, mattis massa. Cras id feugiat neque. Vestibulum nec blandit turpis, a bibendum urna. Donec in nibh metus. Phasellus dapibus mi id lectus blandit, in iaculis mi malesuada.
-    Praesent id mi a lacus hendrerit bibendum. Aenean leo ipsum, aliquet id ullamcorper nec, ornare vitae eros. Donec ut interdum ipsum. Sed augue odio, tristique ac pretium vel, semper et tellus. Quisque pulvinar metus in pretium mollis. Etiam imperdiet elit quis mauris porta, sed dignissim tortor fringilla. Sed blandit et nibh non lacinia. Cras purus orci, mollis vel odio a, elementum maximus nibh. Duis turpis enim, tempus in nisl nec, hendrerit egestas orci. Vivamus a mattis nisl. Curabitur at velit id mi pharetra tempus. Nunc ut odio tempus, tincidunt diam id, hendrerit libero. Donec in rhoncus ex, vel semper sapien. Donec congue nunc vel erat faucibus condimentum.
-</p>
 
+<h2>Without autoplay</h2>
+<amp-viqeo-player
+        width="640"
+        height="400"
+        data-profileid="184"
+        data-tag-settings="paddingBottom:57%"
+        data-videoid="922d04f30b66f1a32eb2"
+        layout="responsive">
+</amp-viqeo-player>
+
+<div class="spacer"></div>
 
 </body>
 </html>

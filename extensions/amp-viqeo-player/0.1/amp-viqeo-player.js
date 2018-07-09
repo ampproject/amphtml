@@ -20,7 +20,6 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 
-import {assertAbsoluteHttpOrHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {fullscreenEnter, fullscreenExit, isFullscreenElement, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
@@ -35,15 +34,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?string} */
-    this.videoId_ = null;
-
-    /** @private {?string} */
-    this.profileId_ = null;
-
-    /** @private {?string} */
-    this.markTagParams_ = null;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -63,8 +53,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {?Object} */
     this.viqeoPlayer_ = null;
 
-    /** @private {boolean} */
-    this.kindIsProd_ = true;
   }
 
   /**
@@ -86,25 +74,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  createPlaceholderCallback() {
-    return null;
-  }
-
-  /** @override */
   buildCallback() {
-    this.videoId_ = user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-viqeo-player> %s',
-        this.element);
-
-    this.profileId_ = user().assert(
-        this.element.getAttribute('data-profileid'),
-        'The data-profileid attribute is required for <amp-viqeo-player> %s',
-        this.element);
-
-    this.markTagParams_ = this.element.getAttribute('data-tag-settings');
-
-    this.kindIsProd_ = this.element.getAttribute('data-kind') !== 'stage';
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -117,34 +87,9 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    let scriptPlayerInit = this.element.getAttribute('data-script-url');
-    scriptPlayerInit =
-        (scriptPlayerInit
-            && tryDecodeUriComponent(scriptPlayerInit)
-        )
-        ||
-        (this.kindIsProd_
-          ? 'https://cdn.viqeo.tv/js/vq_player_init.js?amp=true'
-          : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1&amp=true'
-        );
-    // embed preview url
-    let previewUrl = this.element.getAttribute('data-player-url');
-    previewUrl =
-        (previewUrl
-            && previewUrl.length && decodeURI(previewUrl)
-        )
-        || (this.kindIsProd_ ? 'https://cdn.viqeo.tv/embed' : 'https://stage.embed.viqeo.tv');
-
-    // Create preview iframe source path
-    previewUrl = assertAbsoluteHttpOrHttpsUrl(
-        `${previewUrl}/?vid=${this.videoId_}&amp=true`);
 
     const jsonParams = {
-      scriptPlayerInit: encodeURIComponent(scriptPlayerInit),
-      previewUrl: encodeURIComponent(previewUrl),
-      videoId: this.videoId_,
-      profileId: this.profileId_,
-      markTagParams: this.markTagParams_,
+      allowFullscreen: true,
     };
 
     const iframe = getIframe(this.win, this.element, 'viqeoplayer', jsonParams);
