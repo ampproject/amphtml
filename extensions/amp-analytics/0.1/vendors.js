@@ -804,12 +804,18 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'uaBaseSuffix':
           '&a=${pageViewId}&' +
            'z=${random}',
-      'uaPageview':
-          '${uaHost}/r/collect?${uaBasePrefix}&' +
-           't=pageview&' +
+      'uaPageviewCommon':
+           '&t=pageview&' +
            'jid=${random}&' +
            'gjid=${random}&' +
-           '_r=1' +
+           '_r=1',
+      'uaPageview':
+          '${uaHost}/r/collect?${uaBasePrefix}' +
+           '${uaPageviewCommon}' +
+           '${uaBaseSuffix}',
+      'uaPageviewNpa':
+          '${uaHost}/collect?${uaBasePrefix}' +
+           '${uaPageviewCommon}' +
            '${uaBaseSuffix}',
       'uaEvent':
           '${uaHost}/collect?${uaBasePrefix}&' +
