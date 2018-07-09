@@ -15,7 +15,6 @@
  */
 
 import {Autoplay, AutoplayEvents} from './video/autoplay';
-import {Deferred} from '../utils/promise';
 import {PlayingStates, VideoAttributes, VideoEvents} from '../video-interface';
 import {Services} from '../services';
 import {VideoServiceSignals} from './video-service-interface';
@@ -94,7 +93,7 @@ export class VideoServiceSync {
     const ampdoc = getAmpdoc(nodeOrDoc);
     return extensions.installExtensionForDoc(ampdoc, EXTENSION)
         .then(() => /** @type {!Promise<!VideoServiceDef>} */ (
-          getElementServiceForDoc(nodeOrDoc, 'video-service', EXTENSION)));
+          getElementServiceForDoc(ampdoc, 'video-service', EXTENSION)));
   }
 
   /** @override */

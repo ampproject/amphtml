@@ -63,8 +63,7 @@ describe('iframe-helper', function() {
     }).to.throw('cannot register events on an attached iframe'); });
   });
 
-  // TODO(dvoytenko, #12499): Make this work with latest mocha / karma.
-  it.skip('should listen to iframe messages from non-3P frame', () => {
+  it('should listen to iframe messages from non-3P frame', () => {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
@@ -85,8 +84,7 @@ describe('iframe-helper', function() {
     });
   });
 
-  // TODO(dvoytenko, #12499): Make this work with latest mocha / karma.
-  it.skip('should listen to iframe messages from 3P frame', () => {
+  it('should listen to iframe messages from 3P frame', () => {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
@@ -110,8 +108,7 @@ describe('iframe-helper', function() {
     });
   });
 
-  // TODO(dvoytenko, #12499): Make this work with latest mocha / karma.
-  it.skip('should listen to iframe messages from nested 3P frame', () => {
+  it('should listen to iframe messages from nested 3P frame', () => {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
