@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Provides you with responsive and shareable embeds to drive the reach of your websites, blog posts, and articles. from any URL using <a href="http://docs.embed.ly/docs/cards">Embedly cards</a>.</td>
+    <td>Provides you with responsive and shareable embeds to drive the reach of your websites, blog posts, and articles from any URL using <a href="http://docs.embed.ly/docs/cards">Embedly cards</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-embedly-card-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-embedly-card" src="https://cdn.ampproject.org/v0/amp-embedly-card-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -41,7 +41,7 @@ Cards are the easiest way to leverage Embedly. For any media, cards provide a re
 *Example: Embedding multiple resources*
 
 If you have a paid plan, use the `amp-embedly-key` component to set your api key. 
-You just need one per AMP page.
+You just need one `amp-embedly-key` per AMP page.
 
 ```html
 <amp-embedly-key
@@ -50,7 +50,7 @@ You just need one per AMP page.
 </amp-embedly-key>
 ```
 
-Setting a key through the `amp-embedly-key` component is optional. If you are a paid user, this removes Embedly's branding from the cards.
+If you are a paid user, setting the `amp-embedly-key` tag removes Embedly's branding from the cards.
 
 Within your AMP page, you can include one or multiple `amp-embedly-card` components:
 
@@ -82,29 +82,51 @@ The URL to retrieve embedding information.
 
 Specifies the via content in the card. This is a a great way to do attribution.
 
-##### data-card-chrome
-
-Removes the left-hand colored border if the value is set to `0`.
-
 ##### data-card-theme
 
 For dark backgrounds it's better to specify the dark theme.
 
+### data-card-embed
+
+URL to a video or rich media. 
+
+Use with static embeds like articles, instead of using the static page content in the card, 
+the card will embed the video or rich media.
+
 ##### data-card-image
 
-Specifies which image to use in article cards.
+URL to an image.
+
+Specifies which image to use in article cards when `data-url` points to an article.
+Not all image URL's are supported, if the image is not loaded, try a different image or domain.
 
 ##### data-card-controls
 	
-Enables share icons. The default value is `1`.
+Enables share icons.
+
+`0`: Disable share icons.
+`1`: Enable share icons
+
+The default is `1`.
 
 ##### data-card-align
 
-Aligns the card. The default value is `"center"`.
+Aligns the card. 
+
+The possible values are `left`, `center` and `right`.
+
+The default value is `center`.
 
 ##### data-card-recommend
 
-Disables Embedly recommendations on video and rich cards. The default value is `1`.
+When recommendations are supported, it disables embedly recommendations on video and rich cards.
+
+These are recommendations created by embedly.
+
+`0`: Disables embedly recommendations.
+`1`: Enables embedly recommendations.
+
+The default value is `1`.
   
 ##### common attributes
 
