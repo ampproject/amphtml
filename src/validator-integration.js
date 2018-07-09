@@ -16,6 +16,7 @@
 
 import {getMode} from './mode';
 import {loadPromise} from './event-helper';
+import {parseQueryString} from './url';
 import {startsWith} from './string';
 import {urls} from './config';
 
@@ -30,8 +31,9 @@ export function maybeValidate(win) {
   if (startsWith(filename, 'about:')) { // Should only happen in tests.
     return;
   }
-
-  if (getMode().development) {
+  const bypassValidation = parseQueryString(
+      win.location.originalHash || win.location.hash)['validate'] == '0';
+  if (getMode().development && !bypassValidation) {
     loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
       /* global amp: false */
       amp.validator.validateUrlAndLog(
