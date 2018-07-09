@@ -32,15 +32,21 @@ export function maybeValidate(win) {
   if (startsWith(filename, 'about:')) { // Should only happen in tests.
     return;
   }
-  const bypassValidation = parseQueryString(
-      win.location.originalHash || win.location.hash)['validate'] == '0';
-  if (getMode().development && !bypassValidation) {
+  let load = false;
+  if (getMode().development) {
+    load = parseQueryString(
+        win.location.originalHash || win.location.hash)['validate'] != '0';
+  }
+
+  if (load) {
     loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
       /* global amp: false */
       amp.validator.validateUrlAndLog(
           filename, win.document, getMode().filter);
     });
-  } else if (getMode().examiner) {
+  }
+
+  if (getMode().examiner) {
     loadScript(win.document, `${urls.cdn}/examiner.js`);
   }
 }
