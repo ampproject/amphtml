@@ -476,7 +476,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's action endpoint.
-   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doActionXhr_() {
@@ -485,7 +485,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's verify endpoint.
-   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doVerifyXhr_() {
@@ -498,7 +498,7 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doXhr_(url, method, opt_extraFields) {
@@ -532,16 +532,16 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
-   * @param {!../../../src/service/xhr-impl.FetchResponse} response
+   * @param {!Response} response
    * @return {!Promise}
    * @private visible for testing
    */
   handleXhrSubmitSuccess_(response) {
     return response.json().then(json => {
-      this.triggerAction_(/* success */ true, json);
+      this.triggerAction_(/* success */ true, /** @type {?JsonObject} */(json));
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.setState_(FormState_.SUBMIT_SUCCESS);
-      this.renderTemplate_(json || {});
+      this.renderTemplate_(/** @type {?JsonObject} */(json || {}));
       this.maybeHandleRedirect_(response);
     }, error => {
       user().error(TAG, `Failed to parse response JSON: ${error}`);
@@ -625,7 +625,7 @@ export class AmpForm {
 
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
-   * @param {../../../src/service/xhr-impl.FetchResponse} response
+   * @param {Response} response
    * @private
    */
   maybeHandleRedirect_(response) {
