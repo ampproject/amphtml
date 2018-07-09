@@ -88,7 +88,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isObject} from '../../../src/types';
 import {isSecureUrlDeprecated, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
@@ -1058,17 +1057,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
               }
+              let sraUrl;
               // Construct and send SRA request.
               // Chunk handler called with metadata and creative for each slot
-              // in order of URLs given.  Construct promise for each slot
-              // such that its resolver will be called.
+              // in order of URLs given which is then passed to resolver used
+              // for sendXhrRequest.
               const sraRequestAdUrlResolvers =
               typeInstances.map(instance => instance.sraDeferred.resolve);
-              const slotCallback = metaJsonCreativeGrouper(() =>
-                checkStillCurrent() && sraBlockCallbackHandler(
-                  creative, headersObj, done, sraRequestAdUrlResolvers));
+              const slotCallback = metaJsonCreativeGrouper(
+                  (creative, headersObj, done) => {
+                    checkStillCurrent();
+                    sraBlockCallbackHandler(creative, headersObj, done,
+                        sraRequestAdUrlResolvers, sraUrl);
+                  });
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
-              let sraUrl;
               return constructSRARequest_(this, typeInstances)
                   .then(sraUrlIn => {
                     checkStillCurrent();
@@ -1085,14 +1087,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         this.win, response, slotCallback);
                   })
                   .catch(error => {
-                    const canceled = isCancellation(error);
-                    if (canceled) {
+                    if (isCancellation(error)) {
+                      // Cancellation should be propagated to slot promises
+                      // causing their adPromise chains within A4A to handle
+                      // appropriately.
                       typeInstances.forEach(instance =>
                         instance.sraDeferred.reject(error));
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]') ||
                         this.experimentIds.includes(
                             DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER)) {
+                      // If publisher has explicitly enabled SRA mode (not
+                      // experiment), then assume error is network failure,
+                      // collapse slot, reset url to empty string to ensure
+                      // no fallback to frame GET (given expectation of SRA
+                      // consistency), and propagate error to A4A adr promise
+                      // chain.
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                       this.warnOnError('SRA request failure', error);
                       // Publisher explicitly wants SRA so do not attempt to
@@ -1106,6 +1116,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         instance.sraDeferred.reject(error);
                       });
                     } else {
+                      // Opportunistic SRA used so fallback to individual
+                      // XHR requests.
                       typeInstances.forEach(instance =>
                         instance.sraDeferred.resolve(null));
                     }
