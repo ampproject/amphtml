@@ -163,7 +163,7 @@ export class AmpGeo extends AMP.BaseElement {
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
 
     if (preRenderMatch &&
-        !Services.urlForDoc(doc).isProxyOrigin(doc.location)) {
+        !Services.urlForDoc(this.getAmpDoc()).isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
     } else {
@@ -196,7 +196,7 @@ export class AmpGeo extends AMP.BaseElement {
     // ISOCountryGroups are optional but if specified at least one must exist
     const ISOCountryGroups = /** @type {!Object<string, !Array<string>>} */(
       config.ISOCountryGroups);
-    const errorPrefix = `<${TAG}> ISOCountryGroups`; // code size
+    const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
       this.assertWithErrorReturn_(
           isObject(ISOCountryGroups),
@@ -219,25 +219,26 @@ export class AmpGeo extends AMP.BaseElement {
   }
 
   /**
-   * checkGroup_() does this.country_  match the group
+   * checkGroup_() does this.country_ match the group
+   * after expanding any presets and forceing to lower case.
    * @param {!Array<string>} countryGroup The group to match against
    * @return {boolean}
    */
   checkGroup_(countryGroup) {
-    let presetCountries = [];
-    countryGroup = countryGroup.map((country, idx) => {
+    /** @type {!Array<string>} */
+    const expandedGroup = countryGroup.reduce((countries, country) => {
+      // If it's a valid preset then we expand it.
       if (/^preset-/.test(country)) {
-        user().assert(
+        this.assertWithErrorReturn_(
             isArray(ampGeoPresets[country]),
-            `<${TAG}> preset ${country} not found`);
-        delete countryGroup[idx];
-        presetCountries = presetCountries.concat(ampGeoPresets[country]);
-        return;
+            `<amp-geo> preset ${country} not found`);
+        return countries.concat(ampGeoPresets[country]);
       }
-      return country.toLowerCase();
-    }).concat(presetCountries.map(c => c.toLowerCase()));
-
-    return countryGroup.includes(this.country_);
+      // Otherwise we add the country to the list
+      countries.push(country);
+      return countries;
+    }, []).map(c => c.toLowerCase());
+    return expandedGroup.includes(this.country_);
   }
 
   /**

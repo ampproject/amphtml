@@ -101,7 +101,7 @@ feature_tests/svg.html:87:2 The attribute 'xml:base' may not appear in tag 'svg'
 |  
 |    <!-- Valid: style attribute allowed in svgs. -->
 |    <svg>
-|      <g style="display: block; -webkit-box-shadow: 4px 6px 6px 4px #ccc"/>
+|      <g style="display: block; position: relative; -webkit-box-shadow: 4px 6px 6px 4px #ccc"/>
 |    </svg>
 |  
 |    <!-- Invalid: these declarations are not allowed in style attributes. -->

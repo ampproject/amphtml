@@ -691,7 +691,7 @@ export class SafeframeHostApi {
     this.baseInstance_.attemptChangeHeight(newHeight)
         .then(() => {
           this.checkStillCurrent_();
-          this.onFluidResize_();
+          this.onFluidResize_(newHeight);
         }).catch(err => {
           if (err.message == 'CANCELLED') {
             dev().error(TAG, err);
@@ -705,9 +705,15 @@ export class SafeframeHostApi {
   /**
    * Fires a delayed impression and notifies the Fluid creative that its
    * container has been resized.
+   * @param {number} newHeight The height expanded to.
    * @private
    */
-  onFluidResize_() {
+  onFluidResize_(newHeight) {
+    const iframe = dev().assertElement(this.baseInstance_.iframe);
+    const iframeHeight = parseInt(getStyle(iframe, 'height'), 10) || 0;
+    if (iframeHeight != newHeight) {
+      setStyles(iframe, {height: `${newHeight}px`});
+    }
     if (this.fluidImpressionUrl_) {
       this.baseInstance_.fireDelayedImpressions(
           this.fluidImpressionUrl_);
