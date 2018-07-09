@@ -15,6 +15,7 @@
  */
 
 import {loadScript} from './3p';
+import {setStyle} from '../src/style';
 
 /**
  * Embedly platform library url to create cards.
@@ -90,7 +91,14 @@ export function embedly(global, data) {
     }
   }
 
-  global.document.getElementById('c').appendChild(card);
+  const container = global.document.getElementById('c');
+
+  // Adds support embedly dark theme not set by the sdk
+  if (data['cardTheme'] === 'dark') {
+    setStyle(container, 'background', 'rgba(51, 51, 51)');
+  }
+
+  container.appendChild(card);
 
   getEmbedly(global, function() {
     // Given by the parent frame.
