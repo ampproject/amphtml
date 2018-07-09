@@ -54,7 +54,7 @@ export class RequestHandler {
     this.batchInterval_ = request['batchInterval']; //unit is sec
 
     /** @private {?boolean} */
-    this.useBody_ = request['useBody']; //unit is sec
+    this.useBody_ = request['useBody'] === true;
 
     /** @private {?number} */
     this.reportWindow_ = Number(request['reportWindow']) || null; // unit is sec

@@ -468,9 +468,6 @@ describes.realWin('Requests', {amp: 1}, env => {
         },
         'baz': {
           'baseUrl': 'test2',
-          'body': {
-            'bodyAttr': 'test3',
-          },
         },
         'foobar': {},
       },
@@ -486,9 +483,6 @@ describes.realWin('Requests', {amp: 1}, env => {
         },
         'baz': {
           'baseUrl': 'test2',
-          'body': {
-            'bodyAttr': 'test3',
-          },
         },
         'foobar': {},
       },
