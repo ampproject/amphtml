@@ -349,9 +349,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'image': true,
     },
   },
-  
+
   'catchpoint': {
-	
     'requests': {	
       'endpoint': 'https://r.3gl.net/hawklogserver/r.p', 
       'pageview': 'https://r.3gl.net/hawklogserver/r.p' +
@@ -381,9 +380,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'visible',
         'request': 'pageview',
       },
-	},
-	},
-
+},
+},
+  
   'chartbeat': {
     'requests': {
       'host': 'https://ping.chartbeat.net',
