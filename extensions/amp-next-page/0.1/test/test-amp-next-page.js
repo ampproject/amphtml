@@ -210,6 +210,47 @@ env => {
     });
   });
 
+  describe('remote config', () => {
+    it('errors when no config specified', () => {
+      expect(() => nextPage.buildCallback()).to.throw(
+          'amp-next-page should contain only one <script> child, or a URL '
+          + 'specified in [src]​​​');
+    });
+
+    it('fetches remote config when specified in src', function* () {
+      const config = {
+        pages: [
+          {
+            image: '/examples/img/hero@1x.jpg',
+            title: 'Remote config',
+            ampUrl: '/document1',
+          },
+        ],
+      };
+      const srcUrl = 'https://example.com/config.json';
+      element.setAttribute('src', srcUrl);
+
+      const fetchJsonStub =
+          sandbox.stub(Services.batchedXhrFor(win), 'fetchJson')
+              .resolves({
+                ok: true,
+                json() {
+                  return Promise.resolve(config);
+                },
+              });
+      const nextPageService = getService(win, 'next-page');
+      const registerSpy = sandbox.spy(nextPageService, 'register');
+
+      nextPage.buildCallback();
+      yield macroTask();
+
+      expect(fetchJsonStub.calledWithExactly(
+          srcUrl, {requireAmpResponseSourceOrigin: false})).to.be.true;
+      expect(registerSpy.calledWith(element, config)).to.be.true;
+    });
+  });
+});
+
 /**
  * Creates an example document as a child of {@code doc} to be embedded as a
  * shadow document.
