@@ -49,6 +49,7 @@
 
     .circle {
       border-radius: 80px;
+      background: #b60845;
     }
 
     .img-container {
@@ -158,7 +159,8 @@
     <amp-story-page id="grow-horizontal">
       <amp-story-grid-layer template="vertical">
         <h1>grow-horizontal</h1>
-        <div class="square" animate-in="grow-horizontal">
+        <div class="square" animate-in="grow-horizontal" id="grow-horizontal-square">
+          <div class="circle" animate-in-after="grow-horizontal-square" animate-in="fade-in"></div>
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -166,7 +168,8 @@
     <amp-story-page id="grow-vertical">
       <amp-story-grid-layer template="vertical">
         <h1>grow-vertical</h1>
-        <div class="square" animate-in="grow-vertical">
+        <div class="square" animate-in="grow-vertical" id="grow-vertical-square">
+          <div class="circle" animate-in-after="grow-vertical-square" animate-in="fade-in"></div>
         </div>
       </amp-story-grid-layer>
     </amp-story-page>

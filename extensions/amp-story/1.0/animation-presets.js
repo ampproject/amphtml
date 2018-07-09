@@ -226,7 +226,7 @@ export const PRESETS = {
   },
   'grow-horizontal': {
     duration: 500,
-    easing: 'linear',
+    easing: 'ease-out',
     keyframes: [
       {transform: 'scale(0,1)'},
       {transform: 'scale(1,1)'},
@@ -234,7 +234,7 @@ export const PRESETS = {
   },
   'grow-vertical': {
     duration: 500,
-    easing: 'linear',
+    easing: 'ease-out',
     keyframes: [
       {transform: 'scale(1,0)'},
       {transform: 'scale(1,1)'},
