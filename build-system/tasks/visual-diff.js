@@ -362,7 +362,10 @@ async function snapshotWebpages(percy, page, webpages, config) {
 
     await enableExperiments(page, webpage['experiments']);
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
-    await page.goto(`${BASE_URL}/${url}`);
+    // Puppeteer is flaky when it comes to catching navigation requests, so
+    // ignore timeouts. If this was a real non-loading page, this will be caught
+    // in the resulting Percy build.
+    await page.goto(`${BASE_URL}/${url}`).catch(() => {});
 
     // Try to wait until there are no more network requests. This method is
     // flaky since Puppeteer doesn't always understand Chrome's network
