@@ -45,12 +45,12 @@ const CARD_CSS_CLASS = 'embedly-card';
  */
 export const CardOptions = {
   cardVia: 'card-via',
-  cardChrome: 'card-chrome',
   cardTheme: 'card-theme',
   cardImage: 'card-image',
   cardControls: 'card-controls',
   cardAlign: 'card-align',
   cardRecommend: 'card-recommend',
+  cardEmbed: 'card-embed',
   cardKey: 'card-key',
 };
 
@@ -96,6 +96,8 @@ export function embedly(global, data) {
     // Given by the parent frame.
     delete data.width;
     delete data.height;
+
+    global.window['embedly']('card', card);
 
     // Use embedly SDK to listen to resize event from loaded card
     global.window['embedly']('on', RESIZE_EVENT_NAME, function(iframe) {
