@@ -22,7 +22,8 @@ import {urls} from './config';
 
 /**
  * Triggers validation for the current document if there is a script in the
- * page that has a "development" attribute.
+ * page that has a "development" attribute and the bypass validation via
+ * #validate=0 is absent.
  *
  * @param {!Window} win Destination window for the new element.
  */
