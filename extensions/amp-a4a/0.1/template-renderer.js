@@ -41,11 +41,9 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
             }
             // This element must exist, or #render() would have thrown.
             const templateElement = this.iframe.contentWindow.document
-                .getElementsByTagName('template')[0];
-            this.iframe.contentWindow.document.body
-                .removeChild(templateElement);
-            this.iframe.contentWindow.document.body
-                .appendChild(renderedElement);
+                .querySelector('template');
+            templateElement.parentNode
+                .replaceChild(renderedElement, templateElement);
           });
     });
   }
