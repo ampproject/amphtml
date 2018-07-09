@@ -15,7 +15,7 @@
  */
 
 import {FetchInitDef, FetchResponse, fetchPolyfill} from './fetch-polyfill.js';
-import {XhrBase, assertSuccess, setupInit} from './service/xhr-base';
+import {XhrBase, assertSuccess, setupInit} from './xhr-base';
 import {dev} from './log';
 import {isFormDataWrapper} from './form-data-wrapper';
 

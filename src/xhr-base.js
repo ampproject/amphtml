@@ -36,7 +36,7 @@ export class XhrBase {
     // shadow mode tests needs to be fixed or there is a bug in ampdoc impl
     // getAmpDoc.
     // TODO(alabiaga): This should be investigated and fixed
-    /** @private {?./ampdoc-impl.AmpDoc} */
+    /** @private {?./service/ampdoc-impl.AmpDoc} */
 
     this.ampdocSingle_ =
         ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
