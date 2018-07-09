@@ -177,6 +177,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.element);
 
+    /** @private {?Object} */
+    this.consentConfig_ = null;
+
     /** @private {?Element} */
     this.scrollableEl_ = null;
 
@@ -197,7 +200,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
     const storyEl = closestByTag(this.element, 'AMP-STORY');
     const consentEl = closestByTag(this.element, 'AMP-CONSENT');
     const consentId = consentEl.id;
-    this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+
+    this.storeConsentId_(consentId);
 
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
@@ -286,6 +290,12 @@ export class AmpStoryConsent extends AMP.BaseElement {
    * @private
    */
   assertAndParseConfig_() {
+    // Validation of the amp-consent config is handled by the amp-consent
+    // javascript.
+    const parentEl = dev().assertElement(this.element.parentElement);
+    const consentScript = childElementByTag(parentEl, 'script');
+    this.consentConfig_ = parseJson(consentScript.textContent);
+
     const storyConsentScript = childElementByTag(this.element, 'script');
 
     user().assert(
@@ -322,6 +332,33 @@ export class AmpStoryConsent extends AMP.BaseElement {
           this.storyConsentConfig_.externalLink.href,
           `${TAG}: config requires "externalLink.href" to be an absolute URL`);
       assertAbsoluteHttpOrHttpsUrl(this.storyConsentConfig_.externalLink.href);
+    }
+  }
+
+  /**
+   * @param {string} consentId
+   * @private
+   */
+  storeConsentId_(consentId) {
+    const policyId = Object.keys(this.consentConfig_.consents)[0];
+    const policy = this.consentConfig_.consents[policyId];
+
+    // checkConsentHref response overrides the amp-geo config, if provided.
+    if (policy.checkConsentHref) {
+      this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+      return;
+    }
+
+    // If using amp-access with amp-geo, only set the consent id if the user is
+    // in the expected geo group.
+    if (policy.promptIfUnknownForGeoGroup) {
+      Services.geoForDocOrNull(this.element).then(geo => {
+        const geoGroup = policy.promptIfUnknownForGeoGroup;
+        if (geo && !geo.matchedISOCountryGroups.includes(geoGroup)) {
+          return;
+        }
+        this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+      });
     }
   }
 

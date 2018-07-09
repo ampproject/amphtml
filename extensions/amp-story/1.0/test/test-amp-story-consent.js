@@ -38,6 +38,10 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
+    const consentConfig = {
+      consents: {ABC: {checkConsentHref: 'https://example.com'}},
+    };
+
     defaultConfig = {
       title: 'Foo title.',
       message: 'Foo message about the consent.',
@@ -55,12 +59,17 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     // Test DOM structure:
     // <amp-consent>
+    //   <script type="application/json">{JSON Config}</script>
     //   <amp-story-consent>
     //     <script type="application/json">{JSON Config}</script>
     //   </amp-story-consent>
     // </amp-consent>
     const consentEl = win.document.createElement('amp-consent');
     consentEl.setAttribute('id', CONSENT_ID);
+
+    const consentConfigEl = win.document.createElement('script');
+    consentConfigEl.setAttribute('type', 'application/json');
+    consentConfigEl.textContent = JSON.stringify(consentConfig);
 
     storyConsentConfigEl = win.document.createElement('script');
     storyConsentConfigEl.setAttribute('type', 'application/json');
@@ -69,6 +78,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     storyConsentEl = win.document.createElement('amp-story-consent');
     storyConsentEl.appendChild(storyConsentConfigEl);
 
+    consentEl.appendChild(consentConfigEl);
     consentEl.appendChild(storyConsentEl);
     win.document.body.appendChild(consentEl);
 
