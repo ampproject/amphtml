@@ -42,10 +42,6 @@ limitations under the License.
   </tr>
 </table>
 
-{% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
-{% endcall %}
-
 [TOC]
 
 ## Migrating from 0.1 to 1.0
