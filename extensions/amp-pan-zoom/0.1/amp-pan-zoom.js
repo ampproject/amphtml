@@ -31,7 +31,6 @@ import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
@@ -145,8 +144,6 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
     this.action_ = Services.actionServiceForDoc(this.element);
     const children = this.getRealChildren();
 
