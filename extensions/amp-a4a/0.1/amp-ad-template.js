@@ -41,16 +41,16 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
     /** @const {string} */
     this.networkType_ = element.getAttribute('type');
     dev().assert(this.networkType_,
-      'Template amp-ad elements must specify a type');
+        'Template amp-ad elements must specify a type');
 
     const networkConfig = NetworkRegistry[this.networkType_];
     dev().assert(networkConfig, `Invalid network type ${this.networkType_}`);
-    
+
     /** @const {string} */
     this.requestUrl_ = networkConfig.requestUrl;
     dev().assert(this.requestUrl_,
-      'Invalid network configuration: no request URL specified');
-    
+        'Invalid network configuration: no request URL specified');
+
     this.getContext().win = this.win;
   }
 

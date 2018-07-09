@@ -148,7 +148,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @private
    */
   sendRequest_() {
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {     
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       const url = this.getRequestUrl();
       this.adResponsePromise_ = sendXhrRequest(this.win, url);
     });
