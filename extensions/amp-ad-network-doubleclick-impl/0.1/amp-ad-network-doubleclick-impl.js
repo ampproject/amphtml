@@ -1101,7 +1101,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       // experiment), then assume error is network failure,
                       // collapse slot, reset url to empty string to ensure
                       // no fallback to frame GET (given expectation of SRA
-                      // consistency), and propagate error to A4A adr promise
+                      // consistency), and propagate error to A4A ad promise
                       // chain.
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                       this.warnOnError('SRA request failure', error);
