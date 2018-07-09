@@ -26,6 +26,6 @@
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01,
   "amp-date-picker": 1,
-  "url-replacement-v2": 0.1,
+  "url-replacement-v2": 0.5,
   "inline-styles": 1
 }
