@@ -66,6 +66,33 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
       });
 
+      it('should pass correct batchSegments body when useBody is set',
+          function* () {
+            const spy = sandbox.spy();
+            const r = {
+              'baseUrl': 'r',
+              'batchInterval': 1,
+              'useBody': true,
+            };
+            const handler = new RequestHandler(
+                analyticsMock, r, preconnect, spy, false);
+            const expansionOptions = new ExpansionOptions({});
+            handler.send({}, {'on': 'timer', 'extraUrlParams': {'e1': 'e1'}},
+                expansionOptions);
+            clock.tick(5);
+            handler.send({}, {'on': 'click', 'extraUrlParams': {'e2': '&e2'}},
+                expansionOptions);
+            clock.tick(5);
+            handler.send({}, {'on': 'visible', 'extraUrlParams': {'e3': ''}},
+                expansionOptions);
+            clock.tick(1000);
+            yield macroTask();
+            expect(spy).to.be.calledOnce;
+            expect(spy.args[0][2][0]).to.equal('{"e1":"e1"}');
+            expect(spy.args[0][2][1]).to.equal('{"e2":"&e2"}');
+            expect(spy.args[0][2][2]).to.equal('{"e3":""}');
+          });
+
       it('should work properly with no batch', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1'};
@@ -76,6 +103,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledTwice;
+        expect(spy.args[0][2]).to.equal('');
       });
 
 
@@ -425,35 +453,6 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('testFinalUrl');
       });
 
-      it('should pass correct batchSegments body when useBody is set',
-          function* () {
-            const spy = sandbox.spy();
-            const r = {
-              'baseUrl': 'r',
-              'batchInterval': 1,
-              'useBody': true,
-              'batchPlugin': '_ping_',
-            };
-            const handler = new RequestHandler(
-                analyticsMock, r, preconnect, spy, false);
-            // Overwrite batchPlugin function
-            const expansionOptions = new ExpansionOptions({});
-            handler.send({}, {'on': 'timer', 'extraUrlParams': {'e1': 'e1'}},
-                expansionOptions);
-            clock.tick(5);
-            // Test that we decode when pass to batchPlugin function
-            handler.send({}, {'on': 'click', 'extraUrlParams': {'e2': '&e2'}},
-                expansionOptions);
-            clock.tick(5);
-            handler.send({}, {'on': 'visible', 'extraUrlParams': {'e3': ''}},
-                expansionOptions);
-            clock.tick(1000);
-            yield macroTask();
-            expect(spy).to.be.calledOnce;
-            expect(spy.args[0][2][0]).to.equal('{"e1":"e1"}');
-            expect(spy.args[0][2][1]).to.equal('{"e2":"&e2"}');
-            expect(spy.args[0][2][2]).to.equal('{"e3":""}');
-          });
     });
   });
 

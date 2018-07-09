@@ -284,7 +284,11 @@ export class RequestHandler {
         }
         extraUrlParamStrs.requestUrl = requestUrl;
       } else {
-        extraUrlParamStrs.requestBody = paramStrs[0];
+        if (this.batchInterval_) {
+          extraUrlParamStrs.requestBody = paramStrs;
+        } else {
+          extraUrlParamStrs.requestBody = paramStrs[0];
+        }
       }
 
       return extraUrlParamStrs;
@@ -304,25 +308,17 @@ export class RequestHandler {
     return Promise.all(batchSegmentsPromise).then(batchSegments => {
       const batchSegmentsStrs = {
         requestUrl: '',
+        requestBody: '',
       };
       try {
-        if (!this.useBody_) {
-          batchSegmentsStrs.requestUrl =
+        batchSegmentsStrs.requestUrl =
             this.batchingPlugin_(baseUrl, batchSegments);
-        } else {
-          batchSegmentsStrs.requestBody = [];
-          for (let i = 0; i < batchSegments.length; i++) {
-            batchSegmentsStrs.requestBody
-                .push(batchSegments[i]['extraUrlParams']);
-          }
-        }
-
-        return batchSegmentsStrs;
       } catch (e) {
         dev().error(TAG,
             `Error: batchPlugin function ${this.batchPluginId_}`, e);
-        return batchSegmentsStrs;
       }
+
+    	return batchSegmentsStrs;
     });
   }
 
