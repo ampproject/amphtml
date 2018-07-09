@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
-  getAmpAdTemplateHelper
+  getAmpAdTemplateHelper,
 } from '../template-validator';
 import {AmpAdTemplate} from '../amp-ad-template';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
@@ -32,7 +31,7 @@ const realWinConfig = {
 
 describes.realWin('TemplateRenderer', realWinConfig, env => {
 
-  const templateUrl = 'http://www.myadservice.com/getAd'
+  const templateUrl = 'http://www.myadservice.com/getAd';
 
   let containerElement;
   let impl;
@@ -63,8 +62,8 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       arrayBuffer: () => Promise.resolve(utf8Encode(JSON.stringify({
         templateUrl,
         data: {
-          url: 'https://www.google.com'
-        }
+          url: 'https://www.google.com',
+        },
       }))),
       headers: {
         get: header => {
@@ -76,8 +75,8 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
             default:
               return null;
           }
-        }
-      }
+        },
+      },
     });
 
     sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
