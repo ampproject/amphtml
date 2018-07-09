@@ -37,15 +37,10 @@ function getGooglePlus(global, cb) {
  * @param {!Object} data
  */
 export function googleplus(global, data) {
-  setStyles(global.document.getElementById('c'), {
-    overflow: 'auto',
-  });
   const post = global.document.createElement('div');
   post.id = 'gp-post';
 
   let internalIframe = null;
-  let heightUpdated = false;
-  const isMutationDone = () => !!internalIframe && heightUpdated;
 
   // DOMNodeLoaded is deprecated; Use observer instead
   let mutObserver = null;
@@ -61,35 +56,57 @@ export function googleplus(global, data) {
             // Use nodeName in case not element
             if (!internalIframe && node.nodeName.toLowerCase() == 'iframe') {
               internalIframe = node;
-              // TODO(kqian): this iframe is not currently used
-              // I can use this iframe to access contentDocument for styling
-              // However, this might not be a good attempt
-              // since we should use messages to communicate with iframe
               break;
             }
           }
         }
-      } else if (mutation.type == 'attributes') {
+      } else if (internalIframe && mutation.type == 'attributes') {
         // gapi will attempt to change height of post
         // after the post is fully prepared
         // capture the attempt and update dimensions
         if (mutation.attributeName == 'style') {
-          const newWidth = getStyle(post, 'width');
-          const newHeight = getStyle(post, 'height');
+          const newWidthString = getStyle(post, 'width');
+          const newHeightString = getStyle(post, 'height');
           // occasionally these are set with '100%'
-          if (newWidth.substr(newWidth.length - 2, 2) == 'px' &&
-              newHeight.substr(newWidth.length - 2, 2) == 'px') {
-            context.updateDimensions(
-                parseInt(newWidth, 10), // auto remove suffix 'px'
-                parseInt(newHeight, 10)
+          if (newWidthString.substr(newWidthString.length - 2, 2) == 'px' &&
+              newHeightString.substr(newWidthString.length - 2, 2) == 'px') {
+
+            mutObserver.disconnect(); // no furthur mutation interesting
+
+            const newWidth = parseInt(newWidthString, 10); // auto remove suffix 'px'
+            const newHeight = parseInt(newHeightString, 10);
+
+            const goalWidth = Math.min(
+                Number(data.windowwidth) || Infinity,
+                data.width,
+                newWidth
             );
-            heightUpdated = true;
+
+            if (newWidth === goalWidth) {
+              context.updateDimensions(
+                  newWidth,
+                  newHeight,
+              );
+            } else {
+              const scalePercentage = goalWidth / newWidth;
+
+              setStyles(internalIframe, {
+                'transform': `scale(${scalePercentage})`,
+                'transform-origin': '0 0', // left top anchor
+              });
+
+              setStyles(post, {
+                width: newWidth * scalePercentage,
+                height: newHeight * scalePercentage,
+              });
+
+              context.updateDimensions(
+                  newWidth * scalePercentage,
+                  newHeight * scalePercentage,
+              );
+            }
           }
         }
-      }
-      if (isMutationDone()) {
-        // Stop listening
-        mutObserver.disconnect();
       }
     }
   };
@@ -98,31 +115,18 @@ export function googleplus(global, data) {
   mutObserver = new MutationObserver(mutCallback);
   mutObserver.observe(post, mutConfig);
 
-  setStyles(post, {
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  });
   global.document.getElementById('c').appendChild(post);
   getGooglePlus(global, function(gapi) {
-    // Dimensions are given by the parent frame.
-    delete data.width;
-    delete data.height;
-
     // non-blocking (actually probably not needed as in iframe)
     // TODO(kqian): I should remove Promise...
     new Promise(resolve => {
-      setStyles(post, {
-        overflow: 'auto',
-      });
       try {
         gapi.post.render(post, {
-          href: `https://plus.google.com/${data.gpid}/posts/${data.postid}`,
+          href: `https://plus.google.com/${data.userid}/posts/${data.postid}`,
         });
         resolve();
       } catch (e) {
-        // Fail silently for now...
+        context.noContentAvailable();
       }
     });
   });

@@ -39,7 +39,7 @@ export class AmpGoogleplus extends AMP.BaseElement {
         'https://apis.google.com/js/platform.js', 'script');
     preloadBootstrap(this.win, this.preconnect);
 
-    // +CustomURL is not supported by gapi
+    // +CustomURL is ACTUALLY supported by gapi
     // To get real user id based on +CustomURL, search at
     // https://developers.google.com/apis-explorer/#p/plus/v1/plus.people.get
   }
@@ -56,6 +56,10 @@ export class AmpGoogleplus extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.element.setAttribute(
+        'data-windowwidth',
+        this.win.document.body.offsetWidth // passes body width for usage
+    );
     const iframe = getIframe(this.win, this.element, 'googleplus', null,
         {allowFullscreen: true});
     this.applyFillContent(iframe);
@@ -64,8 +68,8 @@ export class AmpGoogleplus extends AMP.BaseElement {
       this.togglePlaceholder(false);
       this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
+    // This is nowhere to be called actually...
     listenFor(iframe, 'no-content', () => {
-      console.log('HAPPENED');
       const fallback = this.getFallback();
       if (fallback) {
         // If there is no content, but a fallback is provided.
