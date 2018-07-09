@@ -109,6 +109,13 @@ export class ViewportBindingDef {
   updateLightboxMode(unusedLightboxMode) {}
 
   /**
+   * Returns the Opacity value of the element.
+   * @param {!Element} el
+   * @return {number}
+   */
+  getElementOpacity(el) {}
+
+  /**
    * Returns the size of the viewport.
    * @return {!{width: number, height: number}}
    */

@@ -19,13 +19,13 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
+import {computedStyle, px, resetStyles, setImportantStyles} from '../../src/style';
 import {dev} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../layout-rect';
-import {px, resetStyles, setImportantStyles} from '../../src/style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../../src/utils/rate-limit';
 
@@ -172,6 +172,27 @@ export class ViewportBindingInabox {
             this.fireScrollThrottle_();
           }
         });
+  }
+
+  /** @override */
+  getElementOpacity(el) {
+    const win = window;
+    const fullyVisibleValue = 1;
+    const fullyHiddenValue = 0;
+
+    if (!el) { return fullyVisibleValue; }
+    const {visibility, opacity} = computedStyle(win, el);
+
+    if (visibility === 'hidden') {
+      return fullyHiddenValue;
+    }
+    const opacityValue = (opacity === '')
+      ? fullyVisibleValue
+      : parseFloat(opacity);
+
+    if (isNaN(opacityValue)) { return fullyVisibleValue; }
+
+    return opacityValue;
   }
 
   /** @override */

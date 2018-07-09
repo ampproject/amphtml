@@ -225,15 +225,6 @@ export class Viewport {
     this.binding_.ensureReadyForElements();
   }
 
-  /**
-   * Returns the lowest Opacity css value among the element, element's parents
-   * and element's children.
-   * @return {number}
-   */
-  getOpacity() {
-    return this.opacity_;
-  }
-
   /** @private */
   updateVisibility_() {
     const visible = this.viewer_.isVisible();
@@ -405,7 +396,7 @@ export class Viewport {
 
   /**
   * Returns the node tree of the current element starting from the document root
-  * @param {element} el
+  * @param {!Element|null} el
   * @return {Array} node list of the element's node tree
   */
   getElementNodeTree(el) {
@@ -416,21 +407,22 @@ export class Viewport {
     const DOCUMENT_NODE_TYPE = 9;
     const ELEMENT_WITH_PARENT_TYPE = 1;
     let parent;
-    nodeList.push(el);
+    let element = el;
+    nodeList.push(element);
 
     for (let i = 0; i < CAP; i++) {
 
-      parent = el.parentNode || el.parentElement;
+      parent = element.parentNode || element.parentElement;
 
       if (parent && parent.nodeType == ELEMENT_WITH_PARENT_TYPE) {
-        el = parent;
-        nodeList.push(el);
+        element = parent;
+        nodeList.push(element);
       } else if (parent && parent.nodeType == DOCUMENT_NODE_TYPE) {
-        parent = el.ownerDocument.defaultView.frameElement;
+        parent = element.ownerDocument.defaultView.frameElement;
 
         if (parent && parent.nodeType == ELEMENT_WITH_PARENT_TYPE) {
-          el = parent;
-          nodeList.push(el);
+          element = parent;
+          nodeList.push(element);
         } else { break; }
       } else { break; }
     }
@@ -441,7 +433,7 @@ export class Viewport {
   /**
    * Returns the min opacity found amongst the element, element's children
    * and element's parents
-   * @param {element} el
+   * @param {!Element|null} el
    * @return {number} minimum opacity value
    */
   getOpacity(el) {

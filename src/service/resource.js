@@ -177,6 +177,9 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
+    /** @private {number} */
+    this.opacity_ = 1;
+
     /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
@@ -577,6 +580,7 @@ export class Resource {
   /**
     * Returns the min opacity among the element, element's parents and
     * element's children
+    * @return {number}
     */
   getOpacity() {
     return this.opacity_;
