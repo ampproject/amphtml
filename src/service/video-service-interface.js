@@ -34,14 +34,6 @@ export class VideoServiceInterface {
   getAnalyticsDetails(unusedVideo) {}
 
   /**
-   * Delegates autoplay.
-   * @param {!AmpElement} unusedVideo
-   * @param {?../observable.Observable<boolean>=} opt_unusedObservable
-   *    If provided, video will be played or paused when this observable fires.
-   */
-  delegateAutoplay(unusedVideo, opt_unusedObservable) {}
-
-  /**
    * @param {!../video-interface.VideoInterface} unusedVideo
    * @return {boolean}
    */
@@ -58,4 +50,5 @@ export class VideoServiceInterface {
 /** @enum {string} */
 export const VideoServiceSignals = {
   USER_INTERACTED: 'user-interacted',
+  AUTOPLAY_DELEGATED: 'autoplay-delegated',
 };

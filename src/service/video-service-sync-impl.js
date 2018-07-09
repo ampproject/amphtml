@@ -15,9 +15,9 @@
  */
 
 import {Autoplay, AutoplayEvents} from './video/autoplay';
-import {Deferred} from '../utils/promise';
 import {PlayingStates, VideoAttributes, VideoEvents} from '../video-interface';
 import {Services} from '../services';
+import {VideoServiceSignals} from './video-service-interface';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
@@ -86,18 +86,18 @@ export class VideoServiceSync {
    * @return {!Promise<!VideoServiceDef>}
    * @visibleForTesting
    */
-  // Not exposed in ../services.js since we don't want other modules to
-  // instantiate or access the service.
   static videoServiceFor(win, nodeOrDoc) {
+    // Not exposed in ../services.js since we don't want other modules to
+    // instantiate or access the service.
     const extensions = Services.extensionsFor(win);
     const ampdoc = getAmpdoc(nodeOrDoc);
     return extensions.installExtensionForDoc(ampdoc, EXTENSION)
         .then(() => /** @type {!Promise<!VideoServiceDef>} */ (
-          getElementServiceForDoc(nodeOrDoc, 'video-service', EXTENSION)));
+          getElementServiceForDoc(ampdoc, 'video-service', EXTENSION)));
   }
 
   /** @override */
-  register(video, unusedFromV1manageAutoplay = true) {
+  register(video) {
     this.asyncImpl_.then(impl =>
       impl.register(video));
 
@@ -114,18 +114,20 @@ export class VideoServiceSync {
     if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
       return;
     }
+
     this.getAutoplay_().register(video);
+
+    const autoplayDelegated = VideoServiceSignals.AUTOPLAY_DELEGATED;
+    video.signals().whenSignal(autoplayDelegated).then(() => {
+      this.getAutoplay_().delegate(video.element);
+    });
   }
 
-  /** @override */
-  delegateAutoplay(video, optObservable = null) {
-    // TODO(alanorozco): Make observable required once implementation of
-    // `VideoService` finalizes.
-    if (optObservable == null) {
-      dev().assert(false, 'Autoplay delegation requires an observable.');
-      return;
-    }
-    this.getAutoplay_().delegate(video, optObservable);
+  /**
+   * @param {!AmpElement|!../base-element.BaseElement} video
+   */
+  static delegateAutoplay(video) {
+    video.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
   }
 
   /** @override */

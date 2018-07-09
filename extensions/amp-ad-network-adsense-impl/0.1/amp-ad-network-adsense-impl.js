@@ -57,15 +57,12 @@ import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {getMode} from '../../../src/mode';
 import {
-  googleLifecycleReporterFactory,
-  setGoogleLifecycleVarsFromHeaders,
-} from '../../../ads/google/a4a/google-data-reporter';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
+  getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
@@ -87,6 +84,26 @@ export function resetSharedState() {
   sharedState.reset();
 }
 
+/**
+ * Mapping of experiment id to viewport offsets by which ad request should
+ * be delayed.
+ * @type {!Object<string, number>}
+ * @visibleForTesting
+ */
+export const DELAY_REQUEST_EXP_BRANCHES = {
+  '21062224': true, // control, delay by renderOutsideViewport
+  '21062225': 3,
+  '21062226': 4,
+  '21062227': 6,
+  '21062228': 12,
+};
+
+/** @type {string} @visibleForTesting */
+export const DELAY_REQUEST_EXP = 'adsense-delay-request';
+
+/** @type {string} */
+const FORMAT_EXP = 'as-use-attr-for-format';
+
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
@@ -95,12 +112,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-
-    /**
-     * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
-     */
-    this.lifecycleReporter_ = this.lifecycleReporter_ ||
-        this.initLifecycleReporter();
 
     /**
      * A unique identifier for this slot.
@@ -203,7 +214,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return true;
+    return DELAY_REQUEST_EXP_BRANCHES[
+        getExperimentBranch(this.win, DELAY_REQUEST_EXP) || ''] || true;
   }
 
   /** @override */
@@ -225,6 +237,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
               viewportSize),
           viewportSize.width).catch(() => {});
     }
+    // This should happen last, as some diversion criteria rely on some of the
+    // preceding logic (specifically responsive logic).
+    this.divertExperiments();
   }
 
   /** @override */
@@ -232,6 +247,30 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Ensure that build is not blocked by need for consent (delay will occur
     // prior to ad URL construction).
     return null;
+  }
+
+  /**
+   * Selects into experiments based on url fragment and/or page level diversion.
+   * @visibleForTesting
+   */
+  divertExperiments() {
+    const experimentInfoMap =
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+        [FORMAT_EXP]: {
+          isTrafficEligible: () => !this.isResponsive_() &&
+            Number(this.element.getAttribute('width')) > 0 &&
+            Number(this.element.getAttribute('height')) > 0,
+          branches: ['21062003', '21062004'],
+        },
+        [DELAY_REQUEST_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.keys(DELAY_REQUEST_EXP_BRANCHES),
+        },
+      });
+    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    Object.keys(setExps).forEach(expName =>
+      addExperimentIdToElement(setExps[expName], this.element));
   }
 
   /** @override */
@@ -256,23 +295,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
 
-    const adsenseFormatExpName = 'as-use-attr-for-format';
-    const experimentInfoMap =
-        /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({});
-    experimentInfoMap[adsenseFormatExpName] = {
-      isTrafficEligible: () => !this.isResponsive_() &&
-        !isNaN(width) && width > 0 &&
-        !isNaN(height) && height > 0,
-      branches: ['21062003', '21062004'],
-    };
-
-    const adsenseFormatExpId =
-        randomlySelectUnsetExperiments(
-            this.win, experimentInfoMap)[adsenseFormatExpName];
-    addExperimentIdToElement(adsenseFormatExpId, this.element);
-
-    this.size_ = adsenseFormatExpId == '21062004'
+    this.size_ = getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
       ? {width, height}
       : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
@@ -361,7 +384,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   extractSize(responseHeaders) {
-    setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
@@ -402,21 +424,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  emitLifecycleEvent(eventName, opt_extraVariables) {
-    if (opt_extraVariables) {
-      this.lifecycleReporter_.setPingParameters(opt_extraVariables);
-    }
-    this.lifecycleReporter_.sendPing(eventName);
-  }
-
-  /**
-   * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
-   */
-  initLifecycleReporter() {
-    return googleLifecycleReporterFactory(this);
-  }
-
-  /** @override */
   isXhrAllowed() {
     return isCdnProxy(this.win) || getMode(this.win).localDev ||
         getMode(this.win).test;
@@ -442,16 +449,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             this.element,
             this.ampAnalyticsConfig_,
             this.qqid_,
-            !!creativeMetaData,
-            this.lifecycleReporter_.getDeltaTime(),
-            this.lifecycleReporter_.getInitTime());
+            !!creativeMetaData);
       }
       this.ampAnalyticsElement_ = insertAnalyticsElement(
           this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
           !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
-
-    this.lifecycleReporter_.addPingsForVisibility(this.element);
 
     setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,
@@ -483,7 +486,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const superResult = super.unlayoutCallback();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
-    this.lifecycleReporter_ = this.initLifecycleReporter();
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
@@ -509,8 +511,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run({
         measure: state => {
+          // Check the parent element because amp-ad is explicitly styled to
+          // have direction: ltr.
           state.direction =
-            computedStyle(this.win, this.element)['direction'];
+            computedStyle(this.win,
+                dev().assertElement(this.element.parentElement))['direction'];
         },
         mutate: state => {
           if (state.direction == 'rtl') {

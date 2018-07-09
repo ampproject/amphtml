@@ -162,16 +162,15 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const ampDoc = this.getAmpDoc();
     const consentPolicyId = super.getConsentPolicy();
     const consentPromise = consentPolicyId
-      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      ? getConsentPolicyState(ampDoc, consentPolicyId)
       : Promise.resolve(null);
     return consentPromise.then(initialConsentState => {
       const {element, win} = this;
       const iframe = getIframe(win, element, 'ima-video',
-          {initialConsentState});
-
-      iframe.setAttribute('allowfullscreen', 'true');
+          {initialConsentState}, {allowFullscreen: true});
 
       this.applyFillContent(iframe);
 
@@ -187,7 +186,7 @@ class AmpImaVideo extends AMP.BaseElement {
       element.appendChild(iframe);
 
       installVideoManagerForDoc(element);
-      Services.videoManagerForDoc(this.win.document).register(this);
+      Services.videoManagerForDoc(ampDoc).register(this);
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });

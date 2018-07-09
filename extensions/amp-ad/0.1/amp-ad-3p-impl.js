@@ -43,9 +43,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe} from '../../../src/3p-frame';
-import {
-  googleLifecycleReporterFactory,
-} from '../../../ads/google/a4a/google-data-reporter';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {preloadBootstrap} from '../../../src/3p-frame';
@@ -123,9 +120,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Promise} */
     this.layoutPromise_ = null;
 
-    /** @type {!../../../ads/google/a4a/performance.BaseLifecycleReporter} */
-    this.lifecycleReporter = googleLifecycleReporterFactory(this);
-
     /** @private {string|undefined} */
     this.type_ = undefined;
 
@@ -151,6 +145,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
+  /** @override */
   renderOutsideViewport() {
     if (is3pThrottled(this.win)) {
       return false;
@@ -192,9 +187,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.type_ = this.element.getAttribute('type');
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
     dev().info(TAG_3P_IMPL, `upgradeDelay ${this.type_}: ${upgradeDelayMs}`);
-    this.emitLifecycleEvent('upgradeDelay', {
-      'forced_delta': upgradeDelayMs,
-    });
 
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
@@ -337,7 +329,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
-    this.emitLifecycleEvent('preAdThrottle');
     user().assert(!this.isInFixedContainer_,
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
@@ -361,10 +352,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // because both happen inside a cross-domain iframe.  Separating them
       // here, though, allows us to measure the impact of ad throttling via
       // incrementLoadingAds().
-      this.emitLifecycleEvent('adRequestStart');
       const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
           this.element, this.type_, opt_context,
-          this.config.remoteHTMLDisabled);
+          {disallowCustom: this.config.remoteHTMLDisabled});
       this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(
           this);
       return this.xOriginIframeHandler_.init(iframe);
@@ -391,7 +381,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
-    this.emitLifecycleEvent('adSlotCleared');
     return true;
   }
 
@@ -408,24 +397,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return consentPolicyId
       ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
       : Promise.resolve(null);
-  }
-
-  /**
-   * Send a lifecycle event notification.  Currently, this is active only for
-   * Google network ad tags (type=adsense or type=doubleclick) and pings are
-   * done via direct image tags.  In the future, this will become an event
-   * notification to amp-analytics, and providers will be able to configure
-   * their own destinations and mechanisms for notifications.
-   *
-   * @param {string} eventName  Name of the event to send.
-   * @param {!Object<string, string|number>=} opt_extraVariables  Additional
-   *   variables to make available for substitution on the event notification.
-   */
-  emitLifecycleEvent(eventName, opt_extraVariables) {
-    if (opt_extraVariables) {
-      this.lifecycleReporter.setPingParameters(opt_extraVariables);
-    }
-    this.lifecycleReporter.sendPing(eventName);
   }
 
   /**

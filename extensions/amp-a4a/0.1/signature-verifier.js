@@ -165,11 +165,9 @@ export class SignatureVerifier {
    *
    * @param {!ArrayBuffer} creative
    * @param {!Headers} headers
-   * @param {function(string, !Object)} lifecycleCallback called for each AMP
-   *     lifecycle event triggered during verification
    * @return {!Promise<!VerificationStatus>}
    */
-  verify(creative, headers, lifecycleCallback) {
+  verify(creative, headers) {
     const signatureFormat =
         /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
     if (!headers.has(AMP_SIGNATURE_HEADER)) {
@@ -184,8 +182,7 @@ export class SignatureVerifier {
       return Promise.resolve(VerificationStatus.ERROR_SIGNATURE_MISMATCH);
     }
     return this.verifyCreativeAndSignature(
-        match[1], match[2], base64DecodeToBytes(match[3]), creative,
-        lifecycleCallback);
+        match[1], match[2], base64DecodeToBytes(match[3]), creative);
   }
 
   /**
@@ -206,13 +203,11 @@ export class SignatureVerifier {
    * @param {string} keypairId
    * @param {!Uint8Array} signature
    * @param {!ArrayBuffer} creative
-   * @param {function(string, !Object)} lifecycleCallback called for each AMP
-   *     lifecycle event triggered during verification
    * @return {!Promise<!VerificationStatus>}
    * @visibleForTesting
    */
   verifyCreativeAndSignature(
-    signingServiceName, keypairId, signature, creative, lifecycleCallback) {
+    signingServiceName, keypairId, signature, creative) {
     if (!this.signers_) {
       // Web Cryptography isn't available.
       return Promise.resolve(VerificationStatus.CRYPTO_UNAVAILABLE);
@@ -243,8 +238,7 @@ export class SignatureVerifier {
                 });
         // This "recursive" call can recurse at most once.
         return this.verifyCreativeAndSignature(
-            signingServiceName, keypairId, signature, creative,
-            lifecycleCallback);
+            signingServiceName, keypairId, signature, creative);
       } else if (keyPromise === null) {
         // We don't have this key and we already tried cachebusting.
         return VerificationStatus.ERROR_KEY_NOT_FOUND;
@@ -256,22 +250,9 @@ export class SignatureVerifier {
             return VerificationStatus.UNVERIFIED;
           }
           const crypto = Services.cryptoFor(this.win_);
-          const startTime = this.getNow_();
           return crypto.verifyPkcs(key, signature, creative).then(
-              result => {
-                const endTime = this.getNow_();
-                if (result) {
-                  lifecycleCallback('signatureVerifySuccess', {
-                    'met.delta.AD_SLOT_ID': endTime - startTime,
-                    'signingServiceName.AD_SLOT_ID': signingServiceName,
-                  });
-                  return VerificationStatus.OK;
-                } else {
-                  // TODO(@taymonbeal, #11090): figure out whether an additional
-                  // CSI ping is needed here
-                  return VerificationStatus.ERROR_SIGNATURE_MISMATCH;
-                }
-              },
+              result => result ? VerificationStatus.OK :
+                VerificationStatus.ERROR_SIGNATURE_MISMATCH,
               err => {
                 // Web Cryptography rejected the verification attempt. This
                 // hopefully won't happen in the wild, but browsers can be weird

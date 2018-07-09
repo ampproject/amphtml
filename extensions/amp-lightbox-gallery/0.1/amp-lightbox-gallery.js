@@ -316,11 +316,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }]`);
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
-      return this.carousel_.getImpl().then(impl => {
-        return this.mutateElement(() => {
-          this.toggleNavControls_(impl.noOfSlides_);
-          toggle(dev().assertElement(this.carousel_), true);
-        });
+      return this.mutateElement(() => {
+        const numSlides = this.elementsMetadata_[lightboxGroupId].length;
+        this.toggleNavControls_(numSlides);
+        toggle(dev().assertElement(this.carousel_), true);
       });
     } else {
       return this.buildCarousel_(lightboxGroupId);
@@ -695,6 +694,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Pauses lightbox childred.
+   */
   pauseLightboxChildren_() {
     const lbgId = this.currentLightboxGroupId_;
     const slides = this.elementsMetadata_[lbgId]
@@ -1018,8 +1020,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  // TODO (cathyxz): make this generalizable to more than just images
-  enter_() {
+  enter_() { // TODO (cathyxz): make this generalizable to more than just images
     const {sourceElement} = this.getCurrentElement_();
     if (!this.elementTypeCanBeAnimated_(sourceElement)) {
       return this.fade_(0, 1);
@@ -1522,7 +1523,7 @@ export function installLightboxManager(win) {
  * @param {!Window} win
  * @return {!Promise}
  */
-function installLightboxGallery(win) {
+export function installLightboxGallery(win) {
   const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
   // TODO (#12859): make this work for more than singleDoc mode
   return ampdoc.whenBodyAvailable().then(body => {

@@ -18,9 +18,10 @@ import * as config from './config';
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
+import {LogLevel, overrideLogLevel} from './log'; // eslint-disable-line no-unused-vars
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {childElementsByTag} from './dom';
+import {childElementsByTag, isConnectedNode} from './dom';
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -212,12 +213,18 @@ function adoptShared(global, callback) {
    * @return {boolean}
    */
   global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
+
   /**
    * @param {string} experimentId
    * @param {boolean=} opt_on
    * @return {boolean}
    */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
+
+  /**
+   * @param {!LogLevel} level
+   */
+  global.AMP.setLogLevel = overrideLogLevel.bind(null);
 
   /**
    * Sets the function to forward tick events to.
@@ -826,7 +833,7 @@ export class MultidocManager {
   purgeShadowRoots_() {
     this.shadowRoots_.forEach(shadowRoot => {
       // The shadow root has been disconnected. Force it closed.
-      if (!this.win.document.contains(shadowRoot.host)) {
+      if (!shadowRoot.host || !isConnectedNode(shadowRoot.host)) {
         user().warn(TAG, 'Shadow doc wasn\'t previously closed');
         this.removeShadowRoot_(shadowRoot);
         this.closeShadowRootAsync_(shadowRoot);

@@ -26,6 +26,8 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
+  DELAY_REQUEST_EXP,
+  DELAY_REQUEST_EXP_BRANCHES,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
@@ -42,6 +44,7 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -227,6 +230,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
+      impl.getA4aAnalyticsConfig = () => {};
+      impl.buildCallback();
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
     });
@@ -477,6 +482,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('has correct format when as-use-attr-for-format is on', () => {
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+      impl.divertExperiments();
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       return impl.getAdUrl().then(url =>
@@ -486,11 +492,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('has experiment eid in adsense frmt exp and width/height numeric',
         () => {
           forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+          impl.divertExperiments();
           return impl.getAdUrl().then(
               url => expect(url).to.match(/eid=[^&]*21062004/));
         });
     it('has control eid in adsense frmt exp and width/height numeric', () => {
       forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
+      impl.divertExperiments();
       return impl.getAdUrl().then(
           url => expect(url).to.match(/eid=[^&]*21062003/));
     });
@@ -498,6 +506,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
           AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+      impl.divertExperiments();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(new RegExp(
             `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.CONTROL}`));
@@ -791,46 +800,55 @@ describes.realWin('amp-ad-network-adsense-impl', {
     let iframe;
 
     function constructImpl(config) {
-      iframe = env.win.document.createElement('iframe');
-
       config.type = 'adsense';
       element = createElementWithAttributes(doc, 'amp-ad', config);
+      iframe = env.win.document.createElement('iframe');
       element.appendChild(iframe);
-      document.body.appendChild(element);
-      impl = new AmpAdNetworkAdsenseImpl(element);
+      doc.body.appendChild(element);
+      const impl = new AmpAdNetworkAdsenseImpl(element);
       impl.element.style.display = 'block';
       impl.element.style.position = 'relative';
       impl.element.style.top = '101vh';
-
       // Fix the viewport to a consistent size to that the test doesn't depend
       // on the actual browser window opened.
       impl.getViewport().getSize =
           () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+      return impl;
     }
 
     it('should do nothing for non-responsive', () => {
-      constructImpl({
+      const adsense = constructImpl({
         width: '320',
         height: '150',
       });
-      expect(impl.buildCallback()).to.be.undefined;
+      expect(adsense.buildCallback()).to.be.undefined;
     });
 
-    it('should schedule a resize for responsive', () => {
-      constructImpl({
+    it('should schedule a resize for responsive', function *() {
+      const adsense = constructImpl({
         width: '100vw',
         height: '100',
         'data-auto-format': 'rspv',
       });
+      env.sandbox.stub(adsense, 'attemptChangeSize').returns(Promise.resolve());
 
-      const callback = impl.buildCallback();
-      expect(callback).to.exist;
+      const promise = adsense.buildCallback();
+      expect(promise).to.exist;
+      yield promise;
 
-      // The returned promise fails for some reason.
-      return callback.then(() => {
-        expect(element.offsetHeight).to.equal(300);
-        expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+      expect(adsense.attemptChangeSize).to.be.calledWith(300, VIEWPORT_WIDTH);
+    });
+
+    it('should call divertExperiments after isResponsive', () => {
+      const adsense = constructImpl({
+        width: '320',
+        height: '150',
       });
+      const isResponsiveSpy = env.sandbox.spy(adsense, 'isResponsive_');
+      const divertExperimentsSpy = env.sandbox.spy(
+          adsense, 'divertExperiments');
+      adsense.buildCallback();
+      expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
     });
   });
 
@@ -959,9 +977,24 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    it('should return true', () => {
-      expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
-          .to.be.true;
+    it('should return true', () =>
+      expect(impl.delayAdRequestEnabled()).to.be.true);
+
+    it('should set experiment when diverted', () => {
+      toggleExperiment(impl.win, DELAY_REQUEST_EXP, true);
+      impl.divertExperiments();
+      let inExp;
+      Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(exp =>
+        inExp = inExp || isInExperiment(impl.element, exp));
+      expect(inExp).to.be.true;
+    });
+    Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(expId => {
+      it(`should return ${DELAY_REQUEST_EXP_BRANCHES[expId]} for ${expId}`,
+          () => {
+            forceExperimentBranch(impl.win, DELAY_REQUEST_EXP, expId);
+            expect(impl.delayAdRequestEnabled()).to.equal(
+                DELAY_REQUEST_EXP_BRANCHES[expId]);
+          });
     });
   });
 

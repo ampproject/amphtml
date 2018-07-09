@@ -39,7 +39,8 @@
     "jsdoc": {
       "tagNamePreference": {
         "returns": "return",
-        "constant": "const"
+        "constant": "const",
+        "class": "constructor"
       },
       "additionalTagNames": {
         "customTags": [
@@ -88,13 +89,13 @@
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
     "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
-    "jsdoc/check-param-names": 1,
-    "jsdoc/check-tag-names": 1,
-    "jsdoc/check-types": 1,
-    "jsdoc/require-param": 1,
-    "jsdoc/require-param-name": 1,
-    "jsdoc/require-param-type": 1,
-    "jsdoc/require-returns-type": 1,
+    "jsdoc/check-param-names": 2,
+    "jsdoc/check-tag-names": 2,
+    "jsdoc/check-types": 2,
+    "jsdoc/require-param": 2,
+    "jsdoc/require-param-name": 2,
+    "jsdoc/require-param-type": 2,
+    "jsdoc/require-returns-type": 2,
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
       "ignoreTrailingComments": true,
@@ -115,6 +116,7 @@
     "no-implied-eval": 2,
     "no-iterator": 2,
     "no-lone-blocks": 2,
+    "no-mixed-operators": 1,
     "no-multi-spaces": 2,
     "no-native-reassign": 2,
     "no-redeclare": 2,
@@ -142,6 +144,15 @@
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
+    "require-jsdoc": [2, {
+      "require": {
+        "FunctionDeclaration": true,
+        "MethodDefinition": true,
+        "ClassDeclaration": false,
+        "ArrowFunctionExpression": false,
+        "FunctionExpression": false
+      }
+    }],
     "semi": 2,
     "keyword-spacing": [2, { "before": true, "after": true }],
     "sort-imports-es6-autofix/sort-imports-es6": [2, {
@@ -156,5 +167,20 @@
     "space-infix-ops": 2,
     "space-unary-ops": [1, { "words": true, "nonwords": false }],
     "wrap-iife": [2, "any"]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.js", "extensions/**/test/**/*.js", "ads/**/test/**/*.js", "testing/**/*.js"],
+      "rules": {
+        "require-jsdoc": 0,
+        "jsdoc/check-param-names": 0,
+        "jsdoc/check-tag-names": 0,
+        "jsdoc/check-types": 0,
+        "jsdoc/require-param": 0,
+        "jsdoc/require-param-name": 0,
+        "jsdoc/require-param-type": 0,
+        "jsdoc/require-returns-type": 0
+      }
+    }
+  ]
 }

@@ -26,15 +26,21 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
+import {computedStyle} from '../../../src/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent, isRTL, iterateCursor} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
+import {
+  escapeCssSelectorIdent,
+  isRTL,
+  iterateCursor,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
+import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
 
 
@@ -158,7 +164,23 @@ const DatePickerEvent = {
  * The size in PX of each calendar day. This value allows the date picker to
  * fit within a 320px wide viewport when fully rendered.
  */
-const DEFAULT_DATE_SIZE = 39;
+const DEFAULT_DAY_SIZE = 39;
+
+/**
+ * This is related to a bug in preact-compat impacting 'react-dates' rendering.
+ * NOTE: If this is updated, make sure to change .DayPicker_tranitionContainer
+ * min-height in amp-date-picker.css
+ * TODO(cvializ): remove this when #13897 is fixed.
+ */
+const DEFAULT_TRANSITION_CONTAINER_MIN_HEIGHT = '354px';
+
+/**
+ * TODO(cvializ): remove this when #13897 is fixed.
+ */
+const RESIZE_BUG_CSS = 'amp-date-picker-resize-bug';
+
+const TRANSITION_CONTAINER_SELECTOR =
+    `.${RESIZE_BUG_CSS} .DayPicker_transitionContainer`;
 
 const DEFAULT_FIRST_DAY_OF_WEEK = 0; // Sunday
 
@@ -238,7 +260,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.daySize_ =
-        Number(this.element.getAttribute('day-size')) || DEFAULT_DATE_SIZE;
+        Number(this.element.getAttribute('day-size')) || DEFAULT_DAY_SIZE;
 
     const blocked = this.element.getAttribute('blocked');
     /** @private @const */
@@ -253,7 +275,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private @const */
     this.container_ = this.document_.createElement('div');
     this.container_.classList.add(
-        CALENDAR_CONTAINER_CSS, PRIVATE_CALENDAR_CONTAINER_CSS);
+        CALENDAR_CONTAINER_CSS, PRIVATE_CALENDAR_CONTAINER_CSS, RESIZE_BUG_CSS);
 
     /** @private @const */
     this.type_ = this.element.getAttribute('type') || DatePickerType.SINGLE;
@@ -345,13 +367,17 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private {?Object} */
     this.state_ = null;
+
+    /** @private @const */
+    this.warnDaySizeOnce_ =
+        once(this.warnDaySize_.bind(this));
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return this.mode_ == DatePickerMode.STATIC ?
       isLayoutSizeDefined(layout) :
-      Layout.CONTAINER;
+      layout == Layout.CONTAINER;
   }
 
   /** @override */
@@ -446,9 +472,6 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} is disabled.`);
-
     this.action_ = Services.actionServiceForDoc(this.element);
 
     this.isRTL_ = isRTL(this.win.document);
@@ -476,12 +499,18 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     this.registerAction('setDate',
-        invocation => this.handleSetDate_(invocation.args['date']));
+        invocation => this.handleSetDateFromString_(invocation.args['date']));
     this.registerAction('setDates',
-        invocation => this.handleSetDates_(
+        invocation => this.handleSetDatesFromString_(
             invocation.args['startDate'],
             invocation.args['endDate']));
     this.registerAction('clear', () => this.handleClear_());
+    this.registerAction('today',
+        this.todayAction_.bind(this, d => this.handleSetDate_(d)));
+    this.registerAction('startToday',
+        this.todayAction_.bind(this, d => this.handleSetDates_(d, null)));
+    this.registerAction('endToday',
+        this.todayAction_.bind(this, d => this.handleSetDates_(null, d)));
 
     return this.mutateElement(() => {
       // NOTE(cvializ): There is no standard date format for just the first
@@ -500,14 +529,76 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Set the date via AMP action
+   * Trigger an action that consumes the current day plus an offset
+   * @param {function(!moment)} cb
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  todayAction_(cb, invocation) {
+    const moment = this.moment_();
+    const offset = invocation.args && invocation.args['offset'];
+    if (offset) {
+      moment.add(offset, 'days');
+    }
+    cb(moment);
+  }
+
+  /**
+   * Set the date via a string.
    * @param {string} date
    */
-  handleSetDate_(date) {
+  handleSetDateFromString_(date) {
     const momentDate = this.createMoment_(date);
-    this.setState_({date: momentDate});
-    this.updateDateField_(this.dateField_, momentDate);
-    this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(momentDate));
+    return this.handleSetDate_(momentDate);
+  }
+
+  /**
+   * Set the date via a moment object.
+   * @param {moment} date
+   */
+  handleSetDate_(date) {
+    this.setState_({date});
+    this.updateDateField_(this.dateField_, date);
+    this.element.setAttribute('date', this.getFormattedDate_(date));
+    this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(date));
+  }
+
+  /**
+   *
+   * @param {?string} startDate
+   * @param {?string} endDate
+   */
+  handleSetDatesFromString_(startDate, endDate) {
+    const momentStart = startDate ? this.createMoment_(startDate) : null;
+    const momentEnd = endDate ? this.createMoment_(endDate) : null;
+    this.handleSetDates_(momentStart, momentEnd);
+  }
+
+  /**
+   * Set one, both, or neither date via AMP action.
+   * @param {?moment} startDate
+   * @param {?moment} endDate
+   */
+  handleSetDates_(startDate, endDate) {
+    const state = {};
+
+    if (startDate) {
+      state.startDate = startDate;
+      this.element.setAttribute(
+          'start-date', this.getFormattedDate_(startDate));
+      this.updateDateField_(this.startDateField_, startDate);
+    }
+    if (endDate) {
+      state.endDate = endDate;
+      this.element.setAttribute('end-date', this.getFormattedDate_(endDate));
+      this.updateDateField_(this.endDateField_, endDate);
+    }
+
+    // TODO(cvializ): check if valid date, blocked, outside range, etc
+    this.setState_(state);
+    if (startDate && endDate) {
+      const selectData = this.getSelectData_(startDate, endDate);
+      this.triggerEvent_(DatePickerEvent.SELECT, selectData);
+    }
   }
 
   /**
@@ -525,34 +616,6 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Set one, both, or neither date via AMP action.
-   * @param {?string} startDate
-   * @param {?string} endDate
-   */
-  handleSetDates_(startDate, endDate) {
-    const state = {};
-    let momentStart, momentEnd;
-
-    if (startDate) {
-      momentStart = this.createMoment_(startDate);
-      state.startDate = momentStart;
-      this.updateDateField_(this.startDateField_, momentStart);
-    }
-    if (endDate) {
-      momentEnd = this.createMoment_(endDate);
-      this.updateDateField_(this.endDateField_, momentEnd);
-      state.endDate = momentEnd;
-    }
-
-    // TODO(cvializ): check if valid date, blocked, outside range, etc
-    this.setState_(state);
-    if (momentStart && momentEnd) {
-      const selectData = this.getSelectData_(momentStart, momentEnd);
-      this.triggerEvent_(DatePickerEvent.SELECT, selectData);
-    }
-  }
-
-  /**
    * Clear the values from the input fields and
    * trigger events with the empty values.
    */
@@ -561,6 +624,9 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.clearDateField_(this.dateField_);
     this.clearDateField_(this.startDateField_);
     this.clearDateField_(this.endDateField_);
+    this.element.removeAttribute('date');
+    this.element.removeAttribute('start-date');
+    this.element.removeAttribute('end-date');
     this.triggerEvent_(DatePickerEvent.SELECT, null);
 
     this.setState_({focusedInput: this.ReactDatesConstants_.START_DATE});
@@ -703,7 +769,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   handleClick_(e) {
     const target = dev().assertElement(e.target);
     const clickWasInDatePicker = (
-      this.element.contains(target) || this.isDateField_(target)
+      this.container_.contains(target) || this.isDateField_(target)
     );
 
     if (!clickWasInDatePicker) {
@@ -891,18 +957,11 @@ export class AmpDatePicker extends AMP.BaseElement {
       const endDate = shouldSetEndDate ? json['endDate'] : null;
 
       if (date) {
-        this.handleSetDate_(date);
+        this.handleSetDateFromString_(date);
       }
-
       if (startDate || endDate) {
-        this.handleSetDates_(startDate, endDate);
+        this.handleSetDatesFromString_(startDate, endDate);
       }
-
-      this.setState_({
-        date: this.createMoment_(date),
-        startDate: this.createMoment_(startDate),
-        endDate: this.createMoment_(endDate),
-      });
     });
   }
 
@@ -1054,7 +1113,9 @@ export class AmpDatePicker extends AMP.BaseElement {
       isFocused: this.mode_ == DatePickerMode.STATIC || !isFinalSelection,
     });
     this.updateDateField_(this.startDateField_, startDate);
+    this.element.setAttribute('start-date', this.getFormattedDate_(startDate));
     this.updateDateField_(this.endDateField_, endDate);
+    this.element.setAttribute('end-date', this.getFormattedDate_(endDate));
 
     if (isFinalSelection &&
         startDate &&
@@ -1072,6 +1133,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(date));
     this.setState_({date});
     this.updateDateField_(this.dateField_, date);
+    this.element.setAttribute('date', this.getFormattedDate_(date));
 
     if (!this.props_.keepOpenOnDateSelect) {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
@@ -1468,6 +1530,31 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
+   * If the author changed the "day-size" attribute, warn them about the
+   * resize bug and give a workaround for it.
+   * Should only be called from within a `measureElement` block
+   * @param {!Element} container
+   */
+  warnDaySize_(container) {
+    if (this.daySize_ !== DEFAULT_DAY_SIZE) {
+      // Check to see if the publisher has fixed the bug by updating the height
+      const {minHeight} = computedStyle(this.win, container);
+      if (minHeight === DEFAULT_TRANSITION_CONTAINER_MIN_HEIGHT) {
+        user().warn(TAG,
+            this.element,
+            'The "day-size" attribute is changed from the default value ' +
+            `"${DEFAULT_DAY_SIZE}". You must specify a new "min-height" ` +
+            `for the "${TRANSITION_CONTAINER_SELECTOR}" element in your ` +
+            'AMP CSS.\n' +
+            'This is necessary due to a bug in the date-picker library. ' +
+            `When the bug is fixed, the "${RESIZE_BUG_CSS}" CSS class ` +
+            'will be removed.\n' +
+            'See https://github.com/ampproject/amphtml/issues/13897');
+      }
+    }
+  }
+
+  /**
    * Render the configured date picker component.
    * @param {?Object=} opt_additionalProps
    * @return {!Promise}
@@ -1479,10 +1566,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       if (Picker) {
-        // TODO(cvializ): When rendered with React, the picker expands to fit
-        // the number of weeks for that month. When rendered with Preact, the
-        // picker expands 1 behind where it should for the number of weeks in
-        // the month. Fix this.
+        // TODO(cvializ, #13897):
+        // When rendered with React, the picker expands to fit
+        // the number of weeks for that month. When rendered with preact-compat,
+        // the picker expands 1 behind where it should for the number of weeks
+        // in the month.
         this.reactRender_(
             this.react_.createElement(Picker, Object.assign({}, {
               date: props.date,
@@ -1506,6 +1594,23 @@ export class AmpDatePicker extends AMP.BaseElement {
       } else {
         this.reactRender_(null, this.container_);
       }
+    }).then(() => {
+      this.measureElement(() => {
+        const transitionContainer =
+            scopedQuerySelector(this.element, TRANSITION_CONTAINER_SELECTOR);
+        if (transitionContainer) {
+          this.warnDaySizeOnce_(transitionContainer);
+        }
+
+        if (this.mode_ === DatePickerMode.STATIC) {
+          const scrollHeight = this.container_./*OK*/scrollHeight;
+          const height = this.element./*OK*/offsetHeight;
+          if (scrollHeight > height) {
+            // Add 1px to allow the bottom border to show
+            this./*OK*/changeHeight(scrollHeight + 1);
+          }
+        }
+      });
     });
   }
 }

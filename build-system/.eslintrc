@@ -6,5 +6,9 @@
     "require": false,
     "process": false,
     "exports": false
+  },
+  "rules": {
+    "amphtml-internal/no-for-of-statement": 0,
+    "require-jsdoc": 0
   }
 }

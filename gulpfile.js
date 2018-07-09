@@ -37,6 +37,8 @@ const watchify = require('watchify');
 const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
+const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
+const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
 const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
@@ -61,160 +63,10 @@ const minified3pTarget = 'dist.3p/current-min/f.js';
 const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
-// Each extension and version must be listed individually here.
-declareExtension('amp-3d-gltf', '0.1');
-declareExtension('amp-3q-player', '0.1');
-declareExtension('amp-access', '0.1', {hasCss: true});
-declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
-declareExtension('amp-access-laterpay', '0.2', {hasCss: true});
-declareExtension('amp-access-scroll', '0.1', {hasCss: true});
-declareExtension('amp-accordion', '0.1');
-declareExtension('amp-ad', '0.1', {hasCss: true});
-declareExtension('amp-ad-network-adsense-impl', 0.1);
-declareExtension('amp-ad-network-adzerk-impl', 0.1);
-declareExtension('amp-ad-network-doubleclick-impl', 0.1);
-declareExtension('amp-ad-network-fake-impl', 0.1);
-declareExtension('amp-ad-network-triplelift-impl', 0.1);
-declareExtension('amp-ad-network-cloudflare-impl', 0.1);
-declareExtension('amp-ad-network-gmossp-impl', 0.1);
-declareExtension('amp-ad-exit', 0.1);
-declareExtension('amp-addthis', '0.1');
-declareExtension('amp-analytics', '0.1');
-declareExtension('amp-anim', '0.1');
-declareExtension('amp-animation', '0.1');
-declareExtension('amp-apester-media', '0.1', {hasCss: true});
-declareExtension('amp-app-banner', '0.1', {hasCss: true});
-declareExtension('amp-audio', '0.1');
-declareExtension('amp-auto-ads', '0.1');
-declareExtension('amp-beopinion', '0.1');
-declareExtension('amp-bind', '0.1');
-declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
-declareExtension('amp-brid-player', '0.1');
-declareExtension('amp-brightcove', '0.1');
-declareExtension('amp-byside-content', '0.1', {hasCss: true});
-declareExtension('amp-kaltura-player', '0.1');
-declareExtension('amp-call-tracking', '0.1');
-declareExtension('amp-carousel', '0.1', {hasCss: true});
-declareExtension('amp-compare-slider', '0.1');
-declareExtension('amp-consent', '0.1', {hasCss: true});
-declareExtension('amp-crypto-polyfill', '0.1');
-declareExtension('amp-dailymotion', '0.1');
-declareExtension('amp-google-document-embed', '0.1');
-declareExtension('amp-dynamic-css-classes', '0.1');
-declareExtension('amp-experiment', '0.1');
-declareExtension('amp-facebook', '0.1');
-declareExtension('amp-facebook-comments', '0.1');
-declareExtension('amp-facebook-like', '0.1');
-declareExtension('amp-facebook-page', '0.1');
-declareExtension('amp-fit-text', '0.1', {hasCss: true});
-declareExtension('amp-font', '0.1');
-declareExtension('amp-form', '0.1', {hasCss: true});
-declareExtension('amp-fx-collection', '0.1');
-declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
-declareExtension('amp-geo', '0.1');
-declareExtension('amp-gfycat', '0.1');
-declareExtension('amp-gist', '0.1');
-declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
-declareExtension('amp-hulu', '0.1');
-declareExtension('amp-iframe', '0.1');
-declareExtension('amp-ima-video', '0.1');
-declareExtension('amp-image-lightbox', '0.1', {hasCss: true});
-declareExtension('amp-imgur', '0.1');
-declareExtension('amp-instagram', '0.1', {hasCss: true});
-declareExtension('amp-install-serviceworker', '0.1');
-declareExtension('amp-izlesene', '0.1');
-declareExtension('amp-jwplayer', '0.1');
-declareExtension('amp-lightbox', '0.1', {hasCss: true});
-declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
-declareExtension('amp-list', '0.1');
-declareExtension('amp-live-list', '0.1', {hasCss: true});
-declareExtension('amp-mathml', '0.1', {hasCss: true});
-declareExtension('amp-mustache', '0.1');
-declareExtension('amp-next-page', '0.1', {hasCss: true});
-declareExtension('amp-nexxtv-player', '0.1');
-declareExtension('amp-o2-player', '0.1');
-declareExtension('amp-ooyala-player', '0.1');
-declareExtension('amp-pinterest', '0.1', {hasCss: true});
-declareExtension('amp-playbuzz', '0.1', {hasCss: true});
-declareExtension('amp-reach-player', '0.1');
-declareExtension('amp-reddit', '0.1');
-declareExtension('amp-riddle-quiz', '0.1');
-declareExtension('amp-share-tracking', '0.1');
-declareExtension('amp-sidebar', '0.1', {hasCss: true});
-declareExtension('amp-soundcloud', '0.1');
-declareExtension('amp-springboard-player', '0.1');
-declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
-declareExtension('amp-story', '0.1', {
-  hasCss: true,
-  cssBinaries: [
-    'amp-story-bookend',
-    'amp-story-consent',
-    'amp-story-hint',
-    'amp-story-unsupported-browser-layer',
-    'amp-story-viewport-warning-layer',
-    'amp-story-info-dialog',
-    'amp-story-share',
-    'amp-story-share-menu',
-    'amp-story-system-layer',
-  ],
+extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
+aliasBundles.forEach(c => {
+  declareExtensionVersionAlias(c.name, c.version, c.latestVersion, c.options);
 });
-declareExtension('amp-story', '1.0', {
-  hasCss: true,
-  cssBinaries: [
-    'amp-story-bookend',
-    'amp-story-consent',
-    'amp-story-hint',
-    'amp-story-unsupported-browser-layer',
-    'amp-story-viewport-warning-layer',
-    'amp-story-info-dialog',
-    'amp-story-share',
-    'amp-story-share-menu',
-    'amp-story-system-layer',
-  ],
-});
-declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
-declareExtension('amp-selector', '0.1', {hasCss: true});
-declareExtension('amp-web-push', '0.1', {hasCss: true});
-declareExtension('amp-wistia-player', '0.1');
-declareExtension('amp-position-observer', '0.1');
-declareExtension('amp-date-picker', '0.1', {hasCss: true});
-declareExtension('amp-image-viewer', '0.1', {hasCss: true});
-declareExtension('amp-subscriptions', '0.1', {hasCss: true});
-declareExtension('amp-subscriptions-google', '0.1', {hasCss: true});
-declareExtension('amp-pan-zoom', '0.1', {hasCss: true});
-/**
- * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
- * Please see {@link AmpCarousel} with `type=slides` attribute instead.
- */
-declareExtension('amp-slides', '0.1');
-declareExtension('amp-social-share', '0.1', {hasCss: true});
-declareExtension('amp-timeago', '0.1');
-declareExtension('amp-twitter', '0.1');
-declareExtension('amp-user-notification', '0.1', {hasCss: true});
-declareExtension('amp-vimeo', '0.1');
-declareExtension('amp-vine', '0.1');
-declareExtension('amp-viz-vega', '0.1', {hasCss: true});
-declareExtension('amp-google-vrview-image', '0.1');
-declareExtension('amp-viewer-integration', '0.1', {
-  // The viewer integration code needs to run asap, so that viewers
-  // can influence document state asap. Otherwise the document may take
-  // a long time to learn that it should start process other extensions
-  // faster.
-  loadPriority: 'high',
-});
-declareExtension('amp-video', '0.1');
-declareExtension('amp-video-service', '0.1', {
-  // `amp-video-service` provides analytics and autoplay for all videos. We need
-  // those to be available asap. This service replaces a runtime-level provider,
-  // so loadPriority is set to high in lieu of delivering it as part of the core
-  // binary.
-  loadPriority: 'high',
-});
-declareExtension('amp-vk', '0.1');
-declareExtension('amp-youtube', '0.1');
-declareExtensionVersionAlias(
-    'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
-
 
 /**
  * Extensions to build when `--extensions=minimal_set`.
@@ -266,20 +118,22 @@ const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 
 /**
  * @param {string} name
- * @param {string} version E.g. 0.1
+ * @param {string|!Array<string>} version E.g. 0.1
  * @param {!ExtensionOption} options extension options object.
  */
 function declareExtension(name, version, options) {
   const defaultOptions = {hasCss: false};
-  const extensionKey = `${name}-${version}`;
-  extensions[extensionKey] = Object.assign(
-      {name, version}, defaultOptions, options);
+  const versions = Array.isArray(version) ? version : [version];
+  versions.forEach(v => {
+    extensions[`${name}-${v}`] =
+        Object.assign({name, version: v}, defaultOptions, options);
+  });
 }
 
 /**
  * This function is used for declaring deprecated extensions. It simply places
  * the current version code in place of the latest versions. This has the
- * ability to break an extension verison, so please be sure that this is the
+ * ability to break an extension version, so please be sure that this is the
  * correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
@@ -459,6 +313,18 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       );
     }
 
+    if (!watch || argv.with_video_iframe_integration) {
+      promises.push(
+          compileJs('./src/', 'video-iframe-integration.js', './dist', {
+            minifiedName: 'video-iframe-integration-v0.js',
+            includePolyfills: false,
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
+    }
+
     if (!watch || argv.with_inabox) {
       promises.push(
           // Entry point for inabox runtime.
@@ -530,6 +396,15 @@ function compileCss(watch, opt_compileAll) {
     });
   }
 
+  /**
+   * Writes CSS to build folder
+   *
+   * @param {string} css
+   * @param {string} originalCssFilename
+   * @param {string} jsFilename
+   * @param {string} cssFilename
+   * @return {Promise}
+   */
   function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
     return toPromise(gulp.src(`css/${originalCssFilename}`)
         .pipe($$.file(jsFilename, 'export const cssText = ' +
@@ -541,6 +416,9 @@ function compileCss(watch, opt_compileAll) {
           fs.writeFileSync(`build/css/${cssFilename}`, css);
         }));
   }
+
+  // Used by `gulp test --local-changes` to map CSS files to JS files.
+  fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
@@ -654,6 +532,12 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
  * @param {!Object} options
  */
 function buildExtensionCss(path, name, version, options) {
+  /**
+   * Writes CSS binaries
+   *
+   * @param {string} name
+   * @param {string} css
+   */
   function writeCssBinaries(name, css) {
     const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
     const jsName = `build/${name}.js`;
@@ -894,6 +778,10 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minifiedRuntimeTarget);
         }
+      }).then(() => {
+        return createModuleCompatibleES5Bundle('v0.js');
+      }).then(() => {
+        return createModuleCompatibleES5Bundle('amp4ads-v0.js');
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
@@ -1161,6 +1049,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   const destFilename = options.toName || srcFilename;
+  /**
+   * Rebundle-javascript
+   *
+   * @param {boolean} failOnError
+   * @return {Promise}
+   */
   function rebundle(failOnError) {
     const startTime = Date.now();
     return toPromise(
@@ -1321,6 +1215,15 @@ function buildWebPushPublisherFilesVersion(version, options) {
   return Promise.all(promises);
 }
 
+/**
+ * Build WebPushPublisher file
+ *
+ * @param {*} version
+ * @param {string} fileName
+ * @param {string} watch
+ * @param {Object} options
+ * @return {Promise}
+ */
 function buildWebPushPublisherFile(version, fileName, watch, options) {
   const basePath = `extensions/amp-web-push/${version}/`;
   const tempBuildDir = `build/all/amp-web-push-${version}/`;
@@ -1537,6 +1440,11 @@ function checkMinVersion() {
   }
 }
 
+/**
+ *Creates directory in sync manner
+ *
+ * @param {string} path
+ */
 function mkdirSync(path) {
   try {
     fs.mkdirSync(path);
@@ -1547,6 +1455,12 @@ function mkdirSync(path) {
   }
 }
 
+/**
+ * Returns a promise for readable
+ *
+ * @param {*} readable
+ * @return {Promise}
+ */
 function toPromise(readable) {
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);

@@ -77,7 +77,9 @@ const activeToolsMonitor = new ActiveToolsMonitor();
 // page.
 let shouldRegisterView = true;
 
-// Redirection to prevent eslint issues.
+/**
+ * Redirection to prevent eslint issues.
+ */
 export function getConfigManager() {
   return configManager;
 }
@@ -298,6 +300,7 @@ class AmpAddThis extends AMP.BaseElement {
 
   /**
    * @private
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    * @return {Object<string, string>}
    */
   getATConfig_(ampDoc) {
@@ -319,6 +322,15 @@ class AmpAddThis extends AMP.BaseElement {
     }, {});
   }
 
+  /**
+   * Sets up listeners.
+   *
+   * @param {!Object} input
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampdoc]
+   * @param {*} [input.loc]
+   * @param {*} [input.pubId]
+   * @memberof AmpAddThis
+   */
   setupListeners_({ampDoc, loc, pubId}) {
     // Send "engagement" analytics on page hide.
     listen(ampDoc.win, 'pagehide', () => callEng({
