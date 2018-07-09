@@ -81,6 +81,7 @@ The URL to retrieve embedding information.
 ##### data-card-via
 
 Specifies the via content in the card. This is a a great way to do attribution.
+This is an optional attribute.
 
 ##### data-card-theme
 
