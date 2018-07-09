@@ -712,15 +712,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.troubleshootData_.creativeId =
-      /** type {string} */ dev.assert(
+      /** @type {string} */ (dev().assert(
           responseHeaders.get('google-creative-id'),
           'Header google-creative-id is null'
-      );
+      ));
     this.troubleshootData_.lineItemId =
-      dev.assert(
+      /** @type {string} */ (dev().assert(
           responseHeaders.get('google-lineitem-id'),
           'Header google-lineitem-id is null'
-      );
+      ));
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -740,7 +740,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.isFluidRequest_ && !this.returnedSize_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+      this.fireDelayedImpressions(
+          /** @type {string} */ (dev().assert(
+              responseHeaders.get('X-AmpImps'),
+              'Header X-AmpImps is null'
+          ))
+      );
     }
 
     return size;
