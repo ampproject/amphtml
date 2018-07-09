@@ -23,6 +23,7 @@ import {
   setMediaSession,
 } from '../mediasession-helper';
 import {
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   PlayingStates,
   VideoAnalyticsEvents,
   VideoAttributes,
@@ -59,12 +60,6 @@ import {startsWith} from '../string';
 /** @private @const {string} */
 const TAG = 'video-manager';
 
-
-/**
- * @const {number} Percentage of the video that should be in viewport before it
- * is considered visible.
- */
-const VISIBILITY_RATIO = 0.5;
 
 /**
  * @private {number} The minimum number of milliseconds to wait between each
@@ -239,7 +234,7 @@ export class VideoManager {
    * in the viewport.
    *
    * Visibility of a video is defined by being in the viewport AND having
-   * {@link VISIBILITY_RATIO} of the video element visible.
+   * {@link MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} of the video element visible.
    *
    * @param {VideoEntry} entry
    * @private
@@ -731,7 +726,9 @@ class VideoEntry {
       const {video} = this;
       const {element} = video;
       this.firstPlayEventOrNoop_();
-      video.showControls();
+      if (video.isInteractive()) {
+        video.showControls();
+      }
       video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
@@ -820,7 +817,8 @@ class VideoEntry {
       const {element} = this.video;
       const ratio = element.getIntersectionChangeEntry().intersectionRatio;
       this.isVisible_ =
-          (!isFiniteNumber(ratio) ? 0 : ratio) >= VISIBILITY_RATIO;
+          (!isFiniteNumber(ratio) ? 0 : ratio) >=
+            MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
     }
 
     if (this.isVisible_ != wasVisible) {
@@ -1126,7 +1124,7 @@ export class AutoFullscreenManager {
 
     if (selected) {
       const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
-      if (intersectionRatio >= VISIBILITY_RATIO) {
+      if (intersectionRatio >= MIN_VISIBILITY_RATIO_FOR_AUTOPLAY) {
         this.currentlyCentered_ = selected;
       }
     }

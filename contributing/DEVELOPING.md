@@ -65,12 +65,12 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp pr-check --files=<test-files-path-glob>`                          | Runs all the Travis CI checks locally, and restricts tests to the files provided.  |
 | `gulp test --unit`                                                      | Runs the unit tests in Chrome (doesn't require the AMP library to be built).                                                 |
 | `gulp test --unit --files=<test-files-path-glob>`                       | Runs the unit tests from the specified files in Chrome.                                                 |
-| `gulp test --local-changes`                                             | Runs the unit tests affected by the files changed in the local branch in Chrome.   |
+| `gulp test --local-changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.   |
 | `gulp test --integration`                                               | Runs the integration tests in Chrome (requires the AMP library to be built).                                                 |
 | `gulp test --integration --files=<test-files-path-glob>`                | Runs the integration tests from the specified files in Chrome.                                                 |
 | `gulp test [--unit\|--integration] --verbose`                           | Runs tests in Chrome with logging enabled.                            |
 | `gulp test [--unit\|--integration] --nobuild`                           | Runs tests without re-build.                                          |
-| `gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/report-html/index.html |
+| `gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/index.html |
 | `gulp test [--unit\|--integration] --watch`                             | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test [--unit\|--integration] --watch --verbose`                   | Same as `watch`, with logging enabled.                                 |
 | `gulp test [--integration] --saucelabs`                                 | Runs integration tests on saucelabs (requires [setup](#testing-on-sauce-labs)).                |

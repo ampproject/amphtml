@@ -221,7 +221,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.divertExperiments();
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
@@ -238,6 +237,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
               viewportSize),
           viewportSize.width).catch(() => {});
     }
+    // This should happen last, as some diversion criteria rely on some of the
+    // preceding logic (specifically responsive logic).
+    this.divertExperiments();
   }
 
   /** @override */
@@ -509,8 +511,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run({
         measure: state => {
+          // Check the parent element because amp-ad is explicitly styled to
+          // have direction: ltr.
           state.direction =
-            computedStyle(this.win, this.element)['direction'];
+            computedStyle(this.win,
+                dev().assertElement(this.element.parentElement))['direction'];
         },
         mutate: state => {
           if (state.direction == 'rtl') {

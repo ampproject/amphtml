@@ -23,6 +23,9 @@ import {dev} from '../../../src/log';
  */
 export class AdsenseSharedState {
 
+  /**
+   * Creates an instance of AdsenseSharedState.
+   */
   constructor() {
 
     /** @private {!Array<!{id: string, format: string, client: string, slotname: (string|undefined)}>} */
@@ -32,14 +35,13 @@ export class AdsenseSharedState {
   /**
    * Registers a new slot with the given format and client, and identified by
    * the given id.
-   *
+   * Returns an object containing the state-dependent ad request URL parameters
+   * relevant for this slot.
    * @param {string} format Format of the slot of form WxH.
    * @param {string} id A unique identifier for the slot.
    * @param {string} client The slot's ad client ID.
    * @param {string|undefined} slotname The slot's name if provided.
-   * @return !{{prevFmts: string, prevSlotnames: string, pv: number}} An object
-   *    containing the state-dependent ad request URL parameters relevant for
-   *    this slot.
+   * @return {!{prevFmts: string, prevSlotnames: string, pv: number}}
    * */
   addNewSlot(format, id, client, slotname) {
     const result = {pv: 2, prevFmts: '', prevSlotnames: ''};
