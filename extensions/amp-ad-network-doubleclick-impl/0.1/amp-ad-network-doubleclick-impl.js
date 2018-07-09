@@ -194,7 +194,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
+    /** @protected {!Deferred<?Response>} */
     this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
@@ -712,9 +712,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.troubleshootData_.creativeId =
-        responseHeaders.get('google-creative-id');
+      /** type {string} */ dev.assert(
+          responseHeaders.get('google-creative-id'),
+          'Header google-creative-id is null'
+      );
     this.troubleshootData_.lineItemId =
-        responseHeaders.get('google-lineitem-id');
+      dev.assert(
+          responseHeaders.get('google-lineitem-id'),
+          'Header google-lineitem-id is null'
+      );
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -1088,7 +1094,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     // Construct pseudo fetch response to be passed down the A4A
                     // promise chain for this block.
                     const headers =
-                  /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
+                  /** @type {?Headers} */
                   ({
                     get: name => {
                       // TODO(keithwrightbos) - fix upstream so response writes
@@ -1102,7 +1108,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     has: name => !!headersObj[name.toLowerCase()],
                   });
                     const fetchResponse =
-                  /** @type {?../../../src/service/xhr-impl.FetchResponse} */
+                  /** @type {?Response} */
                   ({
                     headers,
                     arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
