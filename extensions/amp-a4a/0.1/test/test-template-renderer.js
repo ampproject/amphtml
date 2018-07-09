@@ -16,6 +16,7 @@
 
 import * as sinon from 'sinon';
 import {
+  AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
   getAmpAdTemplateHelper,
 } from '../template-validator';
@@ -173,68 +174,6 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
       return renderer.render(context, containerElement, creativeData)
-          .then(() => {
-            const iframe = containerElement.querySelector('iframe');
-            expect(iframe).to.be.ok;
-            expect(iframe.contentWindow.document.body.innerHTML).to.equal(
-                '<div>\n      <p>ipsum lorem</p>\n      <a href=' +
-                '"https://buy.com/buy-1" target="_top">Click for ad!</a>' +
-                '\n    <amp-analytics class="i-amphtml-element i-amphtml-' +
-                'notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml-' +
-                'layout-size-defined amp-unresolved i-amphtml-unresolved" ' +
-                'style="width: 1px; height: 1px;"></amp-analytics></div>');
-          });
-    });
-  });
-
-  it('should set correct attributes on the iframe', () => {
-    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
-    return validatorPromise.then(validatorOutput => {
-
-      // Sanity check. This behavior is tested in test-template-validator.js.
-      expect(validatorOutput).to.be.ok;
-      expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      return renderer.render(context, containerElement, validatorOutput)
-          .then(() => {
-            const iframe = containerElement.querySelector('iframe');
-            expect(iframe).to.be.ok;
-            expect(iframe.getAttribute('width')).to.equal('320');
-            expect(iframe.getAttribute('height')).to.equal('50');
-            expect(iframe.getAttribute('frameborder')).to.equal('0');
-            expect(iframe.getAttribute('allowfullscreen')).to.equal('');
-            expect(iframe.getAttribute('allowtransparency')).to.equal('');
-            expect(iframe.getAttribute('scrolling')).to.equal('no');
-          });
-    });
-  });
-
-  it('should style body of iframe document to be visible', () => {
-    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
-    return validatorPromise.then(validatorOutput => {
-
-      // Sanity check. This behavior is tested in test-template-validator.js.
-      expect(validatorOutput).to.be.ok;
-      expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      return renderer.render(context, containerElement, validatorOutput)
-          .then(() => {
-            const iframe = containerElement.querySelector('iframe');
-            expect(iframe).to.be.ok;
-            expect(iframe.contentWindow.document.body.style.visibility)
-                .to.equal('visible');
-          });
-    });
-  });
-
-  it('should insert analytics', () => {
-    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
-    const insertAnalyticsSpy = sandbox.spy(
-        getAmpAdTemplateHelper(env.win), 'insertAnalytics');
-    return validatorPromise.then(validatorOutput => {
-
-      // Sanity check. This behavior is tested in test-template-validator.js.
-      expect(validatorOutput).to.be.ok;
-      expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      return renderer.render(context, containerElement, validatorOutput)
           .then(() => {
             expect(insertAnalyticsSpy).to.be.calledOnce;
           });
