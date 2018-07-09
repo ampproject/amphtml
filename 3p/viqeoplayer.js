@@ -44,6 +44,13 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
     Unmute: 'unmute',
   });
 
+  /**
+   * Subscribe on viqeo's events
+   * @param {string} playerEventName
+   * @param {string} targetEventName
+   * @param {function()} extraHandler
+   * @private
+   */
   function subscribe(playerEventName, targetEventName, extraHandler = null) {
     VIQEO['subscribeTracking'](
         () => {
@@ -56,10 +63,15 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
     );
   }
 
+  /**
+   * Subscribe viqeo's tracking
+   * @param {Object.<string, string>} eventsDescription
+   * @private
+   */
   function subscribeTracking(eventsDescription) {
     VIQEO['subscribeTracking'](params => {
-      const name = params && params.trackingParams &&
-          params.trackingParams.name;
+      const name = params && params['trackingParams'] &&
+          params['trackingParams'].name;
       const targetEventName = eventsDescription[name];
       sendMessage(targetEventName);
     }, 'Player:userAction');
@@ -74,6 +86,10 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
     parent./*OK*/postMessage(message, '*');
   };
 
+  /**
+   * Parse events data for viqeo
+   * @param {!Event|{data: !JsonObject}} event
+   */
   function parseMessage(event) {
     const eventData = getData(event);
     const action = eventData['action'];
@@ -94,6 +110,10 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   }
 }
 
+/**
+ * Prepare and return viqeo instance
+ * @param {!Window} global
+ */
 export function viqeoplayer(global) {
   const {data} = global.context;
   const videoId = user().assert(
