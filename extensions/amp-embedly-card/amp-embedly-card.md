@@ -88,6 +88,8 @@ Allows settings the `dark` theme which changes the background color of the main 
 
 Use `dark` to set this theme. For dark backgrounds it's better to specify this.
 
+The default is `light`, which sets no background color of the main card container.
+
 ### data-card-embed
 
 URL to a video or rich media. 
