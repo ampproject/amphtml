@@ -84,10 +84,9 @@ Specifies the via content in the card. This is a a great way to do attribution.
 
 ##### data-card-theme
 
-Sets the card theme. 
+Allows settings the `dark` theme which changes the background color of the main card container.
 
-`light`: Default theme.
-`dark`: For dark backgrounds it's better to specify the dark theme.
+Use `dark` to set this theme. For dark backgrounds it's better to specify this.
 
 ### data-card-embed
 
