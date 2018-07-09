@@ -47,7 +47,7 @@ export class Renderer {
    * @private
    */
   getBodyElement_() {
-    const root = this.ampdoc_.getBody();
+    return this.ampdoc_.getBody();
   }
 
   /**
