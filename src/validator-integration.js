@@ -32,21 +32,20 @@ export function maybeValidate(win) {
   if (startsWith(filename, 'about:')) { // Should only happen in tests.
     return;
   }
-  let load = false;
+  let validator = false;
   if (getMode().development) {
-    load = parseQueryString(
-        win.location.originalHash || win.location.hash)['validate'] != '0';
+    const hash =
+        parseQueryString(win.location.originalHash || win.location.hash);
+    validator = hash.validate !== '0';
   }
 
-  if (load) {
+  if (validator) {
     loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
       /* global amp: false */
       amp.validator.validateUrlAndLog(
           filename, win.document, getMode().filter);
     });
-  }
-
-  if (getMode().examiner) {
+  } else if (getMode().examiner) {
     loadScript(win.document, `${urls.cdn}/examiner.js`);
   }
 }
