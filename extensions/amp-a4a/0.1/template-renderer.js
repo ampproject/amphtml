@@ -26,7 +26,7 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
     return super.render(context, element, creativeData).then(() => {
       const templateData =
           /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
-              creativeData.templateData);
+          creativeData.templateData);
       const {data} = templateData;
       if (!data) {
         return Promise.resolve();
