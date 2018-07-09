@@ -54,7 +54,7 @@ In the following example, we display an image that responds to the size of the v
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -74,7 +74,7 @@ In the following example, if the browser doesn't support WebP, the fallback JPG 
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.fallback.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -97,11 +97,11 @@ This attribute is similar to the `src` attribute on the `img` tag. The value mus
 
 **srcset**
 
-Same as `srcset` attribute on the `img` tag. The behavior will be polyfilled where not natively supported.
+Same as `srcset` attribute on the `img` tag. For browsers that do not support `srcset`, `<amp-img>` will default to using `src`. If only `srcset` and no `src` is provided, the first url in the `srcset` will be selected.
 
 **sizes**
 
-Same as `sizes` attribute on the `img` tag. 
+Same as `sizes` attribute on the `img` tag.
 
 {% call callout('Read on', type='read') %}
 See [Responsive images with srcset, sizes & heights](https://www.ampproject.org/docs/design/responsive/art_direction) for usage of `sizes` and `srcset`.
@@ -173,13 +173,13 @@ For example, instead of specifying `width="900"` and `height="675"`, you can jus
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampimg.aspectratio.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
 #### Setting multiple source files for different screen resolutions
 
-The [`srcset`](#attributes) attribute should be used to provide different resolutions of the same image, that all have the same aspect ratio. The AMP runtime will automatically choose the most appropriate file from `srcset` based on the screen resolution and width of the user's device.
+The [`srcset`](#attributes) attribute should be used to provide different resolutions of the same image, that all have the same aspect ratio. The browser will automatically choose the most appropriate file from `srcset` based on the screen resolution and width of the user's device.
 
 In contrast, the [`media`](https://www.ampproject.org/docs/reference/common_attributes#media) attribute shows or hides AMP components, and should be used when designing responsive layouts. The appropriate way to display images with differing aspect ratios is to use multiple `<amp-img>` components, each with a `media` attribute that matches the screen widths in which to show each instance.
 

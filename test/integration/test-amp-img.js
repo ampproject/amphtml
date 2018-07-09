@@ -98,11 +98,9 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', () => {
                    /examples/img/hero@2x.jpg 1282w"
     width=641 height=480 layout=responsive></amp-img>
   `;
-  const experiments = ['amp-img-native-srcset'];
 
   describes.integration('Internet Explorer edge cases', {
     body,
-    experiments,
   }, env => {
 
     let win;
