@@ -24,6 +24,14 @@ import {numeric} from '../../../src/transition';
 import {Platform} from '../../../src/service/platform-impl';
 import {setStyle} from '../../../src/style';
 
+// event-helper.js -> listen; option: passive = true
+// mount both mouse & touch listener ()
+// Test: mainly describes.integration
+// Visual diffing tests
+
+// this.mutateElement(callback), in which move children
+
+
 export class AmpImageSlider extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -261,8 +269,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   handleTapImage(e) {
     const {left, right} = this.container_.getBoundingClientRect();
-    const leftPercentage = (e.touches[0].pageX - left) / (right - left);
-    this.animateUpdatePositions(leftPercentage);
+    if (e.touches.length > 0) {
+      const leftPercentage = (e.touches[0].pageX - left) / (right - left);
+      this.animateUpdatePositions(leftPercentage);
+    }
   }
 
   /**
@@ -283,7 +293,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     const duration = 200;
     // Using this.bar_ as a standard element
     // to hack and create non-delayed animations on all 3 elements
-    return Animation.animate(this.bar_, pos => {
+    return Animation.animate(this.element, pos => {
       setStyle(this.bar_, 'transform',
           `translateX(${interpolate(pos) * 100}%)`);
       if (wrappedImage) {
@@ -397,6 +407,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.scheduleLayout(this.rightAmpImage_);
 
     Promise.all([
+      // LOAD_START
       this.leftAmpImage_.signals().whenSignal(CommonSignals.LOAD_END),
       this.rightAmpImage_.signals().whenSignal(CommonSignals.LOAD_END),
     ]).then(() => this.registerEvents());
