@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-// import {dev} from '../src/log';
+import {assertAbsoluteHttpOrHttpsUrl, tryDecodeUriComponent} from '../src/url';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
-import {parseJson} from '../src/json';
 import {setStyles} from '../src/style';
-import {tryDecodeUriComponent} from '../src/url';
+import {user} from '../src/log';
 
 
 /**
@@ -90,19 +89,49 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
     } else if (action === 'mute') {
       viqeoPlayerInstance.setVolume(0);
     } else if (action === 'unmute') {
-      viqeoPlayerInstance.setVolume(0);
+      viqeoPlayerInstance.setVolume(1);
     }
   }
 }
 
 export function viqeoplayer(global) {
-  const dataReceived = parseJson(global.name)['attributes']._context;
-  const scriptPlayerInit =
-      tryDecodeUriComponent(dataReceived['scriptPlayerInit']);
-  const previewUrl = tryDecodeUriComponent(dataReceived['previewUrl']);
-  const videoId = dataReceived['videoId'];
-  const profileId = dataReceived['profileId'];
-  const markTagsAdvancedParams = parseToObject(dataReceived['markTagParams']);
+  const {data} = global.context;
+  const videoId = user().assert(
+      data['videoid'],
+      'The data-videoid attribute is required for <amp-viqeo-player> %s',
+      data);
+
+  const profileId = user().assert(
+      data['profileid'],
+      'The data-profileid attribute is required for <amp-viqeo-player> %s',
+      data);
+
+  const markTagsAdvancedParams = data['tag-settings'];
+
+  const kindIsProd = data['data-kind'] !== 'stage';
+
+  let scriptPlayerInit = data['script-url'];
+  scriptPlayerInit =
+      (scriptPlayerInit
+          && tryDecodeUriComponent(scriptPlayerInit)
+      )
+      ||
+      (kindIsProd
+        ? 'https://cdn.viqeo.tv/js/vq_player_init.js?amp=true'
+        : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1&amp=true'
+      );
+  // embed preview url
+  let previewUrl = data['player-url'];
+  previewUrl =
+      (previewUrl
+          && previewUrl.length && decodeURI(previewUrl)
+      )
+      || (kindIsProd ? 'https://cdn.viqeo.tv/embed' : 'https://stage.embed.viqeo.tv');
+
+  // Create preview iframe source path
+  previewUrl = assertAbsoluteHttpOrHttpsUrl(
+      `${previewUrl}/?vid=${videoId}&amp=true`);
+
   const doc = global.document;
   const mark = doc.createElement('div');
 
@@ -139,15 +168,4 @@ export function viqeoplayer(global) {
       viqeoPlayerInitLoaded(global, global['VIQEO']);
     }
   });
-}
-
-function parseToObject(str) {
-  const res = {};
-  str && str.split(';').forEach(item => {
-    const data = item.split(':');
-    if (data.length > 1) {
-      res[data[0]] = data[1];
-    }
-  });
-  return res;
 }
