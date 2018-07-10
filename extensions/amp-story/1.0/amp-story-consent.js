@@ -294,7 +294,13 @@ export class AmpStoryConsent extends AMP.BaseElement {
     // javascript.
     const parentEl = dev().assertElement(this.element.parentElement);
     const consentScript = childElementByTag(parentEl, 'script');
-    this.consentConfig_ = parseJson(consentScript.textContent);
+    this.consentConfig_ = consentScript && parseJson(consentScript.textContent);
+
+    // amp-consent already triggered console errors, step out to avoid polluting
+    // the console.
+    if (!this.consentConfig_) {
+      return;
+    }
 
     const storyConsentScript = childElementByTag(this.element, 'script');
 
@@ -340,8 +346,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
    * @private
    */
   storeConsentId_(consentId) {
-    const policyId = Object.keys(this.consentConfig_.consents)[0];
-    const policy = this.consentConfig_.consents[policyId];
+    const policyId = Object.keys(this.consentConfig_['consents'])[0];
+    const policy = this.consentConfig_['consents'][policyId];
 
     // checkConsentHref response overrides the amp-geo config, if provided.
     if (policy.checkConsentHref) {
@@ -351,10 +357,12 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     // If using amp-access with amp-geo, only set the consent id if the user is
     // in the expected geo group.
-    if (policy.promptIfUnknownForGeoGroup) {
+    if (policy['promptIfUnknownForGeoGroup']) {
       Services.geoForDocOrNull(this.element).then(geo => {
-        const geoGroup = policy.promptIfUnknownForGeoGroup;
-        if (geo && !geo.matchedISOCountryGroups.includes(geoGroup)) {
+        const geoGroup = policy['promptIfUnknownForGeoGroup'];
+        const matchedGeoGroups =
+          /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
+        if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }
         this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);

@@ -17,12 +17,14 @@
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
 import {LocalizationService} from '../localization';
+import {Services} from '../../../../src/services';
 import {computedStyle} from '../../../../src/style';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-consent', {amp: true}, env => {
   const CONSENT_ID = 'CONSENT_ID';
   let win;
+  let consentConfigEl;
   let defaultConfig;
   let getComputedStyleStub;
   let storyConsent;
@@ -67,7 +69,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const consentEl = win.document.createElement('amp-consent');
     consentEl.setAttribute('id', CONSENT_ID);
 
-    const consentConfigEl = win.document.createElement('script');
+    consentConfigEl = win.document.createElement('script');
     consentConfigEl.setAttribute('type', 'application/json');
     consentConfigEl.textContent = JSON.stringify(consentConfig);
 
@@ -277,6 +279,36 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
         .to.equal(CONSENT_ID);
+  });
+
+  it('should set the consent ID in the store if right amp-geo group', () => {
+    const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
+    consentConfigEl.textContent = JSON.stringify(config);
+
+    sandbox.stub(Services, 'geoForDocOrNull')
+        .resolves({matchedISOCountryGroups: ['eea']});
+
+    storyConsent.buildCallback();
+
+    return Promise.resolve().then(() => {
+      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
+          .to.equal(CONSENT_ID);
+    });
+  });
+
+  it('should not set consent ID in the store if wrong amp-geo group', () => {
+    const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
+    consentConfigEl.textContent = JSON.stringify(config);
+
+    sandbox.stub(Services, 'geoForDocOrNull')
+        .resolves({matchedISOCountryGroups: ['othergroup']});
+
+    storyConsent.buildCallback();
+
+    return Promise.resolve().then(() => {
+      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
+          .to.be.null;
+    });
   });
 
   it('should set the font color to black if background is white', () => {
