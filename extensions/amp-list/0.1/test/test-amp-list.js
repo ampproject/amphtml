@@ -38,7 +38,6 @@ describes.realWin('amp-list component', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    ampdoc.isSingleDoc = () => true;
 
     const templates = Services.templatesFor(win);
     templatesMock = sandbox.mock(templates);
