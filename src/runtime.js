@@ -245,14 +245,30 @@ function adoptShared(global, callback) {
    */
   function installExtension(fnOrStruct) {
     const register = () => {
-      iniPromise.then(() => {
+      return iniPromise.then(() => {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
+          // We support extension declarations which declare they have an
+          // "intermediate" dependency that needs to be loaded before they
+          // can execute.
           if (fnOrStruct.i) {
+            // Allow a single string as the intermediate dependency OR allow
+            // for an array if intermediate dependencies that needs to be
+            // resolved first before executing this current extension.
             if (Array.isArray(fnOrStruct.i)) {
+              const promises = fnOrStruct.i.map(dep => {
+                return extensions.preloadExtension(global, dep);
+              });
+              Promise.all(promises).then(function() {
+                extensions.registerExtension(
+                    fnOrStruct.n, fnOrStruct.f, global.AMP);
+              });
             } else if (typeof fnOrStruct.i == 'string') {
-              //extensions.preloadExtension('_base_element');
+              extensions.preloadExtension(fnOrStruct.i).then(function() {
+                extensions.registerExtension(
+                    fnOrStruct.n, fnOrStruct.f, global.AMP);
+              });
             }
           } else {
             extensions.registerExtension(
@@ -260,6 +276,7 @@ function adoptShared(global, callback) {
           }
         }
       });
+
     };
     if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
       // "High priority" extensions do not go through chunking.
@@ -299,6 +316,7 @@ function adoptShared(global, callback) {
     }
   }
 
+  console.log('reached maybePumpEarlyFrame exec');
   maybePumpEarlyFrame(global, () => {
     /**
      * Registers a new custom element.
@@ -373,7 +391,9 @@ export function adopt(global) {
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
     global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
 
+    console.log('exec waitForBodyPromise');
     return waitForBodyPromise(global.document).then(() => {
+      console.log('in waitForBodyPromise');
       // Ensure that all declared extensions are marked and stubbed.
       stubElementsForDoc(ampdoc);
     });
@@ -905,6 +925,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
+  console.log('maybePumpEarlyFrame');
   if (!isExperimentOn(win, 'pump-early-frame')) {
     cb();
     return;
