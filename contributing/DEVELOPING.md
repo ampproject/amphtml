@@ -91,7 +91,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
 | `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
 | `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode. |
-| `gulp visual-diff --percy_debug --chrome_debug --webserver_debug`       | Same as above, with additional logging. Debug flags can be used independently.  |
+| `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.  |
 
 ## Manual testing
 
@@ -213,8 +213,8 @@ In addition to building the AMP runtime and running `gulp test`, the automatic t
 The technology stack used is:
 
 - [Percy](https://percy.io/), a visual regression testing service for webpages
-- [Capybara](https://percy.io/docs/clients/ruby/capybara-rails), a framework that integrates tests with Percy
-- [Poltergeist](https://github.com/teampoltergeist/poltergeist), a driver capable of loading webpages for diffing
+- [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
+- [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
 - [(Headless) Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome browser, optionally in headless mode
 
 The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
@@ -227,11 +227,7 @@ When a test run fails due to visual diffs being present, click the `details` lin
 
 You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
 
-First, make sure you have [Ruby](https://www.ruby-lang.org/en/documentation/installation/) installed on your machine if you don't already have it, and download the gems required for local Percy builds:
-```
-gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper
-```
-Next, build the AMP runtime and run the gulp task that invokes the visual diff script:
+First, build the AMP runtime and run the gulp task that invokes the visual diff script:
 ```
 gulp build
 gulp visual-diff
@@ -245,9 +241,9 @@ To run Chrome in headless mode, use:
 
 To see debugging info during Percy runs, you can run:
 ```
- gulp visual-diff --percy_debug --chrome_debug --webserver_debug
+ gulp visual-diff --chrome_debug --webserver_debug
 ```
-The debug flags `--percy_debug`, `--chrome_debug`, and `--webserver_debug` can be used independently. To enable all three debug flags, you can also run:
+The debug flags `--chrome_debug` and `--webserver_debug` can be used independently. To enable both debug flags, you can also run:
 ```
  gulp visual-diff --debug
 ```
