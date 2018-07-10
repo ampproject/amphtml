@@ -912,6 +912,13 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   });
 });
 
+app.use('/subscription/pingback', (req, res) => {
+  assertCors(req, res, ['GET']);
+  res.json({
+    done: true,
+  });
+});
+
 // Simulated adzerk ad server and AMP cache CDN.
 app.get('/adzerk/*', (req, res) => {
   assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);

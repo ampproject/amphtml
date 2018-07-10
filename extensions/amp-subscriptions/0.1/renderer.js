@@ -16,7 +16,6 @@
 
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 const CSS_PREFIX = 'i-amphtml-subs';
@@ -36,7 +35,7 @@ export class Renderer {
 
     // Initial state is "unknown".
     this.setGrantState(null);
-    this.getRootElement_().classList.add(`${CSS_PREFIX}-ready`);
+    this.getBodyElement_().classList.add(`${CSS_PREFIX}-ready`);
 
     // Check and add progress bar.
     this.addLoadingBar();
@@ -46,9 +45,8 @@ export class Renderer {
    * @return {!Element}
    * @private
    */
-  getRootElement_() {
-    const root = this.ampdoc_.getRootNode();
-    return dev().assertElement(root.documentElement || root.body || root);
+  getBodyElement_() {
+    return this.ampdoc_.getBody();
   }
 
   /**
@@ -58,13 +56,13 @@ export class Renderer {
    */
   setState_(type, state) {
     this.resources_.mutateElement(this.ampdoc_.getBody() , () => {
-      this.getRootElement_().classList.toggle(
+      this.getBodyElement_().classList.toggle(
           `${CSS_PREFIX}-${type}-unk`,
           state === null);
-      this.getRootElement_().classList.toggle(
+      this.getBodyElement_().classList.toggle(
           `${CSS_PREFIX}-${type}-yes`,
           state === true);
-      this.getRootElement_().classList.toggle(
+      this.getBodyElement_().classList.toggle(
           `${CSS_PREFIX}-${type}-no`,
           state === false);
     });
@@ -98,7 +96,7 @@ export class Renderer {
    */
   toggleState_(type, state) {
     this.resources_.mutateElement(this.ampdoc_.getBody(), () => {
-      this.getRootElement_().classList.toggle(`${CSS_PREFIX}-${type}`, state);
+      this.getBodyElement_().classList.toggle(`${CSS_PREFIX}-${type}`, state);
     });
   }
 
