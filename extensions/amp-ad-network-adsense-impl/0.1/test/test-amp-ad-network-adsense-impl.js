@@ -26,8 +26,6 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
-  DELAY_REQUEST_EXP,
-  DELAY_REQUEST_EXP_BRANCHES,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
@@ -44,7 +42,6 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
-import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -979,23 +976,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#delayAdRequestEnabled', () => {
     it('should return true', () =>
       expect(impl.delayAdRequestEnabled()).to.be.true);
-
-    it('should set experiment when diverted', () => {
-      toggleExperiment(impl.win, DELAY_REQUEST_EXP, true);
-      impl.divertExperiments();
-      let inExp;
-      Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(exp =>
-        inExp = inExp || isInExperiment(impl.element, exp));
-      expect(inExp).to.be.true;
-    });
-    Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(expId => {
-      it(`should return ${DELAY_REQUEST_EXP_BRANCHES[expId]} for ${expId}`,
-          () => {
-            forceExperimentBranch(impl.win, DELAY_REQUEST_EXP, expId);
-            expect(impl.delayAdRequestEnabled()).to.equal(
-                DELAY_REQUEST_EXP_BRANCHES[expId]);
-          });
-    });
   });
 
   describe('#preconnect', () => {

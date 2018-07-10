@@ -70,10 +70,6 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -112,15 +108,6 @@ const DOUBLECLICK_EXPERIMENT_FEATURE = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
-};
-
-/** @type {string} @visibleForTesting */
-export const RENDER_IDLE_DELAY_REQUEST_EXP = 'doubleclick-delay-request';
-
-/** @enum {number} @visibleForTesting */
-export const RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES = {
-  CONTROL: 21062231, // control
-  EXPERIMENT: 21062232,
 };
 
 /** @private {?Promise} */
@@ -298,12 +285,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return this.isAmpAdElement();
   }
 
-  /** @override */
-  delayAdRequestEnabled() {
-    return getExperimentBranch(this.win, RENDER_IDLE_DELAY_REQUEST_EXP) ==
-        RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES.EXPERIMENT ? 12 : false;
-  }
-
   /**
    * @param {?string} urlExperimentId
    * @visibleForTesting
@@ -337,21 +318,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             `url experiment selection ${urlExperimentId}: ${experimentId}.`);
         this.experimentIds.push(experimentId);
     }
-    const experimentInfoMap =
-        /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-        // If SRA is not enabled and using renderOnIdle, allow for delay
-        // request experiment.
-        [RENDER_IDLE_DELAY_REQUEST_EXP]: {
-          isTrafficEligible: () => !this.useSra &&
-            this.getIdleRenderEnabled_() !== false,
-          branches: Object.keys(RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES).map(
-              key => RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES[key]),
-        },
-      });
-    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
-      setExps[expName] && this.experimentIds.push(setExps[expName]));
   }
 
   /** @private */
