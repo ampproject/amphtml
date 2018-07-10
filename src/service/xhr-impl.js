@@ -30,6 +30,7 @@ import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
 import {parseJson} from '../json';
+import {urls} from '../config';
 import {utf8Encode} from '../utils/bytes';
 
 /**
@@ -166,6 +167,7 @@ export class Xhr {
    *
    * XHRs are intercepted if all of the following are true:
    * - The AMP doc is in single doc mode
+   * - The requested resource is not a 1p request.
    * - The viewer has the `xhrInterceptor` capability
    * - The Viewer is a trusted viewer or AMP is currently in developement mode
    * - The AMP doc is opted-in for XHR interception (`<html>` tag has
@@ -185,7 +187,8 @@ export class Xhr {
     }
     const viewer = Services.viewerForDoc(this.ampdocSingle_);
     const whenFirstVisible = viewer.whenFirstVisible();
-    if (!viewer.hasCapability('xhrInterceptor')) {
+    const firstPartyResource = urls.cdnProxyRegex.test(new URL(input).origin);
+    if (firstPartyResource || !viewer.hasCapability('xhrInterceptor')) {
       return whenFirstVisible;
     }
     const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
