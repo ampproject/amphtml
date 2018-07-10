@@ -284,11 +284,16 @@ async function runVisualTests(page, visualTestsConfig) {
   // Take the snapshots.
   await generateSnapshots(percy, page, visualTestsConfig.webpages);
 
-  // Tell Percy we're finished taking snapshots.
+  // Tell Percy we're finished taking snapshots and check if the build failed
+  // early.
   await percy.finalizeBuild();
-  // TODO(danielrozenberg): inspect result to check if the build failed fast
-  log('info', 'Build', colors.cyan(buildId),
-      'is now being processed by Percy.');
+  const status = await getBuildStatus(buildId);
+  if (status.state == 'failed') {
+    log('fatal', 'Build', colors.cyan(buildId), 'failed!');
+  } else {
+    log('info', 'Build', colors.cyan(buildId),
+        'is now being processed by Percy.');
+  }
 }
 
 /**
