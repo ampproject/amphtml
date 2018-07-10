@@ -244,6 +244,9 @@
       "name": "amp-dailymotion - Amp By Example"
     },
     {
+      "flaky": true,
+      // The active days on the date picker change daily
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/851544/view/49092701/1400?mode=diff&browser=firefox&snapshot=49092701
       "url": "examples/visual-tests/amp-by-example/components/amp-date-picker/index.html",
       "name": "amp-date-picker - Amp By Example"
     },
