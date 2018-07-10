@@ -48,7 +48,7 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
    * Subscribe on viqeo's events
    * @param {string} playerEventName
    * @param {string} targetEventName
-   * @param {function()} extraHandler
+   * @param {function()|undefined|null} extraHandler
    * @private
    */
   function subscribe(playerEventName, targetEventName, extraHandler = null) {
