@@ -5418,14 +5418,6 @@ amp.validator.categorizeError = function(error) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
 
-  // E.g. "CSS syntax error in tag 'style amp-custom' - Invalid Declaration."
-  // TODO(powdercloud): Legacy generic css error code. Remove after
-  // 2016-06-01.
-  if (error.code === amp.validator.ValidationError.Code.CSS_SYNTAX &&
-      isAuthorStylesheet(error.params[0])) {
-    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
-  }
-
   // E.g. "The inline 'style' attribute is not allowed in AMP documents. Use
   // 'style amp-custom' tag instead."
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR)
