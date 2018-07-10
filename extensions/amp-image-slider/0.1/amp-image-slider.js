@@ -29,6 +29,9 @@ import {setStyle} from '../../../src/style';
 // Test: mainly describes.integration
 // Visual diffing tests
 
+// Wrap <a> anchor around amp-image
+// This is actually creating some trouble with gesture
+
 // this.mutateElement(callback), in which move children
 
 
@@ -69,6 +72,8 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.barButton_ = null;
+    /** @private {?Element} */
+    this.barButtonIcon_ = null;
 
     this.handleHover = this.handleHover.bind(this);
     this.handleClickImage = this.handleClickImage.bind(this);
@@ -100,7 +105,6 @@ export class AmpImageSlider extends AMP.BaseElement {
       return null;
     }
 
-    // TODO(kqian): check children type
     this.leftAmpImage_ = children[0];
     this.rightAmpImage_ = children[1];
 
@@ -160,8 +164,8 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.barButton_ = this.win.document.createElement('div');
     this.barButton_.classList.add('i-amphtml-image-slider-bar-button');
     // TODO(kqian): UI design
-    this.barButton_.appendChild(
-        htmlFor(this.win.document)`<div>&lt;~&gt;</div>`);
+    this.barButtonIcon_ = htmlFor(this.win.document)`<div>&lt;~&gt;</div>`;
+    this.barButton_.appendChild(this.barButtonIcon_);
 
     this.container_.appendChild(this.bar_);
     this.barStick_.appendChild(this.barButton_);
@@ -200,14 +204,10 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.isFollowSlider_) {
       this.container_.addEventListener('mousemove', this.handleHover);
     } else {
-      // TODO(kqian): DESIGN CHOICE DISCUSSION PENDING
-
       // Use container_ for drag operation instead
       // element for click/tap operations
       this.element.addEventListener('click', this.handleClickImage);
       this.element.addEventListener('touchend', this.handleTapImage);
-      // TODO(kqian): merge dragStart and touchStart to a single method
-      // once the actual design is settled
       this.barButton_.addEventListener('mousedown', this.dragStart);
       this.barButton_.addEventListener('touchstart', this.touchStart);
     }
@@ -267,8 +267,6 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {number} toPercentage
    */
   animateUpdatePositions(toPercentage) {
-    // TODO(kqian): this part of the code is very fragile
-    // TOO implementation specific. Seek for improvement and replacement
     const {left: containerLeft, width: containerWidth}
         = this.container_.getBoundingClientRect();
     const {left: barLeft} = this.bar_.getBoundingClientRect();
@@ -280,23 +278,22 @@ export class AmpImageSlider extends AMP.BaseElement {
     // Single animation ensure elements have props updated at same pace
     // Multiple animations would be scheduled at different raf
     return Animation.animate(this.element, pos => {
-      setStyle(this.bar_, 'transform',
-          `translateX(${interpolate(pos) * 100}%)`);
+      const posInterpolated = interpolate(pos);
+      this.updateTranslateX(this.bar_, posInterpolated);
       if (this.leftRealImage_) {
-        setStyle(this.mask_, 'transform',
-            `translateX(${(interpolate(pos) - 1) * 100}%)`);
-        setStyle(this.leftRealImage_, 'transform',
-            `translateX(${(1 - interpolate(pos)) * 100}%)`);
+        this.updateTranslateX(this.mask_, posInterpolated - 1);
+        this.updateTranslateX(this.leftRealImage_, 1 - posInterpolated);
       }
     }, duration, curve).thenAlways();
   }
 
   /**
-   * TODO
+   * Add listeners on drag start
    * @param {Event} e
    */
   dragStart(e) {
     e.preventDefault();
+    e.stopPropagation();
 
     this.win.addEventListener('mousemove', this.dragMove);
     this.win.addEventListener('mouseup', this.dragEnd);
@@ -305,7 +302,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.splitOffset_ = this.bar_.getBoundingClientRect().left;
   }
   /**
-   * TODO
+   * Handle drag move
    * @param {Event} e
    */
   dragMove(e) {
@@ -314,9 +311,15 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.pointerMoveX_(e.pageX);
   }
   /**
-   * TODO
+   * Remove listeners on drag end
+   * e is optional since dragEnd will also be used for unregister cleanup
+   * @param {?Event} e
    */
-  dragEnd() {
+  dragEnd(e) {
+    if (e) {
+      e.stopPropagation();
+    }
+
     this.win.removeEventListener('mousemove', this.dragMove);
     this.win.removeEventListener('mouseup', this.dragEnd);
 
@@ -324,7 +327,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.splitOffset_ = 0;
   }
   /**
-   * TODO
+   * Add listeners on drag start
    * @param {Event} e
    */
   touchStart(e) {
@@ -335,17 +338,23 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.splitOffset_ = this.bar_.getBoundingClientRect().left;
   }
   /**
-   * TODO
+   * Handle touch move
    * @param {Event} e
    */
   touchMove(e) {
+    // When we are holding bar button (or its icon)
+    // Do not scroll page
+    if (e.target === this.barButton_ ||
+        (this.barButtonIcon_ && e.target === this.barButtonIcon_)) {
+      e.preventDefault();
+    }
     e.stopPropagation(); // avoid clashing with clickImage
     if (e.touches.length > 0) {
       this.pointerMoveX_(e.touches[0].pageX);
     }
   }
   /**
-   * TODO
+   * Cleanup when touch released
    * @param {?Event} e
    */
   touchEnd(e) {
@@ -389,6 +398,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.rightAmpImage_.signals().whenSignal(CommonSignals.LOAD_START),
     ]).then(() => {
       // Here we have our real image tag
+      // this.leftRealImage_
+      //   = this.leftAmpImage_.getElementsByTagName('img')[0];
       this.leftRealImage_ = this.leftAmpImage_.firstChild;
       this.registerEvents();
     });
