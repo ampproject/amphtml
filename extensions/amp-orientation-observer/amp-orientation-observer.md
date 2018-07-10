@@ -35,8 +35,7 @@ limitations under the License.
     <td width="40%"><strong>Examples</strong></td>
     <td>
       <ul>
-        <li><a href="https://ampbyexample.com/visual_effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
-        <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with samples</a></li>
+        <li><a href="https://codepen.io/nainar92/project/full/XwzYOd/">CodePen project with samples</a></li>
       </ul>
     </td>
   </tr>
@@ -90,7 +89,7 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
 <!-- The clock container -->
 <div id="clock-scene">
   <!--
-    Use amp-position-observer to tie the movement of the clock scene within
+    Use amp-orientation-observer to tie the movement of the clock scene within
     the viewport to the timeline of the animation
   -->
   <amp-orientation-observer
