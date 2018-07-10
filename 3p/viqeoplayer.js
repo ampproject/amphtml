@@ -118,13 +118,11 @@ export function viqeoplayer(global) {
   const data = getData(global.context);
   const videoId = user().assert(
       data['videoid'],
-      'The data-videoid attribute is required for <amp-viqeo-player> %s',
-      data);
+      'The data-videoid attribute is required for <amp-viqeo-player>');
 
   const profileId = user().assert(
       data['profileid'],
-      'The data-profileid attribute is required for <amp-viqeo-player> %s',
-      data);
+      'The data-profileid attribute is required for <amp-viqeo-player>');
 
   const markTagsAdvancedParams = data['tag-settings'];
 

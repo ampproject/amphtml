@@ -76,6 +76,16 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
 
+    user().assert(
+        this.element.getAttribute('data-videoid'),
+        'The data-videoid attribute is required for <amp-viqeo-player> %s',
+        this.element);
+
+    user().assert(
+        this.element.getAttribute('data-profileid'),
+        'The data-profileid attribute is required for <amp-viqeo-player> %s',
+        this.element);
+
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
@@ -114,7 +124,9 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       this.element.appendChild(iframe);
       this.iframe_ = iframe;
       this.applyFillContent(iframe);
-    }).then(() => Promise.resolve());
+    }).then(() => {
+      return this.playerReadyPromise_;
+    });
   }
 
   /**
