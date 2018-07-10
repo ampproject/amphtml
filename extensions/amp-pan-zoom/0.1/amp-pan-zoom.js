@@ -31,7 +31,6 @@ import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
@@ -139,12 +138,12 @@ export class AmpPanZoom extends AMP.BaseElement {
     /** @private {?../../../src/motion.Motion} */
     this.motion_ = null;
 
+    /** @private */
+    this.resetOnResize_ = false;
   }
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
     this.action_ = Services.actionServiceForDoc(this.element);
     const children = this.getRealChildren();
 
@@ -159,6 +158,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.initialScale_ = this.getNumberAttributeOr_('initial-scale', 1);
     this.initialX_ = this.getNumberAttributeOr_('initial-x', 0);
     this.initialY_ = this.getNumberAttributeOr_('initial-y', 0);
+    this.resetOnResize_ = this.element.hasAttribute('reset-on-resize');
 
     this.registerAction('transform', invocation => {
       const {args} = invocation;
@@ -169,15 +169,16 @@ export class AmpPanZoom extends AMP.BaseElement {
       this.updatePanZoomBounds_(scale);
       const x = this.boundX_(args['x'] || 0, /*allowExtent*/ false);
       const y = this.boundY_(args['y'] || 0, /*allowExtent*/ false);
-      return this.set_(scale, x, y, /*animate*/ true).then(() => {
-        this.onZoomRelease_();
-      });
+      return this.set_(scale, x, y, /*animate*/ true)
+          .then(() => this.onZoomRelease_());
     });
   }
 
   /** @override */
   onMeasureChanged() {
-    this.resetContentDimensions_();
+    if (this.resetOnResize_) {
+      this.resetContentDimensions_();
+    }
   }
 
   /** @override */
@@ -689,7 +690,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       this.posX_ = newPosX;
       this.posY_ = newPosY;
       this.updatePanZoom_();
-      this.triggerTransformEnd_(newScale, newPosX, newPosY);
       return Promise.resolve();
     }
   }
@@ -710,6 +710,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       this.startScale_ = this.scale_;
       this.startX_ = this.posX_;
       this.startY_ = this.posY_;
+      this.triggerTransformEnd_(this.scale_, this.posX_, this.posY_);
     });
   }
 }

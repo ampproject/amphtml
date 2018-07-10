@@ -605,8 +605,6 @@ class ButtonApi {
 const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important;will-change:transform}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@-webkit-keyframes swg-notify{0%{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}to{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@-webkit-keyframes swg-notify-hide{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}to{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 
-
-
 /** @enum {number} */
 const CallbackId = {
   ENTITLEMENTS: 1,
