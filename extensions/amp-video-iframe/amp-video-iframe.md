@@ -259,9 +259,9 @@ like this:
 value is bound to change at any time, and the callbacks may be delayed or
 debounced.
 
-#### <a name="getMetadata"></a> `getMetadata(callback)`
+#### <a name="getMetadata"></a> `getMetadata()`
 
-Gets an object containing metadata about the host document:
+Returns an object containing metadata about the host document:
 
 ```json
 {
