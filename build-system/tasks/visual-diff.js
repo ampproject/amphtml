@@ -54,7 +54,8 @@ const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
 const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 
-const preVisualDiffTasks = argv.nobuild ? [] : ['build'];
+const preVisualDiffTasks =
+    (argv.nobuild || argv.verify_status) ? [] : ['build'];
 
 /**
  * Logs a message to the console.
