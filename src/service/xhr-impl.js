@@ -187,7 +187,8 @@ export class Xhr {
     }
     const viewer = Services.viewerForDoc(this.ampdocSingle_);
     const whenFirstVisible = viewer.whenFirstVisible();
-    const firstPartyResource = urls.cdnProxyRegex.test(new URL(input).origin);
+    const firstPartyResource =
+        urls.cdnProxyRegex.test(parseUrlDeprecated(input).origin);
     if (firstPartyResource || !viewer.hasCapability('xhrInterceptor')) {
       return whenFirstVisible;
     }
