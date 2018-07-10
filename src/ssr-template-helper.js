@@ -15,7 +15,7 @@
  */
 
 import {Capability} from './service/viewer-impl';
-import {isArray} from './types';
+import {iterateCursor} from '../../../src/dom';
 import {map} from './utils/object';
 
 /** The attributes we allow to be sent to the viewer. */
@@ -100,13 +100,13 @@ export class SsrTemplateHelper {
 
   /**
    * Returns the element's contained inputs and values in json format.
-   * @param {!HtmlElement} element
+   * @param {!Element} element
    * @return {!JsonObject}
    */
   getElementInputsAsJson_(element) {
     const inputs = element.querySelectorAll('input');
     const inputsAsJson = map();
-    inputs.forEach(input => {
+    iterateCursor(inputs, input => {
       inputsAsJson[input.name] = input.value;
     });
     return inputsAsJson;
@@ -114,12 +114,12 @@ export class SsrTemplateHelper {
 
   /**
    * Returns the element's attributes in json format.
-   * @param {!HtmlElement} element
+   * @param {!Element} element
    * @return {!JsonObject}
    */
   getElementAttributesAsJson_(element) {
     const attrsAsJson = {};
-    if (isArray(element.attributes)) {
+    if (element.attributes.length > 0) {
       const {attributes} = element;
       // Include commonly shared allowed attributes.
       const whiteList = ATTRS_TO_SEND_TO_VIEWER[this.sourceComponent_];

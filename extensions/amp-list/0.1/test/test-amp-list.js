@@ -22,6 +22,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-list component', {
   amp: {
+    ampdoc: 'single',
     extensions: ['amp-list'],
   },
 }, env => {
