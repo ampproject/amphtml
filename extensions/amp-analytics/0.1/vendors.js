@@ -1054,7 +1054,60 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
     'optout': '_gaUserPrefs.ioo',
   },
+  'iplabel': {
+    'requests': {
+    	'collectorUrl': 'm.col.ip-label.net',
 
+      "endpoint": "https://${collectorUrl}/coll/",
+			'onload': '${endpoint}?'+
+      'T=${trackerId}&'+
+      'm='+
+      '2502|${navTiming(navigationStart)}|'+
+      '2508|${navTiming(domainLookupStart)}|'+
+      '2509|${navTiming(domainLookupEnd)}|'+
+      '2510|${navTiming(connectStart)}|'+  
+      '2512|${navTiming(connectEnd)}|'+
+			'2514|${navTiming(responseStart)}|'+
+      '2515|${navTiming(responseEnd)}|'+
+      '2517|${navTiming(domInteractive)}|'+
+      '2520|${navTiming(loadEventStart)}'+
+      '&ts=${timestamp}'+
+      '&ua=${userAgent}'+
+      '&d=${ipldim}&'+
+       '&i=${clientip}&'+
+       'd[1]=${customdim}&'+
+       'd[2]=${business}&'+
+       'd[3]=${abtesting}&'+
+       'd[4]=${infrastructure}&'+
+       'd[5]=${customer}&'+
+       'u=${urlgroup}&'+
+      'w=${availableScreenWidth}&h=${availableScreenHeight}'+
+      '&r=${documentReferrer}'+
+      '&l=${browserLanguage}'
+    },
+    'triggers': {
+       'trackPageview': {
+       'on': 'visible',
+       'request': 'onload'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': {'suppressWarnings': true},
+    },
+    'vars':{
+      'api': { 'version': '0.0.1' },
+      'trackerId': 'notrackerID',
+        'customdim': '',
+        'business': '',
+        'abtesting': '',
+        'infrastructure': '',
+        'customer': '',
+        'clientip':'',
+        'urlgroup':''
+    }
+  },
   'krux': {
     'requests': {
       'beaconHost': 'https://beacon.krxd.net',
