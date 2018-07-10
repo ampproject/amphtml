@@ -85,6 +85,9 @@ html.i-amphtml-fie > body {
 html.i-amphtml-webview > body {
   overflow-x: hidden !important;
   overflow-y: visible !important;
+  /* A <body> height of 0 will be hidden due to "overflow-x: hidden". */
+  /* Prevent this by setting min-height to 100vh. See b/74541306. */
+  min-height: 100vh !important;
 }
 
 
@@ -751,8 +754,8 @@ amp-story .i-amphtml-loader {
  */
 
 /**
-  * In ampfx-preset-utils.js we are installing styles once the extension is 
- * loaded. This cause the element to jump. This is a fix for that, which 
+  * In ampfx-preset-utils.js we are installing styles once the extension is
+ * loaded. This cause the element to jump. This is a fix for that, which
  * doesn't push the preset's defaults into v0.js making it larger.
  */
 [amp-fx^="fly-in"] {
