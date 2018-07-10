@@ -258,7 +258,8 @@ function adoptShared(global, callback) {
             // resolved first before executing this current extension.
             if (Array.isArray(fnOrStruct.i)) {
               const promises = fnOrStruct.i.map(dep => {
-                return extensions.preloadExtension(global, dep);
+                console.log('dep', dep);
+                return extensions.preloadExtension(dep);
               });
               Promise.all(promises).then(function() {
                 extensions.registerExtension(

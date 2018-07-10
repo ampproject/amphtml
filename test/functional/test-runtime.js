@@ -322,7 +322,7 @@ describes.fakeWin('runtime', {
     });
   });
 
-  it.only('loads and waits for a single intermediate bundles', () => {
+  it('loads and waits for a single intermediate bundles', () => {
     // New format: {n:string, f:function(), i: <string|Array<string>}.
     let progress = '';
     const queueExtensions = win.AMP;
@@ -377,7 +377,7 @@ describes.fakeWin('runtime', {
       n: 'ext0',
       f: amp => {
         expect(amp).to.equal(win.AMP);
-        progress += 'ext0';
+        progress += 'B';
       },
     });
 
@@ -393,25 +393,32 @@ describes.fakeWin('runtime', {
     const script2 = win.document.querySelector(`[data-script=_base_ext2]`);
     expect(script2).to.be.null;
     return promise.then(() => {
-      //const script1 = win.document.querySelector(`[data-script=_base_ext]`);
-      //const script2 = win.document.querySelector(`[data-script=_base_ext2]`);
-      //expect(spy.firstCall).to.have.been.calledWith('_base_ext');
-      //expect(spy.secondCall).to.have.been.calledWith('_base_ext2');
-      //expect(spy.thirdCall).to.have.been.calledWith('ext0');
-      //expect(script1).to.not.be.null;
-      //expect(script2).to.not.be.null;
+      const script1 = win.document.querySelector(`[data-script=_base_ext]`);
+      const script2 = win.document.querySelector(`[data-script=_base_ext2]`);
+      expect(script1).to.not.be.null;
+      expect(script2).to.not.be.null;
+
+      expect(spy.firstCall).to.have.been.calledWith('_base_ext');
+      expect(spy.secondCall).to.have.been.calledWith('_base_ext2');
+      expect(spy.thirdCall).to.have.been.calledWith('ext0');
+
       // ext1 should not be executed yet and needs to wait on _base_ext
-      expect(progress).to.equal('');
+      // Notice that ext0 executes before A
+      expect(progress).to.equal('B');
       // Manually resolve this extension that doesn't exist in test but which
       // we tried to load.
       e.extensions_['_base_ext'].resolve();
       return e.waitForExtension(win, '_base_ext').then(() => {
-        expect(progress).to.equal('A');
+        expect(progress).to.equal('B');
+        e.extensions_['_base_ext2'].resolve();
+        return e.waitForExtension(win, '_base_ext2').then(() => {
+          expect(progress).to.equal('BA');
+        });
       });
     });
   });
 
-  it.only('execs right away if intermediate bundle exists', () => {
+  it('execs right away if intermediate bundle exists', () => {
     // New format: {n:string, f:function(), i: <string|Array<string>}.
     let progress = '';
     const queueExtensions = win.AMP;
