@@ -206,6 +206,8 @@
       "name": "amp-bind - Amp By Example"
     },
     {
+       "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-bodymovin-animation/index.html",
       "name": "amp-bodymovin-animation - Amp By Example"
     },
