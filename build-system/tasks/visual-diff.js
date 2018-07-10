@@ -354,8 +354,7 @@ async function generateSnapshots(percy, page, webpages) {
  * @param {string} config Config being used. One of 'canary' or 'prod'.
  */
 async function snapshotWebpages(percy, page, webpages, config) {
-  webpages = webpages.filter(webpage => (!webpage.flaky &&
-        !webpage.url.startsWith('examples/visual-tests/amp-by-example')));
+  webpages = webpages.filter(webpage => !webpage.flaky);
   for (const webpage of webpages) {
     const {url} = webpage;
     const name = `${webpage.name} (${config})`;
