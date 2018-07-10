@@ -245,7 +245,7 @@ function adoptShared(global, callback) {
    */
   function installExtension(fnOrStruct) {
     const register = () => {
-      return iniPromise.then(() => {
+      iniPromise.then(() => {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
@@ -258,7 +258,6 @@ function adoptShared(global, callback) {
             // resolved first before executing this current extension.
             if (Array.isArray(fnOrStruct.i)) {
               const promises = fnOrStruct.i.map(dep => {
-                console.log('dep', dep);
                 return extensions.preloadExtension(dep);
               });
               Promise.all(promises).then(function() {
@@ -317,7 +316,6 @@ function adoptShared(global, callback) {
     }
   }
 
-  console.log('reached maybePumpEarlyFrame exec');
   maybePumpEarlyFrame(global, () => {
     /**
      * Registers a new custom element.
@@ -392,9 +390,7 @@ export function adopt(global) {
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
     global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
 
-    console.log('exec waitForBodyPromise');
     return waitForBodyPromise(global.document).then(() => {
-      console.log('in waitForBodyPromise');
       // Ensure that all declared extensions are marked and stubbed.
       stubElementsForDoc(ampdoc);
     });
@@ -926,7 +922,6 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  console.log('maybePumpEarlyFrame');
   if (!isExperimentOn(win, 'pump-early-frame')) {
     cb();
     return;

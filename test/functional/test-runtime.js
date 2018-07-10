@@ -360,7 +360,7 @@ describes.fakeWin('runtime', {
     });
   });
 
-  it.only('loads and waits for a multiple intermediate bundles', () => {
+  it('loads and waits for a multiple intermediate bundles', () => {
     // New format: {n:string, f:function(), i: <string|Array<string>}.
     let progress = '';
     const queueExtensions = win.AMP;
