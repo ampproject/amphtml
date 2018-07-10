@@ -17,10 +17,12 @@
 import * as st from '../../../src/style';
 import {dev} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {srcsetFromElement} from '../../../src/srcset';
 
 const TAG = 'amp-anim';
-
+const ATTRIBUTES_TO_PROPAGATE = ['alt', 'aria-label', 'aria-describedby',
+  'aria-labelledby', 'src', 'srcset'];
+const SRC_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///' +
+'yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export class AmpAnim extends AMP.BaseElement {
 
@@ -30,9 +32,6 @@ export class AmpAnim extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.img_ = null;
-
-    /** @private {?../../../src/srcset.Srcset} */
-    this.srcset_ = null;
 
     /** @private {boolean} */
     this.hasLoaded_ = false;
@@ -47,8 +46,7 @@ export class AmpAnim extends AMP.BaseElement {
   buildCallback() {
     this.img_ = new Image();
     this.img_.setAttribute('decoding', 'async');
-    this.propagateAttributes(['alt', 'aria-label',
-      'aria-describedby', 'aria-labelledby'], this.img_);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.applyFillContent(this.img_, true);
 
     // Remove role=img otherwise this breaks screen-readers focus and
@@ -76,10 +74,9 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.srcset_) {
-      this.srcset_ = srcsetFromElement(this.element);
+    if (this.img_.src == SRC_PLACEHOLDER) {
+      this.img_.src = this.element.getAttribute('src');
     }
-    return this.updateImageSrc_();
   }
 
   /** @override */
@@ -101,8 +98,7 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
-    this.img_.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///' +
-        'yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    this.img_.src = SRC_PLACEHOLDER;
     this.hasLoaded_ = false;
     return true;
   }
@@ -113,34 +109,7 @@ export class AmpAnim extends AMP.BaseElement {
     this.togglePlaceholder(!inViewport);
     st.toggle(dev().assertElement(this.img_), inViewport);
   }
-
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  updateImageSrc_() {
-    if (this.getLayoutWidth() <= 0) {
-      return Promise.resolve();
-    }
-    const src = this.srcset_.select(
-        // The width should never be 0, but we fall back to the screen width
-        // just in case.
-        this.getViewport().getWidth() || this.win.screen.width,
-        this.getDpr());
-    if (src == this.img_.getAttribute('src')) {
-      return Promise.resolve();
-    }
-    this.img_.setAttribute('src', src);
-    return this.loadPromise(this.img_)
-        .catch(error => {
-          if (!this.img_.getAttribute('src')) {
-            return;
-          }
-          throw error;
-        });
-  }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAnim);
