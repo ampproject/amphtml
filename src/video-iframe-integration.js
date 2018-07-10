@@ -102,9 +102,6 @@ export class AmpVideoIntegration {
     /** @private @const {!Object<string, function()>} */
     this.methods_ = {};
 
-    /** @private {?DocMetadataDef} */
-    this.metadata_ = null;
-
     /** @private @const {function()} */
     this.listenToOnce_ = once(() => {
       listenTo(this.win_, e => this.onMessage_(e));
@@ -112,15 +109,20 @@ export class AmpVideoIntegration {
 
     /** @private {boolean} */
     this.muted_ = false;
+
+    /**
+     * @return {!DocMetadataDef}
+     * @private
+     */
+    this.getMetadataOnce_ = once(() => {
+      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
+      return {canonicalUrl, sourceUrl};
+    });
   }
 
   /** @return {!DocMetadataDef} */
   getMetadata() {
-    if (!this.metadata_) {
-      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
-      return {canonicalUrl, sourceUrl};
-    }
-    return this.metadata_;
+    return this.getMetadataOnce_();
   }
 
   /**
