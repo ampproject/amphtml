@@ -164,7 +164,8 @@ describes.realWin('amp-auto-ads', {
     expect(adElement.getAttribute('data-ad-client')).to.equal(AD_CLIENT);
   }
 
-  it('should wait for viewer visible', () => {
+  // TODO(ccordry, #16545) Unskip all these tests.
+  it.skip('should wait for viewer visible', () => {
     let resolve;
     const visible = new Promise(res => {
       resolve = res;
@@ -184,7 +185,7 @@ describes.realWin('amp-auto-ads', {
     });
   });
 
-  it('should insert three ads on page using config', () => {
+  it.skip('should insert three ads on page using config', () => {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
     ampAutoAdsElem.setAttribute('type', 'adsense');
     ampAutoAds.buildCallback();
@@ -205,52 +206,54 @@ describes.realWin('amp-auto-ads', {
     });
   });
 
-  it('should insert ads on the page when in holdout experiment branch', () => {
-    forceExperimentBranch(env.win,
-        ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-        AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
+  it.skip('should insert ads on the page when in holdout experiment branch',
+      () => {
+        forceExperimentBranch(env.win,
+            ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+            AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
 
-    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
-    ampAutoAdsElem.setAttribute('type', 'adsense');
-    ampAutoAds.buildCallback();
+        ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+        ampAutoAdsElem.setAttribute('type', 'adsense');
+        ampAutoAds.buildCallback();
 
-    return new Promise(resolve => {
-      waitForChild(anchor4, parent => {
-        return parent.childNodes.length > 0;
-      }, () => {
-        expect(anchor1.childNodes).to.have.lengthOf(1);
-        expect(anchor2.childNodes).to.have.lengthOf(1);
-        expect(anchor3.childNodes).to.have.lengthOf(0);
-        expect(anchor4.childNodes).to.have.lengthOf(1);
-        verifyAdElement(anchor1.childNodes[0]);
-        verifyAdElement(anchor2.childNodes[0]);
-        verifyAdElement(anchor4.childNodes[0]);
-        resolve();
+        return new Promise(resolve => {
+          waitForChild(anchor4, parent => {
+            return parent.childNodes.length > 0;
+          }, () => {
+            expect(anchor1.childNodes).to.have.lengthOf(1);
+            expect(anchor2.childNodes).to.have.lengthOf(1);
+            expect(anchor3.childNodes).to.have.lengthOf(0);
+            expect(anchor4.childNodes).to.have.lengthOf(1);
+            verifyAdElement(anchor1.childNodes[0]);
+            verifyAdElement(anchor2.childNodes[0]);
+            verifyAdElement(anchor4.childNodes[0]);
+            resolve();
+          });
+        });
       });
-    });
-  });
 
-  it('should not insert ads on the page when in holdout control branch', () => {
-    forceExperimentBranch(env.win,
-        ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-        AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
+  it.skip('should not insert ads on the page when in holdout control branch',
+      () => {
+        forceExperimentBranch(env.win,
+            ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+            AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
 
-    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
-    ampAutoAdsElem.setAttribute('type', 'adsense');
-    ampAutoAds.buildCallback();
+        ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+        ampAutoAdsElem.setAttribute('type', 'adsense');
+        ampAutoAds.buildCallback();
 
-    return new Promise(resolve => {
-      setTimeout(() => {
-        expect(anchor1.childNodes).to.have.lengthOf(0);
-        expect(anchor2.childNodes).to.have.lengthOf(0);
-        expect(anchor3.childNodes).to.have.lengthOf(0);
-        expect(anchor4.childNodes).to.have.lengthOf(0);
-        resolve();
-      }, 500);
-    });
-  });
+        return new Promise(resolve => {
+          setTimeout(() => {
+            expect(anchor1.childNodes).to.have.lengthOf(0);
+            expect(anchor2.childNodes).to.have.lengthOf(0);
+            expect(anchor3.childNodes).to.have.lengthOf(0);
+            expect(anchor4.childNodes).to.have.lengthOf(0);
+            resolve();
+          }, 500);
+        });
+      });
 
-  it('should insert ads with the config provided attributes', () => {
+  it.skip('should insert ads with the config provided attributes', () => {
     configObj.attributes = {
       'bad-name': 'should be filtered',
       'data-custom-att-1': 'val-1',
@@ -287,34 +290,35 @@ describes.realWin('amp-auto-ads', {
     });
   });
 
-  it('should override ad network type with config provided attribute', () => {
-    configObj.attributes = {
-      'type': 'doubleclick',
-    };
+  it.skip('should override ad network type with config provided attribute',
+      () => {
+        configObj.attributes = {
+          'type': 'doubleclick',
+        };
 
-    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
-    ampAutoAdsElem.setAttribute('type', 'adsense');
-    ampAutoAds.buildCallback();
+        ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+        ampAutoAdsElem.setAttribute('type', 'adsense');
+        ampAutoAds.buildCallback();
 
-    return new Promise(resolve => {
-      waitForChild(anchor4, parent => {
-        return parent.childNodes.length > 0;
-      }, () => {
-        expect(anchor1.childNodes).to.have.lengthOf(1);
-        expect(anchor1.childNodes[0].getAttribute('type'))
-            .to.equal('doubleclick');
+        return new Promise(resolve => {
+          waitForChild(anchor4, parent => {
+            return parent.childNodes.length > 0;
+          }, () => {
+            expect(anchor1.childNodes).to.have.lengthOf(1);
+            expect(anchor1.childNodes[0].getAttribute('type'))
+                .to.equal('doubleclick');
 
-        expect(anchor2.childNodes).to.have.lengthOf(1);
-        expect(anchor2.childNodes[0].getAttribute('type'))
-            .to.equal('doubleclick');
+            expect(anchor2.childNodes).to.have.lengthOf(1);
+            expect(anchor2.childNodes[0].getAttribute('type'))
+                .to.equal('doubleclick');
 
-        expect(anchor4.childNodes).to.have.lengthOf(1);
-        expect(anchor4.childNodes[0].getAttribute('type'))
-            .to.equal('doubleclick');
-        resolve();
+            expect(anchor4.childNodes).to.have.lengthOf(1);
+            expect(anchor4.childNodes[0].getAttribute('type'))
+                .to.equal('doubleclick');
+            resolve();
+          });
+        });
       });
-    });
-  });
 
   it('should fetch a config from the correct URL', () => {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);

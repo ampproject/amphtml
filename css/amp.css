@@ -85,6 +85,9 @@ html.i-amphtml-fie > body {
 html.i-amphtml-webview > body {
   overflow-x: hidden !important;
   overflow-y: visible !important;
+  /* A <body> height of 0 will be hidden due to "overflow-x: hidden". */
+  /* Prevent this by setting min-height to 100vh. See b/74541306. */
+  min-height: 100vh !important;
 }
 
 
