@@ -20,9 +20,6 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - pip install --user protobuf
-  - gem install percy-capybara capybara selenium-webdriver chromedriver-helper
-  - chromedriver-update 2.35
-  - chromedriver -v
 script: node build-system/pr-check.js
 after_script:
   - build-system/sauce_connect/stop_sauce_connect.sh
@@ -55,6 +52,5 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-    - .gem
   pip: true
   bundler: true
