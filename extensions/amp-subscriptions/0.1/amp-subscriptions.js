@@ -395,9 +395,16 @@ export class SubscriptionService {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId());
-      if (!selectedEntitlement.granted) {
+      if (selectedEntitlement.granted) {
+        this.subscriptionAnalytics_.serviceEvent(
+            SubscriptionAnalyticsEvents.ACCESS_GRANTED,
+            selectedPlatform.getServiceId());
+      } else {
         this.subscriptionAnalytics_.serviceEvent(
             SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+            selectedPlatform.getServiceId());
+        this.subscriptionAnalytics_.serviceEvent(
+            SubscriptionAnalyticsEvents.ACCESS_DENIED,
             selectedPlatform.getServiceId());
       }
     });

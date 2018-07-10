@@ -285,6 +285,24 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           's.animation="none";' +
           's.WebkitAnimation="none;"},1000);throw e};',
     }),
+    compileJs('./src/', 'amp.js', './dist', {
+      minifiedName: 'v0-esm.js',
+      includePolyfills: true,
+      includeOnlyESMLevelPolyfills: true,
+      checkTypes: opt_checkTypes,
+      watch,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      minify: shouldMinify,
+      // If there is a sync JS error during initial load,
+      // at least try to unhide the body.
+      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+          'setTimeout(function(){' +
+          'var s=document.body.style;' +
+          's.opacity=1;' +
+          's.visibility="visible";' +
+          's.animation="none";' +
+          's.WebkitAnimation="none;"},1000);throw e};',
+    }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
           toName: 'amp-viewer-host.max.js',
