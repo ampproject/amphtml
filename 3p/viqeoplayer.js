@@ -115,7 +115,7 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
  * @param {!Window} global
  */
 export function viqeoplayer(global) {
-  const {data} = global.context;
+  const data = getData(global.context);
   const videoId = user().assert(
       data['videoid'],
       'The data-videoid attribute is required for <amp-viqeo-player> %s',
