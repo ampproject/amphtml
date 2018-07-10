@@ -18,6 +18,7 @@ import {Animation} from '../../../src/animation';
 import {bezierCurve} from '../../../src/curve';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
@@ -34,7 +35,7 @@ import {setStyle} from '../../../src/style';
 
 // this.mutateElement(callback), in which move children
 
-
+// TODO(kqian): fix gesture collision between drag mouseup and click to move
 export class AmpImageSlider extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -46,7 +47,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.isMobile_ = platform_.isAndroid() || platform_.isIos();
 
     /** @private {boolean} */
-    this.isFollowSlider_ = (this.element.getAttribute('type') === 'follow')
+    this.isHoverSlider_ = (this.element.getAttribute('type') === 'hover')
         && !this.isMobile_; // coerce to drag slider on mobile
 
     /** @private {!Element} */
@@ -75,6 +76,13 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {?Element} */
     this.barButtonIcon_ = null;
 
+    /** @private {number} */
+    this.moveOffset_ = 0;
+
+    /** @private {number} */
+    this.splitOffset_ = 0;
+
+    // Bind this of handlers
     this.handleHover = this.handleHover.bind(this);
     this.handleClickImage = this.handleClickImage.bind(this);
     this.handleTapImage = this.handleTapImage.bind(this);
@@ -88,9 +96,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.touchEnd = this.touchEnd.bind(this);
 
     this.pointerMoveX_ = this.pointerMoveX_.bind(this);
-
-    this.moveOffset_ = 0;
-    this.splitOffset_ = 0;
   }
 
   /** @override */
@@ -108,16 +113,17 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.leftAmpImage_ = children[0];
     this.rightAmpImage_ = children[1];
 
+    const buildDeferred = new Deferred();
+
     this.mutateElement(() => {
       this.buildImages();
       this.buildBar();
+      buildDeferred.resolve();
     });
-  }
 
-  /**
-   * Apply styling of images
-   * This is created such that the styling would
-   */
+    // Ensure layoutCallback is execute after build finishes
+    return buildDeferred.promise;
+  }
 
   /**
    * Build image structures
@@ -139,8 +145,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Build the image slider bar
    */
   buildBar() {
-    if (this.isFollowSlider_) {
-      this.buildFollowSliderBar();
+    if (this.isHoverSlider_) {
+      this.buildHoverSliderBar();
     } else {
       this.buildTapSliderBar();
     }
@@ -149,7 +155,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Build slider bar that follows mouse movement
    */
-  buildFollowSliderBar() {
+  buildHoverSliderBar() {
     this.container_.appendChild(this.bar_);
     this.bar_.appendChild(this.barStick_);
 
@@ -201,7 +207,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Register event handlers
    */
   registerEvents() {
-    if (this.isFollowSlider_) {
+    if (this.isHoverSlider_) {
       this.container_.addEventListener('mousemove', this.handleHover);
     } else {
       // Use container_ for drag operation instead
@@ -217,7 +223,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Unregister event handlers
    */
   unregisterEvents() {
-    if (this.isFollowSlider_) {
+    if (this.isHoverSlider_) {
       this.container_.removeEventListener('mousemove', this.handleHover);
     } else {
       this.element.removeEventListener('click', this.handleClickImage);
@@ -374,7 +380,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {number} pointerX
    */
   pointerMoveX_(pointerX) {
-    const width = this.container_.offsetWidth;
+    const {width} = this.container_.getBoundingClientRect();
     const {left: leftBound, right: rightBound}
         = this.container_.getBoundingClientRect();
 
@@ -392,7 +398,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    Promise.all([
+    return Promise.all([
       // On load_start, <img>s are already created.
       this.leftAmpImage_.signals().whenSignal(CommonSignals.LOAD_START),
       this.rightAmpImage_.signals().whenSignal(CommonSignals.LOAD_START),
@@ -411,4 +417,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-image-slider', AmpImageSlider, CSS);
+AMP.extension('amp-image-slider', '0.1', AMP => {
+  AMP.registerElement('amp-image-slider', AmpImageSlider, CSS);
+});
