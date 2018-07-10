@@ -87,7 +87,9 @@ function getMode_(win) {
   // paths for localhost/testing/development are eliminated.
   return {
     localDev: isLocalDev,
-    // Triggers validation
+    // Triggers validation or enable pub level logging. Validation can be
+    // bypassed via #validate=0.
+    // Note that AMP_DEV_MODE flag is used for testing purposes.
     development: !!(hashQuery['development'] == '1' || win.AMP_DEV_MODE),
     examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
