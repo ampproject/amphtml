@@ -342,10 +342,10 @@ describes.fakeWin('runtime', {
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('');
     runChunksForTesting(win.document);
-    const script = win.document.querySelector(`[data-script=_base_ext]`);
+    const script = win.document.querySelector('[data-script=_base_ext]');
     expect(script).to.be.null;
     return promise.then(() => {
-      const script = win.document.querySelector(`[data-script=_base_ext]`);
+      const script = win.document.querySelector('[data-script=_base_ext]');
       console.log(script);
       expect(spy).to.have.been.calledWith('_base_ext');
       expect(script).to.not.be.null;
@@ -388,13 +388,13 @@ describes.fakeWin('runtime', {
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('');
     runChunksForTesting(win.document);
-    const script1 = win.document.querySelector(`[data-script=_base_ext]`);
+    const script1 = win.document.querySelector('[data-script=_base_ext]');
     expect(script1).to.be.null;
-    const script2 = win.document.querySelector(`[data-script=_base_ext2]`);
+    const script2 = win.document.querySelector('[data-script=_base_ext2]');
     expect(script2).to.be.null;
     return promise.then(() => {
-      const script1 = win.document.querySelector(`[data-script=_base_ext]`);
-      const script2 = win.document.querySelector(`[data-script=_base_ext2]`);
+      const script1 = win.document.querySelector('[data-script=_base_ext]');
+      const script2 = win.document.querySelector('[data-script=_base_ext2]');
       expect(script1).to.not.be.null;
       expect(script2).to.not.be.null;
 
@@ -438,7 +438,7 @@ describes.fakeWin('runtime', {
       },
     });
 
-    const promise = adopt(win);
+    adopt(win);
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('');
     runChunksForTesting(win.document);
