@@ -365,7 +365,9 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // Body height doesn't include paddingTop on the parent, so we add on the
     // position of the body from the top of the viewport and subtract the
     // scrollTop (as position relative to the viewport changes as you scroll).
-    return this.wrapper_.scrollHeight + this.paddingTop_ + this.getBorderTop();
+    return this.wrapper_./*OK*/scrollHeight
+        + this.paddingTop_
+        + this.getBorderTop();
   }
 
   /** @override */
