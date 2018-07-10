@@ -715,56 +715,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(impl.iframe).is.ok;
     });
 
-    it('should remove FIE if in all exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should remove non-FIE if in all exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not remove FIE if in remain exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.iframe).is.ok;
-    });
-
-    it('should remove rendered non-FIE if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not destroy ad promise for unrendered if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = 'abcdef';
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should destroy ad promise if ad response not yet received and in ' +
-        'remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = null;
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
           impl.ampAnalyticsConfig_ = {};

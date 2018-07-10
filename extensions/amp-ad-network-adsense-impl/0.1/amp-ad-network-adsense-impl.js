@@ -442,21 +442,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   unlayoutCallback() {
-    switch (this.postAdResponseExperimentFeatures['unlayout_exp']) {
-      case 'all':
-        // Ensure all creatives are removed.
-        this.isAmpCreative_ = false;
-        break;
-      case 'remain':
-        if (this.qqid_ && this.isAmpCreative_ === null) {
-          // Ad response received but not yet rendered.  Note that no fills
-          // would fall into this case even if layoutCallback has executed.
-          // Assume high probability of continued no fill therefore do not
-          // tear down.
-          dev().info(TAG, 'unlayoutCallback - unrendered creative can remain');
-          return false;
-        }
-    }
     if (this.isAmpCreative_) {
       // Allow AMP creatives to remain in case SERP viewer swipe back.
       return false;
