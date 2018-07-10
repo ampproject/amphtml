@@ -112,7 +112,7 @@ export function assertScreenReaderElement(element) {
 /////////////////
 
 /** @const {string} */
-const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
+const REQUEST_URL = 'localhost:9876/amp4test/request-bank/';
 
 /**
  * Append user agent to request-bank deposit/withdraw IDs to avoid
