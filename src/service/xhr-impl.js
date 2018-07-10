@@ -198,6 +198,24 @@ export class Xhr extends XhrBase {
           return assertSuccess(response);
         });
   }
+
+  /**
+   * @return {!FetchResponse}
+   * @override
+   */
+  fromStructuredCloneable_(response, responseType) {
+    user().assert(isObject(response), 'Object expected: %s', response);
+
+    dev().assert(responseType == 'document',
+        'fromStructuredCloneable_ called with invalid document responseType');
+    if (typeof this.win.Response === 'function') {
+      // Use native `Response` type if available for performance. If response
+      // type is `document`, we must fall back to `Response` polyfill
+      // because callers would then rely on the `responseXML` property being
+      // present, which is not supported by the Response type.
+      return new this.win.Response(response['body'], response['init']);
+    }
+  }
 }
 
 /**

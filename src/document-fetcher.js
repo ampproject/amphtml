@@ -16,8 +16,10 @@
 
 import {FetchInitDef, FetchResponse, fetchPolyfill} from './fetch-polyfill.js';
 import {XhrBase, assertSuccess, setupInit} from './xhr-base';
-import {dev} from './log';
+import {dev, user} from './log';
+import {isArray, isObject} from './types';
 import {isFormDataWrapper} from './form-data-wrapper';
+import {map} from './utils/object.js';
 
 export class DocumentFetcher extends XhrBase {
   /**
@@ -70,6 +72,55 @@ export class DocumentFetcher extends XhrBase {
           + ' polyfill before fetching a document');
       return response.document_();
     });
+  }
+
+  /**
+   * @return {!FetchResponse} The deserialized regular response.
+   * @override
+   */
+  fromStructuredCloneable_(response, responseType) {
+    user().assert(isObject(response), 'Object expected: %s', response);
+
+    dev().assert(responseType == 'document',
+        'fromStructuredCloneable_ called with non-document responseType');
+
+    const lowercasedHeaders = map();
+    const data = {
+      status: 200,
+      statusText: 'OK',
+      responseText: (response['body'] ? String(response['body']) : ''),
+      /**
+       * @param {string} name
+       * @return {string}
+       */
+      getResponseHeader(name) {
+        return lowercasedHeaders[String(name).toLowerCase()] || null;
+      },
+    };
+
+    if (response['init']) {
+      const init = response['init'];
+      if (isArray(init.headers)) {
+        init.headers.forEach(entry => {
+          const headerName = entry[0];
+          const headerValue = entry[1];
+          lowercasedHeaders[String(headerName).toLowerCase()] =
+              String(headerValue);
+        });
+      }
+      if (init.status) {
+        data.status = parseInt(init.status, 10);
+      }
+      if (init.statusText) {
+        data.statusText = String(init.statusText);
+      }
+    }
+
+
+    data.responseXML =
+        new DOMParser().parseFromString(data.responseText, 'text/html');
+
+    return new FetchResponse(data);
   }
 }
 

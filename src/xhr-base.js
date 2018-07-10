@@ -10,7 +10,6 @@ import {
   parseUrlDeprecated,
 } from './url';
 import {getMode} from './mode';
-import {isArray, isObject} from './types';
 import {isFormDataWrapper} from './form-data-wrapper';
 
 /** @private @const {string} */
@@ -261,63 +260,15 @@ export class XhrBase {
    * 3. If `responseType` is `document`, also parse the body and populate
    * `responseXML` as a `Document` type.
    *
-   * @param {JsonObject|string|undefined} response The structurally-cloneable
+   * @param {JsonObject|string|undefined} unusedResponse The structurally-cloneable
    *     response to convert back to a regular Response.
-   * @param {string|undefined} responseType The original response type used to
+   * @param {string|undefined} unusedResponseType The original response type used to
    *     initiate the XHR.
-   * @return {!FetchResponse|!Response} The deserialized regular response.
-   * @private
+   * @return {*} The deserialized regular response.
+   * @protected
    */
-  fromStructuredCloneable_(response, responseType) {
-    user().assert(isObject(response), 'Object expected: %s', response);
-
-    const isDocumentType = responseType == 'document';
-    if (typeof this.win.Response === 'function' && !isDocumentType) {
-      // Use native `Response` type if available for performance. If response
-      // type is `document`, we must fall back to `Response` polyfill
-      // because callers would then rely on the `responseXML` property being
-      // present, which is not supported by the Response type.
-      return new this.win.Response(response['body'], response['init']);
-    }
-
-    const lowercasedHeaders = map();
-    const data = {
-      status: 200,
-      statusText: 'OK',
-      responseText: (response['body'] ? String(response['body']) : ''),
-      /**
-       * @param {string} name
-       * @return {string}
-       */
-      getResponseHeader(name) {
-        return lowercasedHeaders[String(name).toLowerCase()] || null;
-      },
-    };
-
-    if (response['init']) {
-      const init = response['init'];
-      if (isArray(init.headers)) {
-        init.headers.forEach(entry => {
-          const headerName = entry[0];
-          const headerValue = entry[1];
-          lowercasedHeaders[String(headerName).toLowerCase()] =
-              String(headerValue);
-        });
-      }
-      if (init.status) {
-        data.status = parseInt(init.status, 10);
-      }
-      if (init.statusText) {
-        data.statusText = String(init.statusText);
-      }
-    }
-
-    if (isDocumentType) {
-      data.responseXML =
-          new DOMParser().parseFromString(data.responseText, 'text/html');
-    }
-
-    return new FetchResponse(data);
+  fromStructuredCloneable_(unusedResponse, unusedResponseType) {
+    dev().error('xhr-impl', 'fromStructuredCloneable_ is not implemented');
   }
 }
 
