@@ -44,7 +44,6 @@ The `amp-date-countdown` provides countdown time data that you can render in you
 ```html
 <amp-date-countdown id="ampdate"
     end-date="2020-06-20T00:00:00+08:00"
-    when-ended="stop"
     locale="en"
     height="235" width="500">
   <template type="amp-mustache">
@@ -126,7 +125,7 @@ A POSIX epoch value in seconds; assumed to be UTC timezone. For example, `timest
 A positive or negative number that represents the number of seconds to add or subtract from the `end-date`. For example, `offset-seconds="60"` adds 60 seconds to the end-date.
 
 ##### when-ended (optional)
-Specifies whether to stop the timer when it reaches 0 seconds. The value can be set to `stop` (default) to indicate the timer to stop at 0 secondsand will not pass the final date.
+Specifies whether to stop the timer when it reaches 0 seconds. The value can be set to `stop` (default) to indicate the timer to stop at 0 seconds and will not pass the final date or `continue` to indicate the timer should continue after reaching 0 seconds.
 
 ##### locale (optional)
 An i18n language string for each timer unit. The default value is `en` (for English).
