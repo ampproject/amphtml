@@ -55,6 +55,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {?Element} */
     this.leftAmpImage_ = null;
 
+    /** @private {?Element} */
+    this.leftRealImage_ = null;
+
     /** @private {!Element} */
     this.mask_ = this.win.document.createElement('div');
 
@@ -81,12 +84,8 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.pointerMoveX_ = this.pointerMoveX_.bind(this);
 
-    this.vsync_ = this.getVsync();
-
     this.moveOffset_ = 0;
     this.splitOffset_ = 0;
-
-    this.isMouseButtonDown_ = false;
   }
 
   /** @override */
@@ -105,9 +104,16 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.leftAmpImage_ = children[0];
     this.rightAmpImage_ = children[1];
 
-    this.buildImages();
-    this.buildBar();
+    this.mutateElement(() => {
+      this.buildImages();
+      this.buildBar();
+    });
   }
+
+  /**
+   * Apply styling of images
+   * This is created such that the styling would
+   */
 
   /**
    * Build image structures
@@ -123,11 +129,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.mask_.classList.add('i-amphtml-image-slider-mask');
     this.leftAmpImage_.classList.add('i-amphtml-image-slider-over-image');
-
-    // seems that if I do not take their ownership
-    // they would just never rendered (no layout, not even built)
-    this.setAsOwner(this.leftAmpImage_);
-    this.setAsOwner(this.rightAmpImage_);
   }
 
   /**
@@ -177,10 +178,9 @@ export class AmpImageSlider extends AMP.BaseElement {
   updatePositions(leftPercentage) {
     this.updateTranslateX(this.bar_, leftPercentage);
 
-    const wrappedImage = this.leftAmpImage_.firstChild;
-    if (wrappedImage) {
+    if (this.leftRealImage_) {
       this.updateTranslateX(this.mask_, leftPercentage - 1);
-      this.updateTranslateX(wrappedImage, 1 - leftPercentage);
+      this.updateTranslateX(this.leftRealImage_, 1 - leftPercentage);
     }
   }
 
@@ -229,25 +229,12 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Set mouse button as down
-   * RESERVED FOR LATER
-   */
-  setMouseButtonDown_() { this.isMouseButtonDown_ = true; }
-
-  /**
-   * Set mouse button as up
-   * RESERVED FOR LATER
-   */
-  setMouseButtonUp_() { this.isMouseButtonDown_ = false; }
-
-  /**
    * Handle hover event
    * @param {Event} e
    */
   handleHover(e) {
     // This offsetWidth may change if user resize window
     // Thus not cached
-    // TODO(kqian): vsync measure?
     const {left, right} = this.container_.getBoundingClientRect();
     const leftPercentage = (e.pageX - left) / (right - left);
     this.updatePositions(leftPercentage);
@@ -287,19 +274,18 @@ export class AmpImageSlider extends AMP.BaseElement {
     const {left: barLeft} = this.bar_.getBoundingClientRect();
 
     const fromPercentage = (barLeft - containerLeft) / containerWidth;
-    const wrappedImage = this.leftAmpImage_.firstChild;
     const interpolate = numeric(fromPercentage, toPercentage);
     const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
     const duration = 200;
-    // Using this.bar_ as a standard element
-    // to hack and create non-delayed animations on all 3 elements
+    // Single animation ensure elements have props updated at same pace
+    // Multiple animations would be scheduled at different raf
     return Animation.animate(this.element, pos => {
       setStyle(this.bar_, 'transform',
           `translateX(${interpolate(pos) * 100}%)`);
-      if (wrappedImage) {
+      if (this.leftRealImage_) {
         setStyle(this.mask_, 'transform',
             `translateX(${(interpolate(pos) - 1) * 100}%)`);
-        setStyle(wrappedImage, 'transform',
+        setStyle(this.leftRealImage_, 'transform',
             `translateX(${(1 - interpolate(pos)) * 100}%)`);
       }
     }, duration, curve).thenAlways();
@@ -312,9 +298,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   dragStart(e) {
     e.preventDefault();
 
-    // TODO(kqian): container or window???
-    // this.container_.addEventListener('mousemove', this.dragMove);
-    // this.container_.addEventListener('mouseup', this.dragEnd);
     this.win.addEventListener('mousemove', this.dragMove);
     this.win.addEventListener('mouseup', this.dragEnd);
 
@@ -334,9 +317,6 @@ export class AmpImageSlider extends AMP.BaseElement {
    * TODO
    */
   dragEnd() {
-    // TODO(kqian): container or window???
-    // this.container_.removeEventListener('mousemove', this.dragMove);
-    // this.container_.removeEventListener('mouseup', this.dragEnd);
     this.win.removeEventListener('mousemove', this.dragMove);
     this.win.removeEventListener('mouseup', this.dragEnd);
 
@@ -403,14 +383,15 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.scheduleLayout(this.leftAmpImage_);
-    this.scheduleLayout(this.rightAmpImage_);
-
     Promise.all([
-      // LOAD_START
-      this.leftAmpImage_.signals().whenSignal(CommonSignals.LOAD_END),
-      this.rightAmpImage_.signals().whenSignal(CommonSignals.LOAD_END),
-    ]).then(() => this.registerEvents());
+      // On load_start, <img>s are already created.
+      this.leftAmpImage_.signals().whenSignal(CommonSignals.LOAD_START),
+      this.rightAmpImage_.signals().whenSignal(CommonSignals.LOAD_START),
+    ]).then(() => {
+      // Here we have our real image tag
+      this.leftRealImage_ = this.leftAmpImage_.firstChild;
+      this.registerEvents();
+    });
   }
 
   /** @override */
