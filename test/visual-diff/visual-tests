@@ -263,9 +263,6 @@
       "name": "amp-facebook - Amp By Example"
     },
     {
-    {
-      "flaky": true,
-      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-facebook-like/index.html",
       "name": "amp-facebook-like - Amp By Example"
     },
@@ -282,8 +279,6 @@
       "name": "amp-form - Amp By Example"
     },
     {
-      "flaky": true,
-      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-fx-collection/index.html",
       "name": "amp-fx-collection - Amp By Example"
     },
@@ -359,8 +354,6 @@
       "name": "amp-lightbox - Amp By Example"
     },
     {
-      "flaky": true,
-      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-lightbox-gallery/index.html",
       "name": "amp-lightbox-gallery - Amp By Example"
     },
