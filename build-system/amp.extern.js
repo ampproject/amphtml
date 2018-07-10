@@ -57,7 +57,7 @@ ExtensionPayload.prototype.p;
 /** @type {string} */
 ExtensionPayload.prototype.v;
 
-/** @type {Array<string>|string|undefined} */
+/** @type {!Array<string>|string|undefined} */
 ExtensionPayload.prototype.i;
 
 

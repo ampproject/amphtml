@@ -346,7 +346,6 @@ describes.fakeWin('runtime', {
     expect(script).to.be.null;
     return promise.then(() => {
       const script = win.document.querySelector('[data-script=_base_ext]');
-      console.log(script);
       expect(spy).to.have.been.calledWith('_base_ext');
       expect(script).to.not.be.null;
       // ext1 should not be executed yet and needs to wait on _base_ext
