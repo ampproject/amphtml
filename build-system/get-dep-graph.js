@@ -137,12 +137,15 @@ exports.getBundleFlags = function(g) {
   const indexOfAmp = bundleKeys.indexOf('src/amp.js');
   bundleKeys.splice(indexOfAmp, 1);
   bundleKeys.splice(1, 0, 'src/amp.js');
+  const indexOfIntermedia = bundleKeys.indexOf('_intermediate');
+  bundleKeys.splice(indexOfIntermedia, 1);
+  bundleKeys.splice(1, 0, '_intermediate');
 
   bundleKeys.forEach(function(originalName) {
     const isBase = originalName == '_base';
     const isMain = originalName == 'src/amp.js';
     let extraModules = 0;
-    // TODO(erwinm): This access will break 
+    // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
     if (isBase || bundleKeys.length == 1) {
       flagsArray.push('--js', relativePath(process.cwd(),
@@ -180,8 +183,8 @@ exports.getBundleFlags = function(g) {
         cmd += `:${configEntry.type}`;
       } else {
         // All lower tier bundles depend on src-amp (v0.js)
-        if (name.includes(TYPES_VALUES)) {
-          cmd += ':src-amp';
+        if (TYPES_VALUES.includes(name)) {
+          cmd += ':_intermediate';
         } else {
           cmd += ':_base';
         }
@@ -238,6 +241,12 @@ exports.getGraph = function(entryModules, config) {
         // The modules in the bundle.
         modules: [],
       },
+      _intermediate: {
+        isBase: true,
+        name: '_intermediate',
+        // The modules in the bundle.
+        modules: [],
+      }
     },
     packages: {},
     browserMask: {},
