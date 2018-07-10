@@ -26,6 +26,7 @@ const port = argv.port || process.env.PORT || 8000;
 const useHttps = argv.https != undefined;
 const quiet = argv.quiet != undefined;
 const sendCachingHeaders = argv.cache != undefined;
+const noCachingExtensions = argv.noCachingExtensions != undefined;
 
 /**
  * Starts a simple http server at the repository root
@@ -57,6 +58,7 @@ function serve() {
       'SERVE_PROCESS_ID': process.pid,
       'SERVE_QUIET': quiet,
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
+      'SERVE_EXTENSIONS_WITHOUT_CACHING': noCachingExtensions,
     },
     stdout: !quiet,
   };
