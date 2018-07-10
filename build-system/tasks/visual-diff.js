@@ -354,8 +354,7 @@ async function generateSnapshots(percy, page, webpages) {
  * @param {string} config Config being used. One of 'canary' or 'prod'.
  */
 async function snapshotWebpages(percy, page, webpages, config) {
-  webpages = webpages.filter(webpage => (!webpage.flaky &&
-        !webpage.url.startsWith('examples/visual-tests/amp-by-example')));
+  webpages = webpages.filter(webpage => !webpage.flaky);
   for (const webpage of webpages) {
     const {url} = webpage;
     const name = `${webpage.name} (${config})`;
@@ -589,12 +588,11 @@ async function createEmptyBuild(page) {
 }
 
 /**
- * Simple wrapper around the JS (Percy-Puppeteer) based visual diff tests.
- *
- * This is the current default mode, which is actively deprecating the Ruby
- * (Capybara) implementation.
+ * Runs the AMP visual diff tests.
  */
-async function visualDiffPuppeteer() {
+async function visualDiff() {
+  setPercyBranch();
+
   if (argv.verify) {
     const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
     const status = await waitForBuildCompletion(buildId);
@@ -632,34 +630,6 @@ async function visualDiffPuppeteer() {
   process.exit();
 }
 
-/**
- * Simple wrapper around the ruby (Percy-Capybara) based visual diff tests.
- *
- * This mode is being actively deprecated and will be removed soon.
- */
-function visualDiffCapybara() {
-  let cmd = 'ruby build-system/tasks/visual-diff.rb';
-  for (const arg in argv) {
-    if (arg !== '_') {
-      cmd = cmd + ' --' + arg;
-    }
-  }
-  execOrDie(cmd);
-}
-
-/**
- * Runs the AMP visual diff tests.
- */
-async function visualDiff() {
-  setPercyBranch();
-
-  if (!argv.capybara) {
-    await visualDiffPuppeteer();
-  } else {
-    visualDiffCapybara();
-  }
-}
-
 gulp.task(
     'visual-diff',
     'Runs the AMP visual diff tests.',
@@ -670,11 +640,9 @@ gulp.task(
         'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
         'headless': '  Runs Chrome in headless mode',
-        'percy_debug': '  Prints debug info from Percy-Capybara libraries',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
-        'capybara': '  [DEPRECATED] Use Capybara (Ruby) instead of Puppeteer',
       },
     }
 );
