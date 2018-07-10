@@ -308,6 +308,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
                 'serviceId': 'local',
               }
           );
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.ACCESS_GRANTED,
+              {
+                'serviceId': 'local',
+              }
+          );
           expect(analyticsEventStub).to.not.be.calledWith(
               SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED);
         });
@@ -347,6 +353,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           );
           expect(analyticsEventStub).to.be.calledWith(
               SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+              {
+                'serviceId': 'local',
+              });
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.ACCESS_DENIED,
               {
                 'serviceId': 'local',
               });
