@@ -701,7 +701,6 @@ message ValidationError {
     DOCUMENT_TOO_COMPLEX = 86;
     INVALID_UTF8 = 96;
 
-    CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
     CSS_SYNTAX_STRAY_TRAILING_BACKSLASH = 38;
     CSS_SYNTAX_UNTERMINATED_COMMENT = 39;
@@ -735,6 +734,8 @@ message ValidationError {
     CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE = 73;
     CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH = 74;
     CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION = 75;
+
+    // reserved 13
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
