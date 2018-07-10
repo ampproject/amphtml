@@ -89,10 +89,21 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   layoutCallback() {
 
     const jsonParams = {
-      allowFullscreen: true,
+      allow: 'autoplay',
     };
 
-    const iframe = getIframe(this.win, this.element, 'viqeoplayer', jsonParams);
+    const iframe = getIframe(
+        this.win,
+        this.element,
+        'viqeoplayer',
+        {},
+        {
+          allowFullscreen: true,
+        });
+
+    // required to display the user gesture in the iframe
+    iframe.setAttribute('allow', 'autoplay');
+
     this.unlistenMessage_ = listen(
         this.win,
         'message',
