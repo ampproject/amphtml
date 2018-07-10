@@ -210,7 +210,7 @@ declareExtensionVersionAlias(
 
 /**
  * Extensions to build when `--extensions=minimal_set`.
- * @private @const {!Set<string>}
+ * @private @const {!Array<string>}
  */
 const MINIMAL_EXTENSION_SET = [
   'amp-ad',
