@@ -185,7 +185,7 @@ function isDocFile(filePath) {
  */
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'visual-diff.rb' ||
+  return (filename == 'visual-diff.js' ||
           filename == 'visual-tests.js' ||
           filePath.startsWith('examples/visual-tests/'));
 }
