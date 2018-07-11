@@ -146,7 +146,7 @@ If you want your image to scale as the window is resized but up to a maximum wid
 
 #### The difference between responsive and intrinsic layout
 
-Both the `responsive` and `intrinsic` layouts create an image that will scale automatically.  The main difference is that the `intrinsic` layout uses an SVG image as it's scaling element.  This will make it behave in the same way as a standard html image while retaining the benifit of the browser knowing the image size on initial layout. The `intrinsic` layout will have an intrinsic size and will inflate a floated `div` until it reaches either the natural image size or a CSS constraint like `max-width`. The `responsive` layout will render 0x0 in a floated `div` becasue it takes its size from the parent which in a float has no natural size.
+Both the `responsive` and `intrinsic` layouts create an image that will scale automatically.  The main difference is that the `intrinsic` layout uses an SVG image as its scaling element.  This will make it behave in the same way as a standard HTML image while retaining the benefit of the browser knowing the image size on initial layout. The `intrinsic` layout will have an intrinsic size and will inflate a floated `div` until it reaches either the natural image size or a CSS constraint like `max-width`. The `responsive` layout will render 0x0 in a floated `div` because it takes its size from the parent, which has no natural size when floated.
 
 #### Setting a fixed sized image
 
