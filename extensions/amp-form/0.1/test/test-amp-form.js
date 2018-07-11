@@ -145,7 +145,7 @@ describes.repeated('', {
           sandbox.stub(ampForm, 'analyticsEvent_');
           sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(true);
           const errorRe =
-            /Non-XHR requests are not supported for viewers with renderTemplate capabilities./;
+            /Non-XHR GETs not supported./;
           allowConsoleError(() => {
             expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
           });
@@ -198,9 +198,6 @@ describes.repeated('', {
           ampForm.handleSubmitEvent_(event);
           return whenCalled(fetchAndRenderTemplate)
               .then(() => {
-                return ampForm.ssrTemplateHelper_
-                    .renderTemplatePromiseForTesting();
-              }).then(() => {
                 expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate)
                     .to.have.been.called;
                 expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate)
@@ -805,6 +802,12 @@ describes.repeated('', {
         };
         ampForm.handleSubmitEvent_(event);
         expect(event.preventDefault).to.be.calledOnce;
+        whenCalled(ampForm.doVarSubs_).then(() => {
+          expect(ampForm.analyticsEvent_).to.be.calledWith(
+              'amp-form-submit',
+              expectedFormData
+          ) ;
+        });
         return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch).to.be.calledOnce;
           expect(ampForm.xhr_.fetch).to.be.calledWith('https://example.com');
@@ -814,10 +817,6 @@ describes.repeated('', {
           expect(config.body).to.not.be.null;
           expect(config.method).to.equal('POST');
           expect(config.credentials).to.equal('include');
-          expect(ampForm.analyticsEvent_).to.be.calledWith(
-              'amp-form-submit',
-              expectedFormData
-          );
         });
       });
     });
@@ -860,15 +859,17 @@ describes.repeated('', {
             .to.have.been.calledWith(clientIdField);
         expect(ampForm.urlReplacement_.expandInputValueAsync)
             .to.have.been.calledWith(canonicalUrlField);
+        whenCalled(ampForm.doVarSubs_).then(() => {
+          expect(ampForm.analyticsEvent_).to.be.calledWith(
+              'amp-form-submit',
+              expectedFormData
+          ) ;
+        });
         return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch).to.be.called;
           expect(clientIdField.value).to.match(/amp-.+/);
           expect(canonicalUrlField.value).to.equal(
               'https%3A%2F%2Fexample.com%2Famps.html');
-
-          expect(ampForm.analyticsEvent_).to.be.calledWithMatch(
-              'amp-form-submit',
-              expectedFormData);
         });
       });
     });
@@ -1546,7 +1547,7 @@ describes.repeated('', {
 
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
-          sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
+          sandbox.stub(ampForm, 'handleSubmitSuccess_');
           sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
 
@@ -1588,7 +1589,7 @@ describes.repeated('', {
 
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
-          sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
+          sandbox.stub(ampForm, 'handleSubmitSuccess_');
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync')
               .returns(new Promise(resolve => {
                 expandAsyncStringResolvers.push(resolve);
@@ -1635,7 +1636,7 @@ describes.repeated('', {
 
           sandbox.stub(form, 'submit');
           sandbox.stub(form, 'checkValidity').returns(true);
-          sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
+          sandbox.stub(ampForm, 'handleSubmitSuccess_');
           sandbox.stub(ampForm.urlReplacement_, 'expandInputValueAsync');
           sandbox.spy(ampForm.urlReplacement_, 'expandInputValueSync');
 

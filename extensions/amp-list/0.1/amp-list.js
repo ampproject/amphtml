@@ -240,8 +240,7 @@ export class AmpList extends AMP.BaseElement {
         return this.scheduleRender_(items);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
-      }).then(onFetchSuccess_.bind(this),
-          onFetchError_.bind(this));
+      }).then(onFetchSuccess_.bind(this), onFetchError_.bind(this));
     }
   }
 
@@ -306,7 +305,6 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      // TODO(alabiaga): should call updatebindings as below?
       this.templates_.findAndRenderTemplate(
           this.element, /** @type {!HTML} */ (current.data))
           .then(element => {
@@ -318,13 +316,7 @@ export class AmpList extends AMP.BaseElement {
           this.element, /** @type {!Array} */ (current.data))
           .then(elements => this.updateBindingsForElements_(elements))
           .then(elements => this.render_(elements))
-          .then(/* onFulfilled */ () => {
-            scheduleNextPass();
-            current.resolver();
-          }, /* onRejected */ () => {
-            scheduleNextPass();
-            current.rejecter();
-          });
+          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
     }
   }
 
