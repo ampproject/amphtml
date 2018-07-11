@@ -15,15 +15,15 @@
  */
 
 import {Animation} from '../../../src/animation';
-import {bezierCurve} from '../../../src/curve';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
+import {Platform} from '../../../src/service/platform-impl';
+import {bezierCurve} from '../../../src/curve';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
-import {Platform} from '../../../src/service/platform-impl';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 

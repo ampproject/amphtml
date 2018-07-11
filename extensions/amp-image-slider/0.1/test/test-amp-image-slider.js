@@ -1,5 +1,5 @@
 import '../amp-image-slider';
-import * as sinon from 'sinon';
+// import * as sinon from 'sinon';
 
 describes.realWin('amp-image-slider component', {
   amp: {
