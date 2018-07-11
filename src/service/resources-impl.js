@@ -890,8 +890,31 @@ export class Resources {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
           newWidth, opt_newMargins, /* force */ false, success => {
             if (success) {
+              if (element.elementName() === 'amp-ad') {
+                window.vrys.que.push(() => {
+                  window.vrys.getInstance('varys-errors').track({
+                    action: 'resize attempt successful for ad',
+                    type: 'event',
+                    category: 'ampruntime',
+                    originalHeight: this.element.offsetHeight,
+                    newHeight,
+                  });
+                });
+              }
               resolve();
             } else {
+              if (element.elementName() === 'amp-ad') {
+                window.vrys.que.push(() => {
+                  window.vrys.getInstance('varys-errors').track({
+                    action: 'resize attempt denied for ad',
+                    type: 'event',
+                    category: 'ampruntime',
+                    originalHeight: this.element.offsetHeight,
+                    newHeight,
+                  });
+                });
+              }
+
               reject(new Error('changeSize attempt denied'));
             }
           });
@@ -1248,6 +1271,7 @@ export class Resources {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
 
+    console.log(request.resource);
     // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
       dev().fine(TAG_, 'change size requests:',
