@@ -47,16 +47,16 @@ The configuration of the experiments is specified in a JSON object.
 <amp-experiment>
   <script type="application/json">
     {
-      aExperiment: {
-        sticky: true,
-        consentNotificationId: "consent-notif",
-        variants: {
-          treatment1: 12.5,
-          treatment2: 12.5,
-          treatment3: 25.0,
-        },
+      "aExperiment": {
+        "sticky": true,
+        "consentNotificationId": "consent-notif",
+        "variants": {
+          "treatment1": 12.5,
+          "treatment2": 12.5,
+          "treatment3": 25.0
+        }
       },
-      bExperiment: {...}
+      "bExperiment": {...}
     }
   </script>
 </amp-experiment>

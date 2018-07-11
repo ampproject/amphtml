@@ -54,10 +54,7 @@ const NUM_SENTENCES_LIMIT = 15;
  */
 const NUM_ALL_CHARS_LIMIT = 1500;
 
-/**
- * TextRange represents a text range.
- * @typedef {{sentences: !Array<string>}}
- */
+/** @typedef {{sentences: !Array<string>, skipRendering: boolean}} */
 let HighlightInfoDef;
 
 /**
@@ -97,8 +94,13 @@ export function getHighlightParam(ampdoc) {
       return null;
     }
   }
+  let skipRendering = false;
+  if (highlight['n']) {
+    skipRendering = true;
+  }
   return {
     sentences: sens,
+    skipRendering,
   };
 }
 
@@ -159,6 +161,14 @@ export class HighlightHandler {
    * @private
    */
   initHighlight_(highlightInfo) {
+    if (this.ampdoc_.win.document.querySelector('script[id="amp-access"]')) {
+      // Disable highlighting if <amp-access> is used because highlighting
+      // interacts badily with UI reflows by <amp-access>.
+      // TODO(yunabe): Remove this once <amp-access> provides an API to delay
+      // code execution after DOM manipulation by <amp-access>.
+      this.sendHighlightState_('has_amp_access');
+      return;
+    }
     this.findHighlightedNodes_(highlightInfo);
     if (!this.highlightedNodes_) {
       this.sendHighlightState_('not_found');
@@ -166,6 +176,9 @@ export class HighlightHandler {
     }
     const scrollTop = this.calcTopToCenterHighlightedNodes_();
     this.sendHighlightState_('found', dict({'scroll': scrollTop}));
+    if (highlightInfo.skipRendering) {
+      return;
+    }
 
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];

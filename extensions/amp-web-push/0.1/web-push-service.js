@@ -472,6 +472,7 @@ export class WebPushService {
 
   /**
    * @private
+   * @param {*} subscriptionStateReply
    * @return {(number|undefined)}
    */
   getSubscriptionStateReplyVersion_(subscriptionStateReply) {
@@ -714,6 +715,7 @@ export class WebPushService {
    * callback is executed.
    *
    * @param {?Window} permissionDialogWindow
+   * @param {!Function} onPopupClosed
    * @private
    */
   checkPermissionDialogClosedInterval_(permissionDialogWindow, onPopupClosed) {

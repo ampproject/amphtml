@@ -65,6 +65,7 @@ import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
+import {yotpo} from './yotpo';
 
 import {_ping_} from '../ads/_ping_';
 
@@ -103,6 +104,7 @@ import {adverline} from '../ads/adverline';
 import {adverticum} from '../ads/adverticum';
 import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
+import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
@@ -244,6 +246,7 @@ import {zucks} from '../ads/zucks';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
+  aja: true,
   _ping_: true,
   '24smi': true,
   bringhub: true,
@@ -306,6 +309,7 @@ register('adverline', adverline);
 register('adverticum', adverticum);
 register('advertserve', advertserve);
 register('affiliateb', affiliateb);
+register('aja', aja);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('appvador', appvador);
@@ -446,6 +450,7 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('yieldone', yieldone);
 register('yieldpro', yieldpro);
+register('yotpo', yotpo);
 register('zedo', zedo);
 register('zergnet', zergnet);
 register('zucks', zucks);
