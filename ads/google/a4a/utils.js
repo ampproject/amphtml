@@ -27,7 +27,6 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
@@ -430,17 +429,38 @@ function elapsedTimeWithCeiling(time, start) {
 /**
  * `nodeOrDoc` must be passed for correct behavior in shadow AMP (PWA) case.
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string=} opt_cid
  * @return {number} The correlator.
  */
-export function getCorrelator(win, nodeOrDoc, opt_cid) {
+export function getCorrelator(win, elementOrAmpDoc, opt_cid) {
   if (!win.ampAdPageCorrelator) {
-    win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, Services.documentInfoForDoc(nodeOrDoc).pageViewId);
+    win.ampAdPageCorrelator = isExperimentOn(win, 'exp-new-correlator') ?
+      Math.floor(4503599627370496 * Math.random()) :
+      makeCorrelator(
+          Services.documentInfoForDoc(elementOrAmpDoc).pageViewId, opt_cid);
   }
   return win.ampAdPageCorrelator;
 }
+
+/**
+ * @param {string} pageViewId
+ * @param {string=} opt_clientId
+ * @return {number}
+ */
+function makeCorrelator(pageViewId, opt_clientId) {
+  const pageViewIdNumeric = Number(pageViewId || 0);
+  if (opt_clientId) {
+    return pageViewIdNumeric + ((opt_clientId.replace(/\D/g, '') % 1e6) * 1e6);
+  } else {
+    // In this case, pageViewIdNumeric is only 4 digits => too low entropy
+    // to be useful as a page correlator.  So synthesize one from scratch.
+    // 4503599627370496 == 2^52.  The guaranteed range of JS Number is at least
+    // 2^53 - 1.
+    return Math.floor(4503599627370496 * Math.random());
+  }
+}
+
 
 /**
  * Collect additional dimensions for the brdim parameter.
@@ -769,26 +789,26 @@ export let IdentityToken;
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Promise<!IdentityToken>}
  */
-export function getIdentityToken(win, nodeOrDoc) {
+export function getIdentityToken(win, elementOrAmpDoc) {
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
-      executeIdentityTokenFetch(win, nodeOrDoc);
+      executeIdentityTokenFetch(win, elementOrAmpDoc);
   return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
 }
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {number=} redirectsRemaining (default 1)
  * @param {string=} domain
  * @param {number=} startTime
  * @return {!Promise<!IdentityToken>}
  */
-function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
+function executeIdentityTokenFetch(win, elementOrAmpDoc, redirectsRemaining = 1,
   domain = undefined, startTime = Date.now()) {
-  const url = getIdentityTokenRequestUrl(win, nodeOrDoc, domain);
+  const url = getIdentityTokenRequestUrl(win, elementOrAmpDoc, domain);
   return Services.xhrFor(win).fetchJson(url, {
     mode: 'cors',
     method: 'GET',
@@ -809,7 +829,7 @@ function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
             return {fetchTimeMs};
           }
           return executeIdentityTokenFetch(
-              win, nodeOrDoc, redirectsRemaining, altDomain, startTime);
+              win, elementOrAmpDoc, redirectsRemaining, altDomain, startTime);
         } else if (freshLifetimeSecs > 0 && validLifetimeSecs > 0 &&
             typeof token == 'string') {
           return {token, jar, pucrd, freshLifetimeSecs, validLifetimeSecs,
@@ -826,12 +846,13 @@ function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
 
 /**
  * @param {!Window} win
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string=} domain
  * @return {string} url
  * @visibleForTesting
  */
-export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
+export function getIdentityTokenRequestUrl(win, elementOrAmpDoc,
+  domain = undefined) {
   if (!domain && win != win.top && win.location.ancestorOrigins) {
     const matches = IDENTITY_DOMAIN_REGEXP_.exec(
         win.location.ancestorOrigins[win.location.ancestorOrigins.length - 1]);
@@ -839,7 +860,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   }
   domain = domain || '.google.com';
   const canonical =
-    extractHost(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl);
+    extractHost(Services.documentInfoForDoc(elementOrAmpDoc).canonicalUrl);
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 

@@ -16,7 +16,7 @@
 
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
-import {Action} from '../amp-story-store-service';
+import {Action, StateProperty} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
@@ -757,6 +757,45 @@ describes.realWin('amp-story', {
         [MediaType.VIDEO]: 8,
       };
       expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+    });
+  });
+
+  // TODO(gmajoulet): WIP, unskip these tests once the paywall navigation code
+  // is checked in.
+  describe('amp-access navigation', () => {
+    it.skip('should set the access state to true if next page blocked', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access-hide', '');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(
+                story.storeService_.get(StateProperty.ACCESS_STATE)).to.be.true;
+          });
+    });
+
+    it.skip('should not navigate if next page is blocked by paywall', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access-hide', '');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
     });
   });
 });

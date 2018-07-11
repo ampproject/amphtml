@@ -22,6 +22,13 @@ import {startsWith} from './string';
 import {tryParseJson} from './json';
 
 
+/** @enum {string} */
+export const SandboxOptions = {
+  ALLOW_SCRIPTS: 'allow-scripts',
+  ALLOW_SAME_ORIGIN: 'allow-same-origin',
+};
+
+
 /**
  * @param {!Event} event
  * @param {?Element} iframe
@@ -63,12 +70,22 @@ export function redispatch(element, event, events) {
 /**
  * @param {!./base-element.BaseElement} video
  * @param {string} src
+ * @param {string=} opt_name
+ * @param {!Array<!SandboxOptions>=} opt_sandbox
  * @return {!Element}
  */
-export function createFrameFor(video, src) {
+export function createFrameFor(video, src, opt_name, opt_sandbox) {
   const {element} = video;
   const frame =
       htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
+
+  if (opt_name) {
+    frame.setAttribute('name', opt_name);
+  }
+
+  if (opt_sandbox) {
+    frame.setAttribute('sandbox', opt_sandbox.join(' '));
+  }
 
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
 

@@ -38,7 +38,6 @@ let ampAdTemplateHelper;
  * Returns the global template helper.
  * @param {!Window} win
  * @return {!AmpAdTemplateHelper}
- * @visibleForTesting
  */
 export function getAmpAdTemplateHelper(win) {
   return ampAdTemplateHelper ||
@@ -76,7 +75,7 @@ export class TemplateValidator extends Validator {
     const parsedResponseBody =
         /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
         tryParseJson(body) || {});
-    return getAmpAdTemplateHelper()
+    return getAmpAdTemplateHelper(context.win)
         .fetch(parsedResponseBody.templateUrl)
         .then(template => {
           const creativeMetadata = getAmpAdMetadata(template);

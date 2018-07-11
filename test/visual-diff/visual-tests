@@ -42,20 +42,22 @@
    *   // Name used to identify snapshots of webpage on Percy.
    *   "name": "Foo test",
    *
-   *   // [optional] CSS elements that must never appear on the webpage.
+   *   // [optional] CSS selectors for elements that must never appear on the
+   *   // webpage.
    *   "forbidden_css": [
    *     ".invalid-css-class",
    *     ".another-invalid-css-class"
    *   ],
    *
-   *   // [optional] CSS elements that may initially appear on the page, but must
-   *   // eventually disappear.
+   *   // [optional] CSS selectors for elements that may initially appear on the
+   *   // page, but must eventually be removed from it or become invisible.
    *   "loading_incomplete_css": [
    *     ".loading-in-progress-css-class",
    *     ".another-loading-in-progress-css-class"
    *   ],
    *
-   *   // [optional] CSS elements that must eventually appear on the page.
+   *   // [optional] CSS selectors for elements that must eventually exist on
+   *   // the page and be visible.
    *   "loading_complete_css": [
    *     ".loading-complete-css-class",
    *     ".another-loading-complete-css-class"
@@ -76,12 +78,8 @@
     {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",
-      "loading_complete_css": [
-        ".login-section"
-      ],
-      "loading_incomplete_css": [
-        ".article-body"
-      ]
+      "loading_incomplete_css": [".article-body"],
+      "loading_complete_css": [".login-section"]
     },
     {
       "url": "examples/visual-tests/font.amp/font.amp.html",
@@ -134,8 +132,7 @@
       "loading_complete_css": [
         ".list1",
         ".list2"
-      ],
-      "loading_incomplete_css": [".i-amphtml-loading-container"]
+      ]
     },
     {
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
@@ -144,7 +141,8 @@
     },
     {
       "url": "examples/visual-tests/video/rotate-to-fullscreen.html",
-      "name": "Video rotate-to-fullscreen"
+      "name": "Video rotate-to-fullscreen",
+      "loading_complete_css": ["video.i-amphtml-replaced-content"]
     },
     /**
       * AMP by Example pages go below this.
@@ -208,6 +206,8 @@
       "name": "amp-bind - Amp By Example"
     },
     {
+       "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-bodymovin-animation/index.html",
       "name": "amp-bodymovin-animation - Amp By Example"
     },
@@ -219,6 +219,9 @@
       "name": "amp-brid-player - Amp By Example"
     },
     {
+      "flaky": true,
+      // Embedded video sometimes takes longer to load, resulting in either a video placeholder or a blank box
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/844624/view/48560754/1400?mode=diff&browser=firefox&snapshot=48560754
       "url": "examples/visual-tests/amp-by-example/components/amp-brightcove/index.html",
       "name": "amp-brightcove - Amp By Example"
     },
@@ -241,6 +244,9 @@
       "name": "amp-dailymotion - Amp By Example"
     },
     {
+      "flaky": true,
+      // The active days on the date picker change daily
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/851544/view/49092701/1400?mode=diff&browser=firefox&snapshot=49092701
       "url": "examples/visual-tests/amp-by-example/components/amp-date-picker/index.html",
       "name": "amp-date-picker - Amp By Example"
     },
@@ -263,14 +269,20 @@
       "name": "amp-facebook - Amp By Example"
     },
     {
+      "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-facebook-comments/index.html",
       "name": "amp-facebook-comments - Amp By Example"
     },
     {
+      "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-facebook-like/index.html",
       "name": "amp-facebook-like - Amp By Example"
     },
     {
+      "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-facebook-page/index.html",
       "name": "amp-facebook-page - Amp By Example"
     },
@@ -287,6 +299,8 @@
       "name": "amp-form - Amp By Example"
     },
     {
+      "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-fx-collection/index.html",
       "name": "amp-fx-collection - Amp By Example"
     },
@@ -295,6 +309,8 @@
       "name": "amp-fx-flying-carpet - Amp By Example"
     },
     {
+      "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-geo/index.html",
       "name": "amp-geo - Amp By Example"
     },
@@ -333,6 +349,9 @@
       "name": "amp-ima-video - Amp By Example"
     },
     {
+      "flaky": true,
+      // srcset image sometimes loads the width-dependent image, sometimes doesn't.
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/844644/view/48563377/411?mode=diff&browser=firefox&snapshot=48563377
       "url": "examples/visual-tests/amp-by-example/components/amp-img/index.html",
       "name": "amp-img - Amp By Example"
     },
@@ -352,6 +371,9 @@
       "name": "amp-jwplayer - Amp By Example"
     },
     {
+      "flaky": true,
+      // Embedded video occasionally takes too long to load, resulting in either a video placeholder or a blank box
+      // e.g., https://percy.io/ampproject/danielrozenberg/builds/844624/view/48561819/1400?mode=diff&browser=firefox&snapshot=48561819
       "url": "examples/visual-tests/amp-by-example/components/amp-kaltura-player/index.html",
       "name": "amp-kaltura-player - Amp By Example"
     },
@@ -360,6 +382,8 @@
       "name": "amp-lightbox - Amp By Example"
     },
     {
+      "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-lightbox-gallery/index.html",
       "name": "amp-lightbox-gallery - Amp By Example"
     },
@@ -398,6 +422,8 @@
       "name": "amp-reach-player - Amp By Example"
     },
     {
+      "flaky": true,
+      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-reddit/index.html",
       "name": "amp-reddit - Amp By Example"
     },

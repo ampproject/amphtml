@@ -31,6 +31,7 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    accessstate: boolean,
  *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
@@ -39,6 +40,7 @@ const TAG = 'amp-story';
  *    landscapestate: boolean,
  *    mutedstate: boolean,
  *    pausedstate: boolean,
+ *    rtlstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
  *    consentid: ?string,
@@ -59,6 +61,7 @@ export const StateProperty = {
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
 
   // App States.
+  ACCESS_STATE: 'accessstate', // amp-access paywall.
   AD_STATE: 'adstate',
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
@@ -67,6 +70,7 @@ export const StateProperty = {
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
   PAUSED_STATE: 'pausedstate',
+  RTL_STATE: 'rtlstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
 
@@ -81,6 +85,7 @@ export const StateProperty = {
 export const Action = {
   CHANGE_PAGE: 'setcurrentpageid',
   SET_CONSENT_ID: 'setconsentid',
+  TOGGLE_ACCESS: 'toggleaccess',
   TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
@@ -89,6 +94,7 @@ export const Action = {
   TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
   TOGGLE_PAUSED: 'togglepaused',
+  TOGGLE_RTL: 'togglertl',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
 };
@@ -103,6 +109,13 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    // Triggers the amp-acess paywall.
+    case Action.TOGGLE_ACCESS:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.ACCESS_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
       return /** @type {!State} */ (Object.assign(
@@ -148,6 +161,10 @@ const actions = (state, action, data) => {
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.SHARE_MENU_STATE]: !!data,
           }));
+    // Triggers right to left experience.
+    case Action.TOGGLE_RTL:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.RTL_STATE]: !!data}));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));
@@ -250,6 +267,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
@@ -258,6 +276,7 @@ export class AmpStoryStoreService {
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAUSED_STATE]: false,
+      [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CONSENT_ID]: null,
