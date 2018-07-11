@@ -69,6 +69,12 @@ aliasBundles.forEach(c => {
 });
 
 /**
+ * Tasks that should print the `--nobuild` help text.
+ * @private @const {!Set<string>}
+ */
+const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
+
+/**
  * Extensions to build when `--extensions=minimal_set`.
  * @private @const {!Array<string>}
  */
@@ -613,10 +619,15 @@ function buildExtensionJs(path, name, version, options) {
  * Prints a message that could help speed up local development.
  */
 function printNobuildHelp() {
-  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
-    log(green('To skip building during future test runs, use'),
-        cyan('--nobuild'), green('with your'), cyan('gulp test'),
-        green('command.'));
+  if (!process.env.TRAVIS) {
+    for (const task of NOBUILD_HELP_TASKS) { // eslint-disable-line amphtml-internal/no-for-of-statement
+      if (argv._.includes(task)) {
+        log(green('To skip building during future'), cyan(task),
+            green('runs, use'), cyan('--nobuild'), green('with your'),
+            cyan(`gulp ${task}`), green('command.'));
+        return;
+      }
+    }
   }
 }
 
