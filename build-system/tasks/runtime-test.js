@@ -604,8 +604,7 @@ function runTests() {
     resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
-      log(green(
-          'Running tests in parallel on ' + c.browsers.length +
+      log(green('Running tests on ' + c.browsers.length +
           ' Sauce Labs browser(s)...'));
     } else {
       log(green('Running tests locally...'));
