@@ -393,6 +393,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateViewportSizeStyles_() {
+    if (!this.activePage_) {
+      return;
+    }
+
     this.vsync_.run({
       measure: state => {
         state.vh = this.activePage_.element./*OK*/clientHeight / 100;
