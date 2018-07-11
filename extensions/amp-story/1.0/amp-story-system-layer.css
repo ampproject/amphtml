@@ -40,11 +40,13 @@
    opacity: 0 !important;
  }
  
- .i-amphtml-story-system-layer-buttons {
-   margin-top: 8px; /* 6px progress bar + 2px margin */
-   float: right !important;
-   pointer-events: auto !important;
- }
+.i-amphtml-story-system-layer-buttons {
+  border: black;
+  float: right;
+  display: flex;
+  margin-top: 8px; /* 6px progress bar + 2px margin */
+
+}
  
  .i-amphtml-story-button {
    background-repeat: no-repeat !important;
@@ -55,11 +57,14 @@
    border-radius: 50% !important;
    box-sizing: border-box !important;
    position: relative !important;
- 
+   pointer-events: auto !important;
+   float: right !important;
    /* for svg backgrounds: */
    background: center center no-repeat !important;
+   display: flex;
  }
  
+
  .i-amphtml-story-button:active {
    /* TODO(alanorozco): do we want material ripple effect? */
    background-color: rgba(0, 0, 0, 0.2) !important;
@@ -82,7 +87,7 @@
    visibility: visible !important;
    z-index: 100001 !important;
  }
- 
+
  [ad-showing] .i-amphtml-story-progress-bar {
    visibility: hidden !important;
  }
@@ -126,9 +131,11 @@
   width: max-content;
   transition-property: opacity, transform !important;
   transition-duration: 200ms !important;
-  margin-top: 22px;
   float: right;
   opacity: 0 !important;
+  position: absolute;
+  top: 14px;
+  right: 48px;
 }
  
  [messagedisplay="show"] .i-amphtml-message-container {
@@ -143,7 +150,11 @@
 .i-amphtml-story-unmute-no-sound-text  {
   width: max-content;
 }
-
+.i-amphtml-story-sound-display{
+  display: inline-block;
+  height: 56px !important;
+  position: relative;
+}
  .i-amphtml-story-mute-audio-control,
  .i-amphtml-story-unmute-audio-control,
  .i-amphtml-story-mute-text,
@@ -221,18 +232,17 @@
    border-radius: 100px !important;
  }
  
- [desktop].i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
+ [desktop].i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons,
+{
    display: flex !important;
    height: 40px !important;
    align-items: center !important;
    justify-content: flex-end !important;
-   margin-top: 0px !important;
  }
  
  [desktop] .i-amphtml-story-share-control {
    display: none !important;
  }
- 
  
  /* Share pill */
  

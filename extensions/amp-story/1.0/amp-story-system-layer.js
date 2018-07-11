@@ -58,17 +58,58 @@ const TEMPLATE = {
             {
               tag: 'div',
               attrs: dict({
-                'role': 'button',
-                'class': UNMUTE_CLASS + ' i-amphtml-story-button',
+                'class': 'i-amphtml-story-sound-display',
               }),
-              
-            },
-            {
-              tag: 'div',
-              attrs: dict({
-                'role': 'button',
-                'class': MUTE_CLASS + ' i-amphtml-story-button',
-              }),
+              children: [
+               
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'class': 'i-amphtml-message-container',
+                  }),
+                  children: [
+                    {
+                      tag: 'div',
+                      attrs: dict({
+                        'class': 'i-amphtml-story-mute-text' ,
+                      }),
+                      localizedStringId:
+                          LocalizedStringId.AMP_STORY_MUTE_BUTTON_TEXT,
+                    },
+                    {
+                      tag: 'div',
+                      attrs: dict({
+                        'class': 'i-amphtml-story-unmute-sound-text',
+                      }),
+                      localizedStringId:
+                          LocalizedStringId.AMP_STORY_UNMUTE_SOUND_BUTTON_TEXT,
+                    },
+                    {
+                      tag: 'div',
+                      attrs: dict({
+                        'class': 'i-amphtml-story-unmute-no-sound-text' ,
+                      }),
+                      localizedStringId:
+                          LocalizedStringId.AMP_STORY_UNMUTE_NO_SOUND_BUTTON_TEXT,
+                    },
+                  ]
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'role': 'button',
+                    'class': UNMUTE_CLASS + ' i-amphtml-story-button',
+                  }),
+                  
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'role': 'button',
+                    'class': MUTE_CLASS + ' i-amphtml-story-button',
+                  }),
+                },
+              ]
             },
             {
               tag: 'div',
@@ -80,37 +121,7 @@ const TEMPLATE = {
         
       ],
     },
-    {tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-message-container',
-          }),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-mute-text' ,
-              }),
-              localizedStringId:
-                  LocalizedStringId.AMP_STORY_MUTE_BUTTON_TEXT,
-            },
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-unmute-sound-text',
-              }),
-              localizedStringId:
-                  LocalizedStringId.AMP_STORY_UNMUTE_SOUND_BUTTON_TEXT,
-            },
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-unmute-no-sound-text' ,
-              }),
-              localizedStringId:
-                  LocalizedStringId.AMP_STORY_UNMUTE_NO_SOUND_BUTTON_TEXT,
-            },
-          ]
-        },
+    
   ],
 };
 
@@ -218,7 +229,7 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-        this.progressBar_.build(pageIds), this.systemLayerEl_.lastChild);
+        this.progressBar_.build(pageIds), this.systemLayerEl_.firstChild);
 
     this.buttonsContainer_ =
         this.systemLayerEl_.querySelector(
@@ -371,7 +382,7 @@ export class SystemLayer {
    * @private
    */
   onHasAudioStateUpdate_(hasAudio) {
-    console.log(hasAudio);
+    console.log("1" + hasAudio);
     this.vsync_.mutate(() => {
       this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
     });
