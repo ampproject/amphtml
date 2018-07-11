@@ -19,11 +19,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>A slider used to slide and compare 2 `amp-img`s</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>TODO</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,21 +31,49 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
+    <td>responsive, TODO</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td>TODO</td>
   </tr>
 </table>
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+`<amp-image-slider>` consists of 2 partially displayed images and a central splitting bar. Moving the bar would result in more or less part of the 2 images displayed.  
 
-## Attributes
+Support 2 types of image compare sliders:  
+1. Drag slider (default): allows user to drag the bar (either mouse down or touch), while also allowing clicking/tapping on the images to move the bar to position.  
+```html
+<amp-image-slider layout="responsive" width="1024" height="600">
+  <!-- amp-img left to bar -->
+  <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+  <!-- amp-img right to bar -->
+  <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+  <!-- (optional) add a label to the left center of left amp-img. If present, MUST be a div -->
+  <div before style="color: red; border: 1px solid red; padding: 1em;">BEFORE</div>
+  <!-- (optional) add a label to the right center of left amp-img. If present, MUST be a div -->
+  <div after style="color: red; border: 1px solid red; padding: 1em;">AFTER</div>
+</amp-image-slider>
+```
+2. Hover slider (requires `type="hover"`): allows user to hover the mouse on the slider, during the process the bar would follow cursor's X position. (Hover slider would be coerced to drag slider on mobile platforms)  
+```html
+<amp-image-slider type="hover" layout="responsive" width="1024" height="600">
+  <!-- amp-img left to bar -->
+  <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+  <!-- amp-img right to bar -->
+  <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+  <!-- (optional) add a label to the left center of left amp-img. If present, MUST be a div -->
+  <div before style="color: red; border: 1px solid red; padding: 1em;">BEFORE</div>
+  <!-- (optional) add a label to the right center of left amp-img. If present, MUST be a div -->
+  <div after style="color: red; border: 1px solid red; padding: 1em;">AFTER</div>
+</amp-image-slider>
+```
 
-FILL THIS IN. Does this extension allow for properties to configure?
+Elements labeled with `before` are related to images displayed on the left of bar, while elements with `after` are related to images on the right.  
+
+TODO: add other sections.
 
 ## Validation
 See [amp-image-slider rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-slider/validator-amp-image-slider.protoascii) in the AMP validator specification.

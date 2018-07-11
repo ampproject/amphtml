@@ -64,6 +64,16 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {?Element} */
     this.leftRealImage_ = null;
 
+    /** @private {?Element} */
+    this.leftLabelWrapper_ = null;
+    /** @private {?Element} */
+    this.leftLabel_ = null;
+
+    /** @private {?Element} */
+    this.rightLabelWrapper_ = null;
+    /** @private {?Element} */
+    this.rightLabel_ = null;
+
     /** @private {!Element} */
     this.mask_ = this.win.document.createElement('div');
 
@@ -109,13 +119,28 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     const children = this.getRealChildren();
 
-    // at least 2 children
-    if (children.length < 2) {
-      return null;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (child.hasAttribute('before')) {
+        switch (child.tagName.toLowerCase()) {
+          case 'amp-img':
+            this.leftAmpImage_ = child;
+            break;
+          case 'div':
+            this.leftLabel_ = child;
+            break;
+        }
+      } else if (child.hasAttribute('after')) {
+        switch (child.tagName.toLowerCase()) {
+          case 'amp-img':
+            this.rightAmpImage_ = child;
+            break;
+          case 'div':
+            this.rightLabel_ = child;
+            break;
+        }
+      }
     }
-
-    this.leftAmpImage_ = children[0];
-    this.rightAmpImage_ = children[1];
 
     const buildDeferred = new Deferred();
 
@@ -139,10 +164,27 @@ export class AmpImageSlider extends AMP.BaseElement {
     // rightAmpImage
     this.container_.appendChild(this.mask_);
     this.container_.appendChild(this.rightAmpImage_);
+    if (this.rightLabel_) {
+      this.rightLabelWrapper_ = this.win.document.createElement('div');
+      this.rightLabelWrapper_.classList
+          .add('i-amphtml-image-slider-right-label-wrapper');
+      this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
+      this.rightLabelWrapper_.appendChild(this.rightLabel_);
+      this.container_.appendChild(this.rightLabelWrapper_);
+    }
     this.mask_.appendChild(this.leftAmpImage_);
 
     this.mask_.classList.add('i-amphtml-image-slider-mask');
     this.leftAmpImage_.classList.add('i-amphtml-image-slider-over-image');
+
+    if (this.leftLabel_) {
+      this.leftLabelWrapper_ = this.win.document.createElement('div');
+      this.leftLabelWrapper_.classList
+          .add('i-amphtml-image-slider-left-label-wrapper');
+      this.leftLabel_.classList.add('i-amphtml-image-slider-left-label');
+      this.leftLabelWrapper_.appendChild(this.leftLabel_);
+      this.mask_.appendChild(this.leftLabelWrapper_);
+    }
   }
 
   /**
@@ -195,6 +237,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.leftRealImage_) {
       this.updateTranslateX(this.mask_, leftPercentage - 1);
       this.updateTranslateX(this.leftRealImage_, 1 - leftPercentage);
+      if (this.leftLabelWrapper_) {
+        this.updateTranslateX(this.leftLabelWrapper_, 1 - leftPercentage);
+      }
     }
   }
 
@@ -233,8 +278,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.element.removeEventListener('click', this.handleClickImage);
       this.element.removeEventListener('touchend', this.handleTapImage);
       // remove pointer related events below
-      this.dragEnd();
-      this.touchEnd();
+      this.dragEnd(null);
+      this.touchEnd(null);
     }
   }
 
@@ -293,6 +338,9 @@ export class AmpImageSlider extends AMP.BaseElement {
       if (this.leftRealImage_) {
         this.updateTranslateX(this.mask_, posInterpolated - 1);
         this.updateTranslateX(this.leftRealImage_, 1 - posInterpolated);
+        if (this.leftLabelWrapper_) {
+          this.updateTranslateX(this.leftLabelWrapper_, 1 - posInterpolated);
+        }
       }
     }, duration, curve).thenAlways();
   }
@@ -323,7 +371,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Remove listeners on drag end
    * e is optional since dragEnd will also be used for unregister cleanup
-   * @param {?Event} e
+   * @param {Event|null} e
    */
   dragEnd(e) {
     if (e) {
@@ -365,7 +413,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
   /**
    * Cleanup when touch released
-   * @param {?Event} e
+   * @param {Event|null} e
    */
   touchEnd(e) {
     if (e) {
@@ -420,6 +468,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unregisterEvents();
+    return true;
   }
 }
 
