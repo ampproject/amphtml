@@ -1054,6 +1054,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
     'optout': '_gaUserPrefs.ioo',
   },
+
   'iplabel': {
     'requests': {
       'collectorUrl': 'm.col.ip-label.net',
@@ -1106,6 +1107,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'urlgroup':''
     }
   },
+
   'krux': {
     'requests': {
       'beaconHost': 'https://beacon.krxd.net',
