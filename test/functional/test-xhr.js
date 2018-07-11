@@ -891,9 +891,6 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     it('should not intercept a 1p cdn from subdomain', () => {
-      sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(true));
-      interceptionEnabledWin.AMP_DEV_MODE = true;
-
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
       return xhr.fetch('https://subdomain-model.cdn.ampproject.org/ww.js')
@@ -901,9 +898,6 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     it('should not intercept a 1p cdn resource', () => {
-      sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(true));
-      interceptionEnabledWin.AMP_DEV_MODE = true;
-
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
       return xhr.fetch('https://cdn.ampproject.org/ww.js')
@@ -1113,7 +1107,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org').then(response => {
+        return xhr.fetch('https://www.some-url.org/some-resource/').then(response => {
           expect(response.headers.get('a')).to.equal('2');
           expect(response.headers.get('b')).to.equal('false');
           expect(response.headers.get('Amp-Access-Control-Allow-Source-Origin'))
