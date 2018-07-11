@@ -1073,15 +1073,15 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       '2520|${navTiming(loadEventStart)}' +
       '&ts=${timestamp}' +
       '&ua=${userAgent}' +
-      '&d=${ipldim}&' +
-      '&i=${clientip}&' +
-      'd[1]=${customdim}&' +
-      'd[2]=${business}&' +
-      'd[3]=${abtesting}&' +
-      'd[4]=${infrastructure}&' +
-      'd[5]=${customer}&' +
-      'u=${urlgroup}&' +
-      'w=${availableScreenWidth}&h=${availableScreenHeight}' +
+      '&d=${ipldim}' +
+      '&i=${clientip}' +
+      '&d[1]=${customdim}' +
+      '&d[2]=${business}' +
+      '&d[3]=${abtesting}' +
+      '&d[4]=${infrastructure}' +
+      '&d[5]=${customer}' +
+      '&u=${urlgroup}' +
+      '&w=${availableScreenWidth}&h=${availableScreenHeight}' +
       '&r=${documentReferrer}' +
       '&l=${browserLanguage}',
     },
