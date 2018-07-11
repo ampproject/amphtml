@@ -256,7 +256,7 @@ function Response(body, init = {}) {
 }
 
 /**
- * Installs fetch polyfill
+ * Installs fetch and Response polyfill
  *
  * @export
  * @param {Window} win

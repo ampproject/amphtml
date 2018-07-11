@@ -53,7 +53,7 @@ export class DocumentFetcher extends XhrBase {
             init.body = init.body.getFormData();
           }
 
-          return (this.xhrRequest_).apply(null, arguments);
+          return (this.xhrRequest_).apply(this, arguments);
         });
   }
 
@@ -65,32 +65,32 @@ export class DocumentFetcher extends XhrBase {
    * @private
    */
   xhrRequest_(input, init) {
-    return new Promise(function(resolve, reject) {
-      this.xhr.open(init.method || 'GET', input, true);
+    return new Promise((resolve, reject) => {
+      this.xhr_.open(init.method || 'GET', input, true);
       if (init.credentials == 'include') {
-        this.xhr.withCredentials = true;
+        this.xhr_.withCredentials = true;
       }
-      this.xhr.responseType = 'document';
+      this.xhr_.responseType = 'document';
       if (init.headers) {
-        Object.keys(init.headers).forEach(function(header) {
-          this.xhr.setRequestHeader(header, init.headers[header]);
+        Object.keys(init.headers).forEach(header => {
+          this.xhr_.setRequestHeader(header, init.headers[header]);
         });
       }
-      this.xhr.onreadystatechange = () => {
-        if (this.xhr.readyState < /* STATUS_RECEIVED */ 2) {
+      this.xhr_.onreadystatechange = () => {
+        if (this.xhr_.readyState < /* STATUS_RECEIVED */ 2) {
           return;
         }
-        if (this.xhr.status < 100 || this.xhr.status > 599) {
-          this.xhr.onreadystatechange = null;
+        if (this.xhr_.status < 100 || this.xhr_.status > 599) {
+          this.xhr_.onreadystatechange = null;
           reject(user().createExpectedError(
-              `Unknown HTTP status ${this.xhr.status}`));
+              `Unknown HTTP status ${this.xhr_.status}`));
           return;
         }
 
         // TODO(dvoytenko): This is currently simplified: we will wait for the
         // whole document loading to complete. This is fine for the use cases
         // we have now, but may need to be reimplemented later.
-        if (this.xhr.readyState == /* COMPLETE */ 4) {
+        if (this.xhr_.readyState == /* COMPLETE */ 4) {
           const options = {
             status: this.xhr_.status,
             statusText: this.xhr_.statusText,
@@ -103,16 +103,16 @@ export class DocumentFetcher extends XhrBase {
           resolve(new Response(body, options));
         }
       };
-      this.xhr.onerror = () => {
+      this.xhr_.onerror = () => {
         reject(user().createExpectedError('Network failure'));
       };
-      this.xhr.onabort = () => {
+      this.xhr_.onabort = () => {
         reject(user().createExpectedError('Request aborted'));
       };
       if (init.method == 'POST') {
-        this.xhr.send(init.body);
+        this.xhr_.send(init.body);
       } else {
-        this.xhr.send();
+        this.xhr_.send();
       }
     });
   }
