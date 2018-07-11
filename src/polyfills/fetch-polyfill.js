@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {FetchResponse} from '../xhr-base';
 import {dev, user} from '../log';
+import {isArray} from '../types';
+import {map} from '../utils/object';
+import {parseJson} from '../json';
+import {utf8Encode} from '../utils/bytes';
 
 /** @private @enum {number} Allowed fetch responses. */
 const allowedFetchTypes_ = {
@@ -108,6 +110,152 @@ function createXhrRequest(method, url) {
 }
 
 /**
+ * Response object in the Fetch API.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ */
+class FetchResponse {
+  /**
+   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
+   */
+  constructor(xhr) {
+    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
+    this.xhr_ = xhr;
+
+    /** @const {number} */
+    this.status = this.xhr_.status;
+
+    /** @const {boolean} */
+    this.ok = this.status >= 200 && this.status < 300;
+
+    /** @const {!FetchResponseHeaders} */
+    this.headers = new FetchResponseHeaders(xhr);
+
+    /** @type {boolean} */
+    this.bodyUsed = false;
+
+    /** @type {?ReadableStream} */
+    this.body = null;
+  }
+
+  /**
+   * Create a copy of the response and return it.
+   * @return {!FetchResponse}
+   */
+  clone() {
+    dev().assert(!this.bodyUsed, 'Body already used');
+    return new FetchResponse(this.xhr_);
+  }
+
+  /**
+   * Drains the response and returns the text.
+   * @return {!Promise<string>}
+   * @private
+   */
+  drainText_() {
+    dev().assert(!this.bodyUsed, 'Body already used');
+    this.bodyUsed = true;
+    return Promise.resolve(this.xhr_.responseText);
+  }
+
+  /**
+   * Drains the response and returns a promise that resolves with the response
+   * text.
+   * @return {!Promise<string>}
+   */
+  text() {
+    return this.drainText_();
+  }
+
+  /**
+   * Drains the response and returns the JSON object.
+   * @return {!Promise<!JsonObject>}
+   */
+  json() {
+    return /** @type {!Promise<!JsonObject>} */ (
+      this.drainText_().then(parseJson));
+  }
+
+  /**
+   * Drains the response and returns a promise that resolves with the response
+   * ArrayBuffer.
+   * @return {!Promise<!ArrayBuffer>}
+   */
+  arrayBuffer() {
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+      this.drainText_().then(utf8Encode));
+  }
+}
+
+
+/**
+ * Provides access to the response headers as defined in the Fetch API.
+ * @private Visible for testing.
+ */
+class FetchResponseHeaders {
+  /**
+   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
+   */
+  constructor(xhr) {
+    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
+    this.xhr_ = xhr;
+  }
+
+  /**
+   * @param {string} name
+   * @return {string}
+   */
+  get(name) {
+    return this.xhr_.getResponseHeader(name);
+  }
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  has(name) {
+    return this.xhr_.getResponseHeader(name) != null;
+  }
+}
+/**
+ * Returns instance of Response.
+ * @param {?ResponseBodyInit=} body
+ * @param {!ResponseInit=} init
+ */
+function Response(body, init = {}) {
+  const lowercasedHeaders = map();
+  const data = Object.assign({
+    status: 200,
+    statusText: 'OK',
+    responseText: (body ? String(body) : ''),
+    /**
+     * @param {string} name
+     * @return {string}
+     */
+    getResponseHeader(name) {
+      return lowercasedHeaders[String(name).toLowerCase()] || null;
+    },
+  }, init);
+
+  if (isArray(init.headers)) {
+    init.headers.forEach(entry => {
+      const headerName = entry[0];
+      const headerValue = entry[1];
+      lowercasedHeaders[String(headerName).toLowerCase()] =
+          String(headerValue);
+    });
+  }
+  if (init.status) {
+    data.status = parseInt(init.status, 10);
+  }
+  if (init.statusText) {
+    data.statusText = String(init.statusText);
+  }
+
+  return new FetchResponse(data);
+}
+
+/**
  * Installs fetch polyfill
  *
  * @export
@@ -116,5 +264,6 @@ function createXhrRequest(method, url) {
 export function install(win) {
   if (!win.fetch) {
     win.fetch = fetchPolyfill;
+    win.Response = Response;
   }
 }

@@ -10,6 +10,7 @@ import {
 } from './url';
 import {getMode} from './mode';
 import {isFormDataWrapper} from './form-data-wrapper';
+import {isObject} from './types';
 
 /** @private @const {string} */
 export const ALLOW_SOURCE_ORIGIN_HEADER =
@@ -193,8 +194,49 @@ export class XhrBase {
       });
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
-            this.fromStructuredCloneable_(response, init.responseType));
+            this.fromStructuredCloneable_(response));
     });
+  }
+
+  /**
+   * De-serializes a fetch response that was made possible to be passed to
+   * `postMessage()`, i.e., can be cloned using the
+   * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
+   *
+   * The response is assumed to be serialized in the following way:
+   *
+   * 1. Transform the entries in the headers of the response into an
+   * `!Array<!Array<string>>` holding the list of header entries, where each
+   * element in the array is a header entry (key-value pair) represented as a
+   * 2-element array. The header key is case-insensitive.
+   *
+   * 2. Include the header entry list and `status` and `statusText` properties
+   * of the response in as `headers`, `status` and `statusText` properties of
+   * `init`.
+   *
+   * 3. Include the body of the response serialized as string in `body`.
+   *
+   * 4. Return a new object having properties `body` and `init`.
+   *
+   * The response is de-serialized in the following way:
+   *
+   * 1. If the `Response` type is supported and `responseType` is not
+   * document, pass `body` and `init` directly to the constructor of `Response`.
+   *
+   * 2. Otherwise, populate a fake XHR object to pass to `FetchResponse` as if
+   * the response is returned by the fetch polyfill.
+   *
+   * 3. If `responseType` is `document`, also parse the body and populate
+   * `responseXML` as a `Document` type.
+   *
+   * @param {JsonObject|string|undefined} response The structurally-cloneable
+   *     response to convert back to a regular Response.
+   * @return {!FetchResponse|!Response} The deserialized regular response.
+   * @private
+   */
+  fromStructuredCloneable_(response) {
+    user().assert(isObject(response), 'Object expected: %s', response);
+    return new Response(response['body'], response['init']);
   }
 
   /**
