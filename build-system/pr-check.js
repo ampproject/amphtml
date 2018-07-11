@@ -383,7 +383,7 @@ const command = {
           '. Skipping verification of visual diff tests.');
       return;
     }
-    timedExec('gulp visual-diff --verify');
+    timedExec('gulp visual-diff --verify_status');
   },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');
