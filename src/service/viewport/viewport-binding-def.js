@@ -110,10 +110,10 @@ export class ViewportBindingDef {
 
   /**
    * Returns the Opacity value of the element.
-   * @param {!Element} el
+   * @param {!Element} unusedElementOpacity
    * @return {number}
    */
-  getElementOpacity(el) {}
+  getElementOpacity(unusedElementOpacity) {}
 
   /**
    * Returns the size of the viewport.
