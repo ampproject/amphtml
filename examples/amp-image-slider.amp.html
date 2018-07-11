@@ -11,6 +11,15 @@
       max-width: 800px;
       margin: 0 auto;
     }
+
+    .label {
+      color: white;
+      margin: 0 1em;
+      border: 4px solid white;
+      padding: 1em;
+      font-family: Arial, Helvetica, sans-serif;
+      box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
+    }
   </style>
   <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -21,14 +30,16 @@
     <amp-image-slider layout="responsive" width="1024" height="600">
       <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before style="color: red; border: 1px solid red; padding: 1em;">BEFORE</div>
-      <div after style="color: red; border: 1px solid red; padding: 1em;">AFTER</div>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
     </amp-image-slider>
   
     <p>Hover your mouse to compare</p>
     <amp-image-slider type="hover" layout="responsive" width="1024" height="600">
       <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
     </amp-image-slider>
 
     <p>Drag the button OR click to compare</p>

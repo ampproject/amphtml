@@ -16,6 +16,7 @@
 
 import '../amp-image-slider';
 // import * as sinon from 'sinon';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-image-slider component', {
   amp: {
@@ -28,6 +29,8 @@ describes.realWin('amp-image-slider component', {
     win = env.win;
     doc = win.document;
 
+    toggleExperiment(win, 'amp-image-slider', true);
+
     slider = doc.createElement('amp-image-slider');
     slider.setAttribute('layout', 'responsive');
     slider.setAttribute('width', '1024');
@@ -35,10 +38,12 @@ describes.realWin('amp-image-slider component', {
     const leftImage = doc.createElement('amp-img');
     leftImage.setAttribute('src', 'https://unsplash.it/1080/720?image=1037');
     leftImage.setAttribute('layout', 'fill');
+    leftImage.setAttribute('before', '');
     slider.appendChild(leftImage);
     const rightImage = doc.createElement('amp-img');
     rightImage.setAttribute('src', 'https://unsplash.it/1080/720?image=1038');
     rightImage.setAttribute('layout', 'fill');
+    rightImage.setAttribute('after', '');
     slider.appendChild(rightImage);
 
     impl = slider.implementation_; // expose extended from AMP.BaseElement

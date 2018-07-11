@@ -142,6 +142,10 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
     }
 
+    if (!this.leftAmpImage_ || !this.rightAmpImage_) {
+      return null;
+    }
+
     const buildDeferred = new Deferred();
 
     this.mutateElement(() => {
