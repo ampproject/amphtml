@@ -1056,10 +1056,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   },
   'iplabel': {
     'requests': {
-    	'collectorUrl': 'm.col.ip-label.net',
-
+      'collectorUrl': 'm.col.ip-label.net',
       "endpoint": "https://${collectorUrl}/coll/",
-			'onload': '${endpoint}?'+
+      'onload': '${endpoint}?'+
       'T=${trackerId}&'+
       'm='+
       '2502|${navTiming(navigationStart)}|'+
@@ -1067,7 +1066,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       '2509|${navTiming(domainLookupEnd)}|'+
       '2510|${navTiming(connectStart)}|'+  
       '2512|${navTiming(connectEnd)}|'+
-			'2514|${navTiming(responseStart)}|'+
+      '2514|${navTiming(responseStart)}|'+
       '2515|${navTiming(responseEnd)}|'+
       '2517|${navTiming(domInteractive)}|'+
       '2520|${navTiming(loadEventStart)}'+
@@ -1097,7 +1096,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'image': {'suppressWarnings': true},
     },
     'vars':{
-      'api': { 'version': '0.0.1' },
       'trackerId': 'notrackerID',
         'customdim': '',
         'business': '',
