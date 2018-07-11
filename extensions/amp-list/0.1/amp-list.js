@@ -305,13 +305,11 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
-<<<<<<< HEAD
     if (this.ssrTemplateHelper_.isSupported()) {
       // TODO(alabiaga): should call updatebindings as below?
       this.templates_.findAndRenderTemplate(
           this.element, /** @type {!HTML} */ (current.data))
           .then(element => {
-            console.log(element);
             this.container_.appendChild(element);
           })
           .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
@@ -328,13 +326,6 @@ export class AmpList extends AMP.BaseElement {
             current.rejecter();
           });
     }
-=======
-    this.templates_.findAndRenderTemplateArray(
-        this.element, /** @type {!Array} */ (current.data))
-        .then(elements => this.updateBindingsForElements_(elements))
-        .then(elements => this.render_(elements))
-        .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
->>>>>>> address most of jridgewell comments
   }
 
   /**

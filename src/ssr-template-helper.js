@@ -15,7 +15,7 @@
  */
 
 import {Capability} from './service/viewer-impl';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor} from './dom';
 import {map} from './utils/object';
 
 /** The attributes we allow to be sent to the viewer. */
