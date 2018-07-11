@@ -19,6 +19,9 @@
  * @template T
  */
 export default class PriorityQueue {
+  /**
+   * Creates an instance of PriorityQueue.
+   */
   constructor() {
     /** @private @const {Array<{item: T, priority: number}>} */
     this.queue_ = [];

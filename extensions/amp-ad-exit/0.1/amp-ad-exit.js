@@ -27,6 +27,7 @@ import {dev, user} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
+import {getTopWindow} from '../../../src/service';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {isObject} from '../../../src/types';
 import {makeClickDelaySpec} from './filters/click-delay';
@@ -312,10 +313,9 @@ export class AmpAdExit extends AMP.BaseElement {
    * methods are stubbable.
    * @return {?string}
    * @private
-   * @VisibleForTesting
    */
   getAmpAdResourceId_() {
-    return getAmpAdResourceId(this.element, this.win.top);
+    return getAmpAdResourceId(this.element, getTopWindow(this.win));
   }
 
   /** @override */

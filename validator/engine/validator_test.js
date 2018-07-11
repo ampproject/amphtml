@@ -346,12 +346,7 @@ describe('ValidatorCssLengthValidation', () => {
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('.replace_amp_custom {}', stylesheet)
             .replace('replace_inline_style', '');
-    // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-    test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:5034:0 The inline \'style\' attribute ' +
-        'is not allowed in AMP documents. Use \'style amp-custom\' tag ' +
-        'instead. (see https://www.ampproject.org/docs/guides/author-develop/' +
-        'responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]';
+    test.expectedOutput = 'PASS';
     test.run();
   });
 
@@ -366,18 +361,12 @@ describe('ValidatorCssLengthValidation', () => {
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '');
         test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
         test.expectedOutput = 'FAIL\n' +
            'feature_tests/css_length.html:28:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - we saw ' +
            '50001 bytes whereas the limit is 50000 bytes. ' +
            '(see https://www.ampproject.org/docs/reference/spec' +
-           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]\n' +
-           'feature_tests/css_length.html:5034:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
         test.run();
       });
 
@@ -392,18 +381,12 @@ describe('ValidatorCssLengthValidation', () => {
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '');
         test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
         test.expectedOutput = 'FAIL\n' +
            'feature_tests/css_length.html:28:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - we saw ' +
            '50002 bytes whereas the limit is 50000 bytes. ' +
            '(see https://www.ampproject.org/docs/reference/spec' +
-           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]\n' +
-           'feature_tests/css_length.html:5033:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
         test.run();
       });
 
@@ -416,13 +399,7 @@ describe('ValidatorCssLengthValidation', () => {
         test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:34:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+        test.expectedOutput = 'PASS';
         test.run();
       });
 
@@ -436,13 +413,7 @@ describe('ValidatorCssLengthValidation', () => {
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
         test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
         test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:34:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]\n' +
            'feature_tests/css_length.html:36:6 The author stylesheet ' +
            'specified in tag \'style amp-custom\' and the combined inline ' +
            'styles is too large - we saw 50001 bytes whereas the limit is ' +
@@ -461,13 +432,7 @@ describe('ValidatorCssLengthValidation', () => {
            test.ampHtmlFileContents
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', 'display:block;');
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
         test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:5034:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]\n' +
            'feature_tests/css_length.html:5036:6 The author stylesheet ' +
            'specified in tag \'style amp-custom\' and the combined inline ' +
            'styles is too large - we saw 50014 bytes whereas the limit is ' +
@@ -655,6 +620,7 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
     // Attribute Spec names are matched against lowercased attributes,
     // so the rules *must* also be lower case or non-cased.
     const attrSpecNameRegex = new RegExp('^[^A-Z]+$');
+
     expect(attrSpecNameRegex.test(attrSpec.name)).toBe(true);
   });
   if (attrSpec.valueUrl !== null) {
@@ -666,22 +632,6 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
         expect(allowedProtocolRegex.test(allowedProtocol)).toBe(true);
       }
     });
-    // If disallowed_domain is whatever.ampproject.org then
-    // allow_relative must be false. Otherwise relative URLs would be
-    // rejected for domain whatever.ampproject.org because that is
-    // used as the base URL to parse the relative URL.
-    if ((attrSpec.valueUrl.allowRelative !== null) &&
-        attrSpec.valueUrl.allowRelative) {
-      // allow_relative is true, check to see if whatever.ampproject.org is a
-      // disallowed_domain.
-      it('allow_relative can not be true if ' +
-          'disallowed_domain is whatever.ampproject.org',
-      () => {
-        for (const disallowedDomain of attrSpec.valueUrl.disallowedDomain) {
-          expect(disallowedDomain !== 'whatever.ampproject.org');
-        }
-      });
-    }
     // If allowed_protocol is http then allow_relative should not be false
     // except for `data-` attributes.
     if (!attrSpec.name.startsWith('data-')) {
@@ -846,6 +796,10 @@ describe('ValidatorRulesMakeSense', () => {
     const tagSpecName =
         tagSpec.specName || tagSpec.tagName || 'UNKNOWN_TAGSPEC';
 
+    // html_format must be set.
+    it('\'' + tagSpecName + '\' must have at least one htmlFormat set', () => {
+      expect(tagSpec.htmlFormat.length).toBeGreaterThan(0);
+    });
     // html_format is never UNKNOWN_CODE.
     it('tagSpec.htmlFormat should never contain UNKNOWN_CODE', () => {
       expect(tagSpec.htmlFormat.indexOf(
@@ -874,9 +828,8 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // Verify AMP4ADS extensions are whitelisted.
     if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
-        ((tagSpec.htmlFormat.length === 0) ||
-         (tagSpec.htmlFormat.indexOf(
-             amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
+        (tagSpec.htmlFormat.indexOf(
+            amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
@@ -911,9 +864,8 @@ describe('ValidatorRulesMakeSense', () => {
     }
     // Verify AMP4EMAIL extensions are whitelisted.
     if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
-        ((tagSpec.htmlFormat.length === 0) ||
-         (tagSpec.htmlFormat.indexOf(
-             amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1))) {
+        (tagSpec.htmlFormat.indexOf(
+            amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1)) {
       // AMP4EMAIL format is the source of this whitelist.
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
@@ -922,6 +874,7 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-FIT-TEXT': 0,
         'AMP-IMG': 0,
         'AMP-IMAGE-LIGHTBOX': 0,
+        'AMP-LAYOUT': 0,
         'AMP-LIGHTBOX': 0,
         'AMP-LIST': 0,
         'AMP-SELECTOR': 0,

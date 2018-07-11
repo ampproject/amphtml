@@ -37,6 +37,10 @@ const WHITELIST_POLICY = {
 
 
 export class ConsentPolicyManager {
+  /**
+   * Creates an instance of ConsentPolicyManager.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
@@ -129,8 +133,10 @@ export class ConsentPolicyManager {
     });
   }
 
-  // Inform consent policy manager that all consent instances
-  // state has been initiated with remote value. And ready to start timeout
+  /**
+   * Inform consent policy manager that all consent instances
+   * state has been initiated with remote value. And ready to start timeout
+   */
   enableTimeout() {
     if (this.allConsentInitatedResolver_) {
       this.allConsentInitatedResolver_();
@@ -224,6 +230,10 @@ export class ConsentPolicyManager {
 }
 
 export class ConsentPolicyInstance {
+  /**
+   * Creates an instance of ConsentPolicyInstance.
+   * @param {!JsonObject} config
+   */
   constructor(config) {
     /** !Array<string> */
     const pendingItems = Object.keys(config['waitFor'] || {});

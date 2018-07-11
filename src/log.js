@@ -39,6 +39,7 @@ export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
 
 
 /**
+ * @param {string} message
  * @return {boolean} Whether this message was a user error.
  */
 export function isUserErrorMessage(message) {
@@ -46,6 +47,7 @@ export function isUserErrorMessage(message) {
 }
 
 /**
+ * @param {string} message
  * @return {boolean} Whether this message was a a user error from an iframe embed.
  */
 export function isUserErrorEmbed(message) {
@@ -72,6 +74,19 @@ export const LogLevel = {
  */
 export function setReportError(fn) {
   self.reportError = fn;
+}
+
+/**
+ * @type {!LogLevel|undefined}
+ * @private
+ */
+let levelOverride_ = undefined;
+
+/**
+ * @param {!LogLevel} level
+ */
+export function overrideLogLevel(level) {
+  levelOverride_ = level;
 }
 
 /**
@@ -108,7 +123,7 @@ export class Log {
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
-    this.level_ = this.calcLevel_();
+    this.level_ = this.defaultLevel_();
 
     /** @private @const {string} */
     this.suffix_ = opt_suffix || '';
@@ -118,7 +133,15 @@ export class Log {
    * @return {!LogLevel}
    * @private
    */
-  calcLevel_() {
+  getLevel_() {
+    return (levelOverride_ !== undefined) ? levelOverride_ : this.level_;
+  }
+
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
+  defaultLevel_() {
     // No console - can't enable logging.
     if (!this.win.console || !this.win.console.log) {
       return LogLevel.OFF;
@@ -149,7 +172,7 @@ export class Log {
    * @param {!Array} messages
    */
   msg_(tag, level, messages) {
-    if (this.level_ != LogLevel.OFF) {
+    if (this.getLevel_() != LogLevel.OFF) {
       let fn = this.win.console.log;
       if (level == 'ERROR') {
         fn = this.win.console.error || fn;
@@ -170,7 +193,7 @@ export class Log {
    * @return {boolean}
    */
   isEnabled() {
-    return this.level_ != LogLevel.OFF;
+    return this.getLevel_() != LogLevel.OFF;
   }
 
   /**
@@ -179,7 +202,7 @@ export class Log {
    * @param {...*} var_args
    */
   fine(tag, var_args) {
-    if (this.level_ >= LogLevel.FINE) {
+    if (this.getLevel_() >= LogLevel.FINE) {
       this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -190,7 +213,7 @@ export class Log {
    * @param {...*} var_args
    */
   info(tag, var_args) {
-    if (this.level_ >= LogLevel.INFO) {
+    if (this.getLevel_() >= LogLevel.INFO) {
       this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -201,7 +224,7 @@ export class Log {
    * @param {...*} var_args
    */
   warn(tag, var_args) {
-    if (this.level_ >= LogLevel.WARN) {
+    if (this.getLevel_() >= LogLevel.WARN) {
       this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -215,7 +238,7 @@ export class Log {
    * @private
    */
   error_(tag, var_args) {
-    if (this.level_ >= LogLevel.ERROR) {
+    if (this.getLevel_() >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     } else {
       const error = createErrorVargs.apply(null,
@@ -295,8 +318,8 @@ export class Log {
    * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {T} The value of shouldBeTrueish.
    * @template T
+   * eslint "google-camelcase/google-camelcase": 0
    */
-  /*eslint "google-camelcase/google-camelcase": 0*/
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
     if (!shouldBeTrueish) {
@@ -337,8 +360,8 @@ export class Log {
    * @param {string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
    * @template T
+   * eslint "google-camelcase/google-camelcase": 2
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
     this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
@@ -355,8 +378,8 @@ export class Log {
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
    * @return {string} The string value. Can be an empty string.
+   * eslint "google-camelcase/google-camelcase": 2
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
     this.assert(typeof shouldBeString == 'string',
         (opt_message || 'String expected') + ': %s', shouldBeString);
@@ -402,10 +425,10 @@ export class Log {
    * @param {!Object<T>} enumObj
    * @param {string} s
    * @param {string=} opt_enumName
-   * @return T
+   * @return {T}
    * @template T
+   * eslint "google-camelcase/google-camelcase": 2
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
     if (isEnumValue(enumObj, s)) {
       return s;
@@ -546,7 +569,9 @@ const logs = self.log;
  */
 let logConstructor = null;
 
-
+/**
+ * Initializes log contructor.
+ */
 export function initLogConstructor() {
   logConstructor = Log;
   // Initialize instances for use. If a binary (an extension for example) that
@@ -561,6 +586,9 @@ export function initLogConstructor() {
   user();
 }
 
+/**
+ * Resets log contructor for testing.
+ */
 export function resetLogConstructorForTesting() {
   logConstructor = null;
 }
