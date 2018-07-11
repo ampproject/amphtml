@@ -75,21 +75,20 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Android_latest',
+        'SL_Chrome_67',
         'SL_Chrome_45',
-        'SL_Chrome_android',
-        'SL_Chrome_latest',
-        'SL_Firefox_latest',
-        'SL_Safari_latest',
-        // TODO(rsimha, #15510): Enable these.
-        // 'SL_iOS_latest',
-        // 'SL_Edge_latest',
-        // 'SL_IE_11',
+        'SL_Chrome_Android_7',
+        'SL_Android_6',
+        'SL_iOS_11',
+        'SL_Firefox_61',
+        'SL_Safari_11',
+        'SL_Edge_17',
+        'SL_IE_11',
       ] : [
         // With --saucelabs_lite, a subset of the unit tests are run.
         // Only browsers that support chai-as-promised may be included below.
         // TODO(rsimha-amp): Add more browsers to this list. #6039.
-        'SL_Safari_latest',
+        'SL_Safari_11',
       ],
     });
   }
