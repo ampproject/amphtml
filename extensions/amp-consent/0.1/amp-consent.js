@@ -130,10 +130,6 @@ export class AmpConsent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
-      return;
-    }
-
     this.isMultiSupported_ = isExperimentOn(this.win, MULTI_CONSENT_EXPERIMENT);
 
     user().assert(this.element.getAttribute('id'),
