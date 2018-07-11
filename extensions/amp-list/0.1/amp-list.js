@@ -251,7 +251,8 @@ export class AmpList extends AMP.BaseElement {
   ssrTemplate_() {
     return this.ssrTemplateHelper_.fetchAndRenderTemplate(
         this.element).then(resp => {
-      // TODO(alabiaga): Since this is related to the viewer, this should be a 3rd log type.
+      // TODO(alabiaga): Since this is related to the viewer,
+      // this should be a 3rd log type?
       user().assert(
           resp && (typeof resp.data !== 'undefined'),
           'Response missing the \'data\' field');
