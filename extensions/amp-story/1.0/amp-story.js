@@ -779,6 +779,7 @@ export class AmpStory extends AMP.BaseElement {
    * Advance to the next screen in the story, if there is one.
    * @param {boolean=} opt_isAutomaticAdvance Whether this navigation was caused
    *     by an automatic advancement after a timeout.
+   * @private
    */
   next_(opt_isAutomaticAdvance) {
     const activePage = dev().assert(this.activePage_,
@@ -860,9 +861,11 @@ export class AmpStory extends AMP.BaseElement {
         pageIndex,
         this.getPageCount(),
         targetPage.element.id);
+
     const oldPage = this.activePage_;
 
     this.activePage_ = targetPage;
+    
     this.updateSoundPage_();
     this.systemLayer_.resetDeveloperLogs();
     this.systemLayer_.setDeveloperLogContextString(

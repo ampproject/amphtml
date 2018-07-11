@@ -35,7 +35,6 @@ const AD_SHOWING_ATTRIBUTE = 'ad-showing';
 /** @private @const {string} */
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
-
 /** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
@@ -235,7 +234,6 @@ export class SystemLayer {
         this.systemLayerEl_.querySelector(
             '.i-amphtml-story-system-layer-buttons');
 
-
     this.buildForDevelopmentMode_();
 
     this.initializeListeners_();
@@ -306,7 +304,6 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
     }, true /** callToInitialize */);
-
   }
 
   /**
@@ -382,7 +379,6 @@ export class SystemLayer {
    * @private
    */
   onHasAudioStateUpdate_(hasAudio) {
-    console.log("1" + hasAudio);
     this.vsync_.mutate(() => {
       this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
     });
@@ -407,10 +403,19 @@ export class SystemLayer {
     });
   }
 
+  /**
+   * Hides element after elapsed time
+   * @param {int} hideTimeout
+   * @private
+   */
   hideAfterTimeout_(hideTimeout){
     this.timer_.delay(() => this.hideInteral_(), hideTimeout);
   }
 
+  /**
+   * Hides message
+   * @private
+   */
   hideInteral_() {
     if(!this.isBuilt_){
       return;
@@ -419,12 +424,12 @@ export class SystemLayer {
       this.getShadowRoot().setAttribute('messagedisplay', 'noshow');
     });
   }
+
   /**
    * Handles click events on the mute button.
    * @private
    */
   onMuteAudioClick_() {
-    console.log("mute");
     this.storeService_.dispatch(Action.TOGGLE_MUTED, true);
     const hideTimeout = 1500;
     this.vsync_.mutate(() => {
@@ -432,15 +437,12 @@ export class SystemLayer {
       this.hideAfterTimeout_(hideTimeout);
     });
   }
-
   
   /**
    * Handles click events on the unmute button.
    * @private
    */
   onUnmuteAudioClick_() {
-    console.log("unmute");
-
     this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
     const hideTimeout = 1500;
     this.vsync_.mutate(() => {
