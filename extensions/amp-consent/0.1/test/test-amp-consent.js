@@ -16,7 +16,6 @@
 
 import {
   ACTION_TYPE,
-  AMP_CONSENT_EXPERIMENT,
   AmpConsent,
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
@@ -47,7 +46,6 @@ describes.realWin('amp-consent', {
   beforeEach(() => {
     doc = env.win.document;
     win = env.win;
-    toggleExperiment(win, AMP_CONSENT_EXPERIMENT, true);
     toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
 
     storageValue = {};
