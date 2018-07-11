@@ -22,6 +22,7 @@ import {
   getCorsUrl,
   getSourceOrigin,
   getWinOrigin,
+  isProxyOrigin,
   parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
@@ -30,7 +31,6 @@ import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
 import {parseJson} from '../json';
-import {urls} from '../config';
 import {utf8Encode} from '../utils/bytes';
 
 /**
@@ -187,9 +187,7 @@ export class Xhr {
     }
     const viewer = Services.viewerForDoc(this.ampdocSingle_);
     const whenFirstVisible = viewer.whenFirstVisible();
-    const firstPartyResource =
-        urls.cdnProxyRegex.test(parseUrlDeprecated(input).origin);
-    if (firstPartyResource || !viewer.hasCapability('xhrInterceptor')) {
+    if (isProxyOrigin(input) || !viewer.hasCapability('xhrInterceptor')) {
       return whenFirstVisible;
     }
     const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
