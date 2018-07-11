@@ -104,7 +104,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
+    if (!isExperimentOn(this.win, EXPERIMENT)) {
       user().warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
     }
@@ -250,7 +250,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   handleHover(e) {
     // This offsetWidth may change if user resize window
     // Thus not cached
-    const {left, right} = this.container_.getBoundingClientRect();
+    const {left, right} = this.container_./*OK*/getBoundingClientRect();
     const leftPercentage = (e.pageX - left) / (right - left);
     this.updatePositions(leftPercentage);
   }
@@ -260,7 +260,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   handleClickImage(e) {
-    const {left, right} = this.container_.getBoundingClientRect();
+    const {left, right} = this.container_./*OK*/getBoundingClientRect();
     const leftPercentage = (e.pageX - left) / (right - left);
     this.animateUpdatePositions(leftPercentage);
   }
@@ -270,7 +270,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   handleTapImage(e) {
-    const {left, right} = this.container_.getBoundingClientRect();
+    const {left, right} = this.container_./*OK*/getBoundingClientRect();
     if (e.touches.length > 0) {
       const leftPercentage = (e.touches[0].pageX - left) / (right - left);
       this.animateUpdatePositions(leftPercentage);
@@ -283,8 +283,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   animateUpdatePositions(toPercentage) {
     const {left: containerLeft, width: containerWidth}
-        = this.container_.getBoundingClientRect();
-    const {left: barLeft} = this.bar_.getBoundingClientRect();
+        = this.container_./*OK*/getBoundingClientRect();
+    const {left: barLeft} = this.bar_./*OK*/getBoundingClientRect();
 
     const fromPercentage = (barLeft - containerLeft) / containerWidth;
     const interpolate = numeric(fromPercentage, toPercentage);
@@ -314,7 +314,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.win.addEventListener('mouseup', this.dragEnd);
 
     this.moveOffset_ = e.pageX;
-    this.splitOffset_ = this.bar_.getBoundingClientRect().left;
+    this.splitOffset_ = this.bar_./*OK*/getBoundingClientRect().left;
   }
   /**
    * Handle drag move
@@ -350,7 +350,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.container_.addEventListener('touchend', this.touchEnd);
 
     this.moveOffset_ = e.touches[0].pageX;
-    this.splitOffset_ = this.bar_.getBoundingClientRect().left;
+    this.splitOffset_ = this.bar_./*OK*/getBoundingClientRect().left;
   }
   /**
    * Handle touch move
@@ -389,9 +389,9 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {number} pointerX
    */
   pointerMoveX_(pointerX) {
-    const {width} = this.container_.getBoundingClientRect();
+    const {width} = this.container_./*OK*/getBoundingClientRect();
     const {left: leftBound, right: rightBound}
-        = this.container_.getBoundingClientRect();
+        = this.container_./*OK*/getBoundingClientRect();
 
     const moveX = pointerX - this.moveOffset_;
     const newPos = Math.max(leftBound,
@@ -407,7 +407,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
+    if (!isExperimentOn(this.win, EXPERIMENT)) {
       user().warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
     }
