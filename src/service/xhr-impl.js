@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {FetchInitDef} from '../fetch-polyfill.js';
-import {XhrBase, assertSuccess, setupInit} from '../xhr-base';
-import {dev, user} from '../log';
-import {fetchPolyfill} from '../fetch-polyfill';
+import {FetchInitDef, XhrBase, assertSuccess, setupInit} from '../xhr-base';
+import {dev} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
@@ -54,9 +52,6 @@ export class Xhr extends XhrBase {
    */
   constructor(win) {
     super(win);
-
-    /** @const {!Window} */
-    this.win = win;
   }
 
   /**
@@ -65,7 +60,7 @@ export class Xhr extends XhrBase {
    * @override
    * @return {!Promise<!Response>}
    */
-  fetch_(input, init) {
+  fetchFromNetwork_(input, init) {
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
 
     return this.maybeIntercept_(input, init)
@@ -80,15 +75,7 @@ export class Xhr extends XhrBase {
             init.body = init.body.getFormData();
           }
 
-          // Fallback to xhr polyfill since `fetch` api does not support
-          // responseType = 'document'. We do this so we don't have to do any
-          // parsing and document construction on the UI thread which would be
-          // expensive.
-          if (init.responseType == 'document') {
-            return fetchPolyfill(input, init);
-          }
-
-          return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+          return (this.win.fetch).apply(null, arguments);
         });
   }
 
@@ -129,26 +116,6 @@ export class Xhr extends XhrBase {
       }
     }
     return this.fetch(input, init);
-  }
-
-  /**
-   * Creates an XHR request with responseType=document
-   * and returns a promise for the initialized `Document`.
-   * Note this does not return a `Response`, since this is not a standard
-   * Fetch response type.
-   *
-   * @param {string} input
-   * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!Document>}
-   */
-  fetchDocument(input, opt_init) {
-    user().expectedError('xhr-impl',
-        'fetchDocument is deprecated from xhr-impl.js,'
-        + ' please use document-fetcher instead');
-    const init = setupInit(opt_init, 'text/html');
-    init.responseType = 'document';
-    return this.fetch(input, init)
-        .then(response => response.document_());
   }
 
   /**
@@ -197,24 +164,6 @@ export class Xhr extends XhrBase {
           const response = /**@type {!Response} */ (res);
           return assertSuccess(response);
         });
-  }
-
-  /**
-   * @return {!FetchResponse}
-   * @override
-   */
-  fromStructuredCloneable_(response, responseType) {
-    user().assert(isObject(response), 'Object expected: %s', response);
-
-    dev().assert(responseType == 'document',
-        'fromStructuredCloneable_ called with invalid document responseType');
-    if (typeof this.win.Response === 'function') {
-      // Use native `Response` type if available for performance. If response
-      // type is `document`, we must fall back to `Response` polyfill
-      // because callers would then rely on the `responseXML` property being
-      // present, which is not supported by the Response type.
-      return new this.win.Response(response['body'], response['init']);
-    }
   }
 }
 

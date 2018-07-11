@@ -1,7 +1,6 @@
-import {FetchInitDef, FetchResponse} from './fetch-polyfill.js';
 import {Services} from './services';
 import {dev, user} from './log';
-import {dict, map} from './utils/object';
+import {dict} from './utils/object';
 import {fromIterator} from './utils/array';
 import {
   getCorsUrl,
@@ -13,10 +12,44 @@ import {getMode} from './mode';
 import {isFormDataWrapper} from './form-data-wrapper';
 
 /** @private @const {string} */
-const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
+export const ALLOW_SOURCE_ORIGIN_HEADER =
+    'AMP-Access-Control-Allow-Source-Origin';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
+
+/**
+ * The "init" argument of the Fetch API. Currently, only "credentials: include"
+ * is implemented.  Note ampCors with explicit false indicates that
+ * __amp_source_origin should not be appended to the URL to allow for
+ * potential caching or response across pages.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
+ * @typedef {{
+ *   body: (!Object|!Array|undefined|string),
+ *   credentials: (string|undefined),
+ *   headers: (!Object|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+export let FetchInitDef;
+
+/**
+ * A record version of `XMLHttpRequest` that has all the necessary properties
+ * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
+ * serialized response returned by the viewer.
+ * @typedef {{
+ *   status: number,
+ *   statusText: string,
+ *   responseText: string,
+ *   responseXML: ?Document,
+ *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
+ * }}
+ */
+let XMLHttpRequestDef;
 
 export class XhrBase {
   /**
@@ -81,7 +114,7 @@ export class XhrBase {
     }
     // In edge a `TypeMismatchError` is thrown when body is set to null.
     dev().assert(init.body !== null, 'fetch `body` can not be `null`');
-    return this.fetch_(input, init).then(response => {
+    return this.fetchFromNetwork_(input, init).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
@@ -112,7 +145,7 @@ export class XhrBase {
    * @return {!Promise}
    * @protected
    */
-  fetch_(unusedInput, unusedInit) {
+  fetchFromNetwork_(unusedInput, unusedInit) {
     throw new Error('Fetch from network not is not implemented');
   }
 
@@ -227,48 +260,6 @@ export class XhrBase {
       newInit.body = fromIterator(init.body.entries());
     }
     return {input, init: newInit};
-  }
-
-  /**
-   * De-serializes a fetch response that was made possible to be passed to
-   * `postMessage()`, i.e., can be cloned using the
-   * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
-   *
-   * The response is assumed to be serialized in the following way:
-   *
-   * 1. Transform the entries in the headers of the response into an
-   * `!Array<!Array<string>>` holding the list of header entries, where each
-   * element in the array is a header entry (key-value pair) represented as a
-   * 2-element array. The header key is case-insensitive.
-   *
-   * 2. Include the header entry list and `status` and `statusText` properties
-   * of the response in as `headers`, `status` and `statusText` properties of
-   * `init`.
-   *
-   * 3. Include the body of the response serialized as string in `body`.
-   *
-   * 4. Return a new object having properties `body` and `init`.
-   *
-   * The response is de-serialized in the following way:
-   *
-   * 1. If the `Response` type is supported and `responseType` is not
-   * document, pass `body` and `init` directly to the constructor of `Response`.
-   *
-   * 2. Otherwise, populate a fake XHR object to pass to `Response` as if
-   * the response is returned by the fetch polyfill.
-   *
-   * 3. If `responseType` is `document`, also parse the body and populate
-   * `responseXML` as a `Document` type.
-   *
-   * @param {JsonObject|string|undefined} unusedResponse The structurally-cloneable
-   *     response to convert back to a regular Response.
-   * @param {string|undefined} unusedResponseType The original response type used to
-   *     initiate the XHR.
-   * @return {*} The deserialized regular response.
-   * @protected
-   */
-  fromStructuredCloneable_(unusedResponse, unusedResponseType) {
-    dev().error('xhr-impl', 'fromStructuredCloneable_ is not implemented');
   }
 }
 

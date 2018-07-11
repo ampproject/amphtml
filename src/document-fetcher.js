@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {FetchInitDef, FetchResponse, fetchPolyfill} from './fetch-polyfill.js';
-import {XhrBase, assertSuccess, setupInit} from './xhr-base';
+import {FetchInitDef, XhrBase, assertSuccess, setupInit} from './xhr-base';
 import {dev, user} from './log';
-import {isArray, isObject} from './types';
 import {isFormDataWrapper} from './form-data-wrapper';
-import {map} from './utils/object.js';
 
 export class DocumentFetcher extends XhrBase {
   /**
@@ -28,17 +25,25 @@ export class DocumentFetcher extends XhrBase {
    */
   constructor(win) {
     super(win);
+
+    /** @private {boolean} */
+    this.viewerResponded_ = false;
+
+    /** @private {!XMLHttpRequest} */
+    this.xhr_ = new XMLHttpRequest();
   }
 
   /**
    * @override
    */
-  fetch_(input, init) {
+  fetchFromNetwork_(input, init) {
+    this.viewerResponded_ = false;
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
 
     return this.maybeIntercept_(input, init)
         .then(interceptorResponse => {
           if (interceptorResponse) {
+            this.viewerResponded_ = true;
             return interceptorResponse;
           }
           // After this point, both the native `fetch` and the `fetch` polyfill
@@ -47,8 +52,69 @@ export class DocumentFetcher extends XhrBase {
           if (isFormDataWrapper(init.body)) {
             init.body = init.body.getFormData();
           }
-          return (fetchPolyfill).apply(null, arguments);
+
+          return (this.xhrRequest_).apply(null, arguments);
         });
+  }
+
+  /**
+   *
+   *
+   * @param {string} input
+   * @param {!FetchInitDef} init
+   * @private
+   */
+  xhrRequest_(input, init) {
+    return new Promise(function(resolve, reject) {
+      this.xhr.open(init.method || 'GET', input, true);
+      if (init.credentials == 'include') {
+        this.xhr.withCredentials = true;
+      }
+      this.xhr.responseType = 'document';
+      if (init.headers) {
+        Object.keys(init.headers).forEach(function(header) {
+          this.xhr.setRequestHeader(header, init.headers[header]);
+        });
+      }
+      this.xhr.onreadystatechange = () => {
+        if (this.xhr.readyState < /* STATUS_RECEIVED */ 2) {
+          return;
+        }
+        if (this.xhr.status < 100 || this.xhr.status > 599) {
+          this.xhr.onreadystatechange = null;
+          reject(user().createExpectedError(
+              `Unknown HTTP status ${this.xhr.status}`));
+          return;
+        }
+
+        // TODO(dvoytenko): This is currently simplified: we will wait for the
+        // whole document loading to complete. This is fine for the use cases
+        // we have now, but may need to be reimplemented later.
+        if (this.xhr.readyState == /* COMPLETE */ 4) {
+          const options = {
+            status: this.xhr_.status,
+            statusText: this.xhr_.statusText,
+            headers: parseHeaders(this.xhr_.getAllResponseHeaders() || ''),
+          };
+          options.url = 'responseURL' in this.xhr_
+            ? this.xhr_.responseURL : options.headers.get('X-Request-URL');
+          const body = 'response' in this.xhr_
+            ? this.xhr_.response : this.xhr_.responseText;
+          resolve(new Response(body, options));
+        }
+      };
+      this.xhr.onerror = () => {
+        reject(user().createExpectedError('Network failure'));
+      };
+      this.xhr.onabort = () => {
+        reject(user().createExpectedError('Request aborted'));
+      };
+      if (init.method == 'POST') {
+        this.xhr.send(init.body);
+      } else {
+        this.xhr.send();
+      }
+    });
   }
 
   /**
@@ -62,69 +128,35 @@ export class DocumentFetcher extends XhrBase {
   fetchDocument(input, opt_init) {
     const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
-    return this.fetchAmpCors_(input, init).then(res => {
-      const response = /**@type {!Response} */ (res);
-      return assertSuccess(response);
-    }).then(res => {
-      const response = /** @type {!FetchResponse} */ (res);
-      dev().assert(response.document_,
-          'Document method not found, make sure you passed fetch'
-          + ' polyfill before fetching a document');
-      return response.document_();
+    return this.fetchAmpCors_(input, init).then(response => {
+      assertSuccess(/** @type {!Response} */(response));
+      if (!this.viewerResponded_) {
+        return this.xhr_.responseXML;
+      } else {
+
+      }
     });
-  }
-
-  /**
-   * @return {!FetchResponse} The deserialized regular response.
-   * @override
-   */
-  fromStructuredCloneable_(response, responseType) {
-    user().assert(isObject(response), 'Object expected: %s', response);
-
-    dev().assert(responseType == 'document',
-        'fromStructuredCloneable_ called with non-document responseType');
-
-    const lowercasedHeaders = map();
-    const data = {
-      status: 200,
-      statusText: 'OK',
-      responseText: (response['body'] ? String(response['body']) : ''),
-      /**
-       * @param {string} name
-       * @return {string}
-       */
-      getResponseHeader(name) {
-        return lowercasedHeaders[String(name).toLowerCase()] || null;
-      },
-    };
-
-    if (response['init']) {
-      const init = response['init'];
-      if (isArray(init.headers)) {
-        init.headers.forEach(entry => {
-          const headerName = entry[0];
-          const headerValue = entry[1];
-          lowercasedHeaders[String(headerName).toLowerCase()] =
-              String(headerValue);
-        });
-      }
-      if (init.status) {
-        data.status = parseInt(init.status, 10);
-      }
-      if (init.statusText) {
-        data.statusText = String(init.statusText);
-      }
-    }
-
-
-    data.responseXML =
-        new DOMParser().parseFromString(data.responseText, 'text/html');
-
-    return new FetchResponse(data);
   }
 }
 
-/** @package @VisibleForTesting */
-export function fetchResponseForTesting() {
-  return FetchResponse;
+/**
+ * Parses headers and return headers object.
+ *
+ * @param {string} rawHeaders
+ * @return {JsonObject}
+ */
+function parseHeaders(rawHeaders) {
+  const headers = new Headers();
+  // Replace instances of \r\n and \n followed by at least
+  // one space or horizontal tab with a space.
+  const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
+  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+    const parts = line.split(':');
+    const key = parts.shift().trim();
+    if (key) {
+      const value = parts.join(':').trim();
+      headers.append(key, value);
+    }
+  });
+  return headers;
 }
