@@ -24,6 +24,7 @@ import {
   IniLoadTracker,
   SignalTracker,
   TimerEventTracker,
+  UnloadTracker,
   VisibilityTracker,
 } from '../events';
 import {Signals} from '../../../../src/utils/signals';
@@ -535,6 +536,94 @@ describes.realWin('Events', {amp: 1}, env => {
       });
     });
   });
+
+
+  describe('UnloadTracker', () => {
+    let tracker;
+    let targetSignals;
+
+    beforeEach(() => {
+      tracker = root.getTracker('unload', UnloadTracker);
+      target.classList.add('i-amphtml-element');
+      targetSignals = new Signals();
+      target.signals = () => targetSignals;
+    });
+
+    it('should initalize, add listeners and dispose', () => {
+      expect(tracker.root).to.equal(root);
+    });
+
+    it('should add doc listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'unload', {}, resolver);
+      root.signals().signal('unload');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('unload');
+      });
+    });
+
+    it('should add root listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'unload', {selector: ':root'}, resolver);
+      root.signals().signal('unload');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('unload');
+      });
+    });
+
+    it('should add host listener equal to root', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'unload', {selector: ':host'}, resolver);
+      root.signals().signal('unload');
+      return promise.then(event => {
+        expect(event.target).to.equal(root.getRootElement());
+        expect(event.type).to.equal('unload');
+      });
+    });
+
+    it('should add target listener', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'unload', {selector: '.target'}, resolver);
+      targetSignals.signal('unload');
+      return promise.then(event => {
+        expect(event.target).to.equal(target);
+        expect(event.type).to.equal('unload');
+      });
+    });
+
+    it('should trigger via beforeunload event as well', () => {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      tracker.add(analyticsElement, 'unload', {selector: ':root'},
+          resolver);
+
+      const e = new Event('beforeunload');
+      const doc = env.win.document;
+      doc.dispatchEvent(e);
+
+      return promise.then(event => {
+        expect(event.target).to.equal(tracker.root.getRootElement());
+        expect(event.type).to.equal('unload');
+      });
+    });
+  });
+
 
 
   describe('TimerEventTracker', () => {
