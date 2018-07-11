@@ -146,7 +146,7 @@ describes.repeated('', {
           sandbox.stub(ampForm, 'analyticsEvent_');
           sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(true);
 
-          return Promise.resolve(ampForm);
+          return ampForm;
         });
       });
 
