@@ -151,7 +151,8 @@ const EXPERIMENTS = [
     id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
       ' shadow root',
-    spec: '',
+    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
+      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
