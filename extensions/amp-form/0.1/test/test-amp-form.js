@@ -123,11 +123,13 @@ describes.repeated('', {
     });
 
     describe('Server side template rendering', () => {
-      it('should throw error if using non-xhr get', () => {
-        return getAmpForm(getForm()).then(ampForm => {
+      let ampForm;
+      let event;
+      beforeEach(() => {
+        ampForm = getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           form.id = 'registration';
-          const event = {
+          event = {
             stopImmediatePropagation: sandbox.spy(),
             target: form,
             preventDefault: sandbox.spy(),
@@ -139,11 +141,18 @@ describes.repeated('', {
           form.appendChild(emailInput);
 
           ampForm.method_ = 'GET';
-          ampForm.xhrAction_ = null;
           sandbox.stub(form, 'submit');
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm, 'analyticsEvent_');
           sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(true);
+
+          return Promise.resolve(ampForm);
+        });
+      });
+
+      it('should throw error if using non-xhr get', () => {
+        ampForm.then(ampForm => {
+          ampForm.xhrAction_ = null;
           const errorRe =
             /Non-XHR GETs not supported./;
           allowConsoleError(() => {
@@ -153,7 +162,7 @@ describes.repeated('', {
       });
 
       it('should server side render templates if enabled', () => {
-        return getAmpForm(getForm()).then(ampForm => {
+        ampForm.then(ampForm => {
           const form = ampForm.form_;
           const template = createElement('template');
           template.setAttribute('type', 'amp-mustache');
@@ -168,31 +177,22 @@ describes.repeated('', {
           successTemplateContainer.setAttribute('submit-success', '');
           successTemplateContainer.appendChild(template);
 
-          const emailInput = createElement('input');
-          emailInput.setAttribute('name', 'email');
-          emailInput.setAttribute('type', 'email');
-          emailInput.setAttribute('value', 'j@hnmiller.com');
-          form.appendChild(emailInput);
           form.appendChild(successTemplateContainer);
 
-          ampForm.method_ = 'GET';
-          ampForm.xhrAction_ = 'https://www.xhr-action.org';
-          sandbox.stub(form, 'submit');
-          sandbox.stub(form, 'checkValidity').returns(true);
-          sandbox.stub(ampForm, 'analyticsEvent_');
-          sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(true);
-          sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
+          form.xhrAction_ = 'https://www.xhr-action.org';
+
+          sandbox.stub(form.viewer_, 'sendMessageAwaitResponse')
               .returns(
                   Promise.resolve({
                     renderedHtml: '<div>much success</div>',
                   }));
           const renderedTemplate = createElement('div');
           renderedTemplate.innerText = 'much success';
-          sandbox.stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
+          sandbox.stub(form.ssrTemplateHelper_.templates_, 'findTemplate')
               .returns(template);
           const fetchAndRenderTemplate = sandbox.stub(
-              ampForm.ssrTemplateHelper_, 'fetchAndRenderTemplate');
-          sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
+              form.ssrTemplateHelper_, 'fetchAndRenderTemplate');
+          sandbox.stub(form.templates_, 'findAndRenderTemplate')
               .onFirstCall().returns(Promise.resolve(renderedTemplate))
               .onSecondCall().returns(Promise.resolve(template));
           ampForm.handleSubmitEvent_(event);
