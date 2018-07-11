@@ -47,7 +47,6 @@ describes.realWin('amp-consent', {
   beforeEach(() => {
     doc = env.win.document;
     win = env.win;
-    toggleExperiment(win, AMP_CONSENT_EXPERIMENT, true);
     toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
 
     storageValue = {};

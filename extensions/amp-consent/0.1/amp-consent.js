@@ -46,8 +46,6 @@ const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
 
-export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
-
 /**
  * @enum {string}
  * @visibleForTesting
