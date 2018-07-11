@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 334
+min_validator_revision_required: 338
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 670
+spec_file_revision: 675
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -2500,6 +2500,7 @@ attr_lists: {
   name: "svg-style-attr"
   attrs: {
     name: "style"
+    blacklisted_value_regex: "!important"
     # CSS proprities: https://www.w3schools.com/cssref/default.asp
     # SVG specific properties: https://www.w3.org/TR/SVG11/styling.html#SVGStylingProperties
     # Disallowed:
@@ -2719,21 +2720,9 @@ attr_lists: {
     css_declaration: {
       name: "position"
       value_casei: "absolute"
-    }
-    css_declaration: {
-      name: "position"
       value_casei: "inherit"
-    }
-    css_declaration: {
-      name: "position"
       value_casei: "initial"
-    }
-    css_declaration: {
-      name: "position"
       value_casei: "relative"
-    }
-    css_declaration: {
-      name: "position"
       value_casei: "static"
     }
     css_declaration: { name: "quotes" }
@@ -2789,7 +2778,6 @@ attr_lists: {
     css_declaration: { name: "word-wrap" }
     css_declaration: { name: "writing-mode" }
     css_declaration: { name: "z-index" }
-    blacklisted_value_regex: "!important"
   }
 }
 
@@ -2802,10 +2790,10 @@ tags: {
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2823,9 +2811,9 @@ tags: {
   attrs: { name: "vert-adv-y" }
   attrs: { name: "vert-origin-x" }
   attrs: { name: "vert-origin-y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2840,9 +2828,9 @@ tags: {
   attrs: { name: "glyphref" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -2879,10 +2867,10 @@ tags: {
   attrs: { name: "xlink:title" }
   attrs: { name: "xlink:type" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2901,9 +2889,9 @@ tags: {
   attrs: { name: "refy" }
   attrs: { name: "transform" }
   attrs: { name: "viewbox" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2912,8 +2900,8 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "METADATA"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2927,10 +2915,10 @@ tags: {
   attrs: { name: "pathlength" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2941,9 +2929,9 @@ tags: {
   mandatory_ancestor: "SVG"
   attrs: { name: "solid-color" }
   attrs: { name: "solid-opacity" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2973,10 +2961,10 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "SWITCH"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -2985,13 +2973,13 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "VIEW"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "viewbox" }
   attrs: { name: "viewtarget" }
   attrs: { name: "zoomandpan" }
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # Shapes
@@ -3007,10 +2995,10 @@ tags: {
   attrs: { name: "r" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3026,10 +3014,10 @@ tags: {
   attrs: { name: "ry" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3045,10 +3033,10 @@ tags: {
   attrs: { name: "x2" }
   attrs: { name: "y1" }
   attrs: { name: "y2" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3061,10 +3049,10 @@ tags: {
   attrs: { name: "points" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3077,10 +3065,10 @@ tags: {
   attrs: { name: "points" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3098,10 +3086,10 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # Text
@@ -3121,10 +3109,10 @@ tags: {
   attrs: { name: "transform" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3137,10 +3125,10 @@ tags: {
   attrs: { name: "method" }
   attrs: { name: "spacing" }
   attrs: { name: "startoffset" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -3151,10 +3139,10 @@ tags: {
   tag_name: "TREF"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -3172,10 +3160,10 @@ tags: {
   attrs: { name: "textlength" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # Rendering
@@ -3188,10 +3176,10 @@ tags: {
   attrs: { name: "clippathunits" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3208,9 +3196,9 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -3225,8 +3213,8 @@ tags: {
   attrs: { name: "k" }
   attrs: { name: "u1" }
   attrs: { name: "u2" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3243,9 +3231,9 @@ tags: {
   attrs: { name: "x2" }
   attrs: { name: "y1" }
   attrs: { name: "y2" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -3262,10 +3250,10 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3284,10 +3272,10 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -3307,9 +3295,9 @@ tags: {
   attrs: { name: "gradientunits" }
   attrs: { name: "r" }
   attrs: { name: "spreadmethod" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -3350,8 +3338,8 @@ tags: {
   attrs: { name: "k" }
   attrs: { name: "u1" }
   attrs: { name: "u2" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # Special
@@ -3363,10 +3351,10 @@ tags: {
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3378,9 +3366,9 @@ tags: {
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "viewbox" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3395,10 +3383,10 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
@@ -3412,10 +3400,10 @@ tags: {
   attrs: { name: "in" }
   attrs: { name: "type" }
   attrs: { name: "values" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3431,10 +3419,10 @@ tags: {
   attrs: { name: "k3" }
   attrs: { name: "k4" }
   attrs: { name: "operator" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3443,10 +3431,10 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "FEFLOOD"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3458,10 +3446,10 @@ tags: {
   attrs: { name: "edgemode" }
   attrs: { name: "in" }
   attrs: { name: "stddeviation" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3470,10 +3458,10 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "FEMERGE"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3483,8 +3471,8 @@ tags: {
   tag_name: "FEMERGENODE"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3496,10 +3484,10 @@ tags: {
   attrs: { name: "dx" }
   attrs: { name: "dy" }
   attrs: { name: "in" }
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 # ARIA
@@ -3509,8 +3497,8 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "DESC"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3520,8 +3508,8 @@ tags: {
   tag_name: "TITLE"
   spec_name: "svg title"
   mandatory_ancestor: "SVG"
-  attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 
@@ -4871,6 +4859,249 @@ attr_lists: {
   }
   attrs: { name: "resource" }
   attrs: { name: "rev" }
+  attrs: {
+    name: "style"
+    blacklisted_value_regex: "(!important|<!--)"
+    # CSS proprities: https://www.w3schools.com/cssref/default.asp
+    # Disallowed:
+    # css_declaration: { name: "@charset" }
+    # css_declaration: { name: "@font-face" }
+    # css_declaration: { name: "@font-feature-values" }
+    # css_declaration: { name: "@import" }
+    # css_declaration: { name: "@keyframes" }
+    # css_declaration: { name: "@media" }
+    # Allowed:
+    css_declaration: { name: "align-content" }
+    css_declaration: { name: "align-items" }
+    css_declaration: { name: "align-self" }
+    css_declaration: { name: "all" }
+    css_declaration: { name: "animation" }
+    css_declaration: { name: "animation-delay" }
+    css_declaration: { name: "animation-direction" }
+    css_declaration: { name: "animation-duration" }
+    css_declaration: { name: "animation-fill-mode" }
+    css_declaration: { name: "animation-iteration-count" }
+    css_declaration: { name: "animation-name" }
+    css_declaration: { name: "animation-play-state" }
+    css_declaration: { name: "animation-timing-function" }
+    css_declaration: { name: "backface-visibility" }
+    css_declaration: { name: "background" }
+    css_declaration: { name: "background-attachment" }
+    css_declaration: { name: "background-blend-mode" }
+    css_declaration: { name: "background-clip" }
+    css_declaration: { name: "background-color" }
+    css_declaration: { name: "background-image" }
+    css_declaration: { name: "background-origin" }
+    css_declaration: { name: "background-position" }
+    css_declaration: { name: "background-repeat" }
+    css_declaration: { name: "background-size" }
+    css_declaration: { name: "border" }
+    css_declaration: { name: "border-bottom" }
+    css_declaration: { name: "border-bottom-color" }
+    css_declaration: { name: "border-bottom-left-radius" }
+    css_declaration: { name: "border-bottom-right-radius" }
+    css_declaration: { name: "border-bottom-style" }
+    css_declaration: { name: "border-bottom-width" }
+    css_declaration: { name: "border-collapse" }
+    css_declaration: { name: "border-color" }
+    css_declaration: { name: "border-image" }
+    css_declaration: { name: "border-image-outset" }
+    css_declaration: { name: "border-image-repeat" }
+    css_declaration: { name: "border-image-slice" }
+    css_declaration: { name: "border-image-source" }
+    css_declaration: { name: "border-image-width" }
+    css_declaration: { name: "border-left" }
+    css_declaration: { name: "border-left-color" }
+    css_declaration: { name: "border-left-style" }
+    css_declaration: { name: "border-left-width" }
+    css_declaration: { name: "border-radius" }
+    css_declaration: { name: "border-right" }
+    css_declaration: { name: "border-right-color" }
+    css_declaration: { name: "border-right-style" }
+    css_declaration: { name: "border-right-width" }
+    css_declaration: { name: "border-spacing" }
+    css_declaration: { name: "border-style" }
+    css_declaration: { name: "border-top" }
+    css_declaration: { name: "border-top-color" }
+    css_declaration: { name: "border-top-left-radius" }
+    css_declaration: { name: "border-top-right-radius" }
+    css_declaration: { name: "border-top-style" }
+    css_declaration: { name: "border-top-width" }
+    css_declaration: { name: "border-width" }
+    css_declaration: { name: "bottom" }
+    css_declaration: { name: "box-decoration-break" }
+    css_declaration: { name: "box-shadow" }
+    css_declaration: { name: "box-sizing" }
+    css_declaration: { name: "break-after" }
+    css_declaration: { name: "break-before" }
+    css_declaration: { name: "break-inside" }
+    css_declaration: { name: "caption-side" }
+    css_declaration: { name: "caret-color" }
+    css_declaration: { name: "clear" }
+    css_declaration: { name: "clip" }
+    css_declaration: { name: "color" }
+    css_declaration: { name: "column-count" }
+    css_declaration: { name: "column-fill" }
+    css_declaration: { name: "column-gap" }
+    css_declaration: { name: "column-rule" }
+    css_declaration: { name: "column-rule-color" }
+    css_declaration: { name: "column-rule-style" }
+    css_declaration: { name: "column-rule-width" }
+    css_declaration: { name: "column-span" }
+    css_declaration: { name: "column-width" }
+    css_declaration: { name: "columns" }
+    css_declaration: { name: "content" }
+    css_declaration: { name: "counter-increment" }
+    css_declaration: { name: "counter-reset" }
+    css_declaration: { name: "cursor" }
+    css_declaration: { name: "direction" }
+    css_declaration: { name: "display" }
+    css_declaration: { name: "empty-cells" }
+    css_declaration: { name: "filter" }
+    css_declaration: { name: "flex" }
+    css_declaration: { name: "flex-basis" }
+    css_declaration: { name: "flex-direction" }
+    css_declaration: { name: "flex-flow" }
+    css_declaration: { name: "flex-grow" }
+    css_declaration: { name: "flex-shrink" }
+    css_declaration: { name: "flex-wrap" }
+    css_declaration: { name: "float" }
+    css_declaration: { name: "font" }
+    css_declaration: { name: "font-family" }
+    css_declaration: { name: "font-feature-settings" }
+    css_declaration: { name: "font-kerning" }
+    css_declaration: { name: "font-language-override" }
+    css_declaration: { name: "font-size" }
+    css_declaration: { name: "font-size-adjust" }
+    css_declaration: { name: "font-stretch" }
+    css_declaration: { name: "font-style" }
+    css_declaration: { name: "font-synthesis" }
+    css_declaration: { name: "font-variant" }
+    css_declaration: { name: "font-variant-alternates" }
+    css_declaration: { name: "font-variant-caps" }
+    css_declaration: { name: "font-variant-east-asian" }
+    css_declaration: { name: "font-variant-ligatures" }
+    css_declaration: { name: "font-variant-numeric" }
+    css_declaration: { name: "font-variant-position" }
+    css_declaration: { name: "font-weight" }
+    css_declaration: { name: "grid" }
+    css_declaration: { name: "grid-area" }
+    css_declaration: { name: "grid-auto-columns" }
+    css_declaration: { name: "grid-auto-flow" }
+    css_declaration: { name: "grid-auto-rows" }
+    css_declaration: { name: "grid-column" }
+    css_declaration: { name: "grid-column-end" }
+    css_declaration: { name: "grid-column-gap" }
+    css_declaration: { name: "grid-column-start" }
+    css_declaration: { name: "grid-gap" }
+    css_declaration: { name: "grid-row" }
+    css_declaration: { name: "grid-row-end" }
+    css_declaration: { name: "grid-row-gap" }
+    css_declaration: { name: "grid-row-start" }
+    css_declaration: { name: "grid-template" }
+    css_declaration: { name: "grid-template-areas" }
+    css_declaration: { name: "grid-template-columns" }
+    css_declaration: { name: "grid-template-rows" }
+    css_declaration: { name: "hanging-punctuation" }
+    css_declaration: { name: "height" }
+    css_declaration: { name: "hyphens" }
+    css_declaration: { name: "image-rendering" }
+    css_declaration: { name: "isolation" }
+    css_declaration: { name: "justify-content" }
+    css_declaration: { name: "left" }
+    css_declaration: { name: "letter-spacing" }
+    css_declaration: { name: "line-break" }
+    css_declaration: { name: "line-height" }
+    css_declaration: { name: "list-style" }
+    css_declaration: { name: "list-style-image" }
+    css_declaration: { name: "list-style-position" }
+    css_declaration: { name: "list-style-type" }
+    css_declaration: { name: "margin" }
+    css_declaration: { name: "margin-bottom" }
+    css_declaration: { name: "margin-left" }
+    css_declaration: { name: "margin-right" }
+    css_declaration: { name: "margin-top" }
+    css_declaration: { name: "max-height" }
+    css_declaration: { name: "max-width" }
+    css_declaration: { name: "min-height" }
+    css_declaration: { name: "min-width" }
+    css_declaration: { name: "mix-blend-mode" }
+    css_declaration: { name: "object-fit" }
+    css_declaration: { name: "object-position" }
+    css_declaration: { name: "opacity" }
+    css_declaration: { name: "order" }
+    css_declaration: { name: "orphans" }
+    css_declaration: { name: "outline" }
+    css_declaration: { name: "outline-color" }
+    css_declaration: { name: "outline-offset" }
+    css_declaration: { name: "outline-style" }
+    css_declaration: { name: "outline-width" }
+    css_declaration: { name: "overflow" }
+    css_declaration: { name: "overflow-wrap" }
+    css_declaration: { name: "overflow-x" }
+    css_declaration: { name: "overflow-y" }
+    css_declaration: { name: "padding" }
+    css_declaration: { name: "padding-bottom" }
+    css_declaration: { name: "padding-left" }
+    css_declaration: { name: "padding-right" }
+    css_declaration: { name: "padding-top" }
+    css_declaration: { name: "page-break-after" }
+    css_declaration: { name: "page-break-before" }
+    css_declaration: { name: "page-break-inside" }
+    css_declaration: { name: "perspective" }
+    css_declaration: { name: "perspective-origin" }
+    css_declaration: { name: "pointer-events" }
+    # CSS property `position` with values `fixed` and `sticky are not allowed.
+    # From https://www.w3schools.com/cssref/pr_class_position.asp
+    css_declaration: {
+      name: "position"
+      value_casei: "absolute"
+      value_casei: "inherit"
+      value_casei: "initial"
+      value_casei: "relative"
+      value_casei: "static"
+    }
+    css_declaration: { name: "quotes" }
+    css_declaration: { name: "resize" }
+    css_declaration: { name: "right" }
+    css_declaration: { name: "tab-size" }
+    css_declaration: { name: "table-layout" }
+    css_declaration: { name: "text-align" }
+    css_declaration: { name: "text-align-last" }
+    css_declaration: { name: "text-combine-upright" }
+    css_declaration: { name: "text-decoration" }
+    css_declaration: { name: "text-decoration-color" }
+    css_declaration: { name: "text-decoration-line" }
+    css_declaration: { name: "text-decoration-style" }
+    css_declaration: { name: "text-indent" }
+    css_declaration: { name: "text-justify" }
+    css_declaration: { name: "text-orientation" }
+    css_declaration: { name: "text-overflow" }
+    css_declaration: { name: "text-shadow" }
+    css_declaration: { name: "text-transform" }
+    css_declaration: { name: "text-underline-position" }
+    css_declaration: { name: "top" }
+    css_declaration: { name: "transform" }
+    css_declaration: { name: "transform-origin" }
+    css_declaration: { name: "transform-style" }
+    css_declaration: { name: "transition" }
+    css_declaration: { name: "transition-delay" }
+    css_declaration: { name: "transition-duration" }
+    css_declaration: { name: "transition-property" }
+    css_declaration: { name: "transition-timing-function" }
+    css_declaration: { name: "unicode-bidi" }
+    css_declaration: { name: "user-select" }
+    css_declaration: { name: "vertical-align" }
+    css_declaration: { name: "visibility" }
+    css_declaration: { name: "white-space" }
+    css_declaration: { name: "widows" }
+    css_declaration: { name: "width" }
+    css_declaration: { name: "word-break" }
+    css_declaration: { name: "word-spacing" }
+    css_declaration: { name: "word-wrap" }
+    css_declaration: { name: "writing-mode" }
+    css_declaration: { name: "z-index" }
+  }
   attrs: { name: "typeof" }
   attrs: { name: "vocab" }
   # 3.2.5 HTML5 Global attributes.
@@ -5222,85 +5453,84 @@ error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 26 }
 error_specificity { code: STYLESHEET_TOO_LONG specificity: 27 }
 error_specificity { code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG specificity: 28 }
 error_specificity { code: INLINE_STYLE_TOO_LONG specificity: 29 }
-error_specificity { code: CSS_SYNTAX specificity: 30 }
-error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 31 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 30 }
 error_specificity {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 32
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 31
 }
-error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 33 }
-error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 34 }
-error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 35 }
-error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 36 }
-error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 37 }
-error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 38 }
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 32 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 33 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 34 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 35 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 36 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 37 }
 error_specificity {
-  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 39
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 38
 }
-error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 40 }
-error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 41 }
-error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 42 }
-error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 43 }
-error_specificity { code: DUPLICATE_DIMENSION specificity: 44 }
-error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 45 }
-error_specificity { code: MISSING_URL specificity: 46 }
-error_specificity { code: DISALLOWED_DOMAIN specificity: 47 }
-error_specificity { code: INVALID_URL_PROTOCOL specificity: 48 }
-error_specificity { code: INVALID_URL specificity: 49 }
-error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 50 }
-error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 51 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 52 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 53 }
-error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 54 }
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 39 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 40 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 41 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 42 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 43 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 44 }
+error_specificity { code: MISSING_URL specificity: 45 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 46 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 47 }
+error_specificity { code: INVALID_URL specificity: 48 }
+error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 49 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 50 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 51 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 52 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 53 }
 error_specificity {
-  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 55
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 54
 }
-error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 56 }
-error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 57 }
-error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 58 }
-error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 59 }
-error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 60 }
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 55 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 56 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 57 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 58 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 59 }
 error_specificity {
-  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 61
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 60
 }
-error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 62 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 63 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 64 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 65 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 66 }
-error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 67 }
-error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 68 }
-error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 69 }
-error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 70 }
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 61 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 62 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 63 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 64 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 65 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 66 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 67 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 68 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 69 }
 error_specificity {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 71
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 70
 }
-error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 72 }
-error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 73 }
-error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 74 }
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 71 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 72 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 73 }
 error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
-  specificity: 75
+  specificity: 74
 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 76 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 75 }
 error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
-  specificity: 77
+  specificity: 76
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
-  specificity: 78
+  specificity: 77
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
-  specificity: 79
+  specificity: 78
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
-  specificity: 80
+  specificity: 79
 }
 error_specificity {
   code: BASE_TAG_MUST_PRECEED_ALL_URLS
-  specificity: 81
+  specificity: 80
 }
 error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
@@ -5655,10 +5885,6 @@ error_formats {
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
 # by default).
-error_formats {
-  code: CSS_SYNTAX
-  format: "CSS syntax error in tag '%1' - %2."
-}
 error_formats {
   code: CSS_SYNTAX_INVALID_AT_RULE
   format: "CSS syntax error in tag '%1' - saw invalid at rule '@%2'."

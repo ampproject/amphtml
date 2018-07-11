@@ -24,7 +24,6 @@ import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
-  RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
@@ -62,6 +61,7 @@ import {
   TFCD,
   constructSRABlockParameters,
   serializeTargeting,
+  sraBlockCallbackHandler,
 } from './sra-utils';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
@@ -70,10 +70,6 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -88,7 +84,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isObject} from '../../../src/types';
 import {isSecureUrlDeprecated, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
@@ -97,8 +92,6 @@ import {
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {tryResolve} from '../../../src/utils/promise';
-import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -115,15 +108,6 @@ const DOUBLECLICK_EXPERIMENT_FEATURE = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
-};
-
-/** @type {string} @visibleForTesting */
-export const RENDER_IDLE_DELAY_REQUEST_EXP = 'doubleclick-delay-request';
-
-/** @enum {number} @visibleForTesting */
-export const RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES = {
-  CONTROL: 21062231, // control
-  EXPERIMENT: 21062232,
 };
 
 /** @private {?Promise} */
@@ -301,12 +285,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return this.isAmpAdElement();
   }
 
-  /** @override */
-  delayAdRequestEnabled() {
-    return getExperimentBranch(this.win, RENDER_IDLE_DELAY_REQUEST_EXP) ==
-        RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES.EXPERIMENT ? 12 : false;
-  }
-
   /**
    * @param {?string} urlExperimentId
    * @visibleForTesting
@@ -340,21 +318,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             `url experiment selection ${urlExperimentId}: ${experimentId}.`);
         this.experimentIds.push(experimentId);
     }
-    const experimentInfoMap =
-        /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-        // If SRA is not enabled and using renderOnIdle, allow for delay
-        // request experiment.
-        [RENDER_IDLE_DELAY_REQUEST_EXP]: {
-          isTrafficEligible: () => !this.useSra &&
-            this.getIdleRenderEnabled_() !== false,
-          branches: Object.keys(RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES).map(
-              key => RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES[key]),
-        },
-      });
-    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
-      setExps[expName] && this.experimentIds.push(setExps[expName]));
   }
 
   /** @private */
@@ -518,10 +481,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
         this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
+      this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
+      this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
     opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
@@ -799,21 +764,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override  */
   unlayoutCallback() {
-    switch (this.postAdResponseExperimentFeatures['unlayout_exp']) {
-      case 'all':
-        // Ensure all creatives are removed.
-        this.isAmpCreative_ = false;
-        break;
-      case 'remain':
-        if (this.qqid_ && this.isAmpCreative_ === null) {
-          // Ad response received but not yet rendered.  Note that no fills
-          // would fall into this case even if layoutCallback has executed.
-          // Assume high probability of continued no fill therefore do not
-          // tear down.
-          dev().info(TAG, 'unlayoutCallback - unrendered creative can remain');
-          return false;
-        }
-    }
     if (this.refreshManager_) {
       this.refreshManager_.unobserve();
     }
@@ -1058,68 +1008,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
               }
+              let sraUrl;
               // Construct and send SRA request.
               // Chunk handler called with metadata and creative for each slot
-              // in order of URLs given.  Construct promise for each slot
-              // such that its resolver will be called.
+              // in order of URLs given which is then passed to resolver used
+              // for sendXhrRequest.
               const sraRequestAdUrlResolvers =
               typeInstances.map(instance => instance.sraDeferred.resolve);
               const slotCallback = metaJsonCreativeGrouper(
                   (creative, headersObj, done) => {
                     checkStillCurrent();
-                    const headerNames = Object.keys(headersObj);
-                    if (headerNames.length == 1 &&
-                        isObject(headersObj[headerNames[0]])) {
-                      // TODO(keithwrightbos) - fix upstream so response does
-                      // not improperly place headers under key.
-                      headersObj =
-                        /** @type {!Object} */(headersObj)[headerNames[0]];
-                      headersObj = Object.keys(headersObj).reduce(
-                          (newObj, key) => {
-                            newObj[key.toLowerCase()] = headersObj[key];
-                            return newObj;
-                          }, {});
-                    }
-                    // Force safeframe rendering method.
-                    headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
-                        XORIGIN_MODE.SAFEFRAME;
-                    // Construct pseudo fetch response to be passed down the A4A
-                    // promise chain for this block.
-                    const headers =
-                  /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
-                  ({
-                    get: name => {
-                      // TODO(keithwrightbos) - fix upstream so response writes
-                      // all metadata values as strings.
-                      let header = headersObj[name.toLowerCase()];
-                      if (header && typeof header != 'string') {
-                        header = JSON.stringify(header);
-                      }
-                      return header;
-                    },
-                    has: name => !!headersObj[name.toLowerCase()],
-                  });
-                    const fetchResponse =
-                  /** @type {?../../../src/service/xhr-impl.FetchResponse} */
-                  ({
-                    headers,
-                    arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
-                  });
-                    // Pop head off of the array of resolvers as the response
-                    // should match the order of blocks declared in the ad url.
-                    // This allows the block to start rendering while the SRA
-                    // response is streaming back to the client.
-                    dev().assert(sraRequestAdUrlResolvers.shift())(
-                        fetchResponse);
-                    // If done, expect array to be empty (ensures ad response
-                    // included data for all slots).
-                    if (done && sraRequestAdUrlResolvers.length) {
-                      dev().warn(TAG, 'Premature end of SRA response',
-                          sraRequestAdUrlResolvers.length, sraUrl);
-                    }
+                    sraBlockCallbackHandler(creative, headersObj, done,
+                        sraRequestAdUrlResolvers, sraUrl);
                   });
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
-              let sraUrl;
               return constructSRARequest_(this, typeInstances)
                   .then(sraUrlIn => {
                     checkStillCurrent();
@@ -1136,14 +1038,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         this.win, response, slotCallback);
                   })
                   .catch(error => {
-                    const canceled = isCancellation(error);
-                    if (canceled) {
+                    if (isCancellation(error)) {
+                      // Cancellation should be propagated to slot promises
+                      // causing their adPromise chains within A4A to handle
+                      // appropriately.
                       typeInstances.forEach(instance =>
                         instance.sraDeferred.reject(error));
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]') ||
                         this.experimentIds.includes(
                             DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER)) {
+                      // If publisher has explicitly enabled SRA mode (not
+                      // experiment), then assume error is network failure,
+                      // collapse slot, reset url to empty string to ensure
+                      // no fallback to frame GET (given expectation of SRA
+                      // consistency), and propagate error to A4A ad promise
+                      // chain.
                       assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
                       this.warnOnError('SRA request failure', error);
                       // Publisher explicitly wants SRA so do not attempt to
@@ -1157,6 +1067,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         instance.sraDeferred.reject(error);
                       });
                     } else {
+                      // Opportunistic SRA used so fallback to individual
+                      // XHR requests.
                       typeInstances.forEach(instance =>
                         instance.sraDeferred.resolve(null));
                     }
