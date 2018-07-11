@@ -16,7 +16,6 @@
 
 import {
   ACTION_TYPE,
-  AMP_CONSENT_EXPERIMENT,
   AmpConsent,
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
