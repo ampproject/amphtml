@@ -18,7 +18,6 @@ import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
-import {Platform} from '../../../src/service/platform-impl';
 import {bezierCurve} from '../../../src/curve';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -27,7 +26,7 @@ import {numeric} from '../../../src/transition';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
-const EXPERIMENT = 'amp-image-slider';
+const TAG = 'amp-image-slider';
 
 // event-helper.js -> listen; option: passive = true
 // mount both mouse & touch listener ()
@@ -46,9 +45,8 @@ export class AmpImageSlider extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    const platform_ = new Platform(this.win);
     /** @private {boolean} */
-    this.isMobile_ = platform_.isAndroid() || platform_.isIos();
+    this.isMobile_ = /Android|iPhone|iPad|iPod/i.test(this.win.navigator.userAgent);
 
     /** @private {boolean} */
     this.isHoverSlider_ = (this.element.getAttribute('type') === 'hover')
@@ -104,10 +102,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, EXPERIMENT)) {
-      user().warn('Experiment %s is not turned on.', EXPERIMENT);
-      return;
-    }
+    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
 
     this.container_.classList.add('i-amphtml-image-slider-container');
     this.element.appendChild(this.container_);
@@ -407,10 +402,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.win, EXPERIMENT)) {
-      user().warn('Experiment %s is not turned on.', EXPERIMENT);
-      return;
-    }
+    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
 
     return Promise.all([
       // On load_start, <img>s are already created.
