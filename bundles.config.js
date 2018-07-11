@@ -57,7 +57,6 @@ exports.extensionBundles = [
   {name: 'amp-kaltura-player', version: '0.1'},
   {name: 'amp-call-tracking', version: '0.1'},
   {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
-  {name: 'amp-compare-slider', version: '0.1', options: {hasCss: true}},
   {name: 'amp-consent', version: '0.1', options: {hasCss: true}},
   {name: 'amp-crypto-polyfill', version: '0.1'},
   {name: 'amp-dailymotion', version: '0.1'},
