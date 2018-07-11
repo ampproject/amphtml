@@ -20,10 +20,14 @@ import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {Platform} from '../../../src/service/platform-impl';
 import {setStyle} from '../../../src/style';
+import {user} from '../../../src/log';
+
+const EXPERIMENT = 'amp-image-slider';
 
 // event-helper.js -> listen; option: passive = true
 // mount both mouse & touch listener ()
@@ -100,6 +104,11 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
+      user().warn('Experiment %s is not turned on.', EXPERIMENT);
+      return;
+    }
+
     this.container_.classList.add('i-amphtml-image-slider-container');
     this.element.appendChild(this.container_);
 
@@ -398,6 +407,11 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
+      user().warn('Experiment %s is not turned on.', EXPERIMENT);
+      return;
+    }
+
     return Promise.all([
       // On load_start, <img>s are already created.
       this.leftAmpImage_.signals().whenSignal(CommonSignals.LOAD_START),
