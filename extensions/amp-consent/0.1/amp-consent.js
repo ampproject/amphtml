@@ -46,8 +46,6 @@ const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
 
-export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
-
 /**
  * @enum {string}
  * @visibleForTesting
@@ -130,10 +128,6 @@ export class AmpConsent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
-      return;
-    }
-
     this.isMultiSupported_ = isExperimentOn(this.win, MULTI_CONSENT_EXPERIMENT);
 
     user().assert(this.element.getAttribute('id'),
