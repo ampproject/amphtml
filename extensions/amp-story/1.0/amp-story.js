@@ -784,7 +784,6 @@ export class AmpStory extends AMP.BaseElement {
   next_(opt_isAutomaticAdvance) {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
-    
     const lastPage = this.pages_[this.getPageCount() - 1];
     if (activePage.element.hasAttribute(Attributes.ADVANCE_TO) ||
         activePage !== lastPage) {
@@ -865,7 +864,7 @@ export class AmpStory extends AMP.BaseElement {
     const oldPage = this.activePage_;
 
     this.activePage_ = targetPage;
-    
+
     this.updateSoundPage_();
     this.systemLayer_.resetDeveloperLogs();
     this.systemLayer_.setDeveloperLogContextString(

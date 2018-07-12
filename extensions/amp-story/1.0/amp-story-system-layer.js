@@ -73,7 +73,7 @@ const TEMPLATE = {
                         'class': 'i-amphtml-story-mute-text' ,
                       }),
                       localizedStringId:
-                          LocalizedStringId.AMP_STORY_MUTE_BUTTON_TEXT,
+                          LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
                     },
                     {
                       tag: 'div',
@@ -81,7 +81,7 @@ const TEMPLATE = {
                         'class': 'i-amphtml-story-unmute-sound-text',
                       }),
                       localizedStringId:
-                          LocalizedStringId.AMP_STORY_UNMUTE_SOUND_BUTTON_TEXT,
+                          LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_BUTTON_TEXT,
                     },
                     {
                       tag: 'div',
@@ -89,7 +89,7 @@ const TEMPLATE = {
                         'class': 'i-amphtml-story-unmute-no-sound-text' ,
                       }),
                       localizedStringId:
-                          LocalizedStringId.AMP_STORY_UNMUTE_NO_SOUND_BUTTON_TEXT,
+                          LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_BUTTON_TEXT,
                     },
                   ]
                 },
@@ -120,7 +120,6 @@ const TEMPLATE = {
         
       ],
     },
-    
   ],
 };
 
@@ -395,9 +394,9 @@ export class SystemLayer {
       if(isMuted) {
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'muted');
        } else if(this.storeService_.get(StateProperty.PAGE_HAS_AUDIO_STATE)) {
-        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'soundon');
+        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'audioon');
       } else {
-        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'nosound');
+        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'noaudio');
       }
       
     });

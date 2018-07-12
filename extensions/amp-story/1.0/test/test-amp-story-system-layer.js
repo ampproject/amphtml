@@ -91,13 +91,6 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     expect(systemLayer.getShadowRoot()).to.have.attribute('ad-showing');
   });
 
-  it('should set an attribute to toggle the UI when an ad is shown', () => {
-    systemLayer.build();
-    storeService.dispatch(Action.TOGGLE_AD, true);
-
-    expect(systemLayer.getShadowRoot()).to.have.attribute('ad-showing');
-  });
-
   it('should show that sound off on a page when muted', () => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
@@ -109,13 +102,13 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, false);
     storeService.dispatch(Action.TOGGLE_MUTED, false);
-    expect(systemLayer.getShadowRoot()).to.have.attribute('muted', 'nosound');
+    expect(systemLayer.getShadowRoot()).to.have.attribute('muted', 'noaudio');
   });
 
   it('should show that the sound is on when unmuted', () => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
     storeService.dispatch(Action.TOGGLE_MUTED, false);
-    expect(systemLayer.getShadowRoot()).to.have.attribute('muted', 'soundon');
+    expect(systemLayer.getShadowRoot()).to.have.attribute('muted', 'audioon');
   });
 });

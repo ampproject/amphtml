@@ -122,7 +122,7 @@
  }
  
  [messagedisplay="noshow"] .i-amphtml-message-container {
-  transition: opacity 0.5s cubic-bezier(0.4, 0.0, 1, 1), transform 0.1s cubic-bezier(0.4, 0.0, 1, 1) 0.5s; 
+  transition: opacity 0.5s cubic-bezier(0.4, 0.0, 1, 1) , transform 0.1s cubic-bezier(0.4, 0.0, 1, 1); 
   transform: translateX(15%) !important;
  }
 
@@ -165,10 +165,10 @@
  
  .audio-playing[muted='muted'] .i-amphtml-story-unmute-audio-control,
  .audio-playing[muted='muted'] .i-amphtml-story-mute-text,
- .audio-playing[muted='soundon'] .i-amphtml-story-mute-audio-control,
- .audio-playing[muted='soundon'] .i-amphtml-story-unmute-sound-text,
- .audio-playing[muted='nosound'] .i-amphtml-story-mute-audio-control,
- .audio-playing[muted='nosound'] .i-amphtml-story-unmute-no-sound-text {
+ .audio-playing[muted='audioon'] .i-amphtml-story-mute-audio-control,
+ .audio-playing[muted='audioon'] .i-amphtml-story-unmute-sound-text,
+ .audio-playing[muted='noaudio'] .i-amphtml-story-mute-audio-control,
+ .audio-playing[muted='noaudio'] .i-amphtml-story-unmute-no-sound-text {
    display: block !important;
  }
  
