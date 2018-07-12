@@ -408,7 +408,7 @@ function runAllCommands() {
     command.runDepAndTypeChecks();
     command.runUnitTests();
     command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
-    // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
+    command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -443,7 +443,7 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
-  // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
+  command.verifyVisualDiffTests();
 
   // Validator tests.
   command.buildValidatorWebUI();
