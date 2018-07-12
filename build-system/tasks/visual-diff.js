@@ -116,7 +116,7 @@ function setPercyBranch() {
 async function launchWebServer() {
   const gulpServeAsync = execScriptAsync(
       `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
-      {stdio: 'inherit'});
+      getStdioOptions(argv.gulp_debug || argv.webserver_debug));
 
   gulpServeAsync.on('exit', code => {
     if (code != 0) {
@@ -127,11 +127,7 @@ async function launchWebServer() {
   });
 
   process.on('exit', async() => {
-    if (gulpServeAsync.exitCode == null) {
-      gulpServeAsync.kill();
-      // The child node process has an asynchronous stdout. See #10409.
-      await sleep(100);
-    }
+    await shutdown(gulpServeAsync);
   });
 
   let resolver, rejecter;
@@ -143,8 +139,25 @@ async function launchWebServer() {
     host: HOST,
     port: PORT,
     retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
-  }).on('connected', resolver).on('timeout', rejecter);
+  }).on('connected', () => {
+    return resolver(gulpServeAsync);
+  }).on('timeout', rejecter);
   return deferred;
+}
+
+/**
+ * Kill the webserver process and this own process.
+ *
+ * @param {!ChildProcess} webServerProcess the webserver process to shut down.
+ */
+async function shutdown(webServerProcess) {
+  if (webServerProcess.exitCode == null) {
+    // Explicitly exit the webserver.
+    webServerProcess.kill();
+    // The child node process has an asynchronous stdout. See #10409.
+    await sleep(100);
+  }
+  process.exit();
 }
 
 /**
@@ -306,7 +319,8 @@ function cleanupAmpConfig() {
   log('verbose', 'Cleaning up existing AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} --remove`);
+        `gulp prepend-global --local_dev --target ${targetFile} --remove`,
+        getStdioOptions(argv.gulp_debug));
   });
 }
 
@@ -319,8 +333,8 @@ function applyAmpConfig(config) {
   log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} ` +
-        `--${config}`);
+        `gulp prepend-global --local_dev --target ${targetFile} --${config}`,
+        getStdioOptions(argv.gulp_debug));
   });
 }
 
@@ -561,13 +575,25 @@ function setDebuggingLevel() {
   process.env.WEBSERVER_QUIET = '--quiet';
 
   if (argv.debug) {
-    // eslint-disable-next-line google-camelcase/google-camelcase
-    argv.chrome_debug = true;
-    process.env.WEBSERVER_QUIET = '';
+    argv.chrome_debug = true; // eslint-disable-line google-camelcase/google-camelcase
+    argv.gulp_debug = true; // eslint-disable-line google-camelcase/google-camelcase
+    argv.webserver_debug = true; // eslint-disable-line google-camelcase/google-camelcase
   }
   if (argv.webserver_debug) {
     process.env.WEBSERVER_QUIET = '';
   }
+}
+
+/**
+ * Return sub-process options based on whether its output should be printed.
+ *
+ * @param {boolean} shouldPrint true if the sub-process should print its output
+ * @return {<Object>} sub-process options
+ */
+function getStdioOptions(shouldPrint) {
+  return {
+    stdio: shouldPrint ? ['ignore', process.stdout, process.stderr] : 'ignore',
+  };
 }
 
 /**
@@ -616,14 +642,13 @@ async function visualDiff() {
 
   // Launch a browser and local web server.
   const page = await launchBrowser();
-  await launchWebServer().catch(reason => {
+  const webServerProcess = await launchWebServer().catch(reason => {
     log('fatal', `Failed to start a web server: ${reason}`);
   });
 
   if (argv.skip) {
     await createEmptyBuild(page);
-    // Explicitly exit, to trigger the webserver's exit event too.
-    process.exit();
+    await shutdown(webServerProcess);
     return;
   }
 
@@ -634,8 +659,7 @@ async function visualDiff() {
           'utf8'));
   await runVisualTests(page, visualTestsConfig);
 
-  // Explicitly exit, to trigger the webserver's exit event too.
-  process.exit();
+  await shutdown(webServerProcess);
 }
 
 gulp.task(
@@ -652,6 +676,7 @@ gulp.task(
         'headless': '  Runs Chrome in headless mode',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
+        'gulp_debug': '  Prints debug statements from gulp sub-processes',
         'debug': '  Prints all the above debug info',
       },
     }
