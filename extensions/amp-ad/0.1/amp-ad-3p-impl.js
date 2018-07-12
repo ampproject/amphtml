@@ -182,17 +182,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return super.getConsentPolicy();
   }
 
-  /**
-   * @return {number}
-   * @private
-   */
-  getFullWidthHeightRatio_() {
-    return this.element.getAttribute('data-auto-format') == 'mcrspv' &&
-        !!this.config.mcFullWidthHeightRatio ?
-        this.config.mcFullWidthHeightRatio :
-        this.config.fullWidthHeightRatio;
-  }
-
   /** @override */
   buildCallback() {
     this.type_ = this.element.getAttribute('type');
@@ -419,9 +408,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   attemptFullWidthSizeChange_() {
     const viewportSize = this.getViewport().getSize();
     const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
-    const idealHeight = Math.round(viewportSize.width / this.getFullWidthHeightRatio());
-    const height = clamp(idealHeight, MIN_FULL_WIDTH_HEIGHT, maxHeight);
-    const {width} = viewportSize;
+    const width = viewportSize.width;
+    const height = this.getFullWidthHeight_(width, maxHeight);
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
     // affect it.
@@ -434,5 +422,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           dev().info(TAG_3P_IMPL, `Size change rejected: ${width}x${height}`);
         }
     );
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getFullWidthHeight_(width, maxHeight) {
+    if (this.element.getAttribute('data-auto-format') == 'mcrspv' &&
+        !!this.config.mcFullWidthHeightRatio) {
+      return Math.max(MIN_FULL_WIDTH_HEIGHT,
+         Math.round(width / this.config.mcFullWidthHeightRatio));
+    }
+    return clamp(Math.round(width / this.config.fullWidthHeightRatio),
+        MIN_FULL_WIDTH_HEIGHT, maxHeight);
   }
 }

@@ -62,7 +62,7 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  *
  *   // The width / height ratio for matched content full width ad units.
- *   // Example value: 3.7
+ *   // Example value: 0.27
  *   mcFullWidthHeightRatio: number
  * }
  *
@@ -171,7 +171,7 @@ export const adConfig = {
     remoteHTMLDisabled: true,
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
-    mcFullWidthHeightRatio: 3.7,
+    mcFullWidthHeightRatio: 0.27,
     consentHandlingOverride: true,
   },
 
