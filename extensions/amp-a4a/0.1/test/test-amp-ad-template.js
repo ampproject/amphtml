@@ -21,6 +21,7 @@ import {
 import {AmpAdTemplate} from '../amp-ad-template';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
+import {tryParseJson} from '../../../../src/json';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 const realWinConfig = {
@@ -57,7 +58,20 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     document.body.appendChild(containerElement);
 
     impl = new AmpAdTemplate(containerElement);
+    impl.attemptChangeSize = (width, height) => {
+      impl.element.style.width = width;
+      impl.element.style.height = height;
+    };
     impl.getContext().adUrl = templateUrl;
+    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    document.body.removeChild(containerElement);
+  });
+
+  it('should load AMP ad', () => {
     impl.adResponsePromise_ = Promise.resolve({
       arrayBuffer: () => Promise.resolve(utf8Encode(JSON.stringify({
         templateUrl,
@@ -84,15 +98,6 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       return Promise.resolve(data.adTemplate);
     });
 
-    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    document.body.removeChild(containerElement);
-  });
-
-  it('should load test ad', () => {
     impl.buildCallback();
     return impl.layoutCallback().then(() => {
       const iframe = containerElement.querySelector('iframe');
@@ -100,6 +105,34 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       expect(iframe.contentWindow.document.body.innerHTML.trim()).to
           .equal('<div>\n      <p>ipsum lorem</p>\n      <a href="https://' +
               'www.google.com/" target="_top">Click for ad!</a>\n    </div>');
+    });
+  });
+
+  it('should load non-AMP ad', () => {
+    const mockCreative = '<html><body>Ipsum Lorem</body></html>';
+    impl.adResponsePromise_ = Promise.resolve({
+      arrayBuffer: () => Promise.resolve(utf8Encode(mockCreative)),
+      headers: {
+        get: header => {
+          switch (header) {
+            case AMP_TEMPLATED_CREATIVE_HEADER_NAME:
+              return 'amp-mustache';
+            case 'AMP-Ad-Response-Type':
+              return 'template';
+            default:
+              return null;
+          }
+        },
+      },
+    });
+
+    impl.buildCallback();
+    return impl.layoutCallback().then(() => {
+      const iframe = containerElement.querySelector('iframe');
+      expect(iframe).to.be.ok;
+      const nameAttr = tryParseJson(iframe.getAttribute('name'));
+      expect(nameAttr).to.be.ok;
+      expect(nameAttr.creative).to.equal(mockCreative);
     });
   });
 });

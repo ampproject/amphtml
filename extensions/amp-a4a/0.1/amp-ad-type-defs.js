@@ -76,6 +76,14 @@ export let CreativeMetaDataDef;
     }} */
 export let AmpTemplateCreativeDef;
 
+/** @typedef {{
+      creative: (string|undefined),
+      rawCreativeBytes: (!ArrayBuffer|undefined),
+      sentinel: (string|undefined),
+      additionalContextMetadata: (!JsonObject|undefined),
+    }} */
+export let CrossDomainDataDef;
+
 /**
  * @abstract
  */
