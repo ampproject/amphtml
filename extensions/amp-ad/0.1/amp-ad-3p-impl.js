@@ -422,10 +422,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const idealHeight = Math.round(viewportSize.width / this.getFullWidthHeightRatio());
     const height = clamp(idealHeight, MIN_FULL_WIDTH_HEIGHT, maxHeight);
     const {width} = viewportSize;
-
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
     // affect it.
+
     return this.attemptChangeSize(height, width).then(
         () => {
           dev().info(TAG_3P_IMPL, `Size change accepted: ${width}x${height}`);
