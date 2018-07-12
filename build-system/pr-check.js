@@ -396,10 +396,7 @@ const command = {
   },
 };
 
-/**
- * @param {boolean=} checkBundleSize
- */
-function runAllCommands(checkBundleSize = true) {
+function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
     command.testBuildSystem();
@@ -419,7 +416,8 @@ function runAllCommands(checkBundleSize = true) {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
-    if (checkBundleSize) {
+    // Disable bundle-size check on release branch builds.
+    if (process.env['TRAVIS_BRANCH'] === 'master') {
       command.runBundleSizeCheck();
     }
     command.runPresubmitTests();
@@ -525,9 +523,7 @@ function main() {
   const isPushBuild = !process.env.TRAVIS_PULL_REQUEST_SHA;
   if (isPushBuild) {
     console.log(fileLogPrefix, 'Running all commands on push build.');
-    // Disable bundle-size check on release branch builds.
-    const checkBundleSize = (process.env['TRAVIS_BRANCH'] === 'master');
-    runAllCommands(checkBundleSize);
+    runAllCommands();
     stopTimer('pr-check.js', startTime);
     return 0;
   }
