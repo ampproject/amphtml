@@ -89,7 +89,8 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
-| `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
+| `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
+| `gulp visual-diff --nobuild`                                            | Same as above, but without re-build. |
 | `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode. |
 | `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.  |
 

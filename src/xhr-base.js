@@ -6,6 +6,7 @@ import {
   getCorsUrl,
   getSourceOrigin,
   getWinOrigin,
+  isProxyOrigin,
   parseUrlDeprecated,
 } from './url';
 import {getMode} from './mode';
@@ -140,11 +141,12 @@ export class XhrBase {
    * Intercepts the XHR and proxies it through the viewer if necessary.
    *
    * XHRs are intercepted if all of the following are true:
-   * - The AMP doc is in single doc mode
-   * - The viewer has the `xhrInterceptor` capability
-   * - The Viewer is a trusted viewer or AMP is currently in developement mode
+   * - The AMP doc is in single doc mode.
+   * - The requested resource is not a 1p request.
+   * - The viewer has the `xhrInterceptor` capability.
+   * - The Viewer is a trusted viewer or AMP is currently in developement mode.
    * - The AMP doc is opted-in for XHR interception (`<html>` tag has
-   *   `allow-xhr-interception` attribute)
+   *   `allow-xhr-interception` attribute).
    *
    * @param {string} input The URL of the XHR which may get intercepted.
    * @param {!FetchInitDef} init The options of the XHR which may get
@@ -160,7 +162,7 @@ export class XhrBase {
     }
     const viewer = Services.viewerForDoc(this.ampdocSingle_);
     const whenFirstVisible = viewer.whenFirstVisible();
-    if (!viewer.hasCapability('xhrInterceptor')) {
+    if (isProxyOrigin(input) || !viewer.hasCapability('xhrInterceptor')) {
       return whenFirstVisible;
     }
     const htmlElement = this.ampdocSingle_.getRootNode().documentElement;

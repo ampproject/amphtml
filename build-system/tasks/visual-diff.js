@@ -54,6 +54,9 @@ const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
 const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 
+const preVisualDiffTasks =
+    (argv.nobuild || argv.verify_status) ? [] : ['build'];
+
 /**
  * Logs a message to the console.
  *
@@ -598,7 +601,7 @@ async function createEmptyBuild(page) {
 async function visualDiff() {
   setPercyBranch();
 
-  if (argv.verify) {
+  if (argv.verify_status) {
     const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
     const status = await waitForBuildCompletion(buildId);
     verifyBuildStatus(status, buildId);
@@ -638,11 +641,13 @@ async function visualDiff() {
 gulp.task(
     'visual-diff',
     'Runs the AMP visual diff tests.',
+    preVisualDiffTasks,
     visualDiff,
     {
       options: {
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
-        'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
+        'verify_status':
+          '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
         'headless': '  Runs Chrome in headless mode',
         'chrome_debug': '  Prints debug info from Chrome',
