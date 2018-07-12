@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ describes.realWin('amp-mowplayer', {
 
   function getmowplayer(attributes) {
     const mow = doc.createElement('amp-mowplayer');
-	
+
     for (const key in attributes) {
       mow.setAttribute(key, attributes[key]);
     }
-	
+
     mow.setAttribute('width', '320');
     mow.setAttribute('height', '180');
     mow.setAttribute('layout', 'responsive');
@@ -58,8 +58,9 @@ describes.realWin('amp-mowplayer', {
 
 
   it('fails if no media is specified', () => {
-    return allowConsoleError(() => { return getmowplayer({}).should.eventually.be.rejectedWith(
-        /the data-media-id attributes must exists/);
+    return allowConsoleError(() => {
+      return getmowplayer({}).should.eventually.be.rejectedWith(
+          /the data-media-id attributes must exists/);
     });
   });
 
