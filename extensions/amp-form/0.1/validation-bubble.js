@@ -56,6 +56,7 @@ export class ValidationBubble {
   }
 
   /**
+   * @param {!Element} element
    * @return {boolean}
    */
   isActiveOn(element) {

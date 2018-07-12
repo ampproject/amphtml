@@ -33,7 +33,6 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  RENDER_IDLE_DELAY_REQUEST_EXP,
   getNetworkId,
   resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
@@ -45,10 +44,7 @@ import {
 } from '../../../../ads/google/a4a/utils';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 /**
@@ -711,8 +707,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             regexp => expect(url).to.match(regexp));
       });
     });
-    it('should return empty string if unknown consentState', () => expect(
-        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(''));
+
+    it('should return empty string if unknown consentState', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
+        expect(url).equal('');
+        return expect(impl.getAdUrlDeferred.promise).to.eventually.equal('');
+      }));
 
     it('should include npa=1 if unknown consent & explicit npa', () => {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
@@ -791,56 +791,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(impl.iframe).is.ok;
     });
 
-    it('should remove FIE if in all exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should remove non-FIE if in all exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not remove FIE if in remain exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.iframe).is.ok;
-    });
-
-    it('should remove rendered non-FIE if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not destroy ad promise for unrendered if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = 'abcdef';
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should destroy ad promise if ad response not yet received and in ' +
-        'remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = null;
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
           impl.ampAnalyticsConfig_ = {};
@@ -865,7 +815,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         });
 
     it('should call #unobserve on refreshManager', () => {
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
       impl.refreshManager_ = {
         unobserve: sandbox.spy(),
       };
@@ -904,12 +853,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should return false by default', () => {
       expect(impl.delayAdRequestEnabled()).to.be.false;
-    });
-
-    it('should return 12 if in experiment', () => {
-      forceExperimentBranch(
-          impl.win, RENDER_IDLE_DELAY_REQUEST_EXP, '21062232');
-      expect(impl.delayAdRequestEnabled()).to.equal(12);
     });
   });
 

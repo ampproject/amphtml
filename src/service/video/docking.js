@@ -700,9 +700,15 @@ export class VideoDocking {
     if (!this.slotHasDimensions_()) {
       return false;
     }
+    const relativeY = this.getSlotRelativeY_();
     const {element} = video;
-    const {top} = element.getIntersectionChangeEntry().intersectionRect;
-    return top <= this.getFixedSlotLayoutBox_().top;
+    const {top, bottom} = element.getIntersectionChangeEntry().intersectionRect;
+    const {top: slotTop, height: slotHeight} = this.getFixedSlotLayoutBox_();
+    const slotBottom = this.viewport_.getSize().height - slotHeight - slotTop;
+    if (relativeY == RelativeY.TOP) {
+      return top <= slotTop;
+    }
+    return bottom >= slotBottom;
   }
 
   /**
@@ -931,7 +937,9 @@ export class VideoDocking {
    * @private
    */
   getSlotRelativeY_() {
-    const {top, bottom} = this.getFixedSlotLayoutBox_();
+    const {top, height} = this.getFixedSlotLayoutBox_();
+    const vh = this.viewport_.getSize().height;
+    const bottom = vh - height - top;
     return bottom > top ? RelativeY.TOP : RelativeY.BOTTOM;
   }
 
@@ -978,6 +986,10 @@ export class VideoDocking {
       isFiniteNumber(opt_step) ?
         dev().assertNumber(opt_step) :
         this.calculateStep_(video.element, target);
+
+    if (step < 0.01) {
+      return;
+    }
 
     if (step >= REVERT_TO_INLINE_RATIO &&
         this.currentlyDocked_ &&
@@ -1069,9 +1081,13 @@ export class VideoDocking {
     }
 
     const {top, bottom, height} = element.getLayoutBox();
-    const slotLayoutBox = this.getSlot_().getLayoutBox();
-    const clampedHeight = bottom - Math.max(top, slotLayoutBox.top);
-    return clampedHeight / height;
+    const {top: slotTop, bottom: slotBottom} = this.getSlot_().getLayoutBox();
+
+    if (this.getSlotRelativeY_() == RelativeY.TOP) {
+      return (bottom - Math.max(top, slotTop)) / height;
+    } else {
+      return (slotBottom - top) / height;
+    }
   }
 
   /**

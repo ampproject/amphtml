@@ -38,6 +38,7 @@ const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
+const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
 const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
@@ -61,6 +62,7 @@ const minifiedRuntimeTarget = 'dist/v0.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
 const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
+
 
 // Each extension and version must be listed individually here.
 declareExtension('amp-3d-gltf', '0.1');
@@ -161,54 +163,20 @@ declareExtension('amp-story', ['0.1', '1.0'], {
     'amp-story-system-layer',
   ],
 });
-declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
-declareExtension('amp-selector', '0.1', {hasCss: true});
-declareExtension('amp-web-push', '0.1', {hasCss: true});
-declareExtension('amp-wistia-player', '0.1');
-declareExtension('amp-position-observer', '0.1');
-declareExtension('amp-date-picker', '0.1', {hasCss: true});
-declareExtension('amp-image-viewer', '0.1', {hasCss: true});
-declareExtension('amp-subscriptions', '0.1', {hasCss: true});
-declareExtension('amp-subscriptions-google', '0.1', {hasCss: true});
-declareExtension('amp-pan-zoom', '0.1', {hasCss: true});
-/**
- * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
- * Please see {@link AmpCarousel} with `type=slides` attribute instead.
- */
-declareExtension('amp-slides', '0.1');
-declareExtension('amp-social-share', '0.1', {hasCss: true});
-declareExtension('amp-timeago', '0.1');
-declareExtension('amp-twitter', '0.1');
-declareExtension('amp-user-notification', '0.1', {hasCss: true});
-declareExtension('amp-vimeo', '0.1');
-declareExtension('amp-vine', '0.1');
-declareExtension('amp-viz-vega', '0.1', {hasCss: true});
-declareExtension('amp-google-vrview-image', '0.1');
-declareExtension('amp-viewer-integration', '0.1', {
-  // The viewer integration code needs to run asap, so that viewers
-  // can influence document state asap. Otherwise the document may take
-  // a long time to learn that it should start process other extensions
-  // faster.
-  loadPriority: 'high',
+extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
+aliasBundles.forEach(c => {
+  declareExtensionVersionAlias(c.name, c.version, c.latestVersion, c.options);
 });
-declareExtension('amp-video', '0.1');
-declareExtension('amp-video-service', '0.1', {
-  // `amp-video-service` provides analytics and autoplay for all videos. We need
-  // those to be available asap. This service replaces a runtime-level provider,
-  // so loadPriority is set to high in lieu of delivering it as part of the core
-  // binary.
-  loadPriority: 'high',
-});
-declareExtension('amp-vk', '0.1');
-declareExtension('amp-yotpo', '0.1');
-declareExtension('amp-youtube', '0.1');
-declareExtensionVersionAlias(
-    'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
 
+/**
+ * Tasks that should print the `--nobuild` help text.
+ * @private @const {!Set<string>}
+ */
+const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
 
 /**
  * Extensions to build when `--extensions=minimal_set`.
- * @private @const {!Set<string>}
+ * @private @const {!Array<string>}
  */
 const MINIMAL_EXTENSION_SET = [
   'amp-ad',
@@ -271,7 +239,7 @@ function declareExtension(name, version, options) {
 /**
  * This function is used for declaring deprecated extensions. It simply places
  * the current version code in place of the latest versions. This has the
- * ability to break an extension verison, so please be sure that this is the
+ * ability to break an extension version, so please be sure that this is the
  * correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
@@ -423,6 +391,24 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           's.animation="none";' +
           's.WebkitAnimation="none;"},1000);throw e};',
     }),
+    compileJs('./src/', 'amp.js', './dist', {
+      minifiedName: 'v0-esm.js',
+      includePolyfills: true,
+      includeOnlyESMLevelPolyfills: true,
+      checkTypes: opt_checkTypes,
+      watch,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      minify: shouldMinify,
+      // If there is a sync JS error during initial load,
+      // at least try to unhide the body.
+      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+          'setTimeout(function(){' +
+          'var s=document.body.style;' +
+          's.opacity=1;' +
+          's.visibility="visible";' +
+          's.animation="none";' +
+          's.WebkitAnimation="none;"},1000);throw e};',
+    }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
           toName: 'amp-viewer-host.max.js',
@@ -449,6 +435,18 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
           })
       );
+    }
+
+    if (!watch || argv.with_video_iframe_integration) {
+      promises.push(
+          compileJs('./src/', 'video-iframe-integration.js', './dist', {
+            minifiedName: 'video-iframe-integration-v0.js',
+            includePolyfills: false,
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
     }
 
     if (!watch || argv.with_inabox) {
@@ -542,6 +540,9 @@ function compileCss(watch, opt_compileAll) {
           fs.writeFileSync(`build/css/${cssFilename}`, css);
         }));
   }
+
+  // Used by `gulp test --local-changes` to map CSS files to JS files.
+  fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
@@ -718,10 +719,15 @@ function buildExtensionJs(path, name, version, options) {
  * Prints a message that could help speed up local development.
  */
 function printNobuildHelp() {
-  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
-    log(green('To skip building during future test runs, use'),
-        cyan('--nobuild'), green('with your'), cyan('gulp test'),
-        green('command.'));
+  if (!process.env.TRAVIS) {
+    for (const task of NOBUILD_HELP_TASKS) { // eslint-disable-line amphtml-internal/no-for-of-statement
+      if (argv._.includes(task)) {
+        log(green('To skip building during future'), cyan(task),
+            green('runs, use'), cyan('--nobuild'), green('with your'),
+            cyan(`gulp ${task}`), green('command.'));
+        return;
+      }
+    }
   }
 }
 
