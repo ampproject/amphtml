@@ -162,7 +162,7 @@ declareExtension('amp-story', ['0.1', '1.0'], {
     'amp-story-share-menu',
     'amp-story-system-layer',
   ],
-
+});
 extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
 aliasBundles.forEach(c => {
   declareExtensionVersionAlias(c.name, c.version, c.latestVersion, c.options);
