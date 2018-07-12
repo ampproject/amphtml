@@ -447,10 +447,8 @@ export class NextPageService {
 
     const urlService = Services.urlForDoc(dev().assertElement(this.element_));
     const {title} = documentRef.amp;
-    const url = urlService.parse(documentRef.ampUrl);
-    // Strip the origin from the URL to get the path with query string.
-    const fullPath = documentRef.ampUrl.substr(url.origin.length);
-    this.win_.history.replaceState({}, title, fullPath);
+    const {pathname, search} = urlService.parse(documentRef.ampUrl);
+    this.win_.history.replaceState({}, title, pathname + search);
   }
 
   /**
