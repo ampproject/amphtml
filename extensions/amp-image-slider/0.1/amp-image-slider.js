@@ -26,8 +26,6 @@ import {numeric} from '../../../src/transition';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
-const TAG = 'amp-image-slider';
-
 // event-helper.js -> listen; option: passive = true
 // mount both mouse & touch listener ()
 // Test: mainly describes.integration
@@ -75,7 +73,10 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.rightLabel_ = null;
 
     /** @private {!Element} */
-    this.mask_ = this.win.document.createElement('div');
+    this.leftMask_ = this.win.document.createElement('div');
+
+    /** @private {!Element} */
+    this.rightMask_ = this.win.document.createElement('div');
 
     /** @private {!Element} */
     this.bar_ = this.win.document.createElement('div');
@@ -112,7 +113,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
+    // From https://github.com/ampproject/amphtml/pull/16688
+    user().assert(isExperimentOn(this.win, 'amp-image-slider'),
+        'Experiment <amp-image-slider> disabled');
 
     this.container_.classList.add('i-amphtml-image-slider-container');
     this.element.appendChild(this.container_);
@@ -151,6 +154,13 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.mutateElement(() => {
       this.buildImages();
       this.buildBar();
+
+      // TODO(kqian): this is taking ownership
+      // Simply mutating have chances of failure
+      // Temporarily kept here to ensure render
+      this.setAsOwner(this.leftAmpImage_);
+      this.setAsOwner(this.rightAmpImage_);
+
       buildDeferred.resolve();
     });
 
@@ -166,19 +176,23 @@ export class AmpImageSlider extends AMP.BaseElement {
     // leftMask
     //   |_ leftAmpImage
     // rightAmpImage
-    this.container_.appendChild(this.mask_);
-    this.container_.appendChild(this.rightAmpImage_);
+    this.container_.appendChild(this.rightMask_);
+    this.container_.appendChild(this.leftMask_);
+
+    this.rightMask_.appendChild(this.rightAmpImage_);
+    this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
+
     if (this.rightLabel_) {
       this.rightLabelWrapper_ = this.win.document.createElement('div');
       this.rightLabelWrapper_.classList
           .add('i-amphtml-image-slider-right-label-wrapper');
       this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
       this.rightLabelWrapper_.appendChild(this.rightLabel_);
-      this.container_.appendChild(this.rightLabelWrapper_);
+      this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
-    this.mask_.appendChild(this.leftAmpImage_);
+    this.leftMask_.appendChild(this.leftAmpImage_);
 
-    this.mask_.classList.add('i-amphtml-image-slider-mask');
+    this.leftMask_.classList.add('i-amphtml-image-slider-left-mask');
     this.leftAmpImage_.classList.add('i-amphtml-image-slider-over-image');
 
     if (this.leftLabel_) {
@@ -187,7 +201,7 @@ export class AmpImageSlider extends AMP.BaseElement {
           .add('i-amphtml-image-slider-left-label-wrapper');
       this.leftLabel_.classList.add('i-amphtml-image-slider-left-label');
       this.leftLabelWrapper_.appendChild(this.leftLabel_);
-      this.mask_.appendChild(this.leftLabelWrapper_);
+      this.leftMask_.appendChild(this.leftLabelWrapper_);
     }
   }
 
@@ -239,7 +253,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.updateTranslateX(this.bar_, leftPercentage);
 
     if (this.leftRealImage_) {
-      this.updateTranslateX(this.mask_, leftPercentage - 1);
+      this.updateTranslateX(this.leftMask_, leftPercentage - 1);
       this.updateTranslateX(this.leftRealImage_, 1 - leftPercentage);
       if (this.leftLabelWrapper_) {
         this.updateTranslateX(this.leftLabelWrapper_, 1 - leftPercentage);
@@ -340,7 +354,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       const posInterpolated = interpolate(pos);
       this.updateTranslateX(this.bar_, posInterpolated);
       if (this.leftRealImage_) {
-        this.updateTranslateX(this.mask_, posInterpolated - 1);
+        this.updateTranslateX(this.leftMask_, posInterpolated - 1);
         this.updateTranslateX(this.leftRealImage_, 1 - posInterpolated);
         if (this.leftLabelWrapper_) {
           this.updateTranslateX(this.leftLabelWrapper_, 1 - posInterpolated);
@@ -454,7 +468,17 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
+    // https://github.com/ampproject/amphtml/pull/16688
+    user().assert(isExperimentOn(this.win, 'amp-image-slider'),
+        'Experiment <amp-image-slider> disabled');
+
+    // TODO(kqian): this is taking ownership
+    // Simply mutating have chances of failure
+    // Temporarily kept here to ensure render
+    if (this.leftAmpImage_ && this.rightAmpImage_) {
+      this.scheduleLayout(this.leftAmpImage_);
+      this.scheduleLayout(this.rightAmpImage_);
+    }
 
     return Promise.all([
       // On load_start, <img>s are already created.

@@ -14,11 +14,63 @@
 
     .label {
       color: white;
-      margin: 0 1em;
       border: 4px solid white;
       padding: 1em;
       font-family: Arial, Helvetica, sans-serif;
       box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
+    }
+
+    .top-label {
+      top: 0;
+    }
+
+    .center-y-label {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .bottom-label {
+      bottom: 0;
+    }
+
+    .left-label-left {
+      left: 0;
+    }
+
+    .left-label-center {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-label-right {
+      right: 0;
+      left: auto;
+    }
+
+    .right-label-left {
+      left: 0;
+      right: auto;
+    }
+
+    .right-label-center {
+      right: 50%;
+      transform: translateX(50%);
+    }
+
+    .right-label-right {
+      right: 0;
+    }
+
+    .left-label-center-xy {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .right-label-center-xy {
+      right: 50%;
+      top: 50%;
+      transform: translate(50%, -50%);
     }
   </style>
   <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
@@ -26,20 +78,94 @@
 </head>
 <body>
   <main id="content">
-    <p>Drag the button OR click to compare</p>
+    <h1>Drag/Click Slider with Customizable Labels</h1>
+
+    <p>Labels with no positioning rules specified (default to both top, left label to left, right label to right)</p>
     <amp-image-slider layout="responsive" width="1024" height="600">
       <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
       <div after class="label">AFTER</div>
     </amp-image-slider>
+
+    <p>Labels on top</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label top-label">BEFORE</div>
+      <div after class="label top-label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Labels on center Y</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label center-y-label">BEFORE</div>
+      <div after class="label center-y-label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Labels on bottom</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label bottom-label">BEFORE</div>
+      <div after class="label bottom-label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Left label on top, right label on bottom (combination)</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label top-label">BEFORE</div>
+      <div after class="label bottom-label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Left label on center X, right label on center X</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label left-label-center">BEFORE</div>
+      <div after class="label right-label-center">AFTER</div>
+    </amp-image-slider>
+
+    <p>Left label on left, right label on right</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label left-label-left">BEFORE</div>
+      <div after class="label right-label-right">AFTER</div>
+    </amp-image-slider>
+
+    <p>Left label on right, right label on left</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label left-label-right">BEFORE</div>
+      <div after class="label right-label-left">AFTER</div>
+    </amp-image-slider>
+
+    <p>Left label on left, right label on left</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label left-label-left">BEFORE</div>
+      <div after class="label right-label-left">AFTER</div>
+    </amp-image-slider>
+
+    <p>Center both labels to the center of images (combination)</p>
+    <amp-image-slider layout="responsive" width="1024" height="600">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label left-label-center-xy">BEFORE</div>
+      <div after class="label right-label-center-xy">AFTER</div>
+    </amp-image-slider>
   
-    <p>Hover your mouse to compare</p>
+    <!-- <p>Hover your mouse to compare</p>
     <amp-image-slider type="hover" layout="responsive" width="1024" height="600">
       <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div before class="label center-label">BEFORE</div>
+      <div after class="label center-label">AFTER</div>
     </amp-image-slider>
 
     <p>Drag the button OR click to compare</p>
@@ -64,7 +190,7 @@
     <amp-image-slider type="hover" layout="intrinsic" width="1024" height="600">
       <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-    </amp-image-slider>
+    </amp-image-slider> -->
 
   </main>
 </body>
