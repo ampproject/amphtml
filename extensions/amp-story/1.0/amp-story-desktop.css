@@ -145,6 +145,7 @@ amp-story[standalone][desktop] {
   right: 0 !important;
 }
 
+/** This is needed to overwrite position of replay and read more button at the end of the the story. */
 [dir=rtl] [desktop] > .next-container > .i-amphtml-story-button-move {
   right: auto !important;
   left: 0 !important;
