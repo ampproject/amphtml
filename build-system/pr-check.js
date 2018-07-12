@@ -520,8 +520,7 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
-  const isPushBuild = !process.env.TRAVIS_PULL_REQUEST_SHA;
-  if (isPushBuild) {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
     console.log(fileLogPrefix, 'Running all commands on push build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);
