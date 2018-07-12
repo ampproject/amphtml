@@ -128,9 +128,9 @@ export const RENDER_IDLE_DELAY_REQUEST_EXP_BRANCHES = {
 
 /**
  * Map of pageview tokens to the instances they belong to.
- * @private {!Object{string: !AmpAdNetworkDoubleclickImpl}
+ * @private {!Object<string: !AmpAdNetworkDoubleclickImpl>}
  */
-export const pageviewStateTokens = {};
+export const tokensToInstances = {};
 
 /** @private {?Promise} */
 let sraRequests = null;
@@ -411,10 +411,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {!Array<!AmpAdNetworkDoubleclickImpl>|undefined} instances
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
-  getPageParameters(consentState, instances = [this]) {
+  getPageParameters(consentState, instances) {
+    instances = instances || [this];
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
@@ -1278,7 +1280,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @param {string} token
    */
   setPageviewStateToken(token) {
-    pageviewStateTokens[token] = this;
+    tokensToInstances[token] = this;
   }
 
   /**
@@ -1286,9 +1288,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * and removes it if present.
    */
   removePageviewStateToken() {
-    for (const token in pageviewStateTokens) {
-      if (pageviewStateTokens[token] == this) {
-        delete pageviewStateTokens[token];
+    for (const token in tokensToInstances) {
+      if (tokensToInstances[token] == this) {
+        delete tokensToInstances[token];
         break;
       }
     }
@@ -1342,17 +1344,15 @@ function constructSRARequest_(a4a, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
   dev().assert(instances && instances.length);
   const startTime = Date.now();
-  return Promise
-      .all(instances.map(instance => instance.getAdUrlDeferred.promise))
+  return Promise.all(
+      instances.map(instance => instance.getAdUrlDeferred.promise))
       .then(() => googlePageParameters(a4a, startTime))
       .then(googPageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
-        return truncAndTimeUrl(
-            DOUBLECLICK_BASE_URL,
+        return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
-                          instances[0].getPageParameters(
-                              instances[0].consentState, instances)),
-            startTime);
+                instances[0].getPageParameters(instances[0].consentState,
+                  instances)), startTime);
       });
 }
 
@@ -1365,9 +1365,9 @@ function constructSRARequest_(a4a, instances) {
  */
 function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
   const pageviewStateTokensInAdRequest = [];
-  for (const token in pageviewStateTokens) {
+  for (const token in tokensToInstances) {
     if (!instancesInAdRequest.includes(
-            pageviewStateTokens[token])) {
+        tokensToInstances[token])) {
       pageviewStateTokensInAdRequest.push(token);
     }
   }
