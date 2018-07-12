@@ -1262,7 +1262,7 @@ function constructSRARequest_(a4a, instances) {
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
                 instances[0].getPageParameters(instances[0].consentState,
-                  instances)), startTime);
+                    instances)), startTime);
       });
 }
 
