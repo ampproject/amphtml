@@ -38,20 +38,6 @@ const allowedMethods_ = ['GET', 'POST'];
  */
 export let FetchInitDef;
 
-/**
- * A record version of `XMLHttpRequest` that has all the necessary properties
- * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
- * serialized response returned by the viewer.
- * @typedef {{
- *   status: number,
- *   statusText: string,
- *   responseText: string,
- *   responseXML: ?Document,
- *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
- * }}
- */
-let XMLHttpRequestDef;
-
 export class XhrBase {
   /**
    * Creates an instance of XHRUtils.
@@ -231,7 +217,7 @@ export class XhrBase {
    *
    * @param {JsonObject|string|undefined} response The structurally-cloneable
    *     response to convert back to a regular Response.
-   * @return {!FetchResponse|!Response} The deserialized regular response.
+   * @return {!Response} The deserialized regular response.
    * @private
    */
   fromStructuredCloneable_(response) {

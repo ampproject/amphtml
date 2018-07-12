@@ -94,13 +94,15 @@ export class DocumentFetcher extends XhrBase {
           const options = {
             status: this.xhr_.status,
             statusText: this.xhr_.statusText,
-            headers: parseHeaders(this.xhr_.getAllResponseHeaders() || ''),
+            headers: {
+              get: name => String(this.xhr_.getResponseHeader(name)).toLowerCase(),
+            },
           };
           options.url = 'responseURL' in this.xhr_
             ? this.xhr_.responseURL : options.headers.get('X-Request-URL');
           const body = 'response' in this.xhr_
             ? this.xhr_.response : this.xhr_.responseText;
-          resolve(new Response(body, options));
+          resolve(new Response(/** @type {string} */ (body), /** @type {!ResponseInit} */ (options)));
         }
       };
       this.xhr_.onerror = () => {
@@ -110,7 +112,7 @@ export class DocumentFetcher extends XhrBase {
         reject(user().createExpectedError('Request aborted'));
       };
       if (init.method == 'POST') {
-        this.xhr_.send(init.body);
+        this.xhr_.send(/** @type {!FormData} */ (init.body));
       } else {
         this.xhr_.send();
       }
@@ -137,26 +139,4 @@ export class DocumentFetcher extends XhrBase {
       }
     });
   }
-}
-
-/**
- * Parses headers and return headers object.
- *
- * @param {string} rawHeaders
- * @return {JsonObject}
- */
-function parseHeaders(rawHeaders) {
-  const headers = new Headers();
-  // Replace instances of \r\n and \n followed by at least
-  // one space or horizontal tab with a space.
-  const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
-  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
-    const parts = line.split(':');
-    const key = parts.shift().trim();
-    if (key) {
-      const value = parts.join(':').trim();
-      headers.append(key, value);
-    }
-  });
-  return headers;
 }

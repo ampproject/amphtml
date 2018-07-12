@@ -25,6 +25,20 @@ const allowedFetchTypes_ = {
   text: 2,
 };
 
+/**
+ * A record version of `XMLHttpRequest` that has all the necessary properties
+ * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
+ * serialized response returned by the viewer.
+ * @typedef {{
+ *   status: number,
+ *   statusText: string,
+ *   responseText: string,
+ *   responseXML: ?Document,
+ *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
+ * }}
+ */
+let XMLHttpRequestDef;
+
 
 /**
  * A minimal polyfill of Fetch API. It only polyfills what we currently use.
@@ -252,7 +266,7 @@ function Response(body, init = {}) {
     data.statusText = String(init.statusText);
   }
 
-  return new FetchResponse(data);
+  return new FetchResponse(/** @type {XMLHttpRequestDef} */(data));
 }
 
 /**
@@ -263,7 +277,7 @@ function Response(body, init = {}) {
  */
 export function install(win) {
   if (!win.fetch) {
-    win.fetch = fetchPolyfill;
+    win.prototype.fetch = /** @type {function(string, RequestInit):!Promise} */ (fetchPolyfill);
     win.Response = Response;
   }
 }
