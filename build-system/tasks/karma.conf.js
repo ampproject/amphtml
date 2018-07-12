@@ -127,8 +127,8 @@ module.exports = {
     process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
   ],
 
-  // Do not start sauce labs tests in parallel
-  concurrency: 1,
+  // Number of sauce platforms to start in parallel
+  concurrency: 4,
 
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
