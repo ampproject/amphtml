@@ -18,7 +18,7 @@ PASS
 |  </head>
 |  <body>
 |    <h2>Content discovery</h2>
-|    <amp-next-page>
+|    <amp-next-page src="https://foo.com/data.json">
 |      <div separator>
 |          READ ANOTHER ARTICLE FROM OUR SITE!
 |      </div>
