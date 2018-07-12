@@ -24,6 +24,7 @@
  *   consentHandlingOverride: (boolean|undefined),
  *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
+ *   mcFullWidthHeightRatio: (number|undefined),
  * }}
  */
 let AdNetworkConfigDef;
@@ -59,6 +60,10 @@ let AdNetworkConfigDef;
  *   // If absent, it means the network does not support full width ad units.
  *   // Example value: 1.2
  *   fullWidthHeightRatio: number
+ *
+ *   // The width / height ratio for matched content full width ad units.
+ *   // Example value: 3.7
+ *   mcFullWidthHeightRatio: number
  * }
  *
  * @const {!Object<string, !AdNetworkConfigDef>}}
@@ -166,6 +171,7 @@ export const adConfig = {
     remoteHTMLDisabled: true,
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
+    mcFullWidthHeightRatio: 3.7,
     consentHandlingOverride: true,
   },
 

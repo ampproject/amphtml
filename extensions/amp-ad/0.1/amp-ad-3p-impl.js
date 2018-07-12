@@ -229,9 +229,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!hasFullWidth) {
       return false;
     }
-    if (!this.isAutoResponsive_() && !this.isMCResponsive_()) {
-      return false;
-    }
     user().assert(this.element.getAttribute('width') == '100vw',
         'Ad units with data-full-width must have width="100vw".');
     user().assert(!!this.config.fullWidthHeightRatio,
@@ -419,24 +416,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * Send a lifecycle event notification.  Currently, this is active only for
-   * Google network ad tags (type=adsense or type=doubleclick) and pings are
-   * done via direct image tags.  In the future, this will become an event
-   * notification to amp-analytics, and providers will be able to configure
-   * their own destinations and mechanisms for notifications.
-   *
-   * @param {string} eventName  Name of the event to send.
-   * @param {!Object<string, string|number>=} opt_extraVariables  Additional
-   *   variables to make available for substitution on the event notification.
-   */
-  emitLifecycleEvent(eventName, opt_extraVariables) {
-    if (opt_extraVariables) {
-      this.lifecycleReporter.setPingParameters(opt_extraVariables);
-    }
-    this.lifecycleReporter.sendPing(eventName);
-  }
-
-  /**
    * Calculates and attempts to set the appropriate height & width for a
    * responsive full width ad unit.
    * @return {!Promise}
@@ -444,11 +423,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   attemptFullWidthSizeChange_() {
     const viewportSize = this.getViewport().getSize();
-    const ratio = this.config.fullWidthHeightRatio;
+    const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
+    const ratio = this.isMCResponsive_() && !!this.config.mcFullWidthHeightRatio ? this.config.mcFullWidthHeightRatio : this.config.fullWidthHeightRatio;
+    const idealHeight = Math.round(viewportSize.width / ratio);
+    const height = clamp(idealHeight, MIN_FULL_WIDTH_HEIGHT, maxHeight);
     const {width} = viewportSize;
-    const height = this.isMCResponsive_() ?
-      AmpAd3PImpl.getMCResponsiveHeightForContext_(viewportSize) :
-      AmpAd3PImpl.getAutoResponsiveHeightForContext_(viewportSize, ratio);
+
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
     // affect it.
@@ -461,30 +441,5 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           dev().info(TAG_3P_IMPL, `Size change rejected: ${width}x${height}`);
         }
     );
-  }
-
-  /**
-   * Calculates the appropriate height for a full-width responsive ad of the
-   * given width.
-   * @param {!{width: number, height: number}} viewportSize
-   * @param {number} ratio
-   * @return {number}
-   * @private
-   */
-  static getAutoResponsiveHeightForContext_(viewportSize, ratio) {
-    const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
-    const idealHeight = Math.round(viewportSize.width / ratio);
-    return clamp(idealHeight, MIN_FULL_WIDTH_HEIGHT, maxHeight);
-  }
-
-  /**
-   * Calculates the appropriate height for a full-width responsive matched
-   * content of the given width.
-   * @param {!{width: number, height: number}} viewportSize
-   * @return {number}
-   * @private
-   */
-  static getMCResponsiveHeightForContext_(viewportSize) {
-    return Math.floor(viewportSize.width * 3.4 + 112);
   }
 }
