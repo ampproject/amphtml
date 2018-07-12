@@ -20,7 +20,6 @@ import {
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
@@ -46,7 +45,7 @@ describes.realWin('amp-consent', {
   beforeEach(() => {
     doc = env.win.document;
     win = env.win;
-    toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
+    toggleExperiment(win, 'multi-consent', true);
 
     storageValue = {};
     jsonMockResponses = {

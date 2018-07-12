@@ -16,7 +16,6 @@
 
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
-import {REPLACEMENT_EXP_NAME} from '../../../../src/service/url-replacements-impl';
 import {RequestHandler, expandConfigRequest} from '../requests';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
@@ -481,7 +480,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
 
   it('should replace bindings with v2 flag', function* () {
-    toggleExperiment(env.win, REPLACEMENT_EXP_NAME, true);
+    toggleExperiment(env.win, 'url-replacement-v2', true);
     const spy = sandbox.spy();
     const r = {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
@@ -512,6 +511,6 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledOnce;
     expect(spy.args[0][0]).to.equal(
         'r1&key1=val1&key2=val2&key3=val3&val_base&foo=ZM9V');
-    toggleExperiment(env.win, REPLACEMENT_EXP_NAME);
+    toggleExperiment(env.win, 'url-replacement-v2');
   });
 });
