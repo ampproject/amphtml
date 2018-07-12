@@ -174,6 +174,9 @@
       "name": "amp-ad - Amp By Example"
     },
     {
+      "flaky": true,
+      // Little box sometimes has content, sometimes doesn't
+      // e.g., https://percy.io/ampproject/amphtml/builds/858103/view/49620836/375?mode=diff&browser=firefox&snapshot=49620836
       "url": "examples/visual-tests/amp-by-example/components/amp-analytics/index.html",
       "name": "amp-analytics - Amp By Example"
     },
