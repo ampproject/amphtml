@@ -79,6 +79,15 @@ export class XhrBase {
    * @return {!Promise<*>}
    */
   fetchAmpCors_(input, init = {}) {
+    dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
+
+    // In particular, Firefox does not tolerate `null` values for
+    // `credentials`.
+    const creds = init.credentials;
+
+    dev().assert(
+        creds === undefined || creds == 'include' || creds == 'omit',
+        'Only credentials=include|omit support: %s', creds);
     // Do not append __amp_source_origin if explicitly disabled.
     if (init.ampCors !== false) {
       input = this.getCorsUrl(this.win, input);

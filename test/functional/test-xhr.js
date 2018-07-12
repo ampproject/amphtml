@@ -15,17 +15,13 @@
  */
 
 import * as sinon from 'sinon';
-import {
-  FetchResponse,
-  assertSuccess,
-  fetchPolyfill,
-  xhrServiceForTesting,
-} from '../../src/service/xhr-impl';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
+import {assertSuccess} from '../../src/xhr-base';
 import {getCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
+import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {
@@ -41,11 +37,6 @@ describe.configure().skipSafari().run('XHR', function() {
     fetch: window.fetch,
   };
 
-  const polyfillWin = {
-    location,
-    fetch: fetchPolyfill,
-  };
-
   // Given XHR calls give tests more time.
   this.timeout(5000);
 
@@ -53,9 +44,6 @@ describe.configure().skipSafari().run('XHR', function() {
     {
       win: nativeWin,
       desc: 'Native',
-    }, {
-      win: polyfillWin,
-      desc: 'Polyfill',
     },
   ];
 
@@ -97,196 +85,6 @@ describe.configure().skipSafari().run('XHR', function() {
     beforeEach(() => {
       xhr = xhrServiceForTesting(test.win);
     });
-    // Since it's the Native fetch, it won't use the XHR object so
-    // mocking and testing the request becomes not doable.
-    if (test.desc != 'Native') {
-
-      describe('#XHR', () => {
-        beforeEach(() => {
-          setupMockXhr();
-        });
-
-        it('should allow GET and POST methods', () => {
-          const get = xhr.fetchJson.bind(xhr, '/get?k=v1');
-          const post = xhr.fetchJson.bind(xhr, '/post', {
-            method: 'POST',
-            body: {
-              hello: 'world',
-            },
-          });
-          const put = xhr.fetchJson.bind(xhr, '/put', {
-            method: 'PUT',
-            body: {
-              hello: 'world',
-            },
-          });
-          const patch = xhr.fetchJson.bind(xhr, '/patch', {
-            method: 'PATCH',
-            body: {
-              hello: 'world',
-            },
-          });
-          const deleteMethod = xhr.fetchJson.bind(xhr, '/delete', {
-            method: 'DELETE',
-            body: {
-              id: 3,
-            },
-          });
-
-          expect(get).to.not.throw();
-          expect(post).to.not.throw();
-          allowConsoleError(() => { expect(put).to.throw(); });
-          allowConsoleError(() => { expect(patch).to.throw(); });
-          allowConsoleError(() => { expect(deleteMethod).to.throw(); });
-        });
-
-        it('should allow FormData as body', () => {
-          const formData = new FormDataWrapper();
-          sandbox.stub(JSON, 'stringify');
-          formData.append('name', 'John Miller');
-          formData.append('age', 56);
-          const post = xhr.fetchJson.bind(xhr, '/post', {
-            method: 'POST',
-            body: formData,
-          });
-          expect(post).to.not.throw();
-          expect(JSON.stringify.called).to.be.false;
-        });
-
-        it('should do `GET` as default method', () => {
-          xhr.fetchJson('/get?k=v1');
-          return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
-        });
-
-        it('should normalize GET method name to uppercase', () => {
-          xhr.fetchJson('/abc');
-          return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
-        });
-
-        it('should normalize POST method name to uppercase', () => {
-          xhr.fetchJson('/abc', {
-            method: 'post',
-            body: {
-              hello: 'world',
-            },
-          });
-          return xhrCreated.then(xhr => expect(xhr.method).to.equal('POST'));
-        });
-
-        it('should inject source origin query parameter', () => {
-          xhr.fetchJson('/get?k=v1#h1');
-          return xhrCreated.then(xhr =>
-            expect(noOrigin(xhr.url)).to.equal(
-                '/get?k=v1&__amp_source_origin=https%3A%2F%2Facme.com#h1'));
-        });
-
-        it('should inject source origin query parameter w/o query', () => {
-          xhr.fetchJson('/get');
-          return xhrCreated.then(xhr =>
-            expect(noOrigin(xhr.url)).to.equal(
-                '/get?__amp_source_origin=https%3A%2F%2Facme.com'));
-        });
-
-        it('should defend against invalid source origin query ' +
-           'parameter', () => {
-          allowConsoleError(() => { expect(() => {
-            xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
-          }).to.throw(/Source origin is not allowed/); });
-        });
-
-        it('should defend against empty source origin query parameter', () => {
-          allowConsoleError(() => { expect(() => {
-            xhr.fetchJson('/get?k=v1&__amp_source_origin=#h1');
-          }).to.throw(/Source origin is not allowed/); });
-        });
-
-        it('should defend against re-encoded source origin parameter', () => {
-          allowConsoleError(() => { expect(() => {
-            xhr.fetchJson('/get?k=v1&_%5famp_source_origin=#h1');
-          }).to.throw(/Source origin is not allowed/); });
-        });
-
-        it('should not include __amp_source_origin if ampCors ' +
-            'set to false', () => {
-          xhr.fetchJson('/get', {ampCors: false});
-          return xhrCreated.then(
-              xhr => expect(noOrigin(xhr.url)).to.equal('/get'));
-        });
-
-        it('should accept AMP origin when received in response', () => {
-          const promise = xhr.fetchJson('/get');
-          xhrCreated.then(
-              xhr => xhr.respond(
-                  200, {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Expose-Headers':
-                        'AMP-Access-Control-Allow-Source-Origin',
-                    'AMP-Access-Control-Allow-Source-Origin':
-                        'https://acme.com',
-                  },
-                  '{}'));
-          return promise;
-        });
-
-        it('should deny AMP origin for different origin in response', () => {
-          const promise = xhr.fetchJson('/get');
-          xhrCreated.then(
-              xhr => xhr.respond(
-                  200, {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Expose-Headers':
-                        'AMP-Access-Control-Allow-Source-Origin',
-                    'AMP-Access-Control-Allow-Source-Origin':
-                        'https://other.com',
-                  },
-                  '{}'));
-          return promise.then(() => {
-            throw new Error('UNREACHABLE');
-          }, res => {
-            expect(res).to.match(/Returned AMP-Access-.* is not equal/);
-          });
-        });
-
-        it('should require AMP origin in response for when request', () => {
-          const promise = xhr.fetchJson('/get');
-          xhrCreated.then(
-              xhr => xhr.respond(
-                  200, {
-                    'Content-Type': 'application/json',
-                  },
-                  '{}'));
-          return promise.then(() => {
-            throw new Error('UNREACHABLE');
-          }, error => {
-            expect(error.message).to.contain('Response must contain');
-          });
-        });
-
-        describe('viewer visibility', () => {
-          afterEach(() => {
-            test.win.fetch.restore();
-          });
-          it('should not call fetch if view is not visible ', () => {
-            const fetchCall = sandbox.spy(test.win, 'fetch');
-            ampdocViewerStub.returns({
-              whenFirstVisible: () => Promise.reject(),
-            });
-            xhr.fetchJson('/get', {ampCors: false});
-            expect(fetchCall.notCalled).to.be.true;
-          });
-          it('should call fetch if view is visible ', () => {
-            const fetchCall = sandbox.spy(test.win, 'fetch');
-            ampdocViewerStub.returns({
-              whenFirstVisible: () => Promise.resolve(),
-            });
-            const fetch = xhr.fetchJson('/get', {ampCors: false});
-            fetch.then(() => {
-              expect(fetchCall.calledOnce).to.be.true;
-            });
-          });
-        });
-      });
-    }
 
     describe('AMP-Same-Origin', () => {
       beforeEach(() => {
@@ -333,12 +131,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
-          if (test.desc == 'Native' && 'Response' in Window) {
-            return new Response(body, init);
-          } else {
-            init.responseText = body;
-            return new FetchResponse(init);
-          }
+          return new Response(body, init);
         }
         const mockXhr = {
           status: 200,
@@ -475,98 +268,98 @@ describe.configure().skipSafari().run('XHR', function() {
       });
     });
 
-    describe('#fetchDocument', () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+    // describe('#fetchDocument', () => {
+    //   beforeEach(() => xhr = xhrServiceForTesting(test.win));
 
-      it('should be able to fetch a document', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html').then(doc => {
-          expect(doc.nodeType).to.equal(9);
-        });
-        xhrCreated.then(xhr => {
-          expect(xhr.requestHeaders['Accept']).to.equal('text/html');
-          xhr.respond(
-              200, {
-                'Content-Type': 'text/xml',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>');
-          expect(xhr.responseType).to.equal('document');
-        });
-        return promise;
-      });
+    //   it('should be able to fetch a document', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html').then(doc => {
+    //       expect(doc.nodeType).to.equal(9);
+    //     });
+    //     xhrCreated.then(xhr => {
+    //       expect(xhr.requestHeaders['Accept']).to.equal('text/html');
+    //       xhr.respond(
+    //           200, {
+    //             'Content-Type': 'text/xml',
+    //             'Access-Control-Expose-Headers':
+    //                 'AMP-Access-Control-Allow-Source-Origin',
+    //             'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+    //           },
+    //           '<html></html>');
+    //       expect(xhr.responseType).to.equal('document');
+    //     });
+    //     return promise;
+    //   });
 
-      it('should mark 400 as not retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                400, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.be.undefined;
-          expect(e.retriable).to.not.equal(true);
-        });
-      });
+    //   it('should mark 400 as not retriable', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html');
+    //     xhrCreated.then(
+    //         xhr => xhr.respond(
+    //             400, {
+    //               'Content-Type': 'text/xml',
+    //             },
+    //             '<html></html>'));
+    //     return promise.catch(e => {
+    //       expect(e.retriable).to.be.undefined;
+    //       expect(e.retriable).to.not.equal(true);
+    //     });
+    //   });
 
-      it('should mark 415 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
+    //   it('should mark 415 as retriable', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html');
+    //     xhrCreated.then(
+    //         xhr => xhr.respond(
+    //             415, {
+    //               'Content-Type': 'text/xml',
+    //               'Access-Control-Expose-Headers':
+    //                   'AMP-Access-Control-Allow-Source-Origin',
+    //               'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+    //             },
+    //             '<html></html>'));
+    //     return promise.catch(e => {
+    //       expect(e.retriable).to.exist;
+    //       expect(e.retriable).to.be.true;
+    //     });
+    //   });
 
-      it('should mark 500 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
+    //   it('should mark 500 as retriable', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html');
+    //     xhrCreated.then(
+    //         xhr => xhr.respond(
+    //             415, {
+    //               'Content-Type': 'text/xml',
+    //               'Access-Control-Expose-Headers':
+    //                   'AMP-Access-Control-Allow-Source-Origin',
+    //               'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+    //             },
+    //             '<html></html>'));
+    //     return promise.catch(e => {
+    //       expect(e.retriable).to.exist;
+    //       expect(e.retriable).to.be.true;
+    //     });
+    //   });
 
-      it('should error on non truthy responseXML', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                200, {
-                  'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '{"hello": "world"}'));
-        return promise.catch(e => {
-          expect(e.message)
-              .to.contain('responseXML should exist');
-        });
-      });
-    });
+    //   it('should error on non truthy responseXML', () => {
+    //     setupMockXhr();
+    //     const promise = xhr.fetchDocument('/index.html');
+    //     xhrCreated.then(
+    //         xhr => xhr.respond(
+    //             200, {
+    //               'Content-Type': 'application/json',
+    //               'Access-Control-Expose-Headers':
+    //                   'AMP-Access-Control-Allow-Source-Origin',
+    //               'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+    //             },
+    //             '{"hello": "world"}'));
+    //     return promise.catch(e => {
+    //       expect(e.message)
+    //           .to.contain('responseXML should exist');
+    //     });
+    //   });
+    // });
 
     describe('#fetchText', () => {
       const TEST_TEXT = 'test text';
@@ -574,12 +367,8 @@ describe.configure().skipSafari().run('XHR', function() {
 
       beforeEach(() => {
         xhr = xhrServiceForTesting(test.win);
-        const mockXhr = {
-          status: 200,
-          responseText: TEST_TEXT,
-        };
         fetchStub = sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
-            () => Promise.resolve(new FetchResponse(mockXhr)));
+            () => Promise.resolve(new Response(TEST_TEXT)));
       });
 
       it('should be able to fetch a document', () => {
@@ -721,86 +510,86 @@ describe.configure().skipSafari().run('XHR', function() {
     });
   });
 
-  describe('FetchResponse', () => {
-    const TEST_TEXT = 'this is some test text';
-    const mockXhr = {
-      status: 200,
-      responseText: TEST_TEXT,
-    };
+  // describe('FetchResponse', () => {
+  //   const TEST_TEXT = 'this is some test text';
+  //   const mockXhr = {
+  //     status: 200,
+  //     responseText: TEST_TEXT,
+  //   };
 
-    it('should provide text', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text().then(result => {
-        expect(result).to.equal(TEST_TEXT);
-      });
-    });
+  //   it('should provide text', () => {
+  //     const response = new FetchResponse(mockXhr);
+  //     return response.text().then(result => {
+  //       expect(result).to.equal(TEST_TEXT);
+  //     });
+  //   });
 
-    it('should provide text only once', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text().then(result => {
-        expect(result).to.equal(TEST_TEXT);
-        expect(response.text.bind(response), 'should throw').to.throw(Error,
-            /Body already used/);
-      });
-    });
+  //   it('should provide text only once', () => {
+  //     const response = new FetchResponse(mockXhr);
+  //     return response.text().then(result => {
+  //       expect(result).to.equal(TEST_TEXT);
+  //       expect(response.text.bind(response), 'should throw').to.throw(Error,
+  //           /Body already used/);
+  //     });
+  //   });
 
-    it('should be cloneable and each instance should provide text', () => {
-      const response = new FetchResponse(mockXhr);
-      const clone = response.clone();
-      return Promise.all([
-        response.text(),
-        clone.text(),
-      ]).then(results => {
-        expect(results[0]).to.equal(TEST_TEXT);
-        expect(results[1]).to.equal(TEST_TEXT);
-      });
-    });
+  //   it('should be cloneable and each instance should provide text', () => {
+  //     const response = new FetchResponse(mockXhr);
+  //     const clone = response.clone();
+  //     return Promise.all([
+  //       response.text(),
+  //       clone.text(),
+  //     ]).then(results => {
+  //       expect(results[0]).to.equal(TEST_TEXT);
+  //       expect(results[1]).to.equal(TEST_TEXT);
+  //     });
+  //   });
 
-    it('should not be cloneable if body is already accessed', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text()
-          .then(() => {
-            expect(() => response.clone(), 'should throw').to.throw(
-                Error,
-                /Body already used/);
-          });
-    });
+  //   it('should not be cloneable if body is already accessed', () => {
+  //     const response = new FetchResponse(mockXhr);
+  //     return response.text()
+  //         .then(() => {
+  //           expect(() => response.clone(), 'should throw').to.throw(
+  //               Error,
+  //               /Body already used/);
+  //         });
+  //   });
 
-    scenarios.forEach(test => {
-      if (test.desc === 'Polyfill') {
-        // FetchRequest is only returned by the Polyfill version of Xhr.
-        describe('#text', () => {
-          let xhr;
+  //   scenarios.forEach(test => {
+  //     if (test.desc === 'Polyfill') {
+  //       // FetchRequest is only returned by the Polyfill version of Xhr.
+  //       describe('#text', () => {
+  //         let xhr;
 
-          beforeEach(() => {
-            xhr = xhrServiceForTesting(test.win);
-            setupMockXhr();
-          });
+  //         beforeEach(() => {
+  //           xhr = xhrServiceForTesting(test.win);
+  //           setupMockXhr();
+  //         });
 
-          it('should return text from a full XHR request', () => {
-            const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
-                response => {
-                  expect(response).to.be.instanceof(FetchResponse);
-                  return response.text().then(result => {
-                    expect(result).to.equal(TEST_TEXT);
-                  });
-                });
-            xhrCreated.then(
-                xhr => xhr.respond(
-                    200, {
-                      'Content-Type': 'text/plain',
-                      'Access-Control-Expose-Headers':
-                          'AMP-Access-Control-Allow-Source-Origin',
-                      'AMP-Access-Control-Allow-Source-Origin':
-                          'https://acme.com',
-                    },
-                    TEST_TEXT));
-            return promise;
-          });
-        });
-      }
-    });
-  });
+  //         it('should return text from a full XHR request', () => {
+  //           const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
+  //               response => {
+  //                 expect(response).to.be.instanceof(FetchResponse);
+  //                 return response.text().then(result => {
+  //                   expect(result).to.equal(TEST_TEXT);
+  //                 });
+  //               });
+  //           xhrCreated.then(
+  //               xhr => xhr.respond(
+  //                   200, {
+  //                     'Content-Type': 'text/plain',
+  //                     'Access-Control-Expose-Headers':
+  //                         'AMP-Access-Control-Allow-Source-Origin',
+  //                     'AMP-Access-Control-Allow-Source-Origin':
+  //                         'https://acme.com',
+  //                   },
+  //                   TEST_TEXT));
+  //           return promise;
+  //         });
+  //       });
+  //     }
+  //   });
+  // });
 
   describe('interceptor', () => {
     const origin = 'https://acme.com';
@@ -1071,21 +860,21 @@ describe.configure().skipSafari().run('XHR', function() {
         });
       });
 
-      it('should return correct document response', () => {
-        sendMessageStub.returns(
-            Promise.resolve({
-              body: '<html><body>Foo</body></html>',
-              init: {
-                headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-              },
-            }));
-        const xhr = xhrServiceForTesting(interceptionEnabledWin);
+      // it('should return correct document response', () => {
+      //   sendMessageStub.returns(
+      //       Promise.resolve({
+      //         body: '<html><body>Foo</body></html>',
+      //         init: {
+      //           headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+      //         },
+      //       }));
+      //   const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetchDocument('https://www.some-url.org/some-resource/').then(doc => {
-          expect(doc).to.have.nested.property('body.textContent')
-              .that.equals('Foo');
-        });
-      });
+      //   return xhr.fetchDocument('https://www.some-url.org/some-resource/').then(doc => {
+      //     expect(doc).to.have.nested.property('body.textContent')
+      //         .that.equals('Foo');
+      //   });
+      // });
     });
 
     describe('when native Response type is unavailable', () => {
@@ -1120,19 +909,19 @@ describe.configure().skipSafari().run('XHR', function() {
         });
       });
 
-      it('should return correct document response', () => {
-        sendMessageStub.returns(
-            Promise.resolve({
-              body: '<html><body>Foo</body></html>',
-              init: {
-                headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-              },
-            }));
-        const xhr = xhrServiceForTesting(interceptionEnabledWin);
+      // it('should return correct document response', () => {
+      //   sendMessageStub.returns(
+      //       Promise.resolve({
+      //         body: '<html><body>Foo</body></html>',
+      //         init: {
+      //           headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+      //         },
+      //       }));
+      //   const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetchDocument('https://www.some-url.org/some-resource/')
-            .then(doc => expect(doc.body.textContent).to.equal('Foo'));
-      });
+      //   return xhr.fetchDocument('https://www.some-url.org/some-resource/')
+      //       .then(doc => expect(doc.body.textContent).to.equal('Foo'));
+      // });
 
       it('should return default response when body/init missing', () => {
         sendMessageStub.returns(Promise.resolve({}));
