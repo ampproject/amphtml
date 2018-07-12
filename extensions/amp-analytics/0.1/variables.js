@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {REPLACEMENT_EXP_NAME} from '../../../src/service/url-replacements-impl';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
@@ -151,7 +150,7 @@ export class VariableService {
    */
   getMacros() {
     const isV2ExpansionOn = this.win_ && isExperimentOn(this.win_,
-        REPLACEMENT_EXP_NAME);
+        'url-replacement-v2');
     return isV2ExpansionOn ? this.macros_ : {};
   }
 

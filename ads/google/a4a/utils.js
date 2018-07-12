@@ -149,14 +149,13 @@ export function isReportingEnabled(ampElement) {
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
   const {win} = ampElement;
-  const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
   if (getMode(ampElement.win).localDev && !getMode(ampElement.win).test) {
-    toggleExperiment(win, experimentName, true, true);
+    toggleExperiment(win, 'a4aProfilingRate', true, true);
   }
   return (type == 'doubleclick' || type == 'adsense') &&
-      isExperimentOn(win, experimentName);
+      isExperimentOn(win, 'a4aProfilingRate');
 }
 
 /**

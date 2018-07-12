@@ -24,9 +24,6 @@ import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 
-/** @const */
-const EXPERIMENT = 'amp-viz-vega';
-
 export class AmpVizVega extends AMP.BaseElement {
 
 /** @param {!AmpElement} element */
@@ -74,8 +71,8 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, EXPERIMENT),
-        `Experiment ${EXPERIMENT} disabled`);
+    user().assert(isExperimentOn(this.win, 'amp-viz-vega'),
+        'Experiment amp-viz-vega disabled');
 
     /**
      * Global vg (and implicitly d3) are required and they are created by

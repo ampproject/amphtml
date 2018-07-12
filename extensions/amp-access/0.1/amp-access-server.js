@@ -92,7 +92,7 @@ export class AccessServerAdapter {
     this.serverState_ = stateElement ?
       stateElement.getAttribute('content') : null;
 
-    const isInExperiment = isExperimentOn(ampdoc.win, TAG);
+    const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server');
 
     /** @private @const {boolean} */
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
