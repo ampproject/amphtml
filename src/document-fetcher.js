@@ -95,7 +95,8 @@ export class DocumentFetcher extends XhrBase {
             status: this.xhr_.status,
             statusText: this.xhr_.statusText,
             headers: {
-              get: name => String(this.xhr_.getResponseHeader(name)).toLowerCase(),
+              get: name =>
+                String(this.xhr_.getResponseHeader(name)).toLowerCase(),
             },
           };
           options.url = 'responseURL' in this.xhr_
