@@ -30,7 +30,11 @@ class AmpMowplayer extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
   }
-  
+
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // Host that serves player configuration
     this.preconnect.url('https://code.mowplayer.com', onLayout);
@@ -45,25 +49,25 @@ class AmpMowplayer extends AMP.BaseElement {
         'the data-media-id attributes must exists for <amp-mowplayer> %s',
         this.element);
   }
-  
+
   /** @override */
   layoutCallback() {
-		const iframe = this.element.ownerDocument.createElement("iframe");
-		const src = "https://cdn.mowplayer.com/player.html?code=" + encodeURIComponent(this.mediaid_);
-		iframe.setAttribute("frameborder", "0");
-		iframe.setAttribute("allowfullscreen", "true");
-		iframe.src = src;
-		this.applyFillContent(iframe);
-		this.element.appendChild(iframe);
-		this.iframe_ = iframe;
-		return this.loadPromise(iframe);
-	}
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    const src = 'https://cdn.mowplayer.com/player.html?code=' + encodeURIComponent(this.mediaid_);
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = src;
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
+  }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
-  
+
   /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
@@ -73,6 +77,8 @@ class AmpMowplayer extends AMP.BaseElement {
     return true; // Call layoutCallback again.
   }
 }
+
+
 AMP.extension('amp-mowplayer', '0.1', AMP => {
   AMP.registerElement('amp-mowplayer', AmpMowplayer);
 });
