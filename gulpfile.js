@@ -131,6 +131,7 @@ declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
 declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
+declareExtension('amp-mowplayer', '0.1');
 declareExtension('amp-mustache', ['0.1', '0.2']);
 declareExtension('amp-next-page', '0.1', {hasCss: true});
 declareExtension('amp-nexxtv-player', '0.1');
