@@ -330,7 +330,7 @@
   <div class="carousel-parent">
     <amp-carousel class="carousel-component" height="300" layout="fixed-height" type="carousel">
 
-      <amp-position-observer on="enter:carouselTransition.start" intersection-ratios="0.8" layout="nodisplay">
+      <amp-position-observer on="enter:carouselTrasnsition.start" intersection-ratios="0.8" layout="nodisplay">
       </amp-position-observer>
 
       <amp-img src="https://unsplash.it/800/600?image=1003" width="400" height="300" alt="a sample image"></amp-img>
@@ -345,7 +345,7 @@
 
   This animation will only be triggered once by the position observer as defined above.
   -->
-  <amp-animation id="carouselTransition" layout="nodisplay">
+  <amp-animation id="carouselTrasnsition" layout="nodisplay">
     <script type="application/json">
       {
         "duration": "500ms",

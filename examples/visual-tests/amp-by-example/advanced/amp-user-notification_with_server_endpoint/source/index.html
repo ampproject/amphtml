@@ -1,0 +1,67 @@
+<!--
+  ## Introduction
+
+  Use `amp-user-notification` to display a dismissable notification to the user.
+  Combine it with a server endpoint if you want to store the dismissal
+  state across your AMP articles and your normal articles.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-user-notification with Server Endpoint</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import `amp-user-notification` in the header. -->
+  <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <!-- `amp-user-notification` requires `amp-analytics` to be imported as well. -->
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <!--
+    Specify any additional css, by default, the `amp-user-notification` is positioned
+    in the left bottom corner.
+  -->
+  <style amp-custom>
+    /* Center the notification content */
+    amp-user-notification > div {
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/amp-user-notification_with_server_endpoint/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Using Backend service -->
+  <!--
+    When using a backend solution, two parameters are available: `data-show-if-href` and
+    `data-dismiss-if-href`. They can be used together or separatively.
+
+    `data-show-if-href` needs to point to a server-endpoint returning
+    `{ "showNotification": true|false }`.
+
+    The URL defined by `data-dismiss-href` will be called when the notification is dismissed.
+
+    You can find a sample implementation [here](https://github.com/ampproject/amp-publisher-sample/blob/master/amp-paywall-demo/controllers/amp-user-notification/api.js).
+
+    If the notification has already been dismissed and the related item has been added to
+    the localstorage, the notification will not appear even if you have configured
+    `data-show-if-href` and `data-dismiss-href`.
+  -->
+  <amp-user-notification 
+      id="my-notification"
+      layout="nodisplay" 
+      data-show-if-href="https://rocky-sierra-1919.herokuapp.com/amp-user-notification/api/show?timestamp=TIMESTAMP"
+      data-dismiss-href="https://rocky-sierra-1919.herokuapp.com/amp-user-notification/api/echo/post">
+    <div>
+      This is an amp-user-notification. It uses a backend service to verify if the notification has to be shown.
+      <button on="tap:my-notification.dismiss" class="ampstart-btn caps ml1">I accept</button>
+    </div>
+  </amp-user-notification>
+
+</body>
+</html>
