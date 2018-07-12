@@ -19,14 +19,15 @@ import {
   ValidatorResult,
 } from './amp-ad-type-defs';
 import {AmpAdNetworkBase} from './amp-ad-network-base';
+import {NameFrameRenderer} from './name-frame-renderer';
 import {NetworkRegistry} from './template-config';
 import {TemplateRenderer} from './template-renderer';
 import {TemplateValidator} from './template-validator';
 import {dev} from '../../../src/log';
 
-// TemplateValidator has no side-effects, and thus may be reused between all
-// instances.
+// These have no side-effects, and so may be reused between all instances.
 const validator = new TemplateValidator();
+const nameFrameRenderer = new NameFrameRenderer();
 
 export class AmpAdTemplate extends AmpAdNetworkBase {
   /**
@@ -37,6 +38,7 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
     this.registerValidator(validator, AdResponseType.TEMPLATE);
     this.registerRenderer(new TemplateRenderer(), ValidatorResult.AMP);
+    this.registerRenderer(nameFrameRenderer, ValidatorResult.NON_AMP);
 
     /** @const {string} */
     this.networkType_ = element.getAttribute('type');
