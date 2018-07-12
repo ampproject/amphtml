@@ -416,15 +416,16 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * Calculates and attempts to set the appropriate height & width for a
-   * responsive full width ad unit.
-   * @return {!Promise}
-   * @private
-   */
+  * Calculates and attempts to set the appropriate height & width for a
+  * responsive full width ad unit.
+  * @return {!Promise}
+  * @private
+  */
   attemptFullWidthSizeChange_() {
     const viewportSize = this.getViewport().getSize();
     const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
-    const ratio = this.isMCResponsive_() && !!this.config.mcFullWidthHeightRatio ? this.config.mcFullWidthHeightRatio : this.config.fullWidthHeightRatio;
+    const ratio = this.isMCResponsive_() && !!this.config.mcFullWidthHeightRatio ?
+        this.config.mcFullWidthHeightRatio : this.config.fullWidthHeightRatio;
     const idealHeight = Math.round(viewportSize.width / ratio);
     const height = clamp(idealHeight, MIN_FULL_WIDTH_HEIGHT, maxHeight);
     const {width} = viewportSize;
