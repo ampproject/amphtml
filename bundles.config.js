@@ -25,7 +25,7 @@ exports.TYPES = {
   MISC: '_base_misc',
 };
 
-const TYPES = exports.TYPES;
+const TYPES = {...exports.TYPES};
 
 exports.extensionBundles = [
   {name: 'amp-3d-gltf', version: '0.1', type: TYPES.MEDIA},
@@ -162,7 +162,7 @@ exports.extensionBundles = [
     name: 'amp-lightbox',
     version: '0.1',
     options: {hasCss: true},
-    type: TYPES.MISC
+    type: TYPES.MISC,
   },
   {
     name: 'amp-lightbox-gallery',
@@ -302,7 +302,7 @@ exports.extensionBundles = [
     name: 'amp-social-share',
     version: '0.1',
     options: {hasCss: true},
-    type: TYPES.MISC
+    type: TYPES.MISC,
   },
   {name: 'amp-timeago', version: '0.1', type: TYPES.MISC},
   {name: 'amp-twitter', version: '0.1', type: TYPES.MISC},
@@ -368,7 +368,7 @@ exports.aliasBundles = [
 exports.extensionBundles.forEach(c => {
   const strRep = JSON.stringify(c);
   console./*OK*/assert('name' in c, `name key must exist. Found ${strRep}.`);
-  console./*OK*/assert('version' in c, `version key must exist. ` +
+  console./*OK*/assert('version' in c, 'version key must exist. ' +
       `Found ${strRep}.`);
   console./*OK*/assert('type' in c, `type key must exist. Found ${strRep}.`);
   const validTypes = Object.keys(TYPES).map(x => TYPES[x]);

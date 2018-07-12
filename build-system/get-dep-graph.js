@@ -142,7 +142,7 @@ exports.getBundleFlags = function(g) {
     const isBase = originalName == '_base';
     const isMain = originalName == 'src/amp.js';
     let extraModules = 0;
-    // TODO(erwinm): This access will break 
+    // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
     if (isBase || bundleKeys.length == 1) {
       flagsArray.push('--js', relativePath(process.cwd(),
@@ -368,29 +368,6 @@ exports.getGraph = function(entryModules, config) {
   return promise;
 };
 
-function buildUpCommon(graph) {
-  // This means there is only 1 module output
-  if (!graph.bundles._base) {
-    return;
-  }
-  let baseModules = graph.bundles._base.modules;
-  let mediaModules = graph.bundles._base_media.modules;
-  let mainModuleDeps = graph.depOf['src/amp.js'];
-  graph.bundles._base.modules = baseModules.filter(x => {
-    const usedInMain = !!mainModuleDeps[x];
-    const usedInMedia = inAnyBundle(x, media.map(x => graph.depOf[x]));
-    const shouldGoToVideoBundle = !usedInMain && usedInMedia;
-    if (shouldGoToVideoBundle && mediaModules.indexOf(x) === -1) {
-      mediaModules.push(x);
-    }
-    return !shouldGoToVideoBundle;
-  });
-}
-
-function inAnyBundle(name, dependencyList) {
-  return dependencyList.some(deps => name in deps);
-}
-
 function setupBundles(graph) {
   // For each module, mark them as to whether any of the entry
   // modules depends on them (transitively).
@@ -556,10 +533,7 @@ exports.getFlags({
   modules: ['src/amp.js'].concat(extensions),
   writeTo: './out/',
   externs,
-})
-.then(compile);
-
-
+}).then(compile);
 
 function compile(flagsArray) {
   return new Promise(function(resolve, reject) {
@@ -579,7 +553,7 @@ function compile(flagsArray) {
 }
 
 
-function patchRegisterElement() {
+function patchRegisterElement() { // eslint-disable-line no-unused-vars
   let file;
   // Copies document-register-element into a new file that has an export.
   // This works around a bug in closure compiler, where without the
@@ -622,7 +596,7 @@ function patchWebAnimations() {
 function patchDompurify() {
   // Copies web-animations-js into a new file that has an export.
   const name = 'node_modules/dompurify/package.json';
-  let file = fs.readFileSync(name).toString()
+  const file = fs.readFileSync(name).toString()
       .replace('"browser": "dist/purify.js",', '');
   fs.writeFileSync(name, file);
 }
