@@ -20,7 +20,6 @@
       <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
       <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
       <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
-      <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
       <link rel="canonical" href="https://ampbyexample.com/samples_templates/product_browse_page/">
       <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
       <style amp-custom>
@@ -286,19 +285,6 @@ article#preview {
          #info-wrap .ampstart-input {
            width: 200px;
          }
-         .autosuggest-container {
-            position: relative;
-          }
-
-         .autosuggest-box {
-            position: absolute;
-            width: 100%;
-            background-color: #fafafa;
-            box-shadow: 0px 2px 6px rgba(0,0,0,.3);
-          }
-          .hidden {
-            display: none;
-          }
       </style>
       <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
       <noscript>
@@ -318,83 +304,19 @@ article#preview {
         <a class="caps text-decoration-none block p1" href="/examples/visual-tests/amp-by-example/samples_templates/product_browse_page/preview/">More</a>
       </amp-sidebar>
       <!-- ## Header with Search -->
-      <!-- AMP supports forms, which means you can directly integrate a product search into your AMPs. 
-        Here we implemented autosuggest, try searching for "Appl" and you should be able to select "Apple". 
-        Take a look at [autosuggest sample](/examples/visual-tests/amp-by-example/advanced/autosuggest/) for more details how autosuggest is implemented.
+      <!-- AMP supports forms, which means you can directly integrate a product search into your AMPs. Try searching for "Apple".
         AMP doesn't support custom Javascript, but you can use CSS3 animations to enrich your page. The expanding text field when the search box is focused is implemented with CSS only. -->
       <div class="header">
         <a id="sample-menu" on="tap:drawermenu.toggle">
           <amp-img srcset="/examples/visual-tests/amp-by-example/img/ic_menu_white_1x_web_24dp.png 1x, /examples/visual-tests/amp-by-example/img/ic_menu_white_2x_web_24dp.png 2x" width="24" height="24" alt="navigation"></amp-img>
         </a>
         <input name="search" type="text" placeholder="Search" on="change:AMP.setState({
-          products: {
-          listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ event.value +'&sort='+ products.sortChoiceValue +'&searchColor='+ products.searchColor +'&_=RANDOM',
-          searchProduct: event.value
-        }});
-          input-debounced:
-            AMP.setState({
-              query: event.value,
-              showDropdown: event.value,
-            }),
-          autosuggest-list.show;
-          tap:
-            AMP.setState({
-              query: query == null ? '' : query,
-              showDropdown: 'true'
-            }),
-            autosuggest-list.show"
-          [value]="query || ''"
-          value="">
+        products: {
+        listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ event.value +'&sort='+ products.sortChoiceValue +'&searchColor='+ products.searchColor +'&_=RANDOM',
+        searchProduct: event.value
+        }
+        })">
         <a id="sample-logo" href="/">Products</a>
-        <div class="suggest">
-            <div
-              class="autosuggest-container hidden"
-              [class]="(showDropdown && query) ?
-                'autosuggest-container' :
-                'autosuggest-container hidden'"
-            >
-              <amp-list
-                class="autosuggest-box"
-                layout="fixed-height"
-                height="120"
-                src="/examples/visual-tests/amp-by-example/samples_templates/products_autosuggest"
-                [src]="query ?
-                  autosuggest.endpoint + query :
-                  autosuggest.emptyAndInitialTemplateJson"
-                id="autosuggest-list"
-              >
-                <template type="amp-mustache">
-                  <amp-selector
-                    id="autosuggest-selector"
-                    keyboard-select-mode="focus"
-                    layout="container"
-                    on="
-                      select:
-                        AMP.setState({
-                          query: event.targetOption,
-                          showDropdown: false
-                        }),
-                        autosuggest-list.hide"
-                  >
-                    {{#results}}
-                      <div
-                        class="select-option no-outline ml2"
-                        role="option"
-                        tabindex="0"
-                        on="tap:autosuggest-list.hide"
-                        option="{{.}}"
-                      >{{.}}</div>
-                    {{/results}}
-                    {{^results}}
-                      <div class="select-option {{#query}}empty{{/query}}">
-                        {{#query}}Sorry! We couldn't find the product 😰{{/query}}
-                      </div>
-                    {{/results}}
-                  </amp-selector>
-                </template>
-              </amp-list>
-            </div>
-          </div>
         <!-- Keep this just for creating the change event -->
         <input type="submit" value="">
       </div>
@@ -645,20 +567,6 @@ article#preview {
           </a>
         </template>
       </amp-list>
-      <!--
-        The initial state and helper variables for the product autosuggest are configured by amp-state.
-      -->
-    <amp-state id="autosuggest">
-        <script type="application/json">
-        {
-          "endpoint": "/examples/visual-tests/amp-by-example/samples_templates/products_autosuggest?q=",
-          "emptyAndInitialTemplateJson": [{
-            "query": "",
-            "results": []
-          }]
-        }
-        </script>
-    </amp-state>
       <!--
         ## User Analytics
       -->

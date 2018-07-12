@@ -2,7 +2,7 @@
   "_args": [
     [
       "sw-toolbox@3.6.0",
-      "/usr/local/google/home/rsimha/src/amp-by-example"
+      "/usr/local/google/home/rodaniel/amp-by-example"
     ]
   ],
   "_development": true,
@@ -27,7 +27,7 @@
   ],
   "_resolved": "https://registry.npmjs.org/sw-toolbox/-/sw-toolbox-3.6.0.tgz",
   "_spec": "3.6.0",
-  "_where": "/usr/local/google/home/rsimha/src/amp-by-example",
+  "_where": "/usr/local/google/home/rodaniel/amp-by-example",
   "bugs": {
     "url": "https://github.com/GoogleChrome/sw-toolbox/issues"
   },

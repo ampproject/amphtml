@@ -206,12 +206,6 @@
       "name": "amp-bind - Amp By Example"
     },
     {
-       "flaky": true,
-      // This page does not exist
-      "url": "examples/visual-tests/amp-by-example/components/amp-bodymovin-animation/index.html",
-      "name": "amp-bodymovin-animation - Amp By Example"
-    },
-    {
       "flaky": true,
       // Embedded video sometimes takes longer to load, resulting in either a video placeholder or the provider's logo
       // e.g., https://percy.io/ampproject/danielrozenberg/builds/801880/view/45150404/1400?mode=diff&browser=firefox&snapshot=45150404
@@ -269,22 +263,8 @@
       "name": "amp-facebook - Amp By Example"
     },
     {
-      "flaky": true,
-      // This page does not exist
-      "url": "examples/visual-tests/amp-by-example/components/amp-facebook-comments/index.html",
-      "name": "amp-facebook-comments - Amp By Example"
-    },
-    {
-      "flaky": true,
-      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-facebook-like/index.html",
       "name": "amp-facebook-like - Amp By Example"
-    },
-    {
-      "flaky": true,
-      // This page does not exist
-      "url": "examples/visual-tests/amp-by-example/components/amp-facebook-page/index.html",
-      "name": "amp-facebook-page - Amp By Example"
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-fit-text/index.html",
@@ -299,20 +279,12 @@
       "name": "amp-form - Amp By Example"
     },
     {
-      "flaky": true,
-      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-fx-collection/index.html",
       "name": "amp-fx-collection - Amp By Example"
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-fx-flying-carpet/index.html",
       "name": "amp-fx-flying-carpet - Amp By Example"
-    },
-    {
-      "flaky": true,
-      // This page does not exist
-      "url": "examples/visual-tests/amp-by-example/components/amp-geo/index.html",
-      "name": "amp-geo - Amp By Example"
     },
     {
       "flaky": true,
@@ -382,8 +354,6 @@
       "name": "amp-lightbox - Amp By Example"
     },
     {
-      "flaky": true,
-      // This page does not exist
       "url": "examples/visual-tests/amp-by-example/components/amp-lightbox-gallery/index.html",
       "name": "amp-lightbox-gallery - Amp By Example"
     },
@@ -420,12 +390,6 @@
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-reach-player/index.html",
       "name": "amp-reach-player - Amp By Example"
-    },
-    {
-      "flaky": true,
-      // This page does not exist
-      "url": "examples/visual-tests/amp-by-example/components/amp-reddit/index.html",
-      "name": "amp-reddit - Amp By Example"
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-selector/index.html",
