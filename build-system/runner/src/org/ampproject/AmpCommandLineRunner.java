@@ -71,36 +71,36 @@ public class AmpCommandLineRunner extends CommandLineRunner {
       return createTypeCheckingOptions();
     }
     CompilerOptions options = super.createOptions();
-    //options.setCollapseProperties(true);
+    options.setCollapseProperties(true);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
         assignmentReplacements, prodAssignmentReplacements);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
-    //options.setDevirtualizePrototypeMethods(true);
-    //options.setExtractPrototypeMemberDeclarations(true);
-    //options.setSmartNameRemoval(true);
-    //options.optimizeParameters = true;
-    //options.optimizeReturns = true;
-    //options.optimizeCalls = true;
+    options.setDevirtualizePrototypeMethods(true);
+    options.setExtractPrototypeMemberDeclarations(true);
+    options.setSmartNameRemoval(true);
+    options.optimizeParameters = true;
+    options.optimizeReturns = true;
+    options.optimizeCalls = true;
     // Have to turn this off because we cannot know whether sub classes
     // might override a method. In the future this might be doable
     // with using a more complete extern file instead.
-    //options.setRemoveUnusedPrototypeProperties(false);
-    //options.setInlineProperties(false);
-    //options.setComputeFunctionSideEffects(false);
+    options.setRemoveUnusedPrototypeProperties(false);
+    options.setInlineProperties(false);
+    options.setComputeFunctionSideEffects(false);
     // Property renaming. Relies on AmpCodingConvention to be safe.
-    //options.setRenamingPolicy(VariableRenamingPolicy.ALL,
-    //    PropertyRenamingPolicy.ALL_UNQUOTED);
-    //options.setDisambiguatePrivateProperties(true);
-    //options.setGeneratePseudoNames(true);
+    options.setRenamingPolicy(VariableRenamingPolicy.ALL,
+        PropertyRenamingPolicy.ALL_UNQUOTED);
+    options.setDisambiguatePrivateProperties(true);
+    options.setGeneratePseudoNames(pseudo_names);
     return options;
   }
 
   @Override protected void setRunOptions(CompilerOptions options)
       throws IOException, FlagUsageException {
     super.setRunOptions(options);
-    //	options.setCodingConvention(new AmpCodingConvention());
+    options.setCodingConvention(new AmpCodingConvention());
   }
-  
+
   /**
    * Create the most basic CompilerOptions instance with type checking turned on.
    */
