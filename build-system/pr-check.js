@@ -185,7 +185,7 @@ function isDocFile(filePath) {
  */
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'visual-diff.rb' ||
+  return (filename == 'visual-diff.js' ||
           filename == 'visual-tests.js' ||
           filePath.startsWith('examples/visual-tests/'));
 }
@@ -252,7 +252,7 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
-function startSauceConnect() {
+function startSauceConnect() { // eslint-disable-line no-unused-vars
   process.env['SAUCE_USERNAME'] = 'amphtml';
   process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
       'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
@@ -262,7 +262,7 @@ function startSauceConnect() {
   exec(startScCmd);
 }
 
-function stopSauceConnect() {
+function stopSauceConnect() { // eslint-disable-line no-unused-vars
   const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
   console.log('\n' + fileLogPrefix,
       'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
@@ -312,13 +312,15 @@ const command = {
     }
     // Unit tests with Travis' default chromium in coverage mode.
     timedExecOrDie(cmd + ' --headless --coverage');
-    if (process.env.TRAVIS) {
-      // A subset of unit tests on other browsers via sauce labs
-      cmd = cmd + ' --saucelabs_lite';
-      startSauceConnect();
-      timedExecOrDie(cmd);
-      stopSauceConnect();
-    }
+
+    // TODO(rsimha): Re-enable after fixing Sauce labs platforms.
+    // if (process.env.TRAVIS) {
+    //   // A subset of unit tests on other browsers via sauce labs
+    //   cmd = cmd + ' --saucelabs_lite';
+    //   startSauceConnect();
+    //   timedExecOrDie(cmd);
+    //   stopSauceConnect();
+    // }
   },
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
@@ -335,11 +337,14 @@ const command = {
     if (process.env.TRAVIS) {
       if (coverage) {
         timedExecOrDie(cmd + ' --coverage');
-      } else {
-        startSauceConnect();
-        timedExecOrDie(cmd + ' --saucelabs');
-        stopSauceConnect();
       }
+
+      // TODO(rsimha): Re-enable after fixing Sauce labs platforms.
+      // else {
+      //   startSauceConnect();
+      //   timedExecOrDie(cmd + ' --saucelabs');
+      //   stopSauceConnect();
+      // }
     } else {
       timedExecOrDie(cmd + ' --headless');
     }
@@ -354,7 +359,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff --headless';
+    let cmd = 'gulp visual-diff --nobuild --headless';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -378,7 +383,7 @@ const command = {
           '. Skipping verification of visual diff tests.');
       return;
     }
-    timedExec('gulp visual-diff --verify');
+    timedExec('gulp visual-diff --verify_status');
   },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');
