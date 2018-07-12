@@ -21,12 +21,21 @@ import {computedStyle} from '../../../src/style';
  * Exported for test only.
  */
 export class CircularBuffer {
+  /**
+   * Creates an instance of CircularBuffer.
+   * @param {number} max
+   */
   constructor(max) {
     this.max_ = max;
     this.buff_ = [];
     this.next_ = 0;
   }
 
+  /**
+   * Adds item to buffer.
+   *
+   * @param {*} item
+   */
   add(item) {
     this.buff_[this.next_] = item;
     this.next_ = (this.next_ + 1) % this.max_;

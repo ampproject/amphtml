@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
+
 /**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.

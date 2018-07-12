@@ -32,6 +32,7 @@ import {
 import {isIframed} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {startsWith} from '../string';
 import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
@@ -253,13 +254,24 @@ export class Viewer {
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
+    let isCctEmbedded = false;
+    if (!this.isIframed_) {
+      const queryParams = parseQueryString(this.win.location.search);
+      isCctEmbedded = queryParams['amp_gsa'] === '1' &&
+          startsWith(queryParams['amp_js_v'] || '', 'a');
+    }
+    /**
+     * Whether the AMP document is embedded in a Chrome Custom Tab.
+     * @private @const {boolean}
+     */
+    this.isCctEmbedded_ = isCctEmbedded;
+
     /**
      * Whether the AMP document is embedded in a webview.
      * @private @const {boolean}
      */
     this.isWebviewEmbedded_ = !this.isIframed_ &&
         this.params_['webview'] == '1';
-
 
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe, or
@@ -281,14 +293,8 @@ export class Viewer {
             // Parent asked for viewer JS. We must be embedded.
             || (this.win.location.search.indexOf('amp_js_v') != -1)))
         || this.isWebviewEmbedded_
+        || this.isCctEmbedded_
         || !ampdoc.isSingleDoc());
-
-    /**
-     * Whether the AMP document is embedded in a Chrome Custom Tab.
-     * @private @const {boolean}
-     */
-    this.isCctEmbedded_ = !this.isIframed_ &&
-        parseQueryString(this.win.location.search)['amp_gsa'] === '1';
 
     const url = parseUrlDeprecated(this.ampdoc.win.location.href);
     /**
@@ -343,7 +349,8 @@ export class Viewer {
       // Not embedded in IFrame - can't trust the viewer.
       trustedViewerResolved = false;
       trustedViewerPromise = Promise.resolve(false);
-    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded_) {
+    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded_ &&
+        !this.isCctEmbedded_) {
       // Ancestors when available take precedence. This is the main API used
       // for this determination. Fallback is only done when this API is not
       // supported by the browser.
