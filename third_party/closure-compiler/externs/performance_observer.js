@@ -14,57 +14,48 @@
  * limitations under the License.
  */
 
+/**
+ * @see https://w3c.github.io/performance-timeline/
+ * @interface
+ */
+class PerformanceObserver {
+  /**
+   * @param {function(!PerformanceObserverEntryList)} callback
+   */
+  constructor(callback) {}
+
+  /**
+   * @param {!Object} options
+   */
+  observe(options) {}
+
+  disconnect() {}
+}
 
 /**
- * @typedef {function(!PerformanceObserverEntryList, !PerformanceObserver): void}
+ * @see https://w3c.github.io/performance-timeline/#dom-performanceobserverentrylist
+ * @interface
  */
-var PerformanceObserverCallback;
+class PerformanceObserverEntryList {
 
-/**
- * See:
- * https://w3c.github.io/performance-timeline/#the-performanceobserver-interface
- * @constructor
- * @param {!PerformanceObserverCallback} callback
- */
-function PerformanceObserver(callback) {}
+  /**
+   * @return {!Array<!PerformanceEntry>}
+   */
+  getEntries() {}
 
-/**
- * @param {!PerformanceObserverInit} options
- */
-PerformanceObserver.prototype.observe = function(options) {};
+  /**
+   * @param {string} type
+   * @return {!Array<!PerformanceEntry>}
+   */
+  getEntriesByType(type) {}
 
-/** @return {void} */
-PerformanceObserver.prototype.disconnect = function() {};
-
-/**
- * @record
- */
-function PerformanceObserverInit() {}
-
-/** @type {undefined|!Array<string>} */
-PerformanceObserverInit.prototype.entryTypes;
-/** @type {undefined|boolean} */
-PerformanceObserverInit.prototype.buffered;
-
-/**
- * @constructor
- */
-function PerformanceObserverEntryList() {}
-
-/** @return {!Array<!PerformanceEntry>} */
-PerformanceObserverEntryList.prototype.getEntries = function() {};
-/**
- * @param {string} type
- * @return {!Array<!PerformanceEntry>}
- */
-PerformanceObserverEntryList.prototype.getEntriesByName = function(type) {};
-/**
- * @param {string} name
- * @param {string=} opt_type
- * @return {!Array<!PerformanceEntry>}
- */
-PerformanceObserverEntryList.prototype.getEntriesByType = function(
-    name, opt_type) {};
+  /**
+   * @param {string} name
+   * @param {string=} type
+   * @return {!Array<!PerformanceEntry>}
+   */
+  getEntriesByName(name, type) {}
+};
 
 /**
  * @see https://w3c.github.io/longtasks/#sec-TaskAttributionTiming
@@ -80,4 +71,3 @@ PerformanceObserverEntryList.prototype.getEntriesByType = function(
  * }}
  */
 var TaskAttributionTiming;
-
