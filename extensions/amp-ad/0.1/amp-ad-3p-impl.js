@@ -183,19 +183,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @return {boolean}
+   * @return {number}
    * @private
    */
-  isAutoResponsive_() {
-    return this.element.getAttribute('data-auto-format') == 'rspv';
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isMCResponsive_() {
-    return this.element.getAttribute('data-auto-format') == 'mcrspv';
+  getFullWidthHeightRatio_() {
+    return this.element.getAttribute('data-auto-format') == 'mcrspv' &&
+        !!this.config.mcFullWidthHeightRatio ?
+        this.config.mcFullWidthHeightRatio :
+        this.config.fullWidthHeightRatio;
   }
 
   /** @override */
@@ -424,16 +419,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   attemptFullWidthSizeChange_() {
     const viewportSize = this.getViewport().getSize();
     const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
-    const ratio = this.isMCResponsive_() && !!this.config.mcFullWidthHeightRatio ?
-        this.config.mcFullWidthHeightRatio : this.config.fullWidthHeightRatio;
-    const idealHeight = Math.round(viewportSize.width / ratio);
+    const idealHeight = Math.round(viewportSize.width / this.getFullWidthHeightRatio());
     const height = clamp(idealHeight, MIN_FULL_WIDTH_HEIGHT, maxHeight);
     const {width} = viewportSize;
 
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
     // affect it.
-
     return this.attemptChangeSize(height, width).then(
         () => {
           dev().info(TAG_3P_IMPL, `Size change accepted: ${width}x${height}`);
