@@ -172,7 +172,7 @@ describes.realWin('amp-list component', {
         });
       });
 
-      it('should error if viewer does not define response renderedHtml', () => {
+      it('should error if viewer does not define response data', () => {
         viewerMock.expects('canRenderTemplates').returns(true);
         viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
             Capability.VIEWER_RENDER_TEMPLATE,

@@ -184,7 +184,7 @@ describes.repeated('', {
           sandbox.stub(form.viewer_, 'sendMessageAwaitResponse')
               .returns(
                   Promise.resolve({
-                    renderedHtml: '<div>much success</div>',
+                    data: '<div>much success</div>',
                   }));
           const renderedTemplate = createElement('div');
           renderedTemplate.innerText = 'much success';

@@ -455,22 +455,21 @@ export class AmpForm {
             this.form_, 'submit', /* event */ null, trust);
         // Note that we do not render templates for the submitting state
         // and only deal with submit-success or submit-error.
-        return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-            this.form_,
-            this.handleSubmitSuccess_.bind(this),
-            this.handleSsrTemplateFailure_.bind(this)
-        );
-      });
+        return this.ssrTemplateHelper_.fetchAndRenderTemplate(this.form_);
+      }).then(
+          resp => this.handleSsrTemplateSuccess_(resp),
+          error => this.handleSsrTemplateFailure_(/** @type {!JsonObject} */ (error)));
     } else {
       p = varSubPromise
           .then(() => {
             this.submittingWithTrust_(trust);
             return this.doActionXhr_();
           })
-          .then(response => this.handleSubmitSuccess_(response),
-              error => {
-                return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-              });
+          .then(response => this.handleXhrSubmitSuccess_(
+              /* !../../../src/service/xhr-impl.FetchResponse */ response),
+          error => {
+            return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+          });
     }
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -495,7 +494,7 @@ export class AmpForm {
    * @param {ActionTrust} trust
    */
   submittingWithTrust_(trust) {
-    this.triggerFormSubmitInAnalytics_();
+    this.triggerFormSubmitInAnalytics_('amp-form-submit');
     this.actions_.trigger(
         this.form_, 'submit', /* event */ null, trust);
     // After variable substitution
@@ -579,24 +578,40 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
-   * @param {!../../../src/service/xhr-impl.FetchResponse|!Object} response
+   * @param {!JsonObject} response
    * @return {!Promise}
    * @private visible for testing
    */
-  handleSubmitSuccess_(response) {
-    const isSsrSupported = this.ssrTemplateHelper_.isSupported();
-    const jsonPromise = isSsrSupported
-      ? Promise.resolve(response.renderedHtml) : response.json();
+  handleSsrTemplateSuccess_(response) {
+    return this.handleSubmitSuccess_(Promise.resolve(response['data']));
+  }
 
+
+
+  /**
+   * Transition the form to the submit success state.
+   * @param {!../../../src/service/xhr-impl.FetchResponse} response
+   * @return {!Promise}
+   * @private visible for testing
+   */
+  handleXhrSubmitSuccess_(response) {
+    return this.handleSubmitSuccess_(response.json()).then(() => {
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
+      this.maybeHandleRedirect_(response);
+    });
+  }
+
+  /**
+   * Transition the form to the submit success state.
+   * @param {!Promise<!JsonObject>} jsonPromise
+   * @return {!Promise}
+   * @private visible for testing
+   */
+  handleSubmitSuccess_(jsonPromise) {
     return jsonPromise.then(json => {
       this.triggerAction_(/* success */ true, json);
       this.setState_(FormState_.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
-
-      if (!isSsrSupported) {
-        this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
-        this.maybeHandleRedirect_(response);
-      }
     }, error => {
       user().error(TAG, `Failed to parse response JSON: ${error}`);
     });
@@ -695,7 +710,7 @@ export class AmpForm {
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
    * Not applicable if viewer can render templates.
-   * @param {../../../src/service/xhr-impl.FetchResponse} response
+   * @param {!../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   maybeHandleRedirect_(response) {

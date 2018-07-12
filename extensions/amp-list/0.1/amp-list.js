@@ -26,6 +26,7 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -61,7 +62,7 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
-     * @private {?{data:(string|!Array), resolver:!Function, rejecter:!Function}}
+     * @private {?{data:(?JsonObject|string|undefined|!Array), resolver:!Function, rejecter:!Function}}
      */
     this.renderItems_ = null;
 
@@ -240,7 +241,7 @@ export class AmpList extends AMP.BaseElement {
         return this.scheduleRender_(items);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
-      }).then(onFetchSuccess_.bind(this), onFetchError_.bind(this));
+      }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
     }
   }
 
@@ -253,19 +254,19 @@ export class AmpList extends AMP.BaseElement {
         this.element).then(resp => {
       // TODO(alabiaga): Since this is related to the viewer,
       // this should be a 3rd log type?
+      const data = getData(resp);
       user().assert(
-          resp && (typeof resp.data !== 'undefined'),
+          resp && (typeof data !== 'undefined'),
           'Response missing the \'data\' field');
-      return this.scheduleRender_(resp.data);
+      return this.scheduleRender_(data);
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(
-        onFetchSuccess_.bind(this), onFetchError_.bind(this));
+    }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
   }
 
   /**
    * Schedules a fetch result to be rendered in the near future.
-   * @param {!Array} data
+   * @param {!Array|?JsonObject|string|undefined} data
    * @return {!Promise}
    * @private
    */
@@ -308,7 +309,7 @@ export class AmpList extends AMP.BaseElement {
     };
     if (this.ssrTemplateHelper_.isSupported()) {
       this.templates_.findAndRenderTemplate(
-          this.element, /** @type {!HTML} */ (current.data))
+          this.element, /** @type {!JsonObject} */ (current.data))
           .then(element => {
             this.container_.appendChild(element);
           })
@@ -393,8 +394,6 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {string} itemsExpr
-   * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
-   *     result or rejected if response is invalid.
    * @private
    */
   fetch_(itemsExpr) {
@@ -409,30 +408,30 @@ export class AmpList extends AMP.BaseElement {
     }
     return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
   }
-}
 
-/** @private */
-function onFetchSuccess_() {
-  if (this.getFallback()) {
-    // Hide in case fallback was displayed for a previous fetch.
-    this.toggleFallbackInMutate_(false);
-  }
-  this.togglePlaceholder(false);
-  this.toggleLoading(false);
-}
-
-/**
- * @param {!Error} error
- * @private
- * @throws {!Error} throws error if fallback element is not present.
- */
-function onFetchError_(error) {
-  this.toggleLoading(false);
-  if (this.getFallback()) {
-    this.toggleFallbackInMutate_(true);
+  /** @private */
+  onFetchSuccess_() {
+    if (this.getFallback()) {
+      // Hide in case fallback was displayed for a previous fetch.
+      this.toggleFallbackInMutate_(false);
+    }
     this.togglePlaceholder(false);
-  } else {
-    throw error;
+    this.toggleLoading(false);
+  }
+
+  /**
+   * @param {*=} error
+   * @private
+   * @throws {!Error} throws error if fallback element is not present.
+   */
+  onFetchError_(error) {
+    this.toggleLoading(false);
+    if (this.getFallback()) {
+      this.toggleFallbackInMutate_(true);
+      this.togglePlaceholder(false);
+    } else {
+      throw error;
+    }
   }
 }
 

@@ -101,7 +101,7 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /**
    * Sanitizes the html and inserts it in the DOM.
-   * @param {!HTML} html
+   * @param {string} html
    * @return {!Element}
    * @private
    */

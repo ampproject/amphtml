@@ -463,7 +463,7 @@
 
     Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
       // Mocked response.
-      return Promise.resolve({renderedHtml: "<div>Server side rendered search result</div>"});
+      return Promise.resolve({data: "<div>Server side rendered search result</div>"});
     };
 
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {

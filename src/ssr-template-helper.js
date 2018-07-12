@@ -15,8 +15,8 @@
  */
 
 import {Capability} from './service/viewer-impl';
+import {dict, map} from './utils/object';
 import {iterateCursor} from './dom';
-import {map} from './utils/object';
 
 /** The attributes we allow to be sent to the viewer. */
 const ATTRS_TO_SEND_TO_VIEWER = {
@@ -61,20 +61,13 @@ export class SsrTemplateHelper {
    * Proxies xhr and template rendering to the viewer and renders
    * the response.
    * @param {!Element} element
-   *     viewer to determine the component responsible for proxying the
-   *     request.
-   * @param {?function():Promise<?>} onSuccess
-   * @param {?function():Promise<?>} onFailure
-   * return {!Promise}
+   * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
-  fetchAndRenderTemplate(
-    element,
-    onSuccess,
-    onFailure) {
+  fetchAndRenderTemplate(element) {
     const inputsAsJson = this.getElementInputsAsJson_(element);
     const elementAttrsAsJson =
         this.getElementAttributesAsJson_(element);
-    elementAttrsAsJson.inputData = inputsAsJson;
+    elementAttrsAsJson['inputData'] = inputsAsJson;
     const template = this.templates_.maybeFindTemplate(element);
     let mustacheTemplate;
     if (template) {
@@ -83,19 +76,13 @@ export class SsrTemplateHelper {
       mustacheTemplate = this.xmls_.serializeToString(
           this.templates_.findTemplate(element));
     }
+    const data = dict({
+      'data': elementAttrsAsJson,
+      'mustacheTemplate': mustacheTemplate,
+      'sourceAmpComponent': this.sourceComponent_,
+    });
     return this.viewer_.sendMessageAwaitResponse(
-        Capability.VIEWER_RENDER_TEMPLATE,
-        {
-          data: elementAttrsAsJson,
-          mustacheTemplate,
-          'sourceAmpComponent': this.sourceComponent_,
-        })
-        .then(resp => {
-          return onSuccess ? onSuccess(resp) : resp;
-        }, errorResponseJson => {
-          return onFailure ?
-            onFailure(errorResponseJson) : errorResponseJson;
-        });
+        Capability.VIEWER_RENDER_TEMPLATE, data);
   }
 
   /**
@@ -118,14 +105,14 @@ export class SsrTemplateHelper {
    * @return {!JsonObject}
    */
   getElementAttributesAsJson_(element) {
-    const attrsAsJson = {};
+    const attrsAsJson = map();
     if (element.attributes.length > 0) {
       const {attributes} = element;
-      // Include commonly shared allowed attributes.
+      /** {!Array} */
       const whiteList = ATTRS_TO_SEND_TO_VIEWER[this.sourceComponent_];
       for (let i = 0; i < attributes.length; i++) {
         const keyValue = attributes[i];
-        if (whiteList.includes(keyValue.name)) {
+        if (whiteList.indexOf(keyValue.name) != 1) {
           attrsAsJson[keyValue.name] = keyValue.value;
         }
       }
