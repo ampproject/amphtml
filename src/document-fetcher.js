@@ -15,8 +15,8 @@
  */
 
 import {FetchInitDef, XhrBase, assertSuccess, setupInit} from './xhr-base';
-import {dev, user} from './log';
 import {isFormDataWrapper} from './form-data-wrapper';
+import {user} from './log';
 
 export class DocumentFetcher extends XhrBase {
   /**
@@ -38,7 +38,6 @@ export class DocumentFetcher extends XhrBase {
    */
   fetchFromNetwork_(input, init) {
     this.viewerResponded_ = false;
-    dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
 
     return this.maybeIntercept_(input, init)
         .then(interceptorResponse => {

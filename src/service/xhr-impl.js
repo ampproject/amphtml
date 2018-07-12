@@ -19,13 +19,13 @@ import {
   XMLHttpRequestDef,
   XhrBase,
   assertSuccess,
-  isRetriable,
   setupInit,
 } from '../xhr-base';
 import {dev, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {map} from '../utils/object';
 import {parseJson} from '../json';
 import {
   serializeQueryString,
@@ -202,6 +202,63 @@ export class Xhr extends XhrBase {
           const response = /**@type {!Response} */ (res);
           return assertSuccess(response);
         });
+  }
+
+  /**
+   * @override
+   */
+  fromStructuredCloneable_(response, responseType) {
+    user().assert(isObject(response), 'Object expected: %s', response);
+
+    const isDocumentType = responseType == 'document';
+    if (typeof this.win.Response === 'function' && !isDocumentType) {
+      // Use native `Response` type if available for performance. If response
+      // type is `document`, we must fall back to `FetchResponse` polyfill
+      // because callers would then rely on the `responseXML` property being
+      // present, which is not supported by the Response type.
+      return new this.win.Response(response['body'], response['init']);
+    }
+
+    // TODO(prateekbh): shift below loginc into document-fetch
+    // after fetch-polyfill.
+    const lowercasedHeaders = map();
+    const data = {
+      status: 200,
+      statusText: 'OK',
+      responseText: (response['body'] ? String(response['body']) : ''),
+      /**
+       * @param {string} name
+       * @return {string}
+       */
+      getResponseHeader(name) {
+        return lowercasedHeaders[String(name).toLowerCase()] || null;
+      },
+    };
+
+    if (response['init']) {
+      const init = response['init'];
+      if (isArray(init.headers)) {
+        init.headers.forEach(entry => {
+          const headerName = entry[0];
+          const headerValue = entry[1];
+          lowercasedHeaders[String(headerName).toLowerCase()] =
+              String(headerValue);
+        });
+      }
+      if (init.status) {
+        data.status = parseInt(init.status, 10);
+      }
+      if (init.statusText) {
+        data.statusText = String(init.statusText);
+      }
+    }
+
+    if (isDocumentType) {
+      data.responseXML =
+          new DOMParser().parseFromString(data.responseText, 'text/html');
+    }
+
+    return new FetchResponse(data);
   }
 }
 
