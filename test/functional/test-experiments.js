@@ -122,7 +122,7 @@ describe('isExperimentOn', () => {
   function expectExperiment(cookieString, experimentId) {
     resetExperimentTogglesForTesting(win);
     win.document.cookie = cookieString;
-    return expect(isExperimentOn(win, experimentId));
+    return expect(isExperimentOn(win, /*OK*/experimentId));
   }
 
   describe('with only cookie flag', () => {

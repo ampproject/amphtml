@@ -47,10 +47,6 @@ import {setStyle} from '../../style';
 const TAG_ = 'Viewport';
 
 
-/** @const {string} */
-const A4A_LIGHTBOX_EXPERIMENT = 'amp-lightbox-a4a-proto';
-
-
 /**
  * @typedef {{
  *   relayoutAll: boolean,
@@ -628,7 +624,7 @@ export class Viewport {
    * @visibleForTesting
    */
   isLightboxExperimentOn() {
-    return isExperimentOn(this.ampdoc.win, A4A_LIGHTBOX_EXPERIMENT);
+    return isExperimentOn(this.ampdoc.win, 'amp-lightbox-a4a-proto');
   }
 
   /**
@@ -642,7 +638,7 @@ export class Viewport {
     if (fieOptional) {
       dev().assert(this.isLightboxExperimentOn(),
           'Lightbox mode for A4A is only available when ' +
-          `'${A4A_LIGHTBOX_EXPERIMENT}' experiment is on`);
+          "'amp-lightbox-a4a-proto' experiment is on");
 
       dev().assert(fieOptional).enterFullOverlayMode();
     }
