@@ -419,7 +419,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-<<<<<<< HEAD
    * Send a lifecycle event notification.  Currently, this is active only for
    * Google network ad tags (type=adsense or type=doubleclick) and pings are
    * done via direct image tags.  In the future, this will become an event
@@ -443,13 +442,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-=======
-  * Calculates and attempts to set the appropriate height & width for a
-  * responsive full width ad unit.
-  * @return {!Promise}
-  * @private
-  */
->>>>>>> master
   attemptFullWidthSizeChange_() {
     const viewportSize = this.getViewport().getSize();
     const ratio = this.config.fullWidthHeightRatio;

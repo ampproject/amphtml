@@ -804,21 +804,20 @@ describes.realWin('amp-ad-network-adsense-impl', {
       adsense.buildCallback();
       expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
     });
-    it('should schedule a resize for matched content responsive', () => {
-      constructImpl({
+
+    it('should schedule a resize for matched content responsive', function *() {
+      const adsense = constructImpl({
         width: '100vw',
         height: '100',
         'data-auto-format': 'mcrspv',
       });
+      env.sandbox.stub(adsense, 'attemptChangeSize').returns(Promise.resolve());
 
-      const callback = impl.buildCallback();
-      expect(callback).to.exist;
+      const promise = adsense.buildCallback();
+      expect(promise).to.exist;
+      yield promise;
 
-      // The returned promise fails for some reason.
-      return callback.then(() => {
-        expect(impl.element.offsetHeight).to.equal(1387);
-        expect(impl.element.offsetWidth).to.equal(VIEWPORT_WIDTH);
-      });
+      expect(adsense.attemptChangeSize).to.be.calledWith(1387, VIEWPORT_WIDTH);
     });
   });
 
