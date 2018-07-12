@@ -861,6 +861,7 @@ export const adConfig = {
       'https://a.teads.tv',
       'https://t.teads.tv',
     ],
+    consentHandlingOverride: true,
   },
 
   triplelift: {},
