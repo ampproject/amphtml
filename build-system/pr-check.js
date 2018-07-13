@@ -185,7 +185,7 @@ function isDocFile(filePath) {
  */
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'visual-diff.rb' ||
+  return (filename == 'visual-diff.js' ||
           filename == 'visual-tests.js' ||
           filePath.startsWith('examples/visual-tests/'));
 }
@@ -354,7 +354,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff --headless';
+    let cmd = 'gulp visual-diff --nobuild --headless';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -378,7 +378,7 @@ const command = {
           '. Skipping verification of visual diff tests.');
       return;
     }
-    timedExec('gulp visual-diff --verify');
+    timedExec('gulp visual-diff --verify_status');
   },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');
@@ -403,7 +403,7 @@ function runAllCommands() {
     command.runDepAndTypeChecks();
     command.runUnitTests();
     command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
-    // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
+    command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -411,7 +411,10 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
-    command.runBundleSizeCheck();
+    // Disable bundle-size check on release branch builds.
+    if (process.env['TRAVIS_BRANCH'] === 'master') {
+      command.runBundleSizeCheck();
+    }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
   }
@@ -438,7 +441,7 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
-  // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
+  command.verifyVisualDiffTests();
 
   // Validator tests.
   command.buildValidatorWebUI();
@@ -512,8 +515,7 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
-  // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
-  if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
     console.log(fileLogPrefix, 'Running all commands on push build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);

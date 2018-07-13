@@ -317,13 +317,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'amp-pan-zoom',
-    name: 'Enables zoom / pan manipulation of arbitrary elements' +
-      ' with amp-pan-zoom',
-    spec: 'https://github.com/ampproject/amphtml/issues/13602',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/15594',
-  },
-  {
     id: 'amp-orientation-observer',
     name: 'Enables actions based on the orientation of a mobile device',
     spec: 'https://github.com/ampproject/amphtml/issues/14740',
@@ -452,7 +445,7 @@ function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
     return getCookie(window, 'AMP_CANARY') == '1';
   }
-  return isExperimentOn(window, id);
+  return isExperimentOn(window, /*OK*/id);
 }
 
 /**
