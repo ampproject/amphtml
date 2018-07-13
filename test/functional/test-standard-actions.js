@@ -60,6 +60,18 @@ describes.sandboxed('StandardActions', {}, () => {
     expect(element.hasAttribute('hidden')).to.be.false;
   }
 
+  function expectElementToHaveClass(element, className) {
+    expect(mutateElementStub).to.be.calledOnce;
+    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+    expect(element.classList.contains(className)).to.true;
+  }
+
+  function expectElementToDropClass(element, className) {
+    expect(mutateElementStub).to.be.calledOnce;
+    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
+    expect(element.classList.contains(className)).to.false;
+  }
+
   function expectAmpElementToHaveBeenHidden(element) {
     expect(mutateElementStub).to.be.calledOnce;
     expect(mutateElementStub.firstCall.args[0]).to.equal(element);
@@ -167,6 +179,89 @@ describes.sandboxed('StandardActions', {}, () => {
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenHidden(element);
+    });
+  });
+
+  describe('"toggleClass" action', () => {
+    const dummyClass = 'i-amphtml-test-class-toggle';
+
+    it('should add class when not in classList', () => {
+      const element = createElement();
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': dummyClass,
+        }};
+      standardActions.handleToggleClass(invocation);
+      expectElementToHaveClass(element, dummyClass);
+    });
+
+    it('should delete class when in classList', () => {
+      const element = createElement();
+      element.classList.add(dummyClass);
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': dummyClass,
+        }};
+      standardActions.handleToggleClass(invocation);
+      expectElementToDropClass(element, dummyClass);
+    });
+
+    it('should add class when not in classList, when force=true', () => {
+      const element = createElement();
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': dummyClass,
+          'force': true,
+        }};
+      standardActions.handleToggleClass(invocation);
+      expectElementToHaveClass(element, dummyClass);
+    });
+
+    it('should keep class when in classList, when force=true', () => {
+      const element = createElement();
+      element.classList.add(dummyClass);
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': dummyClass,
+          'force': true,
+        }};
+      standardActions.handleToggleClass(invocation);
+      expectElementToHaveClass(element, dummyClass);
+    });
+
+    it('should not add when not in classList, when force=false', () => {
+      const element = createElement();
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': dummyClass,
+          'force': false,
+        }};
+      standardActions.handleToggleClass(invocation);
+      expectElementToDropClass(element, dummyClass);
+    });
+
+    it('should delete class when in classList, when force=false', () => {
+      const element = createElement();
+      element.classList.add(dummyClass);
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': dummyClass,
+          'force': false,
+        }};
+      standardActions.handleToggleClass(invocation);
+      expectElementToDropClass(element, dummyClass);
     });
   });
 
@@ -405,7 +500,7 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(stub).to.be.calledOnce;
 
       // Global actions.
-      expect(embedActions.addGlobalMethodHandler).to.have.callCount(5);
+      expect(embedActions.addGlobalMethodHandler).to.have.callCount(6);
       expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
       expect(
           embedActions.addGlobalMethodHandler.args[0][1]).to.be.a('function');
@@ -424,6 +519,10 @@ describes.sandboxed('StandardActions', {}, () => {
           .equal('focus');
       expect(
           embedActions.addGlobalMethodHandler.args[4][1]).to.be.a('function');
+      expect(embedActions.addGlobalMethodHandler.args[5][0]).to
+          .equal('toggleClass');
+      expect(
+          embedActions.addGlobalMethodHandler.args[5][1]).to.be.a('function');
       embedActions.addGlobalMethodHandler.args[0][1]();
       expect(hideStub).to.be.calledOnce;
     });

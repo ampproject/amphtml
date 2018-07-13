@@ -86,6 +86,8 @@ export class StandardActions {
         'scrollTo', this.handleScrollTo.bind(this));
     actionService.addGlobalMethodHandler(
         'focus', this.handleFocus.bind(this));
+    actionService.addGlobalMethodHandler(
+        'toggleClass', this.handleToggleClass.bind(this));
   }
 
   /**
@@ -266,6 +268,35 @@ export class StandardActions {
     } else {
       return this.handleHide(invocation);
     }
+  }
+
+  /**
+   * Handles "toggleClass" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   */
+  handleToggleClass(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
+
+    const target = dev().assertElement(invocation.node);
+    const {args} = invocation;
+    const className = user().assertString(args['class'],
+        "Argument 'class' must be a string.");
+
+    this.resources_.mutateElement(target, () => {
+      if (args['force'] !== undefined) {
+        // must be boolean, won't do type conversion
+        const shouldForce = user().assertBoolean(args['force'],
+            "Optional argument 'force' must be a boolean.");
+        target.classList.toggle(className, shouldForce);
+      } else {
+        target.classList.toggle(className);
+      }
+    });
+
+    return null;
   }
 }
 
