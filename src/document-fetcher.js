@@ -93,16 +93,13 @@ export class DocumentFetcher extends XhrBase {
           const options = {
             status: this.xhr_.status,
             statusText: this.xhr_.statusText,
-            headers: {
-              get: name =>
-                String(this.xhr_.getResponseHeader(name)).toLowerCase(),
-            },
+            headers: parseHeaders(this.xhr_.getAllResponseHeaders()),
           };
           options.url = 'responseURL' in this.xhr_
-            ? this.xhr_.responseURL : options.headers.get('X-Request-URL');
+            ? this.xhr_.responseURL : options.headers['X-Request-URL'];
           const body = 'response' in this.xhr_
             ? this.xhr_.response : this.xhr_.responseText;
-          resolve(new Response(/** @type {string} */ (body), /** @type {!ResponseInit} */ (options)));
+          resolve(new Response(/** @type {string} */ (body || ''), /** @type {!ResponseInit} */ (options)));
         }
       };
       this.xhr_.onerror = () => {
@@ -139,4 +136,25 @@ export class DocumentFetcher extends XhrBase {
       }
     });
   }
+}
+
+/**
+ *
+ * @param {string} rawHeaders
+ * @return {JsonObject}
+ */
+function parseHeaders(rawHeaders) {
+  const headers = {};
+  // Replace instances of \r\n and \n followed by at least one space or horizontal tab with a space
+  // https://tools.ietf.org/html/rfc7230#section-3.2
+  const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
+  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+    const parts = line.split(':');
+    const key = parts.shift().trim();
+    if (key) {
+      const value = parts.join(':').trim();
+      headers[key] = value;
+    }
+  });
+  return headers;
 }
