@@ -322,7 +322,7 @@ describes.fakeWin('runtime', {
     });
   });
 
-  it('loads and waits for a single intermediate bundles', () => {
+  it.only('loads and waits for a single intermediate bundles', () => {
     // New format: {n:string, f:function(), i: <string|Array<string>}.
     let progress = '';
     const queueExtensions = win.AMP;
@@ -343,11 +343,9 @@ describes.fakeWin('runtime', {
     expect(progress).to.equal('');
     runChunksForTesting(win.document);
     const script = win.document.querySelector('[data-script=_base_ext]');
-    expect(script).to.be.null;
+    expect(script).to.be.not.null;
     return promise.then(() => {
-      const script = win.document.querySelector('[data-script=_base_ext]');
       expect(spy).to.have.been.calledWith('_base_ext');
-      expect(script).to.not.be.null;
       // ext1 should not be executed yet and needs to wait on _base_ext
       expect(progress).to.equal('');
       // Manually resolve this extension that doesn't exist in test but which

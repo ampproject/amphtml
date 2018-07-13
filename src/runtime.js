@@ -249,36 +249,29 @@ function adoptShared(global, callback) {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
-          // We support extension declarations which declare they have an
-          // "intermediate" dependency that needs to be loaded before they
-          // can execute.
-          if (fnOrStruct.i) {
-            // Allow a single string as the intermediate dependency OR allow
-            // for an array if intermediate dependencies that needs to be
-            // resolved first before executing this current extension.
-            if (Array.isArray(fnOrStruct.i)) {
-              const promises = fnOrStruct.i.map(dep => {
-                return extensions.preloadExtension(dep);
-              });
-              Promise.all(promises).then(function() {
-                extensions.registerExtension(
-                    fnOrStruct.n, fnOrStruct.f, global.AMP);
-              });
-            } else if (typeof fnOrStruct.i == 'string') {
-              extensions.preloadExtension(fnOrStruct.i).then(function() {
-                extensions.registerExtension(
-                    fnOrStruct.n, fnOrStruct.f, global.AMP);
-              });
-            }
-          } else {
-            extensions.registerExtension(
-                fnOrStruct.n, fnOrStruct.f, global.AMP);
-          }
+          extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
         }
       });
-
     };
-    if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
+
+    // We support extension declarations which declare they have an
+    // "intermediate" dependency that needs to be loaded before they
+    // can execute.
+    if (!isFunction && fnOrStruct.i) {
+      // Allow a single string as the intermediate dependency OR allow
+      // for an array if intermediate dependencies that needs to be
+      // resolved first before executing this current extension.
+      if (Array.isArray(fnOrStruct.i)) {
+        const promises = fnOrStruct.i.map(dep => {
+          return extensions.preloadExtension(dep);
+        });
+        Promise.all(promises).then(register);
+      } else if (typeof fnOrStruct.i == 'string') {
+        extensions.preloadExtension(fnOrStruct.i).then(register);
+      }
+    }
+
+    if (isFunction || fnOrStruct.p == 'high') {
       // "High priority" extensions do not go through chunking.
       // This should be used for extensions that need to run early.
       // One example would be viewer communication that is required
