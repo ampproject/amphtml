@@ -1128,17 +1128,23 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '&uuid=${clientId(marin_amp_id)}' +
         '&rnd=${random}',
       'pageView': '${base}?' +
-        '${baseParams}&' +
-        'act=1',
+        '${baseParams}' +
+        '&act=1',
       'conversion': '${base}?' +
         '${baseParams}' +
         '&act=2' +
-        '&trans=UTM:I|${orderId}|${marinConversionType}|${productName}|${category}|${price}|${quantity}'
+        '&trans=UTM:I' +
+          '|${orderId}' +
+          '|${marinConversionType}' +
+          '|${productName}' +
+          '|${category}' +
+          '|${price}' +
+          '|${quantity}',
     },
     'transport': {
       'beacon': true,
       'xhrpost': false,
-      'image': true
+      'image': true,
     },
   },
 
