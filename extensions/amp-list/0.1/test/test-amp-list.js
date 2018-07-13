@@ -179,7 +179,7 @@ describes.realWin('amp-list component', {
             {
               data: {
                 inputData: { },
-                src: 'https://data.com/list.json'
+                src: 'https://data.com/list.json',
               },
               mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml">' +
                   '{{template}}</template>',
