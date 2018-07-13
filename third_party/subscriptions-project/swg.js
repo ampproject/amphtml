@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.18 */
+ /** Version: 0.1.22.21 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -602,7 +602,7 @@ class ButtonApi {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important;will-change:transform}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@-webkit-keyframes swg-notify{0%{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}to{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@-webkit-keyframes swg-notify-hide{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}to{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 
 
@@ -1697,6 +1697,7 @@ const SubscriptionFlows = {
   COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
   SHOW_LOGIN_PROMPT: 'showLoginPrompt',
+  SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
 };
 
 
@@ -2245,7 +2246,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.18',
+    '_client': 'SwG 0.1.22.21',
   });
 }
 
@@ -3255,7 +3256,7 @@ class Dialog {
       return transition(this.getElement(), {
         'transform': 'translateY(0)',
         'opacity': 1,
-        'visiblity': 'visible',
+        'visibility': 'visible',
       }, 300, 'ease-out');
     });
     this.hidden_ = false;
@@ -3726,6 +3727,9 @@ class Toast {
     /** @private @const {!Object<string, ?>} */
     this.args_ = args;
 
+    /** @private {?Promise} */
+    this.animating_ = null;
+
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ =
         /** @type {!HTMLIFrameElement} */ (
@@ -3769,22 +3773,61 @@ class Toast {
           return port.whenReady();
         }).then(() => {
           resetStyles(this.iframe_, ['height']);
-          setImportantStyles(this.iframe_, {
-            'animation': 'swg-notify .3s ease-out normal backwards, '
-                  + 'swg-notify-hide .3s ease-out ' + toastDurationSeconds +
-                  's normal forwards',
+
+          this.animate_(() => {
+            setImportantStyles(this.iframe_, {
+              'transform': 'translateY(100%)',
+              'opactiy': 1,
+              'visibility': 'visible',
+            });
+            return transition(this.iframe_, {
+              'transform': 'translateY(0)',
+              'opacity': 1,
+              'visibility': 'visible',
+            }, 400, 'ease-out');
           });
+
+          // Close the Toast after the specified duration.
           this.doc_.getWin().setTimeout(() => {
             this.close();
           }, (toastDurationSeconds + 1) * 1000);
         });
   }
 
+    /**
+   * @param {function():!Promise} callback
+   * @return {!Promise}
+   * @private
+   */
+  animate_(callback) {
+    const wait = this.animating_ || Promise.resolve();
+    return this.animating_ = wait.then(() => {
+      return callback();
+    }, () => {
+      // Ignore errors to make sure animations don't get stuck.
+    }).then(() => {
+      this.animating_ = null;
+    });
+  }
+
   /**
    * Closes the toast.
+   * @return {!Promise}
    */
   close() {
-    this.doc_.getBody().removeChild(this.iframe_);
+    return this.animate_(() => {
+      // Remove the toast from the DOM after animation is complete.
+      this.doc_.getWin().setTimeout(() => {
+        this.doc_.getBody().removeChild(this.iframe_);
+        return Promise.resolve();
+      }, 500);
+
+      return transition(this.iframe_, {
+        'transform': 'translateY(100%)',
+        'opacity': 1,
+        'visibility': 'visible',
+      }, 400, 'ease-out');
+    });
   }
 }
 
@@ -4500,7 +4543,65 @@ class LoginPromptFlow {
 
 
 
-class WaitingApi {
+class LoginNotificationApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?Promise} */
+    this.openViewPromise_ = null;
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/loginnotificationiframe'),
+        feArgs({
+          publicationId: deps.pageConfig().getPublicationId(),
+          productId: deps.pageConfig().getProductId(),
+          // TODO(chenshay): Pass entitlements value here.
+        }),
+        /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Continues the Login flow (after waiting).
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_.callbacks().triggerFlowStarted(
+        SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
+
+    this.openViewPromise_ = this.dialogManager_.openView(
+        this.activityIframeView_);
+
+    return this.activityIframeView_.acceptResult().then(() => {
+      // The consent part is complete.
+      this.dialogManager_.completeView(this.activityIframeView_);
+    }, reason => {
+      this.dialogManager_.completeView(this.activityIframeView_);
+      throw reason;
+    });
+  }
+}
+
+
+
+
+class WaitForSubscriptionLookupApi {
   /**
    * @param {!./deps.DepsDef} deps
    * @param {?Promise} accountPromise
@@ -4528,7 +4629,7 @@ class WaitingApi {
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
-        feUrl('/loginwaitingiframe'),
+        feUrl('/waitforsubscriptionlookupiframe'),
         feArgs({
           publicationId: deps.pageConfig().getPublicationId(),
           productId: deps.pageConfig().getProductId(),
@@ -4551,7 +4652,6 @@ class WaitingApi {
       return account;
     }, reason => {
       this.dialogManager_.completeView(this.activityIframeView_);
-      // return Promise.reject('no account found');
       throw reason;
     });
   }
@@ -5207,9 +5307,9 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  showWaitingIndicator(accountPromise) {
+  showSubscriptionLookupProgress(accountPromise) {
     return this.documentParsed_.then(() => {
-      const wait = new WaitingApi(this, accountPromise);
+      const wait = new WaitForSubscriptionLookupApi(this, accountPromise);
       return wait.start();
     });
   }
@@ -5242,6 +5342,13 @@ class ConfiguredRuntime {
   showLoginPrompt() {
     return this.documentParsed_.then(() => {
       return new LoginPromptFlow(this).start();
+    });
+  }
+
+  /** @override */
+  showLoginNotification() {
+    return this.documentParsed_.then(() => {
+      return new LoginNotificationApi(this).start();
     });
   }
 
