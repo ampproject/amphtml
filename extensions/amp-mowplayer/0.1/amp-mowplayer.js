@@ -14,11 +14,34 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {
+  createFrameFor,
+  mutedOrUnmutedEvent,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
+import {dev, user} from '../../../src/log';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
+import {htmlFor} from '../../../src/static-template';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
 
-class AmpMowplayer extends AMP.BaseElement {
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
+class AmpMowPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -29,6 +52,21 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+
+    /** @private {?string} */
+    this.videoIframeSrc_ = null;
+
+    /** @private {?number} */
+    this.volume_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /**
@@ -43,29 +81,62 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  /**
+   * Gets the source of video
+   *
+   * @return {string}
+   */
+  getVideoIframeSrc_() {
+	  
+    if (this.videoIframeSrc_) {
+      return this.videoIframeSrc_;
+    }
+
+    //Create iframe
+    const src = 'https://cdn.mowplayer.com/player.html?code=' + encodeURIComponent(this.mediaid_);
+	
+    this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
+
+    return this.videoIframeSrc_;
+  }
+
+  /** @override */
   buildCallback() {
-    this.mediaid_ = user().assert(
-        (this.element.getAttribute('data-media-id')),
+    const {element} = this;
+		
+	this.mediaid_ = user().assert(
+        (element.getAttribute('data-media-id')),
         'the data-media-id attributes must exists for <amp-mowplayer> %s',
-        this.element);
+        element);
+
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+
+    installVideoManagerForDoc(element);
+    Services.videoManagerForDoc(element).register(this);
   }
 
   /** @override */
   layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    const src = 'https://cdn.mowplayer.com/player.html?code=' + encodeURIComponent(this.mediaid_);
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = src;
-    this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
-  }
+    const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    this.iframe_ = iframe;
+
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleMowMessage_.bind(this)
+    );
+
+    this.element.appendChild(iframe);
+
+    return this.loadPromise(iframe)
+        .then(() => this.playerReadyPromise_);
   }
 
   /** @override */
@@ -74,11 +145,178 @@ class AmpMowplayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.pause();
+  }
+
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} command
+   * @param {*=} opt_arg
+   * @private
+   * */
+  sendCommand_(command, opt_arg) {
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        const args = opt_arg === undefined ? '' : '|' + opt_arg;
+        const message = 'Mow|' + command + args;
+        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+      }
+    });
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  handleMowMessage_(event) {
+    if (!originMatches(event, this.iframe_, 'https://cdn.mowplayer.com')) {
+      return;
+    }
+
+    const eventData = /** @type {?string|undefined} */ (getData(event));
+    if (typeof eventData !== 'string' || eventData.indexOf('Mow') !== 0) {
+      return;
+    }
+
+    const {element} = this;
+    const params = eventData.split('|');
+
+    if (params[2] == 'trigger') {
+      if (params[3] == 'ready') {
+        this.playerReadyResolver_(this.iframe_);
+      }
+      redispatch(element, params[3], {
+        'ready': VideoEvents.LOAD,
+        'play': VideoEvents.PLAYING,
+        'pause': VideoEvents.PAUSE,
+      });
+      return;
+    }
+
+    if (params[2] == 'volume') {
+      this.volume_ = parseFloat(params[3]);
+      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.volume_ <= 0));
+      return;
+    }
+  }
+
+  /** @override */
+  supportsPlatform() {
+    return true;
+  }
+
+  /** @override */
+  isInteractive() {
+    return true;
+  }
+
+  /** @override */
+  play(unusedIsAutoplay) {
+    this.sendCommand_('play');
+  }
+
+  /** @override */
+  pause() {
+    this.sendCommand_('pause');
+  }
+
+  /** @override */
+  mute() {
+    this.sendCommand_('muted', 1);
+    this.sendCommand_('volume', 0);
+  }
+
+  /** @override */
+  unmute() {
+    this.sendCommand_('muted', 0);
+    this.sendCommand_('volume', 1);
+  }
+
+  /** @override */
+  showControls() {
+    // Not supported.
+  }
+
+  /** @override */
+  hideControls() {
+    // Not supported.
+  }
+
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
   }
 }
 
 
 AMP.extension('amp-mowplayer', '0.1', AMP => {
-  AMP.registerElement('amp-mowplayer', AmpMowplayer);
+  AMP.registerElement('amp-mowplayer', AmpMowPlayer);
 });
