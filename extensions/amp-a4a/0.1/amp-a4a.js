@@ -145,6 +145,7 @@ export const AnalyticsTrigger = {
   AD_RENDER_START: 'ad-render-start',
   AD_RENDER_END: 'ad-render-end',
   AD_IFRAME_LOADED: 'ad-iframe-loaded',
+  AD_REFRESH: 'ad-refresh',
 };
 
 /**
@@ -161,6 +162,7 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
+  'adRefresh': AnalyticsTrigger.AD_REFRESH,
 };
 
 /**
@@ -923,6 +925,10 @@ export class AmpA4A extends AMP.BaseElement {
         return;
       }
       return this.mutateElement(() => {
+        // Fire an ad-refresh event so that 3rd parties can track when an ad
+        // has changed.
+        this.maybeTriggerAnalyticsEvent_('adRefresh');
+
         this.togglePlaceholder(true);
         // This delay provides a 1 second buffer where the ad loader is
         // displayed in between the creatives.
@@ -1662,8 +1668,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeTriggerAnalyticsEvent_(lifecycleStage) {
-    if (!this.a4aAnalyticsConfig_) {
-      // No config exists that will listen to this event.
+    if (lifecycleStage !== 'adRefresh' && !this.a4aAnalyticsConfig_) {
+      // The ad-refesh analtyics will not be contained within the ad. Otherwise
+      // no config exists that will listen to this event.
       return;
     }
     const analyticsEvent =
