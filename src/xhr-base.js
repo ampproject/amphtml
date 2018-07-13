@@ -264,6 +264,7 @@ export class XhrBase {
    * @protected
    */
   fromStructuredCloneable_(response, unusedResponseType) {
+    dev().assert(this.win.Response, 'Response object not present on window');
     user().assert(isObject(response), 'Object expected: %s', response);
     return new this.win.Response(response['body'], response['init']);
   }

@@ -52,7 +52,7 @@ export class DocumentFetcher extends XhrBase {
             init.body = init.body.getFormData();
           }
 
-          return (this.xhrRequest_).apply(this, arguments);
+          return this.xhrRequest_(this, arguments);
         });
   }
 
@@ -71,9 +71,9 @@ export class DocumentFetcher extends XhrBase {
       }
       this.xhr_.responseType = 'document';
       if (init.headers) {
-        Object.keys(init.headers).forEach(header => {
+        for (const header in init.headers) {
           this.xhr_.setRequestHeader(header, init.headers[header]);
-        });
+        }
       }
       this.xhr_.onreadystatechange = () => {
         if (this.xhr_.readyState < /* STATUS_RECEIVED */ 2) {
@@ -95,8 +95,6 @@ export class DocumentFetcher extends XhrBase {
             statusText: this.xhr_.statusText,
             headers: parseHeaders(this.xhr_.getAllResponseHeaders()),
           };
-          options.url = 'responseURL' in this.xhr_
-            ? this.xhr_.responseURL : options.headers['X-Request-URL'];
           const body = 'response' in this.xhr_
             ? this.xhr_.response : this.xhr_.responseText;
           resolve(new Response(/** @type {string} */ (body || ''), /** @type {!ResponseInit} */ (options)));
@@ -131,12 +129,12 @@ export class DocumentFetcher extends XhrBase {
       assertSuccess(/** @type {!Response} */(response));
       if (!this.viewerResponded_) {
         return this.xhr_.responseXML;
-      } else {
-        // Since this reponse is provided by viewer,
-        // doing a DOMParser on main thread is our only option.
-        return response.text().then(responseText =>
-          new DOMParser().parseFromString(responseText, 'text/html'));
       }
+
+      // Since this reponse is provided by viewer,
+      // doing a DOMParser on main thread is our only option.
+      return response.text().then(responseText =>
+        new DOMParser().parseFromString(responseText, 'text/html'));
     });
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FetchResponse, fetchPolyfill, xhrServiceForTesting} from '../../src/service/xhr-impl';
+import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
 import {Services} from '../../src/services';
 import {assertSuccess, setupInit} from '../../src/xhr-base';
 
