@@ -75,7 +75,7 @@ export class SignInProtocol {
 
     /** @private @const {boolean} */
     this.isEnabled_ =
-        isExperimentOn(ampdoc.win, TAG) &&
+        isExperimentOn(ampdoc.win, 'amp-access-signin') &&
         this.viewer_.isEmbedded() &&
         this.viewer_.getParam('signin') == '1';
 
