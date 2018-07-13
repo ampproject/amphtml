@@ -503,7 +503,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    * @private
    */
-  runVsyncOnIframe_(task) {
+  measureMutate_(task) {
     return this.getResources_().measureMutateElement(this.iframe,
         task.measure || null, task.mutate);
   }
@@ -549,7 +549,7 @@ export class FriendlyIframeEmbed {
       'height': '',
     };
 
-    return this.runVsyncOnIframe_({
+    return this.measureMutate_({
       measure: () => {
         const rect = this.host ?
           this.host.getLayoutBox() :
@@ -598,7 +598,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   leaveFullOverlayMode() {
-    return this.runVsyncOnIframe_({
+    return this.measureMutate_({
       mutate: () => {
         resetStyles(this.iframe, [
           'position',
