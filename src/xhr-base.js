@@ -343,7 +343,7 @@ export class XhrBase {
  */
 export function setupInit(opt_init, opt_accept) {
   const init = opt_init || {};
-  init.method = normalizeMethod_(init.method);
+  init.method = normalizeMethod(init.method);
   init.headers = init.headers || {};
   if (opt_accept) {
     init.headers['Accept'] = opt_accept;
@@ -355,9 +355,8 @@ export function setupInit(opt_init, opt_accept) {
  * Normalized method name by uppercasing.
  * @param {string|undefined} method
  * @return {string}
- * @private
  */
-function normalizeMethod_(method) {
+function normalizeMethod(method) {
   if (method === undefined) {
     return 'GET';
   }

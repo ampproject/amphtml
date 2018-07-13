@@ -16,7 +16,7 @@
 
 import {FetchResponse, fetchPolyfill, xhrServiceForTesting} from '../../src/service/xhr-impl';
 import {Services} from '../../src/services';
-import {assertSuccess} from '../../src/xhr-base';
+import {assertSuccess, setupInit} from '../../src/xhr-base';
 
 
 describes.realWin('XhrBase', {amp: true}, function() {
@@ -131,7 +131,19 @@ describes.realWin('XhrBase', {amp: true}, function() {
               expect(e.retriable).to.be.equals(false);
             });
       });
-
+    });
+    describe('setupInit', () => {
+      it('should normalize method names for get/post', () => {
+        expect(setupInit({
+          method: 'get',
+        }).method).to.equals('GET');
+        expect(setupInit({
+          method: 'post',
+        }).method).to.equals('POST');
+        expect(setupInit({}).method).to.equals('GET');
+        expect(setupInit({},'text/html').headers['Accept'])
+            .to.equals('text/html');
+      });
     });
   });
 
