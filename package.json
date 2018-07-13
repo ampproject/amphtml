@@ -60,7 +60,7 @@
     "cli-highlight": "2.0.0",
     "codecov": "3.0.4",
     "connect-header": "0.0.5",
-    "cssnano": "4.0.0-rc.2",
+    "cssnano": "4.0.2",
     "del": "3.0.0",
     "derequire": "2.0.6",
     "dev-null": "0.1.1",
