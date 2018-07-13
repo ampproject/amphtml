@@ -3704,12 +3704,6 @@ doctrine@2.1.0, doctrine@^2.1.0:
   dependencies:
     esutils "^2.0.2"
 
-doctrine@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-2.0.2.tgz#68f96ce8efc56cc42651f1faadb4f175273b0075"
-  dependencies:
-    esutils "^2.0.2"
-
 document-register-element@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/document-register-element/-/document-register-element-1.5.0.tgz#a91bc20afd9340d50cdb6a493afaf10932c12e00"
@@ -4180,7 +4174,7 @@ eslint-visitor-keys@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#3f3180fb2e291017716acb4c9d6d5b5c34a6a81d"
 
-eslint@5.1.0:
+eslint@5.1.0, eslint@^5.0.1:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/eslint/-/eslint-5.1.0.tgz#2ed611f1ce163c0fb99e1e0cda5af8f662dff645"
   dependencies:
@@ -4223,48 +4217,6 @@ eslint@5.1.0:
     strip-json-comments "^2.0.1"
     table "^4.0.3"
     text-table "^0.2.0"
-
-eslint@^4.0.0:
-  version "4.13.1"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-4.13.1.tgz#0055e0014464c7eb7878caf549ef2941992b444f"
-  dependencies:
-    ajv "^5.3.0"
-    babel-code-frame "^6.22.0"
-    chalk "^2.1.0"
-    concat-stream "^1.6.0"
-    cross-spawn "^5.1.0"
-    debug "^3.0.1"
-    doctrine "^2.0.2"
-    eslint-scope "^3.7.1"
-    espree "^3.5.2"
-    esquery "^1.0.0"
-    estraverse "^4.2.0"
-    esutils "^2.0.2"
-    file-entry-cache "^2.0.0"
-    functional-red-black-tree "^1.0.1"
-    glob "^7.1.2"
-    globals "^11.0.1"
-    ignore "^3.3.3"
-    imurmurhash "^0.1.4"
-    inquirer "^3.0.6"
-    is-resolvable "^1.0.0"
-    js-yaml "^3.9.1"
-    json-stable-stringify-without-jsonify "^1.0.1"
-    levn "^0.3.0"
-    lodash "^4.17.4"
-    minimatch "^3.0.2"
-    mkdirp "^0.5.1"
-    natural-compare "^1.4.0"
-    optionator "^0.8.2"
-    path-is-inside "^1.0.2"
-    pluralize "^7.0.0"
-    progress "^2.0.0"
-    require-uncached "^1.0.3"
-    semver "^5.3.0"
-    strip-ansi "^4.0.0"
-    strip-json-comments "~2.0.1"
-    table "^4.0.1"
-    text-table "~0.2.0"
 
 eslint@^4.15.0:
   version "4.17.0"
@@ -5532,13 +5484,13 @@ gulp-eslint-if-fixed@1.0.0:
   dependencies:
     gulp-if "^2.0.0"
 
-gulp-eslint@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/gulp-eslint/-/gulp-eslint-4.0.2.tgz#18a2a6768e4404cbf3e203239cb57474168fa606"
+gulp-eslint@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/gulp-eslint/-/gulp-eslint-5.0.0.tgz#2a2684095f774b2cf79310262078c56cc7a12b52"
   dependencies:
-    eslint "^4.0.0"
+    eslint "^5.0.1"
     fancy-log "^1.3.2"
-    plugin-error "^1.0.0"
+    plugin-error "^1.0.1"
 
 gulp-exec@3.0.1:
   version "3.0.1"
@@ -9360,7 +9312,7 @@ please-upgrade-node@^3.0.2:
   dependencies:
     semver-compare "^1.0.0"
 
-plugin-error@1.0.1, plugin-error@^1.0.0:
+plugin-error@1.0.1, plugin-error@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/plugin-error/-/plugin-error-1.0.1.tgz#77016bd8919d0ac377fdcdd0322328953ca5781c"
   dependencies:
