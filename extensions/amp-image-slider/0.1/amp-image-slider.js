@@ -16,8 +16,6 @@
 
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
 import {bezierCurve} from '../../../src/curve';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -54,13 +52,10 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
 
     /** @private {?Element} */
-    this.rightAmpImage_ = null;
-
-    /** @private {?Element} */
     this.leftAmpImage_ = null;
 
     /** @private {?Element} */
-    this.leftRealImage_ = null;
+    this.rightAmpImage_ = null;
 
     /** @private {?Element} */
     this.leftLabelWrapper_ = null;
@@ -117,9 +112,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
 
-    this.container_.classList.add('i-amphtml-image-slider-container');
-    this.element.appendChild(this.container_);
-
     const children = this.getRealChildren();
 
     for (let i = 0; i < children.length; i++) {
@@ -149,23 +141,13 @@ export class AmpImageSlider extends AMP.BaseElement {
       return null;
     }
 
-    const buildDeferred = new Deferred();
+    this.container_.classList.add('i-amphtml-image-slider-container');
+    this.element.appendChild(this.container_);
 
-    this.mutateElement(() => {
-      this.buildImages();
-      this.buildBar();
+    this.buildImages();
+    this.buildBar();
 
-      // TODO(kqian): this is taking ownership
-      // Simply mutating have chances of failure
-      // Temporarily kept here to ensure render
-      this.setAsOwner(this.leftAmpImage_);
-      this.setAsOwner(this.rightAmpImage_);
-
-      buildDeferred.resolve();
-    });
-
-    // Ensure layoutCallback is execute after build finishes
-    return buildDeferred.promise;
+    return Promise.resolve();
   }
 
   /**
@@ -252,12 +234,10 @@ export class AmpImageSlider extends AMP.BaseElement {
   updatePositions(leftPercentage) {
     this.updateTranslateX(this.bar_, leftPercentage);
 
-    if (this.leftRealImage_) {
-      this.updateTranslateX(this.leftMask_, leftPercentage - 1);
-      this.updateTranslateX(this.leftRealImage_, 1 - leftPercentage);
-      if (this.leftLabelWrapper_) {
-        this.updateTranslateX(this.leftLabelWrapper_, 1 - leftPercentage);
-      }
+    this.updateTranslateX(this.leftMask_, leftPercentage - 1);
+    this.updateTranslateX(this.leftAmpImage_, 1 - leftPercentage);
+    if (this.leftLabelWrapper_) {
+      this.updateTranslateX(this.leftLabelWrapper_, 1 - leftPercentage);
     }
   }
 
@@ -308,8 +288,8 @@ export class AmpImageSlider extends AMP.BaseElement {
   handleHover(e) {
     // This offsetWidth may change if user resize window
     // Thus not cached
-    const {left, right} = this.container_./*OK*/getBoundingClientRect();
-    const leftPercentage = (e.pageX - left) / (right - left);
+    const {left, width} = this.container_./*OK*/getBoundingClientRect();
+    const leftPercentage = (e.pageX - left) / width;
     this.updatePositions(leftPercentage);
   }
 
@@ -318,8 +298,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   handleClickImage(e) {
-    const {left, right} = this.container_./*OK*/getBoundingClientRect();
-    const leftPercentage = (e.pageX - left) / (right - left);
+    const {left, width} = this.container_./*OK*/getBoundingClientRect();
+    const leftPercentage = (e.pageX - left) / width;
     this.animateUpdatePositions(leftPercentage);
   }
 
@@ -328,9 +308,9 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   handleTapImage(e) {
-    const {left, right} = this.container_./*OK*/getBoundingClientRect();
+    const {left, width} = this.container_./*OK*/getBoundingClientRect();
     if (e.touches.length > 0) {
-      const leftPercentage = (e.touches[0].pageX - left) / (right - left);
+      const leftPercentage = (e.touches[0].pageX - left) / width;
       this.animateUpdatePositions(leftPercentage);
     }
   }
@@ -351,15 +331,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     // Single animation ensure elements have props updated at same pace
     // Multiple animations would be scheduled at different raf
     return Animation.animate(this.element, pos => {
-      const posInterpolated = interpolate(pos);
-      this.updateTranslateX(this.bar_, posInterpolated);
-      if (this.leftRealImage_) {
-        this.updateTranslateX(this.leftMask_, posInterpolated - 1);
-        this.updateTranslateX(this.leftRealImage_, 1 - posInterpolated);
-        if (this.leftLabelWrapper_) {
-          this.updateTranslateX(this.leftLabelWrapper_, 1 - posInterpolated);
-        }
-      }
+      this.updatePositions(interpolate(pos));
     }, duration, curve).thenAlways();
   }
 
@@ -472,25 +444,18 @@ export class AmpImageSlider extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
 
-    // TODO(kqian): this is taking ownership
-    // Simply mutating have chances of failure
-    // Temporarily kept here to ensure render
+    // amp-img initially have no size as amp-image-slider
+    // is not yet completely built.
+    // scheduleLayout without setAsOwner seems work
+    // as a hint that the new layout should be inspected
     if (this.leftAmpImage_ && this.rightAmpImage_) {
       this.scheduleLayout(this.leftAmpImage_);
       this.scheduleLayout(this.rightAmpImage_);
     }
 
-    return Promise.all([
-      // On load_start, <img>s are already created.
-      this.leftAmpImage_.signals().whenSignal(CommonSignals.LOAD_START),
-      this.rightAmpImage_.signals().whenSignal(CommonSignals.LOAD_START),
-    ]).then(() => {
-      // Here we have our real image tag
-      // this.leftRealImage_
-      //   = this.leftAmpImage_.getElementsByTagName('img')[0];
-      this.leftRealImage_ = this.leftAmpImage_.firstChild;
-      this.registerEvents();
-    });
+    this.registerEvents();
+
+    return Promise.resolve();
   }
 
   /** @override */

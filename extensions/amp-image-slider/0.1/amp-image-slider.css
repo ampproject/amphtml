@@ -47,9 +47,13 @@ amp-image-slider > amp-img > img {
   object-fit: contain;
 }
 
-.i-amphtml-image-slider-over-image > img {
+.i-amphtml-image-slider-over-image {
   transform: translateX(50%);
 }
+
+/* .i-amphtml-image-slider-over-image > img {
+  transform: translateX(50%);
+} */
 
 .i-amphtml-image-slider-bar {
   position: absolute;

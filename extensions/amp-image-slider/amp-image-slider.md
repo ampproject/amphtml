@@ -43,13 +43,13 @@ limitations under the License.
 
 `<amp-image-slider>` consists of 2 partially displayed images and a central splitting bar. Moving the bar would result in more or less part of the 2 images displayed.  
 
-Support 2 types of image compare sliders:  
+Currently, it supports 2 types of image compare sliders:  
 1. Drag slider (default): allows user to drag the bar (either mouse down or touch), while also allowing clicking/tapping on the images to move the bar to position.  
 ```html
 <amp-image-slider layout="responsive" width="1024" height="600">
-  <!-- amp-img left to bar -->
+  <!-- (required) amp-img left to bar -->
   <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-  <!-- amp-img right to bar -->
+  <!-- (required) amp-img right to bar -->
   <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
   <!-- (optional) add a label to the left center of left amp-img. If present, MUST be a div -->
   <div before style="color: red; border: 1px solid red; padding: 1em;">BEFORE</div>
@@ -72,6 +72,52 @@ Support 2 types of image compare sliders:
 ```
 
 Elements labeled with `before` are related to images displayed on the left of bar, while elements with `after` are related to images on the right.  
+
+## Label Positioning
+
+`<amp-image-slider>` supports one label on each of the images. The position of the label could be customized, following the following rules:  
+
+1. For `before` label (on the left, a.k.a. `before` image), its horizontal position could be controlled by `left` CSS property:
+```css
+.my-label {
+  left: 10%;
+}
+```
+If you must use `right` to control, do it by setting `left` to `auto`:
+```css
+.my-label {
+  right: 10%;
+  left: auto;
+}
+```  
+2. For `after` label (on the right, a.k.a. `before` image), its horizontal position could be controlled by `right` CSS property:
+```css
+.my-label {
+  right: 10%;
+}
+```
+If you must use `left` to control, do it by setting `right` to `auto`:
+```css
+.my-label {
+  left: 10%;
+  right: auto;
+}
+```  
+3. For both labels, the vertical positions could be controlled by `top` or `bottom` CSS property:
+```css
+.my-label {
+  top: 0;
+}
+```
+4. You can apply `transform: translate(...)` rules to allow more granular control. While percentages on `top/left/bottom/right` are relative to the slider container's width/height, percentages on `translate` is relative to the label's width/height. For example, to center the `before` label both horizontally and vertically, one can do:
+```css
+.before-label-center {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+```  
+More label positioning examples could be seen in `examples/amp-image-slider.html`.  
 
 TODO: add other sections.
 
