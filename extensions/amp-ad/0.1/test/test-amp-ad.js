@@ -16,6 +16,7 @@
 
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {AmpAdTemplate} from '../../../amp-a4a/0.1/amp-ad-template';
 import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {getA4ARegistry} from '../../../../ads/_a4a-config';
@@ -111,6 +112,13 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return expect(ampAd.upgradeCallback())
               .to.eventually.be.instanceof(AmpAd3PImpl);
         });
+      });
+
+      it('uses AmpAdTemplate when template attribute is present', () => {
+        ampAdElement.setAttribute('template', true);
+        ampAdElement.setAttribute('type', 'test');
+        return expect(ampAd.upgradeCallback()).to.eventually.be
+            .instanceof(AmpAdTemplate);
       });
 
       it('fails upgrade on A4A upgrade with loadElementClass error', () => {
