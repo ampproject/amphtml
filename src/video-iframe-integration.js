@@ -102,9 +102,6 @@ export class AmpVideoIntegration {
     /** @private @const {!Object<string, function()>} */
     this.methods_ = {};
 
-    /** @private {?DocMetadataDef} */
-    this.metadata_ = null;
-
     /** @private @const {function()} */
     this.listenToOnce_ = once(() => {
       listenTo(this.win_, e => this.onMessage_(e));
@@ -112,15 +109,20 @@ export class AmpVideoIntegration {
 
     /** @private {boolean} */
     this.muted_ = false;
+
+    /**
+     * @return {!DocMetadataDef}
+     * @private
+     */
+    this.getMetadataOnce_ = once(() => {
+      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
+      return {canonicalUrl, sourceUrl};
+    });
   }
 
   /** @return {!DocMetadataDef} */
   getMetadata() {
-    if (!this.metadata_) {
-      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
-      return {canonicalUrl, sourceUrl};
-    }
-    return this.metadata_;
+    return this.getMetadataOnce_();
   }
 
   /**
@@ -303,10 +305,10 @@ export class AmpVideoIntegration {
 
   /**
    * @param {!JsonObject} data
-   * @param {function()|undefined|null} optCallback
+   * @param {function()=} opt_callback
    * @private
    */
-  postToParent_(data, optCallback = null) {
+  postToParent_(data, opt_callback) {
     const id = this.callCounter_++;
     const completeData = Object.assign({id}, data);
 
@@ -314,8 +316,8 @@ export class AmpVideoIntegration {
       this.win_.parent./*OK*/postMessage(completeData, '*');
     }
 
-    if (optCallback) {
-      this.callbacks_[id] = optCallback;
+    if (opt_callback) {
+      this.callbacks_[id] = opt_callback;
     }
     return id;
   }
