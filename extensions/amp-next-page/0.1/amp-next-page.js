@@ -27,6 +27,7 @@ import {
   childElementsByAttr,
   childElementsByTag,
   isJsonScriptTag,
+  removeElement,
 } from '../../../src/dom';
 import {getService} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
@@ -45,6 +46,19 @@ export class AmpNextPage extends AMP.BaseElement {
 
     /** @private {!./next-page-service.NextPageService} */
     this.service_ = getService(this.win, SERVICE_ID);
+
+    /** @private {?Element} */
+    this.separator_ = null;
+
+    const separatorElements = childElementsByAttr(element, 'separator');
+    user().assert(separatorElements.length <= 1,
+        `${TAG} should contain at most one <div separator> child`);
+
+    if (separatorElements.length === 1) {
+      const separator = separatorElements[0];
+      this.separator_ = separator;
+      removeElement(separator);
+    }
   }
 
   /** @override */
@@ -106,16 +120,7 @@ export class AmpNextPage extends AMP.BaseElement {
       });
     }
 
-    const separatorElements = childElementsByAttr(element, 'separator');
-    user().assert(separatorElements.length <= 1,
-        `${TAG} should contain at most one <div separator> child`);
-
-    let separator = null;
-    if (separatorElements.length === 1) {
-      separator = separatorElements[0];
-    }
-
-    this.service_.register(element, config, separator);
+    this.service_.register(element, config, this.separator_);
     this.service_.setAppendPageHandler(element => this.appendPage_(element));
   }
 
