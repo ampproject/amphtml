@@ -237,7 +237,8 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
   }); // in shadow ampdoc
 
-  describes.realWin('in single ampdoc', {
+  // TODO(choumx, #16721): These tests cause the browser to crash.
+  describes.realWin.skip('in single ampdoc', {
     amp: {
       ampdoc: 'single',
       runtimeOn: false,
