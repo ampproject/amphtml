@@ -23,6 +23,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
+import {sendPixel} from '../../../src/pixel';
 import {setStyle} from '../../../src/style';
 
 /** @const {string} */
@@ -36,6 +37,14 @@ const TAG_ = 'amp-analytics.Transport';
 export function sendRequest(win, request, transportOptions) {
   assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
+
+  const referrerPolicy = transportOptions['referrerPolicy'];
+
+  if (referrerPolicy === 'no-referrer') {
+    transportOptions['beacon'] = false;
+    transportOptions['xhrpost'] = false;
+  }
+
   if (transportOptions['beacon'] &&
       Transport.sendRequestUsingBeacon(win, request)) {
     return;
@@ -48,7 +57,8 @@ export function sendRequest(win, request, transportOptions) {
   if (image) {
     const suppressWarnings = (typeof image == 'object' &&
         image['suppressWarnings']);
-    Transport.sendRequestUsingImage(request, suppressWarnings);
+    Transport.sendRequestUsingImage(
+        win, request, suppressWarnings, referrerPolicy);
     return;
   }
   user().warn(TAG_, 'Failed to send request', request, transportOptions);
@@ -60,14 +70,13 @@ export function sendRequest(win, request, transportOptions) {
 export class Transport {
 
   /**
+   * @param {!Window} win
    * @param {string} request
    * @param {boolean} suppressWarnings
+   * @param {string=} referrerPolicy
    */
-  static sendRequestUsingImage(request, suppressWarnings) {
-    const image = new Image();
-    image.src = request;
-    image.width = 1;
-    image.height = 1;
+  static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy) {
+    const image = sendPixel(win, request, referrerPolicy);
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
