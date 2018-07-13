@@ -43,6 +43,9 @@ export class AmpImageSlider extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {Document} */
+    this.doc_ = this.win.document;
+
     /** @private {boolean} */
     this.isMobile_ = /Android|iPhone|iPad|iPod/i.test(this.win.navigator.userAgent);
 
@@ -51,7 +54,7 @@ export class AmpImageSlider extends AMP.BaseElement {
         && !this.isMobile_; // coerce to drag slider on mobile
 
     /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
+    this.container_ = this.doc_.createElement('div');
 
     /** @private {?Element} */
     this.leftAmpImage_ = null;
@@ -70,21 +73,25 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.rightLabel_ = null;
 
     /** @private {!Element} */
-    this.leftMask_ = this.win.document.createElement('div');
+    this.leftMask_ = this.doc_.createElement('div');
 
     /** @private {!Element} */
-    this.rightMask_ = this.win.document.createElement('div');
+    this.rightMask_ = this.doc_.createElement('div');
 
     /** @private {!Element} */
-    this.bar_ = this.win.document.createElement('div');
+    this.bar_ = this.doc_.createElement('div');
 
     /** @private {!Element} */
-    this.barStick_ = this.win.document.createElement('div');
+    this.barStick_ = this.doc_.createElement('div');
 
     /** @private {?Element} */
     this.barButton_ = null;
     /** @private {?Element} */
     this.barButtonIcon_ = null;
+    /** @private {?Element} */
+    this.barHint_ = null;
+    /** @private {boolean} */
+    this.isBarHintHidden_ = false;
 
     /** @private {number} */
     this.moveOffset_ = 0;
@@ -96,6 +103,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.handleHover = this.handleHover.bind(this);
     this.handleClickImage = this.handleClickImage.bind(this);
     this.handleTapImage = this.handleTapImage.bind(this);
+    this.handleHideHint = this.handleHideHint.bind(this);
 
     this.dragStart = this.dragStart.bind(this);
     this.dragMove = this.dragMove.bind(this);
@@ -107,13 +115,13 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.pointerMoveX_ = this.pointerMoveX_.bind(this);
 
-    /** @private {object} */
+    /** @private {Object} */
     this.elementListeners_ = map();
-    /** @private {object} */
+    /** @private {Object} */
     this.barButtonListeners_ = map();
-    /** @private {object} */
+    /** @private {Object} */
     this.containerListeners_ = map();
-    /** @private {object} */
+    /** @private {Object} */
     this.winListeners_ = map();
   }
 
@@ -143,9 +151,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Element} element
    * @param {string} eventType
    * @param {Function} listener
+   * @param {boolean} capture
    * @private
    */
-  listen_(element, eventType, listener) {
+  listen_(element, eventType, listener, capture = false) {
     const listeners = this.selectListeners_(element);
     if (!listeners) {
       return;
@@ -155,7 +164,12 @@ export class AmpImageSlider extends AMP.BaseElement {
       listeners[eventType] = [];
     }
 
-    listeners[eventType].push(listen(element, eventType, listener));
+    const opts = {};
+    if (capture) {
+      opts.capture = true;
+    }
+
+    listeners[eventType].push(listen(element, eventType, listener, opts));
   }
 
   /**
@@ -243,7 +257,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
 
     if (this.rightLabel_) {
-      this.rightLabelWrapper_ = this.win.document.createElement('div');
+      this.rightLabelWrapper_ = this.doc_.createElement('div');
       this.rightLabelWrapper_.classList
           .add('i-amphtml-image-slider-right-label-wrapper');
       this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
@@ -256,7 +270,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.leftAmpImage_.classList.add('i-amphtml-image-slider-over-image');
 
     if (this.leftLabel_) {
-      this.leftLabelWrapper_ = this.win.document.createElement('div');
+      this.leftLabelWrapper_ = this.doc_.createElement('div');
       this.leftLabelWrapper_.classList
           .add('i-amphtml-image-slider-left-label-wrapper');
       this.leftLabel_.classList.add('i-amphtml-image-slider-left-label');
@@ -285,17 +299,21 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
+
+    this.buildBarHint();
   }
 
   /**
    * Build slider bar that could be drag by button
    */
   buildTapSliderBar() {
-    this.barButton_ = this.win.document.createElement('div');
+    this.barButton_ = this.doc_.createElement('div');
     this.barButton_.classList.add('i-amphtml-image-slider-bar-button');
     // TODO(kqian): UI design
-    this.barButtonIcon_ = htmlFor(this.win.document)`<div>&lt;~&gt;</div>`;
+    this.barButtonIcon_ = htmlFor(this.doc_)`<div>&lt;~&gt;</div>`;
     this.barButton_.appendChild(this.barButtonIcon_);
+
+    this.buildBarHint();
 
     this.container_.appendChild(this.bar_);
     this.barStick_.appendChild(this.barButton_);
@@ -303,6 +321,25 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
+  }
+
+  /**
+   * Build hiding hint
+   * A weird thing is adding the fading animation
+   * brings back the old quirky chrome bug of display
+   */
+  buildBarHint() {
+    if (!this.barStick_) {
+      return;
+    }
+    this.barHint_ = this.doc_.createElement('div');
+    this.barHint_.classList.add('i-amphtml-image-slider-hint');
+    // TODO(kqian): UI design choice
+    const barHintIcon = htmlFor(this.doc_)`<div>← →</div>`;
+    barHintIcon.classList.add('i-amphtml-image-slider-hint-icon');
+    this.barHint_.appendChild(barHintIcon);
+
+    this.barStick_.appendChild(this.barHint_);
   }
 
   /**
@@ -333,10 +370,12 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   registerEvents() {
     if (this.isHoverSlider_) {
+      this.listen_(this.element, 'mousemove', this.handleHideHint, true);
       this.listen_(this.container_, 'mousemove', this.handleHover);
     } else {
       // Use container_ for drag operation instead
       // element for click/tap operations
+      this.listen_(this.element, 'mousedown', this.handleHideHint, true);
       this.listen_(this.element, 'click', this.handleClickImage);
       this.listen_(this.element, 'touchend', this.handleTapImage);
       this.listen_(this.barButton_, 'mousedown', this.dragStart);
@@ -351,6 +390,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.isHoverSlider_) {
       this.unlistenEvent_(this.container_, 'mousemove');
     } else {
+      this.unlistenEvent_(this.element, 'mousedown');
       this.unlistenEvent_(this.element, 'click');
       this.unlistenEvent_(this.element, 'touchend');
       // remove pointer related events below
@@ -391,6 +431,16 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (e.touches.length > 0) {
       const leftPercentage = (e.touches[0].pageX - left) / width;
       this.animateUpdatePositions(leftPercentage);
+    }
+  }
+
+  /**
+   * Handle hinding the hint
+   */
+  handleHideHint() {
+    if (!this.isBarHintHidden_ && this.barHint_) {
+      this.isBarHintHidden_ = true;
+      this.barHint_.classList.add('i-amphtml-image-slider-hint-hidden');
     }
   }
 
@@ -528,6 +578,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     // is not yet completely built.
     // scheduleLayout without setAsOwner seems work
     // as a hint that the new layout should be inspected
+
+    // Actually, now they are no longer useful
+    // But kept since there is an layer experiment check
     if (this.leftAmpImage_ && this.rightAmpImage_) {
       this.scheduleLayout(this.leftAmpImage_);
       this.scheduleLayout(this.rightAmpImage_);
