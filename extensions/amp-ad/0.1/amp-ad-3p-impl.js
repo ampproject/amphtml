@@ -408,7 +408,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   attemptFullWidthSizeChange_() {
     const viewportSize = this.getViewport().getSize();
     const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
-    const width = viewportSize.width;
+    const {width} = viewportSize;
     const height = this.getFullWidthHeight_(width, maxHeight);
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
@@ -425,6 +425,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
+   * Calculates the appropriate width for a responsive full width ad unit.
+   * @param {number} width
+   * @param {number} maxHeight
    * @return {number}
    * @private
    */
@@ -432,7 +435,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.element.getAttribute('data-auto-format') == 'mcrspv' &&
         !!this.config.mcFullWidthHeightRatio) {
       return Math.max(MIN_FULL_WIDTH_HEIGHT,
-         Math.round(width / this.config.mcFullWidthHeightRatio));
+          Math.round(width / this.config.mcFullWidthHeightRatio));
     }
     return clamp(Math.round(width / this.config.fullWidthHeightRatio),
         MIN_FULL_WIDTH_HEIGHT, maxHeight);

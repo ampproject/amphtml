@@ -159,13 +159,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /**
-   * @return {number}
+   * @return {?number}
    * @private
    */
   getRafmtParam_() {
     return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) ?
-        13 : (AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_) ?
-            15 : null);
+      13 : (AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_) ?
+        15 : null);
   }
 
   /** @override */
@@ -247,7 +247,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   divertExperiments() {
     const experimentInfoMap =
-        /** @type {!Object<string,
+    /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
         [FORMAT_EXP]: {
           isTrafficEligible: () => !this.isResponsive_() &&
@@ -518,7 +518,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /**
-   * @param {string} autoFormat
+   * @param {?string} autoFormat
    * @return {boolean}
    * @private
    */
@@ -527,7 +527,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /**
-   * @param {string} autoFormat
+   * @param {?string} autoFormat
    * @return {boolean}
    * @private
    */
@@ -551,8 +551,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const idealHeight = Math.round(viewportSize.width / 1.2);
       return clamp(idealHeight, minHeight, maxHeight);
     } else if (AmpAdNetworkAdsenseImpl.isMCResponsive_(autoFormat)) {
-      return Math.floor(viewportSize.width * 3.4 + 112);
+      return Math.floor((viewportSize.width * 3.4) + 112);
     }
+    return 0;
   }
 }
 
