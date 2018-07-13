@@ -148,7 +148,8 @@ export class DocumentFetcher extends XhrBase {
  */
 function parseHeaders(rawHeaders) {
   const headers = {};
-  // Replace instances of \r\n and \n followed by at least one space or horizontal tab with a space
+  // Replace instances of \r\n and \n followed by at least one
+  // space or horizontal tab with a space
   // https://tools.ietf.org/html/rfc7230#section-3.2
   const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
   preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
