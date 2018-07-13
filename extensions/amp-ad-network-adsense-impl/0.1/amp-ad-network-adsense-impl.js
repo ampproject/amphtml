@@ -155,8 +155,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   isResponsive_() {
-    return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) ||
-        AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_);
+    return this.getRafmtParam_() != null;
   }
 
   /**
