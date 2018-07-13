@@ -20,6 +20,8 @@ import {bezierCurve} from '../../../src/curve';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
+import {map} from '../../../src/utils/object';
 import {numeric} from '../../../src/transition';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
@@ -104,6 +106,76 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.touchEnd = this.touchEnd.bind(this);
 
     this.pointerMoveX_ = this.pointerMoveX_.bind(this);
+
+    /** @private {object} */
+    this.elementListeners_ = map();
+    /** @private {object} */
+    this.barButtonListeners_ = map();
+    /** @private {object} */
+    this.containerListeners_ = map();
+    /** @private {object} */
+    this.winListeners_ = map();
+  }
+
+  /**
+   * Select the listeners map
+   * @param {Element} element
+   * @return {Object}
+   * @private
+   */
+  selectListeners_(element) {
+    switch (element) {
+      case this.element:
+        return this.elementListeners_;
+      case this.container_:
+        return this.containerListeners_;
+      case this.barButton_:
+        return this.barButtonListeners_;
+      case this.win:
+        return this.winListeners_;
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Add an event listener on element
+   * @param {Element} element
+   * @param {string} eventType
+   * @param {Function} listener
+   * @private
+   */
+  listen_(element, eventType, listener) {
+    const listeners = this.selectListeners_(element);
+    if (!listeners) {
+      return;
+    }
+
+    if (!listeners[eventType]) {
+      listeners[eventType] = [];
+    }
+
+    listeners[eventType].push(listen(element, eventType, listener));
+  }
+
+  /**
+   * Call unlisten on listener by event type
+   * @param {Element} element
+   * @param {string} eventType
+   * @private
+   */
+  unlistenEvent_(element, eventType) {
+    const listeners = this.selectListeners_(element);
+    const events = listeners ? listeners[eventType] : null;
+    if (!listeners || !events) {
+      return;
+    }
+
+    for (let i = 0; i < events.length; i++) {
+      events[i]();
+    }
+
+    delete listeners[eventType];
   }
 
   /** @override */
@@ -255,14 +327,14 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   registerEvents() {
     if (this.isHoverSlider_) {
-      this.container_.addEventListener('mousemove', this.handleHover);
+      this.listen_(this.container_, 'mousemove', this.handleHover);
     } else {
       // Use container_ for drag operation instead
       // element for click/tap operations
-      this.element.addEventListener('click', this.handleClickImage);
-      this.element.addEventListener('touchend', this.handleTapImage);
-      this.barButton_.addEventListener('mousedown', this.dragStart);
-      this.barButton_.addEventListener('touchstart', this.touchStart);
+      this.listen_(this.element, 'click', this.handleClickImage);
+      this.listen_(this.element, 'touchend', this.handleTapImage);
+      this.listen_(this.barButton_, 'mousedown', this.dragStart);
+      this.listen_(this.barButton_, 'touchstart', this.touchStart);
     }
   }
 
@@ -271,11 +343,12 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   unregisterEvents() {
     if (this.isHoverSlider_) {
-      this.container_.removeEventListener('mousemove', this.handleHover);
+      this.unlistenEvent_(this.container_, 'mousemove');
     } else {
-      this.element.removeEventListener('click', this.handleClickImage);
-      this.element.removeEventListener('touchend', this.handleTapImage);
+      this.unlistenEvent_(this.element, 'click');
+      this.unlistenEvent_(this.element, 'touchend');
       // remove pointer related events below
+      // clearup actions needed
       this.dragEnd(null);
       this.touchEnd(null);
     }
@@ -343,8 +416,8 @@ export class AmpImageSlider extends AMP.BaseElement {
     e.preventDefault();
     e.stopPropagation();
 
-    this.win.addEventListener('mousemove', this.dragMove);
-    this.win.addEventListener('mouseup', this.dragEnd);
+    this.listen_(this.win, 'mousemove', this.dragMove);
+    this.listen_(this.win, 'mouseup', this.dragEnd);
 
     this.moveOffset_ = e.pageX;
     this.splitOffset_ = this.bar_./*OK*/getBoundingClientRect().left;
@@ -368,8 +441,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       e.stopPropagation();
     }
 
-    this.win.removeEventListener('mousemove', this.dragMove);
-    this.win.removeEventListener('mouseup', this.dragEnd);
+    this.unlistenEvent_(this.win, 'mousemove');
+    this.unlistenEvent_(this.win, 'mouseup');
 
     this.moveOffset_ = 0;
     this.splitOffset_ = 0;
@@ -379,8 +452,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   touchStart(e) {
-    this.container_.addEventListener('touchmove', this.touchMove);
-    this.container_.addEventListener('touchend', this.touchEnd);
+    this.listen_(this.container_, 'touchmove', this.touchMove);
+    this.listen_(this.container_, 'touchend', this.touchEnd);
 
     this.moveOffset_ = e.touches[0].pageX;
     this.splitOffset_ = this.bar_./*OK*/getBoundingClientRect().left;
@@ -410,8 +483,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       // Avoid bubbling up to element
       e.stopPropagation();
     }
-    this.container_.removeEventListener('touchmove', this.touchMove);
-    this.container_.removeEventListener('touchend', this.touchEnd);
+    this.unlistenEvent_(this.container_, 'touchmove');
+    this.unlistenEvent_(this.container_, 'touchend');
 
     this.moveOffset_ = 0;
     this.splitOffset_ = 0;
@@ -420,6 +493,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Pointer move X logic
    * @param {number} pointerX
+   * @private
    */
   pointerMoveX_(pointerX) {
     const {width} = this.container_./*OK*/getBoundingClientRect();
