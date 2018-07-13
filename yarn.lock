@@ -4682,9 +4682,9 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
-fetch-mock@6.4.4:
-  version "6.4.4"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-6.4.4.tgz#c8cf5f21b11ee499ac5a073dafcb36edaa7ec366"
+fetch-mock@6.5.0:
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-6.5.0.tgz#3841b90d5a315e213be61c07f1125be8c52f4f9c"
   dependencies:
     babel-polyfill "^6.26.0"
     glob-to-regexp "^0.4.0"
