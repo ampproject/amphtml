@@ -116,9 +116,14 @@ function setPercyBranch() {
 async function launchWebServer() {
   const gulpServeAsync = execScriptAsync(
       `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
-      getStdioOptions(argv.gulp_debug || argv.webserver_debug));
+      {
+        stdio: argv.webserver_debug ?
+          ['ignore', process.stdout, process.stderr] :
+          'ignore',
+      });
 
-  gulpServeAsync.on('exit', code => {
+  gulpServeAsync.on('close', code => {
+    code = code || 0;
     if (code != 0) {
       log('error', colors.cyan("'serve'"),
           `errored with code ${code}. Cannot continue with visual diff tests`);
@@ -151,12 +156,13 @@ async function launchWebServer() {
  * @param {!ChildProcess} webServerProcess the webserver process to shut down.
  */
 async function shutdown(webServerProcess) {
-  if (webServerProcess.exitCode == null) {
+  if (!webServerProcess.killed) {
     // Explicitly exit the webserver.
     webServerProcess.kill();
     // The child node process has an asynchronous stdout. See #10409.
     await sleep(100);
   }
+  // TODO(rsimha): clean up this exit.
   process.exit();
 }
 
@@ -320,7 +326,7 @@ function cleanupAmpConfig() {
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
         `gulp prepend-global --local_dev --target ${targetFile} --remove`,
-        getStdioOptions(argv.gulp_debug));
+        {'stdio': 'ignore'});
   });
 }
 
@@ -334,7 +340,7 @@ function applyAmpConfig(config) {
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
         `gulp prepend-global --local_dev --target ${targetFile} --${config}`,
-        getStdioOptions(argv.gulp_debug));
+        {'stdio': 'ignore'});
   });
 }
 
@@ -575,25 +581,12 @@ function setDebuggingLevel() {
   process.env.WEBSERVER_QUIET = '--quiet';
 
   if (argv.debug) {
-    argv.chrome_debug = true; // eslint-disable-line google-camelcase/google-camelcase
-    argv.gulp_debug = true; // eslint-disable-line google-camelcase/google-camelcase
-    argv.webserver_debug = true; // eslint-disable-line google-camelcase/google-camelcase
+    argv['chrome_debug'] = true;
+    argv['webserver_debug'] = true;
   }
   if (argv.webserver_debug) {
     process.env.WEBSERVER_QUIET = '';
   }
-}
-
-/**
- * Return sub-process options based on whether its output should be printed.
- *
- * @param {boolean} shouldPrint true if the sub-process should print its output
- * @return {<Object>} sub-process options
- */
-function getStdioOptions(shouldPrint) {
-  return {
-    stdio: shouldPrint ? ['ignore', process.stdout, process.stderr] : 'ignore',
-  };
 }
 
 /**
@@ -676,7 +669,6 @@ gulp.task(
         'headless': '  Runs Chrome in headless mode',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
-        'gulp_debug': '  Prints debug statements from gulp sub-processes',
         'debug': '  Prints all the above debug info',
       },
     }

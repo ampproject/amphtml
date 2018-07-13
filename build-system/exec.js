@@ -62,7 +62,7 @@ exports.execScriptAsync = function(script, options) {
  * Executes the provided command, and terminates the program in case of failure.
  *
  * @param {string} cmd Command line to execute.
- * @param {<Object>} options extra options send to the process.
+ * @param {<Object>} options Extra options send to the process.
  */
 exports.execOrDie = function(cmd, options) {
   const p = exports.exec(cmd, options);
