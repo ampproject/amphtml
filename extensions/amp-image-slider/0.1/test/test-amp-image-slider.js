@@ -120,7 +120,7 @@ describes.realWin('amp-image-slider component', {
 
   function expectLeftImageNotMoved() {
     const {left: imageLeft, right: imageRight}
-        = impl.leftRealImage_.getBoundingClientRect();
+        = impl.leftAmpImage_.getBoundingClientRect();
     const {left: sliderLeft, right: sliderRight}
         = slider.getBoundingClientRect();
     expect(imageLeft).to.equal(sliderLeft);
@@ -163,7 +163,7 @@ describes.realWin('amp-image-slider component', {
           .to.equal(slider.getBoundingClientRect().left);
       // left img vs slider relative position should not change
       expectLeftImageNotMoved();
-      expect(impl.leftRealImage_.getBoundingClientRect().right)
+      expect(impl.leftAmpImage_.getBoundingClientRect().right)
           .to.equal(slider.getBoundingClientRect().right);
       impl.updatePositions(1);
       expect(impl.bar_.getBoundingClientRect().left)
