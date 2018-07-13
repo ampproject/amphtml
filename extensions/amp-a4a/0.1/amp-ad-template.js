@@ -21,13 +21,17 @@ import {
 import {AmpAdNetworkBase} from './amp-ad-network-base';
 import {NameFrameRenderer} from './name-frame-renderer';
 import {NetworkRegistry} from './template-config';
+import {Services} from '../../../src/services';
 import {TemplateRenderer} from './template-renderer';
 import {TemplateValidator} from './template-validator';
+import {camelCaseToDash, startsWith} from '../../../src/string';
 import {dev} from '../../../src/log';
 
 // These have no side-effects, and so may be reused between all instances.
 const validator = new TemplateValidator();
 const nameFrameRenderer = new NameFrameRenderer();
+
+export const DATA_REQUEST_VAR_PREFIX = 'request-var-';
 
 export class AmpAdTemplate extends AmpAdNetworkBase {
   /**
@@ -68,7 +72,23 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
   /** @override */
   getRequestUrl() {
-    const url = this.requestUrl_;
+    const substitutions = {
+      width: this.getContext().size.width,
+      height: this.getContext().size.height,
+    };
+    // We collect all fields in the dataset of the form
+    // 'data-request-var-<field_name>=<val>`, and add <field_name>: <val> to
+    // the substitution object to be inserted into the URL during expansion.
+    Object.keys(this.element.dataset).forEach(dataField => {
+      const dataFieldInDash = camelCaseToDash(dataField);
+      if (startsWith(dataFieldInDash, DATA_REQUEST_VAR_PREFIX)) {
+        const requestVarName = dataFieldInDash.slice(
+            DATA_REQUEST_VAR_PREFIX.length, dataFieldInDash.length);
+        substitutions[requestVarName] = this.element.dataset[dataField];
+      }
+    });
+    const url = Services.urlReplacementsForDoc(this.element)
+        .expandUrlSync(this.requestUrl_, substitutions);
     this.getContext().adUrl = url;
     return url;
   }
