@@ -5492,9 +5492,9 @@ gulp-eslint@5.0.0:
     fancy-log "^1.3.2"
     plugin-error "^1.0.1"
 
-gulp-exec@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/gulp-exec/-/gulp-exec-3.0.1.tgz#c76196a1ba28a0bf5a8d955639b0809584ae6c66"
+gulp-exec@3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/gulp-exec/-/gulp-exec-3.0.2.tgz#6e461646221dd6c47f5803d7f69b399bde20e214"
   dependencies:
     lodash.template "^4.4.0"
     plugin-error "^0.1.2"
