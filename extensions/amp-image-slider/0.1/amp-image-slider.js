@@ -17,6 +17,7 @@
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {bezierCurve} from '../../../src/curve';
+import {dev, user} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -24,7 +25,6 @@ import {listen} from '../../../src/event-helper';
 import {map} from '../../../src/utils/object';
 import {numeric} from '../../../src/transition';
 import {setStyle} from '../../../src/style';
-import {user} from '../../../src/log';
 
 // event-helper.js -> listen; option: passive = true
 // mount both mouse & touch listener ()
@@ -127,8 +127,8 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Select the listeners map
-   * @param {Element} element
-   * @return {Object}
+   * @param {EventTarget} element
+   * @return {Object|null}
    * @private
    */
   selectListeners_(element) {
@@ -148,9 +148,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Add an event listener on element
-   * @param {Element} element
+   * @param {!EventTarget} element
    * @param {string} eventType
-   * @param {Function} listener
+   * @param {function(Event)} listener
    * @param {boolean} capture
    * @private
    */
@@ -174,7 +174,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Call unlisten on listener by event type
-   * @param {Element} element
+   * @param {EventTarget} element
    * @param {string} eventType
    * @private
    */
@@ -358,7 +358,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Set translateX of the element
-   * @param {!Element} element
+   * @param {Element} element
    * @param {number} percentage
    */
   updateTranslateX(element, percentage) {
@@ -371,15 +371,18 @@ export class AmpImageSlider extends AMP.BaseElement {
   registerEvents() {
     if (this.isHoverSlider_) {
       this.listen_(this.element, 'mousemove', this.handleHideHint, true);
-      this.listen_(this.container_, 'mousemove', this.handleHover);
+      this.listen_(dev().assertElement(this.container_),
+          'mousemove', this.handleHover);
     } else {
       // Use container_ for drag operation instead
       // element for click/tap operations
       this.listen_(this.element, 'mousedown', this.handleHideHint, true);
       this.listen_(this.element, 'click', this.handleClickImage);
       this.listen_(this.element, 'touchend', this.handleTapImage);
-      this.listen_(this.barButton_, 'mousedown', this.dragStart);
-      this.listen_(this.barButton_, 'touchstart', this.touchStart);
+      this.listen_(dev().assertElement(this.barButton_),
+          'mousedown', this.dragStart);
+      this.listen_(dev().assertElement(this.barButton_),
+          'touchstart', this.touchStart);
     }
   }
 
@@ -388,7 +391,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   unregisterEvents() {
     if (this.isHoverSlider_) {
-      this.unlistenEvent_(this.container_, 'mousemove');
+      this.unlistenEvent_(dev().assertElement(this.container_), 'mousemove');
     } else {
       this.unlistenEvent_(this.element, 'mousedown');
       this.unlistenEvent_(this.element, 'click');
@@ -436,8 +439,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Handle hinding the hint
+   * @param {Event} unusedEvent
    */
-  handleHideHint() {
+  handleHideHint(unusedEvent) {
     if (!this.isBarHintHidden_ && this.barHint_) {
       this.isBarHintHidden_ = true;
       this.barHint_.classList.add('i-amphtml-image-slider-hint-hidden');
@@ -539,8 +543,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       // Avoid bubbling up to element
       e.stopPropagation();
     }
-    this.unlistenEvent_(this.container_, 'touchmove');
-    this.unlistenEvent_(this.container_, 'touchend');
+    this.unlistenEvent_(dev().assertElement(this.container_), 'touchmove');
+    this.unlistenEvent_(dev().assertElement(this.container_), 'touchend');
 
     this.moveOffset_ = 0;
     this.splitOffset_ = 0;
