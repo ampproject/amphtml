@@ -213,6 +213,12 @@ export class AmpImageSlider extends AMP.BaseElement {
       return null;
     }
 
+    if (!isExperimentOn(this.win, 'layers')) {
+      // When layers not enabled
+      this.setAsOwner(this.leftAmpImage_);
+      this.setAsOwner(this.rightAmpImage_);
+    }
+
     this.container_.classList.add('i-amphtml-image-slider-container');
     this.element.appendChild(this.container_);
 
@@ -536,6 +542,25 @@ export class AmpImageSlider extends AMP.BaseElement {
   unlayoutCallback() {
     this.unregisterEvents();
     return true;
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.unregisterEvents();
+  }
+
+  /** @override */
+  resumeCallback() {
+    this.registerEvents();
+  }
+
+  /** @override */
+  viewportCallback(inViewport) {
+    if (inViewport) {
+      this.registerEvents();
+    } else {
+      this.unregisterEvents();
+    }
   }
 }
 

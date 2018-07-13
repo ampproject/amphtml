@@ -19,11 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A slider used to slide and compare 2 `amp-img`s</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>TODO</td>
+    <td>A slider used to slide and compare 2 <code>amp-img</code>s, with optional labels</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -117,7 +113,7 @@ If you must use `left` to control, do it by setting `right` to `auto`:
   transform: translate(-50%, -50%);
 }
 ```  
-More label positioning examples could be seen in `examples/amp-image-slider.html`.  
+More label positioning examples could be seen in [`examples/amp-image-slider.html`](https://github.com/ampproject/amphtml/blob/master/examples/amp-image-slider.amp.html).  
 
 TODO: add other sections.
 
