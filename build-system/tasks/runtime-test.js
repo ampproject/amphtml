@@ -76,14 +76,15 @@ function getConfig() {
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
         'SL_Chrome_67',
-        'SL_Chrome_45',
-        'SL_Chrome_Android_7',
-        'SL_Android_6',
-        'SL_iOS_11',
         'SL_Firefox_61',
         'SL_Safari_11',
-        'SL_Edge_17',
-        'SL_IE_11',
+        // TODO(rsimha, #16687): Enable after Sauce disconnects are resolved.
+        // 'SL_Chrome_Android_7',
+        // 'SL_Chrome_45',
+        // 'SL_Android_6',
+        // 'SL_iOS_11',
+        // 'SL_Edge_17',
+        // 'SL_IE_11',
       ] : [
         // With --saucelabs_lite, a subset of the unit tests are run.
         // Only browsers that support chai-as-promised may be included below.
