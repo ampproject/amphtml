@@ -447,8 +447,8 @@ export class NextPageService {
 
     const urlService = Services.urlForDoc(dev().assertElement(this.element_));
     const {title} = documentRef.amp;
-    const {pathname} = urlService.parse(documentRef.ampUrl);
-    this.win_.history.replaceState({}, title, pathname);
+    const {pathname, search} = urlService.parse(documentRef.ampUrl);
+    this.win_.history.replaceState({}, title, pathname + search);
   }
 
   /**
