@@ -85,7 +85,7 @@
     "formidable": "1.2.1",
     "fs-extra": "6.0.1",
     "globs-to-files": "1.0.0",
-    "google-closure-compiler": "20180506.0.0",
+    "google-closure-compiler": "20180610.0.2",
     "greenkeeper-lockfile": "2.3.0",
     "gulp": "3.9.1",
     "gulp-ava": "0.19.0",
