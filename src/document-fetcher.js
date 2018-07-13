@@ -132,7 +132,10 @@ export class DocumentFetcher extends XhrBase {
       if (!this.viewerResponded_) {
         return this.xhr_.responseXML;
       } else {
-        // Todo(prateekbh): implement DOMTreeparser case here
+        // Since this reponse is provided by viewer,
+        // doing a DOMParser on main thread is our only option.
+        return response.text().then(responseText =>
+          new DOMParser().parseFromString(responseText, 'text/html'));
       }
     });
   }

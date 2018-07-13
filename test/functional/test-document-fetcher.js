@@ -17,10 +17,9 @@
 import {DocumentFetcher} from '../../src/document-fetcher';
 import {Services} from '../../src/services';
 
-describes.realWin('DocumentFetcher', {amp: true}, function(env) {
+describes.realWin('DocumentFetcher', {amp: true}, function() {
   let xhrCreated;
   let docFetcher;
-  let win;
   let ampdocServiceForStub;
   let ampdocViewerStub;
 
@@ -33,7 +32,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
   }
 
   beforeEach(() => {
-    win = env.win;
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({
@@ -56,6 +54,8 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
     it('should be able to fetch a document', () => {
       const promise = docFetcher.fetchDocument('/index.html').then(doc => {
         expect(doc.nodeType).to.equal(9);
+        expect(docFetcher.viewerResponded_).to.equals(false);
+        expect(doc.firstChild.textContent).to.equals('Foo');
       });
       xhrCreated.then(xhr => {
         expect(xhr.requestHeaders['Accept']).to.equal('text/html');
@@ -66,7 +66,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
                   'AMP-Access-Control-Allow-Source-Origin',
               'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
             },
-            '<html></html>');
+            '<html><body>Foo</body></html>');
         expect(xhr.responseType).to.equal('document');
       });
       return promise;
@@ -138,6 +138,68 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
       return promise.catch(e => {
         expect(e.message)
             .to.contain('responseXML should exist');
+      });
+    });
+  });
+
+  describe('interceptor', () => {
+    const origin = 'https://acme.com';
+    let sendMessageStub;
+    let interceptionEnabledWin;
+    let optedInDoc;
+    let viewer;
+
+    beforeEach(() => {
+      optedInDoc = window.document.implementation.createHTMLDocument('');
+      optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
+
+      ampdocServiceForStub.returns({
+        isSingleDoc: () => true,
+        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+      });
+      viewer = {
+        hasCapability: () => true,
+        isTrustedViewer: () => Promise.resolve(true),
+        sendMessageAwaitResponse: getDefaultResponsePromise,
+        whenFirstVisible: () => Promise.resolve(),
+      };
+      sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      sendMessageStub.returns(getDefaultResponsePromise());
+      ampdocViewerStub.returns(viewer);
+      interceptionEnabledWin = {
+        location: {
+          href: `${origin}/path`,
+        },
+        Response: window.Response,
+      };
+    });
+
+    function getDefaultResponsePromise() {
+      return Promise.resolve({init: getDefaultResponseOptions()});
+    }
+
+    function getDefaultResponseOptions() {
+      return {
+        headers: [
+          ['AMP-Access-Control-Allow-Source-Origin', origin],
+        ],
+      };
+    }
+
+    it('should return correct document response', () => {
+      sendMessageStub.returns(
+          Promise.resolve({
+            body: '<html><body>Foo</body></html>',
+            init: {
+              headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+            },
+          }));
+      const docFetcher = new DocumentFetcher(interceptionEnabledWin);
+
+      return docFetcher.fetchDocument('https://www.some-url.org/some-resource/').then(doc => {
+        expect(docFetcher.viewerResponded_).to.equals(true);
+        expect(doc).to.have.nested.property('body.textContent')
+            .that.equals('Foo');
       });
     });
   });
