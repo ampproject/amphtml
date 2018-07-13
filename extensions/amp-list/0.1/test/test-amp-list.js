@@ -177,7 +177,10 @@ describes.realWin('amp-list component', {
         viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
             Capability.VIEWER_RENDER_TEMPLATE,
             {
-              data: {inputData: { }, src: 'https://data.com/list.json'},
+              data: {
+                inputData: { },
+                src: 'https://data.com/list.json'
+              },
               mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml">' +
                   '{{template}}</template>',
               'sourceAmpComponent': 'amp-list',

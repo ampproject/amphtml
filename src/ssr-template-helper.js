@@ -110,12 +110,11 @@ export class SsrTemplateHelper {
       const {attributes} = element;
       /** {!Array} */
       const whiteList = ATTRS_TO_SEND_TO_VIEWER[this.sourceComponent_];
-      for (let i = 0; i < attributes.length; i++) {
-        const keyValue = attributes[i];
-        if (whiteList.indexOf(keyValue.name) != 1) {
-          attrsAsJson[keyValue.name] = keyValue.value;
+      iterateCursor(attributes, attribute => {
+        if (whiteList.indexOf(attribute.name) != -1) {
+          attrsAsJson[attribute.name] = attribute.value;
         }
-      }
+      });
     }
     return attrsAsJson;
   }
