@@ -20,6 +20,7 @@ import {
 } from '../template-validator';
 import {AmpAdTemplate, DATA_REQUEST_VAR_PREFIX} from '../amp-ad-template';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
+import {NetworkRegistry} from '../template-config';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {tryParseJson} from '../../../../src/json';
 import {utf8Encode} from '../../../../src/utils/bytes';
@@ -138,9 +139,41 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
         expect(nameAttr.creative).to.equal(mockCreative);
       });
     });
+
+    it('should load non-AMP ad in nameframe if missing mustache header', () => {
+      const mockCreative = '<html><body>Ipsum Lorem</body></html>';
+      impl.adResponsePromise_ = Promise.resolve({
+        arrayBuffer: () => Promise.resolve(utf8Encode(mockCreative)),
+        headers: {
+          get: header => {
+            switch (header) {
+              case 'AMP-Ad-Response-Type':
+                return 'template';
+              default:
+                return null;
+            }
+          },
+        },
+      });
+
+      impl.buildCallback();
+      return impl.layoutCallback().then(() => {
+        const iframe = containerElement.querySelector('iframe');
+        expect(iframe).to.be.ok;
+        const nameAttr = tryParseJson(iframe.getAttribute('name'));
+        expect(nameAttr).to.be.ok;
+        expect(nameAttr.creative).to.equal(mockCreative);
+      });
+    });
   });
 
   describe('#getRequestUrl', () => {
+    it('should add url to context', () => {
+      impl.buildCallback();
+      impl.getRequestUrl();
+      expect(impl.getContext().adUrl).to
+          .equal(NetworkRegistry.test.requestUrl);
+    });
     it('should expand url', () => {
       impl.buildCallback();
       impl.element.setAttribute(`data-${DATA_REQUEST_VAR_PREFIX}bar`, '123');
@@ -148,6 +181,26 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.requestUrl_ = 'https://foo.com?param1=bar&sz=widthxheight&param2=baz';
       expect(impl.getRequestUrl()).to.equal(
           'https://foo.com?param1=123&sz=320x50&param2=456');
+    });
+  });
+
+  describe('mandatory fields', () => {
+    it('should throw if missing type attribute', () => {
+      containerElement.removeAttribute('type');
+      expect(() => new AmpAdTemplate(containerElement)).to
+          .throw('Template amp-ad elements must specify a type');
+    });
+    it('should throw if type is not registered', () => {
+      containerElement.setAttribute('type', 'foo');
+      expect(() => new AmpAdTemplate(containerElement)).to
+          .throw('Invalid network type foo');
+    });
+    it('should throw if type does not have corresponding request url', () => {
+      const temp = NetworkRegistry.test.requestUrl;
+      delete NetworkRegistry.test.requestUrl;
+      expect(() => new AmpAdTemplate(containerElement)).to
+          .throw('Invalid network configuration: no request URL specified');
+      NetworkRegistry.test.requestUrl = temp;
     });
   });
 });
