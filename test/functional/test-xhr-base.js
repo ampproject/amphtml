@@ -16,13 +16,14 @@
 
 import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
 import {Services} from '../../src/services';
-import {assertSuccess, setupInit} from '../../src/xhr-base';
+import {assertSuccess, setupInit, XhrBase} from '../../src/xhr-base';
+import { getCorsUrl, getSourceOrigin } from '../../src/url';
 
 
 describes.realWin('XhrBase', {amp: true}, function() {
   let ampdocServiceForStub;
   let ampdocViewerStub;
-
+  let xhrCreated;
   // Given XHR calls give tests more time.
   this.timeout(5000);
 
@@ -37,6 +38,11 @@ describes.realWin('XhrBase', {amp: true}, function() {
       getAmpDoc: () => ampdocViewerStub,
     });
   });
+
+  function setupMockXhr() {
+    const mockXhr = sandbox.useFakeXMLHttpRequest();
+    xhrCreated = new Promise(resolve => mockXhr.onCreate = resolve);
+  }
 
   const nativeWin = {
     location,
@@ -146,5 +152,49 @@ describes.realWin('XhrBase', {amp: true}, function() {
       });
     });
   });
-
+  describe('fetchAmpCors_', () => {
+    let xhrBase;
+    let fetchStub;
+    beforeEach(() => {
+      xhrBase = new XhrBase(window);
+      fetchStub = sandbox.stub(xhrBase, 'fetchFromNetwork_').callsFake(
+          () => Promise.resolve(new Response('ok', {
+            headers: {
+              'AMP-Access-Control-Allow-Source-Origin':
+                getSourceOrigin(window.location.href),
+            },
+          })));
+    });
+    it('should modify url to AMPCors url if ampCors!=false', () => {
+      const promise = xhrBase.fetchAmpCors_('/', {});
+      expect(fetchStub).to.be.calledOnce;
+      expect(fetchStub.getCall(0).args[0]).to.be.equal(getCorsUrl(window, '/'));
+      return promise;
+    });
+    it('should not modify url to AMPCors url if ampCors==false', () => {
+      const promise = xhrBase.fetchAmpCors_('/', {
+        ampCors: false,
+      });
+      expect(fetchStub).to.be.calledOnce;
+      expect(fetchStub.getCall(0).args[0]).to.be.equal('/');
+      return promise;
+    });
+    it('should add AMP-Same-Origin header if target'
+      + ' and current origin are same', () => {
+      const promise = xhrBase.fetchAmpCors_('/', {});
+      expect(fetchStub).to.be.calledOnce;
+      expect(fetchStub.getCall(0).args[1].headers).to.not.be.null;
+      expect(fetchStub.getCall(0).args[1].headers['AMP-Same-Origin'])
+          .to.be.equal('true');
+      return promise;
+    });
+    it('should check for ALLOW_SOURCE_ORIGIN_HEADER if required', () => {
+      fetchStub.restore();
+      fetchStub = sandbox.stub(xhrBase, 'fetchFromNetwork_').callsFake(
+          () => Promise.resolve(new Response('ok', {
+            headers: {},
+          })));
+      expect(xhrBase.fetchAmpCors_('/', {})).to.be.rejectedWith(/Response must contain the AMP-Access-Control-Allow-Source-Origin header​​​/);
+    });
+  });
 });
