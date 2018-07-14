@@ -237,7 +237,8 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
   }); // in shadow ampdoc
 
-  describes.realWin('in single ampdoc', {
+  // TODO(choumx, #16721): These tests cause the browser to crash.
+  describes.realWin.skip('in single ampdoc', {
     amp: {
       ampdoc: 'single',
       runtimeOn: false,
@@ -270,6 +271,19 @@ describe.configure().ifNewChrome().run('Bind', function() {
     it('should scan for bindings when ampdoc is ready', () => {
       createElement(env, container, '[text]="1+1"');
       expect(bind.numberOfBindings()).to.equal(0);
+      return onBindReady(env, bind).then(() => {
+        expect(bind.numberOfBindings()).to.equal(1);
+      });
+    });
+
+    it('should scan fixed layer for bindings', () => {
+      // Mimic FixedLayer by creating a sibling <body> element.
+      const doc = env.win.document;
+      const pseudoFixedLayer = doc.body.cloneNode(false);
+      doc.documentElement.appendChild(pseudoFixedLayer);
+
+      // Make sure that the sibling <body> is scanned for bindings.
+      createElement(env, pseudoFixedLayer, '[text]="1+1"');
       return onBindReady(env, bind).then(() => {
         expect(bind.numberOfBindings()).to.equal(1);
       });

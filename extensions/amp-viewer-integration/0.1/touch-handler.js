@@ -71,6 +71,9 @@ export class TouchHandler {
     this.listenForTouchEvents_();
   }
 
+  /**
+   * @private
+   */
   listenForTouchEvents_() {
     const handleEvent = this.handleEvent_.bind(this);
     const doc = this.win.document;
@@ -87,6 +90,9 @@ export class TouchHandler {
         listen(doc, 'touchmove', handleEvent, options));
   }
 
+  /**
+   * @private
+   */
   unlisten_() {
     this.unlistenHandlers_.forEach(unlisten => unlisten());
     this.unlistenHandlers_.length = 0;

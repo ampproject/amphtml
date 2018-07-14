@@ -19,7 +19,7 @@ export class ImaPlayerData {
   /**
    * Create a new ImaPlayerData object.
    *
-   * @param {number} curentTime
+   * @param {number} currentTime
    * @param {number} duration
    * @param {!Array} playedRanges
    */

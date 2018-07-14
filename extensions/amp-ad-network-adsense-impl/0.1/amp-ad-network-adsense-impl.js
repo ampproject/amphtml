@@ -62,10 +62,6 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
-import {
-  googleLifecycleReporterFactory,
-  setGoogleLifecycleVarsFromHeaders,
-} from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
@@ -88,23 +84,6 @@ export function resetSharedState() {
   sharedState.reset();
 }
 
-/**
- * Mapping of experiment id to viewport offsets by which ad request should
- * be delayed.
- * @type {!Object<string, number>}
- * @visibleForTesting
- */
-export const DELAY_REQUEST_EXP_BRANCHES = {
-  '21062224': true, // control, delay by renderOutsideViewport
-  '21062225': 3,
-  '21062226': 4,
-  '21062227': 6,
-  '21062228': 12,
-};
-
-/** @type {string} @visibleForTesting */
-export const DELAY_REQUEST_EXP = 'adsense-delay-request';
-
 /** @type {string} */
 const FORMAT_EXP = 'as-use-attr-for-format';
 
@@ -116,11 +95,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-
-    /**
-     * @type {?../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
-     */
-    this.lifecycleReporter_ = null;
 
     /**
      * A unique identifier for this slot.
@@ -223,15 +197,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return DELAY_REQUEST_EXP_BRANCHES[
-        getExperimentBranch(this.win, DELAY_REQUEST_EXP) || ''] || true;
+    return true;
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.lifecycleReporter_ = this.initLifecycleReporter();
-    this.divertExperiments();
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
@@ -248,6 +219,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
               viewportSize),
           viewportSize.width).catch(() => {});
     }
+    // This should happen last, as some diversion criteria rely on some of the
+    // preceding logic (specifically responsive logic).
+    this.divertExperiments();
   }
 
   /** @override */
@@ -270,10 +244,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             Number(this.element.getAttribute('width')) > 0 &&
             Number(this.element.getAttribute('height')) > 0,
           branches: ['21062003', '21062004'],
-        },
-        [DELAY_REQUEST_EXP]: {
-          isTrafficEligible: () => true,
-          branches: Object.keys(DELAY_REQUEST_EXP_BRANCHES),
         },
       });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
@@ -392,10 +362,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   extractSize(responseHeaders) {
-    if (this.lifecycleReporter_) {
-      setGoogleLifecycleVarsFromHeaders(
-          responseHeaders, this.lifecycleReporter_);
-    }
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     if (this.ampAnalyticsConfig_) {
@@ -436,25 +402,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  emitLifecycleEvent(eventName, opt_extraVariables) {
-    if (!this.lifecycleReporter_) {
-      dev().warn(TAG, 'lifecycleReporter not yet populated in emit call');
-      return;
-    }
-    if (opt_extraVariables) {
-      this.lifecycleReporter_.setPingParameters(opt_extraVariables);
-    }
-    this.lifecycleReporter_.sendPing(eventName);
-  }
-
-  /**
-   * @return {!../../../ads/google/a4a/performance.BaseLifecycleReporter}
-   */
-  initLifecycleReporter() {
-    return googleLifecycleReporterFactory(this);
-  }
-
-  /** @override */
   isXhrAllowed() {
     return isCdnProxy(this.win) || getMode(this.win).localDev ||
         getMode(this.win).test;
@@ -480,17 +427,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             this.element,
             this.ampAnalyticsConfig_,
             this.qqid_,
-            !!creativeMetaData,
-            this.lifecycleReporter_.getDeltaTime(),
-            this.lifecycleReporter_.getInitTime());
+            !!creativeMetaData);
       }
       this.ampAnalyticsElement_ = insertAnalyticsElement(
           this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
           !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
-
-    dev().assert(!!this.lifecycleReporter_);
-    this.lifecycleReporter_.addPingsForVisibility(this.element);
 
     setStyles(dev().assertElement(this.iframe), {
       width: `${this.size_.width}px`,
@@ -500,21 +442,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   unlayoutCallback() {
-    switch (this.postAdResponseExperimentFeatures['unlayout_exp']) {
-      case 'all':
-        // Ensure all creatives are removed.
-        this.isAmpCreative_ = false;
-        break;
-      case 'remain':
-        if (this.qqid_ && this.isAmpCreative_ === null) {
-          // Ad response received but not yet rendered.  Note that no fills
-          // would fall into this case even if layoutCallback has executed.
-          // Assume high probability of continued no fill therefore do not
-          // tear down.
-          dev().info(TAG, 'unlayoutCallback - unrendered creative can remain');
-          return false;
-        }
-    }
     if (this.isAmpCreative_) {
       // Allow AMP creatives to remain in case SERP viewer swipe back.
       return false;
@@ -522,7 +449,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const superResult = super.unlayoutCallback();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
-    this.lifecycleReporter_ = this.initLifecycleReporter();
     if (this.uniqueSlotId_) {
       sharedState.removeSlot(this.uniqueSlotId_);
     }
@@ -548,8 +474,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run({
         measure: state => {
+          // Check the parent element because amp-ad is explicitly styled to
+          // have direction: ltr.
           state.direction =
-            computedStyle(this.win, this.element)['direction'];
+            computedStyle(this.win,
+                dev().assertElement(this.element.parentElement))['direction'];
         },
         mutate: state => {
           if (state.direction == 'rtl') {

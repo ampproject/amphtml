@@ -24,10 +24,16 @@ export const SubscriptionAnalyticsEvents = {
   ACTION_DELEGATED: 'subscriptions-action-delegated',
   ENTITLEMENT_RESOLVED: 'subscriptions-entitlement-resolved',
   STARTED: 'subscriptions-started',
+  ACCESS_GRANTED: 'subscriptions-access-granted',
+  ACCESS_DENIED: 'subscriptions-access-denied',
 };
 
 export class SubscriptionAnalytics {
 
+  /**
+   * Creates an instance of SubscriptionAnalytics.
+   * @param {!Element} element
+   */
   constructor(element) {
     this.element_ = element;
   }

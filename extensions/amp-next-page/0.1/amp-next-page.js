@@ -50,7 +50,8 @@ export class AmpNextPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
+    user().assert(isExperimentOn(this.win, 'amp-next-page'),
+        'Experiment amp-next-page disabled');
 
     if (this.service_.isActive()) {
       return;
@@ -100,6 +101,10 @@ export class AmpNextPage extends AMP.BaseElement {
     this.service_.setAppendPageHandler(element => this.appendPage_(element));
   }
 
+  /**
+   * Appends the element too page
+   * @param {!Element} element
+   */
   appendPage_(element) {
     return this.mutateElement(() => this.element.appendChild(element));
   }

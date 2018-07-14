@@ -120,6 +120,10 @@ export function assertConfig(config) {
   return /** @type {!AmpAdExitConfig} */ (config);
 }
 
+/**
+ * Asserts a transport.
+ * @param {!Object} transport
+ */
 function assertTransport(transport) {
   for (const t in transport) {
     user().assert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
@@ -128,6 +132,10 @@ function assertTransport(transport) {
   }
 }
 
+/**
+ * Asserts an array of filters.
+ * @param {*} filters
+ */
 function assertFilters(filters) {
   const validFilters = [
     FilterType.CLICK_DELAY,
@@ -142,6 +150,12 @@ function assertFilters(filters) {
   }
 }
 
+/**
+ * Asserts targets and its config
+ *
+ * @param {!Object} targets
+ * @param {*} config
+ */
 function assertTargets(targets, config) {
   user().assert(typeof targets == 'object', '\'targets\' must be an object');
   for (const target in targets) {
@@ -149,6 +163,13 @@ function assertTargets(targets, config) {
   }
 }
 
+/**
+ * Asserts target
+ *
+ * @param {string} name
+ * @param {!Object} target
+ * @param {*} config
+ */
 function assertTarget(name, target, config) {
   user().assert(
       typeof target.finalUrl == 'string',

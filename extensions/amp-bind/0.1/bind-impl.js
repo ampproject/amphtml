@@ -27,7 +27,6 @@ import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
@@ -35,10 +34,11 @@ import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/sanitizer';
+import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-bind';
@@ -128,9 +128,6 @@ export class Bind {
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
 
-    /** @const @private {!Function} */
-    this.boundOnDomUpdate_ = this.onDomUpdate_.bind(this);
-
     /**
      * Maps expression string to the element(s) that contain it.
      * @private @const {!Object<string, !Array<!Element>>}
@@ -175,19 +172,23 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
-    const bodyPromise = (opt_win)
-      ? waitForBodyPromise(opt_win.document)
-          .then(() => dev().assertElement(opt_win.document.body))
-      : ampdoc.whenBodyAvailable();
-
     /**
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ =
-        this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
-          const head = (opt_win) ? opt_win.document.head : ampdoc.getHeadNode();
-          return this.initialize_(body, head && elementByTag(head, 'title'));
+    this.initializePromise_ = this.viewer_.whenFirstVisible()
+        .then(() => {
+          if (opt_win) {
+            // In FIE, scan the document node of the iframe window.
+            const {document} = opt_win;
+            return waitForBodyPromise(document).then(() => document);
+          } else {
+            // Otherwise, scan the root node of the ampdoc.
+            return ampdoc.whenBodyAvailable().then(() => ampdoc.getRootNode());
+          }
+        })
+        .then(root => {
+          return this.initialize_(root);
         });
 
     /** @private {Promise} */
@@ -196,8 +197,10 @@ export class Bind {
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
 
-    // Expose for debugging in the console.
-    AMP.printState = this.printState_.bind(this);
+    // AMP.printState() for debugging in the console.
+    if (!self.AMP.printState) {
+      self.AMP.printState = this.printState_.bind(this);
+    }
   }
 
   /** @override */
@@ -222,18 +225,17 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opt_skipEval, opt_isAmpStateMutation) {
-    // TODO(choumx): What if `state` contains references to globals?
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
     } catch (e) {
       user().error(TAG, 'Failed to merge result from AMP.setState().', e);
     }
 
+    dev().fine(TAG, 'state:', this.state_);
+
     if (opt_skipEval) {
       return Promise.resolve();
     }
-
-    user().fine(TAG, 'State updated; re-evaluating expressions...');
 
     const promise = this.initializePromise_
         .then(() => this.evaluate_())
@@ -304,6 +306,7 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
+    dev().fine(TAG, 'setState:', `"${expression}"`);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result))
         .then(() => {
@@ -326,6 +329,7 @@ export class Bind {
    * @return {!Promise}
    */
   pushStateWithExpression(expression, scope) {
+    dev().fine(TAG, 'pushState:', expression);
     return this.evaluateExpression_(expression, scope).then(result => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
@@ -364,28 +368,14 @@ export class Bind {
    * @return {!Promise}
    */
   scanAndApply(added, removed, timeout = 2000) {
-    const beforeFirstMutate = !this.signals_.get('FIRST_MUTATE');
-
-    const promise = this.removeBindingsForNodes_(removed)
-        .then(() => this.addBindingsForNodes_(added))
-        .then(numberOfBindingsAdded => {
+    dev().fine(TAG, 'rescan:', added, removed);
+    const promise = this.removeThenAdd_(added, removed)
+        .then(bindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
-          if (numberOfBindingsAdded == 0) {
-            return;
+          if (bindingsAdded > 0) {
+            return this.evaluate_().then(results =>
+              this.applyElements_(results, added));
           }
-          return this.evaluate_().then(results => {
-            // Before first mutate, verify `added` elements and throw expected
-            // error to measure the impact of "faster-amp-list" breaking change.
-            if (beforeFirstMutate) {
-              const mismatches = this.verify_(results, added, /* warn */ false);
-              if (mismatches.length) {
-                // Cap size of mismatch string to 30 chars.
-                user().expectedError(TAG, 'Pre-gesture mismatch: '
-                    + String(mismatches).substr(0, 30));
-              }
-            }
-            return this.applyElements_(results, added);
-          });
         });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
@@ -407,24 +397,20 @@ export class Bind {
   }
 
   /**
-   * Scans the ampdoc for bindings and creates the expression evaluator.
-   * @param {!Node} rootNode
-   * @param {?Node} titleNode
+   * Scans the root node (and array of optional nodes) for bindings.
+   * @param {!Node} root
    * @return {!Promise}
    * @private
    */
-  initialize_(rootNode, titleNode) {
-    dev().fine(TAG, 'Scanning DOM for bindings and macros...');
-    const nodes = [rootNode];
-    if (titleNode) {
-      nodes.push(titleNode);
-    }
+  initialize_(root) {
+    dev().fine(TAG, 'init');
     let promise = Promise.all([
       this.addMacros_(),
-      this.addBindingsForNodes_(nodes)]
-    ).then(() => {
+      this.addBindingsForNodes_([root])]
+    ).then(results => {
+      dev().fine(TAG, '⤷', 'Δ:', results);
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
-      rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
+      root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
     });
     if (getMode().development) {
       // Check default values against initial expression results.
@@ -540,7 +526,8 @@ export class Bind {
    * For each node in an array, scans it and its descendants for bindings.
    * This function is not idempotent.
    *
-   * Returns a promise that resolves after bindings have been added.
+   * Returns a promise that resolves with the number of bindings added upon
+   * completion.
    *
    * @param {!Array<!Node>} nodes
    * @return {!Promise<number>}
@@ -578,12 +565,9 @@ export class Bind {
       // `results` is a 2D array where results[i] is an array of bindings.
       // Flatten this into a 1D array of bindings via concat.
       const bindings = Array.prototype.concat.apply([], results);
-      dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
-          `${nodes.length} elements and their descendants.`);
       if (bindings.length == 0) {
         return bindings.length;
       } else {
-        dev().fine(TAG, 'Asking worker to parse expressions...');
         return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
           // Report each parse error.
           Object.keys(parseErrors).forEach(expressionString => {
@@ -594,8 +578,6 @@ export class Bind {
                   elements[0]);
             }
           });
-          dev().fine(TAG, 'Finished parsing expressions with ' +
-              `${Object.keys(parseErrors).length} errors.`);
           return bindings.length;
         });
       }
@@ -605,14 +587,14 @@ export class Bind {
   /**
    * For each node in an array, removes all bindings for it and its descendants.
    *
-   * Returns a promise that resolves after bindings have been removed.
+   * Returns a promise that resolves with the number of removed bindings upon
+   * completion.
    *
    * @param {!Array<!Node>} nodes
-   * @return {!Promise}
+   * @return {!Promise<number>}
    * @private
    */
   removeBindingsForNodes_(nodes) {
-    const before = (getMode().development) ? this.numberOfBindings() : 0;
     // Eliminate bound elements that are descendants of `nodes`.
     filterSplice(this.boundElements_, boundElement => {
       for (let i = 0; i < nodes.length; i++) {
@@ -622,11 +604,6 @@ export class Bind {
       }
       return true;
     });
-    const after = (getMode().development) ? this.numberOfBindings() : 0;
-    if (after < before) {
-      dev().fine(TAG, `Removed ${before - after} bindings from ${nodes.length} `
-          + 'elements and their descendants.');
-    }
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
     // bound to elements.
@@ -648,12 +625,12 @@ export class Bind {
     }
 
     // Remove the bindings from the evaluator.
-    if (deletedExpressions.length > 0) {
-      dev().fine(TAG, 'Asking worker to remove expressions...');
-      return this.ww_(
-          'bind.removeBindingsWithExpressionStrings', [deletedExpressions]);
+    const removed = deletedExpressions.length;
+    if (removed > 0) {
+      return this.ww_('bind.removeBindingsWithExpressionStrings',
+          [deletedExpressions]).then(() => removed);
     } else {
-      return Promise.resolve();
+      return Promise.resolve(0);
     }
   }
 
@@ -673,7 +650,9 @@ export class Bind {
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = map();
 
-    const doc = dev().assert(node.ownerDocument, 'ownerDocument is null.');
+
+    const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
+      ? node : node.ownerDocument, 'ownerDocument is null.');
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
         /* entityReferenceExpansion */ false);
@@ -687,6 +666,11 @@ export class Bind {
       const node = walker.currentNode;
       if (!node) {
         return true;
+      }
+      // If `node` is a Document, it will be scanned first (despite
+      // NodeFilter.SHOW_ELEMENT). Skip it.
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return !walker.nextNode();
       }
       const element = dev().assertElement(node);
       const {tagName} = element;
@@ -813,6 +797,7 @@ export class Bind {
         // Throw to reject promise.
         throw this.reportWorkerError_(error, `${TAG}: Expression eval failed.`);
       } else {
+        dev().fine(TAG, '⤷', result);
         return result;
       }
     });
@@ -824,7 +809,6 @@ export class Bind {
    * @private
    */
   evaluate_() {
-    user().fine(TAG, 'Asking worker to re-evaluate expressions...');
     const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]);
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
@@ -840,6 +824,7 @@ export class Bind {
           reportError(userError, elements[0]);
         }
       });
+      dev().fine(TAG, 'bindings:', results);
       return results;
     });
   }
@@ -931,12 +916,8 @@ export class Bind {
       // Useful for rendering amp-list with amp-bind state via [src].
       if (newValue === undefined ||
           recursiveEquals(newValue, previousResult, /* depth */ 5)) {
-        user().fine(TAG, 'Expression result unchanged or missing: ' +
-            `"${expressionString}"`);
       } else {
         boundProperty.previousResult = newValue;
-        user().fine(TAG, 'New expression result: ' +
-            `"${expressionString}" -> ${newValue}`);
         updates.push({boundProperty, newValue});
       }
     });
@@ -960,7 +941,9 @@ export class Bind {
       }
       return this.applyBoundElement_(results, boundElement);
     });
-    return Promise.all(promises);
+    return Promise.all(promises).then(() => {
+      dev().fine(TAG, 'updated:', promises.length, 'elements');
+    });
   }
 
   /**
@@ -978,7 +961,9 @@ export class Bind {
         }
       });
     });
-    return Promise.all(promises);
+    return Promise.all(promises).then(() => {
+      dev().fine(TAG, 'updated:', promises.length, 'elements');
+    });
   }
 
   /**
@@ -1221,19 +1206,36 @@ export class Bind {
    */
   onDomUpdate_(event) {
     const target = dev().assertElement(event.target);
-
     // Skip amp-list since there's already a custom integration for it.
     const parent = target.parentNode;
     if (parent && parent.tagName == 'AMP-LIST') {
-      dev().info(TAG, 'Skipping DOM_UPDATE rescan of:', target);
       return;
     }
-
-    this.removeBindingsForNodes_([target]).then(() => {
-      return this.addBindingsForNodes_([target]);
-    }).then(() => {
+    dev().fine(TAG, 'dom_update:', target);
+    this.removeThenAdd_([target], [target]).then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
+  }
+
+  /**
+   * Removes bindings for nodes in `remove`, then scans for bindings in `add`.
+   * Return promise that resolves upon completion.
+   * @param {!Array<!Node>} remove
+   * @param {!Array<!Node>} add
+   * @return {!Promise}
+   * @private
+   */
+  removeThenAdd_(remove, add) {
+    let sum = 0;
+    return this.removeBindingsForNodes_(remove)
+        .then(removed => {
+          sum -= removed;
+          return this.addBindingsForNodes_(add);
+        })
+        .then(added => {
+          sum += added;
+          dev().fine(TAG, '⤷', 'Δ:', sum, ', ∑:', this.numberOfBindings());
+        });
   }
 
   /**
@@ -1302,21 +1304,21 @@ export class Bind {
 
   /**
    * Print out the current state in the console.
+   * @param {string=} opt_expression
    * @private
    */
-  printState_() {
-    const seen = [];
-    const s = JSON.stringify(this.state_, (key, value) => {
-      if (isObject(value)) {
-        if (seen.includes(value)) {
-          return '[Circular]';
-        } else {
-          seen.push(value);
-        }
+  printState_(opt_expression) {
+    if (opt_expression) {
+      if (typeof opt_expression !== 'string') {
+        user().error(TAG, 'Invalid JSON expression. Example: ' +
+            'AMP.printState("foo.bar") to print current value of "foo.bar".');
+        return;
       }
-      return value;
-    });
-    user().info(TAG, s);
+      const value = getValueForExpr(this.state_, opt_expression);
+      user().info(TAG, value);
+    } else {
+      user().info(TAG, this.state_);
+    }
   }
 
   /**
