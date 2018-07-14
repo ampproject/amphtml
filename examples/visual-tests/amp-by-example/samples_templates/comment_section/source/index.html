@@ -63,14 +63,6 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
       margin-top: -28px;
       margin-left: -30px;
     }
-    span.placeholder {
-      display: inline-block;
-      height: 14px;
-      width: 150px;
-      background-color: #cccccc;
-      position: relative;
-      top: 3px;
-    }
     </style>
 
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -107,15 +99,6 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
             </div>
           </div>
         </template>
-        <div placeholder>
-            <div class="flex px1 pt1">
-                <amp-img width="44" height="44" class="mr1 flex-none" alt="user" src="/examples/visual-tests/amp-by-example/img/ic_account_box_black_48dp_1x.png"></amp-img>
-                <div class="ampstart-card p1 comment">
-                    <p><span class="placeholder"></span> <span class="placeholder"></span></p>
-                    <p><span class="placeholder"></span></p>
-                </div>
-              </div>
-          </div>
       </amp-list>
 
     <!-- In order to add comments users need to be logged in. We use `amp-access` to integrate login and to show and hide the login button depending on whether the user is logged in. `on="tap:amp-access.login-sign-in"` specifies which

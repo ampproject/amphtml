@@ -836,6 +836,8 @@ describe('friendly-iframe-embed', () => {
 
       expect(el.tagName.toLowerCase()).to.equal('i-amphtml-ad-close-header');
       expect(el.getAttribute('role')).to.equal('button');
+      expect(el.getAttribute('aria-label')).to.equal('Close Ad');
+      expect(el.getAttribute('tabindex')).to.equal('0');
 
       expect(el.firstElementChild.textContent).to.equal('Ad');
 

@@ -14,7 +14,6 @@
   "expAdsenseA4A": 0.01,
   "a4aProfilingRate": 0.01,
   "ad-type-custom": 1,
-  "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
   "amp-ima-video": 1,
   "amp-playbuzz": 1,
@@ -37,9 +36,7 @@
   "amp-story-v1": 1,
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01,
-  "adsense-delay-request": 0.01,
-  "doubleclick-delay-request":0.01,
   "amp-date-picker": 1,
-  "url-replacement-v2": 0.1,
+  "url-replacement-v2": 0.5,
   "inline-styles": 1
 }

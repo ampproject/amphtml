@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.15 */
+ /** Version: 0.1.22.21 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -602,7 +602,7 @@ class ButtonApi {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@-webkit-keyframes swg-notify{0%{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}to{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@-webkit-keyframes swg-notify-hide{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}to{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 
 
@@ -1696,7 +1696,28 @@ const SubscriptionFlows = {
   SUBSCRIBE: 'subscribe',
   COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
+  SHOW_LOGIN_PROMPT: 'showLoginPrompt',
+  SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
 };
+
+
+/**
+ * @enum {string}
+ */
+const WindowOpenMode = {
+  AUTO: 'auto',
+  REDIRECT: 'redirect',
+};
+
+
+/**
+ * @return {!Config}
+ */
+function defaultConfig() {
+  return {
+    windowOpenMode: WindowOpenMode.AUTO,
+  };
+}
 
 
 
@@ -2225,7 +2246,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.15',
+    '_client': 'SwG 0.1.22.21',
   });
 }
 
@@ -2330,10 +2351,12 @@ class PayStartFlow {
     });
 
     // TODO(dvoytenko): switch to gpay async client.
+    const forceRedirect =
+        this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
     const opener = this.activityPorts_.open(
         PAY_REQUEST_ID,
         payUrl(),
-        '_blank',
+        forceRedirect ? '_top' : '_blank',
         feArgs({
           'apiVersion': 1,
           'allowedPaymentMethods': ['CARD'],
@@ -3233,7 +3256,7 @@ class Dialog {
       return transition(this.getElement(), {
         'transform': 'translateY(0)',
         'opacity': 1,
-        'visiblity': 'visible',
+        'visibility': 'visible',
       }, 300, 'ease-out');
     });
     this.hidden_ = false;
@@ -3704,6 +3727,9 @@ class Toast {
     /** @private @const {!Object<string, ?>} */
     this.args_ = args;
 
+    /** @private {?Promise} */
+    this.animating_ = null;
+
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ =
         /** @type {!HTMLIFrameElement} */ (
@@ -3747,22 +3773,61 @@ class Toast {
           return port.whenReady();
         }).then(() => {
           resetStyles(this.iframe_, ['height']);
-          setImportantStyles(this.iframe_, {
-            'animation': 'swg-notify .3s ease-out normal backwards, '
-                  + 'swg-notify-hide .3s ease-out ' + toastDurationSeconds +
-                  's normal forwards',
+
+          this.animate_(() => {
+            setImportantStyles(this.iframe_, {
+              'transform': 'translateY(100%)',
+              'opactiy': 1,
+              'visibility': 'visible',
+            });
+            return transition(this.iframe_, {
+              'transform': 'translateY(0)',
+              'opacity': 1,
+              'visibility': 'visible',
+            }, 400, 'ease-out');
           });
+
+          // Close the Toast after the specified duration.
           this.doc_.getWin().setTimeout(() => {
             this.close();
           }, (toastDurationSeconds + 1) * 1000);
         });
   }
 
+    /**
+   * @param {function():!Promise} callback
+   * @return {!Promise}
+   * @private
+   */
+  animate_(callback) {
+    const wait = this.animating_ || Promise.resolve();
+    return this.animating_ = wait.then(() => {
+      return callback();
+    }, () => {
+      // Ignore errors to make sure animations don't get stuck.
+    }).then(() => {
+      this.animating_ = null;
+    });
+  }
+
   /**
    * Closes the toast.
+   * @return {!Promise}
    */
   close() {
-    this.doc_.getBody().removeChild(this.iframe_);
+    return this.animate_(() => {
+      // Remove the toast from the DOM after animation is complete.
+      this.doc_.getWin().setTimeout(() => {
+        this.doc_.getBody().removeChild(this.iframe_);
+        return Promise.resolve();
+      }, 500);
+
+      return transition(this.iframe_, {
+        'transform': 'translateY(100%)',
+        'opacity': 1,
+        'visibility': 'visible',
+      }, 400, 'ease-out');
+    });
   }
 }
 
@@ -4175,10 +4240,12 @@ class LinkbackFlow {
    */
   start() {
     this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.LINK_ACCOUNT);
+    const forceRedirect =
+        this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
     const opener = this.activityPorts_.open(
         LINK_REQUEST_ID,
         feUrl('/linkbackstart'),
-        '_blank',
+        forceRedirect ? '_top' : '_blank',
         feArgs({
           'publicationId': this.pageConfig_.getPublicationId(),
         }), {});
@@ -4407,6 +4474,186 @@ class LinkSaveFlow {
             return result;
           });
         });
+  }
+}
+
+
+
+
+class LoginPromptFlow {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?Promise} */
+    this.openViewPromise_ = null;
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/loginpromptiframe'),
+        feArgs({
+          publicationId: deps.pageConfig().getPublicationId(),
+          productId: deps.pageConfig().getProductId(),
+          // TODO(chenshay): Pass entitlements value here.
+        }),
+        /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Continues the Login flow (after waiting).
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_.callbacks().triggerFlowStarted(
+        SubscriptionFlows.SHOW_LOGIN_PROMPT);
+
+    this.openViewPromise_ = this.dialogManager_.openView(
+        this.activityIframeView_);
+
+    return this.activityIframeView_.acceptResult().then(() => {
+      // The consent part is complete.
+      this.dialogManager_.completeView(this.activityIframeView_);
+    }, reason => {
+      if (isCancelError(reason)) {
+        this.deps_.callbacks().triggerFlowCanceled(
+            SubscriptionFlows.SHOW_LOGIN_PROMPT);
+      } else {
+        this.dialogManager_.completeView(this.activityIframeView_);
+      }
+      throw reason;
+    });
+  }
+}
+
+
+
+
+class LoginNotificationApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?Promise} */
+    this.openViewPromise_ = null;
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/loginnotificationiframe'),
+        feArgs({
+          publicationId: deps.pageConfig().getPublicationId(),
+          productId: deps.pageConfig().getProductId(),
+          // TODO(chenshay): Pass entitlements value here.
+        }),
+        /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Continues the Login flow (after waiting).
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_.callbacks().triggerFlowStarted(
+        SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
+
+    this.openViewPromise_ = this.dialogManager_.openView(
+        this.activityIframeView_);
+
+    return this.activityIframeView_.acceptResult().then(() => {
+      // The consent part is complete.
+      this.dialogManager_.completeView(this.activityIframeView_);
+    }, reason => {
+      this.dialogManager_.completeView(this.activityIframeView_);
+      throw reason;
+    });
+  }
+}
+
+
+
+
+class WaitForSubscriptionLookupApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {?Promise} accountPromise
+   */
+  constructor(deps, accountPromise) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?Promise} */
+    this.openViewPromise_ = null;
+
+    /** @private {?Promise} */
+    this.accountPromise_ = accountPromise || null;
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/waitforsubscriptionlookupiframe'),
+        feArgs({
+          publicationId: deps.pageConfig().getPublicationId(),
+          productId: deps.pageConfig().getProductId(),
+        }),
+        /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Starts the Login Flow.
+   * @return {!Promise}
+   */
+  start() {
+    this.openViewPromise_ = this.dialogManager_.openView(
+        this.activityIframeView_);
+
+    return this.accountPromise_.then(account => {
+      // Account was found.
+      this.dialogManager_.completeView(this.activityIframeView_);
+      return account;
+    }, reason => {
+      this.dialogManager_.completeView(this.activityIframeView_);
+      throw reason;
+    });
   }
 }
 
@@ -4876,20 +5123,23 @@ class ConfiguredRuntime {
 
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
-   * @param {!../model/page-config.PageConfig} config
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
    *     fetcher: (!Fetcher|undefined),
    *   }=} opt_integr
    */
-  constructor(winOrDoc, config, opt_integr) {
+  constructor(winOrDoc, pageConfig, opt_integr) {
     /** @private @const {!Doc} */
     this.doc_ = resolveDoc(winOrDoc);
 
     /** @private @const {!Window} */
     this.win_ = this.doc_.getWin();
 
+    /** @private @const {!../api/subscriptions.Config} */
+    this.config_ = defaultConfig();
+
     /** @private @const {!../model/page-config.PageConfig} */
-    this.config_ = config;
+    this.pageConfig_ = pageConfig;
 
     /** @private @const {!Promise} */
     this.documentParsed_ = this.doc_.whenReady();
@@ -4911,11 +5161,11 @@ class ConfiguredRuntime {
     this.callbacks_ = new Callbacks();
 
     /** @private @const {!EntitlementsManager} */
-    this.entitlementsManager_ =
-        new EntitlementsManager(this.win_, this.config_, this.fetcher_, this);
+    this.entitlementsManager_ = new EntitlementsManager(
+        this.win_, this.pageConfig_, this.fetcher_, this);
 
     /** @private @const {!OffersApi} */
-    this.offersApi_ = new OffersApi(this.config_, this.fetcher_);
+    this.offersApi_ = new OffersApi(this.pageConfig_, this.fetcher_);
 
     /** @private @const {!ButtonApi} */
     this.buttonApi_ = new ButtonApi(this.doc_);
@@ -4941,7 +5191,7 @@ class ConfiguredRuntime {
 
   /** @override */
   pageConfig() {
-    return this.config_;
+    return this.pageConfig_;
   }
 
   /** @override */
@@ -4975,6 +5225,33 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  configure(config) {
+    // Validate first.
+    let error = null;
+    for (const k in config) {
+      const v = config[k];
+      if (k == 'windowOpenMode') {
+        if (v != WindowOpenMode.AUTO &&
+            v != WindowOpenMode.REDIRECT) {
+          error = 'Unknown windowOpenMode: ' + v;
+        }
+      } else {
+        error = 'Unknown config property: ' + k;
+      }
+    }
+    if (error) {
+      throw new Error(error);
+    }
+    // Assign.
+    Object.assign(this.config_, config);
+  }
+
+  /** @override */
+  config() {
+    return this.config_;
+  }
+
+  /** @override */
   reset() {
     this.entitlementsManager_.reset();
     this.dialogManager_.completeAll();
@@ -4983,7 +5260,7 @@ class ConfiguredRuntime {
   /** @override */
   start() {
     // No need to run entitlements without a product or for an unlocked page.
-    if (!this.config_.getProductId() || !this.config_.isLocked()) {
+    if (!this.pageConfig_.getProductId() || !this.pageConfig_.isLocked()) {
       return Promise.resolve();
     }
     this.getEntitlements();
@@ -5030,6 +5307,14 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  showSubscriptionLookupProgress(accountPromise) {
+    return this.documentParsed_.then(() => {
+      const wait = new WaitForSubscriptionLookupApi(this, accountPromise);
+      return wait.start();
+    });
+  }
+
+  /** @override */
   setOnLoginRequest(callback) {
     this.callbacks_.setOnLoginRequest(callback);
   }
@@ -5050,6 +5335,20 @@ class ConfiguredRuntime {
   saveSubscription(saveSubscriptionRequestCallback) {
     return this.documentParsed_.then(() => {
       return new LinkSaveFlow(this, saveSubscriptionRequestCallback).start();
+    });
+  }
+
+  /** @override */
+  showLoginPrompt() {
+    return this.documentParsed_.then(() => {
+      return new LoginPromptFlow(this).start();
+    });
+  }
+
+  /** @override */
+  showLoginNotification() {
+    return this.documentParsed_.then(() => {
+      return new LoginNotificationApi(this).start();
     });
   }
 

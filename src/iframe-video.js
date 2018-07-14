@@ -70,21 +70,21 @@ export function redispatch(element, event, events) {
 /**
  * @param {!./base-element.BaseElement} video
  * @param {string} src
- * @param {?string} name
- * @param {?Array<!SandboxOptions>=} sandbox
+ * @param {string=} opt_name
+ * @param {!Array<!SandboxOptions>=} opt_sandbox
  * @return {!Element}
  */
-export function createFrameFor(video, src, name = null, sandbox = null) {
+export function createFrameFor(video, src, opt_name, opt_sandbox) {
   const {element} = video;
   const frame =
       htmlFor(element)`<iframe frameborder=0 allowfullscreen></iframe>`;
 
-  if (name) {
-    frame.setAttribute('name', name);
+  if (opt_name) {
+    frame.setAttribute('name', opt_name);
   }
 
-  if (sandbox) {
-    frame.setAttribute('sandbox', sandbox.join(' '));
+  if (opt_sandbox) {
+    frame.setAttribute('sandbox', opt_sandbox.join(' '));
   }
 
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
