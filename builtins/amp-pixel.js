@@ -16,9 +16,9 @@
 
 import {BaseElement} from '../src/base-element';
 import {Services} from '../src/services';
+import {createPixel} from '../src/pixel';
 import {dev, user} from '../src/log';
 import {registerElement} from '../src/service/custom-element-registry';
-import {sendPixel} from '../src/pixel';
 
 const TAG = 'amp-pixel';
 
@@ -87,7 +87,7 @@ export class AmpPixel extends BaseElement {
       return Services.urlReplacementsForDoc(this.element)
           .expandUrlAsync(this.assertSource_(src))
           .then(src => {
-            const pixel = sendPixel(this.win, src, this.referrerPolicy_);
+            const pixel = createPixel(this.win, src, this.referrerPolicy_);
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });

@@ -24,10 +24,10 @@ const TAG = 'pixel';
 /**
  * @param {!Window} win
  * @param {string} src
- * @param {string=} referrerPolicy
+ * @param {?string=} referrerPolicy
  * @return {!Element}
  */
-export function sendPixel(win, src, referrerPolicy) {
+export function createPixel(win, src, referrerPolicy) {
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
     user().error(TAG, 'Unsupported referrerPolicy: ' + referrerPolicy);
   }

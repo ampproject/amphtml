@@ -20,10 +20,10 @@ import {
   checkCorsUrl,
   parseUrlDeprecated,
 } from '../../../src/url';
+import {createPixel} from '../../../src/pixel';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
-import {sendPixel} from '../../../src/pixel';
 import {setStyle} from '../../../src/style';
 
 /** @const {string} */
@@ -32,7 +32,7 @@ const TAG_ = 'amp-analytics.Transport';
 /**
  * @param {!Window} win
  * @param {string} request
- * @param {!Object<string, string>} transportOptions
+ * @param {!Object<string, string|boolean>} transportOptions
  */
 export function sendRequest(win, request, transportOptions) {
   assertHttpsUrl(request, 'amp-analytics request');
@@ -58,7 +58,7 @@ export function sendRequest(win, request, transportOptions) {
     const suppressWarnings = (typeof image == 'object' &&
         image['suppressWarnings']);
     Transport.sendRequestUsingImage(
-        win, request, suppressWarnings, referrerPolicy);
+        win, request, suppressWarnings, /** @type {string|undefined} */ (referrerPolicy));
     return;
   }
   user().warn(TAG_, 'Failed to send request', request, transportOptions);
@@ -73,10 +73,10 @@ export class Transport {
    * @param {!Window} win
    * @param {string} request
    * @param {boolean} suppressWarnings
-   * @param {string=} referrerPolicy
+   * @param {string|undefined} referrerPolicy
    */
   static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy) {
-    const image = sendPixel(win, request, referrerPolicy);
+    const image = createPixel(win, request, referrerPolicy);
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
