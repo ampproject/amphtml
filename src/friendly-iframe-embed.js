@@ -634,7 +634,7 @@ export class FriendlyIframeEmbed {
  */
 export function renderCloseButtonHeader(win, ampAdParent, ampLightbox) {
   const el = htmlFor(ampAdParent)`
-    <i-amphtml-ad-close-header role=button>
+    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
       <div>Ad</div>
       <i-amphtml-ad-close-button class="amp-ad-close-button">
       </i-amphtml-ad-close-button>
