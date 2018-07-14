@@ -645,7 +645,7 @@ function createXhrRequest(method, url) {
     xhr.open(method, url, true);
   } else if (typeof XDomainRequest != 'undefined') {
     // IE-specific object.
-    xhr = new XDomainRequest();
+    xhr = new XDomainRequest(); // eslint-disable-line no-undef
     xhr.open(method, url);
   } else {
     throw dev().createExpectedError('CORS is not supported');

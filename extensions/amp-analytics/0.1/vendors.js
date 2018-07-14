@@ -2204,7 +2204,7 @@ ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 
 ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
     ['triggers']['pageLoad']['iframe' +
-      /* TEMPORARY EXCEPTION */ 'Ping'] = true;
+    /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

@@ -317,7 +317,7 @@ if (!amp.validator.LIGHT) {
     let ruleName = '';
     for (let i = 0; i < this.prelude.length; ++i) {
       const prelude =
-          /** @type {!parse_css.IdentToken} */ (this.prelude[i]);
+      /** @type {!parse_css.IdentToken} */ (this.prelude[i]);
       if (prelude.value) {ruleName += prelude.value;}
     }
     return ruleName;
@@ -512,7 +512,7 @@ class Canonicalizer {
         'Internal Error: parseAnAtRule precondition not met');
 
     const startToken =
-        /** @type {!parse_css.AtKeywordToken} */ (tokenStream.current());
+    /** @type {!parse_css.AtKeywordToken} */ (tokenStream.current());
     const rule = new parse_css.AtRule(startToken.value);
     if (!amp.validator.LIGHT) {
       startToken.copyPosTo(rule);
@@ -683,7 +683,7 @@ class Canonicalizer {
     }
 
     const startToken =
-        /** @type {!parse_css.IdentToken} */ (tokenStream.current());
+    /** @type {!parse_css.IdentToken} */ (tokenStream.current());
     const decl =
         startToken.copyPosTo(new parse_css.Declaration(startToken.value));
 
@@ -729,7 +729,7 @@ class Canonicalizer {
       } else if (
         foundImportant &&
           decl.value[i].tokenType === parse_css.TokenType.DELIM &&
-      /** @type {parse_css.DelimToken} */ (decl.value[i]).value === '!') {
+        /** @type {parse_css.DelimToken} */ (decl.value[i]).value === '!') {
         decl.value.splice(i, decl.value.length);
         decl.important = true;
         break;
@@ -777,7 +777,7 @@ function consumeASimpleBlock(tokenStream, tokenList) {
       'Internal Error: consumeASimpleBlock precondition not met');
 
   const startToken =
-      /** @type {!parse_css.GroupingToken} */ (tokenStream.current());
+  /** @type {!parse_css.GroupingToken} */ (tokenStream.current());
   const {mirror} = startToken;
 
   tokenList.push(startToken);
@@ -791,7 +791,7 @@ function consumeASimpleBlock(tokenStream, tokenList) {
       (current === parse_css.TokenType.CLOSE_CURLY ||
          current === parse_css.TokenType.CLOSE_SQUARE ||
          current === parse_css.TokenType.CLOSE_PAREN) &&
-    /** @type {parse_css.GroupingToken} */ (tokenStream.current()).value ===
+      /** @type {parse_css.GroupingToken} */ (tokenStream.current()).value ===
             mirror) {
       tokenList.push(tokenStream.current());
       return;

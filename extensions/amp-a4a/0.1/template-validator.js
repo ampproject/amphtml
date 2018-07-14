@@ -73,7 +73,7 @@ export class TemplateValidator extends Validator {
     }
 
     const parsedResponseBody =
-        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+    /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
         tryParseJson(body) || {});
     return getAmpAdTemplateHelper(context.win)
         .fetch(parsedResponseBody.templateUrl)

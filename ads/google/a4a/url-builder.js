@@ -55,7 +55,7 @@ export function buildUrl(
     if (fullLength > capacity) {
       const truncatedValue = encodedValue
           .substr(0, capacity - encodedNameAndSep.length - 1)
-        // Don't end with a partially truncated escape sequence
+      // Don't end with a partially truncated escape sequence
           .replace(/%\w?$/, '');
       if (truncatedValue) {
         encodedParams.push(encodedNameAndSep + truncatedValue);
