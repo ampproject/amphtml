@@ -140,7 +140,7 @@ export class NextPageService {
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
         new MultidocManager(win, Services.ampdocServiceFor(win),
-          Services.extensionsFor(win), Services.timerFor(win));
+            Services.extensionsFor(win), Services.timerFor(win));
 
     installPositionObserverServiceForDoc(ampDoc);
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');

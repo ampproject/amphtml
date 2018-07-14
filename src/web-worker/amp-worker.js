@@ -155,7 +155,7 @@ class AmpWorker {
    */
   receiveMessage_(event) {
     const {method, returnValue, id} =
-        /** @type {FromWorkerMessageDef} */ (event.data);
+    /** @type {FromWorkerMessageDef} */ (event.data);
 
     const message = this.messages_[id];
     if (!message) {

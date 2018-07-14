@@ -237,7 +237,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   divertExperiments() {
     const experimentInfoMap =
-        /** @type {!Object<string,
+    /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
         [FORMAT_EXP]: {
           isTrafficEligible: () => !this.isResponsive_() &&

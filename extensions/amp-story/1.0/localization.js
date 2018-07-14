@@ -164,7 +164,7 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
 
   Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
     const localizedStringId =
-        /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
     pseudoLocaleStringBundle[localizedStringId].string =
         localizationFn(localizedStringBundle[localizedStringId].string);
   });

@@ -4297,7 +4297,7 @@ class ParsedValidatorRules {
      */
     this.isTagSpecCorrectHtmlFormat_ = function(tagSpec) {
       const castedHtmlFormat =
-          /** @type {amp.validator.HtmlFormat.Code<string>} */ (
+      /** @type {amp.validator.HtmlFormat.Code<string>} */ (
           /** @type {*} */ (htmlFormat));
       return tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
     };
@@ -4308,7 +4308,7 @@ class ParsedValidatorRules {
      */
     this.isCssLengthSpecCorrectHtmlFormat_ = function(cssLengthSpec) {
       const castedHtmlFormat =
-          /** @type {amp.validator.HtmlFormat.Code<string>} */ (
+      /** @type {amp.validator.HtmlFormat.Code<string>} */ (
           /** @type {*} */ (htmlFormat));
       return cssLengthSpec.htmlFormat == castedHtmlFormat;
     };
