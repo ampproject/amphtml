@@ -123,6 +123,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.containerListeners_ = map();
     /** @private {Object} */
     this.winListeners_ = map();
+
+    /** @private {boolean} */
+    this.isEventRegistered_ = false;
   }
 
   /**
@@ -369,6 +372,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Register event handlers
    */
   registerEvents() {
+    if (this.isEventRegistered_) { // avoid dup
+      return;
+    }
+
     if (this.isHoverSlider_) {
       this.listen_(this.element, 'mousemove', this.handleHideHint, true);
       this.listen_(dev().assertElement(this.container_),
@@ -384,6 +391,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.listen_(dev().assertElement(this.barButton_),
           'touchstart', this.touchStart);
     }
+    this.isEventRegistered_ = true;
   }
 
   /**
@@ -401,6 +409,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.dragEnd(null);
       this.touchEnd(null);
     }
+    this.isEventRegistered_ = false;
   }
 
   /**
