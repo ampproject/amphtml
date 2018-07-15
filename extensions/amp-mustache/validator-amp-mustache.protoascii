@@ -53,8 +53,6 @@ tags: {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "TEMPLATE"
-  # <template> tags may not be nested inside other <template> tags.
-  disallowed_ancestor: "TEMPLATE"
   # <templates> tags inside <amp-story-auto-ads> have additional requirements
   # as specified in the <amp-date-picker> rule file.
   disallowed_ancestor: "AMP-DATE-PICKER"
