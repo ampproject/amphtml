@@ -21,8 +21,6 @@ import {dev, user} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
-import {map} from '../../../src/utils/object';
 import {numeric} from '../../../src/transition';
 import {setStyle} from '../../../src/style';
 
@@ -35,6 +33,10 @@ import {setStyle} from '../../../src/style';
 // This is actually creating some trouble with gesture
 
 // this.mutateElement(callback), in which move children
+
+// INTERESTING EXPERIMENT:
+// getLayoutBox()?
+// this seems to be remeasured and updated on viewport update
 
 // TODO(kqian): fix gesture collision between drag mouseup and click to move
 export class AmpImageSlider extends AMP.BaseElement {
@@ -115,84 +117,8 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.pointerMoveX_ = this.pointerMoveX_.bind(this);
 
-    /** @private {Object} */
-    this.elementListeners_ = map();
-    /** @private {Object} */
-    this.barButtonListeners_ = map();
-    /** @private {Object} */
-    this.containerListeners_ = map();
-    /** @private {Object} */
-    this.winListeners_ = map();
-
     /** @private {boolean} */
     this.isEventRegistered_ = false;
-  }
-
-  /**
-   * Select the listeners map
-   * @param {EventTarget} element
-   * @return {Object|null}
-   * @private
-   */
-  selectListeners_(element) {
-    switch (element) {
-      case this.element:
-        return this.elementListeners_;
-      case this.container_:
-        return this.containerListeners_;
-      case this.barButton_:
-        return this.barButtonListeners_;
-      case this.win:
-        return this.winListeners_;
-      default:
-        return null;
-    }
-  }
-
-  /**
-   * Add an event listener on element
-   * @param {!EventTarget} element
-   * @param {string} eventType
-   * @param {function(Event)} listener
-   * @param {boolean} capture
-   * @private
-   */
-  listen_(element, eventType, listener, capture = false) {
-    const listeners = this.selectListeners_(element);
-    if (!listeners) {
-      return;
-    }
-
-    if (!listeners[eventType]) {
-      listeners[eventType] = [];
-    }
-
-    const opts = {};
-    if (capture) {
-      opts.capture = true;
-    }
-
-    listeners[eventType].push(listen(element, eventType, listener, opts));
-  }
-
-  /**
-   * Call unlisten on listener by event type
-   * @param {EventTarget} element
-   * @param {string} eventType
-   * @private
-   */
-  unlistenEvent_(element, eventType) {
-    const listeners = this.selectListeners_(element);
-    const events = listeners ? listeners[eventType] : null;
-    if (!listeners || !events) {
-      return;
-    }
-
-    for (let i = 0; i < events.length; i++) {
-      events[i]();
-    }
-
-    delete listeners[eventType];
   }
 
   /** @override */
@@ -377,21 +303,21 @@ export class AmpImageSlider extends AMP.BaseElement {
     }
 
     if (this.isHoverSlider_) {
-      this.listen_(this.element, 'mousemove', this.handleHideHint, true);
-      this.listen_(dev().assertElement(this.container_),
-          'mousemove', this.handleHover);
+      this.element.addEventListener('mousemove', this.handleHideHint, true);
+      this.container_.addEventListener('mousemove', this.handleHover);
     } else {
       // Use container_ for drag operation instead
       // element for click/tap operations
-      this.listen_(this.element, 'mousedown', this.handleHideHint, true);
-      this.listen_(this.element, 'touchstart', this.handleHideHint, true);
-      this.listen_(this.element, 'click', this.handleClickImage);
-      this.listen_(this.element, 'touchend', this.handleTapImage);
-      this.listen_(dev().assertElement(this.barButton_),
-          'mousedown', this.dragStart);
-      this.listen_(dev().assertElement(this.barButton_),
-          'touchstart', this.touchStart);
+      this.element.addEventListener('mousedown', this.handleHideHint, true);
+      this.element.addEventListener('touchstart', this.handleHideHint, true);
+      this.element.addEventListener('click', this.handleClickImage);
+      this.element.addEventListener('touchend', this.handleTapImage);
+      dev().assertElement(this.barButton_)
+          .addEventListener('mousedown', this.dragStart);
+      dev().assertElement(this.barButton_)
+          .addEventListener('touchstart', this.touchStart);
     }
+
     this.isEventRegistered_ = true;
   }
 
@@ -400,17 +326,22 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   unregisterEvents() {
     if (this.isHoverSlider_) {
-      this.unlistenEvent_(dev().assertElement(this.container_), 'mousemove');
+      this.element.removeEventListener('mousemove', this.handleHideHint, true);
+      this.container_.removeEventListener('mousemove', this.handleHover);
     } else {
-      this.unlistenEvent_(this.element, 'mousedown');
-      // touchstart events are unlistened in this.touchend(null)
-      this.unlistenEvent_(this.element, 'click');
-      this.unlistenEvent_(this.element, 'touchend');
+      this.element.removeEventListener('mousedown', this.handleHideHint, true);
+      this.element.removeEventListener('touchstart', this.handleHideHint, true);
+      this.element.removeEventListener('click', this.handleClickImage);
+      this.element.removeEventListener('touchend', this.handleTapImage);
+      dev().assertElement(this.barButton_)
+          .removeEventListener('mousedown', this.dragStart);
+      dev().assertElement(this.barButton_)
+          .removeEventListener('touchstart', this.touchStart);
       // remove pointer related events below
-      // clearup actions needed
       this.dragEnd(null);
       this.touchEnd(null);
     }
+
     this.isEventRegistered_ = false;
   }
 
@@ -421,6 +352,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   handleHover(e) {
     // This offsetWidth may change if user resize window
     // Thus not cached
+    // const {left, width} = this.getLayoutBox();
     const {left, width} = this.container_./*OK*/getBoundingClientRect();
     const leftPercentage = (e.pageX - left) / width;
     this.updatePositions(leftPercentage);
@@ -431,6 +363,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   handleClickImage(e) {
+    // const {left, width} = this.getLayoutBox();
     const {left, width} = this.container_./*OK*/getBoundingClientRect();
     const leftPercentage = (e.pageX - left) / width;
     this.animateUpdatePositions(leftPercentage);
@@ -441,6 +374,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   handleTapImage(e) {
+    // const {left, width} = this.getLayoutBox();
     const {left, width} = this.container_./*OK*/getBoundingClientRect();
     if (e.touches.length > 0) {
       const leftPercentage = (e.touches[0].pageX - left) / width;
@@ -465,6 +399,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   animateUpdatePositions(toPercentage) {
     const {left: containerLeft, width: containerWidth}
+    //    = this.getLayoutBox();
         = this.container_./*OK*/getBoundingClientRect();
     const {left: barLeft} = this.bar_./*OK*/getBoundingClientRect();
 
@@ -487,8 +422,8 @@ export class AmpImageSlider extends AMP.BaseElement {
     e.preventDefault();
     e.stopPropagation();
 
-    this.listen_(this.win, 'mousemove', this.dragMove);
-    this.listen_(this.win, 'mouseup', this.dragEnd);
+    this.win.addEventListener('mousemove', this.dragMove);
+    this.win.addEventListener('mouseup', this.dragEnd);
 
     this.moveOffset_ = e.pageX;
     this.splitOffset_ = this.bar_./*OK*/getBoundingClientRect().left;
@@ -512,8 +447,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       e.stopPropagation();
     }
 
-    this.unlistenEvent_(this.win, 'mousemove');
-    this.unlistenEvent_(this.win, 'mouseup');
+    this.win.removeEventListener('mousemove', this.dragMove);
+    this.win.removeEventListener('mouseup', this.dragEnd);
 
     this.moveOffset_ = 0;
     this.splitOffset_ = 0;
@@ -523,8 +458,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   touchStart(e) {
-    this.listen_(this.container_, 'touchmove', this.touchMove);
-    this.listen_(this.container_, 'touchend', this.touchEnd);
+    this.container_.addEventListener('touchmove', this.touchMove);
+    this.container_.addEventListener('touchend', this.touchEnd);
 
     this.moveOffset_ = e.touches[0].pageX;
     this.splitOffset_ = this.bar_./*OK*/getBoundingClientRect().left;
@@ -554,8 +489,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       // Avoid bubbling up to element
       e.stopPropagation();
     }
-    this.unlistenEvent_(dev().assertElement(this.container_), 'touchmove');
-    this.unlistenEvent_(dev().assertElement(this.container_), 'touchend');
+    this.container_.removeEventListener('touchmove', this.touchMove);
+    this.container_.removeEventListener('touchend', this.touchEnd);
 
     this.moveOffset_ = 0;
     this.splitOffset_ = 0;
@@ -567,8 +502,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   pointerMoveX_(pointerX) {
+    // const {width} = this.getLayoutBox();
     const {width} = this.container_./*OK*/getBoundingClientRect();
     const {left: leftBound, right: rightBound}
+    //    = this.getLayoutBox();
         = this.container_./*OK*/getBoundingClientRect();
 
     const moveX = pointerX - this.moveOffset_;
