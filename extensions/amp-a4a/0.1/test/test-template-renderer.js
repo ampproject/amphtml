@@ -93,7 +93,10 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
         })), headers);
   });
 
-  afterEach(() => sandbox.restore());
+  afterEach(() => {
+    sandbox.restore();
+    document.body.removeChild(containerElement);
+  });
 
   it('should append iframe child with correct template values', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
