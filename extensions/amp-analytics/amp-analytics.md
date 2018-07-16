@@ -667,6 +667,20 @@ In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpos
 
 To learn more, see [this example that implements iframe transport client API] (https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed.
 
+##### Referrer Policy
+
+Referrer policy can be specified as `referrerPolicy` field in the `transport` config. Currently only `no-referrer` is supported.
+Referrer policy is only available for `image` transport. If `referrerPolicy: no-referrer` is specified, the `beacon` & `xhrpost` transports are overridden to `false`.
+
+```javascript
+"transport": {
+  "beacon": false,
+  "xhrpost": false,
+  "image": true,
+  "referrerPolicy": "no-referrer"
+}
+```
+
 ## Validation
 
 See [amp-analytics rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/validator-amp-analytics.protoascii) in the AMP validator specification.
