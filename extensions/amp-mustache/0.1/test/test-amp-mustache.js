@@ -20,18 +20,23 @@ import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
 
 describe('amp-mustache 0.1', () => {
+  const sandbox = sinon.sandbox.create();
   let templateElement;
   let template;
   let viewerCanRenderTemplates = false;
 
-  const getServiceForDocStub = sinon.stub(service, 'getServiceForDoc');
-  getServiceForDocStub.returns({
-    canRenderTemplates: () => viewerCanRenderTemplates,
-  });
-
   beforeEach(() => {
     templateElement = document.createElement('template');
+    const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
+    getServiceForDocStub.returns({
+      canRenderTemplates: () => viewerCanRenderTemplates,
+    });
+
     template = new AmpMustache(templateElement);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('should render', () => {
@@ -428,14 +433,14 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should not call mustache parsing', () => {
-      sinon.spy(mustache, 'parse');
+      sandbox.spy(mustache, 'parse');
       template.compileCallback();
       expect(mustache.parse).to.have.not.been.called;
     });
 
     it('should not mustache render but still sanitize html', () => {
-      sinon.spy(sanitizer, 'sanitizeHtml');
-      sinon.spy(mustache, 'render');
+      sandbox.spy(sanitizer, 'sanitizeHtml');
+      sandbox.spy(mustache, 'render');
       template.render();
       expect(mustache.render).to.have.not.been.called;
       expect(sanitizer.sanitizeHtml).to.have.been.called;
