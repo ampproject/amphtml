@@ -1,22 +1,22 @@
 @startuml
-box "AMP Client"
+box "AMP Page"
     participant AMPskimlinks as "amp-skimlinks"
 end box
 
 [-> AMPskimlinks: User visits AMP page.
 
 ==  on buildCallback ==
-hnote over AMPskimlinks: Initialize amp-skimlinks
-hnote over AMPskimlinks: Parse links in page
+'hnote over AMPskimlinks: Initialize amp-skimlinks
+hnote over AMPskimlinks: Find links in page
 AMPskimlinks -> DomainResolverAPI as "Merchant Domain Resolver API \n (r.skimresources.com)": Request (GET): [domainA, domainB, domainC]?
 note left
     Send all domains found in the
     page to our API and resolve
-    which ones can be affiliated.
+    which ones can be affiliated
 end note
 DomainResolverAPI --> AMPskimlinks: Response: { DomainA: yes, domainB: false, domainC: false }
-hnote over AMPskimlinks: Swap monetizable links
-hnote over AMPskimlinks: Prepare tracking data
+hnote over AMPskimlinks: Replace monetizable links in page
+'hnote over AMPskimlinks: Prepare tracking data
 AMPskimlinks -> TrackingAPI as "Tracking API \n (t.skimresources.com)": Page impression tracking (POST): data={...}
 TrackingAPI --> AMPskimlinks:
 |||
@@ -32,7 +32,7 @@ note left
     page to our API.
 end note
 DomainResolverAPI --> AMPskimlinks: Response: { DomainD: yes, domainE: false }
-hnote over AMPskimlinks: Swap monetizable links.
+hnote over AMPskimlinks: Replace monetizable links
 
 == On anchor click ==
 'IF
