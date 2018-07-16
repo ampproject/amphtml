@@ -35,6 +35,17 @@ import {removeChildren} from '../../../src/dom';
 const TAG = 'amp-list';
 
 /**
+ * Option for setting interaction with amp-bind i.e. when to scan for and
+ * evaluates bindings in rendered children elements.
+ * @enum {string}
+ */
+const Binding = {
+  ALWAYS: 'always',
+  REFRESH: 'refresh',
+  NO: 'no',
+};
+
+/**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
  * the spec.
  */
@@ -82,6 +93,9 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
     this.bind_ = null;
 
+    /** @private {!Binding} */
+    this.binding_ = Binding.ALWAYS;
+
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.fetchList_();
@@ -112,6 +126,10 @@ export class AmpList extends AMP.BaseElement {
       this.element.setAttribute('aria-live', 'polite');
     }
 
+    if (this.element.hasAttribute('binding')) {
+      this.binding_ = this.element.getAttribute('binding').toLowerCase();
+    }
+
     Services.bindForDocOrNull(this.element).then(bind => {
       this.bind_ = bind;
     });
@@ -134,26 +152,24 @@ export class AmpList extends AMP.BaseElement {
     const src = mutations['src'];
     const state = mutations['state'];
     if (src !== undefined) {
-      const typeOfSrc = typeof src;
-      if (typeOfSrc === 'string') {
+      if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
-          return this.fetchList_();
+          this.fetchList_();
         }
-      } else if (typeOfSrc === 'object') {
+      } else if (typeof src === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
         const items = isArray(src) ? src : [src];
-        return this.scheduleRender_(items);
+        this.scheduleRender_(items);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
       const items = isArray(state) ? state : [state];
-      return this.scheduleRender_(items);
+      this.scheduleRender_(items);
     }
-    return Promise.resolve();
   }
 
   /**
@@ -292,31 +308,38 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Evaluates and applies any bindings in the given elements.
+   * Scans for, evaluates and applies any bindings in the given elements.
    * Ensures that rendered content is up-to-date with the latest bindable state.
+   * Can be skipped by setting binding="no" or binding="refresh" attribute.
    * @param {!Array<!Element>} elements
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
   updateBindingsForElements_(elements) {
-    // Experiment to _not_ block on retrieval of the Bind service before the
-    // first mutation (AMP.setState). This is a breaking change and will require
-    // either an attribute opt-in or a version bump.
-    if (isExperimentOn(this.win, 'fast-amp-list')) {
+    // Never: Always skip binding update.
+    if (this.binding_ === Binding.NO ||
+        isExperimentOn(this.win, 'amp-list-bind-never')) {
+      return Promise.resolve(elements);
+    }
+    // Refresh only: Do _not_ block on retrieval of the Bind service before the
+    // first mutation (AMP.setState).
+    if (this.binding_ === Binding.REFRESH ||
+        isExperimentOn(this.win, 'amp-list-bind-refresh')) {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return this.updateBindingsWith_(this.bind_, elements);
       } else {
         return Promise.resolve(elements);
       }
-    } else {
-      return Services.bindForDocOrNull(this.element).then(bind => {
-        if (bind) {
-          return this.updateBindingsWith_(bind, elements);
-        } else {
-          return Promise.resolve(elements);
-        }
-      });
     }
+    // Always (default): wait for Bind to scan for and evalute any bindings
+    // in the newly rendered `elements`.
+    return Services.bindForDocOrNull(this.element).then(bind => {
+      if (bind) {
+        return this.updateBindingsWith_(bind, elements);
+      } else {
+        return Promise.resolve(elements);
+      }
+    });
   }
 
   /**
