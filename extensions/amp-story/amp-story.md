@@ -448,7 +448,7 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
 
 **AMP-to-AMP linking**
 
-For documents displayed in an AMP viewer, links typically navigate _top or open in a new window. Links to AMP pages, however, may continue to be displayed in the viewer. To enable this behavior, add "amphtml": true to a component that supports links. For example:
+For documents displayed in an AMP viewer, links typically navigate `_top` or open in a new window. Links to AMP pages, however, may continue to be displayed in the viewer. To enable this behavior, add `"amphtml": true` to a component that supports links. For example:
 
 ```json
 ...
