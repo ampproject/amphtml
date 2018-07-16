@@ -42,6 +42,10 @@ tags: {  # <amp-list> with mandatory src attr
   html_format: EXPERIMENTAL
   tag_name: "AMP-LIST"
   requires_extension: "amp-list"
+  attrs: {
+    name: "binding"
+    value: "always|refresh|no"
+  }
   attrs: { name: "credentials" }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
@@ -84,6 +88,10 @@ tags: {  # <amp-list> with mandatory [src] attr
   tag_name: "AMP-LIST"
   spec_name: "AMP-LIST [SRC]"
   requires_extension: "amp-list"
+  attrs: {
+    name: "binding"
+    value: "always|refresh|no"
+  }
   attrs: { name: "credentials" }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
