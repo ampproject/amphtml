@@ -26,7 +26,7 @@ min_validator_revision_required: 338
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 675
+spec_file_revision: 677
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1113,7 +1113,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
 }
-
 tags: {
   html_format: AMP
   html_format: EXPERIMENTAL
@@ -1122,8 +1121,15 @@ tags: {
   mandatory_alternatives: "head > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
-  deprecation: "head > style[amp-boilerplate]"
-  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+  # Special Case. This tag is deprecated, however this matches any <style> tag
+  # in the document head without an associated attribute. This is far more
+  # likely to happen to be caused by the user intending to use
+  # <style amp-custom> than having used a deprecated amp-boilerplate. So, for
+  # this case, we do not emit deprecation warnings. Note that the <noscript>
+  # component of the deprecated boilerplate will still emit a deprecation
+  # warning.  See https://github.com/ampproject/amphtml/issues/4421
+  #deprecation: "head > style[amp-boilerplate]"
+  #deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
   attrs: { name: "nonce" }
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"

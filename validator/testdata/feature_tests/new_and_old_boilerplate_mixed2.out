@@ -27,8 +27,6 @@ FAIL
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style>body {opacity: 0}</style>
->>   ^~~~~~~~~
-feature_tests/new_and_old_boilerplate_mixed2.html:28:2 The tag 'head > style[amp-boilerplate] - old variant' is deprecated - use 'head > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
 |    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
