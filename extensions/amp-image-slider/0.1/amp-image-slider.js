@@ -384,6 +384,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       // Use container_ for drag operation instead
       // element for click/tap operations
       this.listen_(this.element, 'mousedown', this.handleHideHint, true);
+      this.listen_(this.element, 'touchstart', this.handleHideHint, true);
       this.listen_(this.element, 'click', this.handleClickImage);
       this.listen_(this.element, 'touchend', this.handleTapImage);
       this.listen_(dev().assertElement(this.barButton_),
@@ -402,6 +403,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.unlistenEvent_(dev().assertElement(this.container_), 'mousemove');
     } else {
       this.unlistenEvent_(this.element, 'mousedown');
+      // touchstart events are unlistened in this.touchend(null)
       this.unlistenEvent_(this.element, 'click');
       this.unlistenEvent_(this.element, 'touchend');
       // remove pointer related events below
