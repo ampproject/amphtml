@@ -35,7 +35,10 @@ import {
   VideoServiceInterface,
   VideoServiceSignals,
 } from './video-service-interface';
-import {VideoServiceSync} from './video-service-sync-impl';
+import {
+  VideoServiceSync,
+  setVideoComponentClassname,
+} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {
@@ -185,6 +188,8 @@ export class VideoManager {
 
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
+
+    setVideoComponentClassname(element);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve

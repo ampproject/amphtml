@@ -166,6 +166,8 @@ export class VideoEntry {
     this.loadPromise_ = listenOncePromise(this.element_, VideoEvents.LOAD);
 
     this.listenToAutoplayEvents_();
+
+    setVideoComponentClassname(this.element_);
   }
 
   /**
@@ -192,4 +194,11 @@ export class VideoEntry {
       this.video_.pause();
     });
   }
+}
+
+/**
+ * @param {!Element} element
+ */
+export function setVideoComponentClassname(element) {
+  element.classList.add('i-amphtml-video-component');
 }
