@@ -42,6 +42,6 @@ export function miximedia(global, data) {
   };
   // load the miximedia  AMP JS file script asynchronously
   const rand = Math.round(Math.random() * 100000000);
-  loadScript(global, 'https://static.mixi.media/static/amppages/ampclient/mixi.js?rand=' + rand, () => {},
+  loadScript(global, 'https://amp.mixi.media/ampclient/mixi.js?rand=' + rand, () => {},
       global.context.noContentAvailable);
 }
