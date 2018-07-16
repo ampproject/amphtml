@@ -276,7 +276,7 @@ The post-prompt UI provides one user action type that can be used to allow the u
 
 The `<amp-consent>` element can be used to block any other AMP components on the page from loading (except `<amp-consent>` itself).
 
-### Basic Blocking Behaviors
+### Basic blocking behaviors
 To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if the consent prompt has been skipped by the `checkConsentHref` response or `promptIfUnknownForGeoGroup` when consent is unknown. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
@@ -290,7 +290,7 @@ Individual components may override this behavior to provide more specialized han
 </amp-analytics>
 ```
 
-### Advanced Pre-defined Consent Blocking Behaviors
+### Advanced predefined consent blocking behaviors
 AMP provides a list of pre-defined [consent policy instances](#policy-instance-optional) for publishers to easily define consent blocking behaviors to individual components.
 
 Set the value to the `data-block-on-consent` attribute to use the pre-defined consent blocking behavior policy.
@@ -303,9 +303,8 @@ Set the value to the `data-block-on-consent` attribute to use the pre-defined co
 </amp-analytics>
 ```
 
-AMP may support more advanced pre-defined blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved only for the following supported pre-defined attributes.
+AMP may support more advanced pre-defined blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved only for the following supported pre-defined attributes:
 
-The supported pre-defined attributes are
 * `_till_responded` : Unblock the component until the user has responded to the consent prompt, or the consent prompt has been skipped.
 * `_till_accepted` : [Default basic blocking behavior](#basic-blocking-behaviors), expect that when `_till_accepted` is explicitly added, individual components cannot override the blocking behavior.
 * `_auto_reject` : Always reject the consent automatically if consent is required but unknown. The reject consent decision will not be stored. It is recommended not to specify a consent prompt UI when auto rejecting consent for every components.
