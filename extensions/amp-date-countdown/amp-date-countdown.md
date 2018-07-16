@@ -148,7 +148,7 @@ Event | Description
 `timeout` |  When the timer times out. For this action to function, `when-ended` **must be** set to `stop`. You can only run low-trust actions such as `amp-animation` and `amp-video` actions when the timer times out. This is to enforce AMP's UX principle of not allowing page content to reflow without explicit user actions.
 
 ### Example of action
-![Animated example the action](https://user-images.githubusercontent.com/2099009/42786623-d2ed499a-890b-11e8-9c19-379e9280b929.gif)
+![Animated example the action](https://user-images.githubusercontent.com/2099009/42786835-9e698228-890c-11e8-8776-f82a6cded829.gif)
 
 #### Code
 ```html
