@@ -140,7 +140,7 @@ export class NextPageService {
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
         new MultidocManager(win, Services.ampdocServiceFor(win),
-          Services.extensionsFor(win), Services.timerFor(win));
+            Services.extensionsFor(win), Services.timerFor(win));
 
     installPositionObserverServiceForDoc(ampDoc);
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
@@ -447,8 +447,8 @@ export class NextPageService {
 
     const urlService = Services.urlForDoc(dev().assertElement(this.element_));
     const {title} = documentRef.amp;
-    const {pathname} = urlService.parse(documentRef.ampUrl);
-    this.win_.history.replaceState({}, title, pathname);
+    const {pathname, search} = urlService.parse(documentRef.ampUrl);
+    this.win_.history.replaceState({}, title, pathname + search);
   }
 
   /**

@@ -108,7 +108,7 @@ module.exports = {
     '**/*.js',
     '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
-        'third_party}/**/*.*',
+        'third_party,test/coverage}/**/*.*',
     '!examples/**/*.*',
     '!{validator/dist,validator/webui/dist,' +
         'validator/node_modules,validator/nodejs/node_modules,' +

@@ -106,8 +106,8 @@ export function nativo(global, data) {
       setPercentageOfadViewed(
           (((coordinates.intersectionRect
               .height * 100) / coordinates
-                .boundingClientRect
-                .height) / 100));
+              .boundingClientRect
+              .height) / 100));
       global.PostRelease.checkIsAdVisible();
     }
     // Public

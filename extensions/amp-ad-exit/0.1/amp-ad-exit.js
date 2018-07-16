@@ -133,7 +133,7 @@ export class AmpAdExit extends AMP.BaseElement {
           continue;
         }
         const customVar =
-            /** @type {!./config.VariableDef} */ (target.vars[customVarName]);
+        /** @type {!./config.VariableDef} */ (target.vars[customVarName]);
         if (!customVar) {
           continue;
         }
