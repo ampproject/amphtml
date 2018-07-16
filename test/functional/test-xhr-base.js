@@ -17,7 +17,7 @@
 import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
 import {Services} from '../../src/services';
 import {assertSuccess, setupInit, XhrBase} from '../../src/xhr-base';
-import { getCorsUrl, getSourceOrigin } from '../../src/url';
+import {getCorsUrl, getSourceOrigin} from '../../src/url';
 
 
 describes.realWin('XhrBase', {amp: true}, function() {
