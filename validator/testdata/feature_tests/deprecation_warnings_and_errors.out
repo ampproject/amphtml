@@ -28,8 +28,6 @@ FAIL
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style>body {opacity: 0}</style>
->>   ^~~~~~~~~
-feature_tests/deprecation_warnings_and_errors.html:29:2 The tag 'head > style[amp-boilerplate] - old variant' is deprecated - use 'head > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
 |    <noscript><style>body {opacity: 1}</style></noscript>
 >>             ^~~~~~~~~
 feature_tests/deprecation_warnings_and_errors.html:30:12 The tag 'noscript > style[amp-boilerplate] - old variant' is deprecated - use 'noscript > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
