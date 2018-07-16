@@ -774,7 +774,7 @@ export class Bind {
       } else {
         const err = user().createError(
             `${TAG}: Binding to [${property}] on <${tag}> is not allowed.`);
-        reportError(err, element);
+        this.reportError_(err, element);
       }
     }
     return null;
@@ -821,7 +821,7 @@ export class Bind {
               `${TAG}: Expression evaluation error in "${expressionString}". `
               + evalError.message);
           userError.stack = evalError.stack;
-          reportError(userError, elements[0]);
+          this.reportError_(userError, elements[0]);
         }
       });
       dev().info(TAG, 'bindings:', results);
@@ -1011,7 +1011,7 @@ export class Bind {
         } catch (e) {
           const error = user().createError(`${TAG}: Applying expression ` +
               `results (${JSON.stringify(mutations)}) failed with error`, e);
-          reportError(error, element);
+          this.reportError_(error, element);
         }
       }
     });
@@ -1061,7 +1061,7 @@ export class Bind {
         } else {
           const err = user().createError(
               `${TAG}: "${newValue}" is not a valid result for [class].`);
-          reportError(err, element);
+          this.reportError_(err, element);
         }
         break;
 
@@ -1123,7 +1123,7 @@ export class Bind {
     } catch (e) {
       const error = user().createError(`${TAG}: "${value}" is not a ` +
           `valid result for [${attrName}]`, e);
-      reportError(error, element);
+      this.reportError_(error, element);
     }
     return false;
   }
@@ -1180,7 +1180,7 @@ export class Bind {
         } else {
           const err = user().createError(
               `${TAG}: "${expectedValue}" is not a valid result for [class].`);
-          reportError(err, element);
+          this.reportError_(err, element);
         }
         match = this.compareStringArrays_(initialValue, classes);
         break;
@@ -1258,8 +1258,19 @@ export class Bind {
   reportWorkerError_(e, message, opt_element) {
     const userError = user().createError(message + ' ' + e.message);
     userError.stack = e.stack;
-    reportError(userError, opt_element);
+    this.reportError_(userError, opt_element);
     return userError;
+  }
+
+  /**
+   * @param {!Error} error
+   * @param {!Element=} opt_element
+   */
+  reportError_(error, opt_element) {
+    if (getMode().test) {
+      return;
+    }
+    reportError(error, opt_element);
   }
 
   /**
