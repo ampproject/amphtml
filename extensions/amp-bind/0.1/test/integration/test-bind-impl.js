@@ -237,8 +237,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
   }); // in shadow ampdoc
 
-  // TODO(choumx, #16721): These tests cause the browser to crash.
-  describes.realWin.skip('in single ampdoc', {
+  describes.realWin('in single ampdoc', {
     amp: {
       ampdoc: 'single',
       runtimeOn: false,
@@ -565,11 +564,11 @@ describe.configure().ifNewChrome().run('Bind', function() {
           '{foo: bar}', sinon.match({event: {bar: 123}}));
     });
 
-    it('should only allow one action per event in invoke()', () => {
+    // TODO(choumx, #16721): Causes browser crash for some reason.
+    it.skip('should only allow one action per event in invoke()', () => {
       const {sandbox} = env;
       sandbox.stub(bind, 'setStateWithExpression');
       const userError = sandbox.stub(user(), 'error');
-
 
       const invocation = {
         method: 'setState',
