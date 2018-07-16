@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -21,6 +22,7 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {closest} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {numeric, px, setStyles as setStylesTransition} from '../../../src/transition';
@@ -220,6 +222,32 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
+   * Triggers 'expand' event
+   * @param {!Element} section
+   */
+  triggerExpandEvent_(section) {
+    const name = 'expand';
+    const event =
+        createCustomEvent(this.win, `accordionSection.${name}`);
+    this.action_.trigger(section, name, event, ActionTrust.HIGH);
+
+    this.element.dispatchCustomEvent(name);
+  }
+
+  /**
+   * Triggers 'collapse' event
+   * @param {!Element} section
+   */
+  triggerCollapseEvent_(section) {
+    const name = 'collapse';
+    const event =
+        createCustomEvent(this.win, `accordionSection.${name}`);
+    this.action_.trigger(section, name, event, ActionTrust.HIGH);
+
+    this.element.dispatchCustomEvent(name);
+  }
+
+  /**
    * Toggles section between expanded or collapsed.
    * @param {!Element} section
    * @param {boolean=} opt_forceExpand
@@ -254,6 +282,9 @@ class AmpAccordion extends AMP.BaseElement {
     } else { // Toggle without animation
       this.mutateElement(() => {
         if (toExpand) {
+          if (!section.hasAttribute('expanded')) {
+            this.triggerExpandEvent_(section);
+          }
           section.setAttribute('expanded', '');
           header.setAttribute('aria-expanded', 'true');
           // if expand-single-section is set, only allow one <section> to be
@@ -261,12 +292,18 @@ class AmpAccordion extends AMP.BaseElement {
           if (this.element.hasAttribute('expand-single-section')) {
             this.sections_.forEach(sectionIter => {
               if (sectionIter != section) {
+                if (section.hasAttribute('expanded')) {
+                  this.triggerCollapseEvent_(section);
+                }
                 sectionIter.removeAttribute('expanded');
                 sectionIter.children[0].setAttribute('aria-expanded', 'false');
               }
             });
           }
         } else {
+          if (section.hasAttribute('expanded')) {
+            this.triggerCollapseEvent_(section);
+          }
           section.removeAttribute('expanded');
           header.setAttribute('aria-expanded', 'false');
         }
@@ -287,11 +324,14 @@ class AmpAccordion extends AMP.BaseElement {
     const sectionChild = section.children[1];
 
     return this.mutateElement(() => {
-      // We set posiion and opacity to avoid a FOUC while measuring height
+      // We set position and opacity to avoid a FOUC while measuring height
       setStyles(sectionChild, {
         opacity: 0,
         position: 'fixed',
       });
+      if (!section.hasAttribute('expanded')) {
+        this.triggerExpandEvent_(section);
+      }
       section.setAttribute('expanded', '');
     }).then(() => {
       return this.measureMutateElement(
@@ -343,6 +383,9 @@ class AmpAccordion extends AMP.BaseElement {
         'height': px(numeric(height, 0)),
       }), duration, COLLAPSE_CURVE_).thenAlways(() => {
         return this.mutateElement(() => {
+          if (section.hasAttribute('expanded')) {
+            this.triggerCollapseEvent_(section);
+          }
           section.removeAttribute('expanded');
           setStyles(sectionChild, {
             height: '',
