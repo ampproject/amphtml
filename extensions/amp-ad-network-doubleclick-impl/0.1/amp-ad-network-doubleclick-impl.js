@@ -374,7 +374,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * @param {?CONSENT_POLICY_STATE} consentState
-   * @param {!Array<!AmpAdNetworkDoubleclickImpl>|undefined} instances
+   * @param {!Array<!AmpAdNetworkDoubleclickImpl>|undefined=} instances
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
