@@ -3835,8 +3835,8 @@ tags {
   html_format: AMP4ADS
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submitting]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submitting]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submitting"
@@ -3851,8 +3851,8 @@ tags {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-success]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-success]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-success"
@@ -3865,8 +3865,8 @@ tags {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-success][template]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-success][template]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-success"
@@ -3883,8 +3883,8 @@ tags {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-error]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-error]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-error"
@@ -3897,8 +3897,8 @@ tags {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-error][template]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-error][template]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-error"
