@@ -120,13 +120,13 @@ describes.realWin('AmpState', {
     element.build();
 
     // IMPORTANT: No CORS fetch should happen until viewer is visible.
-    const isVisibleStub = sandbox.stub(viewer, 'isVisible');
-    isVisibleStub.returns(false);
+    const hasBeenVisibleStub = sandbox.stub(viewer, 'hasBeenVisible');
+    hasBeenVisibleStub.returns(false);
     element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
     expect(ampState.fetchAndUpdate_).to.not.have.been.called;
     expect(ampState.fetch_).to.not.have.been.called;
 
-    isVisibleStub.returns(true);
+    hasBeenVisibleStub.returns(true);
     element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
     expect(ampState.fetchAndUpdate_).calledWithExactly(/* isInit */ false);
     return ampState.fetch_().then(() => {
