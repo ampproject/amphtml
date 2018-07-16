@@ -46,19 +46,6 @@ export class AmpNextPage extends AMP.BaseElement {
 
     /** @private {!./next-page-service.NextPageService} */
     this.service_ = getService(this.win, SERVICE_ID);
-
-    /** @private {?Element} */
-    this.separator_ = null;
-
-    const separatorElements = childElementsByAttr(element, 'separator');
-    user().assert(separatorElements.length <= 1,
-        `${TAG} should contain at most one <div separator> child`);
-
-    if (separatorElements.length === 1) {
-      const separator = separatorElements[0];
-      this.separator_ = separator;
-      removeElement(separator);
-    }
   }
 
   /** @override */
@@ -71,6 +58,16 @@ export class AmpNextPage extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-next-page'),
         'Experiment amp-next-page disabled');
 
+    const separatorElements = childElementsByAttr(this.element, 'separator');
+    user().assert(separatorElements.length <= 1,
+        `${TAG} should contain at most one <div separator> child`);
+
+    let separator = null;
+    if (separatorElements.length === 1) {
+      separator = separatorElements[0];
+      removeElement(separator);
+    }
+
     if (this.service_.isActive()) {
       return;
     }
@@ -80,7 +77,8 @@ export class AmpNextPage extends AMP.BaseElement {
 
     const src = element.getAttribute('src');
     if (src) {
-      return this.fetchConfig_().then(config => this.register_(config),
+      return this.fetchConfig_().then(
+          config => this.register_(config, separator),
           error => user().error(TAG, 'error fetching config', error));
     } else {
       const scriptElements = childElementsByTag(element, 'SCRIPT');
@@ -94,7 +92,7 @@ export class AmpNextPage extends AMP.BaseElement {
       const configJson = tryParseJson(scriptElement.textContent, error => {
         user().error(TAG, 'failed to parse config', error);
       });
-      this.register_(configJson);
+      this.register_(configJson, separator);
     }
   }
 
@@ -102,9 +100,10 @@ export class AmpNextPage extends AMP.BaseElement {
    * Verifies the specified config as a valid {@code NextPageConfig} and
    * registers the {@link NextPageService} for this document.
    * @param {*} configJson Config JSON object.
+   * @param {?Element} separator Optional custom separator element.
    * @private
    */
-  register_(configJson) {
+  register_(configJson, separator) {
     const {element} = this;
     const docInfo = Services.documentInfoForDoc(element);
     const urlService = Services.urlForDoc(element);
@@ -120,7 +119,7 @@ export class AmpNextPage extends AMP.BaseElement {
       });
     }
 
-    this.service_.register(element, config, this.separator_);
+    this.service_.register(element, config, separator);
     this.service_.setAppendPageHandler(element => this.appendPage_(element));
   }
 
