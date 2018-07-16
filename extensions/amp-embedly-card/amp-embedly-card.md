@@ -80,30 +80,20 @@ The URL to retrieve embedding information.
 
 ##### data-card-via
 
-Specifies the via content in the card. This is a a great way to do attribution.
-This is an optional attribute.
+Specifies the via content in the card. This is a a great way to do attribution. This is an optional attribute.
 
 ##### data-card-theme
 
-Allows settings the `dark` theme which changes the background color of the main card container.
+Allows settings the `dark` theme which changes the background color of the main card container. Use `dark` to set this theme. For dark backgrounds it's better to specify this. The default is `light`, which sets no background color of the main card container.
 
-Use `dark` to set this theme. For dark backgrounds it's better to specify this.
+##### data-card-embed
 
-The default is `light`, which sets no background color of the main card container.
-
-### data-card-embed
-
-URL to a video or rich media. 
-
-Use with static embeds like articles, instead of using the static page content in the card, 
-the card will embed the video or rich media.
+The URL to a video or rich media. Use with static embeds like articles, instead of using the static page content in the card, the card will embed the video or rich media.
 
 ##### data-card-image
 
-URL to an image.
-
-Specifies which image to use in article cards when `data-url` points to an article.
-Not all image URL's are supported, if the image is not loaded, try a different image or domain.
+The URL to an image. Specifies which image to use in article cards when `data-url` points to an article.
+Not all image URLs are supported, if the image is not loaded, try a different image or domain.
 
 ##### data-card-controls
 	
@@ -116,11 +106,7 @@ The default is `1`.
 
 ##### data-card-align
 
-Aligns the card. 
-
-The possible values are `left`, `center` and `right`.
-
-The default value is `center`.
+Aligns the card. The possible values are `left`, `center` and `right`. The default value is `center`.
 
 ##### data-card-recommend
 
