@@ -150,7 +150,7 @@ The URL's protocol must be HTTPS.
 {% call callout('Important', type='caution') %} Your endpoint must implement 
 the requirements specified in the CORS Requests in AMP spec. {% endcall %}
 
-The `src` attribute may be omitted if the config has been specified inline.
+The `src` attribute is required unless a config has been specified inline.
 
 ## Configuration spec
 
