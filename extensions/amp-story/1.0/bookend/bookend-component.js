@@ -19,10 +19,13 @@ import {ArticleComponent, ArticleComponentDef} from './components/article';
 import {CtaLinkComponent, CtaLinkDef} from './components/cta-link';
 import {HeadingComponent, HeadingComponentDef} from './components/heading';
 import {LandscapeComponent, LandscapeComponentDef} from './components/landscape';
+import {LocalizedStringId} from '../localization';
 import {PortraitComponent, PortraitComponentDef} from './components/portrait';
+import {Services} from '../../../../src/services';
 import {TextBoxComponent, TextBoxComponentDef} from './components/text-box';
 import {dev} from '../../../../src/log';
 import {htmlFor} from '../../../../src/static-template';
+import {toWin} from '../../../../src/types';
 
 /** @type {string} */
 export const TAG = 'amp-story-bookend';
@@ -103,6 +106,29 @@ function componentBuilderInstanceFor(type) {
 }
 
 /**
+ * Prepend a heading to the related articles section if first component is not a
+ * heading already.
+ * @param {!Array<BookendComponentDef>} components
+ * @param {!DocumentFragment} container
+ * @param {!Document} doc
+ */
+function prependTitle(components, container, doc) {
+  if (components[0] && components[0].type != 'heading') {
+    const win = toWin(doc.defaultView);
+    Services.localizationServiceForOrNull(win).then(localizationService => {
+      dev().assert(localizationService,
+          'Could not retrieve LocalizationService.');
+      const title = localizationService
+          .getLocalizedString(
+              LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL);
+      container.insertBefore(
+          componentBuilderInstanceFor('heading')
+              .buildElement({'text': title}, doc), container.firstChild);
+    });
+  }
+}
+
+/**
  * Delegator class that dispatches the logic to build different components
  * on the bookend to their corresponding classes.
  */
@@ -129,14 +155,17 @@ export class BookendComponent {
   }
 
   /**
-   * Delegates components to their corresponding element builder.
-   * class.
+   * Builds the bookend components elements by choosing the appropriate builder
+   * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
    * @return {!DocumentFragment}
    */
   static buildElements(components, doc) {
     const fragment = doc.createDocumentFragment();
+
+    prependTitle(components, fragment, doc);
+
     components.forEach(component => {
       const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
