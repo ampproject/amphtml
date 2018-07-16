@@ -27,6 +27,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isInFie} from '../../../src/friendly-iframe-embed';
 import {toArray} from '../../../src/types';
 import {tryFocus} from '../../../src/dom';
 
@@ -38,7 +39,6 @@ const LightboxEvents = {
   OPEN: 'lightboxOpen',
   CLOSE: 'lightboxClose',
 };
-
 
 class AmpLightbox extends AMP.BaseElement {
 
@@ -180,6 +180,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
+
     this.getViewport().enterLightboxMode(this.element)
         .then(() => this.finalizeOpen_());
   }
@@ -418,10 +419,12 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   maybeSetTransparentBody_() {
-    if (this.getAmpDoc().win != this.win) { // in FIE
-      setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
-        dev().assert(this.win.document.body)));
+    const {win, element} = this;
+    if (!isInFie(element)) {
+      return;
     }
+    const body = dev().assertElement(win.document.body);
+    setTransparentBody(win, /** @type {!HTMLBodyElement} */ (body));
   }
 
   /**
@@ -444,37 +447,37 @@ class AmpLightbox extends AMP.BaseElement {
  * @private
  */
 function setTransparentBody(win, body) {
-  Services.vsyncFor(win).run({
-    measure(state) {
-      state.alreadyTransparent =
-          computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
-    },
-    mutate(state) {
-      if (!state.alreadyTransparent && !getMode().test) {
+  const state = {};
+  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
 
-        // TODO(alanorozco): Create documentation page and link it here once the
-        // A4A lightbox experiment is turned on.
-        user().warn(TAG,
-            'The background of the <body> element has been forced to ' +
-            'transparent. If you need to set background, use an intermediate ' +
-            'container.');
-      }
+  Services.resourcesForDoc(ampdoc).measureMutateElement(body,
+      function measure() {
+        state.alreadyTransparent =
+            computedStyle(win, body)['background-color'] == 'rgba(0, 0, 0, 0)';
+      },
+      function mutate() {
+        if (!state.alreadyTransparent && !getMode().test) {
+          // TODO(alanorozco): Create documentation page and link it here once
+          // the A4A lightbox experiment is turned on.
+          user().warn(TAG,
+              'The background of the <body> element has been forced to ' +
+              'transparent. If you need to set background, use an ' +
+              'intermediate container.');
+        }
 
-      // set as !important regardless to prevent changes
-      setImportantStyles(body, {background: 'transparent'});
-    },
-  }, {});
-}
-
-
-// TODO(alanorozco): refactor this somehow so we don't need to do a direct
-// getMode check
-if (getMode().runtime == 'inabox') {
-  setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
-    dev().assert(document.body)));
+        // set as !important regardless to prevent changes
+        setImportantStyles(body, {background: 'transparent'});
+      });
 }
 
 
 AMP.extension(TAG, '0.1', AMP => {
+  // TODO(alanorozco): refactor this somehow so we don't need to do a direct
+  // getMode check
+  if (getMode().runtime == 'inabox') {
+    setTransparentBody(window, /** @type {!HTMLBodyElement} */ (
+      dev().assert(document.body)));
+  }
+
   AMP.registerElement(TAG, AmpLightbox, CSS);
 });

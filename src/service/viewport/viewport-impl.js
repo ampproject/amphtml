@@ -640,7 +640,7 @@ export class Viewport {
           'Lightbox mode for A4A is only available when ' +
           "'amp-lightbox-a4a-proto' experiment is on");
 
-      dev().assert(fieOptional).enterFullOverlayMode();
+      dev().assert(fieOptional).enterFullOverlayMode(requestingElement);
     }
   }
 
