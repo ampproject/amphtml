@@ -609,6 +609,7 @@ export const adConfig = {
       'https://deb.send.microad.jp',
     ],
   },
+
   miximedia: {
     renderStartImplemented: true,
   },
