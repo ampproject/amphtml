@@ -57,22 +57,6 @@ export const EventType = {
   PAGE_LOADED: 'ampstory:pageload',
 };
 
-
-/**
- * @param {!EventTarget} source
- * @param {string} eventName
- * @param {boolean=} opt_bubbles
- */
-//export function dispatch(source, eventName, opt_bubbles) {
-  //const event = new Event(eventName, {bubbles: !!opt_bubbles});
-  //if (event.initEvent) {
-    //event.initEvent(eventName, /* bubbles */ !!opt_bubbles,
-      //  /* cancelable */ false);
-  //}
-  //source.dispatchEvent(event);
-
-  //dispatch(this.element, EventType.PAGE_LOADED, true);
-//} 
 /**
  * @param {!Window} win
  * @param {!EventTarget} source
