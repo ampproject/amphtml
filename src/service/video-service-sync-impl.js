@@ -103,6 +103,8 @@ export class VideoServiceSync {
 
     this.maybeInstallAutoplay_(video);
 
+    setVideoComponentClassname(video.element);
+
     new VideoEntry(video);
   }
 
@@ -192,4 +194,11 @@ export class VideoEntry {
       this.video_.pause();
     });
   }
+}
+
+/**
+ * @param {!Element} element
+ */
+export function setVideoComponentClassname(element) {
+  element.classList.add('i-amphtml-video-component');
 }
