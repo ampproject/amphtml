@@ -103,8 +103,6 @@ export class VideoServiceSync {
 
     this.maybeInstallAutoplay_(video);
 
-    setVideoComponentClassname(video.element);
-
     new VideoEntry(video);
   }
 
@@ -168,6 +166,8 @@ export class VideoEntry {
     this.loadPromise_ = listenOncePromise(this.element_, VideoEvents.LOAD);
 
     this.listenToAutoplayEvents_();
+
+    setVideoComponentClassname(this.element_);
   }
 
   /**
