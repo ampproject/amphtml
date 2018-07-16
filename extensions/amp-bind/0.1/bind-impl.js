@@ -20,14 +20,13 @@ import {BindExpressionResultDef} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {BindingDef} from './bind-evaluator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {filterSplice} from '../../../src/utils/array';
+import {filterSplice, findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
@@ -197,10 +196,11 @@ export class Bind {
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
 
-    // AMP.printState() for debugging in the console.
-    if (!self.AMP.printState) {
-      self.AMP.printState = this.printState_.bind(this);
-    }
+    // Install debug tools.
+    const g = self.AMP;
+    g.printState = g.printState || this.debugPrintState_.bind(this);
+    g.setState = g.setState || (state => this.setState(state));
+    g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
   /** @override */
@@ -649,7 +649,6 @@ export class Bind {
     const bindings = [];
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = map();
-
 
     const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
       ? node : node.ownerDocument, 'ownerDocument is null.');
@@ -1304,21 +1303,65 @@ export class Bind {
 
   /**
    * Print out the current state in the console.
-   * @param {string=} opt_expression
+   * @param {(!Element|string)=} opt_elementOrExpr
    * @private
    */
-  printState_(opt_expression) {
-    if (opt_expression) {
-      if (typeof opt_expression !== 'string') {
-        user().error(TAG, 'Invalid JSON expression. Example: ' +
-            'AMP.printState("foo.bar") to print current value of "foo.bar".');
-        return;
+  debugPrintState_(opt_elementOrExpr) {
+    if (opt_elementOrExpr) {
+      if (typeof opt_elementOrExpr === 'string') {
+        const value = getValueForExpr(this.state_, opt_elementOrExpr);
+        user().info(TAG, value);
+      } else if (opt_elementOrExpr.nodeType === Node.ELEMENT_NODE) {
+        const element = user().assertElement(opt_elementOrExpr);
+        this.debugPrintElement_(element);
+      } else {
+        user().info(TAG, 'Invalid argument. Pass a JSON expression or an ' +
+            'element instead e.g. AMP.printState("foo.bar") or ' +
+            'AMP.printState($0) after selecting an element.');
       }
-      const value = getValueForExpr(this.state_, opt_expression);
-      user().info(TAG, value);
     } else {
       user().info(TAG, this.state_);
     }
+  }
+
+  /**
+   * Print out the element's bound attributes and respective expression values.
+   * @param {!Element} element
+   * @private
+   */
+  debugPrintElement_(element) {
+    const index = findIndex(this.boundElements_, boundElement => {
+      return boundElement.element === element;
+    });
+    if (index < 0) {
+      user().info(TAG, 'Element has no bindings:', element);
+      return;
+    }
+    // Evaluate expressions in bindings in `element`.
+    const promises = [];
+    const {boundProperties} = this.boundElements_[index];
+    boundProperties.forEach(boundProperty => {
+      const {expressionString} = boundProperty;
+      promises.push(this.evaluateExpression_(expressionString, this.state_));
+    });
+    // Print the map of attribute to expression value for `element`.
+    const output = map();
+    Promise.all(promises).then(results => {
+      boundProperties.forEach((boundProperty, i) => {
+        const {property} = boundProperty;
+        output[property] = results[i];
+      });
+      user().info(TAG, output);
+    });
+  }
+
+  /**
+   * @param {string} expression
+   */
+  debugEvaluate_(expression) {
+    this.evaluateExpression_(expression, this.state_).then(result => {
+      user().info(TAG, result);
+    });
   }
 
   /**

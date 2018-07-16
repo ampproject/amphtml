@@ -249,7 +249,8 @@ export class BindEvaluator {
 
   /**
    * Return parsed bindings for testing.
-   * @visibleForTesting {!Array<BindingDef>}
+   * @return {!Array<BindingDef>}
+   * @visibleForTesting
    */
   bindingsForTesting() {
     return this.bindings_;
