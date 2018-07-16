@@ -174,8 +174,7 @@ exports.getBundleFlags = function(g) {
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend on _base.
     if (!isBase && g.bundles._base) {
-      const basename = path.basename(originalName, '.js');
-      const configEntry = extensionBundles.filter(x => x.name == basename)[0];
+      const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
       } else {
@@ -386,19 +385,33 @@ function setupBundles(graph) {
     let inBundleCount = 0;
     // The bundle a module should go into.
     let dest;
+    // Bundles that this item must be available to.
+    const bundleDestCandidates = [];
     // Count in how many bundles a modules wants to be.
     Object.keys(graph.depOf).sort().forEach(function(entry) {
       if (graph.depOf[entry][id]) {
         inBundleCount++;
         dest = entry;
+        const configEntry = getExtensionBundleConfig(entry);
+        const type = configEntry ? configEntry.type : '_base';
+        bundleDestCandidates.push(type);
       }
     });
     console/*OK*/.assert(inBundleCount >= 1,
         'Should be in at least 1 bundle', id, 'Bundle count',
         inBundleCount, graph.depOf);
     // If a module is in more than 1 bundle, it must go into _base.
-    if (inBundleCount > 1) {
+    if (bundleDestCandidates.length > 1) {
+      const first = bundleDestCandidates[0];
+      const allTheSame = bundleDestCandidates.some(c => c == first);
+      const needsBase = bundleDestCandidates.some(c => c == '_base');
       dest = '_base';
+      if (allTheSame) {
+        dest = first;
+      } else if (!needsBase) {
+        // Comment out when merging PR that introduces intermediate bundle.
+        // dest = '_intermediate'
+      }
     }
     if (!graph.bundles[dest]) {
       graph.bundles[dest] = {
@@ -414,6 +427,12 @@ function setupBundles(graph) {
   if (graph.entryModules.length == 1) {
     delete graph.bundles._base;
   }
+}
+
+// Returns the extension bundle config for the given filename or null.
+function getExtensionBundleConfig(filename) {
+  const basename = path.basename(filename, '.js');
+  return extensionBundles.filter(x => x.name == basename)[0];
 }
 
 const knownExtensions = {
