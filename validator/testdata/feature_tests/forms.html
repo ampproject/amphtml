@@ -47,6 +47,25 @@
     <div submit-success><template type="amp-mustache">Success</template></div>
     <div submit-error>Error</div>
   </form>
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+    custom-validation-reporting="as-you-go">
+    <fieldset>
+      <label>
+        <span>Your name</span>
+        <input id="name" type="text" name="name" required>
+        <span visible-when-invalid="valueMissing" validation-for="name"></span>
+      </label>
+      <label>
+        <span>Your email</span>
+        <input type="email" name="email" required>
+      </label>
+      <input type="submit" value="Subscribe">
+    </fieldset>
+    <div>
+      <div submit-success><template type="amp-mustache">Success</template></div>
+      <div submit-error>Error</div>
+    </div>
+  </form>
   <!-- More valid tags (datalist and optgroup) -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <label>Choose a browser from this list:
