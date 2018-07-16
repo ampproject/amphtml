@@ -369,10 +369,10 @@ export class Bind {
    */
   scanAndApply(added, removed, timeout = 2000) {
     dev().info(TAG, 'rescan:', added, removed);
-    const promise = this.removeThenAdd_(added, removed)
-        .then(bindingsAdded => {
+    const promise = this.removeThenAdd_(removed, added)
+        .then(deltas => {
           // Don't reevaluate/apply if there are no bindings.
-          if (bindingsAdded > 0) {
+          if (deltas.added > 0) {
             return this.evaluate_().then(results =>
               this.applyElements_(results, added));
           }
@@ -1219,22 +1219,24 @@ export class Bind {
 
   /**
    * Removes bindings for nodes in `remove`, then scans for bindings in `add`.
-   * Return promise that resolves upon completion.
+   * Return promise that resolves upon completion with struct containing number
+   * of removed and added bindings.
    * @param {!Array<!Node>} remove
    * @param {!Array<!Node>} add
-   * @return {!Promise}
+   * @return {!Promise<{added: number, removed: number}>}
    * @private
    */
   removeThenAdd_(remove, add) {
-    let sum = 0;
+    let removed = 0;
     return this.removeBindingsForNodes_(remove)
-        .then(removed => {
-          sum -= removed;
+        .then(r => {
+          removed = r;
           return this.addBindingsForNodes_(add);
         })
         .then(added => {
-          sum += added;
-          dev().info(TAG, '⤷', 'Δ:', sum, ', ∑:', this.numberOfBindings());
+          dev().info(TAG,
+              '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
+          return {added, removed};
         });
   }
 
