@@ -119,7 +119,7 @@ Technical issues, designs, etc. are discussed using several different channels:
 - [Slack](https://amphtml.slack.com) ([signup](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877))
   - the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/details/) channel is the main channel for you to discuss/ask questions about *contributing* to the open source project
   - if you're *new to contributing* to AMP stop by [#welcome-contributors](https://amphtml.slack.com/messages/C432AFMFE/details/) to say hi!
-  - if you have a question about *using AMP on your site*, consider using [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html) first; if you can't find answers there the [#using-amp](https://amphtml.slack.com/messages/C9HPA6HGB/details/) Slack channel is available
+  - **NOTE: if you have a question about *using AMP on your site*, use [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html) rather than Slack** as Stack Overflow is more actively monitored for these types of questions
   - there are many other Slack channels for more specific topics; after you join our Slack click on the "Channels" header to find other channels you want to participate in
 - the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss)
 
