@@ -600,6 +600,7 @@ export function resetLogConstructorForTesting() {
  *  1. Not disabled using `#log=0`.
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
+ *  3. AMP.setLogLevel(D) is called, where D >= 1.
  *
  * @param {!Element=} opt_element
  * @return {!Log}
@@ -644,6 +645,7 @@ function getUserLogger(suffix) {
  * Enabled in the following conditions:
  *  1. Not disabled using `#log=0`.
  *  2. Logging is explicitly enabled via `#log=D`, where D >= 2.
+ *  3. AMP.setLogLevel(D) is called, where D >= 2.
  *
  * @return {!Log}
  */

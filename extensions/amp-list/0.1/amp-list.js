@@ -130,7 +130,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    dev().fine(TAG, 'mutate:', mutations);
+    dev().info(TAG, 'mutate:', mutations);
     const src = mutations['src'];
     const state = mutations['state'];
     if (src !== undefined) {
@@ -250,7 +250,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(items) {
-    dev().fine(TAG, 'schedule:', items);
+    dev().info(TAG, 'schedule:', items);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
     // If there's nothing currently being rendered, schedule a render pass.
@@ -269,7 +269,7 @@ export class AmpList extends AMP.BaseElement {
   doRenderPass_() {
     const current = this.renderItems_;
     dev().assert(current, 'Nothing to render.');
-    dev().fine(TAG, 'pass:', current);
+    dev().info(TAG, 'pass:', current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
       if (this.renderItems_ !== current) {
@@ -336,7 +336,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   render_(elements) {
-    dev().fine(TAG, 'render:', elements);
+    dev().info(TAG, 'render:', elements);
 
     this.mutateElement(() => {
       removeChildren(dev().assertElement(this.container_));

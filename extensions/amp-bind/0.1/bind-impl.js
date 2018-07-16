@@ -231,7 +231,7 @@ export class Bind {
       user().error(TAG, 'Failed to merge result from AMP.setState().', e);
     }
 
-    dev().fine(TAG, 'state:', this.state_);
+    dev().info(TAG, 'state:', this.state_);
 
     if (opt_skipEval) {
       return Promise.resolve();
@@ -306,7 +306,7 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    dev().fine(TAG, 'setState:', `"${expression}"`);
+    dev().info(TAG, 'setState:', `"${expression}"`);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result))
         .then(() => {
@@ -329,7 +329,7 @@ export class Bind {
    * @return {!Promise}
    */
   pushStateWithExpression(expression, scope) {
-    dev().fine(TAG, 'pushState:', expression);
+    dev().info(TAG, 'pushState:', expression);
     return this.evaluateExpression_(expression, scope).then(result => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
@@ -368,7 +368,7 @@ export class Bind {
    * @return {!Promise}
    */
   scanAndApply(added, removed, timeout = 2000) {
-    dev().fine(TAG, 'rescan:', added, removed);
+    dev().info(TAG, 'rescan:', added, removed);
     const promise = this.removeThenAdd_(added, removed)
         .then(bindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
@@ -403,12 +403,12 @@ export class Bind {
    * @private
    */
   initialize_(root) {
-    dev().fine(TAG, 'init');
+    dev().info(TAG, 'init');
     let promise = Promise.all([
       this.addMacros_(),
       this.addBindingsForNodes_([root])]
     ).then(results => {
-      dev().fine(TAG, '⤷', 'Δ:', results);
+      dev().info(TAG, '⤷', 'Δ:', results);
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
     });
@@ -797,7 +797,7 @@ export class Bind {
         // Throw to reject promise.
         throw this.reportWorkerError_(error, `${TAG}: Expression eval failed.`);
       } else {
-        dev().fine(TAG, '⤷', result);
+        dev().info(TAG, '⤷', result);
         return result;
       }
     });
@@ -824,7 +824,7 @@ export class Bind {
           reportError(userError, elements[0]);
         }
       });
-      dev().fine(TAG, 'bindings:', results);
+      dev().info(TAG, 'bindings:', results);
       return results;
     });
   }
@@ -942,7 +942,7 @@ export class Bind {
       return this.applyBoundElement_(results, boundElement);
     });
     return Promise.all(promises).then(() => {
-      dev().fine(TAG, 'updated:', promises.length, 'elements');
+      dev().info(TAG, 'updated:', promises.length, 'elements');
     });
   }
 
@@ -962,7 +962,7 @@ export class Bind {
       });
     });
     return Promise.all(promises).then(() => {
-      dev().fine(TAG, 'updated:', promises.length, 'elements');
+      dev().info(TAG, 'updated:', promises.length, 'elements');
     });
   }
 
@@ -1211,7 +1211,7 @@ export class Bind {
     if (parent && parent.tagName == 'AMP-LIST') {
       return;
     }
-    dev().fine(TAG, 'dom_update:', target);
+    dev().info(TAG, 'dom_update:', target);
     this.removeThenAdd_([target], [target]).then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
@@ -1234,7 +1234,7 @@ export class Bind {
         })
         .then(added => {
           sum += added;
-          dev().fine(TAG, '⤷', 'Δ:', sum, ', ∑:', this.numberOfBindings());
+          dev().info(TAG, '⤷', 'Δ:', sum, ', ∑:', this.numberOfBindings());
         });
   }
 
