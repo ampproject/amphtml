@@ -245,7 +245,7 @@ exports.getGraph = function(entryModules, config) {
         name: '_base_i',
         // The modules in the bundle.
         modules: [],
-      }
+      },
     },
     packages: {},
     browserMask: {},
