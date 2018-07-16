@@ -37,7 +37,7 @@ i-amphtml-ad-close-header {
   box-sizing: border-box;
   padding: 5px;
   line-height: 40px; /* 60px - 5px * 2 */
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 1);
   color: white;
   font-family: Helvetica, sans-serif;
   font-size: 12px;
