@@ -21,8 +21,9 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 const TAG = 'amp-anim';
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'aria-label', 'aria-describedby',
   'aria-labelledby', 'src', 'srcset'];
-const SRC_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///' +
-'yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+/** @visibleForTesting */
+export const SRC_PLACEHOLDER = 'data:image/gif;base64,' +
+'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export class AmpAnim extends AMP.BaseElement {
 
