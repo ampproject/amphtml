@@ -112,7 +112,7 @@ const DOUBLECLICK_EXPERIMENT_FEATURE = {
 
 /**
  * Map of pageview tokens to the instances they belong to.
- * @private {!Object<string: !AmpAdNetworkDoubleclickImpl>}
+ * @private {!Object<string, !AmpAdNetworkDoubleclickImpl>}
  */
 export const tokensToInstances = {};
 
