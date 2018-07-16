@@ -193,6 +193,7 @@ The prompt UI is defined within the consent instance config. The `promptUI` attr
 
 AMP displays prompt UI on page load or by user interaction. The prompt UI is hidden based on the three user actions described below.
 
+AMP also supports external consent UI flow with the usage of `<amp-iframe>`. More information about the communication of user actions can be found [below](#prompt-actions-from-external-consent-ui).
 #### Prompt UI for Stories
 
 The `amp-story` extension provides a [default prompt UI](https://user-images.githubusercontent.com/1492044/40135514-8ab56d10-5913-11e8-95a2-72ac01ff31e0.png), that requires using a `<amp-story-consent>` component as the prompt UI. This component content requires a `title`, a `message`, and a list of `vendors`, and has to be specified in its own component configuration.
@@ -236,6 +237,19 @@ following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 * `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
 
 * `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
+
+##### Prompt Actions from External Consent UI
+
+When using iframes as consent prompt UI. Iframes can send a `consent-response` message to the parent AMP page to inform [prompt actions](#prompt-actions) on the current consent. Note the message must come from the `<amp-iframe>` created iframe. Messages from nested iframes will be ignored.
+
+*Example: iframe `consent-response` request*
+
+```javascript
+window.parent.postMessage({
+  type: 'consent-response',
+  action: 'accept/reject/dismiss'
+}, '*');
+```
 
 
 <a name="post-prompt"></a>
@@ -370,11 +384,11 @@ The table below lists the vendors and components that are integrated with amp-co
 
 ##### Will AMP change any behavior by default on May 25th?
 
-No. All desired behavior on AMP pages is managed by publishers and this is no different. 
+No. All desired behavior on AMP pages is managed by publishers and this is no different.
 
-##### How can I stop making ad and analytics calls on all my AMP pages? 
+##### How can I stop making ad and analytics calls on all my AMP pages?
 
-Use the [`data-block-on-consent`](#blocking-behaviors) attribute on the [`<amp-ad>`](https://www.ampproject.org/docs/reference/components/amp-ad) or [`<amp-analytics>`](https://www.ampproject.org/docs/reference/components/amp-analytics) component. 
+Use the [`data-block-on-consent`](#blocking-behaviors) attribute on the [`<amp-ad>`](https://www.ampproject.org/docs/reference/components/amp-ad) or [`<amp-analytics>`](https://www.ampproject.org/docs/reference/components/amp-analytics) component.
 
 Example:
 
@@ -388,77 +402,77 @@ Example:
 
 **Note**: For some vendors, the `data-block-on-consent` attribute only works in conjunction with `<amp-consent>`. Consult with your ad or analytics vendor for implementation details.
 
-##### How can I gather consent from all users on AMP pages? 
+##### How can I gather consent from all users on AMP pages?
 
-Use the `<amp-consent>` component which allows configuring a custom UI with `Accept`, `Reject` and `Dismiss` states. It is up to each amp-component vendor how they interpret these states, so please read your vendor's documentation carefully. 
+Use the `<amp-consent>` component which allows configuring a custom UI with `Accept`, `Reject` and `Dismiss` states. It is up to each amp-component vendor how they interpret these states, so please read your vendor's documentation carefully.
 
 Note that you must configure either the [`promptIfUnknownForGeoGroup`](#promptifunknownforgeogroup) attribute or the checkConsentHref request.
 
-##### How can I stop showing all of my content to users from the EEA?  
+##### How can I stop showing all of my content to users from the EEA?
 
 You could consider hiding all your content for EEA users by implementing [`<amp-geo>`](https://www.ampproject.org/docs/reference/components/amp-geo). See [this blog post](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/) for more details.
 
-##### How can I target consent for only EEA users?  
+##### How can I target consent for only EEA users?
 
 Use [`<amp-geo>`](https://www.ampproject.org/docs/reference/components/amp-geo) to configure a country group and hook up the country group to `promptIfUnknownForGeoGroup` attribute in `<amp-consent>`. If the user accesses the AMP page from a country that's configured in the list, the appropriate consent UI will be invoked.
 
 ##### Can I make the consent UI blocking?
 
-Yes. The UI is not prescriptive. If you do end up providing a non-blocking version of the UI, dismissing the UI will lead to a `dismiss` state. It is up to each vendor (ads & analytics) how they would process `accept`, `reject` and `dismiss`. 
+Yes. The UI is not prescriptive. If you do end up providing a non-blocking version of the UI, dismissing the UI will lead to a `dismiss` state. It is up to each vendor (ads & analytics) how they would process `accept`, `reject` and `dismiss`.
 
-##### What is `checkConsentHref`? And why is it mandatory? 
+##### What is `checkConsentHref`? And why is it mandatory?
 
-Note that [`checkConsentHref`](#checkconsenthref) is not mandatory if you configure the [`promptIfUnknownForGeoGroup`](#promptifunknownforgeogroup) attribute. 
+Note that [`checkConsentHref`](#checkconsenthref) is not mandatory if you configure the [`promptIfUnknownForGeoGroup`](#promptifunknownforgeogroup) attribute.
 
 `checkConsentHref` gives you, the publisher, the ability to know if a consent must be shown to the user.  For example, by using this call, you may determine the user's geo-location on the server-side, allowing you to suppress the consent. You can also instead use `<amp-geo>` and `promptIfUnknownForGeoGroup` to achieve the same result without any server-side setup.
 
-You may also choose to suppress the consent if you detect that the user doesn't need consent because they accepted consent on a different property or for alternate reasons. 
+You may also choose to suppress the consent if you detect that the user doesn't need consent because they accepted consent on a different property or for alternate reasons.
 
 ##### What is `promptIfUnknown`?
 
-`promptIfUnknown` is a response key set on the `checkConsentHref` request, which is made on every pageview. 
+`promptIfUnknown` is a response key set on the `checkConsentHref` request, which is made on every pageview.
 
-Responses to `promptIfUnknown` can have a boolean value. A value of `true` shows the consent; a value of `false` does not show the consent. 
+Responses to `promptIfUnknown` can have a boolean value. A value of `true` shows the consent; a value of `false` does not show the consent.
 
-##### I also manage consent on non-AMP pages, how can I reconcile the two?  
+##### I also manage consent on non-AMP pages, how can I reconcile the two?
 
 You can configure `checkConsentHref` to call your own server-side endpoint to detect consent state for the user and reconcile how you want AMP to behave with a response on `promptIfUnknown`.
 
-##### How can I send additional information to an ad network/analytics provider? 
+##### How can I send additional information to an ad network/analytics provider?
 
-The response on `checkConsentHref` also accepts values for the key [`sharedData`](#response) on the response which will be made available to all vendor components being blocked by the consent logic. It is up to the vendor how they process this sharedData. DoubleClick/AdSense expect specific key-values, refer to their [documentation](https://support.google.com/dfp_premium/answer/7678538#amp-pages) for details. 
+The response on `checkConsentHref` also accepts values for the key [`sharedData`](#response) on the response which will be made available to all vendor components being blocked by the consent logic. It is up to the vendor how they process this sharedData. DoubleClick/AdSense expect specific key-values, refer to their [documentation](https://support.google.com/dfp_premium/answer/7678538#amp-pages) for details.
 
-##### I have a complicated consent UI, will it work? 
+##### I have a complicated consent UI, will it work?
 
-You should try out the [advanced consent flows](https://ampbyexample.com/user_consent/advanced_user_consent_flow/) to see how it's implemented. You could also consider using the [`<amp-selector>`](https://www.ampproject.org/docs/reference/components/amp-selector) component. 
+You should try out the [advanced consent flows](https://ampbyexample.com/user_consent/advanced_user_consent_flow/) to see how it's implemented. You could also consider using the [`<amp-selector>`](https://www.ampproject.org/docs/reference/components/amp-selector) component.
 
 ##### How can I show a persistent UX element for users to update their consent preferences?
 
 You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://ampbyexample.com/user_consent/basic_user_consent_flow/) for a similar implementation.
 
-##### Can I keep the non-EU experience unchanged and just deliver an "opt-out" experience to all EU users? 
+##### Can I keep the non-EU experience unchanged and just deliver an "opt-out" experience to all EU users?
 
-You can configure `<amp-consent>` and [`<amp-geo>`](https://www.ampproject.org/docs/reference/components/amp-geo) to show consent to users in specific countries (e.g., via a list of EEA countries that you configure). The `<amp-consent>` component can also be configured to automatically "reject" consent on behalf of the user, if the publisher so desires. The way to do this is by setting the [`timeout`](#timeout-optional) seconds to `0` and `fallbackAction` to `reject`. Note that the `fallbackAction` state won't be stored across sessions. Note also that each ad network will have its own implementation for how it interprets a "reject" action from a user.  There is no way to automatically 'accept' consent on behalf of the user. 
+You can configure `<amp-consent>` and [`<amp-geo>`](https://www.ampproject.org/docs/reference/components/amp-geo) to show consent to users in specific countries (e.g., via a list of EEA countries that you configure). The `<amp-consent>` component can also be configured to automatically "reject" consent on behalf of the user, if the publisher so desires. The way to do this is by setting the [`timeout`](#timeout-optional) seconds to `0` and `fallbackAction` to `reject`. Note that the `fallbackAction` state won't be stored across sessions. Note also that each ad network will have its own implementation for how it interprets a "reject" action from a user.  There is no way to automatically 'accept' consent on behalf of the user.
 
-You can [learn more](https://support.google.com/dfp_premium/answer/7678538) about how Google AdSense and DoubleClick plan to handle a 'reject', and any configuration available to serve non-personalized ads. 
+You can [learn more](https://support.google.com/dfp_premium/answer/7678538) about how Google AdSense and DoubleClick plan to handle a 'reject', and any configuration available to serve non-personalized ads.
 
-##### Can the consent be set via amp-geo, either directly or through amp-bind? If not, can it be set in the response from checkConsentHref? 
+##### Can the consent be set via amp-geo, either directly or through amp-bind? If not, can it be set in the response from checkConsentHref?
 
-You can use the response of `checkConsentHref` to show a consent to the user if there is no previous consent state, which allows the user to go through the consent flow. For details on how to reject consent by default, see the opt-out question above.  It isn't possible to "accept" consent by default. 
+You can use the response of `checkConsentHref` to show a consent to the user if there is no previous consent state, which allows the user to go through the consent flow. For details on how to reject consent by default, see the opt-out question above.  It isn't possible to "accept" consent by default.
 
-##### Is "checkConsentHref" called on every page view or during every user action? 
+##### Is "checkConsentHref" called on every page view or during every user action?
 
-`checkConsentHref` is called on every page view before the consent UI is displayed to the user. 
+`checkConsentHref` is called on every page view before the consent UI is displayed to the user.
 
-##### Can amp-geo work with amp-consent so that it only shows consent for a user that's accessing my content from a certain country? 
+##### Can amp-geo work with amp-consent so that it only shows consent for a user that's accessing my content from a certain country?
 
-Yes. See example [here](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/). 
+Yes. See example [here](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/).
 
 ##### I can't see feature X being supported, what can I do?
 
-Join in on the discussion where we are discussing [upcoming potential features](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345). Please chime in on the thread if something isn't supported yet. 
+Join in on the discussion where we are discussing [upcoming potential features](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345). Please chime in on the thread if something isn't supported yet.
 
-## Related resources 
+## Related resources
 
 *   Blog post: [New functionality to help manage user choice in AMP pages](https://www.ampproject.org/latest/blog/new-functionality-to-help-manage-user-choice-in-amp-pages/)
 *   Blog post: [Dynamic geo-personalization](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/)
