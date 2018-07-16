@@ -59,6 +59,7 @@ import {urls} from '../src/config';
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
 import {bodymovinanimation} from './bodymovinanimation';
+import {embedly} from './embedly';
 import {facebook} from './facebook';
 import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
@@ -336,6 +337,7 @@ register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('eadv', eadv);
 register('eas', eas);
+register('embedly', embedly);
 register('engageya', engageya);
 register('epeex', epeex);
 register('eplanning', eplanning);
