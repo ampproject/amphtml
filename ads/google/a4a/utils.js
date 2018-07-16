@@ -27,7 +27,6 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-import {makeCorrelator} from '../correlator';
 import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
@@ -150,14 +149,13 @@ export function isReportingEnabled(ampElement) {
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
   const {win} = ampElement;
-  const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
   if (getMode(ampElement.win).localDev && !getMode(ampElement.win).test) {
-    toggleExperiment(win, experimentName, true, true);
+    toggleExperiment(win, 'a4aProfilingRate', true, true);
   }
   return (type == 'doubleclick' || type == 'adsense') &&
-      isExperimentOn(win, experimentName);
+      isExperimentOn(win, 'a4aProfilingRate');
 }
 
 /**
@@ -436,11 +434,32 @@ function elapsedTimeWithCeiling(time, start) {
  */
 export function getCorrelator(win, elementOrAmpDoc, opt_cid) {
   if (!win.ampAdPageCorrelator) {
-    win.ampAdPageCorrelator = makeCorrelator(
-        opt_cid, Services.documentInfoForDoc(elementOrAmpDoc).pageViewId);
+    win.ampAdPageCorrelator = isExperimentOn(win, 'exp-new-correlator') ?
+      Math.floor(4503599627370496 * Math.random()) :
+      makeCorrelator(
+          Services.documentInfoForDoc(elementOrAmpDoc).pageViewId, opt_cid);
   }
   return win.ampAdPageCorrelator;
 }
+
+/**
+ * @param {string} pageViewId
+ * @param {string=} opt_clientId
+ * @return {number}
+ */
+function makeCorrelator(pageViewId, opt_clientId) {
+  const pageViewIdNumeric = Number(pageViewId || 0);
+  if (opt_clientId) {
+    return pageViewIdNumeric + ((opt_clientId.replace(/\D/g, '') % 1e6) * 1e6);
+  } else {
+    // In this case, pageViewIdNumeric is only 4 digits => too low entropy
+    // to be useful as a page correlator.  So synthesize one from scratch.
+    // 4503599627370496 == 2^52.  The guaranteed range of JS Number is at least
+    // 2^53 - 1.
+    return Math.floor(4503599627370496 * Math.random());
+  }
+}
+
 
 /**
  * Collect additional dimensions for the brdim parameter.

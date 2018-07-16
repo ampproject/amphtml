@@ -22,6 +22,7 @@ import {
   getCorsUrl,
   getSourceOrigin,
   getWinOrigin,
+  isProxyOrigin,
   parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
@@ -166,6 +167,7 @@ export class Xhr {
    *
    * XHRs are intercepted if all of the following are true:
    * - The AMP doc is in single doc mode
+   * - The requested resource is not a 1p request.
    * - The viewer has the `xhrInterceptor` capability
    * - The Viewer is a trusted viewer or AMP is currently in developement mode
    * - The AMP doc is opted-in for XHR interception (`<html>` tag has
@@ -185,7 +187,7 @@ export class Xhr {
     }
     const viewer = Services.viewerForDoc(this.ampdocSingle_);
     const whenFirstVisible = viewer.whenFirstVisible();
-    if (!viewer.hasCapability('xhrInterceptor')) {
+    if (isProxyOrigin(input) || !viewer.hasCapability('xhrInterceptor')) {
       return whenFirstVisible;
     }
     const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
@@ -643,7 +645,7 @@ function createXhrRequest(method, url) {
     xhr.open(method, url, true);
   } else if (typeof XDomainRequest != 'undefined') {
     // IE-specific object.
-    xhr = new XDomainRequest();
+    xhr = new XDomainRequest(); // eslint-disable-line no-undef
     xhr.open(method, url);
   } else {
     throw dev().createExpectedError('CORS is not supported');

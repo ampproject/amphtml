@@ -67,8 +67,8 @@ message CssDeclaration {
   // The name of the declaration (e.g. display). Use lower-case attribute names
   // only.
   optional string name = 1;
-  // The value of the declaration (e.g. block).
-  optional string value_casei = 2 [default = ""];
+  // The valid values of the declaration (e.g. block).
+  repeated string value_casei = 2;
 }
 
 // Attributes that are not covered by at least one of these specs are
@@ -701,7 +701,6 @@ message ValidationError {
     DOCUMENT_TOO_COMPLEX = 86;
     INVALID_UTF8 = 96;
 
-    CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
     CSS_SYNTAX_STRAY_TRAILING_BACKSLASH = 38;
     CSS_SYNTAX_UNTERMINATED_COMMENT = 39;
@@ -735,6 +734,8 @@ message ValidationError {
     CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE = 73;
     CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH = 74;
     CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION = 75;
+
+    // reserved 13
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];

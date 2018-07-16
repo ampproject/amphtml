@@ -40,9 +40,12 @@ const HOST = 'localhost';
 const PORT = 8000;
 const BASE_URL = `http://${HOST}:${PORT}`;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
-const NAVIGATE_TIMEOUT_MS = 12000;
+const NAVIGATE_TIMEOUT_MS = 3000;
 const CONFIGS = ['canary', 'prod'];
-const CSS_SELECTOR_TIMEOUT_MS = 5000;
+const CSS_SELECTOR_RETRY_MS = 100;
+const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
+const CSS_SELECTOR_TIMEOUT_MS =
+    CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
 const AMP_RUNTIME_TARGET_FILES = [
   'dist/amp.js', 'dist.3p/current/integration.js'];
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
@@ -50,6 +53,9 @@ const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
 const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
 const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
+
+const preVisualDiffTasks =
+    (argv.nobuild || argv.verify_status) ? [] : ['build'];
 
 /**
  * Logs a message to the console.
@@ -110,9 +116,14 @@ function setPercyBranch() {
 async function launchWebServer() {
   const gulpServeAsync = execScriptAsync(
       `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
-      {stdio: 'inherit'});
+      {
+        stdio: argv.webserver_debug ?
+          ['ignore', process.stdout, process.stderr] :
+          'ignore',
+      });
 
-  gulpServeAsync.on('exit', code => {
+  gulpServeAsync.on('close', code => {
+    code = code || 0;
     if (code != 0) {
       log('error', colors.cyan("'serve'"),
           `errored with code ${code}. Cannot continue with visual diff tests`);
@@ -121,11 +132,7 @@ async function launchWebServer() {
   });
 
   process.on('exit', async() => {
-    if (gulpServeAsync.exitCode == null) {
-      gulpServeAsync.kill();
-      // The child node process has an asynchronous stdout. See #10409.
-      await sleep(100);
-    }
+    await shutdown(gulpServeAsync);
   });
 
   let resolver, rejecter;
@@ -137,8 +144,26 @@ async function launchWebServer() {
     host: HOST,
     port: PORT,
     retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
-  }).on('connected', resolver).on('timeout', rejecter);
+  }).on('connected', () => {
+    return resolver(gulpServeAsync);
+  }).on('timeout', rejecter);
   return deferred;
+}
+
+/**
+ * Kill the webserver process and this own process.
+ *
+ * @param {!ChildProcess} webServerProcess the webserver process to shut down.
+ */
+async function shutdown(webServerProcess) {
+  if (!webServerProcess.killed) {
+    // Explicitly exit the webserver.
+    webServerProcess.kill();
+    // The child node process has an asynchronous stdout. See #10409.
+    await sleep(100);
+  }
+  // TODO(rsimha): clean up this exit.
+  process.exit();
 }
 
 /**
@@ -250,7 +275,7 @@ async function launchBrowser() {
     height: VIEWPORT_HEIGHT,
   });
   page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
-  page.setJavaScriptEnabled(true);
+  await page.setJavaScriptEnabled(true);
 
   return page;
 }
@@ -281,11 +306,16 @@ async function runVisualTests(page, visualTestsConfig) {
   // Take the snapshots.
   await generateSnapshots(percy, page, visualTestsConfig.webpages);
 
-  // Tell Percy we're finished taking snapshots.
+  // Tell Percy we're finished taking snapshots and check if the build failed
+  // early.
   await percy.finalizeBuild();
-  // TODO(danielrozenberg): inspect result to check if the build failed fast
-  log('info', 'Build', colors.cyan(buildId),
-      'is now being processed by Percy.');
+  const status = await getBuildStatus(buildId);
+  if (status.state == 'failed') {
+    log('fatal', 'Build', colors.cyan(buildId), 'failed!');
+  } else {
+    log('info', 'Build', colors.cyan(buildId),
+        'is now being processed by Percy.');
+  }
 }
 
 /**
@@ -295,7 +325,8 @@ function cleanupAmpConfig() {
   log('verbose', 'Cleaning up existing AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} --remove`);
+        `gulp prepend-global --local_dev --target ${targetFile} --remove`,
+        {'stdio': 'ignore'});
   });
 }
 
@@ -308,8 +339,8 @@ function applyAmpConfig(config) {
   log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} ` +
-        `--${config}`);
+        `gulp prepend-global --local_dev --target ${targetFile} --${config}`,
+        {'stdio': 'ignore'});
   });
 }
 
@@ -324,6 +355,7 @@ function applyAmpConfig(config) {
  */
 async function generateSnapshots(percy, page, webpages) {
   if (argv.master) {
+    await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
     await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
   cleanupAmpConfig();
@@ -347,18 +379,25 @@ async function generateSnapshots(percy, page, webpages) {
  * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  * @param {!JsonObject} webpages a JSON objects containing details about the
  *     pages to snapshot.
- * @param {*} config Config being used. One of 'canary' or 'prod'.
+ * @param {string} config Config being used. One of 'canary' or 'prod'.
  */
 async function snapshotWebpages(percy, page, webpages, config) {
-  webpages = webpages.filter(webpage => (!webpage.flaky &&
-        !webpage.url.startsWith('examples/visual-tests/amp-by-example')));
+  webpages = webpages.filter(webpage => !webpage.flaky);
   for (const webpage of webpages) {
     const {url} = webpage;
     const name = `${webpage.name} (${config})`;
 
     await enableExperiments(page, webpage['experiments']);
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
-    await page.goto(`${BASE_URL}/${url}`);
+    // Puppeteer is flaky when it comes to catching navigation requests, so
+    // ignore timeouts. If this was a real non-loading page, this will be caught
+    // in the resulting Percy build.
+    await page.goto(`${BASE_URL}/${url}`).catch(() => {});
+
+    // Try to wait until there are no more network requests. This method is
+    // flaky since Puppeteer doesn't always understand Chrome's network
+    // activity, so ignore timeouts.
+    await page.waitForNavigation({waitUntil: 'networkidle0'}).catch(() => {});
 
     await verifyCssElements(page, url, webpage.forbidden_css,
         webpage.loading_incomplete_css, webpage.loading_complete_css);
@@ -381,56 +420,138 @@ async function snapshotWebpages(percy, page, webpages, config) {
  */
 async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
   loadingCompleteCss) {
-  // Wait for loader dot to be hidden.
-  await page.waitForSelector('.i-amphtml-loader-dot', {
-    hidden: true,
-    timeout: CSS_SELECTOR_TIMEOUT_MS,
-  }).catch(() => {
-    log('fatal', colors.cyan(url),
-        `still has the AMP loader dot after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
-  });
+  // Begin by waiting for all loader dots to disappear.
+  await waitForLoaderDot(page, url);
 
   if (forbiddenCss) {
     for (const css of forbiddenCss) {
       if (await page.$(css) !== null) {
-        log('fatal', colors.cyan(url), 'has forbidden CSS element',
-            colors.cyan(css));
+        log('fatal', colors.cyan(url), '| The forbidden CSS element',
+            colors.cyan(css), 'exists in the page');
       }
     }
   }
 
   if (loadingIncompleteCss) {
+    log('verbose', 'Waiting for invisibility of all:',
+        colors.cyan(loadingIncompleteCss.join(', ')));
     for (const css of loadingIncompleteCss) {
-      log('verbose', `Waiting for invisibility of ${css}`);
-      await page.waitForSelector(css, {
-        hidden: true,
-        timeout: CSS_SELECTOR_TIMEOUT_MS,
-      }).catch(() => {
-        log('fatal', colors.cyan(url), 'still has CSS element',
-            colors.cyan(css), `after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
-      });
+      if (!(await waitForElementVisibility(page, css, {hidden: true}))) {
+        log('fatal', colors.cyan(url), '| An element with the CSS selector',
+            colors.cyan(css),
+            `is still visible after ${CSS_SELECTOR_RETRY_MS} ms`);
+      }
     }
   }
 
   if (loadingCompleteCss) {
+    log('verbose', 'Waiting for existence of all:',
+        colors.cyan(loadingCompleteCss.join(', ')));
     for (const css of loadingCompleteCss) {
-      log('verbose', 'Waiting for visibility of', css);
-      await page.waitForSelector(css, {
-        visible: true,
-        timeout: CSS_SELECTOR_TIMEOUT_MS,
-      }).catch(() => {
-        log('fatal', colors.cyan(url), 'does not yet have CSS element',
-            colors.cyan(css), `after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
-      });
+      if (await !waitForSelectorExistence(page, css)) {
+        log('fatal', colors.cyan(url), '| The CSS selector', colors.cyan(css),
+            'does not match any elements in the page');
+      }
+    }
+
+    log('verbose', 'Waiting for visibility of all:',
+        colors.cyan(loadingCompleteCss.join(', ')));
+    for (const css of loadingCompleteCss) {
+      if (!(await waitForElementVisibility(page, css, {visible: true}))) {
+        log('fatal', colors.cyan(url), '| An element with the CSS selector',
+            colors.cyan(css),
+            `is still invisible after ${CSS_SELECTOR_RETRY_MS} ms`);
+      }
     }
   }
+}
+
+/**
+ * Wait for all AMP loader dot to disappear.
+ *
+ * @param {!puppeteer.Page} page page to wait on.
+ * @param {string} url URL being snapshotted.
+ */
+async function waitForLoaderDot(page, url) {
+  // Wait for loader dot to be hidden.
+  await waitForElementVisibility(
+      page, '.i-amphtml-loader-dot', {hidden: true}).catch(() => {
+    log('fatal', colors.cyan(url),
+        `still has the AMP loader dot after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+  });
+}
+
+/**
+ * Wait until the element is either hidden or visible or until timed out.
+ *
+ * @param {!puppeteer.Page} page page to check the visibility of elements in.
+ * @param {string} selector CSS selector for elements to wait on.
+ * @param {!Object} options with key 'visible' OR 'hidden' set to true.
+ * @return {boolean} true if the expectation is met before the timeout.
+ */
+async function waitForElementVisibility(page, selector, options) {
+  const waitForVisible = Boolean(options['visible']);
+  const waitForHidden = Boolean(options['hidden']);
+  if (waitForVisible == waitForHidden) {
+    log('fatal', 'waitForElementVisibility must be called with exactly one of',
+        "'visible' or 'hidden' set to true.");
+  }
+
+  let attempt = 0;
+  do {
+    const elementsAreVisible = [];
+
+    for (const elementHandle of await page.$$(selector)) {
+      const boundingBox = await elementHandle.boundingBox();
+      const elementIsVisible = boundingBox != null && boundingBox.height > 0 &&
+          boundingBox.width > 0;
+      elementsAreVisible.push(elementIsVisible);
+    }
+
+    log('verbose', 'Found', colors.cyan(elementsAreVisible.length),
+        'element(s) matching the CSS selector', colors.cyan(selector));
+    if (elementsAreVisible.length) {
+      log('verbose', 'Expecting all element visibilities to be',
+          colors.cyan(waitForVisible), '; they are',
+          colors.cyan(elementsAreVisible));
+    }
+    // Since we assert that waitForVisible == !waitForHidden, there is no need
+    // to check equality to both waitForVisible and waitForHidden.
+    if (elementsAreVisible.every(
+        elementIsVisible => elementIsVisible == waitForVisible)) {
+      return true;
+    }
+
+    await sleep(CSS_SELECTOR_RETRY_MS);
+    attempt++;
+  } while (attempt < CSS_SELECTOR_RETRY_ATTEMPTS);
+  return false;
+}
+
+/**
+ * Wait until the CSS selector exists in the page or until timed out.
+ *
+ * @param {!puppeteer.Page} page page to check the existence of the selector in.
+ * @param {string} selector CSS selector.
+ * @return {boolean} true if the element exists before the timeout.
+ */
+async function waitForSelectorExistence(page, selector) {
+  let attempt = 0;
+  do {
+    if (await page.$(selector)) {
+      return true;
+    }
+    await sleep(CSS_SELECTOR_RETRY_MS);
+    attempt++;
+  } while (attempt < CSS_SELECTOR_RETRY_ATTEMPTS);
+  return false;
 }
 
 /**
  * Enables the given AMP experiments.
  *
  * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {*} experiments List of experiments to enable.
+ * @param {!Array<string>} experiments List of experiments to enable.
  */
 async function enableExperiments(page, experiments) {
   if (experiments) {
@@ -460,9 +581,8 @@ function setDebuggingLevel() {
   process.env.WEBSERVER_QUIET = '--quiet';
 
   if (argv.debug) {
-    // eslint-disable-next-line google-camelcase/google-camelcase
-    argv.chrome_debug = true;
-    process.env.WEBSERVER_QUIET = '';
+    argv['chrome_debug'] = true;
+    argv['webserver_debug'] = true;
   }
   if (argv.webserver_debug) {
     process.env.WEBSERVER_QUIET = '';
@@ -495,10 +615,12 @@ async function createEmptyBuild(page) {
 }
 
 /**
- * Simple wrapper around the JS (Percy-Puppeteer) based visual diff tests.
+ * Runs the AMP visual diff tests.
  */
-async function visualDiffPuppeteer() {
-  if (argv.verify) {
+async function visualDiff() {
+  setPercyBranch();
+
+  if (argv.verify_status) {
     const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
     const status = await waitForBuildCompletion(buildId);
     verifyBuildStatus(status, buildId);
@@ -513,14 +635,13 @@ async function visualDiffPuppeteer() {
 
   // Launch a browser and local web server.
   const page = await launchBrowser();
-  await launchWebServer().catch(reason => {
+  const webServerProcess = await launchWebServer().catch(reason => {
     log('fatal', `Failed to start a web server: ${reason}`);
   });
 
   if (argv.skip) {
     await createEmptyBuild(page);
-    // Explicitly exit, to trigger the webserver's exit event too.
-    process.exit();
+    await shutdown(webServerProcess);
     return;
   }
 
@@ -531,54 +652,24 @@ async function visualDiffPuppeteer() {
           'utf8'));
   await runVisualTests(page, visualTestsConfig);
 
-  // Explicitly exit, to trigger the webserver's exit event too.
-  process.exit();
-}
-
-/**
- * Simple wrapper around the ruby (Percy-Capybara) based visual diff tests.
- *
- * This is the current default mode, which is actively being replaced with a
- * pure JS implementation.
- */
-function visualDiffCapybara() {
-  let cmd = 'ruby build-system/tasks/visual-diff.rb';
-  for (const arg in argv) {
-    if (arg !== '_') {
-      cmd = cmd + ' --' + arg;
-    }
-  }
-  execOrDie(cmd);
-}
-
-/**
- * Runs the AMP visual diff tests.
- */
-async function visualDiff() {
-  setPercyBranch();
-
-  if (argv.puppeteer) {
-    await visualDiffPuppeteer();
-  } else {
-    visualDiffCapybara();
-  }
+  await shutdown(webServerProcess);
 }
 
 gulp.task(
     'visual-diff',
     'Runs the AMP visual diff tests.',
+    preVisualDiffTasks,
     visualDiff,
     {
       options: {
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
-        'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
+        'verify_status':
+          '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
         'headless': '  Runs Chrome in headless mode',
-        'percy_debug': '  Prints debug info from Percy-Capybara libraries',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
-        'puppeteer': '  [EXPERIMENTAL] Use Percy-Puppeteer (work in progress)',
       },
     }
 );

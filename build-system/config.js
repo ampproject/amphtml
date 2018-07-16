@@ -108,7 +108,7 @@ module.exports = {
     '**/*.js',
     '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
-        'third_party}/**/*.*',
+        'third_party,test/coverage}/**/*.*',
     '!examples/**/*.*',
     '!{validator/dist,validator/webui/dist,' +
         'validator/node_modules,validator/nodejs/node_modules,' +
@@ -116,6 +116,7 @@ module.exports = {
     '!eslint-rules/**/*.*',
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
+    '!extensions/amp-a4a/0.1/test/testdata/*',
     '!extensions/amp-access/0.1/access-expr-impl.js',
     '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',

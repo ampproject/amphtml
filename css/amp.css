@@ -85,6 +85,9 @@ html.i-amphtml-fie > body {
 html.i-amphtml-webview > body {
   overflow-x: hidden !important;
   overflow-y: visible !important;
+  /* A <body> height of 0 will be hidden due to "overflow-x: hidden". */
+  /* Prevent this by setting min-height to 100vh. See b/74541306. */
+  min-height: 100vh !important;
 }
 
 
@@ -625,8 +628,8 @@ amp-iframe iframe {
  * until the complete rules are loaded as part of amp-subscriptions extension.
  * Notice that, the `[subscription-dialog]` elements are always hidden.
  */
-html:not(.i-amphtml-subs-ready) [subscriptions-section],
-html:not(.i-amphtml-subs-ready) [subscriptions-action],
+body:not(.i-amphtml-subs-ready) [subscriptions-section],
+body:not(.i-amphtml-subs-ready) [subscriptions-action],
 [subscriptions-dialog] {
   display: none !important;
 }
@@ -751,8 +754,8 @@ amp-story .i-amphtml-loader {
  */
 
 /**
-  * In ampfx-preset-utils.js we are installing styles once the extension is 
- * loaded. This cause the element to jump. This is a fix for that, which 
+  * In ampfx-preset-utils.js we are installing styles once the extension is
+ * loaded. This cause the element to jump. This is a fix for that, which
  * doesn't push the preset's defaults into v0.js making it larger.
  */
 [amp-fx^="fly-in"] {
