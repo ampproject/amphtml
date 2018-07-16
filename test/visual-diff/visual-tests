@@ -342,6 +342,9 @@
       "name": "amp-install-serviceworker - Amp By Example"
     },
     {
+      "flaky": true,
+      // Embedded video occasionally takes too long to load, resulting in either a video placeholder or a blank box
+      // e.g., https://percy.io/ampproject/amphtml/builds/862151/view/49968387/1400?mode=diff&browser=firefox&snapshot=49968387
       "url": "examples/visual-tests/amp-by-example/components/amp-jwplayer/index.html",
       "name": "amp-jwplayer - Amp By Example"
     },
