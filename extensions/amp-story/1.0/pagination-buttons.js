@@ -129,8 +129,8 @@ class PaginationButton {
   onClick_(e) {
     e.preventDefault();
     if (this.state_.triggers) {
-      dispatch(this.element, dev().assert(this.state_.triggers),
-          /* opt_bubbles */ true);
+      dispatch(this.win, this.element, dev().assert(this.state_.triggers),
+          /* payload */ undefined, {bubbles: true});
       return;
     }
     if (this.state_.action) {
