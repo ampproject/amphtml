@@ -154,7 +154,7 @@ export class Extensions {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
-      factory(arg);
+      factory(arg, arg._);
       if (getMode().localDev || getMode().test) {
         if (Object.freeze) {
           const m = holder.extension;

@@ -27,9 +27,12 @@ const through = require('through2');
 const TopologicalSort = require('topological-sort');
 const {extensionBundles, TYPES} = require('../bundles.config');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
+const wrappers = require('./compile-wrappers');
 
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
+
+const mainBundle = 'src/amp.js';
 
 //patchRegisterElement();
 patchWebAnimations();
@@ -132,21 +135,17 @@ exports.getBundleFlags = function(g) {
   // Build up the weird flag structure that closure compiler calls
   // modules and we call bundles.
   const bundleKeys = Object.keys(g.bundles).sort();
-  // TODO(erwinm): special case src/amp.js and _base for now. add a propert sort
+  // TODO(erwinm): special case src/amp.js for now. add a propert sort
   // comparator here.
-  const indexOfBase = bundleKeys.indexOf('_base');
-  bundleKeys.splice(indexOfBase, 1);
-  bundleKeys.splice(0, 0, '_base');
-  const indexOfAmp = bundleKeys.indexOf('src/amp.js');
+  const indexOfAmp = bundleKeys.indexOf(mainBundle);
   bundleKeys.splice(indexOfAmp, 1);
-  bundleKeys.splice(1, 0, 'src/amp.js');
-  const indexOfIntermedia = bundleKeys.indexOf('_base_i');
-  bundleKeys.splice(indexOfIntermedia, 1);
+  bundleKeys.splice(0, 0, mainBundle);
+  const indexOfIntermediate = bundleKeys.indexOf('_base_i');
+  bundleKeys.splice(indexOfIntermediate, 1);
   bundleKeys.splice(1, 0, '_base_i');
-
   bundleKeys.forEach(function(originalName) {
-    const isBase = originalName == '_base';
-    const isMain = originalName == 'src/amp.js';
+    const isMain = originalName == mainBundle;
+    const isBase = isMain;
     let extraModules = 0;
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
@@ -178,8 +177,8 @@ exports.getBundleFlags = function(g) {
         .replace(/[\/\\]/g, '-');
     // And now build --module $name:$numberOfJsFiles:$bundleDeps
     let cmd = name + ':' + (bundle.modules.length + extraModules);
-    // All non _base bundles depend on _base.
-    if (!isBase && g.bundles._base) {
+    // All non _base bundles depend onsrc-amp.
+    if (!isBase) {
       const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
@@ -188,27 +187,25 @@ exports.getBundleFlags = function(g) {
         if (TYPES_VALUES.includes(name)) {
           cmd += ':_base_i';
         } else {
-          cmd += ':_base';
+          cmd += ':src-amp';
         }
       }
     }
     flagsArray.push('--module', cmd);
     if (bundleKeys.length > 1) {
-      if (isBase) {
+      function massageWrapper(w) {
+        return (w.replace('<%= contents %>', '%s')
+            + '\n//# sourceMappingURL=%basename%.map\n');
+      }
+      if (isMain) {
         flagsArray.push('--module_wrapper', name + ':' +
-            exports.baseBundleWrapper);
+            massageWrapper(wrappers.mainBinary));
       } else {
-        if (isMain) {
-          flagsArray.push('--module_wrapper', name + ':' +
-              exports.mainBinaryWrapper);
-        } else {
-          flagsArray.push('--module_wrapper', name + ':' +
-              exports.bundleWrapper);
-        }
+        flagsArray.push('--module_wrapper', name + ':' +
+           massageWrapper(wrappers.extension(name)));
       }
     } else {
-      flagsArray.push('--module_wrapper', name + ':' +
-            exports.defaultWrapper);
+      throw new Error('Expect to build more than one bundle.')
     }
   });
   flagsArray.push('--js_module_root', './build/patched-module/');
@@ -235,13 +232,6 @@ exports.getGraph = function(entryModules, config) {
     sorted: undefined,
     // Generated bundles
     bundles: {
-      // We always have a _base bundle.
-      _base: {
-        isBase: true,
-        name: '_base',
-        // The modules in the bundle.
-        modules: [],
-      },
       _base_i: {
         isBase: true,
         name: '_base_i',
@@ -404,7 +394,7 @@ function setupBundles(graph) {
         inBundleCount++;
         dest = entry;
         const configEntry = getExtensionBundleConfig(entry);
-        const type = configEntry ? configEntry.type : '_base';
+        const type = configEntry ? configEntry.type : mainBundle;
         bundleDestCandidates.push(type);
       }
     });
@@ -415,8 +405,8 @@ function setupBundles(graph) {
     if (bundleDestCandidates.length > 1) {
       const first = bundleDestCandidates[0];
       const allTheSame = !bundleDestCandidates.some(c => c != first);
-      const needsBase = bundleDestCandidates.some(c => c == '_base');
-      dest = '_base';
+      const needsBase = bundleDestCandidates.some(c => c == mainBundle);
+      dest = mainBundle;
       // If all requested bundles are the same, then that is the right
       // place.
       if (allTheSame) {
@@ -436,11 +426,6 @@ function setupBundles(graph) {
     }
     graph.bundles[dest].modules.push(id);
   });
-
-  // No need for a base module if there was only one entry module.
-  if (graph.entryModules.length == 1) {
-    delete graph.bundles._base;
-  }
 }
 
 // Returns the extension bundle config for the given filename or null.
@@ -479,68 +464,6 @@ const externs = [
   'third_party/moment/moment.extern.js',
   'third_party/react-externs/externs.js',
 ];
-
-const systemImport =
-    // Polyfill and/or monkey patch System.import.
-    '(self.System=self.System||{}).import=function(n){' +
-    // Always end names in .js
-    'n=n.replace(/\\.js$/g,"")+".js";' +
-    // Short circuit if the bundle is already loaded.
-    'return (self._S["//"+n]&&Promise.resolve(self._S["//"+n]))' +
-    // Short circuit if we are already loadind, otherwise create
-    // a promise (that will short circuit subsequent requests)
-    // and start loading.
-    '||self._S[n]||(self._S[n]=new Promise(function(r,t){' +
-    // Load via a script
-    'var s=document.createElement("script");' +
-    // Calculate the source URL using the same algorithms as used
-    // during bundle generation.
-    's.src=(self.System.baseURL||".")+"/"+n.replace(/[\\/\\\\]/g,"-");' +
-    // Fail promise on any error.
-    's.onerror=t;' +
-    // On success the trailing module in every bundle will have created
-    // the _S global representing the module object that is the root
-    // of the bundle. Resolve the promise with it.
-    's.onload=function(){r(self._S["//"+n])};' +
-    // Append the script tag.
-    '(document.head||document.documentElement).appendChild(s);' +
-    '})' +
-    ')};\n';
-
-const nodeEmulation = 'self.global=self;';
-
-exports.mainBinaryWrapper = 'try{(function(){%s})()}catch(e){' +
-  'setTimeout(function(){' +
-  'var s=document.body.style;' +
-  's.opacity=1;' +
-  's.visibility="visible";' +
-  's.animation="none";' +
-  's.WebkitAnimation="none;"},1000);throw e};' +
-  '//# sourceMappingURL=%basename%.map\n';
-
-exports.defaultWrapper = nodeEmulation + '%s\n' +
-     '//# sourceMappingURL=%basename%.map\n';
-
-// Don't wrap the bundle itself in a closure (other bundles need
-// to be able to see it), but add a little async executor for
-// scheduled functions.
-exports.baseBundleWrapper =
-    // Declaring a few variables that are used in node modules to increase
-    // compatiblity.
-    nodeEmulation +
-    '%s\n' +
-    systemImport +
-    // Runs scheduled non-base bundles in the _S array and overrides
-    // .push to immediately execute incoming bundles.
-    '(self._S=self._S||[]).push=function(f){f.call(self)};' +
-    '(function(f){while(f=self._S.shift()){f.call(self)}})();\n' +
-    '//# sourceMappingURL=%basename%.map\n';
-
-// Schedule or execute bundle via _S global.
-exports.bundleWrapper = '(self.AMP=self.AMP||[]).push({n:"%basename%", ' +
-    'v:"$internalRuntimeVersion$", f:(function(){%s})});\n' +
-    '//# sourceMappingURL=%basename%.map\n';
-
 
 function buildFullPathFromConfig(ext) {
   function getPath(version) {
