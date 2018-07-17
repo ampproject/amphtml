@@ -147,9 +147,9 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
 
 /**
  * Tags that are only whitelisted for specific values of given attributes.
- * @const {!Object<string, {attribute: string, values: !Array<string>}>}
+ * @private @const {!Object<string, {attribute: string, values: !Array<string>}>}
  */
-export const WHITELISTED_TAGS_BY_ATTRS = {
+const WHITELISTED_TAGS_BY_ATTRS = {
   'script': {
     'attribute': 'type',
     'values': [
