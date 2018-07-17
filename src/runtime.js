@@ -159,7 +159,8 @@ function adoptShared(global, callback) {
 
   global.AMP = {
     win: global,
-    '_': global.AMP['_'],
+    // Might not be available in tests.
+    '_': global.AMP ? global.AMP['_'] : undefined,
   };
 
   // `AMP.extension()` function is only installed in a non-minified mode.
