@@ -230,6 +230,10 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @private */
   updateBodyStyles_() {
+    if (this.bodySyncScheduled_) {
+      return;
+    }
+
     const {body} = this.win.document;
     if (!body) {
       return;
