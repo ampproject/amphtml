@@ -802,7 +802,8 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport./*OK*/scrollTop_).to.be.null;
   });
 
-  it('scrolls with scrollIntoView respecting padding', function* () {
+  // TODO(alanorozco): Fix and unskip.
+  it.skip('scrolls with scrollIntoView respecting padding', function* () {
     const element = document.createElement('div');
 
     // scrollIntoView traverses up the DOM tree, so it needs the node to
