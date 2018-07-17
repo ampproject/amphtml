@@ -52,7 +52,6 @@ export const BLACKLISTED_TAGS = {
   'link': true,
   'meta': true,
   'object': true,
-  'script': true,
   'style': true,
   'video': true,
 };
@@ -125,7 +124,7 @@ export const WHITELISTED_ATTRS = [
 ];
 
 /**
- * Tag-specific attribute whitelist used by both Caja and DOMPurify.
+ * Attributes that are only whitelisted for specific tags.
  * @const {!Object<string, !Array<string>>}
  */
 export const WHITELISTED_ATTRS_BY_TAGS = {
@@ -144,6 +143,20 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
   'template': [
     'type',
   ],
+};
+
+/**
+ * Tags that are only whitelisted for specific values of given attributes.
+ * @const {!Object<string, !Array<string>}
+ */
+export const WHITELISTED_TAGS_BY_ATTRS = {
+  'script': {
+    attribute: 'type',
+    values: [
+      'application/json',
+      'application/ld+json',
+    ],
+  },
 };
 
 /** @const {!Array<string>} */
@@ -210,30 +223,57 @@ export function purifyHtml(dirty) {
     'ADD_ATTR': WHITELISTED_ATTRS,
     'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
+    'FORCE_BODY': true,
+    'RETURN_DOM_FRAGMENT': true,
   });
+
+  // Reference to DOMPurify's `allowedTags` whitelist.
+  let allowedTags;
+  const allowedTagsChanges = [];
 
   // Reference to DOMPurify's `allowedAttributes` whitelist.
   let allowedAttributes;
-  // List of tag-specific attributes added to `allowedAttributes`
-  const tagSpecificAttrs = [];
+  const allowedAttributesChanges = [];
 
   /**
    * @param {!Node} node
    * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
    */
   const uponSanitizeElement = function(node, data) {
-    const {tagName, allowedTags} = data;
+    const {tagName} = data;
+    allowedTags = data.allowedTags;
+
     // Allow all AMP elements (constrained by AMP Validator since tag
     // calculation is not possible).
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
     }
-
-    if (tagName == 'a') {
+    // Set `target` attribute for <a> tags if necessary.
+    if (tagName === 'a') {
       if (node.hasAttribute('href') && !node.hasAttribute('target')) {
         node.setAttribute('target', '_top');
       }
     }
+    // Allow certain tags if they have an attribute with a whitelisted value.
+    const whitelist = WHITELISTED_TAGS_BY_ATTRS[tagName];
+    if (whitelist) {
+      const {attribute, values} = whitelist;
+      if (node.hasAttribute(attribute)
+          && values.includes(node.getAttribute(attribute))) {
+        allowedTags[tagName] = true;
+        allowedTagsChanges.push(tagName);
+      }
+    }
+  };
+
+  /**
+   * @param {!Node} unusedNode
+   */
+  const afterSanitizeElements = function(unusedNode) {
+    allowedTagsChanges.forEach(tag => {
+      delete allowedTags[tag];
+    });
+    allowedTagsChanges.length = 0;
   };
 
   /**
@@ -270,7 +310,7 @@ export function purifyHtml(dirty) {
     const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tagName];
     if (attrsByTags && attrsByTags.includes(attrName)) {
       allowedAttributes[attrName] = true;
-      tagSpecificAttrs.push(attrName);
+      allowedAttributesChanges.push(attrName);
     }
 
     // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
@@ -303,13 +343,12 @@ export function purifyHtml(dirty) {
    */
   const afterSanitizeAttributes = function(node) {
     // DOMPurify doesn't have a tag-specific attribute whitelist API and
-    // `allowedAttributes` has a per-invocation scope, so we need to remove
-    // tag-specific attributes from `allowedAttributes` after sanitizing
-    // each element.
-    tagSpecificAttrs.forEach(attr => {
+    // `allowedAttributes` has a per-invocation scope, so we need to undo
+    // changes after sanitizing attributes.
+    allowedAttributesChanges.forEach(attr => {
       delete allowedAttributes[attr];
     });
-    tagSpecificAttrs.length = 0;
+    allowedAttributesChanges.length = 0;
 
     filterSplice(this.removed, r => {
       if (r.from === node && r.attribute) {
@@ -326,11 +365,12 @@ export function purifyHtml(dirty) {
   };
 
   DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
+  DOMPurify.addHook('afterSanitizeElements', afterSanitizeElements);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  const purified = DOMPurify.sanitize(dirty, config);
+  const fragment = DOMPurify.sanitize(dirty, config);
   DOMPurify.removeAllHooks();
-  return purified;
+  return fragmentToHtml(fragment);
 }
 
 /**
@@ -370,19 +410,27 @@ export function purifyTagsForTripleMustache(html) {
     'RETURN_DOM_FRAGMENT': true,
   });
   DOMPurify.removeAllHooks();
-  let purified = '';
+  return fragmentToHtml(fragment);
+}
+
+/**
+ * @param {!DocumentFragment} fragment
+ * @return {string}
+ */
+function fragmentToHtml(fragment) {
+  let html = '';
   for (let i = 0; i < fragment.childNodes.length; i++) {
     const child = fragment.childNodes[i];
     switch (child.nodeType) {
       case Node.TEXT_NODE:
-        purified += child.textContent;
+        html += child.textContent;
         break;
       case Node.ELEMENT_NODE:
-        purified += child./*OK*/outerHTML;
+        html += child./*OK*/outerHTML;
         break;
     }
   }
-  return purified;
+  return html;
 }
 
 /**
