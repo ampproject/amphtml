@@ -1438,6 +1438,10 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
 
       describe('#getPageviewStateTokensForAdRequest', () => {
 
+        afterEach(() => {
+          AmpAdNetworkDoubleclickImpl.tokensToInstances = {};
+        });
+
         it('should return the tokens associated with instances that are not passed to it as an argument', () => {
           const element1 = doc.createElement('amp-ad');
           element1.setAttribute('type', 'doubleclick');
