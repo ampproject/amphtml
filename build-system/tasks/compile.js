@@ -104,7 +104,8 @@ function compile(entryModuleFilenames, outputDir,
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    const checkTypes = options.checkTypes || argv.typecheck_only;
+    const checkTypes =
+        options.checkTypes || options.typeCheckOnly || argv.typecheck_only;
     const intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     // If undefined/null or false then we're ok executing the deletions
@@ -375,7 +376,7 @@ function compile(entryModuleFilenames, outputDir,
         });
 
     // If we're only doing type checking, no need to output the files.
-    if (!argv.typecheck_only) {
+    if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
           .pipe(rename(outputFilename))
           .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
@@ -388,6 +389,8 @@ function compile(entryModuleFilenames, outputDir,
                 .pipe(gulp.dest(outputDir))
                 .on('end', resolve);
           });
+    } else {
+      stream = stream.on('end', resolve);
     }
     return stream;
   });
