@@ -52,6 +52,7 @@ import {layoutRectFromDomRect} from '../../../src/layout-rect';
 import {px, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -309,6 +310,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   findOrBuildCarousel_(lightboxGroupId) {
+    triggerAnalyticsEvent(this.element, 'lightboxOpened', {});
     dev().assert(this.container_);
     const existingCarousel = this.element.querySelector(
         `amp-carousel[amp-lightbox-group=${
@@ -456,6 +458,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.measureMutateElement(measureOverflowState, mutateOverflowState);
       });
     }
+    triggerAnalyticsEvent(this.element, 'descriptionToggled', {});
+
   }
 
   /**
@@ -463,6 +467,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   toggleDescriptionOverflow_() {
+    triggerAnalyticsEvent(this.element, 'descriptionExpanded', {});
     let isInStandardMode, isInOverflowMode, descriptionOverflows;
     const measureOverflowState = () => {
       isInStandardMode = this.descriptionBox_.classList
@@ -1308,6 +1313,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       toggle(dev().assertElement(this.carousel_), false);
       toggle(dev().assertElement(this.descriptionBox_), false);
     });
+    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', {});
   }
 
   /**
