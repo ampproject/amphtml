@@ -270,8 +270,8 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(items) {
-    dev().info(TAG, 'schedule:', items);
+  scheduleRender_(data) {
+    dev().info(TAG, 'schedule:', data);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
     // If there's nothing currently being rendered, schedule a render pass.
