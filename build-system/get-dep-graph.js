@@ -137,6 +137,9 @@ exports.getBundleFlags = function(g) {
   const indexOfAmp = bundleKeys.indexOf('src/amp.js');
   bundleKeys.splice(indexOfAmp, 1);
   bundleKeys.splice(1, 0, 'src/amp.js');
+  const indexOfIntermedia = bundleKeys.indexOf('_base_i');
+  bundleKeys.splice(indexOfIntermedia, 1);
+  bundleKeys.splice(1, 0, '_base_i');
 
   bundleKeys.forEach(function(originalName) {
     const isBase = originalName == '_base';
@@ -174,14 +177,13 @@ exports.getBundleFlags = function(g) {
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend on _base.
     if (!isBase && g.bundles._base) {
-      const basename = path.basename(originalName, '.js');
-      const configEntry = extensionBundles.filter(x => x.name == basename)[0];
+      const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
       } else {
         // All lower tier bundles depend on src-amp (v0.js)
-        if (name.includes(TYPES_VALUES)) {
-          cmd += ':src-amp';
+        if (TYPES_VALUES.includes(name)) {
+          cmd += ':_base_i';
         } else {
           cmd += ':_base';
         }
@@ -235,6 +237,12 @@ exports.getGraph = function(entryModules, config) {
       _base: {
         isBase: true,
         name: '_base',
+        // The modules in the bundle.
+        modules: [],
+      },
+      _base_i: {
+        isBase: true,
+        name: '_base_i',
         // The modules in the bundle.
         modules: [],
       },
@@ -386,19 +394,36 @@ function setupBundles(graph) {
     let inBundleCount = 0;
     // The bundle a module should go into.
     let dest;
+    // Bundles that this item must be available to.
+    const bundleDestCandidates = [];
     // Count in how many bundles a modules wants to be.
     Object.keys(graph.depOf).sort().forEach(function(entry) {
       if (graph.depOf[entry][id]) {
         inBundleCount++;
         dest = entry;
+        const configEntry = getExtensionBundleConfig(entry);
+        const type = configEntry ? configEntry.type : '_base';
+        bundleDestCandidates.push(type);
       }
     });
     console/*OK*/.assert(inBundleCount >= 1,
         'Should be in at least 1 bundle', id, 'Bundle count',
         inBundleCount, graph.depOf);
     // If a module is in more than 1 bundle, it must go into _base.
-    if (inBundleCount > 1) {
+    if (bundleDestCandidates.length > 1) {
+      const first = bundleDestCandidates[0];
+      const allTheSame = !bundleDestCandidates.some(c => c != first);
+      const needsBase = bundleDestCandidates.some(c => c == '_base');
       dest = '_base';
+      // If all requested bundles are the same, then that is the right
+      // place.
+      if (allTheSame) {
+        dest = first;
+      } else if (!needsBase) {
+        // If multiple type-bundles want the file, but it doesn't have to be
+        // in base, move the file into the intermediate bundle.
+        dest = '_base_i';
+      }
     }
     if (!graph.bundles[dest]) {
       graph.bundles[dest] = {
@@ -414,6 +439,12 @@ function setupBundles(graph) {
   if (graph.entryModules.length == 1) {
     delete graph.bundles._base;
   }
+}
+
+// Returns the extension bundle config for the given filename or null.
+function getExtensionBundleConfig(filename) {
+  const basename = path.basename(filename, '.js');
+  return extensionBundles.filter(x => x.name == basename)[0];
 }
 
 const knownExtensions = {
