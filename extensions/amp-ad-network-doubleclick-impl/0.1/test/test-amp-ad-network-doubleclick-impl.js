@@ -271,6 +271,28 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(fireDelayedImpressionsSpy.withArgs(
               'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
         });
+    it('should consume pageview state tokens when header is present',
+        () => {
+          const removePageviewStateTokenSpy =
+              sandbox.spy(impl, 'removePageviewStateToken');
+          const setPageviewStateTokenSpy =
+              sandbox.spy(impl, 'setPageviewStateToken');
+          expect(impl.extractSize({
+            get(name) {
+              switch (name) {
+                case 'amp-ff-pageview-tokens':
+                  return 'DUMMY_TOKEN';
+                default:
+                  return undefined;
+              }
+            },
+            has(name) {
+              return !!this.get(name);
+            },
+          })).to.deep.equal(size);
+          expect(removePageviewStateTokenSpy).to.be.calledOnce;
+          expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be.calledOnce;
+        });
   });
 
   describe('#onCreativeRender', () => {
