@@ -404,9 +404,9 @@ ansi-align@^2.0.0:
   dependencies:
     string-width "^2.0.0"
 
-ansi-colors@2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-2.0.2.tgz#1a95e0163c461846d44cbdea97bb2ac1aa35f1b2"
+ansi-colors@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-2.0.3.tgz#921daaa58f63b9817a5b6518d5677aeb2420b67a"
 
 ansi-colors@^1.0.1:
   version "1.1.0"
