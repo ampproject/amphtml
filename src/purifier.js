@@ -147,12 +147,12 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
 
 /**
  * Tags that are only whitelisted for specific values of given attributes.
- * @const {!Object<string, !Array<string>}
+ * @const {!Object<string, {attribute: string, values: !Array<string>}>}
  */
 export const WHITELISTED_TAGS_BY_ATTRS = {
   'script': {
-    attribute: 'type',
-    values: [
+    'attribute': 'type',
+    'values': [
       'application/json',
       'application/ld+json',
     ],
