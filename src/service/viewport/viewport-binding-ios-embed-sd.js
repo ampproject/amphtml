@@ -116,7 +116,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
     // Wrapper for the `<body>`.
     /** @private @const {!Element} */
-    this.wrapper_ = scroller.firstElementChild;
+    this.wrapper_ = dev().assertElement(scroller.firstElementChild);
 
     // Notice that the -webkit-overflow-scrolling is set later.
     setImportantStyles(this.scroller_, {
