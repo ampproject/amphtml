@@ -259,14 +259,14 @@ function startSauceConnect() {
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
   console.log('\n' + fileLogPrefix,
       'Starting Sauce Connect Proxy:', colors.cyan(startScCmd));
-  exec(startScCmd);
+  execOrDie(startScCmd);
 }
 
 function stopSauceConnect() {
   const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
   console.log('\n' + fileLogPrefix,
       'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
-  exec(stopScCmd);
+  execOrDie(stopScCmd);
 }
 
 const command = {
