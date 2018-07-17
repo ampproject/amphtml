@@ -91,12 +91,24 @@ function log(mode, ...messages) {
 }
 
 /**
+ * Override PERCY_* environment variables if passed via gulp task parameters.
+ */
+function maybeOverridePercyEnvironmentVariables() {
+  ['percy_project', 'percy_token', 'percy_branch'].forEach(variable => {
+    if (variable in argv) {
+      process.env[variable.toUpperCase()] = argv[variable];
+    }
+  });
+}
+
+/**
  * Disambiguates branch names by decorating them with the commit author name.
  * We do this for all non-push builds in order to prevent them from being used
  * as baselines for future builds.
  */
 function setPercyBranch() {
-  if (!argv.master || !process.env['TRAVIS']) {
+  if (!process.env['PERCY_BRANCH'] &&
+      (!argv.master || !process.env['TRAVIS'])) {
     const userName = gitCommitterEmail();
     const branchName = process.env['TRAVIS'] ?
       process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
@@ -360,10 +372,23 @@ async function generateSnapshots(percy, page, webpages) {
   }
   cleanupAmpConfig();
 
-  const numFlakyTests = webpages.filter(webpage => webpage.flaky).length;
-  if (numFlakyTests > 0) {
-    log('info', 'Skipping', colors.cyan(numFlakyTests), 'flaky tests');
+  const numUnfilteredTests = webpages.length;
+  webpages = webpages.filter(webpage => !webpage.flaky);
+  if (numUnfilteredTests != webpages.length) {
+    log('info', 'Skipping', colors.cyan(numUnfilteredTests - webpages.length),
+        'flaky tests');
   }
+  if (argv.grep) {
+    webpages = webpages.filter(webpage => argv.grep.test(webpage.name));
+    log('info', colors.cyan(`--grep ${argv.grep}`), 'matched',
+        colors.cyan(webpages.length), 'tests');
+  }
+
+  if (!webpages.length) {
+    log('fatal', 'No tests left to run!');
+    return;
+  }
+
   for (const config of CONFIGS) {
     applyAmpConfig(config);
     log('verbose',
@@ -382,10 +407,10 @@ async function generateSnapshots(percy, page, webpages) {
  * @param {string} config Config being used. One of 'canary' or 'prod'.
  */
 async function snapshotWebpages(percy, page, webpages, config) {
-  webpages = webpages.filter(webpage => !webpage.flaky);
   for (const webpage of webpages) {
     const {url} = webpage;
     const name = `${webpage.name} (${config})`;
+    log('verbose', 'Visual diff test', colors.yellow(name));
 
     await enableExperiments(page, webpage['experiments']);
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
@@ -508,12 +533,14 @@ async function waitForElementVisibility(page, selector, options) {
       elementsAreVisible.push(elementIsVisible);
     }
 
-    log('verbose', 'Found', colors.cyan(elementsAreVisible.length),
-        'element(s) matching the CSS selector', colors.cyan(selector));
     if (elementsAreVisible.length) {
+      log('verbose', 'Found', colors.cyan(elementsAreVisible.length),
+          'element(s) matching the CSS selector', colors.cyan(selector));
       log('verbose', 'Expecting all element visibilities to be',
           colors.cyan(waitForVisible), '; they are',
           colors.cyan(elementsAreVisible));
+    } else {
+      log('verbose', 'No', colors.cyan(selector), 'matches found');
     }
     // Since we assert that waitForVisible == !waitForHidden, there is no need
     // to check equality to both waitForVisible and waitForHidden.
@@ -618,7 +645,12 @@ async function createEmptyBuild(page) {
  * Runs the AMP visual diff tests.
  */
 async function visualDiff() {
+  maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
+
+  if (argv.grep) {
+    argv.grep = RegExp(argv.grep);
+  }
 
   if (argv.verify_status) {
     const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
@@ -670,6 +702,10 @@ gulp.task(
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
+        'grep': '  Runs tests that match the pattern',
+        'percy_project': '  Override the PERCY_PROJECT environment variable',
+        'percy_token': '  Override the PERCY_TOKEN environment variable',
+        'percy_branch': '  Override the PERCY_BRANCH environment variable',
       },
     }
 );
