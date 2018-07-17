@@ -222,24 +222,11 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Triggers 'expand' event
+   * Triggers event given name
+   * @param {string} name
    * @param {!Element} section
    */
-  triggerExpandEvent_(section) {
-    const name = 'expand';
-    const event =
-        createCustomEvent(this.win, `accordionSection.${name}`, {});
-    this.action_.trigger(section, name, event, ActionTrust.HIGH);
-
-    this.element.dispatchCustomEvent(name);
-  }
-
-  /**
-   * Triggers 'collapse' event
-   * @param {!Element} section
-   */
-  triggerCollapseEvent_(section) {
-    const name = 'collapse';
+  triggerEvent_(name, section) {
     const event =
         createCustomEvent(this.win, `accordionSection.${name}`, {});
     this.action_.trigger(section, name, event, ActionTrust.HIGH);
@@ -283,29 +270,29 @@ class AmpAccordion extends AMP.BaseElement {
       this.mutateElement(() => {
         if (toExpand) {
           if (!section.hasAttribute('expanded')) {
-            this.triggerExpandEvent_(section);
+            this.triggerEvent_('expand', section);
+            section.setAttribute('expanded', '');
           }
-          section.setAttribute('expanded', '');
           header.setAttribute('aria-expanded', 'true');
           // if expand-single-section is set, only allow one <section> to be
           // expanded at a time
           if (this.element.hasAttribute('expand-single-section')) {
             this.sections_.forEach(sectionIter => {
               if (sectionIter != section) {
-                if (section.hasAttribute('expanded')) {
-                  this.triggerCollapseEvent_(section);
+                if (sectionIter.hasAttribute('expanded')) {
+                  this.triggerEvent_('collapse', sectionIter);
+                  sectionIter.removeAttribute('expanded');
                 }
-                sectionIter.removeAttribute('expanded');
                 sectionIter.children[0].setAttribute('aria-expanded', 'false');
               }
             });
           }
         } else {
           if (section.hasAttribute('expanded')) {
-            this.triggerCollapseEvent_(section);
+            this.triggerEvent_('collapse', section);
+            section.removeAttribute('expanded');
+            header.setAttribute('aria-expanded', 'false');
           }
-          section.removeAttribute('expanded');
-          header.setAttribute('aria-expanded', 'false');
         }
       }, section);
     }
@@ -330,9 +317,9 @@ class AmpAccordion extends AMP.BaseElement {
         position: 'fixed',
       });
       if (!section.hasAttribute('expanded')) {
-        this.triggerExpandEvent_(section);
+        this.triggerEvent_('expand', section);
+        section.setAttribute('expanded', '');
       }
-      section.setAttribute('expanded', '');
     }).then(() => {
       return this.measureMutateElement(
           () => {
@@ -384,9 +371,9 @@ class AmpAccordion extends AMP.BaseElement {
       }), duration, COLLAPSE_CURVE_).thenAlways(() => {
         return this.mutateElement(() => {
           if (section.hasAttribute('expanded')) {
-            this.triggerCollapseEvent_(section);
+            this.triggerEvent_('collapse', section);
+            section.removeAttribute('expanded');
           }
-          section.removeAttribute('expanded');
           setStyles(sectionChild, {
             height: '',
           });
