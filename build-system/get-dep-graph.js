@@ -80,7 +80,10 @@ exports.getFlags = function(config) {
     language_out: 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     externs: path.dirname(module.filename) + '/splittable.extern.js',
-    define: ['PSEUDO_NAMES=true'],
+    define: [
+      //'PSEUDO_NAMES=true',
+      'SINGLE_FILE_COMPILATION=true',
+    ],
     jscomp_off: [
       'accessControls',
       'globalThis',
@@ -137,6 +140,9 @@ exports.getBundleFlags = function(g) {
   const indexOfAmp = bundleKeys.indexOf('src/amp.js');
   bundleKeys.splice(indexOfAmp, 1);
   bundleKeys.splice(1, 0, 'src/amp.js');
+  const indexOfIntermedia = bundleKeys.indexOf('_base_i');
+  bundleKeys.splice(indexOfIntermedia, 1);
+  bundleKeys.splice(1, 0, '_base_i');
 
   bundleKeys.forEach(function(originalName) {
     const isBase = originalName == '_base';
@@ -179,8 +185,8 @@ exports.getBundleFlags = function(g) {
         cmd += `:${configEntry.type}`;
       } else {
         // All lower tier bundles depend on src-amp (v0.js)
-        if (name.includes(TYPES_VALUES)) {
-          cmd += ':src-amp';
+        if (TYPES_VALUES.includes(name)) {
+          cmd += ':_base_i';
         } else {
           cmd += ':_base';
         }
@@ -208,7 +214,6 @@ exports.getBundleFlags = function(g) {
   flagsArray.push('--js_module_root', './build/patched-module/');
   flagsArray.push('--js_module_root', './node_modules/');
   flagsArray.push('--js_module_root', './');
-  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return flagsArray;
 };
 
@@ -234,6 +239,12 @@ exports.getGraph = function(entryModules, config) {
       _base: {
         isBase: true,
         name: '_base',
+        // The modules in the bundle.
+        modules: [],
+      },
+      _base_i: {
+        isBase: true,
+        name: '_base_i',
         // The modules in the bundle.
         modules: [],
       },
@@ -403,14 +414,17 @@ function setupBundles(graph) {
     // If a module is in more than 1 bundle, it must go into _base.
     if (bundleDestCandidates.length > 1) {
       const first = bundleDestCandidates[0];
-      const allTheSame = bundleDestCandidates.some(c => c == first);
+      const allTheSame = !bundleDestCandidates.some(c => c != first);
       const needsBase = bundleDestCandidates.some(c => c == '_base');
       dest = '_base';
+      // If all requested bundles are the same, then that is the right
+      // place.
       if (allTheSame) {
         dest = first;
       } else if (!needsBase) {
-        // Comment out when merging PR that introduces intermediate bundle.
-        // dest = '_intermediate'
+        // If multiple type-bundles want the file, but it doesn't have to be
+        // in base, move the file into the intermediate bundle.
+        dest = '_base_i';
       }
     }
     if (!graph.bundles[dest]) {
@@ -555,6 +569,7 @@ exports.getFlags({
 }).then(compile);
 
 function compile(flagsArray) {
+  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return new Promise(function(resolve, reject) {
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
       if (exitCode == 0) {
