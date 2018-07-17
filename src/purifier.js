@@ -223,8 +223,8 @@ export function purifyHtml(dirty) {
     'ADD_ATTR': WHITELISTED_ATTRS,
     'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
+    // Avoid reparenting of some elements to document head e.g. <script>.
     'FORCE_BODY': true,
-    'RETURN_DOM_FRAGMENT': true,
   });
 
   // Reference to DOMPurify's `allowedTags` whitelist.
@@ -368,9 +368,9 @@ export function purifyHtml(dirty) {
   DOMPurify.addHook('afterSanitizeElements', afterSanitizeElements);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  const fragment = DOMPurify.sanitize(dirty, config);
+  const purified = DOMPurify.sanitize(dirty, config);
   DOMPurify.removeAllHooks();
-  return fragmentToHtml(fragment);
+  return purified;
 }
 
 /**
@@ -400,7 +400,7 @@ export function purifyTagsForTripleMustache(html) {
     // required-attribute tags after sanitizing each element.
     allowedTags['template'] = false;
   });
-  // <template> elements are parsed by the browser as document fragments are
+  // <template> elements are parsed by the browser as document fragments and
   // reparented to the head. So to support nested templates, we need
   // RETURN_DOM_FRAGMENT to keep the <template> and FORCE_BODY to prevent
   // reparenting. See https://github.com/cure53/DOMPurify/issues/285#issuecomment-397810671
