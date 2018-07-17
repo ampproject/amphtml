@@ -80,7 +80,10 @@ exports.getFlags = function(config) {
     language_out: 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     externs: path.dirname(module.filename) + '/splittable.extern.js',
-    define: ['PSEUDO_NAMES=true'],
+    define: [
+      //'PSEUDO_NAMES=true',
+      'SINGLE_FILE_COMPILATION=true',
+    ],
     jscomp_off: [
       'accessControls',
       'globalThis',
@@ -211,7 +214,6 @@ exports.getBundleFlags = function(g) {
   flagsArray.push('--js_module_root', './build/patched-module/');
   flagsArray.push('--js_module_root', './node_modules/');
   flagsArray.push('--js_module_root', './');
-  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return flagsArray;
 };
 
@@ -567,6 +569,7 @@ exports.getFlags({
 }).then(compile);
 
 function compile(flagsArray) {
+  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return new Promise(function(resolve, reject) {
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
       if (exitCode == 0) {
