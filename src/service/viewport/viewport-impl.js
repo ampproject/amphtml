@@ -478,7 +478,7 @@ export class Viewport {
    * @return {!Promise}
    */
   scrollIntoView(element) {
-    return this.getScrollableContainer_(element).then(parent =>
+    return this.getScrollingContainerFor_(element).then(parent =>
       this.scrollIntoViewInternal_(element, parent));
   }
 
@@ -514,13 +514,13 @@ export class Viewport {
     curve = 'ease-in',
     pos = 'top') {
 
-    return this.getScrollableContainer_(element).then(parent =>
+    return this.getScrollingContainerFor_(element).then(parent =>
       this.animateScrollIntoViewInternal_(
           element,
           parent,
           dev().assertNumber(duration),
           dev().assertString(curve),
-          dev().assertString(pos))).then();
+          dev().assertString(pos)));
   }
 
   /**
@@ -534,7 +534,7 @@ export class Viewport {
   animateScrollIntoViewInternal_(element, parent, duration, curve, pos) {
     const elementRect = this.binding_.getLayoutRect(element);
 
-    const {height: parentHeight} = this.isRootNode_(parent) ?
+    const {height: parentHeight} = this.isScrollingElement_(parent) ?
       this.getSize() :
       this.getLayoutRect(parent);
 
@@ -574,7 +574,7 @@ export class Viewport {
       // transition experience when things are closer vs farther.
       return Animation.animate(parent, position => {
         this.setElementScrollTop_(parent, interpolate(position));
-      }, duration, curve);
+      }, duration, curve).then();
     });
   }
 
@@ -582,12 +582,13 @@ export class Viewport {
    * @param {!Element} element
    * @return {!Promise<!Element>}
    */
-  getScrollableContainer_(element) {
+  getScrollingContainerFor_(element) {
     return this.vsync_.measurePromise(() => {
       const scrollable = closest(element,
-          parent => parent./*OK*/scrollHeight > parent./*OK*/clientHeight);
+          parent => parent./*OK*/scrollHeight > parent./*OK*/clientHeight,
+          this.ampdoc.getBody());
 
-      return scrollable || this.ampdoc.getRootNode();
+      return scrollable || this.binding_.getScrollingElement();
     });
   }
 
@@ -596,7 +597,7 @@ export class Viewport {
    * @param {number} scrollTop
    */
   setElementScrollTop_(element, scrollTop) {
-    if (this.isRootNode_(element)) {
+    if (this.isScrollingElement_(element)) {
       this.binding_.setScrollTop(scrollTop);
       return;
     }
@@ -610,7 +611,7 @@ export class Viewport {
    * @return {!Promise<number>}
    */
   getElementScrollTop_(element) {
-    if (this.isRootNode_(element)) {
+    if (this.isScrollingElement_(element)) {
       return tryResolve(() => this.getScrollTop());
     }
     return this.vsync_.measurePromise(() => element./*OK*/scrollTop);
@@ -620,8 +621,8 @@ export class Viewport {
    * @param {!Element} element
    * @return {boolean}
    */
-  isRootNode_(element) {
-    return element == this.ampdoc.getRootNode();
+  isScrollingElement_(element) {
+    return element == this.binding_.getScrollingElement();
   }
 
   /**
