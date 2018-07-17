@@ -885,7 +885,7 @@ function checkTypes() {
             include3pDirectories: true,
             includePolyfills: true,
             extraGlobs: ['src/inabox/*.js'],
-            checkTypes: true,
+            typeCheckOnly: true,
           }),
       // Type check 3p/ads code.
       closureCompile(['./3p/integration.js'], './dist',
@@ -893,21 +893,21 @@ function checkTypes() {
             externs: ['ads/ads.extern.js'],
             include3pDirectories: true,
             includePolyfills: true,
-            checkTypes: true,
+            typeCheckOnly: true,
           }),
       closureCompile(['./3p/ampcontext-lib.js'], './dist',
           'ampcontext-check-types.js', {
             externs: ['ads/ads.extern.js'],
             include3pDirectories: true,
             includePolyfills: true,
-            checkTypes: true,
+            typeCheckOnly: true,
           }),
       closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
           'iframe-transport-client-check-types.js', {
             externs: ['ads/ads.extern.js'],
             include3pDirectories: true,
             includePolyfills: true,
-            checkTypes: true,
+            typeCheckOnly: true,
           }),
     ]);
   }).then(() => {
