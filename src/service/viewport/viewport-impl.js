@@ -516,7 +516,11 @@ export class Viewport {
 
     return this.getScrollableContainer_(element).then(parent =>
       this.animateScrollIntoViewInternal_(
-          element, parent, duration, curve, pos)).then();
+          element,
+          parent,
+          dev().assertNumber(duration),
+          dev().assertString(curve),
+          dev().assertString(pos))).then();
   }
 
   /**
