@@ -1273,7 +1273,7 @@ function constructSRARequest_(a4a, instances) {
  * @return {!Array<string>} Array of pageview tokens to include in the ad
  * request.
  */
-function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
+export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
   const pageviewStateTokensInAdRequest = [];
   for (const token in tokensToInstances) {
     if (!instancesInAdRequest.includes(

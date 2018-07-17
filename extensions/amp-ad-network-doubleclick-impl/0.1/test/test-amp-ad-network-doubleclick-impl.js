@@ -35,6 +35,7 @@ import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
   resetLocationQueryParametersForTesting,
+  getPageviewStateTokensForAdRequest,
 } from '../amp-ad-network-doubleclick-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -1432,6 +1433,23 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
           impl.setPageLevelExperiments('');
           expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
+      });
+
+      describe('#getPageviewStateTokensForAdRequest', () => {
+
+        it('should return the tokens associated with instances that are not passed to it as an argument', () => {
+          const element1 = doc.createElement('amp-ad');
+          element1.setAttribute('type', 'doubleclick');
+          element1.setAttribute('data-ad-client', 'doubleclick');
+          const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+          const element2 = doc.createElement('amp-ad');
+          element2.setAttribute('type', 'doubleclick');
+          element2.setAttribute('data-ad-client', 'doubleclick');
+          const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
+          AmpAdNetworkDoubleclickImpl.tokensToInstances = {'DUMMY_TOKEN_1' : impl1, 'DUMMY_TOKEN_2': impl2};
+          const instances = [impl1];
+          expect(getPageviewStateTokensForAdRequest(instances)).to.deep.equal(['DUMMY_TOKEN_2']);
         });
       });
     });
