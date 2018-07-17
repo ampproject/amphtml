@@ -32,16 +32,20 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     sandbox = env.sandbox;
   });
 
+  afterEach(() => {
+    delete ANALYTICS_CONFIG['-test-venfor'];
+  });
+
   describe('merges requests correctly', () => {
     it('inline and vendor both string', () => {
-      ANALYTICS_CONFIG['xyz'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '/bar', 'bar': 'foobar'},
       };
 
       const element = getAnalyticsTag({
         'requests': {'foo': 'https://example.com/${bar}'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': 'xyz'});
+      }, {'type': '-test-venfor'});
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -59,7 +63,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('inline and vendor string and object', () => {
-      ANALYTICS_CONFIG['xyz'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {
           'foo': 'foo',
           'bar': {
@@ -74,7 +78,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'batchInterval': 0,
         }, 'bar': 'bar-i'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': 'xyz'});
+      }, {'type': '-test-venfor'});
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -94,7 +98,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('inline and vendor both object', () => {
-      ANALYTICS_CONFIG['xyz'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {
           'foo': {
             'baseUrl': 'foo',
@@ -115,7 +119,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
         'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': 'xyz'});
+      }, {'type': '-test-venfor'});
 
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
@@ -198,7 +202,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
   describe('vendor only configs', () => {
     it('succeeds for vendor optout config', () => {
-      ANALYTICS_CONFIG['testVendor'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {
           'pageview': '//fake-url',
         },
@@ -210,7 +214,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
         optout: true,
       };
-      const element = getAnalyticsTag({}, {'type': 'testVendor'});
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['optout']).to.be.true;
       });
@@ -227,7 +231,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('succeeds for vendor iframePing config', () => {
-      ANALYTICS_CONFIG['testVendor'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {
           'pageview': '//fake-url',
         },
@@ -239,7 +243,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
       };
-      const element = getAnalyticsTag({}, {'type': 'testVendor'});
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['triggers']).to.deep.equal({
           'pageview': {
@@ -261,7 +265,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('succeeds for vendor iframe transport config', () => {
-      ANALYTICS_CONFIG['testVendor'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {
           'pageview': '//fake-url',
         },
@@ -278,7 +282,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           iframe: '//fake-url',
         },
       };
-      const element = getAnalyticsTag({}, {'type': 'testVendor'});
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['transport']).to.deep.equal({
           image: false,
@@ -290,7 +294,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('fails for inlined iframe transport config', () => {
-      ANALYTICS_CONFIG['testVendor'] = {
+      expectAsyncConsoleError(
+          '[analytics-config] Inline configs are not allowed ' +
+          'to specify transport iframe');
+      expectAsyncConsoleError(
+          '[AmpAnalytics <unknown id>] Inline or remote config ' +
+          'should not overwrite vendor transport settings');
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {
           'pageview': '//fake-url',
         },
@@ -316,9 +326,8 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           beacon: false,
           iframe: '//fake-url2',
         },
-      });
-      return expect(new AnalyticsConfig(element).loadConfig()).to.be
-          .rejectedWith(/Inline configs are not allowed to specify transport iframe/);
+      }, {'type': '-test-venfor'});
+      return new AnalyticsConfig(element).loadConfig();
     });
   });
 
@@ -405,7 +414,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   describe('should re-write configuration if configured', () => {
 
     it('should fully rewrite a configuration', () => {
-      ANALYTICS_CONFIG['xyz'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
@@ -415,7 +424,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       const element = getAnalyticsTag({
         'requests': {'foo': '//inlined'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': 'xyz'});
+      }, {'type': '-test-venfor'});
 
       const xhrStub = stubXhr(element);
       xhrStub.callsFake(url => {
@@ -445,7 +454,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should merge rewritten configuration and use vendor', () => {
-      ANALYTICS_CONFIG['xyz'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
@@ -455,7 +464,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       const element = getAnalyticsTag({
         'requests': {'foo': '//inlined'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': 'xyz', 'config': '//remote'});
+      }, {'type': '-test-venfor', 'config': '//remote'});
 
       const xhrStub = stubXhr(element);
       xhrStub.callsFake(url => {
@@ -485,7 +494,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should ignore config rewriter if no url provided', () => {
-      ANALYTICS_CONFIG['xyz'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
@@ -494,7 +503,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       const element = getAnalyticsTag({
         'requests': {'foo': '//inlined'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': 'xyz'});
+      }, {'type': '-test-venfor'});
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']['foo']).to.deep.equal({
@@ -504,7 +513,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should ignore inlined config rewriter', () => {
-      ANALYTICS_CONFIG['xyz'] = {
+      ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       };
@@ -514,7 +523,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'configRewriter': {
           'url': '//rewriter',
         },
-      }, {'type': 'xyz'});
+      }, {'type': '-test-venfor'});
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']['foo']).to.deep.equal({
