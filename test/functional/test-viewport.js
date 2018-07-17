@@ -802,7 +802,7 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport./*OK*/scrollTop_).to.be.null;
   });
 
-  it.only('scrolls with scrollIntoView respecting padding', function* () {
+  it('scrolls with scrollIntoView respecting padding', function* () {
     const element = document.createElement('div');
 
     // scrollIntoView traverses up the DOM tree, so it needs the node to
@@ -833,9 +833,7 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.verify();
   });
 
-  it.only('scrolls with animateScrollIntoView respecting ' +
-      'padding', function* () {
-
+  it('scrolls with animateScrollIntoView respecting padding', function* () {
     const element = document.createElement('div');
 
     // animateScrollIntoView traverses up the DOM tree, so it needs the node to
