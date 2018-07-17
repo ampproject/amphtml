@@ -1150,7 +1150,6 @@ describe('ValidatorRulesMakeSense', () => {
       expect(errorSpecificityIsUnique.hasOwnProperty(errorSpecificity.code))
           .toBe(false);
       errorSpecificityIsUnique[errorSpecificity.code] = 0;
-      numErrorSpecificity += 1;
     }
   });
 
@@ -1159,7 +1158,6 @@ describe('ValidatorRulesMakeSense', () => {
     for (const errorFormat of rules.errorFormats) {
       expect(errorFormatIsUnique.hasOwnProperty(errorFormat.code)).toBe(false);
       errorFormatIsUnique[errorFormat.code] = 0;
-      numErrorFormat += 1;
     }
   });
 });
