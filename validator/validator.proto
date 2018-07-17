@@ -94,8 +94,8 @@ message AttrSpec {
   // attributes in a given HTML document will be unescaped.
 
   // The attribute value must be equal to the value in this field.
-  optional string value = 4;              // case sensitive
-  optional string value_casei = 18;       // case insensitive
+  repeated string value = 4;              // case sensitive
+  repeated string value_casei = 18;       // case insensitive
   optional string value_regex = 15;       // case sensitive
   optional string value_regex_casei = 5;  // case insensitive
   optional UrlSpec value_url = 14;

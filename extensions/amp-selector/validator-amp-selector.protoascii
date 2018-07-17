@@ -52,7 +52,9 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   attrs: { name: "form" }
   attrs: {
     name: "keyboard-select-mode"
-    value_regex_casei: "focus|none|select"
+    value_casei: "focus"
+    value_casei: "none"
+    value_casei: "select"
   }
   attrs: {
     name: "multiple"

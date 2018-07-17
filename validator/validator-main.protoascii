@@ -26,7 +26,7 @@ min_validator_revision_required: 338
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 677
+spec_file_revision: 680
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -158,7 +158,9 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex_casei: "_blank|_self|_top"
+    value_casei: "_blank"
+    value_casei: "_self"
+    value_casei: "_top"
   }
 }
 # Disallowed.
@@ -811,7 +813,8 @@ tags: {
   attrs: {
     name: "content"
     mandatory: true
-    value_regex_casei: "off|on"
+    value_casei: "off"
+    value_casei: "on"
   }
   attrs: {
     name: "http-equiv"
@@ -1640,7 +1643,9 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex: "_blank|_self|_top"
+    value: "_blank"
+    value: "_self"
+    value: "_top"
   }
   attrs: {
     name: "type"
@@ -1695,7 +1700,7 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex: "_blank"
+    value: "_blank"
   }
   attrs: {
     name: "type"
@@ -2023,7 +2028,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
   attrs: {
     name: "frameborder"
-    value_regex: "0|1"
+    value: "0"
+    value: "1"
   }
   attrs: { name: "height" }
   attrs: { name: "name" }
@@ -2037,7 +2043,9 @@ tags: {
   }
   attrs: {
     name: "scrolling"
-    value_regex: "auto|yes|no"
+    value: "auto"
+    value: "yes"
+    value: "no"
   }
   attrs: {
     name: "src"
@@ -2238,7 +2246,10 @@ attr_lists: {
   }
   attrs: {
     name: "kind"
-    value_regex: "captions|chapters|descriptions|metadata"
+    value: "captions"
+    value: "chapters"
+    value: "descriptions"
+    value: "metadata"
   }
   attrs: { name: "label" }
   attrs: {
@@ -2950,7 +2961,11 @@ tags: {
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
   attrs: { name: "preserveaspectratio" }
-  attrs: { name: "version" value_regex: "1.0|1.1" }
+  attrs: {
+    name: "version"
+    value: "1.0"
+    value: "1.1"
+  }
   attrs: { name: "viewbox" }
   attrs: { name: "width" }
   attrs: { name: "x" }
@@ -3534,7 +3549,8 @@ tags: {
   attrs: { name: "bgcolor" }  # Not valid html5 but commonly used and supported.
   attrs: {  # Not valid html5 but commonly used and supported.
     name: "border"
-    value_regex: "0|1"
+    value: "0"
+    value: "1"
   }
   attrs: { name: "cellpadding" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "cellspacing" }  # Not valid html5 but commonly used and supported.
@@ -3676,10 +3692,10 @@ tags {  # <form method=GET ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "as-you-go|"
-                 "interact-and-submit|"
-                 "show-all-on-submit|"
-                 "show-first-on-submit"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3693,7 +3709,8 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "target"
     mandatory: true
-    value_regex_casei: "_blank|_top"
+    value_casei: "_blank"
+    value_casei: "_top"
   }
   attrs: {
     name: "verify-xhr"
@@ -3727,10 +3744,10 @@ tags {  # <form method=POST ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "as-you-go|"
-                 "interact-and-submit|"
-                 "show-all-on-submit|"
-                 "show-first-on-submit"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3746,7 +3763,8 @@ tags {  # <form method=POST ...>
   # See: https://github.com/ampproject/amphtml/issues/5607
   attrs: {
     name: "target"
-    value_regex_casei: "_blank|_top"
+    value_casei: "_blank"
+    value_casei: "_top"
   }
   attrs: {
     name: "verify-xhr"
@@ -3779,10 +3797,10 @@ tags {  # <form method=GET ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "as-you-go|"
-                 "interact-and-submit|"
-                 "show-all-on-submit|"
-                 "show-first-on-submit"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3815,10 +3833,10 @@ tags {  # <form method=POST ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "as-you-go|"
-                 "interact-and-submit|"
-                 "show-all-on-submit|"
-                 "show-first-on-submit"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -5326,15 +5344,15 @@ attr_lists: {
   }
   attrs: {
     name: "visible-when-invalid"
-    value_regex: "badInput|"
-                 "customError|"
-                 "patternMismatch|"
-                 "rangeOverflow|"
-                 "rangeUnderflow|"
-                 "stepMismatch|"
-                 "tooLong|"
-                 "typeMismatch|"
-                 "valueMissing"
+    value: "badInput"
+    value: "customError"
+    value: "patternMismatch"
+    value: "rangeOverflow"
+    value: "rangeUnderflow"
+    value: "stepMismatch"
+    value: "tooLong"
+    value: "typeMismatch"
+    value: "valueMissing"
     trigger: {
       also_requires_attr: "validation-for"
     }
@@ -5343,13 +5361,13 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
-    value_regex_casei: "fade-in|"
-                       "fade-in-scroll|"
-                       "fly-in-bottom|"
-                       "fly-in-left|"
-                       "fly-in-right|"
-                       "fly-in-top|"
-                       "parallax"
+    value_casei: "fade-in"
+    value_casei: "fade-in-scroll"
+    value_casei: "fly-in-bottom"
+    value_casei: "fly-in-left"
+    value_casei: "fly-in-right"
+    value_casei: "fly-in-top"
+    value_casei: "parallax"
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
@@ -5378,7 +5396,10 @@ attr_lists: {
   }
   attrs: {
     name: "subscriptions-section"
-    value_regex_casei: "actions|content|content-not-granted|loading"
+    value_casei: "actions"
+    value_casei: "content"
+    value_casei: "content-not-granted"
+    value_casei: "loading"
     requires_extension: "amp-subscriptions"
   }
   attrs: {
@@ -5682,18 +5703,18 @@ error_formats {
 error_formats {
   code: STYLESHEET_TOO_LONG
   format: "The author stylesheet specified in tag '%1' is too "
-          "long - we saw %2 bytes whereas the limit is %3 bytes."
+          "long - document contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG
   format: "The author stylesheet specified in tag 'style amp-custom' and "
-          "the combined inline styles is too large - we saw %1 bytes "
-          "whereas the limit is %2 bytes."
+          "the combined inline styles is too large - document contains %1 "
+          "bytes whereas the limit is %2 bytes."
 }
 error_formats {
   code: INLINE_STYLE_TOO_LONG
-  format: "The inline style specified in tag '%1' is too long "
-          "- we saw %2 bytes whereas the limit is %3 bytes."
+  format: "The inline style specified in tag '%1' is too long - document "
+          "contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
