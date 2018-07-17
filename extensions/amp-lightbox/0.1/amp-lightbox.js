@@ -116,7 +116,7 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private @const {string} */
     this.animationPreset_ =
-        element.getAttribute('animate-in') || DEFAULT_ANIMATION;
+        element.getAttribute('animate-in').toLowerCase() || DEFAULT_ANIMATION;
 
     /** @const {function()} */
     this.boundReschedule_ = debounce(this.win, () => {

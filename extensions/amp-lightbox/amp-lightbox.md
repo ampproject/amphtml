@@ -70,6 +70,12 @@ Must be set to `nodisplay`.
 
 When the `scrollable` attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
 
+##### animate-in (optional)
+
+Defines the style of animation for opening the lightbox. By default, this will
+be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom` and
+`fly-in-top`.
+
 ## Styling
 
 You can style the `amp-lightbox` with standard CSS.
