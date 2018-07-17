@@ -90,11 +90,12 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   /** @override */
-  onLayoutMeasure() {
+  onMeasureChanged() {
     const width = this.getLayoutWidth();
-    this.getVsync().mutate(() => {
+    this.mutateElement(() => {
       setStyle(this.container_, 'width', width, 'px');
     });
+    this.scheduleLayout(this.container_);
   }
 
   /** @override */
