@@ -24,6 +24,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
+import {toWin} from '../../../src/types';
 
 const TAG = 'analytics-config';
 
@@ -109,7 +110,7 @@ export class AnalyticsConfig {
     return Services.urlReplacementsForDoc(this.element_)
         .expandUrlAsync(configRewriterUrl)
         .then(expandedUrl => {
-          return Services.xhrFor(/** @type {!Window} */(this.win_)).fetchJson(
+          return Services.xhrFor(toWin(this.win_)).fetchJson(
               expandedUrl, fetchConfig);
         })
         .then(res => res.json())
@@ -146,7 +147,7 @@ export class AnalyticsConfig {
         .expandUrlAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
-          return Services.xhrFor(/** @type {!Window} */(this.win_)).fetchJson(
+          return Services.xhrFor(toWin(this.win_)).fetchJson(
               remoteConfigUrl, fetchConfig);
         })
         .then(res => res.json())
