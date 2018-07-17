@@ -393,7 +393,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   getMediaBySelector_(selector) {
     const iframe = this.element.querySelector('iframe');
-    const fie = iframe && getFriendlyIframeEmbedOptional(iframe);
+    const fie = iframe &&
+        getFriendlyIframeEmbedOptional(/** @type {!HTMLIFrameElement} */ (iframe));
     const mediaSet = [];
 
     iterateCursor(scopedQuerySelectorAll(this.element, selector),
