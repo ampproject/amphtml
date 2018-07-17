@@ -941,7 +941,7 @@ app.get('/adzerk/*', (req, res) => {
 });
 
 /*
- * Serve extension scripts and their source amps.
+ * Serve extension scripts and their source maps.
  */
 app.get(['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'], (req, res, next) => {
   const mode = pc.env.SERVE_MODE;
