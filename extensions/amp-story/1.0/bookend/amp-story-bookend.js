@@ -251,7 +251,8 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onReplayButtonClick_(event) {
     event.stopPropagation();
-    dispatch(this.getRoot(), EventType.REPLAY, /* opt_bubbles */ true);
+    dispatch(this.win, this.getRoot(), EventType.REPLAY,
+    /* payload */ undefined, {bubbles: true});
   }
 
   /**
