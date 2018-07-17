@@ -107,7 +107,7 @@ export class AmpAnalytics extends AMP.BaseElement {
      * We stop reporting after 1 minute.
      * @private @const {number}
      */
-    this.maxResourceTimingReportingTime_ = Date.now() + 60 * 1000;
+    this.maxResourceTimingReportingTime_ = Date.now() + (60 * 1000);
   }
 
   /** @override */

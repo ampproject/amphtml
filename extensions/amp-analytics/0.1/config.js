@@ -37,8 +37,8 @@ export class AnalyticsConfig {
     /** @private {!Element} */
     this.element_ = element;
 
-    /** @private {!Window} */
-    this.win_ = element.ownerDocument.defaultView;
+    /** @private {?Window} */
+    this.win_ = null;
 
     /**
      * @const {!JsonObject} Copied here for tests.
@@ -64,6 +64,7 @@ export class AnalyticsConfig {
    * @return {!Promise<JsonObject>}
    */
   loadConfig() {
+    this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
     return this.fetchRemoteConfig_()
@@ -108,7 +109,7 @@ export class AnalyticsConfig {
     return Services.urlReplacementsForDoc(this.element_)
         .expandUrlAsync(configRewriterUrl)
         .then(expandedUrl => {
-          return Services.xhrFor(this.win_).fetchJson(
+          return Services.xhrFor(/** @type {!Window} */(this.win_)).fetchJson(
               expandedUrl, fetchConfig);
         })
         .then(res => res.json())
@@ -145,7 +146,7 @@ export class AnalyticsConfig {
         .expandUrlAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
-          return Services.xhrFor(this.win_).fetchJson(
+          return Services.xhrFor(/** @type {!Window} */(this.win_)).fetchJson(
               remoteConfigUrl, fetchConfig);
         })
         .then(res => res.json())
