@@ -18,6 +18,10 @@ import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {Layout} from '../../../src/layout';
 import {NextPageService} from './next-page-service';
 import {Services} from '../../../src/services';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {assertConfig} from './config';
 import {
   childElementsByAttr,
@@ -58,22 +62,36 @@ export class AmpNextPage extends AMP.BaseElement {
     }
 
     const {element} = this;
-
     element.classList.add('i-amphtml-next-page');
 
-    // TODO(peterjosling): Read config from another source.
+    const src = element.getAttribute('src');
+    if (src) {
+      return this.fetchConfig_().then(config => this.register_(config),
+          error => user().error(TAG, 'error fetching config', error));
+    } else {
+      const scriptElements = childElementsByTag(element, 'SCRIPT');
+      user().assert(scriptElements.length === 1,
+          `${TAG} should contain only one <script> child, or a URL specified `
+          + 'in [src]');
+      const scriptElement = scriptElements[0];
+      user().assert(isJsonScriptTag(scriptElement),
+          `${TAG} config should ` +
+          'be inside a <script> tag with type="application/json"');
+      const configJson = tryParseJson(scriptElement.textContent, error => {
+        user().error(TAG, 'failed to parse config', error);
+      });
+      this.register_(configJson);
+    }
+  }
 
-    const scriptElements = childElementsByTag(element, 'SCRIPT');
-    user().assert(scriptElements.length == 1,
-        `${TAG} should contain only one <script> child.`);
-    const scriptElement = scriptElements[0];
-    user().assert(isJsonScriptTag(scriptElement),
-        `${TAG} config should ` +
-            'be inside a <script> tag with type="application/json"');
-    const configJson = tryParseJson(scriptElement.textContent, error => {
-      user().error(TAG, 'failed to parse config', error);
-    });
-
+  /**
+   * Verifies the specified config as a valid {@code NextPageConfig} and
+   * registers the {@link NextPageService} for this document.
+   * @param {*} configJson Config JSON object.
+   * @private
+   */
+  register_(configJson) {
+    const {element} = this;
     const docInfo = Services.documentInfoForDoc(element);
     const urlService = Services.urlForDoc(element);
 
@@ -107,6 +125,17 @@ export class AmpNextPage extends AMP.BaseElement {
    */
   appendPage_(element) {
     return this.mutateElement(() => this.element.appendChild(element));
+  }
+
+  /**
+   * Fetches the element config from the URL specified in [src].
+   * @private
+   */
+  fetchConfig_() {
+    const ampdoc = this.getAmpDoc();
+    const policy = UrlReplacementPolicy.ALL;
+    return batchFetchJsonFor(
+        ampdoc, this.element, /* opt_expr */ undefined, policy);
   }
 }
 
