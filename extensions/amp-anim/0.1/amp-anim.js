@@ -78,6 +78,13 @@ export class AmpAnim extends AMP.BaseElement {
     if (this.img_.src == SRC_PLACEHOLDER) {
       this.img_.src = this.element.getAttribute('src');
     }
+    return this.loadPromise(this.img_).catch(e => {
+      if (!this.img_.getAttribute('src') && this.img_.getAttribute('srcset')) {
+        return;
+      }
+      throw e;
+    });
+
   }
 
   /** @override */
