@@ -186,6 +186,12 @@ exports.getBundleFlags = function(g) {
       });
     }
     bundle.modules.forEach(function(js) {
+      // Ultra hack alert. We need to get rid of this overriding
+      // technique and instead uniformly update packages
+      // via update-packages.js
+      if (/document-register-element/.test(js)) {
+        js = js.replace(/node_modules\//, 'build/patched-module/');
+      }
       flagsArray.push('--js', js);
     });
     if (!isBase && bundleKeys.length > 1) {
@@ -242,7 +248,7 @@ exports.getBundleFlags = function(g) {
     if (bundleKeys.length > 1) {
       function massageWrapper(w) {
         return (w.replace('<%= contents %>', '%s')
-            /*+ '\n//# sourceMappingURL=%basename%.map\n'*/);
+        /*+ '\n//# sourceMappingURL=%basename%.map\n'*/);
       }
       if (isMain) {
         flagsArray.push('--module_wrapper', name + ':' +
@@ -559,7 +565,7 @@ function compile(flagsArray) {
   });
 }
 
-
+// TODO(@cramforce): Unify with update-packages.js
 function patchRegisterElement() { // eslint-disable-line no-unused-vars
   let file;
   // Copies document-register-element into a new file that has an export.
@@ -567,8 +573,8 @@ function patchRegisterElement() { // eslint-disable-line no-unused-vars
   // export this module does not generate a goog.provide which fails
   // compilation.
   // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'node_modules/document-register-element' +
-      '/build/document-register-element.patched.js';
+  const patchedName = 'build/patched-module/document-register-element' +
+      '/build/document-register-element.node.js';
   if (!fs.existsSync(patchedName)) {
     file = fs.readFileSync(
         'node_modules/document-register-element/build/' +
@@ -583,6 +589,7 @@ function patchRegisterElement() { // eslint-disable-line no-unused-vars
   }
 }
 
+// TODO(@cramforce): Unify with update-packages.js
 function patchWebAnimations() {
   // Copies web-animations-js into a new file that has an export.
   const patchedName = 'node_modules/web-animations-js/' +
@@ -601,8 +608,8 @@ function patchWebAnimations() {
   fs.writeFileSync(patchedName, file);
 }
 
+// TODO(@cramforce): Unify with update-packages.js
 function patchDompurify() {
-  // Copies web-animations-js into a new file that has an export.
   const name = 'node_modules/dompurify/package.json';
   const file = fs.readFileSync(name).toString()
       .replace('"browser": "dist/purify.js",', '');
