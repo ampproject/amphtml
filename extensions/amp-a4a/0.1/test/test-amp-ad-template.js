@@ -178,9 +178,9 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.buildCallback();
       impl.element.setAttribute(`data-${DATA_REQUEST_VAR_PREFIX}bar`, '123');
       impl.element.setAttribute(`data-${DATA_REQUEST_VAR_PREFIX}baz`, '456');
-      impl.requestUrl_ = 'https://foo.com?param1=bar&sz=widthxheight&param2=baz';
+      impl.requestUrl_ = 'https://foo.com?sz=widthxheight';
       expect(impl.getRequestUrl()).to.equal(
-          'https://foo.com?param1=123&sz=320x50&param2=456');
+          'https://foo.com?sz=320x50&bar=123&baz=456');
     });
   });
 

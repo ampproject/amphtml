@@ -24,6 +24,7 @@ import {NetworkRegistry} from './template-config';
 import {Services} from '../../../src/services';
 import {TemplateRenderer} from './template-renderer';
 import {TemplateValidator} from './template-validator';
+import {addParamToUrl} from '../../../src/url';
 import {camelCaseToDash, startsWith} from '../../../src/string';
 import {dev} from '../../../src/log';
 
@@ -72,23 +73,24 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
   /** @override */
   getRequestUrl() {
-    const substitutions = {
-      width: this.getContext().size.width,
-      height: this.getContext().size.height,
-    };
+    let url = Services.urlReplacementsForDoc(this.element)
+        .expandUrlSync(this.requestUrl_, {
+          width: this.getContext().size.width,
+          height: this.getContext().size.height,
+        });
+
     // We collect all fields in the dataset of the form
-    // 'data-request-var-<field_name>=<val>`, and add <field_name>: <val> to
-    // the substitution object to be inserted into the URL during expansion.
+    // 'data-request-var-<field_name>=<val>`, and append &<field_name>=<val> to
+    // the add request URL.
     Object.keys(this.element.dataset).forEach(dataField => {
       const dataFieldInDash = camelCaseToDash(dataField);
       if (startsWith(dataFieldInDash, DATA_REQUEST_VAR_PREFIX)) {
         const requestVarName = dataFieldInDash.slice(
             DATA_REQUEST_VAR_PREFIX.length, dataFieldInDash.length);
-        substitutions[requestVarName] = this.element.dataset[dataField];
+        url = addParamToUrl(
+            url, requestVarName, this.element.dataset[dataField]);
       }
     });
-    const url = Services.urlReplacementsForDoc(this.element)
-        .expandUrlSync(this.requestUrl_, substitutions);
     this.getContext().adUrl = url;
     return url;
   }
