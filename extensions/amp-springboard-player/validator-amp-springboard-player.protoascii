@@ -45,7 +45,8 @@ tags: {  # <amp-springboard-player>
   attrs: {
     name: "data-mode"
     mandatory: true
-    value_regex_casei: "playlist|video"
+    value_casei: "playlist"
+    value_casei: "video"
   }
   attrs: {
     name: "data-player-id"
