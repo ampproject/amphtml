@@ -254,37 +254,50 @@ function adoptShared(global, callback) {
       });
     };
 
-    // We support extension declarations which declare they have an
-    // "intermediate" dependency that needs to be loaded before they
-    // can execute.
-    if (!isFunction && fnOrStruct.i) {
+    const startRegisterOrChunk = () => {
+      if (isFunction || fnOrStruct.p == 'high') {
+        // "High priority" extensions do not go through chunking.
+        // This should be used for extensions that need to run early.
+        // One example would be viewer communication that is required
+        // to transition document from pre-render to visible (which
+        // affects chunking itself).
+        // We consider functions as high priority, because
+        // - if in doubt, that is a better default
+        // - the only actual  user is a viewer integration that should
+        //   be high priority.
+        Promise.resolve().then(register);
+      } else {
+        register.displayName = fnOrStruct.n;
+        startupChunk(global.document, register);
+      }
+    };
+
+    const preloadDeps = () => {
       // Allow a single string as the intermediate dependency OR allow
       // for an array if intermediate dependencies that needs to be
       // resolved first before executing this current extension.
       if (Array.isArray(fnOrStruct.i)) {
         const promises = fnOrStruct.i.map(dep => {
-          return extensions.preloadExtension(dep);
+          return extensions.preloadExtension(dep).then(ext => {
+            return extensions.waitForExtension(global, dep);
+          });
         });
-        Promise.all(promises).then(register);
+        return Promise.all(promises);
       } else if (typeof fnOrStruct.i == 'string') {
-        extensions.preloadExtension(fnOrStruct.i).then(register);
+        return extensions.preloadExtension(fnOrStruct.i).then(ext => {
+          return extensions.waitForExtension(global, fnOrStruct.i);
+        })
       }
-    }
+      dev().error('dependency is neither an array or a string', fnOrStruct.i);
+    };
 
-    if (isFunction || fnOrStruct.p == 'high') {
-      // "High priority" extensions do not go through chunking.
-      // This should be used for extensions that need to run early.
-      // One example would be viewer communication that is required
-      // to transition document from pre-render to visible (which
-      // affects chunking itself).
-      // We consider functions as high priority, because
-      // - if in doubt, that is a better default
-      // - the only actual  user is a viewer integration that should
-      //   be high priority.
-      Promise.resolve().then(register);
+    // We support extension declarations which declare they have an
+    // "intermediate" dependency that needs to be loaded before they
+    // can execute.
+    if (!isFunction && fnOrStruct.i) {
+      preloadDeps().then(startRegisterOrChunk);
     } else {
-      register.displayName = fnOrStruct.n;
-      startupChunk(global.document, register);
+      startRegisterOrChunk();
     }
   }
 

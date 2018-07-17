@@ -322,10 +322,19 @@ describes.fakeWin('runtime', {
     });
   });
 
-  it.only('loads and waits for a single intermediate bundles', () => {
+  it('loads and waits for a single intermediate bundles', () => {
     // New format: {n:string, f:function(), i: <string|Array<string>}.
     let progress = '';
     const queueExtensions = win.AMP;
+
+    win.AMP.push({
+      n: 'ext2',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'C';
+      },
+      i: 'ext1',
+    });
     win.AMP.push({
       n: 'ext1',
       f: amp => {
@@ -335,24 +344,34 @@ describes.fakeWin('runtime', {
       i: '_base_ext',
     });
 
+    win.AMP.push({
+      n: '_base_ext',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'B';
+      },
+    });
+
+    let script = win.document.querySelector('[data-script=_base_ext]');
+    expect(script).to.be.null;
     const promise = adopt(win);
     const e = Services.extensionsFor(win);
-    const spy = sandbox.spy(e, 'preloadExtension');
 
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('');
     runChunksForTesting(win.document);
-    const script = win.document.querySelector('[data-script=_base_ext]');
+    script = win.document.querySelector('[data-script=_base_ext]');
     expect(script).to.be.not.null;
     return promise.then(() => {
-      expect(spy).to.have.been.calledWith('_base_ext');
       // ext1 should not be executed yet and needs to wait on _base_ext
-      expect(progress).to.equal('');
-      // Manually resolve this extension that doesn't exist in test but which
-      // we tried to load.
-      e.extensions_['_base_ext'].resolve();
+      expect(progress).to.equal('B');
       return e.waitForExtension(win, '_base_ext').then(() => {
-        expect(progress).to.equal('A');
+        return e.waitForExtension(win, 'ext1').then(() => {
+          expect(progress).to.equal('BA');
+          return e.waitForExtension(win, 'ext2').then(() => {
+            expect(progress).to.equal('BAC');
+          });
+        });
       });
     });
   });
@@ -367,81 +386,53 @@ describes.fakeWin('runtime', {
         expect(amp).to.equal(win.AMP);
         progress += 'A';
       },
-      i: ['_base_ext', '_base_ext2', 'ext0'],
+      i: ['_base_ext1', '_base_ext2'],
     });
 
     win.AMP.push({
-      n: 'ext0',
+      n: '_base_ext2',
       f: amp => {
         expect(amp).to.equal(win.AMP);
         progress += 'B';
       },
+      i: ['_base_ext1'],
     });
 
+    win.AMP.push({
+      n: '_base_ext1',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'C';
+      },
+    });
+
+    let script1 = win.document.querySelector('[data-script=_base_ext1]');
+    let script2 = win.document.querySelector('[data-script=_base_ext2]');
+    expect(script1).to.be.null;
+    expect(script2).to.be.null;
     const promise = adopt(win);
     const e = Services.extensionsFor(win);
-    const spy = sandbox.spy(e, 'preloadExtension');
 
     expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('');
     runChunksForTesting(win.document);
-    const script1 = win.document.querySelector('[data-script=_base_ext]');
-    expect(script1).to.be.null;
-    const script2 = win.document.querySelector('[data-script=_base_ext2]');
-    expect(script2).to.be.null;
+    script1 = win.document.querySelector('[data-script=_base_ext1]');
+    script2 = win.document.querySelector('[data-script=_base_ext2]');
+    expect(script1).to.not.be.null;
+    expect(script2).to.not.be.null;
+
     return promise.then(() => {
-      const script1 = win.document.querySelector('[data-script=_base_ext]');
-      const script2 = win.document.querySelector('[data-script=_base_ext2]');
-      expect(script1).to.not.be.null;
-      expect(script2).to.not.be.null;
-
-      expect(spy.firstCall).to.have.been.calledWith('_base_ext');
-      expect(spy.secondCall).to.have.been.calledWith('_base_ext2');
-      expect(spy.thirdCall).to.have.been.calledWith('ext0');
-
       // ext1 should not be executed yet and needs to wait on _base_ext
       // Notice that ext0 executes before A
-      expect(progress).to.equal('B');
-      // Manually resolve this extension that doesn't exist in test but which
-      // we tried to load.
-      e.extensions_['_base_ext'].resolve();
-      return e.waitForExtension(win, '_base_ext').then(() => {
-        expect(progress).to.equal('B');
-        e.extensions_['_base_ext2'].resolve();
-        return e.waitForExtension(win, '_base_ext2').then(() => {
-          expect(progress).to.equal('BA');
+      expect(progress).to.equal('C');
+      runChunksForTesting(win.document);
+      return e.waitForExtension(win, '_base_ext1').then(() => {
+        expect(progress).to.equal('CB');
+      }).then(() => {
+        return e.waitForExtension(win, 'ext1').then(() => {
+          expect(progress).to.equal('CBA');
         });
       });
-    });
-  });
-
-  it('execs right away if intermediate bundle exists', () => {
-    // New format: {n:string, f:function(), i: <string|Array<string>}.
-    let progress = '';
-    const queueExtensions = win.AMP;
-    win.AMP.push({
-      n: 'ext1',
-      f: amp => {
-        expect(amp).to.equal(win.AMP);
-        progress += 'B';
-      },
-      i: 'ext0',
-    });
-    win.AMP.push({
-      n: 'ext0',
-      f: amp => {
-        expect(amp).to.equal(win.AMP);
-        progress += 'A';
-      },
-    });
-
-    adopt(win);
-    expect(queueExtensions).to.have.length(0);
-    expect(progress).to.equal('');
-    runChunksForTesting(win.document);
-    const e = Services.extensionsFor(win);
-    return e.waitForExtension(win, 'ext0').then(() => {
-      expect(progress).to.equal('AB');
     });
   });
 
