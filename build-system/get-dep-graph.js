@@ -205,7 +205,7 @@ exports.getBundleFlags = function(g) {
            massageWrapper(wrappers.extension(name)));
       }
     } else {
-      throw new Error('Expect to build more than one bundle.')
+      throw new Error('Expect to build more than one bundle.');
     }
   });
   flagsArray.push('--js_module_root', './build/patched-module/');

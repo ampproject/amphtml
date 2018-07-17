@@ -13,11 +13,11 @@ exports.mainBinary = 'self.AMP=self.AMP||[];' +
 
 exports.extension = function(name, loadPriority) {
   if (loadPriority && loadPriority != 'high') {
-    throw new Error('Unsupported loadPriority: ' + options.loadPriority);
+    throw new Error('Unsupported loadPriority: ' + loadPriority);
   }
   const priority = loadPriority ? 'p:"high",' : '';
   return `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
-      `v:"${VERSION}",f:(function(AMP,_){<%= contents %>\n})});`
+      `v:"${VERSION}",f:(function(AMP,_){<%= contents %>\n})});`;
 };
 
 exports.none = '<%= contents %>';
