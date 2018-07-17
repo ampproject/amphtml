@@ -26,7 +26,8 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
+// TODO(lannka, 16825): This is flaky.
+describe.configure().skip('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
