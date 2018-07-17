@@ -113,23 +113,6 @@ For example, the following is possible in AMP:
   </tr>
 </table>
 
-## amp-audio
-
-<table>
-  <tr>
-    <th width="20%">Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>play</code></td>
-    <td>Plays the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
-  </tr>
-  <tr>
-    <td><code>pause</code></td>
-    <td>Pauses the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
-  </tr>
-</table>
-
 ### Input elements
 <table>
   <tr>
@@ -336,6 +319,22 @@ event.response</pre></td>
     on another element (usually parent element). We strongly advise against
     losing focus by focusing on <code>body</code>/<code>documentElement</code>
     for accessibility reasons.</td>
+  </tr>
+</table>
+
+### amp-audio
+<table>
+  <tr>
+    <th width="20%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
   </tr>
 </table>
 
