@@ -32,7 +32,6 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -91,14 +90,14 @@ class AmpMowPlayer extends AMP.BaseElement {
    * @return {string}
    */
   getVideoIframeSrc_() {
-	  
+
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
 
     //Create iframe
     const src = 'https://cdn.mowplayer.com/player.html?code=' + encodeURIComponent(this.mediaid_);
-	
+
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
     return this.videoIframeSrc_;
@@ -107,8 +106,8 @@ class AmpMowPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
-		
-	this.mediaid_ = user().assert(
+
+    this.mediaid_ = user().assert(
         (element.getAttribute('data-media-id')),
         'the data-media-id attributes must exists for <amp-mowplayer> %s',
         element);
