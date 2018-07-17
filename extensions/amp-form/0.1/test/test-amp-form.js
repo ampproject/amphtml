@@ -68,6 +68,10 @@ describes.repeated('', {
       sandbox.stub(resources, 'mutateElement').callsArg(1);
     });
 
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     function getAmpForm(form, canonical = 'https://example.com/amps.html') {
       new AmpFormService(env.ampdoc);
       Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
