@@ -141,9 +141,6 @@ class LineCol {
   }
 }
 
-/** @type {!LineCol} */
-const DOCUMENT_START = new LineCol(1, 0);
-
 /**
  * Construct a ValidationError object from the given argument list.
  * @param {!amp.validator.ValidationError.Severity} severity
@@ -670,7 +667,9 @@ class ParsedTagSpec {
    * @return {?CdataMatcher}
    */
   cdataMatcher(lineCol) {
-    if (this.spec_.cdata !== null) {return new CdataMatcher(this.spec_, lineCol);}
+    if (this.spec_.cdata !== null) {
+      return new CdataMatcher(this.spec_, lineCol);
+    }
     return null;
   }
 
@@ -796,15 +795,6 @@ class ParsedTagSpec {
   getMandatoryAttrIds() {
     return this.mandatoryAttrIds_;
   }
-}
-
-/**
- * Determines if |n| is an integer.
- * @param {number} n
- * @return {boolean}
- */
-function isInteger(n) {
-  return (Number(n) === n) && (n % 1 === 0);
 }
 
 /**
@@ -2836,18 +2826,22 @@ function validateNonTemplateAttrValueAgainstSpec(
   // added after protobuf 2.5.0 (which our open-source version uses).
   // begin oneof {
   const spec = parsedAttrSpec.getSpec();
-  if (spec.value !== null) {
-    if (attr.value === spec.value) {
-      return;
+  if (spec.value.length > 0) {
+    for (const value of spec.value) {
+      if (attr.value === value) {
+        return;
+      }
     }
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
         context.getLineCol(),
         /* params */[attr.name, getTagSpecName(tagSpec), attr.value],
         getTagSpecUrl(tagSpec), result);
-  } else if (spec.valueCasei !== null) {
-    if (attr.value.toLowerCase() === spec.valueCasei) {
-      return;
+  } else if (spec.valueCasei.length > 0) {
+    for (const value of spec.valueCasei) {
+      if (attr.value.toLowerCase() === value) {
+        return;
+      }
     }
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
@@ -4361,7 +4355,7 @@ class ParsedValidatorRules {
         if (tag.extensionSpec !== null) {
           // This tag is an extension. Compute and register a dispatch key
           // for it.
-          var dispatchKey;
+          let dispatchKey;
           const attrName = tag.extensionSpec.isCustomTemplate ?
             'custom-template' :
             'custom-element';
@@ -4920,12 +4914,13 @@ amp.validator.ValidationHandler =
         // would be confusing.
         if (encounteredAttrs === null) {return;}
         // So now we compare the attributes from the tag that we encountered
-        // (HtmlParser sent us a startTag event for it earlier) with the attributes
-        // from the effective body tag that we're just receiving now, which contains
-        // all attributes on body tags within the doc. It's correct to think of this
-        // synthetic tag simply as a concatenation - there is in general no
-        // elimination of duplicate attributes or overriding behavior. Thus, if the
-        // second body tag has any attribute this will result in an error.
+        // (HtmlParser sent us a startTag event for it earlier) with the
+        // attributes from the effective body tag that we're just receiving
+        // now, which contains all attributes on body tags within the doc. It's
+        // correct to think of this synthetic tag simply as a concatenation -
+        // there is in general no elimination of duplicate attributes or
+        // overriding behavior. Thus, if the second body tag has any
+        // attribute this will result in an error.
         let differenceSeen = attributes.length !== encounteredAttrs.length;
         if (!differenceSeen) {
           for (let ii = 0; ii < attributes.length; ii++) {
@@ -5038,7 +5033,8 @@ amp.validator.ValidationHandler =
             encounteredTag, resultForReferencePoint.bestMatchTagSpec,
             this.context_);
         checkForReferencePointCollision(
-            resultForReferencePoint.bestMatchTagSpec, resultForTag.bestMatchTagSpec,
+            resultForReferencePoint.bestMatchTagSpec,
+            resultForTag.bestMatchTagSpec,
             this.context_, resultForTag.validationResult);
         this.validationResult_.mergeFrom(resultForTag.validationResult);
 
@@ -5048,29 +5044,30 @@ amp.validator.ValidationHandler =
 
       /**
    * Callback for an end HTML tag.
-   * @param {!amp.htmlparser.ParsedHtmlTag} tag
+   * @param {!amp.htmlparser.ParsedHtmlTag} unused
    * @override
    */
-      endTag(tag) {
-        this.context_.getTagStack().exitTag(this.context_, this.validationResult_);
+      endTag(unused) {
+        this.context_.getTagStack().exitTag(
+            this.context_, this.validationResult_);
       }
 
       /**
    * Callback for pcdata. I'm not sure what this is supposed to include, but it
    * seems to be called for contents of <p> tags, looking at a few examples.
-   * @param {string} text
+   * @param {string} unused
    * @override
    */
-      pcdata(text) {}
+      pcdata(unused) {}
 
       /**
    * Callback for rcdata text. rcdata text includes contents of title or
    * textarea
    * tags. The validator has no specific rules regarding these text blobs.
-   * @param {string} text
+   * @param {string} unused
    * @override
    */
-      rcdata(text) {}
+      rcdata(unused) {}
 
       /**
    * Callback for cdata.

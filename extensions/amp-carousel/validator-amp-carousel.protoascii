@@ -59,7 +59,8 @@ tags: {  # <amp-carousel>
   }
   attrs: {
     name: "type"
-    value_regex: "slides|carousel"
+    value: "slides"
+    value: "carousel"
   }
   # <amp-bind>
   attrs: { name: "[slide]" }
@@ -108,7 +109,8 @@ tags: {  # <amp-carousel> lightbox
   }
   attrs: {
     name: "type"
-    value_regex: "slides|carousel"
+    value: "slides"
+    value: "carousel"
   }
   # <amp-bind>
   attrs: { name: "[slide]" }
