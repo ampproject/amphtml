@@ -566,16 +566,30 @@ export class Viewport {
       if (newScrollTop == curScrollTop) {
         return;
       }
-      /** @const {!TransitionDef<number>} */
-      const interpolate = numeric(curScrollTop, newScrollTop);
-
-      // TODO(aghassemi, #10463): the duration should not be a constant and
-      // should be proportional to the distance to be scrolled for better
-      // transition experience when things are closer vs farther.
-      return Animation.animate(parent, position => {
-        this.setElementScrollTop_(parent, interpolate(position));
-      }, duration, curve).then();
+      return this.interpolateScrollIntoView_(
+          parent, curScrollTop, newScrollTop, duration, curve);
     });
+  }
+
+  /**
+   * @param {!Element} parent
+   * @param {number} curScrollTop
+   * @param {number} newScrollTop
+   * @param {number} duration
+   * @param {string} curve
+   */
+  interpolateScrollIntoView_(
+    parent, curScrollTop, newScrollTop, duration, curve) {
+
+    /** @const {!TransitionDef<number>} */
+    const interpolate = numeric(curScrollTop, newScrollTop);
+
+    // TODO(aghassemi, #10463): the duration should not be a constant and
+    // should be proportional to the distance to be scrolled for better
+    // transition experience when things are closer vs farther.
+    return Animation.animate(parent, position => {
+      this.setElementScrollTop_(parent, interpolate(position));
+    }, duration, curve).then();
   }
 
   /**

@@ -802,8 +802,7 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport./*OK*/scrollTop_).to.be.null;
   });
 
-  // TODO(alanorozco): Fix and unskip.
-  it.skip('scrolls with scrollIntoView respecting padding', function* () {
+  it.only('scrolls with scrollIntoView respecting padding', function* () {
     const element = document.createElement('div');
 
     // scrollIntoView traverses up the DOM tree, so it needs the node to
@@ -811,6 +810,10 @@ describes.fakeWin('Viewport', {}, env => {
     document.body.appendChild(element);
 
     const bindingMock = sandbox.mock(binding);
+
+    bindingMock.expects('getScrollingElement')
+        .returns(document.body)
+        .atLeast(1);
 
     const top = 111;
 
@@ -830,8 +833,7 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.verify();
   });
 
-  // TODO(alanorozco): Fix and unskip.
-  it.skip('scrolls with animateScrollIntoView respecting ' +
+  it.only('scrolls with animateScrollIntoView respecting ' +
       'padding', function* () {
 
     const element = document.createElement('div');
@@ -842,6 +844,10 @@ describes.fakeWin('Viewport', {}, env => {
 
     const bindingMock = sandbox.mock(binding);
 
+    bindingMock.expects('getScrollingElement')
+        .returns(document.body)
+        .atLeast(1);
+
     const top = 111;
 
     bindingMock.expects('getLayoutRect')
@@ -849,9 +855,8 @@ describes.fakeWin('Viewport', {}, env => {
         .returns({top})
         .once();
 
-    bindingMock.expects('setScrollTop')
-        .withArgs(top - /* padding */ 19)
-        .once();
+    const interpolateScrollIntoView =
+        sandbox.stub(viewport, 'interpolateScrollIntoView_');
 
     stubVsyncMeasure();
 
@@ -859,13 +864,20 @@ describes.fakeWin('Viewport', {}, env => {
 
     const animatePromise = viewport.animateScrollIntoView(element, duration);
 
-    runVsync();
-
     clock.tick(duration);
+
+    runVsync();
 
     yield animatePromise;
 
     bindingMock.verify();
+
+    expect(interpolateScrollIntoView.withArgs(
+        /* parent       */ sinon.match.any,
+        /* curScrollTop */ sinon.match.any,
+        /* newScrollTop */ (top - /* padding */ 19),
+        /* duration     */ sinon.match.any,
+        /* curve        */ sinon.match.any)).to.be.calledOnce;
   });
 
   it('should not change scrollTop for animateScrollIntoView', () => {
