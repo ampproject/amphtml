@@ -26,6 +26,7 @@ import {
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
+  getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
 import {
@@ -510,9 +511,10 @@ export class AmpConsent extends AMP.BaseElement {
     const href =
         this.consentConfig_[instanceId]['checkConsentHref'];
     assertHttpsUrl(href, this.element);
-    const ampDoc = this.getAmpDoc();
-    const resolvedHref = resolveRelativeUrl(href, ampDoc.getUrl());
-    const viewer = Services.viewerForDoc(ampDoc);
+    const ampdoc = this.getAmpDoc();
+    const sourceBase = getSourceUrl(ampdoc.getUrl());
+    const resolvedHref = resolveRelativeUrl(href, sourceBase);
+    const viewer = Services.viewerForDoc(ampdoc);
     return viewer.whenFirstVisible().then(() => {
       return Services.xhrFor(this.win)
           .fetchJson(resolvedHref, init)

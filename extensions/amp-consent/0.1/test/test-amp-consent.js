@@ -37,6 +37,7 @@ describes.realWin('amp-consent', {
 }, env => {
   let win;
   let doc;
+  let ampdoc;
   let jsonMockResponses;
   let storageValue;
   let requestBody;
@@ -45,6 +46,7 @@ describes.realWin('amp-consent', {
 
   beforeEach(() => {
     doc = env.win.document;
+    ampdoc = env.ampdoc;
     win = env.win;
     toggleExperiment(win, 'multi-consent', true);
 
@@ -169,11 +171,16 @@ describes.realWin('amp-consent', {
         consentElement.appendChild(scriptElement);
         const ampConsent = new AmpConsent(consentElement);
         doc.body.appendChild(consentElement);
+        const getUrlStub = sandbox.stub(ampdoc, 'getUrl');
+        // return a cache Url to test origin source being used to resolve.
+        getUrlStub.callsFake(() => {
+          return 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0#h';
+        });
         ampConsent.buildCallback();
         yield macroTask();
         expect(fetchSpy).to.be.calledOnce;
         expect(win.testLocation.origin).not.to.be.empty;
-        expect(fetchSpy).to.be.calledWith(win.testLocation.origin + '/r/1');
+        expect(fetchSpy).to.be.calledWith('http://www.origin.com/r/1');
       });
     });
   });

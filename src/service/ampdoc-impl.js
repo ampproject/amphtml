@@ -388,9 +388,6 @@ export class AmpDocSingle extends AmpDoc {
 
   /** @override */
   getUrl() {
-    if (getMode().test && this.win.testLocation) {
-      return this.win.testLocation.href;
-    }
     return this.win.location.href;
   }
 
