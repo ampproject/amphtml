@@ -19,6 +19,7 @@ import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
+import {htmlFor} from '../../static-template';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
 import {waitForBody} from '../../dom';
@@ -101,11 +102,22 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
     const doc = this.win.document;
     const {documentElement} = doc;
-    documentElement.className = 'i-amphtml-ios-embed-sd';
+    documentElement.classList.add('i-amphtml-ios-embed-sd');
+
+    const scroller = htmlFor(doc)`
+      <div id="i-amphtml-scroller">
+        <div id="i-amphtml-body-wrapper">
+          <slot></slot>
+        </div>
+      </div>`;
 
     /** @private @const {!Element} */
-    this.scroller_ = doc.createElement('div');
-    this.scroller_.id = 'i-amphtml-scroller';
+    this.scroller_ = scroller;
+
+    // Wrapper for the `<body>`.
+    /** @private @const {!Element} */
+    this.wrapper_ = scroller.firstElementChild;
+
     // Notice that the -webkit-overflow-scrolling is set later.
     setImportantStyles(this.scroller_, {
       'overflow-x': 'hidden',
@@ -126,11 +138,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
       'border-top': '1px solid transparent',
     });
-
-    // Wrapper for the `<body>`.
-    this.wrapper_ = doc.createElement('div');
-    this.scroller_.appendChild(this.wrapper_);
-    this.wrapper_.id = 'i-amphtml-body-wrapper';
     setImportantStyles(this.wrapper_, {
       'overflow': 'visible',
       'position': 'relative',
@@ -154,6 +161,9 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
     /** @private {number} */
     this.paddingTop_ = 0;
+
+    /** @private {boolean} */
+    this.bodySyncScheduled_ = false;
 
     // Setup UI.
     /** @private {boolean} */
@@ -202,9 +212,8 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     const body = dev().assertElement(doc.body, 'body is not available');
     const shadowRoot = body.attachShadow({mode: 'open'});
 
-    // Main slot will absorb all undistributed children.
-    const mainSlot = doc.createElement('slot');
-    this.wrapper_.appendChild(mainSlot);
+    // Main slot contained within the wrapper will absorb all undistributed
+    // children.
     shadowRoot.appendChild(this.scroller_);
 
     // Update body styles and monitor for further changes.
@@ -229,6 +238,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // Many `<body>` styles are inherited to ensure that layout is preserved.
     // The most important: `display` and related styles.
     const inheritStyles = {};
+    this.bodySyncScheduled_ = true;
     this.vsync_.run({
       measure: () => {
         const bodyStyles = computedStyle(this.win, body);
@@ -237,6 +247,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
         });
       },
       mutate: () => {
+        this.bodySyncScheduled_ = false;
         setImportantStyles(this.wrapper_, inheritStyles);
       },
     });

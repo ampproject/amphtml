@@ -494,6 +494,8 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
     expect(binding.setupDone_).to.be.true;
     expect(win.document.documentElement)
         .to.have.class('i-amphtml-ios-embed-sd');
+    // Should preserve existing classes.
+    expect(win.document.documentElement).to.have.class('top');
     expect(win.document.body).to.exist;
     expect(win.document.body.parentNode)
         .to.equal(win.document.documentElement);
