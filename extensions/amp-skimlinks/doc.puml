@@ -5,8 +5,8 @@ end box
 
 [-> AMPskimlinks: User visits AMP page.
 
-==  on buildCallback ==
-'hnote over AMPskimlinks: Initialize amp-skimlinks
+==  whenDocumentReady ==
+hnote over AMPskimlinks: Attach amp-skimlinks click handler
 hnote over AMPskimlinks: Find links in page
 AMPskimlinks -> DomainResolverAPI as "Merchant Domain Resolver API \n (r.skimresources.com)": Request (GET): [domainA, domainB, domainC]?
 note left
@@ -15,7 +15,7 @@ note left
     which ones can be affiliated
 end note
 DomainResolverAPI --> AMPskimlinks: Response: { DomainA: yes, domainB: false, domainC: false }
-hnote over AMPskimlinks: Replace monetizable links in page
+hnote over AMPskimlinks: Update list of affiliated links
 'hnote over AMPskimlinks: Prepare tracking data
 AMPskimlinks -> TrackingAPI as "Tracking API \n (t.skimresources.com)": Page impression tracking (POST): data={...}
 TrackingAPI --> AMPskimlinks:
@@ -32,7 +32,7 @@ note left
     page to our API.
 end note
 DomainResolverAPI --> AMPskimlinks: Response: { DomainD: yes, domainE: false }
-hnote over AMPskimlinks: Replace monetizable links
+hnote over AMPskimlinks: Update list of affiliated links
 
 == On anchor click ==
 'IF
