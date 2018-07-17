@@ -24,6 +24,7 @@ import {
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
+import {closest, isIframed} from '../../dom';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -34,7 +35,6 @@ import {
 } from '../../service';
 import {installLayersServiceForDoc} from '../layers-impl';
 import {isExperimentOn} from '../../experiments';
-import {isIframed} from '../../dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
@@ -42,6 +42,7 @@ import {
 } from '../../layout-rect';
 import {numeric} from '../../transition';
 import {setStyle} from '../../style';
+import {tryResolve} from '../../utils/promise';
 
 
 const TAG_ = 'Viewport';
@@ -474,16 +475,27 @@ export class Viewport {
    * Scrolls element into view much like Element. scrollIntoView does but
    * in the AMP/Viewer environment.
    * @param {!Element} element
+   * @return {!Promise}
    */
   scrollIntoView(element) {
+    return this.getScrollableContainer_(element).then(parent =>
+      this.scrollIntoViewInternal_(element, parent));
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!Element} parent
+   */
+  scrollIntoViewInternal_(element, parent) {
     const elementTop = this.binding_.getLayoutRect(element).top;
-    let newScrollTop;
-    if (this.useLayers_) {
-      newScrollTop = elementTop + this.getScrollTop();
-    } else {
-      newScrollTop = Math.max(0, elementTop - this.paddingTop_);
-    }
-    this.binding_.setScrollTop(newScrollTop);
+
+    const newScrollTopPromise = this.useLayers_ ?
+      this.getElementScrollTop_(parent)
+          .then(scrollTop => elementTop + scrollTop) :
+      tryResolve(() => Math.max(0, elementTop - this.paddingTop_));
+
+    newScrollTopPromise.then(newScrollTop =>
+      this.setElementScrollTop_(parent, newScrollTop));
   }
 
   /**
@@ -501,41 +513,111 @@ export class Viewport {
     duration = 500,
     curve = 'ease-in',
     pos = 'top') {
+
+    return this.getScrollableContainer_(element).then(parent =>
+      this.animateScrollIntoViewInternal_(
+          element, parent, duration, curve, pos)).then();
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!Element} parent Should be scrollable.
+   * @param {number} duration
+   * @param {string} curve
+   * @param {string} pos (takes one of 'top', 'bottom', 'center')
+   * @return {!Promise}
+   */
+  animateScrollIntoViewInternal_(element, parent, duration, curve, pos) {
     const elementRect = this.binding_.getLayoutRect(element);
+
+    const {height: parentHeight} = this.isRootNode_(parent) ?
+      this.getSize() :
+      this.getLayoutRect(parent);
+
     let offset;
     switch (pos) {
       case 'bottom':
-        offset = -this.getHeight() + elementRect.height;
+        offset = -parentHeight + elementRect.height;
         break;
       case 'center':
-        offset = (-this.getHeight() / 2) + (elementRect.height / 2);
+        offset = (-parentHeight / 2) + (elementRect.height / 2);
         break;
       default:
         offset = 0;
         break;
     }
     let newScrollTop;
-    let curScrollTop;
+    let curScrollTopPromise;
 
     if (this.useLayers_) {
       newScrollTop = elementRect.top + offset;
-      curScrollTop = 0;
+      curScrollTopPromise = Promise.resolve(0);
     } else {
       const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
       newScrollTop = Math.max(0, calculatedScrollTop);
-      curScrollTop = this.getScrollTop();
+      curScrollTopPromise = this.getElementScrollTop_(parent);
     }
-    if (newScrollTop == curScrollTop) {
-      return Promise.resolve();
+
+    return curScrollTopPromise.then(curScrollTop => {
+      if (newScrollTop == curScrollTop) {
+        return;
+      }
+      /** @const {!TransitionDef<number>} */
+      const interpolate = numeric(curScrollTop, newScrollTop);
+
+      // TODO(aghassemi, #10463): the duration should not be a constant and
+      // should be proportional to the distance to be scrolled for better
+      // transition experience when things are closer vs farther.
+      return Animation.animate(parent, position => {
+        this.setElementScrollTop_(parent, interpolate(position));
+      }, duration, curve);
+    });
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise<!Element>}
+   */
+  getScrollableContainer_(element) {
+    return this.vsync_.measurePromise(() => {
+      const scrollable = closest(element,
+          parent => parent.scrollHeight > parent.clientHeight);
+
+      return scrollable || this.ampdoc.getRootNode();
+    });
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {number} scrollTop
+   */
+  setElementScrollTop_(element, scrollTop) {
+    if (this.isRootNode_(element)) {
+      this.binding_.setScrollTop(scrollTop);
+      return;
     }
-    /** @const {!TransitionDef<number>} */
-    const interpolate = numeric(curScrollTop, newScrollTop);
-    // TODO(aghassemi, #10463): the duration should not be a constant and should
-    // be proportional to the distance to be scrolled for better transition
-    // experience when things are closer vs farther.
-    return Animation.animate(this.ampdoc.getRootNode(), position => {
-      this.binding_.setScrollTop(interpolate(position));
-    }, duration, curve).then();
+    this.vsync_.mutate(() => {
+      element.scrollTop = scrollTop;
+    });
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise<number>}
+   */
+  getElementScrollTop_(element) {
+    if (this.isRootNode_(element)) {
+      return tryResolve(() => this.getScrollTop());
+    }
+    return this.vsync_.measurePromise(() => element.scrollTop);
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  isRootNode_(element) {
+    return element == this.ampdoc.getRootNode();
   }
 
   /**
