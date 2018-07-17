@@ -34,8 +34,9 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
-  resetLocationQueryParametersForTesting,
   getPageviewStateTokensForAdRequest,
+  resetLocationQueryParametersForTesting,
+  resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -160,6 +161,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.size_ = size;
       const extensions = Services.extensionsFor(impl.win);
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
+    });
+
+    afterEach(() => {
+      resetTokensToInstancesMap();
     });
 
     it('should ignore creative-size header for fluid response', () => {
@@ -487,6 +492,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       toggleExperiment(env.win, 'dc-use-attr-for-format', false);
       doc.body.removeChild(element);
       env.win['ampAdGoogleIfiCounter'] = 0;
+      resetTokensToInstancesMap();
     });
 
     it('returns the right URL', () => {
@@ -1438,22 +1444,25 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
 
       describe('#getPageviewStateTokensForAdRequest', () => {
 
-        afterEach(() => {
-          AmpAdNetworkDoubleclickImpl.tokensToInstances = {};
+        beforeEach(() => {
+          resetTokensToInstancesMap();
         });
 
-        it('should return the tokens associated with instances that are not passed to it as an argument', () => {
+        it('should return the tokens associated with instances that are not ' +
+         'passed to it as an argument', () => {
           const element1 = doc.createElement('amp-ad');
           element1.setAttribute('type', 'doubleclick');
           element1.setAttribute('data-ad-client', 'doubleclick');
           const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+          impl1.setPageviewStateToken('DUMMY_TOKEN_1');
           const element2 = doc.createElement('amp-ad');
           element2.setAttribute('type', 'doubleclick');
           element2.setAttribute('data-ad-client', 'doubleclick');
           const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
-          AmpAdNetworkDoubleclickImpl.tokensToInstances = {'DUMMY_TOKEN_1' : impl1, 'DUMMY_TOKEN_2': impl2};
+          impl2.setPageviewStateToken('DUMMY_TOKEN_2');
           const instances = [impl1];
-          expect(getPageviewStateTokensForAdRequest(instances)).to.deep.equal(['DUMMY_TOKEN_2']);
+          expect(getPageviewStateTokensForAdRequest(instances)).to.deep.equal(
+            ['DUMMY_TOKEN_2']);
         });
       });
     });

@@ -114,7 +114,7 @@ const DOUBLECLICK_EXPERIMENT_FEATURE = {
  * Map of pageview tokens to the instances they belong to.
  * @private {!Object<string, !AmpAdNetworkDoubleclickImpl>}
  */
-export const tokensToInstances = {};
+let tokensToInstances = {};
 
 /** @private {?Promise} */
 let sraRequests = null;
@@ -1282,4 +1282,12 @@ export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
     }
   }
   return pageviewStateTokensInAdRequest;
+}
+
+/**
+ * Resets the tokensToInstances mapping for testing purposes.
+ * @visibleForTesting
+ */
+export function resetTokensToInstancesMap() {
+  tokensToInstances = {};
 }
