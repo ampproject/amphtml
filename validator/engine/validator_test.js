@@ -344,59 +344,59 @@ describe('ValidatorCssLengthValidation', () => {
   assertStrictEqual(10, validInlineStyleBlob.length);
 
   it('accepts 50000 bytes in author stylesheet and 0 bytes in inline style',
-     () => {
-    const stylesheet = Array(5001).join(validStyleBlob);
-    assertStrictEqual(50000, stylesheet.length);
-    const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.inlineOutput = false;
-    test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replace_amp_custom {}', stylesheet)
+      () => {
+        const stylesheet = Array(5001).join(validStyleBlob);
+        assertStrictEqual(50000, stylesheet.length);
+        const test = new ValidatorTestCase('feature_tests/css_length.html');
+        test.inlineOutput = false;
+        test.ampHtmlFileContents = test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
             .replace('replace_inline_style', '');
-    test.expectedOutput = 'PASS';
-    test.run();
-  });
+        test.expectedOutput = 'PASS';
+        test.run();
+      });
 
   it('will not accept 50001 bytes in author stylesheet and 0 bytes in ' +
      'inline style',
-      () => {
-        const stylesheet = Array(5001).join(validStyleBlob) + ' ';
-        assertStrictEqual(50001, stylesheet.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('.replace_amp_custom {}', stylesheet)
-               .replace('replace_inline_style', '');
-        test.expectedOutputFile = null;
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
-           'specified in tag \'style amp-custom\' is too long - document ' +
-           'contains 50001 bytes whereas the limit is 50000 bytes. ' +
-           '(see https://www.ampproject.org/docs/reference/spec' +
-           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
+  () => {
+    const stylesheet = Array(5001).join(validStyleBlob) + ' ';
+    assertStrictEqual(50001, stylesheet.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+       test.ampHtmlFileContents
+           .replace('.replace_amp_custom {}', stylesheet)
+           .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+       'feature_tests/css_length.html:28:2 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' is too long - document ' +
+       'contains 50001 bytes whereas the limit is 50000 bytes. ' +
+       '(see https://www.ampproject.org/docs/reference/spec' +
+       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
 
   it('knows utf8 and rejects file with 50002 bytes but 49999 characters ' +
      'and 0 bytes in inline style',
-      () => {
-        const stylesheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
-        assertStrictEqual(49999, stylesheet.length); // character length
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('.replace_amp_custom {}', stylesheet)
-               .replace('replace_inline_style', '');
-        test.expectedOutputFile = null;
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
-           'specified in tag \'style amp-custom\' is too long - document ' +
-           'contains 50002 bytes whereas the limit is 50000 bytes. ' +
-           '(see https://www.ampproject.org/docs/reference/spec' +
-           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
+  () => {
+    const stylesheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
+    assertStrictEqual(49999, stylesheet.length); // character length
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+       test.ampHtmlFileContents
+           .replace('.replace_amp_custom {}', stylesheet)
+           .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+       'feature_tests/css_length.html:28:2 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' is too long - document ' +
+       'contains 50002 bytes whereas the limit is 50000 bytes. ' +
+       '(see https://www.ampproject.org/docs/reference/spec' +
+       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
 
   it('accepts 0 bytes in author stylesheet and 50000 bytes in inline style',
       () => {
@@ -413,45 +413,45 @@ describe('ValidatorCssLengthValidation', () => {
 
   it('will not accept 0 bytes in author stylesheet and 50001 bytes in ' +
      'inline style',
-      () => {
-        const inlineStyle = Array(5001).join(validInlineStyleBlob) + ' ';
-        assertStrictEqual(50001, inlineStyle.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-           test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
-               .replace('replace_inline_style', inlineStyle);
-        test.expectedOutputFile = null;
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:36:6 The author stylesheet ' +
-           'specified in tag \'style amp-custom\' and the combined inline ' +
-           'styles is too large - document contains 50001 bytes whereas the ' +
-           'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
-           '/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
+  () => {
+    const inlineStyle = Array(5001).join(validInlineStyleBlob) + ' ';
+    assertStrictEqual(50001, inlineStyle.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+       test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
+           .replace('replace_inline_style', inlineStyle);
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+       'feature_tests/css_length.html:36:6 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' and the combined inline ' +
+       'styles is too large - document contains 50001 bytes whereas the ' +
+       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
+       '/author-develop/responsive/style_pages) ' +
+       '[AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
 
   it('will not accept 50000 bytes in author stylesheet and 14 bytes in ' +
      'inline style',
-      () => {
-        const stylesheet = Array(5001).join(validStyleBlob);
-        assertStrictEqual(50000, stylesheet.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('.replace_amp_custom {}', stylesheet)
-               .replace('replace_inline_style', 'display:block;');
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:5036:6 The author stylesheet ' +
-           'specified in tag \'style amp-custom\' and the combined inline ' +
-           'styles is too large - document contains 50014 bytes whereas the ' +
-           'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
-           '/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
+  () => {
+    const stylesheet = Array(5001).join(validStyleBlob);
+    assertStrictEqual(50000, stylesheet.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+       test.ampHtmlFileContents
+           .replace('.replace_amp_custom {}', stylesheet)
+           .replace('replace_inline_style', 'display:block;');
+    test.expectedOutput = 'FAIL\n' +
+       'feature_tests/css_length.html:5036:6 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' and the combined inline ' +
+       'styles is too large - document contains 50014 bytes whereas the ' +
+       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
+       '/author-develop/responsive/style_pages) ' +
+       '[AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
 });
 
 describe('CssLength', () => {
@@ -986,7 +986,7 @@ describe('ValidatorRulesMakeSense', () => {
       }
 
       if (attrSpec.dispatchKey) {
-        it('tag_spec ' + tagSpecName + 
+        it('tag_spec ' + tagSpecName +
            ' can not have more than one dispatch_key', () => {
           expect(seenDispatchKey).toBe(false);
           seenDispatchKey = true;
