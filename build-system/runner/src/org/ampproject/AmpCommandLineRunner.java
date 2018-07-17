@@ -101,6 +101,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     options.setDisambiguatePrivateProperties(true);
     options.setGeneratePseudoNames(pseudo_names);
+    // Prefix all global names with _. as a means for async loading to be
+    // able to supply the global scope.
+    options.renamePrefixNamespace = '_';
     return options;
   }
 

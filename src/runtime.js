@@ -245,7 +245,7 @@ function adoptShared(global, callback) {
     const register = () => {
       iniPromise.then(() => {
         if (typeof fnOrStruct == 'function') {
-          fnOrStruct(global.AMP);
+          fnOrStruct(global.AMP, global.AMP._);
         } else {
           extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
         }
