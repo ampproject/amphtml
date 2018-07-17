@@ -252,7 +252,7 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
-function startSauceConnect() { // eslint-disable-line no-unused-vars
+function startSauceConnect() {
   process.env['SAUCE_USERNAME'] = 'amphtml';
   process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
       'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
@@ -262,7 +262,7 @@ function startSauceConnect() { // eslint-disable-line no-unused-vars
   exec(startScCmd);
 }
 
-function stopSauceConnect() { // eslint-disable-line no-unused-vars
+function stopSauceConnect() {
   const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
   console.log('\n' + fileLogPrefix,
       'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
@@ -312,15 +312,13 @@ const command = {
     }
     // Unit tests with Travis' default chromium in coverage mode.
     timedExecOrDie(cmd + ' --headless --coverage');
-
-    // TODO(rsimha): Re-enable after fixing Sauce labs platforms.
-    // if (process.env.TRAVIS) {
-    //   // A subset of unit tests on other browsers via sauce labs
-    //   cmd = cmd + ' --saucelabs_lite';
-    //   startSauceConnect();
-    //   timedExecOrDie(cmd);
-    //   stopSauceConnect();
-    // }
+    if (process.env.TRAVIS) {
+      // A subset of unit tests on other browsers via sauce labs
+      cmd = cmd + ' --saucelabs_lite';
+      startSauceConnect();
+      timedExecOrDie(cmd);
+      stopSauceConnect();
+    }
   },
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
@@ -336,15 +334,12 @@ const command = {
     }
     if (process.env.TRAVIS) {
       if (coverage) {
-        timedExecOrDie(cmd + ' --coverage');
+        timedExecOrDie(cmd + ' --headless --coverage');
+      } else {
+        startSauceConnect();
+        timedExecOrDie(cmd + ' --saucelabs');
+        stopSauceConnect();
       }
-
-      // TODO(rsimha): Re-enable after fixing Sauce labs platforms.
-      // else {
-      //   startSauceConnect();
-      //   timedExecOrDie(cmd + ' --saucelabs');
-      //   stopSauceConnect();
-      // }
     } else {
       timedExecOrDie(cmd + ' --headless');
     }
@@ -408,7 +403,7 @@ function runAllCommands() {
     command.runDepAndTypeChecks();
     command.runUnitTests();
     command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
-    // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
+    command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -416,7 +411,10 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
-    command.runBundleSizeCheck();
+    // Disable bundle-size check on release branch builds.
+    if (process.env['TRAVIS_BRANCH'] === 'master') {
+      command.runBundleSizeCheck();
+    }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
   }
@@ -443,7 +441,7 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
-  // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
+  command.verifyVisualDiffTests();
 
   // Validator tests.
   command.buildValidatorWebUI();
@@ -517,8 +515,7 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
-  // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
-  if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
     console.log(fileLogPrefix, 'Running all commands on push build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);

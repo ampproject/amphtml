@@ -27,7 +27,7 @@ import {
 } from '../../../../src/experiments';
 import {waitForChild} from '../../../../src/dom';
 
-describes.realWin('amp-auto-ads', {
+describes.realWin.skip('amp-auto-ads', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',

@@ -445,7 +445,7 @@ function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
     return getCookie(window, 'AMP_CANARY') == '1';
   }
-  return isExperimentOn(window, id);
+  return isExperimentOn(window, /*OK*/id);
 }
 
 /**

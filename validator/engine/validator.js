@@ -1857,12 +1857,32 @@ class CdataMatcher {
       if (!context.getRules()
           .getFullMatchRegex(this.tagSpec_.cdata.cdataRegex)
           .test(cdata)) {
-        context.addError(
-            amp.validator.ValidationError.Code
-                .MANDATORY_CDATA_MISSING_OR_INCORRECT,
-            context.getLineCol(),
-            /* params */[getTagSpecName(this.tagSpec_)],
-            getTagSpecUrl(this.tagSpec_), validationResult);
+        // Special Case Hack! The deprecated amp-boilerplate is a <style> tag
+        // with no attributes on it in the document head. The valid
+        // implementation looks like:
+        //
+        // <style>body ?{opacity: ?0}</style>
+        //
+        // If we find ourselves here, it means that we saw a style tag, with the
+        // incorrect CDATA contents. This is *far* more likely to be caused by
+        // the user intending to use <style amp-custom>, so we override the
+        // error selected here.
+        if (this.tagSpec_.specName !== null &&
+            this.tagSpec_.specName ===
+                'head > style[amp-boilerplate] - old variant') {
+          context.addError(
+              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+              context.getLineCol(),
+              /* params */['amp-custom', 'style amp-custom'],
+              context.getRules().getStylesSpecUrl(), validationResult);
+        } else {
+          context.addError(
+              amp.validator.ValidationError.Code
+                  .MANDATORY_CDATA_MISSING_OR_INCORRECT,
+              context.getLineCol(),
+              /* params */[getTagSpecName(this.tagSpec_)],
+              getTagSpecUrl(this.tagSpec_), validationResult);
+        }
         return;
       }
     } else if (cdataSpec.cssSpec !== null) {
@@ -4297,7 +4317,7 @@ class ParsedValidatorRules {
      */
     this.isTagSpecCorrectHtmlFormat_ = function(tagSpec) {
       const castedHtmlFormat =
-          /** @type {amp.validator.HtmlFormat.Code<string>} */ (
+      /** @type {amp.validator.HtmlFormat.Code<string>} */ (
           /** @type {*} */ (htmlFormat));
       return tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
     };
@@ -4308,7 +4328,7 @@ class ParsedValidatorRules {
      */
     this.isCssLengthSpecCorrectHtmlFormat_ = function(cssLengthSpec) {
       const castedHtmlFormat =
-          /** @type {amp.validator.HtmlFormat.Code<string>} */ (
+      /** @type {amp.validator.HtmlFormat.Code<string>} */ (
           /** @type {*} */ (htmlFormat));
       return cssLengthSpec.htmlFormat == castedHtmlFormat;
     };

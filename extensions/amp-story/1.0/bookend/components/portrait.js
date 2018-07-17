@@ -29,7 +29,7 @@ import {userAssertValidProtocol} from '../../utils';
  *   title: string,
  *   url: string,
  *   domainName: string,
- *   image: string
+ *   image: string,
  * }}
  */
 export let PortraitComponentDef;
@@ -40,6 +40,7 @@ export let PortraitComponentDef;
  *   title: !Element,
  *   image: !Element,
  *   meta: !Element,
+ *   domainName: string
  * }}
  */
 let portraitElementsDef;
