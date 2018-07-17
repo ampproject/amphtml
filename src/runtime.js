@@ -241,7 +241,11 @@ function adoptShared(global, callback) {
   const iniPromise = callback(global, extensions);
 
   /**
+<<<<<<< HEAD
    * @param {function(!Object,!Object)|ExtensionPayload} fnOrStruct
+=======
+   * @param {!function(!Object)|ExtensionPayload} fnOrStruct
+>>>>>>> hoist functions
    */
   function installExtension(fnOrStruct) {
     const register = () => {
@@ -254,46 +258,15 @@ function adoptShared(global, callback) {
       });
     };
 
-    const startRegisterOrChunk = () => {
-      if (isFunction || fnOrStruct.p == 'high') {
-        // "High priority" extensions do not go through chunking.
-        // This should be used for extensions that need to run early.
-        // One example would be viewer communication that is required
-        // to transition document from pre-render to visible (which
-        // affects chunking itself).
-        // We consider functions as high priority, because
-        // - if in doubt, that is a better default
-        // - the only actual  user is a viewer integration that should
-        //   be high priority.
-        Promise.resolve().then(register);
-      } else {
-        register.displayName = fnOrStruct.n;
-        startupChunk(global.document, register);
-      }
-    };
-
-    const preloadDeps = () => {
-      // Allow a single string as the intermediate dependency OR allow
-      // for an array if intermediate dependencies that needs to be
-      // resolved first before executing this current extension.
-      if (Array.isArray(fnOrStruct.i)) {
-        const promises = fnOrStruct.i.map(dep => {
-          return extensions.preloadExtension(dep);
-        });
-        return Promise.all(promises);
-      } else if (typeof fnOrStruct.i == 'string') {
-        return extensions.preloadExtension(fnOrStruct.i);
-      }
-      dev().error('dependency is neither an array or a string', fnOrStruct.i);
-    };
-
     // We support extension declarations which declare they have an
     // "intermediate" dependency that needs to be loaded before they
     // can execute.
-    if (!isFunction && fnOrStruct.i) {
-      preloadDeps().then(startRegisterOrChunk);
+    if (!(typeof fnOrStruct == 'function') && fnOrStruct.i) {
+      preloadDeps(extensions, fnOrStruct).then(function() {
+        return startRegisterOrChunk(global, fnOrStruct, register);
+      });
     } else {
-      startRegisterOrChunk();
+      startRegisterOrChunk(global, fnOrStruct, register);
     }
   }
 
@@ -362,6 +335,51 @@ function adoptShared(global, callback) {
   }
 
   return iniPromise;
+}
+
+/**
+ * @param {!./service/extensions-impl.Extensions} extensions
+ * @param {function(!Object)|ExtensionPayload} fnOrStruct
+ * @return {!Promise}
+ */
+function preloadDeps(extensions, fnOrStruct) {
+  // Allow a single string as the intermediate dependency OR allow
+  // for an array if intermediate dependencies that needs to be
+  // resolved first before executing this current extension.
+  if (Array.isArray(fnOrStruct.i)) {
+    const promises = fnOrStruct.i.map(dep => {
+      return extensions.preloadExtension(dep);
+    });
+    return Promise.all(promises);
+  } else if (typeof fnOrStruct.i == 'string') {
+    return extensions.preloadExtension(fnOrStruct.i);
+  }
+  dev().error('dependency is neither an array or a string', fnOrStruct.i);
+  return Promise.resolve();
+}
+
+
+/**
+ * @param {!Window} global Global scope to adopt.
+ * @param {function(!Object)|ExtensionPayload} fnOrStruct
+ * @param {function()} register
+ */
+function startRegisterOrChunk(global, fnOrStruct, register) {
+  if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
+    // "High priority" extensions do not go through chunking.
+    // This should be used for extensions that need to run early.
+    // One example would be viewer communication that is required
+    // to transition document from pre-render to visible (which
+    // affects chunking itself).
+    // We consider functions as high priority, because
+    // - if in doubt, that is a better default
+    // - the only actual  user is a viewer integration that should
+    //   be high priority.
+    Promise.resolve().then(register);
+  } else {
+    register.displayName = fnOrStruct.n;
+    startupChunk(global.document, register);
+  }
 }
 
 
@@ -884,7 +902,7 @@ export class MultidocManager {
  * to have the same AMP release version.
  *
  * @param {!Window} win
- * @param {function(!Object)|ExtensionPayload} fnOrStruct
+ * @param {function(!Object)|!ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
