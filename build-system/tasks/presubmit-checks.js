@@ -140,6 +140,7 @@ const forbiddenTerms = {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
     whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
       'extensions/amp-analytics/0.1/config.js',
     ],
   },

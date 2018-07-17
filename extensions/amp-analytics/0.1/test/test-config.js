@@ -135,7 +135,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       });
     });
 
-    it.only('inline and remote both string', () => {
+    it('inline and remote both string', () => {
       const element = getAnalyticsTag({
         'vars': {'title': 'local'},
         'requests': {'foo': 'https://example.com/${title}'},

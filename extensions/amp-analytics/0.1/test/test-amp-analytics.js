@@ -290,66 +290,60 @@ describes.realWin('amp-analytics', {
     }
   });
 
-  it('does not unnecessarily preload iframe transport script', function() {
-    const el = doc.createElement('amp-analytics');
-    el.setAttribute('type', 'foo');
-    doc.body.appendChild(el);
-    const analytics = new AmpAnalytics(el);
-    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
-    const preloadSpy = sandbox.spy(analytics, 'preload');
+  describe('iframe transport', () => {
 
-    sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
-        .returns(Promise.resolve({
-          'triggers': {
-            'sample_visibility_trigger': {
-              'on': 'visible',
-              'request': 'sample_visibility_request',
-            },
-          },
-          'requests': {
-            'sample_visibility_request': {
-              baseUrl: '//fake-request',
-            },
-          },
-        }));
+    const sampleconfig = {
+      'triggers': {
+        'sample_visibility_trigger': {
+          'on': 'visible',
+          'request': 'sample_visibility_request',
+        },
+      },
+      'requests': {
+        'sample_visibility_request': {
+          baseUrl: '//fake-request',
+        },
+      },
+    };
 
-    analytics.buildCallback();
-    analytics.preconnectCallback();
-    return analytics.layoutCallback().then(() => {
-      expect(preloadSpy).to.have.not.been.called;
+    it('does not unnecessarily preload iframe transport script', function() {
+      const el = doc.createElement('amp-analytics');
+      el.setAttribute('type', 'foo');
+      doc.body.appendChild(el);
+      const analytics = new AmpAnalytics(el);
+      sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+      const preloadSpy = sandbox.spy(analytics, 'preload');
+
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .returns(Promise.resolve(sampleconfig));
+
+      analytics.buildCallback();
+      analytics.preconnectCallback();
+      return analytics.layoutCallback().then(() => {
+        expect(preloadSpy).to.have.not.been.called;
+      });
     });
-  });
 
-  it('preloads iframe transport script if relevant', function() {
-    const el = doc.createElement('amp-analytics');
-    el.setAttribute('type', 'foo');
-    doc.body.appendChild(el);
-    const analytics = new AmpAnalytics(el);
-    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
-    const preloadSpy = sandbox.spy(analytics, 'preload');
-    sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
-        .returns(Promise.resolve({
-          'transport': {
-            'iframe': 'http://example.com',
-          },
-          'triggers': {
-            'sample_visibility_trigger': {
-              'on': 'visible',
-              'request': 'sample_visibility_request',
+    it('preloads iframe transport script if relevant', function() {
+      const el = doc.createElement('amp-analytics');
+      el.setAttribute('type', 'foo');
+      doc.body.appendChild(el);
+      const analytics = new AmpAnalytics(el);
+      sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+      const preloadSpy = sandbox.spy(analytics, 'preload');
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .returns(Promise.resolve(Object.assign({}, sampleconfig, {
+            'transport': {
+              'iframe': 'http://example.com',
             },
-          },
-          'requests': {
-            'sample_visibility_request': {
-              baseUrl: '//fake-request',
-            },
-          },
-        }));
-    analytics.buildCallback();
-    analytics.preconnectCallback();
-    return analytics.layoutCallback().then(() => {
-      expect(preloadSpy.withArgs(
-          'http://localhost:9876/dist/iframe-transport-client-lib.js',
-          'script')).to.be.calledOnce;
+          })));
+      analytics.buildCallback();
+      analytics.preconnectCallback();
+      return analytics.layoutCallback().then(() => {
+        expect(preloadSpy.withArgs(
+            'http://localhost:9876/dist/iframe-transport-client-lib.js',
+            'script')).to.be.calledOnce;
+      });
     });
   });
 
