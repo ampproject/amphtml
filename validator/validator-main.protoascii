@@ -26,7 +26,7 @@ min_validator_revision_required: 338
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 677
+spec_file_revision: 678
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -5682,18 +5682,18 @@ error_formats {
 error_formats {
   code: STYLESHEET_TOO_LONG
   format: "The author stylesheet specified in tag '%1' is too "
-          "long - we saw %2 bytes whereas the limit is %3 bytes."
+          "long - document contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG
   format: "The author stylesheet specified in tag 'style amp-custom' and "
-          "the combined inline styles is too large - we saw %1 bytes "
-          "whereas the limit is %2 bytes."
+          "the combined inline styles is too large - document contains %1 "
+          "bytes whereas the limit is %2 bytes."
 }
 error_formats {
   code: INLINE_STYLE_TOO_LONG
-  format: "The inline style specified in tag '%1' is too long "
-          "- we saw %2 bytes whereas the limit is %3 bytes."
+  format: "The inline style specified in tag '%1' is too long - document "
+          "contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
