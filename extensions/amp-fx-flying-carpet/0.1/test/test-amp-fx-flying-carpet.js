@@ -210,15 +210,13 @@ describes.realWin('amp-fx-flying-carpet', {
   it('should relayout the content on onMeasureChanged', () => {
     return getAmpFlyingCarpet().then(flyingCarpet => {
       const impl = flyingCarpet.implementation_;
-      const container = flyingCarpet.firstChild.firstChild;
       const scheduleLayoutSpy_ = sandbox.spy(impl, 'scheduleLayout');
 
       impl.mutateElement = function(callback) {
         callback();
       };
-
       impl.onMeasureChanged();
-      expect(scheduleLayoutSpy_).to.have.been.calledWith(container);
+      expect(scheduleLayoutSpy_).to.have.been.calledWith(impl.children_);
     });
   });
 
