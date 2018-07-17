@@ -54,16 +54,17 @@ The `<amp-pan-zoom>` component takes one child of arbitrary content and enables 
 ```
 
 ## Attributes
+
 ##### max-scale (optional)
-Specifies a max zoom scale, which can be a value from 0 - 9.  The default value is 3.
+Specifies a max zoom scale, which should be a positive number from 1 - 9.  The default value is 3.
 
 ##### initial-scale (optional)
 
-Specifies a default zoom scale, which can be a value from 0 - 9. The default value is 1.
+Specifies a default zoom scale, which should be a positive number from 1 - 9. The default value is 1.
 
 ##### initial-x, initial-y (optional)
 
-Specifies default translation coordinates, otherwise both are set to 0. Expected to be a whole number.
+Specifies default translation coordinates, otherwise both are set to 0. The value is expected to be a whole number.
 
 ##### reset-on-resize (optional)
 
