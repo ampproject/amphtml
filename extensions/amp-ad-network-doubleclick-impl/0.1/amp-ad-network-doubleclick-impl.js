@@ -710,10 +710,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     // If the response included a pageview state token, check for an existing
     // token and remove it. Then save the new one to the module level object.
-    if (responseHeaders.get('_pvtoken_')) {
+    if (responseHeaders.get('amp-ff-pageview-tokens')) {
       this.removePageviewStateToken();
       this.setPageviewStateToken(
-          responseHeaders.get('_pvtoken_'));
+          responseHeaders.get('amp-ff-pageview-tokens'));
     }
 
     return size;
