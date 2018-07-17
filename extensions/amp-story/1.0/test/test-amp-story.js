@@ -95,7 +95,7 @@ describes.realWin('amp-story', {
 
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
-    // TODO(alanorozco): Test active page event triggers once the stubbable
+    // TODO(alanorozco): Test active page event triggers once the stubbables
     // `Services` module is part of the amphtml-story repo.
     // sandbox.stub(element.implementation_,
     // 'triggerActiveEventForPage_').callsFake(NOOP);
