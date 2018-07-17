@@ -5682,18 +5682,18 @@ error_formats {
 error_formats {
   code: STYLESHEET_TOO_LONG
   format: "The author stylesheet specified in tag '%1' is too "
-          "long - we saw %2 bytes whereas the limit is %3 bytes."
+          "long - document contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG
   format: "The author stylesheet specified in tag 'style amp-custom' and "
-          "the combined inline styles is too large - we saw %1 bytes "
-          "whereas the limit is %2 bytes."
+          "the combined inline styles is too large - document contains %1 "
+          "bytes whereas the limit is %2 bytes."
 }
 error_formats {
   code: INLINE_STYLE_TOO_LONG
-  format: "The inline style specified in tag '%1' is too long "
-          "- we saw %2 bytes whereas the limit is %3 bytes."
+  format: "The inline style specified in tag '%1' is too long - document "
+          "contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
