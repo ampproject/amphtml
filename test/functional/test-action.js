@@ -1299,6 +1299,130 @@ describes.fakeWin('Core events', {amp: true}, env => {
     });
   });
 
+  it('should trigger focus event on focus', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('focus');
+    const handler = window.document.addEventListener.getCall(8).args[1];
+    const element = {tagName: 'target1', nodeType: 1};
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(element, 'focus', event);
+  });
+
+  it('should trigger focus event for <input> elements', () => {
+    const handler = window.document.addEventListener.getCall(8).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'text');
+    element.setAttribute('value', 'foo');
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'focus',
+        sinon.match(object => object.target.value == 'foo'));
+  });
+
+  it('should trigger focus event for <select> elements', () => {
+    const handler = window.document.addEventListener.getCall(8).args[1];
+    const element = document.createElement('select');
+    element.innerHTML =
+        `<option value="foo"></option>
+        <option value="bar"></option>
+        <option value="qux"></option>`;
+    element.selectedIndex = 2;
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'focus',
+        sinon.match(object => object.target.firstChild.value == 'foo'));
+  });
+
+  it('should trigger focus event for <textarea> elements', () => {
+    const handler = window.document.addEventListener.getCall(8).args[1];
+    const element = document.createElement('textarea');
+    element.value = 'foo';
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'focus',
+        sinon.match(object => object.target.value == 'foo'));
+  });
+
+  it('should trigger focus event for <a> elements', () => {
+    const handler = window.document.addEventListener.getCall(8).args[1];
+    const element = document.createElement('a');
+    element.textContent = 'foo';
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'focus',
+        sinon.match(object => object.target.textContent == 'foo'));
+  });
+
+  it('should trigger blur event on blur', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('blur');
+    const handler = window.document.addEventListener.getCall(9).args[1];
+    const element = {tagName: 'target1', nodeType: 1};
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(element, 'blur', event);
+  });
+
+  it('should trigger blur event for <input> elements', () => {
+    const handler = window.document.addEventListener.getCall(9).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'text');
+    element.setAttribute('value', 'foo');
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'blur',
+        sinon.match(object => object.target.value == 'foo'));
+  });
+
+  it('should trigger blur event for <select> elements', () => {
+    const handler = window.document.addEventListener.getCall(9).args[1];
+    const element = document.createElement('select');
+    element.innerHTML =
+        `<option value="foo"></option>
+        <option value="bar"></option>
+        <option value="qux"></option>`;
+    element.selectedIndex = 2;
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'blur',
+        sinon.match(object => object.target.firstChild.value == 'foo'));
+  });
+
+  it('should trigger blur event for <textarea> elements', () => {
+    const handler = window.document.addEventListener.getCall(9).args[1];
+    const element = document.createElement('textarea');
+    element.value = 'foo';
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'blur',
+        sinon.match(object => object.target.value == 'foo'));
+  });
+
+  it('should trigger blur event for <a> elements', () => {
+    const handler = window.document.addEventListener.getCall(9).args[1];
+    const element = document.createElement('a');
+    element.textContent = 'foo';
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+        element,
+        'blur',
+        sinon.match(object => object.target.textContent == 'foo'));
+  });
+
   describe('DeferredEvent', () => {
     it('should copy the properties of an event object', () => {
       const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});

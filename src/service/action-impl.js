@@ -254,6 +254,8 @@ export class ActionService {
     this.addEvent('input-throttled');
     this.addEvent('valid');
     this.addEvent('invalid');
+    this.addEvent('focus');
+    this.addEvent('blur');
   }
 
   /** @override */
@@ -332,6 +334,16 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
+    } else if (name == 'focus') {
+      this.root_.addEventListener(name, event => {
+        const element = dev().assertElement(event.target);
+        this.trigger(element, name, event, ActionTrust.HIGH);
+      }, true); // blur and focus never bubbles
+    } else if (name == 'blur') {
+      this.root_.addEventListener(name, event => {
+        const element = dev().assertElement(event.target);
+        this.trigger(element, name, event, ActionTrust.HIGH);
+      }, true); // blur and focus never bubbles
     }
   }
 

@@ -130,6 +130,27 @@ For example, the following is possible in AMP:
   </tr>
 </table>
 
+### Focusable elements
+<table>
+  <tr>
+    <th width="20%">Event</th>
+    <th width="30%">Description</th>
+    <th width="40%">Elements</th>
+  </tr>
+  <!-- focus -->
+  <tr>
+    <td><code>focus</code></td>
+    <td>Fired when the element receives focus. This event is using capture, meaning the parents would receive this event before their children.</td>
+    <td>Elements that could receive <code>focus</code> event, including form elements such as <code>input</code>, <code>select</code> and <code>textarea</code>, or many other elements that has <code>tabindex</code> set.</td>
+  </tr>
+  <!-- blur -->
+  <tr>
+    <td><code>blur</code></td>
+    <td>Fired when the element loses focus. This event is using capture, meaning the parents would receive this event before their children.</td>
+    <td>Same as <code>focus</code></td>
+  </tr>
+</table>
+
 ### Input elements
 <table>
   <tr>
