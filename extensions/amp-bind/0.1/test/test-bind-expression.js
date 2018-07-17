@@ -18,6 +18,7 @@ import {BindExpression} from '../bind-expression';
 import {BindMacro} from '../bind-macro';
 
 describe('BindExpression', () => {
+  const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
   const expressionSizeExceededError = 'exceeds max';
 
@@ -438,6 +439,21 @@ describe('BindExpression', () => {
       expect(() => {
         evaluate('bar.__defineSetter__()', scope);
       }).to.throw(Error, unsupportedFunctionError);
+    });
+
+    it('disallow: object in arguments for most functions', () => {
+      expect(() => {
+        evaluate('[1, 2, 3].indexOf({})');
+      }).to.throw(Error, argumentTypeError);
+      expect(() => {
+        evaluate('"abc".substr({})');
+      }).to.throw(Error, argumentTypeError);
+
+      // Only allow objects in arguments for some functions.
+      expect(evaluate('keys({x: 2})')).to.deep.equal(['x']);
+      expect(evaluate('values({x: 2})')).to.deep.equal([2]);
+      expect(evaluate('splice([1, 3], 1, 0, {x: 2})'))
+          .to.deep.equal([1, {x: 2}, 3]);
     });
   });
 
