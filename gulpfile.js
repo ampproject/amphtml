@@ -59,8 +59,10 @@ const extensionAliasFilePath = {};
 const {green, red, cyan} = colors;
 
 const minifiedRuntimeTarget = 'dist/v0.js';
+const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
 const unminifiedRuntimeTarget = 'dist/amp.js';
+const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
 extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
@@ -275,6 +277,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           includePolyfills: false,
         }),
     compileJs('./src/', 'amp.js', './dist', {
+      toName: 'amp.js',
       minifiedName: 'v0.js',
       includePolyfills: true,
       checkTypes: opt_checkTypes,
@@ -292,6 +295,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           's.WebkitAnimation="none;"},1000);throw e};',
     }),
     compileJs('./src/', 'amp.js', './dist', {
+      toName: 'amp-esm.js',
       minifiedName: 'v0-esm.js',
       includePolyfills: true,
       includeOnlyESMLevelPolyfills: true,
@@ -805,7 +809,9 @@ function dist() {
         copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
-          return enableLocalTesting(minifiedRuntimeTarget);
+          return enableLocalTesting(minifiedRuntimeTarget).then(() => {
+            return enableLocalTesting(minifiedRuntimeEsmTarget);
+          });
         }
       }).then(() => {
         return createModuleCompatibleES5Bundle('v0.js');
@@ -1032,7 +1038,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
           }
         })
         .then(() => {
-          endBuildStep('Minified', srcFilename, startTime);
+          endBuildStep('Minified', options.minifiedName, startTime);
 
           // Remove intemediary, transpiled JS files after compilation.
           if (options.typeScript) {
@@ -1109,7 +1115,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
                   path.join(destDir, destFilename));
             }))
         .then(() => {
-          endBuildStep('Compiled', srcFilename, startTime);
+          endBuildStep('Compiled', destFilename, startTime);
 
           // Remove intemediary, transpiled JS files after compilation.
           if (options.typeScript) {
@@ -1118,9 +1124,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         })
         .then(() => {
           if (process.env.NODE_ENV === 'development') {
-            if (srcFilename === 'amp.js') {
+            if (destFilename === 'amp.js') {
               return enableLocalTesting(unminifiedRuntimeTarget);
-            } else if (srcFilename === 'integration.js') {
+            } else if (destFilename === 'amp-esm.js') {
+              return enableLocalTesting(unminifiedRuntimeEsmTarget);
+            } else if (destFilename === 'integration.js') {
               return enableLocalTesting(unminified3pTarget);
             } else {
               return Promise.resolve();
