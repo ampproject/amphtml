@@ -95,7 +95,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     this.mutateElement(() => {
       setStyle(this.container_, 'width', width, 'px');
     });
-    this.scheduleLayout(this.container_);
+    this.scheduleLayout(dev().assertElement(this.container_));
   }
 
   /** @override */
