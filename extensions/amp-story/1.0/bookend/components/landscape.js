@@ -29,7 +29,7 @@ import {userAssertValidProtocol} from '../../utils';
  *   title: string,
  *   url: string,
  *   domainName: string,
- *   image: string
+ *   image: string,
  * }}
  */
 export let LandscapeComponentDef;

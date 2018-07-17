@@ -395,7 +395,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   loadConfigAndMaybeRenderBookend(renderBookend = true) {
     return this.loadConfig().then(config => {
       if (renderBookend && config) {
-        this.renderBookend_(config);
+        return this.renderBookend_(config).then(() => config);
       }
       return config;
     });
@@ -495,6 +495,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * @param {!./bookend-component.BookendDataDef} bookendConfig
+   * @return {!Promise<!../localization.LocalizationService>}
    * @private
    */
   renderBookend_(bookendConfig) {
@@ -505,21 +506,27 @@ export class AmpStoryBookend extends AMP.BaseElement {
     this.assertBuilt_();
     this.isBookendRendered_ = true;
 
-    this.renderComponents_(bookendConfig.components);
+    return this.renderComponents_(bookendConfig.components);
   }
 
   /**
    * @param {!Array<!../bookend/bookend-component.BookendComponentDef>} components
+   * @return {!Promise<!../localization.LocalizationService>}
    * @private
    */
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
-    const fragment = BookendComponent
-        .buildElements(components, this.win.document);
-    const container = dev().assertElement(
-        BookendComponent.buildContainer(this.getInnerContainer_(),
-            this.win.document));
-    this.mutateElement(() => container.appendChild(fragment));
+
+    return Services
+        .localizationServiceForOrNull(this.win).then(localizationService => {
+          const bookendEls = BookendComponent
+              .buildElements(
+                  components, this.win.document, localizationService);
+          const container = dev().assertElement(
+              BookendComponent.buildContainer(this.getInnerContainer_(),
+                  this.win.document));
+          this.mutateElement(() => container.appendChild(bookendEls));
+        });
   }
 
   /** @return {!Element} */
