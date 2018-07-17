@@ -54,6 +54,9 @@ const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
 const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 
+const preVisualDiffTasks =
+    (argv.nobuild || argv.verify_status) ? [] : ['build'];
+
 /**
  * Logs a message to the console.
  *
@@ -113,9 +116,14 @@ function setPercyBranch() {
 async function launchWebServer() {
   const gulpServeAsync = execScriptAsync(
       `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
-      {stdio: 'inherit'});
+      {
+        stdio: argv.webserver_debug ?
+          ['ignore', process.stdout, process.stderr] :
+          'ignore',
+      });
 
-  gulpServeAsync.on('exit', code => {
+  gulpServeAsync.on('close', code => {
+    code = code || 0;
     if (code != 0) {
       log('error', colors.cyan("'serve'"),
           `errored with code ${code}. Cannot continue with visual diff tests`);
@@ -124,11 +132,7 @@ async function launchWebServer() {
   });
 
   process.on('exit', async() => {
-    if (gulpServeAsync.exitCode == null) {
-      gulpServeAsync.kill();
-      // The child node process has an asynchronous stdout. See #10409.
-      await sleep(100);
-    }
+    await shutdown(gulpServeAsync);
   });
 
   let resolver, rejecter;
@@ -140,8 +144,26 @@ async function launchWebServer() {
     host: HOST,
     port: PORT,
     retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
-  }).on('connected', resolver).on('timeout', rejecter);
+  }).on('connected', () => {
+    return resolver(gulpServeAsync);
+  }).on('timeout', rejecter);
   return deferred;
+}
+
+/**
+ * Kill the webserver process and this own process.
+ *
+ * @param {!ChildProcess} webServerProcess the webserver process to shut down.
+ */
+async function shutdown(webServerProcess) {
+  if (!webServerProcess.killed) {
+    // Explicitly exit the webserver.
+    webServerProcess.kill();
+    // The child node process has an asynchronous stdout. See #10409.
+    await sleep(100);
+  }
+  // TODO(rsimha): clean up this exit.
+  process.exit();
 }
 
 /**
@@ -284,11 +306,16 @@ async function runVisualTests(page, visualTestsConfig) {
   // Take the snapshots.
   await generateSnapshots(percy, page, visualTestsConfig.webpages);
 
-  // Tell Percy we're finished taking snapshots.
+  // Tell Percy we're finished taking snapshots and check if the build failed
+  // early.
   await percy.finalizeBuild();
-  // TODO(danielrozenberg): inspect result to check if the build failed fast
-  log('info', 'Build', colors.cyan(buildId),
-      'is now being processed by Percy.');
+  const status = await getBuildStatus(buildId);
+  if (status.state == 'failed') {
+    log('fatal', 'Build', colors.cyan(buildId), 'failed!');
+  } else {
+    log('info', 'Build', colors.cyan(buildId),
+        'is now being processed by Percy.');
+  }
 }
 
 /**
@@ -298,7 +325,8 @@ function cleanupAmpConfig() {
   log('verbose', 'Cleaning up existing AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} --remove`);
+        `gulp prepend-global --local_dev --target ${targetFile} --remove`,
+        {'stdio': 'ignore'});
   });
 }
 
@@ -311,8 +339,8 @@ function applyAmpConfig(config) {
   log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} ` +
-        `--${config}`);
+        `gulp prepend-global --local_dev --target ${targetFile} --${config}`,
+        {'stdio': 'ignore'});
   });
 }
 
@@ -354,15 +382,17 @@ async function generateSnapshots(percy, page, webpages) {
  * @param {string} config Config being used. One of 'canary' or 'prod'.
  */
 async function snapshotWebpages(percy, page, webpages, config) {
-  webpages = webpages.filter(webpage => (!webpage.flaky &&
-        !webpage.url.startsWith('examples/visual-tests/amp-by-example')));
+  webpages = webpages.filter(webpage => !webpage.flaky);
   for (const webpage of webpages) {
     const {url} = webpage;
     const name = `${webpage.name} (${config})`;
 
     await enableExperiments(page, webpage['experiments']);
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
-    await page.goto(`${BASE_URL}/${url}`);
+    // Puppeteer is flaky when it comes to catching navigation requests, so
+    // ignore timeouts. If this was a real non-loading page, this will be caught
+    // in the resulting Percy build.
+    await page.goto(`${BASE_URL}/${url}`).catch(() => {});
 
     // Try to wait until there are no more network requests. This method is
     // flaky since Puppeteer doesn't always understand Chrome's network
@@ -551,9 +581,8 @@ function setDebuggingLevel() {
   process.env.WEBSERVER_QUIET = '--quiet';
 
   if (argv.debug) {
-    // eslint-disable-next-line google-camelcase/google-camelcase
-    argv.chrome_debug = true;
-    process.env.WEBSERVER_QUIET = '';
+    argv['chrome_debug'] = true;
+    argv['webserver_debug'] = true;
   }
   if (argv.webserver_debug) {
     process.env.WEBSERVER_QUIET = '';
@@ -586,13 +615,12 @@ async function createEmptyBuild(page) {
 }
 
 /**
- * Simple wrapper around the JS (Percy-Puppeteer) based visual diff tests.
- *
- * This is the current default mode, which is actively deprecating the Ruby
- * (Capybara) implementation.
+ * Runs the AMP visual diff tests.
  */
-async function visualDiffPuppeteer() {
-  if (argv.verify) {
+async function visualDiff() {
+  setPercyBranch();
+
+  if (argv.verify_status) {
     const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
     const status = await waitForBuildCompletion(buildId);
     verifyBuildStatus(status, buildId);
@@ -607,14 +635,13 @@ async function visualDiffPuppeteer() {
 
   // Launch a browser and local web server.
   const page = await launchBrowser();
-  await launchWebServer().catch(reason => {
+  const webServerProcess = await launchWebServer().catch(reason => {
     log('fatal', `Failed to start a web server: ${reason}`);
   });
 
   if (argv.skip) {
     await createEmptyBuild(page);
-    // Explicitly exit, to trigger the webserver's exit event too.
-    process.exit();
+    await shutdown(webServerProcess);
     return;
   }
 
@@ -625,53 +652,24 @@ async function visualDiffPuppeteer() {
           'utf8'));
   await runVisualTests(page, visualTestsConfig);
 
-  // Explicitly exit, to trigger the webserver's exit event too.
-  process.exit();
-}
-
-/**
- * Simple wrapper around the ruby (Percy-Capybara) based visual diff tests.
- *
- * This mode is being actively deprecated and will be removed soon.
- */
-function visualDiffCapybara() {
-  let cmd = 'ruby build-system/tasks/visual-diff.rb';
-  for (const arg in argv) {
-    if (arg !== '_') {
-      cmd = cmd + ' --' + arg;
-    }
-  }
-  execOrDie(cmd);
-}
-
-/**
- * Runs the AMP visual diff tests.
- */
-async function visualDiff() {
-  setPercyBranch();
-
-  if (!argv.capybara) {
-    await visualDiffPuppeteer();
-  } else {
-    visualDiffCapybara();
-  }
+  await shutdown(webServerProcess);
 }
 
 gulp.task(
     'visual-diff',
     'Runs the AMP visual diff tests.',
+    preVisualDiffTasks,
     visualDiff,
     {
       options: {
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
-        'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
+        'verify_status':
+          '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
         'headless': '  Runs Chrome in headless mode',
-        'percy_debug': '  Prints debug info from Percy-Capybara libraries',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
-        'capybara': '  [DEPRECATED] Use Capybara (Ruby) instead of Puppeteer',
       },
     }
 );

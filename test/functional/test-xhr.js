@@ -890,13 +890,27 @@ describe.configure().skipSafari().run('XHR', function() {
           .then(() => expect(sendMessageStub).to.not.have.been.called);
     });
 
+    it('should not intercept a 1p cdn from subdomain', () => {
+      const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+      return xhr.fetch('https://subdomain-model.cdn.ampproject.org/ww.js')
+          .then(() => expect(sendMessageStub).to.not.have.been.called);
+    });
+
+    it('should not intercept a 1p cdn resource', () => {
+      const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+      return xhr.fetch('https://cdn.ampproject.org/ww.js')
+          .then(() => expect(sendMessageStub).to.not.have.been.called);
+    });
+
     it('should intercept if viewer untrusted but dev mode', () => {
       sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
       interceptionEnabledWin.AMP_DEV_MODE = true;
 
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return xhr.fetch('https://cdn.ampproject.org')
+      return xhr.fetch('https://www.some-url.org/some-resource/')
           .then(() => expect(sendMessageStub).to.have.been.called);
     });
 
@@ -906,14 +920,14 @@ describe.configure().skipSafari().run('XHR', function() {
 
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return xhr.fetch('https://cdn.ampproject.org')
+      return xhr.fetch('https://www.some-url.org/some-resource/')
           .then(() => expect(sendMessageStub).to.have.been.called);
     });
 
     it('should send viewer message named `xhr`', () => {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return xhr.fetch('https://cdn.ampproject.org')
+      return xhr.fetch('https://www.some-url.org/some-resource/')
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
                 'xhr', sinon.match.any));
@@ -922,12 +936,12 @@ describe.configure().skipSafari().run('XHR', function() {
     it('should post correct structurally-cloneable GET request', () => {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return xhr.fetch('https://cdn.ampproject.org')
+      return xhr.fetch('https://www.some-url.org/some-resource/')
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
                 sinon.match.any, {
                   originalRequest: {
-                    input: 'https://cdn.ampproject.org' +
+                    input: 'https://www.some-url.org/some-resource/' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
                     init: {
                       headers: {},
@@ -942,7 +956,7 @@ describe.configure().skipSafari().run('XHR', function() {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
       return xhr
-          .fetch('https://cdn.ampproject.org', {
+          .fetch('https://www.some-url.org/some-resource/', {
             method: 'POST',
             headers: {'Content-Type': 'application/json;charset=utf-8'},
             body: JSON.stringify({a: 42, b: [24, true]}),
@@ -951,7 +965,7 @@ describe.configure().skipSafari().run('XHR', function() {
             expect(sendMessageStub).to.have.been.calledWithMatch(
                 sinon.match.any, {
                   originalRequest: {
-                    input: 'https://cdn.ampproject.org' +
+                    input: 'https://www.some-url.org/some-resource/' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
                     init: {
                       headers: {
@@ -975,7 +989,7 @@ describe.configure().skipSafari().run('XHR', function() {
       formData.append('b', true);
 
       return xhr
-          .fetch('https://cdn.ampproject.org', {
+          .fetch('https://www.some-url.org/some-resource/', {
             method: 'POST',
             body: formData,
           })
@@ -983,7 +997,7 @@ describe.configure().skipSafari().run('XHR', function() {
             expect(sendMessageStub).to.have.been.calledWithMatch(
                 sinon.match.any, {
                   originalRequest: {
-                    input: 'https://cdn.ampproject.org' +
+                    input: 'https://www.some-url.org/some-resource/' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
                     init: {
                       headers: {
@@ -1002,7 +1016,7 @@ describe.configure().skipSafari().run('XHR', function() {
       sendMessageStub.returns(Promise.resolve());
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return expect(xhr.fetch('https://cdn.ampproject.org'))
+      return expect(xhr.fetch('https://www.some-url.org/some-resource/'))
           .to.eventually.be.rejectedWith(Error, 'Object expected: undefined');
     });
 
@@ -1010,7 +1024,7 @@ describe.configure().skipSafari().run('XHR', function() {
       sendMessageStub.returns(Promise.resolve(null));
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return expect(xhr.fetch('https://cdn.ampproject.org'))
+      return expect(xhr.fetch('https://www.some-url.org/some-resource/'))
           .to.eventually.be.rejectedWith(Error, 'Object expected: null');
     });
 
@@ -1018,7 +1032,7 @@ describe.configure().skipSafari().run('XHR', function() {
       sendMessageStub.returns(Promise.resolve('response text'));
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return expect(xhr.fetch('https://cdn.ampproject.org')).to.eventually
+      return expect(xhr.fetch('https://www.some-url.org/some-resource/')).to.eventually
           .be.rejectedWith(Error, 'Object expected: response text');
     });
 
@@ -1041,7 +1055,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org').then(response => {
+        return xhr.fetch('https://www.some-url.org/some-resource/').then(response => {
           expect(response.headers.get('a')).to.equal('2');
           expect(response.headers.get('b')).to.equal('false');
           expect(response.headers.get('Amp-Access-Control-Allow-source-origin'))
@@ -1067,7 +1081,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetchDocument('https://cdn.ampproject.org').then(doc => {
+        return xhr.fetchDocument('https://www.some-url.org/some-resource/').then(doc => {
           expect(doc).to.have.nested.property('body.textContent')
               .that.equals('Foo');
         });
@@ -1093,7 +1107,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org').then(response => {
+        return xhr.fetch('https://www.some-url.org/some-resource/').then(response => {
           expect(response.headers.get('a')).to.equal('2');
           expect(response.headers.get('b')).to.equal('false');
           expect(response.headers.get('Amp-Access-Control-Allow-Source-Origin'))
@@ -1116,7 +1130,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetchDocument('https://cdn.ampproject.org')
+        return xhr.fetchDocument('https://www.some-url.org/some-resource/')
             .then(doc => expect(doc.body.textContent).to.equal('Foo'));
       });
 
@@ -1124,7 +1138,7 @@ describe.configure().skipSafari().run('XHR', function() {
         sendMessageStub.returns(Promise.resolve({}));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               expect(response.headers.get('a')).to.be.null;
               expect(response.headers.has('a')).to.be.false;
@@ -1138,7 +1152,7 @@ describe.configure().skipSafari().run('XHR', function() {
         sendMessageStub.returns(Promise.resolve({body: '', init: {}}));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               expect(response.headers.get('a')).to.be.null;
               expect(response.headers.has('a')).to.be.false;
@@ -1150,7 +1164,7 @@ describe.configure().skipSafari().run('XHR', function() {
         sendMessageStub.returns(Promise.resolve({body: 32}));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               return expect(response.text()).to.eventually.equal('32');
             });
@@ -1160,7 +1174,7 @@ describe.configure().skipSafari().run('XHR', function() {
         sendMessageStub.returns(Promise.resolve({init: {status: '209.6'}}));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               return expect(response).to.have.property('status')
                   .that.equals(209);
@@ -1176,7 +1190,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               expect(response.headers.get(1)).to.equal('true');
               expect(response.headers.get('false')).to.equal('NaN');
@@ -1197,7 +1211,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               expect(response.headers.get('content-type'))
                   .to.equal('text/plain');
