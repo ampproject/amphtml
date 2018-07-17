@@ -17,7 +17,6 @@
 import {Deferred} from '../utils/promise';
 import {Signals} from '../utils/signals';
 import {dev} from '../log';
-import {getMode} from '../mode';
 import {
   getParentWindowFrameElement,
   registerServiceBuilder,
