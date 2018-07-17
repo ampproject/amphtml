@@ -249,6 +249,14 @@ class AmpAccordion extends AMP.BaseElement {
     const toExpand = (opt_forceExpand == undefined) ?
       !section.hasAttribute('expanded') : opt_forceExpand;
 
+    if ((toExpand && section.hasAttribute('expanded')) ||
+        (!toExpand && !section.hasAttribute('expanded'))) {
+      // Caveat: if expand-single-section is added when target section
+      // already expanded, it would still short circuit here and
+      // not collapsing other sections
+      return;
+    }
+
     // Animate Toggle
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
@@ -269,10 +277,8 @@ class AmpAccordion extends AMP.BaseElement {
     } else { // Toggle without animation
       this.mutateElement(() => {
         if (toExpand) {
-          if (!section.hasAttribute('expanded')) {
-            this.triggerEvent_('expand', section);
-            section.setAttribute('expanded', '');
-          }
+          this.triggerEvent_('expand', section);
+          section.setAttribute('expanded', '');
           header.setAttribute('aria-expanded', 'true');
           // if expand-single-section is set, only allow one <section> to be
           // expanded at a time
@@ -288,11 +294,9 @@ class AmpAccordion extends AMP.BaseElement {
             });
           }
         } else {
-          if (section.hasAttribute('expanded')) {
-            this.triggerEvent_('collapse', section);
-            section.removeAttribute('expanded');
-            header.setAttribute('aria-expanded', 'false');
-          }
+          this.triggerEvent_('collapse', section);
+          section.removeAttribute('expanded');
+          header.setAttribute('aria-expanded', 'false');
         }
       }, section);
     }
