@@ -98,11 +98,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
-    /** @const @private {!function()} */
+    /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
         this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
 
-    /** @private {?Element} */
+    /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
     /** @private @const {!Promise} */
