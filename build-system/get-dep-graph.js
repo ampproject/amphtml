@@ -178,14 +178,17 @@ exports.getBundleFlags = function(g) {
     // And now build --module $name:$numberOfJsFiles:$bundleDeps
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend onsrc-amp.
+    const bundleDeps = [];
     if (!isBase) {
       const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
+        bundleDeps.push('_base_i', configEntry.type);
       } else {
         // All lower tier bundles depend on src-amp (v0.js)
         if (TYPES_VALUES.includes(name)) {
           cmd += ':_base_i';
+          bundleDeps.push('_base_i');
         } else {
           cmd += ':src-amp';
         }
@@ -202,7 +205,7 @@ exports.getBundleFlags = function(g) {
             massageWrapper(wrappers.mainBinary));
       } else {
         flagsArray.push('--module_wrapper', name + ':' +
-           massageWrapper(wrappers.extension(name)));
+           massageWrapper(wrappers.extension(name, null, bundleDeps)));
       }
     } else {
       throw new Error('Expect to build more than one bundle.');

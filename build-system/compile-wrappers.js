@@ -11,12 +11,28 @@ exports.mainBinary = 'self.AMP=self.AMP||[];' +
     's.animation="none";' +
     's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function(name, loadPriority) {
-  if (loadPriority && loadPriority != 'high') {
-    throw new Error('Unsupported loadPriority: ' + loadPriority);
+exports.extension = function(name, loadPriority, intermediateDeps) {
+  let deps = '';
+  if (intermediateDeps) {
+    deps = 'i:';
+    function quote(s) {
+      return `"${s}"`;
+    }
+    if (intermediateDeps.length == 1) {
+      deps += quote(intermediateDeps[0]);
+    } else {
+      deps += `[${intermediateDeps.map(quote).join(',')}]`;
+    }
+    deps += ',';
   }
-  const priority = loadPriority ? 'p:"high",' : '';
-  return `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
+  let priority = '';
+  if (loadPriority) {
+    if (loadPriority != 'high') {
+      throw new Error('Unsupported loadPriority: ' + loadPriority);
+    }
+    priority = 'p:"high",';
+  }
+  return `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
       `v:"${VERSION}",f:(function(AMP,_){<%= contents %>\n})});`;
 };
 
