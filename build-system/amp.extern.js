@@ -48,7 +48,7 @@ function ExtensionPayload() {}
 /** @type {string} */
 ExtensionPayload.prototype.n;
 
-/** @type {function(!Object)} */
+/** @type {function(!Object,!Object)} */
 ExtensionPayload.prototype.f;
 
 /** @type {string|undefined} */
