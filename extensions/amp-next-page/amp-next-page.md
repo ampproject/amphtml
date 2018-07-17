@@ -18,16 +18,16 @@ limitations under the License.
 
 <table>
   <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
+    <td width="40%"><strong>Description</strong></td>
     <td>Dynamically loads more documents recommended for the user.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
+    <td><strong>Availability</strong></td>
     <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
   </tr>
   <tr>
-    <td width="40%"><strong>Required Script</strong></td>
+    <td><strong>Required Script</strong></td>
     <td>
       <code>
         &lt;script async custom-element="amp-next-page"
@@ -36,14 +36,16 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty">
+    <td>
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
-          Supported Layouts
-        </a>
+        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a>
       </strong>
     </td>
     <td>N/A</td>
+  </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-next-page/">amp-next-page example</a>.</td>
   </tr>
 </table>
 
@@ -54,6 +56,7 @@ limitations under the License.
 Given a list of pages, `amp-next-page` tries to load them after the current document, providing an infinite-scroll type experience. 
 
 The pages should be inlined using a JSON format.
+
 ```html
 <amp-next-page>
   <script type="application/json">
@@ -70,15 +73,11 @@ If loading the next document is successful, everything after the placement of `a
 
 N/A
 
-##### Common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
-
-## Configuration Spec
+## Configuration spec
 
 The configuration defines the documents recommended by `<amp-next-page>` to the user.
 
-### Example Configuration
+### Example configuration
 
 The following configuration will only recommend one more document for the user to read.
 
