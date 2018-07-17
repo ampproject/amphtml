@@ -17,6 +17,7 @@
 import {Deferred} from '../utils/promise';
 import {Signals} from '../utils/signals';
 import {dev} from '../log';
+import {getMode} from '../mode';
 import {
   getParentWindowFrameElement,
   registerServiceBuilder,
@@ -387,6 +388,9 @@ export class AmpDocSingle extends AmpDoc {
 
   /** @override */
   getUrl() {
+    if (getMode().test && this.win.testLocation) {
+      return this.win.testLocation.href;
+    }
     return this.win.location.href;
   }
 

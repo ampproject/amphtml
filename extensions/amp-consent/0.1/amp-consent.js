@@ -510,9 +510,9 @@ export class AmpConsent extends AMP.BaseElement {
     const href =
         this.consentConfig_[instanceId]['checkConsentHref'];
     assertHttpsUrl(href, this.element);
-    const ampdoc = this.getAmpDoc();
-    const resolvedHref = resolveRelativeUrl(href, this.getAmpDoc().getUrl());
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const ampDoc = this.getAmpDoc();
+    const resolvedHref = resolveRelativeUrl(href, ampDoc.getUrl());
+    const viewer = Services.viewerForDoc(ampDoc);
     return viewer.whenFirstVisible().then(() => {
       return Services.xhrFor(this.win)
           .fetchJson(resolvedHref, init)
