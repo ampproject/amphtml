@@ -27,7 +27,8 @@ import {userAssertValidProtocol} from '../../utils';
  *   type: string,
  *   title: string,
  *   url: string,
- *   image: (string|undefined)
+ *   image: (string|undefined),
+ *   domainName: string,
  * }}
  */
 export let ArticleComponentDef;
