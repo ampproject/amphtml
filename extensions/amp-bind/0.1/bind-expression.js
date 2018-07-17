@@ -361,18 +361,12 @@ export class BindExpression {
 
         if (validFunction) {
           if (Array.isArray(params)) {
-            // Don't allow objects as parameters except for Object functions.
-            const invalidArgumentType = this.containsObject_(params)
-                && !this.isObjectMethod_(method);
-            if (!invalidArgumentType) {
-              return validFunction.apply(caller, params);
-            }
+            return validFunction.apply(caller, params);
           } else if (typeof params == 'function') {
             // Special case: `params` may be an arrow function, which are only
             // supported as the sole argument to functions like Array#find.
             return validFunction.call(caller, params);
           }
-          throw new Error(`Unexpected argument type in ${method}().`);
         }
 
         throw new Error(unsupportedError);
