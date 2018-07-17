@@ -51,7 +51,7 @@ let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
 // Flatten nested arrays to support multiple versions
 extensions = [].concat.apply([], extensions);
 
-//patchRegisterElement();
+patchRegisterElement();
 patchWebAnimations();
 patchDompurify();
 
@@ -99,9 +99,19 @@ exports.getFlags = function(config) {
     language_in: 'ES6',
     language_out: 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
-    externs: path.dirname(module.filename) + '/splittable.extern.js',
+    externs: [
+      path.dirname(module.filename) + '/splittable.extern.js',
+      './build-system/amp.extern.js',
+      // 'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/performance_observer.js',
+      // 'third_party/closure-compiler/externs/shadow_dom.js',
+      // 'third_party/closure-compiler/externs/streams.js',
+      'third_party/closure-compiler/externs/web_animations.js',
+      'third_party/moment/moment.extern.js',
+      'third_party/react-externs/externs.js',
+    ],
     define: [
-      //'PSEUDO_NAMES=true',
+      'PSEUDO_NAMES=true',
       'SINGLE_FILE_COMPILATION=true',
     ],
     jscomp_off: [
@@ -232,7 +242,7 @@ exports.getBundleFlags = function(g) {
     if (bundleKeys.length > 1) {
       function massageWrapper(w) {
         return (w.replace('<%= contents %>', '%s')
-            + '\n//# sourceMappingURL=%basename%.map\n');
+            /*+ '\n//# sourceMappingURL=%basename%.map\n'*/);
       }
       if (isMain) {
         flagsArray.push('--module_wrapper', name + ':' +
@@ -557,8 +567,8 @@ function patchRegisterElement() { // eslint-disable-line no-unused-vars
   // export this module does not generate a goog.provide which fails
   // compilation.
   // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.node.js';
+  const patchedName = 'node_modules/document-register-element' +
+      '/build/document-register-element.patched.js';
   if (!fs.existsSync(patchedName)) {
     file = fs.readFileSync(
         'node_modules/document-register-element/build/' +
@@ -568,6 +578,7 @@ function patchRegisterElement() { // eslint-disable-line no-unused-vars
     // ran into here https://github.com/Microsoft/TypeScript/issues/2719
     file = file.replace('module.exports = installCustomElements;',
         'exports.default = installCustomElements;');
+    file = file.replace('installCustomElements(global);', '');
     fs.writeFileSync(patchedName, file);
   }
 }

@@ -5192,7 +5192,7 @@ glob-base@^0.3.0:
     glob-parent "^2.0.0"
     is-glob "^2.0.0"
 
-glob-move@^1.0.1:
+glob-move@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/glob-move/-/glob-move-1.0.1.tgz#a6287586e26b0152bd366e84de9a8ee87b8025cc"
   dependencies:

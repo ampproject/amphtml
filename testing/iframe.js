@@ -30,7 +30,7 @@ import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStylesLegacy} from '../src/style-installer';
 import {parseIfNeeded} from '../src/iframe-helper';
 import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+  'document-register-element/build/document-register-element.patched';
 
 let iframeCount = 0;
 

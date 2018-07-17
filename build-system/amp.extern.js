@@ -99,6 +99,7 @@ window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
 window.AMP = {};
+window.AMP._ = {};
 
 /** @constructor */
 function AmpConfigType() {}
