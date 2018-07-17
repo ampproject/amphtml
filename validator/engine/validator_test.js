@@ -343,7 +343,8 @@ describe('ValidatorCssLengthValidation', () => {
   const validInlineStyleBlob = 'width:1px;';
   assertStrictEqual(10, validInlineStyleBlob.length);
 
-  it('accepts 50000 bytes in author stylesheet and 0 bytes in inline style', () => {
+  it('accepts 50000 bytes in author stylesheet and 0 bytes in inline style',
+     () => {
     const stylesheet = Array(5001).join(validStyleBlob);
     assertStrictEqual(50000, stylesheet.length);
     const test = new ValidatorTestCase('feature_tests/css_length.html');
@@ -355,7 +356,8 @@ describe('ValidatorCssLengthValidation', () => {
     test.run();
   });
 
-  it('will not accept 50001 bytes in author stylesheet and 0 bytes in inline style',
+  it('will not accept 50001 bytes in author stylesheet and 0 bytes in ' +
+     'inline style',
       () => {
         const stylesheet = Array(5001).join(validStyleBlob) + ' ';
         assertStrictEqual(50001, stylesheet.length);
@@ -375,7 +377,8 @@ describe('ValidatorCssLengthValidation', () => {
         test.run();
       });
 
-  it('knows utf8 and rejects file with 50002 bytes but 49999 characters and 0 bytes in inline style',
+  it('knows utf8 and rejects file with 50002 bytes but 49999 characters ' +
+     'and 0 bytes in inline style',
       () => {
         const stylesheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
         assertStrictEqual(49999, stylesheet.length); // character length
@@ -408,7 +411,8 @@ describe('ValidatorCssLengthValidation', () => {
         test.run();
       });
 
-  it('will not accept 0 bytes in author stylesheet and 50001 bytes in inline style',
+  it('will not accept 0 bytes in author stylesheet and 50001 bytes in ' +
+     'inline style',
       () => {
         const inlineStyle = Array(5001).join(validInlineStyleBlob) + ' ';
         assertStrictEqual(50001, inlineStyle.length);
@@ -428,7 +432,8 @@ describe('ValidatorCssLengthValidation', () => {
         test.run();
       });
 
-  it('will not accept 50000 bytes in author stylesheet and 14 bytes in inline style',
+  it('will not accept 50000 bytes in author stylesheet and 14 bytes in ' +
+     'inline style',
       () => {
         const stylesheet = Array(5001).join(validStyleBlob);
         assertStrictEqual(50000, stylesheet.length);
@@ -597,21 +602,6 @@ describe('CssLength', () => {
       expect(parsed.isValid).toBe(true); expect(parsed.isFluid).toBe(true);}
   });
 });
-
-/**
- * Helper for sorting attributes.
- * @param {string} a
- * @param {string} b
- * @return {number}
- */
-function compareAttrNames(a, b) {
-  // amp-bind attributes (e.g. "[name]") should be after other attributes.
-  if (a.startsWith('[') && !b.startsWith('[')) {return 1;}
-  if (!a.startsWith('[') && b.startsWith('[')) {return -1;}
-  if (a < b) {return -1;}
-  if (a > b) {return 1;}
-  return 0;
-}
 
 /**
  * Helper for ValidatorRulesMakeSense.
@@ -949,10 +939,10 @@ describe('ValidatorRulesMakeSense', () => {
       // whitelist check on the attribute value.
       if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {
         it('every <script> tag with a src attribute has a whitelist check',
-           () => {
-             expect(attrSpec.value.length > 0 || attrSpec.valueRegex !== null)
-                 .toBe(true);
-           });
+            () => {
+              expect(attrSpec.value.length > 0 || attrSpec.valueRegex !== null)
+                  .toBe(true);
+            });
       }
       // TagSpecs with an ExtensionSpec are extensions. We have a few
       // additional checks for these.
@@ -996,20 +986,13 @@ describe('ValidatorRulesMakeSense', () => {
       }
 
       if (attrSpec.dispatchKey) {
-        it('tag_spec ' + tagSpecName + ' can not have more than one dispatch_key', () => {
+        it('tag_spec ' + tagSpecName + 
+           ' can not have more than one dispatch_key', () => {
           expect(seenDispatchKey).toBe(false);
           seenDispatchKey = true;
         });
       }
     }
-
-    // TODO(#15443): Figure out how to check for sorted attrs with the minified
-    // output of the new closure compiler.
-    // it('\'' + tagSpecName + '\' has attrs not sorted alphabetically by name', () => {
-    //   const sortedAttrs = Object.keys(attrNameIsUnique).sort(compareAttrNames);
-
-    //   expect(Object.keys(attrNameIsUnique)).toEqual(sortedAttrs);
-    // });
 
     // cdata
     if (tagSpec.cdata !== null) {
@@ -1091,10 +1074,11 @@ describe('ValidatorRulesMakeSense', () => {
         let hasSrc = false;
         let hasJson = false;
         for (const attrSpecId of tagSpec.attrs) {
-          if (attrSpecId < 0) continue;
+          if (attrSpecId < 0) { continue; }
           const attrSpec = rules.attrs[attrSpecId];
-          if (attrSpec.name === 'src')
+          if (attrSpec.name === 'src') {
             hasSrc = true;
+          }
           if (attrSpec.name === 'type' && attrSpec.valueCasei.length > 0) {
             for (const value of attrSpec.valueCasei) {
               if (value === 'application/ld+json' ||
@@ -1160,11 +1144,6 @@ describe('ValidatorRulesMakeSense', () => {
 
   // Verify that for every error code in our enum, we have exactly one format
   // and specificity value in the rules.
-  let numValidCodes = 0;
-  for (const code in amp.validator.ValidationError.Code) {
-    numValidCodes += 1;
-  }
-  let numErrorSpecificity = 0;
   const errorSpecificityIsUnique = {};
   it('Two specificity rules found for same error code', () => {
     for (const errorSpecificity of rules.errorSpecificity) {
@@ -1175,11 +1154,6 @@ describe('ValidatorRulesMakeSense', () => {
     }
   });
 
-  // TODO(#15443): This test is flaky. numErrorSpecificity is either 0 or 100.
-  // it('Some error codes are missing specificity rules', () => {
-  //   expect(numValidCodes).toEqual(numErrorSpecificity);
-  // });
-  let numErrorFormat = 0;
   const errorFormatIsUnique = {};
   it('Two error format string rules found for same error code', () => {
     for (const errorFormat of rules.errorFormats) {
@@ -1188,9 +1162,4 @@ describe('ValidatorRulesMakeSense', () => {
       numErrorFormat += 1;
     }
   });
-
-  // TODO(#15443): This test is flaky. numErrorFormat is either 0 or 100.
-  // it('Some error codes are missing format strings', () => {
-  //   expect(numValidCodes).toEqual(numErrorFormat);
-  // });
 });
