@@ -91,6 +91,17 @@ function log(mode, ...messages) {
 }
 
 /**
+ * Override PERCY_* environment variables if passed via gulp task parameters.
+ */
+function maybeOverridePercyEnvironmentVariables() {
+  ['percy_project', 'percy_token', 'percy_branch'].forEach(variable => {
+    if (variable in argv) {
+      process.env[variable.toUpperCase()] = argv[variable];
+    }
+  });
+}
+
+/**
  * Disambiguates branch names by decorating them with the commit author name.
  * We do this for all non-push builds in order to prevent them from being used
  * as baselines for future builds.
@@ -103,14 +114,6 @@ function setPercyBranch() {
       process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
-}
-
-function maybeOverridePercyEnvironmentVariables() {
-  ['percy_project', 'percy_token', 'percy_branch'].forEach(variable => {
-    if (variable in argv) {
-      process.env[variable.toUpperCase()] = argv[variable];
-    }
-  });
 }
 
 /**
