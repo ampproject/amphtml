@@ -31,8 +31,8 @@ describes.realWin('AmpState', {
 
   // Viewer-related vars.
   let viewer;
-  let whenFirstVisiblePromise;
-  let whenFirstVisiblePromiseResolve;
+  let hasBeenVisiblePromise;
+  let hasBeenVisiblePromiseResolve;
 
   function getAmpState() {
     const el = win.document.createElement('amp-state');
@@ -44,11 +44,11 @@ describes.realWin('AmpState', {
   beforeEach(() => {
     ({win, sandbox} = env);
     viewer = Services.viewerForDoc(win.document);
-    whenFirstVisiblePromise = new Promise(resolve => {
-      whenFirstVisiblePromiseResolve = resolve;
+    hasBeenVisiblePromise = new Promise(resolve => {
+      hasBeenVisiblePromiseResolve = resolve;
     });
-    sandbox.stub(viewer, 'whenFirstVisible')
-        .callsFake(() => whenFirstVisiblePromise);
+    sandbox.stub(viewer, 'hasBeenVisible')
+        .callsFake(() => hasBeenVisiblePromise);
 
     element = getAmpState();
     ampState = element.implementation_;
@@ -68,8 +68,8 @@ describes.realWin('AmpState', {
     expect(ampState.fetch_).to.not.have.been.called;
     expect(ampState.updateState_).to.not.have.been.called;
 
-    whenFirstVisiblePromiseResolve();
-    return whenFirstVisiblePromise.then(() => {
+    hasBeenVisiblePromiseResolve();
+    return hasBeenVisiblePromise.then(() => {
       expect(ampState.fetchAndUpdate_).calledWithExactly(/* isInit */ true);
       return ampState.fetch_();
     }).then(() => {
@@ -87,8 +87,8 @@ describes.realWin('AmpState', {
     expect(ampState.fetch_).to.not.have.been.called;
     expect(ampState.updateState_).to.not.have.been.called;
 
-    whenFirstVisiblePromiseResolve();
-    return whenFirstVisiblePromise.then(() => {
+    hasBeenVisiblePromiseResolve();
+    return hasBeenVisiblePromise.then(() => {
       expect(ampState.fetchAndUpdate_).to.not.have.been.called;
       expect(ampState.updateState_).calledWithMatch({foo: 'bar'});
     });
@@ -105,8 +105,8 @@ describes.realWin('AmpState', {
     expect(ampState.fetch_).to.not.have.been.called;
     expect(ampState.updateState_).to.not.have.been.called;
 
-    whenFirstVisiblePromiseResolve();
-    return whenFirstVisiblePromise.then(() => {
+    hasBeenVisiblePromiseResolve();
+    return hasBeenVisiblePromise.then(() => {
       expect(ampState.updateState_).calledWithMatch({foo: 'bar'});
       expect(ampState.fetchAndUpdate_).calledWithExactly(/* isInit */ true);
       return ampState.fetch_();
