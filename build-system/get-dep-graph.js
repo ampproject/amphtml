@@ -18,8 +18,9 @@ const babel = require('babelify');
 const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;
 const devnull = require('dev-null');
-const fs = require('fs');
+const fs = require('fs-extra');
 const mkpath = require('mkpath');
+const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
@@ -36,7 +37,15 @@ const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
 let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
   const path = buildFullPathFromConfig(ext);
-  extensionsInfo[path] = ext;
+  if (Array.isArray(path)) {
+    path.forEach((p, index) => {
+      extensionsInfo[p] = Object.create(ext);
+      extensionsInfo[p].filename = ext.name + '-' + ext.version[index];
+    });
+  } else {
+    extensionsInfo[path] = Object.create(ext);
+    extensionsInfo[path].filename = ext.name + '-' + ext.version;
+  }
   return path;
 });
 // Flatten nested arrays to support multiple versions
@@ -179,23 +188,30 @@ exports.getBundleFlags = function(g) {
       extraModules += packageCount;
       packageCount = 0;
     }
-    // Replace directory separator with - in bundle filename
-    const name = bundle.name
-        .replace(/\.js$/g, '')
-        .replace(/[\/\\]/g, '-');
+    let name;
     let info = extensionsInfo[bundle.name];
-    if (!info) {
-      // TODO(@cramforce): Remove special case.
-      if (name != '_base_i' || name != 'src-amp') {
-        throw new Error('Unexpected missing extension info ' + name);
+    if (info) {
+      name = info.filename;
+      if (!name) {
+        throw new Error('Expected filename ' + JSON.stringify(info));
       }
+    } else if (bundle.name == mainBundle) {
+      name = 'v0';
       info = {
-        name: name,
+        name,
+      };
+    } else {
+      // TODO(@cramforce): Remove special case.
+      if (!/_base/.test(bundle.name)) {
+        throw new Error('Unexpected missing extension info ' + bundle.name);
+      }
+      name = bundle.name;
+      info = {
+        name,
       };
     }
     // And now build --module $name:$numberOfJsFiles:$bundleDeps
     let cmd = name + ':' + (bundle.modules.length + extraModules);
-    // All non _base bundles depend onsrc-amp.
     const bundleDeps = [];
     if (!isBase) {
       const configEntry = getExtensionBundleConfig(originalName);
@@ -203,12 +219,12 @@ exports.getBundleFlags = function(g) {
         cmd += `:${configEntry.type}`;
         bundleDeps.push('_base_i', configEntry.type);
       } else {
-        // All lower tier bundles depend on src-amp (v0.js)
+        // All lower tier bundles depend on v0.js
         if (TYPES_VALUES.includes(name)) {
           cmd += ':_base_i';
           bundleDeps.push('_base_i');
         } else {
-          cmd += ':src-amp';
+          cmd += ':v0';
         }
       }
     }
@@ -224,7 +240,7 @@ exports.getBundleFlags = function(g) {
       } else {
         flagsArray.push('--module_wrapper', name + ':' +
            massageWrapper(wrappers.extension(
-              info.name, info.loadPriority, bundleDeps)));
+               info.name, info.loadPriority, bundleDeps)));
       }
     } else {
       throw new Error('Expect to build more than one bundle.');
@@ -506,7 +522,14 @@ exports.getFlags({
   modules: ['src/amp.js'].concat(extensions),
   writeTo: './out/',
   externs,
-}).then(compile);
+}).then(compile).then(function() {
+  // Move things into place as AMP expects them.
+  fs.ensureDirSync('out/v0');
+  return Promise.all([
+    move('out/amp*', 'out/v0'),
+    move('out/_base*', 'out/v0'),
+  ]);
+});
 
 function compile(flagsArray) {
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
