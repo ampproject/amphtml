@@ -53,6 +53,7 @@ describes.realWin('amp-mowplayer', {
       expect(iframe.src).to.equal(
           'https://cdn.mowplayer.com/player.html?code=myfwarfx4tb');
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
+	  setTimeout(() => {done();}, 2000);
     });
   });
 
