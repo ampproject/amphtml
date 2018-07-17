@@ -426,7 +426,7 @@ describes.fakeWin('runtime', {
       // Notice that ext0 executes before A
       expect(progress).to.equal('C');
       runChunksForTesting(win.document);
-      return e.waitForExtension(win, '_base_ext1').then(() => {
+      return e.waitForExtension(win, '_base_ext2').then(() => {
         expect(progress).to.equal('CB');
       }).then(() => {
         return e.waitForExtension(win, 'ext1').then(() => {

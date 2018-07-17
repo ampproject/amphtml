@@ -278,15 +278,11 @@ function adoptShared(global, callback) {
       // resolved first before executing this current extension.
       if (Array.isArray(fnOrStruct.i)) {
         const promises = fnOrStruct.i.map(dep => {
-          return extensions.preloadExtension(dep).then(ext => {
-            return extensions.waitForExtension(global, dep);
-          });
+          return extensions.preloadExtension(dep);
         });
         return Promise.all(promises);
       } else if (typeof fnOrStruct.i == 'string') {
-        return extensions.preloadExtension(fnOrStruct.i).then(ext => {
-          return extensions.waitForExtension(global, fnOrStruct.i);
-        })
+        return extensions.preloadExtension(fnOrStruct.i);
       }
       dev().error('dependency is neither an array or a string', fnOrStruct.i);
     };
