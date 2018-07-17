@@ -943,31 +943,32 @@ app.get('/adzerk/*', (req, res) => {
 /*
  * Serve extension scripts and their source maps.
  */
-app.get(['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'], (req, res, next) => {
-  const mode = pc.env.SERVE_MODE;
-  const fileName = path.basename(req.path).replace('.max.', '.');
-  let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
-  if (mode == 'cdn') {
-    // This will not be useful until extension-location.js change in prod
-    // Require url from cdn
-    request(filePath, (error, response) => {
-      if (error) {
-        res.status(404);
-        res.end();
-      } else {
-        res.send(response);
+app.get(['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
+    (req, res, next) => {
+      const mode = pc.env.SERVE_MODE;
+      const fileName = path.basename(req.path).replace('.max.', '.');
+      let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+      if (mode == 'cdn') {
+        // This will not be useful until extension-location.js change in prod
+        // Require url from cdn
+        request(filePath, (error, response) => {
+          if (error) {
+            res.status(404);
+            res.end();
+          } else {
+            res.send(response);
+          }
+        });
+        return;
       }
+      const isJsMap = filePath.endsWith('.map');
+      if (isJsMap) {
+        filePath = filePath.replace(/\.js\.map$/, '\.js');
+      }
+      filePath = replaceUrls(mode, filePath);
+      req.url = filePath + (isJsMap ? '.map' : '');
+      next();
     });
-    return;
-  }
-  const isJsMap = filePath.endsWith('.map');
-  if (isJsMap) {
-    filePath = filePath.replace(/\.js\.map$/, '\.js');
-  }
-  filePath = replaceUrls(mode, filePath);
-  req.url = filePath + (isJsMap ? '.map' : '');
-  next();
-});
 
 /**
  * Serve entry point script url
