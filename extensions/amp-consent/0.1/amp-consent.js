@@ -17,10 +17,7 @@
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {
-  ConsentPolicyManager,
-  MULTI_CONSENT_EXPERIMENT,
-} from './consent-policy-manager';
+import {ConsentPolicyManager} from './consent-policy-manager';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
@@ -38,7 +35,6 @@ import {dict, map} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles, toggle} from '../../../src/style';
 
@@ -128,7 +124,7 @@ export class AmpConsent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isMultiSupported_ = isExperimentOn(this.win, MULTI_CONSENT_EXPERIMENT);
+    this.isMultiSupported_ = ConsentPolicyManager.isMultiSupported(this.win);
 
     user().assert(this.element.getAttribute('id'),
         'amp-consent should have an id');

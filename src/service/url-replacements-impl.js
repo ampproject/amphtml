@@ -53,9 +53,6 @@ const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
-/** @const {string} */
-export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
-
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
  * @param {*} val
@@ -595,7 +592,7 @@ export class GlobalVariableSource extends VariableSource {
    */
   addReplaceParamsIfMissing_(orig) {
     const {replaceParams} =
-        /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
+    /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
     const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
     const params = parseQueryString(url.search);
     return addParamsToUrl(removeSearch(orig),
@@ -1048,7 +1045,7 @@ export class UrlReplacements {
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
-        REPLACEMENT_EXP_NAME);
+        'url-replacement-v2');
     if (isV2ExperimentOn) {
       // TODO(ccordy) support opt_collectVars && opt_whitelist
       return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,
