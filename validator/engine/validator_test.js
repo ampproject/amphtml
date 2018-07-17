@@ -1081,6 +1081,27 @@ describe('ValidatorRulesMakeSense', () => {
               .toBe(true);
         });
       }
+      // We want to be certain not to allow SCRIPT tagspecs which don't either
+      // define a src attribute OR define a JSON type.
+      if (tagSpec.tagName === 'SCRIPT') {
+        let hasSrc = false;
+        let hasJson = false;
+        for (const attrSpecId of tagSpec.attrs) {
+          if (attrSpecId < 0) continue;
+          const attrSpec = rules.attrs[attrSpecId];
+          if (attrSpec.name === 'src')
+            hasSrc = true;
+          if (attrSpec.name === 'type' &&
+              attrSpec.valueCasei !== null &&
+              (attrSpec.valueCasei === 'application/ld+json' ||
+               attrSpec.valueCasei === 'application/json')) {
+            hasJson = true;
+          }
+        }
+        it('script tags must be json or src', () => {
+          expect(hasSrc || hasJson).toBe(true);
+        });
+      }
       // cdata_regex and mandatory_cdata
       if ((tagSpec.cdata.cdataRegex !== null) ||
           (tagSpec.cdata.mandatoryCdata !== null)) {
