@@ -1,6 +1,6 @@
 <!doctype html>
 <html ⚡>
-
+<!-- gulp --extensions=amp-skimlinks,amp-list,amp-mustache,amp-analytics -->
 <head>
     <meta charset="utf-8">
     <title>Skimlinks Example</title>
@@ -14,11 +14,34 @@
     <!-- ... and the `amp-mustache` component in the header -->
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
 
     <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 
 <body>
+    <amp-consent layout="nodisplay" id="consent-element">
+    <script type="application/json">
+    {
+      "consents": {
+        "my-consent": {
+          "checkConsentHref": "https://www.mocky.io/v2/5b3c8e6f330000fd14599fe5"
+        }
+      }
+    }
+    </script>
+    <style>
+        #consent-ui {
+            background: #ccc;
+        }
+    </style>
+    <div id="consent-ui">
+        <p> Would like like to give your consent? </p>
+        <button on="tap:consent-element.accept" role="button">Accept</button>
+        <button on="tap:consent-element.reject" role="button">Reject</button>
+        <button on="tap:consent-element.dismiss" role="button">Dismiss</button>
+    </div>
+    </amp-consent>
 
     <amp-skimlinks width="auto" height="100" layout="fixed-height">
     </amp-skimlinks>

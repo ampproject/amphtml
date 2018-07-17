@@ -39,16 +39,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // "layoutCallback" from custom-element base class needs be executed in order to have analytics working.
     // Analytics are not setup until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(this.element);
-    analyticsBuilder.track('page_impressions', `${TRACKING_API_URL}/page?\${test}`);
-    analyticsBuilder.track('link_impressions', `${TRACKING_API_URL}/link?\${test}`);
+    analyticsBuilder.track('page_impressions', `${TRACKING_API_URL}/track.php?data=\${data}`);
+    analyticsBuilder.track('link_impressions', `${TRACKING_API_URL}/link?data=\${data}`);
     // Mutate config since it doesn't seem like we can provide a config in the custructor.
-    // Force the request to be a GET request.
-    analyticsBuilder.config_['transport'] = {
-      'image': true,
-      'xhrpost': false,
-      'beacon': false,
-      'suppressWarnings': true,
-    };
 
     this.analytics_ = analyticsBuilder.build();
   }
