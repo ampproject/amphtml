@@ -22,28 +22,39 @@ limitations under the License.
     <td>Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Required Script</strong></td>
+    <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed_height, flex_item, nodisplay, responsive</td>
+    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><strong>Examples</strong></td>
     <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
-![amp-date-countdownexample](https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png)
+<amp-img alt="countdown timer example" layout="responsive" src="https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png" width="816" height="294">
+  <noscript>
+    <img alt="countdown timer" src="https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png" width="816" height="294">
+  </noscript>
+</amp-img>
 
 The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering.  Refer to the [ list below for each returned time parameter](#returned-time-parameters).
 
 ### Example
 
-![count-down](https://user-images.githubusercontent.com/2099009/42785881-e161f078-8908-11e8-8f31-435e36a1de95.gif)
+<amp-img alt="countdown timer example 2" layout="intrinsic" src="https://user-images.githubusercontent.com/2099009/42785881-e161f078-8908-11e8-8f31-435e36a1de95.gif" width="489" height="48">
+  <noscript>
+    <img alt="countdown timer" src="https://user-images.githubusercontent.com/2099009/42785881-e161f078-8908-11e8-8f31-435e36a1de95.gif" width="489" height="48">
+  </noscript>
+</amp-img>
+
 
 ```html
 <amp-date-countdown timestamp-seconds="2147483648"
@@ -77,7 +88,7 @@ hours | i18n string for hour or hours
 minutes | i18n string for minute or minutes
 seconds | i18n string for second or seconds
 
-### Examples
+#### Samples of formatted values
 
 This table provides examples of formatted values specified in a Mustache template, and a sample of what the output:
 
@@ -100,18 +111,23 @@ You must specify at least one of these required attributes: `end-date`, `timesta
 An ISO formatted date to count down to. For example, `2020-06-01T00:00:00+08:00`
 
 ##### timestamp-ms
+
 A POSIX epoch value in milliseconds; assumed to be UTC timezone. For example, `timestamp-ms="1521880470000"`.
 
 ##### timestamp-seconds
+
 A POSIX epoch value in seconds; assumed to be UTC timezone. For example, `timestamp-seconds="1521880470"`.
 
 ##### offset-seconds (optional)
+
 A positive or negative number that represents the number of seconds to add or subtract from the `end-date`. For example, `offset-seconds="60"` adds 60 seconds to the end-date.
 
 ##### when-ended (optional)
+
 Specifies whether to stop the timer when it reaches 0 seconds. The value can be set to `stop` (default) to indicate the timer to stop at 0 secondsand will not pass the final date.
 
 ##### locale (optional)
+
 An i18n language string for each timer unit. The default value is `en` (for English).
 Supported values:
 
@@ -135,21 +151,22 @@ zh-cn | Chinese Simplified
 zh-tw | Chinese Traditional
 
 ##### biggest-unit (optional)
+
 Allows the `amp-date-countdown` component to calculate the time difference based on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays `1210 hours` left.
 
 * Supported values: `days`, `hours`, `minutes`, `seconds`
 * Default: `days`
 
 ## Events
-The `amp-date-countdown` exposes the following events you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
+
+The `amp-date-countdown` component exposes the following event that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
 
 Event | Description
 -- | --
 `timeout` |  When the timer times out. For this action to function, `when-ended` **must be** set to `stop`. You can only run low-trust actions such as `amp-animation` and `amp-video` actions when the timer times out. This is to enforce AMP's UX principle of not allowing page content to reflow without explicit user actions.
 
-### Example of action
+*Example: Demonstrating usage of timeout event*
 
-#### Code
 ```html
 <h1 id="sample">
   When Timer hits 0, will hide the timer itself and hide this message.
@@ -175,8 +192,13 @@ Event | Description
 </amp-date-countdown>
 ```
 
-#### Output
-![Animated example the action](https://user-images.githubusercontent.com/2099009/42786835-9e698228-890c-11e8-8776-f82a6cded829.gif)
+Renders as:
+
+<amp-img alt="Animated example the action" layout="intrinsic" src="https://user-images.githubusercontent.com/2099009/42786835-9e698228-890c-11e8-8776-f82a6cded829.gif" width="359" height="270">
+  <noscript>
+    <img alt="countdown timer" src="https://user-images.githubusercontent.com/2099009/42786835-9e698228-890c-11e8-8776-f82a6cded829.gif" width="359" height="270">
+  </noscript>
+</amp-img>
 
 ## Validation
 See [amp-date-countdown rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-countdown/validator-amp-date-countdown.protoascii) in the AMP validator specification.
