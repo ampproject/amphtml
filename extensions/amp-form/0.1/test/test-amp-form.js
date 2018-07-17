@@ -154,6 +154,10 @@ describes.repeated('', {
         });
       });
 
+      afterEach(() => {
+        sandbox.restore();
+      });
+
       it('should throw error if using non-xhr get', () => {
         ampForm.then(ampForm => {
           ampForm.xhrAction_ = null;
