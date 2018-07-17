@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
-import {Action, StateProperty} from '../amp-story-store-service';
+import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
-import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
-import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
+const IDENTITY_FN = x => x;
 
 
 describes.realWin('amp-story', {
@@ -41,11 +37,6 @@ describes.realWin('amp-story', {
   let element;
   let story;
 
-  /**
-   * @param {!Element} container
-   * @param {boolean=} opt_active
-   * @return {!Element}
-   */
   function appendEmptyPage(container, opt_active) {
     const page = document.createElement('amp-story-page');
     page.id = '-empty-page';
@@ -56,12 +47,6 @@ describes.realWin('amp-story', {
     return page;
   }
 
-  /**
-   * @param {!Element} container
-   * @param {number} count
-   * @param {Array<string>=} opt_ids
-   * @return {!Array<!Element>}
-   */
   function createPages(container, count, opt_ids) {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
@@ -71,10 +56,6 @@ describes.realWin('amp-story', {
     });
   }
 
-  /**
-   * @param {string} eventType
-   * @return {!Event}
-   */
   function createEvent(eventType) {
     const eventObj = document.createEventObject ?
       document.createEventObject() : document.createEvent('Events');
@@ -89,9 +70,6 @@ describes.realWin('amp-story', {
 
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
@@ -342,10 +320,8 @@ describes.realWin('amp-story', {
 
     return story.layoutCallback()
         .then(() => {
-          expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
-            id: firstPageId,
-            index: 0,
-          });
+          expect(dispatchStub)
+              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
         });
   });
 
@@ -383,177 +359,6 @@ describes.realWin('amp-story', {
         .then(() => {
           return expect(replaceStub).to.not.have.been.called;
         });
-  });
-
-  it('should not set first page to active when rendering paused story', () => {
-    sandbox.stub(win.history, 'replaceState');
-    createPages(story.element, 2, ['cover', 'page-1']);
-
-    story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-    story.buildCallback();
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(story.getPageById('cover').state_)
-              .to.equal(PageState.NOT_ACTIVE);
-        });
-  });
-
-  describe('amp-story consent', () => {
-    it('should pause the story if there is a consent', () => {
-      sandbox.stub(win.history, 'replaceState');
-
-      const consentEl = win.document.createElement('amp-consent');
-      const storyConsentEl = win.document.createElement('amp-story-consent');
-      consentEl.appendChild(storyConsentEl);
-      element.appendChild(consentEl);
-
-      createPages(story.element, 2, ['cover', 'page-1']);
-
-      // Never resolving consent promise, emulating a user looking at the
-      // consent prompt.
-      const promise = new Promise(() => {});
-      sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
-
-      story.buildCallback();
-
-      const coverEl = element.querySelector('amp-story-page');
-      let setStateStub;
-
-      return coverEl.getImpl()
-          .then(cover => {
-            setStateStub = sandbox.stub(cover, 'setState');
-            return story.layoutCallback();
-          })
-          .then(() => {
-            // These assertions ensure we don't spam the page state. We want to
-            // avoid a situation where we set the page to active, then paused,
-            // which would spam the media pool with expensive operations.
-            expect(setStateStub).to.have.been.calledOnce;
-            expect(setStateStub.getCall(0))
-                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
-          });
-    });
-
-    it('should play the story after the consent is resolved', () => {
-      sandbox.stub(win.history, 'replaceState');
-
-      const consentEl = win.document.createElement('amp-consent');
-      const storyConsentEl = win.document.createElement('amp-story-consent');
-      consentEl.appendChild(storyConsentEl);
-      element.appendChild(consentEl);
-
-      createPages(story.element, 2, ['cover', 'page-1']);
-
-      // In a real scenario, promise is resolved when the user accepted or
-      // rejected the consent.
-      let resolver;
-      const promise = new Promise(resolve => {
-        resolver = resolve;
-      });
-
-      sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
-
-      story.buildCallback();
-
-      const coverEl = element.querySelector('amp-story-page');
-      let setStateStub;
-
-      return coverEl.getImpl()
-          .then(cover => {
-            setStateStub = sandbox.stub(cover, 'setState');
-            return story.layoutCallback();
-          })
-          .then(() => resolver()) // Resolving the consent.
-          .then(() => {
-            // These assertions ensure we don't spam the page state. We want to
-            // avoid a situation where we set the page to active, then paused,
-            // then back to active, which would spam the media pool with
-            // expensive operations.
-            expect(setStateStub).to.have.been.calledTwice;
-            expect(setStateStub.getCall(0))
-                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
-            expect(setStateStub.getCall(1))
-                .to.have.been.calledWithExactly(PageState.ACTIVE);
-          });
-    });
-
-    it('should play the story if the consent was already resolved', () => {
-      sandbox.stub(win.history, 'replaceState');
-
-      const consentEl = win.document.createElement('amp-consent');
-      const storyConsentEl = win.document.createElement('amp-story-consent');
-      consentEl.appendChild(storyConsentEl);
-      element.appendChild(consentEl);
-
-      createPages(story.element, 2, ['cover', 'page-1']);
-
-      // Returns an already resolved promised: the user already accepted or
-      // rejected the consent in a previous session.
-      sandbox.stub(consent, 'getConsentPolicyState').resolves();
-
-      story.buildCallback();
-
-      const coverEl = element.querySelector('amp-story-page');
-      let setStateStub;
-
-      return coverEl.getImpl()
-          .then(cover => {
-            setStateStub = sandbox.stub(cover, 'setState');
-            return story.layoutCallback();
-          })
-          .then(() => {
-            // These assertions ensure we don't spam the page state. We want to
-            // avoid a situation where we set the page to active, then paused,
-            // then back to active, which would spam the media pool with
-            // expensive operations.
-            expect(setStateStub).to.have.been.calledTwice;
-            expect(setStateStub.getCall(0))
-                .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
-            expect(setStateStub.getCall(1))
-                .to.have.been.calledWithExactly(PageState.ACTIVE);
-          });
-    });
-  });
-
-  describe('amp-story continue anyway', () => {
-    it('should not display layout', () => {
-      AmpStory.isBrowserSupported = () => false;
-      story = new AmpStory(element);
-      const dispatchStub = sandbox.stub(story.storeService_, 'dispatch');
-      createPages(story.element, 2, ['cover', 'page-4']);
-      story.buildCallback();
-      return story.layoutCallback()
-          .then(() => {
-            expect(dispatchStub).to.have.been.calledWith(
-                Action.TOGGLE_SUPPORTED_BROWSER, false
-            );
-          });
-    });
-
-    it('should display the story after clicking "continue" button', () => {
-
-      AmpStory.isBrowserSupported = () => false;
-      story = new AmpStory(element);
-      const dispatchStub = sandbox.stub(
-          story.unsupportedBrowserLayer_.storeService_, 'dispatch');
-      createPages(story.element, 2, ['cover', 'page-1']);
-
-      story.buildCallback();
-      //story.layoutCallback();
-
-      //story.unsupportedBrowserLayer_.continueButton_.click();
-
-      return story.layoutCallback()
-          .then(() => {
-            story.unsupportedBrowserLayer_.continueButton_.click();
-          })
-          .then(() => {
-            expect(dispatchStub).to.have.been.calledWith(
-                Action.TOGGLE_SUPPORTED_BROWSER, true
-            );
-          });
-    });
   });
 
 
@@ -759,43 +564,59 @@ describes.realWin('amp-story', {
       expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
     });
   });
+});
 
-  // TODO(gmajoulet): WIP, unskip these tests once the paywall navigation code
-  // is checked in.
-  describe('amp-access navigation', () => {
-    it.skip('should set the access state to true if next page blocked', () => {
-      sandbox.stub(win.history, 'replaceState');
-      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
-      story.buildCallback();
+describes.realWin('amp-story origin whitelist', {
+  amp: {
+    extensions: ['amp-story:1.0'],
+  },
+}, env => {
+  let win;
+  let element;
+  let story;
 
-      return story.layoutCallback()
-          .then(() => {
-            story.getPageById('page-1')
-                .element.setAttribute('amp-access-hide', '');
-            return story.switchTo_('page-1');
-          })
-          .then(() => {
-            expect(
-                story.storeService_.get(StateProperty.ACCESS_STATE)).to.be.true;
-          });
-    });
+  beforeEach(() => {
+    win = env.win;
+    element = win.document.createElement('amp-story');
+    win.document.body.appendChild(element);
 
-    it.skip('should not navigate if next page is blocked by paywall', () => {
-      sandbox.stub(win.history, 'replaceState');
-      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+    story = new AmpStory(element);
+    story.hashOrigin_ = IDENTITY_FN;
+  });
 
-      story.buildCallback();
+  it('should allow exact whitelisted origin with https scheme', () => {
+    story.originWhitelist_ = ['example.com'];
+    expect(story.isOriginWhitelisted_('https://example.com')).to.be.true;
+  });
 
-      return story.layoutCallback()
-          .then(() => {
-            story.getPageById('page-1')
-                .element.setAttribute('amp-access-hide', '');
-            return story.switchTo_('page-1');
-          })
-          .then(() => {
-            expect(story.activePage_.element.id).to.equal('cover');
-          });
-    });
+  it('should allow exact whitelisted origin with http scheme', () => {
+    story.originWhitelist_ = ['example.com'];
+    expect(story.isOriginWhitelisted_('http://example.com')).to.be.true;
+  });
+
+  it('should allow www subdomain of origin', () => {
+    story.originWhitelist_ = ['example.com'];
+    expect(story.isOriginWhitelisted_('https://www.example.com')).to.be.true;
+  });
+
+  it('should allow subdomain of origin', () => {
+    story.originWhitelist_ = ['example.com'];
+    expect(story.isOriginWhitelisted_('https://foobar.example.com')).to.be.true;
+  });
+
+  it('should not allow exact whitelisted domain under different tld', () => {
+    story.originWhitelist_ = ['example.com'];
+    expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
+  });
+
+  it('should not allow exact whitelisted domain infixed in another tld', () => {
+    story.originWhitelist_ = ['example.co.uk'];
+    expect(story.isOriginWhitelisted_('https://example.co')).to.be.false;
+  });
+
+  it('should not allow domain that contains whitelisted domain', () => {
+    story.originWhitelist_ = ['example.co'];
+    expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
   });
 });
