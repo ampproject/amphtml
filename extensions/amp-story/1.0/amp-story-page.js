@@ -314,7 +314,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   markPageAsLoaded_() {
-    dispatch(this.win, this.element, EventType.PAGE_LOADED, true);
+    dispatch(this.win, this.element, EventType.PAGE_LOADED, undefined,
+        {bubbles: true});
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
@@ -665,7 +666,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     const targetPageId = this.getPreviousPageId();
 
     if (targetPageId === null) {
-      dispatch(this.win, this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
+      dispatch(this.win, this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP,
+          undefined, {bubbles: true});
       return;
     }
 
@@ -690,7 +692,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Delegated the navigation decision to AMP-STORY via event.
-   * @param {number} direction The direction in which navigation needs to takes place.
+   * @param {number} direction The direction in which navigation needs to
+   * takes place.
    */
   navigateOnTap(direction) {
     const payload = {direction};
