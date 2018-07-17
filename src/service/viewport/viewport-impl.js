@@ -1131,7 +1131,9 @@ function createViewport(ampdoc) {
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     if (isExperimentOn(ampdoc.win, 'ios-embed-sd') &&
-        ampdoc.win.Element.prototype.attachShadow) {
+        ampdoc.win.Element.prototype.attachShadow &&
+        // Even though iOS 10 supports Shadow DOM, the support is buggy.
+        Services.platformFor(ampdoc.win).getMajorVersion() >= 11) {
       binding = new ViewportBindingIosEmbedShadowRoot_(ampdoc.win);
     } else {
       binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);

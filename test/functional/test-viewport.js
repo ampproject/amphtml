@@ -1401,6 +1401,8 @@ describe('createViewport', () => {
     });
 
     it('should bind to "iOS embed SD" when the experiment is on', () => {
+      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
+          .callsFake(() => 11);
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
@@ -1408,6 +1410,31 @@ describe('createViewport', () => {
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingIosEmbedShadowRoot_);
+    });
+
+    it('should bind to "iOS embed SD" in future Safari', () => {
+      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
+          .callsFake(() => 12);
+      toggleExperiment(win, 'ios-embed-sd', true);
+      win.parent = {};
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingIosEmbedShadowRoot_);
+    });
+
+    it('should NOT bind to "iOS embed SD" in Safari 10', () => {
+      // This is due to some scrolling and SD bugs.
+      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
+          .callsFake(() => 10);
+      toggleExperiment(win, 'ios-embed-sd', true);
+      win.parent = {};
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingIosEmbedWrapper_);
     });
 
     it('should only bind to "iOS embed SD" when SD is supported', () => {
