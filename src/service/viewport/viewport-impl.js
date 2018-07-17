@@ -585,7 +585,7 @@ export class Viewport {
   getScrollableContainer_(element) {
     return this.vsync_.measurePromise(() => {
       const scrollable = closest(element,
-          parent => parent.scrollHeight > parent.clientHeight);
+          parent => parent./*OK*/scrollHeight > parent./*OK*/clientHeight);
 
       return scrollable || this.ampdoc.getRootNode();
     });
@@ -601,7 +601,7 @@ export class Viewport {
       return;
     }
     this.vsync_.mutate(() => {
-      element.scrollTop = scrollTop;
+      element./*OK*/scrollTop = scrollTop;
     });
   }
 
@@ -613,7 +613,7 @@ export class Viewport {
     if (this.isRootNode_(element)) {
       return tryResolve(() => this.getScrollTop());
     }
-    return this.vsync_.measurePromise(() => element.scrollTop);
+    return this.vsync_.measurePromise(() => element./*OK*/scrollTop);
   }
 
   /**
