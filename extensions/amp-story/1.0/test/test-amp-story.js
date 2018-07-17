@@ -176,12 +176,12 @@ describes.realWin('amp-story', {
   // TODO(#11639): Re-enable this test.
   it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
     const hideBookendStub = sandbox.stub(
-        element.implementation_, 'hideBookend_', NOOP);
+        element.implementation_, 'hideBookend_').callsFake(NOOP);
 
     appendEmptyPage(element);
 
     element.build();
-
+    
     element.dispatchEvent(new Event(EventType.CLOSE_BOOKEND));
 
     expect(hideBookendStub).to.have.been.calledOnce;
@@ -189,13 +189,22 @@ describes.realWin('amp-story', {
 
   // TODO(#11639): Re-enable this test.
   it.skip('should return a valid page index', () => {
-    const count = 5;
+    const count = 2;
+    const pages = createPages(story.element, count, ['cover', 'page-1']);
 
-    const pages = createPages(element, count);
+    for(var i = 0; i < count; i++) {
+      //console.log(story.element.getPageIndex(page));
+      expect(story.getPageIndex(pages[i])).to.equal(i);
+    };
+       
+    /*const count = 5;
 
+    createPages(story.element, count, ['page-0', 'page-1', 'page-2', 'page-3', 'page-4'])
+    expect(story.getPageCount()).to.equal(count);
     pages.forEach((page, i) => {
+      console.log(element.implementation_.getPageIndex(page));
       expect(element.implementation_.getPageIndex(page)).to.equal(i);
-    });
+    });*/
   });
 
   // TODO(#11639): Re-enable this test.
@@ -207,7 +216,7 @@ describes.realWin('amp-story', {
     const page = win.document.createElement('div');
 
     const updateProgressBarStub =
-        sandbox.stub(impl.systemLayer_, 'updateProgressBar').callsFake(NOOP);
+        sandbox.stub(impl.systemLayer_, 'updateProgress').callsFake(NOOP);
 
     appendEmptyPage(element, /* opt_active */ true);
 
@@ -221,7 +230,7 @@ describes.realWin('amp-story', {
   });
 
   // TODO(#11639): Re-enable this test.
-  it.skip('should pause/resume pages when switching pages', () => {
+  it('should pause/resume pages when switching pages', () => {
     const impl = element.implementation_;
     const pages = createPages(element, 5);
     impl.schedulePause = sandbox.spy();

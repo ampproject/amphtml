@@ -314,8 +314,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   markPageAsLoaded_() {
-    dispatch(this.win, this.element, EventType.PAGE_LOADED, undefined,
-        {bubbles: true});
+    dispatch(this.win, this.element, EventType.PAGE_LOADED,
+        /* payload */ undefined, {bubbles: true});
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
@@ -667,7 +667,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (targetPageId === null) {
       dispatch(this.win, this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP,
-          undefined, {bubbles: true});
+          /* payload */ undefined, {bubbles: true});
       return;
     }
 

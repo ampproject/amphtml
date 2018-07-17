@@ -64,8 +64,8 @@ export const EventType = {
  * @param {!Object=} payload
  * @param {!CustomEventInit=} eventInit
  */
-export function dispatch(win, source, eventName, payload = undefined, 
+export function dispatch(win, source, eventName, payload = undefined,
   eventInit = undefined) {
-    const event = createCustomEvent(win, eventName, payload, eventInit);
-    source.dispatchEvent(event);
+  const event = createCustomEvent(win, eventName, payload, eventInit);
+  source.dispatchEvent(event);
 }
