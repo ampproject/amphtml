@@ -530,6 +530,7 @@ export class Viewport {
    * @param {string} curve
    * @param {string} pos (takes one of 'top', 'bottom', 'center')
    * @return {!Promise}
+   * @private
    */
   animateScrollIntoViewInternal_(element, parent, duration, curve, pos) {
     const elementRect = this.binding_.getLayoutRect(element);
@@ -577,6 +578,7 @@ export class Viewport {
    * @param {number} newScrollTop
    * @param {number} duration
    * @param {string} curve
+   * @private
    */
   interpolateScrollIntoView_(
     parent, curScrollTop, newScrollTop, duration, curve) {
