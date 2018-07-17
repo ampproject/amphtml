@@ -311,7 +311,8 @@ describes.realWin('amp-analytics', {
       el.setAttribute('type', 'foo');
       doc.body.appendChild(el);
       const analytics = new AmpAnalytics(el);
-      sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+      sandbox.stub(analytics, 'assertAmpAdResourceId')
+          .callsFake(() => 'fakeId');
       const preloadSpy = sandbox.spy(analytics, 'preload');
 
       sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
@@ -329,7 +330,8 @@ describes.realWin('amp-analytics', {
       el.setAttribute('type', 'foo');
       doc.body.appendChild(el);
       const analytics = new AmpAnalytics(el);
-      sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+      sandbox.stub(analytics, 'assertAmpAdResourceId')
+          .callsFake(() => 'fakeId');
       const preloadSpy = sandbox.spy(analytics, 'preload');
       sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
           .returns(Promise.resolve(Object.assign({}, sampleconfig, {
