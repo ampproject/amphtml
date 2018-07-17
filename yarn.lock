@@ -163,9 +163,9 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.0.tgz#50c1e2260ac0ed9439a181de3725a0168d59c48a"
 
-"@percy/puppeteer@0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-0.3.2.tgz#ef1218689884d0100612b4ab72cd23547156fc5d"
+"@percy/puppeteer@0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-0.3.3.tgz#60cf6a075f7c657d5be08fb05cf8ce73f4174d4b"
   dependencies:
     mime-types "^2.1.17"
     percy-client "^2.6.0"
