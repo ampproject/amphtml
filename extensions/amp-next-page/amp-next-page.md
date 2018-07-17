@@ -51,7 +51,8 @@ limitations under the License.
 
 ## Behavior
 
-Given a list of pages, `amp-next-page` tries to load them after the current document, providing an infinite-scroll type experience. 
+Given a list of pages, `amp-next-page` tries to load them after the current 
+document, providing an infinite-scroll type experience. 
 
 The pages should be inlined using a JSON format.
 ```html
@@ -64,7 +65,73 @@ The pages should be inlined using a JSON format.
 </amp-next-page>
 ```
 
-If loading the next document is successful, everything after the placement of `amp-next-page` is removed from the current document. Typical use would be to include `amp-next-page` directly after the unique content of a given page: for example, at the end of a news article or recipe, but before the footer or other content repeated across articles.
+If loading the next document is successful it will be appended to the end of
+the current document as a child of the `amp-next-page` component, moving any 
+content after it further down the page. Because of this the component should
+usually be placed directly after the unique content of a given page: for 
+example, at the end of a news article or recipe, but before the footer or 
+other content repeated across articles.
+
+{% call callout('Note', type='note') %} For performance reasons the 
+component will render a maximum of three documents (total) on screen at one 
+time. This limit may be changed or removed in the future.
+
+### Recommendation box
+
+If the user reaches the end of a page before the next has loaded (or if the 
+next page fails to load), a box will be displayed with links to the next three 
+pages. This box will also be displayed after the maximum number of articles 
+have been rendered.
+
+The appearance of these links can be customized by styling the following 
+classes:
+
+- `.amp-next-page-links` for the containing element
+- `.amp-next-page-link` for an individual link
+- `.amp-next-page-image` for the link image
+- `.amp-next-page-text` for the link text
+
+### Separator
+
+A separator is rendered between each loaded document. By default this is 
+rendered as a full-width hairline. It can be customised by styling the `
+.amp-next-page-default-separator` class.
+
+Alternatively, you can specify a custom separator containing arbitrary HTML 
+content as a child of the `amp-next-page` component by using the `separator` 
+attribute.
+```html
+<amp-next-page>
+  <div separator>
+    <h1>Keep reading</h1>
+  </div>
+  ...
+</amp-next-page>
+```
+
+### Element hiding
+
+Elements which are common across multiple pages can be programmatically 
+hidden in child documents, to avoid e.g. stacking up multiple page footers at
+the end of the document, or to hide the page header from each subsequent page.
+
+Elements can be hidden by specifying one or more string CSS selectors in the 
+`hideSelectors` key of the element config. Elements matching any of the 
+selectors will be set to `display: none` in all child documents.
+```html
+<amp-next-page>
+  <script type="application/json">
+    {
+      "hideSelectors": [
+        ".header",
+        ".main footer",
+        "#navigation"
+      ],
+      "pages": ...
+    }
+  </script>
+</amp-next-page>
+```
 
 ## Attributes
 
@@ -72,28 +139,56 @@ N/A
 
 ##### Common attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes 
+[common attributes](https://www.ampproject.org/docs/reference/common_attributes) 
+extended to AMP components.
 
 ## Configuration Spec
 
-The configuration defines the documents recommended by `<amp-next-page>` to the user.
+The configuration defines the documents recommended by `amp-next-page` to 
+the user as a JSON object.
+
+| Key                | Value |
+| ------------------ | ----- |
+| `pages` (required) | Ordered array of one or more page objects |
+| `hideSelectors`    | Optional array of string CSS selectors to hide in child documents |
+
+Each page object should have the following format:
+
+| Key                   | Value |
+| --------------------- | ----- |
+| `ampUrl` (required)   | String URL of the page. Must be on the same origin as the current document. URLs will automatically be rewritten to point to the Google AMP cache when required. |
+| `title` (required)    | String title of the page, will be used when rendering the recommendation box |
+| `imageUrl` (required) | String URL of the image to display in the recommendation box |
 
 ### Example Configuration
 
-The following configuration will only recommend one more document for the user to read.
+The following configuration will recommend two more documents for the user to
+read, and hides the header and footer elements from each child document.
 
 ```json
 {
   "pages": [
     {
-      "image": "http://example.com/image1.jpg",
-      "title": "This is one another article",
-      "ampUrl": "http://example.com/article1.amp.html"      
+      "image": "https://example.com/image1.jpg",
+      "title": "This article shows first",
+      "ampUrl": "https://example.com/article1.amp.html"      
+    },
+    {
+      "image": "https://example.com/image2.jpg",
+      "title": "This article shows second",
+      "ampUrl": "https://example.com/article2.amp.html"      
     }
+  ],
+  "hideSelectors": [
+    ".header",
+    ".footer"
   ]
 }
 ```
 
 ## Validation
 
-See [amp-next-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-next-page/validator-amp-next-page.protoascii) in the AMP validator specification.
+See
+[amp-next-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-next-page/validator-amp-next-page.protoascii) 
+in the AMP validator specification.
