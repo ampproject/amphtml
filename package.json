@@ -86,7 +86,6 @@
     "fs-extra": "7.0.0",
     "globs-to-files": "1.0.0",
     "google-closure-compiler": "20180506.0.0",
-    "greenkeeper-lockfile": "2.3.0",
     "gulp": "3.9.1",
     "gulp-ava": "0.19.0",
     "gulp-batch-replace": "0.0.0",
