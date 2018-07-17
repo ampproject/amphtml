@@ -66,7 +66,7 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     const viewer = Services.viewerForDoc(this.getAmpDoc());
-    if (!viewer.isVisible()) {
+    if (!viewer.hasBeenVisible()) {
       const TAG = this.getName_();
       dev().error(TAG, 'Viewer must be visible before mutation.');
       return;
