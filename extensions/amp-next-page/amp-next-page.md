@@ -78,6 +78,7 @@ other content repeated across articles.
 {% call callout('Note', type='note') %} For performance reasons the 
 component will render a maximum of three documents (total) on screen at one 
 time. This limit may be changed or removed in the future.
+{% endcall %}
 
 ### Recommendation box
 
