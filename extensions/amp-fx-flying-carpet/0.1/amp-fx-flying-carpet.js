@@ -57,6 +57,8 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
      * @private
      */
     this.container_ = null;
+
+    this.firstLayoutCompleted_ = false;
   }
 
 
@@ -95,7 +97,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     this.mutateElement(() => {
       setStyle(this.container_, 'width', width, 'px');
     });
-    this.scheduleLayout(dev().assertElement(this.container_));
+    if (this.firstLayoutCompleted_) {
+      this.scheduleLayout(this.children_);
+      listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
+    }
   }
 
   /** @override */
@@ -146,6 +151,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     }
     this.scheduleLayout(this.children_);
     listen(this.element, AmpEvents.BUILT, this.layoutBuiltChild_.bind(this));
+    this.firstLayoutCompleted_ = true;
     return Promise.resolve();
   }
 
