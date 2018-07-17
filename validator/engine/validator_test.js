@@ -698,8 +698,12 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
   }
   // only has one of value set.
   let numValues = 0;
-  if (attrSpec.value !== null) {numValues += 1;}
-  if (attrSpec.valueCasei !== null) {numValues += 1;}
+  if (attrSpec.value.length > 0) {
+    numValues += 1;
+  }
+  if (attrSpec.valueCasei.length > 0) {
+    numValues += 1;
+  }
   if (attrSpec.valueRegex !== null) {numValues += 1;}
   if (attrSpec.valueRegexCasei !== null) {numValues += 1;}
   if (attrSpec.valueUrl !== null) {numValues += 1;}
@@ -945,10 +949,10 @@ describe('ValidatorRulesMakeSense', () => {
       // whitelist check on the attribute value.
       if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {
         it('every <script> tag with a src attribute has a whitelist check',
-            () => {
-              expect(attrSpec.value !== null ||
-                    attrSpec.valueRegex !== null).toBe(true);
-            });
+           () => {
+             expect(attrSpec.value.length > 0 || attrSpec.valueRegex !== null)
+                 .toBe(true);
+           });
       }
       // TagSpecs with an ExtensionSpec are extensions. We have a few
       // additional checks for these.
@@ -1091,11 +1095,13 @@ describe('ValidatorRulesMakeSense', () => {
           const attrSpec = rules.attrs[attrSpecId];
           if (attrSpec.name === 'src')
             hasSrc = true;
-          if (attrSpec.name === 'type' &&
-              attrSpec.valueCasei !== null &&
-              (attrSpec.valueCasei === 'application/ld+json' ||
-               attrSpec.valueCasei === 'application/json')) {
-            hasJson = true;
+          if (attrSpec.name === 'type' && attrSpec.valueCasei.length > 0) {
+            for (const value of attrSpec.valueCasei) {
+              if (value === 'application/ld+json' ||
+                  value === 'application/json') {
+                hasJson = true;
+              }
+            }
           }
         }
         it('script tags must be json or src', () => {

@@ -2836,18 +2836,22 @@ function validateNonTemplateAttrValueAgainstSpec(
   // added after protobuf 2.5.0 (which our open-source version uses).
   // begin oneof {
   const spec = parsedAttrSpec.getSpec();
-  if (spec.value !== null) {
-    if (attr.value === spec.value) {
-      return;
+  if (spec.value.length > 0) {
+    for (const value of spec.value) {
+      if (attr.value === value) {
+        return;
+      }
     }
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
         context.getLineCol(),
         /* params */[attr.name, getTagSpecName(tagSpec), attr.value],
         getTagSpecUrl(tagSpec), result);
-  } else if (spec.valueCasei !== null) {
-    if (attr.value.toLowerCase() === spec.valueCasei) {
-      return;
+  } else if (spec.valueCasei.length > 0) {
+    for (const value of spec.valueCasei) {
+      if (attr.value.toLowerCase() === value) {
+        return;
+      }
     }
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
