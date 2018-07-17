@@ -228,7 +228,7 @@ class AmpAccordion extends AMP.BaseElement {
   triggerExpandEvent_(section) {
     const name = 'expand';
     const event =
-        createCustomEvent(this.win, `accordionSection.${name}`);
+        createCustomEvent(this.win, `accordionSection.${name}`, {});
     this.action_.trigger(section, name, event, ActionTrust.HIGH);
 
     this.element.dispatchCustomEvent(name);
@@ -241,7 +241,7 @@ class AmpAccordion extends AMP.BaseElement {
   triggerCollapseEvent_(section) {
     const name = 'collapse';
     const event =
-        createCustomEvent(this.win, `accordionSection.${name}`);
+        createCustomEvent(this.win, `accordionSection.${name}`, {});
     this.action_.trigger(section, name, event, ActionTrust.HIGH);
 
     this.element.dispatchCustomEvent(name);
