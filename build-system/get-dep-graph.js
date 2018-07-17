@@ -33,6 +33,14 @@ const wrappers = require('./compile-wrappers');
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
 const mainBundle = 'src/amp.js';
+const extensionsInfo = {};
+let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
+  const path = buildFullPathFromConfig(ext);
+  extensionsInfo[path] = ext;
+  return path;
+});
+// Flatten nested arrays to support multiple versions
+extensions = [].concat.apply([], extensions);
 
 //patchRegisterElement();
 patchWebAnimations();
@@ -175,6 +183,16 @@ exports.getBundleFlags = function(g) {
     const name = bundle.name
         .replace(/\.js$/g, '')
         .replace(/[\/\\]/g, '-');
+    let info = extensionsInfo[bundle.name];
+    if (!info) {
+      // TODO(@cramforce): Remove special case.
+      if (name != '_base_i' || name != 'src-amp') {
+        throw new Error('Unexpected missing extension info ' + name);
+      }
+      info = {
+        name: name,
+      };
+    }
     // And now build --module $name:$numberOfJsFiles:$bundleDeps
     let cmd = name + ':' + (bundle.modules.length + extraModules);
     // All non _base bundles depend onsrc-amp.
@@ -205,7 +223,8 @@ exports.getBundleFlags = function(g) {
             massageWrapper(wrappers.mainBinary));
       } else {
         flagsArray.push('--module_wrapper', name + ':' +
-           massageWrapper(wrappers.extension(name, null, bundleDeps)));
+           massageWrapper(wrappers.extension(
+              info.name, info.loadPriority, bundleDeps)));
       }
     } else {
       throw new Error('Expect to build more than one bundle.');
@@ -482,11 +501,6 @@ function buildFullPathFromConfig(ext) {
 function unsupportedExtensions(name) {
   return name;
 }
-let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
-  return buildFullPathFromConfig(ext);
-});
-// Flatten nested arrays to support multiple versions
-extensions = [].concat.apply([], extensions);
 
 exports.getFlags({
   modules: ['src/amp.js'].concat(extensions),
