@@ -55,6 +55,10 @@ function patchWebAnimations() {
   }
 }
 
+/**
+ * Creates a version of document-register-element that can be installed
+ * without side effects.
+ */
 function patchRegisterElement() {
   let file;
   // Copies document-register-element into a new file that has an export.
@@ -82,13 +86,14 @@ function patchRegisterElement() {
           'to appear in document-register-element');
     }
     file = file.replace('module.exports = installCustomElements;',
-        'module.exports = exports.default = installCustomElements;');
+        'exports.installCustomElements = installCustomElements;');
     fs.writeFileSync(patchedName, file);
     if (!process.env.TRAVIS) {
       log(colors.green('Patched'), colors.cyan(patchedName));
     }
   }
 }
+
 
 /**
  * Installs custom lint rules in build-system/eslint-rules to node_modules.
