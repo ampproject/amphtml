@@ -166,24 +166,39 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Wraps `toggleFallback()` in a mutate context.
-   * @param {boolean} state
+   * Wraps `toggleFallback()` in a mutate context (with optional disable).
+   * @param {boolean} show
+   * @param {boolean=} mutate
    * @private
    */
-  toggleFallbackInMutate_(state) {
-    if (state) {
-      this.getVsync().mutate(() => {
-        this.toggleFallback(true);
-        this.fallbackDisplayed_ = true;
-      });
+  toggleFallback_(show, mutate = true) {
+    // Early-out if toggling would be a no-op.
+    if (!show && !this.fallbackDisplayed_) {
+      return;
+    }
+    const toggle = value => {
+      this.toggleFallback(value);
+      this.fallbackDisplayed_ = value;
+    };
+    if (mutate) {
+      this.mutateElement(() => toggle(show));
     } else {
-      // Don't queue mutate if fallback isn't already visible.
-      if (this.fallbackDisplayed_) {
-        this.getVsync().mutate(() => {
-          this.toggleFallback(false);
-          this.fallbackDisplayed_ = false;
-        });
-      }
+      toggle(show);
+    }
+  }
+
+  /**
+   * If `reset-on-refresh` attribute exists, then removes any previously
+   * rendered children and displays placeholder, loading indicator, etc.
+   */
+  resetIfNecessary_() {
+    if (this.element.hasAttribute('reset-on-refresh')) {
+      this.togglePlaceholder(true);
+      this.toggleLoading(true);
+      this.mutateElement(() => {
+        this.toggleFallback_(false, /* mutate */ false);
+        removeChildren(dev().assertElement(this.container_));
+      });
     }
   }
 
@@ -197,13 +212,8 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
-    if (this.element.hasAttribute('reset-on-refresh')) {
-      this.togglePlaceholder(true);
-      this.toggleLoading(true, this.isLoadingReused());
-      this.toggleFallbackInMutate_(false);
-      // Remove any previous items before the reload
-      removeChildren(dev().assertElement(this.container_));
-    }
+
+    this.resetIfNecessary_();
 
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {
@@ -228,14 +238,14 @@ export class AmpList extends AMP.BaseElement {
     }).then(() => {
       if (this.getFallback()) {
         // Hide in case fallback was displayed for a previous fetch.
-        this.toggleFallbackInMutate_(false);
+        this.toggleFallback_(false);
       }
       this.togglePlaceholder(false);
       this.toggleLoading(false);
     }, error => {
       this.toggleLoading(false);
       if (this.getFallback()) {
-        this.toggleFallbackInMutate_(true);
+        this.toggleFallback_(true);
         this.togglePlaceholder(false);
       } else {
         throw error;
@@ -251,6 +261,9 @@ export class AmpList extends AMP.BaseElement {
    */
   scheduleRender_(items) {
     dev().info(TAG, 'schedule:', items);
+
+    this.resetIfNecessary_();
+
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
     // If there's nothing currently being rendered, schedule a render pass.
@@ -346,11 +359,13 @@ export class AmpList extends AMP.BaseElement {
         }
         this.container_.appendChild(element);
       });
+
       const event = createCustomEvent(this.win,
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
+
       // Change height if needed.
-      this.getVsync().measure(() => {
+      this.measureElement(() => {
         const scrollHeight = this.container_./*OK*/scrollHeight;
         const height = this.element./*OK*/offsetHeight;
         if (scrollHeight > height) {
