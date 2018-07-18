@@ -51,7 +51,6 @@ let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
 // Flatten nested arrays to support multiple versions
 extensions = [].concat.apply([], extensions);
 
-patchRegisterElement();
 patchWebAnimations();
 patchDompurify();
 
@@ -186,12 +185,6 @@ exports.getBundleFlags = function(g) {
       });
     }
     bundle.modules.forEach(function(js) {
-      // Ultra hack alert. We need to get rid of this overriding
-      // technique and instead uniformly update packages
-      // via update-packages.js
-      if (/document-register-element/.test(js)) {
-        js = js.replace(/node_modules\//, 'build/patched-module/');
-      }
       flagsArray.push('--js', js);
     });
     if (!isBase && bundleKeys.length > 1) {
@@ -563,30 +556,6 @@ function compile(flagsArray) {
       }
     });
   });
-}
-
-// TODO(@cramforce): Unify with update-packages.js
-function patchRegisterElement() { // eslint-disable-line no-unused-vars
-  let file;
-  // Copies document-register-element into a new file that has an export.
-  // This works around a bug in closure compiler, where without the
-  // export this module does not generate a goog.provide which fails
-  // compilation.
-  // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.node.js';
-  if (!fs.existsSync(patchedName)) {
-    file = fs.readFileSync(
-        'node_modules/document-register-element/build/' +
-        'document-register-element.node.js').toString();
-    // Closure Compiler does not generate a `default` property even though
-    // to interop CommonJS and ES6 modules. This is the same issue typescript
-    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
-    file = file.replace('module.exports = installCustomElements;',
-        'exports.default = installCustomElements;');
-    file = file.replace('installCustomElements(global);', '');
-    fs.writeFileSync(patchedName, file);
-  }
 }
 
 // TODO(@cramforce): Unify with update-packages.js

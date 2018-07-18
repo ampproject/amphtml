@@ -55,6 +55,30 @@ function patchWebAnimations() {
   }
 }
 
+function patchRegisterElement() {
+  let file;
+  // Copies document-register-element into a new file that has an export.
+  // This works around a bug in closure compiler, where without the
+  // export this module does not generate a goog.provide which fails
+  // compilation.
+  // Details https://github.com/google/closure-compiler/issues/1831
+  const patchedName = 'node_modules/document-register-element' +
+      '/build/document-register-element.patched.js';
+  if (!fs.existsSync(patchedName)) {
+    file = fs.readFileSync(
+        'node_modules/document-register-element/build/' +
+        'document-register-element.node.js').toString();
+    // Eliminate the immediate side effect.
+    file = file.replace('installCustomElements(global);', '');
+    // Closure Compiler does not generate a `default` property even though
+    // to interop CommonJS and ES6 modules. This is the same issue typescript
+    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+    file = file.replace('module.exports = installCustomElements;',
+        'exports.default = installCustomElements;');
+    fs.writeFileSync(patchedName, file);
+  }
+}
+
 /**
  * Installs custom lint rules in build-system/eslint-rules to node_modules.
  */
@@ -97,6 +121,7 @@ function updatePackages() {
     runYarnCheck();
   }
   patchWebAnimations();
+  patchRegisterElement();
 }
 
 gulp.task(
