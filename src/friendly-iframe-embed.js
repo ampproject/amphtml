@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from './action-constants';
 import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {dev, rethrowAsync} from './log';
+import {closestBySelector, escapeHtml, removeElement} from './dom';
+import {createCustomEvent, listenOnce, loadPromise} from './event-helper';
+import {dev, rethrowAsync, user} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
-import {escapeHtml} from './dom';
+import {htmlFor} from './static-template';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
-import {loadPromise} from './event-helper';
 import {
   px,
   resetStyles,
@@ -103,6 +105,9 @@ export function setFriendlyIframeEmbedVisible(embed, visible) {
 
 /**
  * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * Caution: This will only return the FIE after the iframe has 'loaded'. If you
+ * are checking before this signal you may be in a race condition that returns
+ * null.
  * @param {!HTMLIFrameElement} iframe
  * @return {?FriendlyIframeEmbed}
  */
@@ -488,9 +493,9 @@ export class FriendlyIframeEmbed {
 
   /**
    * @return {!./service/resources-impl.Resources}
-   * @visibleForTesting
+   * @private
    */
-  getResources() {
+  getResources_() {
     return Services.resourcesForDoc(this.iframe);
   }
 
@@ -498,49 +503,84 @@ export class FriendlyIframeEmbed {
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
    * @param {{measure: (function()|undefined), mutate: function()}} task
-   * @param {!Object=} opt_state
    * @return {!Promise}
    * @private
    */
-  runVsyncOnIframe_(task, opt_state) {
-    return this.getResources().measureMutateElement(this.iframe,
+  measureMutate_(task) {
+    return this.getResources_().measureMutateElement(this.iframe,
         task.measure || null, task.mutate);
   }
 
   /**
+   * @param {!Element} requestingElement An amp-lightbox element.
    * @return {!Promise}
    */
-  enterFullOverlayMode() {
+  enterFullOverlayMode(requestingElement) {
+    const ampAdParent = dev().assertElement(this.iframe.parentNode);
+
+    // Security assertion. Otherwise any 3p frame could request lighbox mode.
+    user().assert(ampAdParent.tagName.toLowerCase() == 'amp-ad',
+        'Only <amp-ad> is allowed to enter lightbox mode.');
+
+    const header =
+        renderCloseButtonHeader(this.win, ampAdParent, requestingElement);
+
+    ampAdParent.appendChild(header);
+
     const bodyStyle = {
       'background': 'transparent',
       'position': 'absolute',
+      'bottom': 'auto',
+      'right': 'auto',
+
+      // Set for replacing with vsync values.
       'top': '',
       'left': '',
       'width': '',
       'height': '',
-      'bottom': 'auto',
-      'right': 'auto',
     };
-    return this.runVsyncOnIframe_({
+
+    const iframeStyle = {
+      'position': 'fixed',
+      'left': 0,
+      'right': 0,
+      'bottom': 0,
+      'width': '100vw',
+
+      // Set for replacing with vsync values.
+      'top': '',
+      'height': '',
+    };
+
+    return this.measureMutate_({
       measure: () => {
-        const iframeRect = this.iframe./*OK*/getBoundingClientRect();
+        const rect = this.host ?
+          this.host.getLayoutBox() :
+          this.iframe./*OK*/getBoundingClientRect();
+
+        const {top, left, width, height} = rect;
+
+        const headerHeight = this.getHeaderHeight_(header);
+
+        Object.assign(iframeStyle, {
+          'top': px(headerHeight),
+          'height': `calc(100vh - ${px(headerHeight)})`,
+        });
+
+        // Offset body by header height to prevent visual jump.
         Object.assign(bodyStyle, {
-          'top': px(iframeRect.top),
-          'left': px(iframeRect.left),
-          'width': px(iframeRect.width),
-          'height': px(iframeRect.height),
+          'top': px(top - headerHeight),
+          'left': px(left),
+          'width': px(width),
+          'height': px(height - headerHeight),
         });
       },
       mutate: () => {
-        setStyles(this.iframe, {
-          'position': 'fixed',
-          'left': 0,
-          'right': 0,
-          'top': 0,
-          'bottom': 0,
-          'width': '100vw',
-          'height': '100vh',
-        });
+        // !important to prevent abuse e.g. box @ ltwh = 0, 0, 0,0
+        setImportantStyles(this.iframe, iframeStyle);
+
+        // Done in vsync in order to apply transition.
+        header.classList.add('amp-ad-close-header');
 
         // We need to override runtime-level !important rules
         setImportantStyles(this.getBodyElement(), bodyStyle);
@@ -549,10 +589,19 @@ export class FriendlyIframeEmbed {
   }
 
   /**
+   * Stubbed in tests.
+   * @param {!Element} element
+   * @private
+   */
+  getHeaderHeight_(element) {
+    return element./*OK*/getBoundingClientRect().height;
+  }
+
+  /**
    * @return {!Promise}
    */
   leaveFullOverlayMode() {
-    return this.runVsyncOnIframe_({
+    return this.measureMutate_({
       mutate: () => {
         resetStyles(this.iframe, [
           'position',
@@ -565,7 +614,7 @@ export class FriendlyIframeEmbed {
         ]);
 
         // we're not resetting background here as we need to set it to
-        // transparent permanently (see TODO)
+        // transparent permanently.
         resetStyles(this.getBodyElement(), [
           'position',
           'top',
@@ -580,6 +629,41 @@ export class FriendlyIframeEmbed {
   }
 }
 
+/**
+ * @param {!Window} win
+ * @param {!Element} ampAdParent
+ * @param {!Element} ampLightbox
+ * @visibleForTesting
+ */
+export function renderCloseButtonHeader(win, ampAdParent, ampLightbox) {
+  const el = htmlFor(ampAdParent)`
+    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
+      <div>Ad</div>
+      <i-amphtml-ad-close-button class="amp-ad-close-button">
+      </i-amphtml-ad-close-button>
+    </i-amphtml-ad-close-header>`;
+
+  listenOnce(el, 'click', () => {
+    triggerLightboxClose(win, ampLightbox, /* caller */ ampAdParent);
+    removeElement(el);
+  });
+
+  return el;
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} target An amp-lightbox target.
+ * @param {!Element} caller Whomever.
+ */
+function triggerLightboxClose(win, target, caller) {
+  const event = createCustomEvent(win, 'tap', /* detail */ {});
+  const method = 'close';
+  const args = null;
+  const trust = ActionTrust.HIGH;
+  Services.actionServiceForDoc(target)
+      .execute(target, method, args, caller, caller, event, trust);
+}
 
 /**
  * Returns the promise that will be resolved when all content elements
@@ -601,4 +685,12 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
         });
         return Promise.all(promises);
       });
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInFie(element) {
+  return !!closestBySelector(element, '.i-amphtml-fie');
 }

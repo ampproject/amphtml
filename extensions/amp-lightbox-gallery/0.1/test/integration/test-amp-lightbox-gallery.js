@@ -17,7 +17,8 @@
 import * as analytics from '../../../../../src/analytics';
 import {poll} from '../../../../../testing/iframe';
 
-describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
+// TODO(cathyxz, #16822): This suite is flaky.
+describe.configure().skip('amp-lightbox-gallery', function() {
   this.timeout(10000);
   const extensions = ['amp-lightbox-gallery'];
   const body = `
