@@ -52,7 +52,6 @@ tags: {  # <amp-3d-gltf>
     name: "src"
     mandatory: true
     value_url: {
-      allow_relative: true
       allowed_protocol: "https"
     }
   }
