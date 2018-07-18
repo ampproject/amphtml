@@ -96,8 +96,9 @@ class PaginationButton {
    * @param {!Document} doc
    * @param {!ButtonStateDef} initialState
    * @param {!./amp-story-store-service.AmpStoryStoreService} storeService
+   * @param {!Window} win
    */
-  constructor(doc, initialState, storeService) {
+  constructor(doc, initialState, storeService, win) {
     /** @private {!ButtonStateDef} */
     this.state_ = initialState;
 
@@ -110,6 +111,9 @@ class PaginationButton {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
+
+    /** @private @const {!Window} */
+    this.win_ = win;
   }
 
   /** @param {!ButtonStateDef} state */
@@ -129,7 +133,7 @@ class PaginationButton {
   onClick_(e) {
     e.preventDefault();
     if (this.state_.triggers) {
-      dispatch(this.win, this.element, dev().assert(this.state_.triggers),
+      dispatch(this.win_, this.element, dev().assert(this.state_.triggers),
           /* payload */ undefined, {bubbles: true});
       return;
     }
@@ -150,11 +154,12 @@ export class PaginationButtons {
 
     /** @private @const {!PaginationButton} */
     this.forwardButton_ =
-        new PaginationButton(doc, ForwardButtonStates.NEXT_PAGE, storeService);
+        new PaginationButton(doc, ForwardButtonStates.NEXT_PAGE, storeService,
+          win);
 
     /** @private @const {!PaginationButton} */
     this.backButton_ =
-        new PaginationButton(doc, BackButtonStates.HIDDEN, storeService);
+        new PaginationButton(doc, BackButtonStates.HIDDEN, storeService, win);
 
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
