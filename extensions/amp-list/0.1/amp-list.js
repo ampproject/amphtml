@@ -84,7 +84,8 @@ export class AmpList extends AMP.BaseElement {
 
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
-        this.fetchList_();
+        this.resetIfNecessary_();
+        return this.fetchList_();
       }
     }, ActionTrust.HIGH);
   }
@@ -138,11 +139,13 @@ export class AmpList extends AMP.BaseElement {
       if (typeOfSrc === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
+          this.resetIfNecessary_();
           return this.fetchList_();
         }
       } else if (typeOfSrc === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
+        this.resetIfNecessary_();
         const items = isArray(src) ? src : [src];
         return this.scheduleRender_(items);
       } else {
@@ -150,6 +153,7 @@ export class AmpList extends AMP.BaseElement {
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
+      this.resetIfNecessary_();
       const items = isArray(state) ? state : [state];
       return this.scheduleRender_(items);
     }
@@ -212,9 +216,6 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
-
-    this.resetIfNecessary_();
-
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {
       if (this.element.hasAttribute('single-item')) {
@@ -261,9 +262,6 @@ export class AmpList extends AMP.BaseElement {
    */
   scheduleRender_(items) {
     dev().info(TAG, 'schedule:', items);
-
-    this.resetIfNecessary_();
-
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
     // If there's nothing currently being rendered, schedule a render pass.
