@@ -110,6 +110,12 @@ const DOUBLECLICK_EXPERIMENT_FEATURE = {
   SRA_NO_RECOVER: '21062235',
 };
 
+/**
+ * Map of pageview tokens to the instances they belong to.
+ * @private {!Object<string, !AmpAdNetworkDoubleclickImpl>}
+ */
+let tokensToInstances = {};
+
 /** @private {?Promise} */
 let sraRequests = null;
 
@@ -124,7 +130,6 @@ let TroubleshootDataDef;
 
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
-
 
 /**
  * @typedef
@@ -369,10 +374,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {!Array<!AmpAdNetworkDoubleclickImpl>=} instances
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
-  getPageParameters(consentState) {
+  getPageParameters(consentState, instances) {
+    instances = instances || [this];
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
@@ -380,6 +387,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
+      'psts': getPageviewStateTokensForAdRequest(instances),
     };
   }
 
@@ -700,6 +708,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     }
 
+    // If the response included a pageview state token, check for an existing
+    // token and remove it. Then save the new one to the module level object.
+    if (responseHeaders.get('amp-ff-pageview-tokens')) {
+      this.removePageviewStateToken();
+      this.setPageviewStateToken(
+          responseHeaders.get('amp-ff-pageview-tokens'));
+    }
+
     return size;
   }
 
@@ -742,6 +758,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = null;
     this.consentState = null;
     this.getAdUrlDeferred = new Deferred();
+    this.removePageviewStateToken();
   }
 
   /** @override */
@@ -1099,7 +1116,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       : super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
-
   /**
    * Note that location is parsed once on first access and cached.
    * @param {string} parameterName
@@ -1168,6 +1184,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
   }
 
+  /**
+   * Sets the pageview state token associated with the slot. Token does not
+   * expire.
+   * @param {string} token
+   */
+  setPageviewStateToken(token) {
+    tokensToInstances[token] = this;
+  }
+
+  /**
+   * Checks for the presence of a pageview token in the module level object
+   * and removes it if present.
+   */
+  removePageviewStateToken() {
+    for (const token in tokensToInstances) {
+      if (tokensToInstances[token] == this) {
+        delete tokensToInstances[token];
+        break;
+      }
+    }
+  }
+
   /** @override */
   getA4aAnalyticsVars(analyticsTrigger) {
     return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
@@ -1223,7 +1261,33 @@ function constructSRARequest_(a4a, instances) {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
-                instances[0].getPageParameters(instances[0].consentState)),
-            startTime);
+                instances[0].getPageParameters(instances[0].consentState,
+                    instances)), startTime);
       });
+}
+
+/**
+ * Returns the pageview tokens that should be included in the ad request. Tokens
+ * should come only from instances that are not being requested in this request.
+ * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instancesInAdRequest
+ * @return {!Array<string>} Array of pageview tokens to include in the ad
+ * request.
+ */
+export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
+  const pageviewStateTokensInAdRequest = [];
+  for (const token in tokensToInstances) {
+    if (!instancesInAdRequest.includes(
+        tokensToInstances[token])) {
+      pageviewStateTokensInAdRequest.push(token);
+    }
+  }
+  return pageviewStateTokensInAdRequest;
+}
+
+/**
+ * Resets the tokensToInstances mapping for testing purposes.
+ * @visibleForTesting
+ */
+export function resetTokensToInstancesMap() {
+  tokensToInstances = {};
 }
