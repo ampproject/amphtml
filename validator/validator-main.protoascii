@@ -26,7 +26,7 @@ min_validator_revision_required: 338
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 680
+spec_file_revision: 684
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -231,7 +231,6 @@ tags: {
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -257,7 +256,6 @@ tags: {
     mandatory: true
     value_url: {
       allowed_protocol: "https"
-      allow_relative: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -954,14 +952,12 @@ tags: {  # Special custom 'author' spreadsheet for AMP
         allowed_protocol: "http"
         allowed_protocol: "data"
         allowed_protocol: "absolute"  # Temporary / will go away.
-        allow_relative: true
         allow_empty: true
       }
       font_url_spec: {
         allowed_protocol: "https"
         allowed_protocol: "http"
         allowed_protocol: "data"
-        allow_relative: true
         allow_empty: true
       }
     }
@@ -1032,14 +1028,12 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
         allowed_protocol: "http"
         allowed_protocol: "data"
         allowed_protocol: "absolute"  # Temporary / will go away.
-        allow_relative: true
         allow_empty: true
       }
       font_url_spec: {
         allowed_protocol: "https"
         allowed_protocol: "http"
         allowed_protocol: "data"
-        allow_relative: true
         allow_empty: true
       }
       validate_amp4ads: true
@@ -1443,10 +1437,9 @@ attr_lists: {
   attrs: {
     name: "cite"
     value_url: {
-      allow_empty: true
-      allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -1570,8 +1563,6 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
-      allow_empty: true
-      allow_relative: true
       allowed_protocol: "ftp"
       allowed_protocol: "geo"
       allowed_protocol: "http"
@@ -1598,6 +1589,7 @@ tags: {
       allowed_protocol: "webcal"
       allowed_protocol: "web+mastodon"  # See GitHub issue #14793
       allowed_protocol: "whatsapp"
+      allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -2000,7 +1992,6 @@ tags: {
   attrs: {
     name: "longdesc"
     value_url: {
-      allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
@@ -2502,7 +2493,6 @@ attr_lists: {
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: true
       allow_empty: false
     }
   }
@@ -2873,7 +2863,6 @@ tags: {
       allowed_protocol: "data"
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: true
       allow_empty: false
     }
     # Inline SVGs execute in a different context and can affect page elements.
@@ -3676,7 +3665,6 @@ tags {  # <form method=GET ...>
     name: "action"
     mandatory: true
     value_url: {
-      allow_relative: true
       allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -3684,7 +3672,6 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "action-xhr"
     value_url: {
-      allow_relative: true
       allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -3715,7 +3702,6 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "verify-xhr"
     value_url: {
-      allow_relative: true
       allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -3736,7 +3722,6 @@ tags {  # <form method=POST ...>
     name: "action-xhr"
     mandatory: true
     value_url: {
-      allow_relative: true
       allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -3769,7 +3754,6 @@ tags {  # <form method=POST ...>
   attrs: {
     name: "verify-xhr"
     value_url: {
-      allow_relative: true
       allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -4648,7 +4632,6 @@ attr_lists: {
       allowed_protocol: "data"
       allowed_protocol: "http"
       allowed_protocol: "https"
-      allow_relative: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }

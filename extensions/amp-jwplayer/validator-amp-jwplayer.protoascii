@@ -32,7 +32,7 @@ tags: {  # <amp-jwplayer>
   requires_extension: "amp-jwplayer"
   attrs: {
     name: "data-media-id"
-    mandatory_oneof: "data-media-id or data-playlist-id"
+    mandatory_oneof: "['data-media-id', 'data-playlist-id']"
     value_regex_casei: "[0-9a-z]{8}"
   }
   attrs: {
@@ -42,7 +42,7 @@ tags: {  # <amp-jwplayer>
   }
   attrs: {
     name: "data-playlist-id"
-    mandatory_oneof: "data-media-id or data-playlist-id"
+    mandatory_oneof: "['data-media-id', 'data-playlist-id']"
     value_regex_casei: "[0-9a-z]{8}"
   }
   amp_layout: {
