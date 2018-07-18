@@ -184,8 +184,8 @@
     {
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad-wrapper.html",
       "name": "AMP Sticky Ad",
-      "loading_complete_css": ["ready-for-visual-diff"]
-    }
+      "loading_complete_css": [".ready-for-visual-diff"]
+    },
     /**
       * AMP by Example pages go below this.
       */
@@ -464,6 +464,10 @@
       // e.g., https://percy.io/ampproject/amphtml/builds/805397/view/45410014/1400?mode=diff&browser=firefox&snapshot=45410014
       "url": "examples/visual-tests/amp-by-example/components/amp-springboard-player/index.html",
       "name": "amp-springboard-player - Amp By Example"
+    },
+    {
+      "url": "examples/visual-tests/amp-by-example/components/amp-sticky-ad/index.html",
+      "name": "amp-sticky-ad - Amp By Example"
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-timeago/index.html",
