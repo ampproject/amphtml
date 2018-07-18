@@ -113,7 +113,7 @@ import {setStyles} from '../src/style';
 import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock';
 import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+  'document-register-element/build/document-register-element.patched';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
