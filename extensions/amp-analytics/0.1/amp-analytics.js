@@ -553,13 +553,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   getTypeConfig_() {
     const type = this.element.getAttribute('type');
-    if (type == 'googleanalytics-alpha') {
-      const TAG = this.getName_();
-      user().warn(TAG, '"googleanalytics-alpha" configuration is not ' +
-          'planned to be supported long-term. Avoid use of this value for ' +
-          'amp-analytics config attribute unless you plan to migrate before ' +
-          'deprecation');
-    }
     return this.predefinedConfig_[type] || {};
   }
 

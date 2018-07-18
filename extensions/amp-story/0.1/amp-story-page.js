@@ -85,7 +85,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
-    /** @private {?Element} */
+    /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
     /** @private @const {!Promise} */
@@ -111,7 +111,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type');
 
-    /** @const @private {!function()} */
+    /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
         this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
 
