@@ -297,8 +297,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             },
           })).to.deep.equal(size);
           expect(removePageviewStateTokenSpy).to.be.calledOnce;
-          expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be.
-            calledOnce;
+          expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be
+              .calledOnce;
         });
   });
 
@@ -1462,7 +1462,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
           impl2.setPageviewStateToken('DUMMY_TOKEN_2');
           const instances = [impl1];
-            expect(getPageviewStateTokensForAdRequest(instances)).to.deep.equal(
+          expect(getPageviewStateTokensForAdRequest(instances)).to.deep.equal(
               ['DUMMY_TOKEN_2']);
         });
       });
