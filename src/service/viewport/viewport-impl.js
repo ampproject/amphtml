@@ -27,7 +27,7 @@ import {
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
-import {closest, isIframed} from '../../dom';
+import {closestBySelector, isIframed} from '../../dom';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -603,8 +603,7 @@ export class Viewport {
    */
   getScrollingContainerFor_(element) {
     return this.vsync_.measurePromise(() => {
-      const scrollable = closest(element,
-          parent => parent./*OK*/scrollHeight > parent./*OK*/clientHeight,
+      const scrollable = closestBySelector(element, '.i-amphtml-scrollable',
           /* stopAt */ this.ampdoc.getBody());
 
       return scrollable || this.binding_.getScrollingElement();
