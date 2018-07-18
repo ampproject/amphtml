@@ -56,16 +56,12 @@ amp-list/0.1/test/validator-amp-list.html:43:2 The attribute '[state]' in tag 'a
 |    </amp-list>
 |    <!-- Valid amp-list with binding="refresh" attribute -->
 |    <amp-list width=10 height=10
->>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:55:2 The attribute 'binding' in tag 'amp-list' is set to the invalid value 'refresh'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |              src="https://data.com/articles.json?ref=CANONICAL_URL"
 |              binding="refresh">
 |      <div></div>
 |    </amp-list>
 |    <!-- Valid amp-list with binding="no" attribute -->
 |    <amp-list width=10 height=10
->>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:61:2 The attribute 'binding' in tag 'amp-list' is set to the invalid value 'no'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |              src="https://data.com/articles.json?ref=CANONICAL_URL"
 |              binding="no">
 |      <div></div>

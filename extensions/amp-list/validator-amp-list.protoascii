@@ -44,7 +44,9 @@ tags: {  # <amp-list> with mandatory src attr
   requires_extension: "amp-list"
   attrs: {
     name: "binding"
-    value: "always|refresh|no"
+    value: "always"
+    value: "no"
+    value: "refresh"
   }
   attrs: { name: "credentials" }
   attrs: { name: "items" }
@@ -90,7 +92,9 @@ tags: {  # <amp-list> with mandatory [src] attr
   requires_extension: "amp-list"
   attrs: {
     name: "binding"
-    value: "always|refresh|no"
+    value: "always"
+    value: "no"
+    value: "refresh"
   }
   attrs: { name: "credentials" }
   attrs: { name: "items" }
