@@ -1,13 +1,13 @@
 PASS
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,7 @@ PASS
 |  <body>
 |  <div id="container">
 |  Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
-|  
+|
 |  <amp-analytics id="analytics1">
 |  <script type="application/json">
 |  {
@@ -145,9 +145,9 @@ PASS
 |  }
 |  </script>
 |  </amp-analytics>
-|  
+|
 |  <amp-analytics id="analytics3" config="./analytics.config.json"></amp-analytics>
-|  
+|
 |  <div class="logo"></div>
 |  <h1 id="top">AMP Analytics</h1>
 |  <span id="test1" class="box" data-vars-title="Example request with element level overrides">
@@ -204,7 +204,7 @@ PASS
 |  <ul>
 |  <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 |  </ul>
-|  
+|
 |  </p>
 |  <amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
 |    <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
