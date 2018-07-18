@@ -32,6 +32,8 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
+import {installCustomElements} from
+  'document-register-element/build/document-register-element.patched';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
@@ -42,8 +44,6 @@ import {installPixel} from '../../builtins/amp-pixel';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
 import {map} from '../utils/object';
 import {toWin} from '../types';
-import installCustomElements from
-  'document-register-element/build/document-register-element.patched';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
