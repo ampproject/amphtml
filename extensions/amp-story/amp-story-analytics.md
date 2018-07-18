@@ -54,7 +54,6 @@ Consult your vendor's documentation for more specific details on how to set this
 
 The `story-bookend-enter` trigger is fired when the bookend is shown to the user, after the last page of the current story.
 
-
 ### Bookend exit trigger (`"on": "story-bookend-exit"`)
 
 The `story-bookend-exit` trigger is fired when the bookend is dismissed by the user.
