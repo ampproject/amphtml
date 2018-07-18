@@ -175,15 +175,17 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
 
-    this.isScrollable_ = this.element.hasAttribute('scrollable');
+    const {element} = this;
+
+    this.isScrollable_ = element.hasAttribute('scrollable');
 
     const children = this.getRealChildren();
 
-    this.container_ = this.element.ownerDocument.createElement('div');
+    this.container_ = element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
       this.applyFillContent(this.container_);
     }
-    this.element.appendChild(this.container_);
+    element.appendChild(this.container_);
 
     children.forEach(child => {
       this.container_.appendChild(child);
@@ -194,16 +196,18 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       this.takeOwnershipOfDescendants_();
 
-      this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      element.classList.add('i-amphtml-scrollable');
+
+      element.addEventListener(AmpEvents.DOM_UPDATE, () => {
         this.takeOwnershipOfDescendants_();
         this.updateChildrenInViewport_(this.pos_, this.pos_);
       });
 
-      this.element.addEventListener('scroll', this.scrollHandler_.bind(this));
+      element.addEventListener('scroll', this.scrollHandler_.bind(this));
     }
 
     if (!this.isScrollable_) {
-      const gestures = Gestures.get(this.element);
+      const gestures = Gestures.get(element);
       gestures.onGesture(SwipeXYRecognizer, () => {
         // Consume to block scroll events and side-swipe.
       });
