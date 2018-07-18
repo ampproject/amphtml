@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
+import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
 import {resetStyles, setStyles} from '../../../src/style';
@@ -54,10 +55,7 @@ const NUM_SENTENCES_LIMIT = 15;
  */
 const NUM_ALL_CHARS_LIMIT = 1500;
 
-/**
- * TextRange represents a text range.
- * @typedef {{sentences: !Array<string>}}
- */
+/** @typedef {{sentences: !Array<string>, skipRendering: boolean}} */
 let HighlightInfoDef;
 
 /**
@@ -97,8 +95,13 @@ export function getHighlightParam(ampdoc) {
       return null;
     }
   }
+  let skipRendering = false;
+  if (highlight['n']) {
+    skipRendering = true;
+  }
   return {
     sentences: sens,
+    skipRendering,
   };
 }
 
@@ -159,6 +162,14 @@ export class HighlightHandler {
    * @private
    */
   initHighlight_(highlightInfo) {
+    if (this.ampdoc_.win.document.querySelector('script[id="amp-access"]')) {
+      // Disable highlighting if <amp-access> is used because highlighting
+      // interacts badily with UI reflows by <amp-access>.
+      // TODO(yunabe): Remove this once <amp-access> provides an API to delay
+      // code execution after DOM manipulation by <amp-access>.
+      this.sendHighlightState_('has_amp_access');
+      return;
+    }
     this.findHighlightedNodes_(highlightInfo);
     if (!this.highlightedNodes_) {
       this.sendHighlightState_('not_found');
@@ -166,6 +177,9 @@ export class HighlightHandler {
     }
     const scrollTop = this.calcTopToCenterHighlightedNodes_();
     this.sendHighlightState_('found', dict({'scroll': scrollTop}));
+    if (highlightInfo.skipRendering) {
+      return;
+    }
 
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
@@ -207,15 +221,20 @@ export class HighlightHandler {
     const viewport = Services.viewportForDoc(this.ampdoc_);
     let minTop = Number.MAX_VALUE;
     let maxBottom = 0;
+    const paddingTop = viewport.getPaddingTop();
     for (let i = 0; i < nodes.length; i++) {
-      const {top, bottom} = viewport.getLayoutRect(nodes[i]);
+      // top and bottom returned by getLayoutRect includes the header padding
+      // size. We need to cancel the padding to calculate the positions in
+      // document.body like Viewport.animateScrollIntoView does.
+      const {top, bottom} = moveLayoutRect(viewport.getLayoutRect(nodes[i]),
+          0, -paddingTop);
       minTop = Math.min(minTop, top);
       maxBottom = Math.max(maxBottom, bottom);
     }
     if (minTop >= maxBottom) {
       return 0;
     }
-    const height = viewport.getHeight() - viewport.getPaddingTop();
+    const height = viewport.getHeight() - paddingTop;
     if (maxBottom - minTop > height) {
       return minTop;
     }

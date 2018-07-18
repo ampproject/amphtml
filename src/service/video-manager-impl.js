@@ -23,6 +23,7 @@ import {
   setMediaSession,
 } from '../mediasession-helper';
 import {
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   PlayingStates,
   VideoAnalyticsEvents,
   VideoAttributes,
@@ -34,7 +35,10 @@ import {
   VideoServiceInterface,
   VideoServiceSignals,
 } from './video-service-interface';
-import {VideoServiceSync} from './video-service-sync-impl';
+import {
+  VideoServiceSync,
+  setVideoComponentClassname,
+} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {
@@ -51,6 +55,7 @@ import {map} from '../utils/object';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
+import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {setStyle} from '../style';
 import {startsWith} from '../string';
 
@@ -58,12 +63,6 @@ import {startsWith} from '../string';
 /** @private @const {string} */
 const TAG = 'video-manager';
 
-
-/**
- * @const {number} Percentage of the video that should be in viewport before it
- * is considered visible.
- */
-const VISIBILITY_PERCENT = 75;
 
 /**
  * @private {number} The minimum number of milliseconds to wait between each
@@ -190,6 +189,8 @@ export class VideoManager {
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
+    setVideoComponentClassname(element);
+
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
@@ -238,7 +239,7 @@ export class VideoManager {
    * in the viewport.
    *
    * Visibility of a video is defined by being in the viewport AND having
-   * {@link VISIBILITY_PERCENT} of the video element visible.
+   * {@link MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} of the video element visible.
    *
    * @param {VideoEntry} entry
    * @private
@@ -701,14 +702,14 @@ class VideoEntry {
    */
   installAutoplayArtifacts_() {
     const {video} = this;
-    const {element} = this.video;
+    const {element, win} = this.video;
 
     if (element.hasAttribute(VideoAttributes.NO_AUDIO) ||
         element.signals().get(VideoServiceSignals.USER_INTERACTED)) {
       return;
     }
 
-    const animation = this.createAutoplayAnimation_();
+    const animation = renderIcon(win, element);
 
     /** @param {boolean} isPlaying */
     const toggleAnimation = isPlaying => {
@@ -730,12 +731,14 @@ class VideoEntry {
       const {video} = this;
       const {element} = video;
       this.firstPlayEventOrNoop_();
-      video.showControls();
+      if (video.isInteractive()) {
+        video.showControls();
+      }
       video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
       });
-      const animation = element.querySelector('i-amphtml-video-eq');
+      const animation = element.querySelector('.amp-video-eq');
       const mask = element.querySelector('i-amphtml-video-mask');
       if (animation) {
         removeElement(animation);
@@ -745,11 +748,11 @@ class VideoEntry {
       }
     });
 
-    if (!this.video.isInteractive()) {
+    if (!video.isInteractive()) {
       return;
     }
 
-    const mask = this.createAutoplayMask_();
+    const mask = renderInteractionOverlay(win, element);
 
     /** @param {string} display */
     const setMaskDisplay = display => {
@@ -805,55 +808,6 @@ class VideoEntry {
   }
 
   /**
-   * Creates a pure CSS animated equalizer icon.
-   * @private
-   * @return {!Element}
-   */
-  createAutoplayAnimation_() {
-    const doc = this.ampdoc_.win.document;
-    const anim = doc.createElement('i-amphtml-video-eq');
-    anim.classList.add('amp-video-eq');
-    // Four columns for the equalizer.
-    for (let i = 1; i <= 4; i++) {
-      const column = doc.createElement('div');
-      column.classList.add('amp-video-eq-col');
-      // Two overlapping filler divs that animate at different rates creating
-      // randomness illusion.
-      for (let j = 1; j <= 2; j++) {
-        const filler = doc.createElement('div');
-        filler.classList.add(`amp-video-eq-${i}-${j}`);
-        column.appendChild(filler);
-      }
-      anim.appendChild(column);
-    }
-    const platform = Services.platformFor(this.ampdoc_.win);
-    if (platform.isIos()) {
-      // iOS can not pause hardware accelerated animations.
-      anim.setAttribute('unpausable', '');
-    }
-    return anim;
-  }
-
-  /**
-   * Creates a mask to overlay on top of an autoplay video to detect the first
-   * user tap.
-   * We have to do this since many players are iframe-based and we can not get
-   * the click event from the iframe.
-   * We also can not rely on hacks such as constantly checking doc.activeElement
-   * to know if user has tapped on the iframe since they won't be a trusted
-   * event that would allow us to unmuted the video as only trusted
-   * user-initiated events can be used to interact with the video.
-   * @private
-   * @return {!Element}
-   */
-  createAutoplayMask_() {
-    const doc = this.ampdoc_.win.document;
-    const mask = doc.createElement('i-amphtml-video-mask');
-    mask.classList.add('i-amphtml-fill-content');
-    return mask;
-  }
-
-  /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
    * @param {?boolean=} opt_forceVisible
@@ -862,21 +816,19 @@ class VideoEntry {
   updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
-    this.video.measureMutateElement(() => {
-      if (opt_forceVisible == true) {
-        this.isVisible_ = true;
-      } else {
-        // Calculate what percentage of the video is in viewport.
-        const change = this.video.element.getIntersectionChangeEntry();
-        const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
-          : change.intersectionRatio * 100;
-        this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
-      }
-    }, () => {
-      if (this.isVisible_ != wasVisible) {
-        this.videoVisibilityChanged_();
-      }
-    });
+    if (opt_forceVisible) {
+      this.isVisible_ = true;
+    } else {
+      const {element} = this.video;
+      const ratio = element.getIntersectionChangeEntry().intersectionRatio;
+      this.isVisible_ =
+          (!isFiniteNumber(ratio) ? 0 : ratio) >=
+            MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
+    }
+
+    if (this.isVisible_ != wasVisible) {
+      this.videoVisibilityChanged_();
+    }
   }
 
   /**
@@ -1177,7 +1129,7 @@ export class AutoFullscreenManager {
 
     if (selected) {
       const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
-      if (intersectionRatio >= VISIBILITY_PERCENT / 100) {
+      if (intersectionRatio >= MIN_VISIBILITY_RATIO_FOR_AUTOPLAY) {
         this.currentlyCentered_ = selected;
       }
     }
@@ -1239,7 +1191,7 @@ export class AutoFullscreenManager {
  * @return {number}
  */
 function centerDist(viewport, rect) {
-  const centerY = rect.top + rect.height / 2;
+  const centerY = rect.top + (rect.height / 2);
   const centerViewport = viewport.getSize().height / 2;
   return Math.abs(centerY - centerViewport);
 }

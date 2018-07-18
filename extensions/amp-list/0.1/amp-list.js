@@ -125,35 +125,35 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.layoutCompleted_ = true;
-
     return this.fetchList_();
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
+    dev().info(TAG, 'mutate:', mutations);
     const src = mutations['src'];
     const state = mutations['state'];
-
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
-          this.fetchList_();
+          return this.fetchList_();
         }
       } else if (typeOfSrc === 'object') {
-        const items = isArray(src) ? src : [src];
-        this.scheduleRender_(items);
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
+        const items = isArray(src) ? src : [src];
+        return this.scheduleRender_(items);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
-      const items = isArray(state) ? state : [state];
-      this.scheduleRender_(items);
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
+      const items = isArray(state) ? state : [state];
+      return this.scheduleRender_(items);
     }
+    return Promise.resolve();
   }
 
   /**
@@ -250,9 +250,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(items) {
+    dev().info(TAG, 'schedule:', items);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
-
     // If there's nothing currently being rendered, schedule a render pass.
     if (!this.renderItems_) {
       this.renderPass_.schedule();
@@ -267,8 +267,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   doRenderPass_() {
-    dev().assert(this.renderItems_, 'Nothing to render.');
     const current = this.renderItems_;
+    dev().assert(current, 'Nothing to render.');
+    dev().info(TAG, 'pass:', current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
       if (this.renderItems_ !== current) {
@@ -277,15 +278,16 @@ export class AmpList extends AMP.BaseElement {
         this.renderItems_ = null;
       }
     };
-    this.templates_.findAndRenderTemplateArray(this.element, current.items)
+    const {items, resolver, rejecter} = current;
+    this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindingsForElements_(elements))
-        .then(elements => this.rendered_(elements))
+        .then(elements => this.render_(elements))
         .then(/* onFulfilled */ () => {
           scheduleNextPass();
-          current.resolver();
+          resolver();
         }, /* onRejected */ () => {
           scheduleNextPass();
-          current.rejecter();
+          rejecter();
         });
   }
 
@@ -297,12 +299,16 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   updateBindingsForElements_(elements) {
-    // New default behavior is to _not_ block on retrieval of the Bind service
-    // before the first mutation (AMP.setState), because the rendered content
-    // can't be "out of date" if the bindable state hasn't changed.
-    // Allow a temporary opt-out to this behavior in case this causes breaking
-    // changes due to state-independent mutations, e.g. "[text]="1+1".
-    if (isExperimentOn(this.win, 'disable-faster-amp-list')) {
+    // Experiment to _not_ block on retrieval of the Bind service before the
+    // first mutation (AMP.setState). This is a breaking change and will require
+    // either an attribute opt-in or a version bump.
+    if (isExperimentOn(this.win, 'fast-amp-list')) {
+      if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
+        return this.updateBindingsWith_(this.bind_, elements);
+      } else {
+        return Promise.resolve(elements);
+      }
+    } else {
       return Services.bindForDocOrNull(this.element).then(bind => {
         if (bind) {
           return this.updateBindingsWith_(bind, elements);
@@ -310,12 +316,6 @@ export class AmpList extends AMP.BaseElement {
           return Promise.resolve(elements);
         }
       });
-    } else {
-      if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
-        return this.updateBindingsWith_(this.bind_, elements);
-      } else {
-        return Promise.resolve(elements);
-      }
     }
   }
 
@@ -335,27 +335,29 @@ export class AmpList extends AMP.BaseElement {
    * @param {!Array<!Element>} elements
    * @private
    */
-  rendered_(elements) {
-    removeChildren(dev().assertElement(this.container_));
-    elements.forEach(element => {
-      if (!element.hasAttribute('role')) {
-        element.setAttribute('role', 'listitem');
-      }
-      this.container_.appendChild(element);
-    });
+  render_(elements) {
+    dev().info(TAG, 'render:', elements);
 
-    const event = createCustomEvent(this.win,
-        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
-    this.container_.dispatchEvent(event);
-
-    // Change height if needed.
-    this.getVsync().measure(() => {
-      const scrollHeight = this.container_./*OK*/scrollHeight;
-      const height = this.element./*OK*/offsetHeight;
-      if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight).catch(() => {});
-      }
-    });
+    this.mutateElement(() => {
+      removeChildren(dev().assertElement(this.container_));
+      elements.forEach(element => {
+        if (!element.hasAttribute('role')) {
+          element.setAttribute('role', 'listitem');
+        }
+        this.container_.appendChild(element);
+      });
+      const event = createCustomEvent(this.win,
+          AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
+      this.container_.dispatchEvent(event);
+      // Change height if needed.
+      this.getVsync().measure(() => {
+        const scrollHeight = this.container_./*OK*/scrollHeight;
+        const height = this.element./*OK*/offsetHeight;
+        if (scrollHeight > height) {
+          this.attemptChangeHeight(scrollHeight).catch(() => {});
+        }
+      });
+    }, this.container_);
   }
 
   /**

@@ -41,11 +41,43 @@ env => {
     ampdoc = env.ampdoc;
     viewport = Services.viewportForDoc(ampdoc);
     sizes = viewport.getSize();
+    element = doc.createElement('div');
 
     toggleExperiment(win, 'amp-next-page', true);
 
-    element = doc.createElement('div');
-    element.innerHTML = `
+    // Ensure element is off screen when it renders.
+    setStyle(element, 'marginTop', '10000px');
+    element.getAmpDoc = () => ampdoc;
+    element.getFallback = () => null;
+    element.getResources = () => win.services.resources.obj;
+
+    doc.body.appendChild(element);
+    nextPage = new AmpNextPage(element);
+
+    // sourceUrl is set to about:srcdoc, which has no host.
+    sandbox.stub(Services.documentInfoForDoc(element), 'sourceUrl').value('/');
+
+    xhrMock = sandbox.mock(Services.xhrFor(win));
+
+    sandbox.stub(Services.resourcesForDoc(ampdoc), 'mutateElement')
+        .callsFake((unused, mutator) => {
+          mutator();
+          return Promise.resolve();
+        });
+    sandbox.stub(nextPage, 'mutateElement').callsFake(mutator => {
+      mutator();
+      return Promise.resolve();
+    });
+  });
+
+  afterEach(() => {
+    xhrMock.verify();
+    toggleExperiment(win, 'amp-next-page', false);
+  });
+
+  describe('valid inline config', () => {
+    beforeEach(() => {
+      element.innerHTML = `
           <script type="application/json">
             {
               "pages": [
@@ -66,144 +98,156 @@ env => {
               ]
             }
           </script>`;
-    // Ensure element is off screen when it renders.
-    setStyle(element, 'marginTop', '10000px');
-    element.getAmpDoc = () => ampdoc;
-    element.getFallback = () => null;
-    element.getResources = () => win.services.resources.obj;
-
-    doc.body.appendChild(element);
-    nextPage = new AmpNextPage(element);
-
-    // sourceUrl is set to about:srcdoc, which has no host.
-    sandbox.stub(Services.documentInfoForDoc(element), 'sourceUrl').value('/');
-    nextPage.buildCallback();
-
-    xhrMock = sandbox.mock(Services.xhrFor(win));
-
-    sandbox.stub(Services.resourcesForDoc(ampdoc), 'mutateElement')
-        .callsFake((unused, mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
-    sandbox.stub(nextPage, 'mutateElement').callsFake(mutator => {
-      mutator();
-      return Promise.resolve();
+      nextPage.buildCallback();
     });
-  });
 
-  afterEach(() => {
-    xhrMock.verify();
-  });
+    it('does not fetch the next document before 3 viewports away',
+        function* () {
+          xhrMock.expects('fetchDocument').never();
+          sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+            // 4x viewports away
+            return Promise.resolve(
+                layoutRectLtwh(0, 0, sizes.width, sizes.height * 5));
+          });
 
-  afterEach(() => {
-    toggleExperiment(win, 'amp-next-page', false);
-  });
-
-  it('does not fetch the next document before 3 viewports away',
-      function* () {
-        xhrMock.expects('fetchDocument').never();
-        sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
-          // 4x viewports away
-          return Promise.resolve(
-              layoutRectLtwh(0, 0, sizes.width, sizes.height * 5));
+          win.dispatchEvent(new Event('scroll'));
+          yield macroTask();
         });
 
-        win.dispatchEvent(new Event('scroll'));
-        yield macroTask();
+    it('fetches the next document within 3 viewports away', function* () {
+      xhrMock.expects('fetchDocument').returns(Promise.resolve());
+
+      sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+        // 1x viewport away
+        return Promise.resolve(
+            layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
       });
 
-  it('fetches the next document within 3 viewports away', function* () {
-    xhrMock.expects('fetchDocument').returns(Promise.resolve());
-
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
-      // 1x viewport away
-      return Promise.resolve(
-          layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+      win.dispatchEvent(new Event('scroll'));
+      yield macroTask();
     });
 
-    win.dispatchEvent(new Event('scroll'));
-    yield macroTask();
+    it('only fetches the next document once', function*() {
+      xhrMock.expects('fetchDocument')
+          // Promise which is never resolved.
+          .returns(new Promise(() => {}))
+          .once();
+
+      sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+        // 1x viewport away
+        return Promise.resolve(
+            layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+      });
+
+      win.dispatchEvent(new Event('scroll'));
+      yield macroTask();
+      win.dispatchEvent(new Event('scroll'));
+      yield macroTask();
+    });
+
+    it('adds the hidden class to hideSelector elements', function* () {
+      const exampleDoc = createExampleDocument(doc);
+      xhrMock.expects('fetchDocument')
+          .returns(Promise.resolve(exampleDoc))
+          .once();
+
+      const nextPageService = getService(win, 'next-page');
+      const attachShadowDocSpy =
+          sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
+
+      sandbox.stub(viewport, 'getClientRectAsync')
+          .onFirstCall().callsFake(() => {
+            // 1x viewport away
+            return Promise.resolve(
+                layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+          });
+
+      win.dispatchEvent(new Event('scroll'));
+      yield macroTask();
+
+      const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
+      yield shadowDoc.whenReady();
+
+      const shadowRoot = shadowDoc.getRootNode();
+
+      expect(shadowRoot.querySelector('header'))
+          .to.have.class('i-amphtml-next-page-hidden');
+
+      expect(shadowRoot.querySelector('footer'))
+          .to.have.class('i-amphtml-next-page-hidden');
+    });
+
+    it('removes amp-analytics tags from child documents', function* () {
+      const exampleDoc = createExampleDocument(doc);
+      exampleDoc.body.innerHTML +=
+          '<amp-analytics id="analytics1"></amp-analytics>';
+      exampleDoc.body.innerHTML +=
+          '<amp-analytics id="analytics2"></amp-analytics>';
+      xhrMock.expects('fetchDocument')
+          .returns(Promise.resolve(exampleDoc))
+          .once();
+
+      const nextPageService = getService(win, 'next-page');
+      const attachShadowDocSpy =
+          sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
+
+      sandbox.stub(viewport, 'getClientRectAsync')
+          .onFirstCall().callsFake(() => {
+            // 1x viewport away
+            return Promise.resolve(
+                layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+          });
+
+      win.dispatchEvent(new Event('scroll'));
+      yield macroTask();
+
+      const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
+      yield shadowDoc.whenReady();
+
+      const shadowRoot = shadowDoc.getRootNode();
+      expect(shadowRoot.getElementById('analytics1')).to.be.null;
+      expect(shadowRoot.getElementById('analytics2')).to.be.null;
+    });
   });
 
-  it('only fetches the next document once', function*() {
-    xhrMock.expects('fetchDocument')
-        // Promise which is never resolved.
-        .returns(new Promise(() => {}))
-        .once();
-
-    sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
-      // 1x viewport away
-      return Promise.resolve(
-          layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+  describe('remote config', () => {
+    it('errors when no config specified', () => {
+      expect(() => nextPage.buildCallback()).to.throw(
+          'amp-next-page should contain only one <script> child, or a URL '
+          + 'specified in [src]​​​');
     });
 
-    win.dispatchEvent(new Event('scroll'));
-    yield macroTask();
-    win.dispatchEvent(new Event('scroll'));
-    yield macroTask();
-  });
+    it('fetches remote config when specified in src', function* () {
+      const config = {
+        pages: [
+          {
+            image: '/examples/img/hero@1x.jpg',
+            title: 'Remote config',
+            ampUrl: '/document1',
+          },
+        ],
+      };
+      const srcUrl = 'https://example.com/config.json';
+      element.setAttribute('src', srcUrl);
 
-  it('adds the hidden class to hideSelector elements', function* () {
-    const exampleDoc = createExampleDocument(doc);
-    xhrMock.expects('fetchDocument')
-        .returns(Promise.resolve(exampleDoc))
-        .once();
+      const fetchJsonStub =
+          sandbox.stub(Services.batchedXhrFor(win), 'fetchJson')
+              .resolves({
+                ok: true,
+                json() {
+                  return Promise.resolve(config);
+                },
+              });
+      const nextPageService = getService(win, 'next-page');
+      const registerSpy = sandbox.spy(nextPageService, 'register');
 
-    const nextPageService = getService(win, 'next-page');
-    const attachShadowDocSpy =
-        sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
+      nextPage.buildCallback();
+      yield macroTask();
 
-    sandbox.stub(viewport, 'getClientRectAsync').onFirstCall().callsFake(() => {
-      // 1x viewport away
-      return Promise.resolve(
-          layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+      expect(fetchJsonStub.calledWithExactly(
+          srcUrl, {requireAmpResponseSourceOrigin: false})).to.be.true;
+      expect(registerSpy.calledWith(element, config)).to.be.true;
     });
-
-    win.dispatchEvent(new Event('scroll'));
-    yield macroTask();
-
-    const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
-    yield shadowDoc.whenReady();
-
-    const shadowRoot = shadowDoc.getRootNode();
-
-    expect(shadowRoot.querySelector('header'))
-        .to.have.class('i-amphtml-next-page-hidden');
-
-    expect(shadowRoot.querySelector('footer'))
-        .to.have.class('i-amphtml-next-page-hidden');
-  });
-
-  it('removes amp-analytics tags from child documents', function* () {
-    const exampleDoc = createExampleDocument(doc);
-    exampleDoc.body.innerHTML +=
-        '<amp-analytics id="analytics1"></amp-analytics>';
-    exampleDoc.body.innerHTML +=
-        '<amp-analytics id="analytics2"></amp-analytics>';
-    xhrMock.expects('fetchDocument')
-        .returns(Promise.resolve(exampleDoc))
-        .once();
-
-    const nextPageService = getService(win, 'next-page');
-    const attachShadowDocSpy =
-      sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
-
-    sandbox.stub(viewport, 'getClientRectAsync').onFirstCall().callsFake(() => {
-      // 1x viewport away
-      return Promise.resolve(
-          layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
-    });
-
-    win.dispatchEvent(new Event('scroll'));
-    yield macroTask();
-
-    const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
-    yield shadowDoc.whenReady();
-
-    const shadowRoot = shadowDoc.getRootNode();
-    expect(shadowRoot.getElementById('analytics1')).to.be.null;
-    expect(shadowRoot.getElementById('analytics2')).to.be.null;
   });
 });
 
