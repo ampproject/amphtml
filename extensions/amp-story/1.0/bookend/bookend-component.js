@@ -39,12 +39,12 @@ export let BookendDataDef;
 
 /**
  * @typedef {
- *   (!ArticleComponentDef|
- *    !CtaLinkDef|
- *    !HeadingComponentDef|
- *    !LandscapeComponentDef|
- *    !PortraitComponentDef|
- *    !TextBoxComponentDef)
+ *   (!./components/article.ArticleComponentDef|
+ *    !./components/cta-link.CtaLinkDef|
+ *    !./components/heading.HeadingComponentDef|
+ *    !./components/landscape.LandscapeComponentDef|
+ *    !./components/portrait.PortraitComponentDef|
+ *    !./components/text-box.TextBoxComponentDef)
  * }
  */
 export let BookendComponentDef;
@@ -107,7 +107,7 @@ function componentBuilderInstanceFor(type) {
  * Prepend a heading to the related articles section if first component is not a
  * heading already.
  * @param {!Array<BookendComponentDef>} components
- * @param {!../../localization.LocalizationService>} localizationService
+ * @param {?../localization.LocalizationService} localizationService
  * @return {!Array<BookendComponentDef>}
  */
 function prependTitle(components, localizationService) {
@@ -153,7 +153,7 @@ export class BookendComponent {
    * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
-   * @param {!../../localization.LocalizationService>} localizationService
+   * @param {?../localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
   static buildElements(components, doc, localizationService) {

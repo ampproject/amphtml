@@ -495,7 +495,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * @param {!./bookend-component.BookendDataDef} bookendConfig
-   * @return {!Promise<!../localization.LocalizationService>}
+   * @return {!Promise<?../localization.LocalizationService>|undefined}
    * @private
    */
   renderBookend_(bookendConfig) {
@@ -511,7 +511,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * @param {!Array<!../bookend/bookend-component.BookendComponentDef>} components
-   * @return {!Promise<!../localization.LocalizationService>}
+   * @return {!Promise<?../localization.LocalizationService>}
    * @private
    */
   renderComponents_(components) {
@@ -526,6 +526,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
               BookendComponent.buildContainer(this.getInnerContainer_(),
                   this.win.document));
           this.mutateElement(() => container.appendChild(bookendEls));
+          return localizationService;
+        }).catch(e => {
+          user().error(TAG, 'Unable to fetch localization service.', e.message);
+          return null;
         });
   }
 
