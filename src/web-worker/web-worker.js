@@ -56,6 +56,8 @@ self.addEventListener('unhandledrejection', errorHandler_);
 self.addEventListener('error', errorHandler_);
 
 self.addEventListener('message', function(event) {
+  const start = self.performance.now();
+
   const {method, args, id, scope} =
     /** @type {ToWorkerMessageDef} */ (event.data);
 
@@ -87,8 +89,10 @@ self.addEventListener('message', function(event) {
       throw new Error(`Unrecognized method: ${method}`);
   }
 
-  /** @type {FromWorkerMessageDef} */
-  const message = {method, returnValue, id};
+  const latency = self.performance.now() - start;
+  const message = /** @type {FromWorkerMessageDef} */ (
+    {method, returnValue, id, latency}
+  );
   // `message` may only contain values or objects handled by the
   // structured clone algorithm.
   // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm

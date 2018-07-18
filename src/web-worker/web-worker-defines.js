@@ -15,20 +15,11 @@
  */
 
 /**
- * @typedef {{
- *   method: string,
- *   args: !Array,
- *   scope: number,
- *   id: number,
- * }}
+ * @typedef {{method: string, args: !Array, scope: number, id: number}}
  */
 export let ToWorkerMessageDef;
 
 /**
- * @typedef {{
- *   method: string,
- *   returnValue: *,
- *   id: number,
- * }}
+ * @typedef {{method: string, returnValue: *, id: number, latency: number}}
  */
 export let FromWorkerMessageDef;

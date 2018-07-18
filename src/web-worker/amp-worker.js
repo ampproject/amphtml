@@ -24,7 +24,7 @@ import {getService, registerServiceBuilder} from '../service';
 const TAG = 'web-worker';
 
 /**
- * @typedef {{method: string, resolve: !Function, reject: !Function}}
+ * @typedef {{method: string, resolve: !Function, reject: !Function, start: number}}
  */
 let PendingMessageDef;
 
@@ -115,6 +115,9 @@ class AmpWorker {
      */
     this.counter_ = 0;
 
+    /** @const @private {!../service/performance.Performance} */
+    this.performance_ = Services.performanceFor(win);
+
     /**
      * Array of top-level and local windows passed into `invokeWebWorker`.
      * Used to uniquely identify windows for scoping worker functions when
@@ -131,17 +134,19 @@ class AmpWorker {
    * @param {Window=} opt_localWin
    * @return {!Promise}
    * @private
+   * @restricted
    */
   sendMessage_(method, args, opt_localWin) {
     return this.fetchPromise_.then(() => {
       return new Promise((resolve, reject) => {
         const id = this.counter_++;
-        this.messages_[id] = {method, resolve, reject};
-
         const scope = this.idForWindow_(opt_localWin || this.win_);
+        const start = this.win_.performance.now();
 
-        /** @type {ToWorkerMessageDef} */
-        const message = {method, args, scope, id};
+        this.messages_[id] = {method, resolve, reject, start};
+        const message = /** @type {ToWorkerMessageDef} */ (
+          {method, args, scope, id}
+        );
         this.worker_./*OK*/postMessage(message);
       });
     });
@@ -154,8 +159,8 @@ class AmpWorker {
    * @private
    */
   receiveMessage_(event) {
-    const {method, returnValue, id} =
-    /** @type {FromWorkerMessageDef} */ (event.data);
+    const {method, returnValue, id, latency} =
+      /** @type {FromWorkerMessageDef} */ (event.data);
 
     const message = this.messages_[id];
     if (!message) {
@@ -167,8 +172,12 @@ class AmpWorker {
         `(${method}, ${id}), expected ${message.method}.`);
 
     message.resolve(returnValue);
-
     delete this.messages_[id];
+
+    this.performance_.tickDelta('wk', latency);
+
+    const latencyWithPost = this.win_.performance.now() - message.start;
+    this.performance_.tickDelta('wkp', latencyWithPost);
   }
 
   /**
