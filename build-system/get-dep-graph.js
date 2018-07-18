@@ -19,6 +19,7 @@ const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;
 const devnull = require('dev-null');
 const fs = require('fs-extra');
+const mkpath = require('mkpath');
 const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
@@ -49,6 +50,9 @@ let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
 });
 // Flatten nested arrays to support multiple versions
 extensions = [].concat.apply([], extensions);
+
+patchWebAnimations();
+patchDompurify();
 
 exports.splittable = function(config) {
 
@@ -148,8 +152,10 @@ exports.getBundleFlags = function(g) {
   // Write all the packages (directories with a package.json) as --js
   // inputs to the flags. Closure compiler reads the packages to resolve
   // non-relative module names.
+  let packageCount = 0;
   Object.keys(g.packages).sort().forEach(function(pkg) {
     flagsArray.push('--js', pkg);
+    packageCount++;
   });
 
   // Build up the weird flag structure that closure compiler calls
@@ -165,11 +171,32 @@ exports.getBundleFlags = function(g) {
   bundleKeys.splice(1, 0, '_base_i');
   bundleKeys.forEach(function(originalName) {
     const isMain = originalName == mainBundle;
+    const isBase = isMain;
+    let extraModules = 0;
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
+    if (isBase || bundleKeys.length == 1) {
+      flagsArray.push('--js', relativePath(process.cwd(),
+          require.resolve('./base.js')));
+      extraModules++;
+      Object.keys(g.browserMask).sort().forEach(function(mask) {
+        flagsArray.push('--js', mask);
+        extraModules++;
+      });
+    }
     bundle.modules.forEach(function(js) {
       flagsArray.push('--js', js);
     });
+    if (!isBase && bundleKeys.length > 1) {
+      // TODO(erwinm): do we still need the bundleTrailModule?
+      //flagsArray.push('--js', bundleTrailModule(bundle.name));
+      //extraModules++;
+    }
+    // The packages count as inputs to the first module.
+    if (packageCount) {
+      extraModules += packageCount;
+      packageCount = 0;
+    }
     let name;
     let info = extensionsInfo[bundle.name];
     if (info) {
@@ -193,9 +220,9 @@ exports.getBundleFlags = function(g) {
       };
     }
     // And now build --module $name:$numberOfJsFiles:$bundleDeps
-    let cmd = name + ':' + (bundle.modules.length);
+    let cmd = name + ':' + (bundle.modules.length + extraModules);
     const bundleDeps = [];
-    if (!isMain) {
+    if (!isBase) {
       const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
@@ -260,6 +287,7 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
+    browserMask: {},
   };
 
   TYPES_VALUES.forEach(type => {
@@ -286,6 +314,47 @@ exports.getGraph = function(entryModules, config) {
           require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
         ],
       });
+
+  b.on('package', function(pkg) {
+    if (!pkg.browser) {
+      return;
+    }
+    Object.keys(pkg.browser).sort().forEach(function(entry) {
+      if (/^\./.test(entry)) {
+        throw new Error(
+            'Relative entries in package.json#browser not yet supported: ' +
+            entry + ' [' + pkg.__dirname + '.package.json]');
+      }
+      if (pkg.browser[entry] !== false) {
+        throw new Error(
+            'Only masking of entire modules via false supported in ' +
+            'package.json#browser:' + entry +
+            ' [' + pkg.__dirname + '.package.json]');
+      }
+      let filename =
+          'splittable-build/browser/node_modules/' + entry;
+      const maskedPkg = 'splittable-build/browser/node_modules/' +
+          entry.split('/')[0] + '/package.json';
+      if (!/\//.test(entry)) {
+        filename += '/index';
+      }
+      filename = exports.maybeAddDotJs(filename);
+      if (graph.browserMask[filename]) {
+        return;
+      }
+      graph.browserMask[filename] = true;
+      mkpath.sync(path.dirname(filename));
+      fs.writeFileSync(filename,
+          '// Generated to mask module via package.json#browser.\n' +
+          'module.exports = {};\n');
+      if (graph.browserMask[pkg]) {
+        return;
+      }
+      graph.browserMask[maskedPkg] = true;
+      fs.writeFileSync(maskedPkg,
+          '{"Generated to mask module via package.json#browser":true}\n');
+    });
+  });
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
   // will not be stable.
@@ -305,8 +374,19 @@ exports.getGraph = function(entryModules, config) {
           relativePath(process.cwd(), row.id)));
       topo.addNode(id, id);
       const deps = edges[id] = Object.keys(row.deps).sort().map(function(dep) {
-        return unifyPath(relativePath(process.cwd(),
+        //const depId = row.deps[dep];
+        const relPathtoDep = unifyPath(relativePath(process.cwd(),
             row.deps[dep]));
+
+        // TODO(erwimm): don't parse package.json, breaks closure right now.
+        // Non relative module path. Find the package.json.
+        //if (!/^\./.test(dep)) {
+        //var packageJson = findPackageJson(depId);
+        //if (packageJson) {
+        //graph.packages[packageJson] = true;
+        //}
+        //}
+        return relPathtoDep;
       });
       graph.deps[id] = deps;
       if (row.entry) {
@@ -325,7 +405,11 @@ exports.getGraph = function(entryModules, config) {
     graph.sorted = Array.from(topo.sort().keys()).reverse();
 
     setupBundles(graph);
+
     resolve(graph);
+
+    //buildUpCommon(graph);
+
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
   return promise;
@@ -419,7 +503,10 @@ function unifyPath(id) {
 
 const externs = [
   'build-system/amp.extern.js',
+  //'third_party/closure-compiler/externs/intersection_observer.js',
   'third_party/closure-compiler/externs/performance_observer.js',
+  //'third_party/closure-compiler/externs/shadow_dom.js',
+  //'third_party/closure-compiler/externs/streams.js',
   'third_party/closure-compiler/externs/web_animations.js',
   'third_party/moment/moment.extern.js',
   'third_party/react-externs/externs.js',
@@ -469,4 +556,31 @@ function compile(flagsArray) {
       }
     });
   });
+}
+
+// TODO(@cramforce): Unify with update-packages.js
+function patchWebAnimations() {
+  // Copies web-animations-js into a new file that has an export.
+  const patchedName = 'node_modules/web-animations-js/' +
+      'web-animations.install.js';
+  if (fs.existsSync(patchedName)) {
+    return;
+  }
+  let file = fs.readFileSync(
+      'node_modules/web-animations-js/' +
+      'web-animations.min.js').toString();
+  // Wrap the contents inside the install function.
+  file = 'exports.installWebAnimations = function(window) {\n' +
+      'var document = window.document;\n' +
+      file + '\n' +
+      '}\n';
+  fs.writeFileSync(patchedName, file);
+}
+
+// TODO(@cramforce): Unify with update-packages.js
+function patchDompurify() {
+  const name = 'node_modules/dompurify/package.json';
+  const file = fs.readFileSync(name).toString()
+      .replace('"browser": "dist/purify.js",', '');
+  fs.writeFileSync(name, file);
 }
