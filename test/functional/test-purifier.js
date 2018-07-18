@@ -44,15 +44,22 @@ describe('DOMPurify-based', () => {
     it('should allow script[type="application/json"]', () => {
       const html = '<script type="application/json">{}</script>';
       expect(purifyHtml(html)).to.equal(html);
-      // Should not allow insecure <script> tags following a secure one.
-      expect(purifyHtml(html + '<script>alert(1)</script>')).to.equal(html);
     });
 
     it('should allow script[type="application/ld+json"]', () => {
       const html = '<script type="application/ld+json">{}</script>';
       expect(purifyHtml(html)).to.equal(html);
-      // Should not allow insecure <script> tags following a secure one.
+    });
+
+    it('should not allow insecure <script> tags around secure ones', () => {
+      const html = '<script type="application/json">{}</script>';
+      // Should not allow an insecure tag following a secure one.
       expect(purifyHtml(html + '<script>alert(1)</script>')).to.equal(html);
+      // Should not allow an insecure tag preceding a secure one.
+      expect(purifyHtml('<script>alert(1)</script>' + html)).to.equal(html);
+      // Should not allow an insecure tag containing a secure one.
+      expect(purifyHtml('<script>alert(1)' +
+          '<script type="application/json">{}</script></script>')).to.equal('');
     });
   });
 
