@@ -66,106 +66,8 @@ const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
-// Each extension and version must be listed individually here.
-declareExtension('amp-3d-gltf', '0.1');
-declareExtension('amp-3q-player', '0.1');
-declareExtension('amp-access', '0.1', {hasCss: true});
-declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
-declareExtension('amp-access-laterpay', '0.2', {hasCss: true});
-declareExtension('amp-access-scroll', '0.1', {hasCss: true});
-declareExtension('amp-accordion', '0.1');
-declareExtension('amp-ad', '0.1', {hasCss: true});
-declareExtension('amp-ad-network-adsense-impl', 0.1);
-declareExtension('amp-ad-network-adzerk-impl', 0.1);
-declareExtension('amp-ad-network-doubleclick-impl', 0.1);
-declareExtension('amp-ad-network-fake-impl', 0.1);
-declareExtension('amp-ad-network-triplelift-impl', 0.1);
-declareExtension('amp-ad-network-cloudflare-impl', 0.1);
-declareExtension('amp-ad-network-gmossp-impl', 0.1);
-declareExtension('amp-ad-exit', 0.1);
-declareExtension('amp-addthis', '0.1');
-declareExtension('amp-analytics', '0.1');
-declareExtension('amp-anim', '0.1');
-declareExtension('amp-animation', '0.1');
-declareExtension('amp-apester-media', '0.1', {hasCss: true});
-declareExtension('amp-app-banner', '0.1', {hasCss: true});
-declareExtension('amp-audio', '0.1');
-declareExtension('amp-auto-ads', '0.1');
-declareExtension('amp-beopinion', '0.1');
-declareExtension('amp-bind', '0.1');
-declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
-declareExtension('amp-brid-player', '0.1');
-declareExtension('amp-brightcove', '0.1');
-declareExtension('amp-byside-content', '0.1', {hasCss: true});
-declareExtension('amp-kaltura-player', '0.1');
-declareExtension('amp-call-tracking', '0.1');
-declareExtension('amp-carousel', '0.1', {hasCss: true});
-declareExtension('amp-compare-slider', '0.1');
-declareExtension('amp-consent', '0.1', {hasCss: true});
-declareExtension('amp-crypto-polyfill', '0.1');
-declareExtension('amp-dailymotion', '0.1');
-declareExtension('amp-date-countdown', '0.1');
-declareExtension('amp-google-document-embed', '0.1');
-declareExtension('amp-dynamic-css-classes', '0.1');
-declareExtension('amp-experiment', '0.1');
-declareExtension('amp-facebook', '0.1');
-declareExtension('amp-facebook-comments', '0.1');
-declareExtension('amp-facebook-like', '0.1');
-declareExtension('amp-facebook-page', '0.1');
-declareExtension('amp-fit-text', '0.1', {hasCss: true});
-declareExtension('amp-font', '0.1');
-declareExtension('amp-form', '0.1', {hasCss: true});
-declareExtension('amp-fx-collection', '0.1');
-declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
-declareExtension('amp-geo', '0.1');
-declareExtension('amp-gfycat', '0.1');
-declareExtension('amp-gist', '0.1');
-declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
-declareExtension('amp-hulu', '0.1');
-declareExtension('amp-iframe', '0.1');
-declareExtension('amp-ima-video', '0.1');
-declareExtension('amp-image-lightbox', '0.1', {hasCss: true});
-declareExtension('amp-imgur', '0.1');
-declareExtension('amp-instagram', '0.1', {hasCss: true});
-declareExtension('amp-install-serviceworker', '0.1');
-declareExtension('amp-izlesene', '0.1');
-declareExtension('amp-jwplayer', '0.1');
-declareExtension('amp-lightbox', '0.1', {hasCss: true});
-declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
-declareExtension('amp-list', '0.1');
-declareExtension('amp-live-list', '0.1', {hasCss: true});
-declareExtension('amp-mathml', '0.1', {hasCss: true});
-declareExtension('amp-mowplayer', '0.1');
-declareExtension('amp-mustache', ['0.1', '0.2']);
-declareExtension('amp-next-page', '0.1', {hasCss: true});
-declareExtension('amp-nexxtv-player', '0.1');
-declareExtension('amp-o2-player', '0.1');
-declareExtension('amp-ooyala-player', '0.1');
-declareExtension('amp-pinterest', '0.1', {hasCss: true});
-declareExtension('amp-playbuzz', '0.1', {hasCss: true});
-declareExtension('amp-reach-player', '0.1');
-declareExtension('amp-reddit', '0.1');
-declareExtension('amp-riddle-quiz', '0.1');
-declareExtension('amp-share-tracking', '0.1');
-declareExtension('amp-sidebar', '0.1', {hasCss: true});
-declareExtension('amp-soundcloud', '0.1');
-declareExtension('amp-springboard-player', '0.1');
-declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
-declareExtension('amp-story', ['0.1', '1.0'], {
-  hasCss: true,
-  cssBinaries: [
-    'amp-story-bookend',
-    'amp-story-consent',
-    'amp-story-hint',
-    'amp-story-unsupported-browser-layer',
-    'amp-story-viewport-warning-layer',
-    'amp-story-info-dialog',
-    'amp-story-share',
-    'amp-story-share-menu',
-    'amp-story-system-layer',
-  ],
-});
 extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
 aliasBundles.forEach(c => {
   declareExtensionVersionAlias(c.name, c.version, c.latestVersion, c.options);
@@ -1589,7 +1491,7 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
+gulp.task('build', 'Builds the AMP library', maybeUpdatePackages, build, {
   options: {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
     extensions: '  Builds only the listed extensions.',
@@ -1598,16 +1500,16 @@ gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
 });
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
-gulp.task('check-types', 'Check JS types', ['update-packages'], checkTypes);
-gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
+gulp.task('check-types', 'Check JS types', maybeUpdatePackages, checkTypes);
+gulp.task('css', 'Recompile css to build directory', maybeUpdatePackages, css);
 gulp.task('default', 'Runs "watch" and then "serve"',
-    ['update-packages', 'watch'], serve, {
+    maybeUpdatePackages.concat(['watch']), serve, {
       options: {
         extensions: '  Watches and builds only the listed extensions.',
         noextensions: '  Watches and builds with no extensions.',
       },
     });
-gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
+gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
             'Great for profiling and debugging production code.',
@@ -1616,7 +1518,7 @@ gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
-    ['update-packages'], watch, {
+    maybeUpdatePackages, watch, {
       options: {
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',

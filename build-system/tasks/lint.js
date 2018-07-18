@@ -34,6 +34,8 @@ const options = {
 };
 let collapseLintResults = !!process.env.TRAVIS;
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+
 /**
  * Initializes the linter stream based on globs
  * @param {!Object} globs
@@ -193,7 +195,7 @@ function lint() {
 gulp.task(
     'lint',
     'Validates against Google Closure Linter',
-    ['update-packages'],
+    maybeUpdatePackages,
     lint,
     {
       options: {
