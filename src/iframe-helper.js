@@ -81,9 +81,15 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @param {!Element} iframe the iframe element who's context will trigger the
  *     event
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
+ * @param {boolean=} opt_isInsensitive is set to true if data is not considered
+ *     sensitive and event origin check doesn't need to take place
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
-function getOrCreateListenForEvents(parentWin, iframe, opt_is3P, opt_isInsensitive) {
+function getOrCreateListenForEvents(
+  parentWin,
+  iframe,
+  opt_is3P,
+  opt_isInsensitive) {
   const {origin} = parseUrlDeprecated(iframe.src);
   const sentinel = getSentinel_(iframe, opt_is3P);
   const listenSentinel = getListenForSentinel(parentWin, sentinel, true);
@@ -281,7 +287,7 @@ export function listenFor(
       parentWin,
       iframe,
       opt_is3P,
-      opt_isInsensitive,
+      opt_isInsensitive
   );
 
   let events = listenForEvents[typeOfMessage] ||
