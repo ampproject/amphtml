@@ -82,8 +82,8 @@ message AttrSpec {
   optional bool mandatory = 3;
   // Within the context of the tag, exactly one of the attributes tagged
   // with this identifier must be present. Per convention, this identifier
-  // should list the tags participating in the mandatory oneof, with or,
-  // e.g. "foo or bar or baz".
+  // should list the tags participating in the mandatory oneof:
+  // e.g. mandatory_oneof: "['foo', 'bar']"
   optional string mandatory_oneof = 12;
 
   // This would be a oneof, but this file only uses features in protobuf 2.5.0.
