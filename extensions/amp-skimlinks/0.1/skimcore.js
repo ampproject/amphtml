@@ -5,6 +5,8 @@ import DomainResolver from './affiliate-link-resolver';
 
 const PUB_CODE = '68019X1559797';
 
+
+
 // function attachClickHandler() {
 //   document.addEventListener('click', e => {
 //     const elt = e.target;
@@ -33,11 +35,16 @@ const PUB_CODE = '68019X1559797';
  */
 export function startSkimcore(context) {
   const domainResolverService = new DomainResolver(context.xhr, PUB_CODE);
-  const affiliateService = new AffiliateLinks(domainResolverService);
-
-  affiliateService.initialize({});
+  const affiliateService = new AffiliateLinks(
+      context.ampDoc,
+      domainResolverService.resolveUnknownLinks.bind(domainResolverService),
+      domainResolverService.getLinkAffiliateStatus.bind(domainResolverService),
+      {}
+  );
 }
 
+
+// https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
 function pageImpressionsTracking(context) {
   console.log('Page Impression');
   const data = {

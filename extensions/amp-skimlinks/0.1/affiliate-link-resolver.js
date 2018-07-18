@@ -15,7 +15,7 @@ export default class AffiliateLinkResolver {
 
   // Interface
   resolveUnknownLinks(links) {
-    // TODO: don't send duplicates and exluded domains
+    // TODO: don't send duplicates,remove exluded domains, remove internal link.
     const domains = links.map(this.getLinkDomain);
     const data = {
       pubcode: this.pubcode_,
@@ -34,9 +34,11 @@ export default class AffiliateLinkResolver {
     return this.xhr_.fetchJson(beaconUrl, postReq).then(res => {
       return res.json().then(data => {
         this.updateDomainResolverData_(domains, data);
-        this.updateBeaconData(data);
+        this.updateBeaconData_(data);
       });
     });
+
+    //return [{ link: a, status: X}, {...}]
   }
 
   // Interface
@@ -49,13 +51,13 @@ export default class AffiliateLinkResolver {
     return this.domains_[linkDomain] || LINK_STATUS__UNKNOWN;
   }
 
-  updateBeaconData(beaconData) {
+  updateBeaconData_(beaconData) {
     // TODO: Only update missing fields
     this.beaconData_ = beaconData;
   }
 
   updateDomainResolverData_(domains, data) {
-    console.log('data', data)
+    console.log('data', data);
 
     domains.forEach(domain => {
       const isAffiliateDomain = data.merchant_domains.indexOf(domain) !== -1;

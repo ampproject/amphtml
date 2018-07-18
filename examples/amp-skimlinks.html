@@ -7,6 +7,7 @@
     <link rel="canonical" href="http://nonblocking.io/">
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <meta name="amp-ad-enable-refresh" content="doubleclick=30">
+    <meta name="amp-link-variable-allowed-origin" content="https://skimjs-e2e-resources.storage.googleapis.com http://test-merchant.skimlinks.com">
     <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
     <script async custom-element="amp-skimlinks" src="/dist/v0/amp-skimlinks-0.1.max.js"></script>
     <!-- Import the `amp-list` component ... -->
@@ -46,14 +47,19 @@
     <amp-skimlinks width="auto" height="100" layout="fixed-height">
     </amp-skimlinks>
     <h1> Simple affiliated link </h1>
-    <a id="merchant-link" href="http://test-merchant.skimlinks.com/merchant_test.html">
+    <a id="merchant-link" href="http://test-merchant.skimlinks.com/merchant_test.html?abc=QUERY_PARAM(bar, default)&bar=test1" data-amp-replace="QUERY_PARAM">
         Merchant
     </a>
 
     <h2> Non-merchant link </h2>
-    <a id="non-merchant-link" href="https://skimjs-e2e-resources.storage.googleapis.com/publisher_test.html">
+    <a id="non-merchant-link" href="https://skimjs-e2e-resources.storage.googleapis.com/publisher_test.html?test=" >
         Just a random non-merchant site.
     </a>
+
+    <div>
+        <a href="http://localhost:8000/examples/amp-skimlinks.html?abc=QUERY_PARAM(bar, default)&bar=test1" data-amp-replace="QUERY_PARAM"> nonblocking </a>
+        <br />
+    </div>
 
     <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
         <template type="amp-mustache" id="amp-template-id">

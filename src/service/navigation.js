@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../amp-events';
 import {Services} from '../services';
 import {
   closestByTag,
@@ -21,6 +22,7 @@ import {
   isIframed,
   openWindowDialog,
 } from '../dom';
+import {createCustomEvent} from '../event-helper';
 import {dev, user} from '../log';
 import {
   getExtraParamsUrl,
@@ -42,6 +44,12 @@ const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
+const anchorClickActions = {
+  NAVIGATE_A2A: 'navigate-a2a',
+  NAVIGATE_CUSTOM_PROTOCOL: 'navigate-custom-protocol',
+  NAVIGATE_OUTBOUND: 'navigate-outbound',
+  OPEN_CONTEXT_MENU: 'open-context-menu',
+}
 /**
  * Install navigation service for ampdoc, which handles navigations from anchor
  * tag clicks and other runtime features like AMP.navigateTo().
@@ -219,8 +227,10 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
+
+    let clickActionType = null;
     if (e.type == EVENT_TYPE_CLICK) {
-      this.handleClick_(target, e);
+      clickActionType = this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
       // Handles contextmenu click. Note that currently this only deals
       // with url variable substitution and expansion, as there is
@@ -230,7 +240,23 @@ export class Navigation {
       // TODO(alabiaga): investigate fix for handling A2A and custom link
       // protocols.
       this.expandVarsForAnchor_(target);
+      clickActionType = anchorClickActions.OPEN_CONTEXT_MENU;
     }
+
+    this.dispatchAnchorClickEvent_(e, target, clickActionType);
+  }
+
+  dispatchAnchorClickEvent_(e, anchor, clickActionType) {
+    if (!clickActionType) {
+      return;
+    }
+
+    const event = createCustomEvent(this.ampdoc.win,
+        AmpEvents.ANCHOR_CLICK,
+        {clickEvent: e, clickActionType, anchor},
+        {bubbles: true});
+
+    this.ampdoc.getRootNode().dispatchEvent(event);
   }
 
   /**
@@ -245,16 +271,18 @@ export class Navigation {
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
-      return;
+      return anchorClickActions.NAVIGATE_A2A;
     }
 
     // Handle navigating to custom protocol if applicable.
     if (this.handleCustomProtocolClick_(e, target, location)) {
-      return;
+      return anchorClickActions.NAVIGATE_CUSTOM_PROTOCOL;
     }
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
+
+    return anchorClickActions.NAVIGATE_OUTBOUND;
   }
 
   /**

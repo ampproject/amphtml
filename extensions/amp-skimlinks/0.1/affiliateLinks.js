@@ -1,28 +1,42 @@
+import {AmpEvents} from '../../../src/amp-events';
+import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
+
+
 export const LINK_STATUS__AFFILIATE = 'affiliate';
 export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
 export const LINK_STATUS__IGNORE_LINK = 'ignore';
 export const LINK_STATUS__UNKNOWN = 'unkonwn';
 
 export default class AffiliateLinks {
-  constructor(domainResolver) {
-    this.domainResolver_ = domainResolver;
-    this.linkMap_ = new Map();
-  }
+  constructor(ampDoc, resolveUnknownLinks, getLinkAffiliateStatus, options) {
+    user().assert(typeof resolveUnknownLinks === 'function', 'resolveUnknownLinks is required and should be a function.');
+    user().assert(typeof getLinkAffiliateStatus === 'function', 'getLinkAffiliateStatus is required and should be a function.');
+    options = options || {};
 
-  initialize(options) {
+    this.resolveUnknownLinks_ = resolveUnknownLinks;
+    this.getLinkAffiliateStatus_ = getLinkAffiliateStatus;
+    this.linkMap_ = new Map();
+    this.ampDoc_ = ampDoc;
+
+    this.urlReplacement_ = Services.urlReplacementsForDoc(ampDoc);
+
     this.onAffiliate_ = options.onAffiliatedClick;
     this.onNonAffiliate_ = options.onNonAffiliate;
     this.linkSelector_ = options.linkSelector;
 
-    document.addEventListener('click', this.clickHandler_.bind(this));
-
+    this.installGlobalEventListener_(ampDoc.getRootNode());
     this.reset();
   }
 
-  addDomChangeListener_() {
-    // TODO
-    //Listen for event
-    this.reset();
+  installGlobalEventListener_(rootNode) {
+    rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.onDomChanged.bind(this));
+    rootNode.addEventListener(AmpEvents.ANCHOR_CLICK, this.clickHandler_.bind(this));
+  }
+
+  onDomChanged() {
+    console.log("ON DOM CHANGED");
+    // this.reset();
   }
 
 
@@ -35,12 +49,8 @@ export default class AffiliateLinks {
     // If there are some unresolved links, ask beacon.
     if (unknownLinks.length) {
       this.resolveUnknownLinks_(unknownLinks).then(() => {
-        // Ignore if there are links that are still unknown.
         const stillUnknown = this.updateLinkMap_(unknownLinks);
-        // TODO: If DEV ONLY
-        if (stillUnknown.length) {
-          console.error("You have some links still unknown after trying to resolve them.")
-        }
+        dev().assert(stillUnknown.length === 0, 'Some links are still unknown after calling resolveUnknownLinks(), check your implementation of the function.');
       });
     }
   }
@@ -62,24 +72,23 @@ export default class AffiliateLinks {
     return unknownLinks;
   }
 
-  clickHandler_(e) {
-    e.preventDefault();
-    const link = e.target;
-    const linkState = this.linkMap_.get(link);
-    console.log('Received click', link, linkState);
+  clickHandler_(customEvent) {
+    const {clickActionType, anchor} = customEvent.detail;
+
+    if (clickActionType !== 'navigate-outbound' && clickActionType !== 'open-context-menu') {
+      return;
+    }
+
+    const linkState = this.linkMap_.get(anchor);
+    if (linkState && linkState.status === LINK_STATUS__AFFILIATE) {
+      const initialHref = anchor.href;
+      anchor.href = `https://go.redirectingat.com?id=68019X1559797&url=${initialHref}`;
+    }
+
+    console.log('Received click', anchor, linkState);
   }
 
   getLinksInDOM_() {
     return document.querySelectorAll(this.linkSelector_ || 'a');
-  }
-
-  resolveUnknownLinks_(unknownLinks) {
-    // TODO: Throw if resolveUnknownLinks is not a function
-    return this.domainResolver_.resolveUnknownLinks(unknownLinks);
-  }
-
-  getLinkAffiliateStatus_(link) {
-    // TODO: Throw if getLinkAffiliateStatus is not a function
-    return this.domainResolver_.getLinkAffiliateStatus(link);
   }
 }

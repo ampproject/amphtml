@@ -29,6 +29,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     const context = {
       xhr: Services.xhrFor(this.win),
       analytics: this.analytics_,
+      ampDoc: this.getAmpDoc(),
     };
     const signals = this.signals();
     signals.whenSignal(CommonSignals.LOAD_START).then(() => console.log('LOAD_START'));
