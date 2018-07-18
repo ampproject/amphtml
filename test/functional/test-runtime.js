@@ -49,6 +49,7 @@ describes.fakeWin('runtime', {
   let ampdocService;
   let ampdocServiceMock;
   let extensionElementIndex;
+  let elements;
 
   beforeEach(() => {
     win = env.win;
@@ -64,6 +65,13 @@ describes.fakeWin('runtime', {
     win.services = {
       ampdoc: {obj: ampdocService},
     };
+    elements = [];
+    const {createElement} = win.document;
+    win.document.createElement = function() {
+      const ele = createElement.apply(this, arguments);
+      elements.push(ele);
+      return ele;
+    };
     const ampdoc = new AmpDocSingle(win);
     ampdocService.getAmpDoc = () => ampdoc;
     installDocumentStateService(win);
@@ -74,12 +82,13 @@ describes.fakeWin('runtime', {
   });
 
 
-  function regularExtension(fn, opt_version) {
+  function regularExtension(fn, opt_version, intermediateBundles) {
     return {
       n: 'amp-test-element' + extensionElementIndex++,
       f: fn,
       // Default version of uncompiled sources.
       v: opt_version || '$internalRuntimeVersion$',
+      i: intermediateBundles,
     };
   }
 
@@ -387,6 +396,61 @@ describes.fakeWin('runtime', {
     yield waitNext(promise);
     expect(progress).to.equal('1234');
     expect(queueExtensions).to.have.length(0);
+  });
+
+  it('should load intermediate bundles in the right order', function* () {
+    let progress = '';
+    function loadTick() {
+      return Promise.resolve().then(() => {
+        return Promise.resolve();
+      });
+    }
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += 'e0';
+    }, 'version', ['inter0']));
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += 'e1';
+    }, 'version', ['inter0', 'inter1']));
+    win.AMP.push({
+      n: 'inter0',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'i0';
+      },
+    });
+    const promise = adopt(win);
+    runChunksForTesting(win.document);
+    yield promise;
+    expect(elements).to.have.length(3);
+    expect(elements[1].src).to
+        .match(/\/rtv\/\$internalRuntimeVersion\$\/v0\/inter0-0\.1\.js$/);
+    expect(elements[2].src).to
+        .match(/inter1-0\.1\.js$/);
+    expect(progress).to.equal('i0');
+    elements[1].onload();
+    yield loadTick();
+    expect(progress).to.equal('i0e0');
+    win.AMP.push({
+      n: 'inter1',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'i1';
+      },
+    });
+    yield loadTick();
+    expect(progress).to.equal('i0e0i1');
+    elements[2].onload();
+    yield loadTick();
+    expect(progress).to.equal('i0e0i1e1');
+    win.AMP.push(regularExtension(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += 'e2';
+    }, 'version', ['inter0', 'inter1']));
+    expect(elements).to.have.length(3);
+    yield loadTick();
+    expect(progress).to.equal('i0e0i1e1e2');
   });
 
   it('should load correct extension version', function* () {

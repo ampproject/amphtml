@@ -70,6 +70,7 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from './experiments';
+import {loadIntermediateBundles} from './intermediate-bundle-loader';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
@@ -244,8 +245,13 @@ function adoptShared(global, callback) {
    * @param {function(!Object,!Object)|ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
+    let delayExecution = iniPromise;
+    if (fnOrStruct.i) {
+      delayExecution = Promise.all(
+          [iniPromise, loadIntermediateBundles(global, fnOrStruct.i)]);
+    }
     const register = () => {
-      iniPromise.then(() => {
+      delayExecution.then(() => {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {

@@ -41,6 +41,7 @@ Element.prototype.dataset;
  *   as early as possible. Currently this is primarily used
  *   for viewer communication setup.
  * - v is the release version
+ * - i Array of bundles to load before executing this extension.
  * @constructor @struct
  */
 function ExtensionPayload() {}
@@ -56,6 +57,9 @@ ExtensionPayload.prototype.p;
 
 /** @type {string} */
 ExtensionPayload.prototype.v;
+
+/** @type {!Array<string>|undefined} */
+ExtensionPayload.prototype.i;
 
 
 /**
