@@ -34,7 +34,9 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
+  getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
+  resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -161,6 +163,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
 
+    afterEach(() => {
+      resetTokensToInstancesMap();
+    });
+
     it('should ignore creative-size header for fluid response', () => {
       impl.isFluid_ = true;
       impl.element.setAttribute('height', 'fluid');
@@ -270,6 +276,29 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           })).to.deep.equal(size);
           expect(fireDelayedImpressionsSpy.withArgs(
               'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
+        });
+    it('should consume pageview state tokens when header is present',
+        () => {
+          const removePageviewStateTokenSpy =
+              sandbox.spy(impl, 'removePageviewStateToken');
+          const setPageviewStateTokenSpy =
+              sandbox.spy(impl, 'setPageviewStateToken');
+          expect(impl.extractSize({
+            get(name) {
+              switch (name) {
+                case 'amp-ff-pageview-tokens':
+                  return 'DUMMY_TOKEN';
+                default:
+                  return undefined;
+              }
+            },
+            has(name) {
+              return !!this.get(name);
+            },
+          })).to.deep.equal(size);
+          expect(removePageviewStateTokenSpy).to.be.calledOnce;
+          expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be
+              .calledOnce;
         });
   });
 
@@ -464,10 +493,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       toggleExperiment(env.win, 'dc-use-attr-for-format', false);
       doc.body.removeChild(element);
       env.win['ampAdGoogleIfiCounter'] = 0;
+      resetTokensToInstancesMap();
     });
 
     it('returns the right URL', () => {
       const impl = new AmpAdNetworkDoubleclickImpl(element);
+      const impl2 = new AmpAdNetworkDoubleclickImpl(element);
+      impl.setPageviewStateToken('abc');
+      impl2.setPageviewStateToken('def');
       impl.experimentIds = ['12345678'];
       return impl.getAdUrl().then(url => {
         [
@@ -507,6 +540,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
+          /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
     });
@@ -1406,6 +1440,30 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
           impl.setPageLevelExperiments('');
           expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
+      });
+
+      describe('#getPageviewStateTokensForAdRequest', () => {
+
+        beforeEach(() => {
+          resetTokensToInstancesMap();
+        });
+
+        it('should return the tokens associated with instances that are not ' +
+         'passed to it as an argument', () => {
+          const element1 = doc.createElement('amp-ad');
+          element1.setAttribute('type', 'doubleclick');
+          element1.setAttribute('data-ad-client', 'doubleclick');
+          const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+          impl1.setPageviewStateToken('DUMMY_TOKEN_1');
+          const element2 = doc.createElement('amp-ad');
+          element2.setAttribute('type', 'doubleclick');
+          element2.setAttribute('data-ad-client', 'doubleclick');
+          const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
+          impl2.setPageviewStateToken('DUMMY_TOKEN_2');
+          const instances = [impl1];
+          expect(getPageviewStateTokensForAdRequest(instances)).to.deep.equal(
+              ['DUMMY_TOKEN_2']);
         });
       });
     });
