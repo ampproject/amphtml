@@ -240,7 +240,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
-      animation: 'none',
+      'animation': 'none',
     });
     renderStartedNoInline(doc);
   };

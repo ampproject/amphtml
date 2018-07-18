@@ -34,6 +34,7 @@ const rimraf = require('rimraf');
 const source = require('vinyl-source-stream');
 const touch = require('touch');
 const watchify = require('watchify');
+const wrappers = require('./build-system/compile-wrappers');
 const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
@@ -284,15 +285,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       watch,
       preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
-      // If there is a sync JS error during initial load,
-      // at least try to unhide the body.
-      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-          'setTimeout(function(){' +
-          'var s=document.body.style;' +
-          's.opacity=1;' +
-          's.visibility="visible";' +
-          's.animation="none";' +
-          's.WebkitAnimation="none;"},1000);throw e};',
+      wrapper: wrappers.mainBinary,
     }),
     compileJs('./src/', 'amp.js', './dist', {
       toName: 'amp-esm.js',
@@ -303,15 +296,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       watch,
       preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
-      // If there is a sync JS error during initial load,
-      // at least try to unhide the body.
-      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-          'setTimeout(function(){' +
-          'var s=document.body.style;' +
-          's.opacity=1;' +
-          's.visibility="visible";' +
-          's.animation="none";' +
-          's.WebkitAnimation="none;"},1000);throw e};',
+      wrapper: wrappers.mainBinary,
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -600,10 +585,6 @@ function buildExtensionCss(path, name, version, options) {
  */
 function buildExtensionJs(path, name, version, options) {
   const filename = options.filename || name + '.js';
-  if (options.loadPriority && options.loadPriority != 'high') {
-    throw new Error('Unsupported loadPriority: ' + options.loadPriority);
-  }
-  const priority = options.loadPriority ? 'p:"high",' : '';
   return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,
@@ -614,8 +595,7 @@ function buildExtensionJs(path, name, version, options) {
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
-      : `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
-      `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
+      : wrappers.extension(name, options.loadPriority),
   }));
 }
 
@@ -1069,7 +1049,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   // Default wrapper for `gulp build`.
   // We don't need an explicit function wrapper like we do for `gulp dist`
   // because Babel handles that for you.
-  const wrapper = options.wrapper || '<%= contents %>';
+  const wrapper = options.wrapper || wrappers.none;
 
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)

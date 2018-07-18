@@ -159,6 +159,8 @@ function adoptShared(global, callback) {
 
   global.AMP = {
     win: global,
+    // Might not be available in tests.
+    '_': global.AMP ? global.AMP['_'] : undefined,
   };
 
   // `AMP.extension()` function is only installed in a non-minified mode.
@@ -239,13 +241,13 @@ function adoptShared(global, callback) {
   const iniPromise = callback(global, extensions);
 
   /**
-   * @param {function(!Object)|ExtensionPayload} fnOrStruct
+   * @param {function(!Object,!Object)|ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
     const register = () => {
       iniPromise.then(() => {
         if (typeof fnOrStruct == 'function') {
-          fnOrStruct(global.AMP);
+          fnOrStruct(global.AMP, global.AMP._);
         } else {
           extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
         }
