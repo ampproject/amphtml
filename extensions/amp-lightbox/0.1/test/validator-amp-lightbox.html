@@ -29,8 +29,25 @@
 </head>
 <body>
   <!-- Valid -->
-  <amp-lightbox id="quote-lb" layout="nodisplay">
+  <amp-lightbox id="lb-0" layout="nodisplay">
+
   <!-- Invalid: layout must be nodisplay. -->
   <amp-lightbox width="512" height="360"></amp-lightbox>
+
+  <!-- Valid -->
+  <amp-lightbox id="lb-2" layout="nodisplay" animate-in="fade-in">
+  </amp-lightbox>
+
+  <!-- Valid -->
+  <amp-lightbox id="lb-3" layout="nodisplay" animate-in="fly-in-bottom">
+  </amp-lightbox>
+
+  <!-- Valid -->
+  <amp-lightbox id="lb-4" layout="nodisplay" animate-in="fly-in-top">
+  </amp-lightbox>
+
+  <!-- Invalid: invalid `animate-in` value -->
+  <amp-lightbox id="lb-5" layout="nodisplay" animate-in="xmas-lights">
+  </amp-lightbox>
 </body>
 </html>
