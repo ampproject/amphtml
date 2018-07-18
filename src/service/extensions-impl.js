@@ -43,7 +43,7 @@ import {installStylesForDoc, installStylesLegacy} from '../style-installer';
 import {map} from '../utils/object';
 import {toWin} from '../types';
 import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+  'document-register-element/build/document-register-element.patched';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
