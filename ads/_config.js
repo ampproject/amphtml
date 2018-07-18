@@ -615,6 +615,10 @@ export const adConfig = {
     ],
   },
 
+  miximedia: {
+    renderStartImplemented: true,
+  },
+
   mixpo: {
     prefetch: 'https://cdn.mixpo.com/js/loader.js',
     preconnect: [
