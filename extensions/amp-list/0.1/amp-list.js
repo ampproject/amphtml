@@ -200,7 +200,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.hasAttribute('reset-on-refresh')) {
       // Placeholder and loading don't need a mutate context.
       this.togglePlaceholder(true);
-      this.toggleLoading(true);
+      this.toggleLoading(true, /* opt_force */ true);
       this.mutateElement(() => {
         this.toggleFallback_(false, /* mutate */ false);
         removeChildren(dev().assertElement(this.container_));

@@ -83,7 +83,7 @@ describes.realWin('amp-list component', {
 
     if (opts.resetOnRefresh) {
       listMock.expects('togglePlaceholder').withExactArgs(true).once();
-      listMock.expects('toggleLoading').withExactArgs(true).once();
+      listMock.expects('toggleLoading').withExactArgs(true, true).once();
     }
     listMock.expects('toggleLoading').withExactArgs(false).once();
     listMock.expects('togglePlaceholder').withExactArgs(false).once();
@@ -419,7 +419,7 @@ describes.realWin('amp-list component', {
 
         // Expect display of placeholder/loading but no fetch.
         listMock.expects('togglePlaceholder').withExactArgs(true).once();
-        listMock.expects('toggleLoading').withExactArgs(true).once();
+        listMock.expects('toggleLoading').withExactArgs(true, true).once();
 
         element.setAttribute('src', 'https://new.com/list.json');
         list.mutatedAttributesCallback({'src': items});
