@@ -126,7 +126,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         expect(triggerAnalyticsEventSpy).to.be.called;
         expect(triggerAnalyticsEventSpy).to.be.calledWith(
             win.document.getElementById('amp-lightbox-gallery'),
-            'descriptionToggled');
+            'controlsToggled');
       });
     });
 

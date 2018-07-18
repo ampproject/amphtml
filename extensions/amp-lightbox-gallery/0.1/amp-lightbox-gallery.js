@@ -458,8 +458,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.measureMutateElement(measureOverflowState, mutateOverflowState);
       });
     }
-    triggerAnalyticsEvent(this.element, 'descriptionToggled', {});
-
   }
 
   /**
@@ -467,7 +465,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   toggleDescriptionOverflow_() {
-    triggerAnalyticsEvent(this.element, 'descriptionExpanded', {});
+    triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled', {});
     let isInStandardMode, isInOverflowMode, descriptionOverflows;
     const measureOverflowState = () => {
       isInStandardMode = this.descriptionBox_.classList
@@ -637,6 +635,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.hideControls_();
       }
     }
+    triggerAnalyticsEvent(this.element, 'controlsToggled', {});
   }
 
   /**
