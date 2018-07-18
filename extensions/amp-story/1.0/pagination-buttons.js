@@ -155,7 +155,7 @@ export class PaginationButtons {
     /** @private @const {!PaginationButton} */
     this.forwardButton_ =
         new PaginationButton(doc, ForwardButtonStates.NEXT_PAGE, storeService,
-          win);
+            win);
 
     /** @private @const {!PaginationButton} */
     this.backButton_ =
