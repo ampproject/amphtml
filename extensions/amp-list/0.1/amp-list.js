@@ -35,17 +35,6 @@ import {removeChildren} from '../../../src/dom';
 const TAG = 'amp-list';
 
 /**
- * Option for setting interaction with amp-bind i.e. when to scan for and
- * evaluates bindings in rendered children elements.
- * @enum {string}
- */
-const Binding = {
-  ALWAYS: 'always',
-  REFRESH: 'refresh',
-  NO: 'no',
-};
-
-/**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
  * the spec.
  */
@@ -93,9 +82,6 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
     this.bind_ = null;
 
-    /** @private {!Binding} */
-    this.binding_ = Binding.ALWAYS;
-
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.fetchList_();
@@ -124,10 +110,6 @@ export class AmpList extends AMP.BaseElement {
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
-    }
-
-    if (this.element.hasAttribute('binding')) {
-      this.binding_ = this.element.getAttribute('binding').toLowerCase();
     }
 
     Services.bindForDocOrNull(this.element).then(bind => {
@@ -316,22 +298,23 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   updateBindingsForElements_(elements) {
-    // Never: Always skip binding update.
-    if (this.binding_ === Binding.NO ||
-        isExperimentOn(this.win, 'amp-list-bind-never')) {
+    const binding = this.element.getAttribute('binding');
+    // "no": Always skip binding update.
+    if (binding === 'no' ||
+        isExperimentOn(this.win, 'amp-list-binding-no')) {
       return Promise.resolve(elements);
     }
-    // Refresh only: Do _not_ block on retrieval of the Bind service before the
+    // "refresh": Do _not_ block on retrieval of the Bind service before the
     // first mutation (AMP.setState).
-    if (this.binding_ === Binding.REFRESH ||
-        isExperimentOn(this.win, 'amp-list-bind-refresh')) {
+    if (binding === 'refresh' ||
+        isExperimentOn(this.win, 'amp-list-binding-refresh')) {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return this.updateBindingsWith_(this.bind_, elements);
       } else {
         return Promise.resolve(elements);
       }
     }
-    // Always (default): wait for Bind to scan for and evalute any bindings
+    // "always" (default): Wait for Bind to scan for and evalute any bindings
     // in the newly rendered `elements`.
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {

@@ -18,7 +18,6 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-list component', {
   amp: {
@@ -422,9 +421,33 @@ describes.realWin('amp-list component', {
       });
     });
 
-    describe('`fast-amp-list` experiment', () => {
+    describe('no `binding` attribute', () => {
+      it('should call scanAndApply()', function*() {
+        const items = [{title: 'Title1'}];
+        const output = [doc.createElement('div')];
+        expectFetchAndRender(items, output);
+        yield list.layoutCallback();
+        expect(bind.scanAndApply).to.have.been.calledOnce;
+      });
+    });
+
+    describe('binding="always"', () => {
       beforeEach(() => {
-        toggleExperiment(win, 'fast-amp-list', true, true);
+        element.setAttribute('binding', 'always');
+      });
+
+      it('should call scanAndApply()', function*() {
+        const items = [{title: 'Title1'}];
+        const output = [doc.createElement('div')];
+        expectFetchAndRender(items, output);
+        yield list.layoutCallback();
+        expect(bind.scanAndApply).to.have.been.calledOnce;
+      });
+    });
+
+    describe('binding="refresh"', () => {
+      beforeEach(() => {
+        element.setAttribute('binding', 'refresh');
       });
 
       it('should not call scanAndApply() before FIRST_MUTATE', function*() {
@@ -432,7 +455,6 @@ describes.realWin('amp-list component', {
         const output = [doc.createElement('div')];
         expectFetchAndRender(items, output);
         yield list.layoutCallback();
-
         expect(bind.scanAndApply).to.not.have.been.called;
       });
 
@@ -440,14 +462,26 @@ describes.realWin('amp-list component', {
         bind.signals = () => {
           return {get: name => (name === 'FIRST_MUTATE')};
         };
-
         const items = [{title: 'Title1'}];
         const output = [doc.createElement('div')];
         expectFetchAndRender(items, output);
         yield list.layoutCallback();
-
         expect(bind.scanAndApply).to.have.been.calledOnce;
         expect(bind.scanAndApply).calledWithExactly(output, [list.container_]);
+      });
+    });
+
+    describe('binding="no"', () => {
+      beforeEach(() => {
+        element.setAttribute('binding', 'no');
+      });
+
+      it('should not call scanAndApply()', function*() {
+        const items = [{title: 'Title1'}];
+        const output = [doc.createElement('div')];
+        expectFetchAndRender(items, output);
+        yield list.layoutCallback();
+        expect(bind.scanAndApply).to.not.have.been.called;
       });
     });
   }); // with amp-bind
