@@ -148,7 +148,7 @@ function adoptShared(global, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
-  /** @const {!Array<function(!Object)|ExtensionPayload>} */
+  /** @const {!Array<function(!Object)|!ExtensionPayload>} */
   const preregisteredExtensions = global.AMP || [];
 
   installExtensionsService(global);
@@ -241,7 +241,7 @@ function adoptShared(global, callback) {
   const iniPromise = callback(global, extensions);
 
   /**
-   * @param {function(!Object,!Object)|ExtensionPayload} fnOrStruct
+   * @param {function(!Object,!Object)|!ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
     const register = () => {
@@ -290,7 +290,7 @@ function adoptShared(global, callback) {
   maybePumpEarlyFrame(global, () => {
     /**
      * Registers a new custom element.
-     * @param {function(!Object)|ExtensionPayload} fnOrStruct
+     * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
      */
     global.AMP.push = function(fnOrStruct) {
       if (maybeLoadCorrectVersion(global, fnOrStruct)) {
@@ -335,7 +335,7 @@ function adoptShared(global, callback) {
 
 /**
  * @param {!./service/extensions-impl.Extensions} extensions
- * @param {function(!Object)|ExtensionPayload} fnOrStruct
+ * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
  * @return {!Promise}
  */
 function preloadDeps(extensions, fnOrStruct) {
@@ -358,7 +358,7 @@ function preloadDeps(extensions, fnOrStruct) {
 
 /**
  * @param {!Window} global Global scope to adopt.
- * @param {function(!Object)|ExtensionPayload} fnOrStruct
+ * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
  * @param {function()} register
  */
 function startRegisterOrChunk(global, fnOrStruct, register) {
@@ -899,7 +899,7 @@ export class MultidocManager {
  * to have the same AMP release version.
  *
  * @param {!Window} win
- * @param {function(!Object)|!ExtensionPayload} fnOrStruct
+ * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
