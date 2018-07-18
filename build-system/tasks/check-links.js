@@ -25,6 +25,7 @@ const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
 const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
 /**
  * Parses the list of files in argv, or extracts it from the commit log.
@@ -175,7 +176,7 @@ function runLinkChecker(markdownFile) {
 gulp.task(
     'check-links',
     'Detects dead links in markdown files',
-    ['update-packages'],
+    maybeUpdatePackages,
     checkLinks,
     {
       options: {

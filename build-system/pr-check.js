@@ -389,11 +389,15 @@ const command = {
   buildValidator: function() {
     timedExecOrDie('gulp validator');
   },
+  updatePackages: function() {
+    timedExecOrDie('gulp update-packages');
+  },
 };
 
 function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
+    command.updatePackages();
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
@@ -409,6 +413,7 @@ function runAllCommands() {
     command.buildValidator();
   }
   if (process.env.BUILD_SHARD == 'integration_tests') {
+    command.updatePackages();
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
     // Disable bundle-size check on release branch builds.
@@ -544,6 +549,7 @@ function main() {
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
+    command.updatePackages();
     if (buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('RUNTIME')) {
       command.testBuildSystem();
@@ -570,6 +576,7 @@ function main() {
   }
 
   if (process.env.BUILD_SHARD == 'integration_tests') {
+    command.updatePackages();
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
         buildTargets.has('VISUAL_DIFF') ||

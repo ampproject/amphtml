@@ -35,6 +35,7 @@ const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
 const red = msg => log(colors.red(msg));
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
 /**
  * @typedef {{
@@ -297,5 +298,5 @@ function flatten(arr) {
 gulp.task(
     'dep-check',
     'Runs a dependency check on each module',
-    ['update-packages', 'css'],
+    maybeUpdatePackages.concat(['css']),
     depCheck);
