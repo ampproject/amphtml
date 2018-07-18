@@ -209,8 +209,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should load delayed impression amp-pixels with fluid', () => {
-      const fireDelayedImpressionsSpy =
-          sandbox.spy(impl, 'fireDelayedImpressions');
       impl.isFluidRequest_ = true;
       expect(impl.extractSize({
         get(name) {
@@ -230,8 +228,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
     it('should not load delayed impression amp-pixels with fluid + multi-size',
         () => {
-          const fireDelayedImpressionsSpy =
-              sandbox.spy(impl, 'fireDelayedImpressions');
           sandbox.stub(impl, 'handleResize_');
           impl.isFluid_ = true;
           expect(impl.extractSize({
