@@ -14,8 +14,7 @@
       window.scroll(0, 100);
       // Give 1000ms for ad to load
       setTimeout(() => {
-        const ad = document.getElementsByTagName('amp-ad')[0];
-        ad.classList.add('ready-for-visual-diff');
+        window.parent.postMessage('ready-for-visual-diff', '*');
       }, 1000);
     }, 1000);
   </script>
