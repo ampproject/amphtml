@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
@@ -137,6 +138,16 @@ export class AmpSelector extends AMP.BaseElement {
         this.toggle_(args['index'], args['value']);
       }
     }, ActionTrust.LOW);
+
+    // Listening to this event
+    // Simply listening for mutation would not work
+    this.element.addEventListener(AmpEvents.DOM_UPDATE, unusedEvent => {
+      // Clear prev states
+      this.options_ = [];
+      this.selectedOptions_ = [];
+      this.inputs_ = [];
+      this.init_();
+    });
   }
 
   /** @override */
