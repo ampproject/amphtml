@@ -32,8 +32,15 @@ const TAG = 'amp-sidebar toolbar';
 /** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
 
+/**
+  * For browsers with bottom nav bars the content towards the bottom
+  * end of the sidebar is cut off.
+  * Currently Safari is the only browser with a nav bar on the bottom
+  * so we set the width of this block to the width of Safari's nav bar.
+  * Source for value: https://github.com/WebKit/webkit/blob/de9875e914c8fda3f46247cd482ce4f849ddad0a/Source/WebInspectorUI/UserInterface/Views/Variables.css#L119
+ */
 /** @private @const {string} */
-const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
+const IOS_SAFARI_BOTTOMBAR_HEIGHT = '29px';
 
 /**  @enum {string} */
 const SidebarEvents = {
