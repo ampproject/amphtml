@@ -115,7 +115,7 @@ class AmpWorker {
      */
     this.counter_ = 0;
 
-    /** @const @private {!../service/performance.Performance} */
+    /** @const @private {!../service/performance-impl.Performance} */
     this.performance_ = Services.performanceFor(win);
 
     /**
