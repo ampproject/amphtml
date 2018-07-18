@@ -65,6 +65,7 @@ export class FrameOverlayManager {
       this.isExpanded_ = true;
       this.viewportChangedSinceExpand_ = false;
       this.collapsedRect_ = collapsedRect;
+
       callback(expandedRect);
     });
   }

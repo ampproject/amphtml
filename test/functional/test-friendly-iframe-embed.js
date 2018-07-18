@@ -22,7 +22,7 @@ import {
   getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
-  renderCloseButtonHeader,
+  renderClickableCloseButtonHeader,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
@@ -824,7 +824,7 @@ describe('friendly-iframe-embed', () => {
     });
   });
 
-  describe('#renderCloseButtonHeader', () => {
+  describe('#renderClickableCloseButtonHeader', () => {
 
     const win = document.defaultView;
 
@@ -832,7 +832,7 @@ describe('friendly-iframe-embed', () => {
       const ampAdParentMock = document.createElement('div');
       const ampLightboxMock = document.createElement('div');
 
-      const el = renderCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
+      const el = renderClickableCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
 
       expect(el.tagName.toLowerCase()).to.equal('i-amphtml-ad-close-header');
       expect(el.getAttribute('role')).to.equal('button');
@@ -853,7 +853,7 @@ describe('friendly-iframe-embed', () => {
       const ampAdParentMock = document.createElement('div');
       const ampLightboxMock = document.createElement('div');
 
-      const el = renderCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
+      const el = renderClickableCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
 
       const execute = sandbox.spy();
       const actionServiceMock = {execute};

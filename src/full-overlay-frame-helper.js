@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {htmlFor} from './static-template';
 import {px, resetStyles, setStyles, translate} from './style';
 
 
@@ -27,11 +28,12 @@ import {px, resetStyles, setStyles, translate} from './style';
  */
 export function centerFrameUnderVsyncMutate(
   iframe, iframeRect, viewportSize, transitionTimeMs) {
+
   const translateX = px(
-      (viewportSize.width / 2 - iframeRect.width / 2) - iframeRect.left);
+      (viewportSize.width / 2) - (iframeRect.width / 2) - iframeRect.left);
 
   const translateY = px(
-      (viewportSize.height / 2 - iframeRect.height / 2) - iframeRect.top);
+      (viewportSize.height / 2) - (iframeRect.height / 2) - iframeRect.top);
 
   setStyles(iframe, {
     'position': 'fixed',
@@ -41,8 +43,7 @@ export function centerFrameUnderVsyncMutate(
     'bottom': px(viewportSize.height - (iframeRect.top + iframeRect.height)),
     'height': px(iframeRect.height),
     'width': px(iframeRect.width),
-    'transition':
-        `transform ${(transitionTimeMs / 1000)}s ease`,
+    'transition': `transform ${transitionTimeMs}ms ease`,
     'transform': translate(translateX, translateY),
   });
 }
@@ -91,4 +92,19 @@ export function collapseFrameUnderVsyncMutate(iframe) {
     'margin',
     'border',
   ]);
+}
+
+
+/**
+ * @param {!Element} ctx
+ * @return {!Element}
+ * @visibleForTesting
+ */
+export function renderCloseButtonHeader(ctx) {
+  return htmlFor(ctx)`
+    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
+      <div>Ad</div>
+      <i-amphtml-ad-close-button class="amp-ad-close-button">
+      </i-amphtml-ad-close-button>
+    </i-amphtml-ad-close-header>`;
 }

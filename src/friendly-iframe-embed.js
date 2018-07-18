@@ -23,7 +23,6 @@ import {closestBySelector, escapeHtml, removeElement} from './dom';
 import {createCustomEvent, listenOnce, loadPromise} from './event-helper';
 import {dev, rethrowAsync, user} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
-import {htmlFor} from './static-template';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {
@@ -33,6 +32,7 @@ import {
   setStyle,
   setStyles,
 } from './style';
+import {renderCloseButtonHeader} from './full-overlay-frame-helper';
 import {toWin} from './types';
 
 
@@ -523,7 +523,8 @@ export class FriendlyIframeEmbed {
         'Only <amp-ad> is allowed to enter lightbox mode.');
 
     const header =
-        renderCloseButtonHeader(this.win, ampAdParent, requestingElement);
+        renderClickableCloseButtonHeader(
+            this.win, ampAdParent, requestingElement);
 
     ampAdParent.appendChild(header);
 
@@ -635,13 +636,10 @@ export class FriendlyIframeEmbed {
  * @param {!Element} ampLightbox
  * @visibleForTesting
  */
-export function renderCloseButtonHeader(win, ampAdParent, ampLightbox) {
-  const el = htmlFor(ampAdParent)`
-    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
-      <div>Ad</div>
-      <i-amphtml-ad-close-button class="amp-ad-close-button">
-      </i-amphtml-ad-close-button>
-    </i-amphtml-ad-close-header>`;
+export function renderClickableCloseButtonHeader(
+  win, ampAdParent, ampLightbox) {
+
+  const el = renderCloseButtonHeader(/* ctx */ ampAdParent);
 
   listenOnce(el, 'click', () => {
     triggerLightboxClose(win, ampLightbox, /* caller */ ampAdParent);

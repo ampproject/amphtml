@@ -441,6 +441,12 @@ function compileCss(watch, opt_compileAll) {
       .then(() => {
         endBuildStep('Recompiled CSS in', 'amp.css', startTime);
       })
+      .then(() => jsifyCssAsync('css/lightbox-ad.css'))
+      .then(css => writeCss(css,
+          'lightbox-ad.css', 'lightbox-ad.css.js', 'lightbox-ad.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'lightbox-ad.css', startTime);
+      })
       .then(() => jsifyCssAsync('css/video-docking.css'))
       .then(css => writeCss(css,
           'video-docking.css', 'video-docking.css.js', 'video-docking.css'))
