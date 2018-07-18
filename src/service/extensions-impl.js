@@ -43,7 +43,7 @@ import {installStylesForDoc, installStylesLegacy} from '../style-installer';
 import {map} from '../utils/object';
 import {toWin} from '../types';
 import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+  'document-register-element/build/document-register-element.patched';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -146,7 +146,7 @@ export class Extensions {
    * services and document factories. This method is called by the extension's
    * script itself when it's loaded using the regular `AMP.push()` callback.
    * @param {string} extensionId
-   * @param {function(!Object)} factory
+   * @param {function(!Object, !Object)} factory
    * @param {!Object} arg
    * @restricted
    */
@@ -154,7 +154,7 @@ export class Extensions {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
-      factory(arg);
+      factory(arg, arg['_']);
       if (getMode().localDev || getMode().test) {
         if (Object.freeze) {
           const m = holder.extension;
