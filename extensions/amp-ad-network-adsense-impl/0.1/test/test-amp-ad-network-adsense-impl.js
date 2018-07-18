@@ -26,8 +26,6 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
-  DELAY_REQUEST_EXP,
-  DELAY_REQUEST_EXP_BRANCHES,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
@@ -44,7 +42,6 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
-import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -718,56 +715,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(impl.iframe).is.ok;
     });
 
-    it('should remove FIE if in all exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should remove non-FIE if in all exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not remove FIE if in remain exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.iframe).is.ok;
-    });
-
-    it('should remove rendered non-FIE if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not destroy ad promise for unrendered if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = 'abcdef';
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should destroy ad promise if ad response not yet received and in ' +
-        'remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = null;
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
           impl.ampAnalyticsConfig_ = {};
@@ -800,46 +747,55 @@ describes.realWin('amp-ad-network-adsense-impl', {
     let iframe;
 
     function constructImpl(config) {
-      iframe = env.win.document.createElement('iframe');
-
       config.type = 'adsense';
       element = createElementWithAttributes(doc, 'amp-ad', config);
+      iframe = env.win.document.createElement('iframe');
       element.appendChild(iframe);
-      document.body.appendChild(element);
-      impl = new AmpAdNetworkAdsenseImpl(element);
+      doc.body.appendChild(element);
+      const impl = new AmpAdNetworkAdsenseImpl(element);
       impl.element.style.display = 'block';
       impl.element.style.position = 'relative';
       impl.element.style.top = '101vh';
-
       // Fix the viewport to a consistent size to that the test doesn't depend
       // on the actual browser window opened.
       impl.getViewport().getSize =
           () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+      return impl;
     }
 
     it('should do nothing for non-responsive', () => {
-      constructImpl({
+      const adsense = constructImpl({
         width: '320',
         height: '150',
       });
-      expect(impl.buildCallback()).to.be.undefined;
+      expect(adsense.buildCallback()).to.be.undefined;
     });
 
-    it('should schedule a resize for responsive', () => {
-      constructImpl({
+    it('should schedule a resize for responsive', function *() {
+      const adsense = constructImpl({
         width: '100vw',
         height: '100',
         'data-auto-format': 'rspv',
       });
+      env.sandbox.stub(adsense, 'attemptChangeSize').returns(Promise.resolve());
 
-      const callback = impl.buildCallback();
-      expect(callback).to.exist;
+      const promise = adsense.buildCallback();
+      expect(promise).to.exist;
+      yield promise;
 
-      // The returned promise fails for some reason.
-      return callback.then(() => {
-        expect(element.offsetHeight).to.equal(300);
-        expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+      expect(adsense.attemptChangeSize).to.be.calledWith(300, VIEWPORT_WIDTH);
+    });
+
+    it('should call divertExperiments after isResponsive', () => {
+      const adsense = constructImpl({
+        width: '320',
+        height: '150',
       });
+      const isResponsiveSpy = env.sandbox.spy(adsense, 'isResponsive_');
+      const divertExperimentsSpy = env.sandbox.spy(
+          adsense, 'divertExperiments');
+      adsense.buildCallback();
+      expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
     });
   });
 
@@ -970,23 +926,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
   describe('#delayAdRequestEnabled', () => {
     it('should return true', () =>
       expect(impl.delayAdRequestEnabled()).to.be.true);
-
-    it('should set experiment when diverted', () => {
-      toggleExperiment(impl.win, DELAY_REQUEST_EXP, true);
-      impl.divertExperiments();
-      let inExp;
-      Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(exp =>
-        inExp = inExp || isInExperiment(impl.element, exp));
-      expect(inExp).to.be.true;
-    });
-    Object.keys(DELAY_REQUEST_EXP_BRANCHES).forEach(expId => {
-      it(`should return ${DELAY_REQUEST_EXP_BRANCHES[expId]} for ${expId}`,
-          () => {
-            forceExperimentBranch(impl.win, DELAY_REQUEST_EXP, expId);
-            expect(impl.delayAdRequestEnabled()).to.equal(
-                DELAY_REQUEST_EXP_BRANCHES[expId]);
-          });
-    });
   });
 
   describe('#preconnect', () => {

@@ -210,7 +210,7 @@ The following is a proposed list of AMP components that are supported in AMP ema
 
 ### Specifying CSS in an AMP document
 
-All CSS in any AMP document must be included in a `<style amp-custom>` tag within the header. Inline style attributes are not allowed in AMP.
+All CSS in any AMP document must be included in a `<style amp-custom>` tag within the header or as inline `style` attributes.
 
 ```html
 ...

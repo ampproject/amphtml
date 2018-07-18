@@ -251,6 +251,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  aja: {
+    renderStartImplemented: true,
+    prefetch: 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
+  },
+
   appvador: {
     prefetch: [
       'https://cdn.apvdr.com/js/VastAdUnit.min.js',
@@ -610,6 +615,10 @@ export const adConfig = {
     ],
   },
 
+  miximedia: {
+    renderStartImplemented: true,
+  },
+
   mixpo: {
     prefetch: 'https://cdn.mixpo.com/js/loader.js',
     preconnect: [
@@ -684,6 +693,7 @@ export const adConfig = {
     preconnect: [
       'https://odb.outbrain.com',
     ],
+    consentHandlingOverride: true,
   },
 
   pixels: {

@@ -53,9 +53,6 @@ const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
-/** @const {string} */
-export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
-
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
  * @param {*} val
@@ -313,7 +310,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns assigned variant name for the given experiment.
     this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
-      return this.getVairiantsValue_(variants => {
+      return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
@@ -325,7 +322,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns all assigned experiment variants in a serialized form.
     this.setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
-      return this.getVairiantsValue_(variants => {
+      return this.getVariantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
           const variant = variants[experiment];
@@ -595,7 +592,7 @@ export class GlobalVariableSource extends VariableSource {
    */
   addReplaceParamsIfMissing_(orig) {
     const {replaceParams} =
-        /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
+    /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
     const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
     const params = parseQueryString(url.search);
     return addParamsToUrl(removeSearch(orig),
@@ -678,7 +675,7 @@ export class GlobalVariableSource extends VariableSource {
    * @template T
    * @private
    */
-  getVairiantsValue_(getter, expr) {
+  getVariantsValue_(getter, expr) {
     if (!this.variants_) {
       this.variants_ = Services.variantForOrNull(this.ampdoc.win);
     }
@@ -1048,7 +1045,7 @@ export class UrlReplacements {
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
-        REPLACEMENT_EXP_NAME);
+        'url-replacement-v2');
     if (isV2ExperimentOn) {
       // TODO(ccordy) support opt_collectVars && opt_whitelist
       return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,

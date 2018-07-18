@@ -77,6 +77,7 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
+  fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
@@ -103,7 +104,8 @@ function compile(entryModuleFilenames, outputDir,
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    const checkTypes = options.checkTypes || argv.typecheck_only;
+    const checkTypes =
+        options.checkTypes || options.typeCheckOnly || argv.typecheck_only;
     const intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     // If undefined/null or false then we're ok executing the deletions
@@ -119,7 +121,6 @@ function compile(entryModuleFilenames, outputDir,
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
     wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
-    patchRegisterElement();
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
     }
@@ -193,8 +194,8 @@ function compile(entryModuleFilenames, outputDir,
       'node_modules/promise-pjs/promise.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
-      'build/patched-module/document-register-element/build/' +
-          'document-register-element.node.js',
+      'node_modules/document-register-element/build/' +
+          'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
@@ -227,13 +228,33 @@ function compile(entryModuleFilenames, outputDir,
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
-    if (options.includePolyfills) {
+    if (options.includeOnlyESMLevelPolyfills) {
+      const polyfillsShadowList = [
+        'array-includes.js',
+        'document-contains.js',
+        'domtokenlist-toggle.js',
+        'math-sign.js',
+        'object-assign.js',
+        'promise.js',
+      ];
       srcs.push(
           '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js'
+          '!build/fake-module/src/polyfills/**/*.js',
+          '!build/fake-polyfills/src/polyfills.js',
+          '!src/polyfills/*.js',
+          'build/fake-polyfills/**/*.js');
+      polyfillsShadowList.forEach(polyfillFile => {
+        fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
+            'export function install() {}');
+      });
+    } else if (options.includePolyfills) {
+      srcs.push(
+          '!build/fake-module/src/polyfills.js',
+          '!build/fake-module/src/polyfills/**/*.js',
+          '!build/fake-polyfills/**/*.js',
       );
     } else {
-      srcs.push('!src/polyfills.js');
+      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
       unneededFiles.push('build/fake-module/src/polyfills.js');
     }
     unneededFiles.forEach(function(fake) {
@@ -282,6 +303,7 @@ function compile(entryModuleFilenames, outputDir,
           'node_modules/',
           'build/patched-module/',
           'build/fake-module/',
+          'build/fake-polyfills/',
         ],
         entry_point: entryModuleFilenames,
         process_common_js_modules: true,
@@ -353,7 +375,7 @@ function compile(entryModuleFilenames, outputDir,
         });
 
     // If we're only doing type checking, no need to output the files.
-    if (!argv.typecheck_only) {
+    if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
           .pipe(rename(outputFilename))
           .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
@@ -366,40 +388,9 @@ function compile(entryModuleFilenames, outputDir,
                 .pipe(gulp.dest(outputDir))
                 .on('end', resolve);
           });
+    } else {
+      stream = stream.on('end', resolve);
     }
     return stream;
   });
-}
-
-function patchRegisterElement() {
-  let file;
-  // Copies document-register-element into a new file that has an export.
-  // This works around a bug in closure compiler, where without the
-  // export this module does not generate a goog.provide which fails
-  // compilation.
-  // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.node.js';
-  if (!fs.existsSync(patchedName)) {
-    file = fs.readFileSync(
-        'node_modules/document-register-element/build/' +
-        'document-register-element.node.js').toString();
-    if (argv.fortesting) {
-      // Need to switch global to self since closure doesn't wrap the module
-      // like CommonJS
-      file = file.replace('installCustomElements(global);',
-          'installCustomElements(self);');
-    } else {
-      // Get rid of the side effect the module has so we can tree shake it
-      // better and control installation, unless --fortesting flag
-      // is passed since we also treat `--fortesting` mode as "dev".
-      file = file.replace('installCustomElements(global);', '');
-    }
-    // Closure Compiler does not generate a `default` property even though
-    // to interop CommonJS and ES6 modules. This is the same issue typescript
-    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
-    file = file.replace('module.exports = installCustomElements;',
-        'exports.default = installCustomElements;');
-    fs.writeFileSync(patchedName, file);
-  }
 }
