@@ -3,6 +3,7 @@ build
 dist
 dist.3p
 dist.tools
+out
 examples
 third_party
 test/coverage
