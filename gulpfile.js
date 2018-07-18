@@ -66,6 +66,8 @@ const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+
 extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
 aliasBundles.forEach(c => {
   declareExtensionVersionAlias(c.name, c.version, c.latestVersion, c.options);
@@ -1489,7 +1491,7 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
+gulp.task('build', 'Builds the AMP library', maybeUpdatePackages, build, {
   options: {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
     extensions: '  Builds only the listed extensions.',
@@ -1498,16 +1500,16 @@ gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
 });
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
-gulp.task('check-types', 'Check JS types', ['update-packages'], checkTypes);
-gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
+gulp.task('check-types', 'Check JS types', maybeUpdatePackages, checkTypes);
+gulp.task('css', 'Recompile css to build directory', maybeUpdatePackages, css);
 gulp.task('default', 'Runs "watch" and then "serve"',
-    ['update-packages', 'watch'], serve, {
+    maybeUpdatePackages.concat(['watch']), serve, {
       options: {
         extensions: '  Watches and builds only the listed extensions.',
         noextensions: '  Watches and builds with no extensions.',
       },
     });
-gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
+gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
             'Great for profiling and debugging production code.',
@@ -1516,7 +1518,7 @@ gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
-    ['update-packages'], watch, {
+    maybeUpdatePackages, watch, {
       options: {
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',
