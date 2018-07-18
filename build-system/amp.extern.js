@@ -57,6 +57,9 @@ ExtensionPayload.prototype.p;
 /** @type {string} */
 ExtensionPayload.prototype.v;
 
+/** @type {!Array<string>|string|undefined} */
+ExtensionPayload.prototype.i;
+
 
 /**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
