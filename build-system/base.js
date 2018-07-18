@@ -13,11 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* eslint "no-unused-vars": 0 */
-/** @const {!Object}  */
-const process = {
-  env: {
-    'NODE_ENV': 'production',
-  },
-};
