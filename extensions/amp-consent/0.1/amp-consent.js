@@ -24,7 +24,11 @@ import {
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  getSourceUrl,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {
   childElementsByTag,
   isJsonScriptTag,
@@ -507,10 +511,13 @@ export class AmpConsent extends AMP.BaseElement {
     const href =
         this.consentConfig_[instanceId]['checkConsentHref'];
     assertHttpsUrl(href, this.element);
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const ampdoc = this.getAmpDoc();
+    const sourceBase = getSourceUrl(ampdoc.getUrl());
+    const resolvedHref = resolveRelativeUrl(href, sourceBase);
+    const viewer = Services.viewerForDoc(ampdoc);
     return viewer.whenFirstVisible().then(() => {
       return Services.xhrFor(this.win)
-          .fetchJson(href, init)
+          .fetchJson(resolvedHref, init)
           .then(res => res.json());
     });
   }
