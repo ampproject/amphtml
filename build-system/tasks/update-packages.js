@@ -74,7 +74,7 @@ function patchRegisterElement() {
     // to interop CommonJS and ES6 modules. This is the same issue typescript
     // ran into here https://github.com/Microsoft/TypeScript/issues/2719
     file = file.replace('module.exports = installCustomElements;',
-        'exports.default = installCustomElements;');
+        'module.exports = exports.default = installCustomElements;');
     fs.writeFileSync(patchedName, file);
   }
 }
