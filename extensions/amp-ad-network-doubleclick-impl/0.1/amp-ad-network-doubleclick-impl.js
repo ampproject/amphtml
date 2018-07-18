@@ -696,8 +696,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // fluid, wait until after resize.
     if (this.isFluidRequest_ && !this.returnedSize_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
-    } else {
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     }
 
     return size;
