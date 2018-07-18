@@ -105,6 +105,9 @@ export function setFriendlyIframeEmbedVisible(embed, visible) {
 
 /**
  * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * Caution: This will only return the FIE after the iframe has 'loaded'. If you
+ * are checking before this signal you may be in a race condition that returns
+ * null.
  * @param {!HTMLIFrameElement} iframe
  * @return {?FriendlyIframeEmbed}
  */
