@@ -717,6 +717,17 @@
             </ul>
         </template>
     </div>
+    <div verify-error>
+
+        <template type="amp-mustache">
+            {{#verifyErrors}}
+                <p>{{message}}</p>
+            {{/verifyErrors}}
+            {{^verifyErrors}}
+                <p>Something went wrong. Try again later?</p>
+            {{/verifyErrors}}
+        </template>
+    </div>
     <div submit-error>
         <template type="amp-mustache">
             {{#verifyErrors}}

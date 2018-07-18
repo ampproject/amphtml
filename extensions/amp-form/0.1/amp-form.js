@@ -77,6 +77,7 @@ const EXTERNAL_DEPS = [
 const FormState_ = {
   INITIAL: 'initial',
   VERIFYING: 'verifying',
+  VERIFY_ERROR: 'verify-error',
   SUBMITTING: 'submitting',
   SUBMIT_ERROR: 'submit-error',
   SUBMIT_SUCCESS: 'submit-success',
@@ -280,23 +281,21 @@ export class AmpForm {
 
     // If the viewer can render templates, then form verifier is not applicable.
     if (!this.ssrTemplateHelper_.isSupported()) {
-      const afterVerifierCommit = () => {
-        // Move from the VERIFYING state back to INITIAL
-        if (this.state_ === FormState_.VERIFYING) {
-          this.setState_(FormState_.INITIAL);
-        }
-      };
       this.form_.addEventListener('change', e => {
         this.verifier_.onCommit()
-            .then(updatedElements => {
+            .then(({updatedElements, errors}) => {
+              if (this.state_ === FormState_.VERIFYING) {
+                this.setState_(errors.length ?
+                  FormState_.VERIFY_ERROR : FormState_.INITIAL);
+                this.renderTemplate_(
+                    /** @type {!JsonObject} */ ({verifyErrors: errors}));
+              }
               updatedElements.forEach(checkUserValidityAfterInteraction_);
               this.validator_.onBlur(e);
-            }, () => {
-              checkUserValidityAfterInteraction_(dev().assertElement(e.target));
-            })
-            .then(afterVerifierCommit, afterVerifierCommit);
+            });
       });
     }
+
     this.form_.addEventListener('input', e => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
