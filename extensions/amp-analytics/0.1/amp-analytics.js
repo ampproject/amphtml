@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from './vendors';
 import {Activity} from './activity-impl';
+import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
 import {
   ExpansionOptions,
@@ -30,20 +30,16 @@ import {
 import {LayoutPriority} from '../../../src/layout';
 import {
   RequestHandler,
-  expandConfigRequest,
 } from './requests';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
-import {isArray, isObject} from '../../../src/types';
+import {isArray} from '../../../src/types';
 import {isEnumValue} from '../../../src/types';
-import {isJsonScriptTag} from '../../../src/dom';
-import {parseJson} from '../../../src/json';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
@@ -62,12 +58,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /**
-     * @const {!JsonObject} Copied here for tests.
-     * @private
-     */
-    this.predefinedConfig_ = ANALYTICS_CONFIG;
 
     /** @private {!Promise} */
     this.consentPromise_ = Promise.resolve();
@@ -90,11 +80,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private {JsonObject}
      */
     this.config_ = dict();
-
-    /**
-     * @private {JsonObject}
-     */
-    this.remoteConfig_ = dict();
 
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
@@ -122,7 +107,7 @@ export class AmpAnalytics extends AMP.BaseElement {
      * We stop reporting after 1 minute.
      * @private @const {number}
      */
-    this.maxResourceTimingReportingTime_ = Date.now() + 60 * 1000;
+    this.maxResourceTimingReportingTime_ = Date.now() + (60 * 1000);
   }
 
   /** @override */
@@ -217,12 +202,14 @@ export class AmpAnalytics extends AMP.BaseElement {
             // Rudimentary "idle" signal.
             .then(() => Services.timerFor(this.win).promise(1))
             .then(() => this.consentPromise_)
-            .then(this.fetchRemoteConfig_.bind(this))
             .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
+              return new AnalyticsConfig(this.element).loadConfig();
             })
-            .then(this.processConfigs_.bind(this))
+            .then(config => {
+              this.config_ = config;
+            })
             .then(this.registerTriggers_.bind(this));
     return this.iniPromise_;
   }
@@ -421,212 +408,6 @@ export class AmpAnalytics extends AMP.BaseElement {
         }
       }
     }
-  }
-
-  /**
-   * Returns a promise that resolves when configuration is re-written if
-   * configRewriter is configured by a vendor.
-   *
-   * @private
-   * @return {!Promise<undefined>}
-   */
-  processConfigs_() {
-    const configRewriterUrl = this.getConfigRewriter_()['url'];
-
-    const config = dict({});
-    const inlineConfig = this.getInlineConfigNoInline();
-    this.validateTransport_(inlineConfig);
-    this.mergeObjects_(inlineConfig, config);
-    this.mergeObjects_(this.remoteConfig_, config);
-
-    if (!configRewriterUrl || this.isSandbox_) {
-      this.config_ = this.mergeConfigs_(config);
-      // use default configuration merge.
-      return Promise.resolve();
-    }
-
-    assertHttpsUrl(configRewriterUrl, this.element);
-    const TAG = this.getName_();
-    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
-
-    const fetchConfig = {
-      method: 'POST',
-      body: config,
-      requireAmpResponseSourceOrigin: false,
-    };
-    if (this.element.hasAttribute('data-credentials')) {
-      fetchConfig.credentials = this.element.getAttribute('data-credentials');
-    }
-    const ampdoc = this.getAmpDoc();
-    return Services.urlReplacementsForDoc(this.element)
-        .expandUrlAsync(configRewriterUrl)
-        .then(expandedUrl => {
-          return Services.xhrFor(ampdoc.win).fetchJson(
-              expandedUrl, fetchConfig);
-        })
-        .then(res => res.json())
-        .then(jsonValue => {
-          this.config_ = this.mergeConfigs_(jsonValue);
-          dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
-        }, err => {
-          this.user().error(TAG,
-              'Error rewriting configuration: ', configRewriterUrl, err);
-        });
-  }
-  /**
-   * Returns a promise that resolves when remote config is ready (or
-   * immediately if no remote config is specified.)
-   * @private
-   * @return {!Promise<undefined>}
-   */
-  fetchRemoteConfig_() {
-    let remoteConfigUrl = this.element.getAttribute('config');
-    if (!remoteConfigUrl || this.isSandbox_) {
-      return Promise.resolve();
-    }
-    assertHttpsUrl(remoteConfigUrl, this.element);
-    const TAG = this.getName_();
-    dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
-    const fetchConfig = {
-      requireAmpResponseSourceOrigin: false,
-    };
-    if (this.element.hasAttribute('data-credentials')) {
-      fetchConfig.credentials = this.element.getAttribute('data-credentials');
-    }
-    const ampdoc = this.getAmpDoc();
-    return Services.urlReplacementsForDoc(this.element)
-        .expandUrlAsync(remoteConfigUrl)
-        .then(expandedUrl => {
-          remoteConfigUrl = expandedUrl;
-          return Services.xhrFor(ampdoc.win).fetchJson(
-              remoteConfigUrl, fetchConfig);
-        })
-        .then(res => res.json())
-        .then(jsonValue => {
-          this.remoteConfig_ = jsonValue;
-          dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);
-        }, err => {
-          this.user().error(TAG,
-              'Error loading remote config: ', remoteConfigUrl, err);
-        });
-  }
-
-  /**
-   * Merges various sources of configs and stores them in a member variable.
-   *
-   * Order of precedence for configs from highest to lowest:
-   * - Remote config: specified through an attribute of the tag.
-   * - Inline config: specified insize the tag.
-   * - Predefined config: Defined as part of the platform.
-   * - Default config: Built-in config shared by all amp-analytics tags.
-   *
-   * @private
-   * @param {!JsonObject} rewrittenConfig
-   * @return {!JsonObject}
-   */
-  mergeConfigs_(rewrittenConfig) {
-    // Initialize config with analytics related vars.
-    const config = dict({
-      'vars': {
-        'requestCount': 0,
-      },
-    });
-    const defaultConfig = this.predefinedConfig_['default'] || {};
-    this.mergeObjects_(expandConfigRequest(defaultConfig), config);
-    this.mergeObjects_(expandConfigRequest(this.getTypeConfig_()), config,
-        /* predefined */ true);
-    this.mergeObjects_(expandConfigRequest(rewrittenConfig), config);
-    return config;
-  }
-
-  /**
-   * Reads configRewriter from a vendor config.
-   * @return {!JsonObject}
-   */
-  getConfigRewriter_() {
-    return this.getTypeConfig_()['configRewriter'] || {};
-  }
-
-  /**
-   * Reads a vendor configuration.
-   * @return {!JsonObject}
-   */
-  getTypeConfig_() {
-    const type = this.element.getAttribute('type');
-    if (type == 'googleanalytics-alpha') {
-      const TAG = this.getName_();
-      user().warn(TAG, '"googleanalytics-alpha" configuration is not ' +
-          'planned to be supported long-term. Avoid use of this value for ' +
-          'amp-analytics config attribute unless you plan to migrate before ' +
-          'deprecation');
-    }
-    return this.predefinedConfig_[type] || {};
-  }
-
-  /**
-   * Validates transport configuration.
-   * @param {!JsonObject} inlineConfig
-   */
-  validateTransport_(inlineConfig) {
-    const type = this.element.getAttribute('type');
-    if (this.predefinedConfig_[type]) {
-      // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport
-      // overwriting
-      if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
-        const TAG = this.getName_();
-        this.user().error(TAG, 'Inline or remote config should not ' +
-            'overwrite vendor transport settings');
-      }
-    }
-
-    // Do NOT allow inline or remote config to use 'transport: iframe'
-    if (inlineConfig['transport'] && inlineConfig['transport']['iframe']) {
-      this.user().error(TAG, 'Inline configs are not allowed to ' +
-          'specify transport iframe');
-      if (!getMode().localDev || getMode().test) {
-        inlineConfig['transport']['iframe'] = undefined;
-      }
-    }
-
-    if (this.remoteConfig_['transport'] &&
-        this.remoteConfig_['transport']['iframe']) {
-      this.user().error(TAG, 'Remote configs are not allowed to ' +
-          'specify transport iframe');
-      this.remoteConfig_['transport']['iframe'] = undefined;
-    }
-  }
-
-  /**
-   * @private
-   * @return {!JsonObject}
-   */
-  getInlineConfigNoInline() {
-    if (this.element.CONFIG) {
-      // If the analytics element is created by runtime, return cached config.
-      return this.element.CONFIG;
-    }
-    let inlineConfig = {};
-    const TAG = this.getName_();
-    try {
-      const {children} = this.element;
-      if (children.length == 1) {
-        const child = children[0];
-        if (isJsonScriptTag(child)) {
-          inlineConfig = parseJson(children[0].textContent);
-        } else {
-          this.user().error(TAG, 'The analytics config should ' +
-              'be put in a <script> tag with type="application/json"');
-        }
-      } else if (children.length > 1) {
-        this.user().error(TAG, 'The tag should contain only one' +
-            ' <script> child.');
-      }
-    }
-    catch (er) {
-      this.user().error(TAG, 'Analytics config could not be ' +
-          'parsed. Is it in a valid JSON format?', er);
-    }
-    return /** @type {!JsonObject} */ (inlineConfig);
   }
 
   /**
@@ -916,52 +697,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Merges two objects. If the value is array or plain object, the values are
-   * merged otherwise the value is overwritten.
-   *
-   * @param {Object|Array} from Object or array to merge from
-   * @param {Object|Array} to Object or Array to merge into
-   * @param {boolean=} opt_predefinedConfig
-   * @private
-   */
-  mergeObjects_(from, to, opt_predefinedConfig) {
-    if (to === null || to === undefined) {
-      to = {};
-    }
-
-    // Assert that optouts are allowed only in predefined configs.
-    // The last expression adds an exception of known, safe optout function
-    // that is already being used in the wild.
-    user().assert(opt_predefinedConfig || !from || !from['optout'] ||
-        from['optout'] == '_gaUserPrefs.ioo',
-    'optout property is only available to vendor config.');
-
-    for (const property in from) {
-      user().assert(opt_predefinedConfig || property != 'iframePing',
-          'iframePing config is only available to vendor config.');
-      // Only deal with own properties.
-      if (hasOwn(from, property)) {
-        if (isArray(from[property])) {
-          if (!isArray(to[property])) {
-            to[property] = [];
-          }
-          to[property] = this.mergeObjects_(from[property], to[property],
-              opt_predefinedConfig);
-        } else if (isObject(from[property])) {
-          if (!isObject(to[property])) {
-            to[property] = {};
-          }
-          to[property] = this.mergeObjects_(from[property], to[property],
-              opt_predefinedConfig);
-        } else {
-          to[property] = from[property];
-        }
-      }
-    }
-    return to;
-  }
-
-  /**
    * @param {!Object<string, Object<string, string|Array<string>>>} source1
    * @param {!Object<string, Object<string, string|Array<string>>>} source2
    * @param {number=} opt_iterations
@@ -970,9 +705,9 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expansionOptions_(source1, source2, opt_iterations, opt_noEncode) {
     const vars = map();
-    this.mergeObjects_(this.config_['vars'], vars);
-    this.mergeObjects_(source2['vars'], vars);
-    this.mergeObjects_(source1['vars'], vars);
+    mergeObjects(this.config_['vars'], vars);
+    mergeObjects(source2['vars'], vars);
+    mergeObjects(source1['vars'], vars);
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
