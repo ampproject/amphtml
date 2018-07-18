@@ -69,13 +69,24 @@ function patchRegisterElement() {
         'node_modules/document-register-element/build/' +
         'document-register-element.node.js').toString();
     // Eliminate the immediate side effect.
+    if (!/installCustomElements\(global\);/.test(file)) {
+      throw new Error('Expected "installCustomElements(global);" ' +
+          'to appear in document-register-element');
+    }
     file = file.replace('installCustomElements(global);', '');
     // Closure Compiler does not generate a `default` property even though
     // to interop CommonJS and ES6 modules. This is the same issue typescript
     // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+    if (!/module.exports = installCustomElements;/.test(file)) {
+      throw new Error('Expected "module.exports = installCustomElements;" ' +
+          'to appear in document-register-element');
+    }
     file = file.replace('module.exports = installCustomElements;',
         'module.exports = exports.default = installCustomElements;');
     fs.writeFileSync(patchedName, file);
+    if (!process.env.TRAVIS) {
+      log(colors.green('Patched'), colors.cyan(patchedName));
+    }
   }
 }
 
