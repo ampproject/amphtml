@@ -20,12 +20,13 @@ import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
 
 describe('amp-mustache 0.1', () => {
-  const sandbox = sinon.sandbox.create();
+  let sandbox;
   let templateElement;
   let template;
   let viewerCanRenderTemplates = false;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     templateElement = document.createElement('template');
     const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
     getServiceForDocStub.returns({
@@ -35,9 +36,7 @@ describe('amp-mustache 0.1', () => {
     template = new AmpMustache(templateElement);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  afterEach(() => sandbox.restore());
 
   it('should render', () => {
     templateElement.content.textContent = 'value = {{value}}';

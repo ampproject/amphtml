@@ -68,9 +68,7 @@ describes.repeated('', {
       sandbox.stub(resources, 'mutateElement').callsArg(1);
     });
 
-    afterEach(() => {
-      sandbox.restore();
-    });
+    afterEach(() => sandbox.restore());
 
     function getAmpForm(form, canonical = 'https://example.com/amps.html') {
       new AmpFormService(env.ampdoc);
@@ -152,10 +150,6 @@ describes.repeated('', {
 
           return ampForm;
         });
-      });
-
-      afterEach(() => {
-        sandbox.restore();
       });
 
       it('should throw error if using non-xhr get', () => {
