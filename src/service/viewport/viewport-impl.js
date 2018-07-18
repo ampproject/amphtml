@@ -602,12 +602,9 @@ export class Viewport {
    * @return {!Promise<!Element>}
    */
   getScrollingContainerFor_(element) {
-    return this.vsync_.measurePromise(() => {
-      const scrollable = closestBySelector(element, '.i-amphtml-scrollable',
-          /* stopAt */ this.ampdoc.getBody());
-
-      return scrollable || this.binding_.getScrollingElement();
-    });
+    return this.vsync_.measurePromise(() =>
+      closestBySelector(element, '.i-amphtml-scrollable') ||
+        this.binding_.getScrollingElement());
   }
 
   /**
