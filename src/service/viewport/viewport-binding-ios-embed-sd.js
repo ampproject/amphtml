@@ -247,7 +247,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       measure: () => {
         const bodyStyles = computedStyle(this.win, body);
         INHERIT_STYLES.forEach(style => {
-          inheritStyles[style] = bodyStyles[style];
+          inheritStyles[style] = bodyStyles[style] || '';
         });
       },
       mutate: () => {
