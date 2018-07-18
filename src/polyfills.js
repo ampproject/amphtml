@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {
   install as installDOMTokenListToggle,
@@ -28,13 +27,6 @@ import {install as installPromise} from './polyfills/promise';
 import installCustomElements from
   'document-register-element/build/document-register-element.patched';
 
-/**
-  Only install in closure binary and not in babel/browserify binary, since in
-  the closure binary we strip out the `document-register-element` install side
-  effect so we can tree shake the dependency correctly and we have to make
-  sure to not `install` it during dev since the `install` is done as a side
-  effect in importing the module.
-*/
 installCustomElements(self, 'auto');
 installDOMTokenListToggle(self);
 installMathSign(self);
