@@ -44,6 +44,7 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
+import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
@@ -392,17 +393,18 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   getMediaBySelector_(selector) {
     const iframe = this.element.querySelector('iframe');
-    const iframeDoc = iframe && iframe.contentDocument;
+    const fie = iframe &&
+        getFriendlyIframeEmbedOptional(/** @type {!HTMLIFrameElement} */ (iframe));
     const mediaSet = [];
 
     iterateCursor(scopedQuerySelectorAll(this.element, selector),
         el => mediaSet.push(el));
 
-    if (!iframeDoc) {
+    if (!fie) {
       return mediaSet;
     }
 
-    iterateCursor(iframeDoc.querySelectorAll(selector),
+    iterateCursor(fie.win.document.querySelectorAll(selector),
         el => mediaSet.push(el));
     return mediaSet;
   }
