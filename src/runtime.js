@@ -241,11 +241,7 @@ function adoptShared(global, callback) {
   const iniPromise = callback(global, extensions);
 
   /**
-<<<<<<< HEAD
    * @param {function(!Object,!Object)|ExtensionPayload} fnOrStruct
-=======
-   * @param {!function(!Object)|ExtensionPayload} fnOrStruct
->>>>>>> hoist functions
    */
   function installExtension(fnOrStruct) {
     const register = () => {
@@ -354,7 +350,8 @@ function preloadDeps(extensions, fnOrStruct) {
   } else if (typeof fnOrStruct.i == 'string') {
     return extensions.preloadExtension(fnOrStruct.i);
   }
-  dev().error('dependency is neither an array or a string', fnOrStruct.i);
+  dev().error('RUNTIME',
+      'dependency is neither an array or a string', fnOrStruct.i);
   return Promise.resolve();
 }
 
