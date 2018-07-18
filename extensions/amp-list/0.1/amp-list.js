@@ -170,7 +170,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Wraps `toggleFallback()` in a mutate context (with optional disable).
+   * Wraps `toggleFallback()`. Runs in a mutate context by default but can be
+   * disabled by passing false to `mutate`.
    * @param {boolean} show
    * @param {boolean=} mutate
    * @private
@@ -197,6 +198,7 @@ export class AmpList extends AMP.BaseElement {
    */
   resetIfNecessary_() {
     if (this.element.hasAttribute('reset-on-refresh')) {
+      // Placeholder and loading don't need a mutate context.
       this.togglePlaceholder(true);
       this.toggleLoading(true);
       this.mutateElement(() => {

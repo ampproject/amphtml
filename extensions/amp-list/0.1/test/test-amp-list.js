@@ -76,9 +76,10 @@ describes.realWin('amp-list component', {
    * @return {!Promise}
    */
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
-    const fetch = Promise.resolve(fetched);
     listMock.expects('fetch_')
-        .withExactArgs(opts.expr || 'items').returns(fetch).atLeast(1);
+        .withExactArgs(opts.expr || DEFAULT_LIST_OPTS.expr)
+        .returns(Promise.resolve(fetched))
+        .atLeast(1);
 
     if (opts.resetOnRefresh) {
       listMock.expects('togglePlaceholder').withExactArgs(true).once();
