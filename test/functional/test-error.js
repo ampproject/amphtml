@@ -75,7 +75,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 
   it('should allow null errors', () => {
-    allowConsoleErrors(() => {
+    allowConsoleError(() => {
       rejectedPromiseEvent.reason = null;
       win.eventListeners.fire(rejectedPromiseEvent);
       expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
@@ -83,7 +83,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 
   it('should allow string errors', () => {
-    allowConsoleErrors(() => {
+    allowConsoleError(() => {
       rejectedPromiseEvent.reason = 'string error';
       win.eventListeners.fire(rejectedPromiseEvent);
       expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
@@ -530,6 +530,10 @@ describe('reportErrorToServer', () => {
       scripts = [];
       expect(detectNonAmpJs(window)).to.be.true;
     });
+
+    /*it('should detect JS in shadow doc', () => {
+      
+    });*/
   });
 });
 
