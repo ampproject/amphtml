@@ -24,6 +24,9 @@ const ATTRIBUTES_TO_PROPAGATE = ['alt', 'aria-label', 'aria-describedby',
 /** @visibleForTesting */
 export const SRC_PLACEHOLDER = 'data:image/gif;base64,' +
 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+/** @visibleForTesting */
+export const SRCSET_PLACEHOLDER = 'data:image/gif;base64,' +
+'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 ';
 
 export class AmpAnim extends AMP.BaseElement {
 
@@ -76,15 +79,9 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (this.img_.src == SRC_PLACEHOLDER) {
-      this.img_.src = this.element.getAttribute('src');
+      this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     }
-    return this.loadPromise(this.img_).catch(e => {
-      if (!this.img_.getAttribute('src') && this.img_.getAttribute('srcset')) {
-        return;
-      }
-      throw e;
-    });
-
+    return this.loadPromise(this.img_);
   }
 
   /** @override */
@@ -107,6 +104,7 @@ export class AmpAnim extends AMP.BaseElement {
   unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;
+    this.img_.srcset = SRCSET_PLACEHOLDER;
     this.hasLoaded_ = false;
     return true;
   }
