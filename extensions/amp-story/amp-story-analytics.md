@@ -50,6 +50,14 @@ Using `amp-analytics` you can re-assign the `story-page-visible` event to behave
 
 Consult your vendor's documentation for more specific details on how to set this up.
 
+### Bookend enter trigger (`"on": "story-bookend-enter"`)
+
+The `story-bookend-enter` trigger is fired when the bookend is shown to the user, after the last page of the current story.
+
+### Bookend exit trigger (`"on": "story-bookend-exit"`)
+
+The `story-bookend-exit` trigger is fired when the bookend is dismissed by the user.
+
 ### Mute trigger (`"on": "story-audio-muted"`)
 
 The `story-audio-muted` trigger is fired when the user initiates an interaction to mute the audio for the current story.
