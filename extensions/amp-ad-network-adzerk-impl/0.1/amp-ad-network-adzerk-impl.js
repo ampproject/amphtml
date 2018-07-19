@@ -20,6 +20,7 @@ import {
   NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
+import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {tryParseJson} from '../../../src/json';
@@ -31,12 +32,6 @@ const TAG = 'amp-ad-network-adzerk-impl';
 
 /** @visibleForTesting @type {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
-
-/** @typedef {{
-      templateUrl: string,
-      data: (JsonObject|undefined),
-    }} */
-let AmpTemplateCreativeDef;
 
 /** @private {?AmpAdTemplateHelper} */
 let ampAdTemplateHelper;
@@ -70,7 +65,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     /** @private {?CreativeMetaDataDef} */
     this.creativeMetadata_ = null;
 
-    /** @private {?AmpTemplateCreativeDef} */
+    /** @private {?../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */
     this.ampCreativeJson_ = null;
 
     ampAdTemplateHelper = ampAdTemplateHelper ||
@@ -113,7 +108,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     const checkStillCurrent = this.verifyStillCurrent();
     return tryResolve(() => utf8Decode(bytes)).then(body => {
       checkStillCurrent();
-      this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
+      this.ampCreativeJson_ = /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
       return ampAdTemplateHelper
