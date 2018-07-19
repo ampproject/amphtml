@@ -29,7 +29,7 @@ import {
   hasAnimations,
 } from './animation';
 import {Deferred} from '../../../src/utils/promise';
-import {EventType, dispatch, dispatchCustom} from './events';
+import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
@@ -352,7 +352,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   markPageAsLoaded_() {
-    dispatch(this.element, EventType.PAGE_LOADED, true);
+    dispatch(this.win, this.element, EventType.PAGE_LOADED,
+        /* payload */ undefined, {bubbles: true});
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
@@ -603,7 +604,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       progress,
     };
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.PAGE_PROGRESS, payload,
+    dispatch(this.win, this.element, EventType.PAGE_PROGRESS, payload,
         eventInit);
   }
 
@@ -689,7 +690,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     const targetPageId = this.getPreviousPageId();
 
     if (targetPageId === null) {
-      dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
+      dispatch(this.win, this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP,
+          /* payload */ undefined, {bubbles: true});
       return;
     }
 
@@ -714,12 +716,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Delegated the navigation decision to AMP-STORY via event.
-   * @param {number} direction The direction in which navigation needs to takes place.
+   * @param {number} direction The direction in which navigation needs to
+   * takes place.
    */
   navigateOnTap(direction) {
     const payload = {direction};
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,
+    dispatch(this.win, this.element, EventType.TAP_NAVIGATION, payload,
         eventInit);
   }
 
@@ -731,7 +734,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   switchTo_(targetPageId) {
     const payload = {targetPageId};
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
+    dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
   }
 
@@ -745,7 +748,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     getLogEntries(this.element).then(logEntries => {
-      dispatchCustom(this.win, this.element,
+      dispatch(this.win, this.element,
           EventType.DEV_LOG_ENTRIES_AVAILABLE, logEntries, {bubbles: true});
     });
   }
