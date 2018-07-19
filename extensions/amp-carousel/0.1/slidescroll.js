@@ -604,7 +604,7 @@ export class AmpSlideScroll extends BaseSlides {
       showIndexArr.push(prevIndex);
     }
     showIndexArr.push(newIndex);
-    if (nextIndex != null) {
+    if (nextIndex != null && this.noOfSlides_ > 2) {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {
@@ -620,7 +620,6 @@ export class AmpSlideScroll extends BaseSlides {
       dev().error(TAG, error);
       return false;
     }
-
     this.updateInViewport(newSlideInView, true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
