@@ -205,9 +205,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
 
       return Promise.all([
         event1Promise,
-        event2Promise
-            .then(() => { assert.fail('Blur should not have been forwarded'); })
-            .catch(() => { /* timed-out, all good */ }),
+        expect(event2Promise).to.eventually.be.rejectedWith(/timeout/),
       ]);
     });
 
