@@ -644,12 +644,25 @@ export function renderClickableCloseButtonHeader(
 
   const el = renderCloseButtonHeader(/* ctx */ ampAdParent);
 
+  annotateAnimationStyle(el, ampLightbox);
+
   listenOnce(el, 'click', () => {
     triggerLightboxClose(win, ampLightbox, /* caller */ ampAdParent);
     removeElement(el);
   });
 
   return el;
+}
+
+/**
+ * @param {!Element} header
+ * @param {!Element} ampLightbox
+ */
+function annotateAnimationStyle(header, ampLightbox) {
+  const animation = ampLightbox.getAttribute('animate-in');
+  if (animation) {
+    header.classList.add(`amp-animate-in-${animation}`);
+  }
 }
 
 /**
