@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -29,7 +30,7 @@ export function sekindo(global, data) {
   global.context.startTime + '&';
   let getParam = '';
   for (const key in data) {
-    if (data.hasOwnProperty(key)) {
+    if (hasOwn(data, key)) {
       if (typeof excludesSet[key] == 'undefined') {
         getParam = (typeof customParamMap[key] == 'undefined') ?
           key : customParamMap[key];

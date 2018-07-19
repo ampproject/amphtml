@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../src/utils/object';
 import {startsWith} from '../src/string';
 import {validateData} from '../3p/3p';
 
@@ -36,7 +37,7 @@ export function spotx(global, data) {
 
   // Add data-* attribute for each data value passed in.
   for (const key in data) {
-    if (data.hasOwnProperty(key) && startsWith(key, 'spotx_')) {
+    if (hasOwn(data, key) && startsWith(key, 'spotx_')) {
       script.setAttribute(`data-${key}`, data[key]);
     }
   }

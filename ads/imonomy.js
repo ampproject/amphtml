@@ -15,6 +15,7 @@
  */
 
 import {doubleclick} from '../ads/google/doubleclick';
+import {hasOwn} from '../src/utils/object';
 import {loadScript, writeScript} from '../3p/3p';
 
 const DEFAULT_TIMEOUT = 500; // ms
@@ -72,7 +73,7 @@ export function imonomy(global, data) {
  */
 function prepareData(data) {
   for (const attr in data) {
-    if (data.hasOwnProperty(attr) && imonomyData.indexOf(attr) >= 0) {
+    if (hasOwn(data, attr) && imonomyData.indexOf(attr) >= 0) {
       delete data[attr];
     }
   }
