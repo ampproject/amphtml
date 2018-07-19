@@ -19,11 +19,6 @@ import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../iframe-transport-vendors';
 import {isSecureUrlDeprecated} from '../../../../src/url';
 
 describe('analytics vendors', () => {
-  it('googleanalytics & googleanalytics-alpha should be identical', () => {
-    const gaConfig = ANALYTICS_CONFIG['googleanalytics'];
-    expect(gaConfig).to
-        .deep.equal(ANALYTICS_CONFIG['googleanalytics-alpha']);
-  });
 
   it('should contain only iframe transport in ' +
       'ANALYTICS_IFRAME_TRANSPORT_CONFIG', () => {

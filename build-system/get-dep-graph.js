@@ -18,8 +18,8 @@ const babel = require('babelify');
 const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;
 const devnull = require('dev-null');
-const fs = require('fs');
-const mkpath = require('mkpath');
+const fs = require('fs-extra');
+const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
@@ -27,13 +27,28 @@ const through = require('through2');
 const TopologicalSort = require('topological-sort');
 const {extensionBundles, TYPES} = require('../bundles.config');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
+const wrappers = require('./compile-wrappers');
 
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
-//patchRegisterElement();
-patchWebAnimations();
-patchDompurify();
+const mainBundle = 'src/amp.js';
+const extensionsInfo = {};
+let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
+  const path = buildFullPathFromConfig(ext);
+  if (Array.isArray(path)) {
+    path.forEach((p, index) => {
+      extensionsInfo[p] = Object.create(ext);
+      extensionsInfo[p].filename = ext.name + '-' + ext.version[index];
+    });
+  } else {
+    extensionsInfo[path] = Object.create(ext);
+    extensionsInfo[path].filename = ext.name + '-' + ext.version;
+  }
+  return path;
+});
+// Flatten nested arrays to support multiple versions
+extensions = [].concat.apply([], extensions);
 
 exports.splittable = function(config) {
 
@@ -79,8 +94,21 @@ exports.getFlags = function(config) {
     language_in: 'ES6',
     language_out: 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
-    externs: path.dirname(module.filename) + '/splittable.extern.js',
-    define: ['PSEUDO_NAMES=true'],
+    externs: [
+      path.dirname(module.filename) + '/splittable.extern.js',
+      './build-system/amp.extern.js',
+      // 'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/performance_observer.js',
+      // 'third_party/closure-compiler/externs/shadow_dom.js',
+      // 'third_party/closure-compiler/externs/streams.js',
+      'third_party/closure-compiler/externs/web_animations.js',
+      'third_party/moment/moment.extern.js',
+      'third_party/react-externs/externs.js',
+    ],
+    define: [
+      'PSEUDO_NAMES=true',
+      'SINGLE_FILE_COMPILATION=true',
+    ],
     jscomp_off: [
       'accessControls',
       'globalThis',
@@ -120,95 +148,89 @@ exports.getBundleFlags = function(g) {
   // Write all the packages (directories with a package.json) as --js
   // inputs to the flags. Closure compiler reads the packages to resolve
   // non-relative module names.
-  let packageCount = 0;
   Object.keys(g.packages).sort().forEach(function(pkg) {
     flagsArray.push('--js', pkg);
-    packageCount++;
   });
 
   // Build up the weird flag structure that closure compiler calls
   // modules and we call bundles.
   const bundleKeys = Object.keys(g.bundles).sort();
-  // TODO(erwinm): special case src/amp.js and _base for now. add a propert sort
+  // TODO(erwinm): special case src/amp.js for now. add a propert sort
   // comparator here.
-  const indexOfBase = bundleKeys.indexOf('_base');
-  bundleKeys.splice(indexOfBase, 1);
-  bundleKeys.splice(0, 0, '_base');
-  const indexOfAmp = bundleKeys.indexOf('src/amp.js');
+  const indexOfAmp = bundleKeys.indexOf(mainBundle);
   bundleKeys.splice(indexOfAmp, 1);
-  bundleKeys.splice(1, 0, 'src/amp.js');
-
+  bundleKeys.splice(0, 0, mainBundle);
+  const indexOfIntermediate = bundleKeys.indexOf('_base_i');
+  bundleKeys.splice(indexOfIntermediate, 1);
+  bundleKeys.splice(1, 0, '_base_i');
   bundleKeys.forEach(function(originalName) {
-    const isBase = originalName == '_base';
-    const isMain = originalName == 'src/amp.js';
-    let extraModules = 0;
+    const isMain = originalName == mainBundle;
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
-    if (isBase || bundleKeys.length == 1) {
-      flagsArray.push('--js', relativePath(process.cwd(),
-          require.resolve('./base.js')));
-      extraModules++;
-      Object.keys(g.browserMask).sort().forEach(function(mask) {
-        flagsArray.push('--js', mask);
-        extraModules++;
-      });
-    }
     bundle.modules.forEach(function(js) {
       flagsArray.push('--js', js);
     });
-    if (!isBase && bundleKeys.length > 1) {
-      // TODO(erwinm): do we still need the bundleTrailModule?
-      //flagsArray.push('--js', bundleTrailModule(bundle.name));
-      //extraModules++;
+    let name;
+    let info = extensionsInfo[bundle.name];
+    if (info) {
+      name = info.filename;
+      if (!name) {
+        throw new Error('Expected filename ' + JSON.stringify(info));
+      }
+    } else if (bundle.name == mainBundle) {
+      name = 'v0';
+      info = {
+        name,
+      };
+    } else {
+      // TODO(@cramforce): Remove special case.
+      if (!/_base/.test(bundle.name)) {
+        throw new Error('Unexpected missing extension info ' + bundle.name);
+      }
+      name = bundle.name;
+      info = {
+        name,
+      };
     }
-    // The packages count as inputs to the first module.
-    if (packageCount) {
-      extraModules += packageCount;
-      packageCount = 0;
-    }
-    // Replace directory separator with - in bundle filename
-    const name = bundle.name
-        .replace(/\.js$/g, '')
-        .replace(/[\/\\]/g, '-');
     // And now build --module $name:$numberOfJsFiles:$bundleDeps
-    let cmd = name + ':' + (bundle.modules.length + extraModules);
-    // All non _base bundles depend on _base.
-    if (!isBase && g.bundles._base) {
+    let cmd = name + ':' + (bundle.modules.length);
+    const bundleDeps = [];
+    if (!isMain) {
       const configEntry = getExtensionBundleConfig(originalName);
       if (configEntry) {
         cmd += `:${configEntry.type}`;
+        bundleDeps.push('_base_i', configEntry.type);
       } else {
-        // All lower tier bundles depend on src-amp (v0.js)
-        if (name.includes(TYPES_VALUES)) {
-          cmd += ':src-amp';
+        // All lower tier bundles depend on v0.js
+        if (TYPES_VALUES.includes(name)) {
+          cmd += ':_base_i';
+          bundleDeps.push('_base_i');
         } else {
-          cmd += ':_base';
+          cmd += ':v0';
         }
       }
     }
     flagsArray.push('--module', cmd);
     if (bundleKeys.length > 1) {
-      if (isBase) {
+      function massageWrapper(w) {
+        return (w.replace('<%= contents %>', '%s')
+        /*+ '\n//# sourceMappingURL=%basename%.map\n'*/);
+      }
+      if (isMain) {
         flagsArray.push('--module_wrapper', name + ':' +
-            exports.baseBundleWrapper);
+            massageWrapper(wrappers.mainBinary));
       } else {
-        if (isMain) {
-          flagsArray.push('--module_wrapper', name + ':' +
-              exports.mainBinaryWrapper);
-        } else {
-          flagsArray.push('--module_wrapper', name + ':' +
-              exports.bundleWrapper);
-        }
+        flagsArray.push('--module_wrapper', name + ':' +
+           massageWrapper(wrappers.extension(
+               info.name, info.loadPriority, bundleDeps)));
       }
     } else {
-      flagsArray.push('--module_wrapper', name + ':' +
-            exports.defaultWrapper);
+      throw new Error('Expect to build more than one bundle.');
     }
   });
   flagsArray.push('--js_module_root', './build/patched-module/');
   flagsArray.push('--js_module_root', './node_modules/');
   flagsArray.push('--js_module_root', './');
-  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return flagsArray;
 };
 
@@ -230,16 +252,14 @@ exports.getGraph = function(entryModules, config) {
     sorted: undefined,
     // Generated bundles
     bundles: {
-      // We always have a _base bundle.
-      _base: {
+      _base_i: {
         isBase: true,
-        name: '_base',
+        name: '_base_i',
         // The modules in the bundle.
         modules: [],
       },
     },
     packages: {},
-    browserMask: {},
   };
 
   TYPES_VALUES.forEach(type => {
@@ -266,47 +286,6 @@ exports.getGraph = function(entryModules, config) {
           require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
         ],
       });
-
-  b.on('package', function(pkg) {
-    if (!pkg.browser) {
-      return;
-    }
-    Object.keys(pkg.browser).sort().forEach(function(entry) {
-      if (/^\./.test(entry)) {
-        throw new Error(
-            'Relative entries in package.json#browser not yet supported: ' +
-            entry + ' [' + pkg.__dirname + '.package.json]');
-      }
-      if (pkg.browser[entry] !== false) {
-        throw new Error(
-            'Only masking of entire modules via false supported in ' +
-            'package.json#browser:' + entry +
-            ' [' + pkg.__dirname + '.package.json]');
-      }
-      let filename =
-          'splittable-build/browser/node_modules/' + entry;
-      const maskedPkg = 'splittable-build/browser/node_modules/' +
-          entry.split('/')[0] + '/package.json';
-      if (!/\//.test(entry)) {
-        filename += '/index';
-      }
-      filename = exports.maybeAddDotJs(filename);
-      if (graph.browserMask[filename]) {
-        return;
-      }
-      graph.browserMask[filename] = true;
-      mkpath.sync(path.dirname(filename));
-      fs.writeFileSync(filename,
-          '// Generated to mask module via package.json#browser.\n' +
-          'module.exports = {};\n');
-      if (graph.browserMask[pkg]) {
-        return;
-      }
-      graph.browserMask[maskedPkg] = true;
-      fs.writeFileSync(maskedPkg,
-          '{"Generated to mask module via package.json#browser":true}\n');
-    });
-  });
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
   // will not be stable.
@@ -326,19 +305,8 @@ exports.getGraph = function(entryModules, config) {
           relativePath(process.cwd(), row.id)));
       topo.addNode(id, id);
       const deps = edges[id] = Object.keys(row.deps).sort().map(function(dep) {
-        //const depId = row.deps[dep];
-        const relPathtoDep = unifyPath(relativePath(process.cwd(),
+        return unifyPath(relativePath(process.cwd(),
             row.deps[dep]));
-
-        // TODO(erwimm): don't parse package.json, breaks closure right now.
-        // Non relative module path. Find the package.json.
-        //if (!/^\./.test(dep)) {
-        //var packageJson = findPackageJson(depId);
-        //if (packageJson) {
-        //graph.packages[packageJson] = true;
-        //}
-        //}
-        return relPathtoDep;
       });
       graph.deps[id] = deps;
       if (row.entry) {
@@ -357,11 +325,7 @@ exports.getGraph = function(entryModules, config) {
     graph.sorted = Array.from(topo.sort().keys()).reverse();
 
     setupBundles(graph);
-
     resolve(graph);
-
-    //buildUpCommon(graph);
-
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
   return promise;
@@ -393,7 +357,7 @@ function setupBundles(graph) {
         inBundleCount++;
         dest = entry;
         const configEntry = getExtensionBundleConfig(entry);
-        const type = configEntry ? configEntry.type : '_base';
+        const type = configEntry ? configEntry.type : mainBundle;
         bundleDestCandidates.push(type);
       }
     });
@@ -403,14 +367,17 @@ function setupBundles(graph) {
     // If a module is in more than 1 bundle, it must go into _base.
     if (bundleDestCandidates.length > 1) {
       const first = bundleDestCandidates[0];
-      const allTheSame = bundleDestCandidates.some(c => c == first);
-      const needsBase = bundleDestCandidates.some(c => c == '_base');
-      dest = '_base';
+      const allTheSame = !bundleDestCandidates.some(c => c != first);
+      const needsBase = bundleDestCandidates.some(c => c == mainBundle);
+      dest = mainBundle;
+      // If all requested bundles are the same, then that is the right
+      // place.
       if (allTheSame) {
         dest = first;
       } else if (!needsBase) {
-        // Comment out when merging PR that introduces intermediate bundle.
-        // dest = '_intermediate'
+        // If multiple type-bundles want the file, but it doesn't have to be
+        // in base, move the file into the intermediate bundle.
+        dest = '_base_i';
       }
     }
     if (!graph.bundles[dest]) {
@@ -422,11 +389,6 @@ function setupBundles(graph) {
     }
     graph.bundles[dest].modules.push(id);
   });
-
-  // No need for a base module if there was only one entry module.
-  if (graph.entryModules.length == 1) {
-    delete graph.bundles._base;
-  }
 }
 
 // Returns the extension bundle config for the given filename or null.
@@ -457,76 +419,11 @@ function unifyPath(id) {
 
 const externs = [
   'build-system/amp.extern.js',
-  //'third_party/closure-compiler/externs/intersection_observer.js',
   'third_party/closure-compiler/externs/performance_observer.js',
-  //'third_party/closure-compiler/externs/shadow_dom.js',
-  //'third_party/closure-compiler/externs/streams.js',
   'third_party/closure-compiler/externs/web_animations.js',
   'third_party/moment/moment.extern.js',
   'third_party/react-externs/externs.js',
 ];
-
-const systemImport =
-    // Polyfill and/or monkey patch System.import.
-    '(self.System=self.System||{}).import=function(n){' +
-    // Always end names in .js
-    'n=n.replace(/\\.js$/g,"")+".js";' +
-    // Short circuit if the bundle is already loaded.
-    'return (self._S["//"+n]&&Promise.resolve(self._S["//"+n]))' +
-    // Short circuit if we are already loadind, otherwise create
-    // a promise (that will short circuit subsequent requests)
-    // and start loading.
-    '||self._S[n]||(self._S[n]=new Promise(function(r,t){' +
-    // Load via a script
-    'var s=document.createElement("script");' +
-    // Calculate the source URL using the same algorithms as used
-    // during bundle generation.
-    's.src=(self.System.baseURL||".")+"/"+n.replace(/[\\/\\\\]/g,"-");' +
-    // Fail promise on any error.
-    's.onerror=t;' +
-    // On success the trailing module in every bundle will have created
-    // the _S global representing the module object that is the root
-    // of the bundle. Resolve the promise with it.
-    's.onload=function(){r(self._S["//"+n])};' +
-    // Append the script tag.
-    '(document.head||document.documentElement).appendChild(s);' +
-    '})' +
-    ')};\n';
-
-const nodeEmulation = 'self.global=self;';
-
-exports.mainBinaryWrapper = 'try{(function(){%s})()}catch(e){' +
-  'setTimeout(function(){' +
-  'var s=document.body.style;' +
-  's.opacity=1;' +
-  's.visibility="visible";' +
-  's.animation="none";' +
-  's.WebkitAnimation="none;"},1000);throw e};' +
-  '//# sourceMappingURL=%basename%.map\n';
-
-exports.defaultWrapper = nodeEmulation + '%s\n' +
-     '//# sourceMappingURL=%basename%.map\n';
-
-// Don't wrap the bundle itself in a closure (other bundles need
-// to be able to see it), but add a little async executor for
-// scheduled functions.
-exports.baseBundleWrapper =
-    // Declaring a few variables that are used in node modules to increase
-    // compatiblity.
-    nodeEmulation +
-    '%s\n' +
-    systemImport +
-    // Runs scheduled non-base bundles in the _S array and overrides
-    // .push to immediately execute incoming bundles.
-    '(self._S=self._S||[]).push=function(f){f.call(self)};' +
-    '(function(f){while(f=self._S.shift()){f.call(self)}})();\n' +
-    '//# sourceMappingURL=%basename%.map\n';
-
-// Schedule or execute bundle via _S global.
-exports.bundleWrapper = '(self.AMP=self.AMP||[]).push({n:"%basename%", ' +
-    'v:"$internalRuntimeVersion$", f:(function(){%s})});\n' +
-    '//# sourceMappingURL=%basename%.map\n';
-
 
 function buildFullPathFromConfig(ext) {
   function getPath(version) {
@@ -542,19 +439,22 @@ function buildFullPathFromConfig(ext) {
 function unsupportedExtensions(name) {
   return name;
 }
-let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
-  return buildFullPathFromConfig(ext);
-});
-// Flatten nested arrays to support multiple versions
-extensions = [].concat.apply([], extensions);
 
 exports.getFlags({
   modules: ['src/amp.js'].concat(extensions),
   writeTo: './out/',
   externs,
-}).then(compile);
+}).then(compile).then(function() {
+  // Move things into place as AMP expects them.
+  fs.ensureDirSync('out/v0');
+  return Promise.all([
+    move('out/amp*', 'out/v0'),
+    move('out/_base*', 'out/v0'),
+  ]);
+});
 
 function compile(flagsArray) {
+  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return new Promise(function(resolve, reject) {
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
       if (exitCode == 0) {
@@ -569,53 +469,4 @@ function compile(flagsArray) {
       }
     });
   });
-}
-
-
-function patchRegisterElement() { // eslint-disable-line no-unused-vars
-  let file;
-  // Copies document-register-element into a new file that has an export.
-  // This works around a bug in closure compiler, where without the
-  // export this module does not generate a goog.provide which fails
-  // compilation.
-  // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.node.js';
-  if (!fs.existsSync(patchedName)) {
-    file = fs.readFileSync(
-        'node_modules/document-register-element/build/' +
-        'document-register-element.node.js').toString();
-    // Closure Compiler does not generate a `default` property even though
-    // to interop CommonJS and ES6 modules. This is the same issue typescript
-    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
-    file = file.replace('module.exports = installCustomElements;',
-        'exports.default = installCustomElements;');
-    fs.writeFileSync(patchedName, file);
-  }
-}
-
-function patchWebAnimations() {
-  // Copies web-animations-js into a new file that has an export.
-  const patchedName = 'node_modules/web-animations-js/' +
-      'web-animations.install.js';
-  if (fs.existsSync(patchedName)) {
-    return;
-  }
-  let file = fs.readFileSync(
-      'node_modules/web-animations-js/' +
-      'web-animations.min.js').toString();
-  // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
-      'var document = window.document;\n' +
-      file + '\n' +
-      '}\n';
-  fs.writeFileSync(patchedName, file);
-}
-
-function patchDompurify() {
-  // Copies web-animations-js into a new file that has an export.
-  const name = 'node_modules/dompurify/package.json';
-  const file = fs.readFileSync(name).toString()
-      .replace('"browser": "dist/purify.js",', '');
-  fs.writeFileSync(name, file);
 }

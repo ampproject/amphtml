@@ -82,8 +82,8 @@ message AttrSpec {
   optional bool mandatory = 3;
   // Within the context of the tag, exactly one of the attributes tagged
   // with this identifier must be present. Per convention, this identifier
-  // should list the tags participating in the mandatory oneof, with or,
-  // e.g. "foo or bar or baz".
+  // should list the tags participating in the mandatory oneof:
+  // e.g. mandatory_oneof: "['foo', 'bar']"
   optional string mandatory_oneof = 12;
 
   // This would be a oneof, but this file only uses features in protobuf 2.5.0.
@@ -94,8 +94,8 @@ message AttrSpec {
   // attributes in a given HTML document will be unescaped.
 
   // The attribute value must be equal to the value in this field.
-  optional string value = 4;              // case sensitive
-  optional string value_casei = 18;       // case insensitive
+  repeated string value = 4;              // case sensitive
+  repeated string value_casei = 18;       // case insensitive
   optional string value_regex = 15;       // case sensitive
   optional string value_regex_casei = 5;  // case insensitive
   optional UrlSpec value_url = 14;

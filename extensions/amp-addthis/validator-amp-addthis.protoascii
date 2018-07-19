@@ -36,19 +36,17 @@ tags: {  # <amp-addthis>
   attrs: {
     name: "data-share-media"
     value_url: {
-      allow_empty: true
-      allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_empty: true
     }
   }
   attrs: {
     name: "data-share-url"
     value_url: {
-      allow_empty: true
-      allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_empty: true
     }
   }
   attrs: {

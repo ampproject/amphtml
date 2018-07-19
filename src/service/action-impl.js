@@ -1082,7 +1082,7 @@ class ParserTokenizer {
 
     // A numeric. Notice that it steals the `.` from separators.
     if (convertValues && (isNum(c) ||
-            ((c == '.') && (newIndex + 1 < this.str_.length) &&
+            (c == '.' && newIndex + 1 < this.str_.length &&
             isNum(this.str_[newIndex + 1])))) {
       let hasFraction = c == '.';
       let end = newIndex + 1;

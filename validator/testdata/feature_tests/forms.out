@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,6 +48,25 @@ FAIL
 |      <div submit-success><template type="amp-mustache">Success</template></div>
 |      <div submit-error>Error</div>
 |    </form>
+|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+|      custom-validation-reporting="as-you-go">
+|      <fieldset>
+|        <label>
+|          <span>Your name</span>
+|          <input id="name" type="text" name="name" required>
+|          <span visible-when-invalid="valueMissing" validation-for="name"></span>
+|        </label>
+|        <label>
+|          <span>Your email</span>
+|          <input type="email" name="email" required>
+|        </label>
+|        <input type="submit" value="Subscribe">
+|      </fieldset>
+|      <div>
+|        <div submit-success><template type="amp-mustache">Success</template></div>
+|        <div submit-error>Error</div>
+|      </div>
+|    </form>
 |    <!-- More valid tags (datalist and optgroup) -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <label>Choose a browser from this list:
@@ -82,7 +101,7 @@ FAIL
 |    <!-- Invalid: form action must be https. -->
 |    <form method="post" action-xhr="http://example.com/subscribe" target="_blank">
 >>   ^~~~~~~~~
-feature_tests/forms.html:82:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:101:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <input type="submit" value="Subscribe">
 |    </form>
 |    <!-- Invalid: form action must be a non-cdn link. -->
@@ -104,7 +123,7 @@ feature_tests/forms.html:82:2 Invalid URL protocol 'http:' for attribute 'action
 |    <!-- Invalid: form target must be _blank or _top -->
 |    <form method="post" action-xhr="https://example/subscribe" target="_new">
 >>   ^~~~~~~~~
-feature_tests/forms.html:102:2 The attribute 'target' in tag 'FORM [method=POST]' is set to the invalid value '_new'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:121:2 The attribute 'target' in tag 'FORM [method=POST]' is set to the invalid value '_new'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <input type="submit" value="Subscribe">
 |    </form>
 |    <!-- Invalid: input, select, option and textarea must be children of form. -->
@@ -117,10 +136,10 @@ feature_tests/forms.html:102:2 The attribute 'target' in tag 'FORM [method=POST]
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="button" name="button">
 >>     ^~~~~~~~~
-feature_tests/forms.html:113:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:132:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-feature_tests/forms.html:114:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:133:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
@@ -131,39 +150,39 @@ feature_tests/forms.html:114:4 The attribute 'type' in tag 'input' is set to the
 |    <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
-feature_tests/forms.html:123:4 The tag 'INPUT [type=password]' may only appear as a descendant of tag 'form [method=post]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:142:4 The tag 'INPUT [type=password]' may only appear as a descendant of tag 'form [method=post]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: if validation-for is set on an element, then -->
 |    <!-- visible-when-invalid must also be set and vice versa. -->
 |    <form action="/foo" target="_blank">
 |      <div validation-for="bar"></div>
 >>     ^~~~~~~~~
-feature_tests/forms.html:128:4 The attribute 'visible-when-invalid' in tag 'div' is missing or incorrect, but required by attribute 'validation-for'. [DISALLOWED_HTML]
+feature_tests/forms.html:147:4 The attribute 'visible-when-invalid' in tag 'div' is missing or incorrect, but required by attribute 'validation-for'. [DISALLOWED_HTML]
 |      <div visibile-when-invalid="valueMissing"></div>
 >>     ^~~~~~~~~
-feature_tests/forms.html:129:4 The attribute 'visibile-when-invalid' may not appear in tag 'div'. [DISALLOWED_HTML]
+feature_tests/forms.html:148:4 The attribute 'visibile-when-invalid' may not appear in tag 'div'. [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: submit-success must be a div -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
 |      custom-validation-reporting="as-you-go">
 |      <span submit-success><template type="amp-mustache">Success</template></span>
 >>     ^~~~~~~~~
-feature_tests/forms.html:134:4 The attribute 'submit-success' may not appear in tag 'span'. [DISALLOWED_HTML]
+feature_tests/forms.html:153:4 The attribute 'submit-success' may not appear in tag 'span'. [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: post implies action-xhr -->
 |    <form method="post" action="https://example.com/subscribe" target="_top">
 >>   ^~~~~~~~~
-feature_tests/forms.html:137:2 The attribute 'action' may not appear in tag 'FORM [method=POST]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:156:2 The attribute 'action' may not appear in tag 'FORM [method=POST]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: get implies action -->
 |    <form method="get" action-xhr="https://example.com/subscribe" target="_top">
 >>   ^~~~~~~~~
-feature_tests/forms.html:140:2 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:159:2 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: get implies action, default method is get -->
 |    <form action-xhr="https://example.com/subscribe" target="_top">
 >>   ^~~~~~~~~
-feature_tests/forms.html:143:2 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:162:2 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Valid: inlined template, referenced template -->
 |    <template type="amp-mustache" id="submit_success_template">
@@ -181,8 +200,6 @@ feature_tests/forms.html:143:2 The mandatory attribute 'action' is missing in ta
 |      <input type="submit" value="Subscribe">
 |      <div submit-success template="submit_success_template">
 |        <template type="amp-mustache">Success in inlined inlined</template>
->>       ^~~~~~~~~
-feature_tests/forms.html:160:6 The parent tag of tag 'amp-story-auto-ads > template' is 'div', but it can only be 'amp-story-auto-ads'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
 |      </div>
 |    </form>
 |  </body>
