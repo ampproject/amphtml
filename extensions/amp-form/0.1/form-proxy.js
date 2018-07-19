@@ -111,7 +111,7 @@ function createFormProxyConstr(win) {
           // Exclude properties that already been created.
           win.Object.prototype.hasOwnProperty.call(FormProxyProto, name) ||
           // Exclude some properties. Currently only used for testing.
-          blacklistedProperties && blacklistedProperties.indexOf(name) != -1) {
+          (blacklistedProperties && blacklistedProperties.includes(name))) {
         continue;
       }
       if (typeof property.value == 'function') {

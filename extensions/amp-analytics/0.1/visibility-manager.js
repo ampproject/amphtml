@@ -549,7 +549,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     }
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
-    return trackedElement && trackedElement.intersectionRatio || 0;
+    return (trackedElement && trackedElement.intersectionRatio) || 0;
   }
 
   /**
