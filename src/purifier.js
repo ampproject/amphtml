@@ -270,6 +270,9 @@ export function purifyHtml(dirty) {
    * @param {!Node} unusedNode
    */
   const afterSanitizeElements = function(unusedNode) {
+    // DOMPurify doesn't have a attribute-specific tag whitelist API and
+    // `allowedTags` has a per-invocation scope, so we need to undo
+    // changes after sanitizing elements.
     allowedTagsChanges.forEach(tag => {
       delete allowedTags[tag];
     });
@@ -350,14 +353,14 @@ export function purifyHtml(dirty) {
     });
     allowedAttributesChanges.length = 0;
 
+    // Restore the `on` attribute which DOMPurify incorrectly flags as an
+    // unknown protocol due to presence of the `:` character.
     filterSplice(this.removed, r => {
       if (r.from === node && r.attribute) {
         const {name, value} = r.attribute;
-        // Restore the `on` attribute which DOMPurify incorrectly flags as an
-        // unknown protocol due to presence of the `:` character.
         if (name.toLowerCase() === 'on') {
           node.setAttribute('on', value);
-          return false; // Remove from array once processed.
+          return false; // Delete from `removed` array once processed.
         }
       }
       return true;
