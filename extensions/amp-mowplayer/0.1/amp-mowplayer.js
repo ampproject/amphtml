@@ -36,12 +36,10 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
 
 /**
  * @enum {number}
@@ -211,7 +209,8 @@ class AmpMowplayer extends AMP.BaseElement {
   assertDatasourceExists_() {
     const datasourceExists = this.mediaid_;
     user().assert(
-        datasourceExists, 'The data-mediaid attribute is required for <amp-mowplayer> %s',
+        datasourceExists,
+        'The data-mediaid attribute is required for <amp-mowplayer> %s',
         this.element
     );
   }
