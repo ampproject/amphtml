@@ -299,16 +299,14 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
   }
-  let hasAmpShadowJs = false;
   let hasNonAmpJs = false;
   try {
     hasNonAmpJs = detectNonAmpJs(self);
-    hasAmpShadowJs = detectAmpShadowJs(self);
   } catch (ignore) {
     // Ignore errors during error report generation.
   }
-  if (!hasAmpShadowJs && hasNonAmpJs && Math.random() > 0.01) {
-    // Only report 1% of errors on pages with non-AMP JS and are not PWAs
+  if (hasNonAmpJs && Math.random() > 0.01) {
+    // Only report 1% of errors on pages with non-AMP JS.
     // These errors can almost never be acted upon, but spikes such as
     // due to buggy browser extensions may be helpful to notify authors.
     return;
@@ -538,25 +536,14 @@ export function getErrorReportData(message, filename, line, col, error,
  * @visibleForTesting
  */
 export function detectNonAmpJs(win) {
-  const scripts = win.document.querySelectorAll('script[src]');
+  const scripts = Services.ampdocServiceFor(win)
+      .getAmpDoc().getHeadNode().querySelectorAll('script[src]');
   for (let i = 0; i < scripts.length; i++) {
     if (!isProxyOrigin(scripts[i].src.toLowerCase())) {
       return true;
     }
   }
   return false;
-}
-
-/**
- * Returns true if the AMP runtime support for shadow DOM is used.
- * @param {!Window} win
- * @return {boolean}
- * @visibleForTesting
- */
-export function detectAmpShadowJs(win) {
-  const root = Services.ampdocServiceFor(win).getAmpDoc().getHeadNode();
-  const querySelector = 'script[src="' + urls.cdn + '/shadow-v0.js"]';
-  return !!root.querySelector(querySelector);
 }
 
 /**
