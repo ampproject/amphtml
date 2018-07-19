@@ -17,305 +17,382 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
 import {
-  createFrameFor,
-  mutedOrUnmutedEvent,
-  originMatches,
-  redispatch,
-} from '../../../src/iframe-video';
+createFrameFor,
+        isJsonOrObj,
+        mutedOrUnmutedEvent,
+        objOrParseJson,
+        originMatches,
+        redispatch,
+        } from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
+fullscreenEnter,
+        fullscreenExit,
+        getDataParamsFromAttributes,
+        isFullscreenElement,
+        removeElement,
+        } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
+import {htmlFor} from '../../../src/static-template';
 import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+installVideoManagerForDoc,
+        } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setStyles} from '../../../src/style';
 
 /**
- * @implements {../../../src/video-interface.VideoInterface}
+ * @enum {number}
+ * @private
  */
-class AmpMowPlayer extends AMP.BaseElement {
 
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
+const PlayerStates = {
+    UNSTARTED: -1,
+    ENDED: 0,
+    PLAYING: 1,
+    PAUSED: 2,
+};
 
-    /** @private {string} */
-    this.mediaid_ = '';
+/** @implements {../../../src/video-interface.VideoInterface} */
+class AmpMowplayer extends AMP.BaseElement {
 
-    /** @private {?HTMLIFrameElement} */
-    this.iframe_ = null;
+    /** @param {!AmpElement} element */
+    constructor(element) {
+        super(element);
 
-    /** @private {?Promise} */
-    this.playerReadyPromise_ = null;
+        /** @private {?string}  */
+        this.mediaid_ = null;
 
-    /** @private {?Function} */
-    this.playerReadyResolver_ = null;
+        /** @private {?boolean}  */
+        this.muted_ = false;
 
-    /** @private {?string} */
-    this.videoIframeSrc_ = null;
+        /** @private {?Element} */
+        this.iframe_ = null;
 
-    /** @private {?number} */
-    this.volume_ = null;
+        /** @private {?string} */
+        this.videoIframeSrc_ = null;
 
-    /** @private {?Function} */
-    this.unlistenMessage_ = null;
-  }
+        /** @private {?Promise} */
+        this.playerReadyPromise_ = null;
 
-  /**
-   * @param {boolean=} onLayout
-   * @override
-   */
-  preconnectCallback(onLayout) {
-    // Host that serves player configuration
-    this.preconnect.url('https://code.mowplayer.com', onLayout);
-    // CDN which hosts mowplayer assets
-    this.preconnect.url('https://cdn.mowplayer.com', onLayout);
-  }
+        /** @private {?Function} */
+        this.playerReadyResolver_ = null;
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /**
-   * Gets the source of video
-   *
-   * @return {string}
-   */
-  getVideoIframeSrc_() {
-
-    if (this.videoIframeSrc_) {
-      return this.videoIframeSrc_;
+        /** @private {?Function} */
+        this.unlistenMessage_ = null;
     }
 
-    //Create iframe
-    const src = 'https://cdn.mowplayer.com/player.html?code=' + encodeURIComponent(this.mediaid_);
+    /**
+     * @param {boolean=} opt_onLayout
+     * @override
+     */
+    preconnectCallback(opt_onLayout) {
 
-    this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
-
-    return this.videoIframeSrc_;
-  }
-
-  /** @override */
-  buildCallback() {
-    const {element} = this;
-
-    this.mediaid_ = user().assert(
-        (element.getAttribute('data-media-id')),
-        'the data-media-id attributes must exists for <amp-mowplayer> %s',
-        element);
-
-    const deferred = new Deferred();
-    this.playerReadyPromise_ = deferred.promise;
-    this.playerReadyResolver_ = deferred.resolve;
-
-    installVideoManagerForDoc(element);
-    Services.videoManagerForDoc(element).register(this);
-  }
-
-  /** @override */
-  layoutCallback() {
-    const iframe = createFrameFor(this, this.getVideoIframeSrc_());
-
-    this.iframe_ = iframe;
-
-    this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleMowMessage_.bind(this)
-    );
-
-    this.element.appendChild(iframe);
-
-    return this.loadPromise(iframe)
-        .then(() => this.playerReadyPromise_);
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
-    }
-    if (this.unlistenMessage_) {
-      this.unlistenMessage_();
+        const {preconnect} = this;
+        preconnect.url(this.getVideoIframeSrc_());
+        // Host that YT uses to serve JS needed by player.
+        preconnect.url('https://cdn.mowplayer.com', opt_onLayout);
+        // Load player settings
+        preconnect.url('https://code.mowplayer.com', opt_onLayout);
     }
 
-    const deferred = new Deferred();
-    this.playerReadyPromise_ = deferred.promise;
-    this.playerReadyResolver_ = deferred.resolve;
-    return true; // Call layoutCallback again.
-  }
-
-  /** @override */
-  pauseCallback() {
-    this.pause();
-  }
-
-  /**
-   * Sends a command to the player through postMessage.
-   * @param {string} command
-   * @param {*=} opt_arg
-   * @private
-   * */
-  sendCommand_(command, opt_arg) {
-    this.playerReadyPromise_.then(() => {
-      if (this.iframe_ && this.iframe_.contentWindow) {
-        const args = opt_arg === undefined ? '' : '|' + opt_arg;
-        const message = 'Mow|' + command + args;
-        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-      }
-    });
-  }
-
-  /**
-   * @param {!Event} event
-   * @private
-   */
-  handleMowMessage_(event) {
-    if (!originMatches(event, this.iframe_, 'https://cdn.mowplayer.com')) {
-      return;
+    /** @override */
+    isLayoutSupported(layout) {
+        return isLayoutSizeDefined(layout);
     }
 
-    const eventData = /** @type {?string|undefined} */ (getData(event));
-    if (typeof eventData !== 'string' || eventData.indexOf('Mow') !== 0) {
-      return;
+    /** @override */
+    viewportCallback(visible) {
+        this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
     }
 
-    const {element} = this;
-    const params = eventData.split('|');
+    /** @override */
+    buildCallback() {
+        this.mediaid_ = this.getMediaId_();
+        this.assertDatasourceExists_();
 
-    if (params[2] == 'trigger') {
-      if (params[3] == 'ready') {
-        this.playerReadyResolver_(this.iframe_);
-      }
-      redispatch(element, params[3], {
-        'ready': VideoEvents.LOAD,
-        'play': VideoEvents.PLAYING,
-        'pause': VideoEvents.PAUSE,
-      });
-      return;
+        const deferred = new Deferred();
+        this.playerReadyPromise_ = deferred.promise;
+        this.playerReadyResolver_ = deferred.resolve;
+
+        installVideoManagerForDoc(this.element);
+        Services.videoManagerForDoc(this.element).register(this);
     }
 
-    if (params[2] == 'volume') {
-      this.volume_ = parseFloat(params[3]);
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.volume_ <= 0));
-      return;
+    /**
+     * @return {string}
+     * @private
+     */
+    getVideoIframeSrc_() {
+
+        if (this.videoIframeSrc_) {
+            return this.videoIframeSrc_;
+        }
+
+        let src = 'https://cdn.mowplayer.com/player.html?code=' + encodeURIComponent(this.mediaid_);
+
+        const {element} = this;
+        const params = getDataParamsFromAttributes(element);
+
+        src = addParamsToUrl(src, params);
+        return this.videoIframeSrc_ = src;
     }
-  }
 
-  /** @override */
-  supportsPlatform() {
-    return true;
-  }
+    /** @override */
+    layoutCallback() {
 
-  /** @override */
-  isInteractive() {
-    return true;
-  }
+        const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
-  /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('play');
-  }
+        this.iframe_ = iframe;
 
-  /** @override */
-  pause() {
-    this.sendCommand_('pause');
-  }
+        this.unlistenMessage_ = listen(
+                this.win,
+                'message',
+                this.handleMowMessage_.bind(this)
+                );
 
-  /** @override */
-  mute() {
-    this.sendCommand_('muted', 1);
-    this.sendCommand_('volume', 0);
-  }
-
-  /** @override */
-  unmute() {
-    this.sendCommand_('muted', 0);
-    this.sendCommand_('volume', 1);
-  }
-
-  /** @override */
-  showControls() {
-    // Not supported.
-  }
-
-  /** @override */
-  hideControls() {
-    // Not supported.
-  }
-
-  /**
-   * @override
-   */
-  fullscreenEnter() {
-    if (!this.iframe_) {
-      return;
+        const loaded = this.loadPromise(this.iframe_).then(() => {
+            // Tell YT that we want to receive messages
+            this.listenToFrame_();
+            this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        });
+        this.playerReadyResolver_(loaded);
+        return loaded;
     }
-    fullscreenEnter(dev().assertElement(this.iframe_));
-  }
 
-  /**
-   * @override
-   */
-  fullscreenExit() {
-    if (!this.iframe_) {
-      return;
+    /** @override */
+    unlayoutCallback() {
+        if (this.iframe_) {
+            removeElement(this.iframe_);
+            this.iframe_ = null;
+        }
+        if (this.unlistenMessage_) {
+            this.unlistenMessage_();
+        }
+
+        const deferred = new Deferred();
+        this.playerReadyPromise_ = deferred.promise;
+        this.playerReadyResolver_ = deferred.resolve;
+        return true; // Call layoutCallback again.
     }
-    fullscreenExit(dev().assertElement(this.iframe_));
-  }
 
-  /** @override */
-  isFullscreen() {
-    if (!this.iframe_) {
-      return false;
+    /** @override */
+    pauseCallback() {
+        if (this.iframe_ && this.iframe_.contentWindow) {
+            this.pause();
+        }
     }
-    return isFullscreenElement(dev().assertElement(this.iframe_));
-  }
 
-  /** @override */
-  getMetadata() {
-    // Not implemented
-  }
+    /** @override */
+    mutatedAttributesCallback(mutations) {
+        if (mutations['data-mediaid'] == null) {
+            return;
+        }
+        this.mediaid_ = this.getMediaId_();
+        if (!this.iframe_) {
+            return;
+        }
+        this.sendCommand_('loadVideoById', [this.mediaid_]);
+    }
 
-  /** @override */
-  preimplementsMediaSessionAPI() {
-    return false;
-  }
+    /**
+     * @return {?string}
+     * @private
+     */
+    getMediaId_() {
+        return this.element.getAttribute('data-mediaid');
+    }
 
-  /** @override */
-  preimplementsAutoFullscreen() {
-    return false;
-  }
+    /**
+     * @private
+     */
+    assertDatasourceExists_() {
+        const datasourceExists = this.mediaid_;
+        user().assert(
+                datasourceExists, 'The data-mediaid attribute is required for <amp-mowplayer> %s',
+                this.element
+                );
+    }
 
-  /** @override */
-  getCurrentTime() {
-    // Not supported.
-    return 0;
-  }
+    /**
+     * Sends a command to the player through postMessage.
+     * @param {string} command
+     * @param {Array=} opt_args
+     * @private
+     */
+    sendCommand_(command, opt_args) {
+        this.playerReadyPromise_.then(() => {
+            if (this.iframe_ && this.iframe_.contentWindow) {
+                const message = JSON.stringify(dict({
+                    'event': 'command',
+                    'func': command,
+                    'args': opt_args || '',
+                }));
+                this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+            }
+        });
+    }
 
-  /** @override */
-  getDuration() {
-    // Not supported.
-    return 1;
-  }
+    /**
+     * @param {!Event} event
+     * @private
+     */
+    handleMowMessage_(event) {
+        if (!originMatches(event, this.iframe_, 'https://cdn.mowplayer.com')) {
+            return;
+        }
+        const eventData = getData(event);
+        if (!isJsonOrObj(eventData)) {
+            return;
+        }
 
-  /** @override */
-  getPlayedRanges() {
-    // Not supported.
-    return [];
-  }
+        const data = objOrParseJson(eventData);
+        if (data == null) {
+            return; // We only process valid JSON.
+        }
+
+        const eventType = data['event'];
+        const info = data['info'] || {};
+
+        const {element} = this;
+
+        const playerState = info['playerState'];
+        if (eventType == 'infoDelivery' && playerState != null) {
+            redispatch(element, playerState.toString(), {
+                [PlayerStates.PLAYING]: VideoEvents.PLAYING,
+                [PlayerStates.PAUSED]: VideoEvents.PAUSE,
+                // YT does not fire pause and ended together.
+                [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
+            });
+            return;
+        }
+
+        const muted = info['muted'];
+        if (eventType == 'infoDelivery' && info && muted != null) {
+            if (this.muted_ == muted) {
+                return;
+            }
+            this.muted_ = muted;
+            element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+            return;
+        }
+
+    }
+
+    /**
+     * Sends 'listening' message to the Mowplayer iframe to listen for events.
+     * @private
+     */
+    listenToFrame_() {
+        if (!this.iframe_) {
+            return;
+        }
+        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
+            'event': 'listening',
+        })), '*');
+    }
+
+    /** @override */
+    supportsPlatform() {
+        return true;
+    }
+
+    /** @override */
+    isInteractive() {
+        return true;
+    }
+
+    /** @override */
+    play(unusedIsAutoplay) {
+        this.sendCommand_('playVideo');
+    }
+
+    /** @override */
+    pause() {
+        this.sendCommand_('pauseVideo');
+    }
+
+    /** @override */
+    mute() {
+        this.sendCommand_('mute');
+    }
+
+    /** @override */
+    unmute() {
+        this.sendCommand_('unMute');
+    }
+
+    /** @override */
+    showControls() {
+        // Not supported.
+    }
+
+    /** @override */
+    hideControls() {
+        // Not supported.
+    }
+
+    /** @override */
+    fullscreenEnter() {
+        if (!this.iframe_) {
+            return;
+        }
+        fullscreenEnter(dev().assertElement(this.iframe_));
+    }
+
+    /** @override */
+    fullscreenExit() {
+        if (!this.iframe_) {
+            return;
+        }
+        fullscreenExit(dev().assertElement(this.iframe_));
+    }
+
+    /** @override */
+    isFullscreen() {
+        if (!this.iframe_) {
+            return false;
+        }
+        return isFullscreenElement(dev().assertElement(this.iframe_));
+    }
+
+    /** @override */
+    getMetadata() {
+        // Not implemented
+    }
+
+    /** @override */
+    preimplementsMediaSessionAPI() {
+        return true;
+    }
+
+    /** @override */
+    preimplementsAutoFullscreen() {
+        return false;
+    }
+
+    /** @override */
+    getCurrentTime() {
+        // Not supported.
+        return 0;
+    }
+
+    /** @override */
+    getDuration() {
+        // Not supported.
+        return 1;
+    }
+
+    /** @override */
+    getPlayedRanges() {
+        // Not supported.
+        return [];
+    }
 }
 
 
 AMP.extension('amp-mowplayer', '0.1', AMP => {
-  AMP.registerElement('amp-mowplayer', AmpMowPlayer);
+    AMP.registerElement('amp-mowplayer', AmpMowplayer);
 });
