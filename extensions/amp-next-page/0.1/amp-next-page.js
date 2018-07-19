@@ -60,38 +60,36 @@ export class AmpNextPage extends AMP.BaseElement {
       removeElement(separator);
     }
 
-    if (this.service_.isActive()) {
-      return;
-    }
+    return getServicePromiseForDoc(this.getAmpDoc(), SERVICE_ID)
+        .then(service => {
+          if (service.isActive()) {
+            return;
+          }
 
-    getServicePromiseForDoc(this.getAmpDoc(), SERVICE_ID).then(service => {
-      if (service.isActive()) {
-        return;
-      }
+          const {element} = this;
+          element.classList.add('i-amphtml-next-page');
 
-      const {element} = this;
-      element.classList.add('i-amphtml-next-page');
-
-      const src = element.getAttribute('src');
-      if (src) {
-        return this.fetchConfig_().then(
-            config => this.register_(service, config, separator),
-            error => user().error(TAG, 'error fetching config', error));
-      } else {
-        const scriptElements = childElementsByTag(element, 'SCRIPT');
-        user().assert(scriptElements.length === 1,
-            `${TAG} should contain only one <script> child, or a URL specified `
-            + 'in [src]');
-        const scriptElement = scriptElements[0];
-        user().assert(isJsonScriptTag(scriptElement),
-            `${TAG} config should ` +
+          const src = element.getAttribute('src');
+          if (src) {
+            return this.fetchConfig_().then(
+                config => this.register_(service, config, separator),
+                error => user().error(TAG, 'error fetching config', error));
+          } else {
+            const scriptElements = childElementsByTag(element, 'SCRIPT');
+            user().assert(scriptElements.length === 1,
+                `${TAG} should contain only one <script> child, or a URL `
+            + 'specified in [src]');
+            const scriptElement = scriptElements[0];
+            user().assert(isJsonScriptTag(scriptElement),
+                `${TAG} config should ` +
             'be inside a <script> tag with type="application/json"');
-        const configJson = tryParseJson(scriptElement.textContent, error => {
-          user().error(TAG, 'failed to parse config', error);
+            const configJson = tryParseJson(
+                scriptElement.textContent, error => {
+                  user().error(TAG, 'failed to parse config', error);
+                });
+            this.register_(service, configJson, separator);
+          }
         });
-        this.register_(service, configJson, separator);
-      }
-    });
   }
 
   /**
