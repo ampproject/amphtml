@@ -867,6 +867,10 @@ export const adConfig = {
     ],
   },
 
+  tracdelight: {
+    prefetch: 'https://scripts.tracdelight.com/amp.js',
+  },
+
   triplelift: {},
 
   trugaze: {
