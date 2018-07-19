@@ -16,7 +16,6 @@
 
 
 import '../amp-mowplayer';
-import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
@@ -93,7 +92,7 @@ describes.realWin('amp-mowplayer', {
       });
     });
 
-    it('should forward certain events from mowplayer to the amp element', () => {
+    it('should send events from mowplayer to the amp element', () => {
       return getMowPlayer({'data-mediaid': datasource}).then(mp => {
         const iframe = mp.querySelector('iframe');
 
