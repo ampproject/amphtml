@@ -20,9 +20,13 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - pip install --user protobuf
-script: node build-system/pr-check.js
+  - gem install travis
+script:
+  -  ls foo
 after_script:
   - build-system/sauce_connect/stop_sauce_connect.sh
+after_failure:
+  - travis cancel $TRAVIS_BUILD_NUMBER
 branches:
   only:
     - master
@@ -52,5 +56,6 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
+    - .gem
   pip: true
   bundler: true
