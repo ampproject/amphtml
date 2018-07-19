@@ -93,8 +93,9 @@ function sanitizeWithCaja(html) {
     }
   };
 
-  // Caja doesn't support SVG.
-  const cajaBlacklistedTags = Object.assign({'svg': true}, BLACKLISTED_TAGS);
+  // No Caja support for <script> or <svg>.
+  const cajaBlacklistedTags = Object.assign(
+      {'script': true, 'svg': true}, BLACKLISTED_TAGS);
 
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {
