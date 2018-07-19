@@ -477,3 +477,37 @@ AMP.require;
  * @typedef {function(number, boolean):?|function(number):?}
  */
 var TransitionDef;
+
+///////////////////
+// amp-bind externs
+///////////////////
+
+/**
+ * @typedef {{id: string, argumentNames: Array<string>, expressionString: string}}
+ */
+let AmpBindMacroDef;
+
+/**
+ * @typedef {{tagName: string, property: string, expressionString: string}}
+ */
+let BindingDef;
+
+/**
+ * @typedef {{message: string, stack: string}}
+ */
+let EvaluatorErrorDef;
+
+/**
+ * @typedef {(null|boolean|string|number|Array|Object)}
+ */
+let BindExpressionResultDef;
+
+/**
+ * @typedef {{results: !Object<string, BindExpressionResultDef>, errors: !Object<string, !EvaluatorErrorDef>}}
+ */
+let EvaluateBindingsResultDef;
+
+/**
+ * @typedef {{result: BindExpressionResultDef, error: ?EvaluatorErrorDef}}
+ */
+let EvaluateExpressionResultDef;

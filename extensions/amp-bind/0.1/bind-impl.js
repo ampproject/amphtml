@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {AmpBindMacroDef} from './amp-bind-macro';
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindExpressionResultDef} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {BindingDef} from './bind-evaluator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
+import {EvaluatorErrorDef} from './bind-evaluator';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
@@ -70,7 +71,7 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @typedef {{boundElements: !Array<BoundElementDef>, bindings: !Array<./bind-evaluator.BindingDef>, expressionToElements: !Object<string, !Array<!Element>>, limitExceeded: boolean}}
+ * @typedef {{boundElements: !Array<BoundElementDef>, bindings: !Array<!BindingDef>, expressionToElements: !Object<string, !Array<!Element>>, limitExceeded: boolean}}
  */
 let NodeScanDef;
 
@@ -496,8 +497,7 @@ export class Bind {
    */
   addMacros_() {
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
-    const macros =
-      /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+    const macros = /** @type {!Array<!AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')
@@ -607,7 +607,7 @@ export class Bind {
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
     // bound to elements.
-    const deletedExpressions = [];
+    const deletedExpressions = /** @type {!Array<string>} */ ([]);
     for (const expression in this.expressionToElements_) {
       const elements = this.expressionToElements_[expression];
       filterSplice(elements, element => {
@@ -645,11 +645,10 @@ export class Bind {
   scanNode_(node, limit) {
     /** @type {!Array<BoundElementDef>} */
     const boundElements = [];
-    /** @type {!Array<./bind-evaluator.BindingDef>} */
+    /** @type {!Array<!BindingDef>} */
     const bindings = [];
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = map();
-
 
     const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
       ? node : node.ownerDocument, 'ownerDocument is null.');
@@ -979,7 +978,7 @@ export class Bind {
       return Promise.resolve();
     }
     return this.resources_.mutateElement(element, () => {
-      const mutations = dict();
+      const mutations = map();
       let width, height;
 
       updates.forEach(update => {
