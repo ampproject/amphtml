@@ -288,17 +288,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
       wrapper: wrappers.mainBinary,
-    }),
-    compileJs('./src/', 'amp.js', './dist', {
-      toName: 'amp-esm.js',
-      minifiedName: 'v0-esm.js',
-      includePolyfills: true,
-      includeOnlyESMLevelPolyfills: true,
-      checkTypes: opt_checkTypes,
-      watch,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      minify: shouldMinify,
-      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -313,9 +303,24 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         }),
   ];
 
+  if (!argv.single_pass) {
+    promises.push(
+        compileJs('./src/', 'amp.js', './dist', {
+          toName: 'amp-esm.js',
+          minifiedName: 'v0-esm.js',
+          includePolyfills: true,
+          includeOnlyESMLevelPolyfills: true,
+          checkTypes: opt_checkTypes,
+          watch,
+          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          minify: shouldMinify,
+          wrapper: wrappers.mainBinary,
+        }));
+  }
+
   // We don't rerun type check for the shadow entry point for now.
   if (!opt_checkTypes) {
-    if (!watch || argv.with_shadow) {
+    if (!argv.single_pass && (!watch || argv.with_shadow)) {
       promises.push(
           compileJs('./src/', 'amp-shadow.js', './dist', {
             minifiedName: 'shadow-v0.js',
@@ -341,18 +346,21 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     }
 
     if (!watch || argv.with_inabox) {
+      if (!argv.single_pass) {
+        promises.push(
+            // Entry point for inabox runtime.
+            compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+              toName: 'amp-inabox.js',
+              minifiedName: 'amp4ads-v0.js',
+              includePolyfills: true,
+              extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+              checkTypes: opt_checkTypes,
+              watch,
+              preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+              minify: shouldMinify,
+            }));
+      }
       promises.push(
-          // Entry point for inabox runtime.
-          compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-            toName: 'amp-inabox.js',
-            minifiedName: 'amp4ads-v0.js',
-            includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-            checkTypes: opt_checkTypes,
-            watch,
-            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-            minify: shouldMinify,
-          }),
 
           // inabox-host
           compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
@@ -586,6 +594,10 @@ function buildExtensionCss(path, name, version, options) {
  * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
+  if (argv.single_pass) {
+    console.log('Skipping extension JS build in single pass mode', name);
+    return;
+  }
   const filename = options.filename || name + '.js';
   return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
     toName: `${name}-${version}.max.js`,
@@ -792,7 +804,9 @@ function dist() {
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minifiedRuntimeTarget).then(() => {
-            return enableLocalTesting(minifiedRuntimeEsmTarget);
+            if (!argv.single_pass) {
+              return enableLocalTesting(minifiedRuntimeEsmTarget);
+            }
           });
         }
       }).then(() => {
@@ -1515,6 +1529,7 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
             'Great for profiling and debugging production code.',
     fortesting: '  Compiles production binaries for local testing',
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    single_pass: 'Compile AMP\'s primary JS bundles in a single invocatoion',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',

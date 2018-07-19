@@ -55,6 +55,17 @@ describes.sandboxed('Extension Location', {}, () => {
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
     });
+
+    it('should allow no versions', () => {
+      window.AMP_MODE = {rtvVersion: '123'};
+      const script = calculateExtensionScriptUrl({
+        pathname: 'examples/ads.amp.html',
+        host: 'localhost:8000',
+        protocol: 'http:',
+      }, 'no-version', /* version is empty but defined */ '', true);
+      expect(script).to.equal(
+          'http://localhost:8000/dist/rtv/123/v0/no-version.js');
+    });
   });
 
   describe('get correct entry point source', () => {
