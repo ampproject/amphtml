@@ -82,6 +82,12 @@ function log(mode, ...messages) {
       break;
     case 'fatal':
       messages.unshift(colors.red('FATAL:'));
+      break;
+    case 'travis':
+      if (process.env['TRAVIS']) {
+        messages.forEach(message => process.stdout.write(message));
+      }
+      return;
   }
   // eslint-disable-next-line amphtml-internal/no-spread
   fancyLog(...messages);
@@ -387,6 +393,10 @@ async function generateSnapshots(percy, page, webpages) {
   if (!webpages.length) {
     log('fatal', 'No tests left to run!');
     return;
+  } else {
+    log('info', 'Executing', colors.cyan(webpages.length),
+        'visual diff tests for each of', colors.cyan(CONFIGS.join(', ')),
+        'configurations');
   }
 
   for (const config of CONFIGS) {
@@ -428,7 +438,9 @@ async function snapshotWebpages(percy, page, webpages, config) {
         webpage.loading_incomplete_css, webpage.loading_complete_css);
     await percy.snapshot(name, page, SNAPSHOT_OPTIONS);
     await clearExperiments(page);
+    log('travis', colors.green('●'));
   }
+  log('travis', '\n');
 }
 
 /**
