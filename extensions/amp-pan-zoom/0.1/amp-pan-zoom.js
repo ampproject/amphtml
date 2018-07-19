@@ -152,6 +152,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         this.elementIsSupported_(children[0]),
         children[0].tagName + ` is not supported by ${TAG}`
     );
+    this.element.classList.add('i-amphtml-pan-zoom');
     this.content_ = children[0];
     this.content_.classList.add('i-amphtml-pan-zoom-child');
     this.maxScale_ = this.getNumberAttributeOr_('max-scale', DEFAULT_MAX_SCALE);
@@ -297,8 +298,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       return this.mutateElement(() => {
         // Set the actual dimensions of the content
         setStyles(content, {
-          top: px(this.contentBox_.top),
-          left: px(this.contentBox_.left),
           width: px(this.contentBox_.width),
           height: px(this.contentBox_.height),
         });
