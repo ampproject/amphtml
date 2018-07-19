@@ -628,7 +628,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(extensions.extensions_['amp-test']).to.be.undefined;
       extensions.preloadExtension('_bundle');
       expect(doc.head.querySelectorAll(
-        '[custom-element="_bundle"]')).to.have.length(0);
+          '[custom-element="_bundle"]')).to.have.length(0);
       expect(doc.head.querySelectorAll(
           'script[src*="_bundle"]')).to.have.length(1);
     });
