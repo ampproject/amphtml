@@ -75,6 +75,10 @@ const forbiddenTerms = {
         'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
         'for a list of alternatives.',
   },
+  'document-register-element.node': {
+    message: 'Use `document-register-element.patched` instead',
+    whitelist: ['build-system/tasks/update-packages.js'],
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -141,6 +145,7 @@ const forbiddenTerms = {
         'temporary workarounds.',
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/config.js',
     ],
   },
   // Service factories that should only be installed once.

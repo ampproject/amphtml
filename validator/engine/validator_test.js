@@ -236,9 +236,13 @@ function renderInlineResult(validationResult, filename, filecontents) {
   let linesEmitted = 0;
   for (const error of validationResult.errors) {
     // Emit all input lines up to and including the line containing the error,
-    // prefixed with '|  '.
+    // prefixed with '|  ' (or just '|' if the line is empty).
     while (linesEmitted < error.line && linesEmitted < lines.length) {
-      rendered += '\n|  ' + lines[linesEmitted++];
+      rendered += '\n|';
+      if (lines[linesEmitted] !== '') {
+        rendered += '  ' + lines[linesEmitted];
+      }
+      linesEmitted++;
     }
     // Emit a carat showing the column of the following error.
     rendered += '\n>>';
@@ -248,7 +252,11 @@ function renderInlineResult(validationResult, filename, filecontents) {
     rendered += renderErrorWithPosition(filename, error);
   }
   while (linesEmitted < lines.length) {
-    rendered += '\n|  ' + lines[linesEmitted++];
+    rendered += '\n|';
+    if (lines[linesEmitted] !== '') {
+      rendered += '  ' + lines[linesEmitted];
+    }
+    linesEmitted++;
   }
   return rendered;
 }

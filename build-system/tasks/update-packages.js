@@ -56,6 +56,46 @@ function patchWebAnimations() {
 }
 
 /**
+ * Creates a version of document-register-element that can be installed
+ * without side effects.
+ */
+function patchRegisterElement() {
+  let file;
+  // Copies document-register-element into a new file that has an export.
+  // This works around a bug in closure compiler, where without the
+  // export this module does not generate a goog.provide which fails
+  // compilation.
+  // Details https://github.com/google/closure-compiler/issues/1831
+  const patchedName = 'node_modules/document-register-element' +
+      '/build/document-register-element.patched.js';
+  if (!fs.existsSync(patchedName)) {
+    file = fs.readFileSync(
+        'node_modules/document-register-element/build/' +
+        'document-register-element.node.js').toString();
+    // Eliminate the immediate side effect.
+    if (!/installCustomElements\(global\);/.test(file)) {
+      throw new Error('Expected "installCustomElements(global);" ' +
+          'to appear in document-register-element');
+    }
+    file = file.replace('installCustomElements(global);', '');
+    // Closure Compiler does not generate a `default` property even though
+    // to interop CommonJS and ES6 modules. This is the same issue typescript
+    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+    if (!/module.exports = installCustomElements;/.test(file)) {
+      throw new Error('Expected "module.exports = installCustomElements;" ' +
+          'to appear in document-register-element');
+    }
+    file = file.replace('module.exports = installCustomElements;',
+        'exports.installCustomElements = installCustomElements;');
+    fs.writeFileSync(patchedName, file);
+    if (!process.env.TRAVIS) {
+      log(colors.green('Patched'), colors.cyan(patchedName));
+    }
+  }
+}
+
+
+/**
  * Installs custom lint rules in build-system/eslint-rules to node_modules.
  */
 function installCustomEslintRules() {
@@ -97,6 +137,7 @@ function updatePackages() {
     runYarnCheck();
   }
   patchWebAnimations();
+  patchRegisterElement();
 }
 
 gulp.task(
