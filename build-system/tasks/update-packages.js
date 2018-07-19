@@ -24,17 +24,18 @@ const {exec, getStderr} = require('../exec');
 const yarnExecutable = 'npx yarn';
 
 /**
- * Returns true if the contents of the given file are equal to data.
- * (Returns false if the file doesn't exist.)
- * @param {string} filename
- * @param {string} data
+ * Writes the given contents to the patched file if updated
+ * @param {string} patchedName Name of patched file
+ * @param {string} file Contents to write
  */
-function fileContentsMatch(filename, data) {
-  if (!fs.existsSync(filename)) {
-    return false;
+function writeIfUpdated(patchedName, file) {
+  if (!fs.existsSync(patchedName) ||
+      fs.readFileSync(patchedName) != file) {
+    fs.writeFileSync(patchedName, file);
+    if (!process.env.TRAVIS) {
+      log(colors.green('Patched'), colors.cyan(patchedName));
+    }
   }
-  const fileContents = fs.readFileSync(filename);
-  return fileContents == data;
 }
 
 /**
@@ -60,12 +61,7 @@ function patchWebAnimations() {
       }) +
       '\n' +
       '}\n';
-  if (!fileContentsMatch(patchedName, file)) {
-    fs.writeFileSync(patchedName, file);
-    if (!process.env.TRAVIS) {
-      log(colors.green('Patched'), colors.cyan(patchedName));
-    }
-  }
+  writeIfUpdated(patchedName, file);
 }
 
 /**
@@ -99,14 +95,8 @@ function patchRegisterElement() {
   }
   file = file.replace('module.exports = installCustomElements;',
       'exports.installCustomElements = installCustomElements;');
-  if (!fileContentsMatch(patchedName, file)) {
-    fs.writeFileSync(patchedName, file);
-    if (!process.env.TRAVIS) {
-      log(colors.green('Patched'), colors.cyan(patchedName));
-    }
-  }
+  writeIfUpdated(patchedName, file);
 }
-
 
 /**
  * Installs custom lint rules in build-system/eslint-rules to node_modules.
