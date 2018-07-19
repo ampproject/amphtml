@@ -510,10 +510,10 @@ let BindExpressionResultDef;
  * Structured cloneable return value for 'bind.evaluateBindings' API.
  * @typedef {{results: !Object<string, BindExpressionResultDef>, errors: !Object<string, !BindEvaluatorErrorDef>}}
  */
-let EvaluateBindingsResultDef;
+let BindEvaluateBindingsResultDef;
 
 /**
  * Structured cloneable return value for 'bind.evaluateExpression' API.
  * @typedef {{result: BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
  */
-let EvaluateExpressionResultDef;
+let BindEvaluateExpressionResultDef;

@@ -107,7 +107,7 @@ export class BindEvaluator {
    * Evaluates all expressions with the given `scope` data returns two maps:
    * expression strings to results and expression strings to errors.
    * @param {!Object} scope
-   * @return {!EvaluateBindingsResultDef}
+   * @return {!BindEvaluateBindingsResultDef}
    */
   evaluateBindings(scope) {
     /** @type {!Object<string, BindExpressionResultDef>} */
@@ -165,7 +165,7 @@ export class BindEvaluator {
    * Evaluates and returns a single expression string.
    * @param {string} expressionString
    * @param {!Object} scope
-   * @return {!EvaluateExpressionResultDef}
+   * @return {!BindEvaluateExpressionResultDef}
    */
   evaluateExpression(expressionString, scope) {
     const parsed = this.parse_(expressionString);
