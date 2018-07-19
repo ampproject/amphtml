@@ -155,16 +155,8 @@ export function copyChildren(from, to) {
  * @param {?Node} after
  */
 export function insertAfterOrAtStart(root, element, after) {
-  if (after) {
-    if (after.nextSibling) {
-      root.insertBefore(element, after.nextSibling);
-    } else {
-      root.appendChild(element);
-    }
-  } else {
-    // Add at the start.
-    root.insertBefore(element, root.firstChild);
-  }
+  const before = after ? after.nextSibling : root.firstChild;
+  root.insertBefore(element, before);
 }
 
 /**
