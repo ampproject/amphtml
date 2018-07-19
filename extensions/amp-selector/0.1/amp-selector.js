@@ -24,6 +24,7 @@ import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {mod} from '../../../src/utils/math';
+import {toArray} from '../../../src/types';
 const TAG = 'amp-selector';
 
 /**
@@ -233,8 +234,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   maybeRefreshOnUpdate_(unusedEvent) {
-    const newOptions =
-        [].slice.call(this.element.querySelectorAll('[option]'));
+    const newOptions = toArray(this.element.querySelectorAll('[option]'));
     if (areEqual(this.options_, newOptions)) { // no updates
       return;
     }
@@ -246,7 +246,7 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * @param {?Array<Element>} opt_options
+   * @param {Array<Element>=} opt_options
    * @private
    */
   init_(opt_options) {
