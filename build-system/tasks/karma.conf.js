@@ -30,6 +30,8 @@ const SAUCE_TIMEOUT_CONFIG = {
   idleTimeout: 5 * 60,
 };
 
+const preprocessors = ['browserify'];
+
 /**
  * @param {!Object} config
  */
@@ -40,14 +42,15 @@ module.exports = {
     'mocha',
     'sinon-chai',
     'chai',
+    'source-map-support',
   ],
 
   preprocessors: {
     './test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': ['browserify'],
-    './ads/**/test/test-*.js': ['browserify'],
-    './extensions/**/test/**/*.js': ['browserify'],
-    './testing/**/*.js': ['browserify'],
+    './test/**/*.js': preprocessors,
+    './ads/**/test/test-*.js': preprocessors,
+    './extensions/**/test/**/*.js': preprocessors,
+    './testing/**/*.js': preprocessors,
   },
 
   // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
@@ -60,7 +63,7 @@ module.exports = {
     debug: true,
     basedir: __dirname + '/../../',
     transform: [
-      ['babelify', {compact: false}],
+      ['babelify', {compact: false, sourceMapsAbsolute: true}],
     ],
     bundleDelay: 1200,
   },
@@ -244,6 +247,7 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
+    'karma-source-map-support',
     'karma-chrome-launcher',
     'karma-edge-launcher',
     'karma-firefox-launcher',
