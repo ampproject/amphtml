@@ -38,7 +38,7 @@ import {
 } from '../position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../style-installer';
 import {isFiniteNumber} from '../../types';
-import {isRTL, removeElement} from '../../dom';
+import {isRTL, removeElement, closestBySelector} from '../../dom';
 import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
@@ -568,12 +568,11 @@ export class VideoDocking {
 
   /** @private */
   hideControlsOnTapOutside_() {
-    listen(this.ampdoc_.getRootNode(), 'mouseup', e => {
+    listen(this.ampdoc_.getRootNode(), 'mousedown', e => {
       if (!this.currentlyDocked_) {
         return;
       }
-      const {clientX, clientY} = e;
-      if (this.isInsideTargetAreaWhenDocked_(clientX, clientY)) {
+      if (this.isControlsEventTarget_(dev().assertElement(e.target))) {
         return;
       }
       this.hideControls_(/* respectSticky */ true);
@@ -1600,24 +1599,12 @@ export class VideoDocking {
   }
 
   /**
-   * @param {number} x
-   * @param {number} y
+   * @param {!Element} target
    * @return {boolean}
    * @private
    */
-  isInsideTargetAreaWhenDocked_(x, y) {
-    const video = this.getDockedVideo_();
-    const target = /** @type {!DockTargetDef} */ (
-      dev().assert(this.getTargetFor_(video)));
-    const {
-      x: left,
-      y: top,
-      targetWidth,
-      targetHeight,
-    } = this.getTargetArea_(video, target);
-    const right = left + targetWidth;
-    const bottom = top + targetHeight;
-    return x >= left && y >= top && x <= right && y <= bottom;
+  isControlsEventTarget_(target) {
+    return !!closestBySelector(target, '.amp-video-docked-controls');
   }
 
   /**
