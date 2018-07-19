@@ -22,7 +22,7 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - pip install --user protobuf
-script: node build-system/pr-check.js
+script: gulp dist
 after_script:
   - build-system/sauce_connect/stop_sauce_connect.sh
 branches:
