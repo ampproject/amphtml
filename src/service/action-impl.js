@@ -776,7 +776,7 @@ export function parseActionMap(s, context) {
   do {
     tok = toks.next();
     if (tok.type == TokenType.EOF ||
-            tok.type == TokenType.SEPARATOR && tok.value == ';') {
+            (tok.type == TokenType.SEPARATOR && tok.value == ';')) {
       // Expected, ignore.
     } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
 
@@ -1081,8 +1081,8 @@ class ParserTokenizer {
 
     // A numeric. Notice that it steals the `.` from separators.
     if (convertValues && (isNum(c) ||
-            c == '.' && newIndex + 1 < this.str_.length &&
-            isNum(this.str_[newIndex + 1]))) {
+            (c == '.' && newIndex + 1 < this.str_.length &&
+            isNum(this.str_[newIndex + 1])))) {
       let hasFraction = c == '.';
       let end = newIndex + 1;
       for (; end < this.str_.length; end++) {

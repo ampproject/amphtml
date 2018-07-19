@@ -1534,7 +1534,7 @@ function createBaseCustomElementClass(win) {
     isInA4A_() {
       return (
       // in FIE
-        this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+        (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
 
           // in inabox
           getMode().runtime == 'inabox');
