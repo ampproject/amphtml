@@ -403,6 +403,7 @@ async function generateSnapshots(percy, page, webpages) {
     applyAmpConfig(config);
     log('verbose',
         'Generating snapshots using the', colors.cyan(config), 'AMP config');
+    log('travis', colors.cyan(config), ': ');
     await snapshotWebpages(percy, page, webpages, config);
   }
 }
