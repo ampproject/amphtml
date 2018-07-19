@@ -1,11 +1,9 @@
 import {parseUrlDeprecated} from '../../../src/url';
 
-import AffiliateLinks from './affiliateLinks';
+import AffiliateLinksManager from './affiliate-links-manager';
 import DomainResolver from './affiliate-link-resolver';
 
 const PUB_CODE = '68019X1559797';
-
-
 
 // function attachClickHandler() {
 //   document.addEventListener('click', e => {
@@ -34,11 +32,13 @@ const PUB_CODE = '68019X1559797';
  * @param {Object} context
  */
 export function startSkimcore(context) {
-  const domainResolverService = new DomainResolver(context.xhr, PUB_CODE);
-  const affiliateService = new AffiliateLinks(
+  const currentLocation = context.ampDoc.win.location;
+  // TODO: Read excludedDomain option
+  const excludedDomain = [currentLocation.hostname];
+  const domainResolverService = new DomainResolver(context.xhr, PUB_CODE, excludedDomain);
+  const affiliateService = new AffiliateLinksManager(
       context.ampDoc,
-      domainResolverService.resolveUnknownLinks.bind(domainResolverService),
-      domainResolverService.getLinkAffiliateStatus.bind(domainResolverService),
+      domainResolverService.resolveUnknownAnchors.bind(domainResolverService),
       {}
   );
 }
