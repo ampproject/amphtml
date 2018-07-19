@@ -204,7 +204,8 @@ message CssSpec {
   // TODO(chenshay): Make this more generic.
   optional bool validate_keyframes = 6;
 
-  repeated string allowed_declarations = 7;
+  // Any declaration listed here are allowed.
+  repeated string declaration = 7;
 }
 
 // NEXT AVAILABLE TAG: 9
