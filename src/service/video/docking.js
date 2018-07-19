@@ -26,6 +26,7 @@ import {
   PositionObserverFidelity,
 } from '../position-observer/position-observer-worker';
 import {Services} from '../../services';
+import {closestBySelector, isRTL, removeElement} from '../../dom';
 import {createCustomEvent} from '../../event-helper';
 // Source for this constant is css/video-docking.css:
 import {cssText} from '../../../build/video-docking.css.js';
@@ -38,7 +39,6 @@ import {
 } from '../position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../style-installer';
 import {isFiniteNumber} from '../../types';
-import {isRTL, removeElement, closestBySelector} from '../../dom';
 import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
