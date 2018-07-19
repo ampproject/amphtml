@@ -32,7 +32,10 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {cssText as lightboxAdCss} from '../../../build/lightbox-ad.css.js';
 import {removeElement, tryFocus} from '../../../src/dom';
-import {renderCloseButtonHeader} from '../../../src/full-overlay-frame-helper';
+import {
+  renderCloseButtonHeader,
+  showCloseButtonHeader,
+} from '../../../src/full-overlay-frame-helper';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
@@ -120,6 +123,9 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private @const {string} */
     this.animationPreset_ =
         (element.getAttribute('animate-in') || DEFAULT_ANIMATION).toLowerCase();
+
+    /** @private {?Element} */
+    this.closeButtonHeader_ = null;
 
     /** @const {function()} */
     this.boundReschedule_ = debounce(this.win, () => {
@@ -317,22 +323,21 @@ class AmpLightbox extends AMP.BaseElement {
 
     const header = renderCloseButtonHeader(this.element);
 
-    listenOnce(header, 'click', () => {
-      removeElement(header);
-      this.close();
-    });
+    this.closeButtonHeader_ = header;
+
+    listenOnce(header, 'click', () => this.close());
 
     installStylesForDoc(this.getAmpDoc(), lightboxAdCss, () => {
       this.element.insertBefore(header, this.container_);
-
-      // Done in callback in order to apply transition.
-      header.classList.add('amp-ad-close-header');
 
       let headerHeight;
 
       this.measureMutateElement(() => {
         headerHeight = header./*OK*/getBoundingClientRect().height;
       }, () => {
+        // Done in vsync in order to apply transition.
+        showCloseButtonHeader(header);
+
         setImportantStyles(dev().assertElement(this.container_), {
           'margin-top': px(headerHeight),
           'min-height': `calc(100vh - ${px(headerHeight)})`,
@@ -340,7 +345,7 @@ class AmpLightbox extends AMP.BaseElement {
       });
     },
     /* opt_isRuntimeCss */ false,
-    /* opt_ext */ 'amp-lightbox');
+    /* opt_ext */ 'amp-lightbox-ad');
   }
 
   /**
@@ -372,6 +377,10 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', '');
     }
+    if (this.closeButtonHeader_) {
+      removeElement(this.closeButtonHeader_);
+      this.closeButtonHeader_ = null;
+    }
     this.getViewport().leaveLightboxMode(this.element)
         .then(() => this.finalizeClose_());
   }
@@ -392,8 +401,8 @@ class AmpLightbox extends AMP.BaseElement {
       this.boundReschedule_();
     };
 
-    // Disable transition for inabox since the frame gets immediately collapsed.
-    if (this.isInabox_()) {
+    // Disable transition for ads since the frame gets immediately collapsed.
+    if (this.isInAd_()) {
       st.resetStyles(element, ['transition']);
       collapseAndReschedule();
     } else {
@@ -412,6 +421,14 @@ class AmpLightbox extends AMP.BaseElement {
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
     this.triggerEvent_(LightboxEvents.CLOSE);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isInAd_() {
+    return this.isInabox_() || isInFie(this.element);
   }
 
   /**

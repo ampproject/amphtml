@@ -108,3 +108,10 @@ export function renderCloseButtonHeader(ctx) {
       </i-amphtml-ad-close-button>
     </i-amphtml-ad-close-header>`;
 }
+
+/**
+ * @param {!Element} header
+ */
+export function showCloseButtonHeader(header) {
+  header.classList.add('amp-ad-close-header');
+}

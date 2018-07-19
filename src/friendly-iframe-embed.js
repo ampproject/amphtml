@@ -32,7 +32,10 @@ import {
   setStyle,
   setStyles,
 } from './style';
-import {renderCloseButtonHeader} from './full-overlay-frame-helper';
+import {
+  renderCloseButtonHeader,
+  showCloseButtonHeader,
+} from './full-overlay-frame-helper';
 import {toWin} from './types';
 
 
@@ -581,7 +584,7 @@ export class FriendlyIframeEmbed {
         setImportantStyles(this.iframe, iframeStyle);
 
         // Done in vsync in order to apply transition.
-        header.classList.add('amp-ad-close-header');
+        showCloseButtonHeader(header);
 
         // We need to override runtime-level !important rules
         setImportantStyles(this.getBodyElement(), bodyStyle);
