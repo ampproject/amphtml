@@ -50,8 +50,8 @@ export class JwtHelper {
      * Might be `null` if the platform does not support Crypto Subtle.
      * @const @private {?webCrypto.SubtleCrypto}
      */
-    this.subtle_ = win.crypto &&
-        (win.crypto.subtle || win.crypto.webkitSubtle) || null;
+    this.subtle_ = (win.crypto &&
+        (win.crypto.subtle || win.crypto.webkitSubtle)) || null;
   }
 
   /**

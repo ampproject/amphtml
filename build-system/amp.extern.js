@@ -57,6 +57,9 @@ ExtensionPayload.prototype.p;
 /** @type {string} */
 ExtensionPayload.prototype.v;
 
+/** @type {!Array<string>|string|undefined} */
+ExtensionPayload.prototype.i;
+
 
 /**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
@@ -120,6 +123,8 @@ AmpConfigType.prototype.localDev;
 AmpConfigType.prototype.v;
 /* @public {boolean} */
 AmpConfigType.prototype.canary;
+/* @public {string} */
+AmpConfigType.prototype.runtime;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;

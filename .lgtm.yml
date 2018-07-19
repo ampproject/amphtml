@@ -1,4 +1,11 @@
 path_classifiers:
+  docs:
+    - "**/*.md"
+  test:
+    - "**/test/**/*.js"
+    - "**/testing/**/*.js"
+  third_party:
+    - "third_party/**/*.*"
   externs:
     - "**/*.extern.js"
 extraction:

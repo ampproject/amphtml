@@ -57,30 +57,15 @@ export const EventType = {
   PAGE_LOADED: 'ampstory:pageload',
 };
 
-
-/**
- * @param {!EventTarget} source
- * @param {string} eventName
- * @param {boolean=} opt_bubbles
- */
-export function dispatch(source, eventName, opt_bubbles) {
-  const event = new Event(eventName, {bubbles: !!opt_bubbles});
-  if (event.initEvent) {
-    event.initEvent(eventName, /* bubbles */ !!opt_bubbles,
-        /* cancelable */ false);
-  }
-  source.dispatchEvent(event);
-}
-
-
 /**
  * @param {!Window} win
  * @param {!EventTarget} source
  * @param {string} eventName
- * @param {!Object} payload
- * @param {!CustomEventInit=} opt_eventInit
+ * @param {!Object=} payload
+ * @param {!CustomEventInit=} eventInit
  */
-export function dispatchCustom(win, source, eventName, payload, opt_eventInit) {
-  const event = createCustomEvent(win, eventName, payload, opt_eventInit);
+export function dispatch(win, source, eventName, payload = undefined,
+  eventInit = undefined) {
+  const event = createCustomEvent(win, eventName, payload, eventInit);
   source.dispatchEvent(event);
 }

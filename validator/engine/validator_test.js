@@ -236,9 +236,13 @@ function renderInlineResult(validationResult, filename, filecontents) {
   let linesEmitted = 0;
   for (const error of validationResult.errors) {
     // Emit all input lines up to and including the line containing the error,
-    // prefixed with '|  '.
+    // prefixed with '|  ' (or just '|' if the line is empty).
     while (linesEmitted < error.line && linesEmitted < lines.length) {
-      rendered += '\n|  ' + lines[linesEmitted++];
+      rendered += '\n|';
+      if (lines[linesEmitted] !== '') {
+        rendered += '  ' + lines[linesEmitted];
+      }
+      linesEmitted++;
     }
     // Emit a carat showing the column of the following error.
     rendered += '\n>>';
@@ -248,7 +252,11 @@ function renderInlineResult(validationResult, filename, filecontents) {
     rendered += renderErrorWithPosition(filename, error);
   }
   while (linesEmitted < lines.length) {
-    rendered += '\n|  ' + lines[linesEmitted++];
+    rendered += '\n|';
+    if (lines[linesEmitted] !== '') {
+      rendered += '  ' + lines[linesEmitted];
+    }
+    linesEmitted++;
   }
   return rendered;
 }
@@ -620,22 +628,25 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
 
     expect(attrSpecNameRegex.test(attrSpec.name)).toBe(true);
   });
+  it('attr_spec name can not be [style]', () => {
+    expect(attrSpec.name).not.toEqual('[style]');
+  });
   if (attrSpec.valueUrl !== null) {
-    const allowedProtocolRegex = new RegExp('[a-z-]+');
-    // UrlSpec allowed_protocols are matched against lowercased protocol names
+    const protocolRegex = new RegExp('[a-z-]+');
+    // UrlSpec protocol is matched against lowercased protocol names
     // so the rules *must* also be lower case.
-    it('allowed_protocol must be lower case', () => {
-      for (const allowedProtocol of attrSpec.valueUrl.allowedProtocol) {
-        expect(allowedProtocolRegex.test(allowedProtocol)).toBe(true);
+    it('protocol must be lower case', () => {
+      for (const protocol of attrSpec.valueUrl.protocol) {
+        expect(protocolRegex.test(protocol)).toBe(true);
       }
     });
-    // If allowed_protocol is http then allow_relative should not be false
+    // If protocol is http then allow_relative should not be false
     // except for `data-` attributes.
     if (!attrSpec.name.startsWith('data-')) {
-      for (const allowedProtocol of attrSpec.valueUrl.allowedProtocol) {
-        if ((allowedProtocol === 'http') &&
+      for (const protocol of attrSpec.valueUrl.protocol) {
+        if ((protocol === 'http') &&
             (attrSpec.valueUrl.allowRelative !== null)) {
-          it('allow_relative can not be false if allowed_protocol is http: ' +
+          it('allow_relative can not be false if protocol is http: ' +
                  attrSpec.name,
           () => {
             expect(attrSpec.valueUrl.allowRelative).toEqual(true);
@@ -682,8 +693,8 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
   }
   // value_url must have at least one allowed protocol.
   if (attrSpec.valueUrl !== null) {
-    it('value_url must have at least one allowed protocol', () => {
-      expect(attrSpec.valueUrl.allowedProtocol.length).toBeGreaterThan(0);
+    it('value_url must have at least one protocol', () => {
+      expect(attrSpec.valueUrl.protocol.length).toBeGreaterThan(0);
     });
   }
   // only has one of value set.
@@ -751,6 +762,32 @@ describe('ValidatorRulesMakeSense', () => {
   it('amp_layout_attrs defined', () => {
     expect(rules.ampLayoutAttrs.length).toBeGreaterThan(0);
   });
+
+  for (const list of rules.directAttrLists) {
+    for (const index of list) {
+      if (index < 0) {
+        it('attr_spec name can not be [style]', () => {
+          expect(rules.internedStrings[-1 - index]).not.toEqual('[style]');
+        });
+      } else {
+        it('attr_spec name can not be [style]', () => {
+          expect(rules.attrs[index].name).not.toEqual('[style]');
+        });
+      }
+    }
+  }
+
+  for (const index of rules.globalAttrs) {
+    it('attr_spec name can not be [style]', () => {
+      expect(rules.internedStrings[-1 - index]).not.toEqual('[style]');
+    });
+  }
+
+  for (const index of rules.ampLayoutAttrs) {
+    it('attr_spec name can not be [style]', () => {
+      expect(rules.internedStrings[-1 - index]).not.toEqual('[style]');
+    });
+  }
 
   it('min_validator_revision_required defined', () => {
     expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);

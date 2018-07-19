@@ -284,7 +284,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
-    return false;
+    return true;
   }
 
   /** @override */

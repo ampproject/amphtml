@@ -24,7 +24,7 @@ tags: {  # amp-analytics
     name: "amp-analytics"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: NONE
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -61,7 +61,7 @@ tags: {  # <amp-analytics>
   attrs: {
     name: "config"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }

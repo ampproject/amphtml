@@ -19,7 +19,6 @@ import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
-import {expandConfigRequest} from './requests';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
@@ -202,16 +201,8 @@ export class AnalyticsConfig {
    */
   getTypeConfig_() {
     const type = this.element_.getAttribute('type');
-    if (type == 'googleanalytics-alpha') {
-      const TAG = this.getName_();
-      user().warn(TAG, '"googleanalytics-alpha" configuration is not ' +
-          'planned to be supported long-term. Avoid use of this value for ' +
-          'amp-analytics config attribute unless you plan to migrate before ' +
-          'deprecation');
-    }
     return this.predefinedConfig_[type] || {};
   }
-
 
   /**
    * @private
@@ -335,4 +326,34 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
     }
   }
   return to;
+}
+
+/**
+ * Expand config's request to object
+ * @param {!JsonObject} config
+ * @visibleForTesting
+ */
+export function expandConfigRequest(config) {
+  if (!config['requests']) {
+    return config;
+  }
+  for (const k in config['requests']) {
+    if (hasOwn(config['requests'], k)) {
+      config['requests'][k] = expandRequestStr(config['requests'][k]);
+    }
+  }
+  return config;
+}
+
+/**
+ * Expand single request to an object
+ * @param {!JsonObject} request
+ */
+function expandRequestStr(request) {
+  if (isObject(request)) {
+    return request;
+  }
+  return {
+    'baseUrl': request,
+  };
 }

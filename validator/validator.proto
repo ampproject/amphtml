@@ -53,8 +53,8 @@ message PropertySpecList {
 
 // Used for validating urls in attribute values (such as href/src/srcset).
 message UrlSpec {
-  // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
-  repeated string allowed_protocol = 1;
+  // protocol must be in lowercase (e.g. "javascript" not "JavaScript").
+  repeated string protocol = 1;
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
@@ -82,8 +82,8 @@ message AttrSpec {
   optional bool mandatory = 3;
   // Within the context of the tag, exactly one of the attributes tagged
   // with this identifier must be present. Per convention, this identifier
-  // should list the tags participating in the mandatory oneof, with or,
-  // e.g. "foo or bar or baz".
+  // should list the tags participating in the mandatory oneof:
+  // e.g. mandatory_oneof: "['foo', 'bar']"
   optional string mandatory_oneof = 12;
 
   // This would be a oneof, but this file only uses features in protobuf 2.5.0.
@@ -155,7 +155,7 @@ message AttrList {
 // great-grandchildren, etc).
 message DescendantTagList {
   optional string name = 1;
-  repeated string allowed_tags = 2;
+  repeated string tag = 2;
 }
 
 // Regex which, if matches the cdata of a tag, causes the tag validation to
@@ -204,7 +204,8 @@ message CssSpec {
   // TODO(chenshay): Make this more generic.
   optional bool validate_keyframes = 6;
 
-  repeated string allowed_declarations = 7;
+  // Any declaration listed here are allowed.
+  repeated string declaration = 7;
 }
 
 // NEXT AVAILABLE TAG: 9
