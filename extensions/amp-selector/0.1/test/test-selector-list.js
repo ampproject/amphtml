@@ -19,6 +19,7 @@ import {AmpList} from '../../../amp-list/0.1/amp-list';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {AmpSelector} from '../amp-selector';
 import {Deferred} from '../../../../src/utils/promise';
+import {createCustomEvent} from '../../../../src/event-helper';
 import {poll} from '../../../../testing/iframe';
 
 describes.realWin('amp-selector amp-list interaction', {
@@ -35,6 +36,7 @@ describes.realWin('amp-selector amp-list interaction', {
   let updateDeferred;
 
   let layoutPromise;
+  let refreshDeferred;
 
   beforeEach(() => {
     win = env.win;
@@ -52,6 +54,16 @@ describes.realWin('amp-selector amp-list interaction', {
     });
     const selectorElement = doc.createElement('div');
     selectorElement.getAmpDoc = () => ampdoc;
+
+    AmpSelector.prototype.init_ = sandbox.spy(AmpSelector.prototype, 'init_');
+    const origMaybeRefreshOnUpdate =
+        AmpSelector.prototype.maybeRefreshOnUpdate_;
+    AmpSelector.prototype.maybeRefreshOnUpdate_ = function() {
+      origMaybeRefreshOnUpdate.call(this);
+      if (refreshDeferred) {
+        refreshDeferred.resolve();
+      }
+    };
     selector = new AmpSelector(selectorElement);
     parent.appendChild(selector.element);
     selector.buildCallback();
@@ -98,6 +110,11 @@ describes.realWin('amp-selector amp-list interaction', {
     layoutPromise = list.layoutCallback();
   });
 
+  afterEach(() => {
+    AmpSelector.prototype.init_.restore();
+    refreshDeferred = null;
+  });
+
   it('should load selector options correctly with template', function() {
     return layoutPromise.then(() => {
       return poll('wait for options to construct', () => {
@@ -108,6 +125,33 @@ describes.realWin('amp-selector amp-list interaction', {
           expect(selector.options_.length).to.equal(2);
           expect(selector.options_[0].getAttribute('option')).to.equal('0');
           expect(selector.options_[1].getAttribute('option')).to.equal('1');
+        });
+  });
+
+  it('should not call init again if no actual option is changed', function() {
+    let opts;
+    let initCount;
+    return layoutPromise.then(() => {
+      return poll('wait for options to construct', () => {
+        return selector.options_.length > 0;
+      }, () => {}, 1000);
+    })
+        .then(() => {
+          opts = selector.options_;
+          initCount = AmpSelector.prototype.init_.callCount;
+
+          refreshDeferred = new Deferred();
+          const DOMUpdateEvent = createCustomEvent(
+              win,
+              AmpEvents.DOM_UPDATE,
+              /* detail */ null,
+              {bubbles: true});
+          listElement.dispatchEvent(DOMUpdateEvent);
+          return refreshDeferred.promise;
+        })
+        .then(() => {
+          expect(opts).to.equal(selector.options_);
+          expect(AmpSelector.prototype.init_.callCount).to.equal(initCount);
         });
   });
 });

@@ -19,6 +19,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {areEqual} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
@@ -139,15 +140,9 @@ export class AmpSelector extends AMP.BaseElement {
       }
     }, ActionTrust.LOW);
 
-    // Listening to this event
-    // Simply listening for mutation would not work
-    this.element.addEventListener(AmpEvents.DOM_UPDATE, unusedEvent => {
-      // Clear prev states
-      this.options_ = [];
-      this.selectedOptions_ = [];
-      this.inputs_ = [];
-      this.init_();
-    });
+    // Triggers on DOM children updates
+    this.element.addEventListener(AmpEvents.DOM_UPDATE,
+        this.maybeRefreshOnUpdate_.bind(this));
   }
 
   /** @override */
@@ -233,10 +228,31 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
+   * Calls init_ again if options element has changed
+   * @param {Event} unusedEvent
    * @private
    */
-  init_() {
-    const options = [].slice.call(this.element.querySelectorAll('[option]'));
+  maybeRefreshOnUpdate_(unusedEvent) {
+    const newOptions =
+        [].slice.call(this.element.querySelectorAll('[option]'));
+    if (areEqual(this.options_, newOptions)) { // no updates
+      return;
+    }
+    // Clear prev states
+    this.options_ = [];
+    this.selectedOptions_ = [];
+    this.inputs_ = [];
+    this.init_(newOptions);
+  }
+
+  /**
+   * @param {Array<Element>|undefined} opt_options
+   * @private
+   */
+  init_(opt_options) {
+    const options = opt_options ?
+      opt_options :
+      [].slice.call(this.element.querySelectorAll('[option]'));
     options.forEach(option => {
       if (!option.hasAttribute('role')) {
         option.setAttribute('role', 'option');
