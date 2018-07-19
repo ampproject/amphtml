@@ -60,12 +60,6 @@ amp-list/0.1/test/validator-amp-list.html:43:2 The attribute '[state]' in tag 'a
 |              reset-on-refresh>
 |      <div></div>
 |    </amp-list>
-|    <!-- Valid: amp-list with [src] and reset-on-refresh attributes -->
-|    <amp-list width=10 height=10
-|              [src]="foo.bar"
-|              reset-on-refresh>
-|      <div></div>
-|    </amp-list>
 |    <!-- Invalid: width is mistyped. -->
 |    <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
 >>   ^~~~~~~~~
