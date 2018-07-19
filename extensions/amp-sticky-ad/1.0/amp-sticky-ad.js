@@ -197,14 +197,20 @@ class AmpStickyAd extends AMP.BaseElement {
       signals.whenSignal(CommonSignals.RENDER_START),
       signals.whenSignal(CommonSignals.LOAD_END),
     ]).then(() => {
-      return this.vsync_.mutatePromise(() => {
-        // Set sticky-ad to visible and change container style
-        this.element.setAttribute('visible', '');
-        // Add border-bottom to the body to compensate space that was taken
-        // by sticky ad, so no content would be blocked by sticky ad unit.
-        const borderBottom = this.element./*OK*/offsetHeight;
-        this.viewport_.updatePaddingBottom(borderBottom);
-        this.forceOpacity_();
+      let backgroundColor;
+      return this.measureElement(() => {
+        backgroundColor =
+            computedStyle(this.win, this.element)['backgroundColor'];
+      }).then(() => {
+        return this.vsync_.mutatePromise(() => {
+          // Set sticky-ad to visible and change container style
+          this.element.setAttribute('visible', '');
+          // Add border-bottom to the body to compensate space that was taken
+          // by sticky ad, so no content would be blocked by sticky ad unit.
+          const borderBottom = this.element./*OK*/offsetHeight;
+          this.viewport_.updatePaddingBottom(borderBottom);
+          this.forceOpacity_(backgroundColor);
+        });
       });
     });
   }
@@ -241,10 +247,10 @@ class AmpStickyAd extends AMP.BaseElement {
   /**
    * To check for background-color alpha and force it to be 1.
    * Whoever calls this needs to make sure it's in a vsync.
+   * @param {string} backgroundColor
    * @private
    */
-  forceOpacity_() {
-    const {backgroundColor} = computedStyle(this.win, this.element);
+  forceOpacity_(backgroundColor) {
     const newBackgroundColor = removeAlphaFromColor(backgroundColor);
     if (backgroundColor == newBackgroundColor) {
       return;
