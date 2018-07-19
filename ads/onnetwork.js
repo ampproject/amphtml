@@ -45,7 +45,7 @@ export function adonnetwork(global, data) {
   // Movie placement using "data-mid" attribute
   }
   else if (mid) {
-    url = hosts.adx + '/embed.php?ampsrc=1&mid=' + encodeURIComponent(mid);
+    url = hosts.track + '/embed.php?ampsrc=1&mid=' + encodeURIComponent(mid);
   }
 
   writeScript(global, url);
