@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../action-constants';
+import {AmpEvents} from '../amp-events';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -50,7 +51,7 @@ import {
 import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
-import {isFiniteNumber} from '../types';
+import {isFiniteNumber, toArray} from '../types';
 import {map} from '../utils/object';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
@@ -132,6 +133,22 @@ export class VideoManager {
     // if video analytics are present, since the timer is not needed if
     // video analytics are not present.
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+
+    listen(this.ampdoc.win,
+        AmpEvents.MODAL_CLOSED,
+        e => this.onModalClosed_(e.target));
+  }
+
+  /**
+   * @param {!Element} modal
+   */
+  onModalClosed_(modal) {
+    const videos = modal.querySelectorAll('.i-amphtml-video-interface');
+    if (videos) {
+      return;
+    }
+    toArray(videos).forEach(video =>
+      video.getImpl().then(impl => impl.pause()));
   }
 
   /**

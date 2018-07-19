@@ -373,6 +373,8 @@ class AmpLightbox extends AMP.BaseElement {
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
     this.triggerEvent_(LightboxEvents.CLOSE);
+
+    element.dispatchCustomEvent(AmpEvents.MODAL_CLOSED);
   }
 
   /**
