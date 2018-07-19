@@ -21,7 +21,6 @@ import {Services} from '../../src/services';
 import {
   blockedByConsentError,
   cancellation,
-  detectAmpShadowJs,
   detectJsEngineFromStack,
   detectNonAmpJs,
   getErrorReportData,
@@ -526,55 +525,6 @@ describe('reportErrorToServer', () => {
     it('should detect non-AMP JS in karma', () => {
       scripts = [];
       expect(detectNonAmpJs(window)).to.be.true;
-    });
-  });
-
-  describe('detectAmpShadowJs', () => {
-    let ampdocServiceForStub;
-    let win;
-    let scripts;
-    beforeEach(() => {
-      scripts = [];
-      win = {
-        document: {
-          querySelectorAll: selector => {
-            expect(selector).to.equal('script[src]');
-            return scripts;
-          },
-        },
-      };
-      ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
-      ampdocServiceForStub.returns({
-        getAmpDoc: () => {
-          return {
-            getHeadNode: () => {
-              return {
-                querySelector: selector => {
-                  expect(selector).to.equal(
-                      'script[src="https://cdn.ampproject.org/shadow-v0.js"]');
-                  return scripts.filter(script =>
-                    script.src === 'https://cdn.ampproject.org/shadow-v0.js')[0];
-                },
-              };
-            },
-          };
-        },
-      });
-      for (let i = 0; i < 5; i++) {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.ampproject.org/' + i + '.js';
-        scripts.push(s);
-      }
-      scripts[0].src = 'https://cdn.ampproject.org/shadow-v0.js';
-    });
-
-    it('should detect usage of AMP shadow DOM API', () => {
-      expect(detectAmpShadowJs(win)).to.be.true;
-    });
-
-    it('should detect no usage of AMP shadow DOM API', () => {
-      scripts[0].src = 'https://cdn.ampproject.org/0.js';
-      expect(detectAmpShadowJs(win)).to.be.false;
     });
   });
 });
