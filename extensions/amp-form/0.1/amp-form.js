@@ -23,7 +23,7 @@ import {
   getFormVerifier,
 } from './form-verifiers';
 import {FormDataWrapper} from '../../../src/form-data-wrapper';
-import {FormEvents} from './form-events';
+import {FormEvent} from './form-event';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
@@ -80,17 +80,6 @@ const FormState = {
   SUBMITTING: 'submitting',
   SUBMIT_ERROR: 'submit-error',
   SUBMIT_SUCCESS: 'submit-success',
-};
-
-/** @const @enum {string} */
-const FormAmpEvent = {
-  SUBMIT: 'submit',
-  SUBMIT_SUCCESS: 'submit-success',
-  SUBMIT_ERROR: 'submit-error',
-  VERIFY: 'verify',
-  VERIFY_ERROR: 'verify-error',
-  VALID: 'valid',
-  INVALID: 'invalid',
 };
 
 /** @const @enum {string} */
@@ -298,7 +287,7 @@ export class AmpForm {
               this.setState_(FormState.VERIFY_ERROR);
               this.renderTemplate_(
                   /** @type {!JsonObject} */ ({verifyErrors: errors}));
-              this.triggerAction_(FormAmpEvent.VERIFY_ERROR, errors);
+              this.triggerAction_(FormEvent.VERIFY_ERROR, errors);
             } else {
               this.setState_(FormState.INITIAL);
             }
@@ -449,7 +438,7 @@ export class AmpForm {
       return Promise.resolve();
     }
     this.setState_(FormState.VERIFYING);
-    this.triggerAction_(FormAmpEvent.VERIFY, null);
+    this.triggerAction_(FormEvent.VERIFY, null);
 
     return this.doVarSubs_(this.getVarSubsFields_())
         .then(() => this.doVerifyXhr_());
@@ -467,7 +456,7 @@ export class AmpForm {
     if (this.ssrTemplateHelper_.isSupported()) {
       p = varSubPromise.then(() => {
         this.actions_.trigger(
-            this.form_, FormAmpEvent.SUBMIT, /* event */ null, trust);
+            this.form_, FormEvent.SUBMIT, /* event */ null, trust);
         // Note that we do not render templates for the submitting state
         // and only deal with submit-success or submit-error.
         return this.ssrTemplateHelper_.fetchAndRenderTemplate(this.form_);
@@ -624,7 +613,7 @@ export class AmpForm {
    */
   handleSubmitSuccess_(jsonPromise) {
     return jsonPromise.then(json => {
-      this.triggerAction_(FormAmpEvent.SUBMIT_SUCCESS, json);
+      this.triggerAction_(FormEvent.SUBMIT_SUCCESS, json);
       this.setState_(FormState.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
     }, error => {
@@ -646,7 +635,7 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then(responseJson => {
-      this.triggerAction_(FormAmpEvent.SUBMIT_ERROR, responseJson);
+      this.triggerAction_(FormEvent.SUBMIT_ERROR, responseJson);
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.setState_(FormState.SUBMIT_ERROR);
       this.renderTemplate_(responseJson || {});
@@ -753,7 +742,7 @@ export class AmpForm {
 
   /**
    * Triggers either a submit-success or submit-error action with response data.
-   * @param {!FormAmpEvent} name
+   * @param {!FormEvent} name
    * @param {?Object} detail
    * @private
    */
@@ -1035,7 +1024,7 @@ export class AmpFormService {
       this.whenInitialized_.then(() => {
         const {win} = ampdoc;
         const event = createCustomEvent(
-            win, FormEvents.SERVICE_INIT, null, {bubbles: true});
+            win, FormEvent.SERVICE_INIT, null, {bubbles: true});
         win.dispatchEvent(event);
       });
     }
