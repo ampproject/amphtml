@@ -15,7 +15,7 @@
  */
 
 
-import * as Promise from 'promise-pjs/promise';
+import Promise from 'promise-pjs/promise';
 
 /**
  * Sets the Promise polyfill if it does not exist.

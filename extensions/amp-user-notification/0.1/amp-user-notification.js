@@ -96,7 +96,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     const deferred = new Deferred();
 
-    /** @private {Promise} */
+    /** @private {!Promise} */
     this.dialogPromise_ = deferred.promise;
 
     /** @private {?function()} */
@@ -123,7 +123,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @private {string} */
     this.storageKey_ = '';
 
-    /** @private {?Promise<!Storage>} */
+    /** @private {?Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = null;
 
     /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */

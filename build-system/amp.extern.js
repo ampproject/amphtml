@@ -104,6 +104,12 @@ window.AMP_TAG;
 window.AMP = {};
 window.AMP._ = {};
 
+/**
+ * Registers a new custom element.
+ * @param {function(!Object)|ExtensionPayload} fnOrStruct
+ */
+window.AMP.push = function(fnOrStruct) {};
+
 /** @constructor */
 function AmpConfigType() {}
 
@@ -479,3 +485,7 @@ AMP.require;
  * @typedef {function(number, boolean):?|function(number):?}
  */
 var TransitionDef;
+
+/** @type {string|undefined} */
+Navigator.prototype.userLanguage;
+

@@ -225,8 +225,9 @@ export class Performance {
     if (!this.win.PerformancePaintTiming
         && this.win.chrome
         && typeof this.win.chrome.loadTimes == 'function') {
-      const fpTime = (this.win.chrome.loadTimes().firstPaintTime
-          * 1000) - this.win.performance.timing.navigationStart;
+      const fpTime = /** @type {!ChromeLoadTimes} */ (
+          (this.win.chrome.loadTimes().firstPaintTime * 1000)
+          - this.win.performance.timing.navigationStart);
       if (fpTime <= 1) {
         // Throw away bad data generated from an apparent Chrome bug
         // that is fixed in later Chrome versions.
@@ -328,7 +329,7 @@ export class Performance {
     // Store certain page visibility metrics to be exposed as analytics
     // variables.
     const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
-				 : value - this.initTime_);
+        : value - this.initTime_);
     switch (label) {
       case 'fcp':
         this.firstContentfulPaint_ = storedVal;
