@@ -1569,7 +1569,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:boolean,force:boolean}=} opt_options
+     * @param {{cleanup:boolean, force:boolean}=} opt_options
      * @public @final @this {!Element}
      */
     toggleLoading(state, opt_options) {
