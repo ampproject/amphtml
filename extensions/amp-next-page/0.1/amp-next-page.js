@@ -60,36 +60,34 @@ export class AmpNextPage extends AMP.BaseElement {
       removeElement(separator);
     }
 
-    return getServicePromiseForDoc(this.getAmpDoc(), SERVICE_ID)
-        .then(service => {
-          if (service.isActive()) {
-            return;
-          }
+    return nextPageServiceForDoc(this.getAmpDoc()).then(service => {
+      if (service.isActive()) {
+        return;
+      }
 
-          const {element} = this;
-          element.classList.add('i-amphtml-next-page');
+      const {element} = this;
+      element.classList.add('i-amphtml-next-page');
 
-          const src = element.getAttribute('src');
-          if (src) {
-            return this.fetchConfig_().then(
-                config => this.register_(service, config, separator),
-                error => user().error(TAG, 'error fetching config', error));
-          } else {
-            const scriptElements = childElementsByTag(element, 'SCRIPT');
-            user().assert(scriptElements.length === 1,
-                `${TAG} should contain only one <script> child, or a URL `
-            + 'specified in [src]');
-            const scriptElement = scriptElements[0];
-            user().assert(isJsonScriptTag(scriptElement),
-                `${TAG} config should ` +
+      const src = element.getAttribute('src');
+      if (src) {
+        return this.fetchConfig_().then(
+            config => this.register_(service, config, separator),
+            error => user().error(TAG, 'error fetching config', error));
+      } else {
+        const scriptElements = childElementsByTag(element, 'SCRIPT');
+        user().assert(scriptElements.length === 1,
+            `${TAG} should contain only one <script> child, or a URL specified `
+            + 'in [src]');
+        const scriptElement = scriptElements[0];
+        user().assert(isJsonScriptTag(scriptElement),
+            `${TAG} config should ` +
             'be inside a <script> tag with type="application/json"');
-            const configJson = tryParseJson(
-                scriptElement.textContent, error => {
-                  user().error(TAG, 'failed to parse config', error);
-                });
-            this.register_(service, configJson, separator);
-          }
+        const configJson = tryParseJson(scriptElement.textContent, error => {
+          user().error(TAG, 'failed to parse config', error);
         });
+        this.register_(service, configJson, separator);
+      }
+    });
   }
 
   /**
@@ -138,6 +136,15 @@ export class AmpNextPage extends AMP.BaseElement {
     return batchFetchJsonFor(
         ampdoc, this.element, /* opt_expr */ undefined, policy);
   }
+}
+
+/**
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<!NextPageService>}
+ */
+function nextPageServiceForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<!NextPageService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, SERVICE_ID));
 }
 
 AMP.extension(TAG, '0.1', AMP => {
