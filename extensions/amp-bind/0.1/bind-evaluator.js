@@ -20,27 +20,6 @@ import {BindValidator} from './bind-validator';
 import {filterSplice} from '../../../src/utils/array';
 
 /**
- * @typedef {{tagName: string, property: string, expressionString: string}}
- */
-export let BindingDef;
-
-/**
- * @typedef {{results: !Object<string, ./bind-expression.BindExpressionResultDef>, errors: !Object<string, !EvaluatorErrorDef>}}
- */
-let EvaluateBindingsResultDef;
-
-/**
- * @typedef {{result: ./bind-expression.BindExpressionResultDef, error: ?EvaluatorErrorDef}}
- */
-let EvaluateExpressionResultDef;
-
-/**
- * Error-like object that can be passed through web worker boundary.
- * @typedef {{message: string, stack: string}}
- */
-export let EvaluatorErrorDef;
-
-/**
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
@@ -48,7 +27,7 @@ export class BindEvaluator {
    * Creates an instance of BindEvaluator.
    */
   constructor() {
-    /** @const @private {!Array<BindingDef>} */
+    /** @const @private {!Array<!BindBindingDef>} */
     this.bindings_ = [];
 
     /**
@@ -67,8 +46,8 @@ export class BindEvaluator {
   /**
    * Parses and stores given bindings into expression objects and returns map
    * of expression string to parse errors.
-   * @param {!Array<!BindingDef>} bindings
-   * @return {!Object<string, !EvaluatorErrorDef>},
+   * @param {!Array<!BindBindingDef>} bindings
+   * @return {!Object<string, !BindEvaluatorErrorDef>},
    */
   addBindings(bindings) {
     const errors = Object.create(null);
@@ -103,12 +82,12 @@ export class BindEvaluator {
   /**
    * Parses and stores the given macros and returns map of macro `id` to
    * parse errors.
-   * @param {!Array<!./amp-bind-macro.AmpBindMacroDef>} macros
-   * @return {!Object<string, !EvaluatorErrorDef>}
+   * @param {!Array<!BindMacroDef>} macros
+   * @return {!Object<string, !BindEvaluatorErrorDef>}
    */
   addMacros(macros) {
     const errors = [];
-    // Create BindMacro objects from AmpBindMacroDef.
+    // Create BindMacro objects from BindMacroDef.
     macros.forEach((macro, index) => {
       // Only allow a macro to reference macros defined before it to prevent
       // cycles and recursion.
@@ -131,9 +110,9 @@ export class BindEvaluator {
    * @return {!EvaluateBindingsResultDef}
    */
   evaluateBindings(scope) {
-    /** @type {!Object<string, ./bind-expression.BindExpressionResultDef>} */
+    /** @type {!Object<string, BindExpressionResultDef>} */
     const cache = Object.create(null);
-    /** @type {!Object<string, !EvaluatorErrorDef>} */
+    /** @type {!Object<string, !BindEvaluatorErrorDef>} */
     const errors = Object.create(null);
 
     // First, evaluate all of the expression strings in the bindings.
@@ -203,7 +182,7 @@ export class BindEvaluator {
   /**
    * Parses a single expression string, caches and returns it.
    * @param {string} expressionString
-   * @return {{expression: ?BindExpression, error: ?EvaluatorErrorDef}}
+   * @return {{expression: ?BindExpression, error: ?BindEvaluatorErrorDef}}
    * @private
    */
   parse_(expressionString) {
@@ -224,7 +203,7 @@ export class BindEvaluator {
    * Evaluate a single expression with the given scope.
    * @param {!BindExpression} expression
    * @param {!Object} scope
-   * @return {{result: ?./bind-expression.BindExpressionResultDef, error: ?EvaluatorErrorDef}}
+   * @return {{result: ?BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
    * @private
    */
   evaluate_(expression, scope) {
@@ -240,7 +219,8 @@ export class BindEvaluator {
 
   /**
    * Return parsed bindings for testing.
-   * @visibleForTesting {!Array<BindingDef>}
+   * @return {!Array<!BindBindingDef>}
+   * @visibleForTesting
    */
   bindingsForTesting() {
     return this.bindings_;
@@ -258,7 +238,7 @@ export class BindEvaluator {
   /**
    * Returns the expression result string for a binding to `property`.
    * @param {string} property
-   * @param {./bind-expression.BindExpressionResultDef} result
+   * @param {BindExpressionResultDef} result
    * @return {?string}
    * @private
    */
