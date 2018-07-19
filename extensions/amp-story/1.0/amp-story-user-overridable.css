@@ -23,7 +23,6 @@ amp-story {
   grid-gap: 16px;
   justify-content: stretch;
   justify-items: start;
-  padding: 32px;
 }
 
 .i-amphtml-story-grid-template-vertical > * {
@@ -35,14 +34,8 @@ amp-story {
   align-items: start;
   grid-gap: 16px;
   justify-content: start;
-  padding: 32px;
-}
-
-.i-amphtml-story-grid-template-thirds {
-  padding: 32px;
 }
 
 amp-story-grid-layer {
   padding: 68px 32px 32px; /* 44 + 24 */
 }
-
