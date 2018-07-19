@@ -197,11 +197,31 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
+<<<<<<< HEAD
    * Sends a command to the player through postMessage.
    * @param {string} command
    * @param {Array=} opt_args
    * @private
    */
+=======
+     * @private
+     */
+  assertDatasourceExists_() {
+    const datasourceExists = this.mediaid_;
+    user().assert(
+        datasourceExists,
+        'The data-mediaid attribute is required for <amp-mowplayer> %s',
+        this.element
+    );
+  }
+
+  /**
+     * Sends a command to the player through postMessage.
+     * @param {string} command
+     * @param {Array=} opt_args
+     * @private
+     */
+>>>>>>> ae16190da... Removed unused vars and break long line codes
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {

@@ -88,6 +88,17 @@ describes.realWin('amp-mowplayer', {
 		getMowPlayer({}).should.eventually.be.rejectedWith(
 			/The data-mediaid attribute is required for/)));
 
+<<<<<<< HEAD
+=======
+    it('requires data-mediaid', () => {
+      return allowConsoleError(() => {
+        return getMowPlayer({})
+            .should.eventually.be.rejectedWith(
+                /The data-mediaid attribute is required for/);
+      });
+    });
+
+>>>>>>> ae16190da... Removed unused vars and break long line codes
     it('should send events from mowplayer to the amp element', () => {
       return getMowPlayer({'data-mediaid': datasource}).then(mp => {
         const iframe = mp.querySelector('iframe');
