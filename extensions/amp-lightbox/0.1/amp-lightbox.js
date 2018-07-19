@@ -28,12 +28,9 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {removeElement, tryFocus} from '../../../src/dom';
-import {
-  renderCloseButtonHeader,
-  showCloseButtonHeader,
-} from '../../../src/full-overlay-frame-helper';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
@@ -75,6 +72,26 @@ const AnimationPresets = {
 
 /** @private @const {string} */
 const DEFAULT_ANIMATION = 'fade-in';
+
+/**
+ * @param {!Element} ctx
+ * @return {!Element}
+ */
+function renderCloseButtonHeader(ctx) {
+  return htmlFor(ctx)`
+    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
+      <div>Ad</div>
+      <i-amphtml-ad-close-button class="amp-ad-close-button">
+      </i-amphtml-ad-close-button>
+    </i-amphtml-ad-close-header>`;
+}
+
+/**
+ * @param {!Element} header
+ */
+function showCloseButtonHeader(header) {
+  header.classList.add('amp-ad-close-header');
+}
 
 class AmpLightbox extends AMP.BaseElement {
 

@@ -93,25 +93,3 @@ export function collapseFrameUnderVsyncMutate(iframe) {
     'border',
   ]);
 }
-
-
-/**
- * @param {!Element} ctx
- * @return {!Element}
- * @visibleForTesting
- */
-export function renderCloseButtonHeader(ctx) {
-  return htmlFor(ctx)`
-    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
-      <div>Ad</div>
-      <i-amphtml-ad-close-button class="amp-ad-close-button">
-      </i-amphtml-ad-close-button>
-    </i-amphtml-ad-close-header>`;
-}
-
-/**
- * @param {!Element} header
- */
-export function showCloseButtonHeader(header) {
-  header.classList.add('amp-ad-close-header');
-}
