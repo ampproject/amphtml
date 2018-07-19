@@ -45,9 +45,9 @@ tags: {  # <amp-nexxtv-player>
   attrs: {
     name: "data-origin"
     value_url: {
+      protocol: "https"
+      protocol: "http"
       allow_empty: true
-      allowed_protocol: "https"
-      allowed_protocol: "http"
     }
   }
   attrs: {

@@ -32,7 +32,7 @@ tags: {  # <amp-web-push>
     name: "helper-iframe-url"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
   }
@@ -45,7 +45,7 @@ tags: {  # <amp-web-push>
     name: "permission-dialog-url"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
   }
@@ -53,7 +53,7 @@ tags: {  # <amp-web-push>
     name: "service-worker-url"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
   }

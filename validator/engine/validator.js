@@ -187,7 +187,7 @@ class ParsedUrlSpec {
      */
     this.allowedProtocols_ = Object.create(null);
     if (this.spec_ !== null) {
-      for (const protocol of this.spec_.allowedProtocol) {
+      for (const protocol of this.spec_.protocol) {
         this.allowedProtocols_[protocol] = 0;
       }
     }

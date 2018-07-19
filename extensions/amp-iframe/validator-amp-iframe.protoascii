@@ -64,8 +64,8 @@ tags: {  # <amp-iframe>
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"

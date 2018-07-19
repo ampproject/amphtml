@@ -53,8 +53,8 @@ message PropertySpecList {
 
 // Used for validating urls in attribute values (such as href/src/srcset).
 message UrlSpec {
-  // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
-  repeated string allowed_protocol = 1;
+  // protocol must be in lowercase (e.g. "javascript" not "JavaScript").
+  repeated string protocol = 1;
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];

@@ -38,15 +38,15 @@ tags: {  # <amp-story>
   attrs: {
     name: "background-audio"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
     name: "bookend-config-src"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
     deprecation: "AMP-STORY-BOOKEND"
     deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-story#migrating-from-0.1-to-1.0"
@@ -54,23 +54,23 @@ tags: {  # <amp-story>
   attrs: {
     name: "poster-landscape-src"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
     name: "poster-portrait-src"
     mandatory: true
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
     name: "poster-square-src"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
@@ -81,8 +81,8 @@ tags: {  # <amp-story>
     name: "publisher-logo-src"
     mandatory: true
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
@@ -118,15 +118,15 @@ tags: {  # <amp-story> without metadata (deprecated)
   attrs: {
     name: "background-audio"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
     name: "bookend-config-src"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
@@ -153,8 +153,8 @@ tags: {  # <amp-story-page>
   attrs: {
     name: "background-audio"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   attrs: {
@@ -319,8 +319,8 @@ tags: {  # <amp-story-bookend>
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
   }
   child_tags: {

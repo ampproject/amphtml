@@ -56,7 +56,7 @@ tags: {  # <amp-3d-gltf>
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
   }
   attr_lists: "extended-amp-global"
