@@ -127,15 +127,13 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
     // Scan for TYPECHECK_ONLY string which we pass in as a --define
     for (String arg : args) {
-      // TODO(@erwinmombay) It looks like none of these actually works.
-      // See last option for more correct format.
-      if (arg.contains("--define=TYPECHECK_ONLY=true")) {
+      if (arg.contains("TYPECHECK_ONLY=true")) {
         runner.typecheck_only = true;
-      } else if (arg.contains("--define=FORTESTING=true")) {
+      } else if (arg.contains("FORTESTING=true")) {
         runner.is_production_env = false;
-      } else if (arg.contains("--define=PSEUDO_NAMES=true")) {
+      } else if (arg.contains("PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
-      } else if ("SINGLE_FILE_COMPILATION=true".equals(arg)) {
+      } else if (arg.contains("SINGLE_FILE_COMPILATION=true")) {
         runner.single_file_compilation = true;
       }
     }

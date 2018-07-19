@@ -27,6 +27,7 @@ const replace = require('gulp-replace');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const {highlight} = require('cli-highlight');
+const {singlePassCompile} = require('../get-dep-graph');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -96,6 +97,46 @@ function formatClosureCompilerError(message) {
 
 function compile(entryModuleFilenames, outputDir,
   outputFilename, options) {
+  const hideWarningsFor = [
+    'third_party/caja/',
+    'third_party/closure-library/sha384-generated.js',
+    'third_party/subscriptions-project/',
+    'third_party/d3/',
+    'third_party/mustache/',
+    'third_party/vega/',
+    'third_party/webcomponentsjs/',
+    'third_party/rrule/',
+    'third_party/react-dates/',
+    'node_modules/',
+    'build/patched-module/',
+    // Can't seem to suppress `(0, win.eval)` suspicious code warning
+    '3p/environment.js',
+    // Generated code.
+    'extensions/amp-access/0.1/access-expr-impl.js',
+  ];
+
+  const baseExterns = [
+    'build-system/amp.extern.js',
+    'third_party/closure-compiler/externs/performance_observer.js',
+    'third_party/closure-compiler/externs/web_animations.js',
+    'third_party/moment/moment.extern.js',
+    'third_party/react-externs/externs.js',
+  ];
+  const define = [];
+  if (argv.pseudo_names) {
+    define.push('PSEUDO_NAMES=true');
+  }
+  if (argv.fortesting) {
+    define.push('FORTESTING=true');
+  }
+  if (options.singlePassCompilation) {
+    // TODO(@cramforce): Run the post processing step
+    return singlePassCompile(entryModuleFilenames, {
+      define,
+      externs: baseExterns,
+      hideWarningsFor,
+    });
+  }
   return new Promise(function(resolve) {
     let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {
@@ -265,16 +306,7 @@ function compile(entryModuleFilenames, outputDir,
       }
     });
 
-    let externs = [
-      'build-system/amp.extern.js',
-      'third_party/closure-compiler/externs/intersection_observer.js',
-      'third_party/closure-compiler/externs/performance_observer.js',
-      'third_party/closure-compiler/externs/shadow_dom.js',
-      'third_party/closure-compiler/externs/streams.js',
-      'third_party/closure-compiler/externs/web_animations.js',
-      'third_party/moment/moment.extern.js',
-      'third_party/react-externs/externs.js',
-    ];
+    let externs = baseExterns;
     if (options.externs) {
       externs = externs.concat(options.externs);
     }
@@ -318,24 +350,8 @@ function compile(entryModuleFilenames, outputDir,
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
         jscomp_off: ['unknownDefines'],
-        define: [],
-        hide_warnings_for: [
-          'third_party/caja/',
-          'third_party/closure-library/sha384-generated.js',
-          'third_party/subscriptions-project/',
-          'third_party/d3/',
-          'third_party/mustache/',
-          'third_party/vega/',
-          'third_party/webcomponentsjs/',
-          'third_party/rrule/',
-          'third_party/react-dates/',
-          'node_modules/',
-          'build/patched-module/',
-          // Can't seem to suppress `(0, win.eval)` suspicious code warning
-          '3p/environment.js',
-          // Generated code.
-          'extensions/amp-access/0.1/access-expr-impl.js',
-        ],
+        define,
+        hide_warnings_for: hideWarningsFor,
         jscomp_error: [],
       },
     };
@@ -353,12 +369,6 @@ function compile(entryModuleFilenames, outputDir,
           'globalThis');
       compilerOptions.compilerFlags.conformance_configs =
           'build-system/conformance-config.textproto';
-    }
-    if (argv.pseudo_names) {
-      compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
-    }
-    if (argv.fortesting) {
-      compilerOptions.compilerFlags.define.push('FORTESTING=true');
     }
 
     if (compilerOptions.compilerFlags.define.length == 0) {

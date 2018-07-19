@@ -50,40 +50,15 @@ let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
 // Flatten nested arrays to support multiple versions
 extensions = [].concat.apply([], extensions);
 
-exports.splittable = function(config) {
-
-  if (!config || !config.modules) {
-    return Promise.reject(
-        new Error('Pass an array of entry modules via modules option. ' +
-            'Example: {modules: ["./first", "./second"]}'));
-  }
-
-  return exports.getFlags(config).then(function(flagsArray) {
-    return new Promise(function(resolve, reject) {
-      new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
-        if (exitCode == 0) {
-          resolve({
-            warnings: config.warnings ? stdErr : null,
-          });
-        } else {
-          reject(
-              new Error('Closure compiler compilation of bundles failed.\n' +
-                  stdOut + '\n' +
-                  stdErr));
-        }
-      });
-    });
-  });
-};
-
 
 exports.getFlags = function(config) {
+  config.define.push('SINGLE_FILE_COMPILATION=true');
   /* eslint "google-camelcase/google-camelcase": 0 */
   // Reasonable defaults.
   const flags = {
     compilation_level: 'ADVANCED',
     process_common_js_modules: true,
-    rewrite_polyfills: true,
+    rewrite_polyfills: false,
     create_source_map: '%outname%.map',
     parse_inline_source_maps: true,
     apply_input_source_maps: true,
@@ -94,29 +69,19 @@ exports.getFlags = function(config) {
     language_in: 'ES6',
     language_out: 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
-    externs: [
-      path.dirname(module.filename) + '/splittable.extern.js',
-      './build-system/amp.extern.js',
-      // 'third_party/closure-compiler/externs/intersection_observer.js',
-      'third_party/closure-compiler/externs/performance_observer.js',
-      // 'third_party/closure-compiler/externs/shadow_dom.js',
-      // 'third_party/closure-compiler/externs/streams.js',
-      'third_party/closure-compiler/externs/web_animations.js',
-      'third_party/moment/moment.extern.js',
-      'third_party/react-externs/externs.js',
-    ],
-    define: [
-      'PSEUDO_NAMES=true',
-      'SINGLE_FILE_COMPILATION=true',
-    ],
-    jscomp_off: [
+    externs: config.externs,
+    define: config.define,
+    // Turn off warning for "Unknown @define" since we use define to pass
+    // args such as FORTESTING to our runner.
+    jscomp_off: ['unknownDefines'],
+    jscomp_error: [
+      'checkTypes',
       'accessControls',
+      'const',
+      'constantProperty',
       'globalThis',
-      'misplacedTypeAnnotation',
-      'nonStandardJsDocs',
-      'suspiciousCode',
-      'uselessCode',
     ],
+    hide_warnings_for: config.hideWarningsFor,
   };
 
   // Turn object into deterministically sorted array.
@@ -417,14 +382,6 @@ function unifyPath(id) {
   return id.split(path.sep).join('/');
 }
 
-const externs = [
-  'build-system/amp.extern.js',
-  'third_party/closure-compiler/externs/performance_observer.js',
-  'third_party/closure-compiler/externs/web_animations.js',
-  'third_party/moment/moment.extern.js',
-  'third_party/react-externs/externs.js',
-];
-
 function buildFullPathFromConfig(ext) {
   function getPath(version) {
     return `extensions/${ext.name}/${version}/${ext.name}.js`;
@@ -440,18 +397,22 @@ function unsupportedExtensions(name) {
   return name;
 }
 
-exports.getFlags({
-  modules: ['src/amp.js'].concat(extensions),
-  writeTo: './out/',
-  externs,
-}).then(compile).then(function() {
-  // Move things into place as AMP expects them.
-  fs.ensureDirSync('out/v0');
-  return Promise.all([
-    move('out/amp*', 'out/v0'),
-    move('out/_base*', 'out/v0'),
-  ]);
-});
+exports.singlePassCompile = function(entryModule, options) {
+  return exports.getFlags({
+    modules: [entryModule].concat(extensions),
+    writeTo: './dist/',
+    define: options.define,
+    externs: options.externs,
+    hideWarningsFor: options.hideWarningsFor,
+  }).then(compile).then(function() {
+    // Move things into place as AMP expects them.
+    fs.ensureDirSync('dist/v0');
+    return Promise.all([
+      move('dist/amp*', 'dist/v0'),
+      move('dist/_base*', 'dist/v0'),
+    ]);
+  });
+};
 
 function compile(flagsArray) {
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
