@@ -258,8 +258,6 @@ class AmpLightbox extends AMP.BaseElement {
     const transition =
         props.map(p => `${p} ${durationSeconds}s ease-in`).join(',');
 
-    element.classList.add('amp-open');
-
     this.eventCounter_++;
 
     if (this.isScrollable_) {
@@ -335,12 +333,14 @@ class AmpLightbox extends AMP.BaseElement {
       this.measureMutateElement(() => {
         headerHeight = header./*OK*/getBoundingClientRect().height;
       }, () => {
-        setImportantStyles(this.container_, {
+        setImportantStyles(dev().assertElement(this.container_), {
           'margin-top': px(headerHeight),
           'min-height': `calc(100vh - ${px(headerHeight)})`,
         });
       });
-    });
+    },
+    /* opt_isRuntimeCss */ false,
+    /* opt_ext */ 'amp-lightbox');
   }
 
   /**

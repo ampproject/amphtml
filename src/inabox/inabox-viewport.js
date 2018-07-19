@@ -352,13 +352,6 @@ export class ViewportBindingInabox {
           MessageType.CANCEL_FULL_OVERLAY_FRAME,
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           response => {
-            const openLightbox =
-              this.win.document.querySelector('amp-lightbox.amp-open');
-
-            if (openLightbox) {
-              openLightbox.getImpl().then(impl => impl.close());
-            }
-
             unlisten();
             this.updateBoxRect_(response.boxRect);
             resolve();
