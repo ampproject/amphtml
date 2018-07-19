@@ -19,11 +19,11 @@ import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {closestBySelector, escapeHtml} from './dom';
-import {loadPromise} from './event-helper';
 import {dev, rethrowAsync, user} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
+import {loadPromise} from './event-helper';
 import {
   px,
   resetStyles,
@@ -510,10 +510,9 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @param {!Element} requestingElement An amp-lightbox element.
    * @return {!Promise}
    */
-  enterFullOverlayMode(requestingElement) {
+  enterFullOverlayMode() {
     const ampAdParent = dev().assertElement(this.iframe.parentNode);
 
     // Security assertion. Otherwise any 3p frame could request lighbox mode.
