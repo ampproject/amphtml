@@ -310,7 +310,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   findOrBuildCarousel_(lightboxGroupId) {
-    triggerAnalyticsEvent(this.element, 'lightboxOpened', {});
     dev().assert(this.container_);
     const existingCarousel = this.element.querySelector(
         `amp-carousel[amp-lightbox-group=${
@@ -798,7 +797,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
       return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
     }).then(() => this.openLightboxForElement_(element))
-        .then(() => this.showControls_());
+        .then(() => {
+          this.showControls_();
+          triggerAnalyticsEvent(this.element, 'lightboxOpened', {});
+        });
   }
 
   /**
