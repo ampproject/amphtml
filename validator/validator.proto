@@ -53,8 +53,8 @@ message PropertySpecList {
 
 // Used for validating urls in attribute values (such as href/src/srcset).
 message UrlSpec {
-  // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
-  repeated string allowed_protocol = 1;
+  // protocol must be in lowercase (e.g. "javascript" not "JavaScript").
+  repeated string protocol = 1;
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3 [default = false];
@@ -155,7 +155,7 @@ message AttrList {
 // great-grandchildren, etc).
 message DescendantTagList {
   optional string name = 1;
-  repeated string allowed_tags = 2;
+  repeated string tag = 2;
 }
 
 // Regex which, if matches the cdata of a tag, causes the tag validation to
@@ -204,7 +204,8 @@ message CssSpec {
   // TODO(chenshay): Make this more generic.
   optional bool validate_keyframes = 6;
 
-  repeated string allowed_declarations = 7;
+  // Any declaration listed here are allowed.
+  repeated string declaration = 7;
 }
 
 // NEXT AVAILABLE TAG: 9
