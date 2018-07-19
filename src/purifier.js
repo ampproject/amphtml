@@ -100,6 +100,7 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
  */
 export const WHITELISTED_ATTRS = [
   // AMP-only attributes that don't exist in HTML.
+  'amp-fx',
   'fallback',
   'heights',
   'layout',

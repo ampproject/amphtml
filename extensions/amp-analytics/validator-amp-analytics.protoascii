@@ -61,7 +61,7 @@ tags: {  # <amp-analytics>
   attrs: {
     name: "config"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
