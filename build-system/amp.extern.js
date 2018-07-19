@@ -485,6 +485,16 @@ var TransitionDef;
 ///////////////////
 
 /**
+ * @typedef {{method: string, args: !Array, scope: number, id: number}}
+ */
+let ToWorkerMessageDef;
+
+/**
+ * @typedef {{method: string, returnValue: *, id: number}}
+ */
+let FromWorkerMessageDef;
+
+/**
  * Structured cloneable representation of an <amp-bind-macro> element.
  * @typedef {{id: string, argumentNames: Array<string>, expressionString: string}}
  */
