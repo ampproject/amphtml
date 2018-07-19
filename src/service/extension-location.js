@@ -43,7 +43,7 @@ export function calculateExtensionScriptUrl(location, extensionId,
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
-    opt_extensionVersion = '0.1'
+    opt_extensionVersion = '0.1';
   }
   let extensionVersion = opt_extensionVersion
       ? '-' + opt_extensionVersion
