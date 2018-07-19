@@ -39,7 +39,8 @@ tags: {  # <amp-beopinion>
   }
   attrs: {
     name: "data-my-content"
-    value_regex: "0|1"
+    value: "0"
+    value: "1"
   }
   attrs: {
     name: "data-name"

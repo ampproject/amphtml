@@ -187,7 +187,7 @@ class ParsedUrlSpec {
      */
     this.allowedProtocols_ = Object.create(null);
     if (this.spec_ !== null) {
-      for (const protocol of this.spec_.allowedProtocol) {
+      for (const protocol of this.spec_.protocol) {
         this.allowedProtocols_[protocol] = 0;
       }
     }
@@ -1579,7 +1579,7 @@ class TagStack {
       // Get the list matching this tag's descendant tag name.
       if (parsedTagSpec.getSpec().descendantTagList ===
           descendantTagList.name) {
-        for (const tag of descendantTagList.allowedTags) {
+        for (const tag of descendantTagList.tag) {
           allowedDescendantsForThisTag.push(tag);
         }
       }
@@ -1647,8 +1647,8 @@ function isAtRuleValid(cssSpec, atRuleName) {
  * @return {boolean}
  */
 function IsDeclarationValid(cssSpec, declarationName) {
-  if (cssSpec.allowedDeclarations.length === 0) {return true;}
-  return cssSpec.allowedDeclarations.indexOf(
+  if (cssSpec.declaration.length === 0) {return true;}
+  return cssSpec.declaration.indexOf(
       parse_css.stripVendorPrefix(declarationName)) > -1;
 }
 
@@ -1658,8 +1658,8 @@ function IsDeclarationValid(cssSpec, declarationName) {
  * @return {string}
  */
 function AllowedDeclarationsString(cssSpec) {
-  if (cssSpec.allowedDeclarations.length > 5) {return '';}
-  return '[\'' + cssSpec.allowedDeclarations.join('\', \'') + '\']';
+  if (cssSpec.declaration.length > 5) {return '';}
+  return '[\'' + cssSpec.declaration.join('\', \'') + '\']';
 }
 
 /** @private */
@@ -1696,8 +1696,8 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
   /** @inheritDoc */
   visitDeclaration(declaration) {
     if (!IsDeclarationValid(this.cssSpec, declaration.name)) {
-      const allowedDeclarationsStr = AllowedDeclarationsString(this.cssSpec);
-      if (allowedDeclarationsStr === '') {
+      const declarationsStr = AllowedDeclarationsString(this.cssSpec);
+      if (declarationsStr === '') {
         this.context.addError(
             amp.validator.ValidationError.Code
                 .CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
