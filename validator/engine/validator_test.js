@@ -628,6 +628,9 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
 
     expect(attrSpecNameRegex.test(attrSpec.name)).toBe(true);
   });
+  it('attr_spec name can not be [style]', () => {
+    expect(attrSpec.name).not.toEqual("[style]");
+  });
   if (attrSpec.valueUrl !== null) {
     const protocolRegex = new RegExp('[a-z-]+');
     // UrlSpec protocol is matched against lowercased protocol names
@@ -759,6 +762,32 @@ describe('ValidatorRulesMakeSense', () => {
   it('amp_layout_attrs defined', () => {
     expect(rules.ampLayoutAttrs.length).toBeGreaterThan(0);
   });
+
+  for (const list of rules.directAttrLists) {
+    for (const index of list ) {
+      if (index < 0) {
+        it('attr_spec name can not be [style]', () => {
+          expect(rules.internedStrings[-1 -index]).not.toEqual("[style]");
+        });
+      } else {
+        it('attr_spec name can not be [style]', () => {
+          expect(rules.attrs[index].name).not.toEqual("[style]");
+        });
+      }
+    }
+  }
+
+  for (const index of rules.globalAttrs) {
+    it('attr_spec name can not be [style]', () => {
+      expect(rules.internedStrings[-1 -index]).not.toEqual("[style]");
+    });
+  }
+
+  for (const index of rules.ampLayoutAttrs) {
+    it('attr_spec name can not be [style]', () => {
+      expect(rules.internedStrings[-1 -index]).not.toEqual("[style]");
+    });
+  }
 
   it('min_validator_revision_required defined', () => {
     expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
