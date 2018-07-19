@@ -299,7 +299,7 @@ export class AnalyticsRoot {
 
         // Check if the target matches the selector.
         if (isSelectAny ||
-            isSelectRoot && target == rootElement ||
+            (isSelectRoot && target == rootElement) ||
             matchesNoInline(target, selector)) {
           listener(target, event);
           // Don't fire the event multiple times even if the more than one

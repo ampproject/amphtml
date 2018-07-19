@@ -48,7 +48,7 @@ function ExtensionPayload() {}
 /** @type {string} */
 ExtensionPayload.prototype.n;
 
-/** @type {function(!Object)} */
+/** @type {function(!Object,!Object)} */
 ExtensionPayload.prototype.f;
 
 /** @type {string|undefined} */
@@ -56,6 +56,9 @@ ExtensionPayload.prototype.p;
 
 /** @type {string} */
 ExtensionPayload.prototype.v;
+
+/** @type {!Array<string>|string|undefined} */
+ExtensionPayload.prototype.i;
 
 
 /**
@@ -99,6 +102,7 @@ window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
 window.AMP = {};
+window.AMP._ = {};
 
 /** @constructor */
 function AmpConfigType() {}
