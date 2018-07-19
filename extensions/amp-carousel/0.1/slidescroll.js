@@ -604,7 +604,7 @@ export class AmpSlideScroll extends BaseSlides {
       showIndexArr.push(prevIndex);
     }
     showIndexArr.push(newIndex);
-    if (nextIndex != null && this.noOfSlides_ > 2) {
+    if (nextIndex != null && nextIndex !== prevIndexg) {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {

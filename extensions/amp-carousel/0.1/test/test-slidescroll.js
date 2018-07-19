@@ -686,7 +686,7 @@ describes.realWin('SlideScroll', {
       });
     });
 
-    it.only('show correct slides when looping with `autoplay` on for 2 slides', () => {
+    it('show correct slides when looping with `autoplay` for 2 slides', () => {
       return getAmpSlideScroll(true, 2).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
