@@ -607,7 +607,9 @@ export class Extensions {
       opt_extensionVersion = '';
     } else {
       scriptElement.setAttribute(
-          isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
+          isTemplateExtension(extensionId)
+            ? 'custom-template'
+            : 'custom-element',
           extensionId);
     }
     scriptElement.setAttribute('data-script', extensionId);

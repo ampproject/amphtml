@@ -45,9 +45,9 @@ export function calculateExtensionScriptUrl(location, extensionId,
   if (opt_extensionVersion == null) {
     opt_extensionVersion = '0.1';
   }
-  let extensionVersion = opt_extensionVersion
-      ? '-' + opt_extensionVersion
-      : '';
+  const extensionVersion = opt_extensionVersion
+    ? '-' + opt_extensionVersion
+    : '';
   return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}.js`;
 }
 
