@@ -1,6 +1,8 @@
 language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
+jdk:
+  - oraclejdk9
 node_js:
   - "lts/*"
 python:
