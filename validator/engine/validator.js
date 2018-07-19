@@ -1579,7 +1579,7 @@ class TagStack {
       // Get the list matching this tag's descendant tag name.
       if (parsedTagSpec.getSpec().descendantTagList ===
           descendantTagList.name) {
-        for (const tag of descendantTagList.allowedTags) {
+        for (const tag of descendantTagList.tag) {
           allowedDescendantsForThisTag.push(tag);
         }
       }
