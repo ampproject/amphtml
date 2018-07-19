@@ -51,7 +51,7 @@ tags: {  # <amp-live-list>
   }
   attrs: {
     name: "sort"
-    value_regex: "ascending"
+    value: "ascending"
   }
   reference_points: {
     tag_spec_name: "AMP-LIVE-LIST [update]"

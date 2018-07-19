@@ -30,19 +30,23 @@ tags: {  # <amp-3d-gltf>
   requires_extension: "amp-3d-gltf"
   attrs: {
     name: "alpha"
-    value_regex: "false|true"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "antialiasing"
-    value_regex: "false|true"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "autorotate"
-    value_regex: "false|true"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "enablezoom"
-    value_regex: "false|true"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "maxpixelratio"
@@ -52,7 +56,7 @@ tags: {  # <amp-3d-gltf>
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
   }
   attr_lists: "extended-amp-global"

@@ -33,7 +33,7 @@ tags: {  # <amp-call-tracking>
     name: "config"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"

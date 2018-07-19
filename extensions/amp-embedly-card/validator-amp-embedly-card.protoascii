@@ -33,7 +33,7 @@ tags: {  # <amp-embedly-card>
     name: "data-url"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
   }

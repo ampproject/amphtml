@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 338
+min_validator_revision_required: 344
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 684
+spec_file_revision: 690
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -229,8 +229,8 @@ tags: {
     name: "href"
     mandatory: true
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -255,7 +255,7 @@ tags: {
     name: "href"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -510,7 +510,7 @@ tags: {
     name: "content"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
   }
   attrs: {
@@ -948,16 +948,16 @@ tags: {  # Special custom 'author' spreadsheet for AMP
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allowed_protocol: "absolute"  # Temporary / will go away.
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
         allow_empty: true
       }
     }
@@ -1024,16 +1024,16 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allowed_protocol: "absolute"  # Temporary / will go away.
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
         allow_empty: true
       }
       validate_amp4ads: true
@@ -1090,7 +1090,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
+        protocol: "https"
       }
     }
     blacklisted_cdata_regex: {
@@ -1276,11 +1276,11 @@ tags: {
         type: PARSE_AS_ERROR
       }
       validate_keyframes: true
-      allowed_declarations: "animation-timing-function"
-      allowed_declarations: "offset-distance"
-      allowed_declarations: "opacity"
-      allowed_declarations: "transform"
-      allowed_declarations: "visibility"
+      declaration: "animation-timing-function"
+      declaration: "offset-distance"
+      declaration: "opacity"
+      declaration: "transform"
+      declaration: "visibility"
     }
   }
 }
@@ -1437,8 +1437,8 @@ attr_lists: {
   attrs: {
     name: "cite"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
       allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -1563,32 +1563,32 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
-      allowed_protocol: "ftp"
-      allowed_protocol: "geo"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allowed_protocol: "mailto"
-      allowed_protocol: "maps"
+      protocol: "ftp"
+      protocol: "geo"
+      protocol: "http"
+      protocol: "https"
+      protocol: "mailto"
+      protocol: "maps"
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
-      allowed_protocol: "bbmi"
-      allowed_protocol: "fb-messenger"
-      allowed_protocol: "intent"
+      protocol: "bbmi"
+      protocol: "fb-messenger"
+      protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
-      allowed_protocol: "line"
-      allowed_protocol: "skype"
-      allowed_protocol: "sms"
-      allowed_protocol: "snapchat"
-      allowed_protocol: "tel"
-      allowed_protocol: "tg"
-      allowed_protocol: "threema"
-      allowed_protocol: "twitter"
-      allowed_protocol: "viber"
-      allowed_protocol: "webcal"
-      allowed_protocol: "web+mastodon"  # See GitHub issue #14793
-      allowed_protocol: "whatsapp"
+      protocol: "line"
+      protocol: "skype"
+      protocol: "sms"
+      protocol: "snapchat"
+      protocol: "tel"
+      protocol: "tg"
+      protocol: "threema"
+      protocol: "twitter"
+      protocol: "viber"
+      protocol: "webcal"
+      protocol: "web+mastodon"  # See GitHub issue #14793
+      protocol: "whatsapp"
       allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -1657,9 +1657,9 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      protocol: "https"
+      protocol: "mailto"
       allow_relative: false
-      allowed_protocol: "https"
-      allowed_protocol: "mailto"
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
     # appear at the beginnig of the attribute's value. Likewise closing doubly
@@ -1992,8 +1992,8 @@ tags: {
   attrs: {
     name: "longdesc"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -2002,8 +2002,8 @@ tags: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2042,8 +2042,8 @@ tags: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2078,8 +2078,8 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2102,8 +2102,8 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2122,7 +2122,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2144,7 +2144,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2167,7 +2167,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2190,7 +2190,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2213,7 +2213,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2247,8 +2247,8 @@ attr_lists: {
     name: "src"
     mandatory: true
     value_url: {
+      protocol: "https"
       allow_relative: false
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -2270,8 +2270,8 @@ attr_lists: {
     name: "src"
     mandatory: true
     value_url: {
+      protocol: "https"
       allow_relative: false
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -2491,8 +2491,8 @@ attr_lists: {
     # xlink:href is deprecated since SVG2 in favor of href.
     alternative_names: "href"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
       allow_empty: false
     }
   }
@@ -2860,9 +2860,9 @@ tags: {
     # xlink:href is deprecated since SVG2 in favor of href.
     alternative_names: "href"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
       allow_empty: false
     }
     # Inline SVGs execute in a different context and can affect page elements.
@@ -3665,14 +3665,14 @@ tags {  # <form method=GET ...>
     name: "action"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "action-xhr"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -3702,7 +3702,7 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "verify-xhr"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -3722,7 +3722,7 @@ tags {  # <form method=POST ...>
     name: "action-xhr"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -3754,7 +3754,7 @@ tags {  # <form method=POST ...>
   attrs: {
     name: "verify-xhr"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -3773,7 +3773,7 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "action-xhr"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
@@ -3808,8 +3808,8 @@ tags {  # <form method=POST ...>
     name: "action-xhr"
     mandatory: true
     value_url: {
+      protocol: "https"
       allow_relative: false
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
@@ -4629,9 +4629,9 @@ attr_lists: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -4646,7 +4646,7 @@ attr_lists: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
@@ -4673,7 +4673,7 @@ attr_lists: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
@@ -4784,7 +4784,7 @@ tags: {  # <amp-pixel>
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
