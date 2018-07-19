@@ -75,15 +75,19 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 
   it('should allow null errors', () => {
-    rejectedPromiseEvent.reason = null;
-    win.eventListeners.fire(rejectedPromiseEvent);
-    expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+    allowConsoleErrors(() => {
+      rejectedPromiseEvent.reason = null;
+      win.eventListeners.fire(rejectedPromiseEvent);
+      expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+    }
   });
 
   it('should allow string errors', () => {
-    rejectedPromiseEvent.reason = 'string error';
-    win.eventListeners.fire(rejectedPromiseEvent);
-    expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+    allowConsoleErrors(() => {
+      rejectedPromiseEvent.reason = 'string error';
+      win.eventListeners.fire(rejectedPromiseEvent);
+      expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
+    });
   });
 
   it('should ignore cancellation', () => {
