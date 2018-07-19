@@ -573,7 +573,7 @@ export class VideoDocking {
         return;
       }
       const {clientX, clientY} = e;
-      if (this.isInsideTargetArea_(clientX, clientY)) {
+      if (this.isInsideTargetAreaWhenDocked_(clientX, clientY)) {
         return;
       }
       this.hideControls_(/* respectSticky */ true);
@@ -1605,14 +1605,16 @@ export class VideoDocking {
    * @return {boolean}
    * @private
    */
-  isInsideTargetArea_(x, y) {
+  isInsideTargetAreaWhenDocked_(x, y) {
     const video = this.getDockedVideo_();
+    const target = /** @type {!DockTargetDef} */ (
+      dev().assert(this.getTargetFor_(video)));
     const {
       x: left,
       y: top,
       targetWidth,
       targetHeight,
-    } = this.getTargetArea_(video, dev().assert(this.getTargetFor_(video)));
+    } = this.getTargetArea_(video, target);
     const right = left + targetWidth;
     const bottom = top + targetHeight;
     return x >= left && y >= top && x <= right && y <= bottom;
