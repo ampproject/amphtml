@@ -75,6 +75,7 @@ describes.realWin('amp-mowplayer', {
      * @param {string} datasource
      */
   function runTestsForDatasource(datasource) {
+
     it('renders', () => {
       return getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID}, true).then(mp => {
         const iframe = mp.querySelector('iframe');

@@ -92,7 +92,7 @@ class AmpMowplayer extends AMP.BaseElement {
 
     const {preconnect} = this;
     preconnect.url(this.getVideoIframeSrc_());
-    // Host that YT uses to serve JS needed by player.
+    // Host that mowplayer uses to serve JS needed by player.
     preconnect.url('https://cdn.mowplayer.com', opt_onLayout);
     // Load player settings
     preconnect.url('https://code.mowplayer.com', opt_onLayout);
@@ -154,7 +154,7 @@ class AmpMowplayer extends AMP.BaseElement {
     );
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      // Tell YT that we want to receive messages
+      // Tell mowplayer that we want to receive messages
       this.listenToFrame_();
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
@@ -263,7 +263,7 @@ class AmpMowplayer extends AMP.BaseElement {
       redispatch(element, playerState.toString(), {
         [PlayerStates.PLAYING]: VideoEvents.PLAYING,
         [PlayerStates.PAUSED]: VideoEvents.PAUSE,
-        // YT does not fire pause and ended together.
+        // mowplayer does not fire pause and ended together.
         [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
       });
       return;
