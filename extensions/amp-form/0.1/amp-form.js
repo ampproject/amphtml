@@ -72,9 +72,8 @@ const EXTERNAL_DEPS = [
   'amp-selector',
 ];
 
-
 /** @const @enum {string} */
-const FormState_ = {
+const FormState = {
   INITIAL: 'initial',
   VERIFYING: 'verifying',
   VERIFY_ERROR: 'verify-error',
@@ -83,6 +82,16 @@ const FormState_ = {
   SUBMIT_SUCCESS: 'submit-success',
 };
 
+/** @const @enum {string} */
+const FormAmpEvent = {
+  SUBMIT: 'submit',
+  SUBMIT_SUCCESS: 'submit-success',
+  SUBMIT_ERROR: 'submit-error',
+  VERIFY: 'verify',
+  VERIFY_ERROR: 'verify-error',
+  VALID: 'valid',
+  INVALID: 'invalid',
+};
 
 /** @const @enum {string} */
 const UserValidityState = {
@@ -180,8 +189,8 @@ export class AmpForm {
     /** @const @private {!Array<!Element>} */
     this.submitButtons_ = toArray(submitButtons);
 
-    /** @private {!FormState_} */
-    this.state_ = FormState_.INITIAL;
+    /** @private {!FormState} */
+    this.state_ = FormState.INITIAL;
 
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
@@ -282,17 +291,23 @@ export class AmpForm {
     // If the viewer can render templates, then form verifier is not applicable.
     if (!this.ssrTemplateHelper_.isSupported()) {
       this.form_.addEventListener('change', e => {
-        this.verifier_.onCommit()
-            .then(({updatedElements, errors}) => {
-              if (this.state_ === FormState_.VERIFYING) {
-                this.setState_(errors.length ?
-                  FormState_.VERIFY_ERROR : FormState_.INITIAL);
-                this.renderTemplate_(
-                    /** @type {!JsonObject} */ ({verifyErrors: errors}));
-              }
-              updatedElements.forEach(checkUserValidityAfterInteraction_);
-              this.validator_.onBlur(e);
-            });
+        this.verifier_.onCommit().then(({updatedElements, errors}) => {
+          // Only make the verify XHR if the user hasn't pressed submit.
+          if (this.state_ === FormState.VERIFYING) {
+            if (errors.length) {
+              this.setState_(FormState.VERIFY_ERROR);
+              this.renderTemplate_(
+                  /** @type {!JsonObject} */ ({verifyErrors: errors}));
+              this.triggerAction_(FormAmpEvent.VERIFY_ERROR, errors);
+            } else {
+              this.setState_(FormState.INITIAL);
+            }
+          }
+          updatedElements.forEach(checkUserValidityAfterInteraction_);
+          // Tell the validation to reveal any input.validationMessage added
+          // by the form verifier.
+          this.validator_.onBlur(e);
+        });
       });
     }
 
@@ -331,7 +346,7 @@ export class AmpForm {
    * @private
    */
   handleSubmitAction_(invocation) {
-    if (this.state_ == FormState_.SUBMITTING || !this.checkValidity_()) {
+    if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
       return;
     }
     // `submit` has the same trust level as the AMP Action that caused it.
@@ -347,7 +362,7 @@ export class AmpForm {
    */
   handleClearAction_() {
     this.form_.reset();
-    this.setState_(FormState_.INITIAL);
+    this.setState_(FormState.INITIAL);
     this.form_.classList.remove('user-valid');
     this.form_.classList.remove('user-invalid');
 
@@ -386,7 +401,7 @@ export class AmpForm {
    * @private
    */
   handleSubmitEvent_(event) {
-    if (this.state_ == FormState_.SUBMITTING || !this.checkValidity_()) {
+    if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
       event.stopImmediatePropagation();
       event.preventDefault();
       return;
@@ -430,10 +445,11 @@ export class AmpForm {
    * @private
    */
   handleXhrVerify_() {
-    if (this.state_ === FormState_.SUBMITTING) {
+    if (this.state_ === FormState.SUBMITTING) {
       return Promise.resolve();
     }
-    this.setState_(FormState_.VERIFYING);
+    this.setState_(FormState.VERIFYING);
+    this.triggerAction_(FormAmpEvent.VERIFY, null);
 
     return this.doVarSubs_(this.getVarSubsFields_())
         .then(() => this.doVerifyXhr_());
@@ -451,7 +467,7 @@ export class AmpForm {
     if (this.ssrTemplateHelper_.isSupported()) {
       p = varSubPromise.then(() => {
         this.actions_.trigger(
-            this.form_, 'submit', /* event */ null, trust);
+            this.form_, FormAmpEvent.SUBMIT, /* event */ null, trust);
         // Note that we do not render templates for the submitting state
         // and only deal with submit-success or submit-error.
         return this.ssrTemplateHelper_.fetchAndRenderTemplate(this.form_);
@@ -608,8 +624,8 @@ export class AmpForm {
    */
   handleSubmitSuccess_(jsonPromise) {
     return jsonPromise.then(json => {
-      this.triggerAction_(/* success */ true, json);
-      this.setState_(FormState_.SUBMIT_SUCCESS);
+      this.triggerAction_(FormAmpEvent.SUBMIT_SUCCESS, json);
+      this.setState_(FormState.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
     }, error => {
       user().error(TAG, `Failed to parse response JSON: ${error}`);
@@ -630,9 +646,9 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then(responseJson => {
-      this.triggerAction_(/* success */ false, responseJson);
+      this.triggerAction_(FormAmpEvent.SUBMIT_ERROR, responseJson);
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
-      this.setState_(FormState_.SUBMIT_ERROR);
+      this.setState_(FormState.SUBMIT_ERROR);
       this.renderTemplate_(responseJson || {});
       this.maybeHandleRedirect_(error.response);
       user().error(TAG, `Form submission failed: ${error}`);
@@ -737,15 +753,14 @@ export class AmpForm {
 
   /**
    * Triggers either a submit-success or submit-error action with response data.
-   * @param {boolean} success
-   * @param {?JsonObject} json
+   * @param {!FormAmpEvent} name
+   * @param {?Object} detail
    * @private
    */
-  triggerAction_(success, json) {
-    const name = success ? FormState_.SUBMIT_SUCCESS : FormState_.SUBMIT_ERROR;
+  triggerAction_(name, detail) {
     const event =
         createCustomEvent(this.win_, `${TAG}.${name}`,
-            dict({'response': json}));
+            dict({'response': detail}));
     this.actions_.trigger(this.form_, name, event, ActionTrust.HIGH);
   }
 
@@ -781,7 +796,7 @@ export class AmpForm {
 
   /**
    * Adds proper classes for the state passed.
-   * @param {!FormState_} newState
+   * @param {!FormState} newState
    * @private
    */
   setState_(newState) {
@@ -791,7 +806,7 @@ export class AmpForm {
     this.cleanupRenderedTemplate_(previousState);
     this.state_ = newState;
     this.submitButtons_.forEach(button => {
-      if (newState == FormState_.SUBMITTING) {
+      if (newState == FormState.SUBMITTING) {
         button.setAttribute('disabled', '');
       } else {
         button.removeAttribute('disabled');
@@ -844,7 +859,7 @@ export class AmpForm {
 
   /**
    * Removes the template for the passed state.
-   * @param {!FormState_} state
+   * @param {!FormState} state
    * @private
    */
   cleanupRenderedTemplate_(state) {

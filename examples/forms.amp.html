@@ -677,6 +677,7 @@
 <h4>Asynchronous verification example</h4>
 
 <form
+  on="verify-error:mistake.show;verifying:mistake.hide"
   method="post"
   action-xhr="/form/verify-search-json/post"
   verify-xhr="/form/verify-search-json/post"
@@ -718,7 +719,6 @@
         </template>
     </div>
     <div verify-error>
-
         <template type="amp-mustache">
             {{#verifyErrors}}
                 <p>{{message}}</p>
@@ -739,6 +739,8 @@
         </template>
     </div>
 </form>
+<span id="mistake" hidden>You made a mistake</span>
+
 
 <h4>Debounced search</h4>
 <form
