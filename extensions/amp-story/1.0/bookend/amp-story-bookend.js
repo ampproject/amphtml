@@ -394,7 +394,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   loadConfigAndMaybeRenderBookend(renderBookend = true) {
     return this.loadConfig().then(config => {
-      if (renderBookend && config) {
+      if (renderBookend && !this.isBookendRendered_ && config) {
         return this.renderBookend_(config).then(() => config);
       }
       return config;
@@ -495,14 +495,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * @param {!./bookend-component.BookendDataDef} bookendConfig
-   * @return {!Promise<?../localization.LocalizationService>|undefined}
+   * @return {!Promise}
    * @private
    */
   renderBookend_(bookendConfig) {
-    if (this.isBookendRendered_) {
-      return;
-    }
-
     this.assertBuilt_();
     this.isBookendRendered_ = true;
 
@@ -510,8 +506,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
+   * Renders the configurable components of the bookend in the page. It returns
+   * a promise to ensure loadConfigAndMaybeRenderBookend renders the components
+   * first before proceeding. This is needed for our unit tests.
    * @param {!Array<!../bookend/bookend-component.BookendComponentDef>} components
-   * @return {!Promise<?../localization.LocalizationService>}
+   * @return {!Promise}
    * @private
    */
   renderComponents_(components) {
@@ -526,7 +525,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
               BookendComponent.buildContainer(this.getInnerContainer_(),
                   this.win.document));
           this.mutateElement(() => container.appendChild(bookendEls));
-          return localizationService;
         }).catch(e => {
           user().error(TAG, 'Unable to fetch localization service.', e.message);
           return null;
