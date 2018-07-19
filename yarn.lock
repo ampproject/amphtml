@@ -7159,6 +7159,12 @@ karma-sinon-chai@2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/karma-sinon-chai/-/karma-sinon-chai-2.0.2.tgz#e28c109b989973abafc28a7c9f09ef24a05e07c2"
 
+karma-source-map-support@1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/karma-source-map-support/-/karma-source-map-support-1.3.0.tgz#36dd4d8ca154b62ace95696236fae37caf0a7dde"
+  dependencies:
+    source-map-support "^0.5.5"
+
 karma-super-dots-reporter@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/karma-super-dots-reporter/-/karma-super-dots-reporter-0.2.0.tgz#71c3ac8ee0b7353ef2234fe43815f740d254544a"
@@ -11304,6 +11310,13 @@ source-map-support@^0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.0.tgz#2018a7ad2bdf8faf2691e5fddab26bed5a2bacab"
   dependencies:
+    source-map "^0.6.0"
+
+source-map-support@^0.5.5:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.6.tgz#4435cee46b1aab62b8e8610ce60f788091c51c13"
+  dependencies:
+    buffer-from "^1.0.0"
     source-map "^0.6.0"
 
 source-map-url@^0.4.0:
