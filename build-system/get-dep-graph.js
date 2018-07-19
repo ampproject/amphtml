@@ -108,6 +108,7 @@ exports.getFlags = function(config) {
     define: [
       'PSEUDO_NAMES=true',
       'SINGLE_FILE_COMPILATION=true',
+      'FORTESTING=true',
     ],
     jscomp_off: [
       'accessControls',
