@@ -369,6 +369,7 @@ describes.realWin('Requests', {amp: 1}, env => {
             analyticsMock, r, preconnect, spy, false);
         // Overwrite batchPlugin function
         handler.batchingPlugin_ = () => {throw new Error('test');};
+        expectAsyncConsoleError(/test/);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
         clock.tick(1000);
