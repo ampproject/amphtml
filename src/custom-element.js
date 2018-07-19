@@ -1534,7 +1534,7 @@ function createBaseCustomElementClass(win) {
     isInA4A_() {
       return (
       // in FIE
-        this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+        (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
 
           // in inabox
           getMode().runtime == 'inabox');
@@ -1569,7 +1569,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:boolean,force:boolean}=} opt_options
+     * @param {{cleanup:boolean, force:boolean}=} opt_options
      * @public @final @this {!Element}
      */
     toggleLoading(state, opt_options) {
