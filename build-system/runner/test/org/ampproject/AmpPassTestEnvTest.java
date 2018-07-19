@@ -1,6 +1,7 @@
 package org.ampproject;
 
 
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
@@ -17,7 +18,7 @@ import com.google.javascript.jscomp.Es6CompilerTestCase;
  */
 public class AmpPassTestEnvTest extends Es6CompilerTestCase {
 
-  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of();
+  ImmutableMap<String, ImmutableSet<String>> suffixTypes = ImmutableMap.of();
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
       "IS_MINIFIED",
       IR.trueNode());

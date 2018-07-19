@@ -1,8 +1,6 @@
 language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
-jdk:
-  - oraclejdk9
 node_js:
   - "lts/*"
 python:
@@ -22,7 +20,7 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - pip install --user protobuf
-script: gulp dist
+script: node build-system/pr-check.js
 after_script:
   - build-system/sauce_connect/stop_sauce_connect.sh
 branches:

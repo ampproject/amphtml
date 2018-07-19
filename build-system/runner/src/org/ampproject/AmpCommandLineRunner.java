@@ -49,7 +49,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   /**
    * List of string suffixes to eliminate from the AST.
    */
-  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
+  ImmutableMap<String, ImmutableSet<String>> suffixTypes = ImmutableMap.of(
       "module$src$log.dev", ImmutableSet.of(
           "assert", "fine", "assertElement", "assertString",
           "assertNumber", "assertBoolean"),

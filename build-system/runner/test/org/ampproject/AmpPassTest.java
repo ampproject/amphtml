@@ -2,7 +2,7 @@
 package org.ampproject;
 
 
-import java.util.Set;
+import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -18,7 +18,7 @@ import com.google.javascript.rhino.Node;
  */
 public class AmpPassTest extends Es6CompilerTestCase {
 
-  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
+  Map<String, ImmutableSet<String>> suffixTypes = ImmutableMap.of(
       "module$src$log.dev",
           ImmutableSet.of("assert", "fine", "assertElement", "assertString", "assertNumber"),
       "module$src$log.user", ImmutableSet.of("fine"));
