@@ -169,6 +169,11 @@ amp-story-page {
   right: 0 !important;
   top: 0 !important;
   transition: none !important;
+  z-index: 0 !important;
+}
+
+amp-story-page[active] {
+  z-index: 1 !important;
 }
 
 .i-amphtml-story-fallback amp-story-page {
