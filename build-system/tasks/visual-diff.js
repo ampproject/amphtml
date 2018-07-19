@@ -439,7 +439,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
         webpage.loading_incomplete_css, webpage.loading_complete_css);
     await percy.snapshot(name, page, SNAPSHOT_OPTIONS);
     await clearExperiments(page);
-    log('travis', colors.green('●'));
+    log('travis', colors.cyan('●'));
   }
   log('travis', '\n');
 }
