@@ -27,7 +27,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 
@@ -300,14 +299,12 @@ export class AmpList extends AMP.BaseElement {
   updateBindingsForElements_(elements) {
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
-    if (binding === 'no' ||
-        isExperimentOn(this.win, 'amp-list-binding-no')) {
+    if (binding === 'no') {
       return Promise.resolve(elements);
     }
     // "refresh": Do _not_ block on retrieval of the Bind service before the
     // first mutation (AMP.setState).
-    if (binding === 'refresh' ||
-        isExperimentOn(this.win, 'amp-list-binding-refresh')) {
+    if (binding === 'refresh') {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return this.updateBindingsWith_(this.bind_, elements);
       } else {
