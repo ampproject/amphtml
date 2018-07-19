@@ -16,7 +16,7 @@
 
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
-import {RequestHandler, expandConfigRequest} from '../requests';
+import {RequestHandler} from '../requests';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -420,32 +420,6 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
         expect(spy).to.be.calledWith('testFinalUrl');
       });
-    });
-  });
-
-  //TODO: Move the expansion related tests here.
-
-  it('expandConfigRequest function', () => {
-    let config = {
-      'requests': {
-        'foo': 'test',
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'foobar': {},
-      },
-    };
-    config = expandConfigRequest(config);
-    expect(config).to.jsonEqual({
-      'requests': {
-        'foo': {
-          'baseUrl': 'test',
-        },
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'foobar': {},
-      },
     });
   });
 
