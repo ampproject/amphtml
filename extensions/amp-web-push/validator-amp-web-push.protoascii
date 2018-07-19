@@ -39,7 +39,7 @@ tags: {  # <amp-web-push>
   attrs: {
     name: "id"
     mandatory: true
-    value_regex: "amp-web-push"
+    value: "amp-web-push"
   }
   attrs: {
     name: "permission-dialog-url"
@@ -70,7 +70,9 @@ tags: {  # <amp-web-push-widget>
   attrs: {
     name: "visibility"
     mandatory: true
-    value_regex: "blocked|subscribed|unsubscribed"
+    value: "blocked"
+    value: "subscribed"
+    value: "unsubscribed"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-web-push"
