@@ -15,6 +15,7 @@
  */
 import {createCustomEvent} from '../../../src/event-helper';
 import {escapeCssSelectorIdent} from '../../../src/dom';
+import {hasOwn} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -100,7 +101,7 @@ const LOG_ID = 'GWD';
  */
 function getCounter(receiver, counterName) {
   if (receiver[GOTO_COUNTER_PROP] &&
-      receiver[GOTO_COUNTER_PROP].hasOwnProperty(counterName)) {
+      hasOwn(receiver[GOTO_COUNTER_PROP], counterName)) {
     return receiver[GOTO_COUNTER_PROP][counterName];
   }
   return 0;
@@ -118,7 +119,7 @@ function setCounter(receiver, counterName, counterValue) {
   if (!receiver[GOTO_COUNTER_PROP]) {
     receiver[GOTO_COUNTER_PROP] = {};
   }
-  if (!receiver[GOTO_COUNTER_PROP].hasOwnProperty(counterName)) {
+  if (!hasOwn(receiver[GOTO_COUNTER_PROP], counterName)) {
     receiver[GOTO_COUNTER_PROP][counterName] = 0;
   }
   receiver[GOTO_COUNTER_PROP][counterName] = counterValue;
