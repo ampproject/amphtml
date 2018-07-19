@@ -549,6 +549,19 @@ export function rethrowAsync(var_args) {
 
 
 /**
+ * Rethrows the error immediately. Required because async errors thrown during
+ * tests leak to subsequent tests. DO NOT USE IN RUNTIME CODE.
+ * @visibleForTesting
+ * @param {...*} var_args
+ */
+export function rethrowAsyncForTests(var_args) {
+  const error = createErrorVargs.apply(null, arguments);
+  self.reportError(error);
+  throw error;
+}
+
+
+/**
  * Cache for logs. We do not use a Service since the service module depends
  * on Log and closure literally can't even.
  * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
