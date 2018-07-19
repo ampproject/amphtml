@@ -885,70 +885,96 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
-    this.storeService_.dispatch(Action.CHANGE_PAGE, {
-      id: targetPageId,
-      index: pageIndex,
-    });
-
-    this.handlePreviewAttributes_(targetPage);
-
-    this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
-
-    if (targetPage.isAd()) {
-      this.storeService_.dispatch(Action.TOGGLE_AD, true);
-      setAttributeInMutate(this, Attributes.AD_SHOWING);
-    } else {
-      this.storeService_.dispatch(Action.TOGGLE_AD, false);
-      removeAttributeInMutate(this, Attributes.AD_SHOWING);
-      // TODO(alanorozco): decouple this using NavigationState
-      this.systemLayer_.setActivePageId(targetPageId);
-    }
-
-    // TODO(alanorozco): check if autoplay
-    this.navigationState_.updateActivePage(
-        pageIndex,
-        this.getPageCount(),
-        targetPage.element.id,
-        targetPage.getNextPageId() === null /* isFinalPage */
-    );
-
     const oldPage = this.activePage_;
-
     this.activePage_ = targetPage;
 
-    this.systemLayer_.resetDeveloperLogs();
-    this.systemLayer_.setDeveloperLogContextString(this.activePage_.element.id);
+    // Each step will run in a requestAnimationFrame, and wait for the next
+    // frame before executing the following step.
+    // First step contains the bare minimum the display and play the next page.
+    const steps = [
+      () => {
+        oldPage && oldPage.element.removeAttribute('active');
+        oldPage && oldPage.stopListeningToNavigationEvents();
 
-    return targetPage.beforeVisible().then(() => {
-      this.triggerActiveEventForPage_();
+        this.systemLayer_.setActivePageId(targetPageId);
 
-      if (oldPage) {
-        oldPage.setState(PageState.NOT_ACTIVE);
+        // Starts playing the page, if the story is not paused.
+        // Note: navigation is prevented when the story is paused, this test
+        // covers the case where the story is rendered paused (eg: consent).
+        if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+          targetPage.setState(PageState.ACTIVE);
+        }
 
-        // Indication that this should be offscreen to left in desktop view.
-        setAttributeInMutate(oldPage, Attributes.VISITED);
-      }
+        this.forceRepaintForSafari_();
+      },
+      () => {
+        if (oldPage) {
+          oldPage.setState(PageState.NOT_ACTIVE);
 
-      // Starts playing the page, if the story is not paused.
-      // Note: navigation is prevented when the story is paused, this test
-      // covers the case where the story is rendered paused (eg: consent).
-      if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
-        targetPage.setState(PageState.ACTIVE);
-      }
+          // Indication that this should be offscreen to left in desktop view.
+          setAttributeInMutate(oldPage, Attributes.VISITED);
+        }
 
-      // If first navigation.
-      if (!oldPage) {
-        this.registerAndPreloadBackgroundAudio_();
-      }
+        this.storeService_.dispatch(Action.CHANGE_PAGE, {
+          id: targetPageId,
+          index: pageIndex,
+        });
 
-      if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-        oldPage && oldPage.muteAllMedia();
-        this.activePage_.unmuteAllMedia();
-      }
+        if (targetPage.isAd()) {
+          this.storeService_.dispatch(Action.TOGGLE_AD, true);
+          setAttributeInMutate(this, Attributes.AD_SHOWING);
+        } else {
+          this.storeService_.dispatch(Action.TOGGLE_AD, false);
+          removeAttributeInMutate(this, Attributes.AD_SHOWING);
+        }
 
-      this.preloadPagesByDistance_();
-      this.forceRepaintForSafari_();
-      this.maybePreloadBookend_();
+        // TODO(alanorozco): check if autoplay
+        this.navigationState_.updateActivePage(
+            pageIndex,
+            this.getPageCount(),
+            targetPage.element.id,
+            targetPage.getNextPageId() === null /* isFinalPage */
+        );
+
+        // If first navigation.
+        if (!oldPage) {
+          this.registerAndPreloadBackgroundAudio_();
+        }
+
+        if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+          oldPage && oldPage.muteAllMedia();
+          this.activePage_.unmuteAllMedia();
+        }
+
+        this.handlePreviewAttributes_(targetPage);
+
+        this.updateBackground_(targetPage.element, /* initial */ !oldPage);
+      },
+      () => {
+        this.preloadPagesByDistance_();
+        this.maybePreloadBookend_();
+
+        this.triggerActiveEventForPage_();
+
+        this.systemLayer_.resetDeveloperLogs();
+        this.systemLayer_
+            .setDeveloperLogContextString(this.activePage_.element.id);
+      },
+    ];
+
+    return new Promise(resolve => {
+      targetPage.beforeVisible().then(() => {
+        // Recursively executes one step per frame.
+        const unqueueStepInRAF = () => {
+          steps.shift().call(this);
+          if (!steps.length) {
+            return resolve();
+          }
+          this.win.requestAnimationFrame(() => unqueueStepInRAF());
+        };
+
+        unqueueStepInRAF();
+      });
     });
   }
 

@@ -193,7 +193,7 @@ amp-story:not([desktop]) >
 }
 
 amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="1"] {
+    amp-story-page:not[active].i-amphtml-layout-container[distance="1"] {
   transform: translateY(100%) !important;
 }
 
