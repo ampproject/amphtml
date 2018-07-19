@@ -405,11 +405,6 @@ const cssEntryPoints = [
     outCss: 'v0.css',
   },
   {
-    path: 'lightbox-ad.css',
-    outJs: 'lightbox-ad.css.js',
-    outCss: 'lightbox-ad.css',
-  },
-  {
     path: 'video-docking.css',
     outJs: 'video-docking.css.js',
     outCss: 'video-docking.css',

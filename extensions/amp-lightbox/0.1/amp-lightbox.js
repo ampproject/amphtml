@@ -28,9 +28,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {installStylesForDoc} from '../../../src/style-installer';
 import {isInFie} from '../../../src/friendly-iframe-embed';
-import {cssText as lightboxAdCss} from '../../../build/lightbox-ad.css.js';
 import {removeElement, tryFocus} from '../../../src/dom';
 import {
   renderCloseButtonHeader,
@@ -317,35 +315,33 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @private */
   maybeRenderCloseButtonHeader_() {
-    if (!this.isInabox_()) {
+    const {element} = this;
+
+    if (element.getAttribute('close-button') == null) {
       return;
     }
 
-    const header = renderCloseButtonHeader(this.element);
+    const header = renderCloseButtonHeader(element);
 
     this.closeButtonHeader_ = header;
 
     listenOnce(header, 'click', () => this.close());
 
-    installStylesForDoc(this.getAmpDoc(), lightboxAdCss, () => {
-      this.element.insertBefore(header, this.container_);
+    element.insertBefore(header, this.container_);
 
-      let headerHeight;
+    let headerHeight;
 
-      this.measureMutateElement(() => {
-        headerHeight = header./*OK*/getBoundingClientRect().height;
-      }, () => {
-        // Done in vsync in order to apply transition.
-        showCloseButtonHeader(header);
+    this.measureMutateElement(() => {
+      headerHeight = header./*OK*/getBoundingClientRect().height;
+    }, () => {
+      // Done in vsync in order to apply transition.
+      showCloseButtonHeader(header);
 
-        setImportantStyles(dev().assertElement(this.container_), {
-          'margin-top': px(headerHeight),
-          'min-height': `calc(100vh - ${px(headerHeight)})`,
-        });
+      setImportantStyles(dev().assertElement(this.container_), {
+        'margin-top': px(headerHeight),
+        'min-height': `calc(100vh - ${px(headerHeight)})`,
       });
-    },
-    /* opt_isRuntimeCss */ false,
-    /* opt_ext */ 'amp-lightbox-ad');
+    });
   }
 
   /**
@@ -428,15 +424,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   isInAd_() {
-    return this.isInabox_() || isInFie(this.element);
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isInabox_() {
-    return getMode(this.win).runtime == 'inabox';
+    return getMode(this.win).runtime == 'inabox' || isInFie(this.element);
   }
 
   /**

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-constants';
 import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {closestBySelector, escapeHtml, removeElement} from './dom';
-import {createCustomEvent, listenOnce, loadPromise} from './event-helper';
+import {closestBySelector, escapeHtml} from './dom';
+import {loadPromise} from './event-helper';
 import {dev, rethrowAsync, user} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
@@ -32,10 +31,6 @@ import {
   setStyle,
   setStyles,
 } from './style';
-import {
-  renderCloseButtonHeader,
-  showCloseButtonHeader,
-} from './full-overlay-frame-helper';
 import {toWin} from './types';
 
 
@@ -525,12 +520,6 @@ export class FriendlyIframeEmbed {
     user().assert(ampAdParent.tagName.toLowerCase() == 'amp-ad',
         'Only <amp-ad> is allowed to enter lightbox mode.');
 
-    const header =
-        renderClickableCloseButtonHeader(
-            this.win, ampAdParent, requestingElement);
-
-    ampAdParent.appendChild(header);
-
     const bodyStyle = {
       'background': 'transparent',
       'position': 'absolute',
@@ -550,10 +539,8 @@ export class FriendlyIframeEmbed {
       'right': 0,
       'bottom': 0,
       'width': '100vw',
-
-      // Set for replacing with vsync values.
-      'top': '',
-      'height': '',
+      'top': 0,
+      'height': '100vh',
     };
 
     return this.measureMutate_({
@@ -564,41 +551,22 @@ export class FriendlyIframeEmbed {
 
         const {top, left, width, height} = rect;
 
-        const headerHeight = this.getHeaderHeight_(header);
-
-        Object.assign(iframeStyle, {
-          'top': px(headerHeight),
-          'height': `calc(100vh - ${px(headerHeight)})`,
-        });
-
         // Offset body by header height to prevent visual jump.
         Object.assign(bodyStyle, {
-          'top': px(top - headerHeight),
+          'top': px(top),
           'left': px(left),
           'width': px(width),
-          'height': px(height - headerHeight),
+          'height': px(height),
         });
       },
       mutate: () => {
-        // !important to prevent abuse e.g. box @ ltwh = 0, 0, 0,0
+        // !important to prevent abuse e.g. box @ ltwh = 0, 0, 0, 0
         setImportantStyles(this.iframe, iframeStyle);
-
-        // Done in vsync in order to apply transition.
-        showCloseButtonHeader(header);
 
         // We need to override runtime-level !important rules
         setImportantStyles(this.getBodyElement(), bodyStyle);
       },
     });
-  }
-
-  /**
-   * Stubbed in tests.
-   * @param {!Element} element
-   * @private
-   */
-  getHeaderHeight_(element) {
-    return element./*OK*/getBoundingClientRect().height;
   }
 
   /**
@@ -631,52 +599,6 @@ export class FriendlyIframeEmbed {
       },
     });
   }
-}
-
-/**
- * @param {!Window} win
- * @param {!Element} ampAdParent
- * @param {!Element} ampLightbox
- * @visibleForTesting
- */
-export function renderClickableCloseButtonHeader(
-  win, ampAdParent, ampLightbox) {
-
-  const el = renderCloseButtonHeader(/* ctx */ ampAdParent);
-
-  annotateAnimationStyle(el, ampLightbox);
-
-  listenOnce(el, 'click', () => {
-    triggerLightboxClose(win, ampLightbox, /* caller */ ampAdParent);
-    removeElement(el);
-  });
-
-  return el;
-}
-
-/**
- * @param {!Element} header
- * @param {!Element} ampLightbox
- */
-function annotateAnimationStyle(header, ampLightbox) {
-  const animation = ampLightbox.getAttribute('animate-in');
-  if (animation) {
-    header.classList.add(`amp-animate-in-${animation}`);
-  }
-}
-
-/**
- * @param {!Window} win
- * @param {!Element} target An amp-lightbox target.
- * @param {!Element} caller Whomever.
- */
-function triggerLightboxClose(win, target, caller) {
-  const event = createCustomEvent(win, 'tap', /* detail */ {});
-  const method = 'close';
-  const args = null;
-  const trust = ActionTrust.HIGH;
-  Services.actionServiceForDoc(target)
-      .execute(target, method, args, caller, caller, event, trust);
 }
 
 /**
