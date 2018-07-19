@@ -246,7 +246,7 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * @param {Array<Element>|undefined} opt_options
+   * @param {?Array<Element>} opt_options
    * @private
    */
   init_(opt_options) {
