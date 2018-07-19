@@ -31,7 +31,7 @@ const INFINITY_RE = /^(infinity|infinite)$/i;
  * @return {boolean}
  */
 export function isVarCss(css, normalize) {
-  return VAR_CSS_RE.test(css) || normalize && NORM_CSS_RE.test(css);
+  return VAR_CSS_RE.test(css) || (normalize && NORM_CSS_RE.test(css));
 }
 
 
