@@ -66,17 +66,6 @@ describes.sandboxed('Extension Location', {}, () => {
       expect(script).to.equal(
           'http://localhost:8000/dist/rtv/123/v0/no-version.js');
     });
-
-    it('should support intermediate bundle (leading underscore) URLs', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, '_bundle', undefined, true);
-      expect(script).to.equal(
-          'http://localhost:8000/dist/rtv/123/v0/_bundle.js');
-    });
   });
 
   describe('get correct entry point source', () => {
