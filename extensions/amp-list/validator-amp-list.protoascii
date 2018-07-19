@@ -54,7 +54,7 @@ tags: {  # <amp-list> with mandatory src attr
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -95,7 +95,7 @@ tags: {  # <amp-list> with mandatory [src] attr
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -129,12 +129,16 @@ tags: {  # <amp-list>
   disallowed_ancestor: "TEMPLATE"
   attrs: { name: "items" }
   attrs: { name: "max-items" }
+  attrs: {
+    name: "reset-on-refresh"
+    value: ""
+  }
   attrs: { name: "single-item" }
   attrs: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin|"

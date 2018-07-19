@@ -39,7 +39,7 @@ tags: {  # <amp-user-notification>
   attrs: {
     name: "data-dismiss-href"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
       allow_empty: false
     }
@@ -47,7 +47,7 @@ tags: {  # <amp-user-notification>
   attrs: {
     name: "data-show-if-href"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
       allow_empty: false
     }
