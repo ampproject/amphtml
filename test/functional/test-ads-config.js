@@ -15,7 +15,7 @@
  */
 
 import {adConfig} from '../../ads/_config';
-import {hasOwn} from '../../src/utils/object';
+import {hasOwnProperty} from '../../src/utils/object';
 
 describe('test-ads-config', () => {
 
@@ -37,7 +37,7 @@ describe('test-ads-config', () => {
 
   it('preconnect should have no duplicates with prefetch', () => {
     for (const adNetwork in adConfig) {
-      if (!hasOwn(adConfig, adNetwork)) {
+      if (!hasOwnProperty(adConfig, adNetwork)) {
         continue;
       }
 
@@ -51,7 +51,7 @@ describe('test-ads-config', () => {
 
   it('should use HTTPS URLs', () => {
     for (const adNetwork in adConfig) {
-      if (!hasOwn(adConfig, adNetwork)) {
+      if (!hasOwnProperty(adConfig, adNetwork)) {
         continue;
       }
 

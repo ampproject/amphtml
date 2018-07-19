@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwnProperty} from '../../../src/utils/object';
 import {isObject} from '../../../src/types';
 
 const ATTR_PREFIX = 'amp-x-';
@@ -37,7 +37,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
   // Variant can be overridden from URL fragment.
   const viewer = Services.viewerForDoc(ampdoc);
   const override = viewer.getParam(ATTR_PREFIX + experimentName);
-  if (override && hasOwn(config['variants'], override)) {
+  if (override && hasOwnProperty(config['variants'], override)) {
     return Promise.resolve(/** @type {?string} */ (override));
   }
 
@@ -94,7 +94,7 @@ function validateConfig(config) {
   }
   let totalPercentage = 0;
   for (const variantName in variants) {
-    if (hasOwn(variants, variantName)) {
+    if (hasOwnProperty(variants, variantName)) {
       assertName(variantName);
       const percentage = variants[variantName];
       user().assert(

@@ -26,7 +26,7 @@ import {computedStyle, setImportantStyles} from '../../../src/style';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwnProperty} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {toArray} from '../../../src/types';
@@ -129,7 +129,7 @@ class AmpLightbox extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.user().assert(
-        hasOwn(AnimationPresets, this.animationPreset_),
+        hasOwnProperty(AnimationPresets, this.animationPreset_),
         'Invalid `animate-in` value %s',
         this.animationPreset_);
 

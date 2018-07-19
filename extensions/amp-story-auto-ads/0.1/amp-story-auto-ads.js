@@ -21,7 +21,7 @@ import {StateChangeEventDef, StateChangeType} from '../../amp-story/1.0/navigati
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwnProperty, map} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
@@ -518,7 +518,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.idOfAdShowing_ = adIndex;
     }
 
-    if (!hasOwn(this.uniquePageIds_, pageId)) {
+    if (!hasOwnProperty(this.uniquePageIds_, pageId)) {
       this.uniquePagesCount_++;
       this.uniquePageIds_[pageId] = true;
     }

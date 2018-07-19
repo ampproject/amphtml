@@ -17,7 +17,7 @@ import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorNth, scopedQuerySelector} from '../../../src/dom';
-import {hasOwn, map} from '../../../src/utils/object';
+import {hasOwnProperty, map} from '../../../src/utils/object';
 import {scale, setImportantStyles} from '../../../src/style';
 
 
@@ -139,7 +139,7 @@ export class ProgressBar {
    * @private
    */
   assertVaildSegmentId_(segmentId) {
-    dev().assert(hasOwn(this.segmentIdMap_, segmentId),
+    dev().assert(hasOwnProperty(this.segmentIdMap_, segmentId),
         'Invalid segment-id passed to progress-bar');
   }
 

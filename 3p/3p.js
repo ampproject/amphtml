@@ -23,7 +23,7 @@
 
 
 import {dev, user} from '../src/log';
-import {hasOwn, map} from '../src/utils/object';
+import {hasOwnProperty, map} from '../src/utils/object';
 import {isArray} from '../src/types';
 import {rethrowAsync} from '../src/log';
 
@@ -280,7 +280,7 @@ function validateAllowedFields(data, allowedFields) {
   };
 
   for (const field in data) {
-    if (!hasOwn(data, field) || field in defaultAvailableFields) {
+    if (!hasOwnProperty(data, field) || field in defaultAvailableFields) {
       continue;
     }
     if (allowedFields.indexOf(field) < 0) {

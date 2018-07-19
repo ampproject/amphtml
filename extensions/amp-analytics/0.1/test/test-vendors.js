@@ -16,7 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../iframe-transport-vendors';
-import {hasOwn} from '../../../../src/utils/object';
+import {hasOwnProperty} from '../../../../src/utils/object';
 import {isSecureUrlDeprecated} from '../../../../src/url';
 
 describe('analytics vendors', () => {
@@ -37,8 +37,8 @@ describe('analytics vendors', () => {
       ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG)', () => {
     for (const vendor in ANALYTICS_CONFIG) {
       const vendorEntry = ANALYTICS_CONFIG[vendor];
-      if (hasOwn(vendorEntry, 'transport') &&
-          hasOwn(vendorEntry.transport, 'iframe')) {
+      if (hasOwnProperty(vendorEntry, 'transport') &&
+          hasOwnProperty(vendorEntry.transport, 'iframe')) {
         const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
         expect(vendorITEntry).to.exist;
       }

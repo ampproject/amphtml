@@ -19,7 +19,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {dev, user} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {hasOwn, map} from '../../../src/utils/object';
+import {hasOwnProperty, map} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isObject} from '../../../src/types';
@@ -336,7 +336,7 @@ export class ConsentPolicyInstance {
   consentStateChangeHandler(consentId, state) {
     // TODO: Keeping an array can have performance issue, change to using a map
     // if necessary.
-    if (!hasOwn(this.itemToConsentState_, consentId)) {
+    if (!hasOwnProperty(this.itemToConsentState_, consentId)) {
       dev().error(TAG, `cannot find ${consentId} in policy state`);
       return;
     }

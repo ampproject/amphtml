@@ -18,7 +18,7 @@ import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwnProperty} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
@@ -307,7 +307,7 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
     user().assert(opt_predefinedConfig || property != 'iframePing',
         'iframePing config is only available to vendor config.');
     // Only deal with own properties.
-    if (hasOwn(from, property)) {
+    if (hasOwnProperty(from, property)) {
       if (isArray(from[property])) {
         if (!isArray(to[property])) {
           to[property] = [];
@@ -338,7 +338,7 @@ export function expandConfigRequest(config) {
     return config;
   }
   for (const k in config['requests']) {
-    if (hasOwn(config['requests'], k)) {
+    if (hasOwnProperty(config['requests'], k)) {
       config['requests'][k] = expandRequestStr(config['requests'][k]);
     }
   }

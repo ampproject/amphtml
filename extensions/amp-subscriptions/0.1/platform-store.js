@@ -18,7 +18,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwnProperty} from '../../../src/utils/object';
 
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
@@ -335,7 +335,7 @@ export class PlatformStore {
   getAvailablePlatformsEntitlements_() {
     const entitlements = [];
     for (const platform in this.entitlements_) {
-      if (hasOwn(this.entitlements_, platform)) {
+      if (hasOwnProperty(this.entitlements_, platform)) {
         entitlements.push(this.entitlements_[platform]);
       }
     }

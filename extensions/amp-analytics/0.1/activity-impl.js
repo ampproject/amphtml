@@ -20,7 +20,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwnProperty} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 import {registerServiceBuilderForDoc} from '../../../src/service';
 
@@ -329,7 +329,7 @@ export class Activity {
    * @return {number}
    */
   getIncrementalEngagedTime(name, reset = true) {
-    if (!hasOwn(this.totalEngagedTimeByTrigger_, name)) {
+    if (!hasOwnProperty(this.totalEngagedTimeByTrigger_, name)) {
       if (reset) {
         this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
       }

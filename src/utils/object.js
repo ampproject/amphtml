@@ -17,7 +17,7 @@
 import {isObject} from '../types';
 
 /* @const */
-const hasOwn_ = Object.prototype.hasOwnProperty;
+const hasOwnProperty_ = Object.prototype.hasOwnProperty;
 
 /**
  * Returns a map-like object.
@@ -60,8 +60,8 @@ export function dict(opt_initial) {
  * @return {boolean}
  * @template T
  */
-export function hasOwn(obj, key) {
-  return hasOwn_.call(obj, key);
+export function hasOwnProperty(obj, key) {
+  return hasOwnProperty_.call(obj, key);
 }
 
 /**
@@ -73,7 +73,7 @@ export function hasOwn(obj, key) {
  * @return {*}
  */
 export function ownProperty(obj, key) {
-  if (hasOwn(obj, key)) {
+  if (hasOwnProperty(obj, key)) {
     return obj[key];
   } else {
     return undefined;
@@ -117,7 +117,7 @@ export function deepMerge(target, source, depth = 10) {
       const newValue = s[key];
       // Perform a deep merge IFF both target and source have the same key
       // whose corresponding values are objects.
-      if (hasOwn(t, key)) {
+      if (hasOwnProperty(t, key)) {
         const oldValue = t[key];
         if (isObject(newValue) && isObject(oldValue)) {
           queue.push({t: oldValue, s: newValue, d: d + 1});

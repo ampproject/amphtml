@@ -19,7 +19,7 @@ import {CSS} from '../../../build/amp-ad-0.1.css';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwnProperty} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 
 
@@ -58,8 +58,8 @@ export class AmpAd extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
     return consent.then(() => {
       const isCustom = type === 'custom';
-      user().assert(isCustom || hasOwn(adConfig, type)
-          || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
+      user().assert(isCustom || hasOwnProperty(adConfig, type)
+          || hasOwnProperty(a4aRegistry, type), `Unknown ad type "${type}"`);
 
       // Check for the custom ad type (no ad network, self-service)
       if (isCustom) {

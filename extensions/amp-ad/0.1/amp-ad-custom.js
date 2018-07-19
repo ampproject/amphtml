@@ -24,7 +24,7 @@ import {
   childElementByTag,
   removeChildren,
 } from '../../../src/dom';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwnProperty} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -99,7 +99,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
-        templateData = hasOwn(data, this.slot_) ? data[this.slot_] :
+        templateData = hasOwnProperty(data, this.slot_) ? data[this.slot_] :
           null;
       }
 

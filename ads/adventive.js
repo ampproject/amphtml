@@ -15,7 +15,7 @@
  */
 
 import {addParamsToUrl} from '../src/url.js';
-import {dict, hasOwn} from '../src/utils/object';
+import {dict, hasOwnProperty} from '../src/utils/object';
 import {endsWith, startsWith} from '../src/string';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 
@@ -24,7 +24,7 @@ import {loadScript, validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function adventive(global, data) {
-  if (hasOwn(data, 'isDev')) {
+  if (hasOwnProperty(data, 'isDev')) {
     adventive_(global, data);
   } else {
     validateData(data, ['src'], ['isDev']);
@@ -73,9 +73,9 @@ const adv = {
 function adventive_(global, data) {
   validateData(data, requiredData, optionalData);
 
-  if (!hasOwn(global, 'adventive')) { global.adventive = adv; }
+  if (!hasOwnProperty(global, 'adventive')) { global.adventive = adv; }
   const ns = global.adventive;
-  if (!hasOwn(ns, 'context')) { ns.context = global.context; }
+  if (!hasOwnProperty(ns, 'context')) { ns.context = global.context; }
 
   if (!Object.isFrozen(ns.mode)) {
     updateMode(ns.mode, global.context.location.hostname);
@@ -83,8 +83,9 @@ function adventive_(global, data) {
 
   const cb = callback.bind(this, data.pid, ns),
       url = getUrl(global.context, data, ns);
-  url ?
-    (hasOwn(data, 'async') ? loadScript : writeScript)(global, url, cb) : cb();
+  url ? (
+    hasOwnProperty(data, 'async') ? loadScript : writeScript)(
+      global, url, cb) : cb();
 }
 
 /**
@@ -117,7 +118,7 @@ function callback(id, ns) { ns.addInstance(id); }
  */
 function getUrl(context, data, ns) {
   const {mode} = ns,
-      isDev = hasOwn(data, 'isDev'),
+      isDev = hasOwnProperty(data, 'isDev'),
       sld_ = sld[!mode.dev],
       thld_ = thld[isDev && !mode.live],
       search = reduceSearch(ns, data.pid, data.click, context.referrer),
@@ -139,7 +140,7 @@ function getUrl(context, data, ns) {
  *    representation of the url search query.
  */
 function reduceSearch(ns, placementId, click, referrer) {
-  const isRecipeLoaded = hasOwn(ns.args, 'placementId'),
+  const isRecipeLoaded = hasOwnProperty(ns.args, 'placementId'),
       isRecipeStale = !isRecipeLoaded ? true :
         (Date.now() - ns.args[placementId].requestTime) > (60 * cacheTime),
       needsRequest = !isRecipeLoaded || isRecipeStale;
