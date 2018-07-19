@@ -79,7 +79,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
       rejectedPromiseEvent.reason = null;
       win.eventListeners.fire(rejectedPromiseEvent);
       expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
-    }
+    });
   });
 
   it('should allow string errors', () => {
