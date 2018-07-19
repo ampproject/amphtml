@@ -208,7 +208,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   isLoopingEligible() {
-    return this.noOfSlides_ > 2;
+    return this.noOfSlides_ > 1;
   }
 
   /** @override */
