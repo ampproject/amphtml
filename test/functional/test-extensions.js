@@ -751,7 +751,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(loadSpy).to.be.calledOnce;
 
       // Resolve.
-      extensions.registerExtension('amp-test', () => {});
+      extensions.registerExtension('amp-test', () => {}, {});
       return promise1.then(() => {
         const promise3 = extensions.installExtensionForDoc(ampdoc, 'amp-test');
         expect(promise3).to.equal(promise1);
