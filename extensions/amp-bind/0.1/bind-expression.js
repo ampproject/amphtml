@@ -24,12 +24,6 @@ import {parser} from './bind-expr-impl';
 const TAG = 'amp-bind';
 
 /**
- * Possible types of a Bind expression evaluation.
- * @typedef {(null|boolean|string|number|Array|Object)}
- */
-export let BindExpressionResultDef;
-
-/**
  * Maximum number of nodes in an expression AST.
  * @const @private {number}
  */

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 import {Services} from '../services';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
@@ -131,6 +130,7 @@ class AmpWorker {
    * @param {Window=} opt_localWin
    * @return {!Promise}
    * @private
+   * @restricted
    */
   sendMessage_(method, args, opt_localWin) {
     return this.fetchPromise_.then(() => {
@@ -140,8 +140,8 @@ class AmpWorker {
 
         const scope = this.idForWindow_(opt_localWin || this.win_);
 
-        /** @type {ToWorkerMessageDef} */
-        const message = {method, args, scope, id};
+        const message =
+          /** @type {ToWorkerMessageDef} */ ({method, args, scope, id});
         this.worker_./*OK*/postMessage(message);
       });
     });
@@ -155,7 +155,7 @@ class AmpWorker {
    */
   receiveMessage_(event) {
     const {method, returnValue, id} =
-    /** @type {FromWorkerMessageDef} */ (event.data);
+      /** @type {FromWorkerMessageDef} */ (event.data);
 
     const message = this.messages_[id];
     if (!message) {
