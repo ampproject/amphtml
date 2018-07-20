@@ -16,7 +16,7 @@
 
 import {AstNodeType} from './bind-expr-defines';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwnProperty, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {parser} from './bind-expr-impl';
@@ -84,7 +84,7 @@ function generateFunctionWhitelist() {
   function values(object) {
     const v = [];
     for (const key in object) {
-      if (hasOwn(object, key)) {
+      if (hasOwnProperty(object, key)) {
         v.push(object[key]);
       }
     }

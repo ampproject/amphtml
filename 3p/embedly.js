@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../src/utils/object';
+import {hasOwnProperty} from '../src/utils/object';
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';
 
@@ -85,7 +85,7 @@ export function embedly(global, data) {
   // when these are provided by component.
   for (const key in CardOptions) {
     if (
-      hasOwn(CardOptions, key) &&
+      hasOwnProperty(CardOptions, key) &&
       typeof data[key] !== 'undefined'
     ) {
       card.setAttribute(`data-${CardOptions[key]}`, data[key]);

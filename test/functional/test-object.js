@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-import * as object from '../../src/utils/object';
+import {deepMerge, hasOwnProperty, map, ownProperty} from '../../src/utils/object';
 
 describe('Object', () => {
-  it('hasOwn', () => {
-    expect(object.hasOwn(object.map(), 'a')).to.be.false;
-    expect(object.hasOwn(object.map({'a': 'b'}), 'b')).to.be.false;
-    expect(object.hasOwn(object.map({'a': {}}), 'a')).to.be.true;
+  it('hasOwnProperty', () => {
+    expect(hasOwnProperty(map(), 'a')).to.be.false;
+    expect(hasOwnProperty(map({'a': 'b'}), 'b')).to.be.false;
+    expect(hasOwnProperty(map({'a': {}}), 'a')).to.be.true;
   });
 
   it('ownProperty', () => {
-    expect(object.ownProperty({}, '__proto__')).to.be.undefined;
-    expect(object.ownProperty({}, 'constructor')).to.be.undefined;
-    expect(object.ownProperty({foo: 'bar'}, 'foo')).to.equal('bar');
+    expect(ownProperty({}, '__proto__')).to.be.undefined;
+    expect(ownProperty({}, 'constructor')).to.be.undefined;
+    expect(ownProperty({foo: 'bar'}, 'foo')).to.equal('bar');
   });
 
   describe('map', () => {
     it('should make map like objects', () => {
-      expect(object.map().prototype).to.be.undefined;
-      expect(object.map().__proto__).to.be.undefined;
-      expect(object.map().toString).to.be.undefined;
+      expect(map().prototype).to.be.undefined;
+      expect(map().__proto__).to.be.undefined;
+      expect(map().toString).to.be.undefined;
     });
 
     it('should make map like objects from objects', () => {
-      expect(object.map({}).prototype).to.be.undefined;
-      expect(object.map({}).__proto__).to.be.undefined;
-      expect(object.map({}).toString).to.be.undefined;
-      expect(object.map({foo: 'bar'}).foo).to.equal('bar');
+      expect(map({}).prototype).to.be.undefined;
+      expect(map({}).__proto__).to.be.undefined;
+      expect(map({}).toString).to.be.undefined;
+      expect(map({foo: 'bar'}).foo).to.equal('bar');
       const obj = {foo: 'bar', test: 1};
-      expect(object.map(obj).test).to.equal(1);
-      expect(object.map(obj)).to.not.equal(obj);
+      expect(map(obj).test).to.equal(1);
+      expect(map(obj)).to.not.equal(obj);
     });
   });
 
@@ -68,7 +68,7 @@ describe('Object', () => {
           },
         },
       };
-      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+      expect(deepMerge(destObject, fromObject)).to.deep.equal({
         a: 'hello world',
         b: 'hello world',
         c: {
@@ -93,7 +93,7 @@ describe('Object', () => {
           c: ['h', 'i'],
         },
       };
-      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+      expect(deepMerge(destObject, fromObject)).to.deep.equal({
         a: [1,2,3,4,5],
         b: {
           c: ['h', 'i'],
@@ -122,7 +122,7 @@ describe('Object', () => {
           },
         },
       };
-      expect(object.deepMerge(destObject, fromObject, 1)).to.deep.equal({
+      expect(deepMerge(destObject, fromObject, 1)).to.deep.equal({
         a: {
           b: {
             c: {
@@ -139,7 +139,7 @@ describe('Object', () => {
       destObject.a = destObject;
       const fromObject = {};
       fromObject.a = {};
-      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+      expect(deepMerge(destObject, fromObject)).to.deep.equal({
         a: destObject,
       });
     });
@@ -149,7 +149,7 @@ describe('Object', () => {
       destObject.a = {};
       const fromObject = {};
       fromObject.a = fromObject;
-      expect(() => object.deepMerge(destObject, fromObject)).to.throw(
+      expect(() => deepMerge(destObject, fromObject)).to.throw(
           /Source object has a circular reference./);
     });
 
@@ -174,7 +174,7 @@ describe('Object', () => {
         },
         f: undefined,
       };
-      expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
+      expect(deepMerge(destObject, fromObject)).to.deep.equal({
         a: {
           i: 'j',
         },
@@ -192,7 +192,7 @@ describe('Object', () => {
           throw new Error('deep merge tried to merge object with itself');
         },
       };
-      expect(object.deepMerge(destObject, destObject)).to.not.throw;
+      expect(deepMerge(destObject, destObject)).to.not.throw;
     });
   });
 });

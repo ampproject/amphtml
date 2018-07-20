@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwnProperty} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -185,11 +185,11 @@ export class SafeframeHostApi {
         this.baseInstance_.element.getAttribute(
             'data-safeframe-config')) || {});
     /** @private {boolean} */
-    this.expandByOverlay_ = hasOwn(sfConfig, 'expandByOverlay') ?
+    this.expandByOverlay_ = hasOwnProperty(sfConfig, 'expandByOverlay') ?
       sfConfig['expandByOverlay'] : true;
 
     /** @private {boolean} */
-    this.expandByPush_ = hasOwn(sfConfig, 'expandByPush') ?
+    this.expandByPush_ = hasOwnProperty(sfConfig, 'expandByPush') ?
       sfConfig['expandByPush'] : true;
 
     /** @private {?Function} */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../src/utils/object';
+import {hasOwnProperty} from '../src/utils/object';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -51,7 +51,7 @@ function parseParams(data) {
     const params = JSON.parse(data);
     let queryParams = '';
     for (const p in params) {
-      if (hasOwn(params, p)) {
+      if (hasOwnProperty(params, p)) {
         queryParams += '&' + p + '=' + encodeURIComponent(params[p]);
       }
     }

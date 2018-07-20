@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../src/utils/object';
+import {hasOwnProperty} from '../src/utils/object';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -59,10 +59,10 @@ export function adplugg(global,data) {
         function(event) {
           // Create the opt_data object.
           const optData = {};
-          if (hasOwn(event, 'width')) {
+          if (hasOwnProperty(event, 'width')) {
             optData.width = event.width;
           }
-          if (hasOwn(event, 'height')) {
+          if (hasOwnProperty(event, 'height')) {
             optData.height = event.height;
           }
           global.context.renderStart(optData);

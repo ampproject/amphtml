@@ -33,7 +33,7 @@ import {
 } from './requests';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwnProperty, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
@@ -249,7 +249,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
-      if (hasOwn(this.config_['triggers'], k)) {
+      if (hasOwnProperty(this.config_['triggers'], k)) {
         const trigger = this.config_['triggers'][k];
         const expansionOptions = this.expansionOptions_(
             {}, trigger, undefined, true);
@@ -449,7 +449,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.config_['requests']) {
       for (const k in this.config_['requests']) {
-        if (hasOwn(this.config_['requests'], k)) {
+        if (hasOwnProperty(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           if (!request['baseUrl']) {
             this.user().error(TAG, 'request must have a baseUrl');
@@ -471,7 +471,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
       const requests = {};
       for (const k in this.config_['requests']) {
-        if (hasOwn(this.config_['requests'], k)) {
+        if (hasOwnProperty(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
               this.element, request, this.preconnect,

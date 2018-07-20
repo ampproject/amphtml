@@ -22,7 +22,7 @@
  */
 
 import {getCookie, setCookie} from './cookies';
-import {hasOwn} from './utils/object';
+import {hasOwnProperty} from './utils/object';
 import {parseQueryString} from './url';
 
 /** @const {string} */
@@ -298,10 +298,10 @@ export function randomlySelectUnsetExperiments(win, experiments) {
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
     // has already been populated by some other property.
-    if (!hasOwn(experiments, experimentName)) {
+    if (!hasOwnProperty(experiments, experimentName)) {
       continue;
     }
-    if (hasOwn(win.experimentBranches, experimentName)) {
+    if (hasOwnProperty(win.experimentBranches, experimentName)) {
       selectedExperiments[experimentName] =
           win.experimentBranches[experimentName];
       continue;

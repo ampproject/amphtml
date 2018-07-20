@@ -17,7 +17,7 @@
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+import {hasOwnProperty} from '../../../../src/utils/object';
 
 
 describes.realWin('amp-experiment', {
@@ -68,7 +68,7 @@ describes.realWin('amp-experiment', {
 
   function expectBodyHasAttributes(attributes) {
     for (const attributeName in attributes) {
-      if (hasOwn(attributes, attributeName)) {
+      if (hasOwnProperty(attributes, attributeName)) {
         expect(doc.body.getAttribute(attributeName))
             .to.equal(attributes[attributeName]);
       }

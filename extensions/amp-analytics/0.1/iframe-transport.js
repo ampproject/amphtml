@@ -18,7 +18,7 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwnProperty} from '../../../src/utils/object';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {setStyles} from '../../../src/style';
 import {urls} from '../../../src/config';
@@ -227,7 +227,7 @@ export class IframeTransport {
    * @visibleForTesting
    */
   static hasCrossDomainIframe(type) {
-    return hasOwn(IframeTransport.crossDomainIframes_, type);
+    return hasOwnProperty(IframeTransport.crossDomainIframes_, type);
   }
 
   /**

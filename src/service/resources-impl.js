@@ -26,7 +26,7 @@ import {areMarginsChanged} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
 import {dev} from '../log';
-import {dict, hasOwn} from '../utils/object';
+import {dict, hasOwnProperty} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
@@ -1791,7 +1791,7 @@ export class Resources {
    */
   calcLayoutScore_(currentScore, layout, depth, cache) {
     const id = layout.getId();
-    if (hasOwn(cache, id)) {
+    if (hasOwnProperty(cache, id)) {
       return dev().assertNumber(cache[id]);
     }
 

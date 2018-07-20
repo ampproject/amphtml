@@ -24,7 +24,7 @@ module.exports = {
           context.report({
             node,
             message: 'Do not use hasOwnProperty directly. ' +
-                'Use hasOwn from src/utils/object.js instead.',
+                'Use hasOwnProperty from src/utils/object.js instead.',
           });
         }
       },

@@ -22,7 +22,7 @@ import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
-import {hasOwn, map} from '../utils/object';
+import {hasOwnProperty, map} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -282,7 +282,7 @@ export class ActionService {
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
-              (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
+              (role && hasOwnProperty(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
           if (!event.defaultPrevented && isTapEventRole) {
             event.preventDefault();
             this.trigger(element, name, event, ActionTrust.HIGH);
