@@ -36,7 +36,7 @@ export let BindExpressionResultDef;
 const MAX_AST_SIZE = 100;
 
 /** @const @private {string} */
-const BUILT_IN_FUNCTIONS = 'built-in-functions';
+const CUSTOM_FUNCTIONS = 'custom-functions';
 
 /**
  * Map of object type to function name to whitelisted function.
@@ -52,12 +52,12 @@ function generateFunctionWhitelist() {
   /**
    * Deprecated. Static, not-in-place variant of Array#splice.
    * @param {!Array} array
-   * @param {number=} start
-   * @param {number=} deleteCount
-   * @param {...?} items
+   * @param {number=} unusedStart
+   * @param {number=} unusedDeleteCount
+   * @param {...?} unusedItems
    * @return {!Array}
    */
-  function splice(array, start, deleteCount, items) { // eslint-disable-line no-unused-vars
+  function splice(array, unusedStart, unusedDeleteCount, unusedItems) {
     if (!isArray(array)) {
       throw new Error(`splice: ${array} is not an array.`);
     }
@@ -72,13 +72,13 @@ function generateFunctionWhitelist() {
    */
   function instanceSplice() {
     /**
-     * @param {number=} start
-     * @param {number=} deleteCount
-     * @param {...?} items
+     * @param {number=} unusedStart
+     * @param {number=} unusedDeleteCount
+     * @param {...?} unusedItems
      * @return {!Array}
      * @this {!Array}
      */
-    return function splice(start, deleteCount, items) { // eslint-disable-line no-unused-vars
+    return function splice(unusedStart, unusedDeleteCount, unusedItems) {
       const copy = Array.prototype.slice.call(this);
       Array.prototype.splice.apply(copy, arguments);
       return copy;
@@ -134,7 +134,7 @@ function generateFunctionWhitelist() {
   // Prototype functions.
   const whitelist = dict({
     '[object Array]': {
-      // TODO(choumx): Need polyfill for Array#find and Array#findIndex.
+      // TODO(choumx): Polyfill Array#find and Array#findIndex for IE.
       'concat': Array.prototype.concat,
       'filter': Array.prototype.filter,
       'indexOf': Array.prototype.indexOf,
@@ -170,7 +170,7 @@ function generateFunctionWhitelist() {
   });
 
   // Un-namespaced static functions.
-  whitelist[BUILT_IN_FUNCTIONS] = {
+  whitelist[CUSTOM_FUNCTIONS] = {
     'encodeURI': encodeURI,
     'encodeURIComponent': encodeURIComponent,
     'abs': Math.abs,
@@ -204,12 +204,12 @@ function generateFunctionWhitelist() {
     });
   });
 
-  // Custom functions (non-js-built-ins) must be added manually as their names
+  // Custom functions (non-JS-built-ins) must be added manually as their names
   // will be minified at compile time.
-  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = splice; // Deprecated.
-  out[BUILT_IN_FUNCTIONS]['sort'] = sort; // Deprecated.
-  out[BUILT_IN_FUNCTIONS]['splice'] = splice; // Deprecated.
-  out[BUILT_IN_FUNCTIONS]['values'] =
+  out[CUSTOM_FUNCTIONS]['copyAndSplice'] = splice; // Deprecated.
+  out[CUSTOM_FUNCTIONS]['sort'] = sort; // Deprecated.
+  out[CUSTOM_FUNCTIONS]['splice'] = splice; // Deprecated.
+  out[CUSTOM_FUNCTIONS]['values'] =
       (typeof Object.values == 'function') ? Object.values : values;
 
   return out;
@@ -271,7 +271,7 @@ export class BindExpression {
     if (this.isMacroInvocationNode_(ast)) {
       const macro = this.macros_[String(ast.value)];
       let nodes = macro.getExpressionSize();
-      this.getInvocationArgNodes_(ast).forEach(arg => {
+      this.argumentsForInvocation_(ast).forEach(arg => {
         if (arg) {
           nodes += this.numberOfNodesInAst_(arg) - 1;
         }
@@ -306,23 +306,29 @@ export class BindExpression {
   }
 
   /**
-   * Gets the array of nodes for the arguments of the provided INVOCATION
-   * node, without the wrapping ARGS node and ARRAY node.
+   * Given an INVOCATION node, returns an array containing its arguments.
+   * Also unwraps its ARGS child, if it has one.
    * @param {!./bind-expr-defines.AstNode} ast
    * @return {!Array<./bind-expr-defines.AstNode>}
    * @private
    */
-  getInvocationArgNodes_(ast) {
-    if (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS) {
-      const argsNode = ast.args[1];
-      if (argsNode.args.length === 0) {
+  argumentsForInvocation_(ast) {
+    // The INVOCATION node may or may not contain an ARGS child node.
+    const argsNode =
+        (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS)
+          ? ast.args[1] : null;
+    if (argsNode) {
+      // An ARGS node can either have an empty array or an ARRAY child.
+      const {args} = argsNode;
+      if (args.length === 0) {
         return [];
-      } else if (argsNode.args.length === 1 &&
-          argsNode.args[0].type === AstNodeType.ARRAY) {
-        const arrayNode = argsNode.args[0];
+      } else if (args.length === 1 && args[0].type === AstNodeType.ARRAY) {
+        // An ARRAY node contains an actual array.
+        const arrayNode = args[0];
         return arrayNode.args || [];
       }
     }
+    // Otherwise, just return the array of its non-ARGS arguments.
     return ast.args || [];
   }
 
@@ -369,7 +375,7 @@ export class BindExpression {
                   scope, Array.prototype.slice.call(arguments));
             };
           } else {
-            validFunction = FUNCTION_WHITELIST[BUILT_IN_FUNCTIONS][method];
+            validFunction = FUNCTION_WHITELIST[CUSTOM_FUNCTIONS][method];
           }
           if (!validFunction) {
             unsupportedError = `${method} is not a supported function.`;
@@ -386,7 +392,7 @@ export class BindExpression {
             const f = caller[method];
             if (f && f === whitelist[method]) {
               validFunction = f;
-            } else if (method === 'sort' || method === 'splice') {
+            } else if (this.isCustomInstanceFunction_(method)) {
               validFunction = whitelist[method];
             }
           }
@@ -550,6 +556,17 @@ export class BindExpression {
       default:
         throw new Error(`Unexpected AstNodeType: ${type}.`);
     }
+  }
+
+  /**
+   * Returns true if `method` is a non-standard instance function.
+   * We alter certain functions e.g. Array.sort to modify and return a copy
+   * instead of operating in-place.
+   * @param {string} method
+   * @return {boolean}
+   */
+  isCustomInstanceFunction_(method) {
+    return method === 'sort' || method === 'splice';
   }
 
   /**
