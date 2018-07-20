@@ -428,7 +428,7 @@ function runAllCommands() {
     }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
-    command.runSinglePassCompiledIntegrationTest();
+    command.runSinglePassCompiledIntegrationTests();
   }
 }
 
@@ -591,7 +591,7 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.runSinglePassCompiledIntegrationTest()
+      command.runSinglePassCompiledIntegrationTests()
       command.buildRuntimeMinified(/* extensions */ false);
       command.runBundleSizeCheck();
       command.runVisualDiffTests();
