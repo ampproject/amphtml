@@ -16,6 +16,7 @@
 
 import * as st from '../../../src/style';
 import {dev} from '../../../src/log';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 const TAG = 'amp-anim';
@@ -80,6 +81,8 @@ export class AmpAnim extends AMP.BaseElement {
   layoutCallback() {
     if (this.img_.src == SRC_PLACEHOLDER) {
       this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+      const srcset = this.element.getAttribute('srcset');
+      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_, srcset);
     }
     return this.loadPromise(this.img_);
   }
