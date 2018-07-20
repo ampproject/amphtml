@@ -29,7 +29,7 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {getService} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -39,14 +39,6 @@ const TAG = 'amp-next-page';
 const SERVICE_ID = 'next-page';
 
 export class AmpNextPage extends AMP.BaseElement {
-
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {!./next-page-service.NextPageService} */
-    this.service_ = getService(this.win, SERVICE_ID);
-  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -68,42 +60,45 @@ export class AmpNextPage extends AMP.BaseElement {
       removeElement(separator);
     }
 
-    if (this.service_.isActive()) {
-      return;
-    }
+    return nextPageServiceForDoc(this.getAmpDoc()).then(service => {
+      if (service.isActive()) {
+        return;
+      }
 
-    const {element} = this;
-    element.classList.add('i-amphtml-next-page');
+      const {element} = this;
+      element.classList.add('i-amphtml-next-page');
 
-    const src = element.getAttribute('src');
-    if (src) {
-      return this.fetchConfig_().then(
-          config => this.register_(config, separator),
-          error => user().error(TAG, 'error fetching config', error));
-    } else {
-      const scriptElements = childElementsByTag(element, 'SCRIPT');
-      user().assert(scriptElements.length === 1,
-          `${TAG} should contain only one <script> child, or a URL specified `
-          + 'in [src]');
-      const scriptElement = scriptElements[0];
-      user().assert(isJsonScriptTag(scriptElement),
-          `${TAG} config should ` +
-          'be inside a <script> tag with type="application/json"');
-      const configJson = tryParseJson(scriptElement.textContent, error => {
-        user().error(TAG, 'failed to parse config', error);
-      });
-      this.register_(configJson, separator);
-    }
+      const src = element.getAttribute('src');
+      if (src) {
+        return this.fetchConfig_().then(
+            config => this.register_(service, config, separator),
+            error => user().error(TAG, 'error fetching config', error));
+      } else {
+        const scriptElements = childElementsByTag(element, 'SCRIPT');
+        user().assert(scriptElements.length === 1,
+            `${TAG} should contain only one <script> child, or a URL specified `
+            + 'in [src]');
+        const scriptElement = scriptElements[0];
+        user().assert(isJsonScriptTag(scriptElement),
+            `${TAG} config should ` +
+            'be inside a <script> tag with type="application/json"');
+        const configJson = tryParseJson(scriptElement.textContent, error => {
+          user().error(TAG, 'failed to parse config', error);
+        });
+        this.register_(service, configJson, separator);
+      }
+    });
   }
 
   /**
    * Verifies the specified config as a valid {@code NextPageConfig} and
    * registers the {@link NextPageService} for this document.
+   * @param {!NextPageService} service Service to register with.
    * @param {*} configJson Config JSON object.
    * @param {?Element} separator Optional custom separator element.
    * @private
    */
-  register_(configJson, separator) {
+  register_(service, configJson, separator) {
     const {element} = this;
     const docInfo = Services.documentInfoForDoc(element);
     const urlService = Services.urlForDoc(element);
@@ -119,8 +114,8 @@ export class AmpNextPage extends AMP.BaseElement {
       });
     }
 
-    this.service_.register(element, config, separator);
-    this.service_.setAppendPageHandler(element => this.appendPage_(element));
+    service.register(element, config, separator);
+    service.setAppendPageHandler(element => this.appendPage_(element));
   }
 
   /**
@@ -141,6 +136,15 @@ export class AmpNextPage extends AMP.BaseElement {
     return batchFetchJsonFor(
         ampdoc, this.element, /* opt_expr */ undefined, policy);
   }
+}
+
+/**
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<!NextPageService>}
+ */
+function nextPageServiceForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<!NextPageService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, SERVICE_ID));
 }
 
 AMP.extension(TAG, '0.1', AMP => {
