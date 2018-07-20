@@ -16,7 +16,7 @@
 
 import {AmpNextPage} from '../amp-next-page';
 import {Services} from '../../../../src/services';
-import {getService} from '../../../../src/service';
+import {getServicePromiseForDoc} from '../../../../src/service';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {macroTask} from '../../../../testing/yield';
 import {setStyle} from '../../../../src/style';
@@ -76,7 +76,7 @@ env => {
   });
 
   describe('valid inline config', () => {
-    beforeEach(() => {
+    beforeEach(done => {
       element.innerHTML = `
           <script type="application/json">
             {
@@ -98,7 +98,7 @@ env => {
               ]
             }
           </script>`;
-      nextPage.buildCallback();
+      nextPage.buildCallback().then(done);
     });
 
     it('does not fetch the next document before 3 viewports away',
@@ -151,7 +151,8 @@ env => {
           .returns(Promise.resolve(exampleDoc))
           .once();
 
-      const nextPageService = getService(win, 'next-page');
+      const nextPageService =
+          yield getServicePromiseForDoc(ampdoc, 'next-page');
       const attachShadowDocSpy =
           sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
 
@@ -187,7 +188,8 @@ env => {
           .returns(Promise.resolve(exampleDoc))
           .once();
 
-      const nextPageService = getService(win, 'next-page');
+      const nextPageService =
+          yield getServicePromiseForDoc(ampdoc, 'next-page');
       const attachShadowDocSpy =
           sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
 
@@ -212,7 +214,7 @@ env => {
 
   describe('remote config', () => {
     it('errors when no config specified', () => {
-      expect(() => nextPage.buildCallback()).to.throw(
+      return nextPage.buildCallback().should.be.rejectedWith(
           'amp-next-page should contain only one <script> child, or a URL '
           + 'specified in [src]​​​');
     });
@@ -238,10 +240,11 @@ env => {
                   return Promise.resolve(config);
                 },
               });
-      const nextPageService = getService(win, 'next-page');
+      const nextPageService =
+          yield getServicePromiseForDoc(ampdoc, 'next-page');
       const registerSpy = sandbox.spy(nextPageService, 'register');
 
-      nextPage.buildCallback();
+      yield nextPage.buildCallback();
       yield macroTask();
 
       expect(fetchJsonStub.calledWithExactly(
