@@ -255,13 +255,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
-    }
-    if (this.unlistenMessage_) {
-      this.unlistenMessage_();
-    }
+    this.removeIframe_();
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -390,12 +384,33 @@ class AmpYoutube extends AMP.BaseElement {
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
+
+      if (info['duration'] !== undefined) {
+        // Video not available.
+        if (info['duration'] <= 0 && info['videoData'] &&
+            info['videoData']['title'] == '') {
+          this.removeIframe_();
+          this.toggleFallback(true);
+        }
+      }
+
       return;
     }
 
     if (eventType == 'infoDelivery' && info['currentTime'] !== undefined) {
       this.info_.currentTime = info['currentTime'];
       return;
+    }
+  }
+
+  /** @private */
+  removeIframe_() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
     }
   }
 
