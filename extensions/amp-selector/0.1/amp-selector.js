@@ -15,14 +15,17 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {areEqualOrdered} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
+import {toArray} from '../../../src/types';
 const TAG = 'amp-selector';
 
 /**
@@ -138,6 +141,10 @@ export class AmpSelector extends AMP.BaseElement {
         this.toggle_(args['index'], args['value']);
       }
     }, ActionTrust.LOW);
+
+    // Triggers on DOM children updates
+    this.element.addEventListener(AmpEvents.DOM_UPDATE,
+        this.maybeRefreshOnUpdate_.bind(this));
   }
 
   /** @override */
@@ -223,10 +230,30 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
+   * Calls init_ again if options element has changed
+   * @param {Event} unusedEvent
    * @private
    */
-  init_() {
-    const options = [].slice.call(this.element.querySelectorAll('[option]'));
+  maybeRefreshOnUpdate_(unusedEvent) {
+    const newOptions = toArray(this.element.querySelectorAll('[option]'));
+    if (areEqualOrdered(this.options_, newOptions)) { // no updates
+      return;
+    }
+    // Clear prev states
+    this.options_ = [];
+    this.selectedOptions_ = [];
+    this.inputs_ = [];
+    this.init_(newOptions);
+  }
+
+  /**
+   * @param {Array<Element>=} opt_options
+   * @private
+   */
+  init_(opt_options) {
+    const options = opt_options ?
+      opt_options :
+      toArray(this.element.querySelectorAll('[option]'));
     options.forEach(option => {
       if (!option.hasAttribute('role')) {
         option.setAttribute('role', 'option');
