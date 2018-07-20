@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parser} from './access-expr-impl';
+import {publicParser as parser} from './access-expr-impl';
 
 
 /**
