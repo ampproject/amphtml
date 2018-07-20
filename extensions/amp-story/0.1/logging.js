@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {LogLevel, dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {tryResolve} from '../../../src/utils/promise';
 
@@ -181,14 +182,14 @@ function getLogEntry(rootElement, logType, element) {
   return tryResolve(() => predicate(element))
       .then(conforms => {
         return new Promise(resolve => {
-          resolve({
-            rootElement,
-            element,
-            conforms,
-            level: logType.level,
-            message: logType.message,
-            moreInfo: logType.moreInfo,
-          });
+          resolve(dict({
+            'rootElement': rootElement,
+            'element': element,
+            'conforms': conforms,
+            'level': logType.level,
+            'message': logType.message,
+            'moreInfo': logType.moreInfo,
+          }));
         });
       });
 }

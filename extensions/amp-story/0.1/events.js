@@ -77,7 +77,7 @@ export function dispatch(source, eventName, opt_bubbles) {
  * @param {!Window} win
  * @param {!EventTarget} source
  * @param {string} eventName
- * @param {!Object} payload
+ * @param {!JsonObject} payload
  * @param {!CustomEventInit=} opt_eventInit
  */
 export function dispatchCustom(win, source, eventName, payload, opt_eventInit) {
