@@ -44,6 +44,7 @@ const TEMPLATE_PROP = '__AMP_ACCESS__TEMPLATE';
 
 /**
  * AccessService implements the complete lifecycle of the AMP Access system.
+ * QQQQ: amp-analytics is no longer required /REMOVE.
  * @implements {AccessVars}
  */
 export class AccessService {
