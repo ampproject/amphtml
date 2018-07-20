@@ -15,9 +15,9 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
-import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceOriginForBookendComponent} from './bookend-component-interface';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
@@ -70,7 +70,7 @@ export class PortraitComponent {
   /** @override */
   build(portraitJson, element) {
     const url = portraitJson['url'];
-    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+    const domainName = getSourceOriginForBookendComponent(element, url);
 
     const portrait = {
       url,
