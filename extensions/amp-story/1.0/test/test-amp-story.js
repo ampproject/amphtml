@@ -505,6 +505,101 @@ describes.realWin('amp-story', {
     });
   });
 
+  describe('amp-story pause/resume callbacks', () => {
+    it('should pause the story when tab becomes inactive', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      sandbox.stub(story.documentState_, 'isHidden').returns(true);
+      const onVisibilityChangedStub =
+          sandbox.stub(story.documentState_, 'onVisibilityChanged');
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            // Execute the callback passed to onVisibilityChanged.
+            expect(onVisibilityChangedStub).to.have.been.calledOnce;
+            onVisibilityChangedStub.getCall(0).args[0]();
+
+            // Paused state has been changed to true.
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.true;
+          });
+    });
+
+    it('should play the story when tab becomes active', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      sandbox.stub(story.documentState_, 'isHidden').returns(false);
+      const onVisibilityChangedStub =
+          sandbox.stub(story.documentState_, 'onVisibilityChanged');
+
+      story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            // Execute the callback passed to onVisibilityChanged.
+            expect(onVisibilityChangedStub).to.have.been.calledOnce;
+            onVisibilityChangedStub.getCall(0).args[0]();
+
+            // Paused state has been changed to false.
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.false;
+          });
+    });
+
+    it('should pause the story when viewer becomes inactive', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.pauseCallback();
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.true;
+          });
+    });
+
+    it('should play the story when viewer becomes active', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.resumeCallback();
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.false;
+          });
+    });
+
+    it('should keep the story paused on resume when previously paused', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.pauseCallback();
+            story.resumeCallback();
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.true;
+          });
+    });
+  });
+
   describe('amp-story continue anyway', () => {
     it('should not display layout', () => {
       AmpStory.isBrowserSupported = () => false;
