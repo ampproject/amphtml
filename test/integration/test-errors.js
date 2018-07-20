@@ -38,9 +38,6 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
       }
     }).then(f => {
       fixture = f;
-      if (fixture.win.location.hash != '#development=1') {
-        throw new Error('Location not updated ' + fixture.win.location.href);
-      }
       return poll('errors to happen', () => {
         return fixture.doc.querySelectorAll('[error-message]').length >= 2;
       }, () => {
