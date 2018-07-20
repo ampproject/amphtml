@@ -19,12 +19,14 @@ import {AmpEvents} from '../../../src/amp-events';
 import {Deferred} from '../../../src/utils/promise';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -60,7 +62,7 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
-     * @private {?{items:!Array, resolver:!Function, rejecter:!Function}}
+     * @private {?{data:(?JsonObject|string|undefined|!Array), resolver:!Function, rejecter:!Function}}
      */
     this.renderItems_ = null;
 
@@ -88,6 +90,16 @@ export class AmpList extends AMP.BaseElement {
         return this.fetchList_();
       }
     }, ActionTrust.HIGH);
+
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+
+    /**
+     * @const {!../../../src/ssr-template-helper.SsrTemplateHelper}
+     * @private
+     */
+    this.ssrTemplateHelper_ = new SsrTemplateHelper(
+        TAG, this.viewer_, this.templates_);
   }
 
   /** @override */
@@ -210,7 +222,9 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Request list data from `src` and return a promise that resolves when
-   * the list has been populated with rendered list items.
+   * the list has been populated with rendered list items. If the viewer is
+   * capable of rendering the templates, then the fetching of the list and
+   * transformation of the template is handled by the viewer.
    * @return {!Promise}
    * @private
    */
@@ -218,59 +232,67 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
-    const itemsExpr = this.element.getAttribute('items') || 'items';
-    return this.fetch_(itemsExpr).then(items => {
-      if (this.element.hasAttribute('single-item')) {
-        user().assert(typeof items !== 'undefined' ,
-            'Response must contain an array or object at "%s". %s',
-            itemsExpr, this.element);
-        if (!isArray(items)) {
-          items = [items];
+    if (this.ssrTemplateHelper_.isSupported()) {
+      return this.ssrTemplate_();
+    } else {
+      const itemsExpr = this.element.getAttribute('items') || 'items';
+      return this.fetch_(itemsExpr).then(items => {
+        if (this.element.hasAttribute('single-item')) {
+          user().assert(typeof items !== 'undefined',
+              'Response must contain an array or object at "%s". %s',
+              itemsExpr, this.element);
+          if (!isArray(items)) {
+            items = [items];
+          }
         }
-      }
-      user().assert(isArray(items),
-          'Response must contain an array at "%s". %s',
-          itemsExpr, this.element);
-      const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
-      if (maxLen < items.length) {
-        items = items.slice(0, maxLen);
-      }
-      return this.scheduleRender_(items);
+        user().assert(isArray(items),
+            'Response must contain an array at "%s". %s',
+            itemsExpr, this.element);
+        const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
+        if (maxLen < items.length) {
+          items = items.slice(0, maxLen);
+        }
+        return this.scheduleRender_(items);
+      }, error => {
+        throw user().createError('Error fetching amp-list', error);
+      }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
+    }
+  }
+
+  /**
+   * Proxies the template rendering to the viewer.
+   * @return {!Promise}
+   */
+  ssrTemplate_() {
+    return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+        this.element).then(resp => {
+      // TODO(alabiaga): Since this is related to the viewer,
+      // this should be a 3rd log type?
+      const data = getData(resp);
+      user().assert(
+          resp && (typeof data !== 'undefined'),
+          'Response missing the \'data\' field');
+      return this.scheduleRender_(data);
     }, error => {
-      throw user().createError('Error fetching amp-list', error);
-    }).then(() => {
-      if (this.getFallback()) {
-        // Hide in case fallback was displayed for a previous fetch.
-        this.toggleFallback_(false);
-      }
-      this.togglePlaceholder(false);
-      this.toggleLoading(false);
-    }, error => {
-      this.toggleLoading(false);
-      if (this.getFallback()) {
-        this.toggleFallback_(true);
-        this.togglePlaceholder(false);
-      } else {
-        throw error;
-      }
-    });
+      throw user().createError('Error proxying amp-list templates', error);
+    }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
   }
 
   /**
    * Schedules a fetch result to be rendered in the near future.
-   * @param {!Array} items
+   * @param {!Array|?JsonObject|string|undefined} data
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(items) {
-    dev().info(TAG, 'schedule:', items);
+  scheduleRender_(data) {
+    dev().info(TAG, 'schedule:', data);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
     // If there's nothing currently being rendered, schedule a render pass.
     if (!this.renderItems_) {
       this.renderPass_.schedule();
     }
-    this.renderItems_ = {items, resolver, rejecter};
+    this.renderItems_ = {data, resolver, rejecter};
     return promise;
   }
 
@@ -291,17 +313,28 @@ export class AmpList extends AMP.BaseElement {
         this.renderItems_ = null;
       }
     };
-    const {items, resolver, rejecter} = current;
-    this.templates_.findAndRenderTemplateArray(this.element, items)
-        .then(elements => this.updateBindingsForElements_(elements))
-        .then(elements => this.render_(elements))
-        .then(/* onFulfilled */ () => {
-          scheduleNextPass();
-          resolver();
-        }, /* onRejected */ () => {
-          scheduleNextPass();
-          rejecter();
-        });
+    const onFulfilledCallback = () => {
+      scheduleNextPass();
+      current.resolver();
+    };
+    const onRejectedCallback = () => {
+      scheduleNextPass();
+      current.rejecter();
+    };
+    if (this.ssrTemplateHelper_.isSupported()) {
+      this.templates_.findAndRenderTemplate(
+          this.element, /** @type {!JsonObject} */ (current.data))
+          .then(element => {
+            this.container_.appendChild(element);
+          })
+          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+    } else {
+      this.templates_.findAndRenderTemplateArray(
+          this.element, /** @type {!Array} */ (current.data))
+          .then(elements => this.updateBindingsForElements_(elements))
+          .then(elements => this.render_(elements))
+          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+    }
   }
 
   /**
@@ -382,7 +415,6 @@ export class AmpList extends AMP.BaseElement {
   fetch_(itemsExpr) {
     const ampdoc = this.getAmpDoc();
     const src = this.element.getAttribute('src');
-
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     let policy = UrlReplacementPolicy.OPT_IN;
@@ -391,6 +423,31 @@ export class AmpList extends AMP.BaseElement {
       policy = UrlReplacementPolicy.ALL;
     }
     return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
+  }
+
+  /** @private */
+  onFetchSuccess_() {
+    if (this.getFallback()) {
+      // Hide in case fallback was displayed for a previous fetch.
+      this.toggleFallback_(false);
+    }
+    this.togglePlaceholder(false);
+    this.toggleLoading(false);
+  }
+
+  /**
+   * @param {*=} error
+   * @private
+   * @throws {!Error} throws error if fallback element is not present.
+   */
+  onFetchError_(error) {
+    this.toggleLoading(false);
+    if (this.getFallback()) {
+      this.toggleFallback(true);
+      this.togglePlaceholder(false);
+    } else {
+      throw error;
+    }
   }
 }
 
