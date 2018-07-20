@@ -44,7 +44,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {setImportantStyles, setStyle} from '../../style';
+import {setStyle} from '../../style';
 import {tryResolve} from '../../utils/promise';
 
 
@@ -782,11 +782,6 @@ export class Viewport {
   enterOverlayMode() {
     this.disableTouchZoom();
     this.disableScroll();
-    // Make the body non scrollable by marking it's overflow as such.
-    setImportantStyles(this.globalDoc_.body, {
-      'overflow': 'hidden',
-      'position': 'fixed',
-    });
   }
 
   /**
@@ -795,11 +790,6 @@ export class Viewport {
   leaveOverlayMode() {
     this.resetScroll();
     this.restoreOriginalTouchZoom();
-    // Reset the overflow as set when you enterOverlaymode.
-    setImportantStyles(this.globalDoc_.body, {
-      'overflow': 'visible',
-      'position': 'absolute',
-    });
   }
 
   /**
