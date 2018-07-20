@@ -341,7 +341,7 @@ One of the main differences between `:invalid` and `:user-invalid` is when are t
 ## Classes and CSS Hooks
 `amp-form` provides classes and CSS hooks for publishers to style their forms and inputs.
 
-`.amp-form-initial`, `.amp-form-verifying`, `.amp-form-verify-error`, `.amp-form-submitting`, `.amp-form-submit-success` and `.amp-form-submit-error` are added to indicate the state of the form submission.
+`.amp-form-initial`, `.amp-form-verify`, `.amp-form-verify-error`, `.amp-form-submitting`, `.amp-form-submit-success` and `.amp-form-submit-error` are added to indicate the state of the form submission.
 
 `.user-valid` and `.user-invalid` classes are a polyfill for the pseudo classes as described above. Publishers can use these to style their inputs and fieldsets to be responsive to user actions (e.g., highlighting an invalid input with a red border after user blurs from it).
 

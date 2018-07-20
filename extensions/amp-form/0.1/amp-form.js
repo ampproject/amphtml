@@ -23,7 +23,7 @@ import {
   getFormVerifier,
 } from './form-verifiers';
 import {FormDataWrapper} from '../../../src/form-data-wrapper';
-import {FormEvent} from './form-event';
+import {FormEvents} from './form-events';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
@@ -281,21 +281,22 @@ export class AmpForm {
     if (!this.ssrTemplateHelper_.isSupported()) {
       this.form_.addEventListener('change', e => {
         this.verifier_.onCommit().then(({updatedElements, errors}) => {
+          updatedElements.forEach(checkUserValidityAfterInteraction_);
+          // Tell the validation to reveal any input.validationMessage added
+          // by the form verifier.
+          this.validator_.onBlur(e);
+
           // Only make the verify XHR if the user hasn't pressed submit.
           if (this.state_ === FormState.VERIFYING) {
             if (errors.length) {
               this.setState_(FormState.VERIFY_ERROR);
               this.renderTemplate_(
                   /** @type {!JsonObject} */ ({verifyErrors: errors}));
-              this.triggerAction_(FormEvent.VERIFY_ERROR, errors);
+              this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
             } else {
               this.setState_(FormState.INITIAL);
             }
           }
-          updatedElements.forEach(checkUserValidityAfterInteraction_);
-          // Tell the validation to reveal any input.validationMessage added
-          // by the form verifier.
-          this.validator_.onBlur(e);
         });
       });
     }
@@ -438,7 +439,7 @@ export class AmpForm {
       return Promise.resolve();
     }
     this.setState_(FormState.VERIFYING);
-    this.triggerAction_(FormEvent.VERIFY, null);
+    this.triggerAction_(FormEvents.VERIFY, null);
 
     return this.doVarSubs_(this.getVarSubsFields_())
         .then(() => this.doVerifyXhr_());
@@ -450,13 +451,13 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmit_(varSubsFields, trust) {
-    this.setState_(FormState_.SUBMITTING);
+    this.setState_(FormState.SUBMITTING);
     const varSubPromise = this.doVarSubs_(varSubsFields);
     let p;
     if (this.ssrTemplateHelper_.isSupported()) {
       p = varSubPromise.then(() => {
         this.actions_.trigger(
-            this.form_, FormEvent.SUBMIT, /* event */ null, trust);
+            this.form_, FormEvents.SUBMIT, /* event */ null, trust);
         // Note that we do not render templates for the submitting state
         // and only deal with submit-success or submit-error.
         return this.ssrTemplateHelper_.fetchAndRenderTemplate(this.form_);
@@ -486,7 +487,7 @@ export class AmpForm {
    */
   handleSsrTemplateFailure_(error) {
     this.triggerAction_(/* success */ false, error); // do we need this?
-    this.setState_(FormState_.SUBMIT_ERROR);
+    this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, `Form submission failed: ${error}`);
     return tryResolve(() => {
       this.renderTemplate_(error || {});
@@ -613,7 +614,7 @@ export class AmpForm {
    */
   handleSubmitSuccess_(jsonPromise) {
     return jsonPromise.then(json => {
-      this.triggerAction_(FormEvent.SUBMIT_SUCCESS, json);
+      this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
       this.setState_(FormState.SUBMIT_SUCCESS);
       this.renderTemplate_(json || {});
     }, error => {
@@ -635,7 +636,7 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then(responseJson => {
-      this.triggerAction_(FormEvent.SUBMIT_ERROR, responseJson);
+      this.triggerAction_(FormEvents.SUBMIT_ERROR, responseJson);
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.setState_(FormState.SUBMIT_ERROR);
       this.renderTemplate_(responseJson || {});
@@ -742,7 +743,7 @@ export class AmpForm {
 
   /**
    * Triggers either a submit-success or submit-error action with response data.
-   * @param {!FormEvent} name
+   * @param {!FormEvents} name
    * @param {?Object} detail
    * @private
    */
@@ -1024,7 +1025,7 @@ export class AmpFormService {
       this.whenInitialized_.then(() => {
         const {win} = ampdoc;
         const event = createCustomEvent(
-            win, FormEvent.SERVICE_INIT, null, {bubbles: true});
+            win, FormEvents.SERVICE_INIT, null, {bubbles: true});
         win.dispatchEvent(event);
       });
     }

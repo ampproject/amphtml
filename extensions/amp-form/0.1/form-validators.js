@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {FormEvent} from './form-event';
+import {FormEvents} from './form-events';
 import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -111,7 +111,7 @@ export class FormValidator {
     this.formValidity_ = this.form.checkValidity();
     if (previousValidity !== this.formValidity_) {
       const win = toWin(this.form.ownerDocument.defaultView);
-      const type = this.formValidity_ ? FormEvent.VALID : FormEvent.INVALID;
+      const type = this.formValidity_ ? FormEvents.VALID : FormEvents.INVALID;
       const event = createCustomEvent(win, type, null, {bubbles: true});
       this.form.dispatchEvent(event);
     }
