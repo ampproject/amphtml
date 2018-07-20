@@ -222,7 +222,7 @@ function createBaseCustomElementClass(win) {
       this.heightsList_ = undefined;
 
       /** @public {boolean} */
-      this.has3pOverflow = false;
+      this.warnOnMissingOverflow = true;
 
       /**
        * This element can be assigned by the {@link applyStaticLayout} to a
@@ -1668,7 +1668,7 @@ function createBaseCustomElementClass(win) {
     overflowCallback(overflown, requestedHeight, requestedWidth) {
       this.getOverflowElement();
       if (!this.overflowElement_) {
-        if (overflown && !this.has3pOverflow) {
+        if (overflown && this.warnOnMissingOverflow) {
           user().warn(TAG,
               'Cannot resize element and overflow is not available', this);
         }
