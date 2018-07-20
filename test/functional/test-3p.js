@@ -147,14 +147,12 @@ describe('3p', () => {
       }, /* mandatory */[], ['foo', 'bar']);
       clock.tick(1);
 
-      validateData({
-        type: 'TEST',
-        foo: true,
-        'not-whitelisted': true,
-      }, [], ['foo']);
-
       allowConsoleError(() => { expect(() => {
-        clock.tick(1);
+        validateData({
+          type: 'TEST',
+          foo: true,
+          'not-whitelisted': true,
+        }, [], ['foo']);
       }).to.throw(/Unknown attribute for TEST: not-whitelisted./); });
     });
 
