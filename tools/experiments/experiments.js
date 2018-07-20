@@ -304,13 +304,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'disable-faster-amp-list',
-    name: 'Disables new default behavior where <amp-list> will not evaluate ' +
-       'bindings on rendered children before first setState() mutation.',
-    spec: 'https://github.com/ampproject/amphtml/issues/15311',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15610',
-  },
-  {
     id: 'amp-google-document-embed',
     name: 'Enables the experiment amp-google-document-embed component' +
         ' which is a wrapper around the Google Drive document viewer embed.',
