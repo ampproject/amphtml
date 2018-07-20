@@ -552,7 +552,7 @@ export function getCorsUrl(win, url) {
 
 
 /**
- * Checks if the url have __amp_source_origin and throws if it does.
+ * Checks if the url has __amp_source_origin and throws if it does.
  * @param {string} url
  */
 export function checkCorsUrl(url) {

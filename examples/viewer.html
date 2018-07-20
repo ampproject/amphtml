@@ -146,6 +146,28 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="6"] #container6 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="6"] #show-container6-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="7"] #container7 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="7"] #show-container7-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -220,7 +242,7 @@
         prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a,swipe',
+        cap: 'foo,a2a,swipe,viewerRenderTemplate',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -412,6 +434,14 @@
         case 'touchend':
           log('touch event!', name);
           return Promise.resolve();
+        case 'viewerRenderTemplate':
+        if (data.sourceAmpComponent === 'amp-list') {
+          return this.ssrRenderAmpListTemplate_(data);
+        } else if (data.sourceAmpComponent == 'amp-form') {
+          return this.ssrRenderAmpFormTemplate_(data);
+        } else {
+          return Promise.reject({error: 'source amp component is not valid'})
+        }
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':
@@ -424,6 +454,17 @@
       }
     };
 
+    Viewer.prototype.ssrRenderAmpListTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({
+        data : "<ul><li>Some list item</li><li>Some list item</li><li>Some list item</li></ul>"
+      });
+    };
+
+    Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({data: "<div>Server side rendered search result</div>"});
+    };
 
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
       log('Viewer.prototype.handleUnload_');
@@ -509,6 +550,20 @@
           false).start();
       addShowContainer('5');
 
+      new Viewer(
+          'container6',
+          '6',
+          './mustache-to-amp-view-host.amp.html?amp_js_v=0.1?',
+          false).start();
+      addShowContainer('6');
+
+      new Viewer(
+          'container7',
+          '7',
+          './form-proxy-template-to-viewer-host.amp.html?amp_js_v=0.1?',
+          false).start();
+      addShowContainer('7');
+
       showContainer('1');
     }
 
@@ -551,6 +606,8 @@
       <a class="show-container-anchor" id="show-container3-anchor">Three</a>
       <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
       <a class="show-container-anchor" id="show-container5-anchor">Five</a>
+      <a class="show-container-anchor" id="show-container6-anchor">Six</a>
+      <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -579,6 +636,16 @@
         Please wait, the AMP doc will appear here...
       </div>
     </container>
+    <container id="container6">
+        <div class="wait">
+          Please wait, the AMP doc will appear here...
+        </div>
+    </container>
+    <container id="container7">
+    <div class="wait">
+      Please wait, the AMP doc will appear here...
+    </div>
+</container>
   </viewer>
 </body>
 </html>
