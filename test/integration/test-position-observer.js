@@ -79,8 +79,7 @@ config.run('amp-position-observer', function() {
     extensions,
     experiments,
   }, env => {
-    it.only('runs animation with scroll', () => {
-      debugger;
+    it('runs animation with scroll', () => {
       // Not visible yet, opacity = 0;
       expect(getOpacity(env.win)).to.equal(0);
 

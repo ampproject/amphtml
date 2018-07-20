@@ -22,12 +22,12 @@ import {LogLevel, overrideLogLevel} from './log'; // eslint-disable-line no-unus
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
 import {childElementsByTag, isConnectedNode} from './dom';
+import {config} from './config';
 import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
-import {config} from './config';
 import {cssText} from '../build/css';
 import {dev, initLogConstructor, setReportError, user} from './log';
 import {

@@ -31,6 +31,7 @@ import {createCustomEvent} from '../../event-helper';
 // Source for this constant is css/video-docking.css:
 import {cssText} from '../../../build/video-docking.css.js';
 import {dev, user} from '../../log';
+import {dict} from '../../utils/object';
 import {getInternalVideoElementFor} from '../../utils/video';
 import {getServiceForDoc} from '../../service';
 import {htmlFor, htmlRefs} from '../../static-template';
@@ -1034,7 +1035,8 @@ export class VideoDocking {
    */
   trigger_(video, action) {
     const trust = ActionTrust.LOW;
-    const event = createCustomEvent(this.ampdoc_.win, action, /* detail */ {});
+    const event = createCustomEvent(this.ampdoc_.win,
+        /** @type {string} */ (action), /* detail */ dict({}));
     const actions = Services.actionServiceForDoc(this.ampdoc_);
     actions.trigger(video.element, action, event, trust);
   }
