@@ -23,7 +23,7 @@ import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
-import {setImportantStyles, setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
