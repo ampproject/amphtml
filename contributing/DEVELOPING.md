@@ -16,7 +16,7 @@ limitations under the License.
 
 # Development on AMP HTML
 
-## How to get started
+## How to get started with AMP
 
 Before you start developing in AMP, check out these resources:
 * [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
