@@ -20,6 +20,7 @@ import {Services} from './services';
 import {Signals} from './utils/signals';
 import {closestBySelector, escapeHtml} from './dom';
 import {dev, rethrowAsync, user} from './log';
+import {dict} from './utils/object';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';

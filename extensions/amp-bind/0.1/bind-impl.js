@@ -16,11 +16,8 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
-import {BindExpressionResultDef} from './bind-expression';
 import {BindValidator} from './bind-validator';
-import {BindingDef} from './bind-evaluator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
@@ -28,6 +25,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {filterSplice} from '../../../src/utils/array';
+import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
@@ -59,7 +57,7 @@ const MAX_MERGE_DEPTH = 10;
 /**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last evaluation.
- * @typedef {{property: string, expressionString: string, previousResult: (./bind-expression.BindExpressionResultDef|undefined)}}
+ * @typedef {{property: string, expressionString: string, previousResult: (BindExpressionResultDef|undefined)}}
  */
 let BoundPropertyDef;
 
@@ -70,7 +68,7 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @typedef {{boundElements: !Array<BoundElementDef>, bindings: !Array<./bind-evaluator.BindingDef>, expressionToElements: !Object<string, !Array<!Element>>, limitExceeded: boolean}}
+ * @typedef {{boundElements: !Array<BoundElementDef>, bindings: !Array<!BindBindingDef>, expressionToElements: !Object<string, !Array<!Element>>, limitExceeded: boolean}}
  */
 let NodeScanDef;
 
@@ -278,8 +276,8 @@ export class Bind {
       this.signals_.signal('FIRST_MUTATE');
 
       const scope = dict();
-      if (event && event.detail) {
-        scope['event'] = event.detail;
+      if (event && getDetail(/** @type {!Event} */ (event))) {
+        scope['event'] = getDetail(/** @type {!Event} */ (event));
       }
       switch (method) {
         case 'setState':
@@ -496,8 +494,7 @@ export class Bind {
    */
   addMacros_() {
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
-    const macros =
-      /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+    const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')
@@ -607,7 +604,7 @@ export class Bind {
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
     // bound to elements.
-    const deletedExpressions = [];
+    const deletedExpressions = /** @type {!Array<string>} */ ([]);
     for (const expression in this.expressionToElements_) {
       const elements = this.expressionToElements_[expression];
       filterSplice(elements, element => {
@@ -645,11 +642,10 @@ export class Bind {
   scanNode_(node, limit) {
     /** @type {!Array<BoundElementDef>} */
     const boundElements = [];
-    /** @type {!Array<./bind-evaluator.BindingDef>} */
+    /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
     /** @type {!Object<string, !Array<!Element>>} */
     const expressionToElements = map();
-
 
     const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
       ? node : node.ownerDocument, 'ownerDocument is null.');
@@ -805,7 +801,7 @@ export class Bind {
 
   /**
    * Reevaluates all expressions and returns a map of expressions to results.
-   * @return {!Promise<!Object<string, ./bind-expression.BindExpressionResultDef>>}
+   * @return {!Promise<!Object<string, BindExpressionResultDef>>}
    * @private
    */
   evaluate_() {
@@ -832,7 +828,7 @@ export class Bind {
   /**
    * Verifies expression results vs. current DOM state and returns an
    * array of bindings with mismatches (if any).
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {Object<string, BindExpressionResultDef>} results
    * @param {?Array<!Element>=} elements If provided, only verifies bindings
    *     contained within the given elements. Otherwise, verifies all bindings.
    * @param {boolean=} warn If true, emits a user warning for verification
@@ -903,8 +899,8 @@ export class Bind {
    * will only return properties that need to be updated along with their
    * new value.
    * @param {!Array<!BoundPropertyDef>} boundProperties
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
-   * @return {!Array<{boundProperty: !BoundPropertyDef, newValue: !./bind-expression.BindExpressionResultDef}>}
+   * @param {Object<string, BindExpressionResultDef>} results
+   * @return {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>}
    * @private
    */
   calculateUpdates_(boundProperties, results) {
@@ -926,7 +922,7 @@ export class Bind {
 
   /**
    * Applies expression results to all elements in the document.
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {Object<string, BindExpressionResultDef>} results
    * @param {boolean=} opt_isAmpStateMutation
    * @return {!Promise}
    * @private
@@ -948,7 +944,7 @@ export class Bind {
 
   /**
    * Applies expression results to only given elements and their descendants.
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {Object<string, BindExpressionResultDef>} results
    * @param {!Array<!Element>} elements
    * @return {!Promise}
    */
@@ -968,7 +964,7 @@ export class Bind {
 
   /**
    * Applies expression results to a single BoundElementDef.
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {Object<string, BindExpressionResultDef>} results
    * @param {BoundElementDef} boundElement
    * @return {!Promise}
    */
@@ -979,7 +975,7 @@ export class Bind {
       return Promise.resolve();
     }
     return this.resources_.mutateElement(element, () => {
-      const mutations = dict();
+      const mutations = map();
       let width, height;
 
       updates.forEach(update => {
@@ -1021,8 +1017,8 @@ export class Bind {
    * Mutates the bound property of `element` with `newValue`.
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
-   * @param {./bind-expression.BindExpressionResultDef} newValue
-   * @return {?{name: string, value:./bind-expression.BindExpressionResultDef}}
+   * @param {BindExpressionResultDef} newValue
+   * @return {?{name: string, value:BindExpressionResultDef}}
    * @private
    */
   applyBinding_(boundProperty, element, newValue) {
@@ -1133,7 +1129,7 @@ export class Bind {
    * Otherwise, returns a tuple containing the expected and actual values.
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
-   * @param {./bind-expression.BindExpressionResultDef} expectedValue
+   * @param {BindExpressionResultDef} expectedValue
    * @return {?{expected: *, actual: *}}
    * @private
    */

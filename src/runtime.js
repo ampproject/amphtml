@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as config from './config';
+
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
@@ -22,6 +22,7 @@ import {LogLevel, overrideLogLevel} from './log'; // eslint-disable-line no-unus
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
 import {childElementsByTag, isConnectedNode} from './dom';
+import {config} from './config';
 import {
   createShadowDomWriter,
   createShadowRoot,
