@@ -3630,7 +3630,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
     // the extension, look to see if the version matches.
     if (reResult !== null && reResult[1] === extensionSpec.name) {
       const encounteredVersion = reResult[2];
-      if (extensionSpec.deprecatedVersions.indexOf(encounteredVersion) !== -1) {
+      if (extensionSpec.deprecatedVersion.indexOf(encounteredVersion) !== -1) {
         context.addWarning(
             amp.validator.ValidationError.Code
                 .WARNING_EXTENSION_DEPRECATED_VERSION,
@@ -3639,8 +3639,9 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
             getTagSpecUrl(tagSpec), result);
         return true;
       }
-      if (extensionSpec.allowedVersions.indexOf(encounteredVersion) !== -1)
-      {return true;}
+      if (extensionSpec.version.indexOf(encounteredVersion) !== -1) {
+        return true;
+      }
     }
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
