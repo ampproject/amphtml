@@ -117,7 +117,7 @@ If present:
 
 - By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.
 - Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
-- Requires at least 3 slides for autoplay to occur.
+- Requires at least 2 slides for autoplay to occur.
 - Applies only to carousels with `type=slides`.
 
 ##### delay (optional)
