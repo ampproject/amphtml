@@ -51,7 +51,7 @@ i-amphtml-ad-close-header {
 [animate-in="fly-in-bottom"] > i-amphtml-ad-close-header,
 [animate-in="fly-in-top"] > i-amphtml-ad-close-header {
   /* show after transition has finished */
-  transition-delay: 0.3s;
+  transition-delay: 0.2s;
 }
 
 .amp-ad-close-header {

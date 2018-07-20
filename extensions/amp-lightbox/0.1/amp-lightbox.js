@@ -61,12 +61,12 @@ const AnimationPresets = {
   'fly-in-bottom': {
     openStyle: dict({'transform': 'translate(0, 0)'}),
     closedStyle: dict({'transform': 'translate(0, 100%)'}),
-    durationSeconds: 0.3,
+    durationSeconds: 0.2,
   },
   'fly-in-top': {
     openStyle: dict({'transform': 'translate(0, 0)'}),
     closedStyle: dict({'transform': 'translate(0, -100%)'}),
-    durationSeconds: 0.3,
+    durationSeconds: 0.2,
   },
 };
 
