@@ -337,8 +337,8 @@ export function runVideoPlayerIntegrationTests(
 
         afterEach(cleanUp);
       });
-
-  describe.configure().ifNewChrome().run('Autoplay', function() {
+  const t = describe.configure().ifNewChrome().skipIfPropertiesObfuscated();
+  t.run('Autoplay', function() {
     this.timeout(TIMEOUT);
 
     describe('play/pause', () => {
