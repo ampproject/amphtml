@@ -43,6 +43,12 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   compileCallback() {
+    // If viewer is renderTemplate capable, skip the handling of the mustache
+    // templates as its rendering is managed by the viewer. This template will
+    // only be responsible for sanitizing and inserting it into the DOM.
+    if (this.viewerCanRenderTemplates()) {
+      return;
+    }
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
     let index = 0;
@@ -66,13 +72,26 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   render(data) {
-    let mustacheData = data;
-    if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+    let html = data;
+    if (!this.viewerCanRenderTemplates()) {
+      let mustacheData = data;
+      if (typeof data === 'object') {
+        mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      }
+      html = mustacheRender(this.template_, mustacheData);
     }
-    const html = mustacheRender(this.template_, mustacheData);
-    const sanitized = sanitizeHtml(html);
+    return this.serializeHtml_(html);
+  }
+
+  /**
+   * Sanitizes the html and inserts it in the DOM.
+   * @param {string} html
+   * @return {!Element}
+   * @private
+   */
+  serializeHtml_(html) {
     const root = this.win.document.createElement('div');
+    const sanitized = sanitizeHtml(html);
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }
