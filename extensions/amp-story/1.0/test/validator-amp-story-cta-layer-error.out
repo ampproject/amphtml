@@ -55,16 +55,18 @@ FAIL
 |        <amp-story-cta-layer>
 >>       ^~~~~~~~~
 amp-story/1.0/test/validator-amp-story-cta-layer-error.html:54:6 Tag 'amp-story-cta-layer', if present, must be the last child of tag 'amp-story-page'. [AMP_TAG_PROBLEM]
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-cta-layer-error.html:54:6 Tag 'amp-story-cta-layer', if present, must be the last child of tag 'amp-story-page'. [AMP_TAG_PROBLEM]
 |          <a href="http://www.google.com" class="button"> Illegal CTA layer above grid layer! </a>
 |        </amp-story-cta-layer>
 |        <amp-story-grid-layer template="vertical">
 |          <h1>fill</h1>
-|          <amp-story-cta-layer animate-in="fade-in">
->>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-cta-layer-error.html:59:8 The tag 'amp-story-cta-layer' conflicts with reference point 'AMP-STORY-GRID-LAYER default' because both define reference points. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
-|            <a href="http://www.google.com" class="button">Click me!</a>
-|          </amp-story-cta-layer>
 |        </amp-story-grid-layer>
+|        <amp-story-cta-layer animate-in="fade-in">
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-cta-layer-error.html:60:6 The attribute 'animate-in' may not appear in tag 'amp-story-cta-layer'. [DISALLOWED_HTML]
+|          <a href="http://www.google.com" class="button">Click me!</a>
+|        </amp-story-cta-layer>
 |      </amp-story-page>
 |      <amp-story-cta-layer>
 >>     ^~~~~~~~~
