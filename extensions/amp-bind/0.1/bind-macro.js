@@ -21,7 +21,7 @@ import {BindExpression} from './bind-expression';
  */
 export class BindMacro {
   /**
-   * @param {!./amp-bind-macro.AmpBindMacroDef} data
+   * @param {!BindMacroDef} data
    * @param {!Object<string, !BindMacro>} referableMacros
    */
   constructor(data, referableMacros) {
@@ -37,7 +37,7 @@ export class BindMacro {
    * @param {!Object} state
    * @param {!Array} args
    * @throws {Error} On illegal function invocation.
-   * @return {./bind-expression.BindExpressionResultDef}
+   * @return {BindExpressionResultDef}
    */
   evaluate(state, args) {
     const scope = Object.assign({}, state);
