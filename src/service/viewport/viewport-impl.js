@@ -594,7 +594,9 @@ export class Viewport {
     // transition experience when things are closer vs farther.
     return Animation.animate(parent, position => {
       this.setElementScrollTop_(parent, interpolate(position));
-    }, duration, curve).then();
+    }, duration, curve).thenAlways(() => {
+      this.setElementScrollTop_(parent, newScrollTop);
+    });
   }
 
   /**
