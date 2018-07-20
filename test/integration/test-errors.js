@@ -25,7 +25,8 @@ const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;
 
 // TODO(@cramforce): Find out why it does not work with obfuscated
 // props.
-const t = describe.configure().retryOnSaucelabs().skipIfPropertiesObfuscated()
+const t = describe.configure().retryOnSaucelabs()
+    .skipIfPropertiesObfuscated();
 t.run('error page', function() {
   this.timeout(TIMEOUT);
 
