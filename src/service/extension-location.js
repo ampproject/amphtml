@@ -29,7 +29,7 @@ function calculateScriptBaseUrl(location, opt_isLocalDev) {
     if (location.protocol == 'about') {
       prefix = '';
     }
-    return `{$prefix}/dist`;
+    return `${prefix}/dist`;
   }
   return urls.cdn;
 }
