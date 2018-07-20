@@ -20,7 +20,11 @@ import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
 import {createFixtureIframe} from '../../testing/iframe';
 
-describe.configure().ifNewChrome().run('amp-bind', function() {
+describe.configure()
+    // This can be turned back on when amp-bind works at all with
+    // property obfuscation.
+    .skipIfPropertiesObfuscated()
+    .ifNewChrome().run('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);

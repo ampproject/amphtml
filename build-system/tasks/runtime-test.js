@@ -484,6 +484,7 @@ function runTests() {
     saucelabs: (!!argv.saucelabs) || (!!argv.saucelabs_lite),
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
+    propertiesObfuscated: !!argv.single_pass,
   };
 
   if (argv.compiled) {

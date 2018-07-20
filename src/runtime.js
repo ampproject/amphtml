@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as config from './config';
+
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
@@ -27,6 +27,7 @@ import {
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
+import {config} from './config';
 import {cssText} from '../build/css';
 import {dev, initLogConstructor, setReportError, user} from './log';
 import {

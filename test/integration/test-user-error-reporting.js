@@ -19,7 +19,8 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe.configure().skipSafari().skipEdge().run('user-error', function() {
+describe.configure().skipIfPropertiesObfuscated()
+    .skipSafari().skipEdge().run('user-error', function() {
   //TODO(zhouyx, #11459): Unskip the test on safari.
   let randomId;
   beforeEach(() => {

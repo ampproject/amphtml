@@ -20,7 +20,8 @@ import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
+describe.configure().skipIfPropertiesObfuscated()
+    .ifNewChrome().run('Viewer Visibility State', () => {
 
   function noop() {}
 

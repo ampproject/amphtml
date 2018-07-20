@@ -158,7 +158,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   triggerScroll_() {
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
-        {percent: this.scrollProgress_});
+        {'percent': this.scrollProgress_});
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 

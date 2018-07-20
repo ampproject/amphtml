@@ -19,7 +19,8 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe.configure().run('amp-analytics', function() {
+describe.configure()
+    .skipIfPropertiesObfuscated().run('amp-analytics', function() {
   this.timeout(15000);
 
   describes.integration('amp-analytics integration test', {
