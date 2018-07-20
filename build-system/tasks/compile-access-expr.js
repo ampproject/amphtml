@@ -31,7 +31,7 @@ gulp.task('compile-access-expr', function() {
       'build-system/tasks/js-license.txt', 'utf8');
   const suppressCheckTypes = '/** @fileoverview ' +
       '@suppress {checkTypes, suspiciousCode, uselessCode} */';
-  const jsExports = 'export const publicParser = parser;';
+  const jsExports = 'export const accessParser = parser;';
 
   const out = [
     license,
