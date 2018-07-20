@@ -32,6 +32,7 @@ import {
 } from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -133,7 +134,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerEnter_() {
     const name = 'enter';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -143,7 +144,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerExit_() {
     const name = 'exit';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -158,7 +159,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   triggerScroll_() {
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
-        {percent: this.scrollProgress_});
+        dict({'percent': this.scrollProgress_}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 

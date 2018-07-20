@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/dom';
 import {hasOwn} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
@@ -458,7 +459,7 @@ export class AmpGwdRuntimeService {
     const timelineEvent = createCustomEvent(
         this.ampdoc_.win,
         GWD_TIMELINE_EVENT,
-        {eventName: userEventName, sourceEvent: event});
+        dict({'eventName': userEventName, 'sourceEvent': event}));
 
     this.ampdoc_.getRootNode().dispatchEvent(timelineEvent);
   }

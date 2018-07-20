@@ -22,6 +22,7 @@ import {Toolbar} from './toolbar';
 import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -433,7 +434,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }

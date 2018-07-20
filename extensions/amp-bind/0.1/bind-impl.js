@@ -25,6 +25,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {filterSplice} from '../../../src/utils/array';
+import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
@@ -275,8 +276,8 @@ export class Bind {
       this.signals_.signal('FIRST_MUTATE');
 
       const scope = dict();
-      if (event && event.detail) {
-        scope['event'] = event.detail;
+      if (event && getDetail(/** @type {!Event} */ (event))) {
+        scope['event'] = getDetail(/** @type {!Event} */ (event));
       }
       switch (method) {
         case 'setState':

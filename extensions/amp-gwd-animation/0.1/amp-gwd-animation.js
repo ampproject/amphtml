@@ -21,6 +21,7 @@ import {
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {Services} from '../../../src/services';
+import {getDetail} from '../../../src/event-helper';
 import {getServiceForDoc} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -165,8 +166,8 @@ export class GwdAnimation extends AMP.BaseElement {
   onGwdTimelineEvent_(event) {
     Services.actionServiceForDoc(this.getAmpDoc()).trigger(
         this.element,
-        `${this.timelineEventPrefix_}${event.detail.eventName}`,
-        event.detail,
+        `${this.timelineEventPrefix_}${getDetail(event)['eventName']}`,
+        event,
         ActionTrust.HIGH);
   }
 

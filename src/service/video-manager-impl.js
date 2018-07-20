@@ -48,10 +48,10 @@ import {
   listenOncePromise,
 } from '../event-helper';
 import {dev, user} from '../log';
+import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
-import {map} from '../utils/object';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
@@ -166,7 +166,7 @@ export class VideoManager {
         duration > 0) {
       const perc = currentTime / duration;
       const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
-          {time: currentTime, percent: perc});
+          dict({'time': currentTime, 'percent': perc}));
       this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
     }
   }
@@ -455,7 +455,7 @@ class VideoEntry {
       const firstPlay = 'firstPlay';
       const trust = ActionTrust.LOW;
       const event = createCustomEvent(this.ampdoc_.win, firstPlay,
-          /* detail */ {});
+          /* detail */ dict({}));
       const actions = Services.actionServiceForDoc(this.ampdoc_);
       actions.trigger(this.video.element, firstPlay, event, trust);
     });

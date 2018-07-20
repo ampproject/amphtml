@@ -60,18 +60,22 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       yield poll('#imgToToggle displayed', () => img.style['display'] === '');
     });
 
-    it('AMP.navigateTo(url=)', function*() {
-      const button = fixture.doc.getElementById('navigateBtn');
+    describe.configure().skipIfPropertiesObfuscated().run('navigate',
+        function() {
+          it('AMP.navigateTo(url=)', function*() {
+            const button = fixture.doc.getElementById('navigateBtn');
 
-      // This is brittle but I don't know how else to stub window navigation.
-      const navigationService = fixture.win.services.navigation.obj;
-      const navigateTo = sandbox.stub(navigationService, 'navigateTo');
+            // This is brittle but I don't know how else to stub
+            // window navigation.
+            const navigationService = fixture.win.services.navigation.obj;
+            const navigateTo = sandbox.stub(navigationService, 'navigateTo');
 
-      button.click();
-      yield poll('navigateTo() called with correct args', () => {
-        return navigateTo.calledWith(fixture.win, 'https://google.com');
-      });
-    });
+            button.click();
+            yield poll('navigateTo() called with correct args', () => {
+              return navigateTo.calledWith(fixture.win, 'https://google.com');
+            });
+          });
+        });
 
     it('AMP.print()', function*() {
       const button = fixture.doc.getElementById('printBtn');

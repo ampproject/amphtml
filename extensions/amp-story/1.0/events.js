@@ -61,7 +61,7 @@ export const EventType = {
  * @param {!Window} win
  * @param {!EventTarget} source
  * @param {string} eventName
- * @param {!Object=} payload
+ * @param {!JsonObject=} payload
  * @param {!CustomEventInit=} eventInit
  */
 export function dispatch(win, source, eventName, payload = undefined,
