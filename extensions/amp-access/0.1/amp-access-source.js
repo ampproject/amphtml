@@ -478,7 +478,7 @@ export class AccessSource {
       } else {
         this.loginAnalyticsEvent_(eventLabel, 'rejected');
       }
-      const exchangePromise = Promise.resolve();//QQQQ: remove
+      const exchangePromise = Promise.resolve();
       if (success || !s) {
         // In case of a success, repeat the authorization and pingback flows.
         // Also do this for an empty response to avoid false negatives.
