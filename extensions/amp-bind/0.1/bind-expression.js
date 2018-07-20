@@ -68,6 +68,8 @@ function generateFunctionWhitelist() {
   }
 
   /**
+   * Needs to be wrapped to avoid a duplicate name conflict with the deprecated
+   * splice function above.
    * @return {!Function}
    */
   function instanceSplice() {
@@ -100,6 +102,8 @@ function generateFunctionWhitelist() {
   }
 
   /**
+   * Needs to be wrapped to avoid a duplicate name conflict with the deprecated
+   * splice function above.
    * @return {!Function}
    */
   function instanceSort() {
