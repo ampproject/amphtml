@@ -228,7 +228,7 @@ describes.realWin('amp-story', {
   });
 
   // TODO(#11639): Re-enable this test.
-  it('should go to next page on right arrow keydown', () => {
+  it.skip('should go to next page on right arrow keydown', () => {
     const pages = createPages(element, 5);
 
     element.build();
