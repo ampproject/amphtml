@@ -231,10 +231,6 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.getViewport().enterLightboxMode(this.element)
         .then(() => this.finalizeOpen_());
-    setImportantStyles(this.win.document.body, {
-      'overflow': 'hidden',
-      'position': 'fixed',
-    });
   }
 
   /**
@@ -344,10 +340,6 @@ class AmpLightbox extends AMP.BaseElement {
     }
     this.getViewport().leaveLightboxMode(this.element)
         .then(() => this.finalizeClose_());
-    setImportantStyles(this.win.document.body, {
-      'overflow': 'visible',
-      'position': 'absolute',
-    });
   }
 
   /**

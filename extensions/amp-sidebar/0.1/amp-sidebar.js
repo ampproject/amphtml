@@ -331,10 +331,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.openerElement_ = opt_invocation.caller;
       this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
-    setImportantStyles(this.win.document.body, {
-      'overflow': 'hidden',
-      'position': 'fixed',
-    });
   }
 
   /**
@@ -358,11 +354,6 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
       tryFocus(this.openerElement_);
     }
-    setImportantStyles(this.win.document.body, {
-      'overflow': 'visible',
-      'position': 'absolute',
-    });
-
   }
 
   /**
