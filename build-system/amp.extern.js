@@ -479,3 +479,53 @@ AMP.require;
  * @typedef {function(number, boolean):?|function(number):?}
  */
 var TransitionDef;
+
+///////////////////
+// amp-bind externs
+///////////////////
+
+/**
+ * @typedef {{method: string, args: !Array, scope: number, id: number}}
+ */
+let ToWorkerMessageDef;
+
+/**
+ * @typedef {{method: string, returnValue: *, id: number}}
+ */
+let FromWorkerMessageDef;
+
+/**
+ * Structured cloneable representation of an <amp-bind-macro> element.
+ * @typedef {{id: string, argumentNames: Array<string>, expressionString: string}}
+ */
+let BindMacroDef;
+
+/**
+ * Structured cloneable representation of a binding e.g. <p [text]="foo>.
+ * @typedef {{tagName: string, property: string, expressionString: string}}
+ */
+let BindBindingDef;
+
+/**
+ * Structured cloneable representation of a JS error.
+ * @typedef {{message: string, stack: string}}
+ */
+let BindEvaluatorErrorDef;
+
+/**
+ * Possible types of an amp-bind expression result.
+ * @typedef {(null|boolean|string|number|Array|Object)}
+ */
+let BindExpressionResultDef;
+
+/**
+ * Structured cloneable return value for 'bind.evaluateBindings' API.
+ * @typedef {{results: !Object<string, BindExpressionResultDef>, errors: !Object<string, !BindEvaluatorErrorDef>}}
+ */
+let BindEvaluateBindingsResultDef;
+
+/**
+ * Structured cloneable return value for 'bind.evaluateExpression' API.
+ * @typedef {{result: BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
+ */
+let BindEvaluateExpressionResultDef;
