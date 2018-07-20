@@ -30,7 +30,7 @@ const hosts = {
  */
 export function onnetwork(global, data) {
   validateData(data, [['src', 'sid', 'mid']]);
-  global.Adonnetwork = {ampData: data};
+  global.onnetwork = {ampData: data};
   const {src, sid, mid} = data;
   let url;
 
