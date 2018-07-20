@@ -515,7 +515,7 @@ class VideoEntry {
       return false;
     }
     return user().assert(this.video.isInteractive(),
-        'Only interactive videos are allowed to enter fullscreen on rotate.',
+        'Only interactive videos are allowed to enter fullscreen on rotate. ' +
         'Set the `controls` attribute on %s to enable.',
         element);
   }
