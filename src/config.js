@@ -45,3 +45,7 @@ export const urls = {
       'https://amp-error-reporting.appspot.com/r',
   localDev: env['localDev'] || false,
 };
+
+export const config = {
+  urls,
+};

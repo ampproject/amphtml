@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as log from '../../src/log';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 import * as url from '../../src/url';
@@ -716,7 +717,6 @@ describe('cid', () => {
 
 describe('getProxySourceOrigin', () => {
   it('should fail on non-proxy origin', () => {
-    expectAsyncConsoleError('[CID] Viewer does not provide cap=cid');
     allowConsoleError(() => { expect(() => {
       getProxySourceOrigin(parseUrlDeprecated('https://abc.org/v/foo.com/'));
     }).to.throw(/Expected proxy origin/); });
@@ -730,7 +730,6 @@ describes.realWin('cid', {amp: true}, env => {
   let sandbox;
   let clock;
   const hasConsent = Promise.resolve();
-  const doesNotProvideError = '[CID] Viewer does not provide cap=cid';
 
   beforeEach(() => {
     win = env.win;
@@ -747,6 +746,8 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('should store CID in cookie when not in Viewer', function *() {
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
     setCookie(win, 'foo', '', 0);
     const fooCid = yield cid.get({
       scope: 'foo',
@@ -761,6 +762,8 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('get method should return CID when in Viewer ', () => {
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(true));
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(Promise.resolve('cid-from-viewer'));
@@ -774,15 +777,19 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('get method should time out when in Viewer', function *() {
-    expectAsyncConsoleError(doesNotProvideError);
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(true));
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(new Promise(() => {}));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer')
         .returns(Promise.resolve(true));
+    const storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(false));
     sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
+    const rethrowAsyncStub = sandbox.stub(log, 'rethrowAsync');
     cid.get({scope: 'foo'}, hasConsent)
         .then(result => {
           scopedCid = result;
@@ -796,6 +803,8 @@ describes.realWin('cid', {amp: true}, env => {
     yield macroTask();
     expect(resolved).to.be.true;
     expect(scopedCid).to.be.undefined;
+    yield macroTask();
+    expect(rethrowAsyncStub).to.be.calledOnce;
   });
 
   describe('pub origin, CID API opt in', () => {
@@ -889,10 +898,10 @@ describes.realWin('cid', {amp: true}, env => {
     it('should not work if vendor not whitelisted', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="abodeanalytics">';
-      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
+      allowConsoleError(() => {
+        expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
+      });
     });
-
-
   });
 });
 

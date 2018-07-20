@@ -22,6 +22,7 @@ import {Toolbar} from './toolbar';
 import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -32,8 +33,15 @@ const TAG = 'amp-sidebar toolbar';
 /** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
 
+/**
+  * For browsers with bottom nav bars the content towards the bottom
+  * end of the sidebar is cut off.
+  * Currently Safari is the only browser with a nav bar on the bottom
+  * so we set the width of this block to the width of Safari's nav bar.
+  * Source for value: https://github.com/WebKit/webkit/blob/de9875e914c8fda3f46247cd482ce4f849ddad0a/Source/WebInspectorUI/UserInterface/Views/Variables.css#L119
+ */
 /** @private @const {string} */
-const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
+const IOS_SAFARI_BOTTOMBAR_HEIGHT = '29px';
 
 /**  @enum {string} */
 const SidebarEvents = {
@@ -99,6 +107,7 @@ export class AmpSidebar extends AMP.BaseElement {
     const {element} = this;
 
     element.classList.add('i-amphtml-overlay');
+    element.classList.add('i-amphtml-scrollable');
 
     this.side_ = element.getAttribute('side');
 
@@ -425,7 +434,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }

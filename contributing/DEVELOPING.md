@@ -89,10 +89,11 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
-| `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
+| `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`. |
 | `gulp visual-diff --nobuild`                                            | Same as above, but without re-build. |
 | `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode. |
 | `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.  |
+| `gulp visual-diff --grep=<regular-expression-pattern>`                  | Same as above, but executes only those tests whose name matches the regular expression pattern. |
 
 ## Manual testing
 
@@ -231,8 +232,10 @@ You can also run the visual tests locally during development. You must first cre
 First, build the AMP runtime and run the gulp task that invokes the visual diff script:
 ```
 gulp build
-gulp visual-diff
+gulp visual-diff --nobuild
 ```
+Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp build` on each execution.
+
 The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome. You can see the results at `https://percy.io/<org>/<project>`.
 
 To run Chrome in headless mode, use:
@@ -248,6 +251,9 @@ The debug flags `--chrome_debug` and `--webserver_debug` can be used independent
 ```
  gulp visual-diff --debug
 ```
+
+To execute only a subset of the tests (i.e., when creating or debugging an existing test) use the `--grep` regular expression flag. e.g., `gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
+
 After each run, a new set of results will be available at `https://percy.io/<org>/<project>`.
 
 ## Testing on devices

@@ -263,7 +263,7 @@ export class Messaging {
   }
 
   /**
-   * I'm handing an incoming request from Bob. I'll either respond normally
+   * I'm handling an incoming request from Bob. I'll either respond normally
    * (ex: "got it Bob!") or with an error (ex: "I didn't get a word of what
    * you said!").
    * @param {Message} message
