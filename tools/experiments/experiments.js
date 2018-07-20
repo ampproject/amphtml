@@ -166,13 +166,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
   },
   {
-    id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP (launched).',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-animation/amp-animation.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
     id: 'pump-early-frame',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
