@@ -212,6 +212,8 @@ describes.realWin('amp-sidebar 0.1 version', {
         impl.openOrCloseTimeOut_ = 10;
 
         impl.open_();
+        expect(doc.body.style.overflow).to.equal('hidden');
+        expect(doc.body.style.position).to.equal('fixed');
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.getAttribute('role')).to.equal('menu');
@@ -264,6 +266,8 @@ describes.realWin('amp-sidebar 0.1 version', {
             impl.close_();
             expect(sidebarElement.hasAttribute('open')).to.be.false;
             expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+            expect(doc.body.style.overflow).to.equal('visible');
+            expect(doc.body.style.position).to.equal('absolute');
             clock.tick(600);
             expect(sidebarElement.style.display).to.equal('none');
             expect(impl.schedulePause).to.be.calledOnce;
