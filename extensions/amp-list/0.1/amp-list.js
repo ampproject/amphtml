@@ -29,7 +29,6 @@ import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 
@@ -147,19 +146,18 @@ export class AmpList extends AMP.BaseElement {
     const src = mutations['src'];
     const state = mutations['state'];
     if (src !== undefined) {
-      const typeOfSrc = typeof src;
-      if (typeOfSrc === 'string') {
+      if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
           this.resetIfNecessary_();
           return this.fetchList_();
         }
-      } else if (typeOfSrc === 'object') {
+      } else if (typeof src === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
         this.resetIfNecessary_();
         const items = isArray(src) ? src : [src];
-        return this.scheduleRender_(items);
+        this.scheduleRender_(items);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
@@ -167,9 +165,8 @@ export class AmpList extends AMP.BaseElement {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
       this.resetIfNecessary_();
       const items = isArray(state) ? state : [state];
-      return this.scheduleRender_(items);
+      this.scheduleRender_(items);
     }
-    return Promise.resolve();
   }
 
   /**
@@ -338,31 +335,37 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Evaluates and applies any bindings in the given elements.
+   * Scans for, evaluates and applies any bindings in the given elements.
    * Ensures that rendered content is up-to-date with the latest bindable state.
+   * Can be skipped by setting binding="no" or binding="refresh" attribute.
    * @param {!Array<!Element>} elements
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
   updateBindingsForElements_(elements) {
-    // Experiment to _not_ block on retrieval of the Bind service before the
-    // first mutation (AMP.setState). This is a breaking change and will require
-    // either an attribute opt-in or a version bump.
-    if (isExperimentOn(this.win, 'fast-amp-list')) {
+    const binding = this.element.getAttribute('binding');
+    // "no": Always skip binding update.
+    if (binding === 'no') {
+      return Promise.resolve(elements);
+    }
+    // "refresh": Do _not_ block on retrieval of the Bind service before the
+    // first mutation (AMP.setState).
+    if (binding === 'refresh') {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
         return this.updateBindingsWith_(this.bind_, elements);
       } else {
         return Promise.resolve(elements);
       }
-    } else {
-      return Services.bindForDocOrNull(this.element).then(bind => {
-        if (bind) {
-          return this.updateBindingsWith_(bind, elements);
-        } else {
-          return Promise.resolve(elements);
-        }
-      });
     }
+    // "always" (default): Wait for Bind to scan for and evalute any bindings
+    // in the newly rendered `elements`.
+    return Services.bindForDocOrNull(this.element).then(bind => {
+      if (bind) {
+        return this.updateBindingsWith_(bind, elements);
+      } else {
+        return Promise.resolve(elements);
+      }
+    });
   }
 
   /**
