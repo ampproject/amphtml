@@ -22,8 +22,8 @@ tags: {  # amp-fit-text
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-fit-text"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }

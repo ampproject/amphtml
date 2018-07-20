@@ -18,8 +18,8 @@ tags: {  # <script custom-element="amp-sticky-ad">
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-app-banner"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"

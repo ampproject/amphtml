@@ -18,8 +18,8 @@ tags: {  # amp-next-page
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-next-page"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }

@@ -989,29 +989,29 @@ describe('ValidatorRulesMakeSense', () => {
           expect(extensionSpec.name).toBeDefined();
         });
         it('extension ' + extensionSpec.name + ' must have at least two ' +
-               'allowed_versions, latest and a numeric version, e.g `1.0`',
+               'versions, latest and a numeric version, e.g `1.0`',
         () => {
-          expect(extensionSpec.allowedVersions).toBeGreaterThan(1);
+          expect(extensionSpec.version).toBeGreaterThan(1);
         });
         it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
                'or a numeric value',
         () => {
-          for (const versionString of extensionSpec.allowedVersions) {
+          for (const versionString of extensionSpec.version) {
             expect(versionString).toMatch(/^(latest|[0-9.])$/);
           }
-          for (const versionString of extensionSpec.deprecatedVersions) {
+          for (const versionString of extensionSpec.deprecatedVersion) {
             expect(versionString).toMatch(/^(latest|[0-9.])$/);
           }
         });
-        it('extension ' + extensionSpec.name + ' deprecated_versions must be ' +
-               'subset of allowed_versions',
+        it('extension ' + extensionSpec.name + ' deprecated_version must be ' +
+               'subset of version',
         () => {
-          const allowedVersions = {};
-          for (const versionString of extensionSpec.allowedVersions) {
+          const versions = {};
+          for (const versionString of extensionSpec.version) {
             expect(versionString).toMatch(/^(latest|[0-9.])$/);
           }
-          for (const versionString of extensionSpec.deprecatedVersions) {
-            expect(allowedVersions.hasOwnProperty(versionString)).toBe(true);
+          for (const versionString of extensionSpec.deprecatedVersion) {
+            expect(versions.hasOwnProperty(versionString)).toBe(true);
           }
         });
         it('extension ' + extensionSpec.name + ' must include the ' +
