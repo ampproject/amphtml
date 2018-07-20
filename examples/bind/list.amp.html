@@ -31,12 +31,27 @@
 
   <button on="tap:AMP.setState({foo: foo+1})">increment foo</button>
 
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="600">
-    <template type="amp-mustache">
-      <strong>Product</strong>: {{name}}
-      <strong>Quantity:</strong>: {{quantity}}
-      <strong>Unit Price</strong>: ${{unitPrice}}
-      <strong>Foo</strong>: <span [text]="foo">?</span>
-    </template>
+  <template id="my-template" type="amp-mustache">
+    <strong>Product</strong>: {{name}}
+    <strong>Quantity:</strong>: {{quantity}}
+    <strong>Unit Price</strong>: ${{unitPrice}}
+    <strong>1+1:</strong>: <span [text]="1+1">?</span>
+    <strong>Foo</strong>: <span [text]="foo">?</span>
+  </template>
+
+  <h3>Default</h3>
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  </amp-list>
+
+  <h3>binding="always"</h3>
+  <amp-list binding="always" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  </amp-list>
+
+  <h3>binding="refresh"</h3>
+  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  </amp-list>
+
+  <h3>binding="no"</h3>
+  <amp-list binding="no" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
   </amp-list>
 </body>
