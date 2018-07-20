@@ -58,9 +58,15 @@ describes.realWin('amp-sticky-ad 1.0 version', {
     });
 
     it('should listen to scroll event', function * () {
+      const spy = sandbox.spy(impl, 'removeOnScrollListener_');
       expect(impl.scrollUnlisten_).to.be.null;
       yield macroTask();
-      expect(impl.scrollUnlisten_).to.be.a('function');
+      // Hack to handle possible unexpected page scroll
+      if (impl.scrollUnlisten_) {
+        expect(impl.scrollUnlisten_).to.be.a('function');
+      } else {
+        expect(spy).to.be.calledOnce;
+      }
     });
 
     it('should not build when scrollTop not greater than 1', () => {
