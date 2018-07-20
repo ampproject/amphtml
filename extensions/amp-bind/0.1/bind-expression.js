@@ -19,7 +19,7 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {parser} from './bind-expr-impl';
+import {bindParser as parser} from './bind-expr-impl';
 
 const TAG = 'amp-bind';
 

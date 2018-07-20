@@ -928,4 +928,4 @@ Parser.prototype = parser;parser.Parser = Parser;
 return new Parser;
 })();
 
-exports.parser = parser;
+export const bindParser = parser;
