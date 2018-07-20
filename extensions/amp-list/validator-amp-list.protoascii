@@ -18,8 +18,8 @@ tags: {  # amp-list
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-list"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -32,8 +32,8 @@ tags: {  # amp-list
   spec_name: "SCRIPT[custom-element=amp-list] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-list"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
