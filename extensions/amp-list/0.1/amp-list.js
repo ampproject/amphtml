@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as setDOM from '../../../node_modules/set-dom/dist/set-dom';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {Deferred} from '../../../src/utils/promise';
@@ -113,8 +114,7 @@ export class AmpList extends AMP.BaseElement {
     // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
 
-    this.container_ = this.win.document.createElement('div');
-    this.applyFillContent(this.container_, true);
+    this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
 
     if (!this.container_.hasAttribute('role')) {
@@ -179,6 +179,30 @@ export class AmpList extends AMP.BaseElement {
    */
   isLoadingReused() {
     return this.element.hasAttribute('reset-on-refresh');
+  }
+
+  /**
+   * Creates and returns <div> that contains the template-rendered children.
+   * @return {!Element}
+   */
+  createContainer_() {
+    const container = this.win.document.createElement('div');
+    this.applyFillContent(container, true);
+    return container;
+  }
+
+  /**
+   * Adds template-rendered `elements` as children to `container`.
+   * @param {!Array<!Node>} elements
+   * @param {!Element} container
+   */
+  addElementsToContainer_(elements, container) {
+    elements.forEach(element => {
+      if (!element.hasAttribute('role')) {
+        element.setAttribute('role', 'listitem');
+      }
+      container.appendChild(element);
+    });
   }
 
   /**
@@ -385,13 +409,15 @@ export class AmpList extends AMP.BaseElement {
     dev().info(TAG, 'render:', elements);
 
     this.mutateElement(() => {
-      removeChildren(dev().assertElement(this.container_));
-      elements.forEach(element => {
-        if (!element.hasAttribute('role')) {
-          element.setAttribute('role', 'listitem');
-        }
-        this.container_.appendChild(element);
-      });
+      const diffing = isExperimentOn(this.win, 'set-dom');
+      if (this.container_.hasChildNodes && diffing) {
+        const newContainer = this.createContainer_();
+        this.addElementsToContainer_(elements, newContainer);
+        setDOM.default(this.container_, newContainer);
+      } else {
+        removeChildren(dev().assertElement(this.container_));
+        this.addElementsToContainer_(elements, this.container_);
+      }
 
       const event = createCustomEvent(this.win,
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
