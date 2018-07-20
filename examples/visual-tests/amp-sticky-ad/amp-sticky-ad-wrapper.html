@@ -1,0 +1,17 @@
+<html>
+  <body>
+    <iframe id="stickyAd"
+      width="350"
+      height="500"
+      src="./amp-sticky-ad.amp.html">
+    </iframe>
+    <script>
+      const iframe = document.getElementById('stickyAd');
+      window.addEventListener('message', event => {
+        if (event.data == 'ready-for-visual-diff') {
+          iframe.classList.add(event.data);
+        }
+      });
+    </script>
+  </body>
+</html>

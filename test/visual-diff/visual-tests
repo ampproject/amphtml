@@ -144,6 +144,11 @@
       "name": "Video rotate-to-fullscreen",
       "loading_complete_css": ["video.i-amphtml-replaced-content"]
     },
+    {
+      "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad-wrapper.html",
+      "name": "AMP Sticky Ad",
+      "loading_complete_css": [".ready-for-visual-diff"]
+    },
     /**
       * AMP by Example pages go below this.
       */
