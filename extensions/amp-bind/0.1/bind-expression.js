@@ -50,7 +50,7 @@ let FUNCTION_WHITELIST;
  */
 function generateFunctionWhitelist() {
   /**
-   * Static, not-in-place variant of Array#splice.
+   * Deprecated. Static, not-in-place variant of Array#splice.
    * @param {!Array} array
    * @param {number=} start
    * @param {number=} deleteCount
@@ -68,7 +68,25 @@ function generateFunctionWhitelist() {
   }
 
   /**
-   * Static, not-in-place variant of Array#sort.
+   * @return {!Function}
+   */
+  function instanceSplice() {
+    /**
+     * @param {number=} start
+     * @param {number=} deleteCount
+     * @param {...?} items
+     * @return {!Array}
+     * @this {!Array}
+     */
+    return function splice(start, deleteCount, items) { // eslint-disable-line no-unused-vars
+      const copy = Array.prototype.slice.call(this);
+      Array.prototype.splice.apply(copy, arguments);
+      return copy;
+    };
+  }
+
+  /**
+   * Deprecated. Static, not-in-place variant of Array#sort.
    * @param {!Array} array
    * @return {!Array}
    */
@@ -79,6 +97,22 @@ function generateFunctionWhitelist() {
     const copy = Array.prototype.slice.call(array);
     Array.prototype.sort.call(copy);
     return copy;
+  }
+
+  /**
+   * @return {!Function}
+   */
+  function instanceSort() {
+    /**
+     * @param {!Function} compareFunction
+     * @return {!Array}
+     * @this {!Array}
+     */
+    return function sort(compareFunction) {
+      const copy = Array.prototype.slice.call(this);
+      Array.prototype.sort.call(copy, compareFunction);
+      return copy;
+    };
   }
 
   /**
@@ -110,6 +144,8 @@ function generateFunctionWhitelist() {
       'reduce': Array.prototype.reduce,
       'slice': Array.prototype.slice,
       'some': Array.prototype.some,
+      'sort': instanceSort(),
+      'splice': instanceSplice(),
       'includes': Array.prototype.includes,
     },
     '[object Number]': {
@@ -160,7 +196,6 @@ function generateFunctionWhitelist() {
       if (func) {
         dev().assert(!func.name || name === func.name, 'Listed function name ' +
             `"${name}" doesn't match name property "${func.name}".`);
-
         out[type][name] = func;
       } else {
         // This can happen if a browser doesn't support a built-in function.
@@ -171,9 +206,9 @@ function generateFunctionWhitelist() {
 
   // Custom functions (non-js-built-ins) must be added manually as their names
   // will be minified at compile time.
-  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = splice; // Legacy name.
-  out[BUILT_IN_FUNCTIONS]['sort'] = sort;
-  out[BUILT_IN_FUNCTIONS]['splice'] = splice;
+  out[BUILT_IN_FUNCTIONS]['copyAndSplice'] = splice; // Deprecated.
+  out[BUILT_IN_FUNCTIONS]['sort'] = sort; // Deprecated.
+  out[BUILT_IN_FUNCTIONS]['splice'] = splice; // Deprecated.
   out[BUILT_IN_FUNCTIONS]['values'] =
       (typeof Object.values == 'function') ? Object.values : values;
 
@@ -351,6 +386,8 @@ export class BindExpression {
             const f = caller[method];
             if (f && f === whitelist[method]) {
               validFunction = f;
+            } else if (method === 'sort' || method === 'splice') {
+              validFunction = whitelist[method];
             }
           }
           if (!validFunction) {
