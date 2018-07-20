@@ -80,11 +80,12 @@ function generateFunctionWhitelist() {
      * @return {!Array}
      * @this {!Array}
      */
-    return function splice(unusedStart, unusedDeleteCount, unusedItems) {
+    function splice(unusedStart, unusedDeleteCount, unusedItems) {
       const copy = Array.prototype.slice.call(this);
       Array.prototype.splice.apply(copy, arguments);
       return copy;
-    };
+    }
+    return splice;
   }
 
   /**
@@ -112,11 +113,12 @@ function generateFunctionWhitelist() {
      * @return {!Array}
      * @this {!Array}
      */
-    return function sort(compareFunction) {
+    function sort(compareFunction) {
       const copy = Array.prototype.slice.call(this);
       Array.prototype.sort.call(copy, compareFunction);
       return copy;
-    };
+    }
+    return sort;
   }
 
   /**
