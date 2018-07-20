@@ -28,7 +28,7 @@ const hosts = {
  * @param {!Window} global
  * @param {!Object} data
  */
-export function adonnetwork(global, data) {
+export function onnetwork(global, data) {
   validateData(data, [['src', 'sid', 'mid']]);
   global.Adonnetwork = {ampData: data};
   const {src, sid, mid} = data;
