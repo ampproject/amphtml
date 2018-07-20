@@ -37,6 +37,7 @@ import {
 } from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
 
+import {dict} from '../../../src/utils/object';
 import {px, scale, setStyles, translate} from '../../../src/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -521,11 +522,11 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   triggerTransformEnd_(scale, x, y) {
     const transformEndEvent =
-    createCustomEvent(this.win, `${TAG}.transformEnd`, {
-      scale,
-      x,
-      y,
-    });
+    createCustomEvent(this.win, `${TAG}.transformEnd`, dict({
+      'scale': scale,
+      'x': x,
+      'y': y,
+    }));
     this.action_.trigger(this.element, 'transformEnd', transformEndEvent,
         ActionTrust.HIGH);
   }

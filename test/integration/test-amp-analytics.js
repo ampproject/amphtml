@@ -19,11 +19,12 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe.configure().run('amp-analytics', function() {
-  this.timeout(15000);
+describe.configure()
+    .skipIfPropertiesObfuscated().run('amp-analytics', function() {
+      this.timeout(15000);
 
-  describes.integration('amp-analytics integration test', {
-    body:
+      describes.integration('amp-analytics integration test', {
+        body:
     `<amp-analytics>
         <script type="application/json">
         {
@@ -40,18 +41,18 @@ describe.configure().run('amp-analytics', function() {
         </script>
     </amp-analytics>
     `,
-    extensions: ['amp-analytics'],
-  }, env => {
-    it('should keep referrer if no referrerpolicy specified', () => {
-      return withdrawRequest(env.win,
-          'analytics-has-referrer').then(request => {
-        expect(request.headers.referer).to.be.ok;
+        extensions: ['amp-analytics'],
+      }, env => {
+        it('should keep referrer if no referrerpolicy specified', () => {
+          return withdrawRequest(env.win,
+              'analytics-has-referrer').then(request => {
+            expect(request.headers.referer).to.be.ok;
+          });
+        });
       });
-    });
-  });
 
-  describes.integration('amp-analytics integration test', {
-    body:
+      describes.integration('amp-analytics integration test', {
+        body:
     `<amp-analytics>
         <script type="application/json">
         {
@@ -71,12 +72,13 @@ describe.configure().run('amp-analytics', function() {
         </script>
     </amp-analytics>
     `,
-    extensions: ['amp-analytics'],
-  }, env => {
-    it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return withdrawRequest(env.win, 'analytics-no-referrer').then(request => {
-        expect(request.headers.referer).to.not.be.ok;
+        extensions: ['amp-analytics'],
+      }, env => {
+        it('should remove referrer if referrerpolicy=no-referrer', () => {
+          return withdrawRequest(env.win, 'analytics-no-referrer')
+              .then(request => {
+                expect(request.headers.referer).to.not.be.ok;
+              });
+        });
       });
     });
-  });
-});

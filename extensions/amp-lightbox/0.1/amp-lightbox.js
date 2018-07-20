@@ -523,7 +523,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }

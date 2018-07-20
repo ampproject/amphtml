@@ -135,8 +135,20 @@ function compile(entryModuleFilenames, outputDir,
       define,
       externs: baseExterns,
       hideWarningsFor,
+    }).then(() => {
+      return new Promise((resolve, reject) => {
+        const stream = gulp.src(outputDir + '/**/*.js');
+        stream.on('end', resolve);
+        stream.on('error', reject);
+        stream.pipe(
+            replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+            .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+            .pipe(shortenLicense())
+            .pipe(gulp.dest(outputDir));
+      });
     });
   }
+
   return new Promise(function(resolve) {
     let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {

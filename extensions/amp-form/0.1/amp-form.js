@@ -37,7 +37,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {deepMerge} from '../../../src/utils/object';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {
   formOrNullForElement,
@@ -745,7 +745,8 @@ export class AmpForm {
   triggerAction_(success, json) {
     const name = success ? FormState_.SUBMIT_SUCCESS : FormState_.SUBMIT_ERROR;
     const event =
-        createCustomEvent(this.win_, `${TAG}.${name}`, {response: json});
+        createCustomEvent(this.win_, `${TAG}.${name}`,
+            dict({'response': json}));
     this.actions_.trigger(this.form_, name, event, ActionTrust.HIGH);
   }
 

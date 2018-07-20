@@ -23,6 +23,7 @@ import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {
   isAdLike,
@@ -650,7 +651,8 @@ export class AmpIframe extends AMP.BaseElement {
         return;
       }
       const event =
-          createCustomEvent(this.win, 'amp-iframe:message', {data: sanitized});
+          createCustomEvent(this.win, 'amp-iframe:message',
+              dict({'data': sanitized}));
       const actionService = Services.actionServiceForDoc(this.getAmpDoc());
       actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
     };

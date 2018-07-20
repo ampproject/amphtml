@@ -344,6 +344,12 @@ const command = {
       timedExecOrDie(cmd + ' --headless');
     }
   },
+  runSinglePassCompiledIntegrationTests: function() {
+    timedExecOrDie('rm -R dist');
+    timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
+    timedExecOrDie('gulp test --integration --nobuild --headless '
+        + '--compiled --single_pass');
+  },
   runVisualDiffTests: function(opt_mode) {
     if (process.env.TRAVIS) {
       process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
@@ -422,6 +428,8 @@ function runAllCommands() {
     }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
+    // Disabled while remaining failures are fixed.
+    // command.runSinglePassCompiledIntegrationTest();
   }
 }
 

@@ -22,6 +22,7 @@ import {Signals} from './utils/signals';
 import {closestBySelector, escapeHtml, removeElement} from './dom';
 import {createCustomEvent, listenOnce, loadPromise} from './event-helper';
 import {dev, rethrowAsync, user} from './log';
+import {dict} from './utils/object';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {htmlFor} from './static-template';
 import {isDocumentReady} from './document-ready';
@@ -657,7 +658,7 @@ export function renderCloseButtonHeader(win, ampAdParent, ampLightbox) {
  * @param {!Element} caller Whomever.
  */
 function triggerLightboxClose(win, target, caller) {
-  const event = createCustomEvent(win, 'tap', /* detail */ {});
+  const event = createCustomEvent(win, 'tap', /* detail */ dict({}));
   const method = 'close';
   const args = null;
   const trust = ActionTrust.HIGH;

@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 const TAG = 'amp-selector';
 
@@ -318,10 +319,10 @@ export class AmpSelector extends AMP.BaseElement {
         // 'selectedOptions' - array of option values of selected elements.
         const name = 'select';
         const selectEvent =
-            createCustomEvent(this.win, `amp-selector.${name}`, {
-              targetOption: el.getAttribute('option'),
-              selectedOptions: selectedValues,
-            });
+            createCustomEvent(this.win, `amp-selector.${name}`, dict({
+              'targetOption': el.getAttribute('option'),
+              'selectedOptions': selectedValues,
+            }));
         this.action_.trigger(this.element, name, selectEvent,
             ActionTrust.HIGH);
       }

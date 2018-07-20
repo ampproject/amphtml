@@ -90,6 +90,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
+import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
@@ -372,12 +373,14 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.switchTo_(e.detail.targetPageId);
+      this.switchTo_(getDetail(e)['targetPageId']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
-      const {pageId, progress} = e.detail;
+      const detail = getDetail(e);
+      const pageId = detail['pageId'];
+      const progress = detail['progress'];
 
       if (pageId !== this.activePage_.element.id) {
         // Ignore progress update events from inactive pages.
@@ -400,7 +403,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
-      const {direction} = e.detail;
+      const direction = getDetail(e)['direction'];
       this.performTapNavigation_(direction);
     });
 
@@ -472,7 +475,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.element.addEventListener(EventType.DEV_LOG_ENTRIES_AVAILABLE, e => {
-      this.systemLayer_.logAll(e.detail);
+      this.systemLayer_.logAll(/** @type {?} */ (getDetail(e)));
     });
   }
 

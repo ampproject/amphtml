@@ -503,7 +503,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
           expect(triggeredAmpEventNames)
               .to.deep.equal(['tl_event-1', 'tl_event-2']);
-          expect(triggeredEvents.map(event => event.eventName))
+          expect(triggeredEvents.map(event => event.detail.eventName))
               .to.deep.equal(['event-1', 'event-2']);
         });
 

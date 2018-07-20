@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+// WARNING
+// WARNING
+// WARNING
+// WARNING
+// File must be synced with amp.extens.js
+
 
 /**
  * @typedef {
