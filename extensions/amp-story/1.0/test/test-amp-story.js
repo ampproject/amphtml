@@ -190,45 +190,45 @@ describes.realWin('amp-story', {
   it('should return a valid page index', () => {
     createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
     return story.layoutCallback()
-      .then(() => {
+        .then(() => {
         // Getting all the AmpStoryPage objets.
-        const pageElements =
+          const pageElements =
             story.element.getElementsByTagName('amp-story-page');
-        const pages = Array.from(pageElements).map(el => el.getImpl());
+          const pages = Array.from(pageElements).map(el => el.getImpl());
 
-        return Promise.all(pages);
-      })
-      .then(pages => {
+          return Promise.all(pages);
+        })
+        .then(pages => {
         // Only the first page should be active.
-        for (let i = 0; i < pages.length; i++) {
-          expect(story.getPageIndex(pages[i])).to.equal(i);
-        }
-      });
+          for (let i = 0; i < pages.length; i++) {
+            expect(story.getPageIndex(pages[i])).to.equal(i);
+          }
+        });
   });
 
 
   it('should pause/resume pages when switching pages', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
     return story.layoutCallback()
-      .then(() => {
+        .then(() => {
         // Getting all the AmpStoryPage objets.
-        const pageElements =
+          const pageElements =
             story.element.getElementsByTagName('amp-story-page');
-        const pages = Array.from(pageElements).map(el => el.getImpl());
-        return Promise.all(pages);
-        const oldPage = pageElements[0].implementation_;
-        const newPage = pageElements[1].implementation_;
-        const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
-        const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
-        story.switchTo_('page-1').then(() => {
-          expect(pauseOldPageStub).to.have.been.calledOnce;
-          expect(resumeNewPageStub).to.have.been.calledOnce;
-        });       
-    });
+          const pages = Array.from(pageElements).map(el => el.getImpl());
+          return Promise.all(pages);
+          const oldPage = pageElements[0].implementation_;
+          const newPage = pageElements[1].implementation_;
+          const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
+          const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+          story.switchTo_('page-1').then(() => {
+            expect(pauseOldPageStub).to.have.been.calledOnce;
+            expect(resumeNewPageStub).to.have.been.calledOnce;
+          });
+        });
   });
 
   // TODO(#11639): Re-enable this test.
-  it.skip('should go to next page on right arrow keydown', () => {
+  it('should go to next page on right arrow keydown', () => {
     const pages = createPages(element, 5);
 
     element.build();
