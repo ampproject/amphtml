@@ -70,10 +70,6 @@ html.i-amphtml-story-standalone body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
 }
 
-html.i-amphtml-story-standalone body {
-  display: grid !important;
-}
-
 html.i-amphtml-story-standalone #i-amphtml-wrapper body {
   /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
       1px bigger than the viewport. */
