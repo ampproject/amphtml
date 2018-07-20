@@ -64,7 +64,8 @@ export function runVideoPlayerIntegrationTests(
     return button;
   }
 
-  describe.configure().ifNewChrome().run('Video Interface', function() {
+  describe.configure().skipIfPropertiesObfuscated()
+      .ifNewChrome().run('Video Interface', function() {
     this.timeout(TIMEOUT);
 
     it('should override the video interface methods', function() {
@@ -136,7 +137,8 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().ifNewChrome().run('Analytics Triggers', function() {
+  describe.configure().skipIfPropertiesObfuscated()
+      .ifNewChrome().run('Analytics Triggers', function() {
     this.timeout(TIMEOUT);
     let video;
 

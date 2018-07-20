@@ -38,12 +38,15 @@ describe.configure().retryOnSaucelabs().run('error page', function() {
       }
     }).then(f => {
       fixture = f;
+      if (location.hash != '#development=1') {
+        throw new Error('Location not updated ' + location.href);
+      }
       return poll('errors to happen', () => {
         return fixture.doc.querySelectorAll('[error-message]').length >= 2;
       }, () => {
         return new Error('Failed to find errors. HTML\n' +
             fixture.doc.documentElement./*TEST*/innerHTML);
-      }, TIMEOUT);
+      }, TIMEOUT - 1000);
     });
   });
 
