@@ -29,45 +29,37 @@
 </head>
 <body>
   <!-- Valid: Runtime-managed animated image. -->
-  <div class="fixedblock">
-    <amp-anim
-      layout="responsive"
-      height="300"
-      width="400"
-      src="lemur.gif">
-    </amp-anim>
-  </div>
+  <amp-anim
+    layout="responsive"
+    height="300"
+    width="400"
+    src="lemur.gif">
+  </amp-anim>
 
   <!-- Valid: Runtime-managed animated image with optional attributes. -->
-  <div class="fixedblock">
-    <amp-anim
-      alt="Lemurs"
-      attribution="National Geographic Channel"
-      controls=""
-      layout="responsive"
-      height="300"
-      width="400"
-      src="lemur.gif">
-    </amp-anim>
-  </div>
+  <amp-anim
+    alt="Lemurs"
+    attribution="National Geographic Channel"
+    controls=""
+    layout="responsive"
+    height="300"
+    width="400"
+    src="lemur.gif">
+  </amp-anim>
 
   <!-- Invalid: Missing src attribute. -->
-  <div class="fixedblock">
-    <amp-anim
-      layout="responsive"
-      height="300"
-      width="400">
-    </amp-anim>
-  </div>
+  <amp-anim
+    layout="responsive"
+    height="300"
+    width="400">
+  </amp-anim>
 
   <!-- Invalid: illegal layout. -->
-  <div class="fixedblock">
-    <amp-anim
-      layout="container"
-      height="300"
-      width="400"
-      src="lemur.gif">
-    </amp-anim>
-  </div>
+  <amp-anim
+    layout="container"
+    height="300"
+    width="400"
+    src="lemur.gif">
+  </amp-anim>
 </body>
 </html>

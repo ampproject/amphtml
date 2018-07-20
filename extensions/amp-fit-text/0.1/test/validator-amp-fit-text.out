@@ -34,7 +34,7 @@ FAIL
 |      <amp-fit-text
 |        layout="responsive"
 |        height="200"
-|        width="200">"
+|        width="200">
 |        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
 |      </amp-fit-text>
 |    </div>

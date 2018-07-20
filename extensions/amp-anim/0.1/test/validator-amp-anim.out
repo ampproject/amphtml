@@ -30,49 +30,41 @@ FAIL
 |  </head>
 |  <body>
 |    <!-- Valid: Runtime-managed animated image. -->
-|    <div class="fixedblock">
-|      <amp-anim
-|        layout="responsive"
-|        height="300"
-|        width="400"
-|        src="lemur.gif">
-|      </amp-anim>
-|    </div>
+|    <amp-anim
+|      layout="responsive"
+|      height="300"
+|      width="400"
+|      src="lemur.gif">
+|    </amp-anim>
 |
 |    <!-- Valid: Runtime-managed animated image with optional attributes. -->
-|    <div class="fixedblock">
-|      <amp-anim
-|        alt="Lemurs"
-|        attribution="National Geographic Channel"
-|        controls=""
-|        layout="responsive"
-|        height="300"
-|        width="400"
-|        src="lemur.gif">
-|      </amp-anim>
-|    </div>
+|    <amp-anim
+|      alt="Lemurs"
+|      attribution="National Geographic Channel"
+|      controls=""
+|      layout="responsive"
+|      height="300"
+|      width="400"
+|      src="lemur.gif">
+|    </amp-anim>
 |
 |    <!-- Invalid: Missing src attribute. -->
-|    <div class="fixedblock">
-|      <amp-anim
->>     ^~~~~~~~~
-amp-anim/0.1/test/validator-amp-anim.html:56:4 The mandatory attribute 'src' is missing in tag 'amp-anim'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
-|        layout="responsive"
-|        height="300"
-|        width="400">
-|      </amp-anim>
-|    </div>
+|    <amp-anim
+>>   ^~~~~~~~~
+amp-anim/0.1/test/validator-amp-anim.html:51:2 The mandatory attribute 'src' is missing in tag 'amp-anim'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+|      layout="responsive"
+|      height="300"
+|      width="400">
+|    </amp-anim>
 |
 |    <!-- Invalid: illegal layout. -->
-|    <div class="fixedblock">
-|      <amp-anim
->>     ^~~~~~~~~
-amp-anim/0.1/test/validator-amp-anim.html:65:4 The specified layout 'CONTAINER' is not supported by tag 'amp-anim'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_LAYOUT_PROBLEM]
-|        layout="container"
-|        height="300"
-|        width="400"
-|        src="lemur.gif">
-|      </amp-anim>
-|    </div>
+|    <amp-anim
+>>   ^~~~~~~~~
+amp-anim/0.1/test/validator-amp-anim.html:58:2 The specified layout 'CONTAINER' is not supported by tag 'amp-anim'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_LAYOUT_PROBLEM]
+|      layout="container"
+|      height="300"
+|      width="400"
+|      src="lemur.gif">
+|    </amp-anim>
 |  </body>
 |  </html>
