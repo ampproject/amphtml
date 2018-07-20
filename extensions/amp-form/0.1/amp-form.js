@@ -291,8 +291,10 @@ export class AmpForm {
             if (errors.length) {
               this.setState_(FormState.VERIFY_ERROR);
               this.renderTemplate_(
-                  /** @type {!JsonObject} */ ({verifyErrors: errors}));
-              this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
+                  /** @type {!JsonObject} */ ({verifyErrors: errors}))
+                  .then(() => {
+                    this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
+                  });
             } else {
               this.setState_(FormState.INITIAL);
             }
@@ -486,11 +488,12 @@ export class AmpForm {
    * @param {!JsonObject} error
    */
   handleSsrTemplateFailure_(error) {
-    this.triggerAction_(/* success */ false, error); // do we need this?
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, `Form submission failed: ${error}`);
     return tryResolve(() => {
-      this.renderTemplate_(error || {});
+      this.renderTemplate_(error || {}).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, error); // do we need this?
+      });
     });
   }
 
@@ -500,13 +503,14 @@ export class AmpForm {
    */
   submittingWithTrust_(trust) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
-    this.actions_.trigger(
-        this.form_, 'submit', /* event */ null, trust);
     // After variable substitution
     const values = this.getFormAsObject_();
     // At the form submitting state, we want to display any template
     // messages with the submitting attribute.
-    this.renderTemplate_(values);
+    this.renderTemplate_(values).then(() => {
+      this.actions_.trigger(
+          this.form_, FormEvents.SUBMIT, /* event */ null, trust);
+    });
   }
 
   /**
@@ -614,9 +618,10 @@ export class AmpForm {
    */
   handleSubmitSuccess_(jsonPromise) {
     return jsonPromise.then(json => {
-      this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
       this.setState_(FormState.SUBMIT_SUCCESS);
-      this.renderTemplate_(json || {});
+      this.renderTemplate_(json || {}).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
+      });
     }, error => {
       user().error(TAG, `Failed to parse response JSON: ${error}`);
     });
@@ -636,10 +641,12 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then(responseJson => {
-      this.triggerAction_(FormEvents.SUBMIT_ERROR, responseJson);
+
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.setState_(FormState.SUBMIT_ERROR);
-      this.renderTemplate_(responseJson || {});
+      this.renderTemplate_(responseJson || {}).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, responseJson);
+      });
       this.maybeHandleRedirect_(error.response);
       user().error(TAG, `Form submission failed: ${error}`);
     });
@@ -807,11 +814,11 @@ export class AmpForm {
   /**
    * Renders a template based on the form state and its presence in the form.
    * @param {!JsonObject} data
-   * @private
+   * @return {!Promise}
    */
   renderTemplate_(data) {
     const container = this.form_./*OK*/querySelector(`[${this.state_}]`);
-    let p = null;
+    let p = Promise.resolve();
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
@@ -838,13 +845,14 @@ export class AmpForm {
         // made visible so that we don't do redundant layout work when a
         // template is rendered too.
         this.resources_.mutateElement(container, () => {});
-        p = Promise.resolve();
       }
     }
 
     if (getMode().test) {
       this.renderTemplatePromise_ = p;
     }
+
+    return p;
   }
 
   /**
