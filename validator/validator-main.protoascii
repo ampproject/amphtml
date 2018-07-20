@@ -5344,13 +5344,21 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
-    value_casei: "fade-in"
-    value_casei: "fade-in-scroll"
-    value_casei: "fly-in-bottom"
-    value_casei: "fly-in-left"
-    value_casei: "fly-in-right"
-    value_casei: "fly-in-top"
-    value_casei: "parallax"
+    value_regex_casei: "(fade-in|"
+                        "fade-in-scroll|"
+                        "fly-in-bottom|"
+                        "fly-in-left|"
+                        "fly-in-right|"
+                        "fly-in-top|"
+                        "parallax)"
+                       "(\\s|"
+                        "fade-in|"
+                        "fade-in-scroll|"
+                        "fly-in-bottom|"
+                        "fly-in-left|"
+                        "fly-in-right|"
+                        "fly-in-top|"
+                        "parallax)*"
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
