@@ -273,6 +273,12 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
+    /** @private @const {!../../../src/service/document-state.DocumentState} */
+    this.documentState_ = Services.documentStateFor(this.win);
+
+    /** @private {boolean} */
+    this.pausedStateToRestore_ = false;
+
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -345,16 +351,34 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
-  /** @private */
+  /** @override */
+  pauseCallback() {
+    // Store the current paused state, to make sure the story does not play on
+    // resume if it was previously paused.
+    this.pausedStateToRestore_ =
+        this.storeService_.get(StateProperty.PAUSED_STATE);
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+  }
+
+
+  /** @override */
+  resumeCallback() {
+    this.storeService_
+        .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
+  }
+
+
+  /**
+   * Note: runs in the buildCallback vsync mutate context.
+   * @private
+   */
   initializeStandaloneStory_() {
     const html = this.win.document.documentElement;
-    this.mutateElement(() => {
-      html.classList.add('i-amphtml-story-standalone');
-      // Lock body to prevent overflow.
-      this.lockBody_();
-      // Standalone CSS affects sizing of the entire page.
-      this.onResize();
-    }, html);
+    html.classList.add('i-amphtml-story-standalone');
+    // Lock body to prevent overflow.
+    this.lockBody_();
+    // Standalone CSS affects sizing of the entire page.
+    this.onResize();
   }
 
 
@@ -515,6 +539,10 @@ export class AmpStory extends AMP.BaseElement {
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
+
+    // TODO(#16795): Remove once the runtime triggers pause/resume callbacks
+    // on document visibility change (eg: user switches tab).
+    this.documentState_.onVisibilityChanged(() => this.onVisibilityChanged_());
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -1090,6 +1118,16 @@ export class AmpStory extends AMP.BaseElement {
         this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, state.isLandscape);
       },
     }, {});
+  }
+
+  /**
+   * Reacts to the browser tab becoming active/inactive.
+   * @private
+   */
+  onVisibilityChanged_() {
+    this.documentState_.isHidden() ?
+      this.pauseCallback() :
+      this.resumeCallback();
   }
 
   /**
