@@ -591,6 +591,7 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.runSinglePassCompiledIntegrationTest()
       command.buildRuntimeMinified(/* extensions */ false);
       command.runBundleSizeCheck();
       command.runVisualDiffTests();
