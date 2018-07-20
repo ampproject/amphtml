@@ -113,6 +113,12 @@
    * },
    */
     {
+      "url": "examples/visual-tests/amp-story/helloworld.html",
+      "name": "amp-story",
+      "loading_complete_css": [".i-amphtml-story-loaded"]
+    },
+    {
+      "flaky": true,
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",
       "loading_incomplete_css": [".article-body"],

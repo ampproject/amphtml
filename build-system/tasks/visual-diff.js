@@ -34,7 +34,7 @@ const {gitBranchName, gitCommitterEmail} = require('../git');
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
 const SNAPSHOT_EMPTY_BUILD_OPTIONS = {widths: [375]};
-const VIEWPORT_WIDTH = 1400;
+const VIEWPORT_WIDTH = 411;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
