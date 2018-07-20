@@ -25,8 +25,8 @@ tags: {  # amp-mustache
   extension_spec: {
     name: "amp-mustache"
     is_custom_template: true
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -41,8 +41,8 @@ tags: {  # amp-mustache
   extension_spec: {
     name: "amp-mustache"
     is_custom_template: true
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }

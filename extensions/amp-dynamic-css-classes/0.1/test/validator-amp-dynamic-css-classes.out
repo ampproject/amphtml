@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |
@@ -16,7 +16,7 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    Tests for the amp-fit-text tag. See the inline comments.
+|    Test for the amp-dynamic-css-classes extension from ampbyexample.com.
 |  -->
 |  <!doctype html>
 |  <html ⚡>
@@ -25,52 +25,44 @@ FAIL
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-|    <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-latest.js"></script>
+|    <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-latest.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <style amp-custom>
+|      body:not(.amp-referrer-pinterest-com) .if-pinterest,
+|      body:not(.amp-referrer-ampbyexample-com) .if-ampbyexample,
+|      body:not(.amp-referrer-google-com) .if-google,
+|      body:not(.amp-referrer-twitter-com) .if-twitter,
+|      body:not(.amp-referrer-linkedin-com) .if-linkedin,
+|      body:not(.amp-referrer-localhost) .if-localhost {
+|        display: none;
+|      }
+|      body:not(.amp-viewer) .if-viewer,
+|      body.amp-viewer .if-not-viewer {
+|        display: none;
+|      }
+|      p {
+|        padding: 1rem;
+|      }
+|    </style>
 |  </head>
 |  <body>
-|    <!-- Valid: Scales text to fit area. -->
-|    <div class="fixedblock">
-|      <amp-fit-text
-|        layout="responsive"
-|        height="200"
-|        width="200">
-|        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
-|      </amp-fit-text>
+|    <!-- #### Referrer -->
+|    <!--
+|      Using these referrer classes will conditionally include elements.
+|    -->
+|    <div>
+|      <p class="if-pinterest">You were referred here or embedded by Pinterest!</p>
+|      <p class="if-twitter">You were referred here or embedded by Twitter!</p>
+|      <p class="if-google">You were referred here or embedded by Google!</p>
+|      <p class="if-ampbyexample">You came here directly!  Cool :)</p>
+|      <p class="if-localhost">You came here directly!  Cool :)</p>
 |    </div>
-|
-|    <!-- Valid: Scales text to fit area using a maximum font size. -->
-|    <div class="fixedblock">
-|      <amp-fit-text
-|        layout="responsive"
-|        height="200"
-|        width="200"
-|        max-font-size="22">
-|        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
-|      </amp-fit-text>
-|    </div>
-|
-|    <!-- Valid: Text is truncated when minimum font size exceeds area. -->
-|    <div class="fixedblock">
-|      <amp-fit-text
-|        layout="responsive"
-|        height="200"
-|        width="200"
-|        min-font-size="40">
-|        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
-|      </amp-fit-text>
-|    </div>
-|
-|    <!-- Invalid: illegal layout. -->
-|    <div class="fixedblock">
-|      <amp-fit-text
->>     ^~~~~~~~~
-amp-fit-text/0.1/test/validator-amp-fit-text.html:65:4 The specified layout 'CONTAINER' is not supported by tag 'amp-fit-text'. (see https://www.ampproject.org/docs/reference/components/amp-fit-text) [AMP_LAYOUT_PROBLEM]
-|        layout="container"
-|        height="200"
-|        width="200">
-|        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt
-|      </amp-fit-text>
+|    <!-- #### Viewer -->
+|    <!--
+|      These classes styles the page based on whether it's embedded inside an AMP viewer. -->
+|    <div>
+|      <p class="if-not-viewer">Hey! You're not visiting within the context of an AMP Viewer!</p>
+|      <p class="if-viewer">Ahoy! Since you're coming from a viewer.</p>
 |    </div>
 |  </body>
 |  </html>
