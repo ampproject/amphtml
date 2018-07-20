@@ -14,32 +14,29 @@
  * limitations under the License.
  */
 
+
 /**
-  * Compares if two arrays contains exactly same elements (of same number)
-  * It will NOT step into array elements if ever seen, simply compare current
-  * level references.
-  * Notice it does NOT handle NaN case as expected.
-  *
-  * @param {!Array<T>} arr1
-  * @param {!Array<T>} arr2
-  * @return {boolean}
-  * @template T
-  */
-export function areEqual(arr1, arr2) {
+ * Compares if two arrays contains exactly same elements of same number
+ * of same order.
+ * Notice that it does NOT handle NaN case as expected
+ *
+ * @param {!Array<T>} arr1
+ * @param {!Array<T>} arr2
+ * @return {boolean}
+ * @template T
+ */
+export function areEqualOrdered(arr1, arr2) {
   if (arr1.length !== arr2.length) {
     return false;
   }
 
-  const arr2Copy = arr2.slice();
   for (let i = 0; i < arr1.length; i++) {
-    const index = arr2Copy.indexOf(arr1[i]);
-    if (index < 0) {
+    if (arr1[i] !== arr2[i]) {
       return false;
     }
-    arr2Copy.splice(index, 1);
   }
 
-  return arr2Copy.length === 0;
+  return true;
 }
 
 /**

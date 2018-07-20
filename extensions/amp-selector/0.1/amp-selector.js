@@ -19,7 +19,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {areEqual} from '../../../src/utils/array';
+import {areEqualOrdered} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
@@ -235,7 +235,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   maybeRefreshOnUpdate_(unusedEvent) {
     const newOptions = toArray(this.element.querySelectorAll('[option]'));
-    if (areEqual(this.options_, newOptions)) { // no updates
+    if (areEqualOrdered(this.options_, newOptions)) { // no updates
       return;
     }
     // Clear prev states
@@ -252,7 +252,7 @@ export class AmpSelector extends AMP.BaseElement {
   init_(opt_options) {
     const options = opt_options ?
       opt_options :
-      [].slice.call(this.element.querySelectorAll('[option]'));
+      toArray(this.element.querySelectorAll('[option]'));
     options.forEach(option => {
       if (!option.hasAttribute('role')) {
         option.setAttribute('role', 'option');
