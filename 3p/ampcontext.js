@@ -212,11 +212,13 @@ export class AbstractAmpContext {
    *    This is not guaranteed to succeed. All this does is make the request.
    *  @param {number} width The new width for the ad we are requesting.
    *  @param {number} height The new height for the ad we are requesting.
+   *  @param {boolean=} hasOverflow Whether the ad handles its own overflow ele
    */
-  requestResize(width, height) {
+  requestResize(width, height, hasOverflow) {
     this.client_.sendMessage(MessageType.EMBED_SIZE, dict({
       'width': width,
       'height': height,
+      'hasOverflow': hasOverflow,
     }));
   }
 
