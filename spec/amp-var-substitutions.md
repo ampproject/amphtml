@@ -1110,7 +1110,7 @@ Provides the time (in seconds) the user has been engaged with the page since the
 
 #### Total Time
 
-Provides the total time from the time page has become visible to the time a ping was sent out.
+Provides the total time from the time page has become visible to the time a ping was sent out. Only applicable to visible trigger events.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalTime}`
