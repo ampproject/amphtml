@@ -93,8 +93,8 @@ describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
             expect(win.document.activeElement).to.not.equal(openerButton);
           });
         });
-      });
-    });
+  });
+});
 
 function waitForSidebarOpen(document) {
   return poll('wait for sidebar to open', () => {
