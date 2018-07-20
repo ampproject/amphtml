@@ -118,6 +118,8 @@ Represents the `fullscreen` button.
 
 attribute: **`rotate-to-fullscreen`**
 
+This attribute is currently only supported for `amp-video`, `amp-ima-video` and `amp-dailymotion`.
+
 If this attribute is present and a video is playing manually (i.e. user initiated playback, or tapped on the video after autoplay), the video displays fullscreen after the user rotates their device into landscape mode, provided that the video is visible.
 
 When multiple videos with the `rotate-to-fullscreen` attribute set are visible
