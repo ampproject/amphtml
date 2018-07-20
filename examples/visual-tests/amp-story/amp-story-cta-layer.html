@@ -1,0 +1,61 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <title>My Story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="./template-vertical.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-story-page {
+        background: white;
+        font-family: sans-serif;
+      }
+      button {
+        background-color: red;
+        color: white;
+        margin: 32px;
+        padding: 20px;
+        width: 200px;
+      }
+    </style>
+    <script>
+      document.addEventListener('ampstory:load', () => {
+        const storyEl = document.querySelector('amp-story');
+
+        // Automatically jump to second page.
+        const switchPageEvent = new CustomEvent('ampstory:switchpage', {
+          detail: {
+            targetPageId: 'the-page-with-the-cta-layer',
+          }
+        });
+
+        storyEl.dispatchEvent(switchPageEvent);
+
+        // Remove the CSS class that indicates that the story is not yet ready.
+        storyEl.classList.remove('visual-diff-pending');
+      });
+    </script>
+  </head>
+
+  <body>
+    <amp-story standalone class="visual-diff-pending">
+
+      <amp-story-page id="cover">
+        CTA layers are disallowed on the first page of stories.  This is just
+        a placeholder page, so that the second page may be tested.
+      </amp-story-page>
+
+      <amp-story-page id="the-page-with-the-cta-layer">
+        <amp-story-cta-layer>
+          <button>Click here for stuff!</button>
+        </amp-story-cta-layer>
+      </amp-story-page>
+
+    </amp-story>
+  </body>
+</html>

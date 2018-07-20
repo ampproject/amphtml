@@ -284,6 +284,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
+      this.markPageAsShown_();
     }
 
     this.reportDevModeErrors_();
@@ -361,6 +362,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
+  }
+
+
+  /** @private */
+  markPageAsShown_() {
+    dispatch(this.element, EventType.PAGE_SHOWN, true);
   }
 
 

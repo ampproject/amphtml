@@ -113,68 +113,45 @@
    * },
    */
     {
-      "url": "examples/visual-tests/amp-story/helloworld.html",
-      "name": "amp-story",
-      "loading_complete_css": [".i-amphtml-story-loaded"]
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
+      "name": "amp-story: Grid layer (fill)",
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "i-amphtml-story-grid-template-fill"
+      ]
     },
     {
-      "flaky": true,
-      "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
-      "name": "AMP Article Access",
-      "loading_incomplete_css": [".article-body"],
-      "loading_complete_css": [".login-section"]
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html",
+      "name": "amp-story: Grid layer (vertical)",
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "i-amphtml-story-grid-template-vertical"
+      ]
     },
     {
-      "url": "examples/visual-tests/font.amp/font.amp.html",
-      "name": "Fonts",
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html",
+      "name": "amp-story: Grid layer (horizontal)",
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "i-amphtml-story-grid-template-horizontal"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html",
+      "name": "amp-story: Grid layer (thirds)",
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "i-amphtml-story-grid-template-thirds"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
+      "name": "amp-story: CTA layer",
       "loading_incomplete_css": [
-        "html.comic-amp-font-loading",
-        "html.comic-amp-bold-font-loading"
+        ".visual-diff-pending"
       ],
       "loading_complete_css": [
-        "html.comic-amp-font-loaded",
-        "html.comic-amp-bold-font-loaded"
-      ]
-    },
-    {
-      "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
-      "name": "AMP Layout"
-    },
-    {
-      "url": "examples/visual-tests/article-fade-in.amp.html",
-      "name": "fade-in & fade-in-scroll",
-      "loading_complete_css": [
-        ".overlay-container",
-        ".overflow-window"
-      ]
-    },
-    {
-      "url": "examples/visual-tests/font.amp.404/font.amp.html",
-      "name": "Fonts 404",
-      "forbidden_css": [
-        ".comic-amp-font-loaded",
-        ".comic-amp-bold-font-loaded"
-      ],
-      "loading_complete_css": [
-        ".comic-amp-font-missing",
-        ".comic-amp-bold-font-missing"
-      ]
-    },
-    {
-      "url": "examples/visual-tests/article.amp/article.amp.html",
-      "name": "AMP Article",
-      "loading_complete_css": [
-        ".article-body",
-        ".ad-one",
-        ".ad-two"
-      ]
-    },
-    {
-      "url": "examples/visual-tests/amp-list/amp-list.amp.html",
-      "name": "AMP List and Mustache",
-      "loading_complete_css": [
-        ".list1",
-        ".list2"
+        ".i-amphtml-story-loaded"
       ]
     },
     {
