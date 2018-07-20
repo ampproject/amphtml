@@ -349,6 +349,7 @@ const command = {
     timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
     timedExecOrDie('gulp test --integration --nobuild --headless '
         + '--compiled --single_pass');
+    timedExecOrDie('rm -R dist');
   },
   runVisualDiffTests: function(opt_mode) {
     if (process.env.TRAVIS) {
