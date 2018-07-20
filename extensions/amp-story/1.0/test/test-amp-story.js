@@ -211,7 +211,7 @@ describes.realWin('amp-story', {
     createPages(story.element, 2, ['cover', 'page-1']);
     return story.layoutCallback()
         .then(() => {
-        // Getting all the AmpStoryPage objets.
+        // Getting all the AmpStoryPage objects.
           const pageElements =
             story.element.getElementsByTagName('amp-story-page');
           const pages = Array.from(pageElements).map(el => el.getImpl());
