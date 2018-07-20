@@ -96,16 +96,6 @@ describes.realWin('amp-selector amp-list interaction', {
       });
     };
 
-    list.scheduleRender_ = items => {
-      const deferred = new Deferred();
-      list.renderItems_ = {
-        items,
-        resolver: deferred.resolve,
-        rejecter: deferred.reject,
-      };
-      list.doRenderPass_();
-      return deferred.promise;
-    };
     list.buildCallback();
     layoutPromise = list.layoutCallback();
   });
