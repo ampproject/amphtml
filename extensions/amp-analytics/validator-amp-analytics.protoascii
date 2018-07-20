@@ -24,7 +24,7 @@ tags: {  # amp-analytics
     name: "amp-analytics"
     version: "0.1"
     version: "latest"
-    requires_usage: NONE
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
