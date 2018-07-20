@@ -991,7 +991,7 @@ describe('ValidatorRulesMakeSense', () => {
         it('extension ' + extensionSpec.name + ' must have at least two ' +
                'versions, latest and a numeric version, e.g `1.0`',
         () => {
-           expect(extensionSpec.version).toBeGreaterThan(1);
+          expect(extensionSpec.version).toBeGreaterThan(1);
         });
         it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
                'or a numeric value',
