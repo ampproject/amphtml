@@ -83,12 +83,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
-    id: 'amp-access-signin',
-    name: 'AMP Access sign-in',
-    spec: 'https://github.com/ampproject/amphtml/issues/4227',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
-  },
-  {
     id: 'amp-auto-ads',
     name: 'AMP Auto Ads',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
