@@ -349,6 +349,7 @@ const command = {
     timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
     timedExecOrDie('gulp test --integration --nobuild --headless '
         + '--compiled --single_pass');
+    timedExecOrDie('rm -R dist');
   },
   runVisualDiffTests: function(opt_mode) {
     if (process.env.TRAVIS) {
@@ -428,8 +429,7 @@ function runAllCommands() {
     }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
-    // Disabled while remaining failures are fixed.
-    // command.runSinglePassCompiledIntegrationTest();
+    command.runSinglePassCompiledIntegrationTests();
   }
 }
 
@@ -618,6 +618,11 @@ function main() {
     }
     if (buildTargets.has('VALIDATOR')) {
       command.buildValidator();
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.runSinglePassCompiledIntegrationTests();
     }
   }
 
