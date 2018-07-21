@@ -592,7 +592,6 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.runSinglePassCompiledIntegrationTests();
       command.buildRuntimeMinified(/* extensions */ false);
       command.runBundleSizeCheck();
       command.runVisualDiffTests();
@@ -619,6 +618,11 @@ function main() {
     }
     if (buildTargets.has('VALIDATOR')) {
       command.buildValidator();
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.runSinglePassCompiledIntegrationTests();
     }
   }
 
