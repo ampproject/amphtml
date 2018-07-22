@@ -17,24 +17,29 @@
 import {assertAbsoluteHttpOrHttpsUrl, tryDecodeUriComponent} from '../src/url';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
+import {parseJson} from '../src/json';
 import {setStyles} from '../src/style';
-import {user} from '../src/log';
 
 
 /**
  * @param {Window} global
+ * @param {boolean} autoplay
  * @param {Object} VIQEO
  * @param  {function(Object)} VIQEO.getPlayers - returns viqeo player
  * @param {function(function(Object), Object)} VIQEO.subscribeTracking - subscriber
  * @private
  */
-function viqeoPlayerInitLoaded(global, VIQEO) {
+function viqeoPlayerInitLoaded(global, autoplay, VIQEO) {
   let viqeoPlayerInstance;
   global.addEventListener('message', parseMessage, false);
 
   subscribe('added', 'ready', () => {
     const players = VIQEO['getPlayers']({container: 'stdPlayer'});
     viqeoPlayerInstance = players && players[0];
+  });
+  subscribe('started', 'started', () => {
+    // if autoplay is off then player will be paused as it just has been started
+    !autoplay && viqeoPlayerInstance && viqeoPlayerInstance.pause();
   });
   subscribe('paused', 'pause');
   subscribe('played', 'play');
@@ -77,11 +82,12 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
     }, 'Player:userAction');
   }
 
-  const sendMessage = eventName => {
+  const sendMessage = (eventName, value = null) => {
     const {parent} = global;
     const message = /** @type {JsonObject} */({
       source: 'ViqeoPlayer',
       action: eventName,
+      value,
     });
     parent./*OK*/postMessage(message, '*');
   };
@@ -116,13 +122,14 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
  */
 export function viqeoplayer(global) {
   const data = getData(global.context);
-  const videoId = user().assert(
-      data['videoid'],
-      'The data-videoid attribute is required for <amp-viqeo-player>');
-
-  const profileId = user().assert(
-      data['profileid'],
-      'The data-profileid attribute is required for <amp-viqeo-player>');
+  let autoplay = false;
+  try {
+    autoplay = parseJson(global.name)['attributes']._context['autoplay'];
+  } catch (e) {
+    // do nothing
+  }
+  const videoId = data['videoid'];
+  const profileId = data['profileid'];
 
   const markTagsAdvancedParams = data['tag-settings'];
 
@@ -181,9 +188,10 @@ export function viqeoplayer(global) {
 
   loadScript(global, scriptPlayerInit, () => {
     if (!global['VIQEO']) {
-      global['onViqeoLoad'] = viqeoPlayerInitLoaded.bind(null, global);
+      global['onViqeoLoad'] =
+        viqeoPlayerInitLoaded.bind(null, global, autoplay);
     } else {
-      viqeoPlayerInitLoaded(global, global['VIQEO']);
+      viqeoPlayerInitLoaded(global, autoplay, global['VIQEO']);
     }
   });
 }

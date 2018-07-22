@@ -18,7 +18,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 import {dev, user} from '../../../src/log';
 import {fullscreenEnter, fullscreenExit, isFullscreenElement, removeElement} from '../../../src/dom';
@@ -53,6 +53,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {?Object} */
     this.viqeoPlayer_ = null;
 
+    /** @private {boolean} */
+    this.hasAutoplay_ = false;
   }
 
   /**
@@ -86,27 +88,26 @@ class AmpViqeoPlayer extends AMP.BaseElement {
         'The data-profileid attribute is required for <amp-viqeo-player> %s',
         this.element);
 
+    this.hasAutoplay_ = this.element.hasAttribute(VideoAttributes.AUTOPLAY);
+
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
-
   }
 
   /** @override */
   layoutCallback() {
 
-    const jsonParams = {
-      allow: 'autoplay',
-    };
-
     const iframe = getIframe(
         this.win,
         this.element,
         'viqeoplayer',
-        {},
+        {
+          'autoplay': this.hasAutoplay_,
+        },
         {
           allowFullscreen: true,
         });
@@ -311,3 +312,5 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 AMP.extension('amp-viqeo-player', '0.1', AMP => {
   AMP.registerElement('amp-viqeo-player', AmpViqeoPlayer);
 });
+
+export default AmpViqeoPlayer;
