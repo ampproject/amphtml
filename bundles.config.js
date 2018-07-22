@@ -356,7 +356,7 @@ exports.extensionBundles = [
     },
     type: TYPES.MISC,
   },
-  {name: 'amp-viqeo-player', version: '0.1'},
+  {name: 'amp-viqeo-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-vk', version: '0.1'},
   {name: 'amp-yotpo', version: '0.1'},
   {name: 'amp-youtube', version: '0.1'},

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import '../amp-viqeo-player';
+import {PlayingStates} from '../../../../src/video-interface';
+import {Services} from '../../../../src/services';
+import AmpViqeoPlayer from '../amp-viqeo-player';
 
 describes.realWin('amp-viqeo-player', {
   amp: {
     extensions: ['amp-viqeo-player'],
   },
-}, env => {
+  allowExternalResources: true,
+}, function(env) {
+  this.timeout(3000);
   let win, doc;
 
   beforeEach(() => {
@@ -28,30 +32,182 @@ describes.realWin('amp-viqeo-player', {
     doc = win.document;
   });
 
-  function getViqeo(viqeoProfileId, viqeoId, opt_params) {
-    const viqeo = doc.createElement('amp-viqeo-player');
-    viqeo.setAttribute('data-profileid', viqeoProfileId);
-    viqeo.setAttribute('data-videoid', viqeoId);
-    viqeo.setAttribute('width', 640);
-    viqeo.setAttribute('height', 360);
-    if (opt_params && opt_params.responsive) {
-      viqeo.setAttribute('layout', 'responsive');
-    }
-    doc.body.appendChild(viqeo);
-    return viqeo.build().then(() => {
-      return viqeo.layoutCallback();
+  it('test-get-data', () => {
+    return getViqeo().then(p => {
+      const {viqeoElement, entry, viqeo} = p;
+      expect(entry.video.element).to.equal(viqeoElement);
+      expect(entry.video instanceof AmpViqeoPlayer).to.equal(true);
+      expect(entry.video).to.equal(viqeo);
+      expect(viqeo instanceof AmpViqeoPlayer).to.equal(true);
     });
+  });
+
+  describe('test-requires-attributes', () => {
+    it('requires data-videoid', () => {
+      const error = /The data-videoid attribute is required for/;
+      expectAsyncConsoleError(error);
+      return getViqeo({viqeoId: null}).should.eventually.be.rejectedWith(error);
+    });
+
+    it('requires data-profileid', () => {
+      const error = /The data-profileid attribute is required for/;
+      expectAsyncConsoleError(error);
+      return getViqeo({viqeoProfileId: null}).should.eventually.be
+          .rejectedWith(error);
+    });
+  });
+
+  describe('test-playing-actions', () => {
+    it('renders responsively', () => {
+      return getViqeo().then(p => {
+        const iframe = p.viqeoElement.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.className).to.match(/i-amphtml-fill-content/);
+      });
+    });
+
+    it('should propagate autoplay to ad iframe', () => {
+      return getViqeo({opt_params: {autoplay: ''}}).then(p => {
+        const iframe = p.viqeoElement.querySelector('iframe');
+        const data = JSON.parse(iframe.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.autoplay).to.equal(true);
+      });
+    });
+
+    it('should propagate autoplay=false ' +
+      'if element has not autoplay attribute to ad iframe', () => {
+      return getViqeo().then(p => {
+        const iframe = p.viqeoElement.querySelector('iframe');
+        const data = JSON.parse(iframe.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        return expect(data._context.autoplay).to.equal(false);
+      });
+    });
+
+    it('should paused without autoplay', () => {
+      return getViqeo().then(p => {
+        const curState = p.videoManager.getPlayingState(p.viqeo);
+        return expect(curState).to.equal(PlayingStates.PAUSED);
+      });
+    });
+
+    // it('should can start', done => {
+    //   return getViqeo().then(p => {
+    //     const {viqeo, videoManager} = p;
+    //     const curState = videoManager.getPlayingState(viqeo);
+    //     expect(curState).to.equal(PlayingStates.PAUSED);
+    //     viqeo.play();
+    //     return p;
+    //   }).then(p => {
+    //     const {viqeoElement, videoManager, viqeo, entry} = p;
+    //     // const button = doc.createElement('button');
+    //     // button.setAttribute('on', 'tap:myVideo.play');
+    //     // viqeoElement.parentElement.appendChild(button);
+    //
+    //     // const promise = listenOncePromise(viqeo, VideoEvents.PLAYING)
+    //     //     .then(() => {
+    //     //       const curState = videoManager.getPlayingState(viqeo);
+    //     //       expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+    //     //     });
+    //     // button.click();
+    //     // viqeo.play();
+    //     setTimeout(() => {
+    //       const curState = entry.getPlayingState();
+    //       expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+    //       done();
+    //     }, 2000);
+    //     return true;
+    //   });
+    // });
+
+    // it('should playing with autoplay', done => {
+    //   getViqeo({opt_params: {autoplay: ''}}).then(p => {
+    //     const {viqeoElement, videoManager, entry, viqeo} = p;
+    //     expect(entry.video.element).to.equal(viqeoElement);
+    //     expect(entry.video instanceof AmpViqeoPlayer).to.equal(true);
+    //     expect(entry.video).to.equal(viqeo);
+    //     expect(viqeo).to.have.property('play');
+    //     expect(viqeo instanceof AmpViqeoPlayer).to.equal(true);
+    //
+    //     // const button = doc.createElement('button');
+    //     // button.setAttribute('on', 'tap:myVideo.pause');
+    //     // viqeoElement.parentElement.appendChild(button);
+    //     //
+    //     // button.click();
+    //
+    //     // viqeo.play();
+    //     viqeo.pause();
+    //
+    //     // listenOncePromise(viqeo, VideoEvents.PAUSE)
+    //     // .then(() => {
+    //     //   const curState = videoManager.getPlayingState(viqeo);
+    //     //   expect(false).to.equal(true);
+    //     //   expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
+    //     //   done();
+    //     // });
+    //
+    //     // setTimeout(() => {
+    //     //   viqeo.getStatus().then(status => {
+    //     //     expect(status).to.equal('paused'); //.or.equal('replayed');
+    //     //     done();
+    //     //   });
+    //     // }, 1000);
+    //     //
+    //     // expect(entry.hasAutoplay).to.equal(true);
+    //     // expect(entry.video.getStatus() instanceof Promise).to.equal(true);
+    //     // expect(entry.video).to.have.property('play');
+    //     // expect(entry.video).to.have.property('getStatus');
+    //
+    //     // done();
+    //
+    //     setTimeout(() => {
+    //       const curState = videoManager.getPlayingState(viqeo);
+    //       expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+    //       done();
+    //     }, 2000);
+    //   });
+    // });
+  });
+
+  function getViqeo(params) {
+    const {id, viqeoProfileId, viqeoId, width, height, opt_params} =
+      Object.assign({
+        id: 'myVideo',
+        viqeoProfileId: 184,
+        viqeoId: '922d04f30b66f1a32eb2',
+        width: 320,
+        height: 180,
+        opt_params: {},
+      }, params);
+
+    const viqeoElement = doc.createElement('amp-viqeo-player');
+
+    id && viqeoElement.setAttribute('id', id);
+    viqeoProfileId
+      && viqeoElement.setAttribute('data-profileid', viqeoProfileId);
+
+    viqeoId && viqeoElement.setAttribute('data-videoid', viqeoId);
+
+    width && viqeoElement.setAttribute('width', width);
+    height && viqeoElement.setAttribute('height', height);
+
+    opt_params && Object.keys(opt_params).forEach(key => {
+      viqeoElement.setAttribute(key, opt_params[key]);
+    });
+
+    doc.body.appendChild(viqeoElement);
+    return viqeoElement.build()
+        .then(viqeoElement.layoutCallback.bind(viqeoElement))
+        .then(() => {
+          const videoManager =
+            Services.videoManagerForDoc(doc);
+          const entry = videoManager.getEntryForElement_(viqeoElement);
+          return Promise.resolve(
+              {viqeoElement, videoManager, entry, viqeo: entry.video}
+          );
+        });
   }
-
-  it('requires data-videoid', () => {
-    return getViqeo(184, '').should.eventually.be.rejectedWith(
-        /The data-videoid attribute is required for/);
-  });
-
-  it('requires data-profileid', () => {
-    return getViqeo('', 'b51b70cdbb06248f4438')
-        .should.eventually.be.rejectedWith(
-            /The data-profileid attribute is required for/);
-  });
-
 });
