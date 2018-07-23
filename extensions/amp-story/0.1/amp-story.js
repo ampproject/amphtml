@@ -90,7 +90,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
-import {getDetail} from '../../../src/event-helper';
+import {getDetail, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
@@ -290,6 +290,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
+
+    /** @private {Array<Function>} */
+    this.unlisteners_ = [];
   }
 
 
@@ -343,13 +346,57 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializeListeners_() {
-    this.element.addEventListener(EventType.NEXT_PAGE, () => {
-      this.next_();
-    });
+    this.unlisteners_.push(
+        listen(this.element, EventType.NEXT_PAGE, () => this.next_()),
 
-    this.element.addEventListener(EventType.PREVIOUS_PAGE, () => {
-      this.previous_();
-    });
+        listen(this.element, EventType.PREVIOUS_PAGE, () => this.previous_()),
+
+        listen(this.element, EventType.SWITCH_PAGE, e => {
+          if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
+            // Disallow switching pages while the bookend is active.
+            return;
+          }
+
+          this.switchTo_(getDetail(e)['targetPageId']);
+          this.ampStoryHint_.hideAllNavigationHint();
+        }),
+
+        listen(this.element, EventType.PAGE_PROGRESS, e => {
+          const detail = getDetail(e);
+          const pageId = detail['pageId'];
+          const progress = detail['progress'];
+
+          if (pageId !== this.activePage_.element.id) {
+            // Ignore progress update events from inactive pages.
+            return;
+          }
+
+          if (!this.activePage_.isAd()) {
+            this.systemLayer_.updateProgress(pageId, progress);
+          }
+        }),
+
+        listen(this.element, EventType.REPLAY, () => {
+          this.replay_();
+        }),
+
+        listen(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
+          if (
+            this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)
+          ) {
+            this.ampStoryHint_.showFirstPageHintOverlay();
+          }
+        }),
+
+        listen(this.element, EventType.TAP_NAVIGATION, e => {
+          const direction = getDetail(e)['direction'];
+          this.performTapNavigation_(direction);
+        }),
+
+        listen(this.win.document, 'keydown', e => {
+          this.onKeyDown_(e);
+        }, {capture: true})
+    );
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
@@ -367,46 +414,6 @@ export class AmpStory extends AMP.BaseElement {
           this.onSupportedBrowserStateUpdate_(isBrowserSupported);
         });
 
-    this.element.addEventListener(EventType.SWITCH_PAGE, e => {
-      if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
-        // Disallow switching pages while the bookend is active.
-        return;
-      }
-
-      this.switchTo_(getDetail(e)['targetPageId']);
-      this.ampStoryHint_.hideAllNavigationHint();
-    });
-
-    this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
-      const detail = getDetail(e);
-      const pageId = detail['pageId'];
-      const progress = detail['progress'];
-
-      if (pageId !== this.activePage_.element.id) {
-        // Ignore progress update events from inactive pages.
-        return;
-      }
-
-      if (!this.activePage_.isAd()) {
-        this.systemLayer_.updateProgress(pageId, progress);
-      }
-    });
-
-    this.element.addEventListener(EventType.REPLAY, () => {
-      this.replay_();
-    });
-
-    this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
-        this.ampStoryHint_.showFirstPageHintOverlay();
-      }
-    });
-
-    this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
-      const direction = getDetail(e)['direction'];
-      this.performTapNavigation_(direction);
-    });
-
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
     });
@@ -414,10 +421,6 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     });
-
-    this.win.document.addEventListener('keydown', e => {
-      this.onKeyDown_(e);
-    }, true);
 
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
       this.onCurrentPageIdUpdate_(pageId);
@@ -611,6 +614,12 @@ export class AmpStory extends AMP.BaseElement {
     return storyLayoutPromise;
   }
 
+  /** @override */
+  unlayoutCallback() {
+    this.unlisteners_.forEach(unlisten => unlisten());
+
+    return true;
+  }
 
   /**
    * @param {number} timeoutMs The maximum amount of time to wait, in
