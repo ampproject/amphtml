@@ -39,7 +39,7 @@ describeChrome.run('amp-form verifiers', function() {
   <input type="submit" id="submit" value="submit">
   <div verify-error>
     <template type="amp-mustache">
-      <div><p id="success">Mistakes were rendered</p></div>
+      <div><p id="message">Mistakes were rendered</p></div>
     </template>
   </div>
 </form>
@@ -56,10 +56,12 @@ describeChrome.run('amp-form verifiers', function() {
     it('should render when the verifier runs', function() {
       const email = doc.getElementById('email');
       email.value = 'x@x';
+
+      const waitForMessage = poll('message to be rendered',
+          () => doc.getElementById('message'), undefined, RENDER_TIMEOUT, win);
       email.dispatchEvent(new Event('change', {bubbles: true}));
 
-      return poll('message to be visible',
-          () => doc.getElementById('success'), undefined, RENDER_TIMEOUT);
+      return waitForMessage;
     });
   });
 
@@ -91,12 +93,14 @@ describeChrome.run('amp-form verifiers', function() {
 
     it('should trigger when the verifier runs', function() {
       const email = doc.getElementById('email');
+      const message = doc.getElementById('message');
+      const waitForMessage = poll('message to be shown',
+          () => !message.hidden, undefined, RENDER_TIMEOUT, win);
+
       email.value = 'x@x';
       email.dispatchEvent(new Event('change', {bubbles: true}));
 
-      const message = doc.getElementById('message');
-      return poll('message to be visible',
-          () => !message.hidden, undefined, RENDER_TIMEOUT);
+      return waitForMessage;
     });
   });
 });
