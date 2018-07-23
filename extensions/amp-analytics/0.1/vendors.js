@@ -1355,6 +1355,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+      'referrerPolicy': 'no-referrer',
     },
   },
 
