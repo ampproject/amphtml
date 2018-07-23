@@ -1045,6 +1045,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(impl.element.getAttribute('layout')).to.equal('fixed');
     });
 
+    it('should not change layout if not `responsive`', () => {
+      impl.element.setAttribute('layout', 'not-responsive');
+      impl.element.setAttribute('data-multi-size', '320x50');
+      impl.populateAdUrlState();
+      expect(impl.element.getAttribute('layout')).to.equal('not-responsive');
+    });
   });
 
   describe('Troubleshoot for AMP pages', () => {
