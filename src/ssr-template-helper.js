@@ -100,7 +100,7 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * Returns the element's attributes in json format.
+   * Returns the element's whitelisted attributes in json format.
    * @param {!Element} element
    * @return {!JsonObject}
    */
