@@ -571,7 +571,7 @@ export class AmpForm {
       method,
       credentials: 'include',
       headers: {
-        Accept: 'application/json',
+        'Accept': 'application/json',
       },
     });
   }
