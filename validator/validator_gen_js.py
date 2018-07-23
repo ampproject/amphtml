@@ -374,6 +374,7 @@ ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
     'amp.validator.AttrSpec.blacklisted_value_regex',
+    'amp.validator.AttrSpec.mandatory_anyof',
     'amp.validator.AttrSpec.mandatory_oneof',
     'amp.validator.AttrSpec.value_regex',
     'amp.validator.AttrSpec.value_regex_casei',

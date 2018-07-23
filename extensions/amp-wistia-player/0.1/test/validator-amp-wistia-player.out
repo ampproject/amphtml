@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |
@@ -16,7 +16,7 @@ PASS
 |  -->
 |  <!--
 |    Test Description:
-|    Tests for the amp-fx-collection tag.
+|    Tests for the amp-wistia-player tag. See the inline comments.
 |  -->
 |  <!doctype html>
 |  <html ⚡>
@@ -25,37 +25,30 @@ PASS
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async custom-element="amp-wistia-player" src="https://cdn.ampproject.org/v0/amp-wistia-player-latest.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-fx-collection" src="https://cdn.ampproject.org/v0/amp-fx-collection-0.1.js"></script>
 |  </head>
 |  <body>
-|    <div amp-fx="parallax" data-parallax-factor="0.8"></div>
-|    <amp-img amp-fx="parallax" data-parallax-factor="1.2" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
-|    <div>
-|      <h1 amp-fx="parallax"></h1>
-|    </div>
-|    <div amp-fx="fade-in"></div>
-|    <amp-img amp-fx="fade-in" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
-|    <div>
-|      <h1 amp-fx="fade-in"></h1>
-|    </div>
-|    <amp-img amp-fx="fade-in-scroll" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
-|    <div>
-|      <h1 amp-fx="fly-in-bottom"></h1>
-|    </div>
-|    <div>
-|        <h1 amp-fx="fly-in-left"></h1>
-|    </div>
-|    <div>
-|        <h1 amp-fx="fly-in-right"></h1>
-|    </div>
-|    <div>
-|        <h1 amp-fx="fly-in-top"></h1>
-|    </div>
-|    <div amp-fx="fade-in fly-in-bottom"></div>
-|    <amp-img amp-fx="fade-in parallax" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
-|    <div>
-|      <h1 amp-fx="fade-in-scroll parallax"></h1>
-|    </div>
+|    <!-- Valid -->
+|    <amp-wistia-player
+|      data-media-hashed-id="u8p9wq6mq8"
+|      width="512" height="360"></amp-wistia-player>
+|
+|    <!-- Invalid: data-media-hashed-id missing. -->
+|    <amp-wistia-player
+>>   ^~~~~~~~~
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:37:2 The mandatory attribute 'data-media-hashed-id' is missing in tag 'amp-wistia-player'. (see https://www.ampproject.org/docs/reference/components/amp-wistia-player) [AMP_TAG_PROBLEM]
+|      width="512" height="360"></amp-wistia-player>
+|    <!-- Invalid: data-media-hashed-id illegal characters. -->
+|    <amp-wistia-player
+>>   ^~~~~~~~~
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:40:2 The attribute 'data-media-hashed-id' in tag 'amp-wistia-player' is set to the invalid value 'illegal value'. (see https://www.ampproject.org/docs/reference/components/amp-wistia-player) [DISALLOWED_HTML]
+|      data-media-hashed-id="illegal value"
+|      width="512" height="360"></amp-wistia-player>
+|    <!-- Invalid: missing layout attributes. -->
+|    <amp-wistia-player
+>>   ^~~~~~~~~
+amp-wistia-player/0.1/test/validator-amp-wistia-player.html:44:2 Incomplete layout attributes specified for tag 'amp-wistia-player'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-wistia-player) [AMP_LAYOUT_PROBLEM]
+|      data-media-hashed-id="u8p9wq6mq8"></amp-wistia-player>
 |  </body>
 |  </html>

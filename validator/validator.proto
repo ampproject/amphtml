@@ -74,17 +74,22 @@ message CssDeclaration {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 21
+// NEXT AVAILABLE TAG: 22
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
   repeated string alternative_names = 2;
   optional bool mandatory = 3;
-  // Within the context of the tag, exactly one of the attributes tagged
+  // Within the context of the tag, *exactly one* of the attributes tagged
   // with this identifier must be present. Per convention, this identifier
   // should list the tags participating in the mandatory oneof:
   // e.g. mandatory_oneof: "['foo', 'bar']"
   optional string mandatory_oneof = 12;
+  // Within the context of the tag, *at least one* of the attributes tagged
+  // with this identifier must be present. Per convention, this identifier
+  // should list the tags participating in the mandatory oneof:
+  // e.g. mandatory_oneof: "['foo', 'bar']"
+  optional string mandatory_anyof = 21;
 
   // This would be a oneof, but this file only uses features in protobuf 2.5.0.
   // begin oneof {
@@ -630,7 +635,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 104
+  // NEXT AVAILABLE TAG: 106
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -649,10 +654,12 @@ message ValidationError {
     INVALID_ATTR_VALUE = 4;
     DUPLICATE_ATTRIBUTE = 94;
     ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
+    MISSING_LAYOUT_ATTRIBUTES = 105;
     IMPLIED_LAYOUT_INVALID = 22;
     SPECIFIED_LAYOUT_INVALID = 26;
     MANDATORY_ATTR_MISSING = 5;
     MANDATORY_ONEOF_ATTR_MISSING = 28;
+    MANDATORY_ANYOF_ATTR_MISSING = 104;
     DUPLICATE_DIMENSION = 60;
     DUPLICATE_UNIQUE_TAG = 6;
     DUPLICATE_UNIQUE_TAG_WARNING = 77;
