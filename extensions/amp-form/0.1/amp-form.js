@@ -277,7 +277,7 @@ export class AmpForm {
       this.validator_.onBlur(e);
     }, true);
 
-    // If the viewer can render templates, then form verifier is not applicable.
+    // Form verification is not supported when SSRing templates is enabled.
     if (!this.ssrTemplateHelper_.isSupported()) {
       this.form_.addEventListener('change', e => {
         this.verifier_.onCommit().then(({updatedElements, errors}) => {
@@ -472,11 +472,10 @@ export class AmpForm {
             this.submittingWithTrust_(trust);
             return this.doActionXhr_();
           })
-          .then(response => this.handleXhrSubmitSuccess_(
-              /* !../../../src/service/xhr-impl.FetchResponse */ response),
-          error => {
-            return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-          });
+          .then(response => this.handleXhrSubmitSuccess_(response),
+              error => {
+                return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+              });
     }
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -492,7 +491,7 @@ export class AmpForm {
     user().error(TAG, `Form submission failed: ${error}`);
     return tryResolve(() => {
       this.renderTemplate_(error || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, error); // do we need this?
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
       });
     });
   }
@@ -677,8 +676,7 @@ export class AmpForm {
   }
 
   /**
-   * Throws an error related to viewer render template handling.
-   * supported.
+   * Asserts that SSR support is the same as value.
    * @param {boolean} value
    * @param {string} msg
    * @private
