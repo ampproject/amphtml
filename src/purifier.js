@@ -109,6 +109,9 @@ export const WHITELISTED_ATTRS = [
   'placeholder',
   'submit-success',
   'submit-error',
+  // Attributes consumed by amp-form
+  'validation-for',
+  'visible-when-invalid',
   // HTML attributes that are scrubbed by Caja but we handle specially.
   'href',
   'style',
@@ -138,6 +141,7 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
   ],
   'form': [
     'action-xhr',
+    'verify-xhr',
     'custom-validation-reporting',
     'target',
   ],
