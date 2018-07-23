@@ -23,7 +23,6 @@ import {getCorsUrl, getSourceOrigin} from '../../src/url';
 describes.realWin('XhrBase', {amp: true}, function() {
   let ampdocServiceForStub;
   let ampdocViewerStub;
-  let xhrCreated;
   // Given XHR calls give tests more time.
   this.timeout(5000);
 
@@ -38,11 +37,6 @@ describes.realWin('XhrBase', {amp: true}, function() {
       getAmpDoc: () => ampdocViewerStub,
     });
   });
-
-  function setupMockXhr() {
-    const mockXhr = sandbox.useFakeXMLHttpRequest();
-    xhrCreated = new Promise(resolve => mockXhr.onCreate = resolve);
-  }
 
   const nativeWin = {
     location,
