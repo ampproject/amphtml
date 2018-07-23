@@ -20,7 +20,6 @@ import {loadScript} from './3p';
 import {parseJson} from '../src/json';
 import {setStyles} from '../src/style';
 
-
 /**
  * @param {Window} global
  * @param {boolean} autoplay
