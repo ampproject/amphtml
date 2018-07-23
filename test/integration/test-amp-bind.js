@@ -572,7 +572,8 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
       return setupWithFixture('test/fixtures/bind-basic.html');
     });
 
-    it('should not loop infinitely if updates change its src binding',
+    it.configure().skipIfPropertiesObfuscated().run(
+        'should not loop infinitely if updates change its src binding',
         () => {
           const changeAmpStateSrcButton =
           fixture.doc.getElementById('ampStateSrcButton');
