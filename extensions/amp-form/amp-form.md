@@ -131,6 +131,8 @@ You can [read more about Actions and Events in AMP in the spec](https://www.ampp
 * **submit**: Emitted whenever the form is submitted and before the submission is complete.
 * **submit-success**: Emitted whenever the form submission is done and the response is a success.
 * **submit-error**: Emitted whenever the form submission is done and the response is an error.
+* **verify**: Emitted whenever asynchronous verification is initiated.
+* **verify-error**: Emitted whenever asynchronous verification is done and the response is an error.
 * **valid**: Emitted whenever the form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)).
 * **invalid**: Emitted whenever the form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).
 
@@ -248,7 +250,7 @@ Both success and error responses should have a `Content-Type: application/json` 
 
 Publishers can render these responses in a inlined template inside their forms as follows:
 
-*Note*: This form uses the `submitting` attribute to display a message to the user when the form is submitting. 
+*Note*: This form uses the `submitting` attribute to display a message to the user when the form is submitting.
 
 ```html
 <form ...>
@@ -256,6 +258,12 @@ Publishers can render these responses in a inlined template inside their forms a
     <input type="text" name="firstName" />
     ...
   </fieldset>
+  <div verify-error>
+    <template type="amp-mustache">
+      There is a mistake in the form!
+      {{#verifyErrors}}{{message}}{{/verifyErrors}}
+    </template>
+  </div>
   <div submitting>
     <template type="amp-mustache">
       Form submitting... Thank you for waiting {{firstName}}.
@@ -333,7 +341,7 @@ One of the main differences between `:invalid` and `:user-invalid` is when are t
 ## Classes and CSS Hooks
 `amp-form` provides classes and CSS hooks for publishers to style their forms and inputs.
 
-`.amp-form-submitting`, `.amp-form-submit-success` and `.amp-form-submit-error` are added to indicate the state of the form submission.
+`.amp-form-initial`, `.amp-form-verify`, `.amp-form-verify-error`, `.amp-form-submitting`, `.amp-form-submit-success` and `.amp-form-submit-error` are added to indicate the state of the form submission.
 
 `.user-valid` and `.user-invalid` classes are a polyfill for the pseudo classes as described above. Publishers can use these to style their inputs and fieldsets to be responsive to user actions (e.g., highlighting an invalid input with a red border after user blurs from it).
 
