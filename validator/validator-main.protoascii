@@ -3832,43 +3832,10 @@ tags {  # <form method=POST ...>
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
 }
-# Will add verify state template if requested by users
 tags {
   html_format: AMP
   html_format: AMP4ADS
   html_format: EXPERIMENTAL
-  tag_name: "DIV"
-  spec_name: "FORM DIV [verify-error]"
-  mandatory_ancestor: "FORM"
-  attrs: { name: "align" }
-  attrs: {
-    name: "verify-error"
-    mandatory: true
-  }
-}
-tags {
-  html_format: AMP
-  html_format: AMP4ADS
-  html_format: EXPERIMENTAL
-  tag_name: "DIV"
-  spec_name: "FORM DIV [verify-error][template]"
-  mandatory_ancestor: "FORM"
-  attrs: { name: "align" }
-  attrs: {
-    name: "verify-error"
-    mandatory: true
-  }
-  attrs: {
-    name: "template"
-    mandatory: true
-  }
-}
-tags {
-  html_format: AMP
-  html_format: AMP4ADS
-  html_format: EXPERIMENTAL
-  # AMP4EMAIL is omitted. There is additional latency in rendering A4E templates,
-  # which reduces the time available to render the template during the submitting state
   tag_name: "DIV"
   spec_name: "FORM DIV [submitting]"
   mandatory_ancestor: "FORM"
@@ -3876,23 +3843,8 @@ tags {
   attrs: {
     name: "submitting"
     mandatory: true
-  }
-}
-tags {
-  html_format: AMP
-  html_format: AMP4ADS
-  html_format: EXPERIMENTAL
-  tag_name: "DIV"
-  spec_name: "FORM DIV [submitting][template]"
-  mandatory_ancestor: "FORM"
-  attrs: { name: "align" }
-  attrs: {
-    name: "submitting"
-    mandatory: true
-  }
-  attrs: {
-    name: "template"
-    mandatory: true
+    # Avoid triggering errors for non-form divs.
+    dispatch_key: NAME_DISPATCH
   }
 }
 tags {
