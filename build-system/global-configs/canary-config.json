@@ -34,8 +34,8 @@
   "amp-consent": 1,
   "amp-img-native-srcset": 1,
   "amp-story-v1": 1,
-  "expAdsenseUnconditionedCanonical": 0.01,
-  "expAdsenseCanonical": 0.01,
+  "expAdsenseUnconditionedCanonical": 0,
+  "expAdsenseCanonical": 0,
   "font-display-swap": 1,
   "amp-date-picker": 1,
   "inline-styles": 1
