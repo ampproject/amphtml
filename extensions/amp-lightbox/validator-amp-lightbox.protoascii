@@ -73,7 +73,7 @@ tags: { # <amp-lightbox close-button> in A4A.
     name: "close-button"
     # Require `close-button` since we can't rely on the lightbox content
     # containing a UI affordance to close it, effectively hijacking the
-    # document.
+    # document otherwise.
     mandatory: true
   }
   attrs: { name: "controls" }
