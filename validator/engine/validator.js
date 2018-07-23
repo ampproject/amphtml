@@ -3462,6 +3462,23 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     const code = layoutAttr === undefined ?
       amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
       amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
+    // Special case. If no layout related attributes were provided, this implies
+    // the CONTAINER layout. However, telling the user that the implied layout
+    // is unsupported for this tag is confusing if all they need is to provide
+    // width and height in, for example, the common case of creating
+    // an AMP-IMG without specifying dimensions. In this case, we emit a
+    // less correct, but simpler error message that could be more useful to
+    // the average user.
+    if (code === amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID &&
+        layout == amp.validator.AmpLayout.Layout.CONTAINER &&
+        spec.ampLayout.supportedLayouts.indexOf(
+            amp.validator.AmpLayout.Layout.RESPONSIVE) !== -1) {
+      context.addError(
+          amp.validator.ValidationError.Code.MISSING_LAYOUT_ATTRIBUTES,
+          context.getLineCol(),
+          /*params=*/[getTagSpecName(spec)], getTagSpecUrl(spec), result);
+      return;
+    }
     context.addError(
         code, context.getLineCol(),
         /* params */[layout, getTagSpecName(spec)], getTagSpecUrl(spec),
@@ -5566,6 +5583,8 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The mandatory attribute 'height' is missing in tag 'amp-img'."
   if (error.code ===
           amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT ||
+      error.code ===
+          amp.validator.ValidationError.Code.MISSING_LAYOUT_ATTRIBUTES ||
       error.code ===
           amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID ||
       error.code ===
