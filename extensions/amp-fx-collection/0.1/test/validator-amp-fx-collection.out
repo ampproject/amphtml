@@ -57,6 +57,5 @@ PASS
 |    <div>
 |      <h1 amp-fx="fade-in-scroll parallax"></h1>
 |    </div>
-|        
 |  </body>
 |  </html>
