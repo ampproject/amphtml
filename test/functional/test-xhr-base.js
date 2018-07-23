@@ -16,7 +16,7 @@
 
 import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
 import {Services} from '../../src/services';
-import {assertSuccess, setupInit, XhrBase} from '../../src/xhr-base';
+import {XhrBase, assertSuccess, setupInit} from '../../src/xhr-base';
 import {getCorsUrl, getSourceOrigin} from '../../src/url';
 
 
