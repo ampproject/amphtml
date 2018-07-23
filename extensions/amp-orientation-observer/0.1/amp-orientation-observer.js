@@ -127,7 +127,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(eventName, eventValue, eventRange) {
-    eventValue = eventValue.toFixed(2);
+    eventValue = eventValue.toFixed();
     const percentValue = eventRange[0] < 0 ?
       (eventValue - eventRange[0]) :
       eventValue;
