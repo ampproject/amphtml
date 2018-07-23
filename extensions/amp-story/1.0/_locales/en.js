@@ -21,6 +21,11 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
+    string: 'More to read',
+    description: 'Label to be placed as a title on top of related articles ' +
+        'at the end of a story.',
+  },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
     string: 'Privacy settings',
     description: 'Title for a section that allows the user to configure ' +
