@@ -25,11 +25,18 @@ amp-image-slider {
   bottom: 0;
   width: 100%;
   height: 100%;
+
+  /* Fix iOS translate + overflow: hidden bug */
+  transform: translateZ(0);
 }
 
 .i-amphtml-image-slider-left-mask {
   position: relative;
   width: 100%;
+
+  /* Alternative fix for weird iOS issue */
+  /* -webkit-mask-image: -webkit-radial-gradient(white, black); */
+
   transform: translateX(-50%);
   height: 100%;
   overflow: hidden;
@@ -37,6 +44,9 @@ amp-image-slider {
 }
 
 .i-amphtml-image-slider-right-mask {
+  /* Alternative fix for weird iOS issue */
+  /* -webkit-mask-image: -webkit-radial-gradient(white, black); */
+
   position: absolute;
   width: 100%;
   height: 100%;
