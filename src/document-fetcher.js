@@ -52,7 +52,7 @@ export class DocumentFetcher extends XhrBase {
             init.body = init.body.getFormData();
           }
 
-          return this.xhrRequest_(this, arguments);
+          return this.xhrRequest_(input, init);
         });
   }
 
