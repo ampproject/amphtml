@@ -239,7 +239,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       case PageState.ACTIVE:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
-          this.beforeVisible();
           this.resumeCallback();
         }
 
