@@ -61,7 +61,7 @@ class AmpMowplayer extends AMP.BaseElement {
     super(element);
 
     /** @private {?string}  */
-    this.mediaid_ = null;
+    this.mediaid_ = '';
 
     /** @private {?boolean}  */
     this.muted_ = false;
@@ -108,8 +108,11 @@ class AmpMowplayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.mediaid_ = this.getMediaId_();
-    this.assertDatasourceExists_();
+
+    this.mediaid_ = user().assert(
+        (this.element.getAttribute('data-mediaid')),
+        '/The data-mediaid attribute is required for <amp-mowplayer> %s',
+        this.element);
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -188,32 +191,13 @@ class AmpMowplayer extends AMP.BaseElement {
     if (mutations['data-mediaid'] == null) {
       return;
     }
-    this.mediaid_ = this.getMediaId_();
+
     if (!this.iframe_) {
       return;
     }
     this.sendCommand_('loadVideoById', [this.mediaid_]);
   }
 
-  /**
-     * @return {?string}
-     * @private
-     */
-  getMediaId_() {
-    return this.element.getAttribute('data-mediaid');
-  }
-
-  /**
-     * @private
-     */
-  assertDatasourceExists_() {
-    const datasourceExists = this.mediaid_;
-    user().assert(
-        datasourceExists,
-        'The data-mediaid attribute is required for <amp-mowplayer> %s',
-        this.element
-    );
-  }
 
   /**
      * Sends a command to the player through postMessage.
