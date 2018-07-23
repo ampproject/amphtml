@@ -17,17 +17,18 @@
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {
-  ConsentPolicyManager,
-  MULTI_CONSENT_EXPERIMENT,
-} from './consent-policy-manager';
+import {ConsentPolicyManager} from './consent-policy-manager';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  getSourceUrl,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {
   childElementsByTag,
   isJsonScriptTag,
@@ -38,15 +39,12 @@ import {dict, map} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles, toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
-
-export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
 
 /**
  * @enum {string}
@@ -130,11 +128,7 @@ export class AmpConsent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
-      return;
-    }
-
-    this.isMultiSupported_ = isExperimentOn(this.win, MULTI_CONSENT_EXPERIMENT);
+    this.isMultiSupported_ = ConsentPolicyManager.isMultiSupported(this.win);
 
     user().assert(this.element.getAttribute('id'),
         'amp-consent should have an id');
@@ -517,10 +511,13 @@ export class AmpConsent extends AMP.BaseElement {
     const href =
         this.consentConfig_[instanceId]['checkConsentHref'];
     assertHttpsUrl(href, this.element);
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const ampdoc = this.getAmpDoc();
+    const sourceBase = getSourceUrl(ampdoc.getUrl());
+    const resolvedHref = resolveRelativeUrl(href, sourceBase);
+    const viewer = Services.viewerForDoc(ampdoc);
     return viewer.whenFirstVisible().then(() => {
       return Services.xhrFor(this.win)
-          .fetchJson(href, init)
+          .fetchJson(resolvedHref, init)
           .then(res => res.json());
     });
   }

@@ -31,13 +31,13 @@ import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
 
+import {dict} from '../../../src/utils/object';
 import {px, scale, setStyles, translate} from '../../../src/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -145,8 +145,6 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
     this.action_ = Services.actionServiceForDoc(this.element);
     const children = this.getRealChildren();
 
@@ -155,6 +153,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         this.elementIsSupported_(children[0]),
         children[0].tagName + ` is not supported by ${TAG}`
     );
+    this.element.classList.add('i-amphtml-pan-zoom');
     this.content_ = children[0];
     this.content_.classList.add('i-amphtml-pan-zoom-child');
     this.maxScale_ = this.getNumberAttributeOr_('max-scale', DEFAULT_MAX_SCALE);
@@ -300,8 +299,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       return this.mutateElement(() => {
         // Set the actual dimensions of the content
         setStyles(content, {
-          top: px(this.contentBox_.top),
-          left: px(this.contentBox_.left),
           width: px(this.contentBox_.width),
           height: px(this.contentBox_.height),
         });
@@ -524,11 +521,11 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   triggerTransformEnd_(scale, x, y) {
     const transformEndEvent =
-    createCustomEvent(this.win, `${TAG}.transformEnd`, {
-      scale,
-      x,
-      y,
-    });
+    createCustomEvent(this.win, `${TAG}.transformEnd`, dict({
+      'scale': scale,
+      'x': x,
+      'y': y,
+    }));
     this.action_.trigger(this.element, 'transformEnd', transformEndEvent,
         ActionTrust.HIGH);
   }

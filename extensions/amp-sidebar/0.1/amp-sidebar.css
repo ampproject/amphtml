@@ -19,7 +19,7 @@ amp-sidebar {
   top: 0;
   max-height: 100vh !important;
   height: 100vh;
-  max-width: 80vw !important;
+  max-width: 80vw;
   background-color: #efefef;
   min-width: 45px !important;
   outline: none;

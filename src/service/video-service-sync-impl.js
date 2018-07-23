@@ -15,7 +15,6 @@
  */
 
 import {Autoplay, AutoplayEvents} from './video/autoplay';
-import {Deferred} from '../utils/promise';
 import {PlayingStates, VideoAttributes, VideoEvents} from '../video-interface';
 import {Services} from '../services';
 import {VideoServiceSignals} from './video-service-interface';
@@ -167,6 +166,8 @@ export class VideoEntry {
     this.loadPromise_ = listenOncePromise(this.element_, VideoEvents.LOAD);
 
     this.listenToAutoplayEvents_();
+
+    setVideoComponentClassname(this.element_);
   }
 
   /**
@@ -193,4 +194,11 @@ export class VideoEntry {
       this.video_.pause();
     });
   }
+}
+
+/**
+ * @param {!Element} element
+ */
+export function setVideoComponentClassname(element) {
+  element.classList.add('i-amphtml-video-component');
 }

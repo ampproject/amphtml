@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Twitter Tweet.</td>
+    <td>Displays a Twitter Tweet or Moment.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -39,7 +39,7 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-twitter` component allows you to embed a Tweet for the specified Twitter ID.  
+The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.  
 
 Here's an example of a basic embedded Tweet:
 
@@ -57,11 +57,11 @@ Here's an example of a basic embedded Tweet:
 
 ## Appearance
 
-Twitter does not currently provide an API that yields fixed aspect ratio for embedded Tweets. Currently, AMP automatically proportionally scales the Tweet to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
+Twitter does not currently provide an API that yields fixed aspect ratio for embedded Tweets or Moments. Currently, AMP automatically proportionally scales the Tweet or Moment to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
 
 ## Placeholders & fallbacks
 
-An element marked with a `placeholder` attribute displays while the content for the Tweet is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet doesn't exist or has been deleted.
+An element marked with a `placeholder` attribute displays while the content for the Tweet or Moment is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet or Moment doesn't exist or has been deleted.
 
 Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
 
@@ -101,7 +101,7 @@ In a URL like https://twitter.com/i/moments/1009149991452135424, `10091499914521
 
 ##### data-* (optional)
 
-You can specify options for the Tweet appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards.
+You can specify options for the Tweet or Moment appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards.
 For details on the available options, see Twitter's docs [for tweets](https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference) and [for moments](https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0). 
 
 <div>

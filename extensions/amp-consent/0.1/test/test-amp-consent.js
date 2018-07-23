@@ -16,12 +16,10 @@
 
 import {
   ACTION_TYPE,
-  AMP_CONSENT_EXPERIMENT,
   AmpConsent,
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
 import {computedStyle} from '../../../../src/style';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
@@ -39,36 +37,40 @@ describes.realWin('amp-consent', {
 }, env => {
   let win;
   let doc;
+  let ampdoc;
   let jsonMockResponses;
   let storageValue;
   let requestBody;
   let ISOCountryGroups;
+  let xhrServiceMock;
 
   beforeEach(() => {
     doc = env.win.document;
+    ampdoc = env.ampdoc;
     win = env.win;
-    toggleExperiment(win, AMP_CONSENT_EXPERIMENT, true);
-    toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
+    toggleExperiment(win, 'multi-consent', true);
 
     storageValue = {};
     jsonMockResponses = {
-      '//response1': '{"promptIfUnknown": true}',
-      '//response2': '{}',
-      '//response3': '{"promptIfUnknown": false}',
+      'https://response1/': '{"promptIfUnknown": true}',
+      'https://response2/': '{}',
+      'https://response3/': '{"promptIfUnknown": false}',
     };
+
+    xhrServiceMock = {fetchJson: (url, init) => {
+      requestBody = init.body;
+      expect(init.credentials).to.equal('include');
+      expect(init.method).to.equal('POST');
+      return Promise.resolve({
+        json() {
+          return Promise.resolve(JSON.parse(jsonMockResponses[url]));
+        },
+      });
+    }};
 
     resetServiceForTesting(win, 'xhr');
     registerServiceBuilder(win, 'xhr', function() {
-      return {fetchJson: (url, init) => {
-        requestBody = init.body;
-        expect(init.credentials).to.equal('include');
-        expect(init.method).to.equal('POST');
-        return Promise.resolve({
-          json() {
-            return Promise.resolve(JSON.parse(jsonMockResponses[url]));
-          },
-        });
-      }};
+      return xhrServiceMock;
     });
 
     resetServiceForTesting(win, 'geo');
@@ -101,10 +103,10 @@ describes.realWin('amp-consent', {
         defaultConfig = {
           'consents': {
             'ABC': {
-              'checkConsentHref': '//response1',
+              'checkConsentHref': 'https://response1',
             },
             'DEF': {
-              'checkConsentHref': '//response1',
+              'checkConsentHref': 'https://response1',
             },
           },
         };
@@ -155,6 +157,31 @@ describes.realWin('amp-consent', {
           expect(() => ampConsent.assertAndParseConfig_()).to.throw();
         });
       });
+
+      it('relative checkConsentHref is resolved', function* () {
+        const fetchSpy = sandbox.spy(xhrServiceMock, 'fetchJson');
+        const config = {
+          'consents': {
+            'XYZ': {
+              'checkConsentHref': '/r/1',
+            },
+          },
+        };
+        scriptElement.textContent = JSON.stringify(config);
+        consentElement.appendChild(scriptElement);
+        const ampConsent = new AmpConsent(consentElement);
+        doc.body.appendChild(consentElement);
+        const getUrlStub = sandbox.stub(ampdoc, 'getUrl');
+        // return a cache Url to test origin source being used to resolve.
+        getUrlStub.callsFake(() => {
+          return 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0#h';
+        });
+        ampConsent.buildCallback();
+        yield macroTask();
+        expect(fetchSpy).to.be.calledOnce;
+        expect(win.testLocation.origin).not.to.be.empty;
+        expect(fetchSpy).to.be.calledWith('http://www.origin.com/r/1');
+      });
     });
   });
 
@@ -165,7 +192,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
           },
         },
       };
@@ -243,7 +270,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
@@ -261,7 +288,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': '//response3',
+            'checkConsentHref': 'https://response3',
             'promptIfUnknownForGeoGroup': 'unknown',
           },
         },
@@ -279,7 +306,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': '//response2',
+            'checkConsentHref': 'https://response2',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
@@ -302,10 +329,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
           },
           'DEF': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
           },
         },
       };
@@ -384,10 +411,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
           },
           'DEF': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
           },
         },
         'policy': {
@@ -427,7 +454,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
           },
         },
       };
@@ -482,15 +509,15 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
             'promptUI': '123',
           },
           'DEF': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
             'promptUI': '123',
           },
           'GH': {
-            'checkConsentHref': '//response1',
+            'checkConsentHref': 'https://response1',
             'promptUI': '123',
           },
         },
@@ -604,7 +631,7 @@ describes.realWin('amp-consent', {
           defaultConfig = {
             'consents': {
               'ABC': {
-                'checkConsentHref': '//response3',
+                'checkConsentHref': 'https://response3',
               },
             },
             'postPromptUI': 'test',

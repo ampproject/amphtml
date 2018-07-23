@@ -18,8 +18,8 @@ tags: {  # amp-addthis
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     name: "amp-addthis"
   }
   attr_lists: "common-extension-attrs"
@@ -36,19 +36,17 @@ tags: {  # <amp-addthis>
   attrs: {
     name: "data-share-media"
     value_url: {
+      protocol: "http"
+      protocol: "https"
       allow_empty: true
-      allow_relative: true
-      allowed_protocol: "http"
-      allowed_protocol: "https"
     }
   }
   attrs: {
     name: "data-share-url"
     value_url: {
+      protocol: "http"
+      protocol: "https"
       allow_empty: true
-      allow_relative: true
-      allowed_protocol: "http"
-      allowed_protocol: "https"
     }
   }
   attrs: {

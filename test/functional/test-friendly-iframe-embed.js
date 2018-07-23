@@ -15,11 +15,14 @@
  */
 
 import * as sinon from 'sinon';
+
+import {ActionTrust} from '../../src/action-constants';
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
+  renderCloseButtonHeader,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
@@ -719,63 +722,84 @@ describe('friendly-iframe-embed', () => {
     };
 
     let win;
-    let iframe;
-    let fie;
+
+    function createFie(bodyElementMock, parentType = 'amp-ad') {
+      const iframe = document.createElement('iframe');
+      const parent = document.createElement(parentType);
+
+      parent.appendChild(iframe);
+
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect')
+          .returns(layoutRectLtwh(x, y, w, h));
+
+      const fie = new FriendlyIframeEmbed(iframe, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      }, Promise.resolve());
+
+      sandbox.stub(fie, 'getResources_').returns(resourcesMock);
+      sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
+
+      fie.win = win;
+
+      return fie;
+    }
+
 
     beforeEach(() => {
       win = {
         innerWidth: winW,
         innerHeight: winH,
       };
-      iframe = document.createElement('iframe');
-
-      sandbox./*OK*/stub(iframe, 'getBoundingClientRect').callsFake(() => ({
-        right: x + w,
-        left: x,
-        top: y,
-        bottom: y + h,
-        width: w,
-        height: h,
-      }));
-
-      fie = new FriendlyIframeEmbed(iframe, {
-        url: 'https://acme.org/url1',
-        html: '<body></body>',
-      }, Promise.resolve());
-
-      sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
-      sandbox.stub(fie, 'win').callsFake(win);
     });
 
-    it('should resize body and fixed container when entering', function* () {
+    it('should not throw if inside an amp-ad', () => {
       const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'amp-ad');
 
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      expect(() => fie.enterFullOverlayMode()).to.not.throw();
+    });
+
+    it('should throw if not inside an amp-ad', () => {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'not-an-amp-ad');
+
+      expect(() => fie.enterFullOverlayMode())
+          .to.throw(/Only .?amp-ad.? is allowed/);
+    });
+
+    it('resizes body and fixed container when entering', function* () {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock);
+      const headerHeight = 60;
+
+      sandbox.stub(fie, 'getHeaderHeight_').returns(headerHeight);
 
       yield fie.enterFullOverlayMode();
 
       expect(bodyElementMock.style.background).to.equal('transparent');
       expect(bodyElementMock.style.position).to.equal('absolute');
       expect(bodyElementMock.style.width).to.equal(`${w}px`);
-      expect(bodyElementMock.style.height).to.equal(`${h}px`);
-      expect(bodyElementMock.style.top).to.equal(`${y}px`);
+      expect(bodyElementMock.style.height).to.equal(`${h - headerHeight}px`);
+      expect(bodyElementMock.style.top).to.equal(`${y - headerHeight}px`);
       expect(bodyElementMock.style.left).to.equal(`${x}px`);
       expect(bodyElementMock.style.right).to.equal('auto');
       expect(bodyElementMock.style.bottom).to.equal('auto');
 
+      const {iframe} = fie;
+
       expect(iframe.style.position).to.equal('fixed');
       expect(iframe.style.left).to.equal('0px');
       expect(iframe.style.right).to.equal('0px');
-      expect(iframe.style.top).to.equal('0px');
+      expect(iframe.style.top).to.equal(`${headerHeight}px`);
       expect(iframe.style.bottom).to.equal('0px');
       expect(iframe.style.width).to.equal('100vw');
-      expect(iframe.style.height).to.equal('100vh');
+      expect(iframe.style.height).to.equal(`calc(100vh - ${headerHeight}px)`);
     });
 
     it('should reset body and fixed container when leaving', function* () {
       const bodyElementMock = document.createElement('div');
-
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      const fie = createFie(bodyElementMock);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();
@@ -788,6 +812,8 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.right).to.be.empty;
       expect(bodyElementMock.style.bottom).to.be.empty;
 
+      const {iframe} = fie;
+
       expect(iframe.style.position).to.be.empty;
       expect(iframe.style.left).to.be.empty;
       expect(iframe.style.right).to.be.empty;
@@ -795,6 +821,55 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.bottom).to.be.empty;
       expect(iframe.style.width).to.be.empty;
       expect(iframe.style.height).to.be.empty;
+    });
+  });
+
+  describe('#renderCloseButtonHeader', () => {
+
+    const win = document.defaultView;
+
+    it('renders', () => {
+      const ampAdParentMock = document.createElement('div');
+      const ampLightboxMock = document.createElement('div');
+
+      const el = renderCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
+
+      expect(el.tagName.toLowerCase()).to.equal('i-amphtml-ad-close-header');
+      expect(el.getAttribute('role')).to.equal('button');
+      expect(el.getAttribute('aria-label')).to.equal('Close Ad');
+      expect(el.getAttribute('tabindex')).to.equal('0');
+
+      expect(el.firstElementChild.textContent).to.equal('Ad');
+
+      const closeButton = el.lastElementChild;
+
+      expect(closeButton.tagName.toLowerCase())
+          .to.equal('i-amphtml-ad-close-button');
+
+      expect(closeButton).to.have.class('amp-ad-close-button');
+    });
+
+    it('triggers action', () => {
+      const ampAdParentMock = document.createElement('div');
+      const ampLightboxMock = document.createElement('div');
+
+      const el = renderCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
+
+      const execute = sandbox.spy();
+      const actionServiceMock = {execute};
+
+      sandbox.stub(Services, 'actionServiceForDoc').returns(actionServiceMock);
+
+      el.click();
+
+      expect(execute.withArgs(
+          /* target */ ampLightboxMock,
+          /* method */ 'close',
+          /* args   */ sinon.match.any,
+          /* source */ ampAdParentMock,
+          /* caller */ ampAdParentMock,
+          /* event  */ sinon.match.any,
+          /* trust  */ ActionTrust.HIGH)).to.be.calledOnce;
     });
   });
 });

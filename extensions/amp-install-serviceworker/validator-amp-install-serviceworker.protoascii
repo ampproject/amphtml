@@ -19,8 +19,8 @@ tags: {  # amp-install-serviceworker
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-install-serviceworker"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -33,7 +33,7 @@ tags: {  # <amp-install-serviceworker>
   attrs: {
     name: "data-iframe-src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -42,7 +42,7 @@ tags: {  # <amp-install-serviceworker>
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"

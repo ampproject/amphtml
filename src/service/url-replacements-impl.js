@@ -37,6 +37,7 @@ import {
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
 import {getTrackImpressionPromise} from '../impression.js';
+import {hasOwn} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -52,9 +53,6 @@ const VARIANT_DELIMITER = '.';
 const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
-
-/** @const {string} */
-export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
 
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
@@ -89,19 +87,6 @@ function dateMethod(method) {
  */
 function screenProperty(screen, property) {
   return () => screen[property];
-}
-
-/**
- * Returns a function that executes method on the viewport. This is a byte
- * saving hack.
- *
- * @param {!./viewport/viewport-impl.Viewport} viewport
- * @param {string} method
- * @return {!SyncResolverDef}
- */
-function viewportMethod(viewport, method) {
-  // Convert to object to allow dynamic access.
-  return () => /** @type {!Object} */(viewport)[method]();
 }
 
 /**
@@ -313,7 +298,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns assigned variant name for the given experiment.
     this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
-      return this.getVairiantsValue_(variants => {
+      return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
@@ -325,7 +310,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns all assigned experiment variants in a serialized form.
     this.setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
-      return this.getVairiantsValue_(variants => {
+      return this.getVariantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
           const variant = variants[experiment];
@@ -387,22 +372,22 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', viewportMethod(viewport, 'getScrollTop'));
+    this.set('SCROLL_TOP', () => viewport.getScrollTop());
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', viewportMethod(viewport, 'getScrollLeft'));
+    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.set('SCROLL_HEIGHT', viewportMethod(viewport, 'getScrollHeight'));
+    this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.set('SCROLL_WIDTH', viewportMethod(viewport, 'getScrollWidth'));
+    this.set('SCROLL_WIDTH', () => viewport.getScrollWidth());
 
     // Returns the viewport height.
-    this.set('VIEWPORT_HEIGHT', viewportMethod(viewport, 'getHeight'));
+    this.set('VIEWPORT_HEIGHT', () => viewport.getHeight());
 
     // Returns the viewport width.
-    this.set('VIEWPORT_WIDTH', viewportMethod(viewport, 'getWidth'));
+    this.set('VIEWPORT_WIDTH', () => viewport.getWidth());
 
 
     const {screen} = this.ampdoc.win;
@@ -595,7 +580,7 @@ export class GlobalVariableSource extends VariableSource {
    */
   addReplaceParamsIfMissing_(orig) {
     const {replaceParams} =
-        /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
+    /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
     const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
     const params = parseQueryString(url.search);
     return addParamsToUrl(removeSearch(orig),
@@ -678,7 +663,7 @@ export class GlobalVariableSource extends VariableSource {
    * @template T
    * @private
    */
-  getVairiantsValue_(getter, expr) {
+  getVariantsValue_(getter, expr) {
     if (!this.variants_) {
       this.variants_ = Services.variantForOrNull(this.ampdoc.win);
     }
@@ -922,7 +907,7 @@ export class UrlReplacements {
     const requestedReplacements = {};
     whitelist.trim().split(/\s+/).forEach(replacement => {
       if (!opt_supportedReplacement ||
-          opt_supportedReplacement.hasOwnProperty(replacement)) {
+          hasOwn(opt_supportedReplacement, replacement)) {
         requestedReplacements[replacement] = true;
       } else {
         user().warn('URL', 'Ignoring unsupported replacement', replacement);
@@ -1048,7 +1033,7 @@ export class UrlReplacements {
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
-        REPLACEMENT_EXP_NAME);
+        'url-replacement-v2');
     if (isV2ExperimentOn) {
       // TODO(ccordy) support opt_collectVars && opt_whitelist
       return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,

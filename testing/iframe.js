@@ -25,12 +25,12 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
+import {installCustomElements} from
+  'document-register-element/build/document-register-element.patched';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStylesLegacy} from '../src/style-installer';
 import {parseIfNeeded} from '../src/iframe-helper';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
 
 let iframeCount = 0;
 

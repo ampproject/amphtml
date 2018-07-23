@@ -53,7 +53,9 @@ app.use('/compose-doc', function(req, res) {
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   ${metaTag}
   <script>
-    window.AMP_CONFIG = window.AMP_CONFIG || {};
+    window.AMP_CONFIG = window.AMP_CONFIG || {
+      "localDev": true
+    };
     window.AMP_CONFIG['allow-doc-opt-in'] =
     (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${experimentString}]);
   </script>

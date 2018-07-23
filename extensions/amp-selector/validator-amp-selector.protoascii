@@ -19,8 +19,8 @@ tags: {
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-selector"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
@@ -32,8 +32,8 @@ tags: {
   spec_name: "SCRIPT[custom-element=amp-selector] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-selector"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
@@ -52,7 +52,9 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   attrs: { name: "form" }
   attrs: {
     name: "keyboard-select-mode"
-    value_regex_casei: "focus|none|select"
+    value_casei: "focus"
+    value_casei: "none"
+    value_casei: "select"
   }
   attrs: {
     name: "multiple"

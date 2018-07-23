@@ -21,8 +21,8 @@ tags: {  # amp-live-list
   unique_warning: true
   extension_spec: {
     name: "amp-live-list"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
@@ -51,7 +51,7 @@ tags: {  # <amp-live-list>
   }
   attrs: {
     name: "sort"
-    value_regex: "ascending"
+    value: "ascending"
   }
   reference_points: {
     tag_spec_name: "AMP-LIVE-LIST [update]"

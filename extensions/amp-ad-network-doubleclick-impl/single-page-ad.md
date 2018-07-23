@@ -56,4 +56,6 @@ See the above link for allowed call-to-action buttons. By design, these will be 
 ## Example
 You can find a fully working example hosted on [ampbyexample.com](https://ampbyexample.com/stories/monetization/doubleclick/).
 
+DoubleClick trafficking instructions can be found in the [DFP Help Center](https://support.google.com/dfp_premium/answer/9038178). 
+
 #### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>

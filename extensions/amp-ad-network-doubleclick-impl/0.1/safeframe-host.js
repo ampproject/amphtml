@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -185,11 +185,11 @@ export class SafeframeHostApi {
         this.baseInstance_.element.getAttribute(
             'data-safeframe-config')) || {});
     /** @private {boolean} */
-    this.expandByOverlay_ = sfConfig.hasOwnProperty('expandByOverlay') ?
+    this.expandByOverlay_ = hasOwn(sfConfig, 'expandByOverlay') ?
       sfConfig['expandByOverlay'] : true;
 
     /** @private {boolean} */
-    this.expandByPush_ = sfConfig.hasOwnProperty('expandByPush') ?
+    this.expandByPush_ = hasOwn(sfConfig, 'expandByPush') ?
       sfConfig['expandByPush'] : true;
 
     /** @private {?Function} */
@@ -691,7 +691,7 @@ export class SafeframeHostApi {
     this.baseInstance_.attemptChangeHeight(newHeight)
         .then(() => {
           this.checkStillCurrent_();
-          this.onFluidResize_();
+          this.onFluidResize_(newHeight);
         }).catch(err => {
           if (err.message == 'CANCELLED') {
             dev().error(TAG, err);
@@ -705,9 +705,15 @@ export class SafeframeHostApi {
   /**
    * Fires a delayed impression and notifies the Fluid creative that its
    * container has been resized.
+   * @param {number} newHeight The height expanded to.
    * @private
    */
-  onFluidResize_() {
+  onFluidResize_(newHeight) {
+    const iframe = dev().assertElement(this.baseInstance_.iframe);
+    const iframeHeight = parseInt(getStyle(iframe, 'height'), 10) || 0;
+    if (iframeHeight != newHeight) {
+      setStyles(iframe, {height: `${newHeight}px`});
+    }
     if (this.fluidImpressionUrl_) {
       this.baseInstance_.fireDelayedImpressions(
           this.fluidImpressionUrl_);
