@@ -1,13 +1,13 @@
 PASS
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,11 +31,11 @@ PASS
 |        padding: 8px;
 |        background: #46b6ac;
 |      }
-|  
+|
 |      amp-user-notification .btn {
 |        border: none;
 |        border-radius: 2px;
-|  
+|
 |        color: #fafafa;
 |        height: 26px;
 |        min-width: 32px;
@@ -49,22 +49,22 @@ PASS
 |        text-align: center;
 |        background: #3f51b5;
 |      }
-|  
+|
 |      @-webkit-keyframes fadeIn {
 |        from { opacity: 0; }
 |        to { opacity: 1; }
 |      }
-|  
+|
 |      @-moz-keyframes fadeIn {
 |        from { opacity: 0; }
 |        to { opacity: 1; }
 |      }
-|  
+|
 |      @keyframes fadeIn {
 |        from { opacity: 0; }
 |        to { opacity: 1; }
 |      }
-|  
+|
 |      amp-user-notification.amp-active {
 |        opacity: 0;
 |        -webkit-animation: fadeIn ease-in 1s 1 forwards;
@@ -78,7 +78,7 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|  
+|
 |    <amp-user-notification
 |        layout=nodisplay
 |        id="amp-user-notification1"
@@ -87,7 +87,7 @@ PASS
 |        This site uses cookies to personalize content.
 |       <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
 |    </amp-user-notification>
-|  
+|
 |    <amp-analytics data-consent-notification-id="amp-user-notification1">
 |      <script type="application/json">
 |      {

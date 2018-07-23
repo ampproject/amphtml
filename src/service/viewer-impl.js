@@ -38,6 +38,11 @@ import {tryResolve} from '../utils/promise';
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
 
+/** @enum {string} */
+export const Capability = {
+  VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
+};
+
 /**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
  * string is returned.
@@ -506,6 +511,14 @@ export class Viewer {
     }
     // TODO(@cramforce): Consider caching the split.
     return capabilities.split(',').indexOf(name) != -1;
+  }
+
+  /**
+   * Whether the viewer can render templates.
+   * @return {boolean}
+   */
+  canRenderTemplates() {
+    return this.hasCapability(Capability.VIEWER_RENDER_TEMPLATE);
   }
 
   /**
@@ -1161,7 +1174,6 @@ export class Viewer {
     }
   }
 }
-
 
 /**
  * Parses the viewer parameters as a string.

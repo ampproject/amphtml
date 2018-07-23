@@ -30,6 +30,8 @@ const SAUCE_TIMEOUT_CONFIG = {
   idleTimeout: 5 * 60,
 };
 
+const preprocessors = ['browserify'];
+
 /**
  * @param {!Object} config
  */
@@ -40,14 +42,15 @@ module.exports = {
     'mocha',
     'sinon-chai',
     'chai',
+    'source-map-support',
   ],
 
   preprocessors: {
     './test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': ['browserify'],
-    './ads/**/test/test-*.js': ['browserify'],
-    './extensions/**/test/**/*.js': ['browserify'],
-    './testing/**/*.js': ['browserify'],
+    './test/**/*.js': preprocessors,
+    './ads/**/test/test-*.js': preprocessors,
+    './extensions/**/test/**/*.js': preprocessors,
+    './testing/**/*.js': preprocessors,
   },
 
   // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
@@ -60,7 +63,7 @@ module.exports = {
     debug: true,
     basedir: __dirname + '/../../',
     transform: [
-      ['babelify', {compact: false}],
+      ['babelify', {compact: false, sourceMapsAbsolute: true}],
     ],
     bundleDelay: 1200,
   },
@@ -127,8 +130,8 @@ module.exports = {
     process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
   ],
 
-  // Number of sauce tests to start in parallel
-  concurrency: 6,
+  // Number of sauce platforms to start in parallel
+  concurrency: 4,
 
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
@@ -147,54 +150,65 @@ module.exports = {
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_latest: Object.assign({
+    SL_Chrome_67: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: 'latest',
+      platform: 'Windows 10',
+      version: '67.0',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Chrome_android: Object.assign({
+    SL_Chrome_Android_7: Object.assign({
       base: 'SauceLabs',
-      browserName: 'android',
-      version: 'latest',
+      appiumVersion: '1.8.1',
+      deviceName: 'Android GoogleAPI Emulator',
+      browserName: 'Chrome',
+      platformName: 'Android',
+      platformVersion: '7.1',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Chrome_45: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: '45',
+      platform: 'Windows 8',
+      version: '45.0',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Android_latest: Object.assign({
+    SL_Android_6: Object.assign({
       base: 'SauceLabs',
-      device: 'Android Emulator',
-      browserName: 'android',
-      platform: 'android',
-      version: 'latest',
+      appiumVersion: '1.8.1',
+      deviceName: 'Android Emulator',
+      browserName: 'Chrome',
+      platformName: 'Android',
+      platformVersion: '6.0',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_iOS_latest: Object.assign({
+    SL_iOS_11: Object.assign({
       base: 'SauceLabs',
-      device: 'iPhone Simulator',
-      browserName: 'iphone',
-      platform: 'iOS',
-      version: 'latest',
+      appiumVersion: '1.8.1',
+      deviceName: 'iPhone X Simulator',
+      browserName: 'Safari',
+      platformName: 'iOS',
+      platformVersion: '11.3',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Firefox_latest: Object.assign({
+    SL_Firefox_61: Object.assign({
       base: 'SauceLabs',
       browserName: 'firefox',
-      version: 'latest',
+      platform: 'Windows 10',
+      version: '61.0',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Safari_latest: Object.assign({
+    SL_Safari_11: Object.assign({
       base: 'SauceLabs',
       browserName: 'safari',
-      version: 'latest',
+      platform: 'macOS 10.13',
+      version: '11.1',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Edge_latest: Object.assign({
+    SL_Edge_17: Object.assign({
       base: 'SauceLabs',
-      browserName: 'microsoftedge',
-      version: 'latest',
+      browserName: 'MicrosoftEdge',
+      platform: 'Windows 10',
+      version: '17.17134',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_IE_11: Object.assign({
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      version: 'latest',
+      platform: 'Windows 10',
+      version: '11.103',
     }, SAUCE_TIMEOUT_CONFIG),
   },
 
@@ -233,6 +247,7 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
+    'karma-source-map-support',
     'karma-chrome-launcher',
     'karma-edge-launcher',
     'karma-firefox-launcher',

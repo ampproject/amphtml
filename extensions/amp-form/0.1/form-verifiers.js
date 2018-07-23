@@ -29,6 +29,13 @@ export const FORM_VERIFY_PARAM = '__amp_form_verify';
  */
 let VerificationErrorDef;
 
+/**
+ * @typedef {{
+ *   updatedElements:!Array<!Element>,
+ *   errors:!Array<!VerificationErrorDef>
+ * }}
+ */
+let UpdatedErrorsDef;
 
 /**
  * Construct the correct form verifier based on whether
@@ -65,25 +72,31 @@ export class FormVerifier {
   /**
    * Called when the user has fully set a value to be verified,
    * e.g. the input's 'change' event
-   * @return {!Promise<!Array<!Element>>}
+   * @return {!Promise<!UpdatedErrorsDef>}
    */
   onCommit() {
     this.clearVerificationErrors_();
     if (this.isDirty_()) {
       return this.verify_();
     } else {
-      return Promise.resolve([]);
+      return Promise.resolve(/** @type {UpdatedErrorsDef} */ ({
+        updatedElements: [],
+        errors: [],
+      }));
     }
   }
 
   /**
    * Sends the verify request if any group is ready to verify.
-   * @return {!Promise<!Array<!Element>>} The list of elements whose state
+   * @return {!Promise<!UpdatedErrorsDef>} The list of elements whose state
    *    must change
    * @protected
    */
   verify_() {
-    return Promise.resolve([]);
+    return Promise.resolve(/** @type {UpdatedErrorsDef} */ ({
+      updatedElements: [],
+      errors: [],
+    }));
   }
 
   /**
@@ -198,7 +211,7 @@ export class AsyncVerifier extends FormVerifier {
    * Set errors on elements that failed verification, and clear any
    * verification state for elements that passed verification.
    * @param {!Array<!VerificationErrorDef>} errors
-   * @return {!Array<!Element>} Updated elements e.g. elements with new errors,
+   * @return {!UpdatedErrorsDef} Updated elements e.g. elements with new errors,
    *    and elements that previously had errors but were fixed. The form will
    *    update their user-valid/user-invalid state.
    * @private
@@ -237,7 +250,10 @@ export class AsyncVerifier extends FormVerifier {
     const fixedElements = previousErrors.filter(isFixed)
         .map(e => this.form_./*OK*/querySelector(`[name="${e.name}"]`));
 
-    return errorElements.concat(fixedElements);
+    return /** @type {!UpdatedErrorsDef} */ ({
+      updatedElements: errorElements.concat(fixedElements),
+      errors,
+    });
   }
 }
 

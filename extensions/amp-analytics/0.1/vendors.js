@@ -871,8 +871,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
-  // Important: please keep this in sync with the following config
-  // 'googleanalytics-alpha'.
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
@@ -966,140 +964,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'optout': '_gaUserPrefs.ioo',
   },
 
-  // USE WITH CAUTION (unless told by Google Analytics representatives)
-  // googleanalytics-alpha configuration is not planned to be supported
-  // long-term. Avoid use of this value for amp-analytics config attribute
-  // unless you plan to migrate before deprecation' #5761
-  'googleanalytics-alpha': {
-    'vars': {
-      'eventValue': '0',
-      'documentLocation': 'SOURCE_URL',
-      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
-      'dataSource': 'AMP',
-      'anonymizeIP': 'aip',
-      'errorParam': '${errorName}-${errorMessage}',
-    },
-    'requests': {
-      'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&' +
-          '_v=a1&' +
-          'ds=${dataSource}&' +
-          '${anonymizeIP}&' +
-          '_s=${requestCount}&' +
-          'dt=${title}&' +
-          'sr=${screenWidth}x${screenHeight}&' +
-          '_utmht=${timestamp}&' +
-          'cid=${clientId}&' +
-          'tid=${account}&' +
-          'dl=${documentLocation}&' +
-          'dr=${externalReferrer}&' +
-          'sd=${screenColorDepth}&' +
-          'ul=${browserLanguage}&' +
-          'de=${documentCharset}',
-      'baseSuffix': '&a=${pageViewId}&' +
-          'z=${random}',
-      'pageview': '${host}/r/collect?${basePrefix}&' +
-          't=pageview&' +
-          'jid=${random}&' +
-          '_r=1' +
-          '${baseSuffix}',
-      'event': '${host}/collect?${basePrefix}&' +
-          't=event&' +
-          'jid=&' +
-          'ec=${eventCategory}&' +
-          'ea=${eventAction}&' +
-          'el=${eventLabel}&' +
-          'ev=${eventValue}' +
-          '${baseSuffix}',
-      'social': '${host}/collect?${basePrefix}&' +
-          't=social&' +
-          'jid=&' +
-          'sa=${socialAction}&' +
-          'sn=${socialNetwork}&' +
-          'st=${socialTarget}' +
-          '${baseSuffix}',
-      'timing': '${host}/collect?${basePrefix}&' +
-          't=${timingRequestType}&' +
-          'jid=&' +
-          'plt=${pageLoadTime}&' +
-          'dns=${domainLookupTime}&' +
-          'tcp=${tcpConnectTime}&' +
-          'rrt=${redirectTime}&' +
-          'srt=${serverResponseTime}&' +
-          'pdt=${pageDownloadTime}&' +
-          'clt=${contentLoadTime}&' +
-          'dit=${domInteractiveTime}' +
-          '${baseSuffix}',
-      'error': '${host}/collect?${basePrefix}&' +
-          't=exception&' +
-          'exd=${errorParam}' +
-          '${baseSuffix}',
-    },
-    'triggers': {
-      'performanceTiming': {
-        'on': 'visible',
-        'request': 'timing',
-        'sampleSpec': {
-          'sampleOn': '${clientId}',
-          'threshold': 1,
-        },
-        'vars': {
-          'timingRequestType': 'timing',
-        },
-      },
-      'adwordsTiming': {
-        'on': 'visible',
-        'request': 'timing',
-        'enabled': '${queryParam(gclid)}',
-        'vars': {
-          'timingRequestType': 'adtiming',
-        },
-      },
-    },
-    'extraUrlParamsReplaceMap': {
-      'dimension': 'cd',
-      'metric': 'cm',
-    },
-    'optout': '_gaUserPrefs.ioo',
-  },
-
-  'krux': {
-    'requests': {
-      'beaconHost': 'https://beacon.krxd.net',
-      'timing': 't_navigation_type=0&' +
-        't_dns=${domainLookupTime}&' +
-        't_tcp=${tcpConnectTime}&' +
-        't_http_request=${serverResponseTime}&' +
-        't_http_response=${pageDownloadTime}&' +
-        't_content_ready=${contentLoadTime}&' +
-        't_window_load=${pageLoadTime}&' +
-        't_redirect=${redirectTime}',
-      'common': 'source=amp&' +
-        'confid=${confid}&' +
-        '_kpid=${pubid}&' +
-        '_kcp_s=${site}&' +
-        '_kcp_sc=${section}&' +
-        '_kcp_ssc=${subsection}&' +
-        '_kcp_d=${canonicalHost}&' +
-        '_kpref_=${documentReferrer}&' +
-        '_kua_kx_amp_client_id=${clientId(_kuid_)}&' +
-        '_kua_kx_lang=${browserLanguage}&' +
-        '_kua_kx_tech_browser_language=${browserLanguage}&' +
-        '_kua_kx_tz=${timezone}',
-      'pageview': '${beaconHost}/pixel.gif?${common}&${timing}',
-      'event': '${beaconHost}/event.gif?${common}&${timing}&pageview=false',
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true,
-    },
-    'extraUrlParamsReplaceMap': {
-      'user.': '_kua_',
-      'page.': '_kpa_',
-    },
-  },
-
   'lotame': {
     'requests': {
       'pageview': 'https://bcp.crwdcntrl.net/amp?c=${account}&pv=y',
@@ -1112,6 +976,37 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
     'transport': {
       'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'marinsoftware': {
+    'requests': {
+      'base': 'https://tracker.marinsm.com/tp',
+      'baseParams': 'cid=${trackerId}' +
+        '&ampVersion=${ampVersion}' +
+        '&ds=AMP' +
+        '&ref=${externalReferrer}' +
+        '&page=${sourceUrl}' +
+        '&uuid=${clientId(marin_amp_id)}' +
+        '&rnd=${random}',
+      'pageView': '${base}?' +
+        '${baseParams}' +
+        '&act=1',
+      'conversion': '${base}?' +
+        '${baseParams}' +
+        '&act=2' +
+        '&trans=UTM:I' +
+          '|${orderId}' +
+          '|${marinConversionType}' +
+          '|${productName}' +
+          '|${category}' +
+          '|${price}' +
+          '|${quantity}',
+    },
+    'transport': {
+      'beacon': true,
       'xhrpost': false,
       'image': true,
     },
@@ -2204,7 +2099,7 @@ ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 
 ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
     ['triggers']['pageLoad']['iframe' +
-      /* TEMPORARY EXCEPTION */ 'Ping'] = true;
+    /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

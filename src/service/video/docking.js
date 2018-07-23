@@ -26,10 +26,12 @@ import {
   PositionObserverFidelity,
 } from '../position-observer/position-observer-worker';
 import {Services} from '../../services';
+import {closestBySelector, isRTL, removeElement} from '../../dom';
 import {createCustomEvent} from '../../event-helper';
 // Source for this constant is css/video-docking.css:
 import {cssText} from '../../../build/video-docking.css.js';
 import {dev, user} from '../../log';
+import {dict} from '../../utils/object';
 import {getInternalVideoElementFor} from '../../utils/video';
 import {getServiceForDoc} from '../../service';
 import {htmlFor, htmlRefs} from '../../static-template';
@@ -38,7 +40,6 @@ import {
 } from '../position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../style-installer';
 import {isFiniteNumber} from '../../types';
-import {isRTL, removeElement} from '../../dom';
 import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
@@ -122,6 +123,7 @@ let DockTargetDef;
  *   x: number,
  *   y: number,
  *   targetWidth: number,
+ *   targetHeight: number,
  *   initialY: number
  * }}
  */
@@ -407,6 +409,10 @@ export class VideoDocking {
 
     /** @private @const {function():?Element} */
     this.getSlot_ = once(() => this.querySlot_());
+
+    /** @private */
+    this.hideControlsOnTapOutsideOnce_ =
+        once(() => this.hideControlsOnTapOutside_());
   }
 
   /**
@@ -559,6 +565,19 @@ export class VideoDocking {
       this.hideControlsOnTimeout_();
     });
     return element;
+  }
+
+  /** @private */
+  hideControlsOnTapOutside_() {
+    listen(this.ampdoc_.getRootNode(), 'mousedown', e => {
+      if (!this.currentlyDocked_) {
+        return;
+      }
+      if (this.isControlsEventTarget_(dev().assertElement(e.target))) {
+        return;
+      }
+      this.hideControls_(/* respectSticky */ true);
+    });
   }
 
   /**
@@ -1016,7 +1035,8 @@ export class VideoDocking {
    */
   trigger_(video, action) {
     const trust = ActionTrust.LOW;
-    const event = createCustomEvent(this.ampdoc_.win, action, /* detail */ {});
+    const event = createCustomEvent(this.ampdoc_.win,
+        /** @type {string} */ (action), /* detail */ dict({}));
     const actions = Services.actionServiceForDoc(this.ampdoc_);
     actions.trigger(video.element, action, event, trust);
   }
@@ -1223,6 +1243,8 @@ export class VideoDocking {
 
     const {triggeredDock} = this.currentlyDocked_ || {triggeredDock: false};
     this.currentlyDocked_ = {video, target, step, triggeredDock};
+
+    this.hideControlsOnTapOutsideOnce_();
   }
 
   /**
@@ -1579,6 +1601,27 @@ export class VideoDocking {
   }
 
   /**
+   * @param {!Element} target
+   * @return {boolean}
+   * @private
+   */
+  isControlsEventTarget_(target) {
+    return !!closestBySelector(target, '.amp-video-docked-controls');
+  }
+
+  /**
+   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!DockTargetDef} target
+   * @return {!TargetAreaDef}
+   * @private
+   */
+  getTargetArea_(video, target) {
+    return isElement(target) ?
+      this.getTargetAreaFromSlot_(video, dev().assertElement(target)) :
+      this.getTargetAreaFromPos_(video, target.posX, target.posY);
+  }
+
+  /**
    * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
@@ -1605,7 +1648,7 @@ export class VideoDocking {
     const initialY = this.calculateInitialY_(
         posY, this.getTopEdge_(), this.getBottomEdge_(), height);
 
-    return {x, y, targetWidth, initialY};
+    return {x, y, targetWidth, targetHeight, initialY};
   }
 
   /**
@@ -1646,7 +1689,10 @@ export class VideoDocking {
     const initialY = this.calculateInitialY_(
         this.getSlotRelativeY_(), top, bottom, naturalHeight);
 
-    return {x, y, targetWidth: naturalWidth * scale, initialY};
+    const targetWidth = naturalWidth * scale;
+    const targetHeight = naturalHeight * scale;
+
+    return {x, y, targetWidth, targetHeight, initialY};
   }
 
   /**
@@ -1668,17 +1714,11 @@ export class VideoDocking {
    */
   getDims_(video, target, step) {
     const {left, width} = video.getLayoutBox();
-
-    const targetArea = isElement(target) ?
-      this.getTargetAreaFromSlot_(video, dev().assertElement(target)) :
-      this.getTargetAreaFromPos_(video, target.posX, target.posY);
-
-    const {x, y, targetWidth, initialY} = targetArea;
+    const {x, y, targetWidth, initialY} = this.getTargetArea_(video, target);
     const currentX = mapStep(step, left, x);
     const currentWidth = mapStep(step, width, targetWidth);
     const currentY = mapStep(step, initialY, y);
     const scale = currentWidth / width;
-
     return {x: currentX, y: currentY, scale};
   }
 

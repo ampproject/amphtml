@@ -686,6 +686,67 @@ describes.realWin('SlideScroll', {
       });
     });
 
+    it('show correct slides when looping with `autoplay` for 2 slides', () => {
+      return getAmpSlideScroll(true, 2).then(ampSlideScroll => {
+        const impl = ampSlideScroll.implementation_;
+        const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
+        const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+        const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
+        const hideRestOfTheSlidesSpy =
+            sandbox.spy(impl, 'hideRestOfTheSlides_');
+        const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
+
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
+
+        impl.showSlide_(1);
+
+        expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.slides_[0], false);
+        expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.slides_[1], true);
+        expect(updateInViewportSpy).to.have.callCount(2);
+        expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
+            .to.be.true;
+        expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
+            .to.be.true;
+        expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[0]);
+        expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[1]);
+        expect(scheduleLayoutSpy).to.be.calledOnce;
+        expect(schedulePreloadSpy).to.have.callCount(1);
+        expect(impl.slideIndex_).to.equal(1);
+        expect(impl.slidesContainer_./*OK*/scrollLeft)
+            .to.equal(impl.slideWidth_);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
+        expect(hideRestOfTheSlidesSpy).to.be.calledOnce;
+        expect(setControlsStateSpy).to.be.calledOnce;
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('true');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('false');
+
+        impl.showSlide_(0);
+
+        expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.slides_[1], false);
+        expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.slides_[0], true);
+        expect(updateInViewportSpy).to.have.callCount(4);
+        expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
+            .to.be.true;
+        expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
+            .to.be.true;
+        expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[0]);
+        expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[1]);
+        expect(scheduleLayoutSpy).to.have.callCount(2);
+        expect(schedulePreloadSpy).to.have.callCount(2);
+        expect(impl.slideIndex_).to.equal(0);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
+        expect(hideRestOfTheSlidesSpy).to.have.callCount(2);
+        expect(setControlsStateSpy).to.have.callCount(2);
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
+      });
+    });
+
     it('should hide unwanted slides when looping', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;

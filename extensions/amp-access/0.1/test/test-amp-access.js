@@ -136,14 +136,12 @@ describes.fakeWin('AccessService', {
     });
     const service = new AccessService(ampdoc);
     service.sources_[0].buildLoginUrls_ = sandbox.spy();
-    service.sources_[0].signIn_.start = sandbox.spy();
     service.runAuthorization_ = sandbox.spy();
     service.scheduleView_ = sandbox.spy();
     service.listenToBroadcasts_ = sandbox.spy();
 
     service.startInternal_();
     expect(service.sources_[0].buildLoginUrls_).to.be.calledOnce;
-    expect(service.sources_[0].signIn_.start).to.be.calledOnce;
     expect(service.runAuthorization_).to.be.calledOnce;
     expect(service.scheduleView_).to.be.calledOnce;
     expect(service.scheduleView_.firstCall.args[0]).to.equal(2000);
@@ -1289,23 +1287,8 @@ describes.fakeWin('AccessService login', {
     });
   });
 
-  it('should request sign-in when configured', () => {
-    const source = service.sources_[0];
-    source.signIn_.requestSignIn = sandbox.stub();
-    source.signIn_.requestSignIn.returns(Promise.resolve('#signin'));
-    source.openLoginDialog_ = sandbox.stub();
-    source.openLoginDialog_.returns(Promise.resolve('#login'));
-    service.loginWithType_('');
-    expect(source.signIn_.requestSignIn).to.be.calledOnce;
-    expect(source.signIn_.requestSignIn.firstCall.args[0])
-        .to.equal('https://acme.com/l?rid=R');
-    expect(source.openLoginDialog_).to.have.not.been.called;
-  });
-
   it('should wait for token exchange post-login with success=true', () => {
     const source = service.sources_[0];
-    source.signIn_.postLoginResult = sandbox.stub();
-    source.signIn_.postLoginResult.returns(Promise.resolve());
     const authorizationStub =
       sandbox.stub(source, 'runAuthorization').callsFake(
           () => Promise.resolve());
@@ -1317,10 +1300,6 @@ describes.fakeWin('AccessService login', {
         .once();
     return service.loginWithType_('').then(() => {
       expect(source.loginPromise_).to.not.exist;
-      expect(source.signIn_.postLoginResult).to.be.calledOnce;
-      expect(source.signIn_.postLoginResult.firstCall.args[0]).to.deep.equal({
-        'success': 'true',
-      });
       expect(authorizationStub).to.be.calledOnce;
       expect(viewStub).to.be.calledOnce;
       expect(broadcastStub).to.be.calledOnce;

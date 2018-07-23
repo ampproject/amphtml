@@ -29,7 +29,7 @@ import {
   hasAnimations,
 } from './animation';
 import {Deferred} from '../../../src/utils/promise';
-import {EventType, dispatch, dispatchCustom} from './events';
+import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
@@ -44,6 +44,8 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
@@ -98,11 +100,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
-    /** @const @private {!function()} */
+    /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
         this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
 
-    /** @private {?Element} */
+    /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
     /** @private @const {!Promise} */
@@ -351,7 +353,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   markPageAsLoaded_() {
-    dispatch(this.element, EventType.PAGE_LOADED, true);
+    dispatch(this.win, this.element, EventType.PAGE_LOADED,
+        /* payload */ undefined, {bubbles: true});
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
@@ -392,17 +395,18 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   getMediaBySelector_(selector) {
     const iframe = this.element.querySelector('iframe');
-    const iframeDoc = iframe && iframe.contentDocument;
+    const fie = iframe &&
+        getFriendlyIframeEmbedOptional(/** @type {!HTMLIFrameElement} */ (iframe));
     const mediaSet = [];
 
     iterateCursor(scopedQuerySelectorAll(this.element, selector),
         el => mediaSet.push(el));
 
-    if (!iframeDoc) {
+    if (!fie) {
       return mediaSet;
     }
 
-    iterateCursor(iframeDoc.querySelectorAll(selector),
+    iterateCursor(fie.win.document.querySelectorAll(selector),
         el => mediaSet.push(el));
     return mediaSet;
   }
@@ -596,12 +600,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {number} progress The progress from 0.0 to 1.0.
    */
   emitProgress_(progress) {
-    const payload = {
-      pageId: this.element.id,
-      progress,
-    };
+    const payload = dict({
+      'pageId': this.element.id,
+      'progress': progress,
+    });
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.PAGE_PROGRESS, payload,
+    dispatch(this.win, this.element, EventType.PAGE_PROGRESS, payload,
         eventInit);
   }
 
@@ -687,7 +691,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     const targetPageId = this.getPreviousPageId();
 
     if (targetPageId === null) {
-      dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
+      dispatch(this.win, this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP,
+          /* payload */ undefined, {bubbles: true});
       return;
     }
 
@@ -712,12 +717,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Delegated the navigation decision to AMP-STORY via event.
-   * @param {number} direction The direction in which navigation needs to takes place.
+   * @param {number} direction The direction in which navigation needs to
+   * takes place.
    */
   navigateOnTap(direction) {
-    const payload = {direction};
+    const payload = dict({'direction': direction});
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,
+    dispatch(this.win, this.element, EventType.TAP_NAVIGATION, payload,
         eventInit);
   }
 
@@ -727,9 +733,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId) {
-    const payload = {targetPageId};
+    const payload = dict({'targetPageId': targetPageId});
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
+    dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
   }
 
@@ -743,8 +749,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     getLogEntries(this.element).then(logEntries => {
-      dispatchCustom(this.win, this.element,
-          EventType.DEV_LOG_ENTRIES_AVAILABLE, logEntries, {bubbles: true});
+      dispatch(this.win, this.element,
+          EventType.DEV_LOG_ENTRIES_AVAILABLE,
+          // ? is OK because all consumers are internal.
+          /** @type {?} */ (logEntries), {bubbles: true});
     });
   }
 

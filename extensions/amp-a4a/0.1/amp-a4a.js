@@ -1264,7 +1264,7 @@ export class AmpA4A extends AMP.BaseElement {
           // whether to retry with an iframe after an ad request failure or just
           // give up and render the fallback content (or collapse the ad slot).
           const networkFailureHandlerResult =
-              this.onNetworkFailure(error, this.adUrl_);
+              this.onNetworkFailure(error, /** @type {string} */ (this.adUrl_));
           dev().assert(!!networkFailureHandlerResult);
           if (networkFailureHandlerResult.frameGetDisabled) {
             // Reset adUrl to null which will cause layoutCallback to not
@@ -1387,7 +1387,8 @@ export class AmpA4A extends AMP.BaseElement {
     return installFriendlyIframeEmbed(
         this.iframe, this.element, {
           host: this.element,
-          url: this.adUrl_,
+          // Need to guarantee that this is no longer null
+          url: /** @type {string} */ (this.adUrl_),
           html: creativeMetaData.minifiedCreative,
           extensionIds: creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
@@ -1499,7 +1500,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
-    /** @type {string} */
+    /** @type {?string} */
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
@@ -1764,7 +1765,7 @@ export class AmpA4A extends AMP.BaseElement {
 /**
  * Attachs query string portion of ad url to error.
  * @param {!Error} error
- * @param {string} adUrl
+ * @param {?string} adUrl
  */
 export function assignAdUrlToError(error, adUrl) {
   if (!adUrl || (error.args && error.args['au'])) {

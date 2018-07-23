@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 338
+min_validator_revision_required: 345
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 675
+spec_file_revision: 691
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -158,7 +158,9 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex_casei: "_blank|_self|_top"
+    value_casei: "_blank"
+    value_casei: "_self"
+    value_casei: "_top"
   }
 }
 # Disallowed.
@@ -227,9 +229,8 @@ tags: {
     name: "href"
     mandatory: true
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -254,8 +255,7 @@ tags: {
     name: "href"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -510,7 +510,7 @@ tags: {
     name: "content"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
   }
   attrs: {
@@ -811,7 +811,8 @@ tags: {
   attrs: {
     name: "content"
     mandatory: true
-    value_regex_casei: "off|on"
+    value_casei: "off"
+    value_casei: "on"
   }
   attrs: {
     name: "http-equiv"
@@ -947,18 +948,16 @@ tags: {  # Special custom 'author' spreadsheet for AMP
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allowed_protocol: "absolute"  # Temporary / will go away.
-        allow_relative: true
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allow_relative: true
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
         allow_empty: true
       }
     }
@@ -1025,18 +1024,16 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allowed_protocol: "absolute"  # Temporary / will go away.
-        allow_relative: true
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
+        protocol: "absolute"  # Temporary / will go away.
         allow_empty: true
       }
       font_url_spec: {
-        allowed_protocol: "https"
-        allowed_protocol: "http"
-        allowed_protocol: "data"
-        allow_relative: true
+        protocol: "https"
+        protocol: "http"
+        protocol: "data"
         allow_empty: true
       }
       validate_amp4ads: true
@@ -1093,7 +1090,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
         type: PARSE_AS_ERROR
       }
       image_url_spec: {
-        allowed_protocol: "https"
+        protocol: "https"
       }
     }
     blacklisted_cdata_regex: {
@@ -1113,7 +1110,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
 }
-
 tags: {
   html_format: AMP
   html_format: EXPERIMENTAL
@@ -1122,8 +1118,15 @@ tags: {
   mandatory_alternatives: "head > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
-  deprecation: "head > style[amp-boilerplate]"
-  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
+  # Special Case. This tag is deprecated, however this matches any <style> tag
+  # in the document head without an associated attribute. This is far more
+  # likely to happen to be caused by the user intending to use
+  # <style amp-custom> than having used a deprecated amp-boilerplate. So, for
+  # this case, we do not emit deprecation warnings. Note that the <noscript>
+  # component of the deprecated boilerplate will still emit a deprecation
+  # warning.  See https://github.com/ampproject/amphtml/issues/4421
+  #deprecation: "head > style[amp-boilerplate]"
+  #deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
   attrs: { name: "nonce" }
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
@@ -1273,11 +1276,11 @@ tags: {
         type: PARSE_AS_ERROR
       }
       validate_keyframes: true
-      allowed_declarations: "animation-timing-function"
-      allowed_declarations: "offset-distance"
-      allowed_declarations: "opacity"
-      allowed_declarations: "transform"
-      allowed_declarations: "visibility"
+      declaration: "animation-timing-function"
+      declaration: "offset-distance"
+      declaration: "opacity"
+      declaration: "transform"
+      declaration: "visibility"
     }
   }
 }
@@ -1434,10 +1437,9 @@ attr_lists: {
   attrs: {
     name: "cite"
     value_url: {
+      protocol: "http"
+      protocol: "https"
       allow_empty: true
-      allow_relative: true
-      allowed_protocol: "http"
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -1561,34 +1563,33 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
-      allow_empty: true
-      allow_relative: true
-      allowed_protocol: "ftp"
-      allowed_protocol: "geo"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allowed_protocol: "mailto"
-      allowed_protocol: "maps"
+      protocol: "ftp"
+      protocol: "geo"
+      protocol: "http"
+      protocol: "https"
+      protocol: "mailto"
+      protocol: "maps"
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
-      allowed_protocol: "bbmi"
-      allowed_protocol: "fb-messenger"
-      allowed_protocol: "intent"
+      protocol: "bbmi"
+      protocol: "fb-messenger"
+      protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
-      allowed_protocol: "line"
-      allowed_protocol: "skype"
-      allowed_protocol: "sms"
-      allowed_protocol: "snapchat"
-      allowed_protocol: "tel"
-      allowed_protocol: "tg"
-      allowed_protocol: "threema"
-      allowed_protocol: "twitter"
-      allowed_protocol: "viber"
-      allowed_protocol: "webcal"
-      allowed_protocol: "web+mastodon"  # See GitHub issue #14793
-      allowed_protocol: "whatsapp"
+      protocol: "line"
+      protocol: "skype"
+      protocol: "sms"
+      protocol: "snapchat"
+      protocol: "tel"
+      protocol: "tg"
+      protocol: "threema"
+      protocol: "twitter"
+      protocol: "viber"
+      protocol: "webcal"
+      protocol: "web+mastodon"  # See GitHub issue #14793
+      protocol: "whatsapp"
+      allow_empty: true
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -1634,7 +1635,9 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex: "_blank|_self|_top"
+    value: "_blank"
+    value: "_self"
+    value: "_top"
   }
   attrs: {
     name: "type"
@@ -1654,9 +1657,9 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      protocol: "https"
+      protocol: "mailto"
       allow_relative: false
-      allowed_protocol: "https"
-      allowed_protocol: "mailto"
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
     # appear at the beginnig of the attribute's value. Likewise closing doubly
@@ -1689,7 +1692,7 @@ tags: {
   }
   attrs: {
     name: "target"
-    value_regex: "_blank"
+    value: "_blank"
   }
   attrs: {
     name: "type"
@@ -1989,9 +1992,8 @@ tags: {
   attrs: {
     name: "longdesc"
     value_url: {
-      allow_relative: true
-      allowed_protocol: "http"
-      allowed_protocol: "https"
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -2000,8 +2002,8 @@ tags: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2017,7 +2019,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
   attrs: {
     name: "frameborder"
-    value_regex: "0|1"
+    value: "0"
+    value: "1"
   }
   attrs: { name: "height" }
   attrs: { name: "name" }
@@ -2031,14 +2034,16 @@ tags: {
   }
   attrs: {
     name: "scrolling"
-    value_regex: "auto|yes|no"
+    value: "auto"
+    value: "yes"
+    value: "no"
   }
   attrs: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2073,8 +2078,8 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2097,8 +2102,8 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
+      protocol: "data"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2117,7 +2122,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2139,7 +2144,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2162,7 +2167,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2185,7 +2190,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2208,7 +2213,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -2232,15 +2237,18 @@ attr_lists: {
   }
   attrs: {
     name: "kind"
-    value_regex: "captions|chapters|descriptions|metadata"
+    value: "captions"
+    value: "chapters"
+    value: "descriptions"
+    value: "metadata"
   }
   attrs: { name: "label" }
   attrs: {
     name: "src"
     mandatory: true
     value_url: {
+      protocol: "https"
       allow_relative: false
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -2262,8 +2270,8 @@ attr_lists: {
     name: "src"
     mandatory: true
     value_url: {
+      protocol: "https"
       allow_relative: false
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -2483,9 +2491,8 @@ attr_lists: {
     # xlink:href is deprecated since SVG2 in favor of href.
     alternative_names: "href"
     value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "http"
+      protocol: "https"
       allow_empty: false
     }
   }
@@ -2853,10 +2860,9 @@ tags: {
     # xlink:href is deprecated since SVG2 in favor of href.
     alternative_names: "href"
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
       allow_empty: false
     }
     # Inline SVGs execute in a different context and can affect page elements.
@@ -2944,7 +2950,11 @@ tags: {
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
   attrs: { name: "preserveaspectratio" }
-  attrs: { name: "version" value_regex: "1.0|1.1" }
+  attrs: {
+    name: "version"
+    value: "1.0"
+    value: "1.1"
+  }
   attrs: { name: "viewbox" }
   attrs: { name: "width" }
   attrs: { name: "x" }
@@ -3528,7 +3538,8 @@ tags: {
   attrs: { name: "bgcolor" }  # Not valid html5 but commonly used and supported.
   attrs: {  # Not valid html5 but commonly used and supported.
     name: "border"
-    value_regex: "0|1"
+    value: "0"
+    value: "1"
   }
   attrs: { name: "cellpadding" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "cellspacing" }  # Not valid html5 but commonly used and supported.
@@ -3654,26 +3665,24 @@ tags {  # <form method=GET ...>
     name: "action"
     mandatory: true
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "action-xhr"
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "as-you-go|"
-                 "interact-and-submit|"
-                 "show-all-on-submit|"
-                 "show-first-on-submit"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3687,13 +3696,13 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "target"
     mandatory: true
-    value_regex_casei: "_blank|_top"
+    value_casei: "_blank"
+    value_casei: "_top"
   }
   attrs: {
     name: "verify-xhr"
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -3713,18 +3722,17 @@ tags {  # <form method=POST ...>
     name: "action-xhr"
     mandatory: true
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "as-you-go|"
-                 "interact-and-submit|"
-                 "show-all-on-submit|"
-                 "show-first-on-submit"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3740,13 +3748,13 @@ tags {  # <form method=POST ...>
   # See: https://github.com/ampproject/amphtml/issues/5607
   attrs: {
     name: "target"
-    value_regex_casei: "_blank|_top"
+    value_casei: "_blank"
+    value_casei: "_top"
   }
   attrs: {
     name: "verify-xhr"
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -3765,7 +3773,7 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "action-xhr"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
@@ -3773,10 +3781,10 @@ tags {  # <form method=GET ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "as-you-go|"
-                 "interact-and-submit|"
-                 "show-all-on-submit|"
-                 "show-first-on-submit"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3800,8 +3808,8 @@ tags {  # <form method=POST ...>
     name: "action-xhr"
     mandatory: true
     value_url: {
+      protocol: "https"
       allow_relative: false
-      allowed_protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
@@ -3809,10 +3817,10 @@ tags {  # <form method=POST ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "as-you-go|"
-                 "interact-and-submit|"
-                 "show-all-on-submit|"
-                 "show-first-on-submit"
+    value: "as-you-go"
+    value: "interact-and-submit"
+    value: "show-all-on-submit"
+    value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3824,19 +3832,67 @@ tags {  # <form method=POST ...>
   attrs: { name: "name" }
   attrs: { name: "novalidate" }
 }
+# Will add verify state template if requested by users
 tags {
   html_format: AMP
   html_format: AMP4ADS
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submitting]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [verify-error]"
+  mandatory_ancestor: "FORM"
+  attrs: { name: "align" }
+  attrs: {
+    name: "verify-error"
+    mandatory: true
+  }
+}
+tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
+  tag_name: "DIV"
+  spec_name: "FORM DIV [verify-error][template]"
+  mandatory_ancestor: "FORM"
+  attrs: { name: "align" }
+  attrs: {
+    name: "verify-error"
+    mandatory: true
+  }
+  attrs: {
+    name: "template"
+    mandatory: true
+  }
+}
+tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
+  # AMP4EMAIL is omitted. There is additional latency in rendering A4E templates,
+  # which reduces the time available to render the template during the submitting state
+  tag_name: "DIV"
+  spec_name: "FORM DIV [submitting]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submitting"
     mandatory: true
-    # Avoid triggering errors for non-form divs.
-    dispatch_key: NAME_DISPATCH
+  }
+}
+tags {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
+  tag_name: "DIV"
+  spec_name: "FORM DIV [submitting][template]"
+  mandatory_ancestor: "FORM"
+  attrs: { name: "align" }
+  attrs: {
+    name: "submitting"
+    mandatory: true
+  }
+  attrs: {
+    name: "template"
+    mandatory: true
   }
 }
 tags {
@@ -3845,8 +3901,8 @@ tags {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-success]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-success]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-success"
@@ -3859,8 +3915,8 @@ tags {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-success][template]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-success][template]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-success"
@@ -3877,8 +3933,8 @@ tags {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-error]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-error]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-error"
@@ -3891,8 +3947,8 @@ tags {
   html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-error][template]"
-  mandatory_parent: "FORM"
+  spec_name: "FORM DIV [submit-error][template]"
+  mandatory_ancestor: "FORM"
   attrs: { name: "align" }
   attrs: {
     name: "submit-error"
@@ -4621,10 +4677,9 @@ attr_lists: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allow_relative: true
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
@@ -4639,7 +4694,7 @@ attr_lists: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
@@ -4666,7 +4721,7 @@ attr_lists: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     # Openning doubly curly brackets {{ (these are mustache delimiters) can only
@@ -4777,7 +4832,7 @@ tags: {  # <amp-pixel>
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
@@ -5320,15 +5375,15 @@ attr_lists: {
   }
   attrs: {
     name: "visible-when-invalid"
-    value_regex: "badInput|"
-                 "customError|"
-                 "patternMismatch|"
-                 "rangeOverflow|"
-                 "rangeUnderflow|"
-                 "stepMismatch|"
-                 "tooLong|"
-                 "typeMismatch|"
-                 "valueMissing"
+    value: "badInput"
+    value: "customError"
+    value: "patternMismatch"
+    value: "rangeOverflow"
+    value: "rangeUnderflow"
+    value: "stepMismatch"
+    value: "tooLong"
+    value: "typeMismatch"
+    value: "valueMissing"
     trigger: {
       also_requires_attr: "validation-for"
     }
@@ -5337,13 +5392,21 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
-    value_regex_casei: "fade-in|"
-                       "fade-in-scroll|"
-                       "fly-in-bottom|"
-                       "fly-in-left|"
-                       "fly-in-right|"
-                       "fly-in-top|"
-                       "parallax"
+    value_regex_casei: "(fade-in|"
+                        "fade-in-scroll|"
+                        "fly-in-bottom|"
+                        "fly-in-left|"
+                        "fly-in-right|"
+                        "fly-in-top|"
+                        "parallax)"
+                       "(\\s|"
+                        "fade-in|"
+                        "fade-in-scroll|"
+                        "fly-in-bottom|"
+                        "fly-in-left|"
+                        "fly-in-right|"
+                        "fly-in-top|"
+                        "parallax)*"
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
@@ -5372,7 +5435,10 @@ attr_lists: {
   }
   attrs: {
     name: "subscriptions-section"
-    value_regex_casei: "actions|content|content-not-granted|loading"
+    value_casei: "actions"
+    value_casei: "content"
+    value_casei: "content-not-granted"
+    value_casei: "loading"
     requires_extension: "amp-subscriptions"
   }
   attrs: {
@@ -5676,18 +5742,18 @@ error_formats {
 error_formats {
   code: STYLESHEET_TOO_LONG
   format: "The author stylesheet specified in tag '%1' is too "
-          "long - we saw %2 bytes whereas the limit is %3 bytes."
+          "long - document contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG
   format: "The author stylesheet specified in tag 'style amp-custom' and "
-          "the combined inline styles is too large - we saw %1 bytes "
-          "whereas the limit is %2 bytes."
+          "the combined inline styles is too large - document contains %1 "
+          "bytes whereas the limit is %2 bytes."
 }
 error_formats {
   code: INLINE_STYLE_TOO_LONG
-  format: "The inline style specified in tag '%1' is too long "
-          "- we saw %2 bytes whereas the limit is %3 bytes."
+  format: "The inline style specified in tag '%1' is too long - document "
+          "contains %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT

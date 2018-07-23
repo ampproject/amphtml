@@ -27,6 +27,7 @@ const replace = require('gulp-replace');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const {highlight} = require('cli-highlight');
+const {singlePassCompile} = require('../get-dep-graph');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -96,6 +97,58 @@ function formatClosureCompilerError(message) {
 
 function compile(entryModuleFilenames, outputDir,
   outputFilename, options) {
+  const hideWarningsFor = [
+    'third_party/caja/',
+    'third_party/closure-library/sha384-generated.js',
+    'third_party/subscriptions-project/',
+    'third_party/d3/',
+    'third_party/mustache/',
+    'third_party/vega/',
+    'third_party/webcomponentsjs/',
+    'third_party/rrule/',
+    'third_party/react-dates/',
+    'node_modules/',
+    'build/patched-module/',
+    // Can't seem to suppress `(0, win.eval)` suspicious code warning
+    '3p/environment.js',
+    // Generated code.
+    'extensions/amp-access/0.1/access-expr-impl.js',
+  ];
+
+  const baseExterns = [
+    'build-system/amp.extern.js',
+    'third_party/closure-compiler/externs/performance_observer.js',
+    'third_party/closure-compiler/externs/web_animations.js',
+    'third_party/moment/moment.extern.js',
+    'third_party/react-externs/externs.js',
+  ];
+  const define = [];
+  if (argv.pseudo_names) {
+    define.push('PSEUDO_NAMES=true');
+  }
+  if (argv.fortesting) {
+    define.push('FORTESTING=true');
+  }
+  if (options.singlePassCompilation) {
+    // TODO(@cramforce): Run the post processing step
+    return singlePassCompile(entryModuleFilenames, {
+      define,
+      externs: baseExterns,
+      hideWarningsFor,
+    }).then(() => {
+      return new Promise((resolve, reject) => {
+        const stream = gulp.src(outputDir + '/**/*.js');
+        stream.on('end', resolve);
+        stream.on('error', reject);
+        stream.pipe(
+            replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+            .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+            .pipe(shortenLicense())
+            .pipe(gulp.dest(outputDir));
+      });
+    });
+  }
+
   return new Promise(function(resolve) {
     let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {
@@ -104,7 +157,8 @@ function compile(entryModuleFilenames, outputDir,
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    const checkTypes = options.checkTypes || argv.typecheck_only;
+    const checkTypes =
+        options.checkTypes || options.typeCheckOnly || argv.typecheck_only;
     const intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     // If undefined/null or false then we're ok executing the deletions
@@ -120,7 +174,6 @@ function compile(entryModuleFilenames, outputDir,
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
     wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
-    patchRegisterElement();
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
     }
@@ -194,8 +247,8 @@ function compile(entryModuleFilenames, outputDir,
       'node_modules/promise-pjs/promise.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
-      'build/patched-module/document-register-element/build/' +
-          'document-register-element.node.js',
+      'node_modules/document-register-element/build/' +
+          'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
@@ -266,16 +319,7 @@ function compile(entryModuleFilenames, outputDir,
       }
     });
 
-    let externs = [
-      'build-system/amp.extern.js',
-      'third_party/closure-compiler/externs/intersection_observer.js',
-      'third_party/closure-compiler/externs/performance_observer.js',
-      'third_party/closure-compiler/externs/shadow_dom.js',
-      'third_party/closure-compiler/externs/streams.js',
-      'third_party/closure-compiler/externs/web_animations.js',
-      'third_party/moment/moment.extern.js',
-      'third_party/react-externs/externs.js',
-    ];
+    let externs = baseExterns;
     if (options.externs) {
       externs = externs.concat(options.externs);
     }
@@ -319,24 +363,8 @@ function compile(entryModuleFilenames, outputDir,
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
         jscomp_off: ['unknownDefines'],
-        define: [],
-        hide_warnings_for: [
-          'third_party/caja/',
-          'third_party/closure-library/sha384-generated.js',
-          'third_party/subscriptions-project/',
-          'third_party/d3/',
-          'third_party/mustache/',
-          'third_party/vega/',
-          'third_party/webcomponentsjs/',
-          'third_party/rrule/',
-          'third_party/react-dates/',
-          'node_modules/',
-          'build/patched-module/',
-          // Can't seem to suppress `(0, win.eval)` suspicious code warning
-          '3p/environment.js',
-          // Generated code.
-          'extensions/amp-access/0.1/access-expr-impl.js',
-        ],
+        define,
+        hide_warnings_for: hideWarningsFor,
         jscomp_error: [],
       },
     };
@@ -355,12 +383,6 @@ function compile(entryModuleFilenames, outputDir,
       compilerOptions.compilerFlags.conformance_configs =
           'build-system/conformance-config.textproto';
     }
-    if (argv.pseudo_names) {
-      compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
-    }
-    if (argv.fortesting) {
-      compilerOptions.compilerFlags.define.push('FORTESTING=true');
-    }
 
     if (compilerOptions.compilerFlags.define.length == 0) {
       delete compilerOptions.compilerFlags.define;
@@ -376,7 +398,7 @@ function compile(entryModuleFilenames, outputDir,
         });
 
     // If we're only doing type checking, no need to output the files.
-    if (!argv.typecheck_only) {
+    if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
           .pipe(rename(outputFilename))
           .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
@@ -389,40 +411,9 @@ function compile(entryModuleFilenames, outputDir,
                 .pipe(gulp.dest(outputDir))
                 .on('end', resolve);
           });
+    } else {
+      stream = stream.on('end', resolve);
     }
     return stream;
   });
-}
-
-function patchRegisterElement() {
-  let file;
-  // Copies document-register-element into a new file that has an export.
-  // This works around a bug in closure compiler, where without the
-  // export this module does not generate a goog.provide which fails
-  // compilation.
-  // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.node.js';
-  if (!fs.existsSync(patchedName)) {
-    file = fs.readFileSync(
-        'node_modules/document-register-element/build/' +
-        'document-register-element.node.js').toString();
-    if (argv.fortesting) {
-      // Need to switch global to self since closure doesn't wrap the module
-      // like CommonJS
-      file = file.replace('installCustomElements(global);',
-          'installCustomElements(self);');
-    } else {
-      // Get rid of the side effect the module has so we can tree shake it
-      // better and control installation, unless --fortesting flag
-      // is passed since we also treat `--fortesting` mode as "dev".
-      file = file.replace('installCustomElements(global);', '');
-    }
-    // Closure Compiler does not generate a `default` property even though
-    // to interop CommonJS and ES6 modules. This is the same issue typescript
-    // ran into here https://github.com/Microsoft/TypeScript/issues/2719
-    file = file.replace('module.exports = installCustomElements;',
-        'exports.default = installCustomElements;');
-    fs.writeFileSync(patchedName, file);
-  }
 }

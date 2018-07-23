@@ -272,7 +272,7 @@
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
-
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-boilerplate>
     body {
       -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
@@ -340,6 +340,41 @@
 </head>
 
 <body>
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "open": "https://foo.com/open",
+          "thumb": "https://foo.com/thumb",
+          "slide": "https://foo.com/slide",
+          "controlToggle": "https://foo.com/controlToggle",
+          "descExpand": "https://foo.com/descExpand"
+        },
+        "triggers": {
+          "trackLightboxOpened": {
+            "on": "lightboxOpened",
+            "request": "open"
+          },
+          "trackThumbnailsViewToggled": {
+            "on": "thumbnailsViewToggled",
+            "request": "thumb"
+          },
+          "trackSlideChange": {
+            "on": "slideChange",
+            "request": "slide"
+          },
+          "trackControlsToggled": {
+            "on": "controlsToggled",
+            "request": "controlToggle"
+          },
+          "trackDescriptionOverflowToggled": {
+            "on": "descriptionOverflowToggled",
+            "request": "descExpand"
+          }
+        }
+      }
+      </script>
+  </amp-analytics>
   <header id="top-bar">
     <button class="menu" title="Toggle Sidebar">
       ☰

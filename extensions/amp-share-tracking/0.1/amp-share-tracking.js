@@ -51,7 +51,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     * @private
     */
   isExperimentOn_() {
-    return isExperimentOn(this.win, TAG);
+    return isExperimentOn(this.win, 'amp-share-tracking');
   }
 
   /** @override */

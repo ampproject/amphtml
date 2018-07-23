@@ -26,6 +26,43 @@ import {toggleExperiment} from '../../src/experiments';
 describe('DOMPurify-based', () => {
   runSanitizerTests();
 
+  describe('<script>', () => {
+    it('should not allow plain <script> tags', () => {
+      expect(purifyHtml('<script>alert(1)</script>')).to.equal('');
+    });
+
+    it('should not allow script[type="text/javascript"]', () => {
+      expect(purifyHtml('<script type="text/javascript">alert(1)</script>'))
+          .to.equal('');
+    });
+
+    it('should not allow script[type="application/javascript"]', () => {
+      const html = '<script type="application/javascript">alert(1)</script>';
+      expect(purifyHtml(html)).to.equal('');
+    });
+
+    it('should allow script[type="application/json"]', () => {
+      const html = '<script type="application/json">{}</script>';
+      expect(purifyHtml(html)).to.equal(html);
+    });
+
+    it('should allow script[type="application/ld+json"]', () => {
+      const html = '<script type="application/ld+json">{}</script>';
+      expect(purifyHtml(html)).to.equal(html);
+    });
+
+    it('should not allow insecure <script> tags around secure ones', () => {
+      const html = '<script type="application/json">{}</script>';
+      // Should not allow an insecure tag following a secure one.
+      expect(purifyHtml(html + '<script>alert(1)</script>')).to.equal(html);
+      // Should not allow an insecure tag preceding a secure one.
+      expect(purifyHtml('<script>alert(1)</script>' + html)).to.equal(html);
+      // Should not allow an insecure tag containing a secure one.
+      expect(purifyHtml('<script>alert(1)' +
+          '<script type="application/json">{}</script></script>')).to.equal('');
+    });
+  });
+
   describe('for <amp-bind>', () => {
     it('should rewrite [text] and [class] attributes', () => {
       expect(purifyHtml('<p [text]="foo"></p>')).to.be
