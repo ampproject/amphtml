@@ -183,7 +183,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
+    /** @protected {!Deferred<?Response>} */
     this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
@@ -683,9 +683,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.troubleshootData_.creativeId =
-        responseHeaders.get('google-creative-id');
+      /** @type {string} */ (dev().assert(
+          responseHeaders.get('google-creative-id'),
+          'Header google-creative-id is null'
+      ));
     this.troubleshootData_.lineItemId =
-        responseHeaders.get('google-lineitem-id');
+      /** @type {string} */ (dev().assert(
+          responseHeaders.get('google-lineitem-id'),
+          'Header google-lineitem-id is null'
+      ));
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -704,6 +710,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // fluid, wait until after resize happens.
     if (this.isFluidRequest_ && !this.returnedSize_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+    } else {
+      this.fireDelayedImpressions(
+          /** @type {string} */ (dev().assert(
+              responseHeaders.get('X-AmpImps'),
+              'Header X-AmpImps is null'
+          ))
+      );
     }
 
     // If the response included a pageview state token, check for an existing

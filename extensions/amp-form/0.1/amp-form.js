@@ -521,7 +521,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's action endpoint.
-   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doActionXhr_() {
@@ -530,7 +530,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's verify endpoint.
-   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doVerifyXhr_() {
@@ -543,7 +543,7 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doXhr_(url, method, opt_extraFields) {
