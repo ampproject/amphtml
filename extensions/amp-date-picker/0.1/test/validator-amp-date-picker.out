@@ -120,16 +120,16 @@ amp-date-picker/0.1/test/validator-amp-date-picker.html:107:2 The attribute 'typ
 |    <!-- Invalid: amp-date-picker with implicit mode="static" without layout -->
 |    <amp-date-picker></amp-date-picker>
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:110:2 The implied layout 'CONTAINER' is not supported by tag 'amp-date-picker[type=single][mode=static]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:110:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 |    <!-- Invalid: amp-date-picker with explicit mode="static" without layout -->
 |    <amp-date-picker mode="static">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:112:2 The implied layout 'CONTAINER' is not supported by tag 'amp-date-picker[type=single][mode=static]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:112:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 |    </amp-date-picker>
 |    <!-- Invalid: overlay amp-date-picker with fullscreen attribute -->
 |    <amp-date-picker mode="overlay" fullscreen>
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:115:2 The implied layout 'CONTAINER' is not supported by tag 'amp-date-picker[type=single][mode=static]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:115:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
 amp-date-picker/0.1/test/validator-amp-date-picker.html:115:2 The attribute 'mode' in tag 'amp-date-picker[type=single][mode=static]' is set to the invalid value 'overlay'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
 |      <input type="text" name="date4">
