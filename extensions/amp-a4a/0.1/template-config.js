@@ -24,7 +24,7 @@ export let NetworkRegistryDef;
 
 /** @const {!NetworkRegistryDef} */
 export const NetworkRegistry = {
-  test: {
+  'custom-template': {
     requestUrl: '/adzerk/1',
   },
 };

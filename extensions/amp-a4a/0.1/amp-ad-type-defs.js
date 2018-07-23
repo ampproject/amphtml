@@ -21,12 +21,6 @@
     }} */
 export let LayoutInfoDef;
 
-/** @typedef {{
-      templateUrl: string,
-      data: (JsonObject|undefined),
-    }} */
-export let AmpTemplateCreativeDef;
-
 /** @enum {string} */
 export const FailureType = {
   REQUEST_ERROR: 'REQUEST_ERROR',
