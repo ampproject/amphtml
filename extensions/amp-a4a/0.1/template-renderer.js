@@ -22,27 +22,29 @@ import {getAmpAdTemplateHelper} from './template-validator';
  */
 export class TemplateRenderer extends FriendlyFrameRenderer {
   /** @override */
-  render(context, element, validatorData) {
-    const {creativeData} = validatorData;
+  render(context, element, creativeData) {
     return super.render(context, element, creativeData).then(() => {
+      const templateData =
+      /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+          creativeData.templateData);
+      const {data} = templateData;
+      if (!data) {
+        return Promise.resolve();
+      }
       const templateHelper = getAmpAdTemplateHelper(context.win);
       return templateHelper
-          .render(
-              creativeData.templateData.data,
-              this.iframe.contentWindow.document.body)
+          .render(data, this.iframe.contentWindow.document.body)
           .then(renderedElement => {
-            const {analytics} = creativeData.templateData;
+            const {analytics} = templateData;
             if (analytics) {
               templateHelper.insertAnalytics(renderedElement, analytics);
             }
             // This element must exist, or #render() would have thrown.
             const templateElement = this.iframe.contentWindow.document
-                .getElementsByTagName('template')[0];
-            this.iframe.contentWindow.document.body
-                .removeChild(templateElement);
-            this.iframe.contentWindow.document.body
-                .appendChild(renderedElement);
-	  });
+                .querySelector('template');
+            templateElement.parentNode
+                .replaceChild(renderedElement, templateElement);
+          });
     });
   }
 }

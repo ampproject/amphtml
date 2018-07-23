@@ -200,7 +200,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     if (error) {
       dev().warn(TAG, error);
     }
-    switch (recoveryMode.type) {
+    switch (recoveryMode) {
       case RecoveryModeType.COLLAPSE:
         this.forceCollapse_();
         break;

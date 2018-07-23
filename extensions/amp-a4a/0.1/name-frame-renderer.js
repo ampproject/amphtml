@@ -23,15 +23,34 @@ import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /**
+ * @typedef {{
+ *   crossDomainData: ./amp-ad-type-defs.CrossDomainDataDef,
+ * }}
+ */
+export let CreativeData;
+
+/**
  * Render a non-AMP creative into a NameFrame.
  */
 export class NameFrameRenderer extends Renderer {
   /** @override */
   render(context, element, creativeData) {
+    creativeData = /** @type {!CreativeData} */ (creativeData);
+
     const {crossDomainData} = creativeData;
     dev().assert(crossDomainData, 'CrossDomain data undefined!');
 
-    const creative = utf8Decode(crossDomainData.rawCreativeBytes);
+    if (!crossDomainData.creative && !crossDomainData.rawCreativeBytes) {
+      // No creative, nothing to do.
+      return Promise.resolve();
+    }
+
+    const creative = crossDomainData.creative ||
+        // rawCreativeBytes must exist; if we're here, then `creative` must not
+        // exist, but the if-statement above guarantees that at least one of
+        // `creative` || `rawCreativeBytes` exists.
+        utf8Decode(/** @type {!ArrayBuffer} */ (
+          crossDomainData.rawCreativeBytes));
     const srcPath =
         getDefaultBootstrapBaseUrl(context.win, 'nameframe');
     const contextMetadata = getContextMetadata(
