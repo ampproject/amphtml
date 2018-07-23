@@ -622,6 +622,17 @@ describes.sandboxed('Extensions', {}, () => {
       expect(win.customElements.elements['amp-test']).to.be.undefined;
     });
 
+    it('should not insert version for _bundle', () => {
+      expect(doc.head.querySelectorAll(
+          '[custom-element="_bundle"]')).to.have.length(0);
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
+      extensions.preloadExtension('_bundle');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="_bundle"]')).to.have.length(0);
+      expect(doc.head.querySelectorAll(
+          'script[src*="_bundle"]')).to.have.length(1);
+    });
+
     it('should only insert script once', () => {
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(0);
@@ -751,7 +762,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(loadSpy).to.be.calledOnce;
 
       // Resolve.
-      extensions.registerExtension('amp-test', () => {});
+      extensions.registerExtension('amp-test', () => {}, {});
       return promise1.then(() => {
         const promise3 = extensions.installExtensionForDoc(ampdoc, 'amp-test');
         expect(promise3).to.equal(promise1);

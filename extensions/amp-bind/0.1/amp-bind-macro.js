@@ -17,17 +17,6 @@
 import {LayoutPriority} from '../../../src/layout';
 
 /**
- * Data representation of an <amp-bind-macro> that can cross the web worker
- * boundary (structured cloneable).
- * @typedef {{
- *   id: string,
- *   argumentNames: Array<string>,
- *   expressionString: string
- * }}
- */
-export let AmpBindMacroDef;
-
-/**
  * The <amp-bind-macro> element is used to define an expression macro that can
  * be called from other amp-bind expressions within the document.
  */

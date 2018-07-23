@@ -17,6 +17,7 @@
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from './utils';
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {camelCaseToDash} from '../../src/string';
+import {hasOwn} from '../../src/utils/object';
 import {setStyles} from '../../src/style';
 import {user} from '../../src/log';
 import {validateData} from '../../3p/3p';
@@ -35,7 +36,7 @@ export function adsense(global, data) {
         'matchedContentColumnsNum']);
 
   if (data['autoFormat'] == 'rspv') {
-    user().assert(data.hasOwnProperty('fullWidth'),
+    user().assert(hasOwn(data, 'fullWidth'),
         'Responsive AdSense ad units require the attribute data-full-width.');
 
     user().assert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,

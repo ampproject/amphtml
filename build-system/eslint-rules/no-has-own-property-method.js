@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var System = {};
-/**
- * @param {string} module
- * @return {!Promise}
- */
-System.import = function(module) {};
-
-/**
- * @type {!Window}
- */
-window.global;
+module.exports = {
+  create(context) {
+    return {
+      CallExpression(node) {
+        if (node.callee.type == 'MemberExpression' && !node.callee.computed &&
+            node.callee.property.name == 'hasOwnProperty') {
+          context.report({
+            node,
+            message: 'Do not use hasOwnProperty directly. ' +
+                'Use hasOwn from src/utils/object.js instead.',
+          });
+        }
+      },
+    };
+  },
+};
