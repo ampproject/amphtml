@@ -23,7 +23,7 @@
    top: 0 !important;
    left: 0 !important;
    right: 0 !important;
-   height: 56px !important; /* 6px progress bar + 48px icons + 2px margin */
+   height: 56px !important; /* 6px progress bar + 48px icon + 2px margin */
    opacity: 1 !important;
    z-index: 100000 !important;
    box-sizing: border-box !important;
