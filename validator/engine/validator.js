@@ -548,6 +548,11 @@ class ParsedTagSpec {
      * @type {!Array<number>}
      * @private
      */
+    this.mandatoryAnyofs_ = [];
+    /**
+     * @type {!Array<number>}
+     * @private
+     */
     this.implicitAttrspecs_ = [];
     /**
      * @type {boolean}
@@ -582,6 +587,7 @@ class ParsedTagSpec {
       this.mergeAttrs(parsedAttrSpecs.globalAttrs, parsedAttrSpecs);
     }
     sortAndUniquify(this.mandatoryOneofs_);
+    sortAndUniquify(this.mandatoryAnyofs_);
 
     if (tagSpec.extensionSpec !== null) {
       this.expandExtensionSpec();
@@ -631,6 +637,9 @@ class ParsedTagSpec {
       }
       if (spec.mandatoryOneof !== null) {
         this.mandatoryOneofs_.push(spec.mandatoryOneof);
+      }
+      if (spec.mandatoryAnyof !== null) {
+        this.mandatoryAnyofs_.push(spec.mandatoryAnyof);
       }
       for (const altName of spec.alternativeNames) {
         this.attrsByName_[altName] = attrId;
@@ -787,6 +796,13 @@ class ParsedTagSpec {
    */
   getMandatoryOneofs() {
     return this.mandatoryOneofs_;
+  }
+
+  /**
+   * @return {!Array<number>}
+   */
+  getMandatoryAnyofs() {
+    return this.mandatoryAnyofs_;
   }
 
   /**
@@ -3750,6 +3766,8 @@ function validateAttributes(
   const mandatoryAttrsSeen = []; // This is a set of attr ids.
   /** @type {!Array<number>} */
   const mandatoryOneofsSeen = []; // This is small list of interned strings.
+  /** @type {!Array<number>} */
+  const mandatoryAnyofsSeen = []; // This is small list of interned strings.
   /** @type {!Array<!amp.validator.AttrSpec>} */
   const triggersToCheck = [];
   /**
@@ -3879,6 +3897,10 @@ function validateAttributes(
       }
       mandatoryOneofsSeen.push(mandatoryOneof);
     }
+    const {mandatoryAnyof} = attrSpec;
+    if (mandatoryAnyof !== null) {
+      mandatoryAnyofsSeen.push(mandatoryAnyof);
+    }
     attrspecsValidated[parsedAttrSpec.getId()] = 0;
     // If the trigger does not have an if_value_regex, then proceed to add the
     // spec. If it does have an if_value_regex, then test the regex to see
@@ -3893,7 +3915,7 @@ function validateAttributes(
     }
   }
   if (result.status === amp.validator.ValidationResult.Status.FAIL) {return;}
-  // The "at least 1" part of mandatory_oneof: If none of the
+  // The "exactly 1" part of mandatory_oneof: If none of the
   // alternatives were present, we report that an attribute is missing.
   for (const mandatoryOneof of parsedTagSpec.getMandatoryOneofs()) {
     if (mandatoryOneofsSeen.indexOf(mandatoryOneof) === -1) {
@@ -3904,6 +3926,21 @@ function validateAttributes(
           [
             getTagSpecName(spec),
             context.getRules().getInternedString(mandatoryOneof),
+          ],
+          getTagSpecUrl(spec), result);
+    }
+  }
+  // The "at least 1" part of mandatory_anyof: If none of the
+  // alternatives were present, we report that an attribute is missing.
+  for (const mandatoryAnyof of parsedTagSpec.getMandatoryAnyofs()) {
+    if (mandatoryAnyofsSeen.indexOf(mandatoryAnyof) === -1) {
+      context.addError(
+          amp.validator.ValidationError.Code.MANDATORY_ANYOF_ATTR_MISSING,
+          context.getLineCol(),
+          /* params */
+          [
+            getTagSpecName(spec),
+            context.getRules().getInternedString(mandatoryAnyof),
           ],
           getTagSpecUrl(spec), result);
     }
@@ -5602,7 +5639,9 @@ amp.validator.categorizeError = function(error) {
   // error should always be for AMP elements thus far, so we don't
   // check for params[0].
   if (error.code ===
-      amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING) {
+      amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING ||
+     error.code ===
+      amp.validator.ValidationError.Code.MANDATORY_ANYOF_ATTR_MISSING) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The attribute 'shortcode' in tag 'amp-instagram' is deprecated -
