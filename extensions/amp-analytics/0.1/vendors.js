@@ -2195,26 +2195,27 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
+      'image': true,
     },
     'requests': {
       'host': 'https://dc.oracleinfinity.io/${guid}/dcs.gif?',
       'basePrefix': 'dcssip=${dcssip}&dcsuri=${dcsuri}&WT.ti=${ti}&dcsdat=${timestamp}&dcsref=${documentReferrer}&WT.es=${sourceHost}${sourcePath}',
-      'browserMeasures': '&WT.bs=${availableScreenWidth}x${availableScreenHeight}&WT.sr=${screenWidth}x${screenHeight}&WT.cd=${screenColorDepth}&WT.ul=${browserLanguage}&WT.le=${documentCharset}&WT.js=Yes',
+      'screenMeasures': '&WT.bs=${availableScreenWidth}x${availableScreenHeight}&WT.sr=${screenWidth}x${screenHeight}&WT.cd=${screenColorDepth}',
+      'browserMeasures': '&WT.ul=${browserLanguage}&WT.le=${documentCharset}&WT.js=Yes',
       'sessionization': '&WT.co_f=${clientId(WT_AMP)}&ora.tv_amp=1.0.0&ora.amp_ver=${ampVersion}&dcscfg=3',
-      'pageview': '${host}${basePrefix}${browserMeasures}${sessionization}&WT.dl=${dl}',
-      'event': '${host}${basePrefix}${browserMeasures}${sessionization}&WT.dl=${dl}'
+      'pageview': '${host}${basePrefix}${browserMeasures}${screenMeasures}${sessionization}&WT.dl=${dl}',
+      'event': '${host}${basePrefix}${browserMeasures}${screenMeasures}${sessionization}&WT.dl=${dl}',
     },
     'vars': {
       'dcssip': '${sourceHost}',
       'dcsuri': '${sourcePath}',
       'dl': '0',
-      'ti': '${title}'
+      'ti': '${title}',
     },
     'triggers': {
       'trackPageview': {
         'on': 'visible',
-        'request': 'pageview'
+        'request': 'pageview',
       },
       'trackAnchorClicks': {
         'on': 'click',
@@ -2222,19 +2223,19 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'request': 'event',
         'vars': {
           'dl': '99',
-          'ti': 'Link Click'
+          'ti': 'Link Click',
         }
       },
     },
     'trackDownloadClicks': {
       'on': 'click',
-      'selector': 'a[href$=".pdf"],a[href$=".xls"],a[href$=".ppt"],a[href$=".zip"],a[href$=".txt"],a[href$=".rtf"],a[href$=".xml"],a[href$=".xml"]',
+      'selector': 'a[href$=".pdf"],a[href$=".xls"],a[href$=".ppt"],a[href$=".zip"],a[href$=".txt"],a[href$=".rtf"],a[href$=".xml"]',
       'request': 'event',
       'vars': {
         'dl': '20',
-        'ti': 'Download Click'
-      }
-    }
+        'ti': 'Download Click',
+      },
+    },
   },
 });
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
