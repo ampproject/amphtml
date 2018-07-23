@@ -83,6 +83,12 @@ export const RTC_VENDORS = {
     macros: ['PUB_ID', 'PARAMS'],
     disableKeyAppend: true,
   },
+  openwrap: {
+    url: 'https://ow.pubmatic.com/amp?v=1&w=ATTR(width)&h=ATTR(height)&ms=ATTR(data-multi-size)&auId=ATTR(data-slot)&purl=HREF&pubId=PUB_ID&profId=PROFILE_ID',
+    macros: ['PUB_ID', 'PROFILE_ID'],
+    errorReportingUrl: 'https://ow.pubmatic.com/amp_error?e=ERROR_TYPE&h=HREF',
+    disableKeyAppend: true,    
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
