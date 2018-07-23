@@ -972,8 +972,9 @@ export class AmpStory extends AMP.BaseElement {
 
     // Each step will run in a requestAnimationFrame, and wait for the next
     // frame before executing the following step.
-    // First step contains the bare minimum the display and play the next page.
     const steps = [
+      // First step contains the minimum amount of code to display and play the
+      // target page as fast as possible.
       () => {
         oldPage && oldPage.element.removeAttribute('active');
 
@@ -988,6 +989,8 @@ export class AmpStory extends AMP.BaseElement {
 
         this.forceRepaintForSafari_();
       },
+      // Second step does all the operations that impact the UI/UX: media sound,
+      // progress bar, ...
       () => {
         if (oldPage) {
           oldPage.setState(PageState.NOT_ACTIVE);
@@ -1031,6 +1034,9 @@ export class AmpStory extends AMP.BaseElement {
 
         this.updateBackground_(targetPage.element, /* initial */ !oldPage);
       },
+      // Third and last step contains all the actions that can be delayed after
+      // the navigation happened, like preloading the following pages, or
+      // sending analytics events.
       () => {
         this.preloadPagesByDistance_();
         this.maybePreloadBookend_();
