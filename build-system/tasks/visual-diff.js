@@ -463,7 +463,7 @@ async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
 
   if (forbiddenCss) {
     for (const css of forbiddenCss) {
-      if (await page.$(css) !== null) {
+      if ((await page.$(css)) !== null) {
         log('fatal', colors.cyan(url), '| The forbidden CSS element',
             colors.cyan(css), 'exists in the page');
       }
@@ -486,7 +486,7 @@ async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
     log('verbose', 'Waiting for existence of all:',
         colors.cyan(loadingCompleteCss.join(', ')));
     for (const css of loadingCompleteCss) {
-      if (await !waitForSelectorExistence(page, css)) {
+      if (!(await waitForSelectorExistence(page, css))) {
         log('fatal', colors.cyan(url), '| The CSS selector', colors.cyan(css),
             'does not match any elements in the page');
       }
@@ -578,7 +578,7 @@ async function waitForElementVisibility(page, selector, options) {
 async function waitForSelectorExistence(page, selector) {
   let attempt = 0;
   do {
-    if (await page.$(selector)) {
+    if ((await page.$(selector)) !== null) {
       return true;
     }
     await sleep(CSS_SELECTOR_RETRY_MS);
