@@ -27,6 +27,9 @@ import {FormEvents} from './form-events';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
+  assertHttpsUrl,
+  checkCorsUrl,
+  isProxyOrigin,
 } from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -393,14 +396,76 @@ export class AmpForm {
    * @private
    */
   handleSubmitEvent_(event) {
+    const action = this.form_.getAttribute('action');
+    const actionXhr = this.form_.getAttribute('action-xhr');
+    const method = (this.form_.getAttribute('method') || 'GET').toUpperCase();
+
+    if (actionXhr) {
+      assertHttpsUrl(actionXhr, this.form_, 'action-xhr');
+      user().assert(!isProxyOrigin(actionXhr),
+          'form action-xhr should not be on AMP CDN: %s', this.form_);
+      checkCorsUrl(actionXhr);
+    }
+    if (action) {
+      assertHttpsUrl(action, this.form_, 'action');
+      user().assert(!isProxyOrigin(action),
+          'form action should not be on AMP CDN: %s', this.form_);
+      checkCorsUrl(action);
+    }
+
+    if (method == 'GET') {
+      user().assert(actionXhr || action,
+          'form action-xhr or action attribute is required for method=GET: %s',
+          this.form_);
+    } else if (method == 'POST') {
+      if (action) {
+        const TAG = 'form';
+        user().error(TAG,
+            'action attribute is invalid for method=POST: %s', this.form_);
+      }
+
+      if (!actionXhr) {
+        event.preventDefault();
+        user().assert(false,
+            'Only XHR based (via action-xhr attribute) submissions are ' +
+            'supported for POST requests. %s',
+            this.form_);
+      }
+    }
+
+    const target = this.form_.getAttribute('target');
+    if (target) {
+      user().assert(target == '_blank' || target == '_top',
+          'form target=%s is invalid can only be _blank or _top: %s',
+          target, this.form_);
+    } else {
+      this.form_.setAttribute('target', '_top');
+    }
+
+    // For xhr submissions relay the submission event through action service to
+    // allow us to wait for amp-form (and possibly its dependencies) to execute
+    // the actual submission. For non-XHR GET we let the submission go through
+    // to allow _blank target to work.
+    if (actionXhr || this.method_ == 'POST') {
+      event.preventDefault();
+
+      // It's important to stop propagation of the submission to avoid double
+      // handling of the event in cases were we are delegating to action service
+      // to deliver the submission event.
+      event.stopImmediatePropagation();
+
+      const actions = Services.actionServiceForDoc(this.form_);
+      actions.execute(
+          this.form_, 'submit', /*args*/ null, /*source*/ this.form_,
+          /*caller*/ this.form_, event,ActionTrust.HIGH);
+    }
+
     if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
       event.stopImmediatePropagation();
       event.preventDefault();
       return;
     }
-    if (this.xhrAction_ || this.method_ == 'POST') {
-      event.preventDefault();
-    }
+
     // Submits caused by user input have high trust.
     this.submit_(ActionTrust.HIGH);
   }

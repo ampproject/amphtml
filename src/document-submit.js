@@ -23,11 +23,15 @@ import {
 } from './url';
 import {Services} from './services';
 import {dev, user} from './log';
+import {isExperimentOn} from './experiments';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
+  if (!isExperimentOn(self, 'dirty-amp')) {
+    return;
+  }
   ampdoc.getRootNode().addEventListener('submit', onDocumentFormSubmit_, true);
 }
 
