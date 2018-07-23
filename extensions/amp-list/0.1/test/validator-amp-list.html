@@ -45,10 +45,34 @@
             [src]="foo.bar" [state]="baz.qux">
     <div></div>
   </amp-list>
-  <!-- Valid amp-list with reset-on-refresh attribute -->
+  <!-- Valid: amp-list with src and reset-on-refresh attributes -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL"
             reset-on-refresh>
+    <div></div>
+  </amp-list>
+  <!-- Valid: amp-list with [src] and reset-on-refresh attributes -->
+  <amp-list width=10 height=10
+            [src]="foo.bar"
+            reset-on-refresh>
+    <div></div>
+  </amp-list>
+  <!-- Valid amp-list with binding="refresh" attribute -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            binding="refresh">
+    <div></div>
+  </amp-list>
+  <!-- Valid amp-list with binding="no" attribute -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            binding="no">
+    <div></div>
+  </amp-list>
+  <!-- Invalid: unsupported "binding" attribute value -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            binding="this-is-an-error">
     <div></div>
   </amp-list>
   <!-- Invalid: width is mistyped. -->

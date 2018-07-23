@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -208,7 +209,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   isLoopingEligible() {
-    return this.noOfSlides_ > 2;
+    return this.noOfSlides_ > 1;
   }
 
   /** @override */
@@ -604,7 +605,7 @@ export class AmpSlideScroll extends BaseSlides {
       showIndexArr.push(prevIndex);
     }
     showIndexArr.push(newIndex);
-    if (nextIndex != null) {
+    if (nextIndex != null && nextIndex !== prevIndex) {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {
@@ -620,7 +621,6 @@ export class AmpSlideScroll extends BaseSlides {
       dev().error(TAG, error);
       return false;
     }
-
     this.updateInViewport(newSlideInView, true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
@@ -657,7 +657,8 @@ export class AmpSlideScroll extends BaseSlides {
     if (slideChanged) {
       const name = 'slideChange';
       const event =
-          createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+          createCustomEvent(this.win, `slidescroll.${name}`,
+              dict({'index': newIndex}));
       this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});

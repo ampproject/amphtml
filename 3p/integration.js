@@ -59,6 +59,7 @@ import {urls} from '../src/config';
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
 import {bodymovinanimation} from './bodymovinanimation';
+import {embedly} from './embedly';
 import {facebook} from './facebook';
 import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
@@ -168,6 +169,7 @@ import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
+import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mytarget} from '../ads/mytarget';
@@ -255,6 +257,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   kuadio: true,
   'mantis-recommend': true,
+  miximedia: true,
   mywidget: true,
   outbrain: true,
   plista: true,
@@ -336,6 +339,7 @@ register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('eadv', eadv);
 register('eas', eas);
+register('embedly', embedly);
 register('engageya', engageya);
 register('epeex', epeex);
 register('eplanning', eplanning);
@@ -380,6 +384,7 @@ register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
 register('microad', microad);
+register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mytarget', mytarget);

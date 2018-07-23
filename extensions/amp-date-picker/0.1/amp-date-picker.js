@@ -67,7 +67,7 @@ let DatesChangeDetailsDef;
  */
 let DateChangeDetailsDef;
 
-/** @dict */
+/** @dict @extends {JsonObject} */
 class BindDateDetails {
   /**
    * @param {string} date
@@ -82,7 +82,7 @@ class BindDateDetails {
   }
 }
 
-/** @dict */
+/** @dict @extends {JsonObject} */
 class BindDatesDetails {
   /**
    * @param {!Array<!BindDateDetails>} dates

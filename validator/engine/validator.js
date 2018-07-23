@@ -141,9 +141,6 @@ class LineCol {
   }
 }
 
-/** @type {!LineCol} */
-const DOCUMENT_START = new LineCol(1, 0);
-
 /**
  * Construct a ValidationError object from the given argument list.
  * @param {!amp.validator.ValidationError.Severity} severity
@@ -190,7 +187,7 @@ class ParsedUrlSpec {
      */
     this.allowedProtocols_ = Object.create(null);
     if (this.spec_ !== null) {
-      for (const protocol of this.spec_.allowedProtocol) {
+      for (const protocol of this.spec_.protocol) {
         this.allowedProtocols_[protocol] = 0;
       }
     }
@@ -670,7 +667,9 @@ class ParsedTagSpec {
    * @return {?CdataMatcher}
    */
   cdataMatcher(lineCol) {
-    if (this.spec_.cdata !== null) {return new CdataMatcher(this.spec_, lineCol);}
+    if (this.spec_.cdata !== null) {
+      return new CdataMatcher(this.spec_, lineCol);
+    }
     return null;
   }
 
@@ -796,15 +795,6 @@ class ParsedTagSpec {
   getMandatoryAttrIds() {
     return this.mandatoryAttrIds_;
   }
-}
-
-/**
- * Determines if |n| is an integer.
- * @param {number} n
- * @return {boolean}
- */
-function isInteger(n) {
-  return (Number(n) === n) && (n % 1 === 0);
 }
 
 /**
@@ -1589,7 +1579,7 @@ class TagStack {
       // Get the list matching this tag's descendant tag name.
       if (parsedTagSpec.getSpec().descendantTagList ===
           descendantTagList.name) {
-        for (const tag of descendantTagList.allowedTags) {
+        for (const tag of descendantTagList.tag) {
           allowedDescendantsForThisTag.push(tag);
         }
       }
@@ -1657,8 +1647,8 @@ function isAtRuleValid(cssSpec, atRuleName) {
  * @return {boolean}
  */
 function IsDeclarationValid(cssSpec, declarationName) {
-  if (cssSpec.allowedDeclarations.length === 0) {return true;}
-  return cssSpec.allowedDeclarations.indexOf(
+  if (cssSpec.declaration.length === 0) {return true;}
+  return cssSpec.declaration.indexOf(
       parse_css.stripVendorPrefix(declarationName)) > -1;
 }
 
@@ -1668,8 +1658,8 @@ function IsDeclarationValid(cssSpec, declarationName) {
  * @return {string}
  */
 function AllowedDeclarationsString(cssSpec) {
-  if (cssSpec.allowedDeclarations.length > 5) {return '';}
-  return '[\'' + cssSpec.allowedDeclarations.join('\', \'') + '\']';
+  if (cssSpec.declaration.length > 5) {return '';}
+  return '[\'' + cssSpec.declaration.join('\', \'') + '\']';
 }
 
 /** @private */
@@ -1706,8 +1696,8 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
   /** @inheritDoc */
   visitDeclaration(declaration) {
     if (!IsDeclarationValid(this.cssSpec, declaration.name)) {
-      const allowedDeclarationsStr = AllowedDeclarationsString(this.cssSpec);
-      if (allowedDeclarationsStr === '') {
+      const declarationsStr = AllowedDeclarationsString(this.cssSpec);
+      if (declarationsStr === '') {
         this.context.addError(
             amp.validator.ValidationError.Code
                 .CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
@@ -1857,12 +1847,32 @@ class CdataMatcher {
       if (!context.getRules()
           .getFullMatchRegex(this.tagSpec_.cdata.cdataRegex)
           .test(cdata)) {
-        context.addError(
-            amp.validator.ValidationError.Code
-                .MANDATORY_CDATA_MISSING_OR_INCORRECT,
-            context.getLineCol(),
-            /* params */[getTagSpecName(this.tagSpec_)],
-            getTagSpecUrl(this.tagSpec_), validationResult);
+        // Special Case Hack! The deprecated amp-boilerplate is a <style> tag
+        // with no attributes on it in the document head. The valid
+        // implementation looks like:
+        //
+        // <style>body ?{opacity: ?0}</style>
+        //
+        // If we find ourselves here, it means that we saw a style tag, with the
+        // incorrect CDATA contents. This is *far* more likely to be caused by
+        // the user intending to use <style amp-custom>, so we override the
+        // error selected here.
+        if (this.tagSpec_.specName !== null &&
+            this.tagSpec_.specName ===
+                'head > style[amp-boilerplate] - old variant') {
+          context.addError(
+              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+              context.getLineCol(),
+              /* params */['amp-custom', 'style amp-custom'],
+              context.getRules().getStylesSpecUrl(), validationResult);
+        } else {
+          context.addError(
+              amp.validator.ValidationError.Code
+                  .MANDATORY_CDATA_MISSING_OR_INCORRECT,
+              context.getLineCol(),
+              /* params */[getTagSpecName(this.tagSpec_)],
+              getTagSpecUrl(this.tagSpec_), validationResult);
+        }
         return;
       }
     } else if (cdataSpec.cssSpec !== null) {
@@ -2816,18 +2826,22 @@ function validateNonTemplateAttrValueAgainstSpec(
   // added after protobuf 2.5.0 (which our open-source version uses).
   // begin oneof {
   const spec = parsedAttrSpec.getSpec();
-  if (spec.value !== null) {
-    if (attr.value === spec.value) {
-      return;
+  if (spec.value.length > 0) {
+    for (const value of spec.value) {
+      if (attr.value === value) {
+        return;
+      }
     }
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
         context.getLineCol(),
         /* params */[attr.name, getTagSpecName(tagSpec), attr.value],
         getTagSpecUrl(tagSpec), result);
-  } else if (spec.valueCasei !== null) {
-    if (attr.value.toLowerCase() === spec.valueCasei) {
-      return;
+  } else if (spec.valueCasei.length > 0) {
+    for (const value of spec.valueCasei) {
+      if (attr.value.toLowerCase() === value) {
+        return;
+      }
     }
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
@@ -3616,7 +3630,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
     // the extension, look to see if the version matches.
     if (reResult !== null && reResult[1] === extensionSpec.name) {
       const encounteredVersion = reResult[2];
-      if (extensionSpec.deprecatedVersions.indexOf(encounteredVersion) !== -1) {
+      if (extensionSpec.deprecatedVersion.indexOf(encounteredVersion) !== -1) {
         context.addWarning(
             amp.validator.ValidationError.Code
                 .WARNING_EXTENSION_DEPRECATED_VERSION,
@@ -3625,8 +3639,9 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
             getTagSpecUrl(tagSpec), result);
         return true;
       }
-      if (extensionSpec.allowedVersions.indexOf(encounteredVersion) !== -1)
-      {return true;}
+      if (extensionSpec.version.indexOf(encounteredVersion) !== -1) {
+        return true;
+      }
     }
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
@@ -4341,7 +4356,7 @@ class ParsedValidatorRules {
         if (tag.extensionSpec !== null) {
           // This tag is an extension. Compute and register a dispatch key
           // for it.
-          var dispatchKey;
+          let dispatchKey;
           const attrName = tag.extensionSpec.isCustomTemplate ?
             'custom-template' :
             'custom-element';
@@ -4900,12 +4915,13 @@ amp.validator.ValidationHandler =
         // would be confusing.
         if (encounteredAttrs === null) {return;}
         // So now we compare the attributes from the tag that we encountered
-        // (HtmlParser sent us a startTag event for it earlier) with the attributes
-        // from the effective body tag that we're just receiving now, which contains
-        // all attributes on body tags within the doc. It's correct to think of this
-        // synthetic tag simply as a concatenation - there is in general no
-        // elimination of duplicate attributes or overriding behavior. Thus, if the
-        // second body tag has any attribute this will result in an error.
+        // (HtmlParser sent us a startTag event for it earlier) with the
+        // attributes from the effective body tag that we're just receiving
+        // now, which contains all attributes on body tags within the doc. It's
+        // correct to think of this synthetic tag simply as a concatenation -
+        // there is in general no elimination of duplicate attributes or
+        // overriding behavior. Thus, if the second body tag has any
+        // attribute this will result in an error.
         let differenceSeen = attributes.length !== encounteredAttrs.length;
         if (!differenceSeen) {
           for (let ii = 0; ii < attributes.length; ii++) {
@@ -5018,7 +5034,8 @@ amp.validator.ValidationHandler =
             encounteredTag, resultForReferencePoint.bestMatchTagSpec,
             this.context_);
         checkForReferencePointCollision(
-            resultForReferencePoint.bestMatchTagSpec, resultForTag.bestMatchTagSpec,
+            resultForReferencePoint.bestMatchTagSpec,
+            resultForTag.bestMatchTagSpec,
             this.context_, resultForTag.validationResult);
         this.validationResult_.mergeFrom(resultForTag.validationResult);
 
@@ -5028,29 +5045,30 @@ amp.validator.ValidationHandler =
 
       /**
    * Callback for an end HTML tag.
-   * @param {!amp.htmlparser.ParsedHtmlTag} tag
+   * @param {!amp.htmlparser.ParsedHtmlTag} unused
    * @override
    */
-      endTag(tag) {
-        this.context_.getTagStack().exitTag(this.context_, this.validationResult_);
+      endTag(unused) {
+        this.context_.getTagStack().exitTag(
+            this.context_, this.validationResult_);
       }
 
       /**
    * Callback for pcdata. I'm not sure what this is supposed to include, but it
    * seems to be called for contents of <p> tags, looking at a few examples.
-   * @param {string} text
+   * @param {string} unused
    * @override
    */
-      pcdata(text) {}
+      pcdata(unused) {}
 
       /**
    * Callback for rcdata text. rcdata text includes contents of title or
    * textarea
    * tags. The validator has no specific rules regarding these text blobs.
-   * @param {string} text
+   * @param {string} unused
    * @override
    */
-      rcdata(text) {}
+      rcdata(unused) {}
 
       /**
    * Callback for cdata.

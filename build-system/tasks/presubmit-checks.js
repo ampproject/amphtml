@@ -75,6 +75,10 @@ const forbiddenTerms = {
         'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
         'for a list of alternatives.',
   },
+  'document-register-element.node': {
+    message: 'Use `document-register-element.patched` instead',
+    whitelist: ['build-system/tasks/update-packages.js'],
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -141,6 +145,7 @@ const forbiddenTerms = {
         'temporary workarounds.',
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/config.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -343,16 +348,17 @@ const forbiddenTerms = {
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
-      'src/service/xhr-impl.js',
-      'src/service/viewer-impl.js',
-      'src/service/viewer-cid-api.js',
-      'src/service/storage-impl.js',
-      'src/service/history-impl.js',
-      'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
+      'src/service/cid-impl.js',
+      'src/service/history-impl.js',
+      'src/service/storage-impl.js',
+      'src/ssr-template-helper.js',
+      'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
+      'src/service/xhr-impl.js',
     ],
   },
   // Privacy sensitive

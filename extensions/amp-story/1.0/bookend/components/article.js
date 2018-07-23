@@ -15,9 +15,9 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
-import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceOriginForBookendComponent} from './bookend-component-interface';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
@@ -27,7 +27,8 @@ import {userAssertValidProtocol} from '../../utils';
  *   type: string,
  *   title: string,
  *   url: string,
- *   image: (string|undefined)
+ *   image: (string|undefined),
+ *   domainName: string,
  * }}
  */
 export let ArticleComponentDef;
@@ -61,7 +62,7 @@ export class ArticleComponent {
   /** @override */
   build(articleJson, element) {
     const url = articleJson['url'];
-    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+    const domainName = getSourceOriginForBookendComponent(element, url);
 
     const article = {
       url,
