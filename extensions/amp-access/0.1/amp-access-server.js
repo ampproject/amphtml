@@ -22,6 +22,7 @@ import {escapeCssSelectorIdent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
+import { DocumentFetcher } from '../../../src/document-fetcher';
 
 /** @const {string} */
 const TAG = 'amp-access-server';
@@ -76,8 +77,8 @@ export class AccessServerAdapter {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = Services.xhrFor(ampdoc.win);
+    /** @const @private {!DocumentFetcher} */
+    this.docFetcher_ = new DocumentFetcher(ampdoc.win);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(ampdoc.win);
@@ -152,7 +153,7 @@ export class AccessServerAdapter {
       // CORS preflight request.
       return this.timer_.timeoutPromise(
           this.clientAdapter_.getAuthorizationTimeout(),
-          this.xhr_.fetchDocument(this.serviceUrl_, {
+          this.docFetcher_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
             headers: {
