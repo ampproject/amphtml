@@ -89,13 +89,5 @@ amp4email_feature_tests/amp_form.html:71:4 The attribute 'submitting' may not ap
 |        Submitting form...
 |      </div>
 |    </form>
-|    <!-- Invalid: invalid usage of submitting attribute -->
-|    <form method="get" action-xhr="https://example.com/subscribe">
-|      <div submitting template="mytemplate">
->>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:77:4 The attribute 'submitting' may not appear in tag 'FORM DIV [submit-success][template]'. [DISALLOWED_HTML]
-|        Submitting form...
-|      </div>
-|    </form>
 |  </body>
 |  </html>
