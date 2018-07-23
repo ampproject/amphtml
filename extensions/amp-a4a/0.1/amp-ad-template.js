@@ -25,14 +25,14 @@ import {Services} from '../../../src/services';
 import {TemplateRenderer} from './template-renderer';
 import {TemplateValidator} from './template-validator';
 import {addParamToUrl} from '../../../src/url';
-import {camelCaseToDash, startsWith} from '../../../src/string';
 import {dev} from '../../../src/log';
+import {startsWith} from '../../../src/string';
 
 // These have no side-effects, and so may be reused between all instances.
 const validator = new TemplateValidator();
 const nameFrameRenderer = new NameFrameRenderer();
 
-export const DATA_REQUEST_VAR_PREFIX = 'request-var-';
+export const DATA_REQUEST_PARAM_PREFIX = 'requestParam';
 
 export class AmpAdTemplate extends AmpAdNetworkBase {
   /**
@@ -83,12 +83,17 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
     // 'data-request-var-<field_name>=<val>`, and append &<field_name>=<val> to
     // the add request URL.
     Object.keys(this.element.dataset).forEach(dataField => {
-      const dataFieldInDash = camelCaseToDash(dataField);
-      if (startsWith(dataFieldInDash, DATA_REQUEST_VAR_PREFIX)) {
-        const requestVarName = dataFieldInDash.slice(
-            DATA_REQUEST_VAR_PREFIX.length, dataFieldInDash.length);
-        url = addParamToUrl(
-            url, requestVarName, this.element.dataset[dataField]);
+      if (startsWith(dataField, DATA_REQUEST_PARAM_PREFIX)) {
+        const requestParamName = dataField.slice(
+            DATA_REQUEST_PARAM_PREFIX.length, dataField.length);
+        if (requestParamName) {
+          // Set the first character to lower case, as reading it in camelCase
+          // will automatically put it into upper case.
+          const finalParamName = requestParamName.charAt(0).toLowerCase() +
+              requestParamName.slice(1);
+          url = addParamToUrl(
+              url, finalParamName, this.element.dataset[dataField]);
+        }
       }
     });
     this.getContext().adUrl = url;

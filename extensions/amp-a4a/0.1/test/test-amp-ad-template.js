@@ -18,7 +18,7 @@ import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   getAmpAdTemplateHelper,
 } from '../template-validator';
-import {AmpAdTemplate, DATA_REQUEST_VAR_PREFIX} from '../amp-ad-template';
+import {AmpAdTemplate} from '../amp-ad-template';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {NetworkRegistry} from '../template-config';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
@@ -42,7 +42,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     containerElement = document.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
-    containerElement.setAttribute('type', 'test');
+    containerElement.setAttribute('type', 'custom-template');
     containerElement.signals = () => ({
       whenSignal: () => Promise.resolve(),
     });
@@ -172,15 +172,16 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.buildCallback();
       impl.getRequestUrl();
       expect(impl.getContext().adUrl).to
-          .equal(NetworkRegistry.test.requestUrl);
+          .equal(NetworkRegistry['custom-template'].requestUrl);
     });
     it('should expand url', () => {
       impl.buildCallback();
-      impl.element.setAttribute(`data-${DATA_REQUEST_VAR_PREFIX}bar`, '123');
-      impl.element.setAttribute(`data-${DATA_REQUEST_VAR_PREFIX}baz`, '456');
+      impl.element.setAttribute('data-request-param-bar', '123');
+      impl.element.setAttribute('data-request-param-baz', '456');
+      impl.element.setAttribute('data-request-param-camel-case', '789');
       impl.requestUrl_ = 'https://foo.com?sz=widthxheight';
       expect(impl.getRequestUrl()).to.equal(
-          'https://foo.com?sz=320x50&bar=123&baz=456');
+          'https://foo.com?sz=320x50&bar=123&baz=456&camelCase=789');
     });
   });
 
@@ -196,11 +197,11 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
           .throw('Invalid network type foo');
     });
     it('should throw if type does not have corresponding request url', () => {
-      const temp = NetworkRegistry.test.requestUrl;
-      delete NetworkRegistry.test.requestUrl;
+      const temp = NetworkRegistry['custom-template'].requestUrl;
+      delete NetworkRegistry['custom-template'].requestUrl;
       expect(() => new AmpAdTemplate(containerElement)).to
           .throw('Invalid network configuration: no request URL specified');
-      NetworkRegistry.test.requestUrl = temp;
+      NetworkRegistry['custom-template'].requestUrl = temp;
     });
   });
 });
