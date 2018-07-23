@@ -2290,6 +2290,7 @@ describe('amp-a4a', () => {
         tearDownSlotMock.returns(undefined);
         const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
         destroyFrameMock.returns(undefined);
+        sandbox.stub(analytics, 'triggerAnalyticsEvent');
 
         expect(a4a.isRefreshing).to.be.false;
         return a4a.refresh(() => {}).then(() => {
@@ -2331,13 +2332,13 @@ describe('amp-a4a', () => {
         const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
         destroyFrameMock.returns(undefined);
 
-        const triggerAnalyticsEventSpy = sandbox.spy(analytics,
+        const triggerAnalyticsEventStub = sandbox.stub(analytics,
             'triggerAnalyticsEvent');
 
         expect(a4a.isRefreshing).to.be.false;
         return a4a.refresh(() => {}).then(() => {
-          expect(triggerAnalyticsEventSpy).calledWith(a4a.element, 'ad-refresh',
-              {time: sinon.match.number});
+          expect(triggerAnalyticsEventStub)
+              .calledWith(a4a.element, 'ad-refresh');
         });
       });
     });

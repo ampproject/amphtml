@@ -926,7 +926,7 @@ export class AmpA4A extends AMP.BaseElement {
       return this.mutateElement(() => {
         // Fire an ad-refresh event so that 3rd parties can track when an ad
         // has changed.
-        triggerAnalyticsEvent(AnalyticsTrigger.AD_REFRESH);
+        triggerAnalyticsEvent(this.element, AnalyticsTrigger.AD_REFRESH);
 
         this.togglePlaceholder(true);
         // This delay provides a 1 second buffer where the ad loader is
