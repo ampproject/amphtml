@@ -164,7 +164,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
-    this.configureVideo_();
+    this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
@@ -178,8 +178,12 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /** @private */
-  configureVideo_() {
+  /**
+   * Delegates video autoplay so the video manager does not follow the
+   * autoplay attribute that may have been set by a publisher, which could
+   * play videos from an inactive page.
+   */
+  delegateVideoAutoplay() {
     const videos = this.element.querySelectorAll('amp-video');
     if (videos.length < 1) {
       return;
