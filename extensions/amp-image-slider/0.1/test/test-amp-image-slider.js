@@ -15,7 +15,6 @@
  */
 
 import '../amp-image-slider';
-import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-image-slider component', {
@@ -23,14 +22,13 @@ describes.realWin('amp-image-slider component', {
     extensions: ['amp-image-slider'],
   },
 }, env => {
-  let win, doc, slider, impl, sandbox;
+  let win, doc, slider, impl;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
 
     toggleExperiment(win, 'amp-image-slider', true);
-    sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
@@ -41,6 +39,23 @@ describes.realWin('amp-image-slider component', {
       env.win.document.body.removeChild(sliders[i]);
     }
   });
+
+  // function injectAnimationDeferred() {
+  //   const deferred = new Deferred();
+  //   impl.deferred = deferred;
+  //   const origAnimateUpdatePositions =
+  //       Object.getPrototypeOf(impl).animateUpdatePositions;
+  //   impl.animateUpdatePositions = function(toPercentage) {
+  //     origAnimateUpdatePositions.call(this, toPercentage)
+  //         .then(function() {
+  //           // Notice that we are ref-ing to the deferred in this scope
+  //           // This action is deliberate s.t. we can override .deferred
+  //           // of implementation on the fly without impacting the original
+  //           // deferred that here we intend to resolve
+  //           deferred.resolve();
+  //         });
+  //   };
+  // }
 
   function buildSlider() {
     slider = doc.createElement('amp-image-slider');
@@ -59,6 +74,8 @@ describes.realWin('amp-image-slider component', {
     slider.appendChild(rightImage);
 
     impl = slider.implementation_; // expose extended from AMP.BaseElement
+
+    // injectAnimationDeferred();
 
     doc.body.appendChild(slider);
     return Promise.all([leftImage.build(), rightImage.build()])
@@ -174,18 +191,15 @@ describes.realWin('amp-image-slider component', {
   });
 
   it('should update bar position with animation correctly', () => {
-    return buildSlider().then(() => {
-      impl.animateUpdatePositions(0);
-    })
+    return buildSlider()
         .then(() => {
-          return waitForMs(300);
+          return impl.animateUpdatePositions(0);
         })
         .then(() => {
           expect(impl.bar_.getBoundingClientRect().left)
               .to.equal(slider.getBoundingClientRect().left);
           expectLeftImageNotMoved();
-          impl.animateUpdatePositions(1);
-          return waitForMs(300);
+          return impl.animateUpdatePositions(1);
         })
         .then(() => {
           expect(impl.bar_.getBoundingClientRect().left)
@@ -193,117 +207,4 @@ describes.realWin('amp-image-slider component', {
           expectLeftImageNotMoved();
         });
   });
-
-  it('should respond with click on image with animated update position', () => {
-    let animateUpdatePositionsSpy;
-    let sliderRect;
-    return buildSlider().then(() => {
-      animateUpdatePositionsSpy
-          = sandbox.spy(impl, 'animateUpdatePositions');
-      sliderRect = slider.getBoundingClientRect();
-      const event = createFakeClickEvent(
-          slider, sliderRect.left, 200);
-      impl.handleClickImage(event);
-      return waitForMs(300);
-    }).then(() => {
-      expect(impl.bar_.getBoundingClientRect().left)
-          .to.equal(sliderRect.left);
-      expectLeftImageNotMoved();
-      expect(animateUpdatePositionsSpy.calledWith(0)).to.be.true;
-      expect(animateUpdatePositionsSpy.calledOnce).to.be.true;
-      const event = createFakeClickEvent(
-          slider, sliderRect.right, 200);
-      impl.handleClickImage(event);
-      return waitForMs(300);
-    }).then(() => {
-      expect(impl.bar_.getBoundingClientRect().left)
-          .to.equal(slider.getBoundingClientRect().right);
-      expectLeftImageNotMoved();
-      expect(animateUpdatePositionsSpy.calledWith(1)).to.be.true;
-      expect(animateUpdatePositionsSpy.calledTwice).to.be.true;
-    });
-  });
-
-  it('should respond with tap on image with animated update position', () => {
-    let animateUpdatePositionsSpy;
-    let sliderRect;
-    return buildSlider().then(() => {
-      animateUpdatePositionsSpy
-          = sandbox.spy(impl, 'animateUpdatePositions');
-      sliderRect = slider.getBoundingClientRect();
-      const event = createFakeTapEvent(
-          slider, sliderRect.left, 200);
-      impl.handleTapImage(event);
-      return waitForMs(300);
-    }).then(() => {
-      expect(impl.bar_.getBoundingClientRect().left)
-          .to.equal(sliderRect.left);
-      expectLeftImageNotMoved();
-      expect(animateUpdatePositionsSpy.calledWith(0)).to.be.true;
-      expect(animateUpdatePositionsSpy.calledOnce).to.be.true;
-      const event = createFakeTapEvent(
-          slider, sliderRect.right, 200);
-      impl.handleTapImage(event);
-      return waitForMs(300);
-    }).then(() => {
-      expect(impl.bar_.getBoundingClientRect().left)
-          .to.equal(slider.getBoundingClientRect().right);
-      expectLeftImageNotMoved();
-      expect(animateUpdatePositionsSpy.calledWith(1)).to.be.true;
-      expect(animateUpdatePositionsSpy.calledTwice).to.be.true;
-    });
-  });
-
-  // To support touchscreen desktops
-  it('should support both tap and click events', () => {
-    let animateUpdatePositionsSpy;
-    let sliderRect;
-    return buildSlider().then(() => {
-      animateUpdatePositionsSpy
-          = sandbox.spy(impl, 'animateUpdatePositions');
-      sliderRect = slider.getBoundingClientRect();
-      const event = createFakeTapEvent(
-          slider, sliderRect.left, 200);
-      impl.handleTapImage(event);
-      return waitForMs(300);
-    }).then(() => {
-      expect(impl.bar_.getBoundingClientRect().left)
-          .to.equal(sliderRect.left);
-      expectLeftImageNotMoved();
-      expect(animateUpdatePositionsSpy.calledWith(0)).to.be.true;
-      expect(animateUpdatePositionsSpy.calledOnce).to.be.true;
-      const event = createFakeClickEvent(
-          slider, sliderRect.right, 200);
-      impl.handleClickImage(event);
-      return waitForMs(300);
-    }).then(() => {
-      expect(impl.bar_.getBoundingClientRect().left)
-          .to.equal(slider.getBoundingClientRect().right);
-      expectLeftImageNotMoved();
-      expect(animateUpdatePositionsSpy.calledWith(1)).to.be.true;
-      expect(animateUpdatePositionsSpy.calledTwice).to.be.true;
-    });
-  });
 });
-
-function waitForMs(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function createFakeClickEvent(target, pageX, pageY) {
-  return {
-    target,
-    pageX,
-    pageY,
-  };
-}
-
-function createFakeTapEvent(target, pageX, pageY) {
-  return {
-    target,
-    touches: [{
-      pageX,
-      pageY,
-    }],
-  };
-}
