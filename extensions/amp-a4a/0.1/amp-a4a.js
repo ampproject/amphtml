@@ -145,6 +145,9 @@ export const AnalyticsTrigger = {
   AD_RENDER_START: 'ad-render-start',
   AD_RENDER_END: 'ad-render-end',
   AD_IFRAME_LOADED: 'ad-iframe-loaded',
+  // This trigger is not part of the normal ads lifecycle and only fires when an
+  // ad is refreshed.
+  AD_REFRESH: 'ad-refresh',
 };
 
 /**
@@ -923,6 +926,10 @@ export class AmpA4A extends AMP.BaseElement {
         return;
       }
       return this.mutateElement(() => {
+        // Fire an ad-refresh event so that 3rd parties can track when an ad
+        // has changed.
+        triggerAnalyticsEvent(this.element, AnalyticsTrigger.AD_REFRESH);
+
         this.togglePlaceholder(true);
         // This delay provides a 1 second buffer where the ad loader is
         // displayed in between the creatives.
