@@ -145,6 +145,8 @@ export const AnalyticsTrigger = {
   AD_RENDER_START: 'ad-render-start',
   AD_RENDER_END: 'ad-render-end',
   AD_IFRAME_LOADED: 'ad-iframe-loaded',
+  // This trigger is not part of the normal ads lifecycle and only fires when an
+  // ad is refreshed.
   AD_REFRESH: 'ad-refresh',
 };
 
