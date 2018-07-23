@@ -2203,8 +2203,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'screenMeasures': '&WT.bs=${availableScreenWidth}x${availableScreenHeight}&WT.sr=${screenWidth}x${screenHeight}&WT.cd=${screenColorDepth}',
       'browserMeasures': '&WT.ul=${browserLanguage}&WT.le=${documentCharset}&WT.js=Yes',
       'sessionization': '&WT.co_f=${clientId(WT_AMP)}&ora.tv_amp=1.0.0&ora.amp_ver=${ampVersion}&dcscfg=3',
-      'pageview': '${host}${basePrefix}${browserMeasures}${screenMeasures}${sessionization}&WT.dl=${dl}',
-      'event': '${host}${basePrefix}${browserMeasures}${screenMeasures}${sessionization}&WT.dl=${dl}',
+      'pageview': '${host}${basePrefix}${screenMeasures}${browserMeasures}${sessionization}&WT.dl=${dl}',
+      'event': '${host}${basePrefix}${screenMeasures}${browserMeasures}${sessionization}&WT.dl=${dl}',
     },
     'vars': {
       'dcssip': '${sourceHost}',
