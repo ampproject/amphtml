@@ -16,10 +16,10 @@ while (document.body.firstChild) {
 }
 
 const iframe = document.createElement('iframe');
-iframe.width = __WIDTH__; // eslint-disable-line no-undef
-iframe.height = __HEIGHT__; // eslint-disable-line no-undef
+iframe.width = __WIDTH__;
+iframe.height = __HEIGHT__;
 iframe.srcdoc = pageContents;
 document.body.appendChild(iframe);
 
-document.body.style.margin = '0'; // eslint-disable-line amphtml-internal/no-style-property-setting
-iframe.style.border = '0'; // eslint-disable-line amphtml-internal/no-style-property-setting
+document.body.style.margin = '0';
+iframe.style.border = '0';
