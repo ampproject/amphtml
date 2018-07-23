@@ -49,75 +49,75 @@ const TEMPLATE = {
   tag: 'aside',
   attrs: dict(
       {'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset'}),
-  children: [  
+  children: [
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
+      children: [
         {
           tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
+          attrs: dict({
+            'class': 'i-amphtml-story-sound-display',
+          }),
           children: [
+
             {
               tag: 'div',
               attrs: dict({
-                'class': 'i-amphtml-story-sound-display',
+                'class': 'i-amphtml-message-container',
               }),
               children: [
-               
                 {
                   tag: 'div',
                   attrs: dict({
-                    'class': 'i-amphtml-message-container',
+                    'class': 'i-amphtml-story-mute-text' ,
                   }),
-                  children: [
-                    {
-                      tag: 'div',
-                      attrs: dict({
-                        'class': 'i-amphtml-story-mute-text' ,
-                      }),
-                      localizedStringId:
+                  localizedStringId:
                           LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
-                    },
-                    {
-                      tag: 'div',
-                      attrs: dict({
-                        'class': 'i-amphtml-story-unmute-sound-text',
-                      }),
-                      localizedStringId:
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'class': 'i-amphtml-story-unmute-sound-text',
+                  }),
+                  localizedStringId:
                           LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_BUTTON_TEXT,
-                    },
-                    {
-                      tag: 'div',
-                      attrs: dict({
-                        'class': 'i-amphtml-story-unmute-no-sound-text' ,
-                      }),
-                      localizedStringId:
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'class': 'i-amphtml-story-unmute-no-sound-text' ,
+                  }),
+                  localizedStringId:
                           LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_BUTTON_TEXT,
-                    },
-                  ]
                 },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'role': 'button',
-                    'class': UNMUTE_CLASS + ' i-amphtml-story-button',
-                  }),
-                  
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'role': 'button',
-                    'class': MUTE_CLASS + ' i-amphtml-story-button',
-                  }),
-                },
-              ]
+              ],
             },
             {
               tag: 'div',
               attrs: dict({
                 'role': 'button',
-                'class': SHARE_CLASS + ' i-amphtml-story-button',
+                'class': UNMUTE_CLASS + ' i-amphtml-story-button',
+              }),
+
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
             },
-        
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': SHARE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+
       ],
     },
   ],
@@ -389,16 +389,16 @@ export class SystemLayer {
    * @private
    */
   onMutedStateUpdate_(isMuted) {
-    
+
     this.vsync_.mutate(() => {
-      if(isMuted) {
+      if (isMuted) {
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'muted');
-       } else if(this.storeService_.get(StateProperty.PAGE_HAS_AUDIO_STATE)) {
+      } else if (this.storeService_.get(StateProperty.PAGE_HAS_AUDIO_STATE)) {
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'audioon');
       } else {
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'noaudio');
       }
-      
+
     });
   }
 
@@ -407,7 +407,7 @@ export class SystemLayer {
    * @param {int} hideTimeout
    * @private
    */
-  hideAfterTimeout_(hideTimeout){
+  hideAfterTimeout_(hideTimeout) {
     this.timer_.delay(() => this.hideInteral_(), hideTimeout);
   }
 
@@ -416,7 +416,7 @@ export class SystemLayer {
    * @private
    */
   hideInteral_() {
-    if(!this.isBuilt_){
+    if (!this.isBuilt_) {
       return;
     }
     this.vsync_.mutate(() => {
@@ -436,7 +436,7 @@ export class SystemLayer {
       this.hideAfterTimeout_(hideTimeout);
     });
   }
-  
+
   /**
    * Handles click events on the unmute button.
    * @private

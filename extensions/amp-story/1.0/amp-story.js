@@ -795,7 +795,7 @@ export class AmpStory extends AMP.BaseElement {
         }
       });
     }
-    this.updateSoundPage_(); 
+    this.updateSoundPage_();
   }
 
 
@@ -1615,13 +1615,13 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * 
+   *
    * @private
    */
   updateSoundPage_() {
     const hasPageAudio = this.activePage_.element.hasAttribute('background-audio');
     this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO,
-      hasPageAudio);
+        hasPageAudio);
   }
 
   /** @private */

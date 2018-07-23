@@ -66,7 +66,7 @@ export const StateProperty = {
   PAGE_HAS_AUDIO_STATE: 'pageaudiostate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
-  CURRENT_PAGE_ID: 'currentpageid',  
+  CURRENT_PAGE_ID: 'currentpageid',
 };
 
 
