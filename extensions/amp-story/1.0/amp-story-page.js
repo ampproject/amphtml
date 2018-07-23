@@ -239,14 +239,14 @@ export class AmpStoryPage extends AMP.BaseElement {
         }
 
         if (this.state_ === PageState.PAUSED) {
-          this.startListeningToNavigationEvents();
+          this.advancement_.start();
           this.playAllMedia_();
         }
 
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        this.stopListeningToNavigationEvents();
+        this.advancement_.stop();
         this.pauseAllMedia_(false /** rewindToBeginning */);
         this.state_ = state;
         break;
@@ -259,7 +259,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.stopListeningToNavigationEvents();
+    this.advancement_.stop();
 
     this.stopListeningToVideoEvents_();
     this.pauseAllMedia_(true /** rewindToBeginning */);
@@ -275,7 +275,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.registerAllMedia_();
 
     if (this.isActive()) {
-      this.startListeningToNavigationEvents();
+      this.advancement_.start();
       this.maybeStartAnimations();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
@@ -301,22 +301,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @return {!Promise} */
   beforeVisible() {
     return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
-  }
-
-
-  /**
-   * Listens to navigation events.
-   */
-  startListeningToNavigationEvents() {
-    this.advancement_.start();
-  }
-
-
-  /**
-   * Stops listening to navigation events.
-   */
-  stopListeningToNavigationEvents() {
-    this.advancement_.stop();
   }
 
 

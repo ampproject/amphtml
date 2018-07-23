@@ -188,12 +188,14 @@ amp-story:not([desktop]) >
 
 amp-story-page[active],
 amp-story:not([desktop]) >
+    amp-story-page[active].i-amphtml-layout-container[distance],
+amp-story:not([desktop]) >
     amp-story-page.i-amphtml-layout-container[distance="0"] {
   transform: translateY(0) !important;
 }
 
 amp-story:not([desktop]) >
-    amp-story-page:not[active].i-amphtml-layout-container[distance="1"] {
+    amp-story-page.i-amphtml-layout-container[distance="1"] {
   transform: translateY(100%) !important;
 }
 

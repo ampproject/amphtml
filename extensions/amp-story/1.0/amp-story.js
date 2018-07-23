@@ -894,7 +894,6 @@ export class AmpStory extends AMP.BaseElement {
     const steps = [
       () => {
         oldPage && oldPage.element.removeAttribute('active');
-        oldPage && oldPage.stopListeningToNavigationEvents();
 
         this.systemLayer_.setActivePageId(targetPageId);
 
