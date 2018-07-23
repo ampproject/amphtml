@@ -178,7 +178,8 @@ export class AmpImageSlider extends AMP.BaseElement {
     // Hierarchy:
     // leftMask
     //   |_ leftAmpImage
-    // rightAmpImage
+    // rightMask
+    //   |_ rightAmpImage
     this.container_.appendChild(this.rightMask_);
     this.container_.appendChild(this.leftMask_);
 
@@ -557,15 +558,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   /** @override */
   resumeCallback() {
     this.registerEvents();
-  }
-
-  /** @override */
-  viewportCallback(inViewport) {
-    if (inViewport) {
-      this.registerEvents();
-    } else {
-      this.unregisterEvents();
-    }
   }
 }
 
