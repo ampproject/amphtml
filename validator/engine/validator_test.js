@@ -181,8 +181,9 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8').trim();
   // Reading in the file with BOM characters appears to strip them. Add them
   // back.
-  if (this.ampHtmlFile === 'feature_tests/unprintable_chars.html')
+  if (this.ampHtmlFile === 'feature_tests/unprintable_chars.html') {
     this.ampHtmlFileContents = '\ufeff\ufeff\ufeff' + this.ampHtmlFileContents;
+  }
 
   // In the update_tests case, this file may not exist.
   const fullOutputFile = path.join(
