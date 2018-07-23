@@ -21,7 +21,6 @@ import {
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {computedStyle} from '../../../../src/style';
-import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
@@ -565,7 +564,7 @@ describes.realWin('amp-consent', {
           'GH', CONSENT_ITEM_STATE.DISMISSED);
     });
 
-    it('throw error when no consent is displaying', function* () {
+    it('ignore when no consent is displaying', function* () {
       ampConsent.buildCallback();
       yield macroTask();
       updateConsentInstanceStateSpy =
@@ -577,10 +576,9 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
-      const errorSpy = sandbox.stub(dev(), 'error');
-      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
-      expect(errorSpy).to.be.calledWith('amp-consent',
-          'No consent ui is displaying, consent id null');
+      expect(updateConsentInstanceStateSpy).to.be.calledThrice;
+      updateConsentInstanceStateSpy.reset();
+      expect(updateConsentInstanceStateSpy).to.not.be.called;
     });
 
     describe('schedule display', () => {
