@@ -328,6 +328,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
+      // Ensures the video-manager does not follow the autoplay attribute on
+      // amp-video tags, which would play the ad in the background before it is
+      // displayed.
+      ampStoryAdPage.getImpl().then(impl => impl.delegateVideoAutoplay());
+
       // remove loading attribute once loaded so that desktop CSS will position
       // offscren with all other pages
       const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
