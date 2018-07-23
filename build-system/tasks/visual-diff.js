@@ -55,7 +55,7 @@ const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 
 const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
-    path.resolve(__dirname, 'visual-diff-wrapper.js'), 'utf8');
+    path.resolve(__dirname, 'visual-diff-wrapper.snippet.js'), 'utf8');
 
 const preVisualDiffTasks =
     (argv.nobuild || argv.verify_status) ? [] : ['build'];
@@ -459,7 +459,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
       // scripts that are inlined in the page inside a <script> tag.
       await page.evaluate(
           'document.head.querySelectorAll("script[src]").forEach(' +
-          'node => node.remove())');
+          'node => node./*OK*/remove())');
     }
 
     if (viewport) {
