@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
@@ -98,6 +99,13 @@ const TRACKER_TYPE = Object.freeze({
     name: 'video',
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) { return new VideoEventTracker(root); },
+  },
+  'unload': {
+    name: 'unload',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
+    klass: function(root) {
+      return new UnloadTracker(root);
+    },
   },
 });
 
@@ -520,6 +528,62 @@ export class IniLoadTracker extends EventTracker {
     return Promise.race([
       signals.whenSignal(CommonSignals.INI_LOAD),
       signals.whenSignal(CommonSignals.LOAD_END),
+    ]);
+  }
+}
+
+/**
+ * Tracks when the elements unlayoutCallback has been called or the
+ * window.beforeunload event has fired (lossy).
+ * @implements {SignalTrackerDef}
+ */
+export class UnloadTracker extends SignalTracker {
+  /** @override */
+  constructor(root) {
+    super(root);
+
+    // Create the promise to be resolved on the `beforeunload` event.
+    const deferred = new Deferred();
+    const {promise, resolve} = deferred;
+    this.beforeUnloadPromise = promise;
+
+    this.createUnloadListener_(resolve);
+  }
+
+  /**
+   * Creates a listener that resolves the `beforeUnloadPromise` on the
+   * `beforeunload` event.
+   * @param {Function} beforeUnloadResolver
+   */
+  createUnloadListener_(beforeUnloadResolver) {
+    const {ampdoc} = this.root;
+    const doc = ampdoc.getRootNode();
+    doc.addEventListener('beforeunload', () => {
+      beforeUnloadResolver();
+    });
+  }
+
+  /** @override */
+  getRootSignal(eventType) {
+    return Promise.race([
+      // `unload` signal sent by CumstomElement.unlayoutCallback.
+      this.root.signals().whenSignal(eventType),
+      // Listener for document.beforeunload event
+      this.beforeUnloadPromise,
+    ]);
+  }
+
+  /** @override */
+  getElementSignal(eventType, element) {
+    if (typeof element.signals != 'function') {
+      return Promise.resolve();
+    }
+    const signals = element.signals();
+    return Promise.race([
+      // `unload` signal sent by CumstomElement.unlayoutCallback.
+      signals.whenSignal(eventType),
+      // Listener for document.beforeunload event
+      this.beforeUnloadPromise,
     ]);
   }
 }
