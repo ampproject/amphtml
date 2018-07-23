@@ -99,10 +99,6 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
-<<<<<<< HEAD
-=======
-  {name: 'amp-compare-slider', version: '0.1', type: TYPES.MISC},
->>>>>>> allowed added amp exension in whitelist to user 'src/service/video-manager-impl.js'
   {
     name: 'amp-consent',
     version: '0.1',
@@ -152,15 +148,12 @@ exports.extensionBundles = [
     version: '0.1', options: {hasCss: true},
     type: TYPES.MISC,
   },
-<<<<<<< HEAD
   {
     name: 'amp-image-slider',
     version: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
   },
-=======
->>>>>>> allowed added amp exension in whitelist to user 'src/service/video-manager-impl.js'
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},
   {
     name: 'amp-instagram',
