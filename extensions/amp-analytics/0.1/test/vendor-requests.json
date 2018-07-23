@@ -210,8 +210,8 @@
   },
   "oracleInfinityAnalytics": {
     "host":"https://dc.oracleinfinity.io",
-    "pageview": "https://dc.oracleinfinity.io/_guid_/dcs.gif?dcssip=_dcssip_&dcsuri=_dcsuri_&WT.ti=_ti_&dcsdat=_timestamp_&dcsref=_documentReferrer_&WT.es=_sourceHost__sourcePath_&WT.bs=_availableScreenWidth_x_availableScreenHeight_&WT.sr=_screenWidth_x_screenHeight_&WT.cd=_screenColorDepth_&WT.ul=_browserLanguage_&WT.le=_documentCharset_&WT.js=Yes&WT.co_f=_clientId(WT_AMP)_&WT.vtid=_clientId(WT_AMP)_&ora.tv_amp=1.0.0&ora.amp_ver=_ampVersion_&dcscfg=3&WT.dl=_dl_",
-    "event": "https://dc.oracleinfinity.io/_guid_/dcs.gif?dcssip=_dcssip_&dcsuri=_dcsuri_&WT.ti=_ti_&dcsdat=_timestamp_&dcsref=_documentReferrer_&WT.es=_sourceHost__sourcePath_&WT.bs=_availableScreenWidth_x_availableScreenHeight_&WT.sr=_screenWidth_x_screenHeight_&WT.cd=_screenColorDepth_&WT.ul=_browserLanguage_&WT.le=_documentCharset_&WT.js=Yes&WT.co_f=_clientId(WT_AMP)_&WT.vtid=_clientId(WT_AMP)_&ora.tv_amp=1.0.0&ora.amp_ver=_ampVersion_&dcscfg=3&WT.dl=_dl_"
+    "pageview": "https://dc.oracleinfinity.io/_guid_/dcs.gif?dcssip=_dcssip_&dcsuri=_dcsuri_&WT.ti=_ti_&dcsdat=_timestamp_&dcsref=_documentReferrer_&WT.es=_sourceHost__sourcePath_&WT.bs=_availableScreenWidth_x_availableScreenHeight_&WT.sr=_screenWidth_x_screenHeight_&WT.cd=_screenColorDepth_&WT.ul=_browserLanguage_&WT.le=_documentCharset_&WT.js=Yes&WT.co_f=_clientId(WT_AMP)_&ora.tv_amp=1.0.0&ora.amp_ver=_ampVersion_&dcscfg=3&WT.dl=_dl_",
+    "event": "https://dc.oracleinfinity.io/_guid_/dcs.gif?dcssip=_dcssip_&dcsuri=_dcsuri_&WT.ti=_ti_&dcsdat=_timestamp_&dcsref=_documentReferrer_&WT.es=_sourceHost__sourcePath_&WT.bs=_availableScreenWidth_x_availableScreenHeight_&WT.sr=_screenWidth_x_screenHeight_&WT.cd=_screenColorDepth_&WT.ul=_browserLanguage_&WT.le=_documentCharset_&WT.js=Yes&WT.co_f=_clientId(WT_AMP)_&ora.tv_amp=1.0.0&ora.amp_ver=_ampVersion_&dcscfg=3&WT.dl=_dl_"
   },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
