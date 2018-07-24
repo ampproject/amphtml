@@ -18,9 +18,10 @@
  * Sets the img src to the first url in the srcset if srcset is defined but
  * src is not for browsers that do not support srcset.
  * @param {!Element} img
- * @param {string} srcset
+ * @param {!Element} element
  */
-export function guaranteeSrcForSrcsetUnsupportedBrowsers(img, srcset) {
+export function guaranteeSrcForSrcsetUnsupportedBrowsers(img, element) {
+  const srcset = element.getAttribute('srcset');
   // The <img> tag does not have a src and does not support srcset
   if (!img.hasAttribute('src') && 'srcset' in img == false) {
     const matches = /\S+/.exec(srcset);

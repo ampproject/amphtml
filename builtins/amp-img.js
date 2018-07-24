@@ -57,8 +57,7 @@ export class AmpImg extends BaseElement {
           value => mutations[value] !== undefined);
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
-      const srcset = this.element.getAttribute('srcset');
-      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_, srcset);
+      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_, this.element);
     }
   }
 
@@ -128,8 +127,7 @@ export class AmpImg extends BaseElement {
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
-    const srcset = this.element.getAttribute('srcset');
-    guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_, srcset);
+    guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_, this.element);
     this.applyFillContent(this.img_, true);
     this.element.appendChild(this.img_);
   }

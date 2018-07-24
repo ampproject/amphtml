@@ -20,14 +20,12 @@ import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 const TAG = 'amp-anim';
-const ATTRIBUTES_TO_PROPAGATE = ['alt', 'aria-label', 'aria-describedby',
-  'aria-labelledby', 'src', 'srcset'];
+const BUILD_ATTRIBUTES = ['alt', 'aria-label', 'aria-describedby',
+  'aria-labelledby'];
+const LAYOUT_ATTRIBUTES = ['src', 'srcset'];
 /** @visibleForTesting */
 export const SRC_PLACEHOLDER = 'data:image/gif;base64,' +
 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-/** @visibleForTesting */
-export const SRCSET_PLACEHOLDER = 'data:image/gif;base64,' +
-'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 ';
 
 export class AmpAnim extends AMP.BaseElement {
 
@@ -51,7 +49,7 @@ export class AmpAnim extends AMP.BaseElement {
   buildCallback() {
     this.img_ = new Image();
     this.img_.setAttribute('decoding', 'async');
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    this.propagateAttributes(BUILD_ATTRIBUTES, this.img_);
     this.applyFillContent(this.img_, true);
 
     // Remove role=img otherwise this breaks screen-readers focus and
@@ -79,11 +77,8 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.img_.src == SRC_PLACEHOLDER) {
-      this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
-      const srcset = this.element.getAttribute('srcset');
-      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_, srcset);
-    }
+    this.propagateAttributes(LAYOUT_ATTRIBUTES, this.img_);
+    guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_, this.element);
     return this.loadPromise(this.img_);
   }
 
@@ -107,7 +102,7 @@ export class AmpAnim extends AMP.BaseElement {
   unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;
-    this.img_.srcset = SRCSET_PLACEHOLDER;
+    this.img_.srcset = SRC_PLACEHOLDER;
     this.hasLoaded_ = false;
     return true;
   }
