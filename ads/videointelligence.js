@@ -24,5 +24,5 @@ export function videointelligence(global, data) {
 
   validateData(data, ['publisherId', 'channelId']);
 
-  loadScript(global, `https://s.vi-serve.com/tagLoaderAmp.js`);
+  loadScript(global, 'https://s.vi-serve.com/tagLoaderAmp.js');
 }
