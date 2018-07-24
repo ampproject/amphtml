@@ -741,6 +741,7 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
+    const bookendActive = !!this.getHistoryBookendState_();
 
     this.initializeBookend_();
     this.initializeSidebar_();
@@ -773,6 +774,13 @@ export class AmpStory extends AMP.BaseElement {
           if (infoDialog) {
             infoDialog.build();
           }
+        })
+        .then(() => {
+          this.hasBookend_().then(hasBookend => {
+            if (hasBookend && bookendActive) {
+              this.showBookend_();
+            }
+          });
         });
 
     // Do not block the layout callback on the completion of these promises, as
@@ -1280,10 +1288,12 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const {history} = this.win;
-    if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
-      history.replaceState({
-        ampStoryPageId: pageId,
-      }, '');
+    if (history.replaceState && history.state &&
+        this.getHistoryStatePageId_() !== pageId) {
+      history.state.ampStoryPageId = pageId;
+      history.replaceState(history.state, '');
+    } else if (!history.state) {
+      history.replaceState({ampStoryPageId: pageId}, '');
     }
   }
 
@@ -1642,10 +1652,53 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
+    this.setHistoryBookendState_(isActive);
+
+    if (isActive) {
+      this.systemLayer_.hideDeveloperLog();
+      this.activePage_.setState(PageState.PAUSED);
+    }
+
+    if (!isActive) {
+      this.activePage_.setState(PageState.ACTIVE);
+    }
   }
 
   /**
    * Toggles content when bookend is opened/closed.
+   * Save bookend state using history API.
+   * @param {boolean} isActive state of the bookend
+   * @private
+   */
+  setHistoryBookendState_(isActive) {
+    // debugger;
+    const {history} = this.win;
+    if (history.replaceState && history.state &&
+        this.getHistoryBookendState_() !== isActive) {
+      history.state.ampStoryBookendActive = isActive;
+      history.replaceState(history.state, '');
+    } else if (!history.state) {
+
+      history.replaceState({ampStoryBookendActive: isActive}, '');
+    }
+  }
+
+
+  /**
+   * @private
+   * @return {?string}
+   */
+  getHistoryBookendState_() {
+    const {history} = this.win;
+    if (history && history.state) {
+      return history.state.ampStoryBookendActive;
+    }
+    return null;
+  }
+
+
+  /**
+   * Toggle content when bookend is opened/closed.
    * @param {boolean} isActive
    * @private
    */

@@ -357,6 +357,25 @@ describes.realWin('amp-story', {
         });
   });
 
+  it('should update bookend status in browser history', () => {
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const pageCount = 1;
+    createPages(story.element, pageCount, ['last-page']);
+
+    sandbox.stub(story, 'buildAndPreloadBookend_');
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+
+          return expect(replaceStub).to.have.been.calledWith(
+              {ampStoryBookendActive: true}, '',
+          );
+        });
+  });
+
   it('should NOT update page id in browser history if ad', () => {
     const firstPageId = 'i-amphtml-ad-page-1';
     const pageCount = 2;
