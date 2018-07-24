@@ -74,6 +74,7 @@ should be specified on the tag.
 
 ## Supported ad networks
 - [AdSense](../../ads/google/adsense.md)
+- [DoubleClick (experimental)](../../ads/google/doubleclick.md)
 
 ## Attributes
 
