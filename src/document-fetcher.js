@@ -15,8 +15,10 @@
  */
 
 import {FetchInitDef, XhrBase, assertSuccess, setupInit} from './xhr-base';
+import {dict} from './utils/object';
 import {isFormDataWrapper} from './form-data-wrapper';
 import {user} from './log';
+
 
 export class DocumentFetcher extends XhrBase {
   /**
@@ -145,7 +147,7 @@ export class DocumentFetcher extends XhrBase {
  * @return {JsonObject}
  */
 function parseHeaders(rawHeaders) {
-  const headers = {};
+  const headers = dict({});
   // Replace instances of \r\n and \n followed by at least one
   // space or horizontal tab with a space
   // https://tools.ietf.org/html/rfc7230#section-3.2

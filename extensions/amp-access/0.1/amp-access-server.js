@@ -15,6 +15,7 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
+import {DocumentFetcher} from '../../../src/document-fetcher';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -22,7 +23,6 @@ import {escapeCssSelectorIdent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import { DocumentFetcher } from '../../../src/document-fetcher';
 
 /** @const {string} */
 const TAG = 'amp-access-server';
