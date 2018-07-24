@@ -899,6 +899,13 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'videointelligence': {
+    preconnect: [
+      'https://s.vi-serve.com'
+    ],
+    renderStartImplemented: true,
+  },
+
   'videonow': {
     renderStartImplemented: true,
   },
