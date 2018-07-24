@@ -258,11 +258,12 @@
       "name": "amp-bind - Amp By Example"
     },
     {
-      "flaky": true,
-      // Embedded video sometimes takes longer to load, resulting in either a video placeholder or the provider's logo
-      // e.g., https://percy.io/ampproject/danielrozenberg/builds/801880/view/45150404/1400?mode=diff&browser=firefox&snapshot=45150404
       "url": "examples/visual-tests/amp-by-example/components/amp-brid-player/index.html",
-      "name": "amp-brid-player - Amp By Example"
+      "name": "amp-brid-player - Amp By Example",
+      "loading_complete_css": [
+        "amp-brid-player[data-video] iframe.i-amphtml-fill-content",
+        "amp-brid-player[data-playlist] iframe.i-amphtml-fill-content"
+      ]
     },
     {
       "flaky": true,
