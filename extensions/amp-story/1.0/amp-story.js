@@ -882,6 +882,10 @@ export class AmpStory extends AMP.BaseElement {
    * @return {!Promise}
    */
   switchTo_(targetPageId) {
+    if (isExperimentOn(this.win, 'amp-story-navigation-performance')) {
+      return this.experimentalSwitchTo_(targetPageId);
+    }
+
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
@@ -949,6 +953,115 @@ export class AmpStory extends AMP.BaseElement {
       this.preloadPagesByDistance_();
       this.forceRepaintForSafari_();
       this.maybePreloadBookend_();
+    });
+  }
+
+
+  /**
+   * Switches to a particular page.
+   * Protected behing the 'amp-story-navigation-performance' experiment.
+   * @param {string} targetPageId
+   * @return {!Promise}
+   */
+  experimentalSwitchTo_(targetPageId) {
+    const targetPage = this.getPageById(targetPageId);
+    const pageIndex = this.getPageIndex(targetPage);
+
+    const oldPage = this.activePage_;
+    this.activePage_ = targetPage;
+
+    // Each step will run in a requestAnimationFrame, and wait for the next
+    // frame before executing the following step.
+    const steps = [
+      // First step contains the minimum amount of code to display and play the
+      // target page as fast as possible.
+      () => {
+        oldPage && oldPage.element.removeAttribute('active');
+
+        this.systemLayer_.setActivePageId(targetPageId);
+
+        // Starts playing the page, if the story is not paused.
+        // Note: navigation is prevented when the story is paused, this test
+        // covers the case where the story is rendered paused (eg: consent).
+        if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+          targetPage.setState(PageState.ACTIVE);
+        }
+
+        this.forceRepaintForSafari_();
+      },
+      // Second step does all the operations that impact the UI/UX: media sound,
+      // progress bar, ...
+      () => {
+        if (oldPage) {
+          oldPage.setState(PageState.NOT_ACTIVE);
+
+          // Indication that this should be offscreen to left in desktop view.
+          setAttributeInMutate(oldPage, Attributes.VISITED);
+        }
+
+        this.storeService_.dispatch(Action.CHANGE_PAGE, {
+          id: targetPageId,
+          index: pageIndex,
+        });
+
+        if (targetPage.isAd()) {
+          this.storeService_.dispatch(Action.TOGGLE_AD, true);
+          setAttributeInMutate(this, Attributes.AD_SHOWING);
+        } else {
+          this.storeService_.dispatch(Action.TOGGLE_AD, false);
+          removeAttributeInMutate(this, Attributes.AD_SHOWING);
+        }
+
+        // TODO(alanorozco): check if autoplay
+        this.navigationState_.updateActivePage(
+            pageIndex,
+            this.getPageCount(),
+            targetPage.element.id,
+            targetPage.getNextPageId() === null /* isFinalPage */
+        );
+
+        // If first navigation.
+        if (!oldPage) {
+          this.registerAndPreloadBackgroundAudio_();
+        }
+
+        if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+          oldPage && oldPage.muteAllMedia();
+          this.activePage_.unmuteAllMedia();
+        }
+
+        this.handlePreviewAttributes_(targetPage);
+
+        this.updateBackground_(targetPage.element, /* initial */ !oldPage);
+      },
+      // Third and last step contains all the actions that can be delayed after
+      // the navigation happened, like preloading the following pages, or
+      // sending analytics events.
+      () => {
+        this.preloadPagesByDistance_();
+        this.maybePreloadBookend_();
+
+        this.triggerActiveEventForPage_();
+
+        this.systemLayer_.resetDeveloperLogs();
+        this.systemLayer_
+            .setDeveloperLogContextString(this.activePage_.element.id);
+      },
+    ];
+
+    return new Promise(resolve => {
+      targetPage.beforeVisible().then(() => {
+        // Recursively executes one step per frame.
+        const unqueueStepInRAF = () => {
+          steps.shift().call(this);
+          if (!steps.length) {
+            return resolve();
+          }
+          this.win.requestAnimationFrame(() => unqueueStepInRAF());
+        };
+
+        unqueueStepInRAF();
+      });
     });
   }
 
