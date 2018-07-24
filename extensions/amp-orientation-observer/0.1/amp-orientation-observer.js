@@ -127,12 +127,11 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(eventName, eventValue, eventRange) {
-    eventValue = eventValue.toFixed();
     const percentValue = eventRange[0] < 0 ?
-      (eventValue - eventRange[0]) :
-      eventValue;
+      (eventValue.toFixed() - eventRange[0]) :
+      eventValue.toFixed();
     const event = createCustomEvent(this.win, `${TAG}.${eventName}`, dict({
-      'angle': eventValue,
+      'angle': eventValue.toFixed(),
       'percent': percentValue /
         (eventRange[1] - eventRange[0]),
     }));
