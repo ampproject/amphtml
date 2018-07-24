@@ -15,6 +15,8 @@
  */
 import {Services} from '../../../src/services';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {loadScript} from '../../../3p/3p';
+
 const TAG = 'amp-access-poool';
 const CONFIG = {
   debug: false,
@@ -89,6 +91,18 @@ export class PooolVendor {
    */
   authorize() {
     return {access: true};
+  /**
+   * Produces the Poool SDK object for the passed in callback.
+   *
+   * @param {!Window} global
+   * @param {function(!Object)} cb
+   */
+  getPooolSDK_(global, cb) {
+    loadScript(global, 'https://assets.poool.fr/poool.min.js', function() {
+      cb(global.poool);
+    });
+  }
+
   /**
    * @return {!Promise}
    */
