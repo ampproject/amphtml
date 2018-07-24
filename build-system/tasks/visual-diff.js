@@ -428,7 +428,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
 
     await enableExperiments(page, webpage['experiments']);
 
-    const snapshotOptions = SNAPSHOT_OPTIONS;
+    const snapshotOptions = Object.assign({}, SNAPSHOT_OPTIONS);
 
     if (viewport) {
       snapshotOptions.widths = [viewport.width];
