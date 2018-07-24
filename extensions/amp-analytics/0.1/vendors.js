@@ -2221,7 +2221,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'event': '${baseP1}${baseP2}${baseDl}',
       'dlPdf': 'a[href$=".pdf"]',
       'dlXls': ',a[href$=".xls"]',
-      'dlPpt': 'a[href$=".ppt"]',
+      'dlPpt': ',a[href$=".ppt"]',
       'dlZip': ',a[href$=".zip"]',
       'dlTxt': ',a[href$=".txt"]',
       'dlRtf': ',a[href$=".rtf"]',
