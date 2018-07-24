@@ -151,7 +151,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-image-slider',
-    version: '0.1', options: {hasCss: true},
+    version: ['0.1', '0.2'], options: {hasCss: true},
     type: TYPES.MISC,
   },
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},
