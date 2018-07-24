@@ -188,7 +188,7 @@
         "width": 400,
         "height": 600
       },
-      "loading_complete_css": [".i-amphtml-sticky-ad-layout"],
+      "loading_complete_css": ["amp-sticky-ad[visible]"],
       "enable_percy_javascript": true
     },
     /**
