@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview "Unit" test for bind-impl.js. Runs as an integration test
- *               because it requires building web-worker binary.
+ * because it requires building web-worker binary.
  */
 
 import * as lolex from 'lolex';

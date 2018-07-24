@@ -25,7 +25,7 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <div>
-        <code>&lt;script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js">&lt;/script></code>
+        <code>&lt;script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js">&lt;/script></code>
       </div>
     </td>
   </tr>
@@ -36,6 +36,13 @@ limitations under the License.
 </table>
 
 [TOC]
+
+## Version notes
+
+| Version | Description |
+| ------- | ----- |
+| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br>Internal improvements may cause minor breaking changes; we recommend testing your pages before adoption. |
+| 0.1 | Initial implementation. |
 
 ## Syntax
 
@@ -53,7 +60,7 @@ The `amp-mustache` template has to be defined and used according to the
 First, the `amp-mustache` has to be declared/loaded like this:
 
 ```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 ```
 
 Then, the Mustache templates can be defined in the `template` tags like this:
