@@ -29,7 +29,7 @@ FAIL
 |    <script async custom-element="amp-date-picker"
 |      src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
 |    <script async custom-template="amp-mustache"
-|      src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+|      src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 |  </head>
 |  <body>
 |    <!-- Valid: amp-date-picker with only layout attributes -->

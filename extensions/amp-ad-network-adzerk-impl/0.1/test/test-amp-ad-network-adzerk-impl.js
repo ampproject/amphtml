@@ -92,7 +92,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
       const template = `<!doctype html><html ⚡><head>
           <script async src="https://cdn.ampproject.org/v0.js"></script>
           <script async custom-template="amp-mustache"
-            src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+            src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
           </head>
           <body>
             <template type="amp-mustache">
@@ -127,7 +127,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
                 '</script>');
             expect(creative).to.not.contain(
                 '<script async custom-template="amp-mustache" src=' +
-                '"https://cdn.ampproject.org/v0/amp-mustache-0.1.js">' +
+                '"https://cdn.ampproject.org/v0/amp-mustache-latest.js">' +
                 '</script>');
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
@@ -145,7 +145,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
       template = `<!doctype html><html ⚡><head>
           <script async src="https://cdn.ampproject.org/v0.js"></script>
           <script async custom-template="amp-mustache"
-            src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+            src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
           </head>
           <body>
             <template type="amp-mustache">

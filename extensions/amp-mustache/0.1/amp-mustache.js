@@ -21,6 +21,9 @@ import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-mustache';
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -39,6 +42,9 @@ export class AmpMustache extends AMP.BaseTemplate {
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
     setUnescapedSanitizier(sanitizeTagsForTripleMustache);
+
+    user().warn(TAG, 'The extension "amp-mustache-0.1.js" is deprecated. ' +
+        'Please use a more recent version of this extension.');
   }
 
   /** @override */
@@ -104,6 +110,6 @@ export class AmpMustache extends AMP.BaseTemplate {
 // For unit tests, it doesn't actually matter which version of amp-mustache is
 // registered. Integration tests should only have one script version included.
 if (getMode().test) {
-  Services.templatesFor(window).unregisterTemplate('amp-mustache');
+  Services.templatesFor(window).unregisterTemplate(TAG);
 }
-AMP.registerTemplate('amp-mustache', AmpMustache);
+AMP.registerTemplate(TAG, AmpMustache);
