@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from '../src/log';
 import {dict} from '../src/utils/object';
 import {getData, listen} from '../src/event-helper';
 import {getMode} from '../src/mode';
@@ -40,7 +41,7 @@ let DocMetadataDef;
  *   on: function(string, function()),
  *   play: function(),
  *   pause: function(),
- *   setMuted: function(boolean),
+ *   setMute: function(boolean),
  *   setControls: function(boolean),
  *   setFullscreen: function(boolean),
  * }}
@@ -118,7 +119,7 @@ export class AmpVideoIntegration {
 
     /** @private @const {function()} */
     this.listenToOnce_ = once(() => {
-      listenTo(this.win_, e => this.onMessage_(e));
+      listenTo(this.win_, e => this.onMessage_(/** @type {!JsonObject} */ (e)));
     });
 
     /** @private {boolean} */
@@ -132,8 +133,11 @@ export class AmpVideoIntegration {
      * @private
      */
     this.getMetadataOnce_ = once(() => {
-      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
-      return {canonicalUrl, sourceUrl};
+      const json = tryParseJson(this.win_.name);
+      return {
+        'canonicalUrl': json['canonicalUrl'],
+        'sourceUrl': json['sourceUrl'],
+      };
     });
   }
 
