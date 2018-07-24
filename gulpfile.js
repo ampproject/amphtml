@@ -406,6 +406,24 @@ function css() {
   return compileCss();
 }
 
+const cssEntryPoints = [
+  {
+    path: 'amp.css',
+    outJs: 'css.js',
+    outCss: 'v0.css',
+  },
+  {
+    path: 'video-docking.css',
+    outJs: 'video-docking.css.js',
+    outCss: 'video-docking.css',
+  },
+  {
+    path: 'video-autoplay.css',
+    outJs: 'video-autoplay.css.js',
+    outCss: 'video-autoplay.css',
+  },
+];
+
 /**
  * Compile all the css and drop in the build folder
  * @param {boolean} watch
@@ -440,34 +458,37 @@ function compileCss(watch, opt_compileAll) {
         }));
   }
 
+  /**
+   * @param {string} path
+   * @param {string} outJs
+   * @param {string} outCss
+   */
+  function writeCssEntryPoint(path, outJs, outCss) {
+    const startTime = Date.now();
+
+    return jsifyCssAsync(`css/${path}`)
+        .then(css => writeCss(css, path, outJs, outCss))
+        .then(() => {
+          endBuildStep('Recompiled CSS in', path, startTime);
+        });
+  }
+
   // Used by `gulp test --local-changes` to map CSS files to JS files.
   fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
-  const startTime = Date.now();
-  return jsifyCssAsync('css/amp.css')
-      .then(css => writeCss(css, 'amp.css', 'css.js', 'v0.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'amp.css', startTime);
-      })
-      .then(() => jsifyCssAsync('css/video-docking.css'))
-      .then(css => writeCss(css,
-          'video-docking.css', 'video-docking.css.js', 'video-docking.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'video-docking.css', startTime);
-      })
-      .then(() => jsifyCssAsync('css/video-autoplay.css'))
-      .then(css => writeCss(css,
-          'video-autoplay.css', 'video-autoplay.css.js', 'video-autoplay.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'video-autoplay.css', startTime);
-      })
-      .then(() => {
-        return buildExtensions({
-          bundleOnlyIfListedInFiles: false,
-          compileOnlyCss: true,
-          compileAll: opt_compileAll,
-        });
-      });
+
+  let promise = Promise.resolve();
+
+  cssEntryPoints.forEach(entryPoint => {
+    const {path, outJs, outCss} = entryPoint;
+    promise = promise.then(() => writeCssEntryPoint(path, outJs, outCss));
+  });
+
+  return promise.then(() => buildExtensions({
+    bundleOnlyIfListedInFiles: false,
+    compileOnlyCss: true,
+    compileAll: opt_compileAll,
+  }));
 }
 
 /**
@@ -476,12 +497,15 @@ function compileCss(watch, opt_compileAll) {
  */
 function copyCss() {
   const startTime = Date.now();
-  fs.copySync('build/css/v0.css', 'dist/v0.css');
-  fs.copySync('build/css/video-docking.css', 'dist/video-docking.css');
+
+  cssEntryPoints.forEach(({outCss}) => {
+    fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
+  });
+
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')))
       .then(() => {
-        endBuildStep('Copied', 'build/css/v0.css to dist/v0.css', startTime);
+        endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
       });
 }
 

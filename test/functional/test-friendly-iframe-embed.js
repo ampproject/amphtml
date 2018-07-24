@@ -16,13 +16,11 @@
 
 import * as sinon from 'sinon';
 
-import {ActionTrust} from '../../src/action-constants';
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
-  renderCloseButtonHeader,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
@@ -771,17 +769,14 @@ describe('friendly-iframe-embed', () => {
     it('resizes body and fixed container when entering', function* () {
       const bodyElementMock = document.createElement('div');
       const fie = createFie(bodyElementMock);
-      const headerHeight = 60;
-
-      sandbox.stub(fie, 'getHeaderHeight_').returns(headerHeight);
 
       yield fie.enterFullOverlayMode();
 
       expect(bodyElementMock.style.background).to.equal('transparent');
       expect(bodyElementMock.style.position).to.equal('absolute');
       expect(bodyElementMock.style.width).to.equal(`${w}px`);
-      expect(bodyElementMock.style.height).to.equal(`${h - headerHeight}px`);
-      expect(bodyElementMock.style.top).to.equal(`${y - headerHeight}px`);
+      expect(bodyElementMock.style.height).to.equal(`${h}px`);
+      expect(bodyElementMock.style.top).to.equal(`${y}px`);
       expect(bodyElementMock.style.left).to.equal(`${x}px`);
       expect(bodyElementMock.style.right).to.equal('auto');
       expect(bodyElementMock.style.bottom).to.equal('auto');
@@ -791,10 +786,10 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.position).to.equal('fixed');
       expect(iframe.style.left).to.equal('0px');
       expect(iframe.style.right).to.equal('0px');
-      expect(iframe.style.top).to.equal(`${headerHeight}px`);
+      expect(iframe.style.top).to.equal('0px');
       expect(iframe.style.bottom).to.equal('0px');
       expect(iframe.style.width).to.equal('100vw');
-      expect(iframe.style.height).to.equal(`calc(100vh - ${headerHeight}px)`);
+      expect(iframe.style.height).to.equal('100vh');
     });
 
     it('should reset body and fixed container when leaving', function* () {
@@ -821,55 +816,6 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.bottom).to.be.empty;
       expect(iframe.style.width).to.be.empty;
       expect(iframe.style.height).to.be.empty;
-    });
-  });
-
-  describe('#renderCloseButtonHeader', () => {
-
-    const win = document.defaultView;
-
-    it('renders', () => {
-      const ampAdParentMock = document.createElement('div');
-      const ampLightboxMock = document.createElement('div');
-
-      const el = renderCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
-
-      expect(el.tagName.toLowerCase()).to.equal('i-amphtml-ad-close-header');
-      expect(el.getAttribute('role')).to.equal('button');
-      expect(el.getAttribute('aria-label')).to.equal('Close Ad');
-      expect(el.getAttribute('tabindex')).to.equal('0');
-
-      expect(el.firstElementChild.textContent).to.equal('Ad');
-
-      const closeButton = el.lastElementChild;
-
-      expect(closeButton.tagName.toLowerCase())
-          .to.equal('i-amphtml-ad-close-button');
-
-      expect(closeButton).to.have.class('amp-ad-close-button');
-    });
-
-    it('triggers action', () => {
-      const ampAdParentMock = document.createElement('div');
-      const ampLightboxMock = document.createElement('div');
-
-      const el = renderCloseButtonHeader(win, ampAdParentMock, ampLightboxMock);
-
-      const execute = sandbox.spy();
-      const actionServiceMock = {execute};
-
-      sandbox.stub(Services, 'actionServiceForDoc').returns(actionServiceMock);
-
-      el.click();
-
-      expect(execute.withArgs(
-          /* target */ ampLightboxMock,
-          /* method */ 'close',
-          /* args   */ sinon.match.any,
-          /* source */ ampAdParentMock,
-          /* caller */ ampAdParentMock,
-          /* event  */ sinon.match.any,
-          /* trust  */ ActionTrust.HIGH)).to.be.calledOnce;
     });
   });
 });
