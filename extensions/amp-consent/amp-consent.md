@@ -144,6 +144,19 @@ current user to the 3rd party vendor extensions.
 
 Unlike consent state, this `shareData` is not persisted in client side storage.
 
+#### onUpdateHref
+`onUpdateHref`: Instructs AMP to make a CORS HTTPS POST request with credentials to the specified URL whenever the stored consent state changes.
+
+AMP sends the consent instance ID, a generated user id only for this usage and the consent state along with the POST request.
+
+```html
+{
+  "consentInstanceId": "my-consent",
+  "ampUserId": "xxx",
+  "consentState": true/false,
+}
+```
+
 #### promptIfUnknownForGeoGroup
 `promptIfUnknownForGeoGroup` Provides an alternative way to instruct AMP to display consent prompt or not when consent state is unknown.
 
