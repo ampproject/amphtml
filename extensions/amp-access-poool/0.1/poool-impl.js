@@ -87,15 +87,33 @@ export class PooolVendor {
     /** @private {string} */
     this.pageType_ = this.pooolConfig_['pageType'] || '';
 
+    /** @protected {string} */
+    this.readerID_ = '';
+
     /** @private {string} */
     this.itemID_ = this.pooolConfig_['itemID'] || '';
 
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
+
+    this.checkMandatoryParams_();
+  }
+
   /**
    * @return {!Promise<!JsonObject>}
    */
   authorize() {
     return {access: true};
+  /**
+   * @private
+   */
+  checkMandatoryParams_() {
+    this.accessSource_.getReaderId_().then(rid => {
+      this.readerID_ = rid;
+    });
+    user().assert(this.bundleID_, 'BundleID is incorrect or not provided.');
+    user().assert(this.pageType_, 'Page type is incorrect or not provided.');
+    user().assert(this.itemID_, 'ItemID is not provided.');
+  }
   /**
    * Produces the Poool SDK object for the passed in callback.
    *
