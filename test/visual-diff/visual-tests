@@ -271,11 +271,9 @@
       "loading_complete_css": ["amp-brightcove iframe.i-amphtml-fill-content"]
     },
     {
-      "flaky": true,
-      // The phone number sometimes takes a while to replace the placeholder.
-      // e.g., https://percy.io/ampproject/amphtml/builds/805397/view/45409686/1400?mode=diff&browser=firefox&snapshot=45409686
       "url": "examples/visual-tests/amp-by-example/components/amp-call-tracking/index.html",
-      "name": "amp-call-tracking - Amp By Example"
+      "name": "amp-call-tracking - Amp By Example",
+      "loading_complete_css": ["a[href=\"tel:15559876543\"]"]
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-carousel/index.html",
