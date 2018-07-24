@@ -175,7 +175,7 @@ export class DocumentFetcher extends XhrBase {
       }
     }
 
-    return new Response(data);
+    return new Response(String(data));
   }
 }
 

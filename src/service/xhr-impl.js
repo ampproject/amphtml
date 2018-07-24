@@ -25,18 +25,9 @@ import {dev, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {map} from '../utils/object';
-import {parseJson} from '../json';
 import {
   serializeQueryString,
 } from '../url';
-import {utf8Encode} from '../utils/bytes';
-
-/** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = {
-  document: 1,
-  text: 2,
-};
 
 /**
  * Special case for fetchJson
@@ -73,7 +64,7 @@ export class Xhr extends XhrBase {
    * We want to call `fetch_` unbound from any context since it could
    * be either the native fetch or our polyfill.
    * @override
-   * @return {!Promise<!FetchResponse>|!Promise<!Response>}
+   * @return {!Promise<!Response>}
    */
   fetchFromNetwork_(input, init) {
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
@@ -89,14 +80,8 @@ export class Xhr extends XhrBase {
           if (isFormDataWrapper(init.body)) {
             init.body = init.body.getFormData();
           }
-          // Fallback to xhr polyfill since `fetch` api does not support
-          // responseType = 'document'. We do this so we don't have to do any
-          // parsing and document construction on the UI thread which would be
-          // expensive.
-          if (init.responseType == 'document') {
-            return fetchPolyfill(input, init);
-          }
-          return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+
+          return this.win.fetch(input, init);
         });
   }
 
@@ -111,7 +96,7 @@ export class Xhr extends XhrBase {
    * @param {string} input
    * @param {?FetchInitJsonDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
-   * @return {!Promise<!FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
@@ -149,39 +134,22 @@ export class Xhr extends XhrBase {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetchText(input, opt_init) {
     return this.fetch(input, setupInit(opt_init, 'text/plain'));
   }
 
   /**
-   * Creates an XHR request with responseType=document
-   * and returns a promise for the initialized `Document`.
-   * Note this does not return a `Response`, since this is not a standard
-   * Fetch response type.
-   *
-   * @param {string} input
-   * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!Document>}
-   */
-  fetchDocument(input, opt_init) {
-    const init = setupInit(opt_init, 'text/html');
-    init.responseType = 'document';
-    return this.fetch(input, init)
-        .then(response => response.document_());
-  }
-
-  /**
    * @param {string} input URL
    * @param {?FetchInitDef=} opt_init Fetch options object.
-   * @return {!Promise<!FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
     return this.fetchAmpCors_(input, init).then(res => {
       const response = /**@type {!Response} */ (res);
-      return /** @type{!Promise<!FetchResponse>} */ (assertSuccess(response));
+      return /** @type{!Promise<!Response>} */ (assertSuccess(response));
     });
   }
 

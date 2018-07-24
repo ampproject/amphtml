@@ -106,17 +106,13 @@ function fetchPolyfill(input, init) {
 /**
  * @param {string} method
  * @param {string} url
- * @return {!XMLHttpRequest|!XDomainRequest}
+ * @return {!XMLHttpRequest}
  * @private
  */
 function createXhrRequest(method, url) {
-  let xhr = new XMLHttpRequest();
+  const xhr = new XMLHttpRequest();
   if ('withCredentials' in xhr) {
     xhr.open(method, url, true);
-  } else if (typeof XDomainRequest != 'undefined') {
-    // IE-specific object.
-    xhr = new XDomainRequest();
-    xhr.open(method, url);
   } else {
     throw dev().createExpectedError('CORS is not supported');
   }

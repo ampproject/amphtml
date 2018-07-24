@@ -313,7 +313,7 @@ function serializeItem_(key, value) {
  * @param {string} creative
  * @param {!Object<string,string>} headersObj
  * @param {boolean} done
- * @param {!Array<fu)>} sraRequestAdUrlResolvers
+ * @param {!Array} sraRequestAdUrlResolvers
  * @param {string} sraUrl url of SRA request for error reporting
  */
 export function sraBlockCallbackHandler(
