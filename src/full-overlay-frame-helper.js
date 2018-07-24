@@ -27,11 +27,12 @@ import {px, resetStyles, setStyles, translate} from './style';
  */
 export function centerFrameUnderVsyncMutate(
   iframe, iframeRect, viewportSize, transitionTimeMs) {
+
   const translateX = px(
-      (viewportSize.width / 2 - iframeRect.width / 2) - iframeRect.left);
+      (viewportSize.width / 2) - (iframeRect.width / 2) - iframeRect.left);
 
   const translateY = px(
-      (viewportSize.height / 2 - iframeRect.height / 2) - iframeRect.top);
+      (viewportSize.height / 2) - (iframeRect.height / 2) - iframeRect.top);
 
   setStyles(iframe, {
     'position': 'fixed',
@@ -41,8 +42,7 @@ export function centerFrameUnderVsyncMutate(
     'bottom': px(viewportSize.height - (iframeRect.top + iframeRect.height)),
     'height': px(iframeRect.height),
     'width': px(iframeRect.width),
-    'transition':
-        `transform ${(transitionTimeMs / 1000)}s ease`,
+    'transition': `transform ${transitionTimeMs}ms ease`,
     'transform': translate(translateX, translateY),
   });
 }
