@@ -141,6 +141,12 @@ const Attributes = {
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
 };
 
+/** @enum {string} */
+const HistoryStates = {
+  PAGE_ID: 'ampStoryPageId',
+  BOOKEND_ACTIVE: 'ampStoryBookendActive',
+};
+
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
  * before the story becomes visible.
@@ -723,8 +729,9 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
+
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
-    const bookendActive = !!this.getHistoryBookendState_();
+    const bookendActive = !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
 
     this.initializeBookend_();
     this.initializeSidebar_();
@@ -1283,6 +1290,7 @@ export class AmpStory extends AMP.BaseElement {
   getHistoryStatePageId_() {
     const state = getState(this.win.history);
     return state ? state.ampStoryPageId : null;
+    this.updateHistoryState_(HistoryStates.PAGE_ID, pageId);
   }
 
   /**
@@ -1597,27 +1605,35 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   setHistoryBookendState_(isActive) {
-    // debugger;
-    const {history} = this.win;
-    if (history.replaceState && history.state &&
-        this.getHistoryBookendState_() !== isActive) {
-      history.state.ampStoryBookendActive = isActive;
-      history.replaceState(history.state, '');
-    } else if (!history.state) {
-
-      history.replaceState({ampStoryBookendActive: isActive}, '');
-    }
+    this.updateHistoryState_(HistoryStates.BOOKEND_ACTIVE, isActive);
   }
 
 
   /**
-   * @private
-   * @return {?string}
+   * Updates the value for a given state in the window history.
+   * @param {string} stateName
+   * @param {string|boolean} newValue
    */
-  getHistoryBookendState_() {
+  updateHistoryState_(stateName, newValue) {
+    const {history} = this.win;
+    if (history.replaceState && history.state &&
+        this.getHistoryState_(stateName) !== newValue) {
+      history.state[stateName] = newValue;
+      history.replaceState(history.state, '');
+    } else if (!history.state) {
+      // First time writing to history state. Nothing to overwrite.
+      history.replaceState({[stateName]: newValue}, '');
+    }
+  }
+
+  /**
+   * Returns the value of a given state of the window history.
+   * @param {string} stateName
+   */
+  getHistoryState_(stateName) {
     const {history} = this.win;
     if (history && history.state) {
-      return history.state.ampStoryBookendActive;
+      return history.state[stateName];
     }
     return null;
   }
