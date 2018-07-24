@@ -31,7 +31,6 @@ tags: {  # amp-image-slider
     name: "custom-element"
     mandatory: true
     value: "amp-image-slider"
-    dispatch_key: true
   }
   attrs: { name: "nonce" }
   attrs: {
