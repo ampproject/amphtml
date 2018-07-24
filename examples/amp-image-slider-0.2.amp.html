@@ -83,6 +83,7 @@
     }
   </style>
   <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.2.js"></script>
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -158,6 +159,21 @@
     </amp-image-slider>
 
     <h1><code>seekTo</code> action</h1>
+
+    <p>Position Observer with Seeking</p>
+    <div>
+      <amp-position-observer
+        intersection-ratios="1"
+        on="scroll:observed.seekTo(value=event.percent)"
+        layout="nodisplay">
+      </amp-position-observer>
+      <amp-image-slider id="observed" tabindex="9" layout="responsive" width="1024" height="600">
+        <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+        <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+        <div before class="label">BEFORE</div>
+        <div after class="label">AFTER</div>
+      </amp-image-slider>
+    </div>
 
     <p>Example of seeking</p>
     <amp-image-slider id="seekable" tabindex="9" layout="responsive" width="1024" height="600">

@@ -17,13 +17,13 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-slider-0.2.css';
-import {dev, user} from '../../../src/log';
 import {getStyle, setStyles} from '../../../src/style';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
+import {user} from '../../../src/log';
 
 export class AmpImageSlider extends AMP.BaseElement {
 
@@ -586,10 +586,12 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
+    this.unregisterEvents();
   }
 
   /** @override */
   resumeCallback() {
+    this.unregisterEvents();
   }
 }
 
