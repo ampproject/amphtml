@@ -163,7 +163,7 @@ describe('amp-analytics.VariableService', function() {
     it('default works without first arg', () => check('$DEFAULT(,two)', 'two'));
 
     it('default works without first arg length',
-        () => check('$DEFAULT(TRIM(), two)', 'two'));
+        () => check('$DEFAULT($TRIM(), two)', 'two'));
 
     it('hash works', () => check('$HASH(test)',
         'doQSMg97CqWBL85CjcRwazyuUOAqZMqhangiSb_o78S37xzLEmJV0ZYEff7fF6Cp'));
@@ -194,7 +194,7 @@ describe('amp-analytics.VariableService', function() {
 
     it('chaining works', () => {
       return check('$SUBSTR(Hello world!, 6)', 'world!').then(() =>
-        check('$TOUPPERCASE(SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
+        check('$TOUPPERCASE($SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
         check('$BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6)))', 'V09STEQh'))
           .then(() =>
             check('$HASH($BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6))))',
