@@ -375,9 +375,6 @@
       "name": "amp-ima-video - Amp By Example"
     },
     {
-      "flaky": true,
-      // srcset image sometimes loads the width-dependent image, sometimes doesn't.
-      // e.g., https://percy.io/ampproject/danielrozenberg/builds/844644/view/48563377/411?mode=diff&browser=firefox&snapshot=48563377
       "url": "examples/visual-tests/amp-by-example/components/amp-img/index.html",
       "name": "amp-img - Amp By Example"
     },
