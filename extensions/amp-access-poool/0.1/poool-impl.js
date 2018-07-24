@@ -116,6 +116,66 @@ export class PooolVendor {
     user().assert(this.itemID_, 'ItemID is not provided.');
   }
   /**
+   * @private
+   */
+  renderPoool_() {
+    this.getPooolSDK_(global, _poool => {
+
+      // Init poool
+      _poool('init', this.bundleID_);
+
+      // Set poool amp basic config
+      _poool(
+          'config',
+          {
+            mode: 'custom',
+            'amp_reader_id': this.readerID_,
+            'amp_item_id': this.itemID_,
+          },
+          true
+      );
+
+      // Set config
+      Object.entries(CONFIG).forEach(configEntry => {
+
+        const configKey = configEntry[0],
+            configDefaultValue = configEntry[1];
+
+        let configValue = this.pooolConfig_[configKey] || configDefaultValue;
+
+        if (configValue) {
+          if (typeof configDefaultValue === 'boolean') {
+            configValue = `${configValue}` === 'true';
+          }
+
+          _poool('config', dashToUnderline(camelCaseToDash(configKey)),
+              configValue);
+        }
+      });
+
+      // Set event handlers
+      EVENTS.forEach(eventName => {
+        _poool(
+            'event',
+            `on${eventName[0].toUpperCase()}${eventName.slice(1)}`,
+            function(eventData) {
+              const message = JSON.stringify(dict({
+                'action': eventName,
+                'data': eventData,
+              }));
+
+              global.parent.postMessage(message, '*');
+            }
+        );
+      });
+
+
+      // Create hit
+      _poool('send', 'page-view', this.pageType_);
+
+    });
+  }
+  /**
    * Produces the Poool SDK object for the passed in callback.
    *
    * @param {!Window} global
