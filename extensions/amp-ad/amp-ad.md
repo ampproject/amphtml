@@ -284,6 +284,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Medyanet](../../ads/medyanet.md)
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
+- [MixiMedia](../../ads/miximedia.md)
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
 - [myTarget](../../ads/mytarget.md)
@@ -353,6 +354,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 ## Supported embed types
 
 - [24smi](../../ads/24smi.md)
+- [AJA](../../ads/aja.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)

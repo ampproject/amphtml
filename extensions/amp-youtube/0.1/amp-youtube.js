@@ -157,7 +157,6 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /**
@@ -235,6 +234,10 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
+    // Listening for VideoEvents.LOAD in AutoFullscreenManager.register may
+    // introduce race conditions which may break elements e.g. amp-ima-video
+    Services.videoManagerForDoc(this.element).register(this);
+
     this.unlistenMessage_ = listen(
         this.win,
         'message',
@@ -309,6 +312,9 @@ class AmpYoutube extends AMP.BaseElement {
     return this.element.getAttribute('credentials') || 'include';
   }
 
+  /**
+   * @private
+   */
   assertDatasourceExists_() {
     const datasourceExists = !(this.videoid_ && this.liveChannelid_)
       && (this.videoid_ || this.liveChannelid_);

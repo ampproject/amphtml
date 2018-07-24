@@ -235,7 +235,7 @@ export class RealTimeConfigManager {
     }
 
     const isGloballyValid = this.isValidCalloutForConsentState(this.rtcConfig_);
-    this.rtcConfig_.urls = this.rtcConfig_.urls.filter(
+    this.rtcConfig_.urls = (this.rtcConfig_.urls || []).filter(
         url => this.isValidCalloutForConsentState(url, isGloballyValid));
 
     Object.keys(this.rtcConfig_.vendors || {}).forEach(vendor => {
@@ -291,7 +291,7 @@ export class RealTimeConfigManager {
     Object.keys(this.rtcConfig_.vendors || []).forEach(vendor => {
       const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
       const url = vendorObject ? vendorObject.url : '';
-      const errorReportingUrl = vendorObject ?
+      const errorReportingUrl = vendorObject && vendorObject.errorReportingUrl ?
         vendorObject.errorReportingUrl : '';
       if (!url) {
         return this.promiseArray_.push(

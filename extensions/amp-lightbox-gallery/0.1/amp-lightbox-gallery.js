@@ -52,6 +52,7 @@ import {layoutRectFromDomRect} from '../../../src/layout-rect';
 import {px, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -463,6 +464,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   toggleDescriptionOverflow_() {
+    triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled', {});
     let isInStandardMode, isInOverflowMode, descriptionOverflows;
     const measureOverflowState = () => {
       isInStandardMode = this.descriptionBox_.classList
@@ -632,6 +634,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.hideControls_();
       }
     }
+    triggerAnalyticsEvent(this.element, 'controlsToggled', {});
   }
 
   /**
@@ -694,6 +697,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Pauses lightbox childred.
+   */
   pauseLightboxChildren_() {
     const lbgId = this.currentLightboxGroupId_;
     const slides = this.elementsMetadata_[lbgId]
@@ -791,7 +797,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
       return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
     }).then(() => this.openLightboxForElement_(element))
-        .then(() => this.showControls_());
+        .then(() => {
+          this.showControls_();
+          triggerAnalyticsEvent(this.element, 'lightboxOpened', {});
+        });
   }
 
   /**
@@ -1017,8 +1026,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  // TODO (cathyxz): make this generalizable to more than just images
-  enter_() {
+  enter_() { // TODO (cathyxz): make this generalizable to more than just images
     const {sourceElement} = this.getCurrentElement_();
     if (!this.elementTypeCanBeAnimated_(sourceElement)) {
       return this.fade_(0, 1);
@@ -1306,6 +1314,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       toggle(dev().assertElement(this.carousel_), false);
       toggle(dev().assertElement(this.descriptionBox_), false);
     });
+    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', {});
   }
 
   /**

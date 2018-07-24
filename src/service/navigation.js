@@ -58,6 +58,11 @@ export function installGlobalNavigationHandlerForDoc(ampdoc) {
       /* opt_instantiate */ true);
 }
 
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Event} e
+ * @visibleForTesting
+ */
 export function maybeExpandUrlParamsForTesting(ampdoc, e) {
   maybeExpandUrlParams(ampdoc, e);
 }
@@ -346,6 +351,8 @@ export class Navigation {
    * @private
    */
   handleNavClick_(e, target, tgtLoc) {
+    // In test mode, we're not able to properly fix the anchor tag's base URL.
+    // So, we have to use the (mocked) window's location instead.
     const baseHref = getMode().test && !this.isEmbed_
       ? this.ampdoc.win.location.href
       : '';
@@ -434,6 +441,7 @@ export class Navigation {
    * @private
    */
   parseUrl_(url) {
+    // Must use URL parsing scoped to this.rootNode_ for correct FIE behavior.
     return Services.urlForDoc(this.rootNode_).parse(url);
   }
 }

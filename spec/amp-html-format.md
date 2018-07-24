@@ -218,8 +218,6 @@ Conditional HTML comments are not allowed.
 
 Attribute names starting with `on` (such as `onclick` or `onmouseover`) are disallowed in AMP HTML. The attribute with the literal name `on` (no suffix) is allowed.
 
-The `style` attribute must not be used.
-
 XML-related attributes, such as xmlns, xml:lang, xml:base, and xml:space are disallowed in AMP HTML.
 
 Internal AMP attributes prefixed with `i-amp-` are disallowed in AMP HTML.
@@ -285,7 +283,7 @@ In the following examples `<property>` needs to be in the whitelist above.
 `overflow` (and `overflow-y`, `overflow-x`) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
 
 #### Maximum size
-It is a validation error if the author stylesheet is larger than 50,000 bytes.
+It is a validation error if the author stylesheet or inline styles together are larger than 50,000 bytes.
 
 ### Keyframes stylesheet
 

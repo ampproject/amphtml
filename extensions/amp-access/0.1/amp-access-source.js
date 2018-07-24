@@ -22,7 +22,6 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {SignInProtocol} from './signin';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -118,10 +117,6 @@ export class AccessSource {
 
     /** @private {?JsonObject} */
     this.authResponse_ = null;
-
-    /** @const @private {!SignInProtocol} */
-    this.signIn_ = new SignInProtocol(ampdoc, this.viewer_, this.pubOrigin_,
-        configJson);
 
     const deferred = new Deferred();
 
@@ -299,9 +294,6 @@ export class AccessSource {
 
     // Calculate login URLs right away.
     this.buildLoginUrls_();
-
-    // Start sign-in.
-    this.signIn_.start();
   }
 
   /**
@@ -336,7 +328,6 @@ export class AccessSource {
       const vars = {
         'READER_ID': readerId,
         'ACCESS_READER_ID': readerId, // A synonym.
-        'ACCESS_TOKEN': () => this.signIn_.getAccessTokenPassive(),
       };
       if (useAuthData) {
         vars['AUTHDATA'] = field => {
@@ -475,8 +466,7 @@ export class AccessSource {
     dev().fine(TAG, 'Start login: ', loginUrl, eventLabel);
 
     this.loginAnalyticsEvent_(eventLabel, 'started');
-    const dialogPromise = this.signIn_.requestSignIn(loginUrl) ||
-        this.openLoginDialog_(loginUrl);
+    const dialogPromise = this.openLoginDialog_(loginUrl);
     const loginPromise = dialogPromise.then(result => {
       dev().fine(TAG, 'Login dialog completed: ', eventLabel, result);
       this.loginPromise_ = null;
@@ -488,21 +478,17 @@ export class AccessSource {
       } else {
         this.loginAnalyticsEvent_(eventLabel, 'rejected');
       }
-      const exchangePromise = this.signIn_.postLoginResult(query) ||
-          Promise.resolve();
       if (success || !s) {
         // In case of a success, repeat the authorization and pingback flows.
         // Also do this for an empty response to avoid false negatives.
         // Pingback is repeated in this case since this could now be a new
         // "view" with a different access profile.
         this.adapter_.postAction();
-        return exchangePromise.then(() => {
-          const authorizationPromise = this.runAuthorization(
-              /* disableFallback */ true);
-          this.onReauthorize_(authorizationPromise);
-          return authorizationPromise.then(() => {
-            this.scheduleView_(/* timeToView */ 0);
-          });
+        const authorizationPromise = this.runAuthorization(
+            /* disableFallback */ true);
+        this.onReauthorize_(authorizationPromise);
+        return authorizationPromise.then(() => {
+          this.scheduleView_(/* timeToView */ 0);
         });
       }
     }).catch(reason => {

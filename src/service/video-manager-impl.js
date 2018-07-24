@@ -23,6 +23,7 @@ import {
   setMediaSession,
 } from '../mediasession-helper';
 import {
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   PlayingStates,
   VideoAnalyticsEvents,
   VideoAttributes,
@@ -34,7 +35,10 @@ import {
   VideoServiceInterface,
   VideoServiceSignals,
 } from './video-service-interface';
-import {VideoServiceSync} from './video-service-sync-impl';
+import {
+  VideoServiceSync,
+  setVideoComponentClassname,
+} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {
@@ -44,10 +48,10 @@ import {
   listenOncePromise,
 } from '../event-helper';
 import {dev, user} from '../log';
+import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
-import {map} from '../utils/object';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
@@ -59,12 +63,6 @@ import {startsWith} from '../string';
 /** @private @const {string} */
 const TAG = 'video-manager';
 
-
-/**
- * @const {number} Percentage of the video that should be in viewport before it
- * is considered visible.
- */
-const VISIBILITY_RATIO = 0.5;
 
 /**
  * @private {number} The minimum number of milliseconds to wait between each
@@ -168,7 +166,7 @@ export class VideoManager {
         duration > 0) {
       const perc = currentTime / duration;
       const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
-          {time: currentTime, percent: perc});
+          dict({'time': currentTime, 'percent': perc}));
       this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
     }
   }
@@ -190,6 +188,8 @@ export class VideoManager {
 
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
+
+    setVideoComponentClassname(element);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
@@ -239,7 +239,7 @@ export class VideoManager {
    * in the viewport.
    *
    * Visibility of a video is defined by being in the viewport AND having
-   * {@link VISIBILITY_RATIO} of the video element visible.
+   * {@link MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} of the video element visible.
    *
    * @param {VideoEntry} entry
    * @private
@@ -455,7 +455,7 @@ class VideoEntry {
       const firstPlay = 'firstPlay';
       const trust = ActionTrust.LOW;
       const event = createCustomEvent(this.ampdoc_.win, firstPlay,
-          /* detail */ {});
+          /* detail */ dict({}));
       const actions = Services.actionServiceForDoc(this.ampdoc_);
       actions.trigger(this.video.element, firstPlay, event, trust);
     });
@@ -515,7 +515,7 @@ class VideoEntry {
       return false;
     }
     return user().assert(this.video.isInteractive(),
-        'Only interactive videos are allowed to enter fullscreen on rotate.',
+        'Only interactive videos are allowed to enter fullscreen on rotate. ' +
         'Set the `controls` attribute on %s to enable.',
         element);
   }
@@ -731,12 +731,14 @@ class VideoEntry {
       const {video} = this;
       const {element} = video;
       this.firstPlayEventOrNoop_();
-      video.showControls();
+      if (video.isInteractive()) {
+        video.showControls();
+      }
       video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
       });
-      const animation = element.querySelector('i-amphtml-video-eq');
+      const animation = element.querySelector('.amp-video-eq');
       const mask = element.querySelector('i-amphtml-video-mask');
       if (animation) {
         removeElement(animation);
@@ -820,7 +822,8 @@ class VideoEntry {
       const {element} = this.video;
       const ratio = element.getIntersectionChangeEntry().intersectionRatio;
       this.isVisible_ =
-          (!isFiniteNumber(ratio) ? 0 : ratio) >= VISIBILITY_RATIO;
+          (!isFiniteNumber(ratio) ? 0 : ratio) >=
+            MIN_VISIBILITY_RATIO_FOR_AUTOPLAY;
     }
 
     if (this.isVisible_ != wasVisible) {
@@ -1126,7 +1129,7 @@ export class AutoFullscreenManager {
 
     if (selected) {
       const {intersectionRatio} = selected.element.getIntersectionChangeEntry();
-      if (intersectionRatio >= VISIBILITY_RATIO) {
+      if (intersectionRatio >= MIN_VISIBILITY_RATIO_FOR_AUTOPLAY) {
         this.currentlyCentered_ = selected;
       }
     }

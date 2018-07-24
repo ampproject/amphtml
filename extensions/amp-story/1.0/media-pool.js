@@ -499,7 +499,11 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then(impl => impl.resetOnDomChange());
+    componentEl.getImpl().then(impl => {
+      if (impl.resetOnDomChange) {
+        impl.resetOnDomChange();
+      }
+    });
   }
 
 

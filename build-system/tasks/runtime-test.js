@@ -26,12 +26,13 @@ const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
+const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {app} = require('../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {exec} = require('../exec');
+const {exec, getStdout} = require('../exec');
 const {gitDiffNameOnlyMaster} = require('../git');
 
 const {green, yellow, cyan, red, bold} = colors;
@@ -40,6 +41,7 @@ const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 const tooManyTestsToFix = 15;
+const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
  * Read in and process the configuration settings for karma
@@ -73,21 +75,21 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Android_latest',
-        'SL_Chrome_45',
-        'SL_Chrome_android',
-        'SL_Chrome_latest',
-        'SL_Firefox_latest',
-        'SL_Safari_latest',
-        // TODO(rsimha, #15510): Enable these.
-        // 'SL_iOS_latest',
-        // 'SL_Edge_latest',
+        'SL_Chrome_67',
+        'SL_Firefox_61',
+        'SL_Safari_11',
+        // TODO(rsimha, #16687): Enable after Sauce disconnects are resolved.
+        // 'SL_Chrome_Android_7',
+        // 'SL_Chrome_45',
+        // 'SL_Android_6',
+        // 'SL_iOS_11',
+        // 'SL_Edge_17',
         // 'SL_IE_11',
       ] : [
         // With --saucelabs_lite, a subset of the unit tests are run.
         // Only browsers that support chai-as-promised may be included below.
         // TODO(rsimha-amp): Add more browsers to this list. #6039.
-        'SL_Safari_latest',
+        'SL_Safari_11',
       ],
     });
   }
@@ -164,8 +166,8 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
-    'local-changes': 'Running unit tests affected by the files changed in the' +
-        ' local branch.',
+    'local-changes': 'Running unit tests directly affected by the files' +
+        ' changed in the local branch.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
@@ -248,13 +250,13 @@ function isUnitTest(file) {
 }
 
 /**
- * Returns the list of files imported by testFile
+ * Returns the list of files imported by a JS file
  *
- * @param {string} testFile
+ * @param {string} jsFile
  * @return {!Array<string>}
  */
-function getImports(testFile) {
-  const imports = findImports([testFile], {
+function getImports(jsFile) {
+  const imports = findImports([jsFile], {
     flatten: true,
     packageImports: false,
     absoluteImports: true,
@@ -262,9 +264,9 @@ function getImports(testFile) {
   });
   const files = [];
   const rootDir = path.dirname(path.dirname(__dirname));
-  const testFileDir = path.dirname(testFile);
+  const jsFileDir = path.dirname(jsFile);
   imports.forEach(function(file) {
-    const fullPath = path.resolve(testFileDir, file) + '.js';
+    const fullPath = path.resolve(jsFileDir, file) + '.js';
     if (fs.existsSync(fullPath)) {
       const relativePath = path.relative(rootDir, fullPath);
       files.push(relativePath);
@@ -302,22 +304,94 @@ function getTestsFor(srcFiles) {
 }
 
 /**
+ * Adds an entry that maps a CSS file to a JS file
+ *
+ * @param {!Object} cssData
+ * @param {string} cssBinaryName
+ * @param {!Object<string, string>} cssJsFileMap
+ */
+function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
+  const cssFilePath = 'extensions/' + cssData['name'] + '/' +
+      cssData['version'] + '/' + cssBinaryName + '.css';
+  const jsFilePath = 'build/' + cssBinaryName + '-' +
+      cssData['version'] + '.css.js';
+  cssJsFileMap[cssFilePath] = jsFilePath;
+}
+
+/**
+ * Extracts a mapping from CSS files to JS files from a well known file
+ * generated during `gulp css`.
+ *
+ * @return {!Object<string, string>}
+ */
+function extractCssJsFileMap() {
+  if (!fs.existsSync(extensionsCssMapPath)) {
+    log(red('ERROR:'), 'Could not find the file',
+        cyan(extensionsCssMapPath) + '.');
+    log('Make sure', cyan('gulp css'), 'was run prior to this.');
+    process.exit();
+  }
+  const extensionsCssMap = fs.readFileSync(extensionsCssMapPath, 'utf8');
+  const extensionsCssMapJson = JSON.parse(extensionsCssMap);
+  const extensions = Object.keys(extensionsCssMapJson);
+  const cssJsFileMap = {};
+  extensions.forEach(extension => {
+    const cssData = extensionsCssMapJson[extension];
+    if (cssData['hasCss']) {
+      addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
+      if (cssData.hasOwnProperty('cssBinaries')) {
+        const cssBinaries = cssData['cssBinaries'];
+        cssBinaries.forEach(cssBinary => {
+          addCssJsEntry(cssData, cssBinary, cssJsFileMap);
+        });
+      }
+    }
+  });
+  return cssJsFileMap;
+}
+
+/**
+ * Retrieves the set of JS source files that import the given CSS file.
+ *
+ * @param {string} cssFile
+ * @param {!Object<string, string>} cssJsFileMap
+ * @return {!Array<string>}
+ */
+function getJsFilesFor(cssFile, cssJsFileMap) {
+  const jsFiles = [];
+  if (cssJsFileMap.hasOwnProperty(cssFile)) {
+    const cssFileDir = path.dirname(cssFile);
+    const jsFilesInDir = fs.readdirSync(cssFileDir).filter(file => {
+      return path.extname(file) == '.js';
+    });
+    jsFilesInDir.forEach(jsFile => {
+      const jsFilePath = cssFileDir + '/' + jsFile;
+      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
+        jsFiles.push(jsFilePath);
+      }
+    });
+  }
+  return jsFiles;
+}
+
+/**
  * Extracts the list of unit tests to run based on the changes in the local
  * branch.
  *
  * @return {!Array<string>}
  */
 function unitTestsToRun() {
+  const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMaster();
-  // Adds a dummy always-passing test for avoiding spurious failure
-  // See comment in test/simple-test.js or #15935.
-  const testsToRun = ['test/simple-test.js'];
-  const srcFiles = [];
+  const testsToRun = [];
+  let srcFiles = [];
   filesChanged.forEach(file => {
     if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {
-      srcFiles.push(file);
+      srcFiles = srcFiles.concat([file]);
+    } else if (path.extname(file) == '.css') {
+      srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
     }
   });
   if (srcFiles.length > 0) {
@@ -374,7 +448,8 @@ function runTests() {
   } else if (argv['local-changes']) {
     const testsToRun = unitTestsToRun();
     if (testsToRun.length == 0) {
-      log(green('INFO: ') + 'No unit tests affected by local changes.');
+      log(green('INFO: ') +
+          'No unit tests were directly affected by local changes.');
       return Promise.resolve();
     } else {
       log(green('INFO: ') + 'Running the following unit tests:');
@@ -403,10 +478,8 @@ function runTests() {
     c.files = c.files.concat(config.testPaths);
   }
 
-  // Include a simple passing test for sauce labs runs. This is done because
-  // running zero tests on a sauce labs browser throws an error. See #11494.
-  if (argv.saucelabs || argv.saucelabs_lite) {
-    c.files = c.files.concat(config.simpleTestPath);
+  if (argv.travis_like) {
+    c.client.failOnConsoleError = false;
   }
 
   // c.client is available in test browser via window.parent.karma.config
@@ -415,6 +488,7 @@ function runTests() {
     saucelabs: (!!argv.saucelabs) || (!!argv.saucelabs_lite),
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
+    propertiesObfuscated: !!argv.single_pass,
   };
 
   if (argv.compiled) {
@@ -430,33 +504,29 @@ function runTests() {
   }
 
   if (argv.coverage) {
-    c.files = c.files.concat(config.coveragePaths);
-    c.browserify.transform.push(
-        ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
-    c.plugins.push('karma-coverage');
-    c.reporters = c.reporters.concat(['coverage']);
-    if (c.preprocessors['src/**/*.js']) {
-      c.preprocessors['src/**/*.js'].push('coverage');
-    }
-    c.preprocessors['extensions/**/*.js'] &&
-        c.preprocessors['extensions/**/*.js'].push('coverage');
-    c.coverageReporter = {
+    c.client.captureConsole = false;
+    c.browserify.transform = [
+      ['babelify', {
+        compact: false,
+        plugins: [
+          ['babel-plugin-istanbul', {
+            exclude: [
+              './ads/**/*.js',
+              './third_party/**/*.js',
+              './test/**/*.js',
+              './extensions/**/test/**/*.js',
+              './testing/**/*.js',
+            ],
+          }],
+        ],
+      }],
+    ];
+    c.plugins.push('karma-coverage-istanbul-reporter');
+    c.reporters = c.reporters.concat(['coverage-istanbul']);
+    c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reporters: [
-        {type: 'html', subdir: 'report-html'},
-        {type: 'lcov', subdir: 'report-lcov'},
-        {type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt'},
-        {type: 'text', subdir: '.', file: 'text.txt'},
-        {type: 'text-summary', subdir: '.', file: 'text-summary.txt'},
-      ],
-      instrumenterOptions: {
-        istanbul: {
-          noCompact: true,
-        },
-      },
+      reports: process.env.TRAVIS ? ['lcov'] : ['html', 'text', 'text-summary'],
     };
-    // TODO(jonkeller): Add c.coverageReporter.check as shown in
-    // https://github.com/karma-runner/karma-coverage/blob/master/docs/configuration.md
   }
 
   // Run fake-server to test XHR responses.
@@ -480,7 +550,7 @@ function runTests() {
   // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
   // reporter for full unit test runs, since it likely contains copious amounts
   // of logs.
-  const shouldCollapseSummary = process.env.TRAVIS &&
+  const shouldCollapseSummary = process.env.TRAVIS && c.client.captureConsole &&
       c.reporters.includes('karmaSimpleReporter') && !argv['local-changes'];
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
@@ -497,6 +567,37 @@ function runTests() {
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
     }
+    if (argv.coverage) {
+      if (process.env.TRAVIS) {
+        log(green('INFO: ') + 'Uploading code coverage report to ' +
+            cyan('https://codecov.io/gh/ampproject/amphtml') + '...');
+        const codecovCmd =
+            './node_modules/.bin/codecov --file=test/coverage/lcov.info';
+        let flags = '';
+        if (argv.unit) {
+          flags = ' --flags=unit_tests';
+        } else if (argv.integration) {
+          flags = ' --flags=integration_tests';
+        }
+        const output = getStdout(codecovCmd + flags);
+        const viewReportPrefix = 'View report at: ';
+        const viewReport = output.match(viewReportPrefix + '.*');
+        if (viewReport && viewReport.length > 0) {
+          log(green('INFO: ') + viewReportPrefix +
+              cyan(viewReport[0].replace(viewReportPrefix, '')));
+        } else {
+          log(yellow('WARNING: ') +
+              'Code coverage report upload may have failed:\n' +
+              yellow(output));
+        }
+      } else {
+        const coverageReportUrl =
+            'file://' + path.resolve('test/coverage/index.html');
+        log(green('INFO: ') + 'Generated code coverage report at ' +
+            cyan(coverageReportUrl));
+        opn(coverageReportUrl, {wait: false});
+      }
+    }
     // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
     if (process.env.TRAVIS) {
       setTimeout(() => {
@@ -508,8 +609,7 @@ function runTests() {
     resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
-      log(green(
-          'Running tests in parallel on ' + c.browsers.length +
+      log(green('Running tests on ' + c.browsers.length +
           ' Sauce Labs browser(s)...'));
     } else {
       log(green('Running tests locally...'));
@@ -521,8 +621,15 @@ function runTests() {
       console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
     }
   }).on('browser_complete', function(browser) {
+    const result = browser.lastResult;
+    // Prevent cases where Karma detects zero tests and still passes. #16851.
+    if (result.total == 0) {
+      log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
+      if (!argv.watch) {
+        process.exit(1);
+      }
+    }
     if (shouldCollapseSummary) {
-      const result = browser.lastResult;
       let message = browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +
           ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
@@ -573,7 +680,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
-    'local-changes': '  Run unit tests affected by the files changed in the ' +
-        'local branch',
+    'local-changes': '  Run unit tests directly affected by the files ' +
+        'changed in the local branch',
   },
 });

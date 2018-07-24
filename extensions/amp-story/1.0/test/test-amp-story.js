@@ -16,7 +16,7 @@
 
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
-import {Action} from '../amp-story-store-service';
+import {Action, StateProperty} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
@@ -28,7 +28,6 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
-const IDENTITY_FN = x => x;
 
 
 describes.realWin('amp-story', {
@@ -210,55 +209,44 @@ describes.realWin('amp-story', {
     expect(hideBookendStub).to.have.been.calledOnce;
   });
 
-  // TODO(#11639): Re-enable this test.
-  it.skip('should return a valid page index', () => {
-    const count = 5;
+  it('should return a valid page index', () => {
+    createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+    return story.layoutCallback()
+        .then(() => {
+        // Getting all the AmpStoryPage objets.
+          const pageElements =
+            story.element.getElementsByTagName('amp-story-page');
+          const pages = Array.from(pageElements).map(el => el.getImpl());
 
-    const pages = createPages(element, count);
-
-    pages.forEach((page, i) => {
-      expect(element.implementation_.getPageIndex(page)).to.equal(i);
-    });
+          return Promise.all(pages);
+        })
+        .then(pages => {
+        // Only the first page should be active.
+          for (let i = 0; i < pages.length; i++) {
+            expect(story.getPageIndex(pages[i])).to.equal(i);
+          }
+        });
   });
 
-  // TODO(#11639): Re-enable this test.
-  it.skip('should update progress bar when switching pages', () => {
-    const impl = element.implementation_;
-    const count = 10;
-    const index = 2;
 
-    const page = win.document.createElement('div');
-
-    const updateProgressBarStub =
-        sandbox.stub(impl.systemLayer_, 'updateProgressBar').callsFake(NOOP);
-
-    appendEmptyPage(element, /* opt_active */ true);
-
-    sandbox.stub(impl, 'getPageCount').returns(count);
-    sandbox.stub(impl, 'getPageIndex').withArgs(page).returns(index);
-
-    impl.switchTo_(page);
-
-    // first page is not counted as part of the progress
-    expect(updateProgressBarStub).to.have.been.calledWith(index, count - 1);
-  });
-
-  // TODO(#11639): Re-enable this test.
-  it.skip('should pause/resume pages when switching pages', () => {
-    const impl = element.implementation_;
-    const pages = createPages(element, 5);
-    impl.schedulePause = sandbox.spy();
-    impl.scheduleResume = sandbox.spy();
-
-    const oldPage = pages[0];
-    const newPage = pages[1];
-
-    element.build();
-
-    return impl.switchTo_(newPage).then(() => {
-      expect(impl.schedulePause).to.have.been.calledWith(oldPage);
-      expect(impl.scheduleResume).to.have.been.calledWith(newPage);
-    });
+  it('should pause/resume pages when switching pages', () => {
+    createPages(story.element, 2, ['cover', 'page-1']);
+    return story.layoutCallback()
+        .then(() => {
+        // Getting all the AmpStoryPage objects.
+          const pageElements =
+            story.element.getElementsByTagName('amp-story-page');
+          const pages = Array.from(pageElements).map(el => el.getImpl());
+          return Promise.all(pages);
+          const oldPage = pageElements[0].implementation_;
+          const newPage = pageElements[1].implementation_;
+          const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
+          const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+          story.switchTo_('page-1').then(() => {
+            expect(pauseOldPageStub).to.have.been.calledOnce;
+            expect(resumeNewPageStub).to.have.been.calledOnce;
+          });
+        });
   });
 
   // TODO(#11639): Re-enable this test.
@@ -517,6 +505,101 @@ describes.realWin('amp-story', {
     });
   });
 
+  describe('amp-story pause/resume callbacks', () => {
+    it('should pause the story when tab becomes inactive', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      sandbox.stub(story.documentState_, 'isHidden').returns(true);
+      const onVisibilityChangedStub =
+          sandbox.stub(story.documentState_, 'onVisibilityChanged');
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            // Execute the callback passed to onVisibilityChanged.
+            expect(onVisibilityChangedStub).to.have.been.calledOnce;
+            onVisibilityChangedStub.getCall(0).args[0]();
+
+            // Paused state has been changed to true.
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.true;
+          });
+    });
+
+    it('should play the story when tab becomes active', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      sandbox.stub(story.documentState_, 'isHidden').returns(false);
+      const onVisibilityChangedStub =
+          sandbox.stub(story.documentState_, 'onVisibilityChanged');
+
+      story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            // Execute the callback passed to onVisibilityChanged.
+            expect(onVisibilityChangedStub).to.have.been.calledOnce;
+            onVisibilityChangedStub.getCall(0).args[0]();
+
+            // Paused state has been changed to false.
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.false;
+          });
+    });
+
+    it('should pause the story when viewer becomes inactive', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.pauseCallback();
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.true;
+          });
+    });
+
+    it('should play the story when viewer becomes active', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.resumeCallback();
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.false;
+          });
+    });
+
+    it('should keep the story paused on resume when previously paused', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            story.pauseCallback();
+            story.resumeCallback();
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.true;
+          });
+    });
+  });
+
   describe('amp-story continue anyway', () => {
     it('should not display layout', () => {
       AmpStory.isBrowserSupported = () => false;
@@ -760,59 +843,43 @@ describes.realWin('amp-story', {
       expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
     });
   });
-});
 
+  // TODO(gmajoulet): WIP, unskip these tests once the paywall navigation code
+  // is checked in.
+  describe('amp-access navigation', () => {
+    it.skip('should set the access state to true if next page blocked', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
-describes.realWin('amp-story origin whitelist', {
-  amp: {
-    extensions: ['amp-story:1.0'],
-  },
-}, env => {
-  let win;
-  let element;
-  let story;
+      story.buildCallback();
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-story');
-    win.document.body.appendChild(element);
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access-hide', '');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(
+                story.storeService_.get(StateProperty.ACCESS_STATE)).to.be.true;
+          });
+    });
 
-    story = new AmpStory(element);
-    story.hashOrigin_ = IDENTITY_FN;
-  });
+    it.skip('should not navigate if next page is blocked by paywall', () => {
+      sandbox.stub(win.history, 'replaceState');
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
-  it('should allow exact whitelisted origin with https scheme', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('https://example.com')).to.be.true;
-  });
+      story.buildCallback();
 
-  it('should allow exact whitelisted origin with http scheme', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('http://example.com')).to.be.true;
-  });
-
-  it('should allow www subdomain of origin', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('https://www.example.com')).to.be.true;
-  });
-
-  it('should allow subdomain of origin', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('https://foobar.example.com')).to.be.true;
-  });
-
-  it('should not allow exact whitelisted domain under different tld', () => {
-    story.originWhitelist_ = ['example.com'];
-    expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
-  });
-
-  it('should not allow exact whitelisted domain infixed in another tld', () => {
-    story.originWhitelist_ = ['example.co.uk'];
-    expect(story.isOriginWhitelisted_('https://example.co')).to.be.false;
-  });
-
-  it('should not allow domain that contains whitelisted domain', () => {
-    story.originWhitelist_ = ['example.co'];
-    expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access-hide', '');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
   });
 });

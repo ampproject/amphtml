@@ -37,6 +37,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {hasOwn} from '../../../src/utils/object';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -253,7 +254,7 @@ export class InstrumentationService {
       // Goes through each of the boundaries and fires an event if it has not
       // been fired so far and it should be.
       for (const b in bounds) {
-        if (!bounds.hasOwnProperty(b)) {
+        if (!hasOwn(bounds, b)) {
           continue;
         }
         const bound = parseInt(b, 10);
@@ -408,20 +409,20 @@ export class AnalyticsGroup {
  * depends on it in multi-doc scope. Otherwise an element life-cycle could
  * resolve way before we have the service available.
  *
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Promise<InstrumentationService>}
  */
-export function instrumentationServicePromiseForDoc(nodeOrDoc) {
+export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
-    getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation'));
 }
 
-/*
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+/**
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!InstrumentationService}
  */
-export function instrumentationServiceForDocForTesting(nodeOrDoc) {
+export function instrumentationServiceForDocForTesting(elementOrAmpDoc) {
   registerServiceBuilderForDoc(
-      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
-  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
+      elementOrAmpDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation');
 }

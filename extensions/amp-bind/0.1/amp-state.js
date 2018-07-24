@@ -66,7 +66,7 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     const viewer = Services.viewerForDoc(this.getAmpDoc());
-    if (!viewer.isVisible()) {
+    if (!viewer.hasBeenVisible()) {
       const TAG = this.getName_();
       dev().error(TAG, 'Viewer must be visible before mutation.');
       return;
@@ -133,7 +133,6 @@ export class AmpState extends AMP.BaseElement {
    * @param {!Element} element
    * @param {boolean} isInit
    * @return {!Promise}
-   * @visibleForTesting
    */
   fetch_(ampdoc, element, isInit) {
     const src = element.getAttribute('src');
@@ -151,7 +150,7 @@ export class AmpState extends AMP.BaseElement {
 
   /**
    * @param {boolean} isInit
-   * @returm {!Promise}
+   * @return {!Promise}
    * @private
    */
   fetchAndUpdate_(isInit) {

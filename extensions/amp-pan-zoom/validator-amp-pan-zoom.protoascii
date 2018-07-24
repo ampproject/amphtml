@@ -18,8 +18,8 @@ tags: {  # amp-pan-zoom
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-pan-zoom"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -43,6 +43,10 @@ tags: {  # <amp-pan-zoom>
   attrs: {
     name: "max-scale"
     value_regex: "[0-9]+(\\.[0-9]+)?"
+  }
+  attrs: {
+    name: "reset-on-resize"
+    value: ""
   }
   attr_lists: "extended-amp-global"
    amp_layout: {

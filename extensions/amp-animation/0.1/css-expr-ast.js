@@ -31,7 +31,7 @@ const INFINITY_RE = /^(infinity|infinite)$/i;
  * @return {boolean}
  */
 export function isVarCss(css, normalize) {
-  return VAR_CSS_RE.test(css) || normalize && NORM_CSS_RE.test(css);
+  return VAR_CSS_RE.test(css) || (normalize && NORM_CSS_RE.test(css));
 }
 
 
@@ -118,6 +118,9 @@ export class CssContext {
  * @abstract
  */
 export class CssNode {
+  /**
+   * Creates an instance of CssNode.
+   */
   constructor() {}
 
   /**
@@ -817,6 +820,9 @@ export class CssRandNode extends CssNode {
  * target in a list of all selected targets.
  */
 export class CssIndexNode extends CssNode {
+  /**
+   * Creates an instance of CssIndexNode.
+   */
   constructor() {
     super();
   }

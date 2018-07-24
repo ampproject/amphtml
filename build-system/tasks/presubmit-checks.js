@@ -75,6 +75,10 @@ const forbiddenTerms = {
         'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
         'for a list of alternatives.',
   },
+  'document-register-element.node': {
+    message: 'Use `document-register-element.patched` instead',
+    whitelist: ['build-system/tasks/update-packages.js'],
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -141,6 +145,7 @@ const forbiddenTerms = {
         'temporary workarounds.',
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/config.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -286,6 +291,14 @@ const forbiddenTerms = {
       'src/service/video/autoplay.js',
     ],
   },
+  'getServiceForDocDeprecated': {
+    message: 'Use getServiceForDoc() instead.',
+    whitelist: [
+      'src/chunk.js',
+      'src/service.js',
+      'src/services.js',
+    ],
+  },
   'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
@@ -335,16 +348,17 @@ const forbiddenTerms = {
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
-      'src/service/xhr-impl.js',
-      'src/service/viewer-impl.js',
-      'src/service/viewer-cid-api.js',
-      'src/service/storage-impl.js',
-      'src/service/history-impl.js',
-      'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
+      'src/service/cid-impl.js',
+      'src/service/history-impl.js',
+      'src/service/storage-impl.js',
+      'src/ssr-template-helper.js',
+      'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
+      'src/service/xhr-impl.js',
     ],
   },
   // Privacy sensitive
@@ -360,6 +374,7 @@ const forbiddenTerms = {
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   'getBaseCid': {
@@ -574,6 +589,7 @@ const forbiddenTerms = {
     whitelist: [
       'ads/google/imaVideo.js',
       'dist.3p/current/integration.js',
+      'src/video-iframe-integration.js',
     ],
   },
   '\\.defer\\(\\)': {
@@ -860,6 +876,10 @@ function isInTestFolder(path) {
   return dirs.indexOf('test') >= 0;
 }
 
+/**
+ * Strip Comments
+ * @param {string} contents
+ */
 function stripComments(contents) {
   // Multi-line comments
   contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
@@ -896,8 +916,9 @@ function matchTerms(file, terms) {
     const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
-    if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
-        isInTestFolder(relative) && !checkInTestFolder)) {
+    if (Array.isArray(whitelist) &&
+      (whitelist.indexOf(relative) != -1 ||
+      (isInTestFolder(relative) && !checkInTestFolder))) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build

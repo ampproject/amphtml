@@ -26,6 +26,10 @@ import {tryParseJson} from '../../../src/json';
   */
 export function lineDelimitedStreamer(win, response, lineCallback) {
   let line = '';
+  /**
+   * @param {string} text
+   * @param {boolean} done
+   */
   function streamer(text, done) {
     const regex = /([^\n]*)(\n)?/g;
     let match;
@@ -73,7 +77,7 @@ export function metaJsonCreativeGrouper(callback) {
   return function(line, done) {
     if (first) {
       const metadata =
-          /** @type {!Object<string, *>} */(tryParseJson(first) || {});
+      /** @type {!Object<string, *>} */(tryParseJson(first) || {});
       const lowerCasedMetadata =
           Object.keys(metadata).reduce((newObj, key) => {
             newObj[key.toLowerCase()] = metadata[key];
