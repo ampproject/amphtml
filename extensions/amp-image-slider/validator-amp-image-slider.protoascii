@@ -22,7 +22,6 @@ tags: {  # amp-image-slider
   requires: "amp-image-slider"
   mandatory_parent: "HEAD"
   unique: true
-  extension_unused_unless_tag_present: "amp-image-slider"
   attrs: {
     name: "async"
     mandatory: true
