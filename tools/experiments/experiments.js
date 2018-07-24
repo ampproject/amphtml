@@ -230,6 +230,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
+    id: 'amp-story-navigation-performance',
+    name: 'amp-story page to page navigation performance improvements',
+    spec: 'https://github.com/ampproject/amphtml/issues/17017',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
+  },
+  {
     id: 'inline-styles',
     name: 'Enables the usage of inline styles for non fixed elements',
     spec: 'https://github.com/ampproject/amphtml/issues/11881',

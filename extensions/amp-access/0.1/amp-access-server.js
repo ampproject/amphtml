@@ -156,9 +156,9 @@ export class AccessServerAdapter {
           this.docFetcher_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-            headers: {
+            headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            }),
             requireAmpResponseSourceOrigin: false,
           }));
     }).then(responseDoc => {

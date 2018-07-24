@@ -154,7 +154,7 @@ feature_tests/mandatory_dimensions.html:110:4 The specified layout 'CONTAINER' i
 feature_tests/mandatory_dimensions.html:111:4 The specified layout 'CONTAINER' is not supported by tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |      <amp-img src="img">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:112:4 The implied layout 'CONTAINER' is not supported by tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:112:4 Incomplete layout attributes specified for tag 'amp-img'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |      <!-- Layout of responsive/fixed without width/height -->
 |      <amp-img src="img" layout="responsive">

@@ -34,7 +34,7 @@ import {
  * @typedef {{
  *   body: (!JsonObject|!FormData|undefined),
  *   credentials: (string|undefined),
- *   headers: (!Object|undefined),
+ *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
  *   ampCors: (boolean|undefined)
