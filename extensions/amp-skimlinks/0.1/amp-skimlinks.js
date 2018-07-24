@@ -8,7 +8,7 @@ import Tracking from './tracking';
 import AffiliateLinksManager, {events as linkManagerEvents} from './affiliate-links-manager';
 import DomainResolver from './affiliate-link-resolver';
 import {getAmpSkimlinksOptions} from './skim-options';
-
+import {getBoundFunction} from './utils';
 
 /*** TODO:
  * - Fix issue with analytics reporting links with macro variables.
@@ -17,12 +17,6 @@ import {getAmpSkimlinksOptions} from './skim-options';
  * - Check if win.location is correct in the context of amp served by google.co.uk
  * - Use no layout container
  */
-
-
-function getBoundFunction(context, functionName) {
-  // TODO: throw error if function doesn't exist?
-  return context[functionName].bind(context);
-}
 
 const startTime = new Date().getTime();
 
@@ -45,8 +39,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
 
   startSkimcore_() {
-    this.userSessionDataDeferred = new Deferred();
-    this.resolveSessionDataONCE_ = once(this.resolveSessionData_);
+    this.userSessionDataDeferred_ = new Deferred();
+    this.resolveSessionDataONCE_ = once(this.resolveSessionData_.bind(this));
     const trackingService = new Tracking(this.element, this.skimOptions_);
     const domainResolverService = this.setupDomainResolver_();
     const affiliateLinksManager = this.setupAffiliateLinkManager_(trackingService, domainResolverService);
@@ -58,7 +52,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
     // Fire impression tracking after we have received beaconRequest
     // TODO: Should this be fired onexit?
-    this.userSessionDataDeferred.promise.then(userSessionData => {
+    this.userSessionDataDeferred_.promise.then(userSessionData => {
       window.t3 = new Date().getTime();
       trackingService.sendImpressionTracking(
           userSessionData,
@@ -70,7 +64,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   resolveSessionData_(beaconData) {
     this.hasCalledBeacon = true;
-    this.userSessionDataDeferred.resolve({
+    this.userSessionDataDeferred_.resolve({
       guid: beaconData.guid,
     });
   }

@@ -5,7 +5,7 @@ import {user} from '../../../src/log';
 export const LINK_STATUS__AFFILIATE = 'affiliate';
 export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
 export const LINK_STATUS__IGNORE_LINK = 'ignore';
-export const LINK_STATUS__UNKNOWN = 'unkonwn';
+export const LINK_STATUS__UNKNOWN = 'unknown';
 
 export const events = {
   PAGE_ANALYSED: 'PAGE_ANALYSED',
