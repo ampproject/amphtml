@@ -1,14 +1,5 @@
 {
-  "allow-doc-opt-in": [
-    "amp-date-picker",
-    "amp-next-page",
-    "ampdoc-shell",
-    "disable-amp-story-desktop",
-    "disable-faster-amp-list",
-    "inabox-rov",
-    "inline-styles",
-    "url-replacement-v2"
-  ],
+  "allow-doc-opt-in": ["amp-animation", "ampdoc-shell", "amp-ima-video", "url-replacement-v2", "inabox-rov", "amp-date-picker"],
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 0,
@@ -19,7 +10,7 @@
   "dbclk_a4a_viz_change": 0.02,
   "a4aProfilingRate": 0.1,
   "ad-type-custom": 1,
-  "amp-access-iframe": 1,
+  "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
   "amp-ima-video": 1,
   "amp-playbuzz": 1,
