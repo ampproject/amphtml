@@ -233,9 +233,6 @@
       "name": "amp-analytics - Amp By Example"
     },
     {
-      "flaky": true,
-      // Loading indicator sometimes takes longer to disappear
-      // e.g., https://percy.io/ampproject/danielrozenberg/builds/801880/view/45150955/1400?mode=diff&browser=firefox&snapshot=45150955
       "url": "examples/visual-tests/amp-by-example/components/amp-anim/index.html",
       "name": "amp-anim - Amp By Example"
     },
