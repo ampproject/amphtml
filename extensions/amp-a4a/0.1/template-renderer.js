@@ -15,14 +15,30 @@
  */
 
 import {FriendlyFrameRenderer} from './friendly-frame-renderer';
+import {Renderer} from './amp-ad-type-defs';
 import {getAmpAdTemplateHelper} from './template-validator';
 
 /**
  * Render AMP creative into FriendlyFrame via templatization.
  */
-export class TemplateRenderer extends FriendlyFrameRenderer {
+export class TemplateRenderer extends Renderer {
+
+  /**
+   * Constructs a TemplateRenderer instance.
+   */
+  constructor() {
+    super();
+
+    /**
+     * @type {!FriendlyFrameRenderer}
+     * @protected
+     */
+    this.friendlyFrameRenderer_ = new FriendlyFrameRenderer();
+  }
+
   /** @override */
   render(context, element, creativeData) {
+<<<<<<< HEAD
     return super.render(context, element, creativeData).then(() => {
       const templateData =
           /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
@@ -46,5 +62,32 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
                 .replaceChild(renderedElement, templateElement);
           });
     });
+=======
+    return this.friendlyFrameRenderer_.render(context, element, creativeData)
+        .then(() => {
+          const templateData =
+          /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+              creativeData.templateData);
+          const {data} = templateData;
+          if (!data) {
+            return Promise.resolve();
+          }
+          const templateHelper = getAmpAdTemplateHelper(context.win);
+          const {iframe} = this.friendlyFrameRenderer_;
+          return templateHelper
+              .render(data, iframe.contentWindow.document.body)
+              .then(renderedElement => {
+                const {analytics} = templateData;
+                if (analytics) {
+                  templateHelper.insertAnalytics(renderedElement, analytics);
+                }
+                // This element must exist, or #render() would have thrown.
+                const templateElement = iframe.contentWindow.document
+                    .querySelector('template');
+                templateElement.parentNode
+                    .replaceChild(renderedElement, templateElement);
+              });
+        });
+>>>>>>> Added amp-ad-custom extension.
   }
 }

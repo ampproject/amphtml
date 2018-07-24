@@ -47,7 +47,7 @@ export class FriendlyFrameRenderer extends Renderer {
 
     /**
      * @type {?Element}
-     * @protected
+     * @public
      */
     this.iframe = null;
   }
