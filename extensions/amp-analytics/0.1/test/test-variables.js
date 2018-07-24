@@ -220,7 +220,8 @@ describe('amp-analytics.VariableService', function() {
     });
 
     it('replaces respecting space as arg', () => {
-      return check('$REPLACE(this-is-a-test, `-`, ` `)', 'this%20is%20a%20test');
+      return check('$REPLACE(this-is-a-test, `-`, ` `)',
+          'this%20is%20a%20test');
     });
 
     it('replaces respecting backticks', () => {
