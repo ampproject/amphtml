@@ -199,11 +199,13 @@
       "name": "Amp By Example"
     },
     {
-      "flaky": true,
-      // An <amp-access> block sometimes doesn't become visible on time
-      // e.g., https://percy.io/ampproject/amphtml/builds/797668/view/44814614/1400?mode=diff&browser=firefox&snapshot=44814614
       "url": "examples/visual-tests/amp-by-example/components/amp-access/index.html",
-      "name": "amp-access - Amp By Example"
+      "name": "amp-access - Amp By Example",
+      "loading_complete_css": [
+        "section[amp-access=\"NOT access\"]",
+        "section[amp-access=\"NOT subscriber\"]"
+      ],
+      "loading_incomplete_css": ["section[amp-access=\"subscriber\"]"]
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-access-laterpay/index.html",
