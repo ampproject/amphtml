@@ -717,7 +717,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (responseHeaders.get('amp-ff-pageview-tokens')) {
       this.removePageviewStateToken();
       this.setPageviewStateToken(
-          responseHeaders.get('amp-ff-pageview-tokens'));
+          /** @type {string} */ (dev().assert(
+              responseHeaders.get('amp-ff-pageview-tokens'),
+              'amp-ff-pageview-tokens header is null'
+          ))
+      );
     }
 
     return size;

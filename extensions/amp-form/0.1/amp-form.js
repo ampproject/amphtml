@@ -595,7 +595,7 @@ export class AmpForm {
    * @private visible for testing
    */
   handleXhrSubmitSuccess_(response) {
-    return this.handleSubmitSuccess_(/** @type {!JsonObject} */(response.json())).then(() => {
+    return this.handleSubmitSuccess_(/** @type {!Promise<!JsonObject>} */(response.json())).then(() => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.maybeHandleRedirect_(response);
     });
