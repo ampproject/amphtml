@@ -58,10 +58,10 @@ tags: {  # <amp-lightbox>
     supported_layouts: NODISPLAY
   }
 }
-tags: { # <amp-lightbox close-button> in AMP4ADS.
+tags: {   # <amp-lightbox close-button> in AMP4ADS.
   html_format: AMP4ADS
   tag_name: "AMP-LIGHTBOX"
-  spect_name: "amp-lightbox [AMP4ADS]"
+  spec_name: "amp-lightbox [AMP4ADS]"
   requires_extension: "amp-lightbox"
   attrs: {
     name: "animate-in"
