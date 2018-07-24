@@ -579,9 +579,9 @@ export class AmpForm {
       body,
       method,
       credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-      },
+      headers: dict({
+        'Accept': 'application/json',
+      }),
     });
   }
 

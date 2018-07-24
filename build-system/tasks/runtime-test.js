@@ -478,6 +478,10 @@ function runTests() {
     c.files = c.files.concat(config.testPaths);
   }
 
+  if (argv.travis_like) {
+    c.client.failOnConsoleError = false;
+  }
+
   // c.client is available in test browser via window.parent.karma.config
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
@@ -622,7 +626,9 @@ function runTests() {
     // Prevent cases where Karma detects zero tests and still passes. #16851.
     if (result.total == 0) {
       log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
-      process.exit(1);
+      if (!argv.watch) {
+        process.exit(1);
+      }
     }
     if (shouldCollapseSummary) {
       let message = browser.name + ': ';
