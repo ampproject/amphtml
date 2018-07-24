@@ -22,7 +22,7 @@ export default class Tracking {
     this.referer_ = '${documentReferrer}';
     this.externalReferer_ = '${externalReferrer}';
     this.timezone_ = '${timezone}';
-    this.pageImpressionId = generatePageImpressionId();
+    this.pageImpressionId_ = generatePageImpressionId();
     this.customTrackingId_ = skimOptions.customTrackingId;
   }
 

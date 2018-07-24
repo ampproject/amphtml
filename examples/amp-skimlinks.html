@@ -44,7 +44,13 @@
     </div>
     </amp-consent>
 
-    <amp-skimlinks width="auto" height="100" layout="fixed-height">
+    <amp-skimlinks
+        width="auto" height="100" layout="fixed-height"
+        publisher-code="68019X1559797"
+
+        tracking="true"
+    >
+    <!--  excluded-domains="test-merchant.skimlinks.com,google.co.uk,skimjs-e2e-resources.storage.googleapis.com" -->
     </amp-skimlinks>
     <h1> Simple affiliated link </h1>
     <a id="merchant-link" href="http://test-merchant.skimlinks.com/merchant_test.html?abc=QUERY_PARAM(bar)&bar=test1" data-amp-replace="QUERY_PARAM">
@@ -61,7 +67,7 @@
         <br />
     </div>
 
-    <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="//list.example.json" class="m1" reset-on-refresh>
+    <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
         <template type="amp-mustache" id="amp-template-id">
             <div>
                 <a href="{{url}}">{{title}}</a>
@@ -71,7 +77,7 @@
     <script>
         window.addEventListener("DOMContentLoaded", () => { console.log("DOMContentLoaded")})
         window.addEventListener("load", () => { console.log("load") })
-
+        window.t0 = new Date().getTime();
     </script>
 
 </body>

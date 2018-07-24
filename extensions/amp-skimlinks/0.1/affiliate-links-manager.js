@@ -7,6 +7,10 @@ export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
 export const LINK_STATUS__IGNORE_LINK = 'ignore';
 export const LINK_STATUS__UNKNOWN = 'unkonwn';
 
+export const events = {
+  PAGE_ANALYSED: 'PAGE_ANALYSED',
+};
+
 /**
  * Manage which links can be affiliated and which one can't based on
  * 'resolveUnknownAnchors' response and swap the link on user click.
@@ -15,7 +19,6 @@ export default class AffiliateLinksManager {
   constructor(ampDoc, resolveUnknownAnchors, options) {
     user().assert(typeof resolveUnknownAnchors === 'function', 'resolveUnknownLinks is required and should be a function.');
     options = options || {};
-    this.ampDoc_ = ampDoc;
     this.resolveUnknownAnchors_ = resolveUnknownAnchors;
     this.restoreDelay_ = 300; //ms
     this.affiliateUnkown_ = true;
@@ -25,18 +28,26 @@ export default class AffiliateLinksManager {
     this.anchorMap_ = new Map();
     this.nonAffiliateClickCallback_ = options.onNonAffiliate;
     this.linkSelector_ = options.linkSelector;
+    this.onResolveFinished_ = options.onResolveFinished;
 
     this.installGlobalEventListener_(ampDoc.getRootNode());
-    this.analyseLinksOnPage_();
+
+    this.listeners_ = {};
   }
 
   getAnchorAffiliateMap() {
     return this.anchorMap_;
   }
 
+  onDomChanged_() {
+    this.analyseLinksOnPage_().then(() => {
+      this.triggerEvent_(events.PAGE_ANALYSED);
+    });
+  }
+
   installGlobalEventListener_(rootNode) {
     rootNode.addEventListener(AmpEvents.DOM_UPDATE,
-        this.analyseLinksOnPage_.bind(this));
+        this.onDomChanged_.bind(this));
     rootNode.addEventListener(AmpEvents.ANCHOR_CLICK,
         this.clickHandler_.bind(this));
   }
@@ -65,10 +76,32 @@ export default class AffiliateLinksManager {
 
       // Anchors for which the status needs to be resolved asynchronously
       if (resolvedData.resolvedLinksPromise) {
-        resolvedData.resolvedLinksPromise.then(resolvedLinks => {
+        return resolvedData.resolvedLinksPromise.then(resolvedLinks => {
           this.updateAnchorMap_(resolvedLinks);
         });
       }
+    }
+
+    return Promise.resolve();
+
+  }
+
+  triggerEvent_(eventName, data) {
+    const handlers = this.listeners_[eventName]
+    if (!handlers) {
+      return;
+    }
+
+    handlers.forEach(handler => {
+      handler(data);
+    });
+  }
+
+  listen(eventName, callback) {
+    if (this.listeners_[eventName]) {
+      this.listeners_[eventName].push(callback);
+    } else {
+      this.listeners_[eventName] = [callback];
     }
   }
 

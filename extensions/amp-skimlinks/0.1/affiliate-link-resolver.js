@@ -94,7 +94,7 @@ export default class AffiliateLinkResolver {
   }
 
   resolvedUnkonwnAnchorsAsync_(anchorList, domainsToAsk) {
-    return this.fetchDomainResolverApi_(domainsToAsk).then(data => {
+    return this.fetchDomainResolverApi(domainsToAsk).then(data => {
       // DomainResolverApi (beaconApi) returns extra meta-data that we want to handle
       // oustide of the resolveUnknownDomains process.
       this.beaconApiCallback_(data);
@@ -105,7 +105,7 @@ export default class AffiliateLinkResolver {
     });
   }
 
-  fetchDomainResolverApi_(domains) {
+  fetchDomainResolverApi(domains) {
     const data = {
       pubcode: this.pubcode_,
       page: '',
@@ -125,11 +125,6 @@ export default class AffiliateLinkResolver {
     return this.xhr_.fetchJson(beaconUrl, postReq).then(res => {
       return res.json();
     });
-  }
-
-  updateBeaconData_(beaconData) {
-    // TODO: Only update missing fields
-    this.beaconData_ = beaconData;
   }
 
   updateDomainsStatusMapPostFetch_(allDomains, affiliateDomains) {
