@@ -9,6 +9,7 @@ export const LINK_STATUS__UNKNOWN = 'unknown';
 
 export const events = {
   PAGE_ANALYSED: 'PAGE_ANALYSED',
+  CLICK: 'CLICK',
 };
 
 /**
@@ -22,13 +23,10 @@ export default class AffiliateLinksManager {
     this.resolveUnknownAnchors_ = resolveUnknownAnchors;
     this.restoreDelay_ = 300; //ms
     this.affiliateUnkown_ = true;
-    this.onAffiliate_ = options.onAffiliatedClick;
 
     // Keep tracks of the affiliate status of each anchor link.
     this.anchorMap_ = new Map();
-    this.nonAffiliateClickCallback_ = options.onNonAffiliate;
     this.linkSelector_ = options.linkSelector;
-    this.onResolveFinished_ = options.onResolveFinished;
 
     this.installGlobalEventListener_(ampDoc.getRootNode());
 
@@ -140,14 +138,13 @@ export default class AffiliateLinksManager {
     }
 
     const linkState = this.anchorMap_.get(anchor);
-    if (linkState === LINK_STATUS__AFFILIATE) {
-      this.handleAffiliateClick_(anchor);
-    } else if (linkState === LINK_STATUS__NON_AFFILIATE && this.nonAffiliateClickCallback_) {
-      this.nonAffiliateClickCallback_(anchor);
-    } else if (linkState === LINK_STATUS__UNKNOWN && this.affiliateUnkown_) {
+    const isAffiliate = linkState === LINK_STATUS__AFFILIATE ||
+          (linkState === LINK_STATUS__UNKNOWN && this.affiliateUnkown_);
+    if (isAffiliate) {
       this.handleAffiliateClick_(anchor);
     }
 
+    this.triggerEvent_(events.CLICK, {anchor, linkStatus: linkState});
     clickEvent.preventDefault();
     console.log('Received click', anchor, linkState);
   }
@@ -159,7 +156,6 @@ export default class AffiliateLinksManager {
       anchor.href = initialHref;
     }, this.restoreDelay_);
   }
-
 
   getLinksInDOM_() {
     return [].slice.call(document.querySelectorAll(this.linkSelector_ || 'a'));

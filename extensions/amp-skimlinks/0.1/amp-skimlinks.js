@@ -5,7 +5,7 @@ import {whenDocumentReady} from '../../../src/document-ready';
 
 import Tracking from './tracking';
 
-import AffiliateLinksManager, {events as linkManagerEvents} from './affiliate-links-manager';
+import AffiliateLinksManager, {LINK_STATUS__NON_AFFILIATE, events as linkManagerEvents} from './affiliate-links-manager';
 import DomainResolver from './affiliate-link-resolver';
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
@@ -26,29 +26,33 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   buildCallback() {
     window.t1 = new Date().getTime();
-    this.hasCalledBeacon = false;
-    this.xhr_ = Services.xhrFor(this.win);
-    this.ampDoc_ = this.getAmpDoc();
-    this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
 
+    this.init_();
     whenDocumentReady(this.ampDoc_).then(() => {
       window.t2 = new Date().getTime();
       this.startSkimcore_();
     });
   }
 
+  init_() {
+    this.hasCalledBeacon = false;
+    this.xhr_ = Services.xhrFor(this.win);
+    this.ampDoc_ = this.getAmpDoc();
+    this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
+    this.resolveSessionDataONCE_ = once(this.resolveSessionData_.bind(this));
+    this.userSessionDataDeferred_ = new Deferred();
+  }
+
 
   startSkimcore_() {
-    this.userSessionDataDeferred_ = new Deferred();
-    this.resolveSessionDataONCE_ = once(this.resolveSessionData_.bind(this));
     const trackingService = new Tracking(this.element, this.skimOptions_);
-    const domainResolverService = this.setupDomainResolver_();
-    const affiliateLinksManager = this.setupAffiliateLinkManager_(trackingService, domainResolverService);
+    const domainResolverService = new DomainResolver(
+        this.xhr_,
+        this.skimOptions_,
+        this.resolveSessionDataONCE_,
+    );
 
-    // HACK TO MAKE SURE WE ALWAYS CALL WAYPOINT in case there are no links to resolve in the page.
-    affiliateLinksManager.listen(linkManagerEvents.PAGE_ANALYSED, () => {
-      this.callBeaconIfNotAlreadyDone_(domainResolverService);
-    });
+    const affiliateLinksManager = this.setupAffiliateLinkManager_(trackingService, domainResolverService);
 
     // Fire impression tracking after we have received beaconRequest
     // TODO: Should this be fired onexit?
@@ -76,27 +80,28 @@ export class AmpSkimlinks extends AMP.BaseElement {
     }
   }
 
-  setupDomainResolver_() {
-    // Only set it the first time, ignore other calls.
-    const domainResolverService = new DomainResolver(
-        this.xhr_,
-        this.skimOptions_,
-        this.resolveSessionDataONCE_,
-    );
-
-    return domainResolverService;
-  }
-
   setupAffiliateLinkManager_(trackingService, domainResolverService) {
-    const affiliateLinkManagerOptions = {
-      onNonAffiliate: getBoundFunction(trackingService, 'sendNaClickTracking'),
+    const resolveFunction = getBoundFunction(domainResolverService, 'resolveUnknownAnchors')
+    const options = {
+      linkSelector: this.skimOptions_.linkSelector,
     };
 
     const affiliateLinksManager = new AffiliateLinksManager(
         this.ampDoc_,
-        getBoundFunction(domainResolverService, 'resolveUnknownAnchors'),
-        affiliateLinkManagerOptions
+        resolveFunction,
+        options
     );
+
+    // HACK TO MAKE SURE WE ALWAYS CALL WAYPOINT in case there are no links to resolve in the page.
+    affiliateLinksManager.listen(linkManagerEvents.PAGE_SCANNED, () => {
+      this.callBeaconIfNotAlreadyDone_(domainResolverService);
+    });
+
+    affiliateLinksManager.listen(linkManagerEvents.CLICK, data => {
+      if (data.linkStatus === LINK_STATUS__NON_AFFILIATE) {
+        trackingService.sendNaClickTracking(data.anchor);
+      }
+    });
 
     return affiliateLinksManager;
   }
