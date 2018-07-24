@@ -110,6 +110,7 @@ let DockedDef;
  *   muteButton: !Element,
  *   unmuteButton: !Element,
  *   fullscreenButton: !Element,
+ *   dismissContainer: !Element,
  * }}
  */
 let ControlsDef;
@@ -335,25 +336,28 @@ export class VideoDocking {
         // TODO(alanorozco): Cleanup markup for readability once fixes land.
         htmlFor(this.getDoc_())`
           <div class="amp-video-docked-controls" hidden>
-            <div class="amp-video-docked-button-group">
-              <div role="button" ref="playButton"
-                  class="amp-video-docked-play"></div>
-              <div role="button" ref="pauseButton"
-                  class="amp-video-docked-pause"></div>
-            </div>
-            <div class="amp-video-docked-button-group">
-              <div role="button" ref="muteButton"
-                  class="amp-video-docked-mute"></div>
-              <div role="button" ref="unmuteButton"
-                  class="amp-video-docked-unmute">
+            <div class="amp-video-docked-main-button-group">
+              <div class="amp-video-docked-button-group">
+                <div role="button" ref="playButton"
+                    class="amp-video-docked-play"></div>
+                <div role="button" ref="pauseButton"
+                    class="amp-video-docked-pause"></div>
+              </div>
+              <div class="amp-video-docked-button-group">
+                <div role="button" ref="muteButton"
+                    class="amp-video-docked-mute"></div>
+                <div role="button" ref="unmuteButton"
+                    class="amp-video-docked-unmute">
+                </div>
+              </div>
+              <div class="amp-video-docked-button-group">
+                <div role="button" ref="fullscreenButton"
+                    class="amp-video-docked-fullscreen">
+                </div>
               </div>
             </div>
-            <div class="amp-video-docked-button-group">
-              <div role="button" ref="fullscreenButton"
-                  class="amp-video-docked-fullscreen">
-              </div>
-            </div>
-            <div class="amp-video-docked-button-group">
+            <div class="amp-video-docked-button-dismiss-group"
+                ref="dismissContainer">
               <div role="button" ref="dismissButton"
                   class="amp-video-docked-dismiss"></div>
             </div>
@@ -1185,7 +1189,10 @@ export class VideoDocking {
     const internalElement = getInternalVideoElementFor(video.element);
     const shadowLayer = this.getShadowLayer_();
     const overlay = this.getOverlay_();
-    const controls = this.getControls_().container;
+    const {
+      container: controls,
+      dismissContainer,
+    } = this.getControls_();
 
     video.mutateElement(() => {
       internalElement.classList.add(BASE_CLASS_NAME);
@@ -1202,6 +1209,13 @@ export class VideoDocking {
       const centerY = y + (height * halfScale);
       setImportantStyles(controls, {
         'transform': translate(centerX, centerY),
+      });
+      const dismissMargin = 8;
+      const dismissWidth = 40;
+      const dismissX = width * halfScale - dismissMargin - dismissWidth;
+      const dismissY = -(height * halfScale - dismissMargin - dismissWidth);
+      setImportantStyles(dismissContainer, {
+        'transform': translate(dismissX, dismissY),
       });
     });
   }
