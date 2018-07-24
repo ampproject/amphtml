@@ -7,6 +7,10 @@ export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
 export const LINK_STATUS__IGNORE_LINK = 'ignore';
 export const LINK_STATUS__UNKNOWN = 'unkonwn';
 
+/**
+ * Manage which links can be affiliated and which one can't based on
+ * 'resolveUnknownAnchors' response and swap the link on user click.
+ */
 export default class AffiliateLinksManager {
   constructor(ampDoc, resolveUnknownAnchors, options) {
     user().assert(typeof resolveUnknownAnchors === 'function', 'resolveUnknownLinks is required and should be a function.');
@@ -23,17 +27,23 @@ export default class AffiliateLinksManager {
     this.linkSelector_ = options.linkSelector;
 
     this.installGlobalEventListener_(ampDoc.getRootNode());
-    this.analyseLinksOnPage();
+    this.analyseLinksOnPage_();
+  }
+
+  getAnchorAffiliateMap() {
+    return this.anchorMap_;
   }
 
   installGlobalEventListener_(rootNode) {
-    rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.analyseLinksOnPage.bind(this));
-    rootNode.addEventListener(AmpEvents.ANCHOR_CLICK, this.clickHandler_.bind(this));
+    rootNode.addEventListener(AmpEvents.DOM_UPDATE,
+        this.analyseLinksOnPage_.bind(this));
+    rootNode.addEventListener(AmpEvents.ANCHOR_CLICK,
+        this.clickHandler_.bind(this));
   }
 
-  analyseLinksOnPage() {
+  analyseLinksOnPage_() {
     const anchorList = this.getLinksInDOM_();
-    this.removeDetachedAnchorsFromMap(anchorList);
+    this.removeDetachedAnchorsFromMap_(anchorList);
 
     // Get the list of new links.
     const unknownAnchors = this.getNewAnchors_(anchorList);
@@ -62,9 +72,10 @@ export default class AffiliateLinksManager {
     }
   }
 
-  removeDetachedAnchorsFromMap(anchorList) {
+  removeDetachedAnchorsFromMap_(anchorList) {
     this.anchorMap_.forEach((value, anchor) => {
-      // Delete if anchor is not in the DOM anymore so it can be garbage collected.
+      // Delete if anchor is not in the DOM anymore so it can
+      // be garbage collected.
       if (anchorList.indexOf(anchor) === -1) {
         this.anchorMap_.delete(anchor);
       }
@@ -89,7 +100,7 @@ export default class AffiliateLinksManager {
   }
 
   clickHandler_(customEvent) {
-    const {clickActionType, anchor} = customEvent.detail;
+    const {clickActionType, anchor, clickEvent} = customEvent.detail;
 
     if (clickActionType !== 'navigate-outbound' && clickActionType !== 'open-context-menu') {
       return;
@@ -99,11 +110,12 @@ export default class AffiliateLinksManager {
     if (linkState === LINK_STATUS__AFFILIATE) {
       this.handleAffiliateClick_(anchor);
     } else if (linkState === LINK_STATUS__NON_AFFILIATE && this.nonAffiliateClickCallback_) {
-      this.nonAffiliateClickCallback_();
+      this.nonAffiliateClickCallback_(anchor);
     } else if (linkState === LINK_STATUS__UNKNOWN && this.affiliateUnkown_) {
       this.handleAffiliateClick_(anchor);
     }
 
+    clickEvent.preventDefault();
     console.log('Received click', anchor, linkState);
   }
 

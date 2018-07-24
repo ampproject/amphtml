@@ -1,6 +1,6 @@
 <!doctype html>
 <html ⚡>
-<!-- gulp --extensions=amp-skimlinks,amp-list,amp-mustache,amp-analytics -->
+<!-- gulp --extensions=amp-skimlinks,amp-list,amp-mustache,amp-analytics,amp-consent -->
 <head>
     <meta charset="utf-8">
     <title>Skimlinks Example</title>
@@ -47,7 +47,7 @@
     <amp-skimlinks width="auto" height="100" layout="fixed-height">
     </amp-skimlinks>
     <h1> Simple affiliated link </h1>
-    <a id="merchant-link" href="http://test-merchant.skimlinks.com/merchant_test.html?abc=QUERY_PARAM(bar, default)&bar=test1" data-amp-replace="QUERY_PARAM">
+    <a id="merchant-link" href="http://test-merchant.skimlinks.com/merchant_test.html?abc=QUERY_PARAM(bar)&bar=test1" data-amp-replace="QUERY_PARAM">
         Merchant
     </a>
 
@@ -61,7 +61,7 @@
         <br />
     </div>
 
-    <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
+    <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="//list.example.json" class="m1" reset-on-refresh>
         <template type="amp-mustache" id="amp-template-id">
             <div>
                 <a href="{{url}}">{{title}}</a>

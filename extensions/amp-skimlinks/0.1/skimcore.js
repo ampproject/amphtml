@@ -1,9 +1,6 @@
 import {parseUrlDeprecated} from '../../../src/url';
 
-import AffiliateLinksManager from './affiliate-links-manager';
-import DomainResolver from './affiliate-link-resolver';
 
-const PUB_CODE = '68019X1559797';
 
 // function attachClickHandler() {
 //   document.addEventListener('click', e => {

@@ -1,51 +1,104 @@
-// import { getIframe, preloadBootstrap } from '../../../src/3p-frame';
-
-import {CommonSignals} from '../../../src/common-signals';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
 import {Services} from '../../../src/services';
-import {startSkimcore} from './skimcore.js';
+import {once} from '../../../src/utils/function';
+import {Deferred} from '../../../src/utils/promise';
 
-export const TRACKING_API_URL = 'https://t.skimresources.com/api';
+import Tracking from './tracking';
+
+import AffiliateLinksManager from './affiliate-links-manager';
+import DomainResolver from './affiliate-link-resolver';
+
+function getBoundFunction(context, functionName) {
+  // TODO: throw error if function doesn't exist?
+  return context[functionName].bind(context);
+}
+
+const startTime = new Date().getTime();
 
 export class AmpSkimlinks extends AMP.BaseElement {
-  // /** @override */
-  // preconnectCallback() {
-  //     console.log("preconnect", this)
-  //     this.preconnect.preload('https://s.skimresources.com/js/68019X1559797.skimlinks.js', 'script');
-  //     preloadBootstrap(this.win, this.preconnect);
-  // }
+  /**
+   * @override
+   */
+  buildCallback() {
+    this.xhr_ = Services.xhrFor(this.win);
+    this.ampDoc_ = this.getAmpDoc();
+
+    this.skimOptions_ = this.validateOptions_();
+    this.startSkimcore_();
+  }
+
+  validateOptions_() {
+    // Always exclude current domains to avoid affiliating internal links.
+    const excludedDomains = [this.ampDoc_.win.location.hostname];
+
+    return {
+      pubcode: '68019X1559797',
+      excludedDomains,
+      tracking: true,
+      customTrackingId: '',
+    };
+  }
+
+  startSkimcore_() {
+    const trackingService = new Tracking(this.element, this.skimOptions_);
+    const {
+      domainResolverService,
+      userSessionDataPromise,
+    } = this.setupDomainResolver_();
+    const affiliateLinksManager = this.setupAffiliateLinkManager_(trackingService, domainResolverService);
+
+    // Fire impression tracking after we have received beaconRequest
+    // TODO: Should this be fired onexit?
+    userSessionDataPromise.then(userSessionData => {
+      trackingService.sendImpressionTracking(
+          userSessionData,
+          affiliateLinksManager.getAnchorAffiliateMap(),
+          startTime,
+      );
+    });
+  }
+
+  setupDomainResolver_() {
+    const deferred = new Deferred();
+    const userSessionDataPromise = deferred.promise;
+
+    // Only set it the first time, ignore other calls.
+    const beaconApiCallback = once(beaconData => {
+      deferred.resolve({
+        guid: beaconData.guid,
+      });
+    });
+
+    const domainResolverService = new DomainResolver(
+        this.xhr_,
+        this.skimOptions_,
+        beaconApiCallback,
+    );
+
+    return {
+      domainResolverService,
+      userSessionDataPromise,
+    };
+  }
+
+  setupAffiliateLinkManager_(trackingService, domainResolverService) {
+    const affiliateLinkManagerOptions = {
+      onNonAffiliate: getBoundFunction(trackingService, 'sendNaClickTracking'),
+    };
+
+    const affiliateLinksManager = new AffiliateLinksManager(
+        this.ampDoc_,
+        getBoundFunction(domainResolverService, 'resolveUnknownAnchors'),
+        affiliateLinkManagerOptions
+    );
+
+    return affiliateLinksManager;
+  }
 
   /** @override */
   isLayoutSupported() {
     return true;
   }
 
-  /**
-   * @override
-   */
-  buildCallback() {
-    console.log('Build callback', this);
-    this.setupAnalyticsEvents();
-    const context = {
-      xhr: Services.xhrFor(this.win),
-      analytics: this.analytics_,
-      ampDoc: this.getAmpDoc(),
-    };
-    const signals = this.signals();
-    signals.whenSignal(CommonSignals.LOAD_START).then(() => console.log('LOAD_START'));
-    startSkimcore(context);
-  }
-
-  setupAnalyticsEvents() {
-    // "layoutCallback" from custom-element base class needs be executed in order to have analytics working.
-    // Analytics are not setup until CommonSignals.LOAD_START is triggered.
-    const analyticsBuilder = new CustomEventReporterBuilder(this.element);
-    analyticsBuilder.track('page_impressions', `${TRACKING_API_URL}/track.php?data=\${data}`);
-    analyticsBuilder.track('link_impressions', `${TRACKING_API_URL}/link?data=\${data}`);
-    // Mutate config since it doesn't seem like we can provide a config in the custructor.
-
-    this.analytics_ = analyticsBuilder.build();
-  }
 
   /** @override */
   layoutCallback() {

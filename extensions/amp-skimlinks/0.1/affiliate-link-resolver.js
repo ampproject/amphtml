@@ -5,12 +5,12 @@ import {
 import {parseUrlDeprecated} from '../../../src/url';
 
 export default class AffiliateLinkResolver {
-  constructor(xhr, pubcode, excludedDomains) {
+  constructor(xhr, skimOptions, beaconApiCallback) {
     this.xhr_ = xhr;
-    this.pubcode_ = pubcode;
-    this.beaconData_ = {};
+    this.pubcode_ = skimOptions.pubcode;
     this.domains_ = {};
-    this.excludedDomains_ = excludedDomains;
+    this.excludedDomains_ = skimOptions.excludedDomains;
+    this.beaconApiCallback_ = beaconApiCallback;
   }
 
   resolveUnknownAnchors(anchorList) {
@@ -95,7 +95,10 @@ export default class AffiliateLinkResolver {
 
   resolvedUnkonwnAnchorsAsync_(anchorList, domainsToAsk) {
     return this.fetchDomainResolverApi_(domainsToAsk).then(data => {
-      this.updateBeaconData_(data);
+      // DomainResolverApi (beaconApi) returns extra meta-data that we want to handle
+      // oustide of the resolveUnknownDomains process.
+      this.beaconApiCallback_(data);
+
       this.updateDomainsStatusMapPostFetch_(domainsToAsk, data.merchant_domains);
 
       return this.resolveAnchorsAffiliateStatus_(anchorList);
@@ -115,6 +118,8 @@ export default class AffiliateLinkResolver {
       // Disabled AMP CORS for dev
       requireAmpResponseSourceOrigin: false,
       ampCors: false,
+      // Allow beacon API to set cookies
+      credentials: 'include',
     };
 
     return this.xhr_.fetchJson(beaconUrl, postReq).then(res => {
