@@ -571,6 +571,11 @@ export class AmpImageSlider extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
 
+    if (this.leftAmpImage_ && this.rightAmpImage_) {
+      this.scheduleLayout(this.leftAmpImage_);
+      this.scheduleLayout(this.rightAmpImage_);
+    }
+
     this.registerEvents();
   }
 
