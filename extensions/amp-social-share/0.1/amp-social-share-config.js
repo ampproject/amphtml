@@ -79,9 +79,16 @@ const BUILTINS = dict({
     },
   },
   'whatsapp': {
-    'shareEndpoint': 'whatsapp://send',
+    'shareEndpoint': 'https://api.whatsapp.com/send',
     'defaultParams': {
       'text': 'TITLE - CANONICAL_URL',
+    },
+  },
+  'line': {
+    'shareEndpoint': 'https://social-plugins.line.me/lineit/share',
+    'defaultParams': {
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
     },
   },
   'sms': {

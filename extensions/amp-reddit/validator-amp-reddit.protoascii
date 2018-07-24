@@ -19,8 +19,8 @@ tags: {  # amp-reddit
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-reddit"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,16 +31,19 @@ tags: {  # <amp-reddit>
   requires_extension: "amp-reddit"
   attrs: {
     name: "data-embedlive"
-    value_regex_casei: "(false|true)"
+    value_casei: "false"
+    value_casei: "true"
   }
   attrs: {
     name: "data-embedparent"
-    value_regex_casei: "(false|true)"
+    value_casei: "false"
+    value_casei: "true"
   }
   attrs: {
     name: "data-embedtype"
     mandatory: true
-    value_regex_casei: "(comment|post)"
+    value_casei: "comment"
+    value_casei: "post"
   }
   attrs: {
     name: "data-src"

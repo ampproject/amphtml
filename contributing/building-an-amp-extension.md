@@ -119,7 +119,7 @@ create your DOM structure and append it to the element. You can also
 read the attributes (e.g. width, height…) the user provided on your
 element in this callback.
 - **Warning**: Don't load remote resources during the buildCallback. This
-only circumvents the AMP resources manager, but it will also lead to
+not only circumvents the AMP resources manager, but it will also lead to
 higher data charges for users because all these resources will be loaded
 before layouting needs to happen.
 - **Warning 2**: Do the least needed work here, and don't build DOM that
@@ -131,8 +131,8 @@ is not needed at this point.
 - **Vsync Context**: None (Neither mutate nor measure)
 - **Override**: Sometimes, if your element will be loading remote
 resources.
-- **Usage**: Use to instruct AMP which hosts to preconnect to and which
-resources to preload/prefetch this allows AMP to delegate to the browser
+- **Usage**: Use to instruct AMP which hosts to preconnect to, and which
+resources to preload/prefetch; this allows AMP to delegate to the browser
 to get a performance boost by preconnecting, preloading and prefetching
 resources via preconnect service.
 - **Example Usage**: [Instagram uses this to
@@ -244,23 +244,27 @@ and when it goes out of it for finer control.
 ## Element styling
 
 You can write a stylesheet to style your element to provide a minimal
-visual appeal, your element structure should account for whether you
+visual appeal. Your element structure should account for whether you
 want users (publishers and developers using your element) to customize
 the default styling you're providing and allow for easy CSS classes
 and/or well-structure DOM elements.
 
 Element styles are loaded when the element script itself is included in
 an AMP doc. You tell AMP which CSS belongs to this element when
-registering the element, see next.
+registering the element (see below).
 
-Class names prefixed with `-amp-` are considered private and
-publishers are not allowed to use to customize (enforced by AMP
-validator).
+Class names prefixed with `i-amphtml` are considered private. Publishers
+are not allowed to use them for customization (enforced by AMP validator).
+
+Class names prefixed with  `amp-` are public css classes that can be customized
+by publishers. All such classes should be documented in the component-specific
+`.md` file. All CSS classes in component stylesheets should be prefixed with
+either `i-amphtml-` or `amp-`.
 
 ## Register element with AMP
 
 Once you have implemented your AMP element, you need to register it with
-AMP, all AMP extensions are prefixed with `amp-`. This is where you
+AMP; all AMP extensions are prefixed with `amp-`. This is where you
 tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
@@ -325,16 +329,16 @@ exposes.
 
 AMP elements are usually discovered and scheduled by the AMP runtime
 automatically and managed through Resources. In some cases an AMP
-element might want to control and own when its sub-elements gets
+element might want to control and own when its sub-elements get
 scheduled and not leave that to the AMP runtime. An example to this is
-the &lt;amp-carousel&gt;, where it wants to schedule
+the &lt;amp-carousel&gt; component, where it wants to schedule
 preloading/pre-rendering or layouting of its cells based on the window
 the user is in.
 
 AMP provides a way for an element to control this by setting the owner
-on the element you want to control. For carousel example, carousel loops
+on the element you want to control. In the carousel example, the component loops
 over all its elements and sets itself as the owner of these elements.
-AMP runtime will not manage scheduling layouting for elements that have
+The AMP runtime will not manage scheduling layouting for elements that have
 owners.
 
 ```javascript
@@ -442,7 +446,7 @@ image directly from instagram media endpoint.
 
 ```javascript
 class AmpInstagram extends AMP.BaseElement {
-  // ...  
+  // ...
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.getWin().document.createElement('div');
@@ -527,7 +531,7 @@ embedded when `unlayoutCallback` is called.
 unlayoutCallback() {
   if (this.iframe_) {
     removeElement(this.iframe_);
-    this.iframe_ = null;    
+    this.iframe_ = null;
     this.iframePromise_ = null;
     setStyles(this.placeholderWrapper_, {
       'display': '',
@@ -542,7 +546,7 @@ probably wants to return true in order to signal to AMP the need to call
 `layoutCallback` again once the document is active. Otherwise your
 element will never be re-laid out.
 
-### vsync, mutateElement, deferMutate and changeSize
+### vsync, mutateElement, and changeSize
 
 AMP provides multiple utilities to optimize many mutations and measuring
 for better performance. These include vsync service with a mutate and
@@ -628,7 +632,7 @@ in EXPERIMENTS variable.
 const EXPERIMENTS = [
   // ...
   {
-    id: 'amp-my-element',  
+    id: 'amp-my-element',
     name: 'AMP My Element',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-my-element/amp-my-element.md',
@@ -665,7 +669,7 @@ Class AmpMyElement extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {  
+  buildCallback() {
     if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
       user.warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
@@ -713,14 +717,16 @@ Also consider contributing to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to gulpfile.js to tell it about your extension, its files and
-its examples.
+changes to bundles.config.js to tell it about your extension, its files and
+its examples. You will need to add an entry in the "extensionBundles" array.
 
 ```javascript
+exports.extensionBundles = [
 ...
-declareExtension('amp-kaltura-player', '0.1', /* hasCss */ false);
-declareExtension('amp-carousel', '0.1', /* hasCss */ true);
+  {name: 'amp-kaltura-player', version: '0.1'},
+  {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
 ...
+];
 ```
 
 ## Versioning

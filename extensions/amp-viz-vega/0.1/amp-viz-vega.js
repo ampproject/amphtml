@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import * as dom from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {tryParseJson} from '../../../src/json';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {isObject, isFiniteNumber} from '../../../src/types';
-import {assertHttpsUrl} from '../../../src/url';
+import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
-
-/** @const */
-const EXPERIMENT = 'amp-viz-vega';
+import {assertHttpsUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
+import {isFiniteNumber, isObject} from '../../../src/types';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {tryParseJson} from '../../../src/json';
 
 export class AmpVizVega extends AMP.BaseElement {
 
@@ -74,8 +71,8 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, EXPERIMENT),
-        `Experiment ${EXPERIMENT} disabled`);
+    user().assert(isExperimentOn(this.win, 'amp-viz-vega'),
+        'Experiment amp-viz-vega disabled');
 
     /**
      * Global vg (and implicitly d3) are required and they are created by
@@ -162,8 +159,8 @@ export class AmpVizVega extends AMP.BaseElement {
           {
             requireAmpResponseSourceOrigin: false,
           }).then(res => res.json()).then(data => {
-            this.data_ = data;
-          });
+        this.data_ = data;
+      });
     }
   }
 
@@ -222,8 +219,8 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /**
    * Gets the padding defined in the Vega data for either width or height.
-   * @param {!string} widthOrHeight One of 'width' or 'height' string values.
-   * @return {!number}
+   * @param {string} widthOrHeight One of 'width' or 'height' string values.
+   * @return {number}
    * @private
    */
   getDataPadding_(widthOrHeight) {

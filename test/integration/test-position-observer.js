@@ -37,7 +37,7 @@ config.run('amp-position-observer', function() {
   `;
 
   const extensions = ['amp-animation', 'amp-position-observer'];
-  const experiments = ['amp-animation', 'amp-position-observer'];
+  const experiments = ['amp-animation'];
 
   const scrollboundBody = `
     <amp-animation id="anim" layout="nodisplay">
@@ -69,7 +69,7 @@ config.run('amp-position-observer', function() {
     <div class="spacer"></div>
     `;
 
- /*
+  /*
   * scrollbound amp-animation will make the target will go
   * from opacity 0 to 1 with scroll.
   **/
@@ -133,7 +133,7 @@ config.run('amp-position-observer', function() {
     <div class="spacer"></div>
     `;
 
- /*
+  /*
   * Animation scene will start when 50% visible above the 10vh margin
   * and paused when 50% invisible below the 10vh margin.
   * There is no scrollbound behavior, purely time-based animation.
@@ -176,7 +176,7 @@ config.run('amp-position-observer', function() {
 function getOpacity(win) {
   const animTarget = win.document.querySelector('#animTarget');
   return parseFloat(win.getComputedStyle(animTarget).opacity);
-};
+}
 
 function waitForOpacity(win, comparison, factor) {
   return poll('wait for opacity to ' + comparison + ': ' + factor, () => {
@@ -188,7 +188,7 @@ function waitForOpacity(win, comparison, factor) {
       return getOpacity(win) > factor;
     }
   });
-};
+}
 
 function ensureOpacityIsNoChangingAnymore(win) {
   return new Promise((resolve, reject) => {
@@ -207,4 +207,4 @@ function ensureOpacityIsNoChangingAnymore(win) {
 
 function getViewportHeight(win) {
   return win.document.querySelector('.spacer').offsetHeight;
-};
+}

@@ -14,24 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Chargeads ⚡
+# Chargeads
 
 ## Example
 
 ### Basic
 
 ```html
-  <amp-ad width=100 height=283
-          type="chargeads"
-          layout="responsive"
-          src="https://www.chargeplatform.com/ads/?id={id}">
-  </amp-ad>
+<amp-ad width="100" height="283"
+    type="chargeads"
+    layout="responsive"
+    src="https://www.chargeplatform.com/ads/?id={id}">
+</amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please [contact Chargeads](http://chargeads.com).
+For configuration semantics, please [contact Chargeads](http://chargeads.com).
 
 Supported parameters:
 
-- src
+- `src`

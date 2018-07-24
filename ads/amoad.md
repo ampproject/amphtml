@@ -16,12 +16,12 @@ limitations under the License.
 
 # AMoAd
 
-## Example
+## Examples
 
-Banner
+### Banner
 
 ```html
-<amp-ad width="300"
+<amp-ad width="300" 
   height="250"
   type="amoad"
   data-ad-type="banner"
@@ -29,7 +29,7 @@ Banner
 </amp-ad>
 ```
 
-InFeed
+### InFeed
 
 ```html
 <amp-ad width="320"
@@ -42,11 +42,11 @@ InFeed
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact http://www.amoad.com/form2/
+For configuration details and to generate your tags, please contact [AMoAd](http://www.amoad.com/form2/).
 
 Supported parameters:
 
-- width
-- height
-- data-sid
-- data-ad-type
+- `width`
+- `height`
+- `data-sid`
+- `data-ad-type`

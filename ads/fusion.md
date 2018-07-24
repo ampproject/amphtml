@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=600 height=100
+<amp-ad width="600" height="100"
     type="fusion"
     data-ad-server="bn-01d.adtomafusion.com"
     data-media-zone="adtomatest.apica"
@@ -31,15 +31,14 @@ limitations under the License.
 
 ## Configuration
 
-For configuration and implementation details, please contact Fusion support team support@adtoma.com
+For configuration and implementation details, please contact the Fusion support team: support@adtoma.com
 
 Supported parameters:
 
-- data-ad-server
-- data-media-zone
-- data-layout
-- data-space
-- data-parameters
+- `data-ad-server`
+- `data-media-zone`
+- `data-layout`
+- `data-space`
+- `data-parameters`
 
-Parameters should be passed as key&value pairs '&' separated. Missing value equals 'true'. 
-So '...&isMobile&...' from example above stands for '...&isMobile=true&...'. 
+Parameters should be passed as `key&value` pairs `&` separated. Missing value equals `true`. So `...&isMobile&...` from the example above stands for `...&isMobile=true&...`. 

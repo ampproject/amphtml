@@ -15,9 +15,9 @@
  */
 
 import {
-  layoutRectLtwh,
   LayoutRectDef,
   layoutRectFromDomRect,
+  layoutRectLtwh,
 } from '../../src/layout-rect';
 import {Observable} from '../../src/observable';
 import {throttle} from '../../src/utils/rate-limit';
@@ -36,7 +36,7 @@ const MIN_EVENT_INTERVAL_IN_MS = 100;
 export class PositionObserver {
 
   /**
-   * @param win {!Window}
+   * @param {!Window} win
    */
   constructor(win) {
     /** @private {!Window} */
@@ -52,8 +52,9 @@ export class PositionObserver {
   /**
    * Start to observe the target element's position change and trigger callback.
    * TODO: maybe take DOM mutation into consideration
-   * @param element {!Element}
-   * @param callback {function(!PositionEntryDef)}
+   * @param {!Element} element
+   * @param {function(!PositionEntryDef)} callback
+   * @return {!UnlistenDef}
    */
   observe(element, callback) {
     if (!this.positionObservable_) {
@@ -68,18 +69,21 @@ export class PositionObserver {
     }
     // Send the 1st ping immediately
     callback(this.getPositionEntry_(element));
-    this.positionObservable_.add(() => {
+    return this.positionObservable_.add(() => {
       callback(this.getPositionEntry_(element));
     });
   }
 
+  /**
+   * Updates viewport rect.
+   */
   update_() {
     this.viewportRect_ = this.getViewportRect();
   }
 
   /**
-   * @param element {!Element}
-   * @returns {!PositionEntryDef}
+   * @param {!Element} element
+   * @return {!PositionEntryDef}
    * @private
    */
   getPositionEntry_(element) {
@@ -95,8 +99,8 @@ export class PositionObserver {
    * A  method to get viewport rect
    */
   getViewportRect() {
-    const scrollingElement = this.scrollingElement_;
-    const win = this.win_;
+    const {scrollingElement_: scrollingElement, win_: win} = this;
+
     const scrollLeft = scrollingElement./*OK*/scrollLeft ||
         win./*OK*/pageXOffset;
     const scrollTop = scrollingElement./*OK*/scrollTop ||
@@ -110,8 +114,8 @@ export class PositionObserver {
 }
 
 /**
- * @param win {!Window}
- * @returns {!Element}
+ * @param {!Window} win
+ * @return {!Element}
  */
 function getScrollingElement(win) {
   const doc = win.document;
@@ -132,7 +136,7 @@ function getScrollingElement(win) {
 
 /**
  * Whether the current browser is based on the WebKit engine.
- * @param ua {string}
+ * @param {string} ua
  * @return {boolean}
  */
 function isWebKit(ua) {

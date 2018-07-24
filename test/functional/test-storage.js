@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
+  LocalStorageBinding,
   Storage,
   Store,
-  LocalStorageBinding,
   ViewerStorageBinding,
 } from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('Storage', () => {
@@ -413,12 +413,14 @@ describe('Store', () => {
   });
 
   it('should prohibit unsafe values', () => {
-    expect(() => {
-      store.set('__proto__', 'value1');
-    }).to.throw(/Name is not allowed/);
-    expect(() => {
-      store.set('prototype', 'value1');
-    }).to.throw(/Name is not allowed/);
+    allowConsoleError(() => {
+      expect(() => {
+        store.set('__proto__', 'value1');
+      }).to.throw(/Name is not allowed/);
+      expect(() => {
+        store.set('prototype', 'value1');
+      }).to.throw(/Name is not allowed/);
+    });
   });
 });
 

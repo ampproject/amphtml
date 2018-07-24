@@ -18,12 +18,12 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../../src/layout-rect';
-import {restrictedVsync, timer} from './util';
 import {
   centerFrameUnderVsyncMutate,
-  expandFrameUnderVsyncMutate,
   collapseFrameUnderVsyncMutate,
+  expandFrameUnderVsyncMutate,
 } from '../../src/full-overlay-frame-helper';
+import {restrictedVsync, timer} from './util';
 
 
 const CENTER_TRANSITION_TIME_MS = 500;
@@ -34,7 +34,7 @@ const CENTER_TRANSITION_END_WAIT_TIME_MS = 200;
  * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!function(!LayoutRectDef, !LayoutRectDef)} onFinish
+ * @param {function(!LayoutRectDef, !LayoutRectDef)} onFinish
  * @private
  */
 const expandFrameImpl = function(win, iframe, onFinish) {
@@ -71,8 +71,8 @@ const expandFrameImpl = function(win, iframe, onFinish) {
  * Resets the frame from full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!function()} onFinish
- * @param {!function(!LayoutRectDef)} onMeasure
+ * @param {function()} onFinish
+ * @param {function(!LayoutRectDef)} onMeasure
  * @private
  */
 const collapseFrameImpl = function(win, iframe, onFinish, onMeasure) {
@@ -98,7 +98,7 @@ const collapseFrameImpl = function(win, iframe, onFinish, onMeasure) {
  * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!function(!LayoutRectDef, !LayoutRectDef)} onFinish
+ * @param {function(!LayoutRectDef, !LayoutRectDef)} onFinish
  */
 export let expandFrame = expandFrameImpl;
 
@@ -124,8 +124,8 @@ export function resetExpandFrameForTesting() {
  * Places the child frame in full overlay mode.
  * @param {!Window} win Host window.
  * @param {!HTMLIFrameElement} iframe
- * @param {!function()} onFinish
- * @param {!function(!LayoutRectDef)} onMeasure
+ * @param {function()} onFinish
+ * @param {function(!LayoutRectDef)} onMeasure
  */
 export let collapseFrame = collapseFrameImpl;
 

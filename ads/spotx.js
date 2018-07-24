@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
+import {hasOwn} from '../src/utils/object';
 import {startsWith} from '../src/string';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -36,7 +37,7 @@ export function spotx(global, data) {
 
   // Add data-* attribute for each data value passed in.
   for (const key in data) {
-    if (data.hasOwnProperty(key) && startsWith(key, 'spotx_')) {
+    if (hasOwn(data, key) && startsWith(key, 'spotx_')) {
       script.setAttribute(`data-${key}`, data[key]);
     }
   }
@@ -47,7 +48,8 @@ export function spotx(global, data) {
     }
   };
 
-  // TODO(KenneyE): Implement AdLoaded callback in script to accurately trigger renderStart()
+  // TODO(KenneyE): Implement AdLoaded callback in script to accurately trigger
+  // renderStart()
   script.onload = global.context.renderStart;
 
   script.src = `//js.spotx.tv/easi/v1/${data['spotx_channel_id']}.js`;

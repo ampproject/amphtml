@@ -24,7 +24,12 @@ describes.realWin('yield', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    clock = lolex.install(
+        {target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   it('should work with nested promises', function* () {

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle, AmpDocShadow} from '../../src/service/ampdoc-impl';
+import * as rds from '../../src/render-delaying-services';
+import * as sinon from 'sinon';
+import * as styles from '../../src/style-installer';
+import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {Services} from '../../src/services';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {getStyle} from '../../src/style';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
-import {Services} from '../../src/services';
-import * as rds from '../../src/render-delaying-services';
-import * as sinon from 'sinon';
-import * as styles from '../../src/style-installer';
 
 
 describe('Styles', () => {
@@ -61,7 +61,7 @@ describe('Styles', () => {
     });
 
     it('should ignore resources failures for render-start', () => {
-      sandbox.stub(resources, 'renderStarted', () => {
+      sandbox.stub(resources, 'renderStarted').callsFake(() => {
         throw new Error('intentional');
       });
       styles.makeBodyVisible(doc);

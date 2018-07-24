@@ -1,0 +1,37 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Basic</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+</head>
+
+<body>
+  <h2>Macros</h2>
+
+  <amp-bind-macro id="add" expression="a + b" arguments="a, b"></amp-bind-macro>
+  <amp-bind-macro id="addFive" expression="add(x, 5)" arguments="x"></amp-bind-macro>
+
+  <amp-bind-macro id="recursive" expression="recursive(x + 1)" arguments="x"></amp-bind-macro>
+
+  <amp-bind-macro id="buddy" expression="guy()"></amp-bind-macro>
+  <amp-bind-macro id="guy" expression="buddy()"></amp-bind-macro>
+
+  <p [text]="three || '1 + 2 = ?'">1 + 2 = ?</p>
+  <button on="tap:AMP.setState({three: add(1, 2)})">Compute</button>
+
+  <p [text]="eight || '3 + 5 = ?'">3 + 5 = ?</p>
+  <button on="tap:AMP.setState({eight: addFive(add(1, 2))})">Compute</button>
+
+  <p [text]="recurse">(Check console for errors)</p>
+  <button on="tap:AMP.setState({recurse: recursive()})">Attempt recursion</button>
+
+  <p [text]="cycle">(Check console for errors)</p>
+  <button on="tap:AMP.setState({cycle: buddy()})">Attempt cycle</button>
+</body>
+</html>

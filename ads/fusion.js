@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
+/**
+ * @param {string=} input
+ * @return {JsonObject|undefined}
+ */
 function queryParametersToObject(input) {
   if (!input) {
     return undefined;

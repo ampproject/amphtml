@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {DomFingerprint} from '../../src/utils/dom-fingerprint';
+import {Services} from '../../src/services';
 import {
   addDataAndJsonAttributes_,
-  getIframe,
   getBootstrapBaseUrl,
   getDefaultBootstrapBaseUrl,
+  getIframe,
   getSubDomain,
   preloadBootstrap,
-  resetCountForTesting,
   resetBootstrapBaseUrlForTesting,
+  resetCountForTesting,
 } from '../../src/3p-frame';
 import {
-  serializeMessage,
   deserializeMessage,
+  serializeMessage,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
-import {Services} from '../../src/services';
 import {loadPromise} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
 import {preconnectForElement} from '../../src/preconnect';
+import {toggleExperiment} from '../../src/experiments';
 import {validateData} from '../../3p/3p';
-import {DomFingerprint} from '../../src/utils/dom-fingerprint';
-import * as sinon from 'sinon';
 
 describe.configure().ifNewChrome().run('3p-frame', () => {
 
@@ -72,8 +72,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   }
 
   function setupElementFunctions(div) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const {innerWidth: width, innerHeight: height} = window;
     div.getIntersectionChangeEntry = function() {
       return {
         time: 1234567888,
@@ -160,8 +159,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const {innerWidth: width, innerHeight: height} = window;
     setupElementFunctions(div);
 
     const viewer = Services.viewerForDoc(window.document);
@@ -172,10 +170,11 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
 
     container.appendChild(div);
 
-    sandbox.stub(DomFingerprint, 'generate', () => 'MY-MOCK-FINGERPRINT');
+    sandbox.stub(DomFingerprint, 'generate').callsFake(
+        () => 'MY-MOCK-FINGERPRINT');
 
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
-    const src = iframe.src;
+    const {src} = iframe;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
     const docInfo = Services.documentInfoForDoc(window.document);
@@ -253,6 +252,41 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     });
   });
 
+  it('should copy attributes to iframe', () => {
+    const div = document.createElement('my-element');
+    div.setAttribute('width', '50');
+    div.setAttribute('height', '100');
+    div.setAttribute('title', 'a_title');
+    div.setAttribute('not_whitelisted', 'shouldnt_be_in_iframe');
+    setupElementFunctions(div);
+
+    container.appendChild(div);
+
+    const iframe = getIframe(window, div, 'none');
+
+    expect(iframe.width).to.equal('50');
+    expect(iframe.height).to.equal('100');
+    expect(iframe.title).to.equal('a_title');
+    expect(iframe.not_whitelisted).to.equal(undefined);
+  });
+
+  it('should not set feature policy for sync-xhr with exp off', () => {
+    const div = document.createElement('my-element');
+    setupElementFunctions(div);
+    container.appendChild(div);
+    const iframe = getIframe(window, div, 'none');
+    expect(iframe.getAttribute('allow')).to.equal(null);
+  });
+
+  it('should set feature policy for sync-xhr with exp on', () => {
+    toggleExperiment(window, 'no-sync-xhr-in-ads', true);
+    const div = document.createElement('my-element');
+    setupElementFunctions(div);
+    container.appendChild(div);
+    const iframe = getIframe(window, div, 'none');
+    expect(iframe.getAttribute('allow')).to.equal('sync-xhr \'none\';');
+  });
+
   it('should pick the right bootstrap url for local-dev mode', () => {
     window.AMP_MODE = {localDev: true};
     expect(getBootstrapBaseUrl(window)).to.equal(
@@ -292,27 +326,27 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     window.AMP_MODE = {};
     let match =
         /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/
-        .exec(getDefaultBootstrapBaseUrl(window));
+            .exec(getDefaultBootstrapBaseUrl(window));
     const domain = match && match[1];
     expect(domain).to.be.ok;
     match =
         /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/
-        .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
+            .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
     expect(match && match[1]).to.equal(domain);
   });
 
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://example.com/boot/remote.html');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       getBootstrapBaseUrl(window);
-    }).to.throw(/meta source must start with "https/);
+    }).to.throw(/meta source must start with "https/); });
   });
 
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       getBootstrapBaseUrl(window, true);
-    }).to.throw(/must not be on the same origin as the/);
+    }).to.throw(/must not be on the same origin as the/); });
   });
 
   it('should pick default url if custom disabled', () => {

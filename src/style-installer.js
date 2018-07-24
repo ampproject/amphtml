@@ -16,9 +16,9 @@
 
 import {Services} from './services';
 import {dev, rethrowAsync} from './log';
+import {insertAfterOrAtStart, waitForBody} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
-import {waitForBody} from './dom';
 import {waitForServices} from './render-delaying-services';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
@@ -45,7 +45,7 @@ const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
  * @return {!Element}
  */
 export function installStylesForDoc(
-    ampdoc, cssText, cb, opt_isRuntimeCss, opt_ext) {
+  ampdoc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const cssRoot = ampdoc.getHeadNode();
   const style = insertStyleElement(
       cssRoot,
@@ -78,13 +78,14 @@ export function installStylesForDoc(
 
 /**
  * Adds the given css text to the given document.
- * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is done.
+ * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is
+ * done.
  *
  * @param {!Document} doc The document that should get the new styles.
  * @param {string} cssText
- * @param {?function(!Element)|undefined} cb Called when the new styles are available.
- *     Not using a promise, because this is synchronous when possible.
- *     for better performance.
+ * @param {?function(!Element)|undefined} cb Called when the new styles are
+ *     available. Not using a promise, because this is synchronous when
+ *     possible. for better performance.
  * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
  *     as the first element in head and all style elements will be positioned
  *     after.
@@ -92,7 +93,7 @@ export function installStylesForDoc(
  * @return {!Element}
  */
 export function installStylesLegacy(
-    doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
+  doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const style = insertStyleElement(
       dev().assertElement(doc.head),
       cssText,
@@ -139,7 +140,7 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
       (ext && ext != 'amp-custom' && ext != 'amp-keyframes');
   const key =
       isRuntimeCss ? 'amp-runtime' :
-      isExtCss ? `amp-extension=${ext}` : null;
+        isExtCss ? `amp-extension=${ext}` : null;
 
   // Check if it has already been created or discovered.
   if (key) {
@@ -239,7 +240,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
-      animation: 'none',
+      'animation': 'none',
     });
     renderStartedNoInline(doc);
   };
@@ -318,24 +319,4 @@ function styleLoaded(doc, style) {
     }
   }
   return false;
-};
-
-/**
- * Insert the element in the root after the element named after or
- * if that is null at the beginning.
- * @param {!Element|!ShadowRoot} root
- * @param {!Element} element
- * @param {?Node} after
- */
-function insertAfterOrAtStart(root, element, after) {
-  if (after) {
-    if (after.nextSibling) {
-      root.insertBefore(element, after.nextSibling);
-    } else {
-      root.appendChild(element);
-    }
-  } else {
-    // Add at the start.
-    root.insertBefore(element, root.firstChild);
-  }
 }

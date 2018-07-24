@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {isDocumentReady,
   onDocumentReady,
-  whenDocumentReady,
   whenDocumentComplete,
+  whenDocumentReady,
 } from '../../src/document-ready';
-import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
 describe('documentReady', () => {
@@ -211,7 +211,7 @@ describe('documentReady', () => {
           expect(callback).to.have.not.been.called;
           expect(eventListeners['readystatechange']).to.not.equal(undefined);
 
-            // Complete
+          // Complete
           testDoc.readyState = 'complete';
           eventListeners['readystatechange']();
 

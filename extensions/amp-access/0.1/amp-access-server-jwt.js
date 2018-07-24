@@ -16,8 +16,11 @@
 
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -26,8 +29,6 @@ import {
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {Services} from '../../../src/services';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';
@@ -70,20 +71,20 @@ const AMP_AUD = 'ampproject.org';
  *            \/
  *    Apply authorization response
  *
- * @implements {./amp-access.AccessTypeAdapterDef}
+ * @implements {./amp-access-source.AccessTypeAdapterDef}
  */
 export class AccessServerJwtAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!./amp-access.AccessTypeAdapterContextDef} context
+   * @param {!./amp-access-source.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private @const */
@@ -106,15 +107,15 @@ export class AccessServerJwtAdapter {
 
     /** @private @const {?string} */
     this.serverState_ = stateElement ?
-        stateElement.getAttribute('content') : null;
+      stateElement.getAttribute('content') : null;
 
-    const isInExperiment = isExperimentOn(ampdoc.win, TAG);
+    const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server-jwt');
 
     /** @private @const {boolean} */
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
 
     const serviceUrlOverride = isInExperiment ?
-        this.viewer_.getParam('serverAccessService') : null;
+      this.viewer_.getParam('serverAccessService') : null;
 
     /** @private @const {string} */
     this.serviceUrl_ = serviceUrlOverride ||
@@ -178,6 +179,11 @@ export class AccessServerJwtAdapter {
   /** @override */
   pingback() {
     return this.clientAdapter_.pingback();
+  }
+
+  /** @override */
+  postAction() {
+    // Nothing to do.
   }
 
   /**
@@ -294,8 +300,7 @@ export class AccessServerJwtAdapter {
   authorizeOnServer_() {
     dev().fine(TAG, 'Proceed via server protocol');
     return this.fetchJwt_().then(resp => {
-      const encoded = resp.encoded;
-      const jwt = resp.jwt;
+      const {encoded, jwt} = resp;
       const accessData = jwt['amp_authdata'];
       const request = serializeQueryString(dict({
         'url': removeFragment(this.ampdoc.win.location.href),
@@ -311,14 +316,14 @@ export class AccessServerJwtAdapter {
           this.xhr_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: request,
-            headers: {
+            headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            }),
             requireAmpResponseSourceOrigin: false,
           })).then(response => {
-            dev().fine(TAG, 'Authorization response: ', response);
-            return this.replaceSections_(response);
-          }).then(() => accessData);
+        dev().fine(TAG, 'Authorization response: ', response);
+        return this.replaceSections_(response);
+      }).then(() => accessData);
     });
   }
 
@@ -334,7 +339,7 @@ export class AccessServerJwtAdapter {
         const section = sections[i];
         const sectionId = section.getAttribute('i-amphtml-access-id');
         const target = this.ampdoc.getRootNode().querySelector(
-            '[i-amphtml-access-id="' + sectionId + '"]');
+            `[i-amphtml-access-id="${escapeCssSelectorIdent(sectionId)}"]`);
         if (!target) {
           dev().warn(TAG, 'Section not found: ', sectionId);
           continue;

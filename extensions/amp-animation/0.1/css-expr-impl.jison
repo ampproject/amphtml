@@ -79,6 +79,7 @@ ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 {W}{I}{D}{T}{H}\(                   return 'WIDTH_START'
 {H}{E}{I}{G}{H}{T}\(                return 'HEIGHT_START'
 {C}{L}{O}{S}{E}{S}{T}\(             return 'CLOSEST_START'
+{N}{U}{M}\(                         return 'NUM_START'
 {ident}\(                           return 'FUNCTION_START'
 {ident}                             return 'IDENT'
 \-\-{ident}                         return 'VAR_NAME';
@@ -250,6 +251,8 @@ function:
       {$$ = $1;}
   | dim_function
       {$$ = $1;}
+  | num_function
+      {$$ = $1;}
   | rand_function
       {$$ = $1;}
   | index_function
@@ -338,6 +341,17 @@ dim_function:
       {$$ = new ast.CssDimSizeNode('w', $3.slice(1, -1), 'closest');}
   | HEIGHT_START CLOSEST_START STRING ')' ')'
       {$$ = new ast.CssDimSizeNode('h', $3.slice(1, -1), 'closest');}
+  ;
+
+
+/**
+ * AMP-specific `num()` function:
+ * - `num(10px)`
+ * - `num(20s)`
+ */
+num_function:
+    NUM_START literal_or_function ')'
+      {$$ = new ast.CssNumConvertNode($2);}
   ;
 
 

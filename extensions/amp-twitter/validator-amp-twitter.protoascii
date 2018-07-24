@@ -19,9 +19,9 @@ tags: {  # amp-twitter
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-twitter"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    version: "0.1"
+    version: "latest"
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,15 +31,52 @@ tags: {  # <amp-twitter>
   tag_name: "AMP-TWITTER"
   requires_extension: "amp-twitter"
   attrs: {
-    name: "data-tweetid"
-    mandatory: true
+    name: "data-cards"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
   }
+  attrs: {
+    name: "data-conversation"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-limit"
+    trigger: {
+      also_requires_attr: "data-momentid"
+    }
+  }
+  attrs: {
+    name: "data-link-color"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-momentid"
+    mandatory_oneof: "['data-tweetid', 'data-momentid']"
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-theme"
+    trigger: {
+      also_requires_attr: "data-tweetid"
+    }
+  }
+  attrs: {
+    name: "data-tweetid"
+    mandatory_oneof: "['data-tweetid', 'data-momentid']"
+  }
+  # All
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

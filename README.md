@@ -1,4 +1,16 @@
+⚡⚡⚡
+
+The first **[AMP Contributor Summit](https://amphtml.wordpress.com/2018/06/28/announcing-the-amp-contributor-summit/)** for developers who contribute to the AMP open source project--or who want to start contributing--will be in **San Francisco, California September 25-26, 2018** with an **optional New Contributor Day on September 24**.
+
+If you are a contributor to AMP or you want to become one please **[apply to attend](https://events.withgoogle.com/amp-contributor-summit/)**!
+
+If you'd like to give a talk at the summit please **[submit a talk proposal](https://goo.gl/forms/DCpv5ZWfH5drqqVh1)** by July 31, 2018.  Please note, that this is a technical summit. Don’t worry that your talk might not be polished enough.  We’re excited to hear from everyone!
+
+⚡⚡⚡
+
 # AMP HTML ⚡
+
+[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
 [AMP HTML](https://www.ampproject.org/docs/get_started/about-amp.html) is a way to build web pages that render with reliable and fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.  AMP HTML is built on existing web technologies; an AMP page will load (quickly) in any modern browser.
 
@@ -10,21 +22,19 @@ There are a lot of ways you can [contribute](CONTRIBUTING.md) to making AMP bett
 
 We enthusiastically welcome new contributors to the AMP Project **_even if you have no experience being part of an open source project_**.  We've got some [tips for new contributors](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#tips-for-new-open-source-contributors) and guides to getting started (both a [detailed version](contributing/getting-started-e2e.md) and a [TL;DR](contributing/getting-started-quick.md)).
 
-If you're new here, sign up for our [Slack](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) and say "Hi!" in the appropriately named [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel ❤️️
+If you're new to **contributing to the AMP open source project**, sign up for our [Slack](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) and say "Hi!" in the appropriately named [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel ❤️️.
+
+## Using AMP on your site
+
+If you are using AMP on your site,
+check out the docs on [ampproject.org](https://www.ampproject.org/), samples on [ampbyexample.com](https://ampbyexample.com/) and templates on [ampstart.com](https://ampstart.com).
+
+The best place to get help with **questions about using AMP** on your site is [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html).  You'll find answers to many common questions there.  In the event your question hasn't already been answered you can post a new one, and one of the many people who are knowledgeable about AMP and who monitor Stack Overflow will likely answer it before too long.
 
 ## Further reading
 
-If you are creating AMP pages,
-check out the docs on [ampproject.org](https://www.ampproject.org/) and samples on [ampbyexample.com](https://ampbyexample.com/).
-
-Reference:
 * [Component reference](https://www.ampproject.org/docs/reference/components)
-
-Resources:
-* [AMP on StackOverflow](https://stackoverflow.com/questions/tagged/amp-html)
 * [Release schedule](contributing/release-schedule.md)
-
-Technical specifications:
 * [Format specification](spec/amp-html-format.md)
 * [Custom element specification](spec/amp-html-components.md)
 

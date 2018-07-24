@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+// WARNING
+// WARNING
+// WARNING
+// WARNING
+// File must be synced with amp.extens.js
+
 
 /**
  * @typedef {
@@ -184,6 +190,7 @@ export const WebAnimationTimingFill = {
 const WHITELISTED_RPOPS = {
   'opacity': true,
   'transform': true,
+  'transform-origin': true,
   'visibility': true,
   'offset-distance': true,
   'offsetDistance': true,

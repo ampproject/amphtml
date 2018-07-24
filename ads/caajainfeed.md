@@ -14,39 +14,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# CA A.J.A. Infeed:
+# CA A.J.A. Infeed
 
 ## Example
 
 ```html
 <amp-ad width="320" height="120" 
-        type="caajainfeed" 
-        data-ad-spot="thtuegn1pAQ" 
-        data-test="true">
+      type="caajainfeed" 
+      data-ad-spot="thtuegn1pAQ" 
+      data-test="true">
 </amp-ad>
 ```
 
 ## Configuration
-For configuration in detail, [please contact us](amb-nad@cyberagent.co.jp). 
 
-### parameters
-- (Required) data-ad-spot
-- (Option) data-format
-- (Option) data-test
-- (Option) data-optout
-- (Option) data-offset
-- (Option) data-ipv4
-- (Option) data-ipv6
-- (Option) data-network-reachability
-- (Option) data-os-name
-- (Option) data-os-version
-- (Option) data-os-lang
-- (Option) data-os-timezone
-- (Option) data-device-version
-- (Option) data-app-id
-- (Option) data-app-version
-- (Option) data-kv
-- (Option) data-uids
-- (Option) data-template
-- (Option) data-protocol
-- (Option) data-fields
+For configuration details, please email amb-nad@cyberagent.co.jp. 
+
+### Required parameters
+
+- `data-ad-spot`
+
+### Optional parameters
+
+- `data-format`
+- `data-test`
+- `data-optout`
+- `data-offset`
+- `data-ipv4`
+- `data-ipv6`
+- `data-network-reachability`
+- `data-os-name`
+- `data-os-version`
+- `data-os-lang`
+- `data-os-timezone`
+- `data-device-version`
+- `data-app-id`
+- `data-app-version`
+- `data-kv`
+- `data-uids`
+- `data-template`
+- `data-protocol`
+- `data-fields`

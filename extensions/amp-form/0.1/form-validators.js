@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
 import {toWin} from '../../../src/types';
 
 
@@ -72,10 +71,13 @@ export class FormValidator {
     this.form = form;
 
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = getAmpdoc(form);
+    this.ampdoc = Services.ampdoc(form);
 
-    /** @protected @const {!Document} */
-    this.doc = /** @type {!Document} */ (form.ownerDocument);
+    /** @const @protected {!../../../src/service/resources-impl.Resources} */
+    this.resources = Services.resourcesForDoc(form);
+
+    /** @protected @const {!Document|!ShadowRoot} */
+    this.root = this.ampdoc.getRootNode();
 
     /**
      * Tribool indicating last known validity of form.
@@ -131,6 +133,10 @@ export class DefaultValidator extends FormValidator {
 /** @private visible for testing */
 export class PolyfillDefaultValidator extends FormValidator {
 
+  /**
+   * Creates an instance of PolyfillDefaultValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
     const bubbleId = `i-amphtml-validation-bubble-${validationBubbleCount++}`;
@@ -181,6 +187,10 @@ export class PolyfillDefaultValidator extends FormValidator {
  */
 export class AbstractCustomValidator extends FormValidator {
 
+  /**
+   * Creates an instance of AbstractCustomValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
 
@@ -206,14 +216,14 @@ export class AbstractCustomValidator extends FormValidator {
    */
   hideAllValidations() {
     for (const id in this.inputVisibleValidationDict_) {
-      const input = this.doc.getElementById(id);
+      const input = this.root.getElementById(id);
       this.hideValidationFor(dev().assertElement(input));
     }
   }
 
   /**
    * @param {!Element} input
-   * @param {!string} invalidType
+   * @param {string} invalidType
    * @return {?Element}
    */
   getValidationFor(input, invalidType) {
@@ -223,7 +233,7 @@ export class AbstractCustomValidator extends FormValidator {
     const selector = `[visible-when-invalid=${invalidType}]` +
         `[validation-for=${input.id}]`;
     if (this.inputValidationsDict_[selector] === undefined) {
-      this.inputValidationsDict_[selector] = this.doc.querySelector(selector);
+      this.inputValidationsDict_[selector] = this.root.querySelector(selector);
     }
     return this.inputValidationsDict_[selector];
   }
@@ -241,10 +251,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!validation.textContent.trim()) {
       validation.textContent = input.validationMessage;
     }
-
-    input.setAttribute('aria-invalid', 'true');
-    validation.classList.add('visible');
     this.inputVisibleValidationDict_[input.id] = validation;
+
+    this.resources.mutateElement(input,
+        () => input.setAttribute('aria-invalid', 'true'));
+    this.resources.mutateElement(validation,
+        () => validation.classList.add('visible'));
   }
 
   /**
@@ -255,9 +267,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!visibleValidation) {
       return;
     }
-    input.removeAttribute('aria-invalid');
-    visibleValidation.classList.remove('visible');
     delete this.inputVisibleValidationDict_[input.id];
+
+    this.resources.mutateElement(input,
+        () => input.removeAttribute('aria-invalid'));
+    this.resources.mutateElement(visibleValidation,
+        () => visibleValidation.classList.remove('visible'));
   }
 
   /**
@@ -285,7 +300,9 @@ export class AbstractCustomValidator extends FormValidator {
    */
   onInteraction(event) {
     const input = dev().assertElement(event.target);
-    const shouldValidate = this.shouldValidateOnInteraction(input);
+    const shouldValidate =
+        !!input.checkValidity && this.shouldValidateOnInteraction(input);
+
     this.hideValidationFor(input);
     if (shouldValidate && !input.checkValidity()) {
       this.reportInput(input);

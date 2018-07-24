@@ -72,8 +72,8 @@ export function recreateNonProtoObject(obj) {
 /**
  * Returns a value from an object for a field-based expression. The expression
  * is a simple nested dot-notation of fields, such as `field1.field2`. If any
- * field in a chain does not exist or is not an object, the returned value will
- * be `undefined`.
+ * field in a chain does not exist or is not an object or array, the returned
+ * value will be `undefined`.
  *
  * @param {!JsonObject} obj
  * @param {string} expr
@@ -89,17 +89,16 @@ export function getValueForExpr(obj, expr) {
   let value = obj;
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
-    if (!part) {
-      value = undefined;
-      break;
+    if (part &&
+        value &&
+        value[part] !== undefined &&
+        hasOwnProperty(value, part)
+    ) {
+      value = value[part];
+      continue;
     }
-    if (!isObject(value) ||
-            value[part] === undefined ||
-            !hasOwnProperty(value, part)) {
-      value = undefined;
-      break;
-    }
-    value = value[part];
+    value = undefined;
+    break;
   }
   return value;
 }
@@ -109,7 +108,7 @@ export function getValueForExpr(obj, expr) {
  * to JsonObject.
  * Create a new wrapper if an array return value is desired.
  * @param {*} json JSON string to parse
- * @return {?JsonObject|undefined} May be extend to parse arrays.
+ * @return {?JsonObject} May be extend to parse arrays.
  */
 export function parseJson(json) {
   return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));

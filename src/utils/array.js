@@ -14,6 +14,31 @@
  * limitations under the License.
  */
 
+
+/**
+ * Compares if two arrays contains exactly same elements of same number
+ * of same order.
+ * Notice that it does NOT handle NaN case as expected
+ *
+ * @param {!Array<T>} arr1
+ * @param {!Array<T>} arr2
+ * @return {boolean}
+ * @template T
+ */
+export function areEqualOrdered(arr1, arr2) {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 /**
  * A bit like Array#filter, but removes elements that filter false from the
  * array. Returns the filtered items.
@@ -25,14 +50,23 @@
  */
 export function filterSplice(array, filter) {
   const splice = [];
+  let index = 0;
   for (let i = 0; i < array.length; i++) {
     const item = array[i];
-    if (!filter(item, i, array)) {
+    if (filter(item, i, array)) {
+      if (index < i) {
+        array[index] = item;
+      }
+      index++;
+    } else {
       splice.push(item);
-      array.splice(i, 1);
-      i--;
     }
   }
+
+  if (index < array.length) {
+    array.length = index;
+  }
+
   return splice;
 }
 
@@ -52,4 +86,32 @@ export function findIndex(array, predicate) {
     }
   }
   return -1;
+}
+
+/**
+ * Converts the given iterator to an array.
+ *
+ * @param {!Iterator<T>} iterator
+ * @return {Array<T>}
+ * @template T
+ */
+export function fromIterator(iterator) {
+  const array = [];
+  for (let e = iterator.next(); !e.done; e = iterator.next()) {
+    array.push(e.value);
+  }
+  return array;
+}
+
+/**
+ * Adds item to array if it is not already present.
+ *
+ * @param {Array<T>} array
+ * @param {T} item
+ * @template T
+ */
+export function pushIfNotExist(array, item) {
+  if (array.indexOf(item) < 0) {
+    array.push(item);
+  }
 }

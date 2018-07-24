@@ -24,12 +24,12 @@ const EmbedType = {
 
 
 import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
-import {getData, listen} from '../../../src/event-helper';
-import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
+import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
+import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 export class AmpVk extends AMP.BaseElement {
 
@@ -254,7 +254,7 @@ export class AmpVk extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 }
 

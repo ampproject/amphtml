@@ -19,9 +19,9 @@ tags: {  # amp-gfycat
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-gfycat"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    version: "0.1"
+    version: "latest"
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"

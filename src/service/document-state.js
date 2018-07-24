@@ -16,8 +16,8 @@
 
 import {Observable} from '../observable';
 import {getVendorJsPropertyName} from '../style';
-import {waitForChild} from '../dom';
 import {registerServiceBuilder} from '../service';
+import {waitForChild} from '../dom';
 
 /**
  */
@@ -68,14 +68,6 @@ export class DocumentState {
 
     /** @private {?Observable} */
     this.bodyAvailableObservable_ = null;
-  }
-
-  /** @private */
-  cleanup_() {
-    if (this.visibilityChangeEvent_) {
-      this.document_.removeEventListener(this.visibilityChangeEvent_,
-          this.boundOnVisibilityChanged_);
-    }
   }
 
   /**

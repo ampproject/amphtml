@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {
   PositionObserver,
 } from '../../src/service/position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
 } from '../../src/service/position-observer/position-observer-worker';
-import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
-import {setStyles} from '../../src/style';
+import {layoutRectLtwh} from '../../src/layout-rect';
 import {macroTask} from '../../testing/yield';
-import * as lolex from 'lolex';
+import {setStyles} from '../../src/style';
 
 describes.realWin('PositionObserver', {amp: 1}, env => {
   let win;
@@ -40,9 +40,9 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
     let elem1;
     let clock;
     beforeEach(() => {
-      clock = lolex.install(win);
+      clock = lolex.install({target: ampdoc.win});
       posOb = new PositionObserver(ampdoc);
-      sandbox.stub(posOb.vsync_, 'measure', callback => {
+      sandbox.stub(posOb.vsync_, 'measure').callsFake(callback => {
         win.setTimeout(callback, 1);
       });
       elem = win.document.createElement('div');
@@ -61,6 +61,10 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         'height': 1,
         'top': 0,
       });
+    });
+
+    afterEach(() => {
+      clock.uninstall();
     });
 
     describe('API functions includes observe/unobserve/changeFidelity', () => {
@@ -88,7 +92,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       let top;
       beforeEach(() => {
         top = 0;
-        sandbox.stub(posOb.viewport_, 'getClientRectAsync', () => {
+        sandbox.stub(posOb.viewport_, 'getClientRectAsync').callsFake(() => {
           return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
         });
       });
@@ -133,7 +137,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       let top;
       beforeEach(() => {
         top = 0;
-        sandbox.stub(posOb.viewport_, 'getClientRectAsync', () => {
+        sandbox.stub(posOb.viewport_, 'getClientRectAsync').callsFake(() => {
           return Promise.resolve(layoutRectLtwh(2, top, 20, 10));
         });
       });

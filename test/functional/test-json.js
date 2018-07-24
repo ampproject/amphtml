@@ -84,6 +84,24 @@ describe('json', () => {
       expect(getValueForExpr(obj, 'num')).to.be.undefined;
       expect(getValueForExpr(obj, '__proto__')).to.be.undefined;
     });
+
+    it('should support array index', () => {
+      const child = {num: 1, str: 'A'};
+      const obj = {foo: [child]};
+      expect(getValueForExpr(obj, 'foo.0.num')).to.equal(1);
+      expect(getValueForExpr(obj, 'foo.0.str')).to.equal('A');
+      expect(getValueForExpr(obj, 'foo.0a.str')).to.be.undefined;
+      expect(getValueForExpr(obj, 'foo.1.num')).to.be.undefined;
+      expect(getValueForExpr(obj, 'foo.1.str')).to.be.undefined;
+    });
+
+    it('should only search in own properties of arrays', () => {
+      const arr = ['A'];
+      expect(getValueForExpr(arr, '0')).to.equal('A');
+      expect(getValueForExpr(arr, '1')).to.be.undefined;
+      expect(getValueForExpr(arr, 'concat')).to.be.undefined;
+      expect(getValueForExpr(arr, '__proto__')).to.be.undefined;
+    });
   });
 
   describe('recreateNonProtoObject', () => {
@@ -91,7 +109,7 @@ describe('json', () => {
       const original = {};
       const copy = recreateNonProtoObject(original);
       expect(copy).to.deep.equal(original);
-      expect(copy === original).to.be.false;
+      expect(copy).to.not.equal(original);
       expect(copy.__proto__).to.be.undefined;
     });
 
@@ -99,7 +117,7 @@ describe('json', () => {
       const original = {str: 'A', num: 1, bool: true, val: null};
       const copy = recreateNonProtoObject(original);
       expect(copy).to.deep.equal(original);
-      expect(copy === original).to.be.false;
+      expect(copy).to.not.equal(original);
       expect(copy.__proto__).to.be.undefined;
       expect(copy.val).to.be.null;
     });
@@ -108,10 +126,10 @@ describe('json', () => {
       const original = {child: {str: 'A', num: 1, bool: true, val: null}};
       const copy = recreateNonProtoObject(original);
       expect(copy).to.deep.equal(original);
-      expect(copy === original).to.be.false;
+      expect(copy).to.not.equal(original);
       expect(copy.__proto__).to.be.undefined;
       expect(copy.child).to.deep.equal(original.child);
-      expect(copy.child === original.child).to.be.false;
+      expect(copy.child).to.not.equal(original.child);
       expect(copy.child.__proto__).to.be.undefined;
     });
   });

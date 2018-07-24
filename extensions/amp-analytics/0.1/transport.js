@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
-  parseUrl,
   checkCorsUrl,
+  parseUrlDeprecated,
 } from '../../../src/url';
+import {createPixel} from '../../../src/pixel';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
@@ -31,11 +32,19 @@ const TAG_ = 'amp-analytics.Transport';
 /**
  * @param {!Window} win
  * @param {string} request
- * @param {!Object<string, string>} transportOptions
+ * @param {!Object<string, string|boolean>} transportOptions
  */
 export function sendRequest(win, request, transportOptions) {
   assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
+
+  const referrerPolicy = transportOptions['referrerPolicy'];
+
+  if (referrerPolicy === 'no-referrer') {
+    transportOptions['beacon'] = false;
+    transportOptions['xhrpost'] = false;
+  }
+
   if (transportOptions['beacon'] &&
       Transport.sendRequestUsingBeacon(win, request)) {
     return;
@@ -44,8 +53,12 @@ export function sendRequest(win, request, transportOptions) {
       Transport.sendRequestUsingXhr(win, request)) {
     return;
   }
-  if (transportOptions['image']) {
-    Transport.sendRequestUsingImage(request);
+  const image = transportOptions['image'];
+  if (image) {
+    const suppressWarnings = (typeof image == 'object' &&
+        image['suppressWarnings']);
+    Transport.sendRequestUsingImage(
+        win, request, suppressWarnings, /** @type {string|undefined} */ (referrerPolicy));
     return;
   }
   user().warn(TAG_, 'Failed to send request', request, transportOptions);
@@ -57,18 +70,20 @@ export function sendRequest(win, request, transportOptions) {
 export class Transport {
 
   /**
+   * @param {!Window} win
    * @param {string} request
+   * @param {boolean} suppressWarnings
+   * @param {string|undefined} referrerPolicy
    */
-  static sendRequestUsingImage(request) {
-    const image = new Image();
-    image.src = request;
-    image.width = 1;
-    image.height = 1;
+  static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy) {
+    const image = createPixel(win, request, referrerPolicy);
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      user().warn(TAG_, 'Response unparseable or failed to send image ' +
-          'request', request);
+      if (!suppressWarnings) {
+        user().warn(TAG_, 'Response unparseable or failed to send image ' +
+            'request', request);
+      }
     });
   }
 
@@ -140,7 +155,8 @@ export function sendRequestUsingIframe(win, request) {
     }, 5000);
   };
   user().assert(
-      parseUrl(request).origin != parseUrl(win.location.href).origin,
+      parseUrlDeprecated(request).origin !=
+        parseUrlDeprecated(win.location.href).origin,
       'Origin of iframe request must not be equal to the document origin.' +
       ' See https://github.com/ampproject/' +
       ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');

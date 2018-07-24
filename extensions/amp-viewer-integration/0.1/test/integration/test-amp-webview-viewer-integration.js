@@ -69,8 +69,9 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
 
     it('should set source and origin for webview', () => {
-      const stub = sandbox.stub(integr, 'webviewPreHandshakePromise_',
-          () => new Promise(() => {}));
+      const stub =
+          sandbox.stub(integr, 'webviewPreHandshakePromise_').callsFake(
+              () => new Promise(() => {}));
       integr.init();
       expect(stub).to.be.calledWith(/* source */ null, /* origin */ '');
     });

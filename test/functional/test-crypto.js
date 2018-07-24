@@ -16,6 +16,7 @@
 
 import {Crypto} from '../../src/service/crypto-impl';
 import {Platform} from '../../src/service/platform-impl';
+import {Services} from '../../src/services';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
@@ -23,7 +24,6 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {Services} from '../../src/services';
 
 
 describes.realWin('crypto-impl', {}, env => {
@@ -42,13 +42,16 @@ describes.realWin('crypto-impl', {}, env => {
     return uint8Array;
   }
 
-  function testSuite(description, win) {
+  function testSuite(description, win, expectedError) {
     describe(description, () => {
       beforeEach(() => {
         crypto = createCrypto(win || env.win);
       });
 
       it('should hash "abc" in sha384', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return crypto.sha384('abc').then(buffer => {
           expect(buffer.length).to.equal(48);
           expect(buffer[0]).to.equal(203);
@@ -58,6 +61,9 @@ describes.realWin('crypto-impl', {}, env => {
       });
 
       it('should hash [1,2,3] in sha384', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return crypto.sha384(uint8Array([1, 2, 3])).then(buffer => {
           expect(buffer.length).to.equal(48);
           expect(buffer[0]).to.equal(134);
@@ -67,29 +73,43 @@ describes.realWin('crypto-impl', {}, env => {
       });
 
       it('should hash "abc" in sha384Base64', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return expect(crypto.sha384Base64('abc')).to.eventually.equal(
             'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
       });
 
       it('should hash "foobar" in sha384Base64', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return expect(crypto.sha384Base64('foobar')).to.eventually.equal(
             'PJww2fZl501RXIQpYNSkUcg6ASX9Pec5LXs3IxrxDHLqWK7fzfiaV2W_kCr5Ps8G');
       });
 
       it('should hash [1,2,3] in sha384', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return expect(crypto.sha384Base64(uint8Array([1, 2, 3])))
             .to.eventually.equal(
-            'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
+                'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
                 'e57T8sjh2sTcMlhn053f8dJim3o5PUf2');
       });
 
       it('should throw when input contains chars out of range [0,255]', () => {
-        expect(() => crypto.sha384('abc今')).to.throw();
-        expect(() => crypto.sha384Base64('abc今')).to.throw();
-        expect(() => crypto.uniform('abc今')).to.throw();
+        allowConsoleError(() => {
+          expect(() => crypto.sha384('abc今')).to.throw();
+          expect(() => crypto.sha384Base64('abc今')).to.throw();
+          expect(() => crypto.uniform('abc今')).to.throw();
+        });
       });
 
       it('should hash "abc" to uniform number', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return crypto.uniform('abc').then(result => {
           expect(result.toFixed(6)).to.equal('0.792976');
         });
@@ -104,7 +124,7 @@ describes.realWin('crypto-impl', {}, env => {
     installDocService(win, /* isSingleDoc */ true);
     installExtensionsService(win);
     const extensions = Services.extensionsFor(win);
-    sandbox.stub(extensions, 'preloadExtension', extensionId => {
+    sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(win);
       return Promise.resolve();
@@ -133,7 +153,7 @@ describes.realWin('crypto-impl', {}, env => {
         digest: () => {throw new Error();},
       },
     },
-  });
+  }, '[Crypto] SubtleCrypto failed, fallback to closure lib. Error');
 
   it('native API result should exactly equal to crypto lib result', () => {
     return Promise

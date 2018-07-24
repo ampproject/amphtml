@@ -15,8 +15,8 @@
  */
 
 
-import {listen} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {listen} from '../../../src/event-helper';
 
 
 /**
@@ -71,6 +71,9 @@ export class TouchHandler {
     this.listenForTouchEvents_();
   }
 
+  /**
+   * @private
+   */
   listenForTouchEvents_() {
     const handleEvent = this.handleEvent_.bind(this);
     const doc = this.win.document;
@@ -87,6 +90,9 @@ export class TouchHandler {
         listen(doc, 'touchmove', handleEvent, options));
   }
 
+  /**
+   * @private
+   */
   unlisten_() {
     this.unlistenHandlers_.forEach(unlisten => unlisten());
     this.unlistenHandlers_.length = 0;
@@ -156,7 +162,7 @@ export class TouchHandler {
     return copiedTouches;
   }
 
- /**
+  /**
    * Copies specified properties of o to a new object.
    * @param {!Object} o The source object.
    * @param {!Array<string>} properties The properties to copy.

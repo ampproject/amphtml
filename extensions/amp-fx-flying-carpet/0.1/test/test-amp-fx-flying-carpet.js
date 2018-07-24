@@ -132,16 +132,16 @@ describes.realWin('amp-fx-flying-carpet', {
       const container = flyingCarpet.firstChild.firstChild;
       let width = 10;
 
-      impl.getVsync().mutate = function(callback) {
+      impl.mutateElement = function(callback) {
         callback();
       };
       impl.getLayoutWidth = () => width;
 
-      impl.onLayoutMeasure();
+      impl.onMeasureChanged();
       expect(container.style.width).to.equal(width + 'px');
 
       width++;
-      impl.onLayoutMeasure();
+      impl.onMeasureChanged();
       expect(container.style.width).to.equal(width + 'px');
     });
   });
@@ -198,12 +198,26 @@ describes.realWin('amp-fx-flying-carpet', {
       return [pretext, img, posttext];
     }).then(flyingCarpet => {
       const attemptCollapse = sandbox.stub(flyingCarpet.implementation_,
-          'attemptCollapse', () => {
-            return Promise.resolve();
-          });
+          'attemptCollapse').callsFake(() => {
+        return Promise.resolve();
+      });
       expect(flyingCarpet.getBoundingClientRect().height).to.be.gt(0);
       img.collapse();
       expect(attemptCollapse).to.have.been.called;
     });
   });
+
+  it('should relayout the content on onMeasureChanged', () => {
+    return getAmpFlyingCarpet().then(flyingCarpet => {
+      const impl = flyingCarpet.implementation_;
+      const scheduleLayoutSpy_ = sandbox.spy(impl, 'scheduleLayout');
+
+      impl.mutateElement = function(callback) {
+        callback();
+      };
+      impl.onMeasureChanged();
+      expect(scheduleLayoutSpy_).to.have.been.calledWith(impl.children_);
+    });
+  });
+
 });

@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from './action-constants';
 import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
-import {Signals} from './utils/signals';
-import {dev, rethrowAsync} from './log';
-import {disposeServicesForEmbed, getTopWindow} from './service';
-import {escapeHtml} from './dom';
 import {Services} from './services';
+import {Signals} from './utils/signals';
+import {closestBySelector, escapeHtml, removeElement} from './dom';
+import {createCustomEvent, listenOnce, loadPromise} from './event-helper';
+import {dev, rethrowAsync, user} from './log';
+import {dict} from './utils/object';
+import {disposeServicesForEmbed, getTopWindow} from './service';
+import {htmlFor} from './static-template';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
-import {loadPromise} from './event-helper';
 import {
   px,
   resetStyles,
@@ -38,7 +41,8 @@ import {toWin} from './types';
 const EMBED_PROP = '__AMP_EMBED__';
 
 /** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
+const EXCLUDE_INI_LOAD =
+    ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL', 'AMP-AD-EXIT'];
 
 
 /**
@@ -63,13 +67,13 @@ export let FriendlyIframeSpec;
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let srcdocSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setSrcdocSupportedForTesting(val) {
   srcdocSupported = val;
@@ -93,7 +97,6 @@ function isSrcdocSupported() {
  * whether the embed is currently in the viewport.
  * @param {!FriendlyIframeEmbed} embed
  * @param {boolean} visible
- * @restricted
  * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
@@ -103,6 +106,9 @@ export function setFriendlyIframeEmbedVisible(embed, visible) {
 
 /**
  * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * Caution: This will only return the FIE after the iframe has 'loaded'. If you
+ * are checking before this signal you may be in a race condition that returns
+ * null.
  * @param {!HTMLIFrameElement} iframe
  * @return {?FriendlyIframeEmbed}
  */
@@ -123,7 +129,7 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec,
-    opt_preinstallCallback) {
+  opt_preinstallCallback) {
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
@@ -145,16 +151,24 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     // Chrome does not reflect the iframe readystate.
     iframe.readyState = 'complete';
   };
+  const registerViolationListener = () => {
+    iframe.contentWindow.addEventListener('securitypolicyviolation',
+        violationEvent => {
+          dev().warn('FIE', 'security policy violation', violationEvent);
+        });
+  };
   let loadedPromise;
   if (isSrcdocSupported()) {
     iframe.srcdoc = html;
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
+    registerViolationListener();
   } else {
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
     childDoc.open();
+    registerViolationListener();
     childDoc.write(html);
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
@@ -266,6 +280,10 @@ function mergeHtml(spec) {
           `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`);
     });
   }
+
+  // Load CSP
+  result.push('<meta http-equiv=Content-Security-Policy ' +
+      'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
 
   // Postambule.
   if (ip > 0) {
@@ -394,7 +412,10 @@ export class FriendlyIframeEmbed {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
   }
 
-  /** @private */
+  /**
+   * @private
+   * @restricted
+   */
   startRender_() {
     if (this.host) {
       this.host.renderStarted();
@@ -403,6 +424,7 @@ export class FriendlyIframeEmbed {
     }
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
+      this.win.document.documentElement.classList.add('i-amphtml-fie');
       setStyles(dev().assertElement(this.win.document.body), {
         opacity: 1,
         visibility: 'visible',
@@ -451,6 +473,7 @@ export class FriendlyIframeEmbed {
   /**
    * @param {boolean} visible
    * @private
+   * @restricted
    */
   setVisible_(visible) {
     if (this.visible_ != visible) {
@@ -465,95 +488,121 @@ export class FriendlyIframeEmbed {
    */
   getBodyElement() {
     return /** @type {!HTMLBodyElement} */ (
-        (this.iframe.contentDocument || this.iframe.contentWindow.document)
-            .body);
-  }
-
-  /**
-   * @return {!./service/vsync-impl.Vsync}
-   * @visibleForTesting
-   */
-  getVsync() {
-    return Services.vsyncFor(this.win);
+      (this.iframe.contentDocument || this.iframe.contentWindow.document)
+          .body);
   }
 
   /**
    * @return {!./service/resources-impl.Resources}
-   * @visibleForTesting
+   * @private
    */
-  getResources() {
+  getResources_() {
     return Services.resourcesForDoc(this.iframe);
   }
 
   /**
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
-   * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
-   * @param {!Object=} opt_state
+   * @param {{measure: (function()|undefined), mutate: function()}} task
    * @return {!Promise}
    * @private
    */
-  runVsyncOnIframe_(task, opt_state) {
-    if (task.mutate && !task.measure) {
-      return this.getResources().mutateElement(this.iframe, () => {
-        task.mutate(opt_state);
-      });
-    }
-    return new Promise(resolve => {
-      this.getVsync().measure(() => {
-        task.measure(opt_state);
+  measureMutate_(task) {
+    return this.getResources_().measureMutateElement(this.iframe,
+        task.measure || null, task.mutate);
+  }
 
-        if (!task.mutate) {
-          return resolve();
-        }
+  /**
+   * @param {!Element} requestingElement An amp-lightbox element.
+   * @return {!Promise}
+   */
+  enterFullOverlayMode(requestingElement) {
+    const ampAdParent = dev().assertElement(this.iframe.parentNode);
 
-        this.runVsyncOnIframe_({mutate: task.mutate}, opt_state)
-            .then(resolve);
-      });
+    // Security assertion. Otherwise any 3p frame could request lighbox mode.
+    user().assert(ampAdParent.tagName.toLowerCase() == 'amp-ad',
+        'Only <amp-ad> is allowed to enter lightbox mode.');
+
+    const header =
+        renderCloseButtonHeader(this.win, ampAdParent, requestingElement);
+
+    ampAdParent.appendChild(header);
+
+    const bodyStyle = {
+      'background': 'transparent',
+      'position': 'absolute',
+      'bottom': 'auto',
+      'right': 'auto',
+
+      // Set for replacing with vsync values.
+      'top': '',
+      'left': '',
+      'width': '',
+      'height': '',
+    };
+
+    const iframeStyle = {
+      'position': 'fixed',
+      'left': 0,
+      'right': 0,
+      'bottom': 0,
+      'width': '100vw',
+
+      // Set for replacing with vsync values.
+      'top': '',
+      'height': '',
+    };
+
+    return this.measureMutate_({
+      measure: () => {
+        const rect = this.host ?
+          this.host.getLayoutBox() :
+          this.iframe./*OK*/getBoundingClientRect();
+
+        const {top, left, width, height} = rect;
+
+        const headerHeight = this.getHeaderHeight_(header);
+
+        Object.assign(iframeStyle, {
+          'top': px(headerHeight),
+          'height': `calc(100vh - ${px(headerHeight)})`,
+        });
+
+        // Offset body by header height to prevent visual jump.
+        Object.assign(bodyStyle, {
+          'top': px(top - headerHeight),
+          'left': px(left),
+          'width': px(width),
+          'height': px(height - headerHeight),
+        });
+      },
+      mutate: () => {
+        // !important to prevent abuse e.g. box @ ltwh = 0, 0, 0,0
+        setImportantStyles(this.iframe, iframeStyle);
+
+        // Done in vsync in order to apply transition.
+        header.classList.add('amp-ad-close-header');
+
+        // We need to override runtime-level !important rules
+        setImportantStyles(this.getBodyElement(), bodyStyle);
+      },
     });
   }
 
   /**
-   * @return {!Promise}
+   * Stubbed in tests.
+   * @param {!Element} element
+   * @private
    */
-  enterFullOverlayMode() {
-    return this.runVsyncOnIframe_({
-      measure: state => {
-        const iframeRect = this.iframe./*OK*/getBoundingClientRect();
-
-        state.bodyStyle = {
-          'background': 'transparent',
-          'position': 'absolute',
-          'top': px(iframeRect.top),
-          'left': px(iframeRect.left),
-          'width': px(iframeRect.width),
-          'height': px(iframeRect.height),
-          'bottom': 'auto',
-          'right': 'auto',
-        };
-      },
-      mutate: state => {
-        setStyles(this.iframe, {
-          'position': 'fixed',
-          'left': 0,
-          'right': 0,
-          'top': 0,
-          'bottom': 0,
-          'width': '100vw',
-          'height': '100vh',
-        });
-
-        // We need to override runtime-level !important rules
-        setImportantStyles(this.getBodyElement(), state.bodyStyle);
-      },
-    }, {});
+  getHeaderHeight_(element) {
+    return element./*OK*/getBoundingClientRect().height;
   }
 
   /**
    * @return {!Promise}
    */
   leaveFullOverlayMode() {
-    return this.runVsyncOnIframe_({
+    return this.measureMutate_({
       mutate: () => {
         resetStyles(this.iframe, [
           'position',
@@ -566,7 +615,7 @@ export class FriendlyIframeEmbed {
         ]);
 
         // we're not resetting background here as we need to set it to
-        // transparent permanently (see TODO)
+        // transparent permanently.
         resetStyles(this.getBodyElement(), [
           'position',
           'top',
@@ -581,17 +630,52 @@ export class FriendlyIframeEmbed {
   }
 }
 
+/**
+ * @param {!Window} win
+ * @param {!Element} ampAdParent
+ * @param {!Element} ampLightbox
+ * @visibleForTesting
+ */
+export function renderCloseButtonHeader(win, ampAdParent, ampLightbox) {
+  const el = htmlFor(ampAdParent)`
+    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
+      <div>Ad</div>
+      <i-amphtml-ad-close-button class="amp-ad-close-button">
+      </i-amphtml-ad-close-button>
+    </i-amphtml-ad-close-header>`;
+
+  listenOnce(el, 'click', () => {
+    triggerLightboxClose(win, ampLightbox, /* caller */ ampAdParent);
+    removeElement(el);
+  });
+
+  return el;
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} target An amp-lightbox target.
+ * @param {!Element} caller Whomever.
+ */
+function triggerLightboxClose(win, target, caller) {
+  const event = createCustomEvent(win, 'tap', /* detail */ dict({}));
+  const method = 'close';
+  const args = null;
+  const trust = ActionTrust.HIGH;
+  Services.actionServiceForDoc(target)
+      .execute(target, method, args, caller, caller, event, trust);
+}
 
 /**
  * Returns the promise that will be resolved when all content elements
  * have been loaded in the initially visible set.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {!Window} hostWin
  * @param {!./layout-rect.LayoutRectDef} rect
  * @return {!Promise}
  */
-export function whenContentIniLoad(context, hostWin, rect) {
-  return Services.resourcesForDoc(context)
+export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
+  return Services.resourcesForDoc(elementOrAmpDoc)
       .getResourcesInRect(hostWin, rect)
       .then(resources => {
         const promises = [];
@@ -602,4 +686,12 @@ export function whenContentIniLoad(context, hostWin, rect) {
         });
         return Promise.all(promises);
       });
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInFie(element) {
+  return !!closestBySelector(element, '.i-amphtml-fie');
 }

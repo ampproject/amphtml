@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {startsWith} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
+import {startsWith} from '../../../src/string';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -64,4 +64,4 @@ function parseAttributes(attributeObject) {
     attributes[key] = String(attributeObject[key]);
   }
   return attributes;
-};
+}

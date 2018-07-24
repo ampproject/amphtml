@@ -1,0 +1,8 @@
+#EXTM3U
+## Generated with https://github.com/google/shaka-packager version v1.6.2-6b98f0d-release
+#EXT-X-STREAM-INF:CODECS="avc1.42c01e",BANDWIDTH=239386
+tokyo_240p.m3u8
+#EXT-X-STREAM-INF:CODECS="avc1.42c01e",BANDWIDTH=653613
+tokyo_360p.m3u8
+#EXT-X-STREAM-INF:CODECS="avc1.42c01e",BANDWIDTH=1073480
+tokyo_480p.m3u8

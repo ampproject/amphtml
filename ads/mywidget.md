@@ -28,15 +28,15 @@ Please visit our [website](https://widget.my.com) for more information about us.
 
 ```html
 <amp-embed height="250"
-      type="mywidget"
-      data-cid="your-campaign-id">
+    type="mywidget"
+    data-cid="your-campaign-id">
 </amp-embed>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://widget.my.com/docs/dev/amp/).
+For semantics of configuration, please see [myWidget documentation](https://widget.my.com/docs/dev/amp/).
 
-Required parameters:
+### Required parameters
 
-- data-cid
+- `data-cid`

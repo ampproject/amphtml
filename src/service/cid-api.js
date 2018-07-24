@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {getCookie, setCookie} from '../cookies';
 import {Services} from '../services';
+import {WindowInterface} from '../window-interface';
 import {dev} from '../log';
 import {dict} from '../utils/object';
-import {isProxyOrigin} from '../url';
-import {WindowInterface} from '../window-interface';
+import {getCookie, setCookie} from '../cookies';
+import {isProxyOrigin, parseUrlDeprecated} from '../url';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 
@@ -44,11 +44,12 @@ const YEAR = 365 * DAY;
  */
 export class GoogleCidApi {
 
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    this.win_ = win;
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /**
+     * @private {!Window}
+     */
+    this.win_ = ampdoc.win;
     /**
      * @private {!./timer-impl.Timer}
      */
@@ -58,6 +59,13 @@ export class GoogleCidApi {
      * @private {!Object<string, !Promise<?string>>}
      */
     this.cidPromise_ = {};
+
+    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+
+    /** @private {?string} */
+    this.canonicalOrigin_ = canonicalUrl
+      ? parseUrlDeprecated(canonicalUrl).origin
+      : null;
   }
 
   /**
@@ -92,12 +100,30 @@ export class GoogleCidApi {
       if (!token || this.isStatusToken_(token)) {
         this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
       }
+
       const url = GOOGLE_API_URL + apiKey;
       return this.fetchCid_(dev().assertString(url), scope, token)
-          .then(this.handleResponse_.bind(this))
+          .then(response => {
+            const cid = this.handleResponse_(response);
+            if (!cid && response['alternateUrl']) {
+              // If an alternate url is provided, try again with the alternate
+              // url The client is still responsible for appending API keys to
+              // the URL.
+              const altUrl = `${response['alternateUrl']}?key=${apiKey}`;
+              return this.fetchCid_(dev().assertString(altUrl), scope, token)
+                  .then(this.handleResponse_.bind(this));
+            }
+            return cid;
+          })
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
-            dev().error(TAG, e);
+            if (e && e.response) {
+              e.response.json().then(res => {
+                dev().error(TAG, JSON.stringify(res));
+              });
+            } else {
+              dev().error(TAG, e);
+            }
             return null;
           });
     });
@@ -112,6 +138,7 @@ export class GoogleCidApi {
   fetchCid_(url, scope, token) {
     const payload = dict({
       'originScope': scope,
+      'canonicalOrigin': this.canonicalOrigin_,
     });
     if (token) {
       payload['securityToken'] = token;
@@ -139,10 +166,12 @@ export class GoogleCidApi {
     if (res['clientId']) {
       this.persistToken_(res['securityToken'], YEAR);
       return res['clientId'];
-    } else {
-      this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
+    }
+    if (res['alternateUrl']) {
       return null;
     }
+    this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
+    return null;
   }
 
   /**
@@ -151,7 +180,9 @@ export class GoogleCidApi {
    */
   persistToken_(tokenValue, expires) {
     if (tokenValue) {
-      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires));
+      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires), {
+        highestAvailableDomain: true,
+      });
     }
   }
 
@@ -163,11 +194,18 @@ export class GoogleCidApi {
     return this.win_.Date.now() + time;
   }
 
+  /**
+   * @return {boolean}
+   */
   isReferrerProxyOrigin_() {
     return isProxyOrigin(WindowInterface.getDocumentReferrer(this.win_));
   }
 
+  /**
+   * @param {?string} token
+   * @return {boolean}
+   */
   isStatusToken_(token) {
-    return token && token[0] === '$';
+    return /** @type boolean */ (token && token[0] === '$');
   }
 }

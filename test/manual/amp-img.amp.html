@@ -24,8 +24,20 @@
   <h1>amp-image</h1>
 
   <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width=400 height=300 layout=responsive noloading
-      sizes="(min-width: 320px) 320px, 100vw">
+      sizes="(max-width: 320px) 320px, 100vw">
     <div placeholder>Waiting for the image!</div>
+  </amp-img>
+
+  <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width=400 height=300 layout=responsive noloading
+  native-sizes="(max-width: 320px) 320px, 100vw">
+  <div placeholder>Waiting for the image!</div>
+  </amp-img>
+
+  <amp-img srcset="/examples/img/hero@1x.jpg 641w,
+                   /examples/img/hero@2x.jpg 1282w"
+    width=641 height=480 layout=responsive noloading
+    native-sizes="(max-width: 800px) 200px, 1282px">
+  <div placeholder>Waiting for the image!</div>
   </amp-img>
 
   <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=responsive

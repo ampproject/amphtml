@@ -15,8 +15,8 @@
  */
 
 import {AdTracker} from '../ad-tracker';
-import {Services} from '../../../../src/services';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
+import {Services} from '../../../../src/services';
 
 
 describes.realWin('placement', {
@@ -94,7 +94,9 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      expect(() => placements[0].getAdElement()).to.throw(/No ad element/);
+      allowConsoleError(() => {
+        expect(() => placements[0].getAdElement()).to.throw(/No ad element/);
+      });
     });
   });
 
@@ -298,9 +300,7 @@ describes.realWin('placement', {
           });
     });
 
-    // TODO(dvoytenko): Enable after fixing #11399.
-    it.skip('should place an ad with ' +
-        'i-amphtml-layout-awaiting-size class', () => {
+    it('should place an ad with i-amphtml-layout-awaiting-size class.', () => {
       const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
@@ -327,6 +327,12 @@ describes.realWin('placement', {
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
+
+      const resources = Services.resourcesForDoc(anchor);
+      sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
+        return Promise.reject();
+      });
+
       return placements[0].placeAd(baseAttributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
@@ -520,7 +526,7 @@ describes.realWin('placement', {
       container.appendChild(anchor);
 
       const resource = Services.resourcesForDoc(anchor);
-      sandbox.stub(resource, 'attemptChangeSize', () => {
+      sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
         return Promise.resolve();
       });
 
@@ -545,7 +551,7 @@ describes.realWin('placement', {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
-      });;
+      });
       return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
@@ -560,7 +566,7 @@ describes.realWin('placement', {
       container.appendChild(anchor);
 
       const resource = Services.resourcesForDoc(anchor);
-      sandbox.stub(resource, 'attemptChangeSize', () => {
+      sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
         return Promise.reject(new Error('Resize failed'));
       });
 

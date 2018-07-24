@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {install} from '../../src/polyfills/document-contains';
 import * as sinon from 'sinon';
+import {install} from '../../src/polyfills/document-contains';
 
 
 describe('HTMLDocument.contains', () => {

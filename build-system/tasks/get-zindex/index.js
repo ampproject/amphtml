@@ -18,14 +18,14 @@
 
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
+const PluginError = require('plugin-error');
 const postcss = require('postcss');
 const table = require('text-table');
 const through = require('through2');
-const util = require('gulp-util');
 
 const tableHeaders = [
- ['selector', 'z-index', 'file'],
- ['---', '---', '---'],
+  ['selector', 'z-index', 'file'],
+  ['---', '---', '---'],
 ];
 
 const tableOptions = {
@@ -67,7 +67,7 @@ function onFileThrough(file, enc, cb) {
   }
 
   if (file.isStream()) {
-    cb(new util.PluginError('size', 'Stream not supported'));
+    cb(new PluginError('size', 'Stream not supported'));
     return;
   }
 
@@ -84,7 +84,6 @@ function onFileThrough(file, enc, cb) {
 /**
  * @param {!Object<string, !Object<string, !Array<number>} filesData
  *    accumulation of files and the rules and z index values.
- * @param {function()} cb callback to end the stream
  * @return {!Array<!Array<string>>}
  */
 function createTable(filesData) {
@@ -107,6 +106,7 @@ function createTable(filesData) {
 
 
 /**
+ * @param {string} glob
  * @return {!Stream}
  */
 function getZindex(glob) {

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {Layout} from '../../../src/layout';
+import {allocateVariant} from './variant';
 import {dev, user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {Layout} from '../../../src/layout';
 import {waitForBodyPromise} from '../../../src/dom';
-import {allocateVariant} from './variant';
-import {registerServiceBuilder} from '../../../src/service';
 
 const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
@@ -34,30 +34,33 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const config = this.getConfig_();
-    const results = Object.create(null);
-    const variants = Object.keys(config).map(experimentName => {
-      return allocateVariant(
-          this.getAmpDoc(), experimentName, config[experimentName])
-          .then(variantName => {
-            results[experimentName] = variantName;
-          });
-    });
+    try {
+      const config = this.getConfig_();
+      const results = Object.create(null);
+      const variants = Object.keys(config).map(experimentName => {
+        return allocateVariant(
+            this.getAmpDoc(), experimentName, config[experimentName])
+            .then(variantName => {
+              results[experimentName] = variantName;
+            });
+      });
 
+      /** @private @const {!Promise<!Object<string, ?string>>} */
+      const experimentVariants = Promise.all(variants)
+          .then(() => results)
+          .then(this.addToBody_.bind(this));
 
-    /** @private @const {!Promise<!Object<string, ?string>>} */
-    const experimentVariants = Promise.all(variants)
-        .then(() => results)
-        .then(this.addToBody_.bind(this));
-
-    registerServiceBuilder(this.win, 'variant', function() {
-      return experimentVariants;
-    });
+      serviceDeferred.resolve(experimentVariants);
+    } catch (e) {
+      // Ensure downstream consumers don't wait for the promise forever.
+      serviceDeferred.resolve(null);
+      throw e;
+    }
   }
 
   /** @return {!JsonObject} [description] */
   getConfig_() {
-    const children = this.element.children;
+    const {children} = this.element;
     user().assert(
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
@@ -66,7 +69,7 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.');
 
     return /** @type {!JsonObject} */ (
-        dev().assert(parseJson(children[0].textContent)));
+      dev().assert(parseJson(children[0].textContent)));
   }
 
   /**
@@ -91,7 +94,15 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 }
 
+/**
+ * Create the service promise at load time to prevent race between extensions
+ */
+
+/** singleton */
+let serviceDeferred = null;
 
 AMP.extension(TAG, '0.1', AMP => {
+  serviceDeferred = new Deferred();
   AMP.registerElement(TAG, AmpExperiment);
+  AMP.registerServiceForDoc('variant', () => serviceDeferred.promise);
 });

@@ -15,22 +15,23 @@
  */
 
 import {
-    withdrawRequest,
-    depositRequestUrl,
+  depositRequestUrl,
+  withdrawRequest,
 } from '../../testing/test-helper';
 
-describe.configure().run('user-error', function() {
+describe.configure().skipIfPropertiesObfuscated()
+    .skipSafari().skipEdge().run('user-error', function() {
+      //TODO(zhouyx, #11459): Unskip the test on safari.
+      let randomId;
+      beforeEach(() => {
+        randomId = Math.random();
+      });
 
-  let randomId;
-  beforeEach(() => {
-    randomId = Math.random();
-  });
-
-  describes.integration('user-error integration test', {
-    extensions: ['amp-analytics'],
-    hash: 'log=0',
-    experiments: ['user-error-reporting'],
-    body: () => `
+      describes.integration('user-error integration test', {
+        extensions: ['amp-analytics'],
+        hash: 'log=0',
+        experiments: ['user-error-reporting'],
+        body: () => `
     <amp-analytics><script type="application/json">
           {
               "requests": {
@@ -47,18 +48,18 @@ describe.configure().run('user-error', function() {
 
     <amp-pixel src="https://foo.com/tracker/foo"
                referrerpolicy="fail-referrer">`,
-  }, env => {
-    it('should ping correct host with amp-pixel user().assert err', () => {
-      return expect(withdrawRequest(env.win, randomId)).to.be.ok;
-    });
-  });
+      }, env => {
+        it('should ping correct host with amp-pixel user().assert err', () => {
+          return withdrawRequest(env.win, randomId);
+        });
+      });
 
-  describes.integration('user-error integration test', {
-    extensions: ['amp-analytics'],
-    hash: 'log=0',
-    experiments: ['user-error-reporting'],
+      describes.integration('user-error integration test', {
+        extensions: ['amp-analytics'],
+        hash: 'log=0',
+        experiments: ['user-error-reporting'],
 
-    body: () => `
+        body: () => `
     <amp-img
       src="../../examples/img/sea@1x.jpg"
       width="360" height="216" layout="responsive"
@@ -78,9 +79,41 @@ describe.configure().run('user-error', function() {
               }
           }
     </script></amp-analytics>`,
-  }, env => {
-    it('should ping correct host with amp-img user().error err', () => {
-      return expect(withdrawRequest(env.win, randomId)).to.be.ok;
+      }, env => {
+        it('should ping correct host with amp-img user().error err', () => {
+          return withdrawRequest(env.win, randomId);
+        });
+      });
+
+      describes.integration('3p user-error integration test', {
+        extensions: ['amp-analytics', 'amp-ad'],
+        hash: 'log=0',
+        experiments: ['user-error-reporting'],
+
+        body: () => `
+    <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='not-exist'
+        data-valid='false'
+        data-error='true'>
+    </amp-ad>
+
+    <amp-analytics><script type="application/json">
+    {
+      "requests": {
+        "error": "${depositRequestUrl(randomId)}"
+      },
+      "triggers": {
+        "userError": {
+          "on": "user-error",
+          "request": "error"
+        }
+      }
+    }
+    </script></amp-analytics>`,
+      }, env => {
+        it('should ping correct host with 3p error message', () => {
+          return withdrawRequest(env.win, randomId);
+        });
+      });
     });
-  });
-});

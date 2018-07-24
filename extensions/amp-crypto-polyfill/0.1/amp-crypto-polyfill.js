@@ -16,8 +16,13 @@
 
 import * as lib from '../../../third_party/closure-library/sha384-generated';
 import {registerServiceBuilder} from '../../../src/service';
-
+/**
+ * Registers crypto polyfill
+ *
+ * @param {!Window} win
+ */
 export function installCryptoPolyfill(win) {
+
   registerServiceBuilder(win, 'crypto-polyfill', function() {
     return lib;
   });

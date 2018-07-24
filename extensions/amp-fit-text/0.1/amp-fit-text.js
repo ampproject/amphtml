@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as st from '../../../src/style';
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import * as st from '../../../src/style';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
@@ -117,13 +117,14 @@ class AmpFitText extends AMP.BaseElement {
 /**
  * @param {Element} measurer
  * @param {number} expectedHeight
+ * @param {number} expectedWidth
  * @param {number} minFontSize
  * @param {number} maxFontSize
  * @return {number}
  * @private  Visible for testing only!
  */
 export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
-    minFontSize, maxFontSize) {
+  minFontSize, maxFontSize) {
   maxFontSize++;
   // Binomial search for the best font size.
   while (maxFontSize - minFontSize > 1) {
@@ -138,7 +139,7 @@ export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
     }
   }
   return minFontSize;
-};
+}
 
 
 /**

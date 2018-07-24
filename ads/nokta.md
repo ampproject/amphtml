@@ -32,12 +32,10 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 ### Required parameters
 
-| Parameter     | Description |
-|:------------- |:-------------|
-| **`data-category`**     | Site category for ad unit |
-| **`data-site`**    | Site descriptor for ad |
-| **`data-zone`**    | Zone id to show related ad  |
+* `data-category`: Site category for ad unit.
+* `data-site`: Site descriptor for ad.
+* `data-zone`: Zone id to show related ad.

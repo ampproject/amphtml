@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {openWindowDialog} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
-import {toWin} from '../../../src/types';
-
 import {Util} from './util';
+import {dev, user} from '../../../src/log';
+import {openWindowDialog} from '../../../src/dom';
+
+import {toWin} from '../../../src/types';
 
 // Popup options
 const POP = 'status=no,resizable=yes,scrollbars=yes,' +
@@ -63,7 +63,7 @@ export class PinItButton {
 
   /**
    * Override the default href click handling to log and open popup
-   * @param {Event} event: the HTML event object
+   * @param {Event} event The HTML event object
    */
   handleClick(event) {
     event.preventDefault();
@@ -84,7 +84,7 @@ export class PinItButton {
 
   /**
    * Pretty print the Pin count with english suffixes
-   * @param {number|string} count: the Pin count for the source URL
+   * @param {number|string} count The Pin count for the source URL
    * @return {string}
    */
   formatPinCount(count) {
@@ -104,8 +104,8 @@ export class PinItButton {
 
   /**
    * Render helper for the optional count bubble
-   * @param {string} count: the data-count attribute
-   * @param {string} heightClass: the height class to apply for spacing
+   * @param {string} count The data-count attribute
+   * @param {string} heightClass The height class to apply for spacing
    * @return {Element}
    */
   renderCount(count, heightClass) {
@@ -118,7 +118,7 @@ export class PinItButton {
 
   /**
    * Render the follow button
-   * @param {JsonObject} count: optional Pin count for the source URL
+   * @param {JsonObject} count Optional Pin count for the source URL
    * @return {Element}
    */
   renderTemplate(count) {
@@ -181,4 +181,4 @@ export class PinItButton {
     }
     return promise.then(this.renderTemplate.bind(this));
   }
-};
+}

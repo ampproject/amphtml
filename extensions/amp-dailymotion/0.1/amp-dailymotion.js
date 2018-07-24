@@ -14,26 +14,33 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {
+  addParamToUrl,
+  addParamsToUrl,
+  parseQueryString,
+} from '../../../src/url';
+import {
+  createFrameFor,
+  mutedOrUnmutedEvent,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {VideoEvents} from '../../../src/video-interface';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {getData, listen} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
-import {
-    parseQueryString,
-    addParamsToUrl,
-    addParamToUrl,
-} from '../../../src/url';
-import {
-  getDataParamsFromAttributes,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -85,12 +92,6 @@ class AmpDailymotion extends AMP.BaseElement {
     /** @private {boolean}  */
     this.muted_ = false;
 
-    /** @private {?boolean}  */
-    this.hasAutoplay_ = false;
-
-    /** @private {?Function} */
-    this.unlistenMessage_ = null;
-
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -108,7 +109,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -152,88 +153,84 @@ class AmpDailymotion extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const readyDeferred = new Deferred();
+    this.playerReadyPromise_ = readyDeferred.promise;
+    this.playerReadyResolver_ = readyDeferred.resolve;
 
-    this.startedBufferingPromise_ = new Promise(resolve => {
-      this.startedBufferingResolver_ = resolve;
-    });
+    const bufferingDeferred = new Deferred();
+    this.startedBufferingPromise_ = bufferingDeferred.promise;
+    this.startedBufferingResolver_ = bufferingDeferred.resolve;
   }
 
   /** @override */
   layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
     dev().assert(this.videoid_);
-    iframe.src = this.getIframeSrc_();
 
-    this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = createFrameFor(this, this.getIframeSrc_());
 
-    this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleEvents_.bind(this)
-    );
-
-    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+    listen(this.win, 'message', this.handleEvents_.bind(this));
 
     return this.loadPromise(this.iframe_);
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleEvents_(event) {
-    if (event.origin != 'https://www.dailymotion.com' ||
-        event.source != this.iframe_.contentWindow) {
+    if (!originMatches(event, this.iframe_, 'https://www.dailymotion.com')) {
       return;
     }
-    if (!getData(event) || !event.type || event.type != 'message') {
-      return;  // Event empty
+    const eventData = getData(event);
+    if (!eventData || !event.type || event.type != 'message') {
+      return; // Event empty
     }
-    const data = parseQueryString(/** @type {string} */ (getData(event)));
+    const data = parseQueryString(/** @type {string} */ (eventData));
     if (data === undefined) {
       return; // The message isn't valid
     }
 
+    redispatch(this.element, data['event'], {
+      [DailymotionEvents.API_READY]: VideoEvents.LOAD,
+      [DailymotionEvents.END]: [VideoEvents.ENDED, VideoEvents.PAUSE],
+      [DailymotionEvents.PAUSE]: VideoEvents.PAUSE,
+      [DailymotionEvents.PLAY]: VideoEvents.PLAYING,
+    });
+
     switch (data['event']) {
       case DailymotionEvents.API_READY:
         this.playerReadyResolver_(true);
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
         break;
+
       case DailymotionEvents.END:
-        this.element.dispatchCustomEvent(VideoEvents.ENDED);
-        // Don't break, also dispatch pause
-      case DailymotionEvents.PAUSE:
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         this.playerState_ = DailymotionEvents.PAUSE;
         break;
+
+      case DailymotionEvents.PAUSE:
       case DailymotionEvents.PLAY:
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-        this.playerState_ = DailymotionEvents.PLAY;
+        this.playerState_ = data['event'];
         break;
+
       case DailymotionEvents.VOLUMECHANGE:
+        const isMuted =
+            data['volume'] == 0 ||
+              (data['muted'] == 'true');
         if (this.playerState_ == DailymotionEvents.UNSTARTED
-            || this.muted_ != (
-                data['volume'] == 0 || (data['muted'] == 'true'))) {
-          this.muted_ = (data['volume'] == 0 || (data['muted'] == 'true'));
-          if (this.muted_) {
-            this.element.dispatchCustomEvent(VideoEvents.MUTED);
-          } else {
-            this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-          }
+            || this.muted_ != isMuted) {
+          this.muted_ = isMuted;
+          this.element.dispatchCustomEvent(mutedOrUnmutedEvent(isMuted));
         }
         break;
+
       case DailymotionEvents.STARTED_BUFFERING:
         this.startedBufferingResolver_(true);
         break;
+
       case DailymotionEvents.FULLSCREEN_CHANGE:
         this.isFullscreen_ = data['fullscreen'] == 'true';
         break;
-      default:
 
+      default: // nothing
     }
   }
 
@@ -401,6 +398,11 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
     return false;
   }
 

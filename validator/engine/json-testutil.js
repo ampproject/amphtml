@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 goog.provide('json_testutil.defaultCmpFn');
 goog.provide('json_testutil.makeJsonKeyCmpFn');
 goog.provide('json_testutil.renderJSON');
+goog.require('goog.asserts');
 
 /**
  * Helper function for renderJSON below.
@@ -57,7 +58,7 @@ function objToJsonSegments(obj, out, cmpFn) {
       out.push(']');
       return;
     } else if (
-        obj instanceof String || obj instanceof Number ||
+      obj instanceof String || obj instanceof Number ||
         obj instanceof Boolean) {
       obj = obj.valueOf();
       // Fall through to switch below.
@@ -66,7 +67,7 @@ function objToJsonSegments(obj, out, cmpFn) {
       const keys = [];
       for (const key in obj) {
         if (Object.prototype.hasOwnProperty.call(
-                /** @type {Object}*/ (obj), key)) {
+            /** @type {Object}*/ (obj), key)) {
           keys.push(key);
         }
       }
@@ -114,8 +115,8 @@ function objToJsonSegments(obj, out, cmpFn) {
  * @param {string} b
  * @return {number} */
 json_testutil.defaultCmpFn = function(a, b) {
-  if (a < b) return -1;
-  if (a > b) return 1;
+  if (a < b) {return -1;}
+  if (a > b) {return 1;}
   return 0;
 };
 
@@ -131,7 +132,7 @@ json_testutil.defaultCmpFn = function(a, b) {
 json_testutil.makeJsonKeyCmpFn = function(keyOrder) {
   /** @type {!Object<string, number>} */
   const keyPriority = {};
-  for (var ii = 0; ii < keyOrder.length; ++ii) {
+  for (let ii = 0; ii < keyOrder.length; ++ii) {
     keyPriority[keyOrder[ii]] = ii;
   }
 
@@ -194,8 +195,8 @@ function endsWithChar(str, ch) {
  * @return {string}
  */
 json_testutil.renderJSON = function(obj, cmpFn, offset) {
-  if (cmpFn === undefined) cmpFn = json_testutil.defaultCmpFn;
-  if (offset === undefined) offset = 0;
+  if (cmpFn === undefined) {cmpFn = json_testutil.defaultCmpFn;}
+  if (offset === undefined) {offset = 0;}
   // First, let objToJsonSegments emit the json into
   // segments. Conveniently, special characters such as '{', ',',
   // etc. are - unless inside a string - emitted as individual strings
@@ -204,8 +205,8 @@ json_testutil.renderJSON = function(obj, cmpFn, offset) {
   objToJsonSegments(obj, segments, cmpFn);
 
   const lines = [];
-  let current = '';      // current line
-  let nesting = offset;  // Keep track of how deep inside {[]} etc.
+  let current = ''; // current line
+  let nesting = offset; // Keep track of how deep inside {[]} etc.
 
   // Walk over the segments emitted by objToJsonSegments.
   for (const segment of segments) {
@@ -213,13 +214,13 @@ json_testutil.renderJSON = function(obj, cmpFn, offset) {
     // we're past 60 chars, or if the segment to process starts
     // with an opening block character (but keep multiple opening blocks
     // together).
-    if (current.length > 60 &&
-            (endsWithChar(current, ',') || endsWithChar(current, ':')) ||
-        (segment === '{' || segment === '[') && !endsWithChar(current, '{') &&
-            !endsWithChar(current, '[')) {
+    if ((current.length > 60 &&
+            (endsWithChar(current, ',') || endsWithChar(current, ':'))) ||
+        ((segment === '{' || segment === '[') && !endsWithChar(current, '{') &&
+            !endsWithChar(current, '['))) {
       lines.push(current);
       current = '';
-      for (let i = 0; i < nesting; i++) {  // Emit indentation.
+      for (let i = 0; i < nesting; i++) { // Emit indentation.
         current += ' ';
       }
     }

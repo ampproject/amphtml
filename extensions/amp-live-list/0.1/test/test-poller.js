@@ -34,7 +34,7 @@ describe('Poller', () => {
       work() {},
     };
     workStub = sandbox.stub(obj, 'work');
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     const wait = 5000;
     poller = new Poller(window, wait, workStub);
   });
@@ -246,7 +246,7 @@ describe('Poller', () => {
     clock.tick(4000);
 
     expect(poller.lastTimeoutId_).to.be.a('number');
-    let lastTimeoutId_ = poller.lastTimeoutId_;
+    let {lastTimeoutId_} = poller;
 
     // Reject 1
     return poller.lastWorkPromise_.then(() => {

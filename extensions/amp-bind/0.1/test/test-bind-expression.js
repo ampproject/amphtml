@@ -15,6 +15,7 @@
  */
 
 import {BindExpression} from '../bind-expression';
+import {BindMacro} from '../bind-macro';
 
 describe('BindExpression', () => {
   const argumentTypeError = 'Unexpected argument type';
@@ -27,7 +28,7 @@ describe('BindExpression', () => {
    * @return {*}
    */
   function evaluate(expression, opt_scope) {
-    return new BindExpression(expression).evaluate(opt_scope || {});
+    return new BindExpression(expression, {}).evaluate(opt_scope || {});
   }
 
   describe('operations', () => {
@@ -410,8 +411,9 @@ describe('BindExpression', () => {
       expect(() => { evaluate('baz()', scope); }).to.throw();
       expect(() => { evaluate('foo.bar()', scope); })
           .to.throw(Error, unsupportedFunctionError);
-      expect(() => { evaluate('foo.qux("a", "return a")', scope); })
-          .to.throw(unsupportedFunctionError);
+      expect(() => {
+        evaluate('foo.qux("a", "return a")', scope);
+      }).to.throw(unsupportedFunctionError);
     });
 
     it('disallow: invocation of prototype functions', () => {
@@ -439,13 +441,19 @@ describe('BindExpression', () => {
       }).to.throw(Error, unsupportedFunctionError);
     });
 
-    it('disallow: whitelisted functions with invalid argument types', () => {
+    it('disallow: object in arguments for most functions', () => {
       expect(() => {
         evaluate('[1, 2, 3].indexOf({})');
       }).to.throw(Error, argumentTypeError);
       expect(() => {
         evaluate('"abc".substr({})');
       }).to.throw(Error, argumentTypeError);
+
+      // Only allow objects in arguments for some functions.
+      expect(evaluate('keys({x: 2})')).to.deep.equal(['x']);
+      expect(evaluate('values({x: 2})')).to.deep.equal([2]);
+      expect(evaluate('splice([1, 3], 1, 0, {x: 2})'))
+          .to.deep.equal([1, {x: 2}, 3]);
     });
   });
 
@@ -589,12 +597,37 @@ describe('BindExpression', () => {
     });
 
     it('disallow: exceeding maximum AST size', () => {
-      expect(new BindExpression('1 + 1', /* maxAstSize */ 3)).to.not.be.null;
+      expect(new BindExpression('1 + 1', {}, /* maxAstSize */ 3))
+          .to.not.be.null;
 
       // The expression '1 + 1' should have an AST size of 3 -- one for each
       // literal, and a PLUS expression wrapping them.
       expect(() => {
-        new BindExpression('1 + 1', /* maxAstSize */ 2);
+        new BindExpression('1 + 1', {}, /* maxAstSize */ 2);
+      }).to.throw(expressionSizeExceededError);
+
+      // Test size computation for macros.
+      const add = new BindMacro({
+        name: 'add',
+        argumentNames: ['x', 'y'],
+        expressionString: 'x + y',
+      });
+      expect(add.getExpressionSize()).to.equal(3);
+
+      // The expression add(1, 1) should have an AST size of 3.
+      expect(new BindExpression('add(1, 1)', {add}, /* maxAstSize */ 3))
+          .to.not.be.null;
+
+      expect(() => {
+        new BindExpression('add(1, 1)', {add}, /* maxAstSize */ 2);
+      }).to.throw(expressionSizeExceededError);
+
+      // The expression add(1, 1 + 1) should have an AST size of 5.
+      expect(new BindExpression('add(1, 1 + 1)', {add}, /* maxAstSize */ 5))
+          .to.not.be.null;
+
+      expect(() => {
+        new BindExpression('add(1, 1 + 1)', {add}, /* maxAstSize */ 4);
       }).to.throw(expressionSizeExceededError);
     });
   });

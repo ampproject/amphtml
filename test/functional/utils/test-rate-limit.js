@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {throttle, debounce} from '../../../src/utils/rate-limit';
 import * as sinon from 'sinon';
+import {debounce, throttle} from '../../../src/utils/rate-limit';
 
 describe('function utils', () => {
   describe('throttle', () => {

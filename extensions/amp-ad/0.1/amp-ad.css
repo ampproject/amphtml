@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import '../../../css/lightbox-ad.css';
+
 /**
  * Force the layout box of the ad iframe to be exactly as big as the actual
  * iframe. The `amp-ad` tag itself can be freely styled.
@@ -57,11 +59,8 @@ amp-ad[type="adsense"] > iframe {
   transform: translate(-50%, -50%);
 }
 
-[dir=rtl] amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
-[dir=rtl] amp-ad[type="adsense"] > iframe {
-  left: 0 !important;
-  right: 50% !important;
-  transform: translate(50%, -50%);
+amp-ad[type="adsense"], amp-ad[type="doubleclick"] {
+  direction: ltr;
 }
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
@@ -70,3 +69,12 @@ amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
   min-width: 0;
 }
 
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] > iframe {
+  height: 100% !important;
+  width: 100% !important;
+  position: relative;
+}
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] {
+  width: 100% !important;
+}

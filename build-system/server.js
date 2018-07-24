@@ -20,24 +20,30 @@
  * files and list directories for use with the gulp live server
  */
 const app = require(require.resolve('./app.js'));
-const isRunning = require('is-running');
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
+const isRunning = require('is-running');
+const log = require('fancy-log');
 const morgan = require('morgan');
-const util = require('gulp-util');
 const webserver = require('gulp-webserver');
 
-const host = process.env.SERVE_HOST;
-const port = process.env.SERVE_PORT;
+const {
+  SERVE_HOST: host,
+  SERVE_PORT: port,
+  SERVE_PROCESS_ID: gulpProcess,
+} = process.env;
+
 const useHttps = process.env.SERVE_USEHTTPS == 'true';
-const gulpProcess = process.env.SERVE_PROCESS_ID;
 const quiet = process.env.SERVE_QUIET == 'true';
+const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
+const header = require('connect-header');
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
   if (err.errno === 'EADDRINUSE') {
-    util.log(util.colors.red('Port', port, 'in use, shutting down server'));
+    log(colors.red('Port', port, 'in use, shutting down server'));
   } else {
-    util.log(util.colors.red(err));
+    log(colors.red(err));
   }
   process.kill(gulpProcess, 'SIGINT');
   process.exit(1);
@@ -50,6 +56,17 @@ setInterval(function() {
   }
 }, 1000);
 
+const middleware = [];
+if (!quiet) {
+  middleware.push(morgan('dev'));
+}
+middleware.push(app);
+if (sendCachingHeaders) {
+  middleware.push(header({
+    'cache-control': ' max-age=600',
+  }));
+}
+
 // Start gulp webserver
 gulp.src(process.cwd())
     .pipe(webserver({
@@ -57,6 +74,6 @@ gulp.src(process.cwd())
       host,
       directoryListing: true,
       https: useHttps,
-      middleware: quiet ? [] : [morgan('dev'), app],
+      middleware,
     }));
 

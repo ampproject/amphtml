@@ -21,8 +21,6 @@ const gulp = require('gulp-help')(require('gulp'));
 
 /**
  * Clean up the build artifacts
- *
- * @param {function} done callback
  */
 function clean() {
   return del([

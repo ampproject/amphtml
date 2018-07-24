@@ -16,13 +16,13 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
-import {installPlatformService} from '../../src/service/platform-impl';
 import {endsWith} from '../../src/string';
-import * as sinon from 'sinon';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {toggleExperiment} from '../../src/experiments';
+import {user} from '../../src/log';
 
 
-describe('FixedLayer', () => {
-  let sandbox;
+describes.sandboxed('FixedLayer', {}, () => {
   let documentApi;
   let ampdoc;
   let vsyncApi;
@@ -36,8 +36,6 @@ describe('FixedLayer', () => {
   let allRules;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-
     allRules = {};
 
     docBody = createElement('docBody');
@@ -48,7 +46,7 @@ describe('FixedLayer', () => {
     element2 = createElement('element2');
     element3 = createElement('element3');
     element4 = createElement('element4');
-    element5 = createElement('element4');
+    element5 = createElement('element5');
     docBody.appendChild(element1);
     docBody.appendChild(element2);
     docBody.appendChild(element3);
@@ -163,15 +161,12 @@ describe('FixedLayer', () => {
     };
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   function createElement(id) {
     const attrs = {};
     const children = [];
     const elem = {
       id,
+      ownerDocument: documentApi,
       autoTop: '',
       toString: () => {
         return id;
@@ -220,7 +215,6 @@ describe('FixedLayer', () => {
         set transition(v) {
           elem.style.setProperty('transition', v);
         },
-
         setProperty(prop, value, priority) {
           const privProp = '_' + prop;
 
@@ -229,9 +223,15 @@ describe('FixedLayer', () => {
             elem.style[privProp] = `${value} !${priority}`;
           } else if (elem.style[privProp] ||
               !endsWith(elem.computedStyle[prop], '!important')) {
-            // If element style is already set, we can override
-            // Or, if computed style is not important priority
-            elem.style[privProp] = value;
+            if (prop === 'transition' && !value &&
+                endsWith(elem.style[privProp] || '', '!important')) {
+              // Emulate a stupid Safari bug.
+              // noop.
+            } else {
+              // If element style is already set, we can override
+              // Or, if computed style is not important priority
+              elem.style[privProp] = value;
+            }
           }
         },
       },
@@ -267,8 +267,8 @@ describe('FixedLayer', () => {
         }
         return 0;
       },
-      getAttribute: name => {
-        return attrs[name];
+      hasAttribute: name => {
+        return !!attrs[name];
       },
       setAttribute: (name, value) => {
         attrs[name] = value;
@@ -298,12 +298,21 @@ describe('FixedLayer', () => {
       cloneNode() {
         return createElement(this.id);
       },
-    };
-    Object.defineProperty(elem, 'offsetTop', {
-      get: () => {
+      get offsetTop() {
         return parseFloat(elem.computedStyle.top);
       },
-    });
+      set innerHTML(html) {
+        if (html === '') {
+          this.firstElementChild = null;
+          return;
+        }
+        // Updating the placeholder means we have to update the tests.
+        expect(html.trim()).to.equal(
+            '<i-amphtml-fpa style="display: none"></i-amphtml-fpa>');
+        this.firstElementChild = createElement('i-amphtml-fpa');
+        this.firstElementChild.style.display = 'none';
+      },
+    };
     return elem;
   }
 
@@ -343,8 +352,8 @@ describe('FixedLayer', () => {
     return rule;
   }
 
-
-  describe('no-transfer', () => {
+  // TODO(jridgewell, #11827): Make this test work on Safari.
+  describe.configure().skipSafari().run('no-transfer', () => {
     let fixedLayer;
 
     beforeEach(() => {
@@ -353,7 +362,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
@@ -366,7 +375,7 @@ describe('FixedLayer', () => {
             `${expected.id}: wrong position`);
         expect(JSON.stringify(actual.selectors))
             .to.equal(JSON.stringify(expected.selectors),
-            `${expected.id}: wrong selectors`);
+                `${expected.id}: wrong selectors`);
       }
 
       expect(fixedLayer.elements_).to.have.length(5);
@@ -550,6 +559,25 @@ describe('FixedLayer', () => {
       expect(state['F0'].fixed).to.be.false;
       expect(state['F1'].fixed).to.be.false;
       expect(state['F4'].sticky).to.be.true;
+    });
+
+    it('should disregard display:none element', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['display'] = 'none';
+      element5.computedStyle['position'] = 'sticky';
+      element5.offsetWidth = 10;
+      element5.offsetHeight = 10;
+      element5.computedStyle['display'] = 'none';
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.false;
+      expect(state['F1'].fixed).to.be.false;
+      expect(state['F4'].sticky).to.be.false;
     });
 
     it('should tolerate getComputedStyle = null', () => {
@@ -739,7 +767,7 @@ describe('FixedLayer', () => {
       expect(state['F0'].top).to.equal('0px');
 
       // Update to transient padding.
-      sandbox.stub(fixedLayer, 'update', () => {});
+      sandbox.stub(fixedLayer, 'update').callsFake(() => {});
       fixedLayer.updatePaddingTop(22, /* transient */ true);
       vsyncTasks[0].measure(state);
       expect(state['F0'].fixed).to.be.true;
@@ -1001,6 +1029,21 @@ describe('FixedLayer', () => {
       fixedLayer.transformMutate('translateY(-10px)');
       expect(fe.element.style.transform).to.equal('');
     });
+
+    it('should user error when inline styles may be overriden', () => {
+      toggleExperiment(ampdoc.win, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+
+      // Set both attribute and property since element1 is a fake element.
+      element1.setAttribute('style', 'bottom: 10px');
+      element1.style.bottom = '10px';
+
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      // Expect error regarding inline styles.
+      expect(userError).calledWithMatch('FixedLayer',
+          /not supported yet for fixed or sticky elements/);
+    });
   });
 
   describe('with-transfer', () => {
@@ -1012,7 +1055,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transfer_).to.be.true;
       expect(fixedLayer.transferLayer_).to.be.null;
     });
@@ -1172,12 +1215,13 @@ describe('FixedLayer', () => {
       expect(fe.placeholder).to.exist;
       expect(fe.placeholder.style['display']).to.equal('none');
 
-      expect(fe.element.parentElement).to.equal(fixedLayer.transferLayer_);
+      expect(fixedLayer.transferLayer_).to.exist;
+      const layer = fixedLayer.transferLayer_.layer_;
+      expect(layer.style['pointerEvents']).to.equal('none');
+
+      expect(fe.element.parentElement).to.equal(layer);
       expect(fe.element.style['pointer-events']).to.equal('initial');
       expect(fe.element.style['zIndex']).to.equal('calc(10001 + 11)');
-
-      expect(fixedLayer.transferLayer_).to.exist;
-      expect(fixedLayer.transferLayer_.style['pointerEvents']).to.equal('none');
     });
 
     it('should ignore transfer when non-transferrable', () => {
@@ -1190,7 +1234,6 @@ describe('FixedLayer', () => {
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.not.exist;
       expect(fixedLayer.transferLayer_).to.not.exist;
-      expect(fe.element.parentElement).to.not.equal(fixedLayer.transferLayer_);
     });
 
     it('should return transfered element if it no longer matches', () => {
@@ -1205,7 +1248,8 @@ describe('FixedLayer', () => {
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.exist;
       expect(fixedLayer.transferLayer_).to.exist;
-      expect(fe.element.parentElement).to.not.equal(fixedLayer.transferLayer_);
+      expect(fe.element.parentElement)
+          .to.not.equal(fixedLayer.transferLayer_.layer_);
       expect(fe.placeholder.parentElement).to.be.null;
       expect(fe.element.style.zIndex).to.equal('');
     });
@@ -1221,9 +1265,10 @@ describe('FixedLayer', () => {
       });
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.exist;
-      expect(fe.element.parentElement).to.equal(fixedLayer.transferLayer_);
+      expect(fe.element.parentElement)
+          .to.equal(fixedLayer.transferLayer_.layer_);
       expect(fixedLayer.transferLayer_).to.exist;
-      expect(fixedLayer.transferLayer_.id).to.equal('doc-body-id');
+      expect(fixedLayer.transferLayer_.layer_.id).to.equal('doc-body-id');
 
       // Remove from DOM.
       fe.element.parentElement.removeChild(fe.element);
@@ -1264,5 +1309,113 @@ describe('FixedLayer', () => {
       expect(state['F0'].fixed).to.equal(true);
       expect(state['F0'].transferrable).to.equal(true);
     });
+
+    it('should user error when inline styles may be overriden', () => {
+      toggleExperiment(ampdoc.win, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+
+      // Set both attribute and property since element1 is a fake element.
+      element1.setAttribute('style', 'bottom: 10px');
+      element1.style.bottom = '10px';
+
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      // Expect error regarding inline styles.
+      expect(userError).calledWithMatch('FixedLayer',
+          /not supported yet for fixed or sticky elements/);
+    });
+  });
+});
+
+
+describes.realWin('FixedLayer: shadow transfer', {}, env => {
+  let win, doc;
+  let ampdoc;
+  let fixedLayer;
+  let vsyncApi;
+  let vsyncTasks;
+  let transferLayer;
+  let root;
+  let shadowRoot;
+  let container;
+
+  beforeEach(function() {
+    if (!env.win.Element.prototype.attachShadow) {
+      // Can only test when SD is supported.
+      this.skip();
+    }
+    win = env.win;
+    doc = win.document;
+    vsyncTasks = [];
+    vsyncApi = {
+      runPromise: task => {
+        vsyncTasks.push(task);
+        return Promise.resolve();
+      },
+      mutate: mutator => {
+        vsyncTasks.push({mutate: mutator});
+      },
+    };
+    installPlatformService(win);
+    ampdoc = new AmpDocSingle(win);
+    shadowRoot = win.document.body.attachShadow({mode: 'open'});
+    fixedLayer = new FixedLayer(ampdoc, vsyncApi,
+        /* borderTop */ 0, /* paddingTop */ 11, /* transfer */ true);
+    fixedLayer.setup();
+    transferLayer = fixedLayer.getTransferLayer_();
+    root = transferLayer.getRoot();
+    container = doc.createElement('div');
+    doc.body.appendChild(container);
+  });
+
+  it('should create layer correctly', () => {
+    expect(root.parentNode).to.equal(shadowRoot);
+    expect(root.id).to.equal('i-amphtml-fixed-layer');
+    expect(root.style.position).to.equal('absolute');
+    expect(root.style.top).to.equal('0px');
+    expect(root.style.left).to.equal('0px');
+    expect(root.style.width).to.equal('0px');
+    expect(root.style.height).to.equal('0px');
+    expect(root.style.overflow).to.equal('hidden');
+    expect(root.style.visibility).to.equal('');
+    expect(root.children).to.have.length(1);
+    expect(root.children[0].tagName).to.equal('SLOT');
+    expect(root.children[0].name).to.equal('i-amphtml-fixed');
+  });
+
+  it('should transfer element', () => {
+    const element = doc.createElement('div');
+    container.appendChild(element);
+    const fe = {element, id: 'F0'};
+    transferLayer.transferTo(fe);
+
+    // Element stays where it was.
+    expect(element.parentElement).to.equal(container);
+    expect(element.getAttribute('slot')).to.equal('i-amphtml-fixed');
+    expect(root.children).to.have.length(1);
+
+    // Ensure that repeat slotting doesn't change anything.
+    transferLayer.transferTo(fe);
+    expect(element.getAttribute('slot')).to.equal('i-amphtml-fixed');
+    expect(root.children).to.have.length(1);
+  });
+
+  it('should return element', () => {
+    const element = doc.createElement('div');
+    container.appendChild(element);
+    const fe = {element, id: 'F0'};
+    transferLayer.transferTo(fe);
+    expect(element.getAttribute('slot')).to.equal('i-amphtml-fixed');
+    expect(root.children).to.have.length(1);
+
+    // The slot distribution is canceled, but the slot itself is kept.
+    transferLayer.returnFrom(fe);
+    expect(element.getAttribute('slot')).to.be.null;
+    expect(root.children).to.have.length(1);
+
+    // Ensure that repeat slotting doesn't change anything.
+    transferLayer.transferTo(fe);
+    expect(element.getAttribute('slot')).to.equal('i-amphtml-fixed');
+    expect(root.children).to.have.length(1);
   });
 });

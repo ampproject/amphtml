@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
-import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
+import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
+import {parseUrlDeprecated} from '../../src/url';
 
 describe('alp-handler', () => {
 
@@ -55,7 +55,7 @@ describe('alp-handler', () => {
       postMessage: sandbox.stub(),
       _id: 'p3',
     };
-    open = sandbox.stub(win, 'open', () => {
+    open = sandbox.stub(win, 'open').callsFake(() => {
       return {};
     });
     const doc = {
@@ -74,7 +74,7 @@ describe('alp-handler', () => {
       ownerDocument: doc,
       getAttribute: sandbox.stub(),
       get search() {
-        return parseUrl(this.href).search;
+        return parseUrlDeprecated(this.href).search;
       },
     };
     event = {

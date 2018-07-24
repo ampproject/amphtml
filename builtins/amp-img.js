@@ -15,16 +15,17 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {dev} from '../src/log';
 import {isLayoutSizeDefined} from '../src/layout';
+import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
-import {srcsetFromElement} from '../src/srcset';
 
 /**
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-  'aria-describedby', 'aria-labelledby'];
+  'aria-describedby', 'aria-labelledby','srcset', 'src', 'sizes'];
 
 export class AmpImg extends BaseElement {
 
@@ -41,25 +42,21 @@ export class AmpImg extends BaseElement {
     /** @private {?Element} */
     this.img_ = null;
 
-    /** @private {?../src/srcset.Srcset} */
-    this.srcset_ = null;
+    /** @private {?UnlistenDef} */
+    this.unlistenLoad_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenError_ = null;
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['src'] !== undefined || mutations['srcset'] !== undefined) {
-      this.srcset_ = srcsetFromElement(this.element);
-      // This element may not have been laid out yet.
-      if (this.img_) {
-        this.updateImageSrc_();
-      }
-    }
-
     if (this.img_) {
       const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
           value => mutations[value] !== undefined);
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
+      this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
     }
   }
 
@@ -77,10 +74,10 @@ export class AmpImg extends BaseElement {
         return;
       }
       // We try to find the first url in the srcset
-      const srcseturls = srcset.match(/https?:\/\/[^\s]+/);
+      const srcseturl = /\S+/.exec(srcset);
       // Connect to the first url if it exists
-      if (srcseturls) {
-        this.preconnect.url(srcseturls[0], onLayout);
+      if (srcseturl) {
+        this.preconnect.url(srcseturl[0], onLayout);
       }
     }
   }
@@ -103,17 +100,17 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
-    if (!this.srcset_) {
-      this.srcset_ = srcsetFromElement(this.element);
-    }
-    this.allowImgLoadFallback_ = true;
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
-    if (this.element.hasAttribute('fallback')) {
-      this.allowImgLoadFallback_ = false;
-    }
+    this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
 
-    this.img_ = new Image();
+    // For inabox SSR, image will have been written directly to DOM so no need
+    // to recreate.  Calling appendChild again will have no effect.
+    if (this.element.hasAttribute('i-amphtml-ssr')) {
+      this.img_ = this.element.querySelector('img');
+    }
+    this.img_ = this.img_ || new Image();
+    this.img_.setAttribute('decoding', 'async');
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }
@@ -129,19 +126,14 @@ export class AmpImg extends BaseElement {
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
     this.applyFillContent(this.img_, true);
-
     this.element.appendChild(this.img_);
   }
 
   /** @override */
   prerenderAllowed() {
     return this.isPrerenderAllowed_;
-  }
-
-  /** @override */
-  isRelayoutNeeded() {
-    return true;
   }
 
   /** @override */
@@ -152,66 +144,80 @@ export class AmpImg extends BaseElement {
   /** @override */
   layoutCallback() {
     this.initialize_();
-    let promise = this.updateImageSrc_();
-
-    // We only allow to fallback on error on the initial layoutCallback
-    // or else this would be pretty expensive.
-    if (this.allowImgLoadFallback_) {
-      promise = promise.catch(e => {
-        this.onImgLoadingError_();
-        throw e;
-      });
-      this.allowImgLoadFallback_ = false;
-    }
-    return promise;
-  }
-
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  updateImageSrc_() {
+    const img = dev().assertElement(this.img_);
+    this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
+    this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const src = this.srcset_.select(
-        // The width should never be 0, but we fall back to the screen width
-        // just in case.
-        this.getViewport().getWidth() || this.win.screen.width,
-        this.getDpr()).url;
-    if (src == this.img_.getAttribute('src')) {
-      return Promise.resolve();
+    return this.loadPromise(img);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.unlistenError_) {
+      this.unlistenError_();
+      this.unlistenError_ = null;
     }
+    if (this.unlistenLoad_) {
+      this.unlistenLoad_();
+      this.unlistenLoad_ = null;
+    }
+    return true;
+  }
 
-    this.img_.setAttribute('src', src);
-
-    return this.loadPromise(this.img_).then(() => {
-      // Clean up the fallback if the src has changed.
-      if (!this.allowImgLoadFallback_ &&
-          this.img_.classList.contains('i-amphtml-ghost')) {
-        this.getVsync().mutate(() => {
-          this.img_.classList.remove('i-amphtml-ghost');
-          this.toggleFallback(false);
-        });
+  /**
+   * Sets the img src to the first url in the srcset if srcset is defined but
+   * src is not.
+   * @private
+   */
+  guaranteeSrcForSrcsetUnsupportedBrowsers_() {
+    // The <img> tag does not have a src and does not support srcset
+    if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
+      const srcset = this.element.getAttribute('srcset');
+      const matches = /\S+/.exec(srcset);
+      if (matches == null) {
+        return;
       }
-    });
+      const srcseturl = matches[0];
+      this.img_.setAttribute('src', srcseturl);
+    }
   }
 
-  onImgLoadingError_() {
-    this.getVsync().mutate(() => {
-      this.img_.classList.add('i-amphtml-ghost');
-      this.toggleFallback(true);
-      // Hide placeholders, as browsers that don't support webp
-      // Would show the placeholder underneath a transparent fallback
-      this.togglePlaceholder(false);
-    });
+  /**
+   * @private
+   */
+  hideFallbackImg_() {
+    if (!this.allowImgLoadFallback_
+      && this.img_.classList.contains('i-amphtml-ghost')) {
+      this.getVsync().mutate(() => {
+        this.img_.classList.remove('i-amphtml-ghost');
+        this.toggleFallback(false);
+      });
+    }
   }
-};
+
+  /**
+   * If the image fails to load, show a fallback or placeholder instead.
+   * @private
+   */
+  onImgLoadingError_() {
+    if (this.allowImgLoadFallback_) {
+      this.getVsync().mutate(() => {
+        this.img_.classList.add('i-amphtml-ghost');
+        this.toggleFallback(true);
+        // Hide placeholders, as browsers that don't support webp
+        // Would show the placeholder underneath a transparent fallback
+        this.togglePlaceholder(false);
+      });
+      this.allowImgLoadFallback_ = false;
+    }
+  }
+}
 
 /**
  * @param {!Window} win Destination window for the new element.
  * @this {undefined}  // Make linter happy
- * @return {undefined}
  */
 export function installImg(win) {
   registerElement(win, 'amp-img', AmpImg);

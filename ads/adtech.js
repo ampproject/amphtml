@@ -15,13 +15,16 @@
  */
 
 import {
-  writeScript,
   validateData,
-  validateSrcPrefix,
   validateSrcContains,
+  validateSrcPrefix,
+  writeScript,
 } from '../3p/3p';
 
-
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function adtech(global, data) {
   const adsrc = data.src;
   if (typeof adsrc != 'undefined') {

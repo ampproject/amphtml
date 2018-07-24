@@ -19,9 +19,9 @@ tags: {  # amp-brightcove
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-brightcove"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    version: "0.1"
+    version: "latest"
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,14 +31,18 @@ tags: {  # <amp-brightcove>
   tag_name: "AMP-BRIGHTCOVE"
   requires_extension: "amp-brightcove"
   attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: {
     name: "data-account"
     mandatory: true
   }
   # <amp-bind>
   attrs: { name: "[data-account]" }
   attrs: { name: "[data-embed]" }
-  attrs: { name: "[data-player]" }
   attrs: { name: "[data-player-id]" }
+  attrs: { name: "[data-player]" }
   attrs: { name: "[data-playlist-id]" }
   attrs: { name: "[data-video-id]" }
   attr_lists: "extended-amp-global"

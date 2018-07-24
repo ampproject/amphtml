@@ -1,0 +1,119 @@
+<!doctype html>
+<html amp lang="en" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <title>مثال لليمين إلى اليسار - RTL Example</title>
+    <link rel="canonical" href="https://ampbyexample.com/internationalization/rtl.html" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+    <style amp-custom>
+      body {
+        /*padding: 1em;*/
+        font-size: 1.2em;
+      }
+
+      button {
+        border: none;
+        background: white;
+        font-size: 1.2em;
+      }
+
+      ul {
+        padding: 0 1em;
+      }
+
+      amp-sidebar ul {
+        list-style: none;
+        margin: 0;
+        padding: 1em;
+      }
+
+      amp-sidebar ul li {
+        padding: 0.5em;
+      }
+
+      header {
+        height: 1em;
+        background: white;
+        box-shadow: 0px 2px 15px rgba(0,0,0,0.5);
+        height: 100%;
+        font-size: 1.2em;
+      }
+
+      h1 {
+        margin: 0;
+      }
+
+      h2 {
+        padding: 0;
+        margin: 0;
+        display: inline;
+      }
+
+      #main {
+        padding: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <button on="tap:sidebar.toggle"
+        class="ampstart-btn caps m2">
+        ☰
+      </button>
+
+      <h2>RTL Example</h2>
+
+      <!-- <div role="button" on="tap:header-sidebar.toggle" tabindex="0" class="ampstart-navbar-trigger md-hide lg-hide pr2"></div> -->
+    </header>
+
+    <div id="main">
+      <h1>مثال لليمين إلى اليسار</h1>
+
+      <p>
+        هناك حقيقة مثبتة منذ زمن طويل وهي أن المحتوى المقروء لصفحة ما سيلهي القارئ عن التركيز على الشكل الخارجي للنص أو شكل توضع الفقرات في الصفحة التي يقرأها.
+      </p>
+
+      <ul>
+        <li>
+          الصفحة التي يقرأها.
+        </li>
+        <li>
+          الصفحة التي يقرأها.
+        </li>
+        <li>
+          الصفحة التي يقرأها.
+        </li>
+      </ul>
+
+      <p>
+        هناك حقيقة مثبتة منذ زمن طويل وهي أن المحتوى المقروء لصفحة ما سيلهي القارئ عن التركيز على الشكل الخارجي للنص أو شكل توضع الفقرات في الصفحة التي يقرأها.
+      </p>
+
+      <p dir="ltr">
+        Example of how to mix RTL with LTR content.
+      </p>
+
+      <p>
+        هناك حقيقة مثبتة منذ زمن طويل وهي أن المحتوى المقروء لصفحة ما سيلهي القارئ عن التركيز على الشكل الخارجي للنص أو شكل توضع الفقرات في الصفحة التي يقرأها.
+      </p>
+    </div>
+
+    <amp-sidebar id='sidebar' layout='nodisplay'>
+      <ul>
+        <li>الخيار </li>
+
+        <li>الخيار </li>
+
+        <li>الخيار </li>
+
+        <li>الخيار </li>
+
+        <li on="tap:sidebar.close" role="button" tabindex="0">Close Sidebar</li>
+      </ul>
+    </amp-sidebar>
+  </body>
+</html>
