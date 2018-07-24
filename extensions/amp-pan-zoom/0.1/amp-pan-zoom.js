@@ -377,9 +377,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         last,
       } = e.data;
 
-      const centerX = this.getOffsetX_(centerClientX);
-      const centerY = this.getOffsetY_(centerClientY);
-      this.onPinchZoom_(centerX, centerY, deltaX, deltaY, dir);
+      this.onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir);
       if (last) {
         this.onZoomRelease_();
       }
