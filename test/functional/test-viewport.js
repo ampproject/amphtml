@@ -1467,11 +1467,12 @@ describe('createViewport', () => {
           .be.instanceof(ViewportBindingIosEmbedShadowRoot_);
     });
 
-    it.skip('should bind to "iOS embed SD" in future Safari', () => {
+    it('should bind to "iOS embed SD" in future Safari', () => {
       sandbox.stub(Services.platformFor(win), 'getMajorVersion')
           .callsFake(() => 12);
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
+      win.getComputedStyle = () => ({});
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
@@ -1479,12 +1480,13 @@ describe('createViewport', () => {
           .be.instanceof(ViewportBindingIosEmbedShadowRoot_);
     });
 
-    it.skip('should NOT bind to "iOS embed SD" in Safari 10', () => {
+    it('should NOT bind to "iOS embed SD" in Safari 10', () => {
       // This is due to some scrolling and SD bugs.
       sandbox.stub(Services.platformFor(win), 'getMajorVersion')
           .callsFake(() => 10);
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
+      win.getComputedStyle = () => ({});
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
