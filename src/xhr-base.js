@@ -120,7 +120,7 @@ export class XhrBase {
         'Only credentials=include|omit support: %s', creds);
     // Do not append __amp_source_origin if explicitly disabled.
     if (init.ampCors !== false) {
-      input = this.getCorsUrl(this.win, input);
+      input = getCorsUrl(this.win, input);
     } else {
       init.requireAmpResponseSourceOrigin = false;
     }
@@ -265,18 +265,6 @@ export class XhrBase {
     dev().assert(this.win.Response, 'Response object not present on window');
     user().assert(isObject(response), 'Object expected: %s', response);
     return new this.win.Response(response['body'], response['init']);
-  }
-
-  /**
-   * Add "__amp_source_origin" query parameter to the URL. Ideally, we'd be
-   * able to set a header (e.g. AMP-Source-Origin), but this will force
-   * preflight request on all CORS request.
-   * @param {!Window} win
-   * @param {string} url
-   * @return {string}
-   */
-  getCorsUrl(win, url) {
-    return getCorsUrl(win, url);
   }
 
   /**
