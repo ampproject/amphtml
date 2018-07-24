@@ -44,7 +44,7 @@ import {utf8Encode} from '../utils/bytes';
  * @typedef {{
  *   body: (!Object|!Array|undefined|string),
  *   credentials: (string|undefined),
- *   headers: (!Object|undefined),
+ *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
  *   ampCors: (boolean|undefined)
@@ -57,7 +57,7 @@ export let FetchInitDef;
  * @typedef {{
  *   body: (!JsonObject|!FormData|undefined),
  *   credentials: (string|undefined),
- *   headers: (!Object|undefined),
+ *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
  *   ampCors: (boolean|undefined)
@@ -562,7 +562,7 @@ function normalizeMethod_(method) {
 function setupInit(opt_init, opt_accept) {
   const init = opt_init || {};
   init.method = normalizeMethod_(init.method);
-  init.headers = init.headers || {};
+  init.headers = init.headers || dict({});
   if (opt_accept) {
     init.headers['Accept'] = opt_accept;
   }
