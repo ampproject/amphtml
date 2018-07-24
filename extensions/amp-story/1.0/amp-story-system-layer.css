@@ -43,7 +43,7 @@
 .i-amphtml-story-system-layer-buttons {
   margin-top: 8px; /* 6px progress bar + 2px margin */
   float: right !important;
-  display: flex;
+  display: flex !important;
 }
 
 .i-amphtml-story-button {
@@ -61,7 +61,7 @@
 
   /* for svg backgrounds: */
   background: center center no-repeat !important;
-  display: flex;
+  display: flex !important;
 }
 
 .i-amphtml-story-button:active {
@@ -101,13 +101,13 @@
   width: 100% !important;
 
   /* An empty mask image works around Safari not clipping rounded corners.
-  * https://stackoverflow.com/questions/5736503/how-to-make-css3-rounded-corners-hide-overflow-in-chrome-opera/10296258#10296258 */
+   * https://stackoverflow.com/questions/5736503/how-to-make-css3-rounded-corners-hide-overflow-in-chrome-opera/10296258#10296258 */
   -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC) !important;
 }
 
 .i-amphtml-story-page-progress-value {
   /* Do not remove `translateZ(0)` or `will-change` as they prevent an iOS
-  * repaint issue. */
+   * repaint issue. */
   background: rgba(255, 255, 255, 1) !important;
   height: 100% !important;
   width: 100% !important;
@@ -121,34 +121,34 @@
 }
 
 .i-amphtml-message-container {
-  width: max-content;
+  width: max-content !important;
   transition-property: opacity, transform !important;
   transition-duration: 200ms !important;
-  float: right;
+  float: right !important;
   opacity: 0 !important;
-  position: absolute;
-  top: 14px;
-  right: 48px;
+  position: absolute !important;
+  top: 14px !important;
+  right: 48px !important;
 }
 
 [messagedisplay="noshow"] .i-amphtml-message-container {
-  transition: opacity 1s cubic-bezier(0.4, 0.0, 1, 1), transform 2s cubic-bezier(1, 0.0, 0.2, 1) 2s;
+  transition: opacity 1s cubic-bezier(0.4, 0.0, 1, 1), transform 2s cubic-bezier(1, 0.0, 0.2, 1) 2s !important;
   transform: translateX(15%) !important;
   opacity: 0 !important;
 }
 
 [messagedisplay="show"] .i-amphtml-message-container {
-  transition: opacity 2s cubic-bezier(0.4, 0.0, 1, 1), transform 2s cubic-bezier(0.4, 0.0, 1, 1);
+  transition: opacity 2s cubic-bezier(0.4, 0.0, 1, 1), transform 2s cubic-bezier(0.4, 0.0, 1, 1) !important;
   opacity: 1 !important;
   transform: translateX(1%) !important;
 }
-
 
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text  {
   width: max-content;
 }
+
 .i-amphtml-story-sound-display{
   display: inline-block;
   height: 56px !important;
@@ -171,7 +171,7 @@
 .audio-playing[muted='noaudio'] .i-amphtml-story-unmute-no-sound-text {
   display: block !important;
 }
- 
+
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-system-layer-buttons,
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-share-pill {

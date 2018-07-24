@@ -60,7 +60,6 @@ const TEMPLATE = {
             'class': 'i-amphtml-story-sound-display',
           }),
           children: [
-
             {
               tag: 'div',
               attrs: dict({
@@ -99,7 +98,6 @@ const TEMPLATE = {
                 'role': 'button',
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
-
             },
             {
               tag: 'div',
@@ -117,7 +115,6 @@ const TEMPLATE = {
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
         },
-
       ],
     },
   ],
@@ -389,7 +386,6 @@ export class SystemLayer {
    * @private
    */
   onMutedStateUpdate_(isMuted) {
-
     this.vsync_.mutate(() => {
       if (isMuted) {
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'muted');
@@ -398,13 +394,12 @@ export class SystemLayer {
       } else {
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'noaudio');
       }
-
     });
   }
 
   /**
-   * Hides element after elapsed time
-   * @param {int} hideTimeout
+   * Hides element after elapsed time.
+   * @param {number} hideTimeout
    * @private
    */
   hideAfterTimeout_(hideTimeout) {
@@ -412,7 +407,7 @@ export class SystemLayer {
   }
 
   /**
-   * Hides message
+   * Hides message.
    * @private
    */
   hideInteral_() {
