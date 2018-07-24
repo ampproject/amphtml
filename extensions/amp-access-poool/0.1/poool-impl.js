@@ -86,6 +86,10 @@ export class PooolVendor {
 
     /** @private {string} */
     this.pageType_ = this.pooolConfig_['pageType'] || '';
+
+    /** @private {string} */
+    this.itemID_ = this.pooolConfig_['itemID'] || '';
+
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
   /**
    * @return {!Promise<!JsonObject>}
