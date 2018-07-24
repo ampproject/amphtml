@@ -216,11 +216,14 @@
       "name": "amp-accordion - Amp By Example"
     },
     {
-      "flaky": true,
-      // Loading progress bar sometimes takes longer to disappear
-      // e.g., https://percy.io/ampproject/danielrozenberg/builds/801880/view/45150930/1400?mode=diff&browser=firefox&snapshot=45150930
       "url": "examples/visual-tests/amp-by-example/components/amp-ad/index.html",
-      "name": "amp-ad - Amp By Example"
+      "name": "amp-ad - Amp By Example",
+      "loading_complete_css": [
+        "amp-ad iframe.i-amphtml-fill-content",
+        "amp-ad.amp-notsupported [fallback] .i-amphtml-ad-default-holder",
+        "amp-ad.amp-notsupported [fallback] p"
+      ],
+      "loading_incomplete_css": [".i-amphtml-loader-line"]
     },
     {
       "flaky": true,
