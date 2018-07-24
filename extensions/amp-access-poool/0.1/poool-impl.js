@@ -15,6 +15,7 @@
  */
 import {CSS} from '../../../build/amp-access-poool-0.1.css';
 import {Services} from '../../../src/services';
+import {camelCaseToDash, dashToUnderline} from '../../../src/string';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {loadScript} from '../../../3p/3p';
