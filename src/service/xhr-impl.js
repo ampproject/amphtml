@@ -32,18 +32,12 @@ import {
 } from '../url';
 import {utf8Encode} from '../utils/bytes';
 
-/** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = {
-  document: 1,
-  text: 2,
-};
-
 /**
  * Special case for fetchJson
  * @typedef {{
  *   body: (!JsonObject|!FormData|undefined),
  *   credentials: (string|undefined),
- *   headers: (!Object|undefined),
+ *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
  *   ampCors: (boolean|undefined)
