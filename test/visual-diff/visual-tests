@@ -266,11 +266,9 @@
       ]
     },
     {
-      "flaky": true,
-      // Embedded video sometimes takes longer to load, resulting in either a video placeholder or a blank box
-      // e.g., https://percy.io/ampproject/danielrozenberg/builds/844624/view/48560754/1400?mode=diff&browser=firefox&snapshot=48560754
       "url": "examples/visual-tests/amp-by-example/components/amp-brightcove/index.html",
-      "name": "amp-brightcove - Amp By Example"
+      "name": "amp-brightcove - Amp By Example",
+      "loading_complete_css": ["amp-brightcove iframe.i-amphtml-fill-content"]
     },
     {
       "flaky": true,
