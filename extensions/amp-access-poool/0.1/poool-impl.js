@@ -17,10 +17,19 @@ import {CSS} from '../../../build/amp-access-poool-0.1.css';
 import {Services} from '../../../src/services';
 import {camelCaseToDash, dashToUnderline} from '../../../src/string';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {loadScript} from '../../../3p/3p';
 
 const TAG = 'amp-access-poool';
+
+const ACCESS_CONFIG = {
+  'authorization':
+    'http://localhost:8001/api/v2/amp/access?rid=READER_ID',
+};
+
+const AUTHORIZATION_TIMEOUT = 3000;
+
 const CONFIG = {
   debug: false,
   forceWidget: null,
@@ -80,6 +89,15 @@ export class PooolVendor {
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
 
+    /** @private {string} */
+    this.accessUrl_ = ACCESS_CONFIG['authorization'];
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.ampdoc.win);
+
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = Services.xhrFor(this.ampdoc.win);
+
     /** @const @private {!JsonObject} For shape see PooolConfigDef */
     this.pooolConfig_ = this.accessSource_.getAdapterConfig();
 
@@ -104,7 +122,22 @@ export class PooolVendor {
    * @return {!Promise<!JsonObject>}
    */
   authorize() {
-    return {access: true};
+    return this.getPooolAccess_()
+        .then(response => {
+          return {access: response.access};
+        }, err => {
+          if (!err || !err.response) {
+            throw err;
+          }
+          const {response} = err;
+          if (response.status !== 402) {
+            throw err;
+          }
+          this.renderPoool_();
+          return {access: false};
+        });
+  }
+
   /**
    * @private
    */
@@ -116,6 +149,24 @@ export class PooolVendor {
     user().assert(this.pageType_, 'Page type is incorrect or not provided.');
     user().assert(this.itemID_, 'ItemID is not provided.');
   }
+
+  /**
+   * @return {!Promise<Object>}
+   * @private
+   */
+  getPooolAccess_() {
+    const url = this.accessUrl_ + '&iid=' + this.itemID_;
+    const urlPromise = this.accessSource_.buildUrl(url, false);
+    return urlPromise.then(url => {
+      return this.accessSource_.getLoginUrl(url);
+    }).then(url => {
+      dev().info(TAG, 'Authorization URL: ', url);
+      return this.timer_.timeoutPromise(
+          AUTHORIZATION_TIMEOUT,
+          this.xhr_.fetchJson(url)).then(res => res.json());
+    });
+  }
+
   /**
    * @private
    */
@@ -170,12 +221,23 @@ export class PooolVendor {
         );
       });
 
+      // Unlock content after onRelease event
+      _poool('event', 'onrelease', this.giveAccessOnPooolRelease_.bind(this));
 
       // Create hit
       _poool('send', 'page-view', this.pageType_);
 
     });
   }
+
+  /**
+   * @private
+   */
+  giveAccessOnPooolRelease_() {
+    const articleBody = document.getElementsByClassName('article-body')[0];
+    articleBody.setAttribute('amp-access-poool', '');
+  }
+
   /**
    * Produces the Poool SDK object for the passed in callback.
    *
