@@ -181,6 +181,16 @@
       "name": "Video rotate-to-fullscreen",
       "loading_complete_css": ["video.i-amphtml-replaced-content"]
     },
+    {
+      "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
+      "name": "AMP Sticky Ad",
+      "viewport": {
+        "width": 400,
+        "height": 600
+      },
+      "loading_complete_css": ["amp-sticky-ad[visible]"],
+      "enable_percy_javascript": true
+    },
     /**
       * AMP by Example pages go below this.
       */
