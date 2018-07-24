@@ -456,7 +456,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (this.element.getAttribute('layout') == 'responsive') {
         // TODO(levitzky) Define the behavior and remove this warning.
         user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
-            'currently not well defined. Proceed with caution.');
+            'currently not well defined. Forcefully overriding layout to ' +
+            '`fixed`.');
+        this.element.setAttribute('layout', 'fixed');
       }
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation') || 'true';
