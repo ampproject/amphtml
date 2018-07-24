@@ -276,7 +276,7 @@ export class XhrBase {
    * @return {string}
    */
   getCorsUrl(win, url) {
-    return getCorsUrl(this.win, url);
+    return getCorsUrl(win, url);
   }
 
   /**

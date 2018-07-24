@@ -16,12 +16,11 @@
 
 import {
   FetchInitDef,
-  XMLHttpRequestDef,
   XhrBase,
   assertSuccess,
   setupInit,
 } from '../xhr-base';
-import {dev, user} from '../log';
+import {dev} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
@@ -170,14 +169,6 @@ export class Xhr extends XhrBase {
           const response = /**@type {!Response} */ (res);
           return assertSuccess(response);
         });
-  }
-
-  /**
-   * @override
-   */
-  fromStructuredCloneable_(response) {
-    user().assert(isObject(response), 'Object expected: %s', response);
-    return new this.win.Response(response['body'], response['init']);
   }
 }
 
