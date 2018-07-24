@@ -73,7 +73,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     });
 
     it('should mark 400 as not retriable', () => {
-      //setupMockXhr();
       const promise = docFetcher.fetchDocument('/index.html');
       xhrCreated.then(
           xhr => xhr.respond(
@@ -88,7 +87,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     });
 
     it('should mark 415 as retriable', () => {
-      //setupMockXhr();
       const promise = docFetcher.fetchDocument('/index.html');
       xhrCreated.then(
           xhr => xhr.respond(
@@ -106,7 +104,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     });
 
     it('should mark 500 as retriable', () => {
-      //setupMockXhr();
       const promise = docFetcher.fetchDocument('/index.html');
       xhrCreated.then(
           xhr => xhr.respond(
@@ -124,7 +121,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     });
 
     it('should error on non truthy responseXML', () => {
-      //setupMockXhr();
       const promise = docFetcher.fetchDocument('/index.html');
       xhrCreated.then(
           xhr => xhr.respond(
@@ -150,6 +146,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     let viewer;
 
     beforeEach(() => {
+      setupMockXhr();
       optedInDoc = window.document.implementation.createHTMLDocument('');
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
