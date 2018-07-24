@@ -58,3 +58,32 @@ tags: {  # <amp-lightbox>
     supported_layouts: NODISPLAY
   }
 }
+tags: {   # <amp-lightbox close-button> in AMP4ADS.
+  html_format: AMP4ADS
+  tag_name: "AMP-LIGHTBOX"
+  spec_name: "amp-lightbox [AMP4ADS]"
+  requires_extension: "amp-lightbox"
+  attrs: {
+    name: "animate-in"
+    value_casei: "fade-in"
+    value_casei: "fly-in-bottom"
+    value_casei: "fly-in-top"
+  }
+  attrs: {
+    name: "close-button"
+    # Require `close-button` since we can't rely on the lightbox content
+    # containing a UI affordance to close it, effectively hijacking the
+    # document otherwise.
+    mandatory: true
+  }
+  attrs: { name: "controls" }
+  attrs: { name: "from" }
+
+  # Never allow `scrollable` as it would break layout with close button and
+  # async iframe interaction.
+
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

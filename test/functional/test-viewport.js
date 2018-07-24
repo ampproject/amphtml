@@ -1472,6 +1472,7 @@ describe('createViewport', () => {
           .callsFake(() => 12);
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
+      win.getComputedStyle = () => ({});
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
@@ -1485,6 +1486,7 @@ describe('createViewport', () => {
           .callsFake(() => 10);
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
+      win.getComputedStyle = () => ({});
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
