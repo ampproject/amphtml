@@ -164,6 +164,7 @@ amp-story-page {
   position: absolute !important;
   right: 0 !important;
   top: 0 !important;
+  opacity: 1 !important;
   transition: none !important;
   z-index: 0 !important;
 }
@@ -178,8 +179,8 @@ amp-story-page[active] {
 
 /* Setting `translateY` distances as a trick so that the runtime schedules
  * layout for the next N pages. The default value (1000%) means that pages are
- * not be automatically laid out. Max distance is set to 3 since we don't want
- * to schedule any further pages. */
+ * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
+ * we don't want to schedule any further pages. */
 
 amp-story:not([desktop]) >
     amp-story-page.i-amphtml-layout-container:not([active]) {
@@ -188,25 +189,15 @@ amp-story:not([desktop]) >
 
 amp-story-page[active],
 amp-story:not([desktop]) >
-    amp-story-page[active].i-amphtml-layout-container[distance],
+    amp-story-page.i-amphtml-layout-container[distance="0"],
 amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="0"] {
+    amp-story-page.i-amphtml-layout-container[distance="1"] {
   transform: translateY(0) !important;
 }
 
 amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="1"] {
-  transform: translateY(100%) !important;
-}
-
-amp-story:not([desktop]) >
     amp-story-page.i-amphtml-layout-container[distance="2"] {
-  transform: translateY(200%) !important;
-}
-
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="3"] {
-  transform: translateY(300%) !important;
+  transform: translateY(100%) !important;
 }
 
 amp-story:not([desktop]) >
