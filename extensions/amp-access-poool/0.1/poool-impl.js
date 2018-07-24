@@ -16,6 +16,49 @@
 import {Services} from '../../../src/services';
 import {installStylesForDoc} from '../../../src/style-installer';
 const TAG = 'amp-access-poool';
+const CONFIG = {
+  debug: false,
+  forceWidget: null,
+  loginButtonEnabled: true,
+  signatureEnabled: true,
+  userIsPremium: false,
+  videoClient: 'vast',
+  customSegment: null,
+  cookiesEnabled: false,
+};
+
+const EVENTS = [
+  'lock',
+  'release',
+  'hidden',
+  'disabled',
+  'register',
+  'error',
+  'adblock',
+  'outdatedBrowser',
+  'userOutsideCohort',
+  'identityAvailable',
+  'subscribeClick',
+  'loginClick',
+  'dataPolicyClick',
+];
+
+/**
+ * @typedef {{
+ *   appId: string,
+ *   pageType: (string),
+ *   debug: (string|null),
+ *   forceWidget: (string|null),
+ *   loginButtonEnabled: (boolean),
+ *   signatureEnabled: (boolean),
+ *   userIsPremium: (boolean),
+ *   videoClient: (string|null)
+ *   customSegment: (string|null),
+ *   cookiesEnabled: (boolean),
+ * }}
+ */
+let PooolConfigDef;
+
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
  */
@@ -32,6 +75,14 @@ export class PooolVendor {
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
 
+    /** @const @private {!JsonObject} For shape see PooolConfigDef */
+    this.pooolConfig_ = this.accessSource_.getAdapterConfig();
+
+    /** @private {string} */
+    this.bundleID_ = this.pooolConfig_['bundleID'] || '';
+
+    /** @private {string} */
+    this.pageType_ = this.pooolConfig_['pageType'] || '';
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
   /**
    * @return {!Promise<!JsonObject>}
