@@ -29,12 +29,16 @@ import {
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installYieldIt} from '../testing/yield';
 import {removeElement} from '../src/dom';
-import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
+import {
+  reportError,
+  resetAccumulatedErrorMessagesForTesting,
+} from '../src/error';
 import {
   resetEvtListenerOptsSupportForTesting,
 } from '../src/event-helper-listen';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
@@ -406,14 +410,18 @@ function preventAsyncErrorThrows() {
       rethrowAsyncSandbox.restore();
     }
     rethrowAsyncSandbox = sinon.sandbox.create();
-    rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake(
-        log.rethrowAsyncForTests);
+    rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
+      const error = log.createErrorVargs.apply(null, args);
+      self.reportError(error);
+      throw error;
+    });
   };
   this.restoreAsyncErrorThrows = function() {
     if (rethrowAsyncSandbox) {
       rethrowAsyncSandbox.restore();
     }
   };
+  setReportError(reportError);
   stubAsyncErrorThrows();
 }
 

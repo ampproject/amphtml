@@ -138,14 +138,12 @@ describe('3p', () => {
         location: true,
         mode: true,
       }, /* mandatory */[], /* optional */[]);
-      clock.tick(1);
 
       validateData({
         width: '',
         foo: true,
         bar: true,
       }, /* mandatory */[], ['foo', 'bar']);
-      clock.tick(1);
 
       allowConsoleError(() => { expect(() => {
         validateData({

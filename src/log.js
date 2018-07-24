@@ -507,9 +507,9 @@ export function duplicateErrorIfNecessary(error) {
 /**
  * @param {...*} var_args
  * @return {!Error}
- * @private
+ * @visibleForTesting
  */
-function createErrorVargs(var_args) {
+export function createErrorVargs(var_args) {
   let error = null;
   let message = '';
   for (let i = 0; i < arguments.length; i++) {
@@ -545,19 +545,6 @@ export function rethrowAsync(var_args) {
     self.reportError(error);
     throw error;
   });
-}
-
-
-/**
- * Rethrows the error immediately. Required because async errors thrown during
- * tests leak to subsequent tests. DO NOT USE IN RUNTIME CODE.
- * @visibleForTesting
- * @param {...*} var_args
- */
-export function rethrowAsyncForTests(var_args) {
-  const error = createErrorVargs.apply(null, arguments);
-  self.reportError(error);
-  throw error;
 }
 
 
