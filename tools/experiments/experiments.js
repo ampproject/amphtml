@@ -83,12 +83,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
-    id: 'amp-access-signin',
-    name: 'AMP Access sign-in',
-    spec: 'https://github.com/ampproject/amphtml/issues/4227',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
-  },
-  {
     id: 'amp-auto-ads',
     name: 'AMP Auto Ads',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
@@ -166,13 +160,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
   },
   {
-    id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP (launched).',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-animation/amp-animation.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
     id: 'pump-early-frame',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
@@ -241,6 +228,12 @@ const EXPERIMENTS = [
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
+  },
+  {
+    id: 'amp-story-navigation-performance',
+    name: 'amp-story page to page navigation performance improvements',
+    spec: 'https://github.com/ampproject/amphtml/issues/17017',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
   },
   {
     id: 'inline-styles',

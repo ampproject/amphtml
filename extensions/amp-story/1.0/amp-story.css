@@ -97,10 +97,6 @@ amp-story h6 {
   font-size: 0.67rem;
 }
 
-html.i-amphtml-story-standalone body {
-  display: grid !important;
-}
-
 html.i-amphtml-story-standalone #i-amphtml-wrapper body {
   /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
       1px bigger than the viewport. */
@@ -192,6 +188,8 @@ amp-story:not([desktop]) >
 
 amp-story-page[active],
 amp-story:not([desktop]) >
+    amp-story-page[active].i-amphtml-layout-container[distance],
+amp-story:not([desktop]) >
     amp-story-page.i-amphtml-layout-container[distance="0"] {
   transform: translateY(0) !important;
 }
@@ -261,24 +259,26 @@ amp-story amp-video::after {
   left: 0 !important;
 }
 
-amp-story-cta-layer, amp-story-grid-layer {
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  position: absolute !important;
-}
-
-/** Call to action layer */
+/** Call to action layer, positioned at the bottom 20% of the screen. */
 amp-story-cta-layer {
   display: block !important;
-  height: 20% !important;
+  position: absolute !important;
+  top: 80% !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  margin: 0 !important;
   z-index: 3 !important;
 }
 
 /** Grid level */
 amp-story-grid-layer {
   display: grid !important;
+  position: absolute !important;
   top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
   z-index: 2 !important;
 }
 

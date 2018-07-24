@@ -316,9 +316,9 @@ export class AccessServerJwtAdapter {
           this.xhr_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: request,
-            headers: {
+            headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            }),
             requireAmpResponseSourceOrigin: false,
           })).then(response => {
         dev().fine(TAG, 'Authorization response: ', response);
