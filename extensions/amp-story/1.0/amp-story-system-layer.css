@@ -132,8 +132,11 @@
 }
 
  [messagedisplay="noshow"] .i-amphtml-message-container {
-  transition: opacity 0.5s cubic-bezier(0.4, 0.0, 1, 1) , transform 0.1s cubic-bezier(0.4, 0.0, 1, 1); 
+  transition: opacity 1s cubic-bezier(0.4, 0.0, 1, 1), transform 2s cubic-bezier(1, 0.0, 0.2, 1) 2s;
+
+  /*transition: opacity 1s cubic-bezier(0.4, 0.0, 1, 1) , transform 0.1s cubic-bezier(0.4, 0.0, 1, 1); */
   transform: translateX(15%) !important;
+  opacity: 0 !important;
  }
  
  [messagedisplay="show"] .i-amphtml-message-container {
