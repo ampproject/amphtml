@@ -22,8 +22,38 @@
         padding: 20px;
         width: 200px;
       }
+
+      body {
+        background-color: black;
+      }
+      amp-story {
+        height: 700px !important;
+      }
+      @media (min-width: 1024px) {
+        amp-story {
+          height: 1000px !important;
+        }
+      }
     </style>
     <script>
+      /**
+       * Mark the document as loaded when the second page becomes active.
+       */
+       document.addEventListener('ampstory:pageactive', e => {
+        const storyEl = document.querySelector('amp-story');
+
+        if (e.detail.pageId !== 'the-page-with-the-cta-layer') {
+          return;
+        }
+
+        // Update the CSS classes to indicate that the story is ready.
+        storyEl.classList.remove('visual-diff-pending');
+        storyEl.classList.add('visual-diff-ready');
+      });
+
+      /**
+       * On load, jump to the second page.
+       */
       document.addEventListener('ampstory:load', () => {
         const storyEl = document.querySelector('amp-story');
 
@@ -35,9 +65,6 @@
         });
 
         storyEl.dispatchEvent(switchPageEvent);
-
-        // Remove the CSS class that indicates that the story is not yet ready.
-        storyEl.classList.remove('visual-diff-pending');
       });
     </script>
   </head>
@@ -46,8 +73,10 @@
     <amp-story standalone class="visual-diff-pending">
 
       <amp-story-page id="cover">
-        CTA layers are disallowed on the first page of stories.  This is just
-        a placeholder page, so that the second page may be tested.
+        <amp-story-grid-layer template="vertical">
+          CTA layers are disallowed on the first page of stories.  This is just
+          a placeholder page, so that the second page may be tested.
+        </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="the-page-with-the-cta-layer">

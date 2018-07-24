@@ -14,9 +14,22 @@
       amp-story-page {
         background: white;
         font-family: sans-serif;
+        font-size: 1rem;
       }
       .big-red-box {
         background-color: red;
+      }
+
+      body {
+        background-color: black;
+      }
+      amp-story {
+        height: 700px !important;
+      }
+      @media (min-width: 1024px) {
+        amp-story {
+          height: 1000px !important;
+        }
       }
     </style>
   </head>
@@ -24,7 +37,7 @@
   <body>
     <amp-story standalone>
 
-      <amp-story-page id="cover">
+      <amp-story-page id="cover" class="visual-diff-pending">
         <amp-story-grid-layer template="fill">
           <div class="big-red-box">this is a big red box</div>
         </amp-story-grid-layer>

@@ -234,12 +234,16 @@ export class AmpStoryPage extends AMP.BaseElement {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
         this.pauseCallback();
+        dispatch(this.win, this.element, EventType.PAGE_INACTIVE,
+            {pageId: this.element.id}, {bubbles: true});
         this.state_ = state;
         break;
       case PageState.ACTIVE:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
           this.resumeCallback();
+          dispatch(this.win, this.element, EventType.PAGE_ACTIVE,
+              {pageId: this.element.id}, {bubbles: true});
         }
 
         if (this.state_ === PageState.PAUSED) {
@@ -284,7 +288,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
-      this.markPageAsShown_();
     }
 
     this.reportDevModeErrors_();
@@ -362,12 +365,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
-  }
-
-
-  /** @private */
-  markPageAsShown_() {
-    dispatch(this.element, EventType.PAGE_SHOWN, true);
   }
 
 

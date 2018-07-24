@@ -115,43 +115,49 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
       "name": "amp-story: Grid layer (fill)",
+      "experiments": ["disable-amp-story-shadow-dom"],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        "i-amphtml-story-grid-template-fill"
+        ".i-amphtml-story-grid-template-fill"
       ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html",
       "name": "amp-story: Grid layer (vertical)",
+      "experiments": ["disable-amp-story-shadow-dom"],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        "i-amphtml-story-grid-template-vertical"
+        ".i-amphtml-story-grid-template-vertical"
       ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html",
       "name": "amp-story: Grid layer (horizontal)",
+      "experiments": ["disable-amp-story-shadow-dom"],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        "i-amphtml-story-grid-template-horizontal"
+        ".i-amphtml-story-grid-template-horizontal"
       ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html",
       "name": "amp-story: Grid layer (thirds)",
+      "experiments": ["disable-amp-story-shadow-dom"],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        "i-amphtml-story-grid-template-thirds"
+        ".i-amphtml-story-grid-template-thirds"
       ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
       "name": "amp-story: CTA layer",
+      "experiments": ["disable-amp-story-shadow-dom"],
       "loading_incomplete_css": [
         ".visual-diff-pending"
       ],
       "loading_complete_css": [
-        ".i-amphtml-story-loaded"
+        ".i-amphtml-story-loaded",
+        ".visual-diff-ready"
       ]
     },
     {
