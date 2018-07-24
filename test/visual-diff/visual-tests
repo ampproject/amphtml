@@ -82,10 +82,10 @@
    *   ],
    *
    *
-   *   // [optional, EXPERIMENTAL] Allow running "dirty" JavaScript code in this
-   *   // AMP page, and enable JavaScript execution on the Percy side.
-   *   // The code being executed *must* be inlined inside a <script> tag, not
-   *   // be an externally loaded script via a <script src="..."> tag.
+   *   // [optional, EXPERIMENTAL] Allow running "dirty" JavaScript code on
+   *   // on Percy in this AMP page. The code being executed *must* be inlined
+   *   // inside a <script> tag, not be an externally loaded script via a
+   *   // <script src="..."> tag.
    *   // The code *WILL BE EXECUTED TWICE*! Once locally, before the DOM is
    *   // sent to Percy, and then once again on Percy before the actual snapshot
    *   // occurs. If you wish to execute the code only once, guard against it
@@ -97,12 +97,14 @@
    *   //       document.body.classList.add('DIRTY_JAVASCRIPT_GUARD');
    *   //     }
    *   //   </script>
+   *   // Note that the AMP runtime will only be executed locally, before
+   *   // sending the snapshot to Percy.
    *   // You may use this feature to create visual diff tests with
    *   // interactivity. In the future we intend to implement visual diff tests
    *   // that have direct access to the Puppeteer Page instance, which would
    *   // allow you to interact with elements on the page in the same capacity
    *   // that a user would. (e.g., click on links, swipe gallery images.)
-   *   "enable_dirty_javascript": true,
+   *   "enable_percy_javascript": true,
    *
    *   // [optional] Add this key and set to true to skip this test. You should
    *   // also add an explanation and a link to an example of a previous

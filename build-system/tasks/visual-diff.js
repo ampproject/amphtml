@@ -453,7 +453,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
     await verifyCssElements(page, url, webpage.forbidden_css,
         webpage.loading_incomplete_css, webpage.loading_complete_css);
 
-    if (webpage.enable_dirty_javascript) {
+    if (webpage.enable_percy_javascript) {
       snapshotOptions.enableJavaScript = true;
       // Remove all scripts that have an external source, leaving only those
       // scripts that are inlined in the page inside a <script> tag.
