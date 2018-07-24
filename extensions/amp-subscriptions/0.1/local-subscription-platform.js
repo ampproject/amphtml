@@ -23,6 +23,7 @@ import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 
 /**
@@ -201,9 +202,9 @@ export class LocalSubscriptionPlatform {
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: {
+        headers: dict({
           'Content-Type': 'text/plain',
-        },
+        }),
         body: JSON.stringify(selectedEntitlement.jsonForPingback()),
       });
     });
