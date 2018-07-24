@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {CSS} from '../../../build/amp-access-poool-0.1.css';
 import {Services} from '../../../src/services';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {loadScript} from '../../../3p/3p';
