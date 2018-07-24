@@ -358,7 +358,7 @@ const forbiddenTerms = {
       'src/ssr-template-helper.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
-      'src/service/xhr-impl.js',
+      'src/service/xhr-base.js',
     ],
   },
   // Privacy sensitive
