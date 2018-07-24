@@ -221,7 +221,7 @@ export class XhrBase {
       });
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
-            this.fromStructuredCloneable_(response, init.responseType));
+            this.fromStructuredCloneable_(response));
     });
   }
 
@@ -258,12 +258,10 @@ export class XhrBase {
    *
    * @param {JsonObject|string|undefined} response The structurally-cloneable
    *     response to convert back to a regular Response.
-   * @param {string|undefined} unusedResponseType The original response type used to
-   *     initiate the XHR.
    * @return {*} The deserialized regular response.
    * @protected
    */
-  fromStructuredCloneable_(response, unusedResponseType) {
+  fromStructuredCloneable_(response) {
     dev().assert(this.win.Response, 'Response object not present on window');
     user().assert(isObject(response), 'Object expected: %s', response);
     return new this.win.Response(response['body'], response['init']);

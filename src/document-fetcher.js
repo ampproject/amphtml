@@ -15,7 +15,8 @@
  */
 
 import {FetchInitDef, XhrBase, assertSuccess, setupInit} from './xhr-base';
-import {dict} from './utils/object';
+import {dict, map} from './utils/object';
+import {isArray} from './types';
 import {isFormDataWrapper} from './form-data-wrapper';
 import {user} from './log';
 
@@ -138,6 +139,43 @@ export class DocumentFetcher extends XhrBase {
       return response.text().then(responseText =>
         new DOMParser().parseFromString(responseText, 'text/html'));
     });
+  }
+
+  /** @override */
+  fromStructuredCloneable_(response) {
+    const lowercasedHeaders = map();
+    const data = {
+      status: 200,
+      statusText: 'OK',
+      responseText: (response['body'] ? String(response['body']) : ''),
+      /**
+       * @param {string} name
+       * @return {string}
+       */
+      getResponseHeader(name) {
+        return lowercasedHeaders[String(name).toLowerCase()] || null;
+      },
+    };
+
+    if (response['init']) {
+      const init = response['init'];
+      if (isArray(init.headers)) {
+        init.headers.forEach(entry => {
+          const headerName = entry[0];
+          const headerValue = entry[1];
+          lowercasedHeaders[String(headerName).toLowerCase()] =
+              String(headerValue);
+        });
+      }
+      if (init.status) {
+        data.status = parseInt(init.status, 10);
+      }
+      if (init.statusText) {
+        data.statusText = String(init.statusText);
+      }
+    }
+
+    return new Response(data);
   }
 }
 
