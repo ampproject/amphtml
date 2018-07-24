@@ -38,4 +38,10 @@ export class PooolVendor {
    */
   authorize() {
     return {access: true};
+  /**
+   * @return {!Promise}
+   */
+  pingback() {
+    return Promise.resolve();
   }
+}
