@@ -136,7 +136,7 @@ The background of the `<body>` element for AMPHTML ads that contain a lightbox i
 
 When you use `<amp-lightbox>` in AMPHTML ads, the background of your `<body>` element becomes transparent because the AMP runtime resizes and realigns your creative's content before the lightbox is expanded. This is done to prevent a visual "jump" of the creative while the lightbox opens. If your creative needs a background, set it on an intermediate container (like a full-size `<div>`) instead of the `<body>`.
 
-When the AMPHTML ad is running in a third-party environment (for example, AMP inabox), the creative is centered relative to the viewport and is then expanded. This is because third-party iframes need to rely on a postMessage API to enable features like frame resizing, which is asynchronous, so centering the creative first allows a smooth transition without visual jumps.
+When the AMPHTML ad is running in a third-party environment (for example, in a non-AMP document), the creative is centered relative to the viewport and is then expanded. This is because third-party iframes need to rely on a postMessage API to enable features like frame resizing, which is asynchronous, so centering the creative first allows a smooth transition without visual jumps.
 
 ### Examples of lightboxs for AMPHTML ads
 
@@ -146,7 +146,7 @@ In the examples below, we demonstrate how the transition looks for an AMPHTML ad
 
 ![](../../spec/img/lightbox-ad-fie.gif)
 
-##### On third-party iframes (e.g., AMP inabox)
+##### On third-party iframes (e.g., outside the AMP cache)
 
 ![](../../spec/img/lightbox-ad-3p.gif)
 
