@@ -131,16 +131,6 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getRootOpacity()).to.equal(1);
   });
 
-  it('should resolve root opacity', () => {
-    const rootElement = win.document.documentElement;
-    sandbox.stub(viewport, 'getOpacity').callsFake(element => {
-      if (element == rootElement) {
-        return 0;
-      }
-    });
-    expect(root.getRootOpacity()).to.equal(0);
-  });
-
   it('should resolve root layout box', () => {
     const rootElement = win.document.documentElement;
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
@@ -416,8 +406,6 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.listenRoot(spec, null, null, eventResolver);
     sandbox.stub(root, 'getRootLayoutBox').callsFake(
         () => layoutRectLtwh(11, 21, 101, 201));
-    sandbox.stub(root, 'getRootOpacity').callsFake(
-        () => 1);
 
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
@@ -1025,8 +1013,6 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       scrollTop = 10;
       sandbox.stub(resource, 'getLayoutBox').callsFake(
           () => layoutRectLtwh(0, scrollTop, 100, 100));
-      sandbox.stub(resource, 'getOpacity').callsFake(
-          () => 0.5);
     });
   });
 
