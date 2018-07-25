@@ -17,7 +17,7 @@
 /**
  * Particulars of the webpages used in the AMP visual diff tests.
  */
-{
+ {
   /**
    * Path relative to amphtml/ that contains the assets for all test pages.
    */
@@ -113,6 +113,85 @@
    * },
    */
     {
+      "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
+      "name": "AMP Article Access",
+      "loading_incomplete_css": [".article-body"],
+      "loading_complete_css": [".login-section"]
+    },
+    {
+      "url": "examples/visual-tests/font.amp/font.amp.html",
+      "name": "Fonts",
+      "loading_incomplete_css": [
+        "html.comic-amp-font-loading",
+        "html.comic-amp-bold-font-loading"
+      ],
+      "loading_complete_css": [
+        "html.comic-amp-font-loaded",
+        "html.comic-amp-bold-font-loaded"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
+      "name": "AMP Layout"
+    },
+    {
+      "url": "examples/visual-tests/article-fade-in.amp.html",
+      "name": "fade-in & fade-in-scroll",
+      "loading_complete_css": [
+        ".overlay-container",
+        ".overflow-window"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/font.amp.404/font.amp.html",
+      "name": "Fonts 404",
+      "forbidden_css": [
+        ".comic-amp-font-loaded",
+        ".comic-amp-bold-font-loaded"
+      ],
+      "loading_complete_css": [
+        ".comic-amp-font-missing",
+        ".comic-amp-bold-font-missing"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/article.amp/article.amp.html",
+      "name": "AMP Article",
+      "loading_complete_css": [
+        ".article-body",
+        ".ad-one",
+        ".ad-two"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-list/amp-list.amp.html",
+      "name": "AMP List and Mustache",
+      "loading_complete_css": [
+        ".list1",
+        ".list2"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-lightbox-gallery.html",
+      "name": "amp-lightbox-gallery - article",
+      "experiments": ["amp-lightbox-gallery"]
+    },
+    {
+      "url": "examples/visual-tests/video/rotate-to-fullscreen.html",
+      "name": "Video rotate-to-fullscreen",
+      "loading_complete_css": ["video.i-amphtml-replaced-content"]
+    },
+    {
+      "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
+      "name": "AMP Sticky Ad",
+      "viewport": {
+        "width": 400,
+        "height": 600
+      },
+      "loading_complete_css": ["amp-sticky-ad[visible]"],
+      "enable_percy_javascript": true
+    },
+    {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
       "name": "amp-story: Grid layer (fill)",
       "experiments": ["disable-amp-story-shadow-dom"],
@@ -162,28 +241,8 @@
       "viewport": {"width": 320, "height": 427},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".on-the-page-with-the-cta-layer"
+        ".visual-diff-is-on-the-page-with-the-cta-layer"
       ]
-    },
-    {
-      "url": "examples/visual-tests/amp-lightbox-gallery.html",
-      "name": "amp-lightbox-gallery - article",
-      "experiments": ["amp-lightbox-gallery"]
-    },
-    {
-      "url": "examples/visual-tests/video/rotate-to-fullscreen.html",
-      "name": "Video rotate-to-fullscreen",
-      "loading_complete_css": ["video.i-amphtml-replaced-content"]
-    },
-    {
-      "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
-      "name": "AMP Sticky Ad",
-      "viewport": {
-        "width": 400,
-        "height": 600
-      },
-      "loading_complete_css": ["amp-sticky-ad[visible]"],
-      "enable_percy_javascript": true
     },
     /**
       * AMP by Example pages go below this.
