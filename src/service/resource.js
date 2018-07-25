@@ -177,9 +177,6 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
-    /** @private {number} */
-    this.opacity_ = 1;
-
     /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
@@ -474,8 +471,6 @@ export class Resource {
     const viewport = this.resources_.getViewport();
     const box = this.resources_.getViewport().getLayoutRect(this.element);
     this.layoutBox_ = box;
-    const opacity = this.resources_.getViewport().getOpacity(this.element);
-    this.opacity_ = opacity;
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
@@ -575,15 +570,6 @@ export class Resource {
    */
   requestMeasure() {
     this.isMeasureRequested_ = true;
-  }
-
-  /**
-    * Returns the min opacity among the element, element's parents and
-    * element's children
-    * @return {number}
-    */
-  getOpacity() {
-    return this.opacity_;
   }
 
   /**
