@@ -26,8 +26,8 @@ import {
 import {restrictedVsync, timer} from './util';
 
 
-const CENTER_TRANSITION_TIME_MS = 500;
-const CENTER_TRANSITION_END_WAIT_TIME_MS = 200;
+const CENTER_TRANSITION_TIME_MS = 150;
+const CENTER_TRANSITION_END_WAIT_TIME_MS = 50;
 
 
 /**

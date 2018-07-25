@@ -34,6 +34,7 @@ const rimraf = require('rimraf');
 const source = require('vinyl-source-stream');
 const touch = require('touch');
 const watchify = require('watchify');
+const wrappers = require('./build-system/compile-wrappers');
 const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
@@ -59,9 +60,13 @@ const extensionAliasFilePath = {};
 const {green, red, cyan} = colors;
 
 const minifiedRuntimeTarget = 'dist/v0.js';
+const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
 const unminifiedRuntimeTarget = 'dist/amp.js';
+const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
+
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
 extensionBundles.forEach(c => declareExtension(c.name, c.version, c.options));
 aliasBundles.forEach(c => {
@@ -275,39 +280,15 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           includePolyfills: false,
         }),
     compileJs('./src/', 'amp.js', './dist', {
+      toName: 'amp.js',
       minifiedName: 'v0.js',
       includePolyfills: true,
       checkTypes: opt_checkTypes,
       watch,
       preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
-      // If there is a sync JS error during initial load,
-      // at least try to unhide the body.
-      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-          'setTimeout(function(){' +
-          'var s=document.body.style;' +
-          's.opacity=1;' +
-          's.visibility="visible";' +
-          's.animation="none";' +
-          's.WebkitAnimation="none;"},1000);throw e};',
-    }),
-    compileJs('./src/', 'amp.js', './dist', {
-      minifiedName: 'v0-esm.js',
-      includePolyfills: true,
-      includeOnlyESMLevelPolyfills: true,
-      checkTypes: opt_checkTypes,
-      watch,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-      minify: shouldMinify,
-      // If there is a sync JS error during initial load,
-      // at least try to unhide the body.
-      wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
-          'setTimeout(function(){' +
-          'var s=document.body.style;' +
-          's.opacity=1;' +
-          's.visibility="visible";' +
-          's.animation="none";' +
-          's.WebkitAnimation="none;"},1000);throw e};',
+      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -322,9 +303,24 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         }),
   ];
 
+  if (!argv.single_pass) {
+    promises.push(
+        compileJs('./src/', 'amp.js', './dist', {
+          toName: 'amp-esm.js',
+          minifiedName: 'v0-esm.js',
+          includePolyfills: true,
+          includeOnlyESMLevelPolyfills: true,
+          checkTypes: opt_checkTypes,
+          watch,
+          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          minify: shouldMinify,
+          wrapper: wrappers.mainBinary,
+        }));
+  }
+
   // We don't rerun type check for the shadow entry point for now.
   if (!opt_checkTypes) {
-    if (!watch || argv.with_shadow) {
+    if (!argv.single_pass && (!watch || argv.with_shadow)) {
       promises.push(
           compileJs('./src/', 'amp-shadow.js', './dist', {
             minifiedName: 'shadow-v0.js',
@@ -350,18 +346,21 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     }
 
     if (!watch || argv.with_inabox) {
+      if (!argv.single_pass) {
+        promises.push(
+            // Entry point for inabox runtime.
+            compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+              toName: 'amp-inabox.js',
+              minifiedName: 'amp4ads-v0.js',
+              includePolyfills: true,
+              extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+              checkTypes: opt_checkTypes,
+              watch,
+              preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+              minify: shouldMinify,
+            }));
+      }
       promises.push(
-          // Entry point for inabox runtime.
-          compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-            toName: 'amp-inabox.js',
-            minifiedName: 'amp4ads-v0.js',
-            includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-            checkTypes: opt_checkTypes,
-            watch,
-            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-            minify: shouldMinify,
-          }),
 
           // inabox-host
           compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
@@ -407,6 +406,24 @@ function css() {
   return compileCss();
 }
 
+const cssEntryPoints = [
+  {
+    path: 'amp.css',
+    outJs: 'css.js',
+    outCss: 'v0.css',
+  },
+  {
+    path: 'video-docking.css',
+    outJs: 'video-docking.css.js',
+    outCss: 'video-docking.css',
+  },
+  {
+    path: 'video-autoplay.css',
+    outJs: 'video-autoplay.css.js',
+    outCss: 'video-autoplay.css',
+  },
+];
+
 /**
  * Compile all the css and drop in the build folder
  * @param {boolean} watch
@@ -441,34 +458,37 @@ function compileCss(watch, opt_compileAll) {
         }));
   }
 
+  /**
+   * @param {string} path
+   * @param {string} outJs
+   * @param {string} outCss
+   */
+  function writeCssEntryPoint(path, outJs, outCss) {
+    const startTime = Date.now();
+
+    return jsifyCssAsync(`css/${path}`)
+        .then(css => writeCss(css, path, outJs, outCss))
+        .then(() => {
+          endBuildStep('Recompiled CSS in', path, startTime);
+        });
+  }
+
   // Used by `gulp test --local-changes` to map CSS files to JS files.
   fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
-  const startTime = Date.now();
-  return jsifyCssAsync('css/amp.css')
-      .then(css => writeCss(css, 'amp.css', 'css.js', 'v0.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'amp.css', startTime);
-      })
-      .then(() => jsifyCssAsync('css/video-docking.css'))
-      .then(css => writeCss(css,
-          'video-docking.css', 'video-docking.css.js', 'video-docking.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'video-docking.css', startTime);
-      })
-      .then(() => jsifyCssAsync('css/video-autoplay.css'))
-      .then(css => writeCss(css,
-          'video-autoplay.css', 'video-autoplay.css.js', 'video-autoplay.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'video-autoplay.css', startTime);
-      })
-      .then(() => {
-        return buildExtensions({
-          bundleOnlyIfListedInFiles: false,
-          compileOnlyCss: true,
-          compileAll: opt_compileAll,
-        });
-      });
+
+  let promise = Promise.resolve();
+
+  cssEntryPoints.forEach(entryPoint => {
+    const {path, outJs, outCss} = entryPoint;
+    promise = promise.then(() => writeCssEntryPoint(path, outJs, outCss));
+  });
+
+  return promise.then(() => buildExtensions({
+    bundleOnlyIfListedInFiles: false,
+    compileOnlyCss: true,
+    compileAll: opt_compileAll,
+  }));
 }
 
 /**
@@ -477,12 +497,15 @@ function compileCss(watch, opt_compileAll) {
  */
 function copyCss() {
   const startTime = Date.now();
-  fs.copySync('build/css/v0.css', 'dist/v0.css');
-  fs.copySync('build/css/video-docking.css', 'dist/video-docking.css');
+
+  cssEntryPoints.forEach(({outCss}) => {
+    fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
+  });
+
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')))
       .then(() => {
-        endBuildStep('Copied', 'build/css/v0.css to dist/v0.css', startTime);
+        endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
       });
 }
 
@@ -595,11 +618,11 @@ function buildExtensionCss(path, name, version, options) {
  * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
-  const filename = options.filename || name + '.js';
-  if (options.loadPriority && options.loadPriority != 'high') {
-    throw new Error('Unsupported loadPriority: ' + options.loadPriority);
+  if (argv.single_pass) {
+    console.log('Skipping extension JS build in single pass mode', name);
+    return;
   }
-  const priority = options.loadPriority ? 'p:"high",' : '';
+  const filename = options.filename || name + '.js';
   return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,
@@ -610,8 +633,7 @@ function buildExtensionJs(path, name, version, options) {
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
-      : `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
-      `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
+      : wrappers.extension(name, options.loadPriority),
   }));
 }
 
@@ -805,7 +827,11 @@ function dist() {
         copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
-          return enableLocalTesting(minifiedRuntimeTarget);
+          return enableLocalTesting(minifiedRuntimeTarget).then(() => {
+            if (!argv.single_pass) {
+              return enableLocalTesting(minifiedRuntimeEsmTarget);
+            }
+          });
         }
       }).then(() => {
         return createModuleCompatibleES5Bundle('v0.js');
@@ -879,7 +905,7 @@ function checkTypes() {
             include3pDirectories: true,
             includePolyfills: true,
             extraGlobs: ['src/inabox/*.js'],
-            checkTypes: true,
+            typeCheckOnly: true,
           }),
       // Type check 3p/ads code.
       closureCompile(['./3p/integration.js'], './dist',
@@ -887,21 +913,21 @@ function checkTypes() {
             externs: ['ads/ads.extern.js'],
             include3pDirectories: true,
             includePolyfills: true,
-            checkTypes: true,
+            typeCheckOnly: true,
           }),
       closureCompile(['./3p/ampcontext-lib.js'], './dist',
           'ampcontext-check-types.js', {
             externs: ['ads/ads.extern.js'],
             include3pDirectories: true,
             includePolyfills: true,
-            checkTypes: true,
+            typeCheckOnly: true,
           }),
       closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
           'iframe-transport-client-check-types.js', {
             externs: ['ads/ads.extern.js'],
             include3pDirectories: true,
             includePolyfills: true,
-            checkTypes: true,
+            typeCheckOnly: true,
           }),
     ]);
   }).then(() => {
@@ -1032,7 +1058,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
           }
         })
         .then(() => {
-          endBuildStep('Minified', srcFilename, startTime);
+          endBuildStep('Minified', options.minifiedName, startTime);
 
           // Remove intemediary, transpiled JS files after compilation.
           if (options.typeScript) {
@@ -1063,7 +1089,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   // Default wrapper for `gulp build`.
   // We don't need an explicit function wrapper like we do for `gulp dist`
   // because Babel handles that for you.
-  const wrapper = options.wrapper || '<%= contents %>';
+  const wrapper = options.wrapper || wrappers.none;
 
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
@@ -1107,9 +1133,19 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             .on('end', function() {
               appendToCompiledFile(srcFilename,
                   path.join(destDir, destFilename));
+
+              if (options.latestName) {
+                // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
+                const latestMaxName =
+                    options.latestName.split('.js')[0] + '.max.js';
+                // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
+                fs.copySync(
+                    path.join(destDir, options.toName),
+                    path.join(destDir, latestMaxName));
+              }
             }))
         .then(() => {
-          endBuildStep('Compiled', srcFilename, startTime);
+          endBuildStep('Compiled', destFilename, startTime);
 
           // Remove intemediary, transpiled JS files after compilation.
           if (options.typeScript) {
@@ -1118,9 +1154,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         })
         .then(() => {
           if (process.env.NODE_ENV === 'development') {
-            if (srcFilename === 'amp.js') {
+            if (destFilename === 'amp.js') {
               return enableLocalTesting(unminifiedRuntimeTarget);
-            } else if (srcFilename === 'integration.js') {
+            } else if (destFilename === 'amp-esm.js') {
+              return enableLocalTesting(unminifiedRuntimeEsmTarget);
+            } else if (destFilename === 'integration.js') {
               return enableLocalTesting(unminified3pTarget);
             } else {
               return Promise.resolve();
@@ -1501,7 +1539,7 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
+gulp.task('build', 'Builds the AMP library', maybeUpdatePackages, build, {
   options: {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
     extensions: '  Builds only the listed extensions.',
@@ -1510,25 +1548,26 @@ gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
 });
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
-gulp.task('check-types', 'Check JS types', ['update-packages'], checkTypes);
-gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
+gulp.task('check-types', 'Check JS types', maybeUpdatePackages, checkTypes);
+gulp.task('css', 'Recompile css to build directory', maybeUpdatePackages, css);
 gulp.task('default', 'Runs "watch" and then "serve"',
-    ['update-packages', 'watch'], serve, {
+    maybeUpdatePackages.concat(['watch']), serve, {
       options: {
         extensions: '  Watches and builds only the listed extensions.',
         noextensions: '  Watches and builds with no extensions.',
       },
     });
-gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
+gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
             'Great for profiling and debugging production code.',
     fortesting: '  Compiles production binaries for local testing',
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    single_pass: 'Compile AMP\'s primary JS bundles in a single invocatoion',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
-    ['update-packages'], watch, {
+    maybeUpdatePackages, watch, {
       options: {
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',

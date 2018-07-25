@@ -99,6 +99,10 @@ describes.realWin('amp-story-auto-ads', {
       sandbox.stub(autoAds, 'createAdElement_').returns(ad);
       autoAds.adPageEls_ = [ad];
 
+      const page = win.document.createElement('amp-story-page');
+      sandbox.stub(autoAds, 'createPageElement_').returns(page);
+      page.getImpl = () => Promise.resolve({delegateVideoAutoplay: () => {}});
+
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.createAdPage_();
       yield macroTask();

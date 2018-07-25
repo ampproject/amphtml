@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.18 */
+/** Version: 0.1.22.22 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -38,51 +38,51 @@ import { ActivityPorts } from 'web-activities/activity-ports';
  * @return {T} The value of shouldBeTrueish.
  * @template T
  */
- function assert(shouldBeTrueish, opt_message, var_args) {
-   let firstElement;
-   if (!shouldBeTrueish) {
-     const message = opt_message || 'Assertion failed';
-     const splitMessage = message.split('%s');
-     const first = splitMessage.shift();
-     let formatted = first;
-     const messageArray = [];
-     pushIfNonEmpty(messageArray, first);
-     for (let i = 2; i < arguments.length; i++) {
-       const val = arguments[i];
-       if (val && val.tagName) {
-         firstElement = val;
-       }
-       const nextConstant = splitMessage.shift();
-       messageArray.push(val);
-       pushIfNonEmpty(messageArray, nextConstant.trim());
-       formatted += toString(val) + nextConstant;
-     }
-     const e = new Error(formatted);
-     e.fromAssert = true;
-     e.associatedElement = firstElement;
-     e.messageArray = messageArray;
-     throw e;
-   }
-   return shouldBeTrueish;
- }
+function assert(shouldBeTrueish, opt_message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    const message = opt_message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
 
 /**
  * @param {!Array} array
  * @param {*} val
  */
- function pushIfNonEmpty(array, val) {
-   if (val != '') {
-     array.push(val);
-   }
- }
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
 
- function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-   if (val && val.nodeType == 1) {
-     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-   }
-   return /** @type {string} */ (val);
- }
+function toString(val) {
+// Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
 
 
 
@@ -385,6 +385,7 @@ function resetStyles(element, properties) {
 /**
  * Resets all the styles of an element to a given value. Defaults to null.
  * The valid values are 'inherit', 'initial', 'unset' or null.
+ * @param {!Element} element
  */
 function resetAllStyles(element) {
   setImportantStyles(element, defaultStyles);
@@ -406,7 +407,8 @@ function addAttributesToElement(element, attributes) {
   for (const attr in attributes) {
     if (attr == 'style') {
       setStyles(element,
-        /** @type !Object<string, string|boolean|number> */ (attributes[attr]));
+           /** @type !Object<string, string|boolean|number> */
+           (attributes[attr]));
     } else {
       element.setAttribute(attr,
           /** @type {string|boolean|number} */ (attributes[attr]));
@@ -602,7 +604,7 @@ class ButtonApi {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important;will-change:transform}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@-webkit-keyframes swg-notify{0%{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}to{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}@-webkit-keyframes swg-notify-hide{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}to{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 
 
@@ -884,9 +886,10 @@ class View {
     // Do nothing by default. Override if needed.
   }
 
-  /*
+  /**
    * Accept the result.
    * @return {!Promise}
+   * @abstract
    */
   whenComplete() {}
 
@@ -1315,7 +1318,7 @@ class UserData {
   constructor(idToken, data) {
     /** @const {string} */
     this.idToken = idToken;
-    /** @private @const {!Object} */
+    /** @const {!Object} */
     this.data = data;
 
     /** @const {string} */
@@ -1641,7 +1644,6 @@ function tryParseJson(json, opt_onFailed) {
  * Provides helper methods to decode and verify JWT tokens.
  */
 class JwtHelper {
-
   constructor() {
   }
 
@@ -1661,6 +1663,9 @@ class JwtHelper {
    */
   decodeInternal_(encodedToken) {
     // See https://jwt.io/introduction/
+    /**
+     * Throws error about invalid token.
+     */
     function invalidToken() {
       throw new Error(`Invalid token: "${encodedToken}"`);
     }
@@ -1697,6 +1702,7 @@ const SubscriptionFlows = {
   COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
   SHOW_LOGIN_PROMPT: 'showLoginPrompt',
+  SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
 };
 
 
@@ -2245,7 +2251,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.18',
+    '_client': 'SwG 0.1.22.22',
   });
 }
 
@@ -2322,9 +2328,6 @@ class PayStartFlow {
   constructor(deps, sku) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
-
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -2415,9 +2418,6 @@ class PayCompleteFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {!../runtime/callbacks.Callbacks} */
-    this.callbacks_ = deps.callbacks();
-
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
 
@@ -2478,7 +2478,7 @@ class PayCompleteFlow {
 
 
 /**
-  *@param {!Window} win
+ * @param {!Window} win
  * @param {!web-activities/activity-ports.ActivityPort} port
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
@@ -2702,7 +2702,7 @@ class DeferredAccountFlow {
         purchaseData,
         userData,
         () => Promise.resolve()  // completeHandler doesn't matter in this case
-        ));
+    ));
     return response;
   }
 }
@@ -2847,6 +2847,7 @@ class LoadingView {
     /** @private @const {!Document} */
     this.doc_ = doc;
 
+    /** @private @const {!Element} */
     this.loadingContainer_ =
         createElement(this.doc_, 'swg-loading-container', {});
 
@@ -2868,21 +2869,21 @@ class LoadingView {
     return this.loadingContainer_;
   }
 
-  /*
+  /**
    * Shows the loading indicator within the container element.
    */
   show() {
     this.loadingContainer_.style.removeProperty('display');
   }
 
-  /*
+  /**
    * Hides the loading indicator within the container element.
    */
   hide() {
     this.loadingContainer_.style.setProperty('display', 'none', 'important');
   }
 
-  /*
+  /**
    * Populates the loading indivicator. The populated element
    * can be added in any view, when required.
    * @private
@@ -3255,7 +3256,7 @@ class Dialog {
       return transition(this.getElement(), {
         'transform': 'translateY(0)',
         'opacity': 1,
-        'visiblity': 'visible',
+        'visibility': 'visible',
       }, 300, 'ease-out');
     });
     this.hidden_ = false;
@@ -3373,7 +3374,7 @@ class Dialog {
 
   /**
    * Removes previouly added bottom padding from the document.
-   * @private`
+   * @private
    */
   removePaddingToHtml_() {
     this.doc_.getRootElement().style.removeProperty('padding-bottom');
@@ -3726,6 +3727,9 @@ class Toast {
     /** @private @const {!Object<string, ?>} */
     this.args_ = args;
 
+    /** @private {?Promise} */
+    this.animating_ = null;
+
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ =
         /** @type {!HTMLIFrameElement} */ (
@@ -3769,11 +3773,21 @@ class Toast {
           return port.whenReady();
         }).then(() => {
           resetStyles(this.iframe_, ['height']);
-          setImportantStyles(this.iframe_, {
-            'animation': 'swg-notify .3s ease-out normal backwards, '
-                  + 'swg-notify-hide .3s ease-out ' + toastDurationSeconds +
-                  's normal forwards',
+
+          this.animate_(() => {
+            setImportantStyles(this.iframe_, {
+              'transform': 'translateY(100%)',
+              'opactiy': 1,
+              'visibility': 'visible',
+            });
+            return transition(this.iframe_, {
+              'transform': 'translateY(0)',
+              'opacity': 1,
+              'visibility': 'visible',
+            }, 400, 'ease-out');
           });
+
+          // Close the Toast after the specified duration.
           this.doc_.getWin().setTimeout(() => {
             this.close();
           }, (toastDurationSeconds + 1) * 1000);
@@ -3781,10 +3795,39 @@ class Toast {
   }
 
   /**
+   * @param {function():!Promise} callback
+   * @return {!Promise}
+   * @private
+   */
+  animate_(callback) {
+    const wait = this.animating_ || Promise.resolve();
+    return this.animating_ = wait.then(() => {
+      return callback();
+    }, () => {
+      // Ignore errors to make sure animations don't get stuck.
+    }).then(() => {
+      this.animating_ = null;
+    });
+  }
+
+  /**
    * Closes the toast.
+   * @return {!Promise}
    */
   close() {
-    this.doc_.getBody().removeChild(this.iframe_);
+    return this.animate_(() => {
+      // Remove the toast from the DOM after animation is complete.
+      this.doc_.getWin().setTimeout(() => {
+        this.doc_.getBody().removeChild(this.iframe_);
+        return Promise.resolve();
+      }, 500);
+
+      return transition(this.iframe_, {
+        'transform': 'translateY(100%)',
+        'opacity': 1,
+        'visibility': 'visible',
+      }, 400, 'ease-out');
+    });
   }
 }
 
@@ -4221,6 +4264,10 @@ class LinkCompleteFlow {
    * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
+    /**
+     * Handler function.
+     * @param {!web-activities/activity-ports.ActivityPort} port
+     */
     function handler(port) {
       deps.entitlementsManager().blockNextNotification();
       deps.callbacks().triggerLinkProgress();
@@ -4381,11 +4428,11 @@ class LinkSaveFlow {
     };
 
     this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/linksaveiframe'),
-      feArgs(iframeArgs),
-      /* shouldFadeBody */ false
+        this.win_,
+        this.activityPorts_,
+        feUrl('/linksaveiframe'),
+        feArgs(iframeArgs),
+        /* shouldFadeBody */ false
     );
     this.activityIframeView_.onMessage(data => {
       if (data['getLinkingInfo']) {
@@ -4437,7 +4484,7 @@ class LinkSaveFlow {
 
 
 
-class LoginPromptFlow {
+class LoginPromptApi {
   /**
    * @param {!./deps.DepsDef} deps
    */
@@ -4461,10 +4508,12 @@ class LoginPromptFlow {
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
-        feUrl('/loginpromptiframe'),
+        feUrl('/loginiframe'),
         feArgs({
           publicationId: deps.pageConfig().getPublicationId(),
           productId: deps.pageConfig().getProductId(),
+          // First ask the user if they want us to log them in.
+          userConsent: true,
           // TODO(chenshay): Pass entitlements value here.
         }),
         /* shouldFadeBody */ true
@@ -4472,7 +4521,7 @@ class LoginPromptFlow {
   }
 
   /**
-   * Continues the Login flow (after waiting).
+   * Prompts the user to login.
    * @return {!Promise}
    */
   start() {
@@ -4500,7 +4549,67 @@ class LoginPromptFlow {
 
 
 
-class WaitingApi {
+class LoginNotificationApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?Promise} */
+    this.openViewPromise_ = null;
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/loginiframe'),
+        feArgs({
+          publicationId: deps.pageConfig().getPublicationId(),
+          productId: deps.pageConfig().getProductId(),
+          // No need to ask the user. Just tell them you're logging them in.
+          userConsent: false,
+          // TODO(chenshay): Pass entitlements value here.
+        }),
+        /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Continues the Login flow (after waiting).
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_.callbacks().triggerFlowStarted(
+        SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
+
+    this.openViewPromise_ = this.dialogManager_.openView(
+        this.activityIframeView_);
+
+    return this.activityIframeView_.acceptResult().then(() => {
+      // The consent part is complete.
+      this.dialogManager_.completeView(this.activityIframeView_);
+    }, reason => {
+      this.dialogManager_.completeView(this.activityIframeView_);
+      throw reason;
+    });
+  }
+}
+
+
+
+
+class WaitForSubscriptionLookupApi {
   /**
    * @param {!./deps.DepsDef} deps
    * @param {?Promise} accountPromise
@@ -4528,7 +4637,7 @@ class WaitingApi {
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
-        feUrl('/loginwaitingiframe'),
+        feUrl('/waitforsubscriptionlookupiframe'),
         feArgs({
           publicationId: deps.pageConfig().getPublicationId(),
           productId: deps.pageConfig().getProductId(),
@@ -4551,7 +4660,6 @@ class WaitingApi {
       return account;
     }, reason => {
       this.dialogManager_.completeView(this.activityIframeView_);
-      // return Promise.reject('no account found');
       throw reason;
     });
   }
@@ -5207,9 +5315,9 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  showWaitingIndicator(accountPromise) {
+  showSubscriptionLookupProgress(accountPromise) {
     return this.documentParsed_.then(() => {
-      const wait = new WaitingApi(this, accountPromise);
+      const wait = new WaitForSubscriptionLookupApi(this, accountPromise);
       return wait.start();
     });
   }
@@ -5241,7 +5349,14 @@ class ConfiguredRuntime {
   /** @override */
   showLoginPrompt() {
     return this.documentParsed_.then(() => {
-      return new LoginPromptFlow(this).start();
+      return new LoginPromptApi(this).start();
+    });
+  }
+
+  /** @override */
+  showLoginNotification() {
+    return this.documentParsed_.then(() => {
+      return new LoginNotificationApi(this).start();
     });
   }
 

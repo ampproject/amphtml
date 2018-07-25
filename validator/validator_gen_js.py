@@ -374,6 +374,7 @@ ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
     'amp.validator.AttrSpec.blacklisted_value_regex',
+    'amp.validator.AttrSpec.mandatory_anyof',
     'amp.validator.AttrSpec.mandatory_oneof',
     'amp.validator.AttrSpec.value_regex',
     'amp.validator.AttrSpec.value_regex_casei',
@@ -680,6 +681,9 @@ def PrintObject(descriptor, msg, registry, out):
 def DispatchKeyForTagSpecOrNone(tag_spec):
   """For a provided tag_spec, generates its dispatch key.
 
+  If the value (or value_casei) is used, uses the first value from the
+  protoascii.
+
   Args:
     tag_spec: an instance of type validator_pb2.TagSpec.
 
@@ -690,10 +694,15 @@ def DispatchKeyForTagSpecOrNone(tag_spec):
     if attr.dispatch_key != attr.NONE_DISPATCH:
       mandatory_parent = tag_spec.mandatory_parent or ''
       attr_name = attr.name
-      attr_value = attr.value_casei or attr.value.lower()
-      assert attr_value is not None
       if attr.dispatch_key == attr.NAME_DISPATCH:
         return '%s' % attr_name
+      attr_value = None
+      if attr.value_casei:
+        attr_value = attr.value_casei[0]
+      elif attr.value:
+        attr_value = attr.value[0].lower()
+      assert attr_value is not None
+
       if attr.dispatch_key == attr.NAME_VALUE_DISPATCH:
         return '%s\\0%s' % (attr_name, attr_value)
       if attr.dispatch_key == attr.NAME_VALUE_PARENT_DISPATCH:

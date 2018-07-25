@@ -21,6 +21,9 @@ import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-mustache';
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -39,10 +42,19 @@ export class AmpMustache extends AMP.BaseTemplate {
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
     setUnescapedSanitizier(sanitizeTagsForTripleMustache);
+
+    user().warn(TAG, 'The extension "amp-mustache-0.1.js" is deprecated. ' +
+        'Please use a more recent version of this extension.');
   }
 
   /** @override */
   compileCallback() {
+    // If viewer is renderTemplate capable, skip the handling of the mustache
+    // templates as its rendering is managed by the viewer. This template will
+    // only be responsible for sanitizing and inserting it into the DOM.
+    if (this.viewerCanRenderTemplates()) {
+      return;
+    }
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
     let index = 0;
@@ -66,13 +78,26 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   render(data) {
-    let mustacheData = data;
-    if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+    let html = data;
+    if (!this.viewerCanRenderTemplates()) {
+      let mustacheData = data;
+      if (typeof data === 'object') {
+        mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      }
+      html = mustacheRender(this.template_, mustacheData);
     }
-    const html = mustacheRender(this.template_, mustacheData);
-    const sanitized = sanitizeHtml(html);
+    return this.serializeHtml_(html);
+  }
+
+  /**
+   * Sanitizes the html and inserts it in the DOM.
+   * @param {string} html
+   * @return {!Element}
+   * @private
+   */
+  serializeHtml_(html) {
     const root = this.win.document.createElement('div');
+    const sanitized = sanitizeHtml(html);
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }
@@ -85,6 +110,6 @@ export class AmpMustache extends AMP.BaseTemplate {
 // For unit tests, it doesn't actually matter which version of amp-mustache is
 // registered. Integration tests should only have one script version included.
 if (getMode().test) {
-  Services.templatesFor(window).unregisterTemplate('amp-mustache');
+  Services.templatesFor(window).unregisterTemplate(TAG);
 }
-AMP.registerTemplate('amp-mustache', AmpMustache);
+AMP.registerTemplate(TAG, AmpMustache);

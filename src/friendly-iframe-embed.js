@@ -18,9 +18,9 @@ import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {dev, rethrowAsync} from './log';
+import {closestBySelector, escapeHtml} from './dom';
+import {dev, rethrowAsync, user} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
-import {escapeHtml} from './dom';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
@@ -103,6 +103,9 @@ export function setFriendlyIframeEmbedVisible(embed, visible) {
 
 /**
  * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * Caution: This will only return the FIE after the iframe has 'loaded'. If you
+ * are checking before this signal you may be in a race condition that returns
+ * null.
  * @param {!HTMLIFrameElement} iframe
  * @return {?FriendlyIframeEmbed}
  */
@@ -488,9 +491,9 @@ export class FriendlyIframeEmbed {
 
   /**
    * @return {!./service/resources-impl.Resources}
-   * @visibleForTesting
+   * @private
    */
-  getResources() {
+  getResources_() {
     return Services.resourcesForDoc(this.iframe);
   }
 
@@ -498,12 +501,11 @@ export class FriendlyIframeEmbed {
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
    * @param {{measure: (function()|undefined), mutate: function()}} task
-   * @param {!Object=} opt_state
    * @return {!Promise}
    * @private
    */
-  runVsyncOnIframe_(task, opt_state) {
-    return this.getResources().measureMutateElement(this.iframe,
+  measureMutate_(task) {
+    return this.getResources_().measureMutateElement(this.iframe,
         task.measure || null, task.mutate);
   }
 
@@ -511,36 +513,54 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   enterFullOverlayMode() {
+    const ampAdParent = dev().assertElement(this.iframe.parentNode);
+
+    // Security assertion. Otherwise any 3p frame could request lighbox mode.
+    user().assert(ampAdParent.tagName.toLowerCase() == 'amp-ad',
+        'Only <amp-ad> is allowed to enter lightbox mode.');
+
     const bodyStyle = {
       'background': 'transparent',
       'position': 'absolute',
+      'bottom': 'auto',
+      'right': 'auto',
+
+      // Set for replacing with vsync values.
       'top': '',
       'left': '',
       'width': '',
       'height': '',
-      'bottom': 'auto',
-      'right': 'auto',
     };
-    return this.runVsyncOnIframe_({
+
+    const iframeStyle = {
+      'position': 'fixed',
+      'left': 0,
+      'right': 0,
+      'bottom': 0,
+      'width': '100vw',
+      'top': 0,
+      'height': '100vh',
+    };
+
+    return this.measureMutate_({
       measure: () => {
-        const iframeRect = this.iframe./*OK*/getBoundingClientRect();
+        const rect = this.host ?
+          this.host.getLayoutBox() :
+          this.iframe./*OK*/getBoundingClientRect();
+
+        const {top, left, width, height} = rect;
+
+        // Offset body by header height to prevent visual jump.
         Object.assign(bodyStyle, {
-          'top': px(iframeRect.top),
-          'left': px(iframeRect.left),
-          'width': px(iframeRect.width),
-          'height': px(iframeRect.height),
+          'top': px(top),
+          'left': px(left),
+          'width': px(width),
+          'height': px(height),
         });
       },
       mutate: () => {
-        setStyles(this.iframe, {
-          'position': 'fixed',
-          'left': 0,
-          'right': 0,
-          'top': 0,
-          'bottom': 0,
-          'width': '100vw',
-          'height': '100vh',
-        });
+        // !important to prevent abuse e.g. box @ ltwh = 0, 0, 0, 0
+        setImportantStyles(this.iframe, iframeStyle);
 
         // We need to override runtime-level !important rules
         setImportantStyles(this.getBodyElement(), bodyStyle);
@@ -552,7 +572,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   leaveFullOverlayMode() {
-    return this.runVsyncOnIframe_({
+    return this.measureMutate_({
       mutate: () => {
         resetStyles(this.iframe, [
           'position',
@@ -565,7 +585,7 @@ export class FriendlyIframeEmbed {
         ]);
 
         // we're not resetting background here as we need to set it to
-        // transparent permanently (see TODO)
+        // transparent permanently.
         resetStyles(this.getBodyElement(), [
           'position',
           'top',
@@ -579,7 +599,6 @@ export class FriendlyIframeEmbed {
     });
   }
 }
-
 
 /**
  * Returns the promise that will be resolved when all content elements
@@ -601,4 +620,12 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
         });
         return Promise.all(promises);
       });
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInFie(element) {
+  return !!closestBySelector(element, '.i-amphtml-fie');
 }

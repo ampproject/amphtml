@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
@@ -127,13 +128,13 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    */
   triggerEvent_(eventName, eventValue, eventRange) {
     const percentValue = eventRange[0] < 0 ?
-      (eventValue - eventRange[0]) :
-      eventValue;
-    const event = createCustomEvent(this.win, `${TAG}.${eventName}`, {
-      angle: eventValue,
-      percent: percentValue /
+      (eventValue.toFixed() - eventRange[0]) :
+      eventValue.toFixed();
+    const event = createCustomEvent(this.win, `${TAG}.${eventName}`, dict({
+      'angle': eventValue.toFixed(),
+      'percent': percentValue /
         (eventRange[1] - eventRange[0]),
-    });
+    }));
     this.action_.trigger(this.element, eventName, event, ActionTrust.LOW);
   }
 }

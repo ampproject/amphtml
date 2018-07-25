@@ -15,6 +15,7 @@
  */
 
 import * as sinon from 'sinon';
+
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -26,8 +27,8 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
-import {getStyle} from '../../src/style';
 import {installServiceInEmbedScope} from '../../src/service';
+import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
@@ -92,7 +93,7 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.visibility).to.equal('');
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
-      expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
+      expect(isAnimationNone(embed.win.document.body)).to.be.true;
       expect(embed.win.document.documentElement.classList.contains(
           'i-amphtml-fie')).to.be.true;
 
@@ -719,38 +720,55 @@ describe('friendly-iframe-embed', () => {
     };
 
     let win;
-    let iframe;
-    let fie;
+
+    function createFie(bodyElementMock, parentType = 'amp-ad') {
+      const iframe = document.createElement('iframe');
+      const parent = document.createElement(parentType);
+
+      parent.appendChild(iframe);
+
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect')
+          .returns(layoutRectLtwh(x, y, w, h));
+
+      const fie = new FriendlyIframeEmbed(iframe, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      }, Promise.resolve());
+
+      sandbox.stub(fie, 'getResources_').returns(resourcesMock);
+      sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
+
+      fie.win = win;
+
+      return fie;
+    }
+
 
     beforeEach(() => {
       win = {
         innerWidth: winW,
         innerHeight: winH,
       };
-      iframe = document.createElement('iframe');
-
-      sandbox./*OK*/stub(iframe, 'getBoundingClientRect').callsFake(() => ({
-        right: x + w,
-        left: x,
-        top: y,
-        bottom: y + h,
-        width: w,
-        height: h,
-      }));
-
-      fie = new FriendlyIframeEmbed(iframe, {
-        url: 'https://acme.org/url1',
-        html: '<body></body>',
-      }, Promise.resolve());
-
-      sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
-      sandbox.stub(fie, 'win').callsFake(win);
     });
 
-    it('should resize body and fixed container when entering', function* () {
+    it('should not throw if inside an amp-ad', () => {
       const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'amp-ad');
 
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      expect(() => fie.enterFullOverlayMode()).to.not.throw();
+    });
+
+    it('should throw if not inside an amp-ad', () => {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'not-an-amp-ad');
+
+      expect(() => fie.enterFullOverlayMode())
+          .to.throw(/Only .?amp-ad.? is allowed/);
+    });
+
+    it('resizes body and fixed container when entering', function* () {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock);
 
       yield fie.enterFullOverlayMode();
 
@@ -763,6 +781,8 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.right).to.equal('auto');
       expect(bodyElementMock.style.bottom).to.equal('auto');
 
+      const {iframe} = fie;
+
       expect(iframe.style.position).to.equal('fixed');
       expect(iframe.style.left).to.equal('0px');
       expect(iframe.style.right).to.equal('0px');
@@ -774,8 +794,7 @@ describe('friendly-iframe-embed', () => {
 
     it('should reset body and fixed container when leaving', function* () {
       const bodyElementMock = document.createElement('div');
-
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      const fie = createFie(bodyElementMock);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();
@@ -787,6 +806,8 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.left).to.be.empty;
       expect(bodyElementMock.style.right).to.be.empty;
       expect(bodyElementMock.style.bottom).to.be.empty;
+
+      const {iframe} = fie;
 
       expect(iframe.style.position).to.be.empty;
       expect(iframe.style.left).to.be.empty;
