@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-amp-image-slider {
+ amp-image-slider {
 }
 
 .i-amphtml-image-slider-container {
+  /* Chrome 56+ disallow preventDefault on scroll */
+  /* touch-action: none; */
+
   position: absolute;
   left: 0;
   right: 0;
@@ -33,10 +36,6 @@ amp-image-slider {
 .i-amphtml-image-slider-left-mask {
   position: relative;
   width: 100%;
-
-  /* Alternative fix for weird iOS issue */
-  /* -webkit-mask-image: -webkit-radial-gradient(white, black); */
-
   transform: translateX(-50%);
   height: 100%;
   overflow: hidden;
@@ -44,9 +43,6 @@ amp-image-slider {
 }
 
 .i-amphtml-image-slider-right-mask {
-  /* Alternative fix for weird iOS issue */
-  /* -webkit-mask-image: -webkit-radial-gradient(white, black); */
-
   position: absolute;
   width: 100%;
   height: 100%;
@@ -78,9 +74,11 @@ amp-image-slider > amp-img > img {
 .i-amphtml-image-slider-bar-stick {
   width: 0;
   height: 100%;
-  border: 4px solid lightgray;
+  border: 3px solid white;
   box-sizing: border-box;
   transform: translateX(-50%);
+
+  cursor: ew-resize;
 }
 
 .i-amphtml-image-slider-bar-button {
@@ -154,13 +152,6 @@ amp-image-slider > amp-img > img {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  opacity: 0.7;
-}
-
-.i-amphtml-image-slider-hint.i-amphtml-image-slider-hint-hidden {
-  transition: 0.5s;
-  opacity: 0;
 }
 
 .i-amphtml-image-slider-hint {

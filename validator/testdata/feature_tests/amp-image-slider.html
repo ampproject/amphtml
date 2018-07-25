@@ -15,6 +15,12 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-image-slider layout="responsive" width="150" height="80"></amp-image-slider>
+  <amp-image-slider id="disableDemo1" tabindex="12" layout="responsive" width="1024" height="600" [disabled]="disableDemo1.disabled">
+    <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+    <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+    <div before class="label">BEFORE</div>
+    <div after class="label">AFTER</div>
+    <div hint hint-loop hint-inactive-interval="1000"></div>
+  </amp-image-slider>
 </body>
 </html>

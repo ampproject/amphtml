@@ -14,31 +14,17 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
-import {bezierCurve} from '../../../src/curve';
 import {dev, user} from '../../../src/log';
+import {getStyle, setStyles} from '../../../src/style';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
-import {setStyle} from '../../../src/style';
 
-// event-helper.js -> listen; option: passive = true
-// mount both mouse & touch listener ()
-// Test: mainly describes.integration
-// Visual diffing tests
-
-// Wrap <a> anchor around amp-image
-// This is actually creating some trouble with gesture
-
-// this.mutateElement(callback), in which move children
-
-// INTERESTING EXPERIMENT:
-// getLayoutBox()?
-// this seems to be remeasured and updated on viewport update
-
-// TODO(kqian): fix gesture collision between drag mouseup and click to move
 export class AmpImageSlider extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -48,30 +34,23 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {Document} */
     this.doc_ = this.win.document;
 
-    /** @private {boolean} */
-    this.isMobile_ = /Android|iPhone|iPad|iPod/i.test(this.win.navigator.userAgent);
-
-    /** @private {boolean} */
-    this.isHoverSlider_ = (this.element.getAttribute('type') === 'hover')
-        && !this.isMobile_; // coerce to drag slider on mobile
-
     /** @private {!Element} */
     this.container_ = this.doc_.createElement('div');
 
     /** @private {?Element} */
     this.leftAmpImage_ = null;
 
-    /** @private {?Element} */
+    /** @private {Element|null} */
     this.rightAmpImage_ = null;
 
-    /** @private {?Element} */
+    /** @private {Element|null} */
     this.leftLabelWrapper_ = null;
-    /** @private {?Element} */
+    /** @private {Element|null} */
     this.leftLabel_ = null;
 
-    /** @private {?Element} */
+    /** @private {Element|null} */
     this.rightLabelWrapper_ = null;
-    /** @private {?Element} */
+    /** @private {Element|null} */
     this.rightLabel_ = null;
 
     /** @private {!Element} */
@@ -86,39 +65,41 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {!Element} */
     this.barStick_ = this.doc_.createElement('div');
 
-    /** @private {?Element} */
-    this.barButton_ = null;
-    /** @private {?Element} */
-    this.barButtonIcon_ = null;
-    /** @private {?Element} */
-    this.barHint_ = null;
-    /** @private {boolean} */
-    this.isBarHintHidden_ = false;
+    /** @private {Element|null} */
+    this.hint_ = null;
+
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseDown_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseUp_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseMove_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenTouchStart_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenTouchMove_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenTouchEnd_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenKeyDown_ = null;
 
     /** @private {number} */
-    this.moveOffset_ = 0;
-
-    /** @private {number} */
-    this.splitOffset_ = 0;
-
-    // Bind this of handlers
-    this.handleHover = this.handleHover.bind(this);
-    this.handleClickImage = this.handleClickImage.bind(this);
-    this.handleTapImage = this.handleTapImage.bind(this);
-    this.handleHideHint = this.handleHideHint.bind(this);
-
-    this.dragStart = this.dragStart.bind(this);
-    this.dragMove = this.dragMove.bind(this);
-    this.dragEnd = this.dragEnd.bind(this);
-
-    this.touchStart = this.touchStart.bind(this);
-    this.touchMove = this.touchMove.bind(this);
-    this.touchEnd = this.touchEnd.bind(this);
-
-    this.pointerMoveX_ = this.pointerMoveX_.bind(this);
+    this.stepSize_ = this.element.hasAttribute('step-size') ?
+      (Number(this.element.getAttribute('step-size')) || 0.1) : 0.1;
 
     /** @private {boolean} */
-    this.isEventRegistered_ = false;
+    this.disableHint_ = this.element.hasAttribute('disable-hint');
+    /** @private {number} */
+    this.hintInactiveInterval_ = 10000;
+    /** @private {boolean} */
+    this.shouldHintLoop_ = false;
+    /** @private {number|null} */
+    this.hintTimeoutHandle_ = null;
+
+    this.isHintHidden_ = false;
+
+    /** @private {boolean} */
+    this.disabled_ = false; // for now, will be set later
   }
 
   /** @override */
@@ -131,6 +112,23 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
+      // if (child.tagName.toLowerCase() === 'amp-img') {
+      //   if (!this.leftAmpImage_) {
+      //     this.leftAmpImage_ = child;
+      //   } else if (!this.rightAmpImage_) {
+      //     this.rightAmpImage_ = child;
+      //   }
+      // }
+
+      // if (child.tagName.toLowerCase() === 'div') {
+      //   if (child.hasAttribute('before')) {
+      //     this.leftLabel_ = child;
+      //   } else if (child.hasAttribute('after')) {
+      //     this.rightLabel_ = child;
+      //   } else if (child.hasAttribute('hint')) {
+      //     this.hint_ = child;
+      //   }
+      // }
       if (child.hasAttribute('before')) {
         switch (child.tagName.toLowerCase()) {
           case 'amp-img':
@@ -149,6 +147,9 @@ export class AmpImageSlider extends AMP.BaseElement {
             this.rightLabel_ = child;
             break;
         }
+      } else if (child.hasAttribute('hint') &&
+          child.tagName.toLowerCase() === 'div') {
+        this.hint_ = child;
       }
     }
 
@@ -165,16 +166,80 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.container_.classList.add('i-amphtml-image-slider-container');
     this.element.appendChild(this.container_);
 
-    this.buildImages();
-    this.buildBar();
+    this.buildImages_();
+    this.buildBar_();
+    this.buildHint_();
+
+    this.registerAction('seekTo', invocation => {
+      const {args} = invocation;
+      if (args) {
+        let value;
+        if (args['value'] !== undefined) {
+          value = args['value'];
+          user().assertNumber(value,
+              'value to seek to must be a number');
+        } else if (args['percent'] !== undefined) {
+          value = args['percent'];
+          user().assertNumber(value,
+              'percent to seek to must be a number');
+          value *= 0.01; // to 0-1 value
+        }
+        if (value !== undefined) {
+          this.updatePositions_(value);
+        }
+      }
+    }, ActionTrust.LOW);
 
     return Promise.resolve();
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const newDisabled = mutations['disabled'];
+    if (newDisabled) {
+      this.disable_();
+    } else {
+      this.enable_();
+    }
+  }
+
   /**
-   * Build image structures
+   * Enable user interaction
    */
-  buildImages() {
+  enable_() {
+    if (!this.disabled_) {
+      return;
+    }
+    if (!this.disableHint_) {
+      this.animateShowHint_();
+    }
+    this.registerEvents_();
+    this.disabled_ = false;
+  }
+
+  /**
+   * Disable user interaction
+   */
+  disable_() {
+    if (this.disabled_) {
+      return;
+    }
+
+    if (!this.disableHint_) {
+      // need to clear timeout handle inside
+      // thus not directly calling animateHideHint_
+      this.resetHintInterval_(true);
+      this.isHintHidden_ = true;
+    }
+
+    this.unregisterEvents_();
+    this.disabled_ = true;
+  }
+
+  /**
+   * Build images
+   */
+  buildImages_() {
     // Hierarchy:
     // leftMask
     //   |_ leftAmpImage
@@ -210,291 +275,313 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Build the image slider bar
+   * Build bar
    */
-  buildBar() {
-    if (this.isHoverSlider_) {
-      this.buildHoverSliderBar();
-    } else {
-      this.buildTapSliderBar();
-    }
-  }
-
-  /**
-   * Build slider bar that follows mouse movement
-   */
-  buildHoverSliderBar() {
+  buildBar_() {
     this.container_.appendChild(this.bar_);
     this.bar_.appendChild(this.barStick_);
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
-
-    this.buildBarHint();
   }
 
   /**
-   * Build slider bar that could be drag by button
+   * Build hint
    */
-  buildTapSliderBar() {
-    this.barButton_ = this.doc_.createElement('div');
-    this.barButton_.classList.add('i-amphtml-image-slider-bar-button');
-    // TODO(kqian): UI design
-    this.barButtonIcon_ = htmlFor(this.doc_)`<div>&lt;~&gt;</div>`;
-    this.barButton_.appendChild(this.barButtonIcon_);
-
-    this.buildBarHint();
-
-    this.container_.appendChild(this.bar_);
-    this.barStick_.appendChild(this.barButton_);
-    this.bar_.appendChild(this.barStick_);
-
-    this.bar_.classList.add('i-amphtml-image-slider-bar');
-    this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
-  }
-
-  /**
-   * Build hiding hint
-   * A weird thing is adding the fading animation
-   * brings back the old quirky chrome bug of display
-   */
-  buildBarHint() {
-    if (!this.barStick_) {
-      return;
+  buildHint_() {
+    if (this.hint_) {
+      this.hint_.parentNode.removeChild(this.hint_);
+    } else {
+      this.hint_ = this.doc_.createElement('div');
     }
-    this.barHint_ = this.doc_.createElement('div');
-    this.barHint_.classList.add('i-amphtml-image-slider-hint');
-    // TODO(kqian): UI design choice
-    const barHintIcon = htmlFor(this.doc_)`<div>← →</div>`;
-    barHintIcon.classList.add('i-amphtml-image-slider-hint-icon');
-    this.barHint_.appendChild(barHintIcon);
-
-    this.barStick_.appendChild(this.barHint_);
-  }
-
-  /**
-   * Update element positions based on percentage
-   * @param {number} leftPercentage
-   */
-  updatePositions(leftPercentage) {
-    this.updateTranslateX(this.bar_, leftPercentage);
-
-    this.updateTranslateX(this.leftMask_, leftPercentage - 1);
-    this.updateTranslateX(this.leftAmpImage_, 1 - leftPercentage);
-    if (this.leftLabelWrapper_) {
-      this.updateTranslateX(this.leftLabelWrapper_, 1 - leftPercentage);
-    }
-  }
-
-  /**
-   * Set translateX of the element
-   * @param {Element} element
-   * @param {number} percentage
-   */
-  updateTranslateX(element, percentage) {
-    setStyle(element, 'transform', `translateX(${percentage * 100}%)`);
-  }
-
-  /**
-   * Register event handlers
-   */
-  registerEvents() {
-    if (this.isEventRegistered_) { // avoid dup
+    if (this.disableHint_) {
+      this.hint_ = null;
       return;
     }
 
-    if (this.isHoverSlider_) {
-      this.element.addEventListener('mousemove', this.handleHideHint, true);
-      this.container_.addEventListener('mousemove', this.handleHover);
-    } else {
-      // Use container_ for drag operation instead
-      // element for click/tap operations
-      this.element.addEventListener('mousedown', this.handleHideHint, true);
-      this.element.addEventListener('touchstart', this.handleHideHint, true);
-      this.element.addEventListener('click', this.handleClickImage);
-      this.element.addEventListener('touchend', this.handleTapImage);
-      dev().assertElement(this.barButton_)
-          .addEventListener('mousedown', this.dragStart);
-      dev().assertElement(this.barButton_)
-          .addEventListener('touchstart', this.touchStart);
+    if (this.hint_.hasAttribute('hint-loop')) {
+      this.shouldHintLoop_ = true;
     }
 
-    this.isEventRegistered_ = true;
-  }
-
-  /**
-   * Unregister event handlers
-   */
-  unregisterEvents() {
-    if (this.isHoverSlider_) {
-      this.element.removeEventListener('mousemove', this.handleHideHint, true);
-      this.container_.removeEventListener('mousemove', this.handleHover);
-    } else {
-      this.element.removeEventListener('mousedown', this.handleHideHint, true);
-      this.element.removeEventListener('touchstart', this.handleHideHint, true);
-      this.element.removeEventListener('click', this.handleClickImage);
-      this.element.removeEventListener('touchend', this.handleTapImage);
-      dev().assertElement(this.barButton_)
-          .removeEventListener('mousedown', this.dragStart);
-      dev().assertElement(this.barButton_)
-          .removeEventListener('touchstart', this.touchStart);
-      // remove pointer related events below
-      this.dragEnd(null);
-      this.touchEnd(null);
+    if (this.hint_.hasAttribute('hint-inactive-interval')) {
+      this.hintInactiveInterval_ =
+          Number(this.hint_.getAttribute('hint-inactive-interval')) ||
+          this.hintInactiveInterval_;
     }
 
-    this.isEventRegistered_ = false;
-  }
+    const hintIcon = htmlFor(this.doc_)
+    `<div class="i-amphtml-image-slider-hint-icon">← →</div>`;
 
-  /**
-   * Handle hover event
-   * @param {Event} e
-   */
-  handleHover(e) {
-    // This offsetWidth may change if user resize window
-    // Thus not cached
-    // const {left, width} = this.getLayoutBox();
-    const {left, width} = this.container_./*OK*/getBoundingClientRect();
-    const leftPercentage = (e.pageX - left) / width;
-    this.updatePositions(leftPercentage);
-  }
-
-  /**
-   * Handle click on the image
-   * @param {Event} e
-   */
-  handleClickImage(e) {
-    // const {left, width} = this.getLayoutBox();
-    const {left, width} = this.container_./*OK*/getBoundingClientRect();
-    const leftPercentage = (e.pageX - left) / width;
-    this.animateUpdatePositions(leftPercentage);
-  }
-
-  /**
-   * Handle tap on the image
-   * @param {Event} e
-   */
-  handleTapImage(e) {
-    // const {left, width} = this.getLayoutBox();
-    const {left, width} = this.container_./*OK*/getBoundingClientRect();
-    if (e.touches.length > 0) {
-      const leftPercentage = (e.touches[0].pageX - left) / width;
-      this.animateUpdatePositions(leftPercentage);
+    for (let i = 0; i < this.hint_.classList.length; i++) {
+      hintIcon.classList.add(this.hint_.classList[i]);
     }
+    this.hint_.appendChild(hintIcon);
+    this.hint_.className = '';
+    this.hint_.classList.add('i-amphtml-image-slider-hint');
+    setStyles(dev().assertElement(this.hint_), {
+      opacity: 0.7,
+    });
+
+    this.barStick_.appendChild(this.hint_);
   }
 
   /**
-   * Handle hinding the hint
-   * @param {Event} unusedEvent
+   * Reset interval when the hint would resurface
+   * @param {boolean=} opt_noRestart
    */
-  handleHideHint(unusedEvent) {
-    if (!this.isBarHintHidden_ && this.barHint_) {
-      this.isBarHintHidden_ = true;
-      this.barHint_.classList.add('i-amphtml-image-slider-hint-hidden');
+  resetHintInterval_(opt_noRestart) {
+    if (this.disableHint_) {
+      return;
     }
+
+    if (!this.isHintHidden_) {
+      this.animateHideHint_();
+    }
+
+    if (this.hintTimeoutHandle_ !== null) {
+      clearTimeout(this.hintTimeoutHandle_);
+    }
+
+    if (opt_noRestart === true) {
+      this.hintTimeoutHandle_ = null;
+      return;
+    }
+
+    this.hintTimeoutHandle_ = setTimeout(() => {
+      this.animateShowHint_();
+    }, this.hintInactiveInterval_);
   }
 
   /**
-   * Animated, update element positions based on percentage
-   * @param {number} toPercentage
+   * Animate show hint
    */
-  animateUpdatePositions(toPercentage) {
-    const {left: containerLeft, width: containerWidth}
-    //    = this.getLayoutBox();
-        = this.container_./*OK*/getBoundingClientRect();
-    const {left: barLeft} = this.bar_./*OK*/getBoundingClientRect();
-
-    const fromPercentage = (barLeft - containerLeft) / containerWidth;
-    const interpolate = numeric(fromPercentage, toPercentage);
-    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
-    const duration = 200;
-    // Single animation ensure elements have props updated at same pace
-    // Multiple animations would be scheduled at different raf
-    return Animation.animate(this.element, pos => {
-      this.updatePositions(interpolate(pos));
-    }, duration, curve).thenAlways();
+  animateShowHint_() {
+    const interpolate = numeric(
+        Number(getStyle(dev().assertElement(this.hint_), 'opacity')), 0.7);
+    this.isHintHidden_ = false;
+    return Animation.animate(dev().assertElement(this.hint_), v => {
+      setStyles(dev().assertElement(this.hint_), {
+        opacity: interpolate(v),
+      });
+    }, 200).thenAlways();
   }
 
   /**
-   * Add listeners on drag start
+   * Animate show hint
+   */
+  animateHideHint_() {
+    const interpolate = numeric(
+        Number(getStyle(dev().assertElement(this.hint_), 'opacity')), 0);
+    return Animation.animate(dev().assertElement(this.hint_), v => {
+      setStyles(dev().assertElement(this.hint_), {
+        opacity: interpolate(v),
+      });
+    }, 200).then(() => this.isHintHidden_ = true);
+  }
+
+  /**
+   * Drag start
    * @param {Event} e
    */
-  dragStart(e) {
+  onMouseDown_(e) {
     e.preventDefault();
-    e.stopPropagation();
+    this.pointerMoveX_(e.pageX);
 
-    this.win.addEventListener('mousemove', this.dragMove);
-    this.win.addEventListener('mouseup', this.dragEnd);
+    // In case, clear up remnants
+    // This is to prevent right mouse button down when left still down
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
 
-    this.moveOffset_ = e.pageX;
-    this.splitOffset_ = this.bar_./*OK*/getBoundingClientRect().left;
+    this.unlistenMouseMove_ =
+        listen(this.win, 'mousemove', this.onMouseMove_.bind(this));
+    this.unlistenMouseUp_ =
+        listen(this.win, 'mouseup', this.onMouseUp_.bind(this));
+
+    this.resetHintInterval_(true);
   }
+
   /**
-   * Handle drag move
+   * Drag move
    * @param {Event} e
    */
-  dragMove(e) {
+  onMouseMove_(e) {
     e.preventDefault();
-    e.stopPropagation(); // avoid clashing with clickImage
     this.pointerMoveX_(e.pageX);
   }
-  /**
-   * Remove listeners on drag end
-   * e is optional since dragEnd will also be used for unregister cleanup
-   * @param {Event|null} e
-   */
-  dragEnd(e) {
-    if (e) {
-      e.stopPropagation();
-    }
 
-    this.win.removeEventListener('mousemove', this.dragMove);
-    this.win.removeEventListener('mouseup', this.dragEnd);
-
-    this.moveOffset_ = 0;
-    this.splitOffset_ = 0;
-  }
   /**
-   * Add listeners on drag start
+   * Drag end
    * @param {Event} e
    */
-  touchStart(e) {
-    this.container_.addEventListener('touchmove', this.touchMove);
-    this.container_.addEventListener('touchend', this.touchEnd);
+  onMouseUp_(e) {
+    e.preventDefault();
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
 
-    this.moveOffset_ = e.touches[0].pageX;
-    this.splitOffset_ = this.bar_./*OK*/getBoundingClientRect().left;
+    this.resetHintInterval_(!this.shouldHintLoop_);
   }
+
   /**
-   * Handle touch move
+   * Touch start
    * @param {Event} e
    */
-  touchMove(e) {
-    // When we are holding bar button (or its icon)
-    // Do not scroll page
-    if (e.target === this.barButton_ ||
-        (this.barButtonIcon_ && e.target === this.barButtonIcon_)) {
-      e.preventDefault();
+  onTouchStart_(e) {
+    e.stopPropagation();
+    this.pointerMoveX_(e.touches[0].pageX);
+
+    // In case, clear up remnants
+    this.unlisten_(this.unlistenTouchMove_);
+    this.unlisten_(this.unlistenTouchEnd_);
+
+    this.unlistenTouchMove_ =
+        listen(this.win, 'touchmove', this.onTouchMove_.bind(this));
+    this.unlistenTouchEnd_ =
+        listen(this.win, 'touchend', this.onTouchEnd_.bind(this));
+
+    this.resetHintInterval_(true);
+  }
+
+  /**
+   * Touch move
+   * @param {Event} e
+   */
+  onTouchMove_(e) {
+    e.stopPropagation();
+    this.pointerMoveX_(e.touches[0].pageX);
+  }
+
+  /**
+   * Touch end
+   * @param {Event} e
+   */
+  onTouchEnd_(e) {
+    e.stopPropagation();
+    this.unlisten_(this.unlistenTouchMove_);
+    this.unlisten_(this.unlistenTouchEnd_);
+
+    this.resetHintInterval_(!this.shouldHintLoop_);
+  }
+
+  /**
+   * On key down
+   * @param {Event} e
+   */
+  onKeyDown_(e) {
+    if (this.doc_.activeElement !== this.element) {
+      return;
     }
-    e.stopPropagation(); // avoid clashing with clickImage
-    if (e.touches.length > 0) {
-      this.pointerMoveX_(e.touches[0].pageX);
+
+    this.resetHintInterval_(!this.shouldHintLoop_);
+
+    switch (e.key.toLowerCase()) {
+      case 'arrowup':
+      case 'arrowleft':
+        this.stepLeft_();
+        break;
+      case 'arrowdown':
+      case 'arrowright':
+        this.stepRight_();
+        break;
+      case 'pageup':
+        e.preventDefault();
+        e.stopPropagation();
+        this.stepLeft_(true);
+        break;
+      case 'pagedown':
+        e.preventDefault();
+        e.stopPropagation();
+        this.stepRight_(true);
+        break;
+      case 'home':
+        e.preventDefault();
+        e.stopPropagation();
+        this.stepExactCenter_();
+        break;
     }
   }
-  /**
-   * Cleanup when touch released
-   * @param {Event|null} e
-   */
-  touchEnd(e) {
-    if (e) {
-      // Avoid bubbling up to element
-      e.stopPropagation();
-    }
-    this.container_.removeEventListener('touchmove', this.touchMove);
-    this.container_.removeEventListener('touchend', this.touchEnd);
 
-    this.moveOffset_ = 0;
-    this.splitOffset_ = 0;
+  /**
+   * Unlisten a listener. If null, does nothing
+   * @param {UnlistenDef|null} unlistenHandle
+   * @private
+   */
+  unlisten_(unlistenHandle) {
+    if (unlistenHandle) {
+      unlistenHandle();
+      unlistenHandle = null;
+    }
+  }
+
+  /**
+   * Register events
+   */
+  registerEvents_() {
+    this.unlistenMouseDown_ =
+        listen(this.element, 'mousedown', this.onMouseDown_.bind(this));
+    this.unlistenTouchStart_ =
+        listen(this.element, 'touchstart', this.onTouchStart_.bind(this));
+    this.unlistenKeyDown_ =
+        listen(this.element, 'keydown', this.onKeyDown_.bind(this));
+  }
+
+  /**
+   * Unregister events
+   */
+  unregisterEvents_() {
+    this.unlisten_(this.unlistenMouseDown_);
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
+
+    this.unlisten_(this.unlistenTouchStart_);
+    this.unlisten_(this.unlistenTouchMove_);
+    this.unlisten_(this.unlistenTouchEnd_);
+
+    this.unlisten_(this.unlistenKeyDown_);
+  }
+
+  /**
+   * Get current slider's percentage to the left
+   */
+  getCurrentSliderPercentage_() {
+    const {left: barLeft} =
+        this.bar_./*OK*/getBoundingClientRect();
+    const {left: boxLeft, width: boxWidth}
+    //    = this.getLayoutBox();
+        = this.container_./*OK*/getBoundingClientRect();
+    return (barLeft - boxLeft) / boxWidth;
+  }
+
+  /**
+   * One step left
+   * @param {boolean=} opt_toEnd
+   */
+  stepLeft_(opt_toEnd) {
+    if (opt_toEnd === true) {
+      this.updatePositions_(0);
+    } else {
+      this.updatePositions_(this.limitPercentage_(
+          this.getCurrentSliderPercentage_() - this.stepSize_));
+    }
+  }
+
+  /**
+   * Step to the center
+   */
+  stepExactCenter_() {
+    this.updatePositions_(0.5);
+  }
+
+  /**
+   * One step right
+   * @param {boolean=} opt_toEnd
+   */
+  stepRight_(opt_toEnd) {
+    if (opt_toEnd === true) {
+      this.updatePositions_(1);
+    } else {
+      this.updatePositions_(this.limitPercentage_(
+          this.getCurrentSliderPercentage_() + this.stepSize_));
+    }
   }
 
   /**
@@ -509,11 +596,44 @@ export class AmpImageSlider extends AMP.BaseElement {
     //    = this.getLayoutBox();
         = this.container_./*OK*/getBoundingClientRect();
 
-    const moveX = pointerX - this.moveOffset_;
-    const newPos = Math.max(leftBound,
-        Math.min(this.splitOffset_ + moveX, rightBound));
+    const newPos = Math.max(leftBound, Math.min(pointerX, rightBound));
     const newPercentage = (newPos - leftBound) / width;
-    this.updatePositions(newPercentage);
+    this.updatePositions_(newPercentage);
+  }
+
+  /**
+   * Update element positions based on percentage
+   * @param {number} leftPercentage
+   */
+  updatePositions_(leftPercentage) {
+    leftPercentage = this.limitPercentage_(leftPercentage);
+
+    this.updateTranslateX_(this.bar_, leftPercentage);
+
+    this.updateTranslateX_(this.leftMask_, leftPercentage - 1);
+    this.updateTranslateX_(this.leftAmpImage_, 1 - leftPercentage);
+    if (this.leftLabelWrapper_) {
+      this.updateTranslateX_(this.leftLabelWrapper_, 1 - leftPercentage);
+    }
+  }
+
+  /**
+   * Limit percentage between 0 and 1
+   * @param {number} percentage
+   */
+  limitPercentage_(percentage) {
+    return Math.max(0, Math.min(percentage, 1));
+  }
+
+  /**
+   * Set translateX of the element
+   * @param {Element} element
+   * @param {number} percentage
+   */
+  updateTranslateX_(element, percentage) {
+    setStyles(dev().assertElement(element), {
+      transform: `translateX(${percentage * 100}%)`,
+    });
   }
 
   /** @override */
@@ -523,41 +643,39 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // https://github.com/ampproject/amphtml/pull/16688
+    // From https://github.com/ampproject/amphtml/pull/16688
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
 
-    // amp-img initially have no size as amp-image-slider
-    // is not yet completely built.
-    // scheduleLayout without setAsOwner seems work
-    // as a hint that the new layout should be inspected
-
-    // Actually, now they are no longer useful
-    // But kept since there is an layer experiment check
     if (this.leftAmpImage_ && this.rightAmpImage_) {
       this.scheduleLayout(this.leftAmpImage_);
       this.scheduleLayout(this.rightAmpImage_);
     }
 
-    this.registerEvents();
+    this.registerEvents_();
+
+    // disabled is done here instead
+    if (this.element.hasAttribute('disabled')) {
+      this.disable_();
+    }
 
     return Promise.resolve();
   }
 
   /** @override */
   unlayoutCallback() {
-    this.unregisterEvents();
+    this.unregisterEvents_();
     return true;
   }
 
   /** @override */
   pauseCallback() {
-    this.unregisterEvents();
+    this.unregisterEvents_();
   }
 
   /** @override */
   resumeCallback() {
-    this.registerEvents();
+    this.registerEvents_();
   }
 }
 
