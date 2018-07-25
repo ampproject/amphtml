@@ -7,12 +7,26 @@ comment: off
 coverage:
   status:
     project:
-      default:
+      default: off
+      unit_tests:
+        flags: unit_tests
+        target: auto
+        threshold: 100 # Passing check no matter what the coverage is
+        base: auto
+      integration_tests:
+        flags: integration_tests
         target: auto
         threshold: 100 # Passing check no matter what the coverage is
         base: auto
     patch:
-      default:
+      default: off
+      unit_tests:
+        flags: unit_tests
+        target: 100 # Target 100% coverage for diffs
+        threshold: 100 # Passing check no matter what the coverage is
+        base: auto
+      integration_tests:
+        flags: integration_tests
         target: 100 # Target 100% coverage for diffs
         threshold: 100 # Passing check no matter what the coverage is
         base: auto
