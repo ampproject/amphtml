@@ -202,9 +202,6 @@ export class SystemLayer {
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
-
-    /** @private {?(number|string)} */
-    this.muteMessageTimeout_ = null;
   }
 
   /**
@@ -294,7 +291,7 @@ export class SystemLayer {
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.STORY_HAS_AUDIO_STATE, hasAudio => {
-      this.onHasAudioStateUpdate_(hasAudio);
+      this.onStoryHasAudioStateUpdate_(hasAudio);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
@@ -374,7 +371,7 @@ export class SystemLayer {
    * @param {boolean} hasAudio
    * @private
    */
-  onHasAudioStateUpdate_(hasAudio) {
+  onStoryHasAudioStateUpdate_(hasAudio) {
     this.vsync_.mutate(() => {
       this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
     });
