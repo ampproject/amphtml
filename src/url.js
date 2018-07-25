@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LRUCache} from './utils/lru-cache';
+import {LruCache} from './utils/lru-cache';
 import {dict} from './utils/object';
 import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
@@ -48,7 +48,7 @@ let a;
  * We cached all parsed URLs. As of now there are no use cases
  * of AMP docs that would ever parse an actual large number of URLs,
  * but we often parse the same one over and over again.
- * @type {Object<string, !Location>}
+ * @type {LruCache}
  */
 let cache;
 
@@ -57,6 +57,9 @@ const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
 /** @private @const Matches amp_gsa parameters in query string. */
 const AMP_GSA_PARAMS_REGEX = /[?&]amp_gsa[^&]*/;
+
+/** @private @const Matches amp_r parameters in query string. */
+const AMP_R_PARAMS_REGEX = /[?&]amp_r[^&]*/;
 
 /** @private @const Matches usqp parameters from goog experiment in query string. */
 const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
@@ -91,38 +94,28 @@ export function getWinOrigin(win) {
 export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = new LRUCache(100));
+    cache = self.UrlCache || (self.UrlCache = new LruCache(100));
   }
 
-  const fromCache = cache.get(url);
-
-  if (fromCache) {
-    return fromCache;
-  }
-
-  const info = parseUrlWithA(a, url);
-
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-
-  if (opt_nocache) {
-    return frozen;
-  }
-
-  cache.put(url, frozen);
-
-  return frozen;
+  return parseUrlWithA(a, url, opt_nocache ? null : cache);
 }
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
  * @param {!HTMLAnchorElement} a
  * @param {string} url
+ * @param {LruCache=} opt_cache
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url) {
+export function parseUrlWithA(a, url, opt_cache) {
+  if (opt_cache && opt_cache.has(url)) {
+    return opt_cache.get(url);
+  }
+
   a.href = url;
 
   // IE11 doesn't provide full URL components when parsing relative URLs.
@@ -166,7 +159,15 @@ export function parseUrlWithA(a, url) {
   } else {
     info.origin = info.protocol + '//' + info.host;
   }
-  return info;
+
+  // Freeze during testing to avoid accidental mutation.
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (opt_cache) {
+    opt_cache.put(url, frozen);
+  }
+
+  return frozen;
 }
 
 /**
@@ -249,7 +250,7 @@ export function serializeQueryString(params) {
  * @param {string|!Location} url
  * @return {boolean}
  */
-export function isSecureUrl(url) {
+export function isSecureUrlDeprecated(url) {
   if (typeof url == 'string') {
     url = parseUrlDeprecated(url);
   }
@@ -275,7 +276,7 @@ export function assertHttpsUrl(
       elementContext, sourceName);
   // (erwinm, #4560): type cast necessary until #4560 is fixed.
   const theUrlString = /** @type {string} */ (urlString);
-  user().assert(isSecureUrl(theUrlString) || /^(\/\/)/.test(theUrlString),
+  user().assert(isSecureUrlDeprecated(theUrlString) || /^(\/\/)/.test(theUrlString),
       '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
@@ -351,6 +352,24 @@ export function isProxyOrigin(url) {
 }
 
 /**
+ * For proxy-origin URLs, returns the serving type. Otherwise, returns null.
+ * E.g., 'https://amp-com.cdn.ampproject.org/a/s/amp.com/amp_document.html'
+ * returns 'a'.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {?string}
+ */
+export function getProxyServingType(url) {
+  if (typeof url == 'string') {
+    url = parseUrlDeprecated(url);
+  }
+  if (!isProxyOrigin(url)) {
+    return null;
+  }
+  const path = url.pathname.split('/', 2);
+  return path[1];
+}
+
+/**
  * Returns whether the URL origin is localhost.
  * @param {string|!Location} url URL of an AMP document.
  * @return {boolean}
@@ -379,18 +398,45 @@ export function isProtocolValid(url) {
 }
 
 /**
+ * Returns a URL without AMP JS parameters.
+ * @param {string} url
+ * @return {string}
+ */
+export function removeAmpJsParamsFromUrl(url) {
+  const parsed = parseUrlDeprecated(url);
+  const search = removeAmpJsParamsFromSearch(parsed.search);
+  return parsed.origin + parsed.pathname + search + parsed.hash;
+
+}
+
+/**
+ * Returns a URL without a query string.
+ * @param {string} url
+ * @return {string}
+ */
+export function removeSearch(url) {
+  const index = url.indexOf('?');
+  if (index == -1) {
+    return url;
+  }
+  const fragment = getFragment(url);
+  return url.substring(0, index) + fragment;
+}
+
+/**
  * Removes parameters that start with amp js parameter pattern and returns the
  * new search string.
  * @param {string} urlSearch
  * @return {string}
  */
-function removeAmpJsParams(urlSearch) {
+function removeAmpJsParamsFromSearch(urlSearch) {
   if (!urlSearch || urlSearch == '?') {
     return '';
   }
   const search = urlSearch
       .replace(AMP_JS_PARAMS_REGEX, '')
       .replace(AMP_GSA_PARAMS_REGEX, '')
+      .replace(AMP_R_PARAMS_REGEX, '')
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, ''); // Removes first ? or &.
   return search ? '?' + search : '';
@@ -427,8 +473,8 @@ export function getSourceUrl(url) {
   // Sanity test that what we found looks like a domain.
   user().assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
-  return origin + path.join('/') + removeAmpJsParams(url.search) +
-      (url.hash || '');
+  return origin + path.join('/') +
+      removeAmpJsParamsFromSearch(url.search) + (url.hash || '');
 }
 
 /**
@@ -506,7 +552,7 @@ export function getCorsUrl(win, url) {
 
 
 /**
- * Checks if the url have __amp_source_origin and throws if it does.
+ * Checks if the url has __amp_source_origin and throws if it does.
  * @param {string} url
  */
 export function checkCorsUrl(url) {

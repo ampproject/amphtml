@@ -100,6 +100,10 @@ let nextInstanceId = 0;
 let elId = 0;
 
 
+/**
+ * Media pool class, providing an optimized and cross browser interface to
+ * handle HTMLMediaElements.
+ */
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
@@ -489,7 +493,11 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then(impl => impl.resetOnDomChange());
+    componentEl.getImpl().then(impl => {
+      if (impl.resetOnDomChange) {
+        impl.resetOnDomChange();
+      }
+    });
   }
 
 

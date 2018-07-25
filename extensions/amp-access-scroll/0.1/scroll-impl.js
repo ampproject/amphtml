@@ -25,12 +25,21 @@ const TAG = 'amp-access-scroll-elt';
 
 /** @const {!JsonObject} */
 const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
-  'authorization': 'https://connect.scroll.com/amp/access?' +
-                   'rid=READER_ID&o=SOURCE_URL&' +
-                   'cid=CLIENT_ID(cid-fallback-cookie)',
-  'pingback': 'https://connect.scroll.com/amp/pingback?' +
-              'rid=READER_ID&o=SOURCE_URL&cid=CLIENT_ID(cid-fallback-cookie)&' +
-              'd=AUTHDATA(scroll)&v=AUTHDATA(visitId)',
+  'authorization': 'https://connect.scroll.com/amp/access'
+                   + '?rid=READER_ID'
+                   + '&cid=CLIENT_ID(scroll1)'
+                   + '&c=CANONICAL_URL'
+                   + '&o=AMPDOC_URL'
+                   + '&x=QUERY_PARAM(scrollx)',
+  'pingback': 'https://connect.scroll.com/amp/pingback'
+              + '?rid=READER_ID'
+              + '&cid=CLIENT_ID(scroll1)'
+              + '&c=CANONICAL_URL'
+              + '&o=AMPDOC_URL'
+              + '&r=DOCUMENT_REFERRER'
+              + '&x=QUERY_PARAM(scrollx)'
+              + '&d=AUTHDATA(scroll)'
+              + '&v=AUTHDATA(visitId)',
   'namespace': 'scroll',
 });
 
@@ -38,10 +47,14 @@ const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'scroll': 'https://connect.scroll.com/amp/analytics'
               + '?rid=ACCESS_READER_ID'
-              + '&cid=CLIENT_ID(cid-fallback-cookie)'
-              + '&o=SOURCE_URL&c=CANONICAL_URL'
+              + '&cid=CLIENT_ID(scroll1)'
+              + '&c=CANONICAL_URL'
+              + '&o=AMPDOC_URL'
+              + '&r=DOCUMENT_REFERRER'
+              + '&x=QUERY_PARAM(scrollx)'
               + '&d=AUTHDATA(scroll.scroll)'
               + '&v=AUTHDATA(scroll.visitId)'
+              + '&h=SOURCE_HOSTNAME'
               + '&s=${totalEngagedTime}',
   },
   'triggers': {
@@ -85,6 +98,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
     this.accessSource_ = accessSource;
   }
 
+  /** @override */
   authorize() {
     return super.authorize()
         .then(response => {
@@ -112,18 +126,12 @@ class ScrollElement {
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
-
-    /** @const {!Element} */
-    this.wrapper_ = document.createElement('div');
-    this.wrapper_.classList.add('amp-access-scroll-bar');
-    ampdoc.getBody().appendChild(this.wrapper_);
+    this.ampdoc_ = ampdoc;
 
     /** @const {!Element} */
     this.placeholder_ = document.createElement('div');
+    this.placeholder_.classList.add('amp-access-scroll-bar');
     this.placeholder_.classList.add('amp-access-scroll-placeholder');
-    this.wrapper_.appendChild(this.placeholder_);
-
     const img = document.createElement('img');
     img.setAttribute('src',
         'https://static.scroll.com/assets/icn-scroll-logo.svg');
@@ -131,7 +139,12 @@ class ScrollElement {
     img.setAttribute('width', 26);
     img.setAttribute('height', 26);
     this.placeholder_.appendChild(img);
+    ampdoc.getBody().appendChild(this.placeholder_);
 
+
+    /** @const {!Element} */
+    this.scrollBar_ = document.createElement('div');
+    this.scrollBar_.classList.add('amp-access-scroll-bar');
     /** @const {!Element} */
     this.iframe_ = document.createElement('iframe');
     this.iframe_.setAttribute('scrolling', 'no');
@@ -143,22 +156,26 @@ class ScrollElement {
     this.iframe_.setAttribute('sandbox', 'allow-scripts allow-same-origin ' +
                                          'allow-top-navigation allow-popups ' +
                                          'allow-popups-to-escape-sandbox');
-    this.wrapper_.appendChild(this.iframe_);
-
+    this.scrollBar_.appendChild(this.iframe_);
+    ampdoc.getBody().appendChild(this.scrollBar_);
   }
 
   /**
    * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
    */
   show(accessService) {
-    accessService.getAccessReaderId()
+    Services.viewportForDoc(this.ampdoc_).addToFixedLayer(this.scrollBar_)
+        .then(() => accessService.getAccessReaderId())
         .then(readerId => {
           this.iframe_.onload = () => {
-            this.wrapper_.removeChild(this.placeholder_);
+            this.ampdoc_.getBody().removeChild(this.placeholder_);
           };
+          const docInfo = Services.documentInfoForDoc(this.ampdoc_);
           this.iframe_.setAttribute('src',
-              'https://connect.scroll.com/amp/scrollbar?readerId=' +
-              encodeURIComponent(readerId));
+              'https://connect.scroll.com/amp/scrollbar'
+                + '?rid=' + encodeURIComponent(readerId)
+                + '&o=' + encodeURIComponent(this.ampdoc_.getUrl())
+                + '&c=' + encodeURIComponent(docInfo.canonicalUrl));
         });
   }
 }

@@ -35,11 +35,9 @@ describes.realWin('amp-selector', {
       const attributes = options.attributes || {};
       const ampSelector = win.document.createElement('amp-selector');
       ampSelector.setAttribute('layout', 'container');
-      if (attributes) {
-        Object.keys(attributes).forEach(key => {
-          ampSelector.setAttribute(key, attributes[key]);
-        });
-      }
+      Object.keys(attributes).forEach(key => {
+        ampSelector.setAttribute(key, attributes[key]);
+      });
 
       const config = options.config || {};
       let noOfSelectables = 3;
@@ -75,6 +73,12 @@ describes.realWin('amp-selector', {
             disabledCount--;
           }
         }
+
+        const optionAttributes = options.optionAttributes || {};
+        Object.keys(optionAttributes).forEach(key => {
+          img.setAttribute(key, optionAttributes[key]);
+        });
+
         ampSelector.appendChild(img);
       }
       win.document.body.appendChild(ampSelector);
@@ -130,6 +134,25 @@ describes.realWin('amp-selector', {
       yield ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.be.calledOnce;
+    });
+
+    it('should retain existing roles', function* () {
+      const ampSelector = getSelector({
+        attributes: {
+          role: 'tablist',
+        },
+        optionAttributes: {
+          role: 'tab',
+        },
+        config: {
+          count: 4,
+          selectedCount: 2,
+        },
+      });
+      const impl = ampSelector.implementation_;
+      yield ampSelector.build();
+      expect(impl.element.getAttribute('role')).to.equal('tablist');
+      expect(impl.options_[0].getAttribute('role')).to.equal('tab');
     });
 
     it('should init properly for single select', function* () {

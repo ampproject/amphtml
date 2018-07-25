@@ -15,13 +15,17 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {areEqualOrdered} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
+import {toArray} from '../../../src/types';
 const TAG = 'amp-selector';
 
 /**
@@ -83,7 +87,9 @@ export class AmpSelector extends AMP.BaseElement {
     this.isMultiple_ = this.element.hasAttribute('multiple');
     this.isDisabled_ = this.element.hasAttribute('disabled');
 
-    this.element.setAttribute('role', 'listbox');
+    if (!this.element.hasAttribute('role')) {
+      this.element.setAttribute('role', 'listbox');
+    }
 
     if (this.isMultiple_) {
       this.element.setAttribute('aria-multiselectable', 'true');
@@ -135,6 +141,10 @@ export class AmpSelector extends AMP.BaseElement {
         this.toggle_(args['index'], args['value']);
       }
     }, ActionTrust.LOW);
+
+    // Triggers on DOM children updates
+    this.element.addEventListener(AmpEvents.DOM_UPDATE,
+        this.maybeRefreshOnUpdate_.bind(this));
   }
 
   /** @override */
@@ -220,12 +230,34 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
+   * Calls init_ again if options element has changed
+   * @param {Event} unusedEvent
    * @private
    */
-  init_() {
-    const options = [].slice.call(this.element.querySelectorAll('[option]'));
+  maybeRefreshOnUpdate_(unusedEvent) {
+    const newOptions = toArray(this.element.querySelectorAll('[option]'));
+    if (areEqualOrdered(this.options_, newOptions)) { // no updates
+      return;
+    }
+    // Clear prev states
+    this.options_ = [];
+    this.selectedOptions_ = [];
+    this.inputs_ = [];
+    this.init_(newOptions);
+  }
+
+  /**
+   * @param {Array<Element>=} opt_options
+   * @private
+   */
+  init_(opt_options) {
+    const options = opt_options ?
+      opt_options :
+      toArray(this.element.querySelectorAll('[option]'));
     options.forEach(option => {
-      option.setAttribute('role', 'option');
+      if (!option.hasAttribute('role')) {
+        option.setAttribute('role', 'option');
+      }
       if (option.hasAttribute('disabled')) {
         option.setAttribute('aria-disabled', 'true');
       }
@@ -244,7 +276,7 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Creates inputs for the currently selected elements and returns a string
    * array of their option values.
-   * @note Ignores elements that have `disabled` attribute set.
+   * Note: Ignores elements that have `disabled` attribute set.
    * @return {!Array<string>}
    * @private
    */
@@ -314,10 +346,10 @@ export class AmpSelector extends AMP.BaseElement {
         // 'selectedOptions' - array of option values of selected elements.
         const name = 'select';
         const selectEvent =
-            createCustomEvent(this.win, `amp-selector.${name}`, {
-              targetOption: el.getAttribute('option'),
-              selectedOptions: selectedValues,
-            });
+            createCustomEvent(this.win, `amp-selector.${name}`, dict({
+              'targetOption': el.getAttribute('option'),
+              'selectedOptions': selectedValues,
+            }));
         this.action_.trigger(this.element, name, selectEvent,
             ActionTrust.HIGH);
       }
@@ -477,7 +509,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Clears a given element from the list of selected options.
-   * @param {!Element} element.
+   * @param {!Element} element
    * @private
    */
   clearSelection_(element) {
@@ -504,7 +536,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Marks a given element as selected and clears the others if required.
-   * @param {!Element} element.
+   * @param {!Element} element
    * @private
    */
   setSelection_(element) {

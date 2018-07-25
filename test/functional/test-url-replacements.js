@@ -292,9 +292,77 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace AMPDOC_URL', () => {
-    return expandUrlAsync('?ref=AMPDOC_URL').then(res => {
-      expect(res).to.not.match(/AMPDOC_URL/);
+  describe('AMPDOC_URL', () => {
+    it('should replace AMPDOC_URL', () => {
+      return expandUrlAsync('?ref=AMPDOC_URL').then(res => {
+        expect(res).to.not.match(/AMPDOC_URL/);
+      });
+    });
+
+    it('should add extra params to AMPDOC_URL', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?amp_r=hello%3Dworld');
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=AMPDOC_URL')
+          .then(res => {
+            expect(res).to.contain(
+                encodeURIComponent(
+                    'https://cdn.ampproject.org/a/o.com/foo/?hello=world'));
+          });
+    });
+
+
+    it('should merge extra params in AMPDOC_URL', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?test=case&amp_r=hello%3Dworld');
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=AMPDOC_URL')
+          .then(res => {
+            expect(res).to.contain(
+                encodeURIComponent(
+                    'https://cdn.ampproject.org/a/o.com/foo/?hello=world&test=case'));
+          });
+    });
+
+    it('should allow an embedded amp_r parameter', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?amp_r=amp_r%3Dweird');
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=AMPDOC_URL')
+          .then(res => {
+            expect(res).to.contain(
+                encodeURIComponent(
+                    'https://cdn.ampproject.org/a/o.com/foo/?amp_r=weird'));
+          });
+    });
+
+    it('should prefer original params in AMPDOC_URL', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?test=case&amp_r=test%3Devil');
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=AMPDOC_URL')
+          .then(res => {
+            expect(res).to.contain(
+                encodeURIComponent(
+                    'https://cdn.ampproject.org/a/o.com/foo/?test=case'));
+          });
+    });
+
+    it('should merge multiple extra params safely in AMPDOC_URL', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?test=case&hello=you&amp_r=hello%3Dworld%26goodnight%3Dmoon');
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=AMPDOC_URL')
+          .then(res => {
+            expect(res).to.contain(
+                encodeURIComponent(
+                    'https://cdn.ampproject.org/a/o.com/foo/?hello=you&goodnight=moon&test=case'));
+          });
     });
   });
 
@@ -310,40 +378,86 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace SOURCE_URL and _HOST', () => {
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-      return Promise.resolve();
-    });
-    return expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
-      expect(res).to.not.match(/SOURCE_URL/);
-      expect(res).to.not.match(/SOURCE_HOST/);
-    });
-  });
-
-  it('should replace SOURCE_URL and _HOSTNAME', () => {
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-      return Promise.resolve();
-    });
-    return expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
-      expect(res).to.not.match(/SOURCE_URL/);
-      expect(res).to.not.match(/SOURCE_HOSTNAME/);
-    });
-  });
-
-  it('should update SOURCE_URL after track impression', () => {
-    const win = getFakeWindow();
-    win.location = parseUrlDeprecated('https://wrong.com');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-      return new Promise(resolve => {
-        win.location = parseUrlDeprecated('https://example.com?gclid=123456');
-        resolve();
-      });
-    });
-    return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandUrlAsync('?url=SOURCE_URL')
-        .then(res => {
-          expect(res).to.contain('example.com');
+  describe('SOURCE_URL', () => {
+    it('should replace SOURCE_URL and SOURCE_HOST', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated('https://wrong.com');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return new Promise(resolve => {
+          win.location = parseUrlDeprecated('https://example.com/test');
+          resolve();
         });
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOST')
+          .then(res => {
+            expect(res).to.equal(
+                '?url=https%3A%2F%2Fexample.com%2Ftest&host=example.com');
+          });
+    });
+
+    it('should replace SOURCE_URL and SOURCE_HOSTNAME', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated('https://wrong.com');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return new Promise(resolve => {
+          win.location = parseUrlDeprecated('https://example.com/test');
+          resolve();
+        });
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL&hostname=SOURCE_HOSTNAME')
+          .then(res => {
+            expect(res).to.equal(
+                '?url=https%3A%2F%2Fexample.com%2Ftest&hostname=example.com');
+          });
+    });
+
+    it('should update SOURCE_URL after track impression', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated('https://wrong.com');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return new Promise(resolve => {
+          win.location = parseUrlDeprecated('https://example.com?gclid=123456');
+          resolve();
+        });
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL')
+          .then(res => {
+            expect(res).to.contain('example.com');
+          });
+    });
+
+    it('should add extra params to SOURCE_URL', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?amp_r=hello%3Dworld');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return Promise.resolve();
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL')
+          .then(res => {
+            expect(res).to.contain(
+                encodeURIComponent('http://o.com/foo/?hello=world'));
+          });
+    });
+
+    it('should merge extra params into SOURCE_URL', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?a=1&safe=1&amp_r=hello%3Dworld%26safe=evil');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return Promise.resolve();
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL')
+          .then(res => {
+            expect(res).to.contain(
+                encodeURIComponent('http://o.com/foo/?hello=world&safe=1&a=1'));
+          });
+    });
   });
 
   it('should replace SOURCE_PATH', () => {
@@ -1049,47 +1163,86 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace QUERY_PARAM with foo', () => {
-    const win = getFakeWindow();
-    win.location = parseUrlDeprecated('https://example.com?query_string_param1=wrong');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-      return new Promise(resolve => {
-        win.location =
-            parseUrlDeprecated('https://example.com?query_string_param1=foo');
-        resolve();
+  describe('QUERY_PARAM', () => {
+    it('should replace QUERY_PARAM with foo', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated('https://example.com?query_string_param1=wrong');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return new Promise(resolve => {
+          win.location =
+              parseUrlDeprecated('https://example.com?query_string_param1=foo');
+          resolve();
+        });
       });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
+          .then(res => {
+            expect(res).to.match(/sh=foo&s/);
+          });
     });
-    return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
-        .then(res => {
-          expect(res).to.match(/sh=foo&s/);
-        });
-  });
 
-  it('should replace QUERY_PARAM with ""', () => {
-    const win = getFakeWindow();
-    win.location = parseUrlDeprecated('https://example.com');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-      return Promise.resolve();
+    it('should replace QUERY_PARAM with ""', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated('https://example.com');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return Promise.resolve();
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
+          .then(res => {
+            expect(res).to.match(/sh=&s/);
+          });
     });
-    return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
-        .then(res => {
-          expect(res).to.match(/sh=&s/);
-        });
-  });
 
-  it('should replace QUERY_PARAM with default_value', () => {
-    const win = getFakeWindow();
-    win.location = parseUrlDeprecated('https://example.com');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-      return Promise.resolve();
+    it('should replace QUERY_PARAM with default_value', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated('https://example.com');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return Promise.resolve();
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync(
+              '?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+          .then(res => {
+            expect(res).to.match(/sh=default_value&s/);
+          });
     });
-    return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
-        .then(res => {
-          expect(res).to.match(/sh=default_value&s/);
+
+    it('should replace QUERY_PARAM with extra param', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?x=wrong');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return new Promise(resolve => {
+          win.location = parseUrlDeprecated(
+              'https://cdn.ampproject.org/a/o.com/foo/?amp_r=x%3Dfoo');
+          resolve();
         });
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?sh=QUERY_PARAM(x)&s')
+          .then(res => {
+            expect(res).to.match(/sh=foo&s/);
+          });
+    });
+
+    it('should replace QUERY_PARAM, preferring original over extra', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?x=wrong');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return new Promise(resolve => {
+          win.location = parseUrlDeprecated(
+              'https://cdn.ampproject.org/a/o.com/foo/?x=foo&amp_r=x%3Devil');
+          resolve();
+        });
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?sh=QUERY_PARAM(x)&s')
+          .then(res => {
+            expect(res).to.match(/sh=foo&s/);
+          });
+    });
   });
 
   it('should collect vars', () => {
@@ -1203,7 +1356,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         '&a=b&d=PROM&e=PAGE_LOAD_TIME');
   });
 
-  describe('access values', () => {
+  describe('access values via amp-access', () => {
 
     let accessService;
     let accessServiceMock;
@@ -1214,6 +1367,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
         getAuthdataField: () => {},
       };
       accessServiceMock = sandbox.mock(accessService);
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve(accessService);
+          });
     });
 
     afterEach(() => {
@@ -1221,21 +1378,84 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
 
     function expandUrlAsync(url, opt_disabled) {
+      if (opt_disabled) {
+        accessService = null;
+      }
       return createIframePromise().then(iframe => {
         iframe.doc.title = 'Pixel Test';
         const link = iframe.doc.createElement('link');
         link.setAttribute('href', 'https://pinterest.com/pin1');
         link.setAttribute('rel', 'canonical');
         iframe.doc.head.appendChild(link);
-
         const replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
-        replacements.getVariableSource().getAccessService_ = ampdoc => {
-          expect(ampdoc.isSingleDoc).to.be.a('function');
-          if (opt_disabled) {
-            return Promise.resolve(null);
-          }
-          return Promise.resolve(accessService);
-        };
+        return replacements.expandUrlAsync(url);
+      });
+    }
+
+    it('should replace ACCESS_READER_ID', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .returns(Promise.resolve('reader1'))
+          .once();
+      return expandUrlAsync('?a=ACCESS_READER_ID') .then(res => {
+        expect(res).to.match(/a=reader1/);
+        expect(userErrorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should replace AUTHDATA', () => {
+      accessServiceMock.expects('getAuthdataField')
+          .withExactArgs('field1')
+          .returns(Promise.resolve('value1'))
+          .once();
+      return expandUrlAsync('?a=AUTHDATA(field1)').then(res => {
+        expect(res).to.match(/a=value1/);
+        expect(userErrorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should report error if not available', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .never();
+      return expandUrlAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
+          .then(res => {
+            expect(res).to.match(/a=;/);
+            expect(userErrorStub).to.be.calledOnce;
+          });
+    });
+  });
+
+  describe('access values via amp-subscriptions', () => {
+
+    let accessService;
+    let accessServiceMock;
+
+    beforeEach(() => {
+      accessService = {
+        getAccessReaderId: () => {},
+        getAuthdataField: () => {},
+      };
+      accessServiceMock = sandbox.mock(accessService);
+      sandbox.stub(Services, 'subscriptionsServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve(accessService);
+          });
+    });
+
+    afterEach(() => {
+      accessServiceMock.verify();
+    });
+
+    function expandUrlAsync(url, opt_disabled) {
+      if (opt_disabled) {
+        accessService = null;
+      }
+      return createIframePromise().then(iframe => {
+        iframe.doc.title = 'Pixel Test';
+        const link = iframe.doc.createElement('link');
+        link.setAttribute('href', 'https://pinterest.com/pin1');
+        link.setAttribute('rel', 'canonical');
+        iframe.doc.head.appendChild(link);
+        const replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
         return replacements.expandUrlAsync(url);
       });
     }

@@ -17,8 +17,8 @@
 import {Deferred} from '../utils/promise';
 import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
-import {getService, registerServiceBuilder} from '../service';
-
+import {getMode} from '../mode';
+import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
 
 /**
  * @fileoverview
@@ -108,6 +108,15 @@ export class BaseTemplate {
     }
     return singleElement || root;
   }
+
+  /**
+   * @protected @final
+   * @return {boolean}
+   */
+  viewerCanRenderTemplates() {
+    return getServiceForDoc(
+        this.element, 'viewer').canRenderTemplates();
+  }
 }
 
 
@@ -131,9 +140,6 @@ export class Templates {
      * @private @const {!Object<string, function(!TemplateClassDef)>}
      */
     this.templateClassResolvers_ = {};
-
-    /** @type {!Object<string, boolean>|undefined} */
-    this.declaredTemplates_ = undefined;
   }
 
   /**
@@ -178,7 +184,7 @@ export class Templates {
    */
   findAndRenderTemplate(parent, data, opt_querySelector) {
     return this.renderTemplate(
-        this.findTemplate_(parent, opt_querySelector),
+        this.findTemplate(parent, opt_querySelector),
         data);
   }
 
@@ -195,7 +201,7 @@ export class Templates {
    */
   findAndRenderTemplateArray(parent, array, opt_querySelector) {
     return this.renderTemplateArray(
-        this.findTemplate_(parent, opt_querySelector),
+        this.findTemplate(parent, opt_querySelector),
         array);
   }
 
@@ -206,7 +212,7 @@ export class Templates {
    * @return {boolean}
    */
   hasTemplate(parent, opt_querySelector) {
-    return !!this.maybeFindTemplate_(parent, opt_querySelector);
+    return !!this.maybeFindTemplate(parent, opt_querySelector);
   }
 
   /**
@@ -215,10 +221,9 @@ export class Templates {
    * @param {!Element} parent
    * @param {string=} opt_querySelector
    * @return {!Element}
-   * @private
    */
-  findTemplate_(parent, opt_querySelector) {
-    const templateElement = this.maybeFindTemplate_(parent, opt_querySelector);
+  findTemplate(parent, opt_querySelector) {
+    const templateElement = this.maybeFindTemplate(parent, opt_querySelector);
     user().assert(templateElement, 'Template not found for %s', parent);
     user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
@@ -233,9 +238,8 @@ export class Templates {
    * @param {!Element} parent
    * @param {string=} opt_querySelector
    * @return {?Element}
-   * @private
    */
-  maybeFindTemplate_(parent, opt_querySelector) {
+  maybeFindTemplate(parent, opt_querySelector) {
     const templateId = parent.getAttribute('template');
     if (templateId) {
       return rootNodeFor(parent).getElementById(templateId);
@@ -304,6 +308,7 @@ export class Templates {
    * @param {string} type
    * @param {!TemplateClassDef} templateClass
    * @private
+   * @restricted
    */
   registerTemplate_(type, templateClass) {
     if (!this.templateClassMap_[type]) {
@@ -317,15 +322,26 @@ export class Templates {
   }
 
   /**
+   * For testing only.
+   * @param {string} type
+   * @visibleForTesting
+   */
+  unregisterTemplate(type) {
+    dev().assert(getMode().test, 'Should only be used in test mode.');
+    delete this.templateClassMap_[type];
+    delete this.templateClassResolvers_[type];
+  }
+
+  /**
    * @param {!BaseTemplate} impl
    * @param {!JsonObject} data
+   * @return {!Element}
    * @private
    */
   render_(impl, data) {
     return impl.render(data);
   }
 }
-
 
 /**
  * @param {!Window} win

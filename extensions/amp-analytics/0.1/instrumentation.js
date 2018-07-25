@@ -37,6 +37,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {hasOwn} from '../../../src/utils/object';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -169,6 +170,7 @@ export class InstrumentationService {
    * @param {!Element} analyticsElement The element associated with the
    *  config.
    * @private
+   * @restricted
    */
   addListenerDepr_(config, listener, analyticsElement) {
     const eventType = config['on'];
@@ -239,7 +241,7 @@ export class InstrumentationService {
     }
 
     /**
-     * @param {!Object<number, boolean>} bounds.
+     * @param {!Object<number, boolean>} bounds
      * @param {number} scrollPos Number representing the current scroll
      * @param {string} varName variable name to assign to the bound that
      * triggers the event
@@ -252,10 +254,14 @@ export class InstrumentationService {
       // Goes through each of the boundaries and fires an event if it has not
       // been fired so far and it should be.
       for (const b in bounds) {
-        if (!bounds.hasOwnProperty(b) || b > scrollPos || bounds[b]) {
+        if (!hasOwn(bounds, b)) {
           continue;
         }
-        bounds[b] = true;
+        const bound = parseInt(b, 10);
+        if (bound > scrollPos || bounds[bound]) {
+          continue;
+        }
+        bounds[bound] = true;
         const vars = Object.create(null);
         vars[varName] = b;
         listener(this.createEventDepr_(AnalyticsEventType.SCROLL, vars));
@@ -403,20 +409,20 @@ export class AnalyticsGroup {
  * depends on it in multi-doc scope. Otherwise an element life-cycle could
  * resolve way before we have the service available.
  *
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Promise<InstrumentationService>}
  */
-export function instrumentationServicePromiseForDoc(nodeOrDoc) {
+export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
-    getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation'));
 }
 
-/*
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
+/**
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!InstrumentationService}
  */
-export function instrumentationServiceForDocForTesting(nodeOrDoc) {
+export function instrumentationServiceForDocForTesting(elementOrAmpDoc) {
   registerServiceBuilderForDoc(
-      nodeOrDoc, 'amp-analytics-instrumentation', InstrumentationService);
-  return getServiceForDoc(nodeOrDoc, 'amp-analytics-instrumentation');
+      elementOrAmpDoc, 'amp-analytics-instrumentation', InstrumentationService);
+  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation');
 }

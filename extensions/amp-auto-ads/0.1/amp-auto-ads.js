@@ -39,7 +39,8 @@ export class AmpAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), 'Experiment is off');
+    user().assert(isExperimentOn(this.win, 'amp-auto-ads'),
+        'Experiment is off');
 
     const type = this.element.getAttribute('type');
     user().assert(type, 'Missing type attribute');
@@ -74,10 +75,11 @@ export class AmpAutoAds extends AMP.BaseElement {
       const attributes = /** @type {!JsonObject} */ (
         Object.assign(adNetwork.getAttributes(),
             getAttributesFromConfigObj(configObj)));
+      const sizing = adNetwork.getSizing();
       const adConstraints = getAdConstraintsFromConfigObj(ampdoc, configObj) ||
           adNetwork.getDefaultAdConstraints();
       const adTracker = new AdTracker(getExistingAds(ampdoc), adConstraints);
-      new AdStrategy(placements, attributes, adTracker).run();
+      new AdStrategy(placements, attributes, sizing, adTracker).run();
       new AnchorAdStrategy(ampdoc, attributes, configObj).run();
     });
   }

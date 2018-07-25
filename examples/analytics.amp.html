@@ -29,13 +29,31 @@
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "endpoint": "/analytics/no-referrer"
+      },
+      "triggers": {
+        "pageview": {
+          "on": "visible",
+          "request": "endpoint"
+        }
+      },
+      "transport": {
+        "referrerPolicy": "no-referrer"
+      }
+    }
+  </script>
+</amp-analytics>
 <amp-analytics id="analytics1">
 <script type="application/json">
 {
-  "transport": {"beacon": false, "xhrpost": false},
+  "transport": {"beacon": true, "xhrpost": false},
   "requests": {
-    "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
-    "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+    "endpoint": "/analytics",
+    "base": "${endpoint}/${type}?path=${canonicalPath}",
     "event": "${base}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
     "visibility": "${base}&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${firstVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}",
     "timer": "${base}&backgroundState=${backgroundState}&timerStart=${timerStart}&duration=${timerDuration}",
@@ -52,7 +70,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "param": "p"
   },
   "triggers": {
-    "defaultPageview": {
+    "pageview": {
       "on": "visible",
       "request": "base",
       "vars": {
@@ -60,13 +78,6 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       },
       "extraUrlParams": {
         "param1": "Another value"
-      }
-    },
-    "pageview": {
-      "on": "visible",
-      "request": "base",
-      "vars": {
-        "type": "${random}${title}"
       }
     },
     "visibility": {
@@ -81,7 +92,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "waitFor": "ini-load"
       },
       "vars": {
-        "type": "visibility"
+        "type": "visible"
       }
     },
     "hidden": {
@@ -90,7 +101,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "visibilitySpec": {
         "selector": "#anim-id",
         "visiblePercentageMin": 20,
-        "visiblePercentageMin": 1000,
+        "visiblePercentageMax": 1000,
         "continuousTimeMax": 5000
       },
       "vars": {
@@ -273,9 +284,9 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
   <amp-analytics id="nestedAnalytics">
     <script type="application/json">
     {
-      "transport": {"beacon": false, "xhrpost": false},
+      "transport": {"beacon": true, "xhrpost": false},
       "requests": {
-        "visibility": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?${type}&RANDOM"
+        "visibility": "/analytics/${type}?RANDOM"
       },
       "triggers": {
         "visibilityScope": {
@@ -286,7 +297,7 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
             "selectionMethod": "scope",
             "visiblePercentageMin": 10
           },
-          "vars": { "type": "scope" }
+          "vars": { "type": "visible-scope" }
         },
         "visibilityClosest": {
           "on": "visible",
@@ -296,7 +307,7 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
             "selectionMethod": "closest",
             "visiblePercentageMin": 20
           },
-          "vars": { "type": "closest" }
+          "vars": { "type": "visible-closest" }
         }
       }
     }

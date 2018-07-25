@@ -118,6 +118,12 @@ app.use('/api/echo/post', (req, res) => {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
+app.use('/analytics/:type', (req, res) => {
+  console.log('Analytics event received: ' + req.params.type);
+  console.log(req.query);
+  res.status(204).send();
+});
+
 /**
  * In practice this would be *.ampproject.org and the publishers
  * origin. Please see AMP CORS docs for more details:
@@ -906,6 +912,13 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   });
 });
 
+app.use('/subscription/pingback', (req, res) => {
+  assertCors(req, res, ['GET']);
+  res.json({
+    done: true,
+  });
+});
+
 // Simulated adzerk ad server and AMP cache CDN.
 app.get('/adzerk/*', (req, res) => {
   assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);
@@ -928,29 +941,34 @@ app.get('/adzerk/*', (req, res) => {
 });
 
 /*
- * Serve extension script url
+ * Serve extension scripts and their source maps.
  */
-app.get('/dist/rtv/*/v0/*.js', (req, res, next) => {
-  const mode = pc.env.SERVE_MODE;
-  const fileName = path.basename(req.path);
-  let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
-  if (mode == 'cdn') {
-    // This will not be useful until extension-location.js change in prod
-    // Require url from cdn
-    request(filePath, (error, response) => {
-      if (error) {
-        res.status(404);
-        res.end();
-      } else {
-        res.send(response);
+app.get(['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
+    (req, res, next) => {
+      const mode = pc.env.SERVE_MODE;
+      const fileName = path.basename(req.path).replace('.max.', '.');
+      let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+      if (mode == 'cdn') {
+        // This will not be useful until extension-location.js change in prod
+        // Require url from cdn
+        request(filePath, (error, response) => {
+          if (error) {
+            res.status(404);
+            res.end();
+          } else {
+            res.send(response);
+          }
+        });
+        return;
       }
+      const isJsMap = filePath.endsWith('.map');
+      if (isJsMap) {
+        filePath = filePath.replace(/\.js\.map$/, '\.js');
+      }
+      filePath = replaceUrls(mode, filePath);
+      req.url = filePath + (isJsMap ? '.map' : '');
+      next();
     });
-    return;
-  }
-  filePath = replaceUrls(mode, filePath);
-  req.url = filePath;
-  next();
-});
 
 /**
  * Serve entry point script url
@@ -1105,6 +1123,7 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
     if (inabox) {
+      file = file.replace(/<html [^>]*>/, '<html amp4ads>');
       file = file.replace(/\/dist\/amp\.js/g, '/dist/amp-inabox.js');
     }
   } else if (mode == 'compiled') {

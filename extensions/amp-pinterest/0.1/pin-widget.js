@@ -48,7 +48,7 @@ export class PinWidget {
 
   /**
    * Override the default href click handling to log and open popup
-   * @param {Event} event: the HTML event object
+   * @param {Event} event
    */
   handleClick(event) {
     event.preventDefault();
@@ -241,6 +241,11 @@ export class PinWidget {
     return structure;
   }
 
+  /**
+   * Renders the pin widget.
+   *
+   * @return {!Promise}
+   */
   render() {
     this.pinUrl = this.element.getAttribute('data-url');
     this.width = this.element.getAttribute('data-width');

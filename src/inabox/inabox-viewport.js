@@ -35,7 +35,11 @@ const TAG = 'inabox-viewport';
 /** @const {number} */
 const MIN_EVENT_INTERVAL = 100;
 
-/** @visibleForTesting */
+/**
+ * @param {!Window} win
+ * @param {!Element} bodyElement
+ * @visibleForTesting
+ */
 export function prepareBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).runPromise({
     measure: state => {
@@ -61,7 +65,11 @@ export function prepareBodyForOverlay(win, bodyElement) {
 }
 
 
-/** @visibleForTesting */
+/**
+ * @param {!Window} win
+ * @param {!Element} bodyElement
+ * @visibleForTesting
+ */
 export function resetBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).mutatePromise(() => {
     // We're not resetting background here as it's supposed to remain

@@ -18,15 +18,22 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 export const SubscriptionAnalyticsEvents = {
   PLATFORM_ACTIVATED: 'subscriptions-platform-activated',
+  PAYWALL_ACTIVATED: 'subscriptions-paywall-activated',
   PLATFORM_REGISTERED: 'subscriptions-platform-registered',
   PLATFORM_REAUTHORIZED: 'subscriptions-platform-re-authorized',
   ACTION_DELEGATED: 'subscriptions-action-delegated',
   ENTITLEMENT_RESOLVED: 'subscriptions-entitlement-resolved',
   STARTED: 'subscriptions-started',
+  ACCESS_GRANTED: 'subscriptions-access-granted',
+  ACCESS_DENIED: 'subscriptions-access-denied',
 };
 
 export class SubscriptionAnalytics {
 
+  /**
+   * Creates an instance of SubscriptionAnalytics.
+   * @param {!Element} element
+   */
   constructor(element) {
     this.element_ = element;
   }

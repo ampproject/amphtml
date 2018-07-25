@@ -106,6 +106,9 @@ describes.realWin('amp-app-banner', {
   }
 
   function testSetupAndShowBanner() {
+    // TODO(alanorozco, #15844): Unskip.
+    this.skip();
+
     return getAppBanner({iosMeta, androidManifest}).then(banner => {
       return banner.implementation_.isDismissed().then(() => {
         expect(banner.parentElement).to.not.be.null;
@@ -181,6 +184,10 @@ describes.realWin('amp-app-banner', {
 
     it('should parse meta content and setup hrefs if app-argument is ' +
         'not provided', () => {
+      expectAsyncConsoleError(
+          '[amp-app-banner] <meta name="apple-itunes-app">\'s content ' +
+          'should contain app-argument to allow opening an already ' +
+          'installed application on iOS.');
       sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
       return getAppBanner({
         iosMeta: {content: 'app-id=828256236'},

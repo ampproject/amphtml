@@ -22,6 +22,7 @@ import {
   getCorsUrl,
   getSourceOrigin,
   getWinOrigin,
+  isProxyOrigin,
   parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
@@ -43,7 +44,7 @@ import {utf8Encode} from '../utils/bytes';
  * @typedef {{
  *   body: (!Object|!Array|undefined|string),
  *   credentials: (string|undefined),
- *   headers: (!Object|undefined),
+ *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
  *   ampCors: (boolean|undefined)
@@ -56,7 +57,7 @@ export let FetchInitDef;
  * @typedef {{
  *   body: (!JsonObject|!FormData|undefined),
  *   credentials: (string|undefined),
- *   headers: (!Object|undefined),
+ *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
  *   requireAmpResponseSourceOrigin: (boolean|undefined),
  *   ampCors: (boolean|undefined)
@@ -166,6 +167,7 @@ export class Xhr {
    *
    * XHRs are intercepted if all of the following are true:
    * - The AMP doc is in single doc mode
+   * - The requested resource is not a 1p request.
    * - The viewer has the `xhrInterceptor` capability
    * - The Viewer is a trusted viewer or AMP is currently in developement mode
    * - The AMP doc is opted-in for XHR interception (`<html>` tag has
@@ -185,7 +187,7 @@ export class Xhr {
     }
     const viewer = Services.viewerForDoc(this.ampdocSingle_);
     const whenFirstVisible = viewer.whenFirstVisible();
-    if (!viewer.hasCapability('xhrInterceptor')) {
+    if (isProxyOrigin(input) || !viewer.hasCapability('xhrInterceptor')) {
       return whenFirstVisible;
     }
     const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
@@ -560,7 +562,7 @@ function normalizeMethod_(method) {
 function setupInit(opt_init, opt_accept) {
   const init = opt_init || {};
   init.method = normalizeMethod_(init.method);
-  init.headers = init.headers || {};
+  init.headers = init.headers || dict({});
   if (opt_accept) {
     init.headers['Accept'] = opt_accept;
   }
@@ -643,7 +645,7 @@ function createXhrRequest(method, url) {
     xhr.open(method, url, true);
   } else if (typeof XDomainRequest != 'undefined') {
     // IE-specific object.
-    xhr = new XDomainRequest();
+    xhr = new XDomainRequest(); // eslint-disable-line no-undef
     xhr.open(method, url);
   } else {
     throw dev().createExpectedError('CORS is not supported');

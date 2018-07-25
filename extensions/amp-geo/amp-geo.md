@@ -22,16 +22,16 @@ limitations under the License.
     <td>Provides an approximate country-level geolocation interface.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Required Script</strong></td>
+    <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</td>
-    <td>Available for testing</td>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-geo/">amp-geo example</a>.</td>
   </tr>
 </table>
 
@@ -134,6 +134,31 @@ The game is called <span class='football'></span>!
 </div>
 ```
 
+### Preset Country Groups
+
+ **GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT
+ DO NOT GUARANTEE THE ACCURACY OR COMPLETENESS OF ANY INFORMATION CONTAINED
+ HEREIN. THIS INFORMATION IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.**
+
+In addition to user specifed country groups `amp-geo` supports preset country lists. See [`amp-geo-presets.js`](./0.1/amp-geo-presets.js) for the available preset lists.
+
+Additional countries may be included with the preset list as in the `myList` example below.
+
+```html
+<amp-geo layout="nodisplay">
+  <script type="application/json">
+  {
+    "ISOCountryGroups": {
+      "eea": [ "preset-eea" ],
+      "myList": [ "preset-eea", "ca", "au" , nz" ]
+    }
+  }
+  </script>
+</amp-geo>
+```
+
 ### Render Blocking
 
 By default, the `amp-geo` component is not render blocking. That is, the page will load and elements will render even if `amp-geo` has not yet loaded and executed. If it's important that certain elements are never rendered in a specific geography, use the `amp-geo-pending` class to provide selective render blocking. This is implemented by the publisher by adding `amp-geo-pending` to the `<body>` element. When the `amp-geo` script loads, it removes the `amp-geo-pending` class at the same time as it adds the `amp-iso-country...` and `amp-geo-group-...` classes.
@@ -211,5 +236,4 @@ The string `{{AMP_ISO_COUNTRY_HOTPATCH}}` must be replaced at serving time with 
 
 ### Debugging
 
-Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Dev Channel](https://www.ampproject.org/docs/reference/experimental) or who are testing locally (i.e., the hostname is `localhost`).
-
+Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Dev Channel](https://www.ampproject.org/docs/reference/experimental) or who are testing locally (i.e., `amp-geo.js` is served in development mode via [`gulp serve`](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md))

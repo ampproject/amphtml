@@ -81,13 +81,10 @@ describes.realWin('amp-sidebar 0.1 version', {
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
-        sandbox.stub(impl.vsync_, 'mutatePromise').callsFake(callback => {
-          callback();
-          return Promise.resolve();
-        });
       }
-      sandbox.stub(impl.vsync_, 'mutate').callsFake(callback => {
+      sandbox.stub(impl, 'mutateElement').callsFake(callback => {
         callback();
+        return Promise.resolve();
       });
 
       if (options.stubHistory) {
@@ -550,21 +547,23 @@ describes.realWin('amp-sidebar 0.1 version', {
       });
     });
 
-    it('should call onAnimationEnd after open and close', () => {
+    it('should trigger actions on open and close', () => {
       return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install(
-            {target: impl.win, toFake: ['Date', 'setTimeout']});
-        impl.boundOnAnimationEnd_ = sandbox.spy();
-        impl.buildCallback();
-
+        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
+          callback();
+        });
         impl.scheduleLayout = sandbox.stub();
 
+        impl.buildCallback();
         impl.open_();
-        expect(impl.boundOnAnimationEnd_).to.be.calledOnce;
+        expect(triggerSpy).to.be.calledOnce;
+        expect(triggerSpy).to.be.calledWith(impl.element, 'sidebarOpen');
 
         impl.close_();
-        expect(impl.boundOnAnimationEnd_).to.be.calledTwice;
+        expect(triggerSpy).to.be.calledTwice;
+        expect(triggerSpy).to.be.calledWith(impl.element, 'sidebarClose');
       });
     });
   });

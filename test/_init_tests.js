@@ -45,6 +45,7 @@ let consoleErrorSandbox;
 let consoleErrorStub;
 let consoleInfoLogWarnSandbox;
 let testName;
+let expectedAsyncErrors;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -153,6 +154,18 @@ class TestConfig {
 
   skipIos() {
     return this.skip(this.runOnIos);
+  }
+
+  skipIfPropertiesObfuscated() {
+    return this.skip(function() {
+      return window.__karma__.config.amp.propertiesObfuscated;
+    });
+  }
+
+  skipSinglePass() {
+    return this.skip(function() {
+      return window.__karma__.config.amp.singlePass;
+    });
   }
 
   enableIe() {
@@ -277,25 +290,61 @@ function warnForConsoleError() {
   if (consoleErrorSandbox) {
     consoleErrorSandbox.restore();
   }
+  expectedAsyncErrors = [];
   consoleErrorSandbox = sinon.sandbox.create();
   const originalConsoleError = console/*OK*/.error;
+  setReportError(() => {});
   consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
-    const errorMessage = messages.join(' ').split('\n', 1)[0]; // First line.
+    const message = messages.join(' ');
+
+    // Match equal strings.
+    if (expectedAsyncErrors.includes(message)) {
+      expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
+      return;
+    }
+
+    // Match regex.
+    for (let i = 0; i < expectedAsyncErrors.length; i++) {
+      const expectedError = expectedAsyncErrors[i];
+      if (typeof expectedError != 'string') {
+        if (expectedError.test(message)) {
+          expectedAsyncErrors.splice(i, 1);
+          return;
+        }
+      }
+    }
+
+    // We're throwing an error. Clean up other expected errors since they will
+    // never appear.
+    expectedAsyncErrors = [];
+
+    const errorMessage = message.split('\n', 1)[0]; // First line.
+    const {failOnConsoleError} = window.__karma__.config;
+    const terminator = failOnConsoleError ? '\'' : '';
+    const separator = failOnConsoleError ? '\n' : '\'\n';
     const helpMessage = '    The test "' + testName + '"' +
-        ' resulted in a call to console.error.\n' +
-        '    ⤷ If this is not expected, fix the code that generated ' +
+        ' resulted in a call to console.error. (See above line.)\n' +
+        '    ⤷ If the error is not expected, fix the code that generated ' +
             'the error.\n' +
-        '    ⤷ If this is expected, use the following pattern to wrap the ' +
-            'test code that generated the error:\n' +
+        '    ⤷ If the error is expected (and synchronous), use the following ' +
+            'pattern to wrap the test code that generated the error:\n' +
         '        \'allowConsoleError(() => { <code that generated the ' +
-            'error> });';
+            'error> });\'\n' +
+        '    ⤷ If the error is expected (and asynchronous), use the ' +
+            'following pattern at the top of the test:\n' +
+        '        \'expectAsyncConsoleError(<string or regex>[, number of' +
+        ' times the error message repeats]);' + terminator;
     // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
-    if (window.__karma__.config.failOnConsoleError) {
-      throw new Error(errorMessage + '\'\n' + helpMessage);
+    if (failOnConsoleError) {
+      throw new Error(errorMessage + separator + helpMessage);
     } else {
-      originalConsoleError(errorMessage + '\'\n' + helpMessage);
+      originalConsoleError(errorMessage + separator + helpMessage);
     }
   });
+  this.expectAsyncConsoleError = function(message, repeat = 1) {
+    expectedAsyncErrors.push.apply(
+        expectedAsyncErrors, Array(repeat).fill(message));
+  };
   this.allowConsoleError = function(func) {
     dontWarnForConsoleError();
     const result = func();
@@ -320,11 +369,20 @@ function dontWarnForConsoleError() {
   consoleErrorSandbox = sinon.sandbox.create();
   consoleErrorStub =
       consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
+  setReportError(reportError);
 }
 
 // Used to restore error level logging after each test.
 function restoreConsoleError() {
   consoleErrorSandbox.restore();
+  if (expectedAsyncErrors.length > 0) {
+    const helpMessage =
+        'The test "' + testName + '" called "expectAsyncConsoleError", ' +
+        'but there were no call(s) to console.error with these message(s): ' +
+        '"' + expectedAsyncErrors.join('", "') + '"';
+    throw new Error(helpMessage);
+  }
+  expectedAsyncErrors = [];
 }
 
 // Used to silence info, log, and warn level logging during each test.
@@ -340,14 +398,19 @@ function stubConsoleInfoLogWarn() {
 
 // Used to restore info, log, and warn level logging after each test.
 function restoreConsoleInfoLogWarn() {
-  consoleInfoLogWarnSandbox.restore();
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
 }
 
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  stubConsoleInfoLogWarn();
+  const {verboseLogging} = window.__karma__.config;
+  if (!verboseLogging) {
+    stubConsoleInfoLogWarn();
+  }
   warnForConsoleError();
   initialGlobalState = Object.keys(global);
   initialWindowState = Object.keys(window);

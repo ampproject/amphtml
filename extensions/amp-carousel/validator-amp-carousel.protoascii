@@ -15,17 +15,25 @@
 #
 
 tags: {  # amp-carousel
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-carousel"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-carousel>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "AMP-CAROUSEL"
   requires_extension: "amp-carousel"
   attrs: {
@@ -51,7 +59,8 @@ tags: {  # <amp-carousel>
   }
   attrs: {
     name: "type"
-    value_regex: "slides|carousel"
+    value: "slides"
+    value: "carousel"
   }
   # <amp-bind>
   attrs: { name: "[slide]" }
@@ -68,6 +77,7 @@ tags: {  # <amp-carousel>
   }
 }
 tags: {  # <amp-carousel> lightbox
+  html_format: AMP
   tag_name: "AMP-CAROUSEL"
   spec_name: "AMP-CAROUSEL [lightbox]"
   requires_extension: "amp-carousel"
@@ -99,7 +109,8 @@ tags: {  # <amp-carousel> lightbox
   }
   attrs: {
     name: "type"
-    value_regex: "slides|carousel"
+    value: "slides"
+    value: "carousel"
   }
   # <amp-bind>
   attrs: { name: "[slide]" }
@@ -122,6 +133,10 @@ tags: {  # <amp-carousel> lightbox
   }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-CAROUSEL lightbox [lightbox-exclude]"
   attrs: {
@@ -130,6 +145,10 @@ tags: {
   }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-CAROUSEL lightbox [child]"
   attrs: {

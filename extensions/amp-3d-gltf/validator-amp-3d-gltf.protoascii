@@ -19,8 +19,8 @@ tags: {  # amp-3d-gltf
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-3d-gltf"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -30,30 +30,33 @@ tags: {  # <amp-3d-gltf>
   requires_extension: "amp-3d-gltf"
   attrs: {
     name: "alpha"
-    value_regex: "[+-]?(\\d*\\.)?\\d+"
+    value: "false"
+    value: "true"
   }
   attrs: {
     name: "antialiasing"
-    value_regex: "false|true"
+    value: "false"
+    value: "true"
   }
   attrs: {
-    name: "autoRotate"
-    value_regex: "false|true"
+    name: "autorotate"
+    value: "false"
+    value: "true"
   }
   attrs: {
-    name: "enableZoom"
-    value_regex: "false|true"
+    name: "enablezoom"
+    value: "false"
+    value: "true"
   }
   attrs: {
-    name: "maxPixelRatio"
+    name: "maxpixelratio"
     value_regex: "[+-]?(\\d*\\.)?\\d+"
   }
   attrs: {
     name: "src"
     mandatory: true
     value_url: {
-      allow_relative: true
-      allowed_protocol: "https"
+      protocol: "https"
     }
   }
   attr_lists: "extended-amp-global"

@@ -7,7 +7,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <title>Key Highlights of AMP Conf 2018</title>
 
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
   <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
@@ -25,14 +25,13 @@
       background: white;
     }
     amp-story h1 {
-      font-size: 46px;
+      font-size: 2.875rem;
     }
     amp-story h2 {
-      font-size: 36px;
+      font-size: 2.25rem;
     }
     amp-story p {
-      font-size: 16px;
-      line-height: 24px;
+      line-height: 1.5;
     }
     .bold {
       font-weight: bold;
@@ -44,53 +43,51 @@
       font-weight: 600;
     }
     .first {
-      padding-top: 65px;
+      padding-top: 8.83vh;
     }
     .last {
-      padding-bottom: 65px;
+      padding-bottom: 8.83vh;
     }
     .blue {
       color: #4285F4;
     }
     .twenty-px {
-      font-size: 20px;
+      font-size: 1.25rem;
     }
     .center {
       text-align: center;
     }
-    .lh30 {
-      line-height: 30px;
-    }
     .icon {
       background-image: url('./img/AMP-Brand-White-Icon.svg');
       background-repeat: no-repeat;
-      background-size: 50px 50px;
-      height: 50px;
+      background-size: 4.25rem 4.25rem;
+      height: 4.25rem;
       object-fit: contain;
-      width: 50px;
+      width: 4.25rem;
     }
     .byline {
       letter-spacing: 1.28px;
-      padding-bottom: 58px;
+      padding-bottom: 7.88vh;
     }
-    .introducing * {
-      line-height: 42px;
+    .introducing p {
+      line-height: 2.625em;
+    }
+    .introducing h2 {
+      line-height: 1.17em;
     }
     .subtitle-page {
-      padding-top: 80px;
+      padding-top: 10.87vh;
     }
     .button {
       align-items: center;
       border: 4px solid #FFFFFF;
       color: #FFFFFF;
       display: flex;
-      height: 60px;
       margin: 0 auto;
       max-width: 240px;
       text-decoration:none;
     }
     .button p {
-      font-size: 20px;
       width: 100%;
     }
     amp-ad[template="image-template"] img {
@@ -105,7 +102,7 @@
   </style>
 </head>
   <body>
-    <amp-story standalone
+    <amp-story standalone id="cats"
         title="Key Highlights of AMP Conf 2018" publisher="The AMP team"
         publisher-logo-src="./img/AMP-Brand-White-Icon.svg"
         poster-portrait-src="./img/overview.jpg">
@@ -297,12 +294,13 @@
         </amp-story-grid-layer>
         <amp-story-cta-layer>
           <a href="https://www.ampproject.org/amp-roadshow/" class="button medium center">
-            <p class="20px">Sign up Now</p>
+            <p class="twenty-px">Sign up Now</p>
           </a>
         </amp-story-cta-layer>
       </amp-story-page>
 
-      <amp-story-bookend src="./json/bookend.json" layout="nodisplay"></amp-story-bookend>
+      <amp-story-bookend src="./bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
     </amp-story>
   </body>
 </html>

@@ -26,8 +26,12 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {
+  VideoServiceSignals,
+} from '../../../src/service/video-service-interface';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 
@@ -264,11 +268,22 @@ export class VideoEntry {
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    video.registerAction('play', () => video.play(/* isAuto */ false), trust);
-    video.registerAction('pause', () => video.pause(), trust);
-    video.registerAction('mute', () => video.mute(), trust);
-    video.registerAction('unmute', () => video.unmute(), trust);
-    video.registerAction('fullscreen', () => video.fullscreenEnter(), trust);
+    registerAction('play', () => video.play(/* isAuto */ false));
+    registerAction('pause', () => video.pause());
+    registerAction('mute', () => video.mute());
+    registerAction('unmute', () => video.unmute());
+    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    /**
+     * @param {string} action
+     * @param {function()} fn
+     */
+    function registerAction(action, fn) {
+      video.registerAction(action, () => {
+        video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+        fn();
+      }, trust);
+    }
   }
 
   /**
@@ -295,7 +310,8 @@ export class VideoEntry {
       const actions = Services.actionServiceForDoc(this.ampdoc_);
       const name = 'timeUpdate';
       const percent = time / duration;
-      const event = createCustomEvent(win, `${TAG}.${name}`, {time, percent});
+      const event = createCustomEvent(win, `${TAG}.${name}`,
+          dict({'time': time, 'percent': percent}));
       actions.trigger(element, name, event, ActionTrust.LOW);
     });
   }

@@ -21,17 +21,22 @@ import {
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {closestBySelector, removeElement} from '../../../src/dom';
 import {createCustomEvent, getData} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
+import {
+  isAdLike,
+  listenFor,
+  looksLikeTrackingIframe,
+} from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isSecureUrl, parseUrlDeprecated, removeFragment} from '../../../src/url';
-import {listenFor} from '../../../src/iframe-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
+import {removeElement} from '../../../src/dom';
+import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/utils/bytes.js';
@@ -112,9 +117,6 @@ export class AmpIframe extends AMP.BaseElement {
      */
     this.container_ = null;
 
-    /** @private {boolean|undefined} */
-    this.isInContainer_ = undefined;
-
     /**
      * The origin of URL at `src` attr, if available. Otherwise, null.
      * @private {?string}
@@ -135,24 +137,27 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   assertSource_(src, containerSrc, sandbox = '') {
-    const url = parseUrlDeprecated(src);
+    const {element} = this;
+    const urlService = Services.urlForDoc(element);
+    const url = urlService.parse(src);
+    const {hostname, protocol, origin} = url;
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
     user().assert(
-        isSecureUrl(url) || url.protocol == 'data:',
+        urlService.isSecure(src) || protocol == 'data:',
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
-        this.element);
-    const containerUrl = parseUrlDeprecated(containerSrc);
+        element);
+    const containerUrl = urlService.parse(containerSrc);
     user().assert(
         !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
-        (url.origin != containerUrl.origin && url.protocol != 'data:'),
+        (origin != containerUrl.origin && protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
-        this.element);
-    user().assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
-        endsWith(url.hostname, '.ampproject.org')),
+        element);
+    user().assert(!(endsWith(hostname, `.${urls.thirdPartyFrameHost}`) ||
+        endsWith(hostname, '.ampproject.org')),
     'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
     return src;
@@ -196,13 +201,13 @@ export class AmpIframe extends AMP.BaseElement {
     if (!src) {
       return;
     }
-    const url = parseUrlDeprecated(src);
+    const {protocol, hash} = Services.urlForDoc(this.element).parse(src);
     // data-URLs are not modified.
-    if (url.protocol == 'data:') {
+    if (protocol == 'data:') {
       return src;
     }
     // If fragment already exists, it's not modified.
-    if (url.hash && url.hash != '#') {
+    if (hash && hash != '#') {
       return src;
     }
     // Add `#amp=1` fragment.
@@ -281,10 +286,12 @@ export class AmpIframe extends AMP.BaseElement {
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
 
-    this.isAdLike_ = isAdLike(this.element);
+    const {element} = this;
+
+    this.isAdLike_ = isAdLike(element);
     this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ = this.isAdLike_ &&
-        !isAdPositionAllowed(this.element, this.win);
+        !isAdPositionAllowed(element, this.win);
 
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed. This can be done by
@@ -292,6 +299,15 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.intersectionObserverApi_) {
       this.intersectionObserverApi_.fire();
     }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  looksLikeTrackingIframe_() {
+    // It may be tempting to inline this method, but it's referenced in tests.
+    return looksLikeTrackingIframe(this.element);
   }
 
   /**
@@ -570,25 +586,6 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /**
-   * Whether this is iframe may have tracking as its primary use case.
-   * @return {boolean}
-   * @private
-   */
-  looksLikeTrackingIframe_() {
-    const box = this.element.getLayoutBox();
-    // This heuristic is subject to change.
-    if (box.width > 10 && box.height > 10) {
-      return false;
-    }
-    // Iframe is not tracking iframe if open with user interaction
-    if (this.isInContainer_ === undefined) {
-      this.isInContainer_ =
-          !!closestBySelector(this.element, '.i-amphtml-overlay');
-    }
-    return !this.isInContainer_;
-  }
-
-  /**
    * Registers 'postMessage' action and 'message' event.
    * @private
    */
@@ -597,9 +594,10 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
 
-    const src = this.element.getAttribute('src');
+    const {element} = this;
+    const src = element.getAttribute('src');
     if (src) {
-      this.targetOrigin_ = parseUrlDeprecated(src).origin;
+      this.targetOrigin_ = Services.urlForDoc(element).parse(src).origin;
     }
 
     // Register action (even if targetOrigin_ is not available so we can
@@ -653,7 +651,8 @@ export class AmpIframe extends AMP.BaseElement {
         return;
       }
       const event =
-          createCustomEvent(this.win, 'amp-iframe:message', {data: sanitized});
+          createCustomEvent(this.win, 'amp-iframe:message',
+              dict({'data': sanitized}));
       const actionService = Services.actionServiceForDoc(this.getAmpDoc());
       actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
     };
@@ -715,36 +714,6 @@ function makeIOsScrollable(element) {
     return wrapper;
   }
   return element;
-}
-
-// Most common ad sizes
-// Array of [width, height] pairs.
-const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
-
-/**
- * Guess whether this element might be an ad.
- * @param {!Element} element An amp-iframe element.
- * @return {boolean}
- * @visibleForTesting
- */
-export function isAdLike(element) {
-  const box = element.getLayoutBox();
-  const {height, width} = box;
-  for (let i = 0; i < adSizes.length; i++) {
-    const refWidth = adSizes[i][0];
-    const refHeight = adSizes[i][1];
-    if (refHeight > height) {
-      continue;
-    }
-    if (refWidth > width) {
-      continue;
-    }
-    // Fuzzy matching to account for padding.
-    if (height - refHeight <= 20 && width - refWidth <= 20) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /**

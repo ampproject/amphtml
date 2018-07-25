@@ -172,7 +172,10 @@ class AmpInstagram extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleInstagramMessages_(event) {
     if (event.origin != 'https://www.instagram.com' ||
         event.source != this.iframe_.contentWindow) {

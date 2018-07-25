@@ -2,7 +2,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>amp-bind: XHR</title>
+  <title>amp-bind: Lists</title>
   <link rel="canonical" href="amps.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
@@ -10,7 +10,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 </head>
 <body>
 
@@ -31,12 +31,27 @@
 
   <button on="tap:AMP.setState({foo: foo+1})">increment foo</button>
 
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="600">
-    <template type="amp-mustache">
-      <strong>Product</strong>: {{name}}
-      <strong>Quantity:</strong>: {{quantity}}
-      <strong>Unit Price</strong>: ${{unitPrice}}
-      <strong>Foo</strong>: <span [text]="foo">?</span>
-    </template>
+  <template id="my-template" type="amp-mustache">
+    <strong>Product</strong>: {{name}}
+    <strong>Quantity:</strong>: {{quantity}}
+    <strong>Unit Price</strong>: ${{unitPrice}}
+    <strong>1+1:</strong>: <span [text]="1+1">?</span>
+    <strong>Foo</strong>: <span [text]="foo">?</span>
+  </template>
+
+  <h3>Default</h3>
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  </amp-list>
+
+  <h3>binding="always"</h3>
+  <amp-list binding="always" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  </amp-list>
+
+  <h3>binding="refresh"</h3>
+  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  </amp-list>
+
+  <h3>binding="no"</h3>
+  <amp-list binding="no" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
   </amp-list>
 </body>

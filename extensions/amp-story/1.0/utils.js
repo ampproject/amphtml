@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {user} from '../../../src/log';
@@ -157,7 +157,7 @@ export function getTextColorForRGB({r, g, b}) {
   const linearG = getLinearRGBValue(g);
   const linearB = getLinearRGBValue(b);
 
-  const L = 0.2126 * linearR + 0.7152 * linearG + 0.0722 * linearB;
+  const L = (0.2126 * linearR) + (0.7152 * linearG) + (0.0722 * linearB);
 
   // Determines which one of the white and black text have a better contrast
   // ratio against the used background color.
@@ -192,4 +192,13 @@ export function removeAttributeInMutate(elementImpl, name) {
   elementImpl.mutateElement(() => {
     elementImpl.element.removeAttribute(name);
   });
+}
+
+/**
+ * @param {!Element} element
+ * @param {string|!Location} url
+ */
+export function userAssertValidProtocol(element, url) {
+  user().assert(Services.urlForDoc(element).isProtocolValid(url),
+      'Unsupported protocol for URL %s', url);
 }

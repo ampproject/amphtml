@@ -17,6 +17,11 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {
+  createFrameFor,
+  objOrParseJson,
+  redispatch,
+} from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
 import {
   fullscreenEnter,
@@ -29,12 +34,9 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
 
-/**
- * @implements {../../../src/video-interface.VideoInterface}
- */
+
+/** @implements {../../../src/video-interface.VideoInterface} */
 class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -74,25 +76,26 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const {element: el} = this;
+
     const embedCode = user().assert(
-        this.element.getAttribute('data-embedcode'),
-        'The data-embedcode attribute is required for <amp-ooyala-player> %s',
-        this.element);
+        el.getAttribute('data-embedcode'),
+        'The data-embedcode attribute is required for %s', el);
+
     const pCode = user().assert(
-        this.element.getAttribute('data-pcode'),
-        'The data-pcode attribute is required for <amp-ooyala-player> %s',
-        this.element);
+        el.getAttribute('data-pcode'),
+        'The data-pcode attribute is required for %s', el);
+
     const playerId = user().assert(
-        this.element.getAttribute('data-playerid'),
-        'The data-playerid attribute is required for <amp-ooyala-player> %s',
-        this.element);
+        el.getAttribute('data-playerid'),
+        'The data-playerid attribute is required for %s', el);
 
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
-    const playerVersion = this.element.getAttribute('data-playerversion') || '';
+    const playerVersion = el.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
       src = 'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
         'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(pCode);
-      const configUrl = this.element.getAttribute('data-config');
+      const configUrl = el.getAttribute('data-config');
       if (configUrl) {
         src += '&options[skin.config]=' + encodeURIComponent(configUrl);
       }
@@ -101,21 +104,16 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     src += '&ec=' + encodeURIComponent(embedCode) +
       '&pbid=' + encodeURIComponent(playerId);
 
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    this.applyFillContent(iframe, true);
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = src;
+    const iframe = createFrameFor(this, src);
 
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(this.win, 'message', event => {
-      this.handleOoyalaMessages_(event);
+      this.handleOoyalaMessage_(event);
     });
 
-    this.element.appendChild(this.iframe_);
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      el.dispatchCustomEvent(VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -158,24 +156,24 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  handleOoyalaMessages_(event) {
-    /** @const {?JsonObject|undefined} */
-    const data = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : tryParseJson(getData(event)));
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  handleOoyalaMessage_(event) {
+    if (event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    const data = objOrParseJson(getData(event));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
-    if (data['data'] == 'playing') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-    } else if (data['data'] == 'paused') {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data['data'] == 'muted') {
-      this.element.dispatchCustomEvent('mute');
-    } else if (data['data'] == 'unmuted') {
-      this.element.dispatchCustomEvent('unmute');
-    }
+    redispatch(this.element, data['data'], {
+      'playing': VideoEvents.PLAYING,
+      'paused': VideoEvents.PAUSE,
+      'muted': VideoEvents.MUTED,
+      'unmuted': VideoEvents.UNMUTED,
+    });
   }
 
   /**

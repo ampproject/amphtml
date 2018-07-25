@@ -19,8 +19,8 @@ tags: {  # amp-brightcove
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-brightcove"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -30,6 +30,10 @@ tags: {  # <amp-brightcove>
   html_format: AMP
   tag_name: "AMP-BRIGHTCOVE"
   requires_extension: "amp-brightcove"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
   attrs: {
     name: "data-account"
     mandatory: true

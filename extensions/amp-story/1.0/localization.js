@@ -25,22 +25,23 @@ import {parseJson} from '../../../src/json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 30
+ * Next ID: 34
  *
  * @const @enum {string}
  */
 export const LocalizedStringId = {
   // amp-story
+  AMP_STORY_AUDIO_MUTE_BUTTON_TEXT: '31',
+  AMP_STORY_AUDIO_UNMUTE_SOUND_BUTTON_TEXT: '32',
+  AMP_STORY_AUDIO_UNMUTE_NO_SOUND_BUTTON_TEXT: '33',
+  AMP_STORY_BOOKEND_MORE_TO_READ_LABEL: '30',
+  AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE: '29',
+  AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL: '28',
   AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL: '22',
   AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL: '23',
-  AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL: '24',
+  AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL: '27',
   AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL: '25',
   AMP_STORY_DOMAIN_DIALOG_HEADING_LINK: '26',
-  AMP_STORY_AUDIO_MUTE_BUTTON_TEXT: '27',
-  AMP_STORY_AUDIO_UNMUTE_SOUND_BUTTON_TEXT: '28',
-  AMP_STORY_AUDIO_UNMUTE_NO_SOUND_BUTTON_TEXT: '29',
-  AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: '0',
-  AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
   AMP_STORY_HINT_UI_NEXT_LABEL: '2',
   AMP_STORY_HINT_UI_PREVIOUS_LABEL: '3',
   AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
@@ -61,6 +62,9 @@ export const LocalizedStringId = {
   AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT: '19',
   AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT: '20',
   AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT: '21',
+  // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: '0',
+  // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
+  // DEPRECATED_AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL: '24',
 };
 
 
@@ -98,7 +102,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  */
 export function getLanguageCodesFromString(languageCode) {
   if (!languageCode) {
-    return ['en'];
+    return ['en', FALLBACK_LANGUAGE_CODE];
   }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce((fallbackLanguageCodeList, chunk, index) => {
@@ -164,7 +168,7 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
 
   Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
     const localizedStringId =
-        /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
     pseudoLocaleStringBundle[localizedStringId].string =
         localizationFn(localizedStringBundle[localizedStringId].string);
   });
@@ -173,6 +177,9 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
 }
 
 
+/**
+ * Localization service.
+ */
 export class LocalizationService {
   /**
    * @param {!Window} win
