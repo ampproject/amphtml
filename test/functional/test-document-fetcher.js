@@ -175,16 +175,17 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     });
 
     function getDefaultResponsePromise() {
-      return Promise.resolve({init: getDefaultResponseOptions()});
+      return Promise.resolve(
+          {
+            init: {
+              headers: [
+                ['AMP-Access-Control-Allow-Source-Origin', origin],
+              ],
+            },
+          }
+      );
     }
 
-    function getDefaultResponseOptions() {
-      return {
-        headers: [
-          ['AMP-Access-Control-Allow-Source-Origin', origin],
-        ],
-      };
-    }
 
     it('should return correct document response', () => {
       sendMessageStub.returns(
