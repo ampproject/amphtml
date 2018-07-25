@@ -105,7 +105,6 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
-
   {name: 'amp-crypto-polyfill', version: '0.1', type: TYPES.MISC},
   {name: 'amp-dailymotion', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-date-countdown', version: '0.1', type: TYPES.MISC},
@@ -151,7 +150,8 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-image-slider',
-    version: ['0.0', '0.1'], options: {hasCss: true},
+    version: ['0.0', '0.1'],
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},

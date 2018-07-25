@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getStyle, setStyles} from '../../../src/style';
 import {htmlFor} from '../../../src/static-template';
@@ -325,7 +326,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     }
 
     if (this.hintTimeoutHandle_ !== null) {
-      clearTimeout(this.hintTimeoutHandle_);
+      Services.timerFor(this.win).cancel(this.hintTimeoutHandle_);
     }
 
     if (opt_noRestart === true) {
@@ -333,8 +334,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       return;
     }
 
-    // TODO(kqian): getting setTimeout from this.win might be necessary?
-    this.hintTimeoutHandle_ = this.win.setTimeout(() => {
+    // Use timer instead of default setTimeout
+    this.hintTimeoutHandle_ = Services.timerFor(this.win).delay(() => {
       this.animateShowHint_();
     }, this.hintInactiveInterval_);
   }
