@@ -169,7 +169,7 @@ export class DocumentFetcher extends XhrBase {
 
     return new Response(
         String(response['body'] ? String(response['body']) : ''),
-        data
+        /** @type {!ResponseInit} */(data)
     );
   }
 }
