@@ -416,9 +416,6 @@
       "name": "amp-live-list - Amp By Example"
     },
     {
-      "flaky": true,
-      // Loading indicator sometimes takes longer to disappear
-      // e.g., https://percy.io/ampproject/amphtml/builds/808263/view/45629509/1400?mode=diff&browser=firefox&snapshot=45629509
       "url": "examples/visual-tests/amp-by-example/components/amp-mustache/index.html",
       "name": "amp-mustache - Amp By Example"
     },
