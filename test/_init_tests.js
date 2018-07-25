@@ -18,6 +18,7 @@
 import '../src/polyfills';
 import 'babel-polyfill';
 import * as describes from '../testing/describes';
+import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {
@@ -46,6 +47,7 @@ let consoleErrorStub;
 let consoleInfoLogWarnSandbox;
 let testName;
 let expectedAsyncErrors;
+let rethrowAsyncSandbox;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -293,7 +295,6 @@ function warnForConsoleError() {
   expectedAsyncErrors = [];
   consoleErrorSandbox = sinon.sandbox.create();
   const originalConsoleError = console/*OK*/.error;
-  setReportError(() => {});
   consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
     const message = messages.join(' ');
 
@@ -369,7 +370,6 @@ function dontWarnForConsoleError() {
   consoleErrorSandbox = sinon.sandbox.create();
   consoleErrorStub =
       consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
-  setReportError(reportError);
 }
 
 // Used to restore error level logging after each test.
@@ -403,6 +403,28 @@ function restoreConsoleInfoLogWarn() {
   }
 }
 
+// Used to precent asynchronous throwing of errors during each test.
+function preventAsyncErrorThrows() {
+  this.stubAsyncErrorThrows = function() {
+    if (rethrowAsyncSandbox) {
+      rethrowAsyncSandbox.restore();
+    }
+    rethrowAsyncSandbox = sinon.sandbox.create();
+    rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
+      const error = log.createErrorVargs.apply(null, args);
+      self.reportError(error);
+      throw error;
+    });
+  };
+  this.restoreAsyncErrorThrows = function() {
+    if (rethrowAsyncSandbox) {
+      rethrowAsyncSandbox.restore();
+    }
+  };
+  setReportError(reportError);
+  stubAsyncErrorThrows();
+}
+
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
@@ -411,6 +433,7 @@ beforeEach(function() {
   if (!verboseLogging) {
     stubConsoleInfoLogWarn();
   }
+  preventAsyncErrorThrows();
   warnForConsoleError();
   initialGlobalState = Object.keys(global);
   initialWindowState = Object.keys(window);
@@ -438,6 +461,7 @@ afterEach(function() {
   const windowState = Object.keys(window);
   restoreConsoleError();
   restoreConsoleInfoLogWarn();
+  restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
@@ -495,7 +519,6 @@ afterEach(function() {
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
-  setReportError(reportError);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

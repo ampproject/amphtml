@@ -568,6 +568,11 @@ describe('Logging', () => {
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
+      restoreAsyncErrorThrows();
+    });
+
+    afterEach(() => {
+      stubAsyncErrorThrows();
     });
 
     it('should rethrow error with single message', () => {

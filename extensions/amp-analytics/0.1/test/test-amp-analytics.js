@@ -486,12 +486,10 @@ describes.realWin('amp-analytics', {
   });
 
   it('should tolerate invalid triggers', function() {
-    const clock = sandbox.useFakeTimers();
     const analytics = getAnalyticsTag();
-    // An incomplete click request.
-    analytics.addTriggerNoInline_({'on': 'click'});
     allowConsoleError(() => { expect(() => {
-      clock.tick(1);
+      // An incomplete click request.
+      analytics.addTriggerNoInline_({'on': 'click'});
     }).to.throw(/Failed to process trigger/); });
   });
 
