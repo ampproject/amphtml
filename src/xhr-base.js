@@ -69,6 +69,7 @@ export let FetchInitDef;
  */
 let XMLHttpRequestDef;
 
+/** @abstract */
 export class XhrBase {
   /**
    * Creates an instance of XHRUtils.
@@ -88,7 +89,8 @@ export class XhrBase {
     // TODO(alabiaga): This should be investigated and fixed
     /** @private {?./service/ampdoc-impl.AmpDoc} */
 
-    this.ampdocSingle_ = ampdocService.isSingleDoc() || null;
+    this.ampdocSingle_ =
+        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   }
 
   /**
