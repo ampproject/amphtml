@@ -79,8 +79,8 @@ tags: {  # amp-cat
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-cat"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -176,15 +176,15 @@ extension with the "amp-cat" name. This will add requirements for the
 as well as a link to documentation on ampproject.org for all error messages.
 
 ```
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
 ```
 
 These fields define a list of all allowed version numbers. Currently, almost all
 extended components are at version `0.1`, and we also allow `latest` to be specified.
 
-The combination of the `allowed_versions` and `name` fields of the
+The combination of the `version` and `name` fields of the
 `extension_spec` define the allowed values of the `src` attribute in the
 script tag, for example `src=https://cdn.ampproject.org/v0/amp-cat-0.1.js`.
 
@@ -314,9 +314,9 @@ as case-sensitive and case-instensitive variants.
 
 ```
 value_url: {
-  allowed_protocol: "https"
-  allowed_protocol: "http"
-  allow_relative: true
+  protocol: "https"
+  protocol: "http"
+  allow_relative: false
   allow_empty: true
 }
 ```
@@ -357,7 +357,7 @@ attrs: {
   name: "img-src"
   mandatory_oneof: "['data-selected-cat', 'img-src']"
   value_url: {
-    allowed_protocol: "https"
+    protocol: "https"
   }
 }
 ```
