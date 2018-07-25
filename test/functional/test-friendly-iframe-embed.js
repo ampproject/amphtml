@@ -93,7 +93,8 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.visibility).to.equal('');
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
-      expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
+      expect(getStyle(embed.win.document.body, 'animation-name'))
+          .to.equal('none');
       expect(embed.win.document.documentElement.classList.contains(
           'i-amphtml-fie')).to.be.true;
 
