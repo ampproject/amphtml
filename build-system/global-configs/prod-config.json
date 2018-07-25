@@ -19,6 +19,7 @@
   "amp-apester-media": 1,
   "amp-ima-video": 1,
   "amp-playbuzz": 1,
+  "amp-story-navigation-performance": 0,
   "chunked-amp": 1,
   "amp-auto-ads": 1,
   "amp-auto-ads-adsense-holdout": 0.1,
