@@ -142,9 +142,6 @@ export class PooolVendor {
    * @private
    */
   checkMandatoryParams_() {
-    this.accessSource_.getReaderId_().then(rid => {
-      this.readerID_ = rid;
-    });
     user().assert(this.bundleID_, 'BundleID is incorrect or not provided.');
     user().assert(this.pageType_, 'Page type is incorrect or not provided.');
     user().assert(this.itemID_, 'ItemID is not provided.');
@@ -176,16 +173,22 @@ export class PooolVendor {
       // Init poool
       _poool('init', this.bundleID_);
 
-      // Set poool amp basic config
-      _poool(
-          'config',
-          {
-            mode: 'custom',
-            'amp_reader_id': this.readerID_,
-            'amp_item_id': this.itemID_,
-          },
-          true
-      );
+      // Get AMP reader id and assign it to poool config
+      this.accessSource_.getReaderId_().then(rid => {
+        this.readerID_ = rid;
+
+        // Set poool amp basic config
+        _poool(
+            'config',
+            {
+              mode: 'custom',
+              'amp_reader_id': this.readerID_,
+              'amp_item_id': this.itemID_,
+            },
+            true
+        );
+      });
+
 
       // Set config
       Object.entries(CONFIG).forEach(configEntry => {
