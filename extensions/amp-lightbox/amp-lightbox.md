@@ -136,7 +136,7 @@ When you use `<amp-lightbox>` in AMPHTML ads, the background of your `<body>` el
 
 When the AMPHTML ad is running in a third-party environment (for example, in a non-AMP document), the creative is centered relative to the viewport and is then expanded. This is because third-party iframes need to rely on a postMessage API to enable features like frame resizing, which is asynchronous, so centering the creative first allows a smooth transition without visual jumps.
 
-### Examples of lightboxs for AMPHTML ads
+### Examples of transitions in lightbox for AMPHTML ads
 
 In the examples below, we demonstrate how the transition looks for an AMPHTML ad that has the `animate-in="fly-in-bottom"` attribute set on the lightbox element for an AMPHTML ad in a friendly iframe, and an AMPHTML ad in a third-party iframe.
 
