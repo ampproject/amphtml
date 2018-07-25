@@ -143,18 +143,10 @@ export class DocumentFetcher extends XhrBase {
 
   /** @override */
   fromStructuredCloneable_(response) {
-    const lowercasedHeaders = map();
     const data = {
       status: 200,
       statusText: 'OK',
-      responseText: (response['body'] ? String(response['body']) : ''),
-      /**
-       * @param {string} name
-       * @return {string}
-       */
-      getResponseHeader(name) {
-        return lowercasedHeaders[String(name).toLowerCase()] || null;
-      },
+      headers: {},
     };
 
     if (response['init']) {
@@ -163,7 +155,7 @@ export class DocumentFetcher extends XhrBase {
         init.headers.forEach(entry => {
           const headerName = entry[0];
           const headerValue = entry[1];
-          lowercasedHeaders[String(headerName).toLowerCase()] =
+          data.headers[String(headerName).toLowerCase()] =
               String(headerValue);
         });
       }
@@ -175,7 +167,10 @@ export class DocumentFetcher extends XhrBase {
       }
     }
 
-    return new Response(String(data));
+    return new Response(
+        String(response['body'] ? String(response['body']) : ''),
+        data
+    );
   }
 }
 
