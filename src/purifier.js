@@ -221,7 +221,7 @@ const PURIFY_CONFIG = {
 
 /**
  * @param {string} dirty
- * @return {string}
+ * @return {{clean: string, bindings: Array<!BindBindingDef>|undefined}}
  */
 export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
@@ -239,6 +239,10 @@ export function purifyHtml(dirty) {
   // Reference to DOMPurify's `allowedAttributes` whitelist.
   let allowedAttributes;
   const allowedAttributesChanges = [];
+
+  // List of <amp-bind> bindings (tuple of tag, property, expression).
+  // Collecting them here is an optimization to obviate DOM scanning later.
+  const bindings = /** @type {!Array<!BindBindingDef>} */ ([]);
 
   /**
    * @param {!Node} node
@@ -324,11 +328,11 @@ export function purifyHtml(dirty) {
     // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
     // after sanitization, which fails because `[]` are not valid attr chars.
-    const isBinding = attrName[0] == '['
-        && attrName[attrName.length - 1] == ']';
-    if (isBinding) {
+    const binding = attrName[0] == '[' && attrName[attrName.length - 1] == ']';
+    if (binding) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`data-amp-bind-${property}`, attrValue);
+      bindings.push({tagName, property, expressionString: attrValue});
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
@@ -376,9 +380,9 @@ export function purifyHtml(dirty) {
   DOMPurify.addHook('afterSanitizeElements', afterSanitizeElements);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  const purified = DOMPurify.sanitize(dirty, config);
+  const clean = DOMPurify.sanitize(dirty, config);
   DOMPurify.removeAllHooks();
-  return purified;
+  return {clean, bindings};
 }
 
 /**
