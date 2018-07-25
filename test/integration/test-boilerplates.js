@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {animationIsNone} from '../../testing/test-helper';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
-} from '../../testing/iframe.js';
+} from '../../testing/iframe';
 import {getStyle} from '../../src/style';
+
 
 const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
@@ -53,14 +55,7 @@ describe.configure().run('New Visibility Boilerplate', () => {
     return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');
-      // Firefox spells out the values when assigning none.
-      const ffValue = '0s ease 0s 1 normal none running none';
-      const animation = getStyle(fixture.win.document.body, 'animation');
-      if (animation == ffValue) {
-        expect(animation).to.equal(ffValue);
-      } else {
-        expect(animation).to.equal('none');
-      }
+      expect(animationIsNone(fixture.win.body)).to.be.true;
     });
   });
 });
