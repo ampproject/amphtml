@@ -3835,6 +3835,7 @@ tags {  # <form method=POST ...>
 tags {
   html_format: AMP
   html_format: AMP4ADS
+  html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
   tag_name: "DIV"
   spec_name: "FORM DIV [submitting]"
