@@ -43,7 +43,7 @@ function serve() {
     log(colors.green('Serving unminified js'));
   }
 
-  nodemon({
+  const config = {
     script: require.resolve('../server.js'),
     watch: [
       require.resolve('../app.js'),
@@ -59,7 +59,17 @@ function serve() {
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
     },
     stdout: !quiet,
-  }).once('quit', function() {
+  };
+
+  if (argv.debug) {
+    Object.assign(config, {
+      execMap: {
+        js: 'node --inspect',
+      },
+    });
+  }
+
+  nodemon(config).once('quit', function() {
     log(colors.green('Shutting down server'));
   });
 }
