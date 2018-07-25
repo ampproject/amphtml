@@ -375,6 +375,42 @@ tags: {  # <amp-story-cta-layer>
   mandatory_ancestor: "AMP-STORY-PAGE"
   descendant_tag_list: "amp-story-cta-layer-allowed-descendants"
   mandatory_last_child: true
+  reference_points: {
+    tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-STORY-CTA-LAYER animate-in"
+  attrs: {
+    name: "animate-in"
+    value: "drop"
+    value: "fade-in"
+    value: "fly-in-bottom"
+    value: "fly-in-left"
+    value: "fly-in-right"
+    value: "fly-in-top"
+    value: "pan-down"
+    value: "pan-left"
+    value: "pan-right"
+    value: "pan-up"
+    value: "pulse"
+    value: "rotate-in-left"
+    value: "rotate-in-right"
+    value: "twirl-in"
+    value: "whoosh-in-left"
+    value: "whoosh-in-right"
+    value: "zoom-in"
+    value: "zoom-out"
+  }
+  attrs: { name: "animate-in-after" }
+  attrs: { name: "animate-in-delay" }
+  attrs: { name: "animate-in-duration" }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
 descendant_tag_list: {
   name: "amp-story-cta-layer-allowed-descendants"

@@ -486,6 +486,7 @@ function runTests() {
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: (!!argv.saucelabs) || (!!argv.saucelabs_lite),
+    singlePass: !!argv.single_pass,
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
     propertiesObfuscated: !!argv.single_pass,
