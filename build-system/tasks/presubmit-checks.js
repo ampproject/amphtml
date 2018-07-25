@@ -388,7 +388,7 @@ const forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/error.js',
-      'src/service/xhr-impl.js',
+      'src/service/xhr-base.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',

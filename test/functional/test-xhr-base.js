@@ -149,14 +149,16 @@ describes.realWin('XhrBase', {amp: true}, function() {
   describe('fetchAmpCors_', () => {
     let xhrBase;
     let fetchStub;
+    let headers;
     beforeEach(() => {
       xhrBase = new XhrBase(window);
+      headers = {
+        'AMP-Access-Control-Allow-Source-Origin':
+          getSourceOrigin(window.location.href),
+      };
       fetchStub = sandbox.stub(xhrBase, 'fetchFromNetwork_').callsFake(
           () => Promise.resolve(new Response('ok', {
-            headers: {
-              'AMP-Access-Control-Allow-Source-Origin':
-                getSourceOrigin(window.location.href),
-            },
+            headers,
           })));
     });
     it('should modify url to AMPCors url if ampCors!=false', () => {
@@ -183,11 +185,7 @@ describes.realWin('XhrBase', {amp: true}, function() {
       return promise;
     });
     it('should check for ALLOW_SOURCE_ORIGIN_HEADER if required', () => {
-      fetchStub.restore();
-      fetchStub = sandbox.stub(xhrBase, 'fetchFromNetwork_').callsFake(
-          () => Promise.resolve(new Response('ok', {
-            headers: {},
-          })));
+      headers = {};
       expect(xhrBase.fetchAmpCors_('/', {})).to.be.rejectedWith(/Response must contain the AMP-Access-Control-Allow-Source-Origin header​​​/);
     });
   });
