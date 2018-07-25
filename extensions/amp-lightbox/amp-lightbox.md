@@ -130,9 +130,7 @@ The `close-button` attribute is required and only allowed in AMPHTML ads. In reg
 
 For AMPHTML ads, scrollable lightboxes are not allowed.
 
-The background of the `<body>` element for AMPHTML ads that contain a lightbox is also set to transparent. For more information, see the [Transparent background](#transparent-background) section below.
-
-#### Transparent background
+### Transparent background
 
 When you use `<amp-lightbox>` in AMPHTML ads, the background of your `<body>` element becomes transparent because the AMP runtime resizes and realigns your creative's content before the lightbox is expanded. This is done to prevent a visual "jump" of the creative while the lightbox opens. If your creative needs a background, set it on an intermediate container (like a full-size `<div>`) instead of the `<body>`.
 
