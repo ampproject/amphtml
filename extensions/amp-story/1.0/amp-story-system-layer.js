@@ -60,9 +60,6 @@ const TEMPLATE = {
         {
           tag: 'div',
           attrs: dict({
-<<<<<<< HEAD
-            'class': 'i-amphtml-story-sound-display',
-=======
             'role': 'button',
             'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
@@ -70,16 +67,7 @@ const TEMPLATE = {
         {
           tag: 'div',
           attrs: dict({
-            'role': 'button',
-            'class': UNMUTE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': MUTE_CLASS + ' i-amphtml-story-button',
->>>>>>> upstream/master
+            'class': 'i-amphtml-story-sound-display',
           }),
           children: [
             {
