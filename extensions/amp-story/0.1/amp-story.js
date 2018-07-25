@@ -411,7 +411,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
-    });
+    }, true /** callToInitialize */);
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
