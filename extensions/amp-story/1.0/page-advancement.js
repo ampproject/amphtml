@@ -263,7 +263,7 @@ class ManualAdvancement extends AdvancementConfig {
   constructor(element) {
     super();
     this.element_ = element;
-    /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
+    /** @private {?./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
     this.sections_ = null;
     this.initializeSections_();
