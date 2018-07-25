@@ -15,6 +15,7 @@ limitations under the License.
 -->
 
 # <a name=”amp-access-poool></a> `amp-access-poool`
+
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
@@ -44,7 +45,7 @@ limitations under the License.
 
 The `amp-access-poool`, based on `amp-access` component, loads and shows a paywall using your `bundleID` from Poool's Dashboard configuration.
 
-If you are unfortunately familiar with Poool's behavior outside AMP, you cannot use `excerpt` and `hidden` modes here, due to AMP's particular behavior. You will be able to lock or unlock your content with the `access` variable which is provided by amp environment.
+If you are unfortunately familiar with Poool's behavior outside AMP, you cannot use `excerpt` and `hidden` modes here, due to AMP's particular behavior. You will be able to lock or unlock your content with the `access` variable which is provided by amp environment. Check poool-widget section just bellow.
 
 The `amp-access-poool` component does not require an authorization or pingback configuration, because it is pre-configured to work with the Poool service.
 
@@ -53,7 +54,46 @@ For more informations about modes, check our [documentation](https://dev.poool.f
 
 ## Configurations
 
-__Example: Basic paywall (with default values)__
+### HTML sections
+
+__Set poool-widget section, which contain poool paywall when access isn't granted.__
+Set the poool-widget section bellow both shown and hidden content like the following examle.
+First section is article preview, always shown to readers.
+Second section need an access (`amp-access="access"` attribute) to be displayed.
+Third section is poool, called when access isn't granted (`amp-access="NOT access"` attribute).
+
+```html
+<section>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    Curabitur ullamcorper turpis vel commodo scelerisque.
+  </p>
+</section>
+
+<section amp-access="access" amp-access-hide class="article-body" itemprop="articleBody">
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    Curabitur ullamcorper turpis vel commodo scelerisque.
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    Curabitur ullamcorper turpis vel commodo scelerisque.
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    Curabitur ullamcorper turpis vel commodo scelerisque.
+  </p>
+</section>
+
+<section amp-access="NOT error AND NOT access">
+    <div id="poool-widget"></div>
+</section>
+```
+
+
+### amp-access script - poool config
+
+__Example: Basic paywall config (with default values)__
 
 Configuration is similar to AMP Access, but no authorization, pingback and login links are required.
 
@@ -80,9 +120,10 @@ __Example: Show a paywall for a user in a custom group/segment called "myCustomS
       "bundleID": "Your app id provided by poool",
       "pageType": "premium",
       "debug": "true",
+      "mode": "custom",
       "cookiesEnabled": "true",
       "itemID": "amp-example-article",
-      "customSegment": "myCustomSegment"
+      "customSegment": "amp-custom-segment"
     }
   }
 </script>
@@ -92,9 +133,9 @@ For more informations about config variables, check our [documentation](https://
 
 ##### Notice
 
-You have to use tags attributes within AMP, in camelCase, instead of the underline (" _ ") symbol traditionally used by Poool.
+You have to set poool config attributes within AMP, in camelCase, instead of the underline (" _ ") symbol traditionally used by Poool.
 
-For example : use `customSegment="test"` to achieve `poool("config", "custom_segment", "test");`.
+For example : use `customSegment="amp-custom-segment"` to achieve `poool("config", "custom_segment", "amp-custom-segment");`.
 
 
 ## Attributes
@@ -108,6 +149,10 @@ Your article ID.
 ##### pageType (required)
 Used to tell Poool a page has been visited by the current user.
 See [documentation](http://dev.poool.fr/doc/sdk#page_view) for more informations.
+
+##### mode
+For AMP environment, you'll have to set mode attribute to `"custom"`.
+See [documentation](http://dev.poool.fr/doc/sdk#debug) for more informations.
 
 ##### debug
 Enable/disable debug mode.
@@ -141,96 +186,6 @@ See [documentation](http://dev.poool.fr/doc/sdk#custom_segment) for more informa
 Following latest GDPR requirements, we decided to disable cookies by default inside our paywall. Set this attribute to enable them when you asked user about his/her consent.
 See [documentation](http://dev.poool.fr/doc/sdk#cookies_enabled) for more informations.
 
-## Events
-
-<table>
-  <tr>
-    <th width="25%">Event</th>
-    <th width="35%">Description</th>
-    <th width="40%">Data</th>
-  </tr>
-  <tr>
-    <td><code>lock</code></td>
-    <td>Fired when the post content should be cut/trimmed/hidden. See [documentation](http://dev.poool.fr/doc/sdk#onlock) for more informations.</td>
-    <td>None</td>
-  </tr>
-  <tr>
-    <td><code>release</code></td>
-    <td>Fired when the post content should be unlocked (typically when the user has performed his/her current paywall action to unlock the post). See [documentation](http://dev.poool.fr/doc/sdk#onrelease) for more informations.</td>
-    <td><pre>event.widget</pre></td>
-  </tr>
-  <tr>
-    <td><code>identityAvailable</code></td>
-    <td>Fired when user has been successfully identified. See [documentation](http://dev.poool.fr/doc/sdk#onidentityavailable) for more informations.</td>
-    <td><pre>
-    event.user_id
-    event.segment_slug
-    </pre></td>
-  </tr>
-  <tr>
-    <td><code>hidden</code></td>
-    <td>Fired when Poool's paywall should be hidden and you should show your own paywall instead. See [documentation](http://dev.poool.fr/doc/sdk#onhidden) for more informations.</td>
-    <td>None</td>
-  </tr>
-  <tr>
-    <td><code>disabled</code></td>
-    <td>Fired when Poool's paywall has been disabled in configuration and you should show your own paywall instead. See [documentation](http://dev.poool.fr/doc/sdk#ondisabled) for more informations.</td>
-    <td>None</td>
-  </tr>
-  <tr>
-    <td><code>register</code></td>
-    <td>Fired when the user interacts with Poool's newsletter paywall form. See [documentation](http://dev.poool.fr/doc/sdk#onregister) for more informations.</td>
-    <td><pre>
-    event.email
-    event.newsletter_id
-    </pre></td>
-  </tr>
-  <tr>
-    <td><code>subscribeClick</code></td>
-    <td>Fired when the user interacts with any "subscribe" button/link within paywall. See [documentation](http://dev.poool.fr/doc/sdk#onsubscribeclick) for more informations.</td>
-    <td><pre>
-    event.widget
-    event.button
-    event.originalEvent
-    event.url
-    </pre></td>
-  </tr>
-  <tr>
-    <td><code>loginClick</code></td>
-    <td>Fired when the user interacts with any "login" button/link within paywall. See [documentation](http://dev.poool.fr/doc/sdk#onloginclick) for more informations.</td>
-    <td><pre>
-    event.widget
-    event.button
-    event.originalEvent
-    event.url
-    </pre></td>
-  </tr>
-  <tr>
-    <td><code>dataPolicyClick</code></td>
-    <td>Fired when the user interacts with GDPR policy buttons/links within paywall. See [documentation](http://dev.poool.fr/doc/sdk#ondatapolicyclick) for more informations.</td>
-    <td><pre>
-    event.widget
-    event.button
-    event.originalEvent
-    event.url
-    </pre></td>
-  </tr>
-  <tr>
-    <td><code>error</code> (deprecated)</td>
-    <td>Fired when an unexpected error has been caught and you might show your regular paywall as a fallback. See [documentation](http://dev.poool.fr/doc/sdk#onerror) for more informations.</td>
-    <td>None</td>
-  </tr>
-  <tr>
-    <td><code>outdatedbrowser</code> (deprecated)</td>
-    <td>Fired when user is using an outdated browser (mainly IE). See [documentation](http://dev.poool.fr/doc/sdk#onoutdatedbrowser) for more informations.</td>
-    <td>None</td>
-  </tr>
-  <tr>
-    <td><code>userOutsideCohort</code> (deprecated)</td>
-    <td>Fired when Poool's paywall is only shown to a percentage of people and the identified user is not part of this percentage.. See [documentation](http://dev.poool.fr/doc/sdk#onuseroutsidecohort) for more informations.</td>
-    <td>None</td>
-  </tr>
-</table>
 
 ## Validation
 
