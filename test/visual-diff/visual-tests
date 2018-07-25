@@ -452,11 +452,9 @@
       "name": "amp-soundcloud - Amp By Example"
     },
     {
-      "flaky": true,
-      // Embedded video occasionally takes too long to load
-      // e.g., https://percy.io/ampproject/amphtml/builds/805397/view/45410014/1400?mode=diff&browser=firefox&snapshot=45410014
       "url": "examples/visual-tests/amp-by-example/components/amp-springboard-player/index.html",
-      "name": "amp-springboard-player - Amp By Example"
+      "name": "amp-springboard-player - Amp By Example",
+      "loading_complete_css": ["amp-springboard-player iframe.i-amphtml-fill-content"]
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-sticky-ad/index.html",
