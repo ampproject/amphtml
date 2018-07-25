@@ -17,7 +17,6 @@ import {CSS} from '../../../build/amp-access-poool-0.1.css';
 import {Services} from '../../../src/services';
 import {camelCaseToDash, dashToUnderline} from '../../../src/string';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {loadScript} from '../../../3p/3p';
 
@@ -32,30 +31,14 @@ const AUTHORIZATION_TIMEOUT = 3000;
 
 const CONFIG = {
   debug: false,
+  mode: 'custom',
   forceWidget: null,
   loginButtonEnabled: true,
   signatureEnabled: true,
-  userIsPremium: false,
   videoClient: 'vast',
   customSegment: null,
   cookiesEnabled: false,
 };
-
-const EVENTS = [
-  'lock',
-  'release',
-  'hidden',
-  'disabled',
-  'register',
-  'error',
-  'adblock',
-  'outdatedBrowser',
-  'userOutsideCohort',
-  'identityAvailable',
-  'subscribeClick',
-  'loginClick',
-  'dataPolicyClick',
-];
 
 /**
  * @typedef {{
@@ -65,7 +48,6 @@ const EVENTS = [
  *   forceWidget: (string|null),
  *   loginButtonEnabled: (boolean),
  *   signatureEnabled: (boolean),
- *   userIsPremium: (boolean),
  *   videoClient: (string|null)
  *   customSegment: (string|null),
  *   cookiesEnabled: (boolean),
@@ -206,22 +188,6 @@ export class PooolVendor {
           _poool('config', dashToUnderline(camelCaseToDash(configKey)),
               configValue);
         }
-      });
-
-      // Set event handlers
-      EVENTS.forEach(eventName => {
-        _poool(
-            'event',
-            `on${eventName[0].toUpperCase()}${eventName.slice(1)}`,
-            function(eventData) {
-              const message = JSON.stringify(dict({
-                'action': eventName,
-                'data': eventData,
-              }));
-
-              global.parent.postMessage(message, '*');
-            }
-        );
       });
 
       // Unlock content after onRelease event
