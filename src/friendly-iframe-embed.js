@@ -22,7 +22,7 @@ import {closestBySelector, escapeHtml} from './dom';
 import {dev, rethrowAsync, user} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh} from './layout-rect';
+import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
   px,
@@ -548,7 +548,9 @@ export class FriendlyIframeEmbed {
           this.host.getLayoutBox() :
           this.iframe./*OK*/getBoundingClientRect();
 
-        const {top, left, width, height} = rect;
+        // Offset by scroll top as iframe will be position: fixed.
+        const dy = -Services.viewportForDoc(this.iframe).getScrollTop();
+        const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
 
         // Offset body by header height to prevent visual jump.
         Object.assign(bodyStyle, {
