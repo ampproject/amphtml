@@ -27,8 +27,8 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
-import {getStyle} from '../../src/style';
 import {installServiceInEmbedScope} from '../../src/service';
+import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
@@ -93,7 +93,7 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.visibility).to.equal('');
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
-      expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
+      expect(isAnimationNone(embed.win.document.body)).to.be.true;
       expect(embed.win.document.documentElement.classList.contains(
           'i-amphtml-fie')).to.be.true;
 
