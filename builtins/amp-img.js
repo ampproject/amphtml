@@ -18,8 +18,7 @@ import {BaseElement} from '../src/base-element';
 import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
-import {srcsetFromElement, srcsetFromSrc} from '../src/srcset'
-import {isExperimentOn} from '../src/experiments';
+import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -51,9 +50,6 @@ export class AmpImg extends BaseElement {
 
     /** @private @const {boolean} */
     this.useNativeSrcset_ = isExperimentOn(this.win, 'amp-img-native-srcset');
-
-    /** @private @const {boolean} */
-    this.expOn_ = isExperimentOn(this.win, 'amp-img-blurry-placeholder');
   }
 
   /** @override */
