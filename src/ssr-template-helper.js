@@ -25,6 +25,14 @@ const ATTRS_TO_SEND_TO_VIEWER = {
 };
 
 /**
+ * @typedef {{
+ *   successTemplate: ?(Element|JsonObject|undefined),
+ *   errorTemplate: ?(Element|JsonObject|undefined)
+ * }}
+ */
+export let SsrTemplateDef;
+
+/**
  * Helper, that manages the proxying of template rendering to the viewer.
  */
 export class SsrTemplateHelper {
@@ -58,29 +66,39 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * Proxies xhr and template rendering to the viewer and renders
-   * the response.
+   * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
+   * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
+   *     the payload. If provided, finding the template in the passed in
+   *     element is not attempted.
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
-  fetchAndRenderTemplate(element) {
+  fetchAndRenderTemplate(element, opt_templates = null) {
     const inputsAsJson = this.getElementInputsAsJson_(element);
     const elementAttrsAsJson =
         this.getElementAttributesAsJson_(element);
     elementAttrsAsJson['inputData'] = inputsAsJson;
-    const template = this.templates_.maybeFindTemplate(element);
     let mustacheTemplate;
-    if (template) {
-      // The document fragment can't be used in the message channel API thus
-      // serializeToString for a string representation of the dom tree.
-      mustacheTemplate = this.xmls_.serializeToString(
-          this.templates_.findTemplate(element));
+    if (!opt_templates) {
+      const template = this.templates_.maybeFindTemplate(element);
+      if (template) {
+        // The document fragment can't be used in the message channel API thus
+        // serializeToString for a string representation of the dom tree.
+        mustacheTemplate = this.xmls_.serializeToString(
+            this.templates_.findTemplate(element));
+      }
     }
     const data = dict({
       'data': elementAttrsAsJson,
-      'mustacheTemplate': mustacheTemplate,
       'sourceAmpComponent': this.sourceComponent_,
     });
+    data['successTemplate'] = opt_templates
+      ? this.xmls_.serializeToString(opt_templates['successTemplate'])
+      : mustacheTemplate;
+    data['errorTemplate'] = opt_templates
+      ? this.xmls_.serializeToString(opt_templates['errorTemplate'])
+      : null;
+
     return this.viewer_.sendMessageAwaitResponse(
         Capability.VIEWER_RENDER_TEMPLATE, data);
   }

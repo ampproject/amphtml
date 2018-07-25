@@ -483,6 +483,28 @@ export class AmpForm {
   }
 
   /**
+   * If present, finds and returns the success and error response templates.
+   * Note that we do not render the submitting state template and only
+   * deal with submit-success or submit-error.
+   * @return {!../../../src/ssr-template-helper.SsrTemplateDef}
+   */
+  getResponseTemplates_() {
+    const successContainer =
+        this.form_.querySelector('div[submit-success]');
+    const errorContainer = this.form_.querySelector('div[submit-error]');
+    let successTemplate;
+    let errorTemplate;
+    if (successContainer) {
+      successTemplate =
+          this.templates_.maybeFindTemplate(successContainer);
+    }
+    if (errorContainer) {
+      errorTemplate = this.templates_.maybeFindTemplate(errorContainer);
+    }
+    return {successTemplate, errorTemplate};
+  }
+
+  /**
    * Handles viewer render template failure.
    * @param {!JsonObject} error
    */
