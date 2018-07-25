@@ -308,6 +308,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
+  {
+    id: 'amp-img-blurry-placeholder',
+    name: 'Enables a blurry image placeholder as an amp-img loads',
+    spec: 'https://github.com/ampproject/amphtml/issues/15146',
+  },
 ];
 
 if (getMode().localDev) {
