@@ -61,7 +61,7 @@ function serve() {
     stdout: !quiet,
   };
 
-  if (argv.debug) {
+  if (argv.inspect) {
     Object.assign(config, {
       execMap: {
         js: 'node --inspect',
@@ -90,6 +90,7 @@ gulp.task(
         'quiet': '  Do not log HTTP requests (default: false)',
         'cache': '  Make local resources cacheable by the browser ' +
             '(default: false)',
+        'inspect': '  Run nodemon in `inspect` mode',
       },
     }
 );
