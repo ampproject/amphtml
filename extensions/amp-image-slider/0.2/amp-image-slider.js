@@ -100,9 +100,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.disabled_ = false; // for now, will be set later
-
-    /** @private {MutationObserver|null} */
-    this.observer_ = null;
   }
 
   /** @override */
@@ -176,28 +173,16 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
     }, ActionTrust.LOW);
 
-    this.observer_ = new MutationObserver(this.mutationCallback_.bind(this));
-
     return Promise.resolve();
   }
 
-  /**
-   * Mutation callback, observing only [disabled] changes currently
-   * @param {sequence<MutationRecord>} mutationList
-   */
-  mutationCallback_(mutationList) {
-    for (let i = 0; i < mutationList.length; i++) {
-      const mutation = mutationList[i];
-      if (mutation.type === 'attributes') {
-        if (mutation.attributeName === 'disabled') {
-          const newDisabled = this.element.hasAttribute('disabled');
-          if (newDisabled) {
-            this.disable_();
-          } else {
-            this.enable_();
-          }
-        }
-      }
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const newDisabled = mutations['disabled'];
+    if (newDisabled) {
+      this.disable_();
+    } else {
+      this.enable_();
     }
   }
 
@@ -656,26 +641,21 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.element.hasAttribute('disabled')) {
       this.disable_();
     }
-
-    this.observer_.observe(this.element, {attributes: true});
   }
 
   /** @override */
   unlayoutCallback() {
     this.unregisterEvents_();
-    this.observer_.disconnect();
   }
 
   /** @override */
   pauseCallback() {
     this.unregisterEvents_();
-    this.observer_.disconnect();
   }
 
   /** @override */
   resumeCallback() {
     this.registerEvents_();
-    this.observer_.observe(this.element, {attributes: true});
   }
 }
 
