@@ -50,46 +50,17 @@ function getValidatorFile(name) {
 tags: {  # ${name}
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "${name} extension .js script"
-  satisfies: "${name} extension .js script"
-  requires: "${name}"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "${name}"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "${name}"
+    version: "0.1"
+    version: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "${name}"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/${name}-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <${name}>
   html_format: AMP
   tag_name: "${name.toUpperCase()}"
-  satisfies: "${name}"
-  requires: "${name} extension .js script"
+  requires_extension: "${name}"
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
   amp_layout: {
