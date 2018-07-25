@@ -86,7 +86,6 @@ Must be set to `nodisplay`.
 When the `scrollable` attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
 
 **Note**: The `scrollable` attribute is not allowed when using `<amp-lightbox>` inside an AMPHTML ad. For details, read the [Using amp-lightbox in AMPHTML ads](#a4a) section.
-{% endcall %}
 
 ## Styling
 
