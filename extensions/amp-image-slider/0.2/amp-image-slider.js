@@ -68,25 +68,41 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {Element|null} */
     this.hint_ = null;
 
-    this.unlistenMouseDown = null;
-    this.unlistenMouseUp = null;
-    this.unlistenMouseMove = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseDown_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseUp_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseMove_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenTouchStart_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenTouchMove_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenTouchEnd_ = null;
+    /** @private {UnlistenDef|null} */
+    this.unlistenKeyDown_ = null;
 
-    this.unlistenTouchStart = null;
-    this.unlistenTouchMove = null;
-    this.unlistenTouchEnd = null;
-
-    this.unlistenKeyDown = null;
-
-    this.stepSize = this.element.hasAttribute('step-size') ?
+    /** @private {number} */
+    this.stepSize_ = this.element.hasAttribute('step-size') ?
       (Number(this.element.getAttribute('step-size')) || 0.1) : 0.1;
 
-    this.disableHint = this.element.hasAttribute('disable-hint');
-    this.hintInactiveInterval = 10000;
-    this.shouldHintLoop = false;
-    this.hintTimeoutHandle = null;
+    /** @private {boolean} */
+    this.disableHint_ = this.element.hasAttribute('disable-hint');
+    /** @private {number} */
+    this.hintInactiveInterval_ = 10000;
+    /** @private {boolean} */
+    this.shouldHintLoop_ = false;
+    /** @private {number|null} */
+    this.hintTimeoutHandle_ = null;
 
-    this.isHintHidden = false;
+    this.isHintHidden_ = false;
+
+    /** @private {boolean} */
+    this.disabled_ = false; // for now, will be set later
+
+    /** @private {MutationObserver|null} */
+    this.observer_ = null;
   }
 
   /** @override */
@@ -136,9 +152,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.container_.classList.add('i-amphtml-image-slider-container');
     this.element.appendChild(this.container_);
 
-    this.buildImages();
-    this.buildBar();
-    this.buildHint();
+    this.buildImages_();
+    this.buildBar_();
+    this.buildHint_();
 
     this.registerAction('seekTo', invocation => {
       const {args} = invocation;
@@ -155,18 +171,73 @@ export class AmpImageSlider extends AMP.BaseElement {
           value *= 0.01; // to 0-1 value
         }
         if (value !== undefined) {
-          this.updatePositions(value);
+          this.updatePositions_(value);
         }
       }
     }, ActionTrust.LOW);
+
+    this.observer_ = new MutationObserver(this.mutationCallback_.bind(this));
 
     return Promise.resolve();
   }
 
   /**
+   * Mutation callback, observing only [disabled] changes currently
+   * @param {sequence<MutationRecord>} mutationList
+   */
+  mutationCallback_(mutationList) {
+    for (let i = 0; i < mutationList.length; i++) {
+      const mutation = mutationList[i];
+      if (mutation.type === 'attributes') {
+        if (mutation.attributeName === 'disabled') {
+          const newDisabled = this.element.hasAttribute('disabled');
+          if (newDisabled) {
+            this.disable_();
+          } else {
+            this.enable_();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Enable user interaction
+   */
+  enable_() {
+    if (!this.disabled_) {
+      return;
+    }
+    if (!this.disableHint_) {
+      this.animateShowHint_();
+    }
+    this.registerEvents_();
+    this.disabled_ = false;
+  }
+
+  /**
+   * Disable user interaction
+   */
+  disable_() {
+    if (this.disabled_) {
+      return;
+    }
+
+    if (!this.disableHint_) {
+      // need to clear timeout handle inside
+      // thus not directly calling animateHideHint_
+      this.resetHintInterval_(true);
+      this.isHintHidden_ = true;
+    }
+
+    this.unregisterEvents_();
+    this.disabled_ = true;
+  }
+
+  /**
    * Build images
    */
-  buildImages() {
+  buildImages_() {
     // Hierarchy:
     // leftMask
     //   |_ leftAmpImage
@@ -204,7 +275,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Build bar
    */
-  buildBar() {
+  buildBar_() {
     this.container_.appendChild(this.bar_);
     this.bar_.appendChild(this.barStick_);
 
@@ -215,24 +286,25 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Build hint
    */
-  buildHint() {
+  buildHint_() {
     if (this.hint_) {
       this.hint_.parentNode.removeChild(this.hint_);
     } else {
       this.hint_ = this.doc_.createElement('div');
     }
-    if (this.disableHint) {
+    if (this.disableHint_) {
+      this.hint_ = null;
       return;
     }
 
     if (this.hint_.hasAttribute('hint-loop')) {
-      this.shouldHintLoop = true;
+      this.shouldHintLoop_ = true;
     }
 
     if (this.hint_.hasAttribute('hint-inactive-interval')) {
-      this.hintInactiveInterval =
+      this.hintInactiveInterval_ =
           Number(this.hint_.getAttribute('hint-inactive-interval')) ||
-          this.hintInactiveInterval;
+          this.hintInactiveInterval_;
     }
 
     const hintIcon = htmlFor(this.doc_)
@@ -255,36 +327,36 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Reset interval when the hint would resurface
    * @param {boolean=} opt_noRestart
    */
-  resetHintInterval(opt_noRestart) {
-    if (this.disableHint) {
+  resetHintInterval_(opt_noRestart) {
+    if (this.disableHint_) {
       return;
     }
 
-    if (!this.isHintHidden) {
-      this.animateHideHint();
+    if (!this.isHintHidden_) {
+      this.animateHideHint_();
     }
 
-    if (this.hintTimeoutHandle) {
-      clearTimeout(this.hintTimeoutHandle);
+    if (this.hintTimeoutHandle_ !== null) {
+      clearTimeout(this.hintTimeoutHandle_);
     }
 
     if (opt_noRestart === true) {
-      this.hintTimeoutHandle = null;
+      this.hintTimeoutHandle_ = null;
       return;
     }
 
-    this.hintTimeoutHandle = setTimeout(() => {
-      this.animateShowHint();
-    }, this.hintInactiveInterval);
+    this.hintTimeoutHandle_ = setTimeout(() => {
+      this.animateShowHint_();
+    }, this.hintInactiveInterval_);
   }
 
   /**
    * Animate show hint
    */
-  animateShowHint() {
+  animateShowHint_() {
     const interpolate = numeric(
         Number(getStyle(this.hint_, 'opacity')), 0.7);
-    this.isHintHidden = false;
+    this.isHintHidden_ = false;
     return Animation.animate(this.hint_, v => {
       setStyles(this.hint_, {
         opacity: interpolate(v),
@@ -295,41 +367,42 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Animate show hint
    */
-  animateHideHint() {
+  animateHideHint_() {
     const interpolate = numeric(
         Number(getStyle(this.hint_, 'opacity')), 0);
     return Animation.animate(this.hint_, v => {
       setStyles(this.hint_, {
         opacity: interpolate(v),
       });
-    }, 200).then(() => this.isHintHidden = true);
+    }, 200).then(() => this.isHintHidden_ = true);
   }
 
   /**
    * Drag start
    * @param {Event} e
    */
-  dragStart(e) {
+  onMouseDown_(e) {
     e.preventDefault();
     this.pointerMoveX_(e.pageX);
 
     // In case, clear up remnants
     // This is to prevent right mouse button down when left still down
-    this.unlisten_(this.unlistenMouseMove);
-    this.unlisten_(this.unlistenMouseUp);
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
 
-    this.unlistenMouseMove =
-        listen(this.win, 'mousemove', this.dragMove.bind(this));
-    this.unlistenMouseUp = listen(this.win, 'mouseup', this.dragEnd.bind(this));
+    this.unlistenMouseMove_ =
+        listen(this.win, 'mousemove', this.onMouseMove_.bind(this));
+    this.unlistenMouseUp_ =
+        listen(this.win, 'mouseup', this.onMouseUp_.bind(this));
 
-    this.resetHintInterval(true);
+    this.resetHintInterval_(true);
   }
 
   /**
    * Drag move
    * @param {Event} e
    */
-  dragMove(e) {
+  onMouseMove_(e) {
     e.preventDefault();
     this.pointerMoveX_(e.pageX);
   }
@@ -338,39 +411,39 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Drag end
    * @param {Event} e
    */
-  dragEnd(e) {
+  onMouseUp_(e) {
     e.preventDefault();
-    this.unlisten_(this.unlistenMouseMove);
-    this.unlisten_(this.unlistenMouseUp);
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
 
-    this.resetHintInterval(!this.shouldHintLoop);
+    this.resetHintInterval_(!this.shouldHintLoop_);
   }
 
   /**
    * Touch start
    * @param {Event} e
    */
-  touchStart(e) {
+  onTouchStart_(e) {
     e.stopPropagation();
     this.pointerMoveX_(e.touches[0].pageX);
 
     // In case, clear up remnants
-    this.unlisten_(this.unlistenTouchMove);
-    this.unlisten_(this.unlistenTouchEnd);
+    this.unlisten_(this.unlistenTouchMove_);
+    this.unlisten_(this.unlistenTouchEnd_);
 
-    this.unlistenTouchMove =
-        listen(this.win, 'touchmove', this.touchMove.bind(this));
-    this.unlistenTouchEnd =
-        listen(this.win, 'touchend', this.touchEnd.bind(this));
+    this.unlistenTouchMove_ =
+        listen(this.win, 'touchmove', this.onTouchMove_.bind(this));
+    this.unlistenTouchEnd_ =
+        listen(this.win, 'touchend', this.onTouchEnd_.bind(this));
 
-    this.resetHintInterval(true);
+    this.resetHintInterval_(true);
   }
 
   /**
    * Touch move
    * @param {Event} e
    */
-  touchMove(e) {
+  onTouchMove_(e) {
     e.stopPropagation();
     this.pointerMoveX_(e.touches[0].pageX);
   }
@@ -379,94 +452,95 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Touch end
    * @param {Event} e
    */
-  touchEnd(e) {
+  onTouchEnd_(e) {
     e.stopPropagation();
-    this.unlisten_(this.unlistenTouchMove);
-    this.unlisten_(this.unlistenTouchEnd);
+    this.unlisten_(this.unlistenTouchMove_);
+    this.unlisten_(this.unlistenTouchEnd_);
 
-    this.resetHintInterval(!this.shouldHintLoop);
+    this.resetHintInterval_(!this.shouldHintLoop_);
   }
 
   /**
    * On key down
    * @param {Event} e
    */
-  onKeyDown(e) {
+  onKeyDown_(e) {
     if (this.doc_.activeElement !== this.element) {
       return;
     }
 
-    this.resetHintInterval(!this.shouldHintLoop);
+    this.resetHintInterval_(!this.shouldHintLoop_);
 
     switch (e.key.toLowerCase()) {
       case 'arrowup':
       case 'arrowleft':
-        this.stepLeft();
+        this.stepLeft_();
         break;
       case 'arrowdown':
       case 'arrowright':
-        this.stepRight();
+        this.stepRight_();
         break;
       case 'pageup':
         e.preventDefault();
         e.stopPropagation();
-        this.stepLeft(true);
+        this.stepLeft_(true);
         break;
       case 'pagedown':
         e.preventDefault();
         e.stopPropagation();
-        this.stepRight(true);
+        this.stepRight_(true);
         break;
       case 'home':
         e.preventDefault();
         e.stopPropagation();
-        this.stepExactCenter();
+        this.stepExactCenter_();
         break;
     }
   }
 
   /**
    * Unlisten a listener. If null, does nothing
-   * @param {any} unlistenHandle
+   * @param {UnlistenDef|null} unlistenHandle
    * @private
    */
   unlisten_(unlistenHandle) {
     if (unlistenHandle) {
       unlistenHandle();
+      unlistenHandle = null;
     }
   }
 
   /**
    * Register events
    */
-  registerEvents() {
-    this.unlistenMouseDown =
-        listen(this.element, 'mousedown', this.dragStart.bind(this));
-    this.unlistenTouchStart =
-        listen(this.element, 'touchstart', this.touchStart.bind(this));
-    this.unlistenKeyDown =
-        listen(this.element, 'keydown', this.onKeyDown.bind(this));
+  registerEvents_() {
+    this.unlistenMouseDown_ =
+        listen(this.element, 'mousedown', this.onMouseDown_.bind(this));
+    this.unlistenTouchStart_ =
+        listen(this.element, 'touchstart', this.onTouchStart_.bind(this));
+    this.unlistenKeyDown_ =
+        listen(this.element, 'keydown', this.onKeyDown_.bind(this));
   }
 
   /**
    * Unregister events
    */
-  unregisterEvents() {
-    this.unlisten_(this.unlistenMouseDown);
-    this.unlisten_(this.unlistenMouseMove);
-    this.unlisten_(this.unlistenMouseUp);
+  unregisterEvents_() {
+    this.unlisten_(this.unlistenMouseDown_);
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
 
-    this.unlisten_(this.unlistenTouchStart);
-    this.unlisten_(this.unlistenTouchMove);
-    this.unlisten_(this.unlistenTouchEnd);
+    this.unlisten_(this.unlistenTouchStart_);
+    this.unlisten_(this.unlistenTouchMove_);
+    this.unlisten_(this.unlistenTouchEnd_);
 
-    this.unlisten_(this.unlistenKeyDown);
+    this.unlisten_(this.unlistenKeyDown_);
   }
 
   /**
    * Get current slider's percentage to the left
    */
-  getCurrentSliderPercentage() {
+  getCurrentSliderPercentage_() {
     const {left: barLeft} =
         this.bar_./*OK*/getBoundingClientRect();
     const {left: boxLeft, width: boxWidth}
@@ -479,32 +553,32 @@ export class AmpImageSlider extends AMP.BaseElement {
    * One step left
    * @param {boolean=} opt_toEnd
    */
-  stepLeft(opt_toEnd) {
+  stepLeft_(opt_toEnd) {
     if (opt_toEnd === true) {
-      this.updatePositions(0);
+      this.updatePositions_(0);
     } else {
-      this.updatePositions(this.limitPercentage(
-          this.getCurrentSliderPercentage() - this.stepSize));
+      this.updatePositions_(this.limitPercentage_(
+          this.getCurrentSliderPercentage_() - this.stepSize_));
     }
   }
 
   /**
    * Step to the center
    */
-  stepExactCenter() {
-    this.updatePositions(0.5);
+  stepExactCenter_() {
+    this.updatePositions_(0.5);
   }
 
   /**
    * One step right
    * @param {boolean=} opt_toEnd
    */
-  stepRight(opt_toEnd) {
+  stepRight_(opt_toEnd) {
     if (opt_toEnd === true) {
-      this.updatePositions(1);
+      this.updatePositions_(1);
     } else {
-      this.updatePositions(this.limitPercentage(
-          this.getCurrentSliderPercentage() + this.stepSize));
+      this.updatePositions_(this.limitPercentage_(
+          this.getCurrentSliderPercentage_() + this.stepSize_));
     }
   }
 
@@ -522,22 +596,22 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     const newPos = Math.max(leftBound, Math.min(pointerX, rightBound));
     const newPercentage = (newPos - leftBound) / width;
-    this.updatePositions(newPercentage);
+    this.updatePositions_(newPercentage);
   }
 
   /**
    * Update element positions based on percentage
    * @param {number} leftPercentage
    */
-  updatePositions(leftPercentage) {
-    leftPercentage = this.limitPercentage(leftPercentage);
+  updatePositions_(leftPercentage) {
+    leftPercentage = this.limitPercentage_(leftPercentage);
 
-    this.updateTranslateX(this.bar_, leftPercentage);
+    this.updateTranslateX_(this.bar_, leftPercentage);
 
-    this.updateTranslateX(this.leftMask_, leftPercentage - 1);
-    this.updateTranslateX(this.leftAmpImage_, 1 - leftPercentage);
+    this.updateTranslateX_(this.leftMask_, leftPercentage - 1);
+    this.updateTranslateX_(this.leftAmpImage_, 1 - leftPercentage);
     if (this.leftLabelWrapper_) {
-      this.updateTranslateX(this.leftLabelWrapper_, 1 - leftPercentage);
+      this.updateTranslateX_(this.leftLabelWrapper_, 1 - leftPercentage);
     }
   }
 
@@ -545,7 +619,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Limit percentage between 0 and 1
    * @param {number} percentage
    */
-  limitPercentage(percentage) {
+  limitPercentage_(percentage) {
     return Math.max(0, Math.min(percentage, 1));
   }
 
@@ -554,7 +628,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Element} element
    * @param {number} percentage
    */
-  updateTranslateX(element, percentage) {
+  updateTranslateX_(element, percentage) {
     setStyles(element, {
       transform: `translateX(${percentage * 100}%)`,
     });
@@ -576,22 +650,32 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.scheduleLayout(this.rightAmpImage_);
     }
 
-    this.registerEvents();
+    this.registerEvents_();
+
+    // disabled is done here instead
+    if (this.element.hasAttribute('disabled')) {
+      this.disable_();
+    }
+
+    this.observer_.observe(this.element, {attributes: true});
   }
 
   /** @override */
   unlayoutCallback() {
-    this.unregisterEvents();
+    this.unregisterEvents_();
+    this.observer_.disconnect();
   }
 
   /** @override */
   pauseCallback() {
-    this.unregisterEvents();
+    this.unregisterEvents_();
+    this.observer_.disconnect();
   }
 
   /** @override */
   resumeCallback() {
-    this.unregisterEvents();
+    this.registerEvents_();
+    this.observer_.observe(this.element, {attributes: true});
   }
 }
 

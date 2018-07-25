@@ -84,6 +84,8 @@
   </style>
   <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.2.js"></script>
   <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <!-- to make this work during testing, cp dist/ww.max.js to dist/ww.js -->
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -189,13 +191,54 @@
     </div>
 
     <h1>Tab + Keyboard</h1>
-    <p>Move step set to 20%, Home for Center, PageUp for Left, PageDown for right-label-center-xy</p>
+    <p>Move step set to 20%, Home for Center, PageUp for Left, PageDown for Right</p>
     <amp-image-slider tabindex="10" step-size="0.2" layout="responsive" width="1024" height="600">
       <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
       <div after class="label">AFTER</div>
     </amp-image-slider>
+
+    <h1>Toggle <code>disabled</code> (for user interaction, <code>seekTo</code> will still work)</h1>
+    <p>Toggling disabled with One-time hint (will be recreated on enable, but if keep enabled, would only appear once)</p>
+    <amp-image-slider id="disableDemo" tabindex="11" layout="responsive" width="1024" height="600" [disabled]="disableDemo.disabled">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:AMP.setState({disableDemo: {disabled: false}})">Enable</button>
+      <button on="tap:disableDemo.seekTo(percent=0)">Seek to Left</button>
+      <button on="tap:AMP.setState({disableDemo: {disabled: true}})">Disable</button>
+    </div>
+
+    <p>Toggling disabled with Hint Reappearing</p>
+    <amp-image-slider id="disableDemo1" tabindex="12" layout="responsive" width="1024" height="600" [disabled]="disableDemo1.disabled">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+      <div hint hint-loop hint-inactive-interval="1000"></div>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:AMP.setState({disableDemo1: {disabled: false}})">Enable</button>
+      <button on="tap:disableDemo1.seekTo(percent=0)">Seek to Left</button>
+      <button on="tap:AMP.setState({disableDemo1: {disabled: true}})">Disable</button>
+    </div>
+
+    <p>Toggling disabled with NO hint</p>
+    <amp-image-slider id="disableDemo2" tabindex="13" layout="responsive" width="1024" height="600" disable-hint [disabled]="disableDemo2.disabled">
+      <amp-img before src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img after src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:AMP.setState({disableDemo2: {disabled: false}})">Enable</button>
+      <button on="tap:disableDemo2.seekTo(percent=0)">Seek to Left</button>
+      <button on="tap:AMP.setState({disableDemo2: {disabled: true}})">Disable</button>
+    </div>
   </main>
 </body>
 </html>
