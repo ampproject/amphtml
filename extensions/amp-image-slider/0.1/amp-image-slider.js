@@ -83,6 +83,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {UnlistenDef|null} */
     this.unlistenKeyDown_ = null;
 
+    // Step size on keyboard action, 0.1 = 10%
     /** @private {number} */
     this.stepSize_ = this.element.hasAttribute('step-size') ?
       (Number(this.element.getAttribute('step-size')) || 0.1) : 0.1;
@@ -95,7 +96,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.shouldHintLoop_ = false;
     /** @private {number|null} */
     this.hintTimeoutHandle_ = null;
-
+    /** @private {boolean} */
     this.isHintHidden_ = false;
 
     /** @private {boolean} */
@@ -113,6 +114,8 @@ export class AmpImageSlider extends AMP.BaseElement {
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       if (child.tagName.toLowerCase() === 'amp-img') {
+        // First encountered = left image
+        // Second encountered = right image
         if (!this.leftAmpImage_) {
           this.leftAmpImage_ = child;
         } else if (!this.rightAmpImage_) {
@@ -132,7 +135,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     }
 
     if (!this.leftAmpImage_ || !this.rightAmpImage_) {
-      return null;
+      return null; // abort
     }
 
     if (!isExperimentOn(this.win, 'layers')) {
@@ -141,6 +144,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.setAsOwner(this.rightAmpImage_);
     }
 
+    // TODO(kqian): investigate if this container can be removed
+    // Depends on UI interaction decision
     this.container_.classList.add('i-amphtml-image-slider-container');
     this.element.appendChild(this.container_);
 
@@ -160,7 +165,7 @@ export class AmpImageSlider extends AMP.BaseElement {
           value = args['percent'];
           user().assertNumber(value,
               'percent to seek to must be a number');
-          value *= 0.01; // to 0-1 value
+          value *= 0.01; // percentage to 0-1 value
         }
         if (value !== undefined) {
           this.updatePositions_(value);
@@ -175,9 +180,9 @@ export class AmpImageSlider extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const newDisabled = mutations['disabled'];
     if (newDisabled) {
-      this.disable_();
+      this.disable_(); // this.disabled_ is set in this call
     } else {
-      this.enable_();
+      this.enable_(); // this.disabled_ is set in this call
     }
   }
 
@@ -188,6 +193,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (!this.disabled_) {
       return;
     }
+    // Show hint if needed
     if (!this.disableHint_) {
       this.animateShowHint_();
     }
@@ -202,14 +208,13 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.disabled_) {
       return;
     }
-
+    // Hide hint if needed
     if (!this.disableHint_) {
       // need to clear timeout handle inside
       // thus not directly calling animateHideHint_
-      this.resetHintInterval_(true);
+      this.resetHintInterval_(true); // no restart
       this.isHintHidden_ = true;
     }
-
     this.unregisterEvents_();
     this.disabled_ = true;
   }
@@ -304,7 +309,10 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Reset interval when the hint would resurface
+   * Reset interval when the hint would reappear
+   * Call this when an user interaction is done
+   * Specify opt_noRestart to true if no intend to start a timeout for
+   * showing hint again.
    * @param {boolean=} opt_noRestart
    */
   resetHintInterval_(opt_noRestart) {
@@ -325,7 +333,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       return;
     }
 
-    this.hintTimeoutHandle_ = setTimeout(() => {
+    // TODO(kqian): getting setTimeout from this.win might be necessary?
+    this.hintTimeoutHandle_ = this.win.setTimeout(() => {
       this.animateShowHint_();
     }, this.hintInactiveInterval_);
   }
@@ -445,6 +454,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   onKeyDown_(e) {
+    // Check if current element has focus
     if (this.doc_.activeElement !== this.element) {
       return;
     }
@@ -461,6 +471,7 @@ export class AmpImageSlider extends AMP.BaseElement {
         this.stepRight_();
         break;
       case 'pageup':
+        // prevent scrolling the page
         e.preventDefault();
         e.stopPropagation();
         this.stepLeft_(true);
@@ -479,7 +490,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Unlisten a listener. If null, does nothing
+   * Unlisten a listener and clear. If null, does nothing
    * @param {UnlistenDef|null} unlistenHandle
    * @private
    */
@@ -524,7 +535,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     const {left: barLeft} =
         this.bar_./*OK*/getBoundingClientRect();
     const {left: boxLeft, width: boxWidth}
-    //    = this.getLayoutBox();
+    //    = this.getLayoutBox(); // could be better with less overhead
         = this.container_./*OK*/getBoundingClientRect();
     return (barLeft - boxLeft) / boxWidth;
   }
@@ -534,6 +545,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {boolean=} opt_toEnd
    */
   stepLeft_(opt_toEnd) {
+    // To the very end of left
     if (opt_toEnd === true) {
       this.updatePositions_(0);
     } else {
@@ -554,6 +566,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {boolean=} opt_toEnd
    */
   stepRight_(opt_toEnd) {
+    // To the very end of right
     if (opt_toEnd === true) {
       this.updatePositions_(1);
     } else {
@@ -625,6 +638,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
 
+    // No effect if layer enabled
     if (this.leftAmpImage_ && this.rightAmpImage_) {
       this.scheduleLayout(this.leftAmpImage_);
       this.scheduleLayout(this.rightAmpImage_);
@@ -632,7 +646,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.registerEvents_();
 
-    // disabled is done here instead
+    // disabled is checked here instead, after all construction is done
     if (this.element.hasAttribute('disabled')) {
       this.disable_();
     }
