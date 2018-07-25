@@ -58,6 +58,21 @@ For showing images in a lightbox, there's also the [`<amp-image-lightbox>`](http
 
 ## Attributes
 
+##### animate-in (optional)
+
+Defines the style of animation for opening the lightbox. By default, this will
+be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom` and
+`fly-in-top`.
+
+⚠️ Note that the `fly-in-*` presets will modify the `transform` property of the
+`amp-lightbox` element. Do not rely on transforming the `amp-lightbox` element
+directly. If you need to apply a transform, set it on a nested element instead.
+
+##### close-button (required on AMP4ADS)
+
+Renders a close button header at the top of the lightbox. This attribute is only
+required and valid when [using on AMP4ADS](#a4a).
+
 ##### id (required)
 
 A unique identifer for the lightbox.
@@ -70,15 +85,8 @@ Must be set to `nodisplay`.
 
 When the `scrollable` attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
 
-##### animate-in (optional)
+⚠️ Note that `scrollable` is not allowed when using `<amp-lightbox>` inside an AMP4ADS creative. [More information.](#a4a)
 
-Defines the style of animation for opening the lightbox. By default, this will
-be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom` and
-`fly-in-top`.
-
-⚠️ Note that the `fly-in-*` presets will modify the `transform` property of the
-`amp-lightbox` element. Do not rely on transforming the `amp-lightbox` element
-directly. If you need to apply a transform, set it on a nested element instead.
 
 ## Styling
 
@@ -101,6 +109,42 @@ The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to t
     <td>Closes the lightbox.</td>
   </tr>
 </table>
+
+## <a id="a4a"></a> Using `amp-lightbox` in AMP4ADS
+
+{% call callout('Read on', type='read') %}
+`amp-lightbox` on AMP4ADS is experimental and under active development. [Turn on the `amp-lightbox-a4a-proto` experiment](http://cdn.ampproject.org/experiments.html) to use it.
+{% endcall %}
+
+There are a few differences using amp-lightbox in normal AMP documents vs. [ads written in AMP.](../amp-a4a/amp-a4a-format.md)
+
+Mainly, the close-button attribute is required in AMP4ADS. This attribute will cause a header to be rendered at the top of your lightbox, which contains a close button and a label displaying "Ad". This enforcement has two reasons:
+
+- Sets a consistent and predictable user-experience for AMP ads.
+
+- Ensures that an exit point for the lightbox always exists, otherwise the creative could effectlively hijack the host document content via a lightbox.
+
+The close-button attribute is required and only allowed in AMP4ADS. In regular AMP, you can render a close button wherever you need as part of the `<amp-lightbox>` content.
+
+Secondly, scrollable lightboxes are not allowed in AMP4ADS.
+
+The background of the `<body>` element for AMP4ADS documents containing a lightbox is also set to transparent. See below for more information.
+
+### Transparent background
+
+When using `<amp-lightbox>` in AMP4ADS, the background of your `<body>` element will become transparent. This is because the AMP runtime will resize and realign your creative's content before the lightbox gets expanded. This is done to prevent a visual "jump" of the creative while the lightbox opens. If your creative needs a background, set it on an intermediate container (like a full-size `<div>`) instead of the `<body>`.
+
+When the ad is running in a 3p environment (for example, AMP inabox), the creative will be centered relative to the viewport and then expanded. This is because 3p iframes need to rely on a postMessage API in order to enable features like frame resizing, which is asynchronous, so centering the creative first allows us to employ a smooth transition without visual jumps.
+
+Here we can see how the transition looks on the two different scenarios, with the attribute `animate-in="fly-in-bottom"` on the lightbox element.
+
+#### On friendly iframes (e.g. coming from the AMP cache)
+
+![](../../spec/img/lightbox-ad-fie.gif)
+
+#### On 3p iframes (e.g. AMP inabox)
+
+![](../../spec/img/lightbox-ad-3p.gif)
 
 ## Validation
 
