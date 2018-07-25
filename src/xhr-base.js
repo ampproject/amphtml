@@ -88,8 +88,7 @@ export class XhrBase {
     // TODO(alabiaga): This should be investigated and fixed
     /** @private {?./service/ampdoc-impl.AmpDoc} */
 
-    this.ampdocSingle_ =
-        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
+    this.ampdocSingle_ = ampdocService.isSingleDoc() || null;
   }
 
   /**
@@ -108,7 +107,7 @@ export class XhrBase {
    * @protected
    * @return {!Promise<*>}
    */
-  fetchAmpCors_(input, init = {}) {
+  fetchAmpCors_(input, init) {
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
 
     // In particular, Firefox does not tolerate `null` values for
@@ -120,17 +119,14 @@ export class XhrBase {
         'Only credentials=include|omit support: %s', creds);
     // Do not append __amp_source_origin if explicitly disabled.
     if (init.ampCors !== false) {
-      input = this.getCorsUrl(this.win, input);
+      input = getCorsUrl(this.win, input);
     } else {
-      init.requireAmpResponseSourceOrigin = false;
+      init.ampCors = true;
     }
-    if (init.requireAmpResponseSourceOrigin === true) {
-      dev().error('XHR',
-          'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
-    }
-    if (init.requireAmpResponseSourceOrigin === undefined) {
-      init.requireAmpResponseSourceOrigin = true;
-    }
+
+    dev().assert('requireAmpResponseSourceOrigin' in init,
+        'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
+
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
     const currentOrigin = getWinOrigin(this.win);
@@ -144,6 +140,11 @@ export class XhrBase {
     return this.fetchFromNetwork_(input, init).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
+
+      user().assert(init.ampCors && !allowSourceOriginHeader,
+          'Response must contain the'
+          + ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
+
       if (allowSourceOriginHeader) {
         const sourceOrigin = getSourceOrigin(this.win.location.href);
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
@@ -152,11 +153,6 @@ export class XhrBase {
             `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
-      } else if (init.requireAmpResponseSourceOrigin) {
-        // If the `AMP-Access-Control-Allow-Source-Origin` header is not
-        // returned but required, return error.
-        user().assert(false, 'Response must contain the' +
-            ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
     }, reason => {
@@ -170,10 +166,9 @@ export class XhrBase {
    * @param {string} unusedInput
    * @param {!FetchInitDef} unusedInit
    * @return {!Promise}
-   * @protected
+   * @abstract
    */
   fetchFromNetwork_(unusedInput, unusedInit) {
-    throw new Error('Fetch from network not is not implemented');
   }
 
   /**
@@ -206,13 +201,13 @@ export class XhrBase {
     }
     const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
     const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
-    const isDevMode = getMode(this.win).development;
     if (!docOptedIn) {
       return whenFirstVisible;
     }
     return whenFirstVisible.then(() => {
       return viewer.isTrustedViewer();
     }).then(viewerTrusted => {
+      const isDevMode = getMode(this.win).development;
       if (!viewerTrusted && !isDevMode) {
         return;
       }
@@ -267,18 +262,6 @@ export class XhrBase {
     dev().assert(this.win.Response, 'Response object not present on window');
     user().assert(isObject(response), 'Object expected: %s', response);
     return new this.win.Response(response['body'], response['init']);
-  }
-
-  /**
-   * Add "__amp_source_origin" query parameter to the URL. Ideally, we'd be
-   * able to set a header (e.g. AMP-Source-Origin), but this will force
-   * preflight request on all CORS request.
-   * @param {!Window} win
-   * @param {string} url
-   * @return {string}
-   */
-  getCorsUrl(win, url) {
-    return getCorsUrl(this.win, url);
   }
 
   /**

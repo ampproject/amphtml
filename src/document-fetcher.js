@@ -66,10 +66,10 @@ export class DocumentFetcher extends XhrBase {
   xhrRequest_(input, init) {
     return new Promise((resolve, reject) => {
       this.xhr_.open(init.method || 'GET', input, true);
-      if (init.credentials == 'include') {
-        this.xhr_.withCredentials = true;
-      }
+      this.xhr_.withCredentials = (init.credentials == 'include');
       this.xhr_.responseType = 'document';
+      // Incoming headers are in fetch format,
+      // so we need to convert them into xhr.
       if (init.headers) {
         for (const header in init.headers) {
           this.xhr_.setRequestHeader(header, init.headers[header]);
@@ -101,7 +101,7 @@ export class DocumentFetcher extends XhrBase {
         }
       };
       this.xhr_.onerror = () => {
-        reject(user().createExpectedError('Network failure'));
+        reject(user().createExpectedError('Request failure'));
       };
       this.xhr_.onabort = () => {
         reject(user().createExpectedError('Request aborted'));
