@@ -214,28 +214,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // ads/google/test/test-utils.js
     });
 
-    it('should load delayed impression amp-pixels', () => {
-      const fireDelayedImpressionsSpy =
-          sandbox.spy(impl, 'fireDelayedImpressions');
-      expect(impl.extractSize({
-        get(name) {
-          switch (name) {
-            case 'X-AmpImps':
-              return 'https://a.com?a=b,https://b.com?c=d';
-            default:
-              return undefined;
-          }
-        },
-        has(name) {
-          return !!this.get(name);
-        },
-      })).to.deep.equal(size);
-      expect(fireDelayedImpressionsSpy.withArgs(
-          'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
-    });
-    it('shouldnt load delayed impression amp-pixels with fluid', () => {
-      const fireDelayedImpressionsSpy =
-          sandbox.spy(impl, 'fireDelayedImpressions');
+    it('should load delayed impression amp-pixels with fluid', () => {
       impl.isFluidRequest_ = true;
       expect(impl.extractSize({
         get(name) {
@@ -250,13 +229,11 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       })).to.deep.equal(size);
-      expect(fireDelayedImpressionsSpy.withArgs(
-          'https://a.com?a=b,https://b.com?c=d')).to.not.be.called;
+      expect(impl.fluidImpressionUrl_).to
+          .equal('https://a.com?a=b,https://b.com?c=d');
     });
-    it('should load delayed impression amp-pixels with fluid + multi-size',
+    it('should not load delayed impression amp-pixels with fluid + multi-size',
         () => {
-          const fireDelayedImpressionsSpy =
-              sandbox.spy(impl, 'fireDelayedImpressions');
           sandbox.stub(impl, 'handleResize_');
           impl.isFluid_ = true;
           expect(impl.extractSize({
@@ -274,8 +251,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
               return !!this.get(name);
             },
           })).to.deep.equal(size);
-          expect(fireDelayedImpressionsSpy.withArgs(
-              'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
+          expect(impl.fluidImpressionUrl_).to.not.be.ok;
         });
     it('should consume pageview state tokens when header is present',
         () => {
@@ -1060,6 +1036,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(impl.adUrl_).to.be.ok;
         expect(impl.adUrl_.length).to.be.ok;
       });
+    });
+
+    it('should force layout to `fixed` if `responsive`', () => {
+      impl.element.setAttribute('layout', 'responsive');
+      impl.element.setAttribute('data-multi-size', '320x50');
+      impl.populateAdUrlState();
+      expect(impl.element.getAttribute('layout')).to.equal('fixed');
+    });
+
+    it('should not change layout if not `responsive`', () => {
+      impl.element.setAttribute('layout', 'not-responsive');
+      impl.element.setAttribute('data-multi-size', '320x50');
+      impl.populateAdUrlState();
+      expect(impl.element.getAttribute('layout')).to.equal('not-responsive');
     });
   });
 

@@ -896,7 +896,10 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     return bookend.loadConfigAndMaybeRenderBookend().then(config => {
       // Still builds rest of valid components.
-      expect(config.components[0]).to.deep.equal(userJson.components[1]);
+
+      // We use config.components[1] because config.components[0] is a heading
+      // that we prepend when there is no heading present in the user config.
+      expect(config.components[1]).to.deep.equal(userJson.components[1]);
     });
   });
 });

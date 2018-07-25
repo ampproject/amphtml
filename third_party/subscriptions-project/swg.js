@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.21 */
+/** Version: 0.1.22.22 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -38,51 +38,51 @@ import { ActivityPorts } from 'web-activities/activity-ports';
  * @return {T} The value of shouldBeTrueish.
  * @template T
  */
- function assert(shouldBeTrueish, opt_message, var_args) {
-   let firstElement;
-   if (!shouldBeTrueish) {
-     const message = opt_message || 'Assertion failed';
-     const splitMessage = message.split('%s');
-     const first = splitMessage.shift();
-     let formatted = first;
-     const messageArray = [];
-     pushIfNonEmpty(messageArray, first);
-     for (let i = 2; i < arguments.length; i++) {
-       const val = arguments[i];
-       if (val && val.tagName) {
-         firstElement = val;
-       }
-       const nextConstant = splitMessage.shift();
-       messageArray.push(val);
-       pushIfNonEmpty(messageArray, nextConstant.trim());
-       formatted += toString(val) + nextConstant;
-     }
-     const e = new Error(formatted);
-     e.fromAssert = true;
-     e.associatedElement = firstElement;
-     e.messageArray = messageArray;
-     throw e;
-   }
-   return shouldBeTrueish;
- }
+function assert(shouldBeTrueish, opt_message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    const message = opt_message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
 
 /**
  * @param {!Array} array
  * @param {*} val
  */
- function pushIfNonEmpty(array, val) {
-   if (val != '') {
-     array.push(val);
-   }
- }
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
 
- function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-   if (val && val.nodeType == 1) {
-     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-   }
-   return /** @type {string} */ (val);
- }
+function toString(val) {
+// Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
 
 
 
@@ -385,6 +385,7 @@ function resetStyles(element, properties) {
 /**
  * Resets all the styles of an element to a given value. Defaults to null.
  * The valid values are 'inherit', 'initial', 'unset' or null.
+ * @param {!Element} element
  */
 function resetAllStyles(element) {
   setImportantStyles(element, defaultStyles);
@@ -406,7 +407,8 @@ function addAttributesToElement(element, attributes) {
   for (const attr in attributes) {
     if (attr == 'style') {
       setStyles(element,
-        /** @type !Object<string, string|boolean|number> */ (attributes[attr]));
+           /** @type !Object<string, string|boolean|number> */
+           (attributes[attr]));
     } else {
       element.setAttribute(attr,
           /** @type {string|boolean|number} */ (attributes[attr]));
@@ -884,9 +886,10 @@ class View {
     // Do nothing by default. Override if needed.
   }
 
-  /*
+  /**
    * Accept the result.
    * @return {!Promise}
+   * @abstract
    */
   whenComplete() {}
 
@@ -1315,7 +1318,7 @@ class UserData {
   constructor(idToken, data) {
     /** @const {string} */
     this.idToken = idToken;
-    /** @private @const {!Object} */
+    /** @const {!Object} */
     this.data = data;
 
     /** @const {string} */
@@ -1641,7 +1644,6 @@ function tryParseJson(json, opt_onFailed) {
  * Provides helper methods to decode and verify JWT tokens.
  */
 class JwtHelper {
-
   constructor() {
   }
 
@@ -1661,6 +1663,9 @@ class JwtHelper {
    */
   decodeInternal_(encodedToken) {
     // See https://jwt.io/introduction/
+    /**
+     * Throws error about invalid token.
+     */
     function invalidToken() {
       throw new Error(`Invalid token: "${encodedToken}"`);
     }
@@ -2246,7 +2251,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.21',
+    '_client': 'SwG 0.1.22.22',
   });
 }
 
@@ -2323,9 +2328,6 @@ class PayStartFlow {
   constructor(deps, sku) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
-
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -2416,9 +2418,6 @@ class PayCompleteFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {!../runtime/callbacks.Callbacks} */
-    this.callbacks_ = deps.callbacks();
-
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
 
@@ -2479,7 +2478,7 @@ class PayCompleteFlow {
 
 
 /**
-  *@param {!Window} win
+ * @param {!Window} win
  * @param {!web-activities/activity-ports.ActivityPort} port
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
@@ -2703,7 +2702,7 @@ class DeferredAccountFlow {
         purchaseData,
         userData,
         () => Promise.resolve()  // completeHandler doesn't matter in this case
-        ));
+    ));
     return response;
   }
 }
@@ -2848,6 +2847,7 @@ class LoadingView {
     /** @private @const {!Document} */
     this.doc_ = doc;
 
+    /** @private @const {!Element} */
     this.loadingContainer_ =
         createElement(this.doc_, 'swg-loading-container', {});
 
@@ -2869,21 +2869,21 @@ class LoadingView {
     return this.loadingContainer_;
   }
 
-  /*
+  /**
    * Shows the loading indicator within the container element.
    */
   show() {
     this.loadingContainer_.style.removeProperty('display');
   }
 
-  /*
+  /**
    * Hides the loading indicator within the container element.
    */
   hide() {
     this.loadingContainer_.style.setProperty('display', 'none', 'important');
   }
 
-  /*
+  /**
    * Populates the loading indivicator. The populated element
    * can be added in any view, when required.
    * @private
@@ -3374,7 +3374,7 @@ class Dialog {
 
   /**
    * Removes previouly added bottom padding from the document.
-   * @private`
+   * @private
    */
   removePaddingToHtml_() {
     this.doc_.getRootElement().style.removeProperty('padding-bottom');
@@ -3794,7 +3794,7 @@ class Toast {
         });
   }
 
-    /**
+  /**
    * @param {function():!Promise} callback
    * @return {!Promise}
    * @private
@@ -4264,6 +4264,10 @@ class LinkCompleteFlow {
    * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
+    /**
+     * Handler function.
+     * @param {!web-activities/activity-ports.ActivityPort} port
+     */
     function handler(port) {
       deps.entitlementsManager().blockNextNotification();
       deps.callbacks().triggerLinkProgress();
@@ -4424,11 +4428,11 @@ class LinkSaveFlow {
     };
 
     this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/linksaveiframe'),
-      feArgs(iframeArgs),
-      /* shouldFadeBody */ false
+        this.win_,
+        this.activityPorts_,
+        feUrl('/linksaveiframe'),
+        feArgs(iframeArgs),
+        /* shouldFadeBody */ false
     );
     this.activityIframeView_.onMessage(data => {
       if (data['getLinkingInfo']) {
@@ -4480,7 +4484,7 @@ class LinkSaveFlow {
 
 
 
-class LoginPromptFlow {
+class LoginPromptApi {
   /**
    * @param {!./deps.DepsDef} deps
    */
@@ -4504,10 +4508,12 @@ class LoginPromptFlow {
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
-        feUrl('/loginpromptiframe'),
+        feUrl('/loginiframe'),
         feArgs({
           publicationId: deps.pageConfig().getPublicationId(),
           productId: deps.pageConfig().getProductId(),
+          // First ask the user if they want us to log them in.
+          userConsent: true,
           // TODO(chenshay): Pass entitlements value here.
         }),
         /* shouldFadeBody */ true
@@ -4515,7 +4521,7 @@ class LoginPromptFlow {
   }
 
   /**
-   * Continues the Login flow (after waiting).
+   * Prompts the user to login.
    * @return {!Promise}
    */
   start() {
@@ -4567,10 +4573,12 @@ class LoginNotificationApi {
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
-        feUrl('/loginnotificationiframe'),
+        feUrl('/loginiframe'),
         feArgs({
           publicationId: deps.pageConfig().getPublicationId(),
           productId: deps.pageConfig().getProductId(),
+          // No need to ask the user. Just tell them you're logging them in.
+          userConsent: false,
           // TODO(chenshay): Pass entitlements value here.
         }),
         /* shouldFadeBody */ true
@@ -5341,7 +5349,7 @@ class ConfiguredRuntime {
   /** @override */
   showLoginPrompt() {
     return this.documentParsed_.then(() => {
-      return new LoginPromptFlow(this).start();
+      return new LoginPromptApi(this).start();
     });
   }
 

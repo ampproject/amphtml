@@ -456,7 +456,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (this.element.getAttribute('layout') == 'responsive') {
         // TODO(levitzky) Define the behavior and remove this warning.
         user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
-            'currently not well defined. Proceed with caution.');
+            'currently not well defined. Forcefully overriding layout to ' +
+            '`fixed`.');
+        this.element.setAttribute('layout', 'fixed');
       }
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation') || 'true';
@@ -701,11 +703,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       size = this.getSlotSize();
     }
     // If this is a multi-size creative, fire delayed impression now. If it's
-    // fluid, wait until after resize.
+    // fluid, wait until after resize happens.
     if (this.isFluidRequest_ && !this.returnedSize_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
-    } else {
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
     }
 
     // If the response included a pageview state token, check for an existing

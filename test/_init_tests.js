@@ -156,6 +156,18 @@ class TestConfig {
     return this.skip(this.runOnIos);
   }
 
+  skipIfPropertiesObfuscated() {
+    return this.skip(function() {
+      return window.__karma__.config.amp.propertiesObfuscated;
+    });
+  }
+
+  skipSinglePass() {
+    return this.skip(function() {
+      return window.__karma__.config.amp.singlePass;
+    });
+  }
+
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;

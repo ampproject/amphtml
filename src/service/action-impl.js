@@ -20,9 +20,10 @@ import {RAW_OBJECT_ARGS_KEY} from '../action-constants';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
+import {dict, hasOwn, map} from '../utils/object';
+import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
-import {hasOwn, map} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -935,9 +936,9 @@ export function dereferenceExprsInArgs(args, event) {
   if (!args) {
     return args;
   }
-  const data = map();
-  if (event && event.detail) {
-    data['event'] = event.detail;
+  const data = dict();
+  if (event && getDetail(/** @type {!Event} */ (event))) {
+    data['event'] = getDetail(/** @type {!Event} */ (event));
   }
   const applied = map();
   Object.keys(args).forEach(key => {

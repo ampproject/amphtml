@@ -19,15 +19,9 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {parser} from './bind-expr-impl';
+import {bindParser as parser} from './bind-expr-impl';
 
 const TAG = 'amp-bind';
-
-/**
- * Possible types of a Bind expression evaluation.
- * @typedef {(null|boolean|string|number|Array|Object)}
- */
-export let BindExpressionResultDef;
 
 /**
  * Maximum number of nodes in an expression AST.
