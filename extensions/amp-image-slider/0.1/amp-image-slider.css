@@ -49,8 +49,8 @@
   overflow: hidden;
 }
 
-amp-image-slider > amp-img > img {
-  object-fit: contain;
+amp-image-slider amp-img > img {
+  object-fit: cover;
 }
 
 .i-amphtml-image-slider-over-image {
@@ -128,30 +128,6 @@ amp-image-slider > amp-img > img {
 .i-amphtml-image-slider-right-label {
   position: absolute;
   right: 0;
-}
-
-.i-amphtml-image-slider-hint {
-  cursor: ew-resize;
-  position: absolute;
-
-  margin: auto;
-
-  width: 9em;
-  height: 9em;
-  border-radius: 50%;
-  color: white;
-
-  top: 0;
-  bottom: 0;
-
-  font-weight: bold;
-
-  transform: translate(-50%);
-  z-index: 3;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .i-amphtml-image-slider-hint {
