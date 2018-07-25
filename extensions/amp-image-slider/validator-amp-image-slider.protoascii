@@ -60,15 +60,6 @@ tags: {  # <amp-image-slider>
     child_tag_name_oneof: "DIV"
   }
 }
-tags: {  # <amp-image-slider> > <amp-img>
-  html_format: AMP
-  html_format: EXPERIMENTAL
-  tag_name: "AMP-IMG"
-  spec_name: "amp-image-slider > amp-img"
-  mandatory_parent: "AMP-IMAGE-SLIDER"
-  attrs: { name: "before" value: "" }
-  attrs: { name: "after" value: "" }
-}
 tags: {  # <amp-image-slider> > <div>
   html_format: AMP
   html_format: EXPERIMENTAL

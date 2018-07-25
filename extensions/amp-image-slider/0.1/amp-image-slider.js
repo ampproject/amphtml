@@ -112,44 +112,22 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
-      // if (child.tagName.toLowerCase() === 'amp-img') {
-      //   if (!this.leftAmpImage_) {
-      //     this.leftAmpImage_ = child;
-      //   } else if (!this.rightAmpImage_) {
-      //     this.rightAmpImage_ = child;
-      //   }
-      // }
+      if (child.tagName.toLowerCase() === 'amp-img') {
+        if (!this.leftAmpImage_) {
+          this.leftAmpImage_ = child;
+        } else if (!this.rightAmpImage_) {
+          this.rightAmpImage_ = child;
+        }
+      }
 
-      // if (child.tagName.toLowerCase() === 'div') {
-      //   if (child.hasAttribute('before')) {
-      //     this.leftLabel_ = child;
-      //   } else if (child.hasAttribute('after')) {
-      //     this.rightLabel_ = child;
-      //   } else if (child.hasAttribute('hint')) {
-      //     this.hint_ = child;
-      //   }
-      // }
-      if (child.hasAttribute('before')) {
-        switch (child.tagName.toLowerCase()) {
-          case 'amp-img':
-            this.leftAmpImage_ = child;
-            break;
-          case 'div':
-            this.leftLabel_ = child;
-            break;
+      if (child.tagName.toLowerCase() === 'div') {
+        if (child.hasAttribute('before')) {
+          this.leftLabel_ = child;
+        } else if (child.hasAttribute('after')) {
+          this.rightLabel_ = child;
+        } else if (child.hasAttribute('hint')) {
+          this.hint_ = child;
         }
-      } else if (child.hasAttribute('after')) {
-        switch (child.tagName.toLowerCase()) {
-          case 'amp-img':
-            this.rightAmpImage_ = child;
-            break;
-          case 'div':
-            this.rightLabel_ = child;
-            break;
-        }
-      } else if (child.hasAttribute('hint') &&
-          child.tagName.toLowerCase() === 'div') {
-        this.hint_ = child;
       }
     }
 
