@@ -43,6 +43,8 @@ app.use('/compose-doc', function(req, res) {
       experiments + '">';
     experimentString = '"' + experiments.split(',').join('","') + '"';
   }
+  const {css} = req.query;
+  const cssTag = css ? `<style amp-custom>${css}</style>` : '';
 
   res.send(`
 <!doctype html>
@@ -63,7 +65,7 @@ app.use('/compose-doc', function(req, res) {
   <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>
   <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">
   ${extensionScripts}
-  <style amp-custom>${req.query.css}</style>
+  ${cssTag}
 </head>
 <body>
 ${req.query.body}
