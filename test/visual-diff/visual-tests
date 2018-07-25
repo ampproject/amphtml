@@ -395,11 +395,9 @@
       "loading_complete_css": ["amp-jwplayer iframe.i-amphtml-fill-content"]
     },
     {
-      "flaky": true,
-      // Embedded video occasionally takes too long to load, resulting in either a video placeholder or a blank box
-      // e.g., https://percy.io/ampproject/danielrozenberg/builds/844624/view/48561819/1400?mode=diff&browser=firefox&snapshot=48561819
       "url": "examples/visual-tests/amp-by-example/components/amp-kaltura-player/index.html",
-      "name": "amp-kaltura-player - Amp By Example"
+      "name": "amp-kaltura-player - Amp By Example",
+      "loading_complete_css": ["amp-kaltura-player iframe.i-amphtml-fill-content"]
     },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-lightbox/index.html",
