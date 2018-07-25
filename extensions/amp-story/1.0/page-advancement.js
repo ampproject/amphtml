@@ -263,32 +263,12 @@ class ManualAdvancement extends AdvancementConfig {
   constructor(element) {
     super();
     this.element_ = element;
+    /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
+    this.sections_ = null;
+    this.initializeSections_();
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
     this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
-
-    if (element.ownerDocument.defaultView) {
-      /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-      this.storeService_ =
-        Services.storyStoreService(element.ownerDocument.defaultView);
-    }
-
-    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
-    this.sections_ = {
-      // Width and navigation direction of each section depend on whether the
-      // document is RTL or LTR.
-      left: {
-        widthRatio: rtlState ?
-          NEXT_SCREEN_AREA_RATIO : PREVIOUS_SCREEN_AREA_RATIO,
-        direction: rtlState ?
-          TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
-      },
-      right: {
-        widthRatio: rtlState ?
-          PREVIOUS_SCREEN_AREA_RATIO : NEXT_SCREEN_AREA_RATIO,
-        direction: rtlState ?
-          TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
-      },
-    };
   }
 
   /** @override */
@@ -309,6 +289,45 @@ class ManualAdvancement extends AdvancementConfig {
   /** @override */
   getProgress() {
     return 1.0;
+  }
+
+  /**
+   * Sets width and direction of each section of the page depending on whether
+   * the document is RTL or LTR.
+   */
+  initializeSections_() {
+    if (this.element_ && this.element_.ownerDocument.defaultView) {
+      this.storeService_ =
+        Services.storyStoreService(this.element_.ownerDocument.defaultView);
+
+      const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+      this.sections_ = {
+        left: {
+          widthRatio: rtlState ?
+            NEXT_SCREEN_AREA_RATIO : PREVIOUS_SCREEN_AREA_RATIO,
+          direction: rtlState ?
+            TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
+        },
+        right: {
+          widthRatio: rtlState ?
+            PREVIOUS_SCREEN_AREA_RATIO : NEXT_SCREEN_AREA_RATIO,
+          direction: rtlState ?
+            TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
+        },
+      };
+    } else {
+      // Fallback, initialize sections as LTR.
+      this.sections_ = {
+        left: {
+          widthRatio: PREVIOUS_SCREEN_AREA_RATIO,
+          direction: TapNavigationDirection.PREVIOUS,
+        },
+        right: {
+          widthRatio: NEXT_SCREEN_AREA_RATIO,
+          direction: TapNavigationDirection.NEXT,
+        },
+      };
+    }
   }
 
   /**
