@@ -15,7 +15,7 @@
  */
 
 import {FetchInitDef, XhrBase, assertSuccess, setupInit} from './xhr-base';
-import {dict, map} from './utils/object';
+import {dict} from './utils/object';
 import {isArray} from './types';
 import {isFormDataWrapper} from './form-data-wrapper';
 import {user} from './log';
