@@ -84,14 +84,14 @@ export function whenCalled(spy, opt_callCount = 1) {
 }
 
 const noneValues = {
-  'animation-name': 'none',
-  'animation-duration': '0s',
-  'animation-timing-function': 'ease',
-  'animation-delay': '0s',
-  'animation-iteration-count': '1',
-  'animation-direction': 'normal',
-  'animation-fill-mode': 'none',
-  'animation-play-state': 'running',
+  'animation-name': ['none', 'initial'],
+  'animation-duration': ['0s', 'initial'],
+  'animation-timing-function': ['ease', 'initial'],
+  'animation-delay': ['0s', 'initial'],
+  'animation-iteration-count': ['1', 'initial'],
+  'animation-direction': ['normal', 'initial'],
+  'animation-fill-mode': ['none', 'initial'],
+  'animation-play-state': ['running', 'initial'],
 };
 
 /**
@@ -103,7 +103,9 @@ const noneValues = {
  */
 export function isAnimationNone(element) {
   for (const property in noneValues) {
-    if (getStyle(element, property) != noneValues[property]) {
+    const value = getStyle(element, property);
+    const expectedValues = noneValues[property];
+    if (!expectedValues.some(expectedValue => value == expectedValue)) {
       return false;
     }
   }
