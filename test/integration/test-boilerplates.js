@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {animationIsNone} from '../../testing/test-helper';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
 } from '../../testing/iframe';
 import {getStyle} from '../../src/style';
+import {isAnimationNone} from '../../testing/test-helper';
 
 
 const timeout = window.ampTestRuntimeConfig.mochaTimeout;
@@ -55,7 +55,7 @@ describe.configure().run('New Visibility Boilerplate', () => {
     return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');
-      expect(animationIsNone(fixture.win.body)).to.be.true;
+      expect(isAnimationNone(fixture.win.body)).to.be.true;
     });
   });
 });
