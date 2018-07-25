@@ -15,26 +15,26 @@ limitations under the License.
 -->
 
 # <a name=”amp-access-poool></a> `amp-access-poool`
-
 <table>
   <tr>
-    <td width="40%"><strong>Description</strong></td>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>Displays a Poool paywall<br />.
+    See <a href="http://poool.fr">poool.fr</a> and <a href="http://demo.poool.fr">demo.poool.fr</a> for more details.. <code>amp-access-poool</code> is based on, and requires <a href="https://www.ampproject.org/docs/reference/components/amp-access">AMP Access</a>.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Required Scripts</strong></td>
     <td>
-      Displays a Poool paywall<br />.
-      See <a href="http://poool.fr">poool.fr</a> and <a href="http://demo.poool.fr">demo.poool.fr</a> for more details.
+        <small>Notice that you need scripts for "amp-access-poool", "amp-access" and "amp-analytics".</small>
+      <div>
+        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
+      </div>
+      <div>
+        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
+      </div>
+      <div>
+        <code>&lt;script async custom-element="amp-access-poool" src="https://cdn.ampproject.org/v0/amp-access-poool-0.1.js">&lt;/script></code>
+      </div>
     </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-access-poool" src="https://cdn.ampproject.org/v0/amp-access-poool-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-access-poool.amp.html">amp-access-poool.amp.html</a></td>
   </tr>
 </table>
 
@@ -99,8 +99,11 @@ For example : use `customSegment="test"` to achieve `poool("config", "custom_seg
 
 ## Attributes
 
-##### bundleId (required)
+##### bundleID (required)
 Your App ID (key given by Poool).
+
+##### itemID (required)
+Your article ID.
 
 ##### pageType (required)
 Used to tell Poool a page has been visited by the current user.
