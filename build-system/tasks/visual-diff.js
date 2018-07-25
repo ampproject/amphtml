@@ -442,7 +442,9 @@ async function snapshotWebpages(percy, page, webpages, config) {
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
     // Puppeteer is flaky when it comes to catching navigation requests, so
     // ignore timeouts. If this was a real non-loading page, this will be caught
-    // in the resulting Percy build.
+    // in the resulting Percy build. Navigate to an empty page first to support
+    // different webpages that only modify the #anchor name.
+    await page.goto('about:blank');
     await page.goto(`${BASE_URL}/${url}`).catch(() => {});
 
     // Try to wait until there are no more network requests. This method is
