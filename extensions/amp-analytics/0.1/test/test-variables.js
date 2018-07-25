@@ -158,77 +158,78 @@ describe('amp-analytics.VariableService', function() {
       return expect(expanded).to.eventually.equal(output);
     }
 
-    it('default works', () => check('DEFAULT(one,two)', 'one'));
+    it('default works', () => check('$DEFAULT(one,two)', 'one'));
 
-    it('default works without first arg', () => check('DEFAULT(,two)', 'two'));
+    it('default works without first arg', () => check('$DEFAULT(,two)', 'two'));
 
     it('default works without first arg length',
-        () => check('DEFAULT(TRIM(), two)', 'two'));
+        () => check('$DEFAULT($TRIM(), two)', 'two'));
 
-    it('hash works', () => check('HASH(test)',
+    it('hash works', () => check('$HASH(test)',
         'doQSMg97CqWBL85CjcRwazyuUOAqZMqhangiSb_o78S37xzLEmJV0ZYEff7fF6Cp'));
 
-    it('substr works', () => check('SUBSTR(Hello world!, 1, 4)', 'ello'));
+    it('substr works', () => check('$SUBSTR(Hello world!, 1, 4)', 'ello'));
 
-    it('trim works', () => check('TRIM(hello      )', 'hello'));
+    it('trim works', () => check('$TRIM(hello      )', 'hello'));
 
     it('json works', () =>
-      check('JSON(Hello world!)', '%22Hello%20world!%22'));
+      check('$JSON(Hello world!)', '%22Hello%20world!%22'));
 
     it('toLowerCase works', () =>
-      check('TOLOWERCASE(HeLLO WOrld!)', 'hello%20world!'));
+      check('$TOLOWERCASE(HeLLO WOrld!)', 'hello%20world!'));
 
     it('toUpperCase works', () => {
-      return check('TOUPPERCASE(HeLLO WOrld!)', 'HELLO%20WORLD!');
+      return check('$TOUPPERCASE(HeLLO WOrld!)', 'HELLO%20WORLD!');
     });
 
-    it('not works (truth-y value)', () => check('NOT(hello)', 'false'));
+    it('not works (truth-y value)', () => check('$NOT(hello)', 'false'));
 
-    it('not works (false-y value)', () => check('NOT()', 'true'));
+    it('not works (false-y value)', () => check('$NOT()', 'true'));
 
     it('base64 works', () => {
-      return check('BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
+      return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
-    it('if works', () => check('IF(hey, truthy, falsey)', 'truthy'));
+    it('if works', () => check('$IF(hey, truthy, falsey)', 'truthy'));
 
     it('chaining works', () => {
-      return check('SUBSTR(Hello world!, 6)', 'world!').then(() =>
-        check('TOUPPERCASE(SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
-        check('BASE64(TOUPPERCASE(SUBSTR(Hello world!, 6)))', 'V09STEQh'))
+      return check('$SUBSTR(Hello world!, 6)', 'world!').then(() =>
+        check('$TOUPPERCASE($SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
+        check('$BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6)))', 'V09STEQh'))
           .then(() =>
-            check('HASH(BASE64(TOUPPERCASE(SUBSTR(Hello world!, 6))))',
+            check('$HASH($BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6))))',
                 'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_Q' +
                 'S7Uc5ZmODduHWdplzrZ7Jsnqx')
           );
     });
 
     it('replaces common use case', () => {
-      return check('REPLACE(this-is-a-test, `-`)', 'thisisatest');
+      return check('$REPLACE(this-is-a-test, `-`)', 'thisisatest');
     });
 
     it('replaces three args', () => {
-      return check('REPLACE(this-is-a-test, `-`, *)', 'this*is*a*test');
+      return check('$REPLACE(this-is-a-test, `-`, *)', 'this*is*a*test');
     });
 
     it('replaces backticks optional', () => {
-      return check('REPLACE(this-is-a-test, -, **)', 'this**is**a**test');
+      return check('$REPLACE(this-is-a-test, -, **)', 'this**is**a**test');
     });
 
     it('replaces not trimming spaces in backticks', () => {
-      return check('REPLACE(this-is-a-test, ` -`)', 'this-is-a-test');
+      return check('$REPLACE(this-is-a-test, ` -`)', 'this-is-a-test');
     });
 
     it('replaces respecting space as arg', () => {
-      return check('REPLACE(this-is-a-test, `-`, ` `)', 'this%20is%20a%20test');
+      return check('$REPLACE(this-is-a-test, `-`, ` `)',
+          'this%20is%20a%20test');
     });
 
     it('replaces respecting backticks', () => {
-      return check('REPLACE(`this-,is-,a-,test`, `-,`)', 'thisisatest');
+      return check('$REPLACE(`this-,is-,a-,test`, `-,`)', 'thisisatest');
     });
 
     it('replace with no third arg', () => {
-      return check('REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
+      return check('$REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
     });
   });
 
