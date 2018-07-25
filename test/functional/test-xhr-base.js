@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Response as FetchResponse, fetchPolyfill} from '../../src/polyfills/fetch-polyfill';
 import {Services} from '../../src/services';
 import {XhrBase, assertSuccess, setupInit} from '../../src/xhr-base';
 import {getCorsUrl, getSourceOrigin} from '../../src/url';
@@ -40,6 +41,12 @@ describes.realWin('XhrBase', {amp: true}, function() {
   const nativeWin = {
     location,
     fetch: window.fetch,
+    Response: window.Response,
+  };
+
+  const polyfilledWin = {
+    location,
+    fetch: fetchPolyfill,
   };
 
   const scenarios = [
@@ -47,14 +54,22 @@ describes.realWin('XhrBase', {amp: true}, function() {
       win: nativeWin,
       desc: 'Native',
     },
+    {
+      win: polyfilledWin,
+      desc: 'Native',
+    },
   ];
 
-  scenarios.forEach(() => {
+  scenarios.forEach(test => {
     beforeEach(() => {
     });
     describe('assertSuccess', () => {
       function createResponseInstance(body, init) {
-        return new Response(body, init);
+        if (test.desc == 'Native' && 'Response' in window) {
+          return new Response(body, init);
+        } else {
+          return new FetchResponse(body, init);
+        }
       }
       const mockXhr = {
         status: 200,

@@ -53,7 +53,7 @@ let XMLHttpRequestDef;
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
-function fetchPolyfill(input, init) {
+export function fetchPolyfill(input, init) {
   return new Promise(function(resolve, reject) {
     const xhr = createXhrRequest(init.method || 'GET', input);
 
@@ -232,7 +232,7 @@ class FetchResponseHeaders {
  * @param {?ResponseBodyInit=} body
  * @param {!ResponseInit=} init
  */
-function Response(body, init = {}) {
+export function Response(body, init = {}) {
   const lowercasedHeaders = map();
   const data = Object.assign({
     status: 200,
