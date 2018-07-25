@@ -360,7 +360,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.gestures_.onGesture(DoubletapRecognizer, e => {
       const {clientX, clientY} = e.data;
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-      const deltaX = (this.elementBox_.height / 2) + this.getOffsetX_(clientX);
+      const deltaX = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
       const deltaY = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
 
       this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true)
@@ -377,9 +377,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         last,
       } = e.data;
 
-      const centerX = this.getOffsetX_(centerClientX);
-      const centerY = this.getOffsetY_(centerClientY);
-      this.onPinchZoom_(centerX, centerY, deltaX, deltaY, dir);
+      this.onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir);
       if (last) {
         this.onZoomRelease_();
       }
