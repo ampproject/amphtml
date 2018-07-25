@@ -507,9 +507,9 @@ export function duplicateErrorIfNecessary(error) {
 /**
  * @param {...*} var_args
  * @return {!Error}
- * @private
+ * @visibleForTesting
  */
-function createErrorVargs(var_args) {
+export function createErrorVargs(var_args) {
   let error = null;
   let message = '';
   for (let i = 0; i < arguments.length; i++) {
