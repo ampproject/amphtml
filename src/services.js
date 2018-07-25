@@ -330,6 +330,18 @@ export class Services {
   }
 
   /**
+   * Version of the story store service depends on which version of amp-story
+   * the publisher is loading. They all have the same implementation.
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryRequestService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryRequestService>}
+   */
+  static storyRequestServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryRequestService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryRequestService>} */
+      (getElementServiceIfAvailable(win, 'story-request', 'amp-story')));
+  }
+
+  /**
    * @param {!Window} win
    * @return {!../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */

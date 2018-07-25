@@ -268,27 +268,29 @@ class ManualAdvancement extends AdvancementConfig {
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-      this.storeService_ =
-        Services.storyStoreService(element.ownerDocument.defaultView);
+      this.storeServicePromise_ =
+        Services.storyStoreServiceForOrNull(element.ownerDocument.defaultView);
     }
 
-    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
-    this.sections_ = {
-      // Width and navigation direction of each section depend on whether the
-      // document is RTL or LTR.
-      left: {
-        widthRatio: rtlState ?
-          NEXT_SCREEN_AREA_RATIO : PREVIOUS_SCREEN_AREA_RATIO,
-        direction: rtlState ?
-          TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
-      },
-      right: {
-        widthRatio: rtlState ?
-          PREVIOUS_SCREEN_AREA_RATIO : NEXT_SCREEN_AREA_RATIO,
-        direction: rtlState ?
-          TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
-      },
-    };
+    this.sectionsPromise_ = this.storeServicePromise_.then(storeService => {
+      const rtlState = storeService.get(StateProperty.RTL_STATE);
+      return {
+        // Width and navigation direction of each section depend on whether the
+        // document is RTL or LTR.
+        left: {
+          widthRatio: rtlState ?
+            NEXT_SCREEN_AREA_RATIO : PREVIOUS_SCREEN_AREA_RATIO,
+          direction: rtlState ?
+            TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
+        },
+        right: {
+          widthRatio: rtlState ?
+            PREVIOUS_SCREEN_AREA_RATIO : NEXT_SCREEN_AREA_RATIO,
+          direction: rtlState ?
+            TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
+        },
+      };
+    });
   }
 
   /** @override */
@@ -369,7 +371,8 @@ class ManualAdvancement extends AdvancementConfig {
       clickEventX: event.pageX,
     };
 
-    this.onTapNavigation(this.getTapDirection_(page));
+    this.getTapDirection_(page)
+        .then(direction => this.onTapNavigation(direction));
   }
 
   /**
@@ -378,15 +381,18 @@ class ManualAdvancement extends AdvancementConfig {
    * individual section has been previously defined depending on the language
    * settings.
    * @param {!Object} page
+   * @return {!Promise<!TapNavigationDirection>}
    */
   getTapDirection_(page) {
-    const {left, right} = this.sections_;
+    return this.sectionsPromise_.then(sections => {
+      const {left, right} = sections;
 
-    if (page.clickEventX <= page.offset + (left.widthRatio * page.width)) {
-      return left.direction;
-    }
+      if (page.clickEventX <= page.offset + (left.widthRatio * page.width)) {
+        return left.direction;
+      }
 
-    return right.direction;
+      return right.direction;
+    });
   }
 }
 
