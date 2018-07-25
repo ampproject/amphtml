@@ -51,9 +51,11 @@ const SIBLING_TRANSFERRED_PROPS = [
  * @return {!Element}
  */
 function createSiblingToPreventContentJump(win, iframe) {
-  if (iframe.parentElement.querySelector('i-amphtml-iframe-sibling')) {
-    // Sibling already exists.
-    return;
+  const existingSibling =
+      iframe.parentElement.querySelector('i-amphtml-iframe-sibling');
+
+  if (existingSibling) {
+    return existingSibling;
   }
 
   const sibling =
@@ -83,9 +85,12 @@ function createSiblingToPreventContentJump(win, iframe) {
 }
 
 /**
- * @param {!Element} parent
+ * @param {?Element} parent
  */
 function removeSiblingToPreventContentJump(parent) {
+  if (!parent) {
+    return;
+  }
   const sibling = parent.querySelector('i-amphtml-iframe-sibling');
   if (sibling) {
     removeElement(sibling);
