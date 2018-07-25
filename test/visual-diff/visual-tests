@@ -147,9 +147,12 @@
       "name": "amp-story: Grid layer (thirds)",
       "experiments": ["disable-amp-story-shadow-dom"],
       "viewport": {"width": 320, "height": 427},
+      "loading_incomplete_css": [
+        "[grid-area]"
+      ],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-thirds"
+        ".i-amphtml-story-grid-template-thirds",
       ]
     },
     {
@@ -157,12 +160,9 @@
       "name": "amp-story: CTA layer",
       "experiments": ["disable-amp-story-shadow-dom"],
       "viewport": {"width": 320, "height": 427},
-      "loading_incomplete_css": [
-        ".visual-diff-pending"
-      ],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".visual-diff-ready"
+        ".on-the-page-with-the-cta-layer"
       ]
     },
     {
