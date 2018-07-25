@@ -84,6 +84,10 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
       return true;
     }
 
+    if (name.contains("_interopRequireDefault")) {
+      return true;
+    }
+
     if (singleFileCompilation) {
       return false;
     }
