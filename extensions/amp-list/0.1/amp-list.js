@@ -30,6 +30,7 @@ import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 
@@ -412,7 +413,7 @@ export class AmpList extends AMP.BaseElement {
     dev().info(TAG, 'render:', elements);
 
     this.mutateElement(() => {
-      const diffing = isExperimentOn(this.win, 'set-dom');
+      const diffing = isExperimentOn(this.win, 'amp-list-diffing');
       if (this.container_.hasChildNodes && diffing) {
         const newContainer = this.createContainer_();
         this.addElementsToContainer_(elements, newContainer);
