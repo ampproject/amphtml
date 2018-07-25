@@ -55,7 +55,7 @@ describe.configure().run('New Visibility Boilerplate', () => {
     return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');
-      expect(isAnimationNone(fixture.win.body)).to.be.true;
+      expect(isAnimationNone(fixture.win.document.body)).to.be.true;
     });
   });
 });
