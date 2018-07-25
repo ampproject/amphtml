@@ -466,8 +466,9 @@ describes.realWin('Requests', {amp: 1}, env => {
       'param1': 'PARAM_1',
       'param2': 'PARAM_2',
       'param3': 'PARAM_3',
-      'foo': 'TOUPPERCASE(BASE64(foo))',
-    });
+      'foo': '$TOUPPERCASE($BASE64(foo))',
+    }, /* opt_iterations */ 2, /* opt_noencode */ true);
+
     const bindings = {
       'PARAM_1': 'val1',
       'PARAM_2': () => 'val2',
