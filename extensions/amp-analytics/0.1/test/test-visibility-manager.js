@@ -112,6 +112,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
     // Root model starts invisible.
     expect(root.getRootVisibility()).to.equal(0);
+    expect(root.getRootOpacity()).to.equal(1);
   });
 
   it('should initialize correctly foregrounded', () => {
@@ -127,6 +128,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     // Root model starts invisible.
     expect(root.parent).to.be.null;
     expect(root.getRootVisibility()).to.equal(1);
+    expect(root.getRootOpacity()).to.equal(1);
   });
 
   it('should resolve root opacity', () => {
@@ -1001,7 +1003,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     ampElement.id = 'abc';
     ampElement.setAttribute('width', '100');
     ampElement.setAttribute('height', '100');
-    ampElement.setAttribute('opacity', '.5');
+    ampElement.style.opacity = 0.5;
     doc.body.appendChild(ampElement);
     return new Promise(resolve => {
       if (resources.getResourceForElementOptional(ampElement)) {
