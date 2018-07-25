@@ -68,6 +68,7 @@ tags: {
     name: "type"
     mandatory: true
     value: "amp-mustache"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: { tag_spec_name: "AMP-STORY-GRID-LAYER default" }
