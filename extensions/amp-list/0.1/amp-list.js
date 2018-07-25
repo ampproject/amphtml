@@ -90,13 +90,10 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    /** @private @const {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /**
-     * @const {?../../../src/ssr-template-helper.SsrTemplateHelper}
-     * @private
-     */
+    /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
   }
 
