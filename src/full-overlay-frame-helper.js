@@ -28,9 +28,6 @@ import {px, resetStyles, setStyles, translate} from './style';
 export function centerFrameUnderVsyncMutate(
   iframe, iframeRect, viewportSize, transitionTimeMs) {
 
-  // TODO(alanorozco): Place a sentinel sibling on inabox to account for
-  // gap necessary for position: fixed.
-
   const translateX = px(
       (viewportSize.width / 2) - (iframeRect.width / 2) - iframeRect.left);
 
