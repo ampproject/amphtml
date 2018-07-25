@@ -319,18 +319,16 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      this.templates_.findAndRenderTemplate(
-          this.element, /** @type {!JsonObject} */ (current.data))
-          .then(element => {
-            this.container_.appendChild(element);
-          })
-          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+      const json = /** @type {!JsonObject} */ (current.data);
+      this.templates_.findAndRenderTemplate(this.element, json)
+          .then(element => this.container_.appendChild(element))
+          .then(onFulfilledCallback, onRejectedCallback);
     } else {
-      this.templates_.findAndRenderTemplateArray(
-          this.element, /** @type {!Array} */ (current.data))
+      const array = /** @type {!Array} */ (current.data);
+      this.templates_.findAndRenderTemplateArray(this.element, array)
           .then(elements => this.updateBindingsForElements_(elements))
           .then(elements => this.render_(elements))
-          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+          .then(onFulfilledCallback, onRejectedCallback);
     }
   }
 
