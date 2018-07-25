@@ -350,10 +350,6 @@ export class VisibilityManager {
         state['opacity'] = getOpacity(opt_element);
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
-        state['opacity'] =
-              resource ?
-                resource.getOpacity() :
-                Services.viewportForDoc(this.ampdoc).getOpacity(opt_element);
         layoutBox =
             resource ?
               resource.getLayoutBox() :
