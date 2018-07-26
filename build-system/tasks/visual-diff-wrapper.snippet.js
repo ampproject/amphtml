@@ -7,9 +7,16 @@
 
 const pageContents = document.documentElement.outerHTML;
 
+const metaCharset = document.querySelector('head meta[charset]')
+    || document.createElement('meta');
+if (!metaCharset.hasAttribute('charset')) {
+  metaCharset.setAttribute('charset', 'utf-8');
+}
+
 while (document.head.firstChild) {
   document.head.removeChild(document.head.firstChild);
 }
+document.head.appendChild(metaCharset);
 
 while (document.body.firstChild) {
   document.body.removeChild(document.body.firstChild);
