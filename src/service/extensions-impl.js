@@ -32,8 +32,8 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import {installCustomElements} from
-  'document-register-element/build/document-register-element.patched';
+// import {installCustomElements} from
+  // 'document-register-element/build/document-register-element.patched';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
