@@ -10,7 +10,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 </head>
 <body>
 
@@ -40,7 +40,7 @@
   </template>
 
   <h3>Default</h3>
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template" max-items=1>
   </amp-list>
 
   <!-- <h3>binding="always"</h3>

@@ -372,10 +372,14 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise<!Array<!Element>>}
    */
   updateBindingsWith_(bind, elements) {
+    dev().info(TAG, 'binding');
+
+    this.start_ = this.win.performance.now();
+
     // Forward elements to chained promise on success or failure.
     const forwardElements = () => elements;
     return this.templates_.findTemplateImplementation(this.element).then(template => {
-      if (template.bindings) {
+      if (this.element.hasAttribute('fast')) {
         return bind.ingestAndApply(template.bindings)
             .then(forwardElements, forwardElements);
       } else {
@@ -391,6 +395,8 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
+
+    console.log(this.win.performance.now() - this.start_);
 
     this.mutateElement(() => {
       removeChildren(dev().assertElement(this.container_));

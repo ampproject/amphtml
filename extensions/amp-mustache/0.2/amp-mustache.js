@@ -96,21 +96,9 @@ export class AmpMustache extends AMP.BaseTemplate {
       }
       html = mustacheRender(this.template_, mustacheData);
     }
-    return this.serializeHtml_(html);
-  }
-
-  /**
-   * Sanitizes the html and inserts it in the DOM.
-   * @param {string} html
-   * @return {!Element}
-   * @private
-   */
-  serializeHtml_(html) {
     const {clean, bindings} = purifyHtml(html);
     this.bindings = bindings; // HACK(choumx)
-    const root = this.win.document.createElement('div');
-    root./*OK*/innerHTML = clean;
-    return this.unwrap(root);
+    return clean;
   }
 }
 

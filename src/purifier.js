@@ -221,7 +221,7 @@ const PURIFY_CONFIG = {
 
 /**
  * @param {string} dirty
- * @return {{clean: string, bindings: Array<{element: !Element, property: string, expression: string}>}}
+ * @return {{clean: !Node, bindings: Array<{element: !Element, property: string, expression: string}>}}
  */
 export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
@@ -230,6 +230,8 @@ export function purifyHtml(dirty) {
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
     'FORCE_BODY': true,
+    // Avoid need for serializing to/from string by returning Node directly.
+    'RETURN_DOM': true,
   });
 
   // Reference to DOMPurify's `allowedTags` whitelist.
@@ -380,9 +382,9 @@ export function purifyHtml(dirty) {
   DOMPurify.addHook('afterSanitizeElements', afterSanitizeElements);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  const clean = DOMPurify.sanitize(dirty, config);
+  const body = DOMPurify.sanitize(`<div>${dirty}</div>`, config);
   DOMPurify.removeAllHooks();
-  return {clean, bindings};
+  return {clean: body.firstElementChild, bindings};
 }
 
 /**
