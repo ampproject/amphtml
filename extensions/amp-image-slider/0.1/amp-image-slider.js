@@ -335,7 +335,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.gestures_.onPointerDown(e => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX);
-      this.resetHintInterval_(true);
+      this.resetHintInterval_(!this.shouldHintLoop_);
     });
   }
 

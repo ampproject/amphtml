@@ -16,13 +16,11 @@
 
 tags: {  # amp-image-slider
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-image-slider"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -44,6 +42,11 @@ tags: {  # <amp-image-slider>
     name: "step-size"
     value_regex: "0|1|(0\.[0-9]+)"
   }
+  # <amp-bind>
+  attrs: {
+    name: "[disabled]"
+    value: ""
+  }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
   amp_layout: {
     supported_layouts: FIXED
@@ -56,20 +59,44 @@ tags: {  # <amp-image-slider>
   child_tags: {
     child_tag_name_oneof: "AMP-IMG"
     child_tag_name_oneof: "DIV"
+    mandatory_min_num_child_tags: 2
   }
 }
-tags: {  # <amp-image-slider> > <div>
+tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "DIV"
-  spec_name: "amp-image-slider > div"
+  spec_name: "AMP-IMAGE-SLIDER [before]"
   mandatory_parent: "AMP-IMAGE-SLIDER"
-  attrs: { name: "before" value: "" }
-  attrs: { name: "after" value: "" }
-  attrs: { name: "hint" value: "" }
+  attrs: {
+    name: "before"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
+}
+tags: {
+  html_format: AMP
+  tag_name: "DIV"
+  spec_name: "AMP-IMAGE-SLIDER [after]"
+  mandatory_parent: "AMP-IMAGE-SLIDER"
+  attrs: {
+    name: "after"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
+}
+tags: {
+  html_format: AMP
+  tag_name: "DIV"
+  spec_name: "AMP-IMAGE-SLIDER [hint]"
+  mandatory_parent: "AMP-IMAGE-SLIDER"
+  attrs: {
+    name: "hint"
+    mandatory: true
+  }
   attrs: { name: "hint-loop" value: "" }
   attrs: {
     name: "hint-inactive-interval"
     value_regex: "[0-9]+"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
 }
