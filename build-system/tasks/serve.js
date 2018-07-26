@@ -43,7 +43,7 @@ function serve() {
     log(colors.green('Serving unminified js'));
   }
 
-  nodemon({
+  const config = {
     script: require.resolve('../server.js'),
     watch: [
       require.resolve('../app.js'),
@@ -59,7 +59,17 @@ function serve() {
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
     },
     stdout: !quiet,
-  }).once('quit', function() {
+  };
+
+  if (argv.inspect) {
+    Object.assign(config, {
+      execMap: {
+        js: 'node --inspect',
+      },
+    });
+  }
+
+  nodemon(config).once('quit', function() {
     log(colors.green('Shutting down server'));
   });
 }
@@ -80,6 +90,7 @@ gulp.task(
         'quiet': '  Do not log HTTP requests (default: false)',
         'cache': '  Make local resources cacheable by the browser ' +
             '(default: false)',
+        'inspect': '  Run nodemon in `inspect` mode',
       },
     }
 );
