@@ -476,7 +476,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
     await percy.snapshot(name, page, snapshotOptions);
     await clearExperiments(page);
     log('travis', colors.cyan('●'));
-    log('info', name, startTime, new Date().getTime());
+    log('info', name, new Date().getTime() - startTime);
   }
   log('travis', '\n');
 }
