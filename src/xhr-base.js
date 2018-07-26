@@ -122,8 +122,6 @@ export class XhrBase {
     // Do not append __amp_source_origin if explicitly disabled.
     if (init.ampCors !== false) {
       input = getCorsUrl(this.win, input);
-    } else {
-      init.ampCors = true;
     }
 
     dev().assert(!('requireAmpResponseSourceOrigin' in init),
