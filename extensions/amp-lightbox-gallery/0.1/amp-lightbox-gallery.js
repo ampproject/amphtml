@@ -266,6 +266,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
+    clonedNode.removeAttribute('i-amphtml-layout');
     return clonedNode;
   }
   /**
