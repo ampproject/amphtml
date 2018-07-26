@@ -87,9 +87,6 @@ function log(mode, ...messages) {
       messages.unshift(colors.red('FATAL:'));
       break;
     case 'travis':
-      if (process.env['TRAVIS']) {
-        messages.forEach(message => process.stdout.write(message));
-      }
       return;
   }
   // eslint-disable-next-line amphtml-internal/no-spread
@@ -424,6 +421,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
   for (const webpage of webpages) {
     const {url, viewport} = webpage;
     const name = `${webpage.name} (${config})`;
+    const startTime = new Date().getTime();
     log('verbose', 'Visual diff test', colors.yellow(name));
 
     await enableExperiments(page, webpage['experiments']);
@@ -478,6 +476,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
     await percy.snapshot(name, page, snapshotOptions);
     await clearExperiments(page);
     log('travis', colors.cyan('●'));
+    log('info', name, startTime, new Date().getTime());
   }
   log('travis', '\n');
 }
