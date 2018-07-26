@@ -112,8 +112,6 @@ amp4ads_feature_tests/extensions.html:79:2 Custom JavaScript is not allowed. (se
 amp4ads_feature_tests/extensions.html:81:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js"></script>
 |    <script async custom-element="amp-lightbox"
->>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:83:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
 |    <script async custom-element="amp-list"
 >>   ^~~~~~~~~
@@ -182,5 +180,7 @@ amp4ads_feature_tests/extensions.html:113:2 Custom JavaScript is not allowed. (s
 |  <body></body></html>
 >>                    ^~~~~~~~~
 amp4ads_feature_tests/extensions.html:121:19 The extension 'amp-animation' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+>>                    ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:121:19 The extension 'amp-lightbox' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
 >>                    ^~~~~~~~~
 amp4ads_feature_tests/extensions.html:121:19 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
