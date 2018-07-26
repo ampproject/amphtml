@@ -142,11 +142,25 @@ In the examples below, we demonstrate how the transition looks for an AMPHTML ad
 
 ##### On friendly iframes (e.g., coming from an AMP cache)
 
-![](../../spec/img/lightbox-ad-fie.gif)
+<amp-img alt="lightbox ad in friendly iframe"
+    layout="fixed"
+    width="360" height="480" 
+    src="https://github.com/ampproject/amphtml/raw/master/spec/img/lightbox-ad-fie.gif" >
+  <noscript>
+    <img alt="lightbox ad in friendly iframe" src="../../spec/img/lightbox-ad-fie.gif" />
+  </noscript>
+</amp-img>
 
 ##### On third-party iframes (e.g., outside the AMP cache)
 
-![](../../spec/img/lightbox-ad-3p.gif)
+<amp-img alt="lightbox ad in 3p iframe"
+    layout="fixed"
+    width="360" height="480" 
+    src="https://github.com/ampproject/amphtml/raw/master/spec/img/lightbox-ad-3p.gif" >
+  <noscript>
+    <img alt="lightbox ad in 3p iframe" src="../../spec/img/lightbox-ad-3p.gif" />
+  </noscript>
+</amp-img>
 
 ## Validation
 
