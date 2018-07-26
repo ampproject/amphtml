@@ -310,7 +310,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'blurry-placeholder',
-    name: 'Enables a blurry image placeholder as an amp-img loads',
+    name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
