@@ -206,15 +206,8 @@ function buildExtensions(options) {
     return Promise.resolve();
   }
 
-  let extensionsToBuild = [];
-  if (!!argv.extensions && !options.compileAll) {
-    extensionsToBuild = argv.extensions.split(',');
-  }
-
-  if (!!argv.extensions_from && !options.compileAll) {
-    const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
-    extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
-  }
+  const extensionsToBuild = options.compileAll ?
+    [] : processExtensionsFromArgs();
 
   const results = [];
   for (const key in extensions) {
@@ -228,6 +221,26 @@ function buildExtensions(options) {
     results.push(buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs));
   }
   return Promise.all(results);
+}
+
+/**
+ * Process the command line arguments --extensions and --extensions_from
+ * and return a list of the referenced extensions.
+ * @return {!Array<string>}
+ */
+function processExtensionsFromArgs() {
+  let extensionsToBuild = [];
+
+  if (!!argv.extensions) {
+    extensionsToBuild = argv.extensions.split(',');
+  }
+
+  if (!!argv.extensions_from) {
+    const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
+    extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
+  }
+
+  return extensionsToBuild;
 }
 
 /**
@@ -873,7 +886,7 @@ function dist() {
           console.log('\n');
         }
       }).then(() => {
-        copyAliasExtensions();
+        return copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minifiedRuntimeTarget).then(() => {
@@ -895,20 +908,14 @@ function dist() {
 
 /**
  * Copy built extension to alias extension
+ * @return {!Promise}
  */
 function copyAliasExtensions() {
   if (argv.noextensions) {
-    return;
-  }
-  let extensionsToBuild = [];
-  if (!!argv.extensions) {
-    extensionsToBuild = argv.extensions.split(',');
+    return Promise.resolve();
   }
 
-  if (!!argv.extensions_from) {
-    const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
-    extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
-  }
+  const extensionsToBuild = processExtensionsFromArgs();
 
   for (const key in extensionAliasFilePath) {
     if (extensionsToBuild.length > 0 &&
@@ -918,6 +925,8 @@ function copyAliasExtensions() {
     fs.copySync('dist/v0/' + extensionAliasFilePath[key]['file'],
         'dist/v0/' + key);
   }
+
+  return Promise.resolve();
 }
 
 /**
