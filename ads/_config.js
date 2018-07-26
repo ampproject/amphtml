@@ -900,9 +900,7 @@ export const adConfig = {
   },
 
   'videointelligence': {
-    preconnect: [
-      'https://s.vi-serve.com',
-    ],
+    preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
   },
 
