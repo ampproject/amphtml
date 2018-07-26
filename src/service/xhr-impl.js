@@ -69,7 +69,6 @@ export class Xhr extends XhrBase {
    * @return {!Promise<!FetchResponse>|!Promise<!Response>}
    */
   fetchFromNetwork_(input, init) {
-    dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
 
     return this.maybeIntercept_(input, init)
         .then(interceptorResponse => {
