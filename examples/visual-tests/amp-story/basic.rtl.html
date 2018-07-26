@@ -16,7 +16,7 @@
         color: white;
         font-family: sans-serif;
       }
-      h1#hello-world {
+      h1.hello-world {
         color: white;
         text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
       }
@@ -24,6 +24,22 @@
     <script>
       // TODO(#17108): Remove this when getMode().test is set.
       AMP_TEST = true;
+
+      /**
+       * On load, jump to the second page (to test progress bar fill).
+       */
+      document.addEventListener('ampstory:load', () => {
+        const storyEl = document.querySelector('amp-story');
+
+        // Automatically jump to second page.
+        const switchPageEvent = new CustomEvent('ampstory:switchpage', {
+          detail: {
+            targetPageId: 'page-2',
+          }
+        });
+
+        storyEl.dispatchEvent(switchPageEvent);
+      });
     </script>
   </head>
 
@@ -33,23 +49,48 @@
       <amp-story-page id="cover">
         <amp-story-grid-layer template="fill">
           <amp-video layout="fill"
-              poster="https://picsum.photos/1600/900?image=981">
+              poster="https://picsum.photos/1600/900?image=980">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <h1 id="hello-world">مرحبا بالعالم</h1>
+          <h1 class="hello-world">مرحبا بالعالم</h1>
+          <p>الصفحة الأولى</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page-2">
+        <amp-story-grid-layer template="fill">
+          <amp-video layout="fill"
+              poster="https://picsum.photos/1600/900?image=981">
+          </amp-video>
+        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <p>page two</p>
+          <h1 class="hello-world">مرحبا بالعالم</h1>
+          <p>الصفحة الثانية</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+          <amp-video layout="fill"
+              poster="https://picsum.photos/1600/900?image=982">
+          </amp-video>
+        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <p>page three</p>
+          <h1 class="hello-world">مرحبا بالعالم</h1>
+          <p>الصفحة الثالثة</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4">
+        <amp-story-grid-layer template="fill">
+          <amp-video layout="fill"
+              poster="https://picsum.photos/1600/900?image=983">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world">مرحبا بالعالم</h1>
+          <p>الصفحة الرابعة</p>
         </amp-story-grid-layer>
       </amp-story-page>
 

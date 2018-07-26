@@ -1,11 +1,13 @@
 <!doctype html>
-<html amp lang="en">
+<html amp lang="ar" dir="rtl">
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <title>amp-story-bookend visual diff</title>
+    <script async custom-element="amp-consent"
+        src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+    <title>amp-story-consent visual diff</title>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="./template-vertical.html">
@@ -24,45 +26,55 @@
     <script>
       // TODO(#17108): Remove this when getMode().test is set.
       AMP_TEST = true;
-
-      /**
-       * On load, open the bookend.
-       */
-       document.addEventListener('ampstory:load', () => {
-        const storyEl = document.querySelector('amp-story');
-
-        // Automatically open the bookend.
-        const openBookendEvent = new CustomEvent('ampstory:dispatchaction', {
-          detail: {
-            action: 'togglebookend',
-            data: true,
-          }
-        });
-
-        storyEl.dispatchEvent(openBookendEvent);
-
-        // Update the CSS classes to indicate that the story is ready.
-        storyEl.classList.add('visual-diff-ready');
-      });
     </script>
   </head>
 
   <body>
     <amp-story standalone>
 
+      <amp-consent id="myConsent" layout="nodisplay">
+        <script type="application/json">
+          {
+            "consents": {
+              "myConsent": {
+                "checkConsentHref": "https://ampbyexample.com/samples_templates/consent/getConsent",
+                "promptUI": "consentUI"
+              }
+            }
+          }
+        </script>
+        <amp-story-consent id="consentUI" layout="nodisplay">
+          <script type="application/json">
+            {
+              "title": "عنوان رئيسي",
+              "message": "لكون بشرية تحرّك ذلك من, ونتج للمجهود ليتسنّى تم بحق. تلك ان ليركز العالم، إتفاقية, أسر تم سقطت أطراف في.",
+              "vendors": [
+                "البند الأول",
+                "البند الثاني",
+                "البند الثالث",
+                "البند الرابع",
+                "البند الخامس",
+                "البند السادس",
+                "البند السابع",
+                "البند ثمانية",
+                "البند التاسع",
+                "البند عشر"
+              ]
+            }
+          </script>
+        </amp-story-consent>
+      </amp-consent>
+
         <amp-story-page id="cover">
           <amp-story-grid-layer template="fill">
-              <amp-video layout="fill"
-                  poster="https://picsum.photos/1600/900?image=981">
-              </amp-video>
+            <amp-video layout="fill"
+                poster="https://picsum.photos/1600/900?image=981">
+            </amp-video>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="vertical">
-              <h1 id="hello-world">Hello world!</h1>
+              <h1 id="hello-world">مرحبا بالعالم</h1>
           </amp-story-grid-layer>
         </amp-story-page>
-
-        <amp-story-bookend src="bookend-en.json" layout="nodisplay">
-        </amp-story-bookend>
 
     </amp-story>
   </body>

@@ -1,11 +1,11 @@
 <!doctype html>
-<html amp lang="en">
+<html amp lang="ar" dir="rtl">
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <title>amp-story-bookend visual diff</title>
+    <title>amp-story share menu visual diff</title>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="./template-vertical.html">
@@ -26,23 +26,20 @@
       AMP_TEST = true;
 
       /**
-       * On load, open the bookend.
+       * On load, open the share menu.
        */
        document.addEventListener('ampstory:load', () => {
         const storyEl = document.querySelector('amp-story');
 
-        // Automatically open the bookend.
-        const openBookendEvent = new CustomEvent('ampstory:dispatchaction', {
+        // Automatically open the share menu.
+        const openShareMenuEvent = new CustomEvent('ampstory:dispatchaction', {
           detail: {
-            action: 'togglebookend',
+            action: 'togglesharemenu',
             data: true,
           }
         });
 
-        storyEl.dispatchEvent(openBookendEvent);
-
-        // Update the CSS classes to indicate that the story is ready.
-        storyEl.classList.add('visual-diff-ready');
+        storyEl.dispatchEvent(openShareMenuEvent);
       });
     </script>
   </head>
@@ -57,11 +54,11 @@
               </amp-video>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="vertical">
-              <h1 id="hello-world">Hello world!</h1>
+              <h1 id="hello-world">مرحبا بالعالم</h1>
           </amp-story-grid-layer>
         </amp-story-page>
 
-        <amp-story-bookend src="bookend-en.json" layout="nodisplay">
+        <amp-story-bookend src="bookend-ar.json" layout="nodisplay">
         </amp-story-bookend>
 
     </amp-story>

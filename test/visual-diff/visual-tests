@@ -192,6 +192,15 @@
       "enable_percy_javascript": true
     },
     {
+      "url": "examples/visual-tests/amp-story/basic.html",
+      "name": "amp-story: basic",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page-2[active]"
+      ]
+    },
+    {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
       "name": "amp-story: Grid layer (fill)",
       "viewport": {"width": 320, "height": 480},
@@ -292,20 +301,21 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/rtl.html",
-      "name": "amp-story: rtl",
-      "viewport": {"width": 320, "height": 480},
-      "loading_complete_css": [
-        ".i-amphtml-story-loaded"
-      ]
-    },
-    {
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
       "name": "amp-story: unsupported browser",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/basic.html",
+      "name": "amp-story: basic (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page-2[active]"
       ]
     },
     {
@@ -391,14 +401,6 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/rtl.html",
-      "name": "amp-story: rtl (desktop)",
-      "viewport": {"width": 1440, "height": 900},
-      "loading_complete_css": [
-        ".i-amphtml-story-loaded"
-      ]
-    },
-    {
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
       "name": "amp-story: unsupported browser (desktop)",
       "viewport": {"width": 1440, "height": 900},
@@ -408,9 +410,81 @@
       ]
     },
     {
+      "url": "examples/visual-tests/amp-story/basic.rtl.html",
+      "name": "amp-story: basic (rtl)",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page-2[active]"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/share-menu.rtl.html",
+      "name": "amp-story: share menu (rtl)",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-menu"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/info-dialog.rtl.html",
+      "name": "amp-story: info dialog (rtl)",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-info-dialog"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
+      "name": "amp-story: bookend (rtl)",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-bookend"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
+      "name": "amp-story: consent (rtl)",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-consent"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/basic.rtl.html",
+      "name": "amp-story: basic (desktop) (rtl)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#page-2[active]"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
+      "name": "amp-story: bookend (desktop) (rtl)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-bookend"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
+      "name": "amp-story: consent (desktop) (rtl)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-consent"
+      ]
+    },
+    {
       // The url here should not matter; this UI should be triggered for all
       // story documents, based on the viewport dimensions.
-      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
+      "url": "examples/visual-tests/amp-story/basic.html",
       "name": "amp-story: rotation overlay",
       "viewport": {"width": 480, "height": 320},
       "loading_complete_css": [
