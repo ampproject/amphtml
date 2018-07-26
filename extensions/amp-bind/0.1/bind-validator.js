@@ -239,6 +239,9 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-IMAGE-SLIDER': {
+      'disabled': null,
+    },
     'AMP-LIST': {
       'src': {
         'allowedProtocols': {
