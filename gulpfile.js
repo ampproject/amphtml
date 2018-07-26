@@ -212,8 +212,8 @@ function buildExtensions(options) {
   }
 
   if (!!argv.extensions_from && !options.compileAll) {
-    extensionsToBuild =
-        extensionsToBuild.concat(getExtensionsFromArg(argv.extensions_from));
+    const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
+    extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
 
   const results = [];
@@ -231,9 +231,9 @@ function buildExtensions(options) {
 }
 
 /**
- * Process the command line argument --extensions from a list of extensions
- * and example AMP documents into a single list of extensions.
- * @param {string} examples A comma separated list of AMPHTML documents
+ * Process the command line argument --extensions_from of example AMP documents
+ * into a single list of AMP extensions consumed by those documents.
+ * @param {string} examples A comma separated list of AMP documents
  * @return {!Array<string>}
  */
 function getExtensionsFromArg(examples) {
