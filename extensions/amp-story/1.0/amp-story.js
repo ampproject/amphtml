@@ -235,6 +235,16 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.nextPage_ = null;
 
+    /** @private @const */
+    this.desktopMedia_ = this.win.matchMedia(
+        `(min-width: ${DESKTOP_WIDTH_THRESHOLD}px) and ` +
+        `(min-height: ${DESKTOP_HEIGHT_THRESHOLD}px)`);
+
+    /** @private @const */
+    this.canRotateToDesktopMedia_ = this.win.matchMedia(
+        `(min-width: ${DESKTOP_HEIGHT_THRESHOLD}px) and ` +
+        `(min-height: ${DESKTOP_WIDTH_THRESHOLD}px)`);
+
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
 
@@ -612,7 +622,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   maybeLockScreenOrientation_() {
     const {screen} = this.win;
-    if (!screen || !this.canRotateToMatchDesktopMedia_()) {
+    if (!screen || !this.canRotateToDesktopMedia_.matches) {
       return;
     }
 
@@ -1281,28 +1291,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return this.matchesDesktopMedia_() && !this.platform_.isBot() &&
+    return this.desktopMedia_.matches && !this.platform_.isBot() &&
         !isExperimentOn(this.win, 'disable-amp-story-desktop');
-  }
-
-  /**
-   * @return {boolean} True if the story matches the size constraints for
-   *     desktop.
-   * @private
-   */
-  matchesDesktopMedia_() {
-    return this.element.offsetWidth >= DESKTOP_WIDTH_THRESHOLD &&
-        this.element.offsetHeight >= DESKTOP_HEIGHT_THRESHOLD;
-  }
-
-  /**
-   * @return {boolean} True if the story would match the size constraints for
-   *     desktop, if rotated by 90°.
-   * @private
-   */
-  canRotateToMatchDesktopMedia_() {
-    return this.element.offsetWidth >= DESKTOP_HEIGHT_THRESHOLD &&
-        this.element.offsetHeight >= DESKTOP_WIDTH_THRESHOLD;
   }
 
   /**
