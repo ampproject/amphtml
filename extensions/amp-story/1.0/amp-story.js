@@ -355,8 +355,8 @@ export class AmpStory extends AMP.BaseElement {
   pauseCallback() {
     // Store the current paused state, to make sure the story does not play on
     // resume if it was previously paused.
-    this.pausedStateToRestore_ =
-        this.storeService_.get(StateProperty.PAUSED_STATE);
+    this.pausedStateToRestore_ = !!this.storeService_
+        .get(StateProperty.PAUSED_STATE);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
   }
 
@@ -514,6 +514,16 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const direction = getDetail(e)['direction'];
       this.performTapNavigation_(direction);
+    });
+
+    this.element.addEventListener(EventType.DISPATCH_ACTION, e => {
+      if (!getMode().test) {
+        return;
+      }
+
+      const action = getDetail(e)['action'];
+      const data = getDetail(e)['data'];
+      this.storeService_.dispatch(action, data);
     });
 
     this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
@@ -853,7 +863,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   previous_() {
     const activePage = dev().assert(this.activePage_,
-        'No active page set when navigating to next page.');
+        'No active page set when navigating to previous page.');
     activePage.previous();
   }
 
