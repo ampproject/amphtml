@@ -905,6 +905,11 @@ function copyAliasExtensions() {
     extensionsToBuild = argv.extensions.split(',');
   }
 
+  if (!!argv.extensions_from) {
+    const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
+    extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
+  }
+
   for (const key in extensionAliasFilePath) {
     if (extensionsToBuild.length > 0 &&
         extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1) {
