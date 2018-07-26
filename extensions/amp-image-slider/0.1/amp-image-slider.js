@@ -524,7 +524,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.unlistenTouchStart_ =
         listen(this.container_, 'touchstart', this.onTouchStart_.bind(this));
     this.unlistenKeyDown_ =
-        listen(this.container_, 'keydown', this.onKeyDown_.bind(this));
+        listen(this.element, 'keydown', this.onKeyDown_.bind(this));
   }
 
   /**
