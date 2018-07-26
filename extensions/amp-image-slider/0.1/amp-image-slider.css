@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
- amp-image-slider {
+amp-image-slider {
 }
 
 .i-amphtml-image-slider-container {
-  /* Chrome 56+ disallow preventDefault on scroll */
-  /* touch-action: none; */
-
   position: absolute;
   left: 0;
   right: 0;
@@ -28,7 +25,6 @@
   bottom: 0;
   width: 100%;
   height: 100%;
-
   /* Fix iOS translate + overflow: hidden bug */
   transform: translateZ(0);
 }
@@ -50,10 +46,11 @@
 }
 
 amp-image-slider amp-img > img {
+  /* Deals with image not fitting size */
   object-fit: cover;
 }
 
-.i-amphtml-image-slider-over-image {
+.i-amphtml-image-slider-image-on-top {
   transform: translateX(50%);
 }
 
@@ -67,41 +64,32 @@ amp-image-slider amp-img > img {
   z-index: 2;
   width: 100%;
   height: 100%;
-
-  animation: all 0.5s ease;
 }
 
 .i-amphtml-image-slider-bar-stick {
   width: 0;
   height: 100%;
-  border: 3px solid white;
+  border: 2px solid white;
   box-sizing: border-box;
   transform: translateX(-50%);
-
   cursor: ew-resize;
 }
 
 .i-amphtml-image-slider-bar-button {
   cursor: ew-resize;
   position: absolute;
-
   margin: auto;
-
   width: 40px;
   height: 40px;
   background-color: white;
   border-radius: 50%;
   color: lightgray;
   box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.5);
-
   top: 0;
   bottom: 0;
-
   font-weight: bold;
-
   transform: translate(-50%);
   z-index: 3;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,22 +121,16 @@ amp-image-slider amp-img > img {
 .i-amphtml-image-slider-hint {
   cursor: ew-resize;
   position: absolute;
-
   margin: auto;
-
   width: 9em;
   height: 9em;
   border-radius: 50%;
   color: white;
-
   top: 0;
   bottom: 0;
-
   font-weight: bold;
-
   transform: translate(-50%);
   z-index: 3;
-
   display: flex;
   align-items: center;
   justify-content: center;

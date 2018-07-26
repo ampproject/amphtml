@@ -37,10 +37,10 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {Document} */
     this.doc_ = this.win.document;
 
-    /** @private {!Element} */
-    this.container_ = this.doc_.createElement('div');
+    /** @private {Element|null} */
+    this.container_ = null;
 
-    /** @private {?Element} */
+    /** @private {Element|null} */
     this.leftAmpImage_ = null;
 
     /** @private {Element|null} */
@@ -56,17 +56,17 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {Element|null} */
     this.rightLabel_ = null;
 
-    /** @private {!Element} */
-    this.leftMask_ = this.doc_.createElement('div');
+    /** @private {Element|null} */
+    this.leftMask_ = null;
 
-    /** @private {!Element} */
-    this.rightMask_ = this.doc_.createElement('div');
+    /** @private {Element|null} */
+    this.rightMask_ = null;
 
-    /** @private {!Element} */
-    this.bar_ = this.doc_.createElement('div');
+    /** @private {Element|null} */
+    this.bar_ = null;
 
-    /** @private {!Element} */
-    this.barStick_ = this.doc_.createElement('div');
+    /** @private {Element|null} */
+    this.barStick_ = null;
 
     /** @private {Element|null} */
     this.hint_ = null;
@@ -134,18 +134,18 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
     }
 
-    if (!this.leftAmpImage_ || !this.rightAmpImage_) {
-      return null; // abort
-    }
+    user().assert(this.leftAmpImage_ && this.rightAmpImage_,
+        '2 <amp-img>s must be provided for comparison');
 
+    // TODO(kqian): remove this after layer launch
     if (!isExperimentOn(this.win, 'layers')) {
       // When layers not enabled
-      this.setAsOwner(this.leftAmpImage_);
-      this.setAsOwner(this.rightAmpImage_);
+      this.setAsOwner(dev().assertElement(this.leftAmpImage_));
+      this.setAsOwner(dev().assertElement(this.rightAmpImage_));
     }
 
+    this.container_ = this.doc_.createElement('div');
     this.container_.classList.add('i-amphtml-image-slider-container');
-    this.element.appendChild(this.container_);
 
     this.buildImages_();
     this.buildBar_();
@@ -171,7 +171,11 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
     }, ActionTrust.LOW);
 
-    return Promise.resolve();
+    // TODO(kqian): move this before building child components on issue
+    // This is the only step when content tree is attached to document
+    return this.mutateElement(() => {
+      this.element.appendChild(this.container_);
+    });
   }
 
   /** @override */
@@ -224,6 +228,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   buildImages_() {
+    this.leftMask_ = this.doc_.createElement('div');
+    this.rightMask_ = this.doc_.createElement('div');
     this.container_.appendChild(this.rightMask_);
     this.container_.appendChild(this.leftMask_);
 
@@ -241,7 +247,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.leftMask_.appendChild(this.leftAmpImage_);
 
     this.leftMask_.classList.add('i-amphtml-image-slider-left-mask');
-    this.leftAmpImage_.classList.add('i-amphtml-image-slider-over-image');
+    this.leftAmpImage_.classList.add('i-amphtml-image-slider-image-on-top');
 
     if (this.leftLabel_) {
       this.leftLabelWrapper_ = this.doc_.createElement('div');
@@ -258,6 +264,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   buildBar_() {
+    this.bar_ = this.doc_.createElement('div');
+    this.barStick_ = this.doc_.createElement('div');
     this.container_.appendChild(this.bar_);
     this.bar_.appendChild(this.barStick_);
 
@@ -516,7 +524,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   registerEvents_() {
     this.unlistenMouseDown_ =
-        listen(this.container_, 'mousedown', this.onMouseDown_.bind(this));
+        listen(dev().assertElement(this.container_),
+            'mousedown', this.onMouseDown_.bind(this));
     this.unlistenKeyDown_ =
         listen(this.element, 'keydown', this.onKeyDown_.bind(this));
     this.registerTouchGestures_();
@@ -665,10 +674,10 @@ export class AmpImageSlider extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
 
-    // No effect if layer enabled
-    if (this.leftAmpImage_ && this.rightAmpImage_) {
-      this.scheduleLayout(this.leftAmpImage_);
-      this.scheduleLayout(this.rightAmpImage_);
+    // TODO(kqian): remove this after layer launch
+    if (isExperimentOn(this.win, 'layers')) {
+      this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
+      this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
     }
 
     this.registerEvents_();
