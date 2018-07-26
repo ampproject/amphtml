@@ -16,7 +16,7 @@
 
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {copyChildren, removeChildren} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
@@ -62,7 +62,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
     this.scrollableEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win);
+    this.storeService_ = getStoreService(this.win);
   }
 
   /** @override */

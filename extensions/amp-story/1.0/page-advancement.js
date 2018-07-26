@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent} from '../../../src/dom';
@@ -269,7 +269,7 @@ class ManualAdvancement extends AdvancementConfig {
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
       this.storeService_ =
-        Services.storyStoreService(element.ownerDocument.defaultView);
+        getStoreService(element.ownerDocument.defaultView);
     }
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);

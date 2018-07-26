@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
@@ -66,9 +70,9 @@ const AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE = {
 export class ShareMenu {
   /**
    * @param {!Window} win
-   * @param {!Element} parentEl Element where to append the component
+   * @param {!Element} storyEl Element where to append the component
    */
-  constructor(win, parentEl) {
+  constructor(win, storyEl) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -85,13 +89,13 @@ export class ShareMenu {
     this.isSystemShareSupported_ = false;
 
     /** @private @const {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(this.win_);
+    this.shareWidget_ = ShareWidget.create(this.win_, storyEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
-    this.parentEl_ = parentEl;
+    this.parentEl_ = storyEl;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);

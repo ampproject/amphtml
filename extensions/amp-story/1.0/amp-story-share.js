@@ -22,6 +22,7 @@ import {
 } from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
+import {getRequestService} from './amp-story-request-service';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -188,8 +189,11 @@ function buildCopySuccessfulToast(doc, url) {
  * Social share widget for story bookend.
  */
 export class ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   */
+  constructor(win, storyEl) {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
@@ -203,12 +207,16 @@ export class ShareWidget {
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(this.win);
+    this.requestService_ = getRequestService(this.win, storyEl);
   }
 
-  /** @param {!Window} win */
-  static create(win) {
-    return new ShareWidget(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   * @return {!ShareWidget}
+   */
+  static create(win, storyEl) {
+    return new ShareWidget(win, storyEl);
   }
 
   /**
@@ -381,9 +389,12 @@ export class ShareWidget {
  * This class is coupled to the DOM structure for ShareWidget, but that's ok.
  */
 export class ScrollableShareWidget extends ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
-    super(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   */
+  constructor(win, storyEl) {
+    super(win, storyEl);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
@@ -396,9 +407,13 @@ export class ScrollableShareWidget extends ShareWidget {
     this.containerWidth_ = null;
   }
 
-  /** @param {!Window} win */
-  static create(win) {
-    return new ScrollableShareWidget(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   * @return {!ScrollableShareWidget}
+   */
+  static create(win, storyEl) {
+    return new ScrollableShareWidget(win, storyEl);
   }
 
   /**
