@@ -122,10 +122,16 @@ export class XhrBase {
     // Do not append __amp_source_origin if explicitly disabled.
     if (init.ampCors !== false) {
       input = getCorsUrl(this.win, input);
+    } else {
+      init.requireAmpResponseSourceOrigin = false;
     }
 
-    dev().assert(!('requireAmpResponseSourceOrigin' in init),
+    dev().assert(init.requireAmpResponseSourceOrigin !== true,
         'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
+
+    if (init.requireAmpResponseSourceOrigin === undefined) {
+      init.requireAmpResponseSourceOrigin = true;
+    }
 
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
@@ -149,7 +155,7 @@ export class XhrBase {
             `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
-      } else if (init.ampCors) {
+      } else if (init.requireAmpResponseSourceOrigin) {
         user().assert(false, 'Response must contain the'
           + ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
