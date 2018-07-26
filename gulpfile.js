@@ -208,7 +208,7 @@ function buildExtensions(options) {
 
   let extensionsToBuild = [];
   if (!!argv.extensions && !options.compileAll) {
-    extensionsToBuild = argv.extensions.split(',');
+    extensionsToBuild = getExtensionsFromArg(argv.extensions);
   }
 
   const results = [];
@@ -223,6 +223,30 @@ function buildExtensions(options) {
     results.push(buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs));
   }
   return Promise.all(results);
+}
+
+/**
+ * Process the command line argument --extensions from a list of extensions
+ * and example AMP documents into a single list of extensions.
+ * @param {string} argvExtensions
+ * @return {!Array<string>}
+ */
+function getExtensionsFromArg(argvExtensions) {
+  const args = argvExtensions.split(',');
+  const extensionsToBuild = args.filter(arg => !arg.endsWith('html'));
+  const examples = args.filter(arg => arg.endsWith('html'));
+
+  examples.forEach(example => {
+    const html = fs.readFileSync(example, 'utf8');
+    const customElementTemplateRe = /custom-(element|template)="([^"]+)"/g;
+    const extensionNameMatchIndex = 2;
+    let match;
+    while ((match = customElementTemplateRe.exec(html))) {
+      extensionsToBuild.push(match[extensionNameMatchIndex]);
+    }
+  });
+
+  return extensionsToBuild;
 }
 
 /**
@@ -680,6 +704,9 @@ function parseExtensionFlags() {
     const extensionsMessage = green('⤷ Use ') +
         cyan('--extensions=amp-foo,amp-bar ') +
         green('to choose which extensions to build.');
+    const exampleExtensionsMessage = green('⤷ Use ') +
+        cyan('--extensions=examples/foo.amp.html ') +
+        green('to build extensions from example AMP(s).');
     const minimalSetMessage = green('⤷ Use ') +
         cyan('--extensions=minimal_set ') +
         green('to build just the extensions needed to load ') +
@@ -689,6 +716,7 @@ function parseExtensionFlags() {
         log(red('ERROR:'), 'Missing list of extensions.');
         log(noExtensionsMessage);
         log(extensionsMessage);
+        log(exampleExtensionsMessage);
         log(minimalSetMessage);
         process.exit(1);
       }
@@ -699,7 +727,7 @@ function parseExtensionFlags() {
       }
 
       log(green('Building extension(s):'),
-          cyan(argv.extensions.replace(/,/g, ', ')));
+          cyan(getExtensionsFromArg(argv.extensions).join(', ')));
 
       if (maybeAddVideoService()) {
         log(green('⤷ Video component(s) being built, added'),
@@ -712,6 +740,7 @@ function parseExtensionFlags() {
     }
     log(noExtensionsMessage);
     log(extensionsMessage);
+    log(exampleExtensionsMessage);
     log(minimalSetMessage);
   }
 }
