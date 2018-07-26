@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-1.0.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
@@ -114,7 +114,7 @@ export class ViewportWarningLayer {
     this.platform_ = Services.platformFor(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;

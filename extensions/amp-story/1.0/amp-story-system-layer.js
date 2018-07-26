@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, StateProperty} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 import {LocalizedStringId} from './localization';
@@ -165,7 +169,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -445,7 +449,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ =
         renderSimpleTemplate(this.win_.document, SHARE_WIDGET_PILL_CONTAINER);
 
-    const shareWidget = new ShareWidget(this.win_);
+    const shareWidget = new ShareWidget(this.win_, this.parentEl_);
 
     this.sharePillContainerNode_
         .querySelector('.i-amphtml-story-share-pill')
