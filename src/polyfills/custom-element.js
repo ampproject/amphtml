@@ -295,7 +295,12 @@ class Registry {
     const upgradeCandidates = this.queryAll_(root, query);
 
     for (let i = 0; i < upgradeCandidates.length; i++) {
-      this.upgradeSelf(upgradeCandidates[i]);
+      const candidate = upgradeCandidates[i];
+      if (root) {
+        this.upgradeSelf(candidate);
+      } else {
+        this.connectedCallback_(candidate);
+      }
     }
   }
 
@@ -473,7 +478,7 @@ function polyfill(win) {
       const def = registry.getByConstructor(constructor);
       el = createElement.call(document, def.name);
     }
-    Object.setPrototypeOf(this, constructor.prototype);
+    Object.setPrototypeOf(el, constructor.prototype);
     return el;
   }
   HTMLElementPolyfill.prototype = Object.create(HTMLElement.prototype, {
