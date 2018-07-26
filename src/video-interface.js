@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
+
 /**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
@@ -208,6 +210,12 @@ export const VideoAttributes = {
    * and http://caniuse.com/#feat=fullscreen
    */
   ROTATE_TO_FULLSCREEN: 'rotate-to-fullscreen',
+  /**
+   * noaudio
+   *
+   * If set and autoplay, the equalizer icon will not be displayed.
+   */
+  NO_AUDIO: 'noaudio',
 };
 
 

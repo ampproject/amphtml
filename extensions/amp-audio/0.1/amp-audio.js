@@ -171,7 +171,8 @@ export class AmpAudio extends AMP.BaseElement {
 
   /**
    * Sets whether the audio is playing or not.
-   * @VisibleForTesting
+   * @param {boolean} isPlaying
+   * @private
    */
   setPlayingStateForTesting_(isPlaying) {
     if (getMode().test) {
@@ -182,13 +183,13 @@ export class AmpAudio extends AMP.BaseElement {
   /**
    * Returns whether `<amp-audio>` has an `<amp-story>` for an ancestor.
    * @return {?Element}
-   * @VisibleForTesting
+   * @private
    */
   isStoryDescendant_() {
     return closestByTag(this.element, 'AMP-STORY');
   }
 
-
+  /** @private */
   audioPlaying_() {
     const playHandler = () => {
       this.audio_.play();
@@ -201,11 +202,7 @@ export class AmpAudio extends AMP.BaseElement {
 
     // Update the media session
     setMediaSession(
-        this.getAmpDoc().win,
-        this.metadata_,
-        playHandler,
-        pauseHandler
-    );
+        this.getAmpDoc(), this.metadata_, playHandler, pauseHandler);
   }
 }
 

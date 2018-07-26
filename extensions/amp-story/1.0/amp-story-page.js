@@ -29,12 +29,13 @@ import {
   hasAnimations,
 } from './animation';
 import {Deferred} from '../../../src/utils/promise';
-import {EventType, dispatch, dispatchCustom} from './events';
+import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
+import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
   closestBySelector,
   iterateCursor,
@@ -43,11 +44,10 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
 import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
@@ -57,7 +57,6 @@ import {upgradeBackgroundAudio} from './audio';
  * @const {string}
  */
 const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
-
 
 /**
  * Selectors for media elements
@@ -70,13 +69,21 @@ const Selectors = {
   ALL_VIDEO: 'video',
 };
 
-
 /** @private @const {string} */
 const TAG = 'amp-story-page';
 
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
+/**
+ * amp-story-page states.
+ * @enum {number}
+ */
+export const PageState = {
+  NOT_ACTIVE: 0, // Page is not displayed. Could still be visible on desktop.
+  ACTIVE: 1, // Page is currently the main page, and playing.
+  PAUSED: 2, // Page is currently the main page, but not playing.
+};
 
 /**
  * The <amp-story-page> custom element, which represents a single page of
@@ -93,7 +100,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
-    /** @private {?Element} */
+    /** @const @private {!function(boolean)} */
+    this.debounceToggleLoadingSpinner_ = debounce(
+        this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
+
+    /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
     /** @private @const {!Promise} */
@@ -119,9 +130,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type');
 
-    /** @const @private {!function()} */
-    this.debounceToggleLoadingSpinner_ = debounce(
-        this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
+    /** @private {!PageState} */
+    this.state_ = PageState.NOT_ACTIVE;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -136,8 +146,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /*
-   * @return {?./animation.AnimationManager}
+  /**
    * @private
    */
   maybeCreateAnimationManager_() {
@@ -155,7 +164,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
-    this.ownVideoAutoplay_();
+    this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
@@ -169,21 +178,18 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /** @private */
-  ownVideoAutoplay_() {
+  /**
+   * Delegates video autoplay so the video manager does not follow the
+   * autoplay attribute that may have been set by a publisher, which could
+   * play videos from an inactive page.
+   */
+  delegateVideoAutoplay() {
     const videos = this.element.querySelectorAll('amp-video');
     if (videos.length < 1) {
       return;
     }
-
-    // This service gets installed by all video instances.
-    // Executions of `installVideoManagerForDoc` following the first are NOOPs,
-    // so this only takes care of a race condition when the service has not yet
-    // been installed.
-    installVideoManagerForDoc(this.getAmpDoc());
-
     toArray(videos).forEach(el => {
-      Services.videoManagerForDoc(this.element).delegateAutoplay(el);
+      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
     });
   }
 
@@ -219,12 +225,48 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
+  /**
+   * Updates the state of the page.
+   * @param {!PageState} state
+   */
+  setState(state) {
+    switch (state) {
+      case PageState.NOT_ACTIVE:
+        this.element.removeAttribute('active');
+        this.pauseCallback();
+        this.state_ = state;
+        break;
+      case PageState.ACTIVE:
+        if (this.state_ === PageState.NOT_ACTIVE) {
+          this.element.setAttribute('active', '');
+          this.resumeCallback();
+        }
+
+        if (this.state_ === PageState.PAUSED) {
+          this.advancement_.start();
+          this.playAllMedia_();
+        }
+
+        this.state_ = state;
+        break;
+      case PageState.PAUSED:
+        this.advancement_.stop();
+        this.pauseAllMedia_(false /** rewindToBeginning */);
+        this.state_ = state;
+        break;
+      default:
+        dev().warn(TAG, `PageState ${state} does not exist`);
+        break;
+    }
+  }
+
+
   /** @override */
   pauseCallback() {
     this.advancement_.stop();
 
     this.stopListeningToVideoEvents_();
-    this.pauseAllMedia_(true /* rewindToBeginning */);
+    this.pauseAllMedia_(true /** rewindToBeginning */);
 
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
@@ -314,7 +356,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   markPageAsLoaded_() {
-    dispatch(this.element, EventType.PAGE_LOADED, true);
+    dispatch(this.win, this.element, EventType.PAGE_LOADED,
+        /* payload */ undefined, {bubbles: true});
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
@@ -355,17 +398,18 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   getMediaBySelector_(selector) {
     const iframe = this.element.querySelector('iframe');
-    const iframeDoc = iframe && iframe.contentDocument;
+    const fie = iframe &&
+        getFriendlyIframeEmbedOptional(/** @type {!HTMLIFrameElement} */ (iframe));
     const mediaSet = [];
 
     iterateCursor(scopedQuerySelectorAll(this.element, selector),
         el => mediaSet.push(el));
 
-    if (!iframeDoc) {
+    if (!fie) {
       return mediaSet;
     }
 
-    iterateCursor(iframeDoc.querySelectorAll(selector),
+    iterateCursor(fie.win.document.querySelectorAll(selector),
         el => mediaSet.push(el));
     return mediaSet;
   }
@@ -520,21 +564,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @param {boolean} isActive
-   */
-  setActive(isActive) {
-    if (isActive) {
-      this.element.setAttribute('active', '');
-      this.beforeVisible();
-      this.resumeCallback();
-    } else {
-      this.element.removeAttribute('active');
-      this.pauseCallback();
-    }
-  }
-
-
-  /**
    * @return {number} The distance from the current page to the active page.
    */
   getDistance() {
@@ -574,12 +603,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {number} progress The progress from 0.0 to 1.0.
    */
   emitProgress_(progress) {
-    const payload = {
-      pageId: this.element.id,
-      progress,
-    };
+    const payload = dict({
+      'pageId': this.element.id,
+      'progress': progress,
+    });
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.PAGE_PROGRESS, payload,
+    dispatch(this.win, this.element, EventType.PAGE_PROGRESS, payload,
         eventInit);
   }
 
@@ -665,7 +694,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     const targetPageId = this.getPreviousPageId();
 
     if (targetPageId === null) {
-      dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
+      dispatch(this.win, this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP,
+          /* payload */ undefined, {bubbles: true});
       return;
     }
 
@@ -690,12 +720,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Delegated the navigation decision to AMP-STORY via event.
-   * @param {number} direction The direction in which navigation needs to takes place.
+   * @param {number} direction The direction in which navigation needs to
+   * takes place.
    */
   navigateOnTap(direction) {
-    const payload = {direction};
+    const payload = dict({'direction': direction});
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,
+    dispatch(this.win, this.element, EventType.TAP_NAVIGATION, payload,
         eventInit);
   }
 
@@ -705,9 +736,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId) {
-    const payload = {targetPageId};
+    const payload = dict({'targetPageId': targetPageId});
     const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
+    dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
   }
 
@@ -721,8 +752,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     getLogEntries(this.element).then(logEntries => {
-      dispatchCustom(this.win, this.element,
-          EventType.DEV_LOG_ENTRIES_AVAILABLE, logEntries, {bubbles: true});
+      dispatch(this.win, this.element,
+          EventType.DEV_LOG_ENTRIES_AVAILABLE,
+          // ? is OK because all consumers are internal.
+          /** @type {?} */ (logEntries), {bubbles: true});
     });
   }
 

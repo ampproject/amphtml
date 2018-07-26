@@ -116,16 +116,13 @@ function callback(id, ns) { ns.addInstance(id); }
  *    provided, otherwise false
  */
 function getUrl(context, data, ns) {
-  const {location} = context,
-      {mode} = ns,
+  const {mode} = ns,
       isDev = hasOwn(data, 'isDev'),
       sld_ = sld[!mode.dev],
       thld_ = thld[isDev && !mode.live],
       search = reduceSearch(ns, data.pid, data.click, context.referrer),
       url = search ?
         addParamsToUrl(`https://${thld_}.${sld_}.com/ad`, search) : false;
-
-  if (isDev && mode.live) { logSuspiciousActivity(location, data, url); }
   return url;
 }
 
@@ -155,6 +152,3 @@ function reduceSearch(ns, placementId, click, referrer) {
     'pid': needsRequest ? placementId : '',
   });
 }
-
-// eslint-disable-next-line no-unused-vars
-function logSuspiciousActivity(location, data, url) { /* todo implement */ }

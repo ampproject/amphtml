@@ -17,6 +17,7 @@
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 
 
 /** @type {string} */
@@ -31,14 +32,19 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    accessstate: boolean,
  *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
+ *    infodialogstate: boolean,
  *    hasaudiostate: boolean,
  *    landscapestate: boolean,
  *    mutedstate: boolean,
+ *    pausedstate: boolean,
+ *    rtlstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
+ *    consentid: ?string,
  *    currentpageid: string,
  * }}
  */
@@ -56,29 +62,42 @@ export const StateProperty = {
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
 
   // App States.
+  ACCESS_STATE: 'accessstate', // amp-access paywall.
   AD_STATE: 'adstate',
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
+  INFO_DIALOG_STATE: 'infodialogstate',
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
+  PAUSED_STATE: 'pausedstate',
+  RTL_STATE: 'rtlstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
+
+  // App data.
+  CONSENT_ID: 'consentid',
   CURRENT_PAGE_ID: 'currentpageid',
+  CURRENT_PAGE_INDEX: 'currentpageindex',
 };
 
 
 /** @private @const @enum {string} */
 export const Action = {
+  CHANGE_PAGE: 'setcurrentpageid',
+  SET_CONSENT_ID: 'setconsentid',
+  TOGGLE_ACCESS: 'toggleaccess',
   TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
+  TOGGLE_INFO_DIALOG: 'toggleinfodialog',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
+  TOGGLE_PAUSED: 'togglepaused',
+  TOGGLE_RTL: 'togglertl',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
-  CHANGE_PAGE: 'changepage',
 };
 
 
@@ -91,6 +110,13 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    // Triggers the amp-acess paywall.
+    case Action.TOGGLE_ACCESS:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.ACCESS_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
       return /** @type {!State} */ (Object.assign(
@@ -106,6 +132,13 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_DESKTOP:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
+    // Shows or hides the info dialog.
+    case Action.TOGGLE_INFO_DIALOG:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.INFO_DIALOG_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Shows or hides the audio controls.
     case Action.TOGGLE_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
@@ -117,29 +150,31 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.MUTED_STATE]: !!data}));
-    case Action.TOGGLE_SUPPORTED_BROWSER:
-      if (data) {
-        dev().error(TAG, 'Cannot exit unsupported browser state.');
-      }
+    case Action.TOGGLE_PAUSED:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-            [StateProperty.CAN_SHOW_BOOKEND]: false,
-            [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-            [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
-            [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-            [StateProperty.BOOKEND_STATE]: false,
-            [StateProperty.DESKTOP_STATE]: false,
-            [StateProperty.HAS_AUDIO_STATE]: false,
-            [StateProperty.MUTED_STATE]: true,
-            [StateProperty.SUPPORTED_BROWSER_STATE]: false,
-          }));
+          {}, state, {[StateProperty.PAUSED_STATE]: !!data}));
+    case Action.TOGGLE_SUPPORTED_BROWSER:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
+          {}, state, {
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.SHARE_MENU_STATE]: !!data,
+          }));
+    // Triggers right to left experience.
+    case Action.TOGGLE_RTL:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.RTL_STATE]: !!data}));
+    case Action.SET_CONSENT_ID:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.CONSENT_ID]: data}));
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
+          {}, state, {
+            [StateProperty.CURRENT_PAGE_ID]: data.id,
+            [StateProperty.CURRENT_PAGE_INDEX]: data.index,
+          }));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -147,6 +182,9 @@ const actions = (state, action, data) => {
 };
 
 
+/**
+ * Store service.
+ */
 export class AmpStoryStoreService {
   /**
    * @param {!Window} win
@@ -169,7 +207,7 @@ export class AmpStoryStoreService {
    * @return {*}
    */
   get(key) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Unknown state ${key}.`);
       return;
     }
@@ -184,7 +222,7 @@ export class AmpStoryStoreService {
    *                                     triggered with current value.
    */
   subscribe(key, listener, callToInitialize = false) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
     }
@@ -230,15 +268,21 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.PAUSED_STATE]: false,
+      [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
+      [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
+      [StateProperty.CURRENT_PAGE_INDEX]: 0,
     });
   }
 

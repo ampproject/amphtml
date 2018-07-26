@@ -20,16 +20,19 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getCorsUrl,
+  getProxyServingType,
   getSourceOrigin,
   getSourceUrl,
   getWinOrigin,
   isLocalhostOrigin,
   isProtocolValid,
   isProxyOrigin,
-  isSecureUrl,
+  isSecureUrlDeprecated,
   parseQueryString,
   parseUrlDeprecated,
+  removeAmpJsParamsFromUrl,
   removeFragment,
+  removeSearch,
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
   serializeQueryString,
@@ -337,34 +340,34 @@ describe('assertHttpsUrl/isSecureUrl', () => {
   });
   it('should allow https', () => {
     assertHttpsUrl('https://twitter.com', referenceElement);
-    expect(isSecureUrl('https://twitter.com')).to.be.true;
+    expect(isSecureUrlDeprecated('https://twitter.com')).to.be.true;
   });
   it('should allow protocol relative', () => {
     assertHttpsUrl('//twitter.com', referenceElement);
     // `isSecureUrl` always resolves relative URLs.
-    expect(isSecureUrl('//twitter.com'))
+    expect(isSecureUrlDeprecated('//twitter.com'))
         .to.be.equal(window.location.protocol == 'https:');
   });
   it('should allow localhost with http', () => {
     assertHttpsUrl('http://localhost:8000/sfasd', referenceElement);
-    expect(isSecureUrl('http://localhost:8000/sfasd')).to.be.true;
+    expect(isSecureUrlDeprecated('http://localhost:8000/sfasd')).to.be.true;
   });
   it('should allow localhost with http suffix', () => {
     assertHttpsUrl('http://iframe.localhost:8000/sfasd', referenceElement);
-    expect(isSecureUrl('http://iframe.localhost:8000/sfasd')).to.be.true;
+    expect(isSecureUrlDeprecated('http://iframe.localhost:8000/sfasd')).to.be.true;
   });
 
   it('should fail on http', () => {
     allowConsoleError(() => { expect(() => {
       assertHttpsUrl('http://twitter.com', referenceElement);
     }).to.throw(/source must start with/); });
-    expect(isSecureUrl('http://twitter.com')).to.be.false;
+    expect(isSecureUrlDeprecated('http://twitter.com')).to.be.false;
   });
   it('should fail on http with localhost in the name', () => {
     allowConsoleError(() => { expect(() => {
       assertHttpsUrl('http://foolocalhost', referenceElement);
     }).to.throw(/source must start with/); });
-    expect(isSecureUrl('http://foolocalhost')).to.be.false;
+    expect(isSecureUrlDeprecated('http://foolocalhost')).to.be.false;
   });
 });
 
@@ -411,6 +414,47 @@ describe('removeFragment', () => {
   it('should ignore when no fragment', () => {
     expect(removeFragment('https://twitter.com/path')).to.equal(
         'https://twitter.com/path');
+  });
+});
+
+describe('removeSearch', () => {
+  it('should remove search', () => {
+    expect(removeSearch('https://twitter.com/path?abc')).to.equal(
+        'https://twitter.com/path');
+  });
+  it('should remove search with value', () => {
+    expect(removeSearch('https://twitter.com/path?abc=123')).to.equal(
+        'https://twitter.com/path');
+  });
+  it('should remove multiple params', () => {
+    expect(removeSearch('https://twitter.com/path?abc=123&d&e=4')).to.equal(
+        'https://twitter.com/path');
+  });
+  it('should remove empty search', () => {
+    expect(removeSearch('https://twitter.com/path?')).to.equal(
+        'https://twitter.com/path');
+  });
+  it('should ignore when no search', () => {
+    expect(removeSearch('https://twitter.com/path')).to.equal(
+        'https://twitter.com/path');
+  });
+  it('should preserve fragment', () => {
+    expect(removeSearch('https://twitter.com/path?abc#f')).to.equal(
+        'https://twitter.com/path#f');
+  });
+  it('should preserve fragment with multiple params', () => {
+    expect(removeSearch('https://twitter.com/path?a&d=1&e=5#f=x')).to.equal(
+        'https://twitter.com/path#f=x');
+  });
+  it('should preserve fragment when no search', () => {
+    expect(removeSearch('https://twitter.com/path#f')).to.equal(
+        'https://twitter.com/path#f');
+  });
+  it('should handle empty fragment', () => {
+    expect(removeSearch('https://twitter.com/path#')).to.equal(
+        'https://twitter.com/path#');
+    expect(removeSearch('https://twitter.com/path?#')).to.equal(
+        'https://twitter.com/path#');
   });
 });
 
@@ -663,6 +707,9 @@ describe('getSourceOrigin/Url', () => {
   testOrigin(
       'https://cdn.ampproject.org/c/o.com/foo/&amp_js_param=5&d=5',
       'http://o.com/foo/&amp_js_param=5&d=5'); // Treats &... as part of path.
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?amp_r=test%3Dhello%20world',
+      'http://o.com/foo/');
 
   // Removes google experimental queryString parameters.
   testOrigin(
@@ -798,5 +845,61 @@ describe('getCorsUrl', () => {
     expect(getCorsUrl(window, 'http://example.com/?name=hello'))
         .to.equal('http://example.com/?name=hello&' +
             '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
+  });
+});
+
+
+describe('removeAmpJsParamsFromUrl', () => {
+  it('should handle unaffected URLs', () => {
+    expect(removeAmpJsParamsFromUrl('http://example.com'))
+        .to.equal('http://example.com/');
+    expect(removeAmpJsParamsFromUrl('http://example.com?x=123'))
+        .to.equal('http://example.com/?x=123');
+    expect(removeAmpJsParamsFromUrl('http://example.com#x=123'))
+        .to.equal('http://example.com/#x=123');
+    expect(removeAmpJsParamsFromUrl('http://example.com?y=abc#x=123'))
+        .to.equal('http://example.com/?y=abc#x=123');
+  });
+
+  it('should remove all internal params', () => {
+    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js=1&amp_gsa=2&amp_r=3&usqp=4'))
+        .to.equal('http://example.com/');
+    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js&amp_gsa&amp_r&usqp'))
+        .to.equal('http://example.com/');
+  });
+
+  it('should remove all internal params, leaving others intact', () => {
+    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e'))
+        .to.equal('http://example.com/?a=a&b=b&c=c&d=d&e=e');
+  });
+
+  it('should preserve the fragment', () => {
+    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
+        .to.equal('http://example.com/?a=a&b=b&c=c&d=d&e=e#frag=yes');
+  });
+
+  it('should preserve the path', () => {
+    expect(
+        removeAmpJsParamsFromUrl('http://example.com/toast?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
+        .to.equal('http://example.com/toast?a=a&b=b&c=c&d=d&e=e#frag=yes');
+  });
+});
+
+describe('getProxyServingType', () => {
+  it('should ignore non-proxy origins', () => {
+    expect(getProxyServingType('http://www.example.com')).to.be.null;
+    expect(getProxyServingType('http://cdn.ampproject.org/c/o.com/foo/')).to.be.null;
+  });
+
+  it('should correctly extract known types', () => {
+    expect(getProxyServingType('https://cdn.ampproject.org/c/o.com/foo/')).to.equal('c');
+    expect(getProxyServingType('https://cdn.ampproject.org/a/o.com/foo/')).to.equal('a');
+    expect(getProxyServingType('https://cdn.ampproject.org/v/o.com/foo/')).to.equal('v');
+  });
+
+  it('should correctly extract unknown types', () => {
+    expect(getProxyServingType('https://cdn.ampproject.org/test/o.com/foo/')).to.equal('test');
+    expect(getProxyServingType('https://not.cdn.ampproject.org/test/o.com/foo/')).to.equal('test');
+    expect(getProxyServingType('https://not.cdn.ampproject.org/test/blah.com/foo/')).to.equal('test');
   });
 });

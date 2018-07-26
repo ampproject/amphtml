@@ -65,12 +65,12 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp pr-check --files=<test-files-path-glob>`                          | Runs all the Travis CI checks locally, and restricts tests to the files provided.  |
 | `gulp test --unit`                                                      | Runs the unit tests in Chrome (doesn't require the AMP library to be built).                                                 |
 | `gulp test --unit --files=<test-files-path-glob>`                       | Runs the unit tests from the specified files in Chrome.                                                 |
-| `gulp test --local-changes`                                             | Runs the unit tests from just the files changed in the local branch in Chrome.   |
+| `gulp test --local-changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.   |
 | `gulp test --integration`                                               | Runs the integration tests in Chrome (requires the AMP library to be built).                                                 |
 | `gulp test --integration --files=<test-files-path-glob>`                | Runs the integration tests from the specified files in Chrome.                                                 |
 | `gulp test [--unit\|--integration] --verbose`                           | Runs tests in Chrome with logging enabled.                            |
 | `gulp test [--unit\|--integration] --nobuild`                           | Runs tests without re-build.                                          |
-| `gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/report-html/index.html |
+| `gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/index.html |
 | `gulp test [--unit\|--integration] --watch`                             | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test [--unit\|--integration] --watch --verbose`                   | Same as `watch`, with logging enabled.                                 |
 | `gulp test [--integration] --saucelabs`                                 | Runs integration tests on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
@@ -89,9 +89,11 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
-| `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
+| `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`. |
+| `gulp visual-diff --nobuild`                                            | Same as above, but without re-build. |
 | `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode. |
-| `gulp visual-diff --percy_debug --chrome_debug --webserver_debug`       | Same as above, with additional logging. Debug flags can be used independently.  |
+| `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.  |
+| `gulp visual-diff --grep=<regular-expression-pattern>`                  | Same as above, but executes only those tests whose name matches the regular expression pattern. |
 
 ## Manual testing
 
@@ -213,8 +215,8 @@ In addition to building the AMP runtime and running `gulp test`, the automatic t
 The technology stack used is:
 
 - [Percy](https://percy.io/), a visual regression testing service for webpages
-- [Capybara](https://percy.io/docs/clients/ruby/capybara-rails), a framework that integrates tests with Percy
-- [Poltergeist](https://github.com/teampoltergeist/poltergeist), a driver capable of loading webpages for diffing
+- [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
+- [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
 - [(Headless) Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome browser, optionally in headless mode
 
 The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
@@ -227,15 +229,13 @@ When a test run fails due to visual diffs being present, click the `details` lin
 
 You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
 
-First, make sure you have [Ruby](https://www.ruby-lang.org/en/documentation/installation/) installed on your machine if you don't already have it, and download the gems required for local Percy builds:
-```
-gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper
-```
-Next, build the AMP runtime and run the gulp task that invokes the visual diff script:
+First, build the AMP runtime and run the gulp task that invokes the visual diff script:
 ```
 gulp build
-gulp visual-diff
+gulp visual-diff --nobuild
 ```
+Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp build` on each execution.
+
 The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome. You can see the results at `https://percy.io/<org>/<project>`.
 
 To run Chrome in headless mode, use:
@@ -245,12 +245,15 @@ To run Chrome in headless mode, use:
 
 To see debugging info during Percy runs, you can run:
 ```
- gulp visual-diff --percy_debug --chrome_debug --webserver_debug
+ gulp visual-diff --chrome_debug --webserver_debug
 ```
-The debug flags `--percy_debug`, `--chrome_debug`, and `--webserver_debug` can be used independently. To enable all three debug flags, you can also run:
+The debug flags `--chrome_debug` and `--webserver_debug` can be used independently. To enable both debug flags, you can also run:
 ```
  gulp visual-diff --debug
 ```
+
+To execute only a subset of the tests (i.e., when creating or debugging an existing test) use the `--grep` regular expression flag. e.g., `gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
+
 After each run, a new set of results will be available at `https://percy.io/<org>/<project>`.
 
 ## Testing on devices

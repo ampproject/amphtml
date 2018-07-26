@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
 import {isObject} from '../../src/types';
@@ -427,13 +428,23 @@ export function imaVideo(global, data) {
 
   consentState = global.context.initialConsentState;
 
-  // Set-up code that can't run until the IMA lib loads.
-  loadScript(
-      /** @type {!Window} */ (global),
-      'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
-      () => onImaLoadSuccess(global, data), onImaLoadFail);
+  if (consentState == 4) { // UNKNOWN
+    // On unknown consent state, do not load IMA. Treat this the same as if IMA
+    // failed to load.
+    onImaLoadFail();
+  } else {
+    // Set-up code that can't run until the IMA lib loads.
+    loadScript(
+        /** @type {!Window} */ (global),
+        'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+        () => onImaLoadSuccess(global, data), onImaLoadFail);
+  }
 }
 
+/**
+ * @param {!Object} global
+ * @param {!Object} data
+ */
 function onImaLoadSuccess(global, data) {
   // This is the first place where we have access to any IMA objects.
 
@@ -496,6 +507,9 @@ function onImaLoadSuccess(global, data) {
   }
 }
 
+/**
+ * Handler for on fail.
+ */
 function onImaLoadFail() {
   // Something blocked ima3.js from loading - ignore all IMA stuff and just play
   // content.
@@ -504,12 +518,22 @@ function onImaLoadFail() {
   postMessage({event: VideoEvents.LOAD});
 }
 
+/**
+ * @param {string} html
+ * @return {!Element}
+ */
 function htmlToElement(html) {
   const template = document.createElement('template');
   template./*OK*/innerHTML = html;
   return template.content.firstChild;
 }
 
+/**
+ * @param {!Object} global
+ * @param {string} name
+ * @param {string} [fill='#FFFFFF']
+ * @return {!Element}
+ */
 function createIcon(global, name, fill = '#FFFFFF') {
   const doc = global.document;
   const icon = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -522,6 +546,11 @@ function createIcon(global, name, fill = '#FFFFFF') {
   return icon;
 }
 
+/**
+ * @param {!Element} element
+ * @param {string} name
+ * @param {string} [fill='#FFFFFF']
+ */
 function changeIcon(element, name, fill = '#FFFFFF') {
   element./*OK*/innerHTML = icons[name];
   if (fill != element.getAttributeNS(null, 'fill')) {
@@ -567,15 +596,17 @@ function onBigPlayTouchMove() {
   userTappedAndDragged = true;
 }
 
-
+/**
+ * Requests ads.
+ */
 export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
-  if (consentState == 4) { // UNKNOWN
+  if (consentState == CONSENT_POLICY_STATE.UNKNOWN) {
     // We're unaware of the user's consent state - do not request ads.
     imaLoadAllowed = false;
     return;
-  } else if (consentState == 2) { // INSUFFICIENT
+  } else if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
     // User has provided consent state but has not consented to personalized
     // ads.
     adsRequest.adTagUrl += '&npa=1';

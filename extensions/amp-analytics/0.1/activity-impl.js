@@ -20,6 +20,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {hasOwn} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 import {registerServiceBuilderForDoc} from '../../../src/service';
 
@@ -65,6 +66,9 @@ function findEngagedTimeBetween(activityEvent, time) {
 
 class ActivityHistory {
 
+  /**
+   * Creates an instance of ActivityHistory.
+   */
   constructor() {
     /** @private {number} */
     this.totalEngagedTime_ = 0;
@@ -325,7 +329,7 @@ export class Activity {
    * @return {number}
    */
   getIncrementalEngagedTime(name, reset = true) {
-    if (!this.totalEngagedTimeByTrigger_.hasOwnProperty(name)) {
+    if (!hasOwn(this.totalEngagedTimeByTrigger_, name)) {
       if (reset) {
         this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
       }

@@ -29,4 +29,12 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
     analytics.event('event1');
     analytics.serviceEvent('event1', 'serviceId');
   });
+
+  it('should trigger a service event', () => {
+    const stub = sandbox.stub(analytics, 'event');
+    analytics.serviceEvent('event1', 'service1');
+    expect(stub).to.be.calledOnce.calledWith('event1', {
+      'serviceId': 'service1',
+    });
+  });
 });

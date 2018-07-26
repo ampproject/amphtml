@@ -45,7 +45,7 @@ echo $(GREEN "  1. If already present, makes a backup of") $(CYAN "$PRE_PUSH_DES
 echo $(GREEN "  2. Creates a new file") $(CYAN "$PRE_PUSH_DEST") $(GREEN "which calls") $(CYAN "$PRE_PUSH_SRC")
 echo $(GREEN "  3. With this,")  $(CYAN "git push") $(GREEN "will first run the checks in") $(CYAN "$PRE_PUSH_SRC")
 echo $(GREEN "  4. You can edit") $(CYAN "$PRE_PUSH_DEST") $(GREEN "to change the pre-push hooks that are run before") $(CYAN "git push")
-echo $(GREEN "  5. To skip the hook, run") $(CYAN "git push --no-verify") $(GREEN "or") $(CYAN "git push -n")
+echo $(GREEN "  5. To skip the hook, run") $(CYAN "git push --no-verify")
 echo $(GREEN "  6. To remove the hook, delete the file") $(CYAN "$PRE_PUSH_DEST")
 echo $(YELLOW "-----------------------------------------------------------------------------------------------------------------")
 echo -e "\n"

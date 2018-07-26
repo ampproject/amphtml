@@ -51,13 +51,27 @@ export function convertEasingKeyword(keyword) {
   }
 }
 
+/**
+ * Returns absolute number for a given percentage
+ *
+ * @param {string} val
+ * @return {?number}
+ */
 export function resolvePercentageToNumber(val) {
   const precentageStrippedVal = parseFloat(val);
   if (!isNaN(precentageStrippedVal)) {
     return precentageStrippedVal / 100;
   }
+  return null;
 }
 
+/**
+ * Returns styles for the animation.
+ *
+ * @param {Element} element
+ * @param {string} fxType
+ * @return {!Object<string, string>}
+ */
 export function installStyles(element, fxType) {
   switch (fxType) {
     case 'parallax':
@@ -88,6 +102,13 @@ export function installStyles(element, fxType) {
   }
 }
 
+/**
+ * Returns animation duration for the given animation type.
+ *
+ * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} fxType
+ * @return {string}
+ */
 export function defaultDurationValues(ampdoc, fxType) {
   switch (fxType) {
     case 'fade-in':
@@ -105,6 +126,13 @@ export function defaultDurationValues(ampdoc, fxType) {
   }
 }
 
+/**
+ * Returns fly-in distance for the given ampdoc and animation type.
+ *
+ * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} fxType
+ * @return {number}
+ */
 export function defaultFlyInDistanceValues(ampdoc, fxType) {
   switch (fxType) {
     case 'fly-in-bottom':
@@ -123,6 +151,12 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
   }
 }
 
+/**
+ * Returns margin values for defaultMarginValues
+ *
+ * @param {string} fxType
+ * @return {!Object<string, number>}
+ */
 export function defaultMarginValues(fxType) {
   switch (fxType) {
     case 'fade-in':
@@ -146,6 +180,12 @@ export function defaultMarginValues(fxType) {
   }
 }
 
+/**
+ * Returns easing values for the given function
+ *
+ * @param {string} fxType
+ * @return {string}
+ */
 export function defaultEasingValues(fxType) {
   switch (fxType) {
     case 'fade-in':

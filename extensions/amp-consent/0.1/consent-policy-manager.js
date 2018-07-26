@@ -24,19 +24,22 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isObject} from '../../../src/types';
 
-export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
 const WHITELIST_POLICY = {
   'default': true,
-  '_if_responded': true,
-  '_if_accepted': true,
+  '_till_responded': true,
+  '_till_accepted': true,
   '_auto_reject': true,
 };
 
 
 export class ConsentPolicyManager {
+  /**
+   * Creates an instance of ConsentPolicyManager.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
@@ -62,6 +65,16 @@ export class ConsentPolicyManager {
     /** @private {?function()} */
     this.allConsentInitatedResolver_ = deferred.resolve;
 
+  }
+
+  /**
+   * Is Multi-consent experiment enabled?
+   *
+   * @param {!Window} win
+   * @return {boolean}
+   */
+  static isMultiSupported(win) {
+    return isExperimentOn(win, 'multi-consent');
   }
 
   /**
@@ -129,8 +142,10 @@ export class ConsentPolicyManager {
     });
   }
 
-  // Inform consent policy manager that all consent instances
-  // state has been initiated with remote value. And ready to start timeout
+  /**
+   * Inform consent policy manager that all consent instances
+   * state has been initiated with remote value. And ready to start timeout
+   */
   enableTimeout() {
     if (this.allConsentInitatedResolver_) {
       this.allConsentInitatedResolver_();
@@ -144,7 +159,7 @@ export class ConsentPolicyManager {
    * @return {!Promise<CONSENT_POLICY_STATE>}
    */
   whenPolicyResolved(policyId) {
-    if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
+    if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
         user().error(TAG, `can not find defined policy ${policyId}, ` +
@@ -165,7 +180,7 @@ export class ConsentPolicyManager {
    * @return {!Promise<boolean>}
    */
   whenPolicyUnblock(policyId) {
-    if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
+    if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
         user().error(TAG, `can not find defined policy ${policyId}, ` +
@@ -224,6 +239,10 @@ export class ConsentPolicyManager {
 }
 
 export class ConsentPolicyInstance {
+  /**
+   * Creates an instance of ConsentPolicyInstance.
+   * @param {!JsonObject} config
+   */
   constructor(config) {
     /** !Array<string> */
     const pendingItems = Object.keys(config['waitFor'] || {});
@@ -330,7 +349,7 @@ export class ConsentPolicyInstance {
 
     if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
       const shouldOverwrite =
-          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.GRANTED &&
+          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.ACCEPTED &&
           this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.REJECTED;
       // Ignore the consent item state and overwrite state value.
       if (shouldOverwrite) {

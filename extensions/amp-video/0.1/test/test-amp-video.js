@@ -188,6 +188,7 @@ describes.realWin('amp-video', {
   });
 
   it('should not load a video with http src', () => {
+    expectAsyncConsoleError(/start with/);
     return expect(getVideo({
       src: 'http://example.com/video.mp4',
       width: 160,

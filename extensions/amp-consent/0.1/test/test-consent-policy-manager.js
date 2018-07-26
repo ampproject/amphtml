@@ -20,7 +20,6 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
-  MULTI_CONSENT_EXPERIMENT,
 } from '../consent-policy-manager';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -37,7 +36,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     consentManagerOnChangeSpy = sandbox.spy();
-    toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
+    toggleExperiment(win, 'multi-consent', true);
 
     resetServiceForTesting(win, 'consentStateManager');
     registerServiceBuilder(win, 'consentStateManager', function() {
@@ -105,35 +104,35 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     });
 
     it('on consent state change', () => {
-      instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+      instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.ACCEPTED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': null,
       });
       instance.consentStateChangeHandler('ABC',
           CONSENT_ITEM_STATE.NOT_REQUIRED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': null,
       });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.DISMISSED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': CONSENT_ITEM_STATE.UNKNOWN,
       });
-      instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.GRANTED);
+      instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.ACCEPTED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
-        'DEF': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
+        'DEF': CONSENT_ITEM_STATE.ACCEPTED,
       });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.REJECTED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': CONSENT_ITEM_STATE.REJECTED,
       });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.DISMISSED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': CONSENT_ITEM_STATE.REJECTED,
       });
     });
@@ -145,36 +144,36 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         'ABC': CONSENT_ITEM_STATE.NOT_REQUIRED,
         'DEF': null,
       });
-      instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+      instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.ACCEPTED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': null,
       });
       instance.consentStateChangeHandler('ABC',
           CONSENT_ITEM_STATE.NOT_REQUIRED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': null,
       });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.UNKNOWN);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': null,
       });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.DISMISSED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': CONSENT_ITEM_STATE.UNKNOWN,
       });
       instance.consentStateChangeHandler('DEF',
           CONSENT_ITEM_STATE.NOT_REQUIRED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': CONSENT_ITEM_STATE.NOT_REQUIRED,
       });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.DISMISSED);
       expect(instance.itemToConsentState_).to.deep.equal({
-        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'ABC': CONSENT_ITEM_STATE.ACCEPTED,
         'DEF': CONSENT_ITEM_STATE.NOT_REQUIRED,
       });
 
@@ -203,7 +202,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         ready = false;
         instance = new ConsentPolicyInstance(config);
         instance.getReadyPromise().then(() => ready = true);
-        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.ACCEPTED);
         yield macroTask();
         expect(ready).to.be.true;
       });
@@ -308,7 +307,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.INSUFFICIENT);
-        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.ACCEPTED);
         expect(instance.getCurrentPolicyStatus()).to.equal(
             CONSENT_POLICY_STATE.SUFFICIENT);
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
@@ -332,7 +331,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         expect(instance.shouldBlock()).to.equal(false);
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
         expect(instance.shouldBlock()).to.equal(false);
-        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.ACCEPTED);
         expect(instance.shouldBlock()).to.equal(true);
       });
 
@@ -352,7 +351,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         expect(instance.shouldBlock()).to.equal(true);
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
         expect(instance.shouldBlock()).to.equal(true);
-        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.ACCEPTED);
         expect(instance.shouldBlock()).to.equal(true);
       });
     });
@@ -375,11 +374,11 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       expect(instance.getCurrentPolicyStatus()).to.equal(
           CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
       // Single ignored
-      instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.GRANTED);
+      instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.ACCEPTED);
       expect(instance.getCurrentPolicyStatus()).to.equal(
           CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
       // All granted
-      instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+      instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.ACCEPTED);
       expect(instance.getCurrentPolicyStatus()).to.equal(
           CONSENT_POLICY_STATE.SUFFICIENT);
       // Single rejected

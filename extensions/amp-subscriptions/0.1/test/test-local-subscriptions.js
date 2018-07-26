@@ -38,20 +38,23 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     granted: true,
     grantReason: GrantReason.SUBSCRIBER,
   };
+  const readerId = 'reader1';
   const entitlement = Entitlement.parseFromJson(json);
-  const authUrl = 'https://lipsum.com/login/authorize';
-  const pingbackUrl = 'https://lipsum.com/login/pingback';
+  const configAuthUrl = 'https://lipsum.com/login/authorize?rid=READER_ID';
+  const configPingbackUrl = 'https://lipsum.com/login/pingback?rid=READER_ID';
   const serviceConfig = {
     'services': [
       {
         'serviceId': 'local',
-        'authorizationUrl': authUrl,
+        'authorizationUrl': configAuthUrl,
+        'pingbackUrl': configPingbackUrl,
         'actions': actionMap,
-        'pingbackUrl': pingbackUrl,
         'baseScore': 99,
       },
     ],
   };
+  const authUrl = configAuthUrl.replace('READER_ID', readerId);
+  const pingbackUrl = configPingbackUrl.replace('READER_ID', readerId);
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -60,6 +63,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         .callsFake(() => new PageConfig('example.org:basic', true));
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
+    sandbox.stub(serviceAdapter, 'getReaderId')
+        .callsFake(() => Promise.resolve('reader1'));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
         serviceConfig.services[0], serviceAdapter,
         new SubscriptionAnalytics(ampdoc.getRootNode()));
@@ -97,7 +102,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_,'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
     return localSubscriptionPlatform.getEntitlements().then(() => {
-      expect(urlBuildingStub).to.be.calledWith(authUrl, false);
+      expect(urlBuildingStub).to.be.calledWith(configAuthUrl, false);
       expect(fetchStub).to.be.calledWith(builtUrl, {credentials: 'include'});
     });
   });
@@ -162,7 +167,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     });
 
     it('should delegate service selection to scoreBasedLogin if no service '
-        + 'name is specified', () => {
+        + 'name is specified for login', () => {
+      element.setAttribute('subscriptions-action', 'login');
       element.removeAttribute('subscriptions-service');
       const platform = {};
       const serviceId = 'serviceId';
@@ -178,14 +184,15 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.be.called;
       expect(delegateStub).to.be.calledWith(
-          element.getAttribute('subscriptions-action'),
+          'login',
           serviceId,
       );
     });
 
     it('should delegate service selection to scoreBasedLogin '
-      + 'service specified is auto', () => {
-      element.removeAttribute('subscriptions-service');
+      + 'service specified is auto for login', () => {
+      element.setAttribute('subscriptions-action', 'login');
+      element.setAttribute('subscriptions-service', 'auto');
       const loginStub = sandbox.stub(
           localSubscriptionPlatform.serviceAdapter_,
           'selectPlatformForLogin'
@@ -199,6 +206,26 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.be.called;
+    });
+
+    it('should NOT delegate for scoreBasedLogin for non-login action', () => {
+      element.setAttribute('subscriptions-action', 'subscribe');
+      element.setAttribute('subscriptions-service', 'auto');
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin');
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService');
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.not.be.called;
+      expect(delegateStub).to.not.be.called;
+      expect(executeStub).to.be.calledOnce.calledWith('subscribe');
     });
   });
 
@@ -232,16 +259,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
   describe('pingback', () => {
     it('should call `sendSignal` to the pingback signal', () => {
-      const urlBuildStub =
-          sandbox.stub(localSubscriptionPlatform.urlBuilder_, 'buildUrl')
-              .callsFake(() => Promise.resolve(pingbackUrl));
       const sendSignalStub =
           sandbox.stub(localSubscriptionPlatform.xhr_, 'sendSignal');
       return localSubscriptionPlatform.pingback(entitlement).then(() => {
-        expect(urlBuildStub).to.be.calledOnce;
         expect(sendSignalStub).to.be.calledOnce;
         expect(sendSignalStub.getCall(0).args[0]).to.be.equal(
-            localSubscriptionPlatform.pingbackUrl_);
+            pingbackUrl);
         expect(sendSignalStub.getCall(0).args[1].body).to.equal(
             JSON.stringify(entitlement.jsonForPingback()));
       });

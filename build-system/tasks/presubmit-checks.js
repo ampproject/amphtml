@@ -75,6 +75,10 @@ const forbiddenTerms = {
         'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
         'for a list of alternatives.',
   },
+  'document-register-element.node': {
+    message: 'Use `document-register-element.patched` instead',
+    whitelist: ['build-system/tasks/update-packages.js'],
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -141,6 +145,7 @@ const forbiddenTerms = {
         'temporary workarounds.',
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/config.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -283,6 +288,15 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
       'src/service/video/docking.js',
+      'src/service/video/autoplay.js',
+    ],
+  },
+  'getServiceForDocDeprecated': {
+    message: 'Use getServiceForDoc() instead.',
+    whitelist: [
+      'src/chunk.js',
+      'src/service.js',
+      'src/services.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -307,6 +321,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/url.js',
       'src/service/navigation.js',
+      'src/service/url-impl.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -321,6 +336,7 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-viewer-integration/0.1/highlight-handler.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
@@ -332,16 +348,17 @@ const forbiddenTerms = {
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
-      'src/service/xhr-impl.js',
-      'src/service/viewer-impl.js',
-      'src/service/viewer-cid-api.js',
-      'src/service/storage-impl.js',
-      'src/service/history-impl.js',
-      'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
+      'src/service/cid-impl.js',
+      'src/service/history-impl.js',
+      'src/service/storage-impl.js',
+      'src/ssr-template-helper.js',
+      'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
+      'src/service/xhr-impl.js',
     ],
   },
   // Privacy sensitive
@@ -354,9 +371,10 @@ const forbiddenTerms = {
       'src/service/standard-actions-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
-      'extensions/amp-subscriptions/0.1/local-subscription-platform.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   'getBaseCid': {
@@ -423,7 +441,9 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-access/0.1/access-vars.js',
       'extensions/amp-access-scroll/0.1/scroll-impl.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
   },
@@ -432,6 +452,8 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-access/0.1/access-vars.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'src/service/url-replacements-impl.js',
     ],
   },
@@ -539,7 +561,7 @@ const forbiddenTerms = {
       'src/config.js',
       'src/experiments.js',
       'src/mode.js',
-      'src/worker-error-reporting.js',
+      'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
       'gulpfile.js',
@@ -548,13 +570,6 @@ const forbiddenTerms = {
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
     message: 'SVG data images must use charset=utf-8: ' +
         '"data:image/svg+xml;charset=utf-8,..."',
-  },
-  'installWorkerErrorReporting': {
-    message: 'Should only be used in worker entry points',
-    whitelist: [
-      'src/web-worker/web-worker.js',
-      'src/worker-error-reporting.js',
-    ],
   },
   'new CustomEvent\\(': {
     message: 'Use createCustomEvent() helper instead.',
@@ -574,6 +589,7 @@ const forbiddenTerms = {
     whitelist: [
       'ads/google/imaVideo.js',
       'dist.3p/current/integration.js',
+      'src/video-iframe-integration.js',
     ],
   },
   '\\.defer\\(\\)': {
@@ -860,6 +876,10 @@ function isInTestFolder(path) {
   return dirs.indexOf('test') >= 0;
 }
 
+/**
+ * Strip Comments
+ * @param {string} contents
+ */
 function stripComments(contents) {
   // Multi-line comments
   contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
@@ -896,8 +916,9 @@ function matchTerms(file, terms) {
     const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
-    if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
-        isInTestFolder(relative) && !checkInTestFolder)) {
+    if (Array.isArray(whitelist) &&
+      (whitelist.indexOf(relative) != -1 ||
+      (isInTestFolder(relative) && !checkInTestFolder))) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build

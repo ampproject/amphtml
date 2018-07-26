@@ -41,9 +41,13 @@ describe('getElementServiceIfAvailable()', () => {
 
   beforeEach(() => {
     doc = {
+      head: {},
       body: {},
     };
     doc.documentElement = {ownerDocument: doc};
+    doc.getHeadNode = () => doc.head;
+    doc.head.querySelectorAll = () => [];
+
 
     win = {
       document: doc,

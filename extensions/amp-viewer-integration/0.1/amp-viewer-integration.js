@@ -15,6 +15,7 @@
  */
 
 import {AmpViewerIntegrationVariableService} from './variable-service';
+import {HighlightHandler, HighlightInfoDef, getHighlightParam} from './highlight-handler';
 import {
   Messaging,
   WindowPortEmulator,
@@ -63,6 +64,11 @@ export class AmpViewerIntegration {
     /** @private {boolean} */
     this.isHandShakePoll_ = false;
 
+    /**
+     * @private {?HighlightHandler}
+     */
+    this.highlightHandler_ = null;
+
     /** @const @private {!AmpViewerIntegrationVariableService} */
     this.variableService_ = new AmpViewerIntegrationVariableService(
         getAmpdoc(this.win.document));
@@ -78,7 +84,8 @@ export class AmpViewerIntegration {
    */
   init() {
     dev().fine(TAG, 'handshake init()');
-    const viewer = Services.viewerForDoc(this.win.document);
+    const ampdoc = getAmpdoc(this.win.document);
+    const viewer = Services.viewerForDoc(ampdoc);
     this.isWebView_ = viewer.getParam('webview') == '1';
     this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
     const origin = viewer.getParam('origin') || '';
@@ -87,8 +94,6 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
-    const ampdoc = getAmpdoc(this.win.document);
-
     if (this.isWebView_ || this.isHandShakePoll_) {
       const source = isIframed(this.win) ? this.win.parent : null;
       return this.webviewPreHandshakePromise_(source, origin)
@@ -96,6 +101,11 @@ export class AmpViewerIntegration {
             return this.openChannelAndStart_(viewer, ampdoc, origin,
                 new Messaging(this.win, receivedPort, this.isWebView_));
           });
+    }
+    /** @type {?HighlightInfoDef} */
+    const highlightInfo = getHighlightParam(ampdoc);
+    if (highlightInfo) {
+      this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);
     }
 
     const port = new WindowPortEmulator(
@@ -181,6 +191,9 @@ export class AmpViewerIntegration {
 
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);
+    }
+    if (this.highlightHandler_ != null) {
+      this.highlightHandler_.setupMessaging(messaging);
     }
   }
 

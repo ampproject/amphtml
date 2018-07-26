@@ -54,6 +54,9 @@ export class JankMeter {
     this.initializeLongTaskObserver_();
   }
 
+  /**
+   * Callback for scheduled.
+   */
   onScheduled() {
     if (!this.isEnabled_()) {
       return;
@@ -64,6 +67,9 @@ export class JankMeter {
     }
   }
 
+  /**
+   * Callback for run.
+   */
   onRun() {
     if (!this.isEnabled_() || this.scheduledTime_ == null) {
       return;
@@ -105,6 +111,11 @@ export class JankMeter {
     }
   }
 
+  /**
+   * Returns if is enabled
+   *
+   * @return {?boolean}
+   */
   isEnabled_() {
     return isJankMeterEnabled(this.win_)
         || (this.perf_
@@ -136,6 +147,9 @@ export class JankMeter {
         (this.totalFrameCnt_ - this.badFrameCnt_) / this.totalFrameCnt_ * 100);
   }
 
+  /**
+   * Initializes long task observer.
+   */
   initializeLongTaskObserver_() {
     if (!this.isEnabled_() || !isLongTaskApiSupported(this.win_)) {
       return;
@@ -161,6 +175,9 @@ export class JankMeter {
     this.longTaskObserver_.observe({entryTypes: ['longtask']});
   }
 
+  /**
+   * Initializes battery manager.
+   */
   initializeBatteryManager_() {
     if (isBatteryApiSupported(this.win_)) {
       this.win_.navigator.getBattery().then(battery => {

@@ -20,6 +20,9 @@
 
 import {Layout} from '../../../src/layout';
 
+/**
+ * Base layer template.
+ */
 export class AmpStoryBaseLayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {

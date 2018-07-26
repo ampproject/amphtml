@@ -98,6 +98,7 @@ export const naturalDimensions_ = {
 export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
+  'AMP-GOOGLE-DOCUMENT-EMBED': true,
   'AMP-EMBED': true,
   'AMP-FACEBOOK': true,
   'AMP-FACEBOOK-COMMENTS': true,
@@ -169,7 +170,7 @@ export function isInternalElement(tag) {
 /**
  * Parses the CSS length value. If no units specified, the assumed value is
  * "px". Returns undefined in case of parsing error.
- * @param {string|undefined} s
+ * @param {string|undefined|null} s
  * @return {!LengthDef|undefined}
  */
 export function parseLength(s) {
@@ -291,7 +292,7 @@ export function getNaturalDimensions(element) {
  * Whether the loading can be shown for the specified elemeent. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
- * @param {!Element} element.
+ * @param {!Element} element
  * @return {boolean}
  */
 export function isLoadingAllowed(element) {
@@ -352,9 +353,11 @@ export function applyStaticLayout(element) {
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
   user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  /** @const {string|null|undefined} */
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
     parseLength(widthAttr) : widthAttr;
   user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  /** @const {string|null|undefined} */
   const inputHeight = (heightAttr && heightAttr != 'fluid') ?
     parseLength(heightAttr) : heightAttr;
   user().assert(inputHeight !== undefined, 'Invalid height value: %s',

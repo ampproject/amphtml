@@ -23,12 +23,11 @@ import {
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAdNetworkDoubleclickImpl,
-  TFCD,
-  constructSRABlockParameters,
   getNetworkId,
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {BaseElement} from '../../../../src/base-element';
+import {Deferred} from '../../../../src/utils/promise';
 import {
   EXPERIMENT_ATTRIBUTE,
 } from '../../../../ads/google/a4a/utils';
@@ -37,10 +36,27 @@ import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
+import {
+  TFCD,
+  combineInventoryUnits,
+  constructSRABlockParameters,
+  getAdks,
+  getContainers,
+  getCookieOptOut,
+  getExperimentIds,
+  getForceSafeframe,
+  getIdentity,
+  getPageOffsets,
+  getSizes,
+  getTargetingAndExclusions,
+  getTfcd,
+  isAdTest,
+  sraBlockCallbackHandler,
+} from '../sra-utils';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 const config = {amp: true, allowExternalResources: true};
 
@@ -51,7 +67,7 @@ const config = {amp: true, allowExternalResources: true};
   calling setAttribute('src', 'foo') on the iframe, which will cause all these
   tests to fail.
 */
-describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
+describes.realWin('Doubleclick SRA', config , env => {
   let sandbox;
   let doc;
 
@@ -86,9 +102,152 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           {name: 'amp-ad-doubleclick-sra'}, 'meta', doc.head);
       const element = createAndAppendAdElement({'data-enable-refresh': 30});
       const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.buildCallback();
       expect(impl.useSra).to.be.true;
       impl.layoutCallback();
       expect(impl.refreshManager_).to.be.null;
+    });
+  });
+
+  describe('block parameter joining', () => {
+    let impls;
+    beforeEach(() => impls = []);
+
+    it('should join IUs', () => {
+      for (let i = 0; i < 2; i++) {
+        impls.push({
+          element: {
+            getAttribute: name => {
+              expect(name).to.equal('data-slot');
+              return '/1234/foo.com/news/world/2018/06/17/article';
+            },
+          },
+        });
+      }
+      expect(combineInventoryUnits(impls)).to.jsonEqual({
+        'iu_parts': '1234,foo.com,news,world,2018,06,17,article',
+        'enc_prev_ius': '0/1/2/3/4/5/6/7,0/1/2/3/4/5/6/7',
+      });
+    });
+    it('should determine cookie opt out', () => {
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[0] = {};
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[1] = {jsonTargeting: {}};
+      expect(getCookieOptOut(impls)).to.be.null;
+      impls[2] = {jsonTargeting: {'cookieOptOut': 1}};
+      expect(getCookieOptOut(impls)).to.jsonEqual({'co': '1'});
+    });
+    it('should combine adks', () => {
+      expect(getAdks(impls)).to.jsonEqual({'adks': ''});
+      const expected = [];
+      for (let i = 1; i <= 10; i++) {
+        impls.push({adKey: i});
+        expected.push(i);
+      }
+      expect(getAdks(impls)).to.jsonEqual({'adks': expected.join()});
+    });
+    it('should combine sizes', () => {
+      expect(getSizes(impls)).to.jsonEqual({'prev_iu_szs': ''});
+      const expected = [];
+      for (let i = 1; i <= 10; i++) {
+        impls.push({parameterSize: i});
+        expected.push(i);
+      }
+      expect(getSizes(impls)).to.jsonEqual(
+          {'prev_iu_szs': expected.join()});
+    });
+    it('should determine tagForChildDirectedTreatment', () => {
+      expect(getTfcd(impls)).to.be.null;
+      expect(getTfcd([{}])).to.be.null;
+      impls[0] = {};
+      impls[1] = {jsonTargeting: {}};
+      impls[2] = {jsonTargeting: {[TFCD]: 'foo'}};
+      impls[3] = {jsonTargeting: {[TFCD]: 'bar'}};
+      expect(getTfcd(impls)).to.jsonEqual({'tfcd': 'foo'});
+    });
+    it('should determine if ad test', () => {
+      expect(isAdTest(impls)).to.be.null;
+      impls[0] = {
+        element: {
+          getAttribute: name => {
+            expect(name).to.equal('data-experiment-id');
+            return undefined;
+          },
+        },
+      };
+      expect(isAdTest(impls)).to.be.null;
+      impls[1] = {
+        element: {
+          getAttribute: name => {
+            expect(name).to.equal('data-experiment-id');
+            return '123,117152632,456';
+          },
+        },
+      };
+      expect(isAdTest(impls)).to.jsonEqual({'adtest': 'on'});
+    });
+    it('should combine targeting and exclusions', () => {
+      expect(getTargetingAndExclusions(impls)).to.be.null;
+      impls[0] = {jsonTargeting: {}};
+      expect(getTargetingAndExclusions(impls)).to.be.null;
+      impls[1] = {jsonTargeting: {targeting: {a: 1, b: 2}}};
+      expect(getTargetingAndExclusions(impls)).to.jsonEqual(
+          {'prev_scp': '|a=1&b=2'});
+      impls[2] = {jsonTargeting: {targeting: {c: 1, d: 'l=d'},
+        categoryExclusions: ['a','b']}};
+      impls[3] = {};
+      expect(getTargetingAndExclusions(impls)).to.jsonEqual(
+          {'prev_scp': '|a=1&b=2|c=1&d=l%3Dd&excl_cat=a,b|'});
+    });
+    it('should determine experiment ids', () => {
+      expect(getExperimentIds(impls)).to.be.null;
+      impls[0] = {win: {location: {hash: '#deid=123,456,7'}},
+        experimentIds: []};
+      // NOTE(keithwrightbos): let's hope this doesn't flake given eids
+      // are stored in object.
+      expect(getExperimentIds(impls)).to.jsonEqual({'eid': '7,123,456'});
+      impls[0].experimentIds = ['901', '902'];
+      expect(getExperimentIds(impls)).to.jsonEqual(
+          {'eid': '7,123,456,901,902'});
+      impls[1] = {experimentIds: ['902', '903']};
+      expect(getExperimentIds(impls)).to.jsonEqual(
+          {'eid': '7,123,456,901,902,903'});
+    });
+    it('should determine identity', () => {
+      impls[0] = new AmpAdNetworkDoubleclickImpl(
+          env.win.document.createElement('span'));
+      impls[0].identityToken = {token: 'foo', jar: 'bar', pucrd: 'oof'};
+      impls[1] = {};
+      expect(getIdentity(impls)).to.jsonEqual(
+          {adsid: 'foo', jar: 'bar', pucrd: 'oof'});
+    });
+    it('should combine force safeframe', () => {
+      expect(getForceSafeframe(impls)).to.be.null;
+      impls[0] = {forceSafeframe: false};
+      expect(getForceSafeframe(impls)).to.be.null;
+      impls[1] = {forceSafeframe: true};
+      expect(getForceSafeframe(impls)).to.jsonEqual({'fsfs': '0,1'});
+      impls[2] = {forceSafeframe: true};
+      expect(getForceSafeframe(impls)).to.jsonEqual({'fsfs': '0,1,1'});
+    });
+    it('should combine page offsets', () => {
+      impls[0] = {getPageLayoutBox: () => ({left: 123, top: 456})};
+      expect(getPageOffsets(impls)).to.jsonEqual(
+          {'adxs': '123', 'adys': '456'});
+      impls[1] = {getPageLayoutBox: () => ({left: 123, top: 789})};
+      expect(getPageOffsets(impls)).to.jsonEqual(
+          {'adxs': '123,123', 'adys': '456,789'});
+    });
+    it('should combine contained state', () => {
+      expect(getContainers(impls)).to.be.null;
+      impls[0] = {element: {}};
+      expect(getContainers(impls)).to.be.null;
+      impls[1] = {element: {parentElement: {tagName: 'AMP-CAROUSEL'}}};
+      expect(getContainers(impls)).to.jsonEqual({'acts': '|ac'});
+      impls[2] = {element: {parentElement: {tagName: 'AMP-CAROUSEL',
+        parentElement: {tagName: 'AMP-STICKY-AD'}}}};
+      expect(getContainers(impls)).to.jsonEqual({'acts': '|ac|ac,sa'});
     });
   });
 
@@ -144,7 +303,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           createElementWithAttributes(doc, 'amp-ad', config1);
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
         sandbox.stub(impl1, 'getPageLayoutBox').returns({top: 123, left: 456});
-        element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
+        impl1.experimentIds = [MANUAL_EXPERIMENT_ID];
         sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320')
             .returns('13579');
         impl1.populateAdUrlState();
@@ -478,4 +637,63 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           {networkId: 8901, instances: 3, invalidInstances: 1}]));
   });
 
+  describe('#sraBlockCallbackHandler', () => {
+    const creative = 'foo';
+    it('should call top resolver with FetchResponse', () => {
+      const headerObj = {a: 'b', c: 123};
+      const slotDeferred = new Deferred();
+      const sraRequestAdUrlResolvers = [
+        slotDeferred.resolve, {resolve: () => {throw new Error();}}];
+      sraBlockCallbackHandler(
+          creative, headerObj, /* done */false, sraRequestAdUrlResolvers);
+      expect(sraRequestAdUrlResolvers.length).to.equal(1);
+      return slotDeferred.promise.then(fetchResponse => {
+        expect(fetchResponse.headers.get('a')).to.equal('b');
+        expect(fetchResponse.headers.get('c')).to.equal('123');
+        expect(fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase()))
+            .to.equal(XORIGIN_MODE.SAFEFRAME);
+        expect(fetchResponse.headers.has('unknown')).to.be.false;
+        return fetchResponse.arrayBuffer().then(buffer =>
+          expect(utf8Decode(buffer)).to.equal(creative));
+      });
+    });
+
+    it('should handle multiple blocks', () => {
+      const blocks = [
+        {
+          headers: {foo: 'bar', yes: false, who: 123},
+          creative: 'creative1',
+          deferred: new Deferred(),
+        },
+        {
+          headers: {bar: 'foo', no: true, who: 456},
+          creative: '2creative',
+          deferred: new Deferred(),
+        },
+        {
+          headers: {asd: 'asd', gsd: 'sdf', basd: 123},
+          creative: 'crea3tive',
+          deferred: new Deferred(),
+        },
+      ];
+      const promises = [];
+      const resolvers = blocks.map(block => block.deferred.resolve);
+      for (let i = 1; i <= blocks.length; i++) {
+        const {creative, headers, deferred} = blocks[i - 1];
+        sraBlockCallbackHandler(
+            creative, headers, resolvers.length == 1, resolvers);
+        expect(resolvers.length).to.equal(blocks.length - i);
+        promises.push(deferred.promise.then(fetchResponse => {
+          Object.keys(headers).forEach(name => expect(
+              fetchResponse.header.get(name)).to.equal(String(headers[name])));
+          expect(fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase()))
+              .to.equal(XORIGIN_MODE.SAFEFRAME);
+          expect(fetchResponse.headers.has('unknown')).to.be.false;
+          return fetchResponse.arrayBuffer().then(buffer =>
+            expect(utf8Decode(buffer)).to.equal(creative));
+        }));
+      }
+      return promises;
+    });
+  });
 });

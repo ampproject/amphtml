@@ -48,7 +48,7 @@ function ExtensionPayload() {}
 /** @type {string} */
 ExtensionPayload.prototype.n;
 
-/** @type {function(!Object)} */
+/** @type {function(!Object,!Object)} */
 ExtensionPayload.prototype.f;
 
 /** @type {string|undefined} */
@@ -56,6 +56,9 @@ ExtensionPayload.prototype.p;
 
 /** @type {string} */
 ExtensionPayload.prototype.v;
+
+/** @type {!Array<string>|string|undefined} */
+ExtensionPayload.prototype.i;
 
 
 /**
@@ -99,6 +102,31 @@ window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
 window.AMP = {};
+window.AMP._ = {};
+window.AMP.push;
+window.AMP.title;
+window.AMP.canonicalUrl;
+window.AMP.extension;
+window.AMP.ampdoc;
+window.AMP.config;
+window.AMP.config.urls;
+window.AMP.BaseElement;
+window.AMP.BaseTemplate;
+window.AMP.registerElement;
+window.AMP.registerTemplate;
+window.AMP.registerServiceForDoc;
+window.AMP.isExperimentOn;
+window.AMP.toggleExperiment;
+window.AMP.setLogLevel;
+window.AMP.setTickFunction;
+window.AMP.viewer;
+window.AMP.viewport = {};
+window.AMP.viewport.getScrollLeft;
+window.AMP.viewport.getScrollWidth;
+window.AMP.viewport.getWidth;
+window.AMP.attachShadowDoc;
+window.AMP.attachShadowDocAsStream
+
 
 /** @constructor */
 function AmpConfigType() {}
@@ -106,9 +134,15 @@ function AmpConfigType() {}
 /* @public {string} */
 AmpConfigType.prototype.thirdPartyUrl;
 /* @public {string} */
+AmpConfigType.prototype.thirdParty;
+/* @public {string} */
 AmpConfigType.prototype.thirdPartyFrameHost;
 /* @public {string} */
 AmpConfigType.prototype.thirdPartyFrameRegex;
+/* @public {string} */
+AmpConfigType.prototype.errorReporting;
+/* @public {string} */
+AmpConfigType.prototype.cdn;
 /* @public {string} */
 AmpConfigType.prototype.cdnUrl;
 /* @public {string} */
@@ -119,6 +153,8 @@ AmpConfigType.prototype.localDev;
 AmpConfigType.prototype.v;
 /* @public {boolean} */
 AmpConfigType.prototype.canary;
+/* @public {string} */
+AmpConfigType.prototype.runtime;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;
@@ -216,7 +252,9 @@ Object.prototype.entryTypes
 
 // Externed explicitly because this private property is read across
 // binaries.
-Element.implementation_ = {};
+Element.prototype.implementation_ = {};
+Element.prototype.signals;
+window.whenSignal;
 
 /** @typedef {number}  */
 var time;
@@ -265,6 +303,33 @@ data.hideCta;
 data.smallHeader;
 data.showFacepile;
 data.showText;
+data.productId;
+data.imageUrl;
+data.yotpoElementId;
+data.backgroudColor;
+data.reviewIds;
+data.showBottomLine;
+data.autoplayEnabled;
+data.autoplaySpeed;
+data.showNavigation;
+data.layoutScroll;
+data.spacing;
+data.hoverColor;
+data.hoverOpacity;
+data.hoverIcon;
+data.ctaText;
+data.ctaColor;
+data.appKey;
+data.widgetType;
+data.layoutRows;
+data.demo;
+data.uploadButton;
+data.reviews;
+data.headerText;
+data.headerBackgroundColor;
+data.bodyBackgroundColor;
+data.data.fontColor;
+data.width;
 
 // 3p code
 var twttr;
@@ -272,6 +337,7 @@ twttr.events;
 twttr.events.bind;
 twttr.widgets;
 twttr.widgets.createTweet;
+twttr.widgets.createMoment;
 
 var FB;
 FB.init;
@@ -411,7 +477,7 @@ SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
 
-AMP.maybeExecuteRealTimeConfig = false;
+AMP.RealTimeConfigManager;
 
 /**
  * Actual filled values for this exists in
@@ -445,3 +511,182 @@ AMP.require;
  * @typedef {function(number, boolean):?|function(number):?}
  */
 var TransitionDef;
+
+///////////////////
+// amp-bind externs
+///////////////////
+
+/**
+ * @typedef {{method: string, args: !Array, scope: number, id: number}}
+ */
+let ToWorkerMessageDef;
+
+/**
+ * @typedef {{method: string, returnValue: *, id: number}}
+ */
+let FromWorkerMessageDef;
+
+/**
+ * Structured cloneable representation of an <amp-bind-macro> element.
+ * @typedef {{id: string, argumentNames: Array<string>, expressionString: string}}
+ */
+let BindMacroDef;
+
+/**
+ * Structured cloneable representation of a binding e.g. <p [text]="foo>.
+ * @typedef {{tagName: string, property: string, expressionString: string}}
+ */
+let BindBindingDef;
+
+/**
+ * Structured cloneable representation of a JS error.
+ * @typedef {{message: string, stack: string}}
+ */
+let BindEvaluatorErrorDef;
+
+/**
+ * Possible types of an amp-bind expression result.
+ * @typedef {(null|boolean|string|number|Array|Object)}
+ */
+let BindExpressionResultDef;
+
+/**
+ * Structured cloneable return value for 'bind.evaluateBindings' API.
+ * @typedef {{results: !Object<string, BindExpressionResultDef>, errors: !Object<string, !BindEvaluatorErrorDef>}}
+ */
+let BindEvaluateBindingsResultDef;
+
+/**
+ * Structured cloneable return value for 'bind.evaluateExpression' API.
+ * @typedef {{result: BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
+ */
+let BindEvaluateExpressionResultDef;
+
+/////////////////////////////
+////// Web Anmomation externs
+/////////////////////////////
+/**
+ * @typedef {
+ *   !WebMultiAnimationDef|
+ *   !WebSwitchAnimationDef|
+ *   !WebCompAnimationDef|
+ *   !WebKeyframeAnimationDef
+ * }
+ */
+var WebAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   animations: !Array<!WebAnimationDef>,
+ * }}
+ */
+var WebMultiAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   switch: !Array<!WebAnimationDef>,
+ * }}
+ */
+var WebSwitchAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   animation: string,
+ * }}
+ */
+var WebCompAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   keyframes: (string|!WebKeyframesDef),
+ * }}
+ */
+var WebKeyframeAnimationDef;
+
+
+/**
+ * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
+ */
+var WebKeyframesDef;
+
+
+/**
+ * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties
+ *
+ * @mixin
+ * @typedef {{
+ *   duration: (time|undefined),
+ *   delay: (time|undefined),
+ *   endDelay: (time|undefined),
+ *   iterations: (number|string|undefined),
+ *   iterationStart: (number|undefined),
+ *   easing: (string|undefined),
+ *   direction: (?|undefined),
+ *   fill: (?|undefined),
+ * }}
+ */
+var WebAnimationTimingDef;
+
+
+/**
+ * Indicates an extension to a type that allows specifying vars. Vars are
+ * specified as properties with the name in the format of `--varName`.
+ *
+ * @mixin
+ * @typedef {Object}
+ */
+var WebAnimationVarsDef;
+
+
+/**
+ * Defines media parameters for an animation.
+ *
+ * @mixin
+ * @typedef {{
+ *   media: (string|undefined),
+ *   supports: (string|undefined),
+ * }}
+ */
+var WebAnimationConditionalDef;
+
+
+/**
+ * @typedef {{
+ *   target: (!Element|undefined),
+ *   selector: (string|undefined),
+ *   subtargets: (!Array<!WebAnimationSubtargetDef>|undefined),
+ * }}
+ */
+var WebAnimationSelectorDef;
+
+
+/**
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @typedef {{
+ *   matcher: (function(!Element, number):boolean|undefined),
+ *   index: (number|undefined),
+ *   selector: (string|undefined),
+ * }}
+ */
+var WebAnimationSubtargetDef;

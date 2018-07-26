@@ -88,7 +88,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 <dl>
   <dt><code>window.context.getHtml (selector, attrs, callback)</code></dt>
-  <dd>Retrieves the specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. <code>selector</code> is a CSS selector of the node to take content from. <code>attrs</code> takes an array of tag attributes to be left in the stringified HTML representation (for instance, <code>['id', 'class']</code>). All not specified attributes will be cut off from the result string. <code>callback</code> takes a function to be called when the content is ready. <code>getHtml</code> invokes callback with the only argument of type string.</dd>
+  <dd>Retrieves the specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. <code>selector</code> is a CSS selector of the node to take content from. <code>attrs</code> takes an array of tag attributes to be left in the stringified HTML representation (for instance, <code>['id', 'class']</code>). All not specified attributes will be cut off from the result string. <code>callback</code> takes a function to be called when the content is ready. <code>getHtml</code> invokes callback with the only argument of type string.<p>This API is by default disabled. To enable it, the `amp-ad` needs to put attribute <code>data-html-access-allowed</code> to explicitly opt-in.</dd>
   <dt><code>window.context.noContentAvailable()</code></dt>
   <dd>Informs the AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise tries to collapse the ad slot.</dd>
   <dt><code>window.context.renderStart(opt_data)</code></dt>
@@ -156,13 +156,15 @@ Additionally, one can observe the `amp:visibilitychange` on the `window` object 
 ### Ad resizing
 
 Ads can call the special API
-`window.context.requestResize(width, height)` to send a resize request.
+`window.context.requestResize(width, height, opt_hasOverflow)` to send a resize request.
 
 Once the request is processed the AMP runtime will try to accommodate this request as soon as
 possible, but it will take into account where the reader is currently reading, whether the scrolling
 is ongoing and any other UX or performance factors.
 
 Ads can observe whether resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
+
+The `opt_hasOverflow` is an optional boolean value, ads can specify `opt_hasOverflow` to `true` to let AMP runtime know that the ad context can handle overflow when attempt to resize is denied, and not to throw warning in such cases.
 
 *Example:*
 
@@ -215,7 +217,7 @@ In case the resize is not successful, AMP will horizontally and vertically cente
 window.context.renderStart({width: 200, height: 100});
 ```
 
-Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height)` API. Details in [Ad Resizing](#ad-resizing).
+Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height, opt_hasOverflow)` API. Details in [Ad Resizing](#ad-resizing).
 
 ### amp-consent integration
 If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute
@@ -235,7 +237,7 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
   </dd>
   <dt><code>window.context.getConsentState(callback)</code></dt>
   <dd>
-    Queries the current consent state asynchronously. The `callback` function 
+    Queries the current consent state asynchronously. The `callback` function
     will be invoked with the current consent state.
   </dd>
   <dt><code>window.context.consentSharedData</code></dt>
@@ -246,7 +248,7 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
 </dl>
 
 After overriding the default consent handling behavior, don't forget to update your publisher facing
- documentation with the new behaviors on user's consent choices.
+ documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/master/ads/_ping_.md#user-consent-integration).
 
 ### Optimizing ad performance
 

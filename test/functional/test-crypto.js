@@ -42,13 +42,16 @@ describes.realWin('crypto-impl', {}, env => {
     return uint8Array;
   }
 
-  function testSuite(description, win) {
+  function testSuite(description, win, expectedError) {
     describe(description, () => {
       beforeEach(() => {
         crypto = createCrypto(win || env.win);
       });
 
       it('should hash "abc" in sha384', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return crypto.sha384('abc').then(buffer => {
           expect(buffer.length).to.equal(48);
           expect(buffer[0]).to.equal(203);
@@ -58,6 +61,9 @@ describes.realWin('crypto-impl', {}, env => {
       });
 
       it('should hash [1,2,3] in sha384', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return crypto.sha384(uint8Array([1, 2, 3])).then(buffer => {
           expect(buffer.length).to.equal(48);
           expect(buffer[0]).to.equal(134);
@@ -67,16 +73,25 @@ describes.realWin('crypto-impl', {}, env => {
       });
 
       it('should hash "abc" in sha384Base64', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return expect(crypto.sha384Base64('abc')).to.eventually.equal(
             'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
       });
 
       it('should hash "foobar" in sha384Base64', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return expect(crypto.sha384Base64('foobar')).to.eventually.equal(
             'PJww2fZl501RXIQpYNSkUcg6ASX9Pec5LXs3IxrxDHLqWK7fzfiaV2W_kCr5Ps8G');
       });
 
       it('should hash [1,2,3] in sha384', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return expect(crypto.sha384Base64(uint8Array([1, 2, 3])))
             .to.eventually.equal(
                 'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
@@ -92,6 +107,9 @@ describes.realWin('crypto-impl', {}, env => {
       });
 
       it('should hash "abc" to uniform number', () => {
+        if (expectedError) {
+          expectAsyncConsoleError(expectedError);
+        }
         return crypto.uniform('abc').then(result => {
           expect(result.toFixed(6)).to.equal('0.792976');
         });
@@ -135,7 +153,7 @@ describes.realWin('crypto-impl', {}, env => {
         digest: () => {throw new Error();},
       },
     },
-  });
+  }, '[Crypto] SubtleCrypto failed, fallback to closure lib. Error');
 
   it('native API result should exactly equal to crypto lib result', () => {
     return Promise

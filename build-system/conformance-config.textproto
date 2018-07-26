@@ -223,6 +223,20 @@ requirement: {
   whitelist: 'ads/yandex.js'
   whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
   whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
+  whitelist: 'src/service/history-impl.js' # False-positive
+}
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getDetail to read the detail property. OK to whitelist 3p ads for now.'
+  value: 'Event.prototype.detail'
+  value: 'MessageEvent.prototype.detail'
+  whitelist: 'src/event-helper.js' # getDetail is implemented here
+
+  # 3p ads are OK
+  whitelist: 'ads/adhese.js'
+  whitelist: 'ads/loka.js'
+  whitelist: 'ads/xlift.js'
 }
 
 requirement: {

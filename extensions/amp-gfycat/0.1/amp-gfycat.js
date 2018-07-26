@@ -184,7 +184,10 @@ class AmpGfycat extends AMP.BaseElement {
     }
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleGfycatMessages_(event) {
     const eventData = /** @type {?string|undefined} */ (getData(event));
 
@@ -231,7 +234,6 @@ class AmpGfycat extends AMP.BaseElement {
   }
 
   /** @override */
-
   mute() {
     // All Gfycat videos have no sound.
   }

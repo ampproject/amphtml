@@ -75,6 +75,13 @@ export const ResourceState = {
 };
 
 
+/** @typedef {{
+  distance: (boolean|number),
+    viewportHeight: (number|undefined),
+    scrollPenalty: (number|undefined),
+  }} */
+let ViewportRatioDef;
+
 /**
  * A Resource binding for an AmpElement.
  * @package
@@ -179,11 +186,12 @@ export class Resource {
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
-    /** @private {?Promise} */
-    this.renderOutsideViewportPromise_ = null;
-
-    /** @private {?Function} */
-    this.renderOutsideViewportResolve_ = null;
+    /**
+     * Really, this is a <number, !Deferred> map,
+     * but CC's type system can't handle it.
+     * @private {?Object<string, !Deferred>}
+     */
+    this.withViewportDeferreds_ = null;
 
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
@@ -330,13 +338,21 @@ export class Resource {
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
     }, reason => {
-      if (!isBlockedByConsent(reason)) {
-        dev().error(TAG, 'failed to build:', this.debugid, reason);
-      }
+      this.maybeReportErrorOnBuildFailure(reason);
       this.isBuilding_ = false;
       this.element.signals().rejectSignal('res-built', reason);
       throw reason;
     });
+  }
+
+  /**
+   * @param {*} reason
+   * @visibleForTesting
+   */
+  maybeReportErrorOnBuildFailure(reason) {
+    if (!isBlockedByConsent(reason)) {
+      dev().error(TAG, 'failed to build:', this.debugid, reason);
+    }
   }
 
   /**
@@ -380,6 +396,7 @@ export class Resource {
         requestedMargins);
   }
 
+  /** reset pending change sizes */
   resetPendingChangeSize() {
     this.pendingChangeSize_ = undefined;
   }
@@ -449,6 +466,7 @@ export class Resource {
     this.element.updateLayoutBox(box, sizeChanges);
   }
 
+  /** Use resources for measurement */
   measureViaResources_() {
     const viewport = this.resources_.getViewport();
     const box = this.resources_.getViewport().getLayoutRect(this.element);
@@ -482,6 +500,7 @@ export class Resource {
     }
   }
 
+  /** Use layers for measurement */
   measureViaLayers_() {
     const {element} = this;
     const layers = element.getLayers();
@@ -646,51 +665,55 @@ export class Resource {
   }
 
   /**
+   * @param {number|boolean} viewport derived from renderOutsideViewport.
    * @return {!Promise} resolves when underlying element is built and within the
-   *    range specified by implementation's renderOutsideViewport
+   *    viewport range given.
    */
-  whenWithinRenderOutsideViewport() {
-    if (!this.isLayoutPending()) {
+  whenWithinViewport(viewport) {
+    dev().assert(viewport !== false);
+    // Resolve is already laid out or viewport is true.
+    if (!this.isLayoutPending() || viewport === true) {
       return Promise.resolve();
     }
-    if (this.renderOutsideViewportPromise_) {
-      return this.renderOutsideViewportPromise_;
+    // See if pre-existing promise.
+    const viewportNum = dev().assertNumber(viewport);
+    const key = String(viewportNum);
+    if (this.withViewportDeferreds_ &&
+        this.withViewportDeferreds_[key]) {
+      return this.withViewportDeferreds_[key].promise;
     }
-    const deferred = new Deferred();
-    this.renderOutsideViewportResolve_ = deferred.resolve;
-    return this.renderOutsideViewportPromise_ = deferred.promise;
+    // See if already within viewport multiplier.
+    if (this.isWithinViewportRatio(viewportNum)) {
+      return Promise.resolve();
+    }
+    // return promise that will trigger when within viewport multiple.
+    this.withViewportDeferreds_ = this.withViewportDeferreds_ || {};
+    this.withViewportDeferreds_[key] = new Deferred();
+    return this.withViewportDeferreds_[key].promise;
   }
 
-  /**
-   * @private resolves render outside viewport promise if one was created via
-   *    whenWithinRenderOutsideViewport.
-   */
-  resolveRenderOutsideViewport_() {
-    if (!this.renderOutsideViewportResolve_) {
+  /** @private resolves promises populated via whenWithinViewport. */
+  resolveDeferredsWhenWithinViewports_() {
+    if (!this.withViewportDeferreds_) {
       return;
     }
-    this.renderOutsideViewportResolve_();
-    this.renderOutsideViewportPromise_ = null;
-    this.renderOutsideViewportResolve_ = null;
+    const viewportRatio = this.getDistanceViewportRatio();
+    for (const key in this.withViewportDeferreds_) {
+      if (this.isWithinViewportRatio(parseFloat(key), viewportRatio)) {
+        this.withViewportDeferreds_[key].resolve();
+        delete this.withViewportDeferreds_[key];
+      }
+    }
   }
 
-  /**
-   * @param {number|boolean} multiplier
-   * @return {boolean} whether resource is within provider multiplier of
-   *    viewports from current visible viewport.
-   * @visibleForTesting
-   */
-  withinViewportMultiplier(multiplier) {
-    // Boolean interface controls explicit result.
-    if (multiplier === true || multiplier === false) {
-      return multiplier;
-    }
-    multiplier = Math.max(multiplier, 0);
-
+  /** @return {!ViewportRatioDef} */
+  getDistanceViewportRatio() {
     if (this.useLayers_) {
       const {element} = this;
-      return element.getLayers().iterateAncestry(element,
-          this.layersDistanceRatio_);
+      return {
+        distance: element.getLayers().iterateAncestry(element,
+            this.layersDistanceRatio_),
+      };
     }
 
     // Numeric interface, element is allowed to render outside viewport when it
@@ -703,8 +726,9 @@ export class Resource {
 
     if (viewportBox.right < layoutBox.left ||
         viewportBox.left > layoutBox.right) {
-      // If outside of viewport's x-axis, element is not in viewport.
-      return false;
+      // If outside of viewport's x-axis, element is not in viewport so return
+      // false.
+      return {distance: false};
     }
 
     if (viewportBox.bottom < layoutBox.top) {
@@ -724,10 +748,31 @@ export class Resource {
         scrollPenalty = 2;
       }
     } else {
-      // Element is in viewport
-      return true;
+      // Element is in viewport so return true for all but boolean false.
+      return {distance: true};
     }
-    return distance < viewportBox.height * multiplier / scrollPenalty;
+    return {distance, scrollPenalty, viewportHeight: viewportBox.height};
+  }
+
+  /**
+   * @param {number|boolean} multiplier
+   * @param {ViewportRatioDef=} opt_viewportRatio
+   * @return {boolean} whether multiplier given is within viewport ratio
+   * @visibleForTesting
+   */
+  isWithinViewportRatio(multiplier, opt_viewportRatio) {
+    if (typeof multiplier === 'boolean') {
+      return multiplier;
+    }
+    const {distance, scrollPenalty, viewportHeight} =
+      opt_viewportRatio || this.getDistanceViewportRatio();
+    if (this.useLayers_) {
+      return dev().assertNumber(distance) < multiplier;
+    }
+    if (typeof distance == 'boolean') {
+      return distance;
+    }
+    return distance < viewportHeight * multiplier / scrollPenalty;
   }
 
   /**
@@ -759,15 +804,9 @@ export class Resource {
     // prerender this resource, so that it can avoid expensive elements wayyy
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
-    if (this.hasOwner()) {
-      this.resolveRenderOutsideViewport_();
-      return true;
-    }
-    if (this.withinViewportMultiplier(this.element.renderOutsideViewport())) {
-      this.resolveRenderOutsideViewport_();
-      return true;
-    }
-    return false;
+    this.resolveDeferredsWhenWithinViewports_();
+    return this.hasOwner() || this.isWithinViewportRatio(
+        this.element.renderOutsideViewport());
   }
 
   /**
@@ -776,7 +815,7 @@ export class Resource {
    * @return {boolean}
    */
   idleRenderOutsideViewport() {
-    return this.withinViewportMultiplier(
+    return this.isWithinViewportRatio(
         this.element.idleRenderOutsideViewport());
   }
 
@@ -901,7 +940,11 @@ export class Resource {
    * @return {boolean}
    */
   isInViewport() {
-    return this.element.isInViewport();
+    const isInViewport = this.element.isInViewport();
+    if (isInViewport) {
+      this.resolveDeferredsWhenWithinViewports_();
+    }
+    return isInViewport;
   }
 
   /**
