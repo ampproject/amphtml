@@ -168,6 +168,7 @@
   min-height: 72px !important;
   background: #FFFFFF !important;
   box-shadow: 0 -2px 3px rgba(0, 0, 0, 0.12) !important;
+  text-align: center !important;
   z-index: 1 !important;
 }
 
