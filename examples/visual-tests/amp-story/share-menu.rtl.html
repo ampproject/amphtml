@@ -15,6 +15,7 @@
         background: black;
         font-family: sans-serif;
       }
+
       h1#hello-world {
         color: white;
         text-align: center;
@@ -28,7 +29,7 @@
       /**
        * On load, open the share menu.
        */
-       document.addEventListener('ampstory:load', () => {
+      document.addEventListener('ampstory:load', () => {
         const storyEl = document.querySelector('amp-story');
 
         // Automatically open the share menu.
@@ -47,20 +48,20 @@
   <body>
     <amp-story standalone>
 
-        <amp-story-page id="cover">
-          <amp-story-grid-layer template="fill">
-              <amp-video layout="fill"
-                  poster="https://picsum.photos/1600/900?image=981">
-              </amp-video>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="vertical">
-              <h1 id="hello-world">مرحبا بالعالم</h1>
-          </amp-story-grid-layer>
-        </amp-story-page>
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=981">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 id="hello-world">مرحبا بالعالم</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
 
-        <amp-story-bookend src="bookend-ar.json" layout="nodisplay">
-        </amp-story-bookend>
+      <amp-story-bookend src="bookend-ar.json" layout="nodisplay">
+      </amp-story-bookend>
 
     </amp-story>
   </body>
+
 </html>

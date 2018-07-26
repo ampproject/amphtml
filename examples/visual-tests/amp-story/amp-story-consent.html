@@ -17,6 +17,7 @@
         background: black;
         font-family: sans-serif;
       }
+
       h1#hello-world {
         color: white;
         text-align: center;
@@ -34,48 +35,48 @@
 
       <amp-consent id="myConsent" layout="nodisplay">
         <script type="application/json">
-          {
-            "consents": {
-              "myConsent": {
-                "checkConsentHref": "https://ampbyexample.com/samples_templates/consent/getConsent",
-                "promptUI": "consentUI"
+            {
+              "consents": {
+                "myConsent": {
+                  "checkConsentHref": "https://ampbyexample.com/samples_templates/consent/getConsent",
+                  "promptUI": "consentUI"
+                }
               }
             }
-          }
-        </script>
+          </script>
         <amp-story-consent id="consentUI" layout="nodisplay">
           <script type="application/json">
-            {
-              "title": "Headline",
-              "message": "This is some more information about this choice. Here's a list of items related to this choice.",
-              "vendors": [
-                "Item 1",
-                "Item 2",
-                "Item 3",
-                "Item 4",
-                "Item 5",
-                "Item 6",
-                "Item 7",
-                "Item 8",
-                "Item 9",
-                "Item 10"
-              ]
-            }
-          </script>
+              {
+                "title": "Headline",
+                "message": "This is some more information about this choice. Here's a list of items related to this choice.",
+                "vendors": [
+                  "Item 1",
+                  "Item 2",
+                  "Item 3",
+                  "Item 4",
+                  "Item 5",
+                  "Item 6",
+                  "Item 7",
+                  "Item 8",
+                  "Item 9",
+                  "Item 10"
+                ]
+              }
+            </script>
         </amp-story-consent>
       </amp-consent>
 
-        <amp-story-page id="cover">
-          <amp-story-grid-layer template="fill">
-            <amp-video layout="fill"
-                poster="https://picsum.photos/1600/900?image=981">
-            </amp-video>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="vertical">
-              <h1 id="hello-world">Hello world!</h1>
-          </amp-story-grid-layer>
-        </amp-story-page>
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=981">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 id="hello-world">Hello world!</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
 
     </amp-story>
   </body>
+
 </html>

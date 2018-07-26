@@ -16,6 +16,7 @@
         color: white;
         font-family: sans-serif;
       }
+
       h1.hello-world {
         color: white;
         text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
@@ -28,7 +29,7 @@
       /**
        * On load, jump to the second page (to test progress bar fill).
        */
-       document.addEventListener('ampstory:load', () => {
+      document.addEventListener('ampstory:load', () => {
         const storyEl = document.querySelector('amp-story');
 
         // Automatically jump to second page.
@@ -48,8 +49,7 @@
 
       <amp-story-page id="cover">
         <amp-story-grid-layer template="fill">
-          <amp-video layout="fill"
-              poster="https://picsum.photos/1600/900?image=980">
+          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=980">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
@@ -60,8 +60,7 @@
 
       <amp-story-page id="page-2">
         <amp-story-grid-layer template="fill">
-          <amp-video layout="fill"
-              poster="https://picsum.photos/1600/900?image=981">
+          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=981">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
@@ -72,8 +71,7 @@
 
       <amp-story-page id="page-3">
         <amp-story-grid-layer template="fill">
-          <amp-video layout="fill"
-              poster="https://picsum.photos/1600/900?image=982">
+          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=982">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
@@ -84,8 +82,7 @@
 
       <amp-story-page id="page-4">
         <amp-story-grid-layer template="fill">
-          <amp-video layout="fill"
-              poster="https://picsum.photos/1600/900?image=983">
+          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=983">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
@@ -96,4 +93,5 @@
 
     </amp-story>
   </body>
+
 </html>

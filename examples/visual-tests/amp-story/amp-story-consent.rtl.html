@@ -17,6 +17,7 @@
         background: black;
         font-family: sans-serif;
       }
+
       h1#hello-world {
         color: white;
         text-align: center;
@@ -34,48 +35,48 @@
 
       <amp-consent id="myConsent" layout="nodisplay">
         <script type="application/json">
-          {
-            "consents": {
-              "myConsent": {
-                "checkConsentHref": "https://ampbyexample.com/samples_templates/consent/getConsent",
-                "promptUI": "consentUI"
+            {
+              "consents": {
+                "myConsent": {
+                  "checkConsentHref": "https://ampbyexample.com/samples_templates/consent/getConsent",
+                  "promptUI": "consentUI"
+                }
               }
             }
-          }
-        </script>
+          </script>
         <amp-story-consent id="consentUI" layout="nodisplay">
           <script type="application/json">
-            {
-              "title": "عنوان رئيسي",
-              "message": "لكون بشرية تحرّك ذلك من, ونتج للمجهود ليتسنّى تم بحق. تلك ان ليركز العالم، إتفاقية, أسر تم سقطت أطراف في.",
-              "vendors": [
-                "البند الأول",
-                "البند الثاني",
-                "البند الثالث",
-                "البند الرابع",
-                "البند الخامس",
-                "البند السادس",
-                "البند السابع",
-                "البند ثمانية",
-                "البند التاسع",
-                "البند عشر"
-              ]
-            }
-          </script>
+              {
+                "title": "عنوان رئيسي",
+                "message": "لكون بشرية تحرّك ذلك من, ونتج للمجهود ليتسنّى تم بحق. تلك ان ليركز العالم، إتفاقية, أسر تم سقطت أطراف في.",
+                "vendors": [
+                  "البند الأول",
+                  "البند الثاني",
+                  "البند الثالث",
+                  "البند الرابع",
+                  "البند الخامس",
+                  "البند السادس",
+                  "البند السابع",
+                  "البند ثمانية",
+                  "البند التاسع",
+                  "البند عشر"
+                ]
+              }
+            </script>
         </amp-story-consent>
       </amp-consent>
 
-        <amp-story-page id="cover">
-          <amp-story-grid-layer template="fill">
-            <amp-video layout="fill"
-                poster="https://picsum.photos/1600/900?image=981">
-            </amp-video>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="vertical">
-              <h1 id="hello-world">مرحبا بالعالم</h1>
-          </amp-story-grid-layer>
-        </amp-story-page>
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=981">
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 id="hello-world">مرحبا بالعالم</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
 
     </amp-story>
   </body>
+
 </html>
