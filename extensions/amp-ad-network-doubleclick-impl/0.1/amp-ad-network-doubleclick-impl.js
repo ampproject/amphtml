@@ -982,15 +982,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - handle chunks for streaming response for each block
    * @visibleForTesting
    */
-  initiateSraRequests() {
-    if (sraRequests) {
-      return;
-    }
+  initiateSraRequests()
     // Use cancellation of the first slot's promiseId as indication of
     // unlayoutCallback execution.  Assume that if called for one slot, it will
     // be called for all and we should cancel SRA execution.
     const checkStillCurrent = this.verifyStillCurrent();
-    sraRequests = this.groupSlotsForSra()
+    const noFallbackExp = this.experimentIds.includes(
+        DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER);
+    sraRequests = sraRequests || this.groupSlotsForSra()
         .then(groupIdToBlocksAry => {
           checkStillCurrent();
           Object.keys(groupIdToBlocksAry).forEach(networkId => {
@@ -1020,7 +1019,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // Determine if more than one block for this element, if not do
               // not set sra request promise which results in sending as non-SRA
               // request (benefit is it allows direct cache method).
-              if (typeInstances.length == 1) {
+              if (!noFallbackExp && typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
@@ -1061,10 +1060,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       // appropriately.
                       typeInstances.forEach(instance =>
                         instance.sraDeferred.reject(error));
-                    } else if (!!this.win.document.querySelector(
-                        'meta[name=amp-ad-doubleclick-sra]') ||
-                        this.experimentIds.includes(
-                            DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER)) {
+                    } else if (noFallbackExp ||
+                      !!this.win.document.querySelector(
+                        'meta[name=amp-ad-doubleclick-sra]')) {
                       // If publisher has explicitly enabled SRA mode (not
                       // experiment), then assume error is network failure,
                       // collapse slot, reset url to empty string to ensure
