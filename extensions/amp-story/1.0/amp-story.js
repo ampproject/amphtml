@@ -29,8 +29,8 @@ import './amp-story-grid-layer';
 import './amp-story-page';
 import {
   Action,
-  AmpStoryStoreService,
   StateProperty,
+  getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpStoryAccess} from './amp-story-access';
@@ -42,7 +42,6 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, PageState} from './amp-story-page';
-import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -188,14 +187,8 @@ export class AmpStory extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {!AmpStoryStoreService} */
-    this.storeService_ = new AmpStoryStoreService(this.win);
-    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
-
-    /** @private @const {!AmpStoryRequestService} */
-    this.requestService_ = new AmpStoryRequestService(this.win, this.element);
-    registerServiceBuilder(
-        this.win, 'story-request', () => this.requestService_);
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {!NavigationState} */
     this.navigationState_ =
@@ -1664,7 +1657,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   getPageIndexById(id) {
     const pageIndex = findIndex(this.pages_, page => page.element.id === id);
-
     if (pageIndex < 0) {
       user().error(TAG,
           `Story refers to page "${id}", but no such page exists.`);
