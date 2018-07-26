@@ -234,16 +234,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
         this.pauseCallback();
-        dispatch(this.win, this.element, EventType.PAGE_INACTIVE,
-            dict({'pageId': this.element.id}), {bubbles: true});
         this.state_ = state;
         break;
       case PageState.ACTIVE:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
           this.resumeCallback();
-          dispatch(this.win, this.element, EventType.PAGE_ACTIVE,
-              dict({'pageId': this.element.id}), {bubbles: true});
         }
 
         if (this.state_ === PageState.PAUSED) {

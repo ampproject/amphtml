@@ -29,18 +29,7 @@
       AMP_TEST = true;
 
       /**
-       * Mark the document as loaded when the second page becomes active.
-       */
-       document.addEventListener('ampstory:pageactive', e => {
-        const storyEl = document.querySelector('amp-story');
-
-        if (e.detail.pageId !== 'the-page-with-the-cta-layer') {
-          return;
-        }
-      });
-
-      /**
-       * On load, jump to the second page.
+       * On load, jump to the second page (with the CTA layer).
        */
       document.addEventListener('ampstory:load', () => {
         const storyEl = document.querySelector('amp-story');
