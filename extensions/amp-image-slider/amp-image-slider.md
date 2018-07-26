@@ -1,5 +1,5 @@
 <!--
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,27 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-compare-slider`"></a> `amp-compare-slider`
-
+# <a name="`amp-image-slider`"></a> `amp-image-slider`
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>
-      Photo-Split-Compare allows for two images to transition from one to the other through a touch interaction. This specific extension will allow the developer to customize the direction in which the second photo is revealed, the appearance of the split between the photos and the touch interactions.
-   </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Under Development!</td>
+    <td>A slider used to slide and compare 2 <code>amp-img</code>s, with optional labels</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td></td>
+    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>responsive, TODO</td>
   </tr>
-  
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>TODO</td>
+  </tr>
 </table>
+
+## Behavior
+TODO. This component is under construction. Examples would be added soon.
+
+## Validation
+See [amp-image-slider rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-slider/validator-amp-image-slider.protoascii) in the AMP validator specification.
