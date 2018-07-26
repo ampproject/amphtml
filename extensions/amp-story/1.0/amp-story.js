@@ -689,7 +689,6 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.switchTo_(initialPageId))
         .then(() => this.updateViewportSizeStyles_())
-        .then(() => this.preloadPagesByDistance_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
           // button is visible.
