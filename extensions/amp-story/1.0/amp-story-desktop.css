@@ -142,6 +142,7 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] > .next-container > .i-amphtml-story-button-move {
+  left: auto !important;
   right: 0 !important;
 }
 

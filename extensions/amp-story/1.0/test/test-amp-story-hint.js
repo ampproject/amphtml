@@ -93,10 +93,10 @@ describes.fakeWin('amp-story hint layer', {}, env => {
  * @return {?Element}
  */
 function getHintContainerFromHost(host) {
-  if (!host.lastElementChild || !host.lastElementChild.shadowRoot) {
+  if (!host.lastElementChild) {
     return null;
   }
 
-  return host.lastElementChild.shadowRoot.querySelector(
-      '.i-amphtml-story-hint-container');
+  const hintRoot = host.lastElementChild.shadowRoot || host.lastElementChild;
+  return hintRoot.querySelector('.i-amphtml-story-hint-container');
 }

@@ -516,6 +516,16 @@ export class AmpStory extends AMP.BaseElement {
       this.performTapNavigation_(direction);
     });
 
+    this.element.addEventListener(EventType.DISPATCH_ACTION, e => {
+      if (!getMode().test) {
+        return;
+      }
+
+      const action = getDetail(e)['action'];
+      const data = getDetail(e)['data'];
+      this.storeService_.dispatch(action, data);
+    });
+
     this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
       this.onAdStateUpdate_(isAd);
     });
