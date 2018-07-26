@@ -266,6 +266,9 @@
       ]
     },
     {
+      "flaky": true,
+      // Internal iframe is flaky.
+      // e.g., https://percy.io/ampproject/amphtml/builds/889329/view/52120454/375?mode=diff&browser=firefox&snapshot=52120454
       "url": "examples/visual-tests/amp-by-example/components/amp-brightcove/index.html",
       "name": "amp-brightcove - Amp By Example",
       "loading_complete_css": ["amp-brightcove iframe.i-amphtml-fill-content"]
@@ -395,6 +398,9 @@
       "loading_complete_css": ["amp-jwplayer iframe.i-amphtml-fill-content"]
     },
     {
+      "flaky": true,
+      // Internal iframe is flaky.
+      // e.g., https://percy.io/ampproject/amphtml/builds/889329/view/52121532/375?mode=diff&browser=firefox&snapshot=52121532
       "url": "examples/visual-tests/amp-by-example/components/amp-kaltura-player/index.html",
       "name": "amp-kaltura-player - Amp By Example",
       "loading_complete_css": ["amp-kaltura-player iframe.i-amphtml-fill-content"]
