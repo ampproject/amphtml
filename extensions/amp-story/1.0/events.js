@@ -55,6 +55,15 @@ export const EventType = {
 
   // Triggered when a page has loaded at least one frame of all of its media.
   PAGE_LOADED: 'ampstory:pageload',
+
+  // Triggered when a page becomes active.
+  PAGE_ACTIVE: 'ampstory:pageactive',
+
+  // Triggered when a page becomes inactive.
+  PAGE_INACTIVE: 'ampstory:pageinactive',
+
+  // Dispatches an action to the amp-story store service. Only works under test.
+  DISPATCH_ACTION: 'ampstory:dispatchaction',
 };
 
 /**
