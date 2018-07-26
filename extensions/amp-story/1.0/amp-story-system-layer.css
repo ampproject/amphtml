@@ -42,8 +42,10 @@
 
 .i-amphtml-story-system-layer-buttons {
   margin-top: 8px; /* 6px progress bar + 2px margin */
-  float: right !important;
   pointer-events: auto !important;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end !important;
 }
 
 .i-amphtml-story-button {
@@ -227,6 +229,11 @@ div.i-amphtml-story-share-pill-container {
   pointer-events: auto !important;
 }
 
+[dir=rtl] .i-amphtml-story-share-pill {
+  right: auto !important;
+  left: 40px !important;
+}
+
 /* Share text for share box */
 span.i-amphtml-story-share-pill-label {
   font-family: 'Roboto', sans-serif!important;
@@ -243,6 +250,11 @@ span.i-amphtml-story-share-pill-label {
   text-transform: uppercase !important;
 }
 
+[dir=rtl] span.i-amphtml-story-share-pill-label {
+  right: auto !important;
+  left: 15px !important;
+}
+
 /* background for the share box */
 .i-amphtml-story-share-pill:before {
   position: absolute!important;
@@ -254,7 +266,12 @@ span.i-amphtml-story-share-pill-label {
   border-radius: 500px!important;
   box-sizing: initial !important;
   transition: width 300ms ease-in-out!important;
-  right: 0!important;
+  right: 0 !important;
+}
+
+[dir=rtl] .i-amphtml-story-share-pill:before {
+  right: auto !important;
+  left: 0 !important;
 }
 
 .i-amphtml-story-share-pill .i-amphtml-story-share-item  {
@@ -313,7 +330,6 @@ span.i-amphtml-story-share-pill-label {
 
 .i-amphtml-story-share-pill .i-amphtml-story-share-list {
   padding: 0!important;
-  margin: 0 72px 0 0 !important;
 }
 
 .i-amphtml-story-share-pill:hover:before {
@@ -353,6 +369,11 @@ span.i-amphtml-story-share-pill-label {
 
 [desktop] .i-amphtml-story-share-list {
   margin-right: 72px !important;
+}
+
+[dir=rtl][desktop] .i-amphtml-story-share-list {
+  margin-right: 0 !important;
+  margin-left: 72px !important;
 }
 
 /* system layer changes */
