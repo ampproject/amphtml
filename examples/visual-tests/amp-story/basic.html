@@ -5,6 +5,8 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
     <title>amp-story rtl visual diff</title>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -45,11 +47,15 @@
   </head>
 
   <body>
-    <amp-story standalone>
+    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
+        publisher-logo-src="https://www.ampproject.org/static/img/icons/120.png"
+        poster-portrait-src="https://picsum.photos/900/1600?image=981"
+        poster-landscape-src="https://picsum.photos/1600/900?image=981"
+        poster-square-src="https://picsum.photos/1600/1600?image=981">
 
       <amp-story-page id="cover">
         <amp-story-grid-layer template="fill">
-          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=980">
+          <amp-video autoplay layout="fill" poster="https://picsum.photos/1600/900?image=980">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
@@ -60,7 +66,7 @@
 
       <amp-story-page id="page-2">
         <amp-story-grid-layer template="fill">
-          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=981">
+          <amp-video autoplay layout="fill" poster="https://picsum.photos/1600/900?image=981">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
@@ -71,7 +77,7 @@
 
       <amp-story-page id="page-3">
         <amp-story-grid-layer template="fill">
-          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=982">
+          <amp-video autoplay layout="fill" poster="https://picsum.photos/1600/900?image=982">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
@@ -82,7 +88,7 @@
 
       <amp-story-page id="page-4">
         <amp-story-grid-layer template="fill">
-          <amp-video layout="fill" poster="https://picsum.photos/1600/900?image=983">
+          <amp-video autoplay layout="fill" poster="https://picsum.photos/1600/900?image=983">
           </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
