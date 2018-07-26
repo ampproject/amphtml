@@ -8,7 +8,7 @@ export const LINK_STATUS__IGNORE_LINK = 'ignore';
 export const LINK_STATUS__UNKNOWN = 'unknown';
 
 export const events = {
-  PAGE_ANALYSED: 'PAGE_ANALYSED',
+  PAGE_SCANNED: 'PAGE_SCANNED',
   CLICK: 'CLICK',
 };
 
@@ -29,7 +29,7 @@ export default class AffiliateLinksManager {
     this.linkSelector_ = options.linkSelector;
 
     this.installGlobalEventListener_(ampDoc.getRootNode());
-
+    this.onDomChanged_();
     this.listeners_ = {};
   }
 
@@ -39,7 +39,7 @@ export default class AffiliateLinksManager {
 
   onDomChanged_() {
     this.analyseLinksOnPage_().then(() => {
-      this.triggerEvent_(events.PAGE_ANALYSED);
+      this.triggerEvent_(events.PAGE_SCANNED);
     });
   }
 

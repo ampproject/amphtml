@@ -4,6 +4,8 @@ import {
 } from './affiliate-links-manager';
 import {parseUrlDeprecated} from '../../../src/url';
 
+import {AnchorRewriteData, AnchorRewriteDataResponse } from "./link-rewriter"
+
 export default class AffiliateLinkResolver {
   constructor(xhr, skimOptions, beaconApiCallback) {
     this.xhr_ = xhr;
@@ -14,9 +16,8 @@ export default class AffiliateLinkResolver {
   }
 
   resolveUnknownAnchors(anchorList) {
-    const resolvedAnchorObject = {
-      resolvedLinks: this.resolveAnchorsAffiliateStatus_(anchorList),
-    };
+    const alreadyResolved = this.resolveAnchorsRewriteData(anchorList);
+    let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);
     if (domainsToAsk.length) {
@@ -24,20 +25,26 @@ export default class AffiliateLinkResolver {
       this.markDomainsAsUnknown(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
       const pendingAnchors = this.getPendingAnchors_(anchorList, domainsToAsk);
-      resolvedAnchorObject.resolvedLinksPromise = this.resolvedUnkonwnAnchorsAsync_(pendingAnchors, domainsToAsk);
+      willBeResolvedPromise = this.resolvedUnkonwnAnchorsAsync_(pendingAnchors, domainsToAsk);
     }
 
-    return resolvedAnchorObject;
+    return new AnchorRewriteDataResponse(alreadyResolved, willBeResolvedPromise);
   }
 
-  resolveAnchorsAffiliateStatus_(anchorList) {
+  getWaypointUrl_(anchor) {
+    return `https://go.redirectingat.com?id=${this.pubcode_}&url=${anchor.href}`;
+  }
+
+  resolveAnchorsRewriteData(anchorList) {
     const anchorListNormalised = anchorList.map(anchor => {
       const status = this.getDomainAffiliateStatus_(this.getLinkDomain(anchor));
+      // Always replace unknown, we will overwrite them after asking beacon if needed
+      if (status === LINK_STATUS__AFFILIATE || status === LINK_STATUS__UNKNOWN) {
+        const replacementUrl = this.getWaypointUrl_(anchor);
+        return new AnchorRewriteData(anchor, replacementUrl);
+      }
 
-      return {
-        anchor,
-        status,
-      };
+      return new AnchorRewriteData(anchor);
     });
 
     return anchorListNormalised;
@@ -101,7 +108,7 @@ export default class AffiliateLinkResolver {
 
       this.updateDomainsStatusMapPostFetch_(domainsToAsk, data.merchant_domains);
 
-      return this.resolveAnchorsAffiliateStatus_(anchorList);
+      return this.resolveAnchorsRewriteData(anchorList);
     });
   }
 
