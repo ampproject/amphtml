@@ -90,15 +90,11 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = null;
 
-    /**
-     * @const {!../../../src/ssr-template-helper.SsrTemplateHelper}
-     * @private
-     */
-    this.ssrTemplateHelper_ = new SsrTemplateHelper(
-        TAG, this.viewer_, this.templates_);
+    /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
+    this.ssrTemplateHelper_ = null;
   }
 
   /** @override */
@@ -108,6 +104,11 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+
+    this.ssrTemplateHelper_ = new SsrTemplateHelper(
+        TAG, this.viewer_, this.templates_);
+
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
