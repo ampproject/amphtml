@@ -76,7 +76,7 @@ export class Validator {
   /**
    * @param {!Object} unusedContext
    * @param {!ArrayBuffer} unusedUnvalidatedBytes
-   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedHeaders
+   * @param {!Headers} unusedHeaders
    * @return {!Promise<!ValidatorOutput>}
    * @abstract
    */

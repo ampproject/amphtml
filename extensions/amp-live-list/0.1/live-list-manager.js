@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {DocumentFetcher} from '../../../src/document-fetcher';
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
@@ -130,7 +131,7 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
-    return Services.xhrFor(this.ampdoc.win)
+    return new DocumentFetcher(this.ampdoc.win)
         // TODO(erwinm): add update time here when possible.
         .fetchDocument(url, {
           requireAmpResponseSourceOrigin: false,

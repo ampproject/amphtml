@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
+import {DocumentFetcher} from '../../../src/document-fetcher';
 import {MultidocManager} from '../../../src/runtime';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
@@ -248,7 +249,7 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      Services.xhrFor(/** @type {!Window} */ (this.win_))
+      new DocumentFetcher(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
             if (documentRef.cancelled) {

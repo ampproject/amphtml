@@ -15,6 +15,7 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
+import {DocumentFetcher} from '../../../src/document-fetcher';
 import {JwtHelper} from './jwt';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -95,6 +96,9 @@ export class AccessServerJwtAdapter {
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);
+
+    /** @const @private {!DocumentFetcher} */
+    this.docFetcher_ = new DocumentFetcher(ampdoc.win);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(ampdoc.win);
@@ -313,7 +317,7 @@ export class AccessServerJwtAdapter {
       // CORS preflight request.
       return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
-          this.xhr_.fetchDocument(this.serviceUrl_, {
+          this.docFetcher_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: request,
             headers: dict({

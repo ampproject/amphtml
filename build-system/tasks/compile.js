@@ -289,6 +289,7 @@ function compile(entryModuleFilenames, outputDir,
         'math-sign.js',
         'object-assign.js',
         'promise.js',
+        'fetch-polyfill.js',
       ];
       srcs.push(
           '!build/fake-module/src/polyfills.js',
