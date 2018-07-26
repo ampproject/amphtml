@@ -144,8 +144,6 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.setAsOwner(this.rightAmpImage_);
     }
 
-    // TODO(kqian): investigate if this container can be removed
-    // Depends on UI interaction decision
     this.container_.classList.add('i-amphtml-image-slider-container');
     this.element.appendChild(this.container_);
 
@@ -188,6 +186,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Enable user interaction
+   * @private
    */
   enable_() {
     if (!this.disabled_) {
@@ -203,6 +202,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Disable user interaction
+   * @private
    */
   disable_() {
     if (this.disabled_) {
@@ -221,13 +221,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Build images
+   * @private
    */
   buildImages_() {
-    // Hierarchy:
-    // leftMask
-    //   |_ leftAmpImage
-    // rightMask
-    //   |_ rightAmpImage
     this.container_.appendChild(this.rightMask_);
     this.container_.appendChild(this.leftMask_);
 
@@ -259,6 +255,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Build bar
+   * @private
    */
   buildBar_() {
     this.container_.appendChild(this.bar_);
@@ -270,6 +267,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Build hint
+   * @private
    */
   buildHint_() {
     if (this.hint_) {
@@ -310,6 +308,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Install gestures for touch
+   * @private
    */
   registerTouchGestures_() {
     if (this.gestures_) {
@@ -335,12 +334,16 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.gestures_.onPointerDown(e => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX);
+      // Use !this.shouldHintLoop here
+      // It is possible that after onPointerDown
+      // SwipeXRecognizer callback is not triggered
       this.resetHintInterval_(!this.shouldHintLoop_);
     });
   }
 
   /**
    * Uninstall gestures for touch
+   * @private
    */
   unregisterTouchGestures_() {
     if (!this.gestures_) {
@@ -356,6 +359,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Specify opt_noRestart to true if no intend to start a timeout for
    * showing hint again.
    * @param {boolean=} opt_noRestart
+   * @private
    */
   resetHintInterval_(opt_noRestart) {
     if (this.disableHint_) {
@@ -382,7 +386,8 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Animate show hint
+   * Show hint with animation
+   * @private
    */
   animateShowHint_() {
     const interpolate = numeric(
@@ -396,7 +401,8 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Animate show hint
+   * Hide hint with animation
+   * @private
    */
   animateHideHint_() {
     const interpolate = numeric(
@@ -409,8 +415,9 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Drag start
+   * Handler on mouse button down
    * @param {Event} e
+   * @private
    */
   onMouseDown_(e) {
     e.preventDefault();
@@ -430,8 +437,9 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Drag move
+   * Handler on mouse move
    * @param {Event} e
+   * @private
    */
   onMouseMove_(e) {
     e.preventDefault();
@@ -439,8 +447,9 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Drag end
+   * Handler on mouse button up
    * @param {Event} e
+   * @private
    */
   onMouseUp_(e) {
     e.preventDefault();
@@ -451,8 +460,9 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * On key down
+   * Handler on key down
    * @param {Event} e
+   * @private
    */
   onKeyDown_(e) {
     // Check if current element has focus
@@ -463,11 +473,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.resetHintInterval_(!this.shouldHintLoop_);
 
     switch (e.key.toLowerCase()) {
-      case 'arrowup':
       case 'arrowleft':
         this.stepLeft_();
         break;
-      case 'arrowdown':
       case 'arrowright':
         this.stepRight_();
         break;
@@ -504,6 +512,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Register events
+   * @private
    */
   registerEvents_() {
     this.unlistenMouseDown_ =
@@ -515,6 +524,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Unregister events
+   * @private
    */
   unregisterEvents_() {
     this.unlisten_(this.unlistenMouseDown_);
@@ -526,75 +536,95 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Get current slider's percentage to the left
+   * Should be wrapped inside measureElement
+   * @private
    */
   getCurrentSliderPercentage_() {
     const {left: barLeft} =
         this.bar_./*OK*/getBoundingClientRect();
-    const {left: boxLeft, width: boxWidth}
-    //    = this.getLayoutBox(); // could be better with less overhead
-        = this.container_./*OK*/getBoundingClientRect();
+    const {left: boxLeft, width: boxWidth} = this.getLayoutBox();
     return (barLeft - boxLeft) / boxWidth;
   }
 
   /**
    * One step left
    * @param {boolean=} opt_toEnd
+   * @private
    */
   stepLeft_(opt_toEnd) {
     // To the very end of left
     if (opt_toEnd === true) {
-      this.updatePositions_(0);
+      this.mutateElement(() => {
+        this.updatePositions_(0);
+      });
     } else {
-      this.updatePositions_(this.limitPercentage_(
-          this.getCurrentSliderPercentage_() - this.stepSize_));
+      let newPercentage;
+      this.measureMutateElement(() => {
+        newPercentage = this.limitPercentage_(
+            this.getCurrentSliderPercentage_() - this.stepSize_);
+      }, () => {
+        this.updatePositions_(newPercentage);
+      });
     }
   }
 
   /**
    * Step to the center
+   * @private
    */
   stepExactCenter_() {
-    this.updatePositions_(0.5);
+    this.mutateElement(() => {
+      this.updatePositions_(0.5);
+    });
   }
 
   /**
    * One step right
    * @param {boolean=} opt_toEnd
+   * @private
    */
   stepRight_(opt_toEnd) {
     // To the very end of right
     if (opt_toEnd === true) {
-      this.updatePositions_(1);
+      this.mutateElement(() => {
+        this.updatePositions_(1);
+      });
     } else {
-      this.updatePositions_(this.limitPercentage_(
-          this.getCurrentSliderPercentage_() + this.stepSize_));
+      let newPercentage;
+      this.measureMutateElement(() => {
+        newPercentage = this.limitPercentage_(
+            this.getCurrentSliderPercentage_() + this.stepSize_);
+      }, () => {
+        this.updatePositions_(newPercentage);
+      });
     }
   }
 
   /**
-   * Pointer move X logic
+   * Move slider based on given pointer x position
+   * Do NOT wrap this in mutateElement!
    * @param {number} pointerX
    * @private
    */
   pointerMoveX_(pointerX) {
-    const {width, left, right}
-        = this.container_./*OK*/getBoundingClientRect();
-    //    = this.getLayoutBox();
-
+    const {width, left, right} = this.getLayoutBox();
     const newPos = Math.max(left, Math.min(pointerX, right));
     const newPercentage = (newPos - left) / width;
-    this.updatePositions_(newPercentage);
+    this.mutateElement(() => {
+      this.updatePositions_(newPercentage);
+    });
   }
 
   /**
    * Update element positions based on percentage
+   * Should be wrapped inside mutateElement
    * @param {number} leftPercentage
+   * @private
    */
   updatePositions_(leftPercentage) {
     leftPercentage = this.limitPercentage_(leftPercentage);
 
     this.updateTranslateX_(this.bar_, leftPercentage);
-
     this.updateTranslateX_(this.leftMask_, leftPercentage - 1);
     this.updateTranslateX_(this.leftAmpImage_, 1 - leftPercentage);
     if (this.leftLabelWrapper_) {
@@ -605,6 +635,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Limit percentage between 0 and 1
    * @param {number} percentage
+   * @private
    */
   limitPercentage_(percentage) {
     return Math.max(0, Math.min(percentage, 1));
@@ -612,8 +643,10 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /**
    * Set translateX of the element
+   * Only used in updatePositions_, which should be wrapped in mutateElement
    * @param {Element} element
    * @param {number} percentage
+   * @private
    */
   updateTranslateX_(element, percentage) {
     setStyles(dev().assertElement(element), {
