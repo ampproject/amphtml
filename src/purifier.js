@@ -221,7 +221,7 @@ const PURIFY_CONFIG = {
 
 /**
  * @param {string} dirty
- * @return {{clean: string, bindings: Array<!BindBindingDef>|undefined}}
+ * @return {{clean: string, bindings: Array<{element: !Element, property: string, expression: string}>}}
  */
 export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
@@ -242,7 +242,7 @@ export function purifyHtml(dirty) {
 
   // List of <amp-bind> bindings (tuple of tag, property, expression).
   // Collecting them here is an optimization to obviate DOM scanning later.
-  const bindings = /** @type {!Array<!BindBindingDef>} */ ([]);
+  const bindings = /** @type {!Array<{element: !Element, property: string, expression: string}>} */ ([]);
 
   /**
    * @param {!Node} node
@@ -332,7 +332,7 @@ export function purifyHtml(dirty) {
     if (binding) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`data-amp-bind-${property}`, attrValue);
-      bindings.push({tagName, property, expressionString: attrValue});
+      bindings.push({element: node, property, expression: attrValue});
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {

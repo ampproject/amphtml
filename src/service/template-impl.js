@@ -230,6 +230,12 @@ export class Templates {
     return templateElement;
   }
 
+  /** TODO */
+  findTemplateImplementation(parent, opt_querySelector) {
+    const template = this.findTemplate(parent, opt_querySelector);
+    return this.getImplementation_(template);
+  }
+
   /**
    * Find a specified template inside the parent. Returns null if not present.
    * The template can be specified either via "template" attribute or as a

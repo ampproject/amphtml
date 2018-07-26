@@ -24,7 +24,7 @@ import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {filterSplice} from '../../../src/utils/array';
+import {filterSplice, findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
@@ -377,6 +377,54 @@ export class Bind {
         });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
+  }
+
+  /** TODO */
+  ingestAndApply(ingestable) {
+    return this.initializePromise_.then(() => {
+      const bindings = /** @type {!Array<!BindBindingDef>} */ ([]);
+      const boundElements = /** @type {!Array<!BoundElementDef>} */ ([]);
+      const expressionToElements = /** @type {!Object<string, !Array<!Element>>} */ (map());
+
+      ingestable.forEach(i => {
+        const {element, property, expression} = i;
+
+        const boundProperty = {property, expressionString: expression, previousResult: undefined};
+        const index = findIndex(boundElements, be => be.element === element);
+        if (index < 0) {
+          boundElements.push({element, boundProperties: [boundProperty]});
+        } else {
+          boundElements[index].boundProperties.push(boundProperty);
+        }
+
+        bindings.push({tagName: element.tagName, property, expressionString: expression});
+
+        if (!expressionToElements[expression]) {
+          expressionToElements[expression] = [];
+        }
+        expressionToElements[expression].push(element);
+      });
+
+      this.boundElements_ = this.boundElements_.concat(boundElements);
+      Object.assign(this.expressionToElements_, expressionToElements);
+
+      return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
+        // Report each parse error.
+        Object.keys(parseErrors).forEach(expressionString => {
+          const elements = this.expressionToElements_[expressionString];
+          if (elements.length > 0) {
+            this.reportWorkerError_(parseErrors[expressionString],
+                `${TAG}: Expression compile error in "${expressionString}".`,
+                elements[0]);
+          }
+        });
+
+        const elements = ingestable.map(i => i.element);
+        return this.evaluate_().then(results =>
+          this.applyElements_(results, elements));
+      });
+
+    });
   }
 
   /**

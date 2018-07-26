@@ -374,8 +374,15 @@ export class AmpList extends AMP.BaseElement {
   updateBindingsWith_(bind, elements) {
     // Forward elements to chained promise on success or failure.
     const forwardElements = () => elements;
-    return bind.scanAndApply(elements, [this.container_])
-        .then(forwardElements, forwardElements);
+    return this.templates_.findTemplateImplementation(this.element).then(template => {
+      if (template.bindings) {
+        return bind.ingestAndApply(template.bindings)
+            .then(forwardElements, forwardElements);
+      } else {
+        return bind.scanAndApply(elements, [this.container_])
+            .then(forwardElements, forwardElements);
+      }
+    });
   }
 
   /**

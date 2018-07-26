@@ -107,6 +107,7 @@ export class AmpMustache extends AMP.BaseTemplate {
    */
   serializeHtml_(html) {
     const {clean, bindings} = purifyHtml(html);
+    this.bindings = bindings; // HACK(choumx)
     const root = this.win.document.createElement('div');
     root./*OK*/innerHTML = clean;
     return this.unwrap(root);
