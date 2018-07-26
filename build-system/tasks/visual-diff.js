@@ -32,7 +32,7 @@ const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
 const {gitBranchName, gitCommitterEmail} = require('../git');
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
-const SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
+const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
 const SNAPSHOT_EMPTY_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
@@ -428,7 +428,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
 
     await enableExperiments(page, webpage['experiments']);
 
-    const snapshotOptions = Object.assign({}, SNAPSHOT_OPTIONS);
+    const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
 
     if (viewport) {
       snapshotOptions.widths = [viewport.width];
