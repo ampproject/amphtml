@@ -41,6 +41,7 @@ Example:
 <amp-addthis
   width="320"
   height="92"
+  layout="responsive"
   data-pub-id="ra-59c2c366435ef478"
   data-widget-id="0fyg">
 </amp-addthis>
