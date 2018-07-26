@@ -125,7 +125,7 @@
   dependencies:
     "@babel/types" "7.0.0-beta.54"
 
-"@babel/helper-plugin-test-runner@^7.0.0-beta.54":
+"@babel/helper-plugin-test-runner@7.0.0-beta.54":
   version "7.0.0-beta.54"
   resolved "https://registry.yarnpkg.com/@babel/helper-plugin-test-runner/-/helper-plugin-test-runner-7.0.0-beta.54.tgz#70b59691f52f955ebdd9adc5d35fe8b7c165f8fe"
   dependencies:

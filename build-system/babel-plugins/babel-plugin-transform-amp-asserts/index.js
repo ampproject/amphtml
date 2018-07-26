@@ -40,18 +40,18 @@ export default function(babel) {
   return {
     visitor: {
       CallExpression(path) {
-        //console.log(path.node.callee)
-        const isRemovableDevCall = t.isMemberExpression(path.node.callee) &&
-              t.isCallExpression(path.node.callee.object) &&
-              t.isIdentifier(path.node.callee.object.callee, {name: 'dev'}) &&
-              isRemovableMethod(t, path.node.callee.property,
-                  removableDevAsserts);
+        const isMemberAndCallExpression = t.isMemberExpression(path.node.callee)
+            && t.isCallExpression(path.node.callee.object);
 
-        const isRemovableUserCall = t.isMemberExpression(path.node.callee) &&
-              t.isCallExpression(path.node.callee.object) &&
-              t.isIdentifier(path.node.callee.object.callee, {name: 'user'}) &&
-              isRemovableMethod(t, path.node.callee.property,
-                  removableUserAsserts);
+        const isRemovableDevCall = isMemberAndCallExpression &&
+            t.isIdentifier(path.node.callee.object.callee, {name: 'dev'}) &&
+            isRemovableMethod(t, path.node.callee.property,
+                removableDevAsserts);
+
+        const isRemovableUserCall = isMemberAndCallExpression &&
+            t.isIdentifier(path.node.callee.object.callee, {name: 'user'}) &&
+            isRemovableMethod(t, path.node.callee.property,
+                removableUserAsserts);
 
         if (!(isRemovableDevCall || isRemovableUserCall)) {
           return;
