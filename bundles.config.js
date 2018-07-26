@@ -99,13 +99,13 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-compare-slider', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-consent',
     version: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
   },
+
   {name: 'amp-crypto-polyfill', version: '0.1', type: TYPES.MISC},
   {name: 'amp-dailymotion', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-date-countdown', version: '0.1', type: TYPES.MISC},
@@ -146,6 +146,11 @@ exports.extensionBundles = [
   {name: 'amp-ima-video', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-image-lightbox',
+    version: '0.1', options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-image-slider',
     version: '0.1', options: {hasCss: true},
     type: TYPES.MISC,
   },
