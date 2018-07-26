@@ -863,7 +863,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   previous_() {
     const activePage = dev().assert(this.activePage_,
-        'No active page set when navigating to next page.');
+        'No active page set when navigating to previous page.');
     activePage.previous();
   }
 
