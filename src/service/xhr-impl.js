@@ -22,10 +22,10 @@ import {
   setupInit,
 } from '../xhr-base';
 import {dev, user} from '../log';
-import {dict, map} from '../utils/object';
 import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {map} from '../utils/object';
 import {parseJson} from '../json';
 import {
   serializeQueryString,
@@ -33,10 +33,10 @@ import {
 import {utf8Encode} from '../utils/bytes';
 
 /** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = dict({
+const allowedFetchTypes_ = {
   'document': 1,
   'text': 2,
-});
+};
 
 /**
  * Special case for fetchJson
