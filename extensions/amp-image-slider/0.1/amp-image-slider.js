@@ -70,6 +70,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.hint_ = null;
 
     /** @private {UnlistenDef|null} */
+    this.unlistenCancelTouchPropagation_ = null;
+
+    /** @private {UnlistenDef|null} */
     this.unlistenMouseDown_ = null;
     /** @private {UnlistenDef|null} */
     this.unlistenMouseUp_ = null;
@@ -422,9 +425,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.unlisten_(this.unlistenTouchEnd_);
 
     this.unlistenTouchMove_ =
-        listen(this.win, 'touchmove', this.onTouchMove_.bind(this));
+        listen(this.container_, 'touchmove', this.onTouchMove_.bind(this));
     this.unlistenTouchEnd_ =
-        listen(this.win, 'touchend', this.onTouchEnd_.bind(this));
+        listen(this.container_, 'touchend', this.onTouchEnd_.bind(this));
 
     this.resetHintInterval_(true);
   }
@@ -434,7 +437,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {Event} e
    */
   onTouchMove_(e) {
-    e.stopPropagation();
+    // e.stopPropagation();
     this.pointerMoveX_(e.touches[0].pageX);
   }
 
@@ -506,18 +509,30 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Register events
    */
   registerEvents_() {
+    this.unlistenCancelTouchPropagation_ =
+        listen(this.element, 'touchmove', e => {
+          // TODO(kqian): double check if this breaks something
+          // This ensures that when user is scrolling the slider
+          // the parent (page/carousel) is not scrolled
+          if (e.currentTarget === this.element) {
+            e.preventDefault();
+          }
+          e.stopPropagation();
+        });
     this.unlistenMouseDown_ =
-        listen(this.element, 'mousedown', this.onMouseDown_.bind(this));
+        listen(this.container_, 'mousedown', this.onMouseDown_.bind(this));
     this.unlistenTouchStart_ =
-        listen(this.element, 'touchstart', this.onTouchStart_.bind(this));
+        listen(this.container_, 'touchstart', this.onTouchStart_.bind(this));
     this.unlistenKeyDown_ =
-        listen(this.element, 'keydown', this.onKeyDown_.bind(this));
+        listen(this.container_, 'keydown', this.onKeyDown_.bind(this));
   }
 
   /**
    * Unregister events
    */
   unregisterEvents_() {
+    this.unlisten_(this.unlistenCancelTouchPropagation_);
+
     this.unlisten_(this.unlistenMouseDown_);
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);

@@ -86,6 +86,7 @@
   <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <!-- to make this work during testing, cp dist/ww.max.js to dist/ww.js -->
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -239,6 +240,43 @@
       <button on="tap:disableDemo2.seekTo(percent=0)">Seek to Left</button>
       <button on="tap:AMP.setState({disableDemo2: {disabled: true}})">Disable</button>
     </div>
+
+
+    <amp-carousel width="400"
+      height="300"
+      layout="responsive"
+      type="slides">
+      <amp-img src="https://unsplash.it/200/300?image=0"
+        width="400"
+        height="300"
+        layout="responsive"
+        alt="a sample image"></amp-img>
+      <amp-image-slider layout="responsive" width="1024" height="600">
+        <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+        <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      </amp-image-slider>
+      <amp-img src="https://unsplash.it/200/300?image=1"
+        width="400"
+        height="300"
+        layout="responsive"
+        alt="and another sample image"></amp-img>
+    </amp-carousel>
+
+    <amp-carousel width="400"
+      height="300"
+      layout="responsive"
+      type="slides">
+      <amp-img src="https://unsplash.it/200/300?image=0"
+        width="400"
+        height="300"
+        layout="responsive"
+        alt="a sample image"></amp-img>
+      <amp-img src="https://unsplash.it/200/300?image=1"
+        width="400"
+        height="300"
+        layout="responsive"
+        alt="and another sample image"></amp-img>
+    </amp-carousel>
   </main>
 </body>
 </html>
