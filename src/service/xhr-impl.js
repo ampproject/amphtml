@@ -22,10 +22,10 @@ import {
   setupInit,
 } from '../xhr-base';
 import {dev, user} from '../log';
+import {dict, map} from '../utils/object';
 import {getService, registerServiceBuilder} from '../service';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {map} from '../utils/object';
 import {parseJson} from '../json';
 import {
   serializeQueryString,
@@ -33,10 +33,10 @@ import {
 import {utf8Encode} from '../utils/bytes';
 
 /** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = {
-  document: 1,
-  text: 2,
-};
+const allowedFetchTypes_ = dict({
+  'document': 1,
+  'text': 2,
+});
 
 /**
  * Special case for fetchJson
@@ -61,13 +61,6 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  * @visibleForTesting
  */
 export class Xhr extends XhrBase {
-
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    super(win);
-  }
 
   /**
    * We want to call `fetch_` unbound from any context since it could
@@ -179,9 +172,8 @@ export class Xhr extends XhrBase {
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
-    return this.fetchAmpCors_(input, init).then(res => {
-      const response = /**@type {!Response} */ (res);
-      return /** @type{!Promise<!FetchResponse>} */ (assertSuccess(response));
+    return this.fetchAmpCors_(input, init).then(response => {
+      return /** @type{!Promise<!FetchResponse>} */ (assertSuccess(/**@type {!Response} */(response)));
     });
   }
 
@@ -198,9 +190,8 @@ export class Xhr extends XhrBase {
    */
   sendSignal(input, opt_init) {
     return this.fetchAmpCors_(input, opt_init)
-        .then(res => {
-          const response = /**@type {!Response} */ (res);
-          return assertSuccess(response);
+        .then(response => {
+          return assertSuccess(/**@type {!Response} */(response));
         });
   }
 
