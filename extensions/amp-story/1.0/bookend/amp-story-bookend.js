@@ -206,41 +206,56 @@ export class AmpStoryBookend extends AMP.BaseElement {
     this.storeService_ = Services.storyStoreService(win);
   }
 
+  /** @private */
+  initializeServices_() {
+    return Promise.all([
+      Services.storyRequestServiceForOrNull(this.win).then(requestService => {
+        this.requestService_ = requestService;
+      }),
+      Services.storyStoreServiceForOrNull(this.win).then(storeService => {
+        this.storeService_ = storeService;
+      }),
+    ]);
+  }
+
   /**
    * Builds the bookend components and appends it to the provided story.
+   * @return {!Promise}
    */
   build() {
     if (this.isBuilt_) {
-      return;
+      return Promise.resolve();
     }
 
-    this.isBuilt_ = true;
+    return this.initializeServices_().then(() => {
+      this.isBuilt_ = true;
 
-    this.root_ = this.win.document.createElement('div');
-    this.bookendEl_ = renderAsElement(this.win.document, ROOT_TEMPLATE);
+      this.root_ = this.win.document.createElement('div');
+      this.bookendEl_ = renderAsElement(this.win.document, ROOT_TEMPLATE);
 
-    createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
+      createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
 
-    this.replayButton_ = this.buildReplayButton_();
+      this.replayButton_ = this.buildReplayButton_();
 
-    const innerContainer = this.getInnerContainer_();
-    innerContainer.appendChild(this.replayButton_);
-    innerContainer.appendChild(
-        this.shareWidget_.build(getAmpdoc(this.win.document)));
+      const innerContainer = this.getInnerContainer_();
+      innerContainer.appendChild(this.replayButton_);
+      innerContainer.appendChild(
+          this.shareWidget_.build(getAmpdoc(this.win.document)));
 
-    const consentId = this.storeService_.get(StateProperty.CONSENT_ID);
+      const consentId = this.storeService_.get(StateProperty.CONSENT_ID);
 
-    if (consentId) {
-      const promptConsentEl =
-          renderAsElement(
-              this.win.document, buildPromptConsentTemplate(String(consentId)));
-      innerContainer.appendChild(promptConsentEl);
-    }
+      if (consentId) {
+        const promptConsentEl =
+            renderAsElement(
+                this.win.document, buildPromptConsentTemplate(String(consentId)));
+        innerContainer.appendChild(promptConsentEl);
+      }
 
-    this.initializeListeners_();
+      this.initializeListeners_();
 
-    this.mutateElement(() => {
-      this.element.parentElement.appendChild(this.getRoot());
+      return this.mutateElement(() => {
+        this.element.parentElement.appendChild(this.getRoot());
+      });
     });
   }
 

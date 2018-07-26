@@ -1620,8 +1620,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    this.bookend_.build();
-    return this.bookend_.loadConfigAndMaybeRenderBookend();
+    return this.bookend_.build()
+        .then(() => this.bookend_.loadConfigAndMaybeRenderBookend());
   }
 
 
