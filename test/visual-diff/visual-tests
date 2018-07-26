@@ -194,8 +194,7 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
       "name": "amp-story: Grid layer (fill)",
-      "experiments": ["disable-amp-story-shadow-dom"],
-      "viewport": {"width": 320, "height": 427},
+      "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-grid-template-fill"
@@ -204,8 +203,7 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html",
       "name": "amp-story: Grid layer (vertical)",
-      "experiments": ["disable-amp-story-shadow-dom"],
-      "viewport": {"width": 320, "height": 427},
+      "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-grid-template-vertical"
@@ -214,8 +212,7 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html",
       "name": "amp-story: Grid layer (horizontal)",
-      "experiments": ["disable-amp-story-shadow-dom"],
-      "viewport": {"width": 320, "height": 427},
+      "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-grid-template-horizontal"
@@ -224,24 +221,200 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html",
       "name": "amp-story: Grid layer (thirds)",
-      "experiments": ["disable-amp-story-shadow-dom"],
-      "viewport": {"width": 320, "height": 427},
+      "viewport": {"width": 320, "height": 480},
       "loading_incomplete_css": [
         "[grid-area]"
       ],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-grid-template-thirds",
+        ".i-amphtml-story-grid-template-thirds"
       ]
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
       "name": "amp-story: CTA layer",
-      "experiments": ["disable-amp-story-shadow-dom"],
-      "viewport": {"width": 320, "height": 427},
+      "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".visual-diff-is-on-the-page-with-the-cta-layer"
+        "amp-story-page#the-one-with-the-cta-layer[active]"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/embed-mode-1.html",
+      "name": "amp-story: embed mode 1",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/embed-mode-2.html",
+      "name": "amp-story: embed mode 2",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/share-menu.html",
+      "name": "amp-story: share menu",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-menu"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/info-dialog.html",
+      "name": "amp-story: info dialog",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-info-dialog"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-bookend.html",
+      "name": "amp-story: bookend",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-bookend"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-consent.html",
+      "name": "amp-story: consent",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-consent"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/rtl.html",
+      "name": "amp-story: rtl",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
+      "name": "amp-story: unsupported browser",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-fallback",
+        ".i-amphtml-story-unsupported-browser-overlay"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
+      "name": "amp-story: Grid layer (fill) (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-fill"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html",
+      "name": "amp-story: Grid layer (vertical) (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-vertical"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html",
+      "name": "amp-story: Grid layer (horizontal) (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-horizontal"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html",
+      "name": "amp-story: Grid layer (thirds) (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_incomplete_css": [
+        "[grid-area]"
+      ],
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-thirds"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
+      "name": "amp-story: CTA layer (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        "amp-story-page#the-one-with-the-cta-layer[active]"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/embed-mode-1.html",
+      "name": "amp-story: embed mode 1 (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/embed-mode-2.html",
+      "name": "amp-story: embed mode 2 (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-bookend.html",
+      "name": "amp-story: bookend (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-bookend"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-consent.html",
+      "name": "amp-story: consent (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-consent"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/rtl.html",
+      "name": "amp-story: rtl (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
+      "name": "amp-story: unsupported browser (desktop)",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-fallback",
+        ".i-amphtml-story-unsupported-browser-overlay"
+      ]
+    },
+    {
+      // The url here should not matter; this UI should be triggered for all
+      // story documents, based on the viewport dimensions.
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
+      "name": "amp-story: rotation overlay",
+      "viewport": {"width": 480, "height": 320},
+      "loading_complete_css": [
+        ".i-amphtml-story-no-rotation-overlay"
       ]
     },
     /**

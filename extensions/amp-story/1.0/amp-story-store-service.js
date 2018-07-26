@@ -25,7 +25,6 @@ import {registerServiceBuilder} from '../../../src/service';
 /** @type {string} */
 const TAG = 'amp-story';
 
-
 /**
  * Util function to retrieve the store service. Ensures we can retrieve the
  * service synchronously from the amp-story codebase without running into race

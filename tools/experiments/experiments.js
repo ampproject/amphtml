@@ -236,12 +236,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
   },
   {
-    id: 'disable-amp-story-shadow-dom',
-    name: 'Disable usage of shadow DOM in amp-story 1.0',
-    spec: 'https://github.com/ampproject/amphtml/issues/xxxxx',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/xxxxx',
-  },
-  {
     id: 'inline-styles',
     name: 'Enables the usage of inline styles for non fixed elements',
     spec: 'https://github.com/ampproject/amphtml/issues/11881',
