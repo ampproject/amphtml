@@ -17,7 +17,9 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
+import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {dev, user} from '../../../src/log';
 import {getStyle, setStyles} from '../../../src/style';
 import {htmlFor} from '../../../src/static-template';
@@ -70,20 +72,11 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.hint_ = null;
 
     /** @private {UnlistenDef|null} */
-    this.unlistenCancelTouchPropagation_ = null;
-
-    /** @private {UnlistenDef|null} */
     this.unlistenMouseDown_ = null;
     /** @private {UnlistenDef|null} */
     this.unlistenMouseUp_ = null;
     /** @private {UnlistenDef|null} */
     this.unlistenMouseMove_ = null;
-    /** @private {UnlistenDef|null} */
-    this.unlistenTouchStart_ = null;
-    /** @private {UnlistenDef|null} */
-    this.unlistenTouchMove_ = null;
-    /** @private {UnlistenDef|null} */
-    this.unlistenTouchEnd_ = null;
     /** @private {UnlistenDef|null} */
     this.unlistenKeyDown_ = null;
 
@@ -105,6 +98,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.disabled_ = false; // for now, will be set later
+
+    /** @private {Gestures|null} */
+    this.gestures_ = null;
   }
 
   /** @override */
@@ -313,6 +309,48 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
+   * Install gestures for touch
+   */
+  registerTouchGestures_() {
+    if (this.gestures_) {
+      return;
+    }
+
+    this.gestures_ = Gestures.get(this.element);
+
+    this.gestures_.onGesture(SwipeXRecognizer, e => {
+      // We need the initial offset, yet gesture event seems not providing
+      if (e.data.first) {
+        // Disable hint reappearance timeout if needed
+        this.resetHintInterval_(true);
+      }
+      this.pointerMoveX_(
+          e.data.startX + e.data.deltaX);
+      if (e.data.last) {
+        // Reset hint reappearance timeout if needed
+        this.resetHintInterval_(!this.shouldHintLoop_);
+      }
+    });
+
+    this.gestures_.onPointerDown(e => {
+      // Ensure touchstart changes slider position
+      this.pointerMoveX_(e.touches[0].pageX);
+      this.resetHintInterval_(true);
+    });
+  }
+
+  /**
+   * Uninstall gestures for touch
+   */
+  unregisterTouchGestures_() {
+    if (!this.gestures_) {
+      return;
+    }
+    this.gestures_.cleanup();
+    this.gestures_ = null;
+  }
+
+  /**
    * Reset interval when the hint would reappear
    * Call this when an user interaction is done
    * Specify opt_noRestart to true if no intend to start a timeout for
@@ -413,47 +451,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Touch start
-   * @param {Event} e
-   */
-  onTouchStart_(e) {
-    e.stopPropagation();
-    this.pointerMoveX_(e.touches[0].pageX);
-
-    // In case, clear up remnants
-    this.unlisten_(this.unlistenTouchMove_);
-    this.unlisten_(this.unlistenTouchEnd_);
-
-    this.unlistenTouchMove_ =
-        listen(this.container_, 'touchmove', this.onTouchMove_.bind(this));
-    this.unlistenTouchEnd_ =
-        listen(this.container_, 'touchend', this.onTouchEnd_.bind(this));
-
-    this.resetHintInterval_(true);
-  }
-
-  /**
-   * Touch move
-   * @param {Event} e
-   */
-  onTouchMove_(e) {
-    // e.stopPropagation();
-    this.pointerMoveX_(e.touches[0].pageX);
-  }
-
-  /**
-   * Touch end
-   * @param {Event} e
-   */
-  onTouchEnd_(e) {
-    e.stopPropagation();
-    this.unlisten_(this.unlistenTouchMove_);
-    this.unlisten_(this.unlistenTouchEnd_);
-
-    this.resetHintInterval_(!this.shouldHintLoop_);
-  }
-
-  /**
    * On key down
    * @param {Event} e
    */
@@ -509,39 +506,22 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Register events
    */
   registerEvents_() {
-    this.unlistenCancelTouchPropagation_ =
-        listen(this.element, 'touchmove', e => {
-          // TODO(kqian): double check if this breaks something
-          // This ensures that when user is scrolling the slider
-          // the parent (page/carousel) is not scrolled
-          if (e.currentTarget === this.element) {
-            e.preventDefault();
-          }
-          e.stopPropagation();
-        });
     this.unlistenMouseDown_ =
         listen(this.container_, 'mousedown', this.onMouseDown_.bind(this));
-    this.unlistenTouchStart_ =
-        listen(this.container_, 'touchstart', this.onTouchStart_.bind(this));
     this.unlistenKeyDown_ =
         listen(this.element, 'keydown', this.onKeyDown_.bind(this));
+    this.registerTouchGestures_();
   }
 
   /**
    * Unregister events
    */
   unregisterEvents_() {
-    this.unlisten_(this.unlistenCancelTouchPropagation_);
-
     this.unlisten_(this.unlistenMouseDown_);
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);
-
-    this.unlisten_(this.unlistenTouchStart_);
-    this.unlisten_(this.unlistenTouchMove_);
-    this.unlisten_(this.unlistenTouchEnd_);
-
     this.unlisten_(this.unlistenKeyDown_);
+    this.unregisterTouchGestures_();
   }
 
   /**
@@ -597,14 +577,12 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   pointerMoveX_(pointerX) {
-    // const {width} = this.getLayoutBox();
-    const {width} = this.container_./*OK*/getBoundingClientRect();
-    const {left: leftBound, right: rightBound}
-    //    = this.getLayoutBox();
+    const {width, left, right}
         = this.container_./*OK*/getBoundingClientRect();
+    //    = this.getLayoutBox();
 
-    const newPos = Math.max(leftBound, Math.min(pointerX, rightBound));
-    const newPercentage = (newPos - leftBound) / width;
+    const newPos = Math.max(left, Math.min(pointerX, right));
+    const newPercentage = (newPos - left) / width;
     this.updatePositions_(newPercentage);
   }
 
