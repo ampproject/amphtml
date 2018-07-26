@@ -16,7 +16,11 @@
 
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
-import {Action, StateProperty} from '../amp-story-store-service';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
@@ -24,6 +28,7 @@ import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
+import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -87,6 +92,9 @@ describes.realWin('amp-story', {
   beforeEach(() => {
     win = env.win;
 
+    sandbox.stub(Services, 'storyStoreService')
+        .callsFake(() => new AmpStoryStoreService(win));
+
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
@@ -94,6 +102,7 @@ describes.realWin('amp-story', {
     registerServiceBuilder(win, 'localization', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
+
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
