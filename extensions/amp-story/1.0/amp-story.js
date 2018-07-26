@@ -355,8 +355,8 @@ export class AmpStory extends AMP.BaseElement {
   pauseCallback() {
     // Store the current paused state, to make sure the story does not play on
     // resume if it was previously paused.
-    this.pausedStateToRestore_ =
-        this.storeService_.get(StateProperty.PAUSED_STATE);
+    this.pausedStateToRestore_ = !!this.storeService_
+        .get(StateProperty.PAUSED_STATE);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
   }
 
