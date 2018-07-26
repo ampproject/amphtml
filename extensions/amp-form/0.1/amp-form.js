@@ -132,6 +132,8 @@ export class AmpForm {
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
+    this.verifyInputs_();
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
 
@@ -184,13 +186,6 @@ export class AmpForm {
     /** @private {!FormState} */
     this.state_ = FormState.INITIAL;
 
-    const inputs = this.form_.elements;
-    for (let i = 0; i < inputs.length; i++) {
-      const {name} = inputs[i];
-      user().assert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
-          'Illegal input name, %s found: %s', name, inputs[i]);
-    }
-
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
 
@@ -207,6 +202,20 @@ export class AmpForm {
 
     /** @private {?Promise} */
     this.renderTemplatePromise_ = null;
+  }
+
+  /**
+   * Verify that the form's controls doesn't have the amp source origin as a
+   * name.
+   * @private
+   */
+  verifyInputs_() {
+    const inputs = this.form_.elements;
+    for (let i = 0; i < inputs.length; i++) {
+      const {name} = inputs[i];
+      user().assert(name != SOURCE_ORIGIN_PARAM && name != FORM_VERIFY_PARAM,
+          'Illegal input name, %s found: %s', name, inputs[i]);
+    }
   }
 
   /**
@@ -396,32 +405,59 @@ export class AmpForm {
    * @private
    */
   handleSubmitEvent_(event) {
-    const action = this.form_.getAttribute('action');
-    const actionXhr = this.form_.getAttribute('action-xhr');
-    const method = (this.form_.getAttribute('method') || 'GET').toUpperCase();
+    const {form_} = this;
+    if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
+      event.stopImmediatePropagation();
+      event.preventDefault();
+      return;
+    }
+    if (this.xhrAction_ || this.method_ == 'POST') {
+      event.preventDefault();
+    }
+
+    // amp-form will add novalidate to all forms to manually trigger
+    // validation. In that case `novalidate` doesn't have the same meaning.
+    const isAmpFormMarked = form_.classList.contains('i-amphtml-form');
+    let shouldValidate;
+    if (isAmpFormMarked) {
+      shouldValidate = !form_.hasAttribute('amp-novalidate');
+    } else {
+      shouldValidate = !form_.hasAttribute('novalidate');
+    }
+
+    // Safari does not trigger validation check on submission, hence we
+    // trigger it manually. In other browsers this would never execute since
+    // the submit event wouldn't be fired if the form is invalid.
+    if (shouldValidate && form_.checkValidity && !form_.checkValidity()) {
+      event.preventDefault();
+    }
+
+    const action = form_.getAttribute('action');
+    const actionXhr = form_.getAttribute('action-xhr');
+    const method = (form_.getAttribute('method') || 'GET').toUpperCase();
 
     if (actionXhr) {
-      assertHttpsUrl(actionXhr, this.form_, 'action-xhr');
+      assertHttpsUrl(actionXhr, form_, 'action-xhr');
       user().assert(!isProxyOrigin(actionXhr),
-          'form action-xhr should not be on AMP CDN: %s', this.form_);
+          'form action-xhr should not be on AMP CDN: %s', form_);
       checkCorsUrl(actionXhr);
     }
     if (action) {
-      assertHttpsUrl(action, this.form_, 'action');
+      assertHttpsUrl(action, form_, 'action');
       user().assert(!isProxyOrigin(action),
-          'form action should not be on AMP CDN: %s', this.form_);
+          'form action should not be on AMP CDN: %s', form_);
       checkCorsUrl(action);
     }
 
     if (method == 'GET') {
       user().assert(actionXhr || action,
           'form action-xhr or action attribute is required for method=GET: %s',
-          this.form_);
+          form_);
     } else if (method == 'POST') {
       if (action) {
         const TAG = 'form';
         user().error(TAG,
-            'action attribute is invalid for method=POST: %s', this.form_);
+            'action attribute is invalid for method=POST: %s', form_);
       }
 
       if (!actionXhr) {
@@ -429,41 +465,17 @@ export class AmpForm {
         user().assert(false,
             'Only XHR based (via action-xhr attribute) submissions are ' +
             'supported for POST requests. %s',
-            this.form_);
+            form_);
       }
     }
 
-    const target = this.form_.getAttribute('target');
+    const target = form_.getAttribute('target');
     if (target) {
       user().assert(target == '_blank' || target == '_top',
           'form target=%s is invalid can only be _blank or _top: %s',
-          target, this.form_);
+          target, form_);
     } else {
-      this.form_.setAttribute('target', '_top');
-    }
-
-    // For xhr submissions relay the submission event through action service to
-    // allow us to wait for amp-form (and possibly its dependencies) to execute
-    // the actual submission. For non-XHR GET we let the submission go through
-    // to allow _blank target to work.
-    if (actionXhr || this.method_ == 'POST') {
-      event.preventDefault();
-
-      // It's important to stop propagation of the submission to avoid double
-      // handling of the event in cases were we are delegating to action service
-      // to deliver the submission event.
-      event.stopImmediatePropagation();
-
-      const actions = Services.actionServiceForDoc(this.form_);
-      actions.execute(
-          this.form_, 'submit', /*args*/ null, /*source*/ this.form_,
-          /*caller*/ this.form_, event,ActionTrust.HIGH);
-    }
-
-    if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
-      event.stopImmediatePropagation();
-      event.preventDefault();
-      return;
+      form_.setAttribute('target', '_top');
     }
 
     // Submits caused by user input have high trust.
