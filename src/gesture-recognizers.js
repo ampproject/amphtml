@@ -382,6 +382,10 @@ class SwipeRecognizer extends GestureRecognizer {
       time: this.lastTime_,
       deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
       deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
+      startX: this.startX_,
+      startY: this.startY_,
+      lastX: this.lastX_,
+      lastY: this.lastY_,
       velocityX: this.horiz_ ? this.velocityX_ : 0,
       velocityY: this.vert_ ? this.velocityY_ : 0,
     }, event);
