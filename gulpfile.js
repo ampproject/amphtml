@@ -237,6 +237,10 @@ function buildExtensions(options) {
  * @return {!Array<string>}
  */
 function getExtensionsFromArg(examples) {
+  if (!examples) {
+    return;
+  }
+
   const extensions = [];
 
   examples.split(',').forEach(example => {
@@ -1588,6 +1592,7 @@ gulp.task('build', 'Builds the AMP library', maybeUpdatePackages, build, {
   options: {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
     extensions: '  Builds only the listed extensions.',
+    extensions_from: '  Builds only the extensions from the listed AMP(s).',
     noextensions: '  Builds with no extensions.',
   },
 });
@@ -1599,6 +1604,8 @@ gulp.task('default', 'Runs "watch" and then "serve"',
     maybeUpdatePackages.concat(['watch']), serve, {
       options: {
         extensions: '  Watches and builds only the listed extensions.',
+        extensions_from: '  Watches and builds only the extensions from the ' +
+            'listed AMP(s).',
         noextensions: '  Watches and builds with no extensions.',
       },
     });
@@ -1608,7 +1615,10 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
             'Great for profiling and debugging production code.',
     fortesting: '  Compiles production binaries for local testing',
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-    single_pass: 'Compile AMP\'s primary JS bundles in a single invocatoion',
+    single_pass: 'Compile AMP\'s primary JS bundles in a single invocation',
+    extensions: '  Builds only the listed extensions.',
+    extensions_from: '  Builds only the extensions from the listed AMP(s).',
+    noextensions: '  Builds with no extensions.',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
@@ -1617,6 +1627,8 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',
         extensions: '  Watches and builds only the listed extensions.',
+        extensions_from: '  Watches and builds only the extensions from the ' +
+            'listed AMP(s).',
         noextensions: '  Watches and builds with no extensions.',
       },
     });
