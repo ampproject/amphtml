@@ -109,7 +109,7 @@ export class XhrBase {
    * @protected
    * @return {!Promise<*>}
    */
-  fetchAmpCors_(input, init) {
+  fetchAmpCors_(input, init = {}) {
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
 
     // In particular, Firefox does not tolerate `null` values for
