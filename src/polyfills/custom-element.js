@@ -80,6 +80,16 @@ function hasCustomElements(win) {
     customElements.whenDefined);
 }
 
+/**
+ * Was HTMLElement already patched this window?
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isPatched(win) {
+  const tag = win.HTMLElement.toString();
+  return tag.indexOf('[native code]') === -1;
+}
+
 class CustomElementRegistry {
   /**
    * @param {!Registry} registry
@@ -496,12 +506,44 @@ function polyfill(win) {
 }
 
 /**
+ * Wraps HTMLElement in a Reflect.construct constructor, so that transpiled
+ * classes can `_this = superClass.call(this)` during their construction.
+ * @param {!Window} win
+ */
+function wrapHTMLElement(win) {
+  const {HTMLElement} = win;
+  /**
+   */
+  function HTMLElementPolyfill() {
+    return Reflect.construct(HTMLElement, [], this.constructor);
+  }
+  HTMLElementPolyfill.prototype = Object.create(HTMLElement.prototype, {
+    constructor: {
+      // enumerable: false,
+      configurable: true,
+      writable: true,
+      value: HTMLElementPolyfill,
+    },
+  });
+
+  // Object.getOwnPropertyDescriptor(window, 'HTMLElement')
+  // {value: ƒ, writable: true, enumerable: false, configurable: true}
+  win.HTMLElement = HTMLElementPolyfill;
+}
+
+/**
  * Polyfills Custom Elements v1 API
  * @param {!Window} win
  * @param {!Function} ctor
  */
 export function install(win, ctor) {
+  if (isPatched(win)) {
+    return;
+  }
+
   let install = true;
+  let installWrapper = false;
+
   if (hasCustomElements(win)) {
     // If ctor is constructable without new, it's a function. That means it was
     // compiled down, and we need to force the polyfill because all you cannot
@@ -509,11 +551,11 @@ export function install(win, ctor) {
     try {
       // "Construct" ctor using ES5 idioms
       const instance = Object.create(ctor.prototype);
-      // Call ctor without new
       ctor.call(instance);
 
-      // If this succeeds, we're in a transpiled environment
-      install = true;
+      // If that succeeded, we're in a transpiled environment
+      // Let's find out if we can wrap HTMLElement and avoid a full patch.
+      installWrapper = typeof Reflect !== 'undefined' && !!Reflect.construct;
     } catch (e) {
 
       // The ctor threw when we constructed is via ES5, so it's a real class.
@@ -522,7 +564,9 @@ export function install(win, ctor) {
     }
   }
 
-  if (install) {
+  if (installWrapper) {
+    wrapHTMLElement(win);
+  } else if (install) {
     polyfill(win);
   }
 }
