@@ -126,7 +126,7 @@ export class XhrBase {
       init.ampCors = true;
     }
 
-    dev().assert('requireAmpResponseSourceOrigin' in init,
+    dev().assert(!('requireAmpResponseSourceOrigin' in init),
         'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
 
     // For some same origin requests, add AMP-Same-Origin: true header to allow
@@ -143,10 +143,6 @@ export class XhrBase {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
 
-      user().assert(init.ampCors && !allowSourceOriginHeader,
-          'Response must contain the'
-          + ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
-
       if (allowSourceOriginHeader) {
         const sourceOrigin = getSourceOrigin(this.win.location.href);
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
@@ -155,6 +151,9 @@ export class XhrBase {
             `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
+      } else if (init.ampCors) {
+        user().assert(false, 'Response must contain the'
+          + ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
     }, reason => {
