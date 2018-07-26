@@ -49,9 +49,6 @@ export class AmpImg extends BaseElement {
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
 
-    /** @private @const {boolean} */
-    this.useBlurryPlaceholder_ = isExperimentOn(this.win, 'blurry-placeholder');
-
     /**@private {boolean} */
     this.hasBlurredPlaceHolder_ = false;
   }
@@ -109,7 +106,7 @@ export class AmpImg extends BaseElement {
     }
 
     // Checks to see if the images has a blurry image placeholder
-    if (this.useBlurryPlaceholder_) {
+    if (isExperimentOn(this.win, 'blurry-placeholder')) {
       this.checkBlur_();
     }
 
@@ -203,13 +200,8 @@ export class AmpImg extends BaseElement {
    */
   checkBlur_() {
     const placeholder = this.getPlaceholder();
-    if (placeholder) {
-      const classes = placeholder.getAttribute('class').split(' ');
-      if (classes.find(function(el) {
-        return el == 'i-amphtml-blur';
-      })) {
+    if (placeholder && placeholder.classList.contains('i-amphtml-blur')) {
         this.hasBlurredPlaceHolder_ = true;
-      }
     }
   }
 
