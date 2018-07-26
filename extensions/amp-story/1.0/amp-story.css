@@ -583,6 +583,12 @@ amp-story .amp-video-eq,
   bottom: 12px !important;
 }
 
+[dir=rtl] amp-story .amp-video-eq,
+.i-amphtml-story-spinner {
+  left: 12px !important;
+  right: auto !important;
+}
+
 .i-amphtml-story-spinner {
   display: inline-block !important;
   position: absolute !important;

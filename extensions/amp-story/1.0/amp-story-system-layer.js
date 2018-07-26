@@ -279,6 +279,10 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
       this.onPageIndexUpdate_(index);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -379,6 +383,19 @@ export class SystemLayer {
   onPageIndexUpdate_(index) {
     this.vsync_.mutate(() => {
       this.getShadowRoot().classList.toggle('first-page-active', index === 0);
+    });
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState ?
+        this.getShadowRoot().setAttribute('dir', 'rtl') :
+        this.getShadowRoot().removeAttribute('dir');
     });
   }
 
