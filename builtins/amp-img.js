@@ -45,6 +45,12 @@ export class AmpImg extends BaseElement {
     /** @private {?UnlistenDef} */
     this.unlistenLoad_ = null;
 
+    /** @private @const {boolean} */
+    this.useBlurryPlaceholder_ = isExperimentOn(this.win, 'blurry-placeholder');
+
+    /**@private {boolean} */
+    this.hasBlurredPlaceHolder_ = false;
+
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
   }
@@ -100,6 +106,11 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
+
+    if (this.useBlurryPlaceholder_) {
+      this.checkBlur_();
+    }
+
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
@@ -164,6 +175,24 @@ export class AmpImg extends BaseElement {
       this.unlistenLoad_ = null;
     }
     return true;
+  }
+
+  /**
+   * Checks to see if there is a placeholder that is blurred
+   * @return {boolean}
+   * @private
+   */
+  checkBlur_() {
+    const placeholder = this.getPlaceholder();
+    if (placeholder) {
+      const classes = placeholder.getAttribute('class').split(' ');
+      if (classes.find(function(el) {
+         return el == 'i-amphtml-blur';
+      })) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
