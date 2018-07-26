@@ -99,12 +99,14 @@ function patchRegisterElement() {
 }
 
 /**
- * Installs custom lint rules in build-system/eslint-rules to node_modules.
+ * Installs custom lint rules from build-system/eslint-rules to node_modules.
  */
 function installCustomEslintRules() {
   const customRuleDir = 'build-system/eslint-rules';
   const customRuleName = 'eslint-plugin-amphtml-internal';
+  exec(yarnExecutable + ' unlink', {'stdio': 'ignore', 'cwd': customRuleDir});
   exec(yarnExecutable + ' link', {'stdio': 'ignore', 'cwd': customRuleDir});
+  exec(yarnExecutable + ' unlink ' + customRuleName, {'stdio': 'ignore'});
   exec(yarnExecutable + ' link ' + customRuleName, {'stdio': 'ignore'});
   if (!process.env.TRAVIS) {
     log(colors.green('Installed lint rules from'), colors.cyan(customRuleDir));
