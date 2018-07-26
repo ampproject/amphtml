@@ -24,7 +24,7 @@ describes.realWin('amp-viqeo-player', {
   },
   allowExternalResources: true,
 }, function(env) {
-  this.timeout(3000);
+  this.timeout(5000);
   let win, doc;
 
   beforeEach(() => {
