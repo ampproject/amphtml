@@ -15,6 +15,7 @@
  */
 
 import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from './iframe-transport-vendors';
+import {deepMerge} from '../../../src/utils/object';
 
 /**
  * @const {!JsonObject}
@@ -2198,6 +2199,139 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'moat': {
+    'requests': {
+      'load': '{' +
+        '"type": "load",' +
+        '"pcode": "${pcode}",' +
+        '"l0t": "${l0t}",' +
+        '"acctType": "${acctType}",' +
+        '"adType": "${adType}",' +
+        '"qs": "${qs}", ' +
+        '"element": {' +
+          '"src": "${htmlAttr(img,src,width)}",' +
+          '"viewer": "${viewer}"' +
+        '},' +
+        '"document": {' +
+          '"AMPDocumentHostname": "${ampdocHostname}",' +
+          '"AMPDocumentURL": "${ampdocUrl}",' +
+          '"canonicalHost": "${canonicalHost}",' +
+          '"canonicalHostname": "${canonicalHostname}",' +
+          '"canonicalPath": "${canonicalPath}",' +
+          '"canonicalURL": "${canonicalUrl}",' +
+          '"documentCharset": "${documentCharset}",' +
+          '"documentReferrer": "${documentReferrer}",' +
+          '"externalReferrer": "${externalReferrer}",' +
+          '"sourceURL": "${sourceUrl}",' +
+          '"sourceHost": "${sourceHost}",' +
+          '"sourceHostname": "${sourceHostname}",' +
+          '"sourcePath": "${sourcePath}",' +
+          '"title": "${title}",' +
+          '"viewer": "${viewer}"' +
+        '},' +
+        '"device": {' +
+          '"availableScreenHeight": "${availableScreenHeight}",' +
+          '"availableScreenWidth": "${availableScreenWidth}",' +
+          '"browserLanguage": "${browserLanguage}",' +
+          '"screenColorDepth": "${screenColorDepth}",' +
+          '"screenHeight": "${screenHeight}",' +
+          '"screenWidth": "${screenWidth}",' +
+          '"scrollHeight": "${scrollHeight}",' +
+          '"scrollWidth": "${scrollWidth}",' +
+          '"scrollLeft": "${scrollLeft}",' +
+          '"scrollTop": "${scrollTop}",' +
+          '"timezone": "${timezone}",' +
+          '"userAgent": "${userAgent}",' +
+          '"viewportHeight": "${viewportHeight}",' +
+          '"viewportWidth": "${viewportWidth}"' +
+        '},' +
+        '"requestCount": "${requestCount}",' +
+        '"timeStamp": "${timestamp}"' +
+      '}',
+      'unload': '{' +
+        '"type": "unload",' +
+        '"pcode": "${pcode}",' +
+        '"l0t": "${l0t}",' +
+        '"requestCount": "${requestCount}",' +
+        '"timeStamp": "${timestamp}"' +
+      '}',
+      'click': '{ ' +
+        '"type": "click",' +
+        '"pcode": "${pcode}",' +
+        '"l0t": "${l0t}",' +
+        '"requestCount": "${requestCount}",' +
+        '"timeStamp": "${timestamp}"' +
+      '}',
+      'viewability': '{ ' +
+        '"type": "viewability",' +
+        '"pcode": "${pcode}",' +
+        '"l0t": "${l0t}",' +
+        '"backgroundState": "${backgroundState}",' +
+        '"intersectionRect": "${intersectionRect}",' +
+        '"intersectionRatio": "${intersectionRatio}",' +
+        '"maxVisiblePercentage": "${maxVisiblePercentage}",' +
+        '"minVisiblePercentage": "${minVisiblePercentage}",' +
+        '"x": "${elementX}",' +
+        '"y": "${elementY}",' +
+        '"height": "${elementHeight}",' +
+        '"width": "${elementWidth}",' +
+        '"viewportHeight": "${viewportHeight}",' +
+        '"viewportWidth": "${viewportWidth}",' +
+        '"opacity": "${opacity}",' +
+        '"timeStamp": "${timestamp}",' +
+        '"requestCount": "${requestCount}"' +
+      ' }',
+      'iframe': '{' +
+        '"type": "iframe",' +
+        '"pcode": "${pcode}",' +
+        '"height": "${elementHeight}",' +
+        '"width": "${elementWidth}",' +
+        '"x": "${elementX}",' +
+        '"y": "${elementY}",' +
+        '"requestCount": "${requestCount}"' +
+      '}',
+    },
+    'triggers': {
+      'load': {
+        'on': 'ini-load',
+        'request': 'load',
+      },
+      'unload': {
+        'on': 'ad-refresh',
+        'selector': '${element}',
+        'request': 'unload',
+      },
+      'click': {
+        'on': 'click',
+        'selector': '${element}',
+        'request': 'click',
+      },
+      'viewability': {
+        'on': 'visible',
+        'selector': '${element}',
+        'request': 'viewability',
+        'visibilitySpec': {
+          'repeat': true,
+          'visiblePercentageThresholds': [
+            [0,0],[0,5],[5,10],[10,15],[15,20],[20,25],
+            [25,30],[30,35],[35,40],[40,45],[45,50],
+            [50,55],[55,60],[60,65],[65,70],[70,75],
+            [75,80],[80,85],[85,90],[90,95],[95,100],[100,100],
+          ],
+        },
+      },
+      'iframe': {
+        'on': 'visible',
+        'selector': ':root',
+        'request': 'iframe',
+        'visibilitySpec': {
+          'repeat': true,
+          'visiblePercentageThresholds': [[0,0]],
+        },
+      },
+    },
+  },
+
 });
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
@@ -2210,4 +2344,9 @@ ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 // Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
-Object.assign(ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG);
+const mergedConfigs = deepMerge(
+    ANALYTICS_CONFIG,
+    ANALYTICS_IFRAME_TRANSPORT_CONFIG,
+    1
+);
+Object.assign(ANALYTICS_CONFIG, mergedConfigs);
