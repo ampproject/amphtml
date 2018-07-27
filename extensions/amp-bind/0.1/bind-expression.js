@@ -19,15 +19,9 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {parser} from './bind-expr-impl';
+import {bindParser as parser} from './bind-expr-impl';
 
 const TAG = 'amp-bind';
-
-/**
- * Possible types of a Bind expression evaluation.
- * @typedef {(null|boolean|string|number|Array|Object)}
- */
-export let BindExpressionResultDef;
 
 /**
  * Maximum number of nodes in an expression AST.
@@ -361,18 +355,15 @@ export class BindExpression {
 
         if (validFunction) {
           if (Array.isArray(params)) {
-            // Don't allow objects as parameters except for Object functions.
-            const invalidArgumentType = this.containsObject_(params)
-                && !this.isObjectMethod_(method);
-            if (!invalidArgumentType) {
-              return validFunction.apply(caller, params);
+            if (this.containsInvalidArgument_(method, params)) {
+              throw new Error(`Unexpected argument type in ${method}().`);
             }
+            return validFunction.apply(caller, params);
           } else if (typeof params == 'function') {
             // Special case: `params` may be an arrow function, which are only
             // supported as the sole argument to functions like Array#find.
             return validFunction.call(caller, params);
           }
-          throw new Error(`Unexpected argument type in ${method}().`);
         }
 
         throw new Error(unsupportedError);
@@ -519,12 +510,16 @@ export class BindExpression {
   }
 
   /**
-   * Returns true iff method is
    * @param {string} method
+   * @param {!Array} params
    * @return {boolean}
    */
-  isObjectMethod_(method) {
-    return method == 'keys' || method == 'values';
+  containsInvalidArgument_(method, params) {
+    // Don't allow objects as parameters except for certain functions.
+    if (method == 'keys' || method == 'values' || method == 'splice') {
+      return false;
+    }
+    return this.containsObject_(params);
   }
 
   /**

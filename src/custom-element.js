@@ -221,6 +221,9 @@ function createBaseCustomElementClass(win) {
       /** @private {!./size-list.SizeList|null|undefined} */
       this.heightsList_ = undefined;
 
+      /** @public {boolean} */
+      this.warnOnMissingOverflow = true;
+
       /**
        * This element can be assigned by the {@link applyStaticLayout} to a
        * child element that will be used to size this element.
@@ -1534,7 +1537,7 @@ function createBaseCustomElementClass(win) {
     isInA4A_() {
       return (
       // in FIE
-        this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+        (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
 
           // in inabox
           getMode().runtime == 'inabox');
@@ -1569,7 +1572,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:boolean,force:boolean}=} opt_options
+     * @param {{cleanup:boolean, force:boolean}=} opt_options
      * @public @final @this {!Element}
      */
     toggleLoading(state, opt_options) {
@@ -1665,7 +1668,7 @@ function createBaseCustomElementClass(win) {
     overflowCallback(overflown, requestedHeight, requestedWidth) {
       this.getOverflowElement();
       if (!this.overflowElement_) {
-        if (overflown) {
+        if (overflown && this.warnOnMissingOverflow) {
           user().warn(TAG,
               'Cannot resize element and overflow is not available', this);
         }

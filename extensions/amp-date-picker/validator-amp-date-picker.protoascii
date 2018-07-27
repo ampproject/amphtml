@@ -19,8 +19,8 @@ tags: {
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-date-picker"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -165,7 +165,7 @@ attr_lists: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"

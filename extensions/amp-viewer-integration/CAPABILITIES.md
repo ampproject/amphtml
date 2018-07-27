@@ -29,4 +29,5 @@ Viewers can communicate their supported "capabilities" to documents through the
 | `navigateTo`          | `navigateTo`          | Support for navigating to external URLs.  |
 | `replaceUrl`          | `getReplaceUrl`       | Support for replacing the document URL with one provided by the viewer.|
 | `swipe`               | `touchstart`, `touchmove`, `touchend`| Forwards touch events from the document to the viewer.|
+| `viewerRenderTemplate`| `viewerRenderTemplate`| Proxies all mustache template rendering to the viewer. |
 | `xhrInterceptor`      | `xhr`                 | Proxies all XHRs through the viewer.      |
