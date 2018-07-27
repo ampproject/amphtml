@@ -254,6 +254,9 @@ export class SystemLayer {
     if (Services.viewerForDoc(this.win_.document.documentElement)
         .isEmbedded()) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
+      this.getShadowRoot().setAttribute('info', '');
+    } else {
+      this.getShadowRoot().removeAttribute('info');
     }
 
     return this.getRoot();

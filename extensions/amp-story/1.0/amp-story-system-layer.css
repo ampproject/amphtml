@@ -119,6 +119,11 @@
 [dir=rtl] .i-amphtml-story-progress-value {
   transform-origin: right !important;
 }
+[info] .i-amphtml-message-container {
+  /* 48px for info button, add width to padding for 
+  * additional story buttons */
+  padding-right: 48px !important; 
+}
 
 .i-amphtml-message-container {
   width: max-content !important;
@@ -150,9 +155,10 @@
 
 .i-amphtml-story-sound-display{
   display: inline-block;
-  height: 56px !important;
+  height: 46px !important;
   position: relative;
 }
+
 
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
