@@ -212,10 +212,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
 
-    if (!isExperimentOn(this.win, 'disable-amp-story-desktop')) {
-      /** Instantiates the viewport warning layer. */
-      new ViewportWarningLayer(this.win, this.element);
-    }
+    /** Instantiates the viewport warning layer. */
+    new ViewportWarningLayer(this.win, this.element);
 
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
