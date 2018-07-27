@@ -23,7 +23,6 @@
 
 import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
-import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
 import {exponentialBackoff} from '../exponential-backoff';
 import {initLogConstructor} from '../log';
 import {urls} from '../config';
@@ -87,8 +86,8 @@ self.addEventListener('message', function(event) {
       throw new Error(`Unrecognized method: ${method}`);
   }
 
-  /** @type {FromWorkerMessageDef} */
-  const message = {method, returnValue, id};
+  const message =
+    /** @type {FromWorkerMessageDef} */ ({method, returnValue, id});
   // `message` may only contain values or objects handled by the
   // structured clone algorithm.
   // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm

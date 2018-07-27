@@ -83,12 +83,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
-    id: 'amp-access-signin',
-    name: 'AMP Access sign-in',
-    spec: 'https://github.com/ampproject/amphtml/issues/4227',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
-  },
-  {
     id: 'amp-auto-ads',
     name: 'AMP Auto Ads',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
@@ -166,13 +160,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
   },
   {
-    id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP (launched).',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-animation/amp-animation.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
     id: 'pump-early-frame',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
@@ -243,6 +230,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
+    id: 'amp-story-navigation-performance',
+    name: 'amp-story page to page navigation performance improvements',
+    spec: 'https://github.com/ampproject/amphtml/issues/17017',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
+  },
+  {
     id: 'inline-styles',
     name: 'Enables the usage of inline styles for non fixed elements',
     spec: 'https://github.com/ampproject/amphtml/issues/11881',
@@ -304,13 +297,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'disable-faster-amp-list',
-    name: 'Disables new default behavior where <amp-list> will not evaluate ' +
-       'bindings on rendered children before first setState() mutation.',
-    spec: 'https://github.com/ampproject/amphtml/issues/15311',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15610',
-  },
-  {
     id: 'amp-google-document-embed',
     name: 'Enables the experiment amp-google-document-embed component' +
         ' which is a wrapper around the Google Drive document viewer embed.',
@@ -322,6 +308,12 @@ const EXPERIMENTS = [
     name: 'Enables actions based on the orientation of a mobile device',
     spec: 'https://github.com/ampproject/amphtml/issues/14740',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/16075',
+  },
+  {
+    id: 'blurry-placeholder',
+    name: 'Enables a blurred image placeholder as an amp-img loads',
+    spec: 'https://github.com/ampproject/amphtml/issues/15146',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
 ];
 

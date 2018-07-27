@@ -21,7 +21,7 @@ import {user} from '../../../../../src/log';
 /**
  * @typedef {{
  *   type: string,
- *   text: string
+ *   text: string,
  * }}
  */
 export let HeadingComponentDef;

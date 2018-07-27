@@ -594,7 +594,9 @@ export class Viewport {
     // transition experience when things are closer vs farther.
     return Animation.animate(parent, position => {
       this.setElementScrollTop_(parent, interpolate(position));
-    }, duration, curve).then();
+    }, duration, curve).thenAlways(() => {
+      this.setElementScrollTop_(parent, newScrollTop);
+    });
   }
 
   /**
@@ -742,7 +744,7 @@ export class Viewport {
           'Lightbox mode for A4A is only available when ' +
           "'amp-lightbox-a4a-proto' experiment is on");
 
-      dev().assert(fieOptional).enterFullOverlayMode(requestingElement);
+      fieOptional.enterFullOverlayMode();
     }
   }
 

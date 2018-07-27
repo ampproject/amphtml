@@ -22,7 +22,7 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe.configure().run('amp-pixel', function() {
+describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   this.timeout(15000);
 
   describes.integration('amp-pixel integration test', {

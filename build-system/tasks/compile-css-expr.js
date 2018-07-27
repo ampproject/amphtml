@@ -32,7 +32,7 @@ gulp.task('compile-css-expr', function() {
   const suppressCheckTypes = '/** @fileoverview ' +
       '@suppress {checkTypes, suspiciousCode, uselessCode} */';
   const imports = 'import * as ast from \'./css-expr-ast\';';
-  const jsExports = 'exports.parser = parser;';
+  const jsExports = 'export const cssParser = parser;';
 
   const out = [
     license,

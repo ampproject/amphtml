@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from '../amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
@@ -29,6 +33,7 @@ import {dev, user} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
+import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
 import {throttle} from '../../../../src/utils/rate-limit';
@@ -196,14 +201,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
     const {win} = this;
 
-    /** @private @const {!../amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(win);
-
-    /** @private {!ScrollableShareWidget} */
-    this.shareWidget_ = ScrollableShareWidget.create(win);
+    /** @private {?ScrollableShareWidget} */
+    this.shareWidget_ = null;
 
     /** @private @const {!../amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(win);
+    this.storeService_ = getStoreService(win);
   }
 
   /**
@@ -222,6 +224,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
     createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
 
     this.replayButton_ = this.buildReplayButton_();
+
+    this.shareWidget_ =
+        ScrollableShareWidget.create(
+            this.win, dev().assertElement(this.element.parentElement));
 
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
@@ -296,7 +302,8 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onReplayButtonClick_(event) {
     event.stopPropagation();
-    dispatch(this.getRoot(), EventType.REPLAY, /* opt_bubbles */ true);
+    dispatch(this.win, this.getRoot(), EventType.REPLAY,
+    /* payload */ undefined, {bubbles: true});
   }
 
   /**
@@ -356,7 +363,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
       return Promise.resolve(this.config_);
     }
 
-    return this.requestService_.loadBookendConfig().then(response => {
+    const requestService =
+        getRequestService(
+            this.win, dev().assertElement(this.element.parentElement));
+
+    return requestService.loadBookendConfig().then(response => {
       if (!response) {
         return null;
       }
@@ -394,8 +405,8 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   loadConfigAndMaybeRenderBookend(renderBookend = true) {
     return this.loadConfig().then(config => {
-      if (renderBookend && config) {
-        this.renderBookend_(config);
+      if (renderBookend && !this.isBookendRendered_ && config) {
+        return this.renderBookend_(config).then(() => config);
       }
       return config;
     });
@@ -495,31 +506,40 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * @param {!./bookend-component.BookendDataDef} bookendConfig
+   * @return {!Promise}
    * @private
    */
   renderBookend_(bookendConfig) {
-    if (this.isBookendRendered_) {
-      return;
-    }
-
     this.assertBuilt_();
     this.isBookendRendered_ = true;
 
-    this.renderComponents_(bookendConfig.components);
+    return this.renderComponents_(bookendConfig.components);
   }
 
   /**
+   * Renders the configurable components of the bookend in the page. It returns
+   * a promise to ensure loadConfigAndMaybeRenderBookend renders the components
+   * first before proceeding. This is needed for our unit tests.
    * @param {!Array<!../bookend/bookend-component.BookendComponentDef>} components
+   * @return {!Promise}
    * @private
    */
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
-    const fragment = BookendComponent
-        .buildElements(components, this.win.document);
-    const container = dev().assertElement(
-        BookendComponent.buildContainer(this.getInnerContainer_(),
-            this.win.document));
-    this.mutateElement(() => container.appendChild(fragment));
+
+    return Services
+        .localizationServiceForOrNull(this.win).then(localizationService => {
+          const bookendEls = BookendComponent
+              .buildElements(
+                  components, this.win.document, localizationService);
+          const container = dev().assertElement(
+              BookendComponent.buildContainer(this.getInnerContainer_(),
+                  this.win.document));
+          this.mutateElement(() => container.appendChild(bookendEls));
+        }).catch(e => {
+          user().error(TAG, 'Unable to fetch localization service.', e.message);
+          return null;
+        });
   }
 
   /** @return {!Element} */

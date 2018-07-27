@@ -16,7 +16,7 @@
 
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
-import {RequestHandler, expandConfigRequest} from '../requests';
+import {RequestHandler} from '../requests';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -369,6 +369,7 @@ describes.realWin('Requests', {amp: 1}, env => {
             analyticsMock, r, preconnect, spy, false);
         // Overwrite batchPlugin function
         handler.batchingPlugin_ = () => {throw new Error('test');};
+        expectAsyncConsoleError(/test/);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
         clock.tick(1000);
@@ -422,32 +423,6 @@ describes.realWin('Requests', {amp: 1}, env => {
     });
   });
 
-  //TODO: Move the expansion related tests here.
-
-  it('expandConfigRequest function', () => {
-    let config = {
-      'requests': {
-        'foo': 'test',
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'foobar': {},
-      },
-    };
-    config = expandConfigRequest(config);
-    expect(config).to.jsonEqual({
-      'requests': {
-        'foo': {
-          'baseUrl': 'test',
-        },
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'foobar': {},
-      },
-    });
-  });
-
   it('should replace dynamic bindings', function* () {
     const spy = sandbox.spy();
     const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE'};
@@ -491,8 +466,9 @@ describes.realWin('Requests', {amp: 1}, env => {
       'param1': 'PARAM_1',
       'param2': 'PARAM_2',
       'param3': 'PARAM_3',
-      'foo': 'TOUPPERCASE(BASE64(foo))',
-    });
+      'foo': '$TOUPPERCASE($BASE64(foo))',
+    }, /* opt_iterations */ 2, /* opt_noencode */ true);
+
     const bindings = {
       'PARAM_1': 'val1',
       'PARAM_2': () => 'val2',

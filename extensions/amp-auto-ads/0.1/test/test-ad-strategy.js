@@ -82,12 +82,15 @@ describes.realWin('amp-strategy', {
           'data-custom-att-2': 'val-2',
         };
 
+        const sizing = {};
+
         const adTracker = new AdTracker([], {
           initialMinSpacing: 0,
           subsequentMinSpacing: [],
           maxAdCount: 1,
         });
-        const adStrategy = new AdStrategy(placements, attributes, adTracker);
+        const adStrategy = new AdStrategy(
+            placements, attributes, sizing, adTracker);
 
         return adStrategy.run().then(result => {
           expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
@@ -141,12 +144,15 @@ describes.realWin('amp-strategy', {
       'data-custom-att-2': 'val-2',
     };
 
+    const sizing = {};
+
     const adTracker = new AdTracker([], {
       initialMinSpacing: 0,
       subsequentMinSpacing: [],
       maxAdCount: 1,
     });
-    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+    const adStrategy = new AdStrategy(
+        placements, attributes, sizing, adTracker);
 
     return adStrategy.run().then(result => {
       expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
@@ -205,12 +211,15 @@ describes.realWin('amp-strategy', {
       'data-custom-att-2': 'val-2',
     };
 
+    const sizing = {};
+
     const adTracker = new AdTracker([], {
       initialMinSpacing: 200,
       subsequentMinSpacing: [],
       maxAdCount: 2,
     });
-    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+    const adStrategy = new AdStrategy(
+        placements, attributes, sizing, adTracker);
 
     return adStrategy.run().then(result => {
       expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
@@ -269,12 +278,15 @@ describes.realWin('amp-strategy', {
       'data-custom-att-2': 'val-2',
     };
 
+    const sizing = {};
+
     const adTracker = new AdTracker([], {
       initialMinSpacing: 200,
       subsequentMinSpacing: [],
       maxAdCount: 2,
     });
-    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+    const adStrategy = new AdStrategy(
+        placements, attributes, sizing, adTracker);
 
     return adStrategy.run().then(result => {
       expect(result).to.deep.equal({adsPlaced: 2, totalAdsOnPage: 2});
@@ -341,12 +353,15 @@ describes.realWin('amp-strategy', {
       'data-custom-att-2': 'val-2',
     };
 
+    const sizing = {};
+
     const adTracker = new AdTracker([fakeExistingAd], {
       initialMinSpacing: 200,
       subsequentMinSpacing: [],
       maxAdCount: 2,
     });
-    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+    const adStrategy = new AdStrategy(
+        placements, attributes, sizing, adTracker);
 
     return adStrategy.run().then(result => {
       expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 2});
@@ -401,12 +416,15 @@ describes.realWin('amp-strategy', {
       'type': 'adsense',
     };
 
+    const sizing = {};
+
     const adTracker = new AdTracker([], {
       initialMinSpacing: 0,
       subsequentMinSpacing: [],
       maxAdCount: 1,
     });
-    const adStrategy = new AdStrategy(placements, attributes, adTracker);
+    const adStrategy = new AdStrategy(
+        placements, attributes, sizing, adTracker);
 
     return adStrategy.run().then(result => {
       expect(result).to.deep.equal({adsPlaced: 0, totalAdsOnPage: 0});

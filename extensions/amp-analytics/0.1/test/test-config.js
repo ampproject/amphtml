@@ -15,7 +15,7 @@
  */
 
 import {ANALYTICS_CONFIG} from '../vendors';
-import {AnalyticsConfig, mergeObjects} from '../config';
+import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
 import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
@@ -529,6 +529,32 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         expect(config['requests']['foo']).to.deep.equal({
           baseUrl: '//inlined',
         });
+      });
+    });
+  });
+
+  describe('expandConfigRequest', () => {
+    it('expandConfigRequest function', () => {
+      let config = {
+        'requests': {
+          'foo': 'test',
+          'bar': {
+            'baseUrl': 'test1',
+          },
+          'foobar': {},
+        },
+      };
+      config = expandConfigRequest(config);
+      expect(config).to.jsonEqual({
+        'requests': {
+          'foo': {
+            'baseUrl': 'test',
+          },
+          'bar': {
+            'baseUrl': 'test1',
+          },
+          'foobar': {},
+        },
       });
     });
   });

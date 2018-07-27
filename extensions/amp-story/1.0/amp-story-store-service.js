@@ -16,11 +16,33 @@
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
+import {registerServiceBuilder} from '../../../src/service';
 
 
 /** @type {string} */
 const TAG = 'amp-story';
+
+
+/**
+ * Util function to retrieve the store service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param  {!Window} win
+ * @return {!AmpStoryStoreService}
+ */
+export const getStoreService = win => {
+  let service = Services.storyStoreService(win);
+
+  if (!service) {
+    service = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => service);
+  }
+
+  return service;
+};
 
 
 /**
@@ -206,7 +228,7 @@ export class AmpStoryStoreService {
    * @return {*}
    */
   get(key) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Unknown state ${key}.`);
       return;
     }
@@ -221,7 +243,7 @@ export class AmpStoryStoreService {
    *                                     triggered with current value.
    */
   subscribe(key, listener, callToInitialize = false) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
     }

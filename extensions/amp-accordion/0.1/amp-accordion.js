@@ -228,7 +228,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   triggerEvent_(name, section) {
     const event =
-        createCustomEvent(this.win, `accordionSection.${name}`, {});
+        createCustomEvent(this.win, `accordionSection.${name}`, dict({}));
     this.action_.trigger(section, name, event, ActionTrust.HIGH);
 
     this.element.dispatchCustomEvent(name);

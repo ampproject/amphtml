@@ -478,12 +478,18 @@ function runTests() {
     c.files = c.files.concat(config.testPaths);
   }
 
+  if (argv.travis_like) {
+    c.client.failOnConsoleError = false;
+  }
+
   // c.client is available in test browser via window.parent.karma.config
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: (!!argv.saucelabs) || (!!argv.saucelabs_lite),
+    singlePass: !!argv.single_pass,
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
+    propertiesObfuscated: !!argv.single_pass,
   };
 
   if (argv.compiled) {
@@ -616,8 +622,15 @@ function runTests() {
       console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
     }
   }).on('browser_complete', function(browser) {
+    const result = browser.lastResult;
+    // Prevent cases where Karma detects zero tests and still passes. #16851.
+    if (result.total == 0) {
+      log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
+      if (!argv.watch) {
+        process.exit(1);
+      }
+    }
     if (shouldCollapseSummary) {
-      const result = browser.lastResult;
       let message = browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +
           ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
