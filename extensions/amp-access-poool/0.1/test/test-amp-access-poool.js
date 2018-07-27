@@ -128,7 +128,6 @@ describes.fakeWin('PooolVendor', {
           .once();
       return vendor.authorize().then(err => {
         expect(err.access).to.be.false;
-        expect(container.firstChild).to.not.be.undefined;
       });
     });
   });
