@@ -310,6 +310,12 @@ const EXPERIMENTS = [
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/16075',
   },
   {
+    id: 'blurry-placeholder',
+    name: 'Enables a blurred image placeholder as an amp-img loads',
+    spec: 'https://github.com/ampproject/amphtml/issues/15146',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
+  },
+  {
     id: 'video-dock',
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',

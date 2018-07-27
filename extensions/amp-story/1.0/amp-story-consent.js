@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Action} from './amp-story-store-service';
+import {Action, getStoreService} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
@@ -184,7 +184,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     this.scrollableEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {?Object} */
     this.storyConsentConfig_ = null;

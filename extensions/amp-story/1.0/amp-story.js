@@ -29,8 +29,8 @@ import './amp-story-grid-layer';
 import './amp-story-page';
 import {
   Action,
-  AmpStoryStoreService,
   StateProperty,
+  getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpStoryAccess} from './amp-story-access';
@@ -42,7 +42,6 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, PageState} from './amp-story-page';
-import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -188,14 +187,8 @@ export class AmpStory extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {!AmpStoryStoreService} */
-    this.storeService_ = new AmpStoryStoreService(this.win);
-    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
-
-    /** @private @const {!AmpStoryRequestService} */
-    this.requestService_ = new AmpStoryRequestService(this.win, this.element);
-    registerServiceBuilder(
-        this.win, 'story-request', () => this.requestService_);
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {!NavigationState} */
     this.navigationState_ =
@@ -355,8 +348,8 @@ export class AmpStory extends AMP.BaseElement {
   pauseCallback() {
     // Store the current paused state, to make sure the story does not play on
     // resume if it was previously paused.
-    this.pausedStateToRestore_ =
-        this.storeService_.get(StateProperty.PAUSED_STATE);
+    this.pausedStateToRestore_ = !!this.storeService_
+        .get(StateProperty.PAUSED_STATE);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
   }
 
@@ -516,6 +509,16 @@ export class AmpStory extends AMP.BaseElement {
       this.performTapNavigation_(direction);
     });
 
+    this.element.addEventListener(EventType.DISPATCH_ACTION, e => {
+      if (!getMode().test) {
+        return;
+      }
+
+      const action = getDetail(e)['action'];
+      const data = getDetail(e)['data'];
+      this.storeService_.dispatch(action, data);
+    });
+
     this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
       this.onAdStateUpdate_(isAd);
     });
@@ -530,7 +533,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
-    });
+    }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
       this.onPausedStateUpdate_(isPaused);
@@ -686,7 +689,6 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.switchTo_(initialPageId))
         .then(() => this.updateViewportSizeStyles_())
-        .then(() => this.preloadPagesByDistance_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
           // button is visible.
@@ -853,7 +855,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   previous_() {
     const activePage = dev().assert(this.activePage_,
-        'No active page set when navigating to next page.');
+        'No active page set when navigating to previous page.');
     activePage.previous();
   }
 
@@ -1654,7 +1656,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   getPageIndexById(id) {
     const pageIndex = findIndex(this.pages_, page => page.element.id === id);
-
     if (pageIndex < 0) {
       user().error(TAG,
           `Story refers to page "${id}", but no such page exists.`);

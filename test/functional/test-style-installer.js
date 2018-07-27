@@ -22,6 +22,7 @@ import {Services} from '../../src/services';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {getStyle} from '../../src/style';
 import {installPerformanceService} from '../../src/service/performance-impl';
+import {isAnimationNone} from '../../testing/test-helper';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 
 
@@ -56,7 +57,7 @@ describe('Styles', () => {
       expect(doc.body).to.exist;
       expect(getStyle(doc.body, 'opacity')).to.equal('1');
       expect(getStyle(doc.body, 'visibility')).to.equal('visible');
-      expect(getStyle(doc.body, 'animation')).to.equal('none');
+      expect(isAnimationNone(doc.body)).to.be.true;
       expect(ampdoc.signals().get('render-start')).to.be.ok;
     });
 
@@ -83,7 +84,7 @@ describe('Styles', () => {
       }).then(() => {
         expect(getStyle(doc.body, 'opacity')).to.equal('1');
         expect(getStyle(doc.body, 'visibility')).to.equal('visible');
-        expect(getStyle(doc.body, 'animation')).to.equal('none');
+        expect(isAnimationNone(doc.body)).to.be.true;
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
         expect(ampdoc.signals().get('render-start')).to.be.ok;
