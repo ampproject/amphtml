@@ -560,6 +560,7 @@ export function install(win, ctor) {
     return;
   }
 
+  const {Object, Reflect} = win;
   let install = true;
   let installWrapper = false;
 
@@ -569,12 +570,12 @@ export function install(win, ctor) {
     // extend HTMLElement without native classes.
     try {
       // "Construct" ctor using ES5 idioms
-      const instance = win.Object.create(ctor.prototype);
+      const instance = Object.create(ctor.prototype);
       ctor.call(instance);
 
       // If that succeeded, we're in a transpiled environment
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
-      installWrapper = !!(win.Reflect && win.Reflect.construct);
+      installWrapper = !!(Reflect && Reflect.construct);
     } catch (e) {
 
       // The ctor threw when we constructed is via ES5, so it's a real class.
