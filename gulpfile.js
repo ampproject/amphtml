@@ -207,7 +207,7 @@ function buildExtensions(options) {
   }
 
   const extensionsToBuild = options.compileAll ?
-    [] : processExtensionsFromArgs();
+    [] : getExtensionsToBuild();
 
   const results = [];
   for (const key in extensions) {
@@ -228,7 +228,7 @@ function buildExtensions(options) {
  * and return a list of the referenced extensions.
  * @return {!Array<string>}
  */
-function processExtensionsFromArgs() {
+function getExtensionsToBuild() {
   let extensionsToBuild = [];
 
   if (!!argv.extensions) {
@@ -757,10 +757,8 @@ function parseExtensionFlags() {
         argv.extensions = MINIMAL_EXTENSION_SET.join(',');
       }
 
-      const extensions = argv.extensions.split(',');
-      const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
       log(green('Building extension(s):'),
-          cyan(dedupe(extensions.concat(extensionsFrom)).join(', ')));
+          cyan(getExtensionsToBuild().join(', ')));
 
       if (maybeAddVideoService()) {
         log(green('⤷ Video component(s) being built, added'),
@@ -915,7 +913,7 @@ function copyAliasExtensions() {
     return Promise.resolve();
   }
 
-  const extensionsToBuild = processExtensionsFromArgs();
+  const extensionsToBuild = getExtensionsToBuild();
 
   for (const key in extensionAliasFilePath) {
     if (extensionsToBuild.length > 0 &&
