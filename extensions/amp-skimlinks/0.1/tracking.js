@@ -36,7 +36,6 @@ export default class Tracking {
       guid: userSessionData.guid,
       uuid: this.pageImpressionId_,
       tz: this.timezone_,
-      sessionid: userSessionData.sessionId,
       pub: this.pubcode_,
     };
 
