@@ -16,6 +16,7 @@
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
+import {getMode} from '../../../src/mode';
 import {user} from '../../../src/log';
 
 /**
@@ -93,18 +94,16 @@ export function ampMediaElementFor(el) {
  * @param  {!Element} container
  * @param  {!Element} element
  * @param  {string} css
- * @return {!ShadowRoot}
  */
 export function createShadowRootWithStyle(container, element, css) {
-  const shadowRoot = createShadowRoot(container);
-
   const style = self.document.createElement('style');
   style./*OK*/textContent = css;
 
-  shadowRoot.appendChild(style);
-  shadowRoot.appendChild(element);
+  const containerToUse = getMode().test ?
+    container : createShadowRoot(container);
 
-  return shadowRoot;
+  containerToUse.appendChild(style);
+  containerToUse.appendChild(element);
 }
 
 

@@ -320,13 +320,11 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   initializeStandaloneStory_() {
     const html = this.win.document.documentElement;
-    this.mutateElement(() => {
-      html.classList.add('i-amphtml-story-standalone');
-      // Lock body to prevent overflow.
-      this.lockBody_();
-      // Standalone CSS affects sizing of the entire page.
-      this.onResize();
-    }, html);
+    html.classList.add('i-amphtml-story-standalone');
+    // Lock body to prevent overflow.
+    this.lockBody_();
+    // Standalone CSS affects sizing of the entire page.
+    this.onResize();
   }
 
 
@@ -413,7 +411,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
-    });
+    }, true /** callToInitialize */);
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
