@@ -32,7 +32,7 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import {install as installCustomElements} from './polyfills/custom-element';
+import {install as installCustomElements} from '../polyfills/custom-elements';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';

@@ -541,6 +541,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/log.js', // Has actual implementation of assertElement.
       'dist.3p/current/integration.js', // Includes the previous.
+      'src/polyfills/custom-elements.js',
     ],
   },
   'startupChunk\\(': {

@@ -15,7 +15,7 @@
  */
 
 import {install as installArrayIncludes} from './polyfills/array-includes';
-import {install as installCustomElements} from './polyfills/custom-element';
+import {install as installCustomElements} from './polyfills/custom-elements';
 import {
   install as installDOMTokenListToggle,
 } from './polyfills/domtokenlist-toggle';
