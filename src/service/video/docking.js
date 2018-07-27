@@ -39,6 +39,7 @@ import {
   installPositionObserverServiceForDoc,
 } from '../position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../style-installer';
+import {isExperimentOn} from '../../experiments';
 import {isFiniteNumber} from '../../types';
 import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
@@ -476,6 +477,10 @@ export class VideoDocking {
 
   /** @param {!../../video-interface.VideoOrBaseElementDef} video */
   register(video) {
+    user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
+        '`video-dock` experiment must be on to use `dock` on `amp-video`: ' +
+        'https://cdn.ampproject.org/experiments.html');
+
     this.install_();
 
     const {element} = video;
