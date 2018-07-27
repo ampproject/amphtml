@@ -104,6 +104,8 @@ export const WHITELISTED_ATTRS = [
   'fallback',
   'heights',
   'layout',
+  'min-font-size',
+  'max-font-size',
   'on',
   'option',
   'placeholder',
