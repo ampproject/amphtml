@@ -242,7 +242,9 @@ class Registry {
     this.current_ = null;
 
     const observer = new win.MutationObserver(records => {
-      this.handleRecords_(records);
+      if (records) {
+        this.handleRecords_(records);
+      }
     });
     observer.observe(win.document, {
       childList: true,
@@ -405,6 +407,10 @@ class Registry {
   handleRecords_(records) {
     for (let i = 0; i < records.length; i++) {
       const record = records[i];
+      if (!record) {
+        continue;
+      }
+
       const {addedNodes, removedNodes} = record;
       for (let i = 0; i < addedNodes.length; i++) {
         const node = addedNodes[i];
@@ -521,8 +527,9 @@ function wrapHTMLElement(win) {
   /**
    */
   function HTMLElementWrapper() {
-    return Reflect.construct(HTMLElement, [],
-        /** @type {!HTMLElement} */(this).constructor);
+    const ctor = /** @type {function(...?):?|undefined} */(
+      /** @type {!HTMLElement} */(this).constructor);
+    return Reflect.construct(HTMLElement, [], ctor);
   }
   subClass(Object, HTMLElement, HTMLElementWrapper);
 
