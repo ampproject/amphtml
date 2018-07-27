@@ -215,10 +215,10 @@ export class AmpDoc {
 
   /**
    * Whether the runtime should recognize this document as an intended invalid
-   * amp page.
+   * amp page. This is triggered by the absense of 'amp' or '⚡' in the html tag.
    * @return {boolean}
    */
-  isDirtyAmp() {}
+  isNonStandardAmp() {}
 
   /**
    * Whether the runtime in the single-doc mode. Alternative is the shadow-doc
@@ -383,7 +383,7 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  isDirtyAmp() {
+  isNonStandardAmp() {
     const docElement = this.win.document.documentElement;
     return !(docElement.hasAttribute('amp') || docElement.hasAttribute('⚡'));
   }
@@ -477,7 +477,7 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  isDirtyAmp() {
+  isNonStandardAmp() {
     return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
 
