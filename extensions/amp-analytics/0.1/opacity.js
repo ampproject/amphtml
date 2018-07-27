@@ -18,6 +18,31 @@ import {computedStyle} from '../../../src/style';
 
 
 /**
+  *  Returns the min opacity found amongst the element and its parents
+  *  @param {!Element|null} el
+  *  @return {number} minimum opacity value
+  */
+export function getOpacity(el) {
+  const parentNodeTree = getElementNodeTree(el.parentElement);
+  parentNodeTree.push(el);
+  let minOpacityFound = 1;
+  let opacity;
+
+  for (let i = 0; i < parentNodeTree.length; i++) {
+    const node = parentNodeTree[i];
+    opacity = getElementOpacity(node);
+
+    if (opacity < minOpacityFound) { minOpacityFound = opacity; }
+
+    if (minOpacityFound === 0) { return minOpacityFound; }
+
+  }
+
+  return minOpacityFound;
+
+}
+
+/**
   * Returns the Opacity value of the element.
   * @param {!Element} el
   * @return {number}
@@ -85,29 +110,3 @@ function getElementNodeTree(el) {
   return nodeList;
 
 }
-
-/**
-  *  Returns the min opacity found amongst the element and its parents
-  *  @param {!Element|null} el
-  *  @return {number} minimum opacity value
-  */
-export function getOpacity(el) {
-  const parentNodeTree = getElementNodeTree(el.parentElement);
-  parentNodeTree.push(el);
-  let minOpacityFound = 1;
-  let opacity;
-
-  for (let i = 0; i < parentNodeTree.length; i++) {
-    const node = parentNodeTree[i];
-    opacity = getElementOpacity(node);
-
-    if (opacity < minOpacityFound) { minOpacityFound = opacity; }
-
-    if (minOpacityFound === 0) { return minOpacityFound; }
-
-  }
-
-  return minOpacityFound;
-
-}
-
