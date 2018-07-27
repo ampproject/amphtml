@@ -147,7 +147,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.container_ = this.doc_.createElement('div');
     this.container_.classList.add('i-amphtml-image-slider-container');
 
-    this.buildImages_();
+    this.buildImageWrappers_();
     this.buildBar_();
     this.buildHint_();
 
@@ -175,6 +175,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     // This is the only step when content tree is attached to document
     return this.mutateElement(() => {
       this.element.appendChild(this.container_);
+      // Ensure ampdoc exists on the amp-imgs
+      this.leftMask_.appendChild(this.leftAmpImage_);
+      this.rightMask_.appendChild(this.rightAmpImage_);
     });
   }
 
@@ -227,13 +230,12 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Build images
    * @private
    */
-  buildImages_() {
+  buildImageWrappers_() {
     this.leftMask_ = this.doc_.createElement('div');
     this.rightMask_ = this.doc_.createElement('div');
     this.container_.appendChild(this.rightMask_);
     this.container_.appendChild(this.leftMask_);
 
-    this.rightMask_.appendChild(this.rightAmpImage_);
     this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
 
     if (this.rightLabel_) {
@@ -244,7 +246,6 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.rightLabelWrapper_.appendChild(this.rightLabel_);
       this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
-    this.leftMask_.appendChild(this.leftAmpImage_);
 
     this.leftMask_.classList.add('i-amphtml-image-slider-left-mask');
     this.leftAmpImage_.classList.add('i-amphtml-image-slider-image-on-top');
@@ -675,7 +676,7 @@ export class AmpImageSlider extends AMP.BaseElement {
         'Experiment <amp-image-slider> disabled');
 
     // TODO(kqian): remove this after layer launch
-    if (isExperimentOn(this.win, 'layers')) {
+    if (!isExperimentOn(this.win, 'layers')) {
       this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
       this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
     }
