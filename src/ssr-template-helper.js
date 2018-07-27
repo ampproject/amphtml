@@ -15,7 +15,9 @@
  */
 
 import {Capability} from './service/viewer-impl';
-import {dict, map} from './utils/object';
+import {FormDataWrapper} from './form-data-wrapper';
+import {addParamsToUrl} from './url';
+import {deepMerge, dict, map} from './utils/object';
 import {iterateCursor} from './dom';
 
 /** The attributes we allow to be sent to the viewer. */
@@ -68,12 +70,13 @@ export class SsrTemplateHelper {
   /**
    * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
+   * @param {!Object} originalRequest
    * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
-  fetchAndRenderTemplate(element, opt_templates = null) {
+  fetchAndRenderTemplate(element, originalRequest, opt_templates = null) {
     const inputsAsJson = this.getElementInputsAsJson_(element);
     const elementAttrsAsJson =
         this.getElementAttributesAsJson_(element);
@@ -89,6 +92,7 @@ export class SsrTemplateHelper {
       }
     }
     const data = dict({
+      'originalRequest': originalRequest,
       'data': elementAttrsAsJson,
       'sourceAmpComponent': this.sourceComponent_,
     });
@@ -134,6 +138,45 @@ export class SsrTemplateHelper {
       });
     }
     return attrsAsJson;
+  }
+
+  /**
+   * Builds fetch data related info.
+   * @param {string} url
+   * @param {string} method
+   * @param {!Object<string, string>=} opt_extraFields
+   * @return {!FetchDataObj}
+   */
+  buildFetchDataObj(url, method, opt_extraFields) {
+    let xhrUrl, body;
+    const isHeadOrGet = method == 'GET' || method == 'HEAD';
+
+    if (isHeadOrGet) {
+      this.assertNoSensitiveFields_();
+      const values = this.getFormAsObject_();
+      if (opt_extraFields) {
+        deepMerge(values, opt_extraFields);
+      }
+      xhrUrl = addParamsToUrl(url, values);
+    } else {
+      xhrUrl = url;
+      body = new FormDataWrapper(this.form_);
+      for (const key in opt_extraFields) {
+        body.append(key, opt_extraFields[key]);
+      }
+    }
+
+    return {
+      xhrUrl,
+      fetchOptions: {
+        body,
+        method,
+        credentials: 'include',
+        headers: dict({
+          'Accept': 'application/json',
+        }),
+      },
+    };
   }
 
 }

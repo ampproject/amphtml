@@ -231,7 +231,7 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (this.ssrTemplateHelper_.isSupported()) {
-      return this.ssrTemplate_();
+      return this.ssrTemplate_(this.element.getAttribute('src'));
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
       return this.fetch_(itemsExpr).then(items => {
@@ -263,15 +263,19 @@ export class AmpList extends AMP.BaseElement {
    */
   ssrTemplate_() {
     return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-        this.element).then(resp => {
-      const data = getData(resp);
-      user().assert(
-          resp && (typeof data !== 'undefined'),
-          'Response missing the \'data\' field');
-      return this.scheduleRender_(data);
-    }, error => {
-      throw user().createError('Error proxying amp-list templates', error);
-    }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
+        this.element,
+        // TODO(alabiaga): build fetch object here.
+        this.ssrTemplateHelper_.buildFetchDataObj_())
+        .then(resp => {
+          const data = getData(resp);
+          user().assert(
+              resp && (typeof data !== 'undefined'),
+              'Response missing the \'data\' field');
+          return this.scheduleRender_(data);
+        }, error => {
+          throw user().createError('Error proxying amp-list templates', error);
+        }).then(
+            () => this.onFetchSuccess_(), error => this.onFetchError_(error));
   }
 
   /**
