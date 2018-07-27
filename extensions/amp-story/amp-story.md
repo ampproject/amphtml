@@ -110,6 +110,45 @@ The new attributes:
 | `poster-square-src` | The story poster in square format (1x1 aspect ratio). |
 | `poster-landscape-src` | The story poster in landscape format (4x3 aspect ratio). |
 
+#### `publisher-logo-src` guidelines
+
+The following guidelines apply to the image for the publisher logo:
+
+- The file must be a raster file, such as `.jpg`, `.png`, or `.gif`.  Don't use vector files, such as `.svg` or `.eps`.
+- Don't use animation.
+- The graphic part of the logo should be legible on the background color.
+
+<table>
+  <tr>
+    <td>
+      <img alt="Logo with blue text on white background"   src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" />
+      Preferred
+    </td>
+    <td>
+      <img alt="Logo with white text on blue background"   src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" />
+      Preferred
+    </td>
+    <td>
+      <img alt="Logo with blue text on blue background"   src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" />
+      Avoid this
+    </td>
+  </tr>
+</table>
+
+- The logo must be a square, not a rectangle.
+- The background color should not be transparent.
+- Publishers should only use one logo per brand that is consistent across AMP stories.
+
+#### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
+
+The following guidelines apply to the image for the story poster image(s):
+
+- The poster image must be representative of the entire AMP story.
+- The poster image must be visible to the user when the user begins the AMP story.  However, the image file URL used in the metadata does not have to match exactly the URL used on the first page of the story.  The URL used in the metadata can include sizing, cropping, or minor styling changes for the preview purpose.
+- The poster image must be a raster file, such as `.jpg`, `.png`, or `.gif`.  Don't use vector files, such as `.svg` or `.eps`.
+- The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
+- If the first page of the story includes video as the background, use a thumbnail from the video as the poster image.  The thumbnail should be the most representative frame from the video.  Verify that the thumbnail that you provide is useful and representative of the AMP story.  The first frame in a video is often not representative of the video.
+
 ## Overview
 
 The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
