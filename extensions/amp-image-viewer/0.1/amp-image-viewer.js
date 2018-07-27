@@ -148,11 +148,11 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (this.loadPromise_) {
       return this.loadPromise_;
     }
-    const laidOutPromise =
-      elementByTag(this.sourceAmpImage_, 'i-amphtml-sizer') !== null
-        ? Promise.resolve()
-        : this.sourceAmpImage_.signals().whenSignal(CommonSignals.LOAD_END);
-    this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
+    const ampImg = dev().assertElement(this.sourceAmpImage_);
+    const laidOutPromise = elementByTag(ampImg, 'i-amphtml-sizer') !== null
+      ? Promise.resolve()
+      : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
+    this.scheduleLayout(ampImg);
     this.loadPromise_ = laidOutPromise
         .then(() => this.init_())
         .then(() => this.resetImageDimensions_())
