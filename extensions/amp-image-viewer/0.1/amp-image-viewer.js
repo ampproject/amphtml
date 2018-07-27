@@ -149,7 +149,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       return this.loadPromise_;
     }
     const ampImg = dev().assertElement(this.sourceAmpImage_);
-    const laidOutPromise = elementByTag(ampImg, 'i-amphtml-sizer') !== null
+    const laidOutPromise = ampImg.hasAttribute('i-amphtml-layout')
       ? Promise.resolve()
       : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
     this.scheduleLayout(ampImg);
