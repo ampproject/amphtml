@@ -25,7 +25,7 @@ export default class AffiliateLinkResolver {
       this.markDomainsAsUnknown(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
       const pendingAnchors = this.getPendingAnchors_(anchorList, domainsToAsk);
-      willBeResolvedPromise = this.resolvedUnkonwnAnchorsAsync_(pendingAnchors, domainsToAsk);
+      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(pendingAnchors, domainsToAsk);
     }
 
     return new AnchorRewriteDataResponse(alreadyResolved, willBeResolvedPromise);
@@ -100,7 +100,7 @@ export default class AffiliateLinkResolver {
     }, []);
   }
 
-  resolvedUnkonwnAnchorsAsync_(anchorList, domainsToAsk) {
+  resolvedUnknownAnchorsAsync_(anchorList, domainsToAsk) {
     return this.fetchDomainResolverApi(domainsToAsk).then(data => {
       // DomainResolverApi (beaconApi) returns extra meta-data that we want to handle
       // oustide of the resolveUnknownDomains process.
