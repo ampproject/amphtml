@@ -5,7 +5,6 @@
   "statusCheckVerify": true,
   "ignoreDeps": [
     "babel-polyfill",
-    "document-register-element",
     "dompurify",
     "promise-pjs",
     "web-activities",

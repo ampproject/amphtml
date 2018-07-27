@@ -142,7 +142,7 @@ function updatePackages() {
     runYarnCheck();
   }
   patchWebAnimations();
-  // patchRegisterElement();
+  patchRegisterElement();
 }
 
 gulp.task(

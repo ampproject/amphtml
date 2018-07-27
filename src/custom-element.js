@@ -104,14 +104,6 @@ export function createCustomElementClass(win, name) {
   /** @extends {HTMLElement} */
   class CustomAmpElement extends baseCustomElement {
     /**
-     * @see https://github.com/WebReflection/document-register-element#v1-caveat
-     * @suppress {checkTypes}
-     * @param {HTMLElement} self
-     */
-    constructor(self) {
-      return super(self);
-    }
-    /**
      * The name of the custom element.
      * @return {string}
      */
@@ -137,14 +129,10 @@ function createBaseCustomElementClass(win) {
   /** @abstract @extends {HTMLElement} */
   class BaseCustomElement extends htmlElement {
     /**
-     * @see https://github.com/WebReflection/document-register-element#v1-caveat
-     * @suppress {checkTypes}
-     * @param {HTMLElement} self
      */
-    constructor(self) {
-      self = super(self);
-      self.createdCallback();
-      return self;
+    constructor() {
+      super();
+      this.createdCallback();
     }
 
     /**

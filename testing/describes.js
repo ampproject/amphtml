@@ -104,8 +104,7 @@ import {
   installBuiltinElements,
   installExtensionsService,
 } from '../src/service/extensions-impl';
-import {installCustomElements} from
-  'document-register-element/build/document-register-element.patched';
+import {installCustomElements} from '../src/service/ampdoc-impl';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {
@@ -587,7 +586,7 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win);
+          installCustomElements(win, class {});
         }
 
         // Intercept event listeners
