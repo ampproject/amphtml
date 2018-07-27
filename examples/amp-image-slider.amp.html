@@ -1,0 +1,271 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-image-slider example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    #content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .flex {
+      display: flex;
+      justify-content: space-between
+    }
+
+    .label {
+      color: white;
+      border: 4px solid white;
+      padding: 1em;
+      font-family: Arial, Helvetica, sans-serif;
+      box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
+    }
+
+    .top-label {
+      top: 0;
+    }
+
+    .center-y-label {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .bottom-label {
+      bottom: 0;
+    }
+
+    .left-label-left {
+      left: 0;
+    }
+
+    .left-label-center {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-label-right {
+      right: 0;
+      left: auto;
+    }
+
+    .right-label-left {
+      left: 0;
+      right: auto;
+    }
+
+    .right-label-center {
+      right: 50%;
+      transform: translateX(50%);
+    }
+
+    .right-label-right {
+      right: 0;
+    }
+
+    .left-label-center-xy {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .right-label-center-xy {
+      right: 50%;
+      top: 50%;
+      transform: translate(50%, -50%);
+    }
+
+    .my-hint {
+      color: red;
+    }
+  </style>
+  <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+  <!-- <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script> -->
+  <!-- to make this work during testing, cp dist/ww.max.js to dist/ww.js -->
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <main id="content">
+    <h1>Drag/Click Slider with Customizable Labels</h1>
+
+    <p>NO labels; NO whatever modifications</p>
+    <amp-image-slider tabindex="1" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <p>Labels with NO positioning rules specified (default to both top, left label to left, right label to right)</p>
+    <amp-image-slider tabindex="2" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Labels with positioning rules specified</p>
+    <amp-image-slider tabindex="3" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label left-label-center-xy">BEFORE</div>
+      <div after class="label right-label-center-xy">AFTER</div>
+    </amp-image-slider>
+
+    <h1>Customizable Hints</h1>
+
+    <p>Disable hint</p>
+    <amp-image-slider tabindex="4" layout="responsive" width="1024" height="600" disable-hint>
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Reemerging hint (default to no interaction for 10s)</p>
+    <amp-image-slider tabindex="5" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+      <div hint hint-loop></div>
+    </amp-image-slider>
+
+    <p>Reemerging hint (customized to no interaction for 2s)</p>
+    <amp-image-slider tabindex="6" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+      <div hint hint-loop hint-inactive-interval="2000"></div>
+    </amp-image-slider>
+
+    <p>Instantly reemerging hint (customized to no interaction for 0.001s)</p>
+    <amp-image-slider tabindex="7" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+      <div hint hint-loop hint-inactive-interval="1"></div>
+    </amp-image-slider>
+
+    <p>Hint with custom styling</p>
+    <amp-image-slider tabindex="8" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+      <div hint class="my-hint"></div>
+    </amp-image-slider>
+
+    <h1><code>seekTo</code> action</h1>
+
+    <p>Position Observer with Seeking</p>
+    <div>
+      <amp-position-observer
+        intersection-ratios="1"
+        on="scroll:observed.seekTo(value=event.percent)"
+        layout="nodisplay">
+      </amp-position-observer>
+      <amp-image-slider id="observed" tabindex="9" layout="responsive" width="1024" height="600">
+        <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+        <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+        <div before class="label">BEFORE</div>
+        <div after class="label">AFTER</div>
+      </amp-image-slider>
+    </div>
+
+    <p>Example of seeking</p>
+    <amp-image-slider id="seekable" tabindex="9" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:seekable.seekTo(percent=0)">Click me to Seek to Left</button>
+      <button on="tap:seekable.seekTo(percent=50)">Click me to Seek to Center</button>
+      <button on="tap:seekable.seekTo(percent=100)">Click me to Seek to Right</button>
+    </div>
+
+    <h1>Tab + Keyboard</h1>
+    <p>Move step set to 20%, Home for Center, PageUp for Left, PageDown for Right</p>
+    <amp-image-slider tabindex="10" step-size="0.2" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+
+    <!--
+    <h1>Toggle <code>disabled</code> (for user interaction, <code>seekTo</code> will still work)</h1>
+    <p>Toggling disabled with One-time hint (will be recreated on enable, but if keep enabled, would only appear once)</p>
+    <amp-image-slider id="disableDemo" tabindex="11" layout="responsive" width="1024" height="600" [disabled]="disableDemo.disabled">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:AMP.setState({disableDemo: {disabled: false}})">Enable</button>
+      <button on="tap:disableDemo.seekTo(percent=0)">Seek to Left</button>
+      <button on="tap:AMP.setState({disableDemo: {disabled: true}})">Disable</button>
+    </div>
+
+    <p>Toggling disabled with Hint Reappearing</p>
+    <amp-image-slider id="disableDemo1" tabindex="12" layout="responsive" width="1024" height="600" [disabled]="disableDemo1.disabled">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+      <div hint hint-loop hint-inactive-interval="1000"></div>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:AMP.setState({disableDemo1: {disabled: false}})">Enable</button>
+      <button on="tap:disableDemo1.seekTo(percent=0)">Seek to Left</button>
+      <button on="tap:AMP.setState({disableDemo1: {disabled: true}})">Disable</button>
+    </div>
+
+    <p>Toggling disabled with NO hint</p>
+    <amp-image-slider id="disableDemo2" tabindex="13" layout="responsive" width="1024" height="600" disable-hint [disabled]="disableDemo2.disabled">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:AMP.setState({disableDemo2: {disabled: false}})">Enable</button>
+      <button on="tap:disableDemo2.seekTo(percent=0)">Seek to Left</button>
+      <button on="tap:AMP.setState({disableDemo2: {disabled: true}})">Disable</button>
+    </div>
+    -->
+
+    <h1>Inside Carousel</h1>
+
+    <p>Carousel would not be scrolled when moving the slider</p>
+    <amp-carousel width="400"
+      height="300"
+      layout="responsive"
+      type="slides"
+      controls>
+      <amp-img src="https://unsplash.it/200/300?image=0"
+        width="400"
+        height="300"
+        layout="responsive"
+        alt="a sample image"></amp-img>
+      <amp-image-slider layout="responsive" width="1024" height="600">
+        <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+        <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      </amp-image-slider>
+      <amp-img src="https://unsplash.it/200/300?image=1"
+        width="400"
+        height="300"
+        layout="responsive"
+        alt="and another sample image"></amp-img>
+    </amp-carousel>
+  </main>
+</body>
+</html>
