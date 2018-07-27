@@ -74,7 +74,6 @@ describes.realWin('amp-mowplayer', {
      * @param {string} datasource
      */
   function runTestsForDatasource(datasource) {
-
     it('renders', () => {
       return getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID}, true).then(mp => {
         const iframe = mp.querySelector('iframe');
@@ -83,14 +82,10 @@ describes.realWin('amp-mowplayer', {
         expect(iframe.src).to.equal(EXAMPLE_VIDEOID_URL);
       });
     });
-
-    it('requires data-mediaid', () => {
-      return allowConsoleError(() => {
-        return getMowPlayer({})
-            .should.eventually.be.rejectedWith(
-                /The data-mediaid attribute is required for/);
-      });
-    });
+	
+	it('requires data-mediaid', () => allowConsoleError(() =>
+		getMowPlayer({}).should.eventually.be.rejectedWith(
+			/The data-mediaid attribute is required for/)));
 
     it('should send events from mowplayer to the amp element', () => {
       return getMowPlayer({'data-mediaid': datasource}).then(mp => {

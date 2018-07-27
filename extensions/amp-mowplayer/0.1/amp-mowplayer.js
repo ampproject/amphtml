@@ -45,7 +45,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
  * @enum {number}
  * @private
  */
-
 const PlayerStates = {
   UNSTARTED: -1,
   ENDED: 0,
@@ -83,11 +82,10 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
-     * @param {boolean=} opt_onLayout
-     * @override
-     */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
-
     const {preconnect} = this;
     preconnect.url(this.getVideoIframeSrc_());
     // Host that mowplayer uses to serve JS needed by player.
@@ -108,12 +106,13 @@ class AmpMowplayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
-    this.mediaid_ = user().assert(
+	  
+	this.mediaid_ = user().assert(
         (this.element.getAttribute('data-mediaid')),
         '/The data-mediaid attribute is required for <amp-mowplayer> %s',
         this.element);
-
+	
+	
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
@@ -123,37 +122,32 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
-     * @return {string}
-     * @private
-     */
+   * @return {string}
+   * @private
+   */
   getVideoIframeSrc_() {
-
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
-
-    let src = 'https://cdn.mowplayer.com/player.html?code=' + encodeURIComponent(this.mediaid_);
-
     const {element} = this;
     const params = getDataParamsFromAttributes(element);
+    const src = addParamsToUrl('https://cdn.mowplayer.com/player.html',
+        Object.assign(dict({
+          'code': this.mediaid_,
+        }), params));
 
-    src = addParamsToUrl(src, params);
     return this.videoIframeSrc_ = src;
   }
 
   /** @override */
   layoutCallback() {
-
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
-
     this.iframe_ = iframe;
-
     this.unlistenMessage_ = listen(
         this.win,
         'message',
         this.handleMowMessage_.bind(this)
     );
-
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
       this.listenToFrame_();
@@ -172,7 +166,6 @@ class AmpMowplayer extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
@@ -191,13 +184,20 @@ class AmpMowplayer extends AMP.BaseElement {
     if (mutations['data-mediaid'] == null) {
       return;
     }
-
+    this.mediaid_ = this.getMediaId_();
     if (!this.iframe_) {
       return;
     }
     this.sendCommand_('loadVideoById', [this.mediaid_]);
   }
 
+  /**
+   * @return {?string}
+   * @private
+   */
+  getMediaId_() {
+    return this.element.getAttribute('data-mediaid');
+  }
 
   /**
      * Sends a command to the player through postMessage.
