@@ -264,7 +264,8 @@ export class AmpList extends AMP.BaseElement {
   ssrTemplate_() {
     return this.ssrTemplateHelper_.fetchAndRenderTemplate(
         this.element,
-        // TODO(alabiaga): build fetch object here.
+        // TODO(alabiaga): build fetch object here...pull out logic from
+        // batchFetchJsonFor..
         this.ssrTemplateHelper_.buildFetchDataObj_())
         .then(resp => {
           const data = getData(resp);
