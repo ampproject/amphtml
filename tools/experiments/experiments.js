@@ -304,6 +304,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    id: 'amp-image-slider',
+    name: 'Enables the experimental amp-image-slider for image comparison',
+    spec: 'TODO',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17165',
+  },
+  {
     id: 'blurry-placeholder',
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
