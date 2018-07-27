@@ -304,12 +304,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'amp-orientation-observer',
-    name: 'Enables actions based on the orientation of a mobile device',
-    spec: 'https://github.com/ampproject/amphtml/issues/14740',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/16075',
-  },
-  {
     id: 'blurry-placeholder',
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
