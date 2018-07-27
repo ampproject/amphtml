@@ -18,7 +18,7 @@ import {computedStyle} from '../../../src/style';
 
 
 /**
-  *  Returns the min opacity found amongst the element and its parents
+  *  Returns the min opacity found amongst the element and its ancestors
   *  @param {!Element|null} el
   *  @return {number} minimum opacity value
   */
