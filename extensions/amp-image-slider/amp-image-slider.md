@@ -43,6 +43,3 @@ This is an EXPERIMENTAL component.
 
 ## Behavior
 TODO. This component is under construction. Examples would be added soon.
-
-## Validation
-See [amp-image-slider rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-slider/validator-amp-image-slider.protoascii) in the AMP validator specification.
