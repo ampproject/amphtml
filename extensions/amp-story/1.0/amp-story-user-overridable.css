@@ -18,6 +18,11 @@ amp-story {
   font-display: optional;
 }
 
+amp-story-grid-layer * {
+  box-sizing: border-box;
+  margin: 0;
+}
+
 .i-amphtml-story-grid-template-fill > amp-anim img,
 .i-amphtml-story-grid-template-fill > amp-img img,
 .i-amphtml-story-grid-template-fill > amp-video video {

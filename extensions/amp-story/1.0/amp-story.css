@@ -273,11 +273,6 @@ amp-story-grid-layer {
   z-index: 2 !important;
 }
 
-amp-story-grid-layer * {
-  box-sizing: border-box !important;
-  margin: 0 !important;
-}
-
 .i-amphtml-story-grid-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
