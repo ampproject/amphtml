@@ -75,26 +75,6 @@ amp-image-slider amp-img > img {
   cursor: ew-resize;
 }
 
-.i-amphtml-image-slider-bar-button {
-  cursor: ew-resize;
-  position: absolute;
-  margin: auto;
-  width: 40px;
-  height: 40px;
-  background-color: white;
-  border-radius: 50%;
-  color: lightgray;
-  box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.5);
-  top: 0;
-  bottom: 0;
-  font-weight: bold;
-  transform: translate(-50%);
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .i-amphtml-image-slider-left-label-wrapper {
   position: absolute;
   width: 100%;
@@ -134,6 +114,12 @@ amp-image-slider amp-img > img {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s;
+}
+
+.i-amphtml-image-slider-hint.i-amphtml-image-slider-hint-hidden {
+  opacity: 0;
+  transition: all 0.3s;
 }
 
 .i-amphtml-image-slider-hint-icon {

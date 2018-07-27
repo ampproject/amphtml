@@ -15,18 +15,17 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
-import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
+import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
-import {getStyle, setStyles} from '../../../src/style';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {numeric} from '../../../src/transition';
+import {setStyles} from '../../../src/style';
 
 export class AmpImageSlider extends AMP.BaseElement {
 
@@ -308,9 +307,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.hint_.appendChild(hintIcon);
     this.hint_.className = '';
     this.hint_.classList.add('i-amphtml-image-slider-hint');
-    setStyles(dev().assertElement(this.hint_), {
-      opacity: 0.7,
-    });
 
     this.barStick_.appendChild(this.hint_);
   }
@@ -365,7 +361,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Reset interval when the hint would reappear
    * Call this when an user interaction is done
-   * Specify opt_noRestart to true if no intend to start a timeout for
+   * Specify opt_noRestart to true if no intent to start a timeout for
    * showing hint again.
    * @param {boolean=} opt_noRestart
    * @private
@@ -399,14 +395,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   animateShowHint_() {
-    const interpolate = numeric(
-        Number(getStyle(dev().assertElement(this.hint_), 'opacity')), 0.7);
+    this.hint_.classList.remove('i-amphtml-image-slider-hint-hidden');
     this.isHintHidden_ = false;
-    return Animation.animate(dev().assertElement(this.hint_), v => {
-      setStyles(dev().assertElement(this.hint_), {
-        opacity: interpolate(v),
-      });
-    }, 200).thenAlways();
   }
 
   /**
@@ -414,13 +404,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   animateHideHint_() {
-    const interpolate = numeric(
-        Number(getStyle(dev().assertElement(this.hint_), 'opacity')), 0);
-    return Animation.animate(dev().assertElement(this.hint_), v => {
-      setStyles(dev().assertElement(this.hint_), {
-        opacity: interpolate(v),
-      });
-    }, 200).then(() => this.isHintHidden_ = true);
+    this.hint_.classList.add('i-amphtml-image-slider-hint-hidden');
+    this.isHintHidden_ = true;
   }
 
   /**
@@ -648,7 +633,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   limitPercentage_(percentage) {
-    return Math.max(0, Math.min(percentage, 1));
+    return clamp(percentage, 0, 1);
   }
 
   /**
