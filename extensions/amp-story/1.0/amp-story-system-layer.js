@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, StateProperty} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 import {LocalizedStringId} from './localization';
@@ -205,7 +209,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -320,6 +324,10 @@ export class SystemLayer {
 
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
       this.onPageIndexUpdate_(index);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
     }, true /** callToInitialize */);
   }
 
@@ -451,6 +459,19 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState ?
+        this.getShadowRoot().setAttribute('dir', 'rtl') :
+        this.getShadowRoot().removeAttribute('dir');
+    });
+  }
+
+  /**
    * Handles click events on the mute button.
    * @private
    */
@@ -527,7 +548,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ =
         renderSimpleTemplate(this.win_.document, SHARE_WIDGET_PILL_CONTAINER);
 
-    const shareWidget = new ShareWidget(this.win_);
+    const shareWidget = new ShareWidget(this.win_, this.parentEl_);
 
     this.sharePillContainerNode_
         .querySelector('.i-amphtml-story-share-pill')
