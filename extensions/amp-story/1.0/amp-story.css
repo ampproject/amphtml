@@ -304,12 +304,6 @@ amp-story-grid-layer * {
   width: auto !important;
 }
 
-.i-amphtml-story-grid-template-fill > amp-anim img,
-.i-amphtml-story-grid-template-fill > amp-img img,
-.i-amphtml-story-grid-template-fill > amp-video video {
-  object-fit: cover !important;
-}
-
 .i-amphtml-story-grid-template-vertical {
   grid-auto-flow: row !important;
   grid-template-columns: 100% !important;

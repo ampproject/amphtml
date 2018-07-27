@@ -18,6 +18,12 @@ amp-story {
   font-display: optional;
 }
 
+.i-amphtml-story-grid-template-fill > amp-anim img,
+.i-amphtml-story-grid-template-fill > amp-img img,
+.i-amphtml-story-grid-template-fill > amp-video video {
+  object-fit: cover;
+}
+
 .i-amphtml-story-grid-template-vertical {
   align-content: start;
   grid-gap: 16px;
