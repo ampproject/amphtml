@@ -105,14 +105,12 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-	  
+  buildCallback() {	  
 	this.mediaid_ = user().assert(
         (this.element.getAttribute('data-mediaid')),
         '/The data-mediaid attribute is required for <amp-mowplayer> %s',
         this.element);
-	
-	
+
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
@@ -184,7 +182,6 @@ class AmpMowplayer extends AMP.BaseElement {
     if (mutations['data-mediaid'] == null) {
       return;
     }
-    this.mediaid_ = this.getMediaId_();
     if (!this.iframe_) {
       return;
     }
@@ -200,11 +197,11 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
-     * Sends a command to the player through postMessage.
-     * @param {string} command
-     * @param {Array=} opt_args
-     * @private
-     */
+   * Sends a command to the player through postMessage.
+   * @param {string} command
+   * @param {Array=} opt_args
+   * @private
+   */
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
@@ -219,9 +216,9 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
-     * @param {!Event} event
-     * @private
-     */
+   * @param {!Event} event
+   * @private
+   */
   handleMowMessage_(event) {
     if (!originMatches(event, this.iframe_, 'https://cdn.mowplayer.com')) {
       return;
@@ -263,11 +260,11 @@ class AmpMowplayer extends AMP.BaseElement {
     }
 
   }
-
+  
   /**
-     * Sends 'listening' message to the Mowplayer iframe to listen for events.
-     * @private
-     */
+   * Sends 'listening' message to the Mowplayer iframe to listen for events.
+   * @private
+   */
   listenToFrame_() {
     if (!this.iframe_) {
       return;
