@@ -307,7 +307,7 @@ const EXPERIMENTS = [
     id: 'amp-image-slider',
     name: 'Enables the experimental amp-image-slider for image comparison',
     spec: 'TODO',
-    cleanupIssue: 'TODO',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17165',
   },
   {
     id: 'blurry-placeholder',
