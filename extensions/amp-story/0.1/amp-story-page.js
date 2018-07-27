@@ -35,6 +35,7 @@ import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
+import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
   closestBySelector,
   matches,
@@ -42,11 +43,9 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
 import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
@@ -87,7 +86,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
-    /** @private {?Element} */
+    /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
     /** @private @const {!Promise} */
@@ -113,7 +112,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type');
 
-    /** @const @private {!function()} */
+    /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
         this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
 
@@ -130,8 +129,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /*
-   * @return {?./animation.AnimationManager}
+  /**
    * @private
    */
   maybeCreateAnimationManager_() {
@@ -149,7 +147,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
-    this.ownVideoAutoplay_();
+    this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
@@ -163,21 +161,18 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /** @private */
-  ownVideoAutoplay_() {
+  /**
+   * Delegates video autoplay so the video manager does not follow the
+   * autoplay attribute that may have been set by a publisher, which could
+   * play videos from an inactive page.
+   */
+  delegateVideoAutoplay() {
     const videos = this.element.querySelectorAll('amp-video');
     if (videos.length < 1) {
       return;
     }
-
-    // This service gets installed by all video instances.
-    // Executions of `installVideoManagerForDoc` following the first are NOOPs,
-    // so this only takes care of a race condition when the service has not yet
-    // been installed.
-    installVideoManagerForDoc(this.getAmpDoc());
-
     toArray(videos).forEach(el => {
-      Services.videoManagerForDoc(this.element).delegateAutoplay(el);
+      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
     });
   }
 
@@ -543,10 +538,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {number} progress The progress from 0.0 to 1.0.
    */
   emitProgress_(progress) {
-    const payload = {
-      pageId: this.element.id,
-      progress,
-    };
+    const payload = dict({
+      'pageId': this.element.id,
+      'progress': progress,
+    });
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.PAGE_PROGRESS, payload,
         eventInit);
@@ -663,7 +658,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {number} direction The direction in which navigation needs to takes place.
    */
   navigateOnTap(direction) {
-    const payload = {direction};
+    const payload = dict({'direction': direction});
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,
         eventInit);
@@ -675,7 +670,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId) {
-    const payload = {targetPageId};
+    const payload = dict({'targetPageId': targetPageId});
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
@@ -692,7 +687,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     getLogEntries(this.element).then(logEntries => {
       dispatchCustom(this.win, this.element,
-          EventType.DEV_LOG_ENTRIES_AVAILABLE, logEntries, {bubbles: true});
+          EventType.DEV_LOG_ENTRIES_AVAILABLE,
+          // ? is OK because all consumers are internal.
+          /** @type {?} */ (logEntries), {bubbles: true});
     });
   }
 

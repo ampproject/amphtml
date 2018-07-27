@@ -28,7 +28,6 @@ __kx_viewability: false,
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function kixer(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
 

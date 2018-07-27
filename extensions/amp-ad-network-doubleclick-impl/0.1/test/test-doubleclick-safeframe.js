@@ -626,6 +626,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
     /**
      * Send a message requesting an expand.
+     * @param {number} height
+     * @param {number} width
      */
     function sendExpandMessage(height, width) {
       const expandMessage = {};
@@ -886,8 +888,10 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
     /**
      * Send a message requesting a resize.
-     * @param {number} height Pixels to resize height by.
-     * @param {number} width Pixels to resize width by.
+     * @param {number} top
+     * @param {number} bottom
+     * @param {number} left
+     * @param {number} right
      */
     function sendResizeMessage(top, bottom, left, right) {
       const resizeMessage = {};

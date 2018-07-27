@@ -15,10 +15,10 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
-import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {htmlFor} from '../../../../../src/static-template';
+import {getSourceOriginForBookendComponent} from './bookend-component-interface';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
 
@@ -27,7 +27,8 @@ import {userAssertValidProtocol} from '../../utils';
  *   type: string,
  *   title: string,
  *   url: string,
- *   image: (string|undefined)
+ *   image: (string|undefined),
+ *   domainName: string,
  * }}
  */
 export let ArticleComponentDef;
@@ -61,7 +62,7 @@ export class ArticleComponent {
   /** @override */
   build(articleJson, element) {
     const url = articleJson['url'];
-    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+    const domainName = getSourceOriginForBookendComponent(element, url);
 
     const article = {
       url,
@@ -74,43 +75,51 @@ export class ArticleComponent {
       article.image = articleJson['image'];
     }
 
+    if (articleJson['amphtml']) {
+      article.amphtml = articleJson['amphtml'];
+    }
+
     return /** @type {!ArticleComponentDef} */ (article);
   }
 
   /** @override */
-  buildTemplate(articleData, doc) {
+  buildElement(articleData, doc) {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
-    const template =
+    const el =
         html`
         <a class="i-amphtml-story-bookend-article
           i-amphtml-story-bookend-component"
           target="_top">
+          <h2 class="i-amphtml-story-bookend-article-heading" ref="heading">
+          </h2>
+          <div class="i-amphtml-story-bookend-component-meta" ref="meta"></div>
         </a>`;
-    addAttributesToElement(template, dict({'href': articleData.url}));
+    addAttributesToElement(el, dict({'href': articleData.url}));
 
-    if (articleData.image) {
-      const ampImg =
-          html`
-          <amp-img class="i-amphtml-story-bookend-article-image"
-                  width="100"
-                  height="100">
-          </amp-img>`;
-
-      addAttributesToElement(ampImg, dict({'src': articleData.image}));
-      template.appendChild(ampImg);
+    if (articleData['amphtml'] === true) {
+      addAttributesToElement(el, dict({'rel': 'amphtml'}));
     }
 
-    const heading =
-      html`<h2 class="i-amphtml-story-bookend-article-heading"></h2>`;
+    if (articleData.image) {
+      const imgEl =
+          html`
+          <div class="i-amphtml-story-bookend-article-image">
+            <img ref="image">
+            </img>
+          </div>`;
+
+      const {image} = htmlRefs(imgEl);
+      addAttributesToElement(image, dict({'src': articleData.image}));
+      el.insertBefore(imgEl, el.firstChild);
+    }
+
+    const articleElements = htmlRefs(el);
+    const {heading, meta} = articleElements;
+
     heading.textContent = articleData.title;
-    template.appendChild(heading);
+    meta.textContent = articleData.domainName;
 
-    const articleMeta =
-      html`<div class="i-amphtml-story-bookend-component-meta"></div>`;
-    articleMeta.textContent = articleData.domainName;
-    template.appendChild(articleMeta);
-
-    return template;
+    return el;
   }
 }

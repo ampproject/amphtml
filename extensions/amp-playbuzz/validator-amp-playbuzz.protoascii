@@ -19,8 +19,8 @@ tags: {  # amp-playbuzz
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-playbuzz"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -30,7 +30,8 @@ tags: {  # <amp-playbuzz>
   requires_extension: "amp-playbuzz"
   attrs: {
     name: "data-comments"
-    value_regex_casei: "false|true"
+    value_casei: "false"
+    value_casei: "true"
   }
   attrs: {
     name: "data-item"
@@ -38,11 +39,13 @@ tags: {  # <amp-playbuzz>
   }
   attrs: {
     name: "data-item-info"
-    value_regex_casei: "false|true"
+    value_casei: "false"
+    value_casei: "true"
   }
   attrs: {
     name: "data-share-buttons"
-    value_regex_casei: "false|true"
+    value_casei: "false"
+    value_casei: "true"
   }
   attrs: {
     name: "src"

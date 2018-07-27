@@ -20,7 +20,6 @@ import {loadScript} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function mediaimpact(global, data) {
   global.fif = false;
   /* eslint google-camelcase/google-camelcase: 0 */

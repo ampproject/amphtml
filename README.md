@@ -1,6 +1,16 @@
+⚡⚡⚡
+
+The first **[AMP Contributor Summit](https://amphtml.wordpress.com/2018/06/28/announcing-the-amp-contributor-summit/)** for developers who contribute to the AMP open source project--or who want to start contributing--will be in **San Francisco, California September 25-26, 2018** with an **optional New Contributor Day on September 24**.
+
+If you are a contributor to AMP or you want to become one please **[apply to attend](https://events.withgoogle.com/amp-contributor-summit/)**!
+
+If you'd like to give a talk at the summit please **[submit a talk proposal](https://goo.gl/forms/DCpv5ZWfH5drqqVh1)** by July 31, 2018.  Please note, that this is a technical summit. Don’t worry that your talk might not be polished enough.  We’re excited to hear from everyone!
+
+⚡⚡⚡
+
 # AMP HTML ⚡
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/ampproject/amphtml.svg)](https://greenkeeper.io/)
+[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
 [AMP HTML](https://www.ampproject.org/docs/get_started/about-amp.html) is a way to build web pages that render with reliable and fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.  AMP HTML is built on existing web technologies; an AMP page will load (quickly) in any modern browser.
 

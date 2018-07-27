@@ -21,10 +21,20 @@
  */
 export class WindowInterface {
 
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {string}
+   */
   static getDocumentReferrer(win) {
     return win.document.referrer;
   }
 
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {string}
+   */
   static getHostname(win) {
     return win.location.hostname;
   }

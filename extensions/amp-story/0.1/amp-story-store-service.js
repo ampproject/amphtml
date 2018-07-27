@@ -17,6 +17,7 @@
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 
 
 /** @type {string} */
@@ -40,6 +41,7 @@ const TAG = 'amp-story';
  *    mutedstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
+ *    consentid: ?string,
  *    currentpageid: string,
  * }}
  */
@@ -66,6 +68,9 @@ export const StateProperty = {
   MUTED_STATE: 'mutedstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
+
+  // App data.
+  CONSENT_ID: 'consentid',
   CURRENT_PAGE_ID: 'currentpageid',
   CURRENT_PAGE_INDEX: 'currentpageindex',
 };
@@ -73,6 +78,8 @@ export const StateProperty = {
 
 /** @private @const @enum {string} */
 export const Action = {
+  CHANGE_PAGE: 'changepage',
+  SET_CONSENT_ID: 'setconsentid',
   TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
@@ -82,7 +89,6 @@ export const Action = {
   TOGGLE_MUTED: 'togglemuted',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
-  CHANGE_PAGE: 'changepage',
 };
 
 
@@ -145,6 +151,9 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
+    case Action.SET_CONSENT_ID:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.CONSENT_ID]: data}));
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -158,6 +167,9 @@ const actions = (state, action, data) => {
 };
 
 
+/**
+ * Store service.
+ */
 export class AmpStoryStoreService {
   /**
    * @param {!Window} win
@@ -180,7 +192,7 @@ export class AmpStoryStoreService {
    * @return {*}
    */
   get(key) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Unknown state ${key}.`);
       return;
     }
@@ -195,7 +207,7 @@ export class AmpStoryStoreService {
    *                                     triggered with current value.
    */
   subscribe(key, listener, callToInitialize = false) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
     }
@@ -250,6 +262,7 @@ export class AmpStoryStoreService {
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
+      [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
     });

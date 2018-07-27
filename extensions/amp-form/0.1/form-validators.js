@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {FormEvents} from './form-events';
 import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {toWin} from '../../../src/types';
-
 
 /** @type {boolean|undefined} */
 let reportValiditySupported;
@@ -111,7 +111,7 @@ export class FormValidator {
     this.formValidity_ = this.form.checkValidity();
     if (previousValidity !== this.formValidity_) {
       const win = toWin(this.form.ownerDocument.defaultView);
-      const type = this.formValidity_ ? 'valid' : 'invalid';
+      const type = this.formValidity_ ? FormEvents.VALID : FormEvents.INVALID;
       const event = createCustomEvent(win, type, null, {bubbles: true});
       this.form.dispatchEvent(event);
     }
@@ -133,6 +133,10 @@ export class DefaultValidator extends FormValidator {
 /** @private visible for testing */
 export class PolyfillDefaultValidator extends FormValidator {
 
+  /**
+   * Creates an instance of PolyfillDefaultValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
     const bubbleId = `i-amphtml-validation-bubble-${validationBubbleCount++}`;
@@ -183,6 +187,10 @@ export class PolyfillDefaultValidator extends FormValidator {
  */
 export class AbstractCustomValidator extends FormValidator {
 
+  /**
+   * Creates an instance of AbstractCustomValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
 

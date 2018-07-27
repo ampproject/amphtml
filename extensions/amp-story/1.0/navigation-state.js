@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 
 
 /**
@@ -53,7 +52,7 @@ export class NavigationState {
     this.win_ = win;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     this.initializeListeners_();
   }
@@ -86,8 +85,8 @@ export class NavigationState {
    * @param {number} totalPages
    * @param {string} pageId
    * @param {boolean} isFinalPage
+   * TODO(alanorozco): pass whether change was automatic or on user action.
    */
-  // TODO(alanorozco): pass whether change was automatic or on user action
   updateActivePage(pageIndex, totalPages, pageId, isFinalPage) {
     const changeValue = {
       pageIndex,

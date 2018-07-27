@@ -18,14 +18,18 @@ import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {Layout} from '../../../src/layout';
 import {NextPageService} from './next-page-service';
 import {Services} from '../../../src/services';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {assertConfig} from './config';
 import {
   childElementsByAttr,
   childElementsByTag,
   isJsonScriptTag,
+  removeElement,
 } from '../../../src/dom';
-import {getService} from '../../../src/service';
-import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../../../src/url';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -36,14 +40,6 @@ const SERVICE_ID = 'next-page';
 
 export class AmpNextPage extends AMP.BaseElement {
 
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {!./next-page-service.NextPageService} */
-    this.service_ = getService(this.win, SERVICE_ID);
-  }
-
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
@@ -51,36 +47,8 @@ export class AmpNextPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
-    if (this.service_.isActive()) {
-      return;
-    }
-
-    this.element.classList.add('i-amphtml-next-page');
-
-    // TODO(peterjosling): Read config from another source.
-
-    const scriptElements = childElementsByTag(this.element, 'SCRIPT');
-    user().assert(scriptElements.length == 1,
-        `${TAG} should contain only one <script> child.`);
-    const scriptElement = scriptElements[0];
-    user().assert(isJsonScriptTag(scriptElement),
-        `${TAG} config should ` +
-            'be inside a <script> tag with type="application/json"');
-    const configJson = tryParseJson(scriptElement.textContent, error => {
-      user().error(TAG, 'failed to parse config', error);
-    });
-
-    const docInfo = Services.documentInfoForDoc(this.element);
-    const url = parseUrlDeprecated(docInfo.url);
-    const sourceOrigin = getSourceOrigin(url);
-    const config = assertConfig(configJson, url.origin, sourceOrigin);
-
-    if (isProxyOrigin(url)) {
-      config.pages.forEach(rec => {
-        rec.ampUrl = rec.ampUrl.replace(sourceOrigin, url.origin);
-      });
-    }
+    user().assert(isExperimentOn(this.win, 'amp-next-page'),
+        'Experiment amp-next-page disabled');
 
     const separatorElements = childElementsByAttr(this.element, 'separator');
     user().assert(separatorElements.length <= 1,
@@ -89,15 +57,94 @@ export class AmpNextPage extends AMP.BaseElement {
     let separator = null;
     if (separatorElements.length === 1) {
       separator = separatorElements[0];
+      removeElement(separator);
     }
 
-    this.service_.register(this.element, config, separator);
-    this.service_.setAppendPageHandler(element => this.appendPage_(element));
+    return nextPageServiceForDoc(this.getAmpDoc()).then(service => {
+      if (service.isActive()) {
+        return;
+      }
+
+      const {element} = this;
+      element.classList.add('i-amphtml-next-page');
+
+      const src = element.getAttribute('src');
+      if (src) {
+        return this.fetchConfig_().then(
+            config => this.register_(service, config, separator),
+            error => user().error(TAG, 'error fetching config', error));
+      } else {
+        const scriptElements = childElementsByTag(element, 'SCRIPT');
+        user().assert(scriptElements.length === 1,
+            `${TAG} should contain only one <script> child, or a URL specified `
+            + 'in [src]');
+        const scriptElement = scriptElements[0];
+        user().assert(isJsonScriptTag(scriptElement),
+            `${TAG} config should ` +
+            'be inside a <script> tag with type="application/json"');
+        const configJson = tryParseJson(scriptElement.textContent, error => {
+          user().error(TAG, 'failed to parse config', error);
+        });
+        this.register_(service, configJson, separator);
+      }
+    });
   }
 
+  /**
+   * Verifies the specified config as a valid {@code NextPageConfig} and
+   * registers the {@link NextPageService} for this document.
+   * @param {!NextPageService} service Service to register with.
+   * @param {*} configJson Config JSON object.
+   * @param {?Element} separator Optional custom separator element.
+   * @private
+   */
+  register_(service, configJson, separator) {
+    const {element} = this;
+    const docInfo = Services.documentInfoForDoc(element);
+    const urlService = Services.urlForDoc(element);
+
+    const url = urlService.parse(docInfo.url);
+    const sourceOrigin = urlService.getSourceOrigin(url);
+
+    const config = assertConfig(element, configJson, url.origin, sourceOrigin);
+
+    if (urlService.isProxyOrigin(url)) {
+      config.pages.forEach(rec => {
+        rec.ampUrl = rec.ampUrl.replace(sourceOrigin, url.origin);
+      });
+    }
+
+    service.register(element, config, separator);
+    service.setAppendPageHandler(element => this.appendPage_(element));
+  }
+
+  /**
+   * Appends the element too page
+   * @param {!Element} element
+   */
   appendPage_(element) {
     return this.mutateElement(() => this.element.appendChild(element));
   }
+
+  /**
+   * Fetches the element config from the URL specified in [src].
+   * @private
+   */
+  fetchConfig_() {
+    const ampdoc = this.getAmpDoc();
+    const policy = UrlReplacementPolicy.ALL;
+    return batchFetchJsonFor(
+        ampdoc, this.element, /* opt_expr */ undefined, policy);
+  }
+}
+
+/**
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<!NextPageService>}
+ */
+function nextPageServiceForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<!NextPageService>} */ (
+    getServicePromiseForDoc(elementOrAmpDoc, SERVICE_ID));
 }
 
 AMP.extension(TAG, '0.1', AMP => {

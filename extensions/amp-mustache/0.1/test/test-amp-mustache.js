@@ -14,35 +14,47 @@
  * limitations under the License.
  */
 
-import {
-  AmpMustache,
-} from '../amp-mustache';
+import * as mustache from '../../../../third_party/mustache/mustache';
+import * as sanitizer from '../../../../src/sanitizer';
+import * as service from '../../../../src/service';
+import {AmpMustache} from '../amp-mustache';
 
-describe('amp-mustache template', () => {
+describe('amp-mustache 0.1', () => {
+  let sandbox;
+  let templateElement;
+  let template;
+  let viewerCanRenderTemplates = false;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    templateElement = document.createElement('template');
+    const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
+    getServiceForDocStub.returns({
+      canRenderTemplates: () => viewerCanRenderTemplates,
+    });
+
+    template = new AmpMustache(templateElement);
+  });
+
+  afterEach(() => sandbox.restore());
 
   it('should render', () => {
-    const templateElement = document.createElement('template');
     templateElement.content.textContent = 'value = {{value}}';
-    const template = new AmpMustache(templateElement);
     template.compileCallback();
     const result = template.render({value: 'abc'});
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
   it('should render {{.}} from string', () => {
-    const templateElement = document.createElement('template');
     templateElement.content.textContent = 'value = {{.}}';
-    const template = new AmpMustache(templateElement);
     template.compileCallback();
     const result = template.render('abc');
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
   it('should sanitize output', () => {
-    const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
         'value = <a href="{{value}}">abc</a>';
-    const template = new AmpMustache(templateElement);
     template.compileCallback();
     allowConsoleError(() => {
       const result = template.render({
@@ -54,10 +66,8 @@ describe('amp-mustache template', () => {
   });
 
   it('should sanitize templated tag names', () => {
-    const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
         'value = <{{value}} href="javascript:alert(0)">abc</{{value}}>';
-    const template = new AmpMustache(templateElement);
     template.compileCallback();
     const result = template.render({
       value: 'a',
@@ -70,10 +80,8 @@ describe('amp-mustache template', () => {
   describe('Sanitizing data- attributes', () => {
 
     it('should sanitize templated attribute names', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
           'value = <a {{value}}="javascript:alert(0)">abc</a>';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -85,10 +93,8 @@ describe('amp-mustache template', () => {
     });
 
     it('should sanitize templated bind attribute names', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
           'value = <p [{{value}}]="javascript:alert()">ALERT</p>';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -102,10 +108,8 @@ describe('amp-mustache template', () => {
     });
 
     it('should parse data-&style=value output correctly', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = <a href="{{value}}"' +
           ' data-&style="color:red;">abc</a>';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -117,10 +121,8 @@ describe('amp-mustache template', () => {
     });
 
     it('should parse data-&attr=value output correctly', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
           'value = <a data-&href="{{value}}">abc</a>';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         value: 'https://google.com/',
@@ -130,10 +132,8 @@ describe('amp-mustache template', () => {
     });
 
     it('should allow for data-attr=value to output correctly', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<a data-my-attr="{{invalidValue}}" data-my-id="{{value}}">abc</a>';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -148,10 +148,8 @@ describe('amp-mustache template', () => {
 
   describe('Rendering Form Fields', () => {
     it('should allow rendering inputs', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<input value="{{value}}" type="text" onchange="{{invalidValue}}">';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -164,10 +162,8 @@ describe('amp-mustache template', () => {
     });
 
     it('should allow rendering textarea', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<textarea>{{value}}</textarea>';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         value: 'Cool story bro.',
@@ -177,10 +173,8 @@ describe('amp-mustache template', () => {
     });
 
     it('should not allow image/file input types rendering', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<input value="{{value}}" type="{{type}}">';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -216,10 +210,8 @@ describe('amp-mustache template', () => {
     });
 
     it('should allow text input type rendering', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<input value="{{value}}" type="{{type}}">';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         value: 'myid',
@@ -230,13 +222,11 @@ describe('amp-mustache template', () => {
     });
 
     it('should sanitize form-related attrs properly', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<input value="{{value}}" ' +
           'formaction="javascript:javascript:alert(1)" ' +
           'formmethod="get" form="form1" formtarget="blank" formnovalidate ' +
           'formenctype="">';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -248,10 +238,8 @@ describe('amp-mustache template', () => {
     });
 
     it('should not sanitize form tags', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
           '<form><input value="{{value}}"></form><input value="hello">';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         value: 'myid',
@@ -264,12 +252,10 @@ describe('amp-mustache template', () => {
   describe('Nested templates', () => {
 
     it('should not sanitize nested amp-mustache templates', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
           'text before a template ' +
           '<template type="amp-mustache">text inside template</template> ' +
           'text after a template';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({});
       expect(result./*OK*/innerHTML).to.equal(
@@ -279,12 +265,10 @@ describe('amp-mustache template', () => {
     });
 
     it('should sanitize nested templates without type="amp-mustache"', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
           'text before a template ' +
           '<template>text inside template</template> ' +
           'text after a template';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({});
       expect(result./*OK*/innerHTML).to.equal(
@@ -292,12 +276,10 @@ describe('amp-mustache template', () => {
     });
 
     it('should not render variables inside a nested template', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
           'outer: {{outerOnlyValue}} {{mutualValue}} ' +
           '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
           ' {{mutualValue}}</template>';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         outerOnlyValue: 'Outer',
@@ -355,11 +337,9 @@ describe('amp-mustache template', () => {
 
     it('should not allow users to pass data having key that starts with ' +
         '__AMP_NESTED_TEMPLATE_0 when there is a nested template', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
           'outer: {{value}} ' +
           '<template type="amp-mustache">nested: {{value}}</template>';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         __AMP_NESTED_TEMPLATE_0: 'MUST NOT RENDER THIS',
@@ -373,9 +353,7 @@ describe('amp-mustache template', () => {
     it('should render user data with a key __AMP_NESTED_TEMPLATE_0 when' +
         ' there are no nested templates, even though it is not a weird name' +
         ' for a template variable', () => {
-      const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = '{{__AMP_NESTED_TEMPLATE_0}}';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         __AMP_NESTED_TEMPLATE_0: '123',
@@ -387,9 +365,7 @@ describe('amp-mustache template', () => {
 
   describe('triple-mustache', () => {
     it('should sanitize text formatting elements', () => {
-      const templateElement = document.createElement('template');
       templateElement.content.textContent = 'value = {{{value}}}';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         value: '<b>abc</b><img><div>def</div>'
@@ -408,9 +384,7 @@ describe('amp-mustache template', () => {
     });
 
     it('should sanitize table related elements and anchor tags', () => {
-      const templateElement = document.createElement('template');
       templateElement.content.textContent = 'value = {{{value}}}';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
         value: '<table class="valid-class">'
@@ -439,23 +413,41 @@ describe('amp-mustache template', () => {
     });
 
     it('should sanitize tags, removing unsafe attributes', () => {
-      const templateElement = document.createElement('template');
       templateElement.content.textContent = 'value = {{{value}}}';
-      const template = new AmpMustache(templateElement);
       template.compileCallback();
-      const result = template.render({
-        value: '<a href="javascript:alert(\'XSS\')">test</a>'
-            + '<img src="x" onerror="alert(\'XSS\')" />',
+      allowConsoleError(() => {
+        const result = template.render({
+          value: '<a href="javascript:alert(\'XSS\')">test</a>'
+              + '<img src="x" onerror="alert(\'XSS\')" />',
+        });
+        expect(result./*OK*/innerHTML).to.equal(
+            'value = <a target="_top">test</a>');
       });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a target="_top">test</a>');
+    });
+  });
+
+  describe('viewer can render templates', () => {
+    beforeEach(() => {
+      viewerCanRenderTemplates = true;
+    });
+
+    it('should not call mustache parsing', () => {
+      sandbox.spy(mustache, 'parse');
+      template.compileCallback();
+      expect(mustache.parse).to.have.not.been.called;
+    });
+
+    it('should not mustache render but still sanitize html', () => {
+      sandbox.spy(sanitizer, 'sanitizeHtml');
+      sandbox.spy(mustache, 'render');
+      template.render();
+      expect(mustache.render).to.have.not.been.called;
+      expect(sanitizer.sanitizeHtml).to.have.been.called;
     });
   });
 
   it('should unwrap output', () => {
-    const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML = '<a>abc</a>';
-    const template = new AmpMustache(templateElement);
     template.compileCallback();
     const result = template.render({});
     expect(result.tagName).to.equal('A');

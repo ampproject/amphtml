@@ -33,8 +33,9 @@ config.filesToCache = [
   '/components/amp-install-serviceworker/',
   config.offlinePage,
   '/img/offline.png',
-  '/playground/img/playground-logo.svg',
   '/playground/',
+  '/img/amp_by_example_logo.svg',
+  '/playground/images/logo.svg',
   '/img/amp_logo_black.svg'
 ];
 

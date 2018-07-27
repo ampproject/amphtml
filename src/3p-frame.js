@@ -67,11 +67,15 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {!AmpElement} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
+ * @param {!{
+ *   disallowCustom,
+ *   allowFullscreen,
+ * }=} opt_options Options for the created iframe.
  * @return {!Element} The iframe.
  */
 export function getIframe(
-  parentWindow, parentElement, opt_type, opt_context, opt_disallowCustom) {
+  parentWindow, parentElement, opt_type, opt_context,
+  {disallowCustom, allowFullscreen} = {}) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
@@ -88,7 +92,7 @@ export function getIframe(
   count[attributes['type']] += 1;
 
   const baseUrl = getBootstrapBaseUrl(
-      parentWindow, undefined, opt_type, opt_disallowCustom);
+      parentWindow, undefined, opt_type, disallowCustom);
   const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
@@ -114,6 +118,9 @@ export function getIframe(
   }
   if (attributes['title']) {
     iframe.title = attributes['title'];
+  }
+  if (allowFullscreen) {
+    iframe.setAttribute('allowfullscreen', 'true');
   }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
@@ -206,10 +213,16 @@ export function getBootstrapBaseUrl(
       getDefaultBootstrapBaseUrl(parentWindow);
 }
 
+/**
+ * @param {string} url
+ */
 export function setDefaultBootstrapBaseUrlForTesting(url) {
   overrideBootstrapBaseUrl = url;
 }
 
+/**
+ * @param {*} win
+ */
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
   win.defaultBootstrapSubDomain = undefined;
@@ -238,6 +251,10 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
       `${srcFileBasename}.html`;
 }
 
+/**
+ * @param {!Window} win
+ * @return {string}
+ */
 function getAdsLocalhost(win) {
   let adsUrl = urls.thirdParty; // local dev with a non-localhost server
   if (adsUrl.indexOf('ampproject.net') > -1) {
@@ -250,6 +267,7 @@ function getAdsLocalhost(win) {
  * Sub domain on which the 3p iframe will be hosted.
  * Because we only calculate the URL once per page, this function is only
  * called once and hence all frames on a page use the same URL.
+ * @param {!Window} win
  * @return {string}
  * @visibleForTesting
  */

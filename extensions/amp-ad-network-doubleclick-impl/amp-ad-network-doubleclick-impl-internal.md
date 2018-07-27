@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>DoubleClick implementation of the AMP Ad tag.  Click <a href="/extensions/amp-a4a/amp-a4a-internal.md">here</a>
+    <td>DoubleClick implementation of the AMP Ad tag.  Click <a href="/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
     for Fast Fetch details, and <a href="/extensions/amp-a4a/amp-a4a-format.md">here</a>
     for AMPHTML ad format details. This tag should
     not be directly referenced by pages and instead is dynamically loaded
@@ -58,7 +58,7 @@ limitations under the License.
   <tr>
     <td><a href="fluid.md">Fluid</a></td>
     <td>Fluid slots do not require a pre-specified size, but will instead fill up the width of their parent container and adjust their height accordingly.</td>
-    <td>Beta</td>
+    <td>Launched</td>
   </tr>
   <tr>
     <td><a href="doubleclick-rtc.md">Real Time Config</a></td>
@@ -85,6 +85,10 @@ limitations under the License.
     <td>When enabled, all eligible slots on the page will be serviced by a single ad request.</td>
     <td>Beta</td>
   </tr>
+  <tr>
+    <td><a href="single-page-ad.md">Single Page Ads</a></td>
+    <td>Ads that appear within an AMP story, the new ad format for visual storytelling.</td>
+    <td>Beta</td>
   <tr>
     <td><a href="amp-consent.md">AMP Consent Integration</a></td>
     <td>Integration with AMP Consent extension.</td>

@@ -112,5 +112,11 @@ app.use('/form/post', function(req, res) {
   });
 });
 
+app.use('/form/verify-error', function(req, res) {
+  res.status(400).json({
+    verifyErrors: [{name: 'email', message: 'That email is already taken.'}],
+  });
+});
+
 
 exports.app = app;

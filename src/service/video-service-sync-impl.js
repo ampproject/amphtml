@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import {PlayingStates} from '../video-interface';
+import {Autoplay, AutoplayEvents} from './video/autoplay';
+import {PlayingStates, VideoAttributes, VideoEvents} from '../video-interface';
 import {Services} from '../services';
+import {VideoServiceSignals} from './video-service-interface';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
 import {isExperimentOn} from '../experiments';
+import {listen, listenOncePromise} from '../event-helper';
+import {once} from '../utils/function';
 
 
 /** @private @const {string} */
@@ -54,8 +58,17 @@ export class VideoServiceSync {
   constructor(ampdoc) {
     const {win} = ampdoc;
 
+    /** @private @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private @const {!Promise<!VideoServiceDef>}  */
     this.asyncImpl_ = VideoServiceSync.videoServiceFor(win, ampdoc);
+
+    /**
+     * @return {!Autoplay}
+     * @private
+     */
+    this.getAutoplay_ = once(() => new Autoplay(this.ampdoc_));
   }
 
   /**
@@ -73,31 +86,48 @@ export class VideoServiceSync {
    * @return {!Promise<!VideoServiceDef>}
    * @visibleForTesting
    */
-  // Not exposed in ../services.js since we don't want other modules to
-  // instantiate or access the service.
   static videoServiceFor(win, nodeOrDoc) {
+    // Not exposed in ../services.js since we don't want other modules to
+    // instantiate or access the service.
     const extensions = Services.extensionsFor(win);
     const ampdoc = getAmpdoc(nodeOrDoc);
     return extensions.installExtensionForDoc(ampdoc, EXTENSION)
         .then(() => /** @type {!Promise<!VideoServiceDef>} */ (
-          getElementServiceForDoc(nodeOrDoc, 'video-service', EXTENSION)));
+          getElementServiceForDoc(ampdoc, 'video-service', EXTENSION)));
   }
 
   /** @override */
-  register(video, unusedFromV1manageAutoplay = true) {
+  register(video) {
     this.asyncImpl_.then(impl =>
       impl.register(video));
+
+    this.maybeInstallAutoplay_(video);
+
+    new VideoEntry(video);
   }
 
-  /** @override */
-  delegateAutoplay(video, optObservable = null) {
-    // TODO(alanorozco): Make observable required once implementation of
-    // `VideoService` finalizes.
-    const observable = dev().assert(optObservable,
-        '`VideoService` requires an observable for autoplay delegation.');
+  /**
+   * @param  {!../video-interface.VideoOrBaseElementDef} video
+   * @private
+   */
+  maybeInstallAutoplay_(video) {
+    if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+      return;
+    }
 
-    this.asyncImpl_.then(impl =>
-      impl.delegateAutoplay(video, observable));
+    this.getAutoplay_().register(video);
+
+    const autoplayDelegated = VideoServiceSignals.AUTOPLAY_DELEGATED;
+    video.signals().whenSignal(autoplayDelegated).then(() => {
+      this.getAutoplay_().delegate(video.element);
+    });
+  }
+
+  /**
+   * @param {!AmpElement|!../base-element.BaseElement} video
+   */
+  static delegateAutoplay(video) {
+    video.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
   }
 
   /** @override */
@@ -117,4 +147,58 @@ export class VideoServiceSync {
     dev().warn(TAG, 'getPlayingState is not implemented');
     return PlayingStates.PAUSED;
   }
+}
+
+
+/** @visibleForTesting */
+export class VideoEntry {
+
+  /** @param {!../video-interface.VideoOrBaseElementDef} video */
+  constructor(video) {
+
+    /** @private @const {!../video-interface.VideoOrBaseElementDef} */
+    this.video_ = video;
+
+    /** @private @const {!AmpElement} */
+    this.element_ = video.element;
+
+    /** @private @const {!Promise} */
+    this.loadPromise_ = listenOncePromise(this.element_, VideoEvents.LOAD);
+
+    this.listenToAutoplayEvents_();
+
+    setVideoComponentClassname(this.element_);
+  }
+
+  /**
+   * @param {string} event
+   * @param {function(!Event)} handler
+   * @private
+   */
+  listenOnLoad_(event, handler) {
+    listen(this.element_, event, e => {
+      this.loadPromise_.then(() => {
+        handler(e);
+      });
+    });
+  }
+
+  /** @private */
+  listenToAutoplayEvents_() {
+    // TODO(alanorozco): Keep track of session
+    this.listenOnLoad_(AutoplayEvents.PLAY, () => {
+      this.video_.play(/* auto */ true);
+    });
+
+    this.listenOnLoad_(AutoplayEvents.PAUSE, () => {
+      this.video_.pause();
+    });
+  }
+}
+
+/**
+ * @param {!Element} element
+ */
+export function setVideoComponentClassname(element) {
+  element.classList.add('i-amphtml-video-component');
 }

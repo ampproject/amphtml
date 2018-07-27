@@ -717,14 +717,16 @@ Also consider contributing to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to gulpfile.js to tell it about your extension, its files and
-its examples.
+changes to bundles.config.js to tell it about your extension, its files and
+its examples. You will need to add an entry in the "extensionBundles" array.
 
 ```javascript
+exports.extensionBundles = [
 ...
-declareExtension('amp-kaltura-player', '0.1', /* hasCss */ false);
-declareExtension('amp-carousel', '0.1', /* hasCss */ true);
+  {name: 'amp-kaltura-player', version: '0.1'},
+  {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
 ...
+];
 ```
 
 ## Versioning

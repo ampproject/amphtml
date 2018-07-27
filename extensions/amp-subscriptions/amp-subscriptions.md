@@ -348,6 +348,51 @@ For instance, to show a "subscribe" action to non-subscribers:
 <button subscriptions-display="NOT subscribed" subscriptions-action="subscribe">Become a subscriber</button>
 ```
 
+## Analytics
+
+The `amp-subscriptions` triggers seven types of analytics signals during the different lifecycle of various subscriptions.
+Following are the events and the conditions when the events are triggered.
+
+1. `subscriptions-platform-activated`:
+ - This event is fired when one of the platforms configured is selected and activated to be used(see [Selecting platform](#selecting-platform)).
+ - This event is fired with `serviceId` of the selected platform.
+2. `subscriptions-access-granted`:
+ - This event is fired when one of the configured platform is selected and the entitlement from the selected platform grants access to the document.
+ - This event is fired with `serviceId` of the selected platform.
+3. `subscriptions-access-denied`:
+ - This event is fired when one of the configured platform is selected and the entitlement from the selected platform denies access to the document.
+ - This event is fired with `serviceId` of the selected platform.
+4. `subscriptions-paywall-activated`:
+ - After selecting a platform, if the entitlement of the platform does not grant access to the document then `subscriptions-paywall-activated` is triggered.
+ - This event is fired with `serviceId` of the selected platform.
+5. `subscriptions-platform-registered`:
+ - Since a platform is free to initialize itself at anytime on the page, `subscriptions-platform-registered` event is triggered when `amp-subscriptions` is able to resolve the instance of the platform.
+ - This event is fired with `serviceId` of the selected platform.
+6. `subscriptions-platform-re-authorized`:
+ - A platform can request for re-authorizing itself after any action performed e.g. `Login`. Once the re-authorization is complete and new entitlement is fetched for the platform `PLATFORM_REAUTHORIZED` is triggered.
+ - This event is fired with `serviceId` of the selected platform.
+7. `subscriptions-action-delegated`:
+ - A platform can request its action to be delegated to another service, in such scenerio `subscriptions-action-delegated` is triggered just before handing over the event to the other platform.
+ - This event is fired with `serviceId` and `action` of the selected platform.
+8. `subscriptions-entitlement-resolved`:
+ - Once the platform is registered, the entitlments from it are requested. `subscriptions-entitlement-resolved` event is triggered when the entitlement fetch from the platform is completed.
+ - This event is fired with `serviceId` and `action` of the selected platform.
+9. `subscriptions-started`:
+ - This event is triggered when `amp-subscriptions` is initialized.
+ - This event does not contain any data.
+10. `subscriptions-action-ActionName-started`:
+ - Whenever any action execution starts, the event with `subscriptions-action-ActionName-started` is fired.
+ - This event does not contain any data.
+11. `subscriptions-action-ActionName-failed`:
+ - If the action execution fails due to any reason, an event with `subscriptions-action-ActionName-failed` is fired.
+ - This event does not contain any data.
+12. `subscriptions-action-ActionName-success`:
+ - If the event result reports a success, `subscriptions-action-ActionName-success` is triggered.
+ - This event does not contain any data.
+13. `subscriptions-action-ActionName-rejected`:
+ - If the event result reports a success, `subscriptions-action-ActionName-rejected` is triggered.
+ - This event does not contain any data.
+
 
 ## Available vendor services
 

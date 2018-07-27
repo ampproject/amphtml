@@ -113,23 +113,6 @@ For example, the following is possible in AMP:
   </tr>
 </table>
 
-## amp-audio
-
-<table>
-  <tr>
-    <th width="20%">Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>play</code></td>
-    <td>Plays the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
-  </tr>
-  <tr>
-    <td><code>pause</code></td>
-    <td>Pauses the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
-  </tr>
-</table>
-
 ### Input elements
 <table>
   <tr>
@@ -318,6 +301,10 @@ event.response</pre></td>
     <td>Toggles the visibility of the target element.</td>
   </tr>
   <tr>
+    <td><code>toggleClass(class=STRING, force=BOOLEAN)</code></td>
+    <td>Toggles class of the target element. <code>force</code> is optional, and if defined, it ensures that class would only be added but not removed if set to <code>true</code>, and only removed but not added if set to <code>false</code>.</td>
+  </tr>
+  <tr>
     <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>
     <td>Scrolls an element into view with a smooth animation. If defined,
     <code>duration</code> specifies the length of the animation in milliseconds
@@ -332,6 +319,22 @@ event.response</pre></td>
     on another element (usually parent element). We strongly advise against
     losing focus by focusing on <code>body</code>/<code>documentElement</code>
     for accessibility reasons.</td>
+  </tr>
+</table>
+
+### amp-audio
+<table>
+  <tr>
+    <th width="20%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
   </tr>
 </table>
 

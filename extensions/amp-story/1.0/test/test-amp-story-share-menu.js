@@ -59,7 +59,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization-v01', () => localizationService);
+    registerServiceBuilder(win, 'localization', () => localizationService);
 
     parentEl = win.document.createElement('div');
     win.document.body.appendChild(parentEl);

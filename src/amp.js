@@ -81,12 +81,12 @@ startupChunk(self.document, function initial() {
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
     });
+    startupChunk(self.document, function adoptWindow() {
+      adopt(self);
+    });
     startupChunk(self.document, function builtins() {
       // Builtins.
       installBuiltins(self);
-    });
-    startupChunk(self.document, function adoptWindow() {
-      adopt(self);
     });
     startupChunk(self.document, function stub() {
       // Pre-stub already known elements.

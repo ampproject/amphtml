@@ -18,6 +18,11 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {
+  createFrameFor,
+  objOrParseJson,
+  redispatch,
+} from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -31,12 +36,10 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {once} from '../../../src/utils/function';
 
-/**
- * @implements {../../../src/video-interface.VideoInterface}
- */
+
+/** @implements {../../../src/video-interface.VideoInterface} */
 class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -46,8 +49,8 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?string} */
-    this.videoIframeSrc_ = null;
+    /** @private {function():string} */
+    this.getVideoIframeSrc_ = once(() => this.resolveVideoIframeSrc_());
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -82,27 +85,29 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
   }
 
-  getVideoIframeSrc_() {
-    if (this.videoIframeSrc_) {
-      return this.videoIframeSrc_;
-    }
+  /**
+   * @return {string}
+   * @private
+   */
+  resolveVideoIframeSrc_() {
+    const {element: el} = this;
 
     const mediaId = user().assert(
-        this.element.getAttribute('data-mediaid'),
+        el.getAttribute('data-mediaid'),
         'The data-mediaid attribute is required for <amp-nexxtv-player> %s',
-        this.element);
+        el);
 
-    const client = user().assert(this.element.getAttribute('data-client'),
+    const client = user().assert(el.getAttribute('data-client'),
         'The data-client attribute is required for <amp-nexxtv-player> %s',
-        this.element);
+        el);
 
-    const delay = this.element.getAttribute('data-seek-to') || '0';
-    const mode = this.element.getAttribute('data-mode') || 'static';
-    const streamtype = this.element.getAttribute('data-streamtype') || 'video';
-    const origin = this.element.getAttribute('data-origin')
-      || 'https://embed.nexx.cloud/';
-    const disableAds = this.element.getAttribute('data-disable-ads');
-    const streamingFilter = this.element.getAttribute('data-streaming-filter');
+    const delay = el.getAttribute('data-seek-to') || '0';
+    const mode = el.getAttribute('data-mode') || 'static';
+    const streamtype = el.getAttribute('data-streamtype') || 'video';
+    const origin = el.getAttribute('data-origin')
+        || 'https://embed.nexx.cloud/';
+    const disableAds = el.getAttribute('data-disable-ads');
+    const streamingFilter = el.getAttribute('data-streaming-filter');
 
     let src = origin;
 
@@ -126,9 +131,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       src += `&streamingFilter=${encodeURIComponent(streamingFilter)}`;
     }
 
-    this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
-
-    return this.videoIframeSrc_;
+    return assertAbsoluteHttpOrHttpsUrl(src);
   }
 
   /** @override */
@@ -138,17 +141,12 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-
-    this.applyFillContent(iframe);
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = this.getVideoIframeSrc_();
+    const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(this.win, 'message', event => {
-      this.handleNexxMessages_(event);
+      this.handleNexxMessage_(event);
     });
 
     this.element.appendChild(this.iframe_);
@@ -159,6 +157,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     return loaded;
   }
 
+  /** @override */
   pauseCallback() {
     if (this.iframe_) {
       this.pause();
@@ -188,6 +187,10 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     return true;
   }
 
+  /**
+   * @param  {string} command
+   * @private
+   */
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
@@ -198,65 +201,72 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     });
   }
 
-  // emitter
-  handleNexxMessages_(event) {
-    if (!getData(event) || event.source !== this.iframe_.contentWindow) {
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  handleNexxMessage_(event) {
+    const eventData = getData(event);
+    if (!eventData || event.source !== this.iframe_.contentWindow) {
       return;
     }
 
-    /** @const {?JsonObject} */
-    const data = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : tryParseJson(getData(event)));
+    const data = objOrParseJson(eventData);
     if (!data) {
       return;
     }
 
-    if (data['event'] == 'play') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-    } else if (data['event'] == 'pause') {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (data['event'] == 'mute') {
-      this.element.dispatchCustomEvent(VideoEvents.MUTED);
-    } else if (data['event'] == 'unmute') {
-      this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-    }
+    redispatch(this.element, data['event'], {
+      'play': VideoEvents.PLAYING,
+      'pause': VideoEvents.PAUSE,
+      'mute': VideoEvents.MUTED,
+      'unmute': VideoEvents.UNMUTED,
+    });
   }
 
   // VideoInterface Implementation
+
+  /** @override */
   play() {
     this.sendCommand_('play');
   }
 
+  /** @override */
   pause() {
     this.sendCommand_('pause');
   }
 
+  /** @override */
   mute() {
     this.sendCommand_('mute');
   }
 
+  /** @override */
   unmute() {
     this.sendCommand_('unmute');
   }
 
+  /** @override */
   supportsPlatform() {
     return true;
   }
 
+  /** @override */
   isInteractive() {
     return true;
   }
 
+  /** @override */
   showControls() {
+    // Not implemented
   }
 
+  /** @override */
   hideControls() {
+    // Not implemented
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   fullscreenEnter() {
     if (!this.iframe_) {
       return;
@@ -264,9 +274,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   fullscreenExit() {
     if (!this.iframe_) {
       return;

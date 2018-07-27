@@ -52,13 +52,8 @@ export class TextBoxComponent {
     return {type, text};
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} textboxData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
-  buildTemplate(textboxData, doc) {
+  /** @override */
+  buildElement(textboxData, doc) {
     const html = htmlFor(doc);
     const container =
         html`

@@ -15,6 +15,7 @@
  */
 
 import {doubleclick} from '../ads/google/doubleclick';
+import {hasOwn} from '../src/utils/object';
 import {loadScript, writeScript} from '../3p/3p';
 
 const DEFAULT_TIMEOUT = 500; // ms
@@ -66,9 +67,12 @@ export function ix(global, data) {
   }
 }
 
+/**
+ * @param {!Object} data
+ */
 function prepareData(data) {
   for (const attr in data) {
-    if (data.hasOwnProperty(attr) && /^ix[A-Z]/.test(attr)) {
+    if (hasOwn(data, attr) && /^ix[A-Z]/.test(attr)) {
       delete data[attr];
     }
   }
@@ -76,6 +80,13 @@ function prepareData(data) {
   data.targeting['IX_AMP'] = '1';
 }
 
+/**
+ * @param {string} siteID
+ * @param {string} slotID
+ * @param {string} dfpSlot
+ * @param {number} start
+ * @param {number} code
+ */
 function reportStats(siteID, slotID, dfpSlot, start, code) {
   try {
     if (code == EVENT_BADTAG) { return; }

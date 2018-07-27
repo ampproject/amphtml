@@ -19,8 +19,8 @@ tags: {  # amp-subscriptions
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-subscriptions"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
@@ -58,8 +58,8 @@ tags: {  # amp-subscriptions-google
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-subscriptions-google"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: NONE
   }
   requires_extension: "amp-subscriptions"

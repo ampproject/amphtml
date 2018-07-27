@@ -41,6 +41,39 @@ The ad label and the call to action (CTA) buttons on the ads must be consistent 
 
 ![Consistent Ad UX](img/consistent-ux.png)
 
+## CTA
+To provide a consistent user experience, the AMP story runtime is responsible for rendering
+the button of a CTA ad.
+
+### CTA Text Enum
+The CTA button must be configured from a pre-defined set of choices.
+  * EXPLORE: "Explore Now"
+  * SHOP: "Shop Now"
+  * READ: "Read Now"
+  * INSTALL: "Install Now" (Note that deep links to apps (e.g. whatsapp://chat) are not supported but publishers can link to the App Store page or the Google Play Store page using http/https).
+
+If you need support for a new CTA button, please open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+
+### CTA Landing Page Enum
+This enum can be used to indicate the type of landing page. In the future the AMP
+runtime may make special optimitizations (e.g. preloading) based on these values.
+ * `STORY` - Landing page is a sponsored story.
+ * `AMP` - Landing page is a valid AMP page.
+ * `NONAMP` - Any other type of web page.
+
+ Note: all pages will default to `NONAMP` if this enum is missing.
+
+## Ad server support for AMP story ads
+
+Ad servers that would like to support advertising for AMP stories should open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new), and we'll be in touch.
+
+If you are a publisher, please reach out to your ad server regarding ad support for stories.
+
+### Ad servers that are currently supported
+**Important** Ad servers are only supported in `amp-story` version `1.0`. For information
+on migrating from 0.1 => 1.0 please see the [migration docs](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story.md#migrating-from-01-to-10).
+* [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/single-page-ad.md)
+
 
 ## Publisher placed ads
 This is an option for publishers who would like to place single page ads amidst AMP story content they produce. This is meant as a stop-gap until more robust ad server support is available.
@@ -154,27 +187,14 @@ At runtime, an `amp-ad` element is dynamically inserted:
 And an ad request is made to this URL: `https://adserver.com/getad?slot=abcd1234`.
 Each story can only have one `amp-story-auto-ads` element.
 
-### CTA ad
-To provide a consistent user experience, the AMP story runtime is responsible for rendering
-the button of a CTA ad. The URL and button text is provided in the `var`
+## CTA ad
+See the general CTA documentation [here](#cta). The URL and button text is provided in the `var`
 object of the ad response.
 
-*  `ctaType`: the CTA button type, of which the value is an `enum`
-   * EXPLORE: "Explore Now"
-   * SHOP: "Shop Now"
-   * READ: "Read Now"
-   * INSTALL: "Install Now" (Note that deep links to apps (e.g. whatsapp://chat) are not supported but publishers can link to the App Store page or the Google Play Store page using http/https).
-   * If you need support for a new CTA button, please open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+* `ctaType`: the CTA button type, of which the value is an [`enum`](#cta-text-enum)
 * `ctaUrl`: the landing page URL for the CTA button
 
 ### Tracking
-Each story page that has a dynamically inserted ad is assigned a system-generated page ID, prefixed with `i-amphtml-AD-`. The `story-page-visible` trigger can be used to track ad views.
+Each story page that has a dynamically inserted ad is assigned a system-generated page ID, prefixed with `i-amphtml-Ad-`. The `story-page-visible` trigger can be used to track ad views.
 
 Also, ad response can leverage the `var` object to set data attributes to the `amp-ad` tag, to be used by amp-analytics as [data vars](../amp-analytics/analytics-vars.md#variables-as-data-attribute).
-
-
-## Ad server support for AMP story ads
-Ad servers that would like to support advertising for AMP stories should open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new), and we'll be in touch.
-
-If you are a publisher, please reach out to your ad server regarding ad support for stories.
-

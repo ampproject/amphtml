@@ -21,6 +21,7 @@
   },
   "rules": {
     "amphtml-internal/no-for-of-statement": 0,
+    "amphtml-internal/no-has-own-property-method": 0,
     "chai-expect/missing-assertion": 1,
     "google-camelcase/google-camelcase": 0,
     "jsdoc/check-param-names": 0,
@@ -47,6 +48,7 @@
     }],
     "no-useless-concat": 1,
     "no-var": 1,
-    "prefer-const": 1
+    "prefer-const": 1,
+    "require-jsdoc": 0
   }
 }

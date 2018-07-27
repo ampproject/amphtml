@@ -84,6 +84,15 @@
   line-height: 1 !important;
 }
 
+.i-amphtml-story-bookend-consent {
+  margin: 0 32px 32px !important;
+}
+
+.i-amphtml-story-bookend-consent .i-amphtml-story-bookend-heading {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 .i-amphtml-story-bookend-article-meta {
   font-family: 'Roboto', sans-serif;
   font-weight: 400 !important;
@@ -116,7 +125,8 @@
   }
 }
 
-.i-amphtml-story-bookend-article-heading {
+.i-amphtml-story-bookend-article-heading,
+.i-amphtml-story-bookend-consent-button {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 400 !important;
   font-size: 16px !important;

@@ -59,7 +59,8 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'twitter');
+    const iframe = getIframe(this.win, this.element, 'twitter', null,
+        {allowFullscreen: true});
     this.applyFillContent(iframe);
     listenFor(iframe, 'embed-size', data => {
       // We only get the message if and when there is a tweet to display,

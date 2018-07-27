@@ -32,6 +32,7 @@ import {
 } from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -93,6 +94,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     /** @private {number} */
     this.scrollProgress_ = 0;
+
+    /** @private {boolean} */
+    this.runOnce_ = false;
+
+    /** @private {boolean} */
+    this.firstIterationComplete_ = false;
   }
 
   /** @override */
@@ -102,6 +109,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // we become visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.init_.bind(this));
+
+    this.runOnce_ = this.element.hasAttribute('once');
   }
 
   /**
@@ -125,7 +134,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerEnter_() {
     const name = 'enter';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -135,7 +144,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerExit_() {
     const name = 'exit';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -150,7 +159,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   triggerScroll_() {
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
-        {percent: this.scrollProgress_});
+        dict({'percent': this.scrollProgress_}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -161,6 +170,11 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   positionChanged_(entry) {
+
+    if (this.runOnce_ && this.firstIterationComplete_) {
+      return;
+    }
+
     const wasVisible = this.isVisible_;
     const prevViewportHeight = this.viewportRect_ && this.viewportRect_.height;
 
@@ -192,6 +206,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
       this.triggerScroll_();
       this.triggerExit_();
+      this.firstIterationComplete_ = true;
     }
 
     if (!wasVisible && this.isVisible_) {

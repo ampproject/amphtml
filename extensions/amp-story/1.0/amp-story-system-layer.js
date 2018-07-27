@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, StateProperty} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 import {LocalizedStringId} from './localization';
@@ -44,6 +48,9 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 /** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
+/** @private @const {string} */
+const INFO_CLASS = 'i-amphtml-story-info-control';
+
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
@@ -54,6 +61,13 @@ const TEMPLATE = {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
       children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': INFO_CLASS + ' i-amphtml-story-button',
+          }),
+        },
         {
           tag: 'div',
           attrs: dict({
@@ -155,7 +169,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -198,6 +212,11 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
+    if (Services.viewerForDoc(this.win_.document.documentElement)
+        .isEmbedded()) {
+      this.systemLayerEl_.classList.add('i-amphtml-embedded');
+    }
+
     return this.getRoot();
   }
 
@@ -228,6 +247,8 @@ export class SystemLayer {
         this.onUnmuteAudioClick_();
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_();
+      } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
+        this.onInfoClick_();
       }
     });
 
@@ -253,6 +274,14 @@ export class SystemLayer {
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
+      this.onPageIndexUpdate_(index);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
     }, true /** callToInitialize */);
   }
 
@@ -348,6 +377,29 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to the active page index changing.
+   * @param {number} index
+   */
+  onPageIndexUpdate_(index) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle('first-page-active', index === 0);
+    });
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState ?
+        this.getShadowRoot().setAttribute('dir', 'rtl') :
+        this.getShadowRoot().removeAttribute('dir');
+    });
+  }
+
+  /**
    * Handles click events on the mute button.
    * @private
    */
@@ -370,6 +422,15 @@ export class SystemLayer {
   onShareClick_() {
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+  }
+
+  /**
+   * Handles click events on the info button and toggles the info dialog.
+   * @private
+   */
+  onInfoClick_() {
+    const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
+    this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
   }
 
   /**
@@ -405,7 +466,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ =
         renderSimpleTemplate(this.win_.document, SHARE_WIDGET_PILL_CONTAINER);
 
-    const shareWidget = new ShareWidget(this.win_);
+    const shareWidget = new ShareWidget(this.win_, this.parentEl_);
 
     this.sharePillContainerNode_
         .querySelector('.i-amphtml-story-share-pill')

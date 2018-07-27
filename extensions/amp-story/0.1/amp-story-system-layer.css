@@ -155,17 +155,17 @@
   top: auto!important;
   bottom: 0!important;
   height: 96px!important;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-direction: row-reverse;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: row-reverse !important;
 }
 
 [desktop] .i-amphtml-story-progress-bar {
   position: relative !important;
+  margin: 0px 24px !important;
   height: 3px !important;
-  width: calc(100vw/3) !important;
-  margin: 0px !important;
+  width: calc(100vw / 3) !important;
 }
 
 [desktop] .i-amphtml-story-page-progress-bar {
@@ -174,14 +174,12 @@
 
 [desktop].i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
   display: flex !important;
+  margin-top: 0px !important;
   height: 40px !important;
-  width: calc(100vw/3) !important;
-  min-width: 200px;
-  align-items: center;
-  justify-content: flex-end;
-  margin-right: 32px;
+  align-items: center !important;
+  justify-content: flex-end !important;
 }
 
 [desktop] .i-amphtml-story-share-control {
-  display: none;
+  display: none !important;
 }

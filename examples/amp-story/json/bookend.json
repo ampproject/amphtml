@@ -1,14 +1,14 @@
 {
-  "bookend-version": "v1.0",
-  "share-providers": [
+  "bookendVersion": "v1.0",
+  "shareProviders": [
     "email",
-    {"provider": "facebook", "app-id": "254325784911610"},
+    {"provider": "facebook", "app_id": "254325784911610"},
     "whatsapp"
   ],
   "components": [
     {
-      "type": "article-set-title",
-      "title": "Getting Started"
+      "type": "heading",
+      "text": "Getting Started"
     },
     {
       "type": "small",
@@ -24,8 +24,8 @@
     },
 
     {
-      "type": "article-set-title",
-      "title": "Animation Examples"
+      "type": "heading",
+      "text": "Animation Examples"
     },
     {
       "type": "small",
@@ -47,8 +47,8 @@
     },
 
     {
-      "type": "article-set-title",
-      "title": "Bookend Examples"
+      "type": "heading",
+      "text": "Bookend Examples"
     },
     {
       "type": "small",
@@ -64,8 +64,8 @@
     },
 
     {
-      "type": "article-set-title",
-      "title": "Layers"
+      "type": "heading",
+      "text": "Layers"
     },
     {
       "type": "small",
@@ -81,8 +81,8 @@
     },
 
     {
-      "type": "article-set-title",
-      "title": "Miscellaneous"
+      "type": "heading",
+      "text": "Miscellaneous"
     },
     {
       "type": "small",
