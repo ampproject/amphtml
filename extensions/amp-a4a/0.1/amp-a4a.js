@@ -60,7 +60,7 @@ import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -768,7 +768,16 @@ export class AmpA4A extends AMP.BaseElement {
               bytes) {
             this.creativeBody_ = bytes;
           }
-          return this.maybeValidateAmpCreative(bytes, headers);
+          //return this.maybeValidateAmpCreative(bytes, headers);
+          return Promise.resolve(utf8Encode(
+              '<html><body style="background-color: black; color: white;">' +
+              '<script>' +
+              'debugger;' +
+              'const style = window.getComputedStyle(document.body);' +
+              'const newHeight = parseInt(style.width, 10) / 10;' +
+              'document.body.style.height = `${newHeight}px`;' +
+              '</script>' +
+              'foobar<br>foobar<br>foobar</body></html>'));
         })
         .then(creative => {
           checkStillCurrent();
@@ -787,8 +796,8 @@ export class AmpA4A extends AMP.BaseElement {
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
-          let creativeMetaDataDef;
-          if (!creativeDecoded ||
+          let creativeMetaDataDef = {minifiedCreative: creativeDecoded, customElementExtensions: []};
+          /*if (!creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))) {
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
@@ -812,7 +821,7 @@ export class AmpA4A extends AMP.BaseElement {
           const urls = Services.urlForDoc(this.getAmpDoc());
           // Preload any AMP images.
           (creativeMetaDataDef.images || []).forEach(image =>
-            urls.isSecure(image) && this.preconnect.preload(image));
+            urls.isSecure(image) && this.preconnect.preload(image));*/
           return creativeMetaDataDef;
         })
         .catch(error => {

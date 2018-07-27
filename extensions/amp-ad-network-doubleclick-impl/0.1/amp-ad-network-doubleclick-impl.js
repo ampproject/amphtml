@@ -865,6 +865,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // creative will be centered instead of left-aligned.
       this.element.removeAttribute('height');
       setStyles(this.element, {width: `${size.width}px`});
+    } else if (this.isFluidRequest_ && this.isVerifiedAmpCreative_) { debugger;
+      // This is an AMP fluid creative that will be rendered in a friendly
+      // frame.
+      dev().assert(this.iframe.contentWindow &&
+          this.iframe.contentWindow.document,
+          'Attempted to access cross-origin frame');
+      this.attemptChangeHeight(
+          this.iframe.contentWindow.document.body.scrollHeight)
+          .then(() => this.fireFluidDelayedImpression());
     }
 
     this.refreshManager_ = this.refreshManager_ ||
@@ -960,6 +969,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 })));
       } catch (unusedError) {}
     });
+  }
+
+  /**
+   * Fires the fluid delayed impression, if the URL is available.
+   */
+  fireFluidDelayedImpression() { debugger;
+    if (this.fluidImpressionUrl_) {
+      this.fireDelayedImpressions(this.fluidImpressionUrl_);
+      this.fluidImpressionUrl_ = null;
+    }
   }
 
   /**
@@ -1138,8 +1157,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
             this, this.isFluidRequest_,
-            /** @type {{height, width}} */(creativeSize),
-            this.fluidImpressionUrl_);
+            /** @type {{height, width}} */(creativeSize));
 
     return this.safeframeApi_.getSafeframeNameAttr();
   }
