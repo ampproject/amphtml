@@ -60,7 +60,7 @@ import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -249,8 +249,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?AMP.AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
 
-    /** @private {boolean} whether creative has been verified as AMP */
-    this.isVerifiedAmpCreative_ = false;
+    /** @type {boolean} whether creative has been verified as AMP */
+    this.isVerifiedAmpCreative = false;
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
@@ -423,7 +423,7 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   renderOutsideViewport() {
     // Ensure non-verified AMP creatives are throttled.
-    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win) &&
+    if (!this.isVerifiedAmpCreative && is3pThrottled(this.win) &&
         !this.inNonAmpPreferenceExp()) {
       return false;
     }
@@ -768,23 +768,14 @@ export class AmpA4A extends AMP.BaseElement {
               bytes) {
             this.creativeBody_ = bytes;
           }
-          //return this.maybeValidateAmpCreative(bytes, headers);
-          return Promise.resolve(utf8Encode(
-              '<html><body style="background-color: black; color: white;">' +
-              '<script>' +
-              'debugger;' +
-              'const style = window.getComputedStyle(document.body);' +
-              'const newHeight = parseInt(style.width, 10) / 10;' +
-              'document.body.style.height = `${newHeight}px`;' +
-              '</script>' +
-              'foobar<br>foobar<br>foobar</body></html>'));
+          return this.maybeValidateAmpCreative(bytes, headers);
         })
         .then(creative => {
           checkStillCurrent();
           // Need to know if creative was verified as part of render outside
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
-          this.isVerifiedAmpCreative_ = !!creative;
+          this.isVerifiedAmpCreative = !!creative;
           return creative && utf8Decode(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
@@ -796,8 +787,8 @@ export class AmpA4A extends AMP.BaseElement {
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
-          let creativeMetaDataDef = {minifiedCreative: creativeDecoded, customElementExtensions: []};
-          /*if (!creativeDecoded ||
+          let creativeMetaDataDef;
+          if (!creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))) {
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
@@ -821,7 +812,7 @@ export class AmpA4A extends AMP.BaseElement {
           const urls = Services.urlForDoc(this.getAmpDoc());
           // Preload any AMP images.
           (creativeMetaDataDef.images || []).forEach(image =>
-            urls.isSecure(image) && this.preconnect.preload(image));*/
+            urls.isSecure(image) && this.preconnect.preload(image));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -1106,7 +1097,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
-    this.isVerifiedAmpCreative_ = false;
+    this.isVerifiedAmpCreative = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         this.getNonAmpCreativeRenderingMethod();

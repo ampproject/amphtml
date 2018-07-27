@@ -238,4 +238,27 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
       });
     });
   });
+
+  it('should resize slot and fire impression for AMP fluid creative', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    let resolver;
+    const promise = new Promise(resolve => {
+      resolver = resolve;
+    });
+    const resizeStub =
+        sandbox.stub(impl, 'attemptChangeHeight').returns(promise);
+    const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative = true;
+    impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
+    impl.onCreativeRender({customElementExtensions: []});
+    expect(resizeStub).to.be.calledOnce;
+    resolver();
+    return promise.then(() => {
+      expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk'))
+          .to.be.calledOnce;
+    });
+  });
 });
