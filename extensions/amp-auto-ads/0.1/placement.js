@@ -223,7 +223,7 @@ export class Placement {
 export function getPlacementsFromConfigObj(ampdoc, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
-    user().warn(TAG, 'No placements in config');
+    user().info(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
