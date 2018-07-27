@@ -15,6 +15,7 @@
  */
 
 import {install as installArrayIncludes} from './polyfills/array-includes';
+import {install as installCustomElements} from './polyfills/custom-element';
 import {
   install as installDOMTokenListToggle,
 } from './polyfills/domtokenlist-toggle';
@@ -22,9 +23,6 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
-// Importing the document-register-element module has the side effect
-// of installing the custom elements polyfill if necessary.
-import {install as installCustomElements} from './polyfills/custom-element';
 
 installCustomElements(self, class {});
 installDOMTokenListToggle(self);

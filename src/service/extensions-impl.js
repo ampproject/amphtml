@@ -32,8 +32,7 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-// import {installCustomElements} from
-  // 'document-register-element/build/document-register-element.patched';
+import {install as installCustomElements} from './polyfills/custom-element';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
@@ -665,7 +664,7 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, 'auto');
+  installCustomElements(childWin);
 }
 
 
