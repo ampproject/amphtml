@@ -23,79 +23,12 @@ import {
   collapseFrameUnderVsyncMutate,
   expandFrameUnderVsyncMutate,
 } from '../../src/full-overlay-frame-helper';
-import {computedStyle, resetStyles, setImportantStyles} from '../../src/style';
-import {removeElement} from '../../src/dom';
+import {resetStyles, setImportantStyles} from '../../src/style';
 import {restrictedVsync, timer} from './util';
 
 
 const CENTER_TRANSITION_TIME_MS = 150;
 const CENTER_TRANSITION_END_WAIT_TIME_MS = 50;
-
-/** @private @const {!Array<string>} */
-const SIBLING_TRANSFERRED_PROPS = [
-  'margin',
-  'position',
-  'top',
-  'left',
-  'right',
-  'bottom',
-  'border',
-  'width',
-  'height',
-];
-
-/**
- * Must be run under vsync measure.
- * @param {!Window} win
- * @param {!Element} iframe
- * @return {!Element}
- */
-function createSiblingToPreventContentJump(win, iframe) {
-  const existingSibling =
-      iframe.parentElement.querySelector('i-amphtml-iframe-sibling');
-
-  if (existingSibling) {
-    return existingSibling;
-  }
-
-  const sibling =
-      iframe.ownerDocument.createElement('i-amphtml-iframe-sibling');
-
-  const styles = {};
-
-  const iframeStyle = computedStyle(win, iframe);
-
-  if (iframeStyle['display'] == 'inline') {
-    styles['display'] = 'inline-block';
-  } else {
-    styles['display'] = iframeStyle['display'];
-  }
-
-  SIBLING_TRANSFERRED_PROPS.forEach(prop => {
-    styles[prop] = iframeStyle[prop];
-  });
-
-  // Border is transferred only for positioning, but we want the space to be
-  // completely blank.
-  styles['border-color'] = 'transparent';
-
-  setImportantStyles(sibling, styles);
-
-  return sibling;
-}
-
-/**
- * @param {?Element} parent
- */
-function removeSiblingToPreventContentJump(parent) {
-  if (!parent) {
-    return;
-  }
-  const sibling = parent.querySelector('i-amphtml-iframe-sibling');
-  if (sibling) {
-    removeElement(sibling);
-  }
-}
 
 /**
  * Places the child frame in full overlay mode.
@@ -112,7 +45,6 @@ const expandFrameImpl = function(win, iframe, onFinish) {
         height: win./*OK*/innerHeight,
       };
       state.rect = layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
-      state.sibling = createSiblingToPreventContentJump(win, iframe);
     },
     mutate(state) {
       const {width, height} = state.viewportSize;
@@ -120,8 +52,6 @@ const expandFrameImpl = function(win, iframe, onFinish) {
 
       centerFrameUnderVsyncMutate(iframe, state.rect, state.viewportSize,
           CENTER_TRANSITION_TIME_MS);
-
-      iframe.parentElement.insertBefore(state.sibling, iframe);
 
       // To prevent double click during transition;
       setImportantStyles(iframe, {'pointer-events': 'none'});
@@ -151,7 +81,6 @@ const expandFrameImpl = function(win, iframe, onFinish) {
 const collapseFrameImpl = function(win, iframe, onFinish, onMeasure) {
   restrictedVsync(win, {
     mutate() {
-      removeSiblingToPreventContentJump(iframe.parentElement);
       collapseFrameUnderVsyncMutate(iframe);
 
       onFinish();
