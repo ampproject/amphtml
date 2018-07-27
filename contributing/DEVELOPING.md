@@ -32,69 +32,73 @@ For most developers the instructions in the [Getting Started Quick Start Guide](
 
 The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setup) has instructions for installing Node.js, yarn, and Gulp which you'll need before running these commands.
 
-| Command                                                                 | Description                                                           |
-| ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| **`gulp`**                                                              | Runs "watch" and "serve". Use this for standard local dev.            |
-| `gulp --extensions=<amp-foo,amp-bar>`                                   | Runs "watch" and "serve", after building only the listed extensions.
-| `gulp --extensions=minimal_set`                                         | Runs "watch" and "serve", after building the extensions needed to load `article.amp.html`.
-| `gulp --noextensions`                                                   | Runs "watch" and "serve" without building any extensions.
-| `gulp dist`                                                             | Builds production binaries.                                           |
-| `gulp dist --extensions=<amp-foo,amp-bar>`                              | Builds production binaries, with only the listed extensions.
-| `gulp dist --extensions=minimal_set`                                    | Builds production binaries, with only the extensions needed to load `article.amp.html`.
-| `gulp dist --noextensions`                                              | Builds production binaries without building any extensions.
-| `gulp dist --fortesting`                                                | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.) |
-| `gulp dist --fortesting --config=<config>`                              | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.) |
-| `gulp lint`                                                             | Validates against the ESLint linter.                              |
-| `gulp lint --watch`                                                     | Watches for changes in files, and validates against the ESLint linter. |
-| `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
-| `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided. Can be used with `--fix`.              |
-| `gulp lint --local-changes`                                             | Lints just the files changed in the local branch. Can be used with `--fix`.   |
-| `gulp build`                                                            | Builds the AMP library.                                               |
-| `gulp build --extensions=<amp-foo,amp-bar>`                             | Builds the AMP library, with only the listed extensions.
-| `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
-| `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
-| `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.                                                 |
-| `gulp clean`                                                            | Removes build output.                                                 |
-| `gulp css`                                                              | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
-| `gulp watch`                                                            | Watches for changes in files, re-builds.                               |
-| `gulp watch --extensions=<amp-foo,amp-bar>`                             | Watches for changes in files, re-builds only the listed extensions.
-| `gulp watch --extensions=minimal_set`                                   | Watches for changes in files, re-builds only the extensions needed to load `article.amp.html`.
-| `gulp watch --noextensions`                                             | Watches for changes in files, re-builds with no extensions.
-| `gulp pr-check`                                                         | Runs all the Travis CI checks locally.         |
-| `gulp pr-check --nobuild`                                               | Runs all the Travis CI checks locally, but skips the `gulp build` step.         |
-| `gulp pr-check --files=<test-files-path-glob>`                          | Runs all the Travis CI checks locally, and restricts tests to the files provided.  |
-| `gulp test --unit`                                                      | Runs the unit tests in Chrome (doesn't require the AMP library to be built).                                                 |
-| `gulp test --unit --files=<test-files-path-glob>`                       | Runs the unit tests from the specified files in Chrome.                                                 |
-| `gulp test --local-changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.   |
-| `gulp test --integration`                                               | Runs the integration tests in Chrome (requires the AMP library to be built).                                                 |
-| `gulp test --integration --files=<test-files-path-glob>`                | Runs the integration tests from the specified files in Chrome.                                                 |
-| `gulp test [--unit\|--integration] --verbose`                           | Runs tests in Chrome with logging enabled.                            |
-| `gulp test [--unit\|--integration] --nobuild`                           | Runs tests without re-build.                                          |
-| `gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/index.html |
-| `gulp test [--unit\|--integration] --watch`                             | Watches for changes in files, runs corresponding test(s) in Chrome.   |
-| `gulp test [--unit\|--integration] --watch --verbose`                   | Same as `watch`, with logging enabled.                                 |
-| `gulp test [--integration] --saucelabs`                                 | Runs integration tests on saucelabs (requires [setup](#testing-on-sauce-labs)).                |
-| `gulp test [--unit] --saucelabs_lite`                                   | Runs unit tests on a subset of saucelabs browsers (requires [setup](#testing-on-sauce-labs)).                |
-| `gulp test [--unit\|--integration] --safari`                            | Runs tests in Safari.                                                 |
-| `gulp test [--unit\|--integration] --firefox`                           | Runs tests in Firefox.                                                |
-| `gulp test [--unit\|--integration] --files=<test-files-path-glob>`      | Runs specific test files.                                             |
-| `gulp test [--unit\|--integration] --testnames`                         | Lists the name of each test being run, and prints a summary at the end.  |
-| `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
-| `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced. |
-| `gulp serve --port 9000`                                                | Same as `serve`, but uses a port number other than the default of 8000. |
-| `gulp serve --inspect`                                                  | Same as `serve`, but runs the server in `node --inspect` mode |
-| `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
-| `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.  |
-| `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
-| `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.  |
-| `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
-| `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
-| `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
-| `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`. |
-| `gulp visual-diff --nobuild`                                            | Same as above, but without re-build. |
-| `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode. |
-| `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.  |
-| `gulp visual-diff --grep=<regular-expression-pattern>`                  | Same as above, but executes only those tests whose name matches the regular expression pattern. |
+Command                                                                 | Description
+------------------------------------------------------------------------|----------------------------------------------------------------------
+**`gulp`**                                                              | Runs "watch" and "serve". Use this for standard local dev.
+`gulp --extensions=amp-foo,amp-bar`                                     | Runs "watch" and "serve", after building only the listed extensions.
+`gulp --extensions=minimal_set`                                         | Runs "watch" and "serve", after building the extensions needed to load `article.amp.html`.
+`gulp --extensions_from=examples/foo.amp.html`                          | Runs "watch" and "serve", after building only extensions from the listed examples.
+`gulp --noextensions`                                                   | Runs "watch" and "serve" without building any extensions.
+`gulp dist`                                                             | Builds production binaries.
+`gulp dist --extensions=amp-foo,amp-bar`                                | Builds production binaries, with only the listed extensions.
+`gulp dist --extensions=minimal_set`                                    | Builds production binaries, with only the extensions needed to load `article.amp.html`.
+`gulp dist --extensions_from=examples/foo.amp.html`                     | Builds production binaries, with only extensions from  the listed examples.
+`gulp dist --noextensions`                                              | Builds production binaries without building any extensions.
+`gulp dist --fortesting`                                                | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.)
+`gulp dist --fortesting --config=<config>`                              | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.)
+`gulp lint`                                                             | Validates against the ESLint linter.
+`gulp lint --watch`                                                     | Watches for changes in files, and validates against the ESLint linter.
+`gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.
+`gulp lint --files=<files-path-glob>`                                   | Lints just the files provided. Can be used with `--fix`.
+`gulp lint --local-changes`                                             | Lints just the files changed in the local branch. Can be used with `--fix`.
+`gulp build`                                                            | Builds the AMP library.
+`gulp build --extensions=amp-foo,amp-bar`                               | Builds the AMP library, with only the listed extensions.
+`gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
+`gulp build --extensions_from=examples/foo.amp.html`                    | Builds the AMP library, with only the extensions needed to load the listed examples.
+`gulp build --noextensions`                                             | Builds the AMP library with no extensions.
+`gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.
+`gulp clean`                                                            | Removes build output.
+`gulp css`                                                              | Recompiles css to build directory and builds the embedded css into js files for the AMP library.
+`gulp watch`                                                            | Watches for changes in files, re-builds.
+`gulp watch --extensions=amp-foo,amp-bar`                               | Watches for changes in files, re-builds only the listed extensions.
+`gulp watch --extensions=minimal_set`                                   | Watches for changes in files, re-builds only the extensions needed to load `article.amp.html`.
+`gulp watch --extensions_from=examples/foo.amp.html`                    | Watches for changes in files, re-builds only the extensions needed to load the listed examples.
+`gulp watch --noextensions`                                             | Watches for changes in files, re-builds with no extensions.
+`gulp pr-check`                                                         | Runs all the Travis CI checks locally.
+`gulp pr-check --nobuild`                                               | Runs all the Travis CI checks locally, but skips the `gulp build` step.
+`gulp pr-check --files=<test-files-path-glob>`                          | Runs all the Travis CI checks locally, and restricts tests to the files provided.
+`gulp test --unit`                                                      | Runs the unit tests in Chrome (doesn't require the AMP library to be built).
+`gulp test --unit --files=<test-files-path-glob>`                       | Runs the unit tests from the specified files in Chrome.
+`gulp test --local-changes`                                             | Runs the unit tests directly affected by the files changed in the local branch in Chrome.
+`gulp test --integration`                                               | Runs the integration tests in Chrome (requires the AMP library to be built).
+`gulp test --integration --files=<test-files-path-glob>`                | Runs the integration tests from the specified files in Chrome.
+`gulp test [--unit\|--integration] --verbose`                           | Runs tests in Chrome with logging enabled.
+`gulp test [--unit\|--integration] --nobuild`                           | Runs tests without re-build.
+`gulp test [--unit\|--integration] --coverage`                          | Runs code coverage tests. After running, the report will be available at test/coverage/index.html
+`gulp test [--unit\|--integration] --watch`                             | Watches for changes in files, runs corresponding test(s) in Chrome.
+`gulp test [--unit\|--integration] --watch --verbose`                   | Same as `watch`, with logging enabled.
+`gulp test [--integration] --saucelabs`                                 | Runs integration tests on saucelabs (requires [setup](#testing-on-sauce-labs)).
+`gulp test [--unit] --saucelabs_lite`                                   | Runs unit tests on a subset of saucelabs browsers (requires [setup](#testing-on-sauce-labs)).
+`gulp test [--unit\|--integration] --safari`                            | Runs tests in Safari.
+`gulp test [--unit\|--integration] --firefox`                           | Runs tests in Firefox.
+`gulp test [--unit\|--integration] --files=<test-files-path-glob>`      | Runs specific test files.
+`gulp test [--unit\|--integration] --testnames`                         | Lists the name of each test being run, and prints a summary at the end.
+`gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default.
+`gulp serve --quiet`                                                    | Same as `serve`, with logging silenced.
+`gulp serve --port 9000`                                                | Same as `serve`, but uses a port number other than the default of 8000.
+`gulp serve --inspect`                                                  | Same as `serve`, but runs the server in `node --inspect` mode
+`gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.
+`gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.
+`gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.
+`gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.
+`node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.
+`gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).
+`gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed.
+`gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
+`gulp visual-diff --nobuild`                                            | Same as above, but without re-build.
+`gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode.
+`gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.
+`gulp visual-diff --grep=<regular-expression-pattern>`                  | Same as above, but executes only those tests whose name matches the regular expression pattern.
 
 ## Manual testing
 
