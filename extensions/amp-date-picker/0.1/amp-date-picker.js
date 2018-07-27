@@ -620,19 +620,23 @@ export class AmpDatePicker extends AMP.BaseElement {
    * trigger events with the empty values.
    */
   handleClear_() {
-    this.setState_({date: null, startDate: null, endDate: null});
     this.clearDateField_(this.dateField_);
     this.clearDateField_(this.startDateField_);
     this.clearDateField_(this.endDateField_);
     this.element.removeAttribute('date');
     this.element.removeAttribute('start-date');
     this.element.removeAttribute('end-date');
+
+    this.setState_({
+      date: null,
+      startDate: null,
+      endDate: null,
+      focusedInput: this.ReactDatesConstants_.START_DATE,
+    });
     this.triggerEvent_(DatePickerEvent.SELECT, null);
 
-    this.setState_({focusedInput: this.ReactDatesConstants_.START_DATE});
-    this.updateDateFieldFocus_(this.startDateField_, true);
-
     if (this.props_.reopenPickerOnClearDate) {
+      this.updateDateFieldFocus_(this.startDateField_, true);
       this.triggerEvent_(DatePickerEvent.ACTIVATE);
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_INPUT);
     }
@@ -803,9 +807,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         this.updateDateFieldFocus_(this.dateField_);
       }
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_INPUT);
-    } else if (this.element.contains(target)) {
-      this.transitionTo_(DatePickerState.OVERLAY_OPEN_PICKER);
-    } else {
+    } else if (!this.element.contains(target)) {
       this.updateDateFieldFocus_(null);
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
     }
