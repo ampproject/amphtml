@@ -22,8 +22,8 @@ import {
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {getMinOpacity} from './opacity';
+import {getMode} from '../../../src/mode';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
