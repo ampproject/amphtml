@@ -33,7 +33,7 @@ describes.fakeWin('PooolVendor', {
     document = win.document;
 
     pooolConfig = {
-      bundleID: 'Q9X1R-27SFS-MYC31-MCYQ1',
+      bundleID: 'ZRGA3EYZ4GRBTSHREG345HGGZRTHZEGEH',
       pageType: 'premium',
       itemID: 'amp-test-article',
     };
@@ -62,8 +62,17 @@ describes.fakeWin('PooolVendor', {
   });
 
   describe('authorize', () => {
+    let container;
+
     beforeEach(() => {
+      container = document.createElement('div');
+      container.id = 'poool-widget';
+      document.body.appendChild(container);
       sandbox.stub(vendor, 'renderPoool_');
+    });
+
+    afterEach(() => {
+      container.parentNode.removeChild(container);
     });
 
     it('successful authorization', () => {
@@ -119,27 +128,8 @@ describes.fakeWin('PooolVendor', {
           .once();
       return vendor.authorize().then(err => {
         expect(err.access).to.be.false;
+        expect(container.firstChild).to.not.be.undefined;
       });
-    });
-  });
-
-
-  describe('create poool paywall', () => {
-    let container;
-
-    beforeEach(() => {
-      container = document.createElement('div');
-      container.id = 'poool-widget';
-      document.body.appendChild(container);
-      vendor.renderPoool_();
-    });
-
-    afterEach(() => {
-      container.parentNode.removeChild(container);
-    });
-
-    it('renders poool paywall', () => {
-      expect(container.firstChild).to.not.be.undefined;
     });
   });
 });
