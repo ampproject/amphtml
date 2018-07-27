@@ -273,11 +273,6 @@ amp-story-grid-layer {
   z-index: 2 !important;
 }
 
-amp-story-grid-layer * {
-  box-sizing: border-box !important;
-  margin: 0 !important;
-}
-
 .i-amphtml-story-grid-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
@@ -302,12 +297,6 @@ amp-story-grid-layer * {
   right: 0 !important;
   top: 0 !important;
   width: auto !important;
-}
-
-.i-amphtml-story-grid-template-fill > amp-anim img,
-.i-amphtml-story-grid-template-fill > amp-img img,
-.i-amphtml-story-grid-template-fill > amp-video video {
-  object-fit: cover !important;
 }
 
 .i-amphtml-story-grid-template-vertical {
