@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpAnim} from '../amp-anim';
+import {AmpAnim, SRC_PLACEHOLDER} from '../amp-anim';
+
+const EXAMPLE_SRCSET = `https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,
+https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif 1923w`;
 
 describes.realWin('amp-anim', {
   amp: {
@@ -26,6 +29,7 @@ describes.realWin('amp-anim', {
   it('should propagate ARIA attributes', () => {
     const el = env.win.document.createElement('amp-anim');
     el.setAttribute('src', 'test.jpg');
+    el.setAttribute('srcset', EXAMPLE_SRCSET);
     el.setAttribute('width', 100);
     el.setAttribute('height', 100);
     el.setAttribute('aria-label', 'Hello');
@@ -40,5 +44,41 @@ describes.realWin('amp-anim', {
     expect(img.getAttribute('aria-labelledby')).to.equal('id2');
     expect(img.getAttribute('aria-describedby')).to.equal('id3');
     expect(img.getAttribute('decoding')).to.equal('async');
+  });
+
+  it('should propagate src and srcset', () => {
+    const el = env.win.document.createElement('amp-anim');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('srcset', EXAMPLE_SRCSET);
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+
+    const impl = new AmpAnim(el);
+    impl.buildCallback();
+    impl.layoutCallback();
+    const img = el.querySelector('img');
+    expect(img.getAttribute('src')).to.equal('test.jpg');
+    expect(img.getAttribute('srcset')).to.equal(EXAMPLE_SRCSET);
+  });
+
+  it('should set src to placeholder on unlayout and reset on layout', () => {
+    const el = env.win.document.createElement('amp-anim');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('srcset', EXAMPLE_SRCSET);
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+
+    const impl = new AmpAnim(el);
+    impl.buildCallback();
+    impl.layoutCallback();
+    const img = el.querySelector('img');
+    expect(img.getAttribute('src')).to.equal('test.jpg');
+    expect(img.getAttribute('srcset')).to.equal(EXAMPLE_SRCSET);
+
+    impl.unlayoutCallback();
+    expect(img.getAttribute('src')).to.equal(SRC_PLACEHOLDER);
+
+    impl.layoutCallback();
+    expect(img.getAttribute('src')).to.equal('test.jpg');
   });
 });
