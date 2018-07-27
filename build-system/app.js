@@ -1247,9 +1247,8 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
       res.end(JSON.stringify({message: unauthorized}));
       throw unauthorized;
     }
+    enableCors(req, res, origin, opt_exposeHeaders);
   }
-
-  enableCors(req, res, origin, opt_exposeHeaders);
 }
 
 function generateInfo(filePath) {
