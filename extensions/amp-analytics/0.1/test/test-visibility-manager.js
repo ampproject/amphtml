@@ -112,7 +112,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
     // Root model starts invisible.
     expect(root.getRootVisibility()).to.equal(0);
-    expect(root.getRootOpacity()).to.equal(1);
+    expect(root.getRootMinOpacity()).to.equal(1);
   });
 
   it('should initialize correctly foregrounded', () => {
@@ -128,7 +128,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     // Root model starts invisible.
     expect(root.parent).to.be.null;
     expect(root.getRootVisibility()).to.equal(1);
-    expect(root.getRootOpacity()).to.equal(1);
+    expect(root.getRootMinOpacity()).to.equal(1);
   });
 
   it('should resolve root layout box', () => {

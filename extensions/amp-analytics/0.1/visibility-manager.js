@@ -173,7 +173,7 @@ export class VisibilityManager {
   * @return {number}
   * @abstract
   */
-  getRootOpacity() {}
+  getRootMinOpacity() {}
 
   /**
    * Returns the root's layout rect.
@@ -362,7 +362,7 @@ export class VisibilityManager {
         });
 
       } else {
-        state['opacity'] = this.getRootOpacity();
+        state['opacity'] = this.getRootMinOpacity();
         layoutBox = this.getRootLayoutBox();
       }
       model.maybeDispose();
@@ -510,7 +510,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /** @override */
-  getRootOpacity() {
+  getRootMinOpacity() {
     const root = this.ampdoc.getRootNode();
     const rootElement = dev().assertElement(
         root.documentElement || root.body || root);
@@ -727,7 +727,7 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   }
 
   /** @override */
-  getRootOpacity() {
+  getRootMinOpacity() {
     const rootElement = dev().assertElement(this.embed.iframe);
     return getMinOpacity(rootElement);
   }
