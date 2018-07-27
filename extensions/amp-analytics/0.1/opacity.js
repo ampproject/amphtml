@@ -22,7 +22,7 @@ import {computedStyle} from '../../../src/style';
   *  @param {!Element|null} el
   *  @return {number} minimum opacity value
   */
-export function getOpacity(el) {
+export function getMinOpacity(el) {
   const parentNodeTree = getElementNodeTree(el.parentElement);
   parentNodeTree.push(el);
   let minOpacityFound = 1;

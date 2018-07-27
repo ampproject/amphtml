@@ -23,7 +23,7 @@ import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {getOpacity} from './opacity';
+import {getMinOpacity} from './opacity';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
@@ -347,7 +347,7 @@ export class VisibilityManager {
       // Optionally, element-level state.
       let layoutBox;
       if (opt_element) {
-        state['opacity'] = getOpacity(opt_element);
+        state['opacity'] = getMinOpacity(opt_element);
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
         layoutBox =
@@ -514,7 +514,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     const root = this.ampdoc.getRootNode();
     const rootElement = dev().assertElement(
         root.documentElement || root.body || root);
-    return getOpacity(rootElement);
+    return getMinOpacity(rootElement);
   }
 
   /** @override */
@@ -729,7 +729,7 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   /** @override */
   getRootOpacity() {
     const rootElement = dev().assertElement(this.embed.iframe);
-    return getOpacity(rootElement);
+    return getMinOpacity(rootElement);
   }
 
   /**
