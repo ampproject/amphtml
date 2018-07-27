@@ -432,6 +432,17 @@ export class AmpForm {
       event.preventDefault();
     }
 
+    this.validateFormAttributes_();
+
+    // Submits caused by user input have high trust.
+    this.submit_(ActionTrust.HIGH);
+  }
+
+  /**
+   * Validates the form's attributes.
+   */
+  validateFormAttributes_() {
+    const {form_} = this;
     const action = form_.getAttribute('action');
     const actionXhr = form_.getAttribute('action-xhr');
     const method = (form_.getAttribute('method') || 'GET').toUpperCase();
@@ -477,11 +488,7 @@ export class AmpForm {
     } else {
       form_.setAttribute('target', '_top');
     }
-
-    // Submits caused by user input have high trust.
-    this.submit_(ActionTrust.HIGH);
   }
-
   /**
    * Helper method that actual handles the different cases (post, get, xhr...).
    * @param {ActionTrust} trust
