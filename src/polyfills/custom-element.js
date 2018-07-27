@@ -57,9 +57,10 @@ const INVALID_NAMES = [
 
 /**
  * Asserts that the custom element name conforms to the spec.
+ * @param {!Function} SyntaxError
  * @param {string} name
  */
-function assertValidName(name) {
+function assertValidName(SyntaxError, name) {
   if (!VALID_NAME.test(name) || INVALID_NAMES.indexOf(name) >= 0) {
     throw new SyntaxError(`invalid custom element name "${name}"`);
   }
@@ -92,31 +93,41 @@ function isPatched(win) {
 
 class CustomElementRegistry {
   /**
+   * @param {!Window} win
    * @param {!Registry} registry
    */
-  constructor(registry) {
-    /** @const @private */
+  constructor(win, registry) {
+    /**
+     * @const @private
+     */
+    this.win_ = win;
+
+    /**
+     * @const @private
+     */
     this.registry_ = registry;
 
     /**
-     * @type {Object<string, DeferredDef>}
+     * @type {!Object<string, DeferredDef>}
      * @private
      * @const
      */
-    this.whens_ = Object.create(null);
+    this.whens_ = this.win_.Object.create(null);
   }
 
   /**
    * @param {string} name
    * @param {!CustomElementConstructorDef} ctor
-   * @param {Object=} options
+   * @param {!Object=} options
    */
   define(name, ctor, options) {
+    const {Error, SyntaxError} = this.win_;
+
     if (options) {
       throw new Error('Extending native custom elements is not supported');
     }
 
-    assertValidName(name);
+    assertValidName(SyntaxError, name);
 
     if (this.registry_.getByName(name) ||
         this.registry_.getByConstructor(ctor)) {
@@ -170,7 +181,8 @@ class CustomElementRegistry {
    * @return {!Promise<undefined>}
    */
   whenDefined(name) {
-    assertValidName(name);
+    const {Promise, SyntaxError} = this.win_;
+    assertValidName(SyntaxError, name);
 
     if (this.registry_.getByName(name)) {
       return Promise.resolve();
@@ -202,20 +214,20 @@ class CustomElementRegistry {
 
 class Registry {
   /**
-   * @param {!Document} doc
+   * @param {!Window} win
    */
-  constructor(doc) {
+  constructor(win) {
     /**
      * @private @const
      */
-    this.doc_ = doc;
+    this.win_ = win;
 
     /**
-     * @type {Object<string, !CustomElementDef>}
+     * @type {!Object<string, !CustomElementDef>}
      * @private
      * @const
      */
-    this.definitions_ = Object.create(null);
+    this.definitions_ = win.Object.create(null);
 
     /**
      * A up-to-date DOM selector for all custom elements.
@@ -229,10 +241,10 @@ class Registry {
      */
     this.current_ = null;
 
-    const observer = new MutationObserver(records => {
+    const observer = new win.MutationObserver(records => {
       this.handleRecords_(records);
     });
-    observer.observe(doc, {
+    observer.observe(win.document, {
       childList: true,
       subtree: true,
     });
@@ -333,7 +345,7 @@ class Registry {
    */
   queryAll_(root, query) {
     if (!root) {
-      root = this.doc_;
+      root = this.win_.document;
     } else if (!query || !root.querySelectorAll) {
       // Nothing to do...
       return [];
@@ -360,7 +372,8 @@ class Registry {
     // value is just the node.
     const el = new ctor();
     if (el !== node) {
-      throw new Error('Constructor illegally returned a different instance.');
+      throw new this.win_.Error(
+          'Constructor illegally returned a different instance.');
     }
   }
 
@@ -419,11 +432,11 @@ class Registry {
  * @param {!Window} win
  */
 function polyfill(win) {
-  const {HTMLElement, Element, Node, Document, document} = win;
+  const {HTMLElement, Element, Node, Document, Object, document} = win;
   const {createElement, cloneNode, importNode} = document;
 
-  const registry = new Registry(document);
-  const customElements = new CustomElementRegistry(registry);
+  const registry = new Registry(win);
+  const customElements = new CustomElementRegistry(win, registry);
 
   // Object.getOwnPropertyDescriptor(window, 'customElements')
   // {get: ƒ, set: undefined, enumerable: true, configurable: true}
@@ -491,14 +504,7 @@ function polyfill(win) {
     Object.setPrototypeOf(el, constructor.prototype);
     return el;
   }
-  HTMLElementPolyfill.prototype = Object.create(HTMLElement.prototype, {
-    constructor: {
-      // enumerable: false,
-      configurable: true,
-      writable: true,
-      value: HTMLElementPolyfill,
-    },
-  });
+  subClass(Object, HTMLElement, HTMLElementPolyfill);
 
   // Object.getOwnPropertyDescriptor(window, 'HTMLElement')
   // {value: ƒ, writable: true, enumerable: false, configurable: true}
@@ -511,24 +517,37 @@ function polyfill(win) {
  * @param {!Window} win
  */
 function wrapHTMLElement(win) {
-  const {HTMLElement} = win;
+  const {HTMLElement, Reflect, Object} = win;
   /**
    */
-  function HTMLElementPolyfill() {
-    return Reflect.construct(HTMLElement, [], this.constructor);
+  function HTMLElementWrapper() {
+    return Reflect.construct(HTMLElement, [],
+        /** @type {!HTMLElement} */(this).constructor);
   }
-  HTMLElementPolyfill.prototype = Object.create(HTMLElement.prototype, {
+  subClass(Object, HTMLElement, HTMLElementWrapper);
+
+  // Object.getOwnPropertyDescriptor(window, 'HTMLElement')
+  // {value: ƒ, writable: true, enumerable: false, configurable: true}
+  win.HTMLElement = HTMLElementWrapper;
+}
+
+/**
+ * Setups up prototype inheritance
+ * @param {!Object} Object
+ * @param {!Function} superClass
+ * @param {!Function} subClass
+ */
+function subClass(Object, superClass, subClass) {
+  // Object.getOwnPropertyDescriptor(superClass.prototype, 'constructor')
+  // {value: ƒ, writable: true, enumerable: false, configurable: true}
+  subClass.prototype = Object.create(superClass.prototype, {
     constructor: {
       // enumerable: false,
       configurable: true,
       writable: true,
-      value: HTMLElementPolyfill,
+      value: subClass,
     },
   });
-
-  // Object.getOwnPropertyDescriptor(window, 'HTMLElement')
-  // {value: ƒ, writable: true, enumerable: false, configurable: true}
-  win.HTMLElement = HTMLElementPolyfill;
 }
 
 /**
@@ -550,12 +569,12 @@ export function install(win, ctor) {
     // extend HTMLElement without native classes.
     try {
       // "Construct" ctor using ES5 idioms
-      const instance = Object.create(ctor.prototype);
+      const instance = win.Object.create(ctor.prototype);
       ctor.call(instance);
 
       // If that succeeded, we're in a transpiled environment
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
-      installWrapper = typeof Reflect !== 'undefined' && !!Reflect.construct;
+      installWrapper = !!(win.Reflect && win.Reflect.construct);
     } catch (e) {
 
       // The ctor threw when we constructed is via ES5, so it's a real class.
