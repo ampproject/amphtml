@@ -309,6 +309,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/14740',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/16075',
   },
+  {
+    id: 'amp-image-slider',
+    name: 'Enables the experimental amp-image-slider for image comparison',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
+  },
 ];
 
 if (getMode().localDev) {
