@@ -755,13 +755,23 @@ export class AmpStoryPage extends AMP.BaseElement {
   */
   checkPageHasAudio_() {
     const hasBGPageAudio = this.element.hasAttribute('background-audio');
-    const videos = this.getAllVideos_();
-    const hasVideoWithAudio = videos.find(function(video) {
-      return video.hasAttribute('noaudio') == false;
-    });
+    if (hasBGPageAudio) {
+      this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+    }
+
+    const videos = this.element.querySelectorAll('amp-video');
+    let index = 0;
+    while (index < videos.length) {
+      if (videos[index].hasAttribute('noaudio')) {
+        index++;
+      } else {
+        break;
+      }
+    }
+    const hasVideoWithAudio = (index < videos.length);
 
     this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO,
-        (hasBGPageAudio || (!!hasVideoWithAudio)));
+        hasVideoWithAudio);
   }
 
   /**
