@@ -19,6 +19,7 @@ import {
   closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -182,16 +183,21 @@ export class Placement {
         }
         this.adElement_ = this.createAdElement_(baseAttributes, sizing.width);
         this.injector_(this.anchorElement_, this.adElement_);
-        return this.resources_.attemptChangeSize(this.adElement_,
-            sizing.height || TARGET_AD_HEIGHT_PX,
-            undefined, this.margins_)
-            .then(() => {
-              this.state_ = PlacementState.PLACED;
-              return this.state_;
-            }, () => {
-              this.state_ = PlacementState.RESIZE_FAILED;
-              return this.state_;
-            });
+
+        // CustomElement polyfill does not call connectedCallback synchronously.
+        // So we explicitly wait for CustomElement to be ready.
+        return whenUpgradedToCustomElement(this.adElement_).then(() => {
+          return this.resources_.attemptChangeSize(this.adElement_,
+              sizing.height || TARGET_AD_HEIGHT_PX,
+              undefined, this.margins_)
+              .then(() => {
+                this.state_ = PlacementState.PLACED;
+                return this.state_;
+              }, () => {
+                this.state_ = PlacementState.RESIZE_FAILED;
+                return this.state_;
+              });
+        });
       });
     });
   }
