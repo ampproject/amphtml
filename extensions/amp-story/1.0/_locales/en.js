@@ -26,12 +26,12 @@ export default {
     description: 'Text that informs users that the sound is off after they ' +
           'click the mute button',
   },
-  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_BUTTON_TEXT]: {
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'Sound on',
     description: 'Text that informs users that the sound is on after they ' +
           'click the unmute button on a page with sound',
   },
-  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_BUTTON_TEXT]: {
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
     string: 'This page has no sound',
     description: 'Text that informs users that the sound is on after they ' +
           'click the unmute button on a page without sound',

@@ -86,7 +86,7 @@ const TEMPLATE = {
                     'class': 'i-amphtml-story-mute-text' ,
                   }),
                   localizedStringId:
-                          LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
+                        LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
                 },
                 {
                   tag: 'div',
@@ -94,7 +94,7 @@ const TEMPLATE = {
                     'class': 'i-amphtml-story-unmute-sound-text',
                   }),
                   localizedStringId:
-                          LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_BUTTON_TEXT,
+                        LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT,
                 },
                 {
                   tag: 'div',
@@ -102,7 +102,7 @@ const TEMPLATE = {
                     'class': 'i-amphtml-story-unmute-no-sound-text' ,
                   }),
                   localizedStringId:
-                          LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_BUTTON_TEXT,
+                        LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT,
                 },
               ],
             },
@@ -314,9 +314,10 @@ export class SystemLayer {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.STORY_HAS_AUDIO_STATE, hasAudio => {
-      this.onStoryHasAudioStateUpdate_(hasAudio);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(StateProperty.STORY_HAS_AUDIO_STATE,
+        hasAudio => {
+          this.onStoryHasAudioStateUpdate_(hasAudio);
+        }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);

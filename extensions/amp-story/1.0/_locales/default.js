@@ -24,10 +24,10 @@ export default {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Sound off',
   },
-  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_BUTTON_TEXT]: {
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'Sound on',
   },
-  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_BUTTON_TEXT]: {
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
     string: 'This page has no sound',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
