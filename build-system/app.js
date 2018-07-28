@@ -1254,6 +1254,7 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
   enableCors(req, res, origin, opt_exposeHeaders);
 }
 
+
 function generateInfo(filePath) {
   const mode = pc.env.SERVE_MODE;
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
