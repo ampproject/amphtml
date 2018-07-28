@@ -298,17 +298,23 @@ export class AmpImageSlider extends AMP.BaseElement {
           this.hintInactiveInterval_;
     }
 
-    const hintIcon = htmlFor(this.doc_)
-    `<div class="i-amphtml-image-slider-hint-icon">← →</div>`;
+    const leftHintIcon = htmlFor(this.doc_)
+    `<div class="i-amphtml-image-slider-hint-left-arrow"></div>`;
+    const rightHintIcon = htmlFor(this.doc_)
+    `<div class="i-amphtml-image-slider-hint-right-arrow"></div>`;
 
-    for (let i = 0; i < this.hint_.classList.length; i++) {
-      hintIcon.classList.add(this.hint_.classList[i]);
+    if (this.hint_.hasAttribute('left-hint-class')) {
+      leftHintIcon.classList.add(this.hint_.getAttribute('left-hint-class'));
     }
-    this.hint_.appendChild(hintIcon);
-    this.hint_.className = '';
-    this.hint_.classList.add('i-amphtml-image-slider-hint');
 
-    this.barStick_.appendChild(this.hint_);
+    if (this.hint_.hasAttribute('right-hint-class')) {
+      rightHintIcon.classList.add(this.hint_.getAttribute('right-hint-class'));
+    }
+
+    this.hint_.appendChild(leftHintIcon);
+    this.hint_.appendChild(rightHintIcon);
+    this.hint_.classList.add('i-amphtml-image-slider-hint');
+    this.bar_.appendChild(this.hint_);
   }
 
   /**

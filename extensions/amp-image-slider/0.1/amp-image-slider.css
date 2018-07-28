@@ -69,10 +69,10 @@ amp-image-slider amp-img > img {
 .i-amphtml-image-slider-bar-stick {
   width: 0;
   height: 100%;
-  border: 2px solid white;
+  border: 0.5px solid white;
   box-sizing: border-box;
   transform: translateX(-50%);
-  cursor: ew-resize;
+  opacity: 0.5;
 }
 
 .i-amphtml-image-slider-left-label-wrapper {
@@ -99,7 +99,6 @@ amp-image-slider amp-img > img {
 }
 
 .i-amphtml-image-slider-hint {
-  cursor: ew-resize;
   position: absolute;
   margin: auto;
   width: 9em;
@@ -122,10 +121,22 @@ amp-image-slider amp-img > img {
   transition: all 0.3s;
 }
 
-.i-amphtml-image-slider-hint-icon {
-  font-weight: bold;
-  font-size: 3em;
-  color: white;
-  text-shadow: black 2px 0 10px;
-  text-align: center;
+.i-amphtml-image-slider-hint-left-arrow {
+  display: inline-block;
+  background-size: 32px 16px;
+  margin-right: 5px;
+  width: 32px;
+  height: 16px;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="32px" height="16px" viewBox="0 0 32 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title>ic/arrow_left_alt</title><defs><polygon id="path-1" points="32.02 22 8 22 8 26 32.02 26 32.02 32 40 24 32.02 16"></polygon></defs><g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="Artboard-Copy-12" transform="translate(-451.000000, -248.000000)"><g id="ic/arrow_right_alt" transform="translate(467.000000, 256.000000) scale(-1, 1) translate(-467.000000, -256.000000) translate(443.000000, 232.000000)"><g id="ic_arrow_right_alt_24px"><mask id="mask-2" fill="white"><use xlink:href="#path-1"></use></mask><g id="Shape" fill-rule="nonzero"></g><g id="c/grey/100" mask="url(#mask-2)" fill="#F1F3F4"><rect id="swatch" x="0" y="0" width="48" height="48"></rect></g></g></g></g></g></svg>');
+  filter: drop-shadow(3px 3px 4px black);
+}
+
+.i-amphtml-image-slider-hint-right-arrow {
+  display: inline-block;
+  background-size: 32px 16px;
+  margin-left: 5px;
+  width: 32px;
+  height: 16px;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="32px" height="16px" viewBox="0 0 32 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title>ic/arrow_right_alt</title><defs><polygon id="path-1" points="32.02 22 8 22 8 26 32.02 26 32.02 32 40 24 32.02 16"></polygon></defs><g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="Artboard-Copy-12" transform="translate(-515.000000, -248.000000)"><g id="ic/arrow_right_alt" transform="translate(507.000000, 232.000000)"><g id="ic_arrow_right_alt_24px"><mask id="mask-2" fill="white"><use xlink:href="#path-1"></use></mask><g id="Shape" fill-rule="nonzero"></g><g id="c/grey/100" mask="url(#mask-2)" fill="#F1F3F4"><rect id="swatch" x="0" y="0" width="48" height="48"></rect></g></g></g></g></g></svg>');
+  filter: drop-shadow(3px 3px 4px black);
 }

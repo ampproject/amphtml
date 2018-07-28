@@ -78,8 +78,12 @@
       transform: translate(50%, -50%);
     }
 
-    .my-hint {
-      color: red;
+    .my-left-hint {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='32px' width='16px'><text x='0' y='15' fill='red' font-size='1'>&lt;-</text></svg>");
+    }
+
+    .my-right-hint {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='32px' width='16px'><text x='0' y='15' fill='red' font-size='1'>-&gt;</text></svg>");
     }
   </style>
   <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
@@ -88,6 +92,7 @@
   <!-- to make this work during testing, cp dist/ww.max.js to dist/ww.js -->
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
 </head>
 <body>
   <main id="content">
@@ -158,7 +163,7 @@
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
       <div after class="label">AFTER</div>
-      <div hint class="my-hint"></div>
+      <div hint left-hint-class="my-left-hint" right-hint-class="my-right-hint"></div>
     </amp-image-slider>
 
     <h1><code>seekTo</code> action</h1>
@@ -251,6 +256,10 @@
       layout="responsive"
       type="slides"
       controls>
+      <amp-image-slider layout="responsive" width="1024" height="600">
+        <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+        <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      </amp-image-slider>
       <amp-img src="https://unsplash.it/200/300?image=0"
         width="400"
         height="300"
@@ -266,6 +275,10 @@
         layout="responsive"
         alt="and another sample image"></amp-img>
     </amp-carousel>
+
+    <amp-lightbox>
+
+    </amp-lightbox>
   </main>
 </body>
 </html>
