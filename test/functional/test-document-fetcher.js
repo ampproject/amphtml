@@ -46,7 +46,7 @@ describe('DocumentFetcher', function() {
     });
   });
 
-  afterEach(() => {
+  after(() => {
     sandbox.restore();
   });
 
@@ -56,6 +56,10 @@ describe('DocumentFetcher', function() {
       docFetcher = new DocumentFetcher({
         location: {href: 'https://acme.com/path'},
       });
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('should be able to fetch a document', () => {
@@ -77,139 +81,6 @@ describe('DocumentFetcher', function() {
         expect(xhr.responseType).to.equal('document');
       });
       return promise;
-    });
-
-    it('should mark 400 as not retriable', () => {
-      const promise = docFetcher.fetchDocument('/index.html');
-      xhrCreated.then(
-          xhr => xhr.respond(
-              400, {
-                'Content-Type': 'text/xml',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>'));
-      return promise.catch(e => {
-        expect(e.retriable).to.be.undefined;
-        expect(e.retriable).to.not.equal(true);
-      });
-    });
-
-    it('should mark 415 as retriable', () => {
-      const promise = docFetcher.fetchDocument('/index.html');
-      xhrCreated.then(
-          xhr => xhr.respond(
-              415, {
-                'Content-Type': 'text/xml',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>'));
-      return promise.catch(e => {
-        expect(e.retriable).to.exist;
-        expect(e.retriable).to.be.true;
-      });
-    });
-
-    it('should mark 500 as retriable', () => {
-      const promise = docFetcher.fetchDocument('/index.html');
-      xhrCreated.then(
-          xhr => xhr.respond(
-              415, {
-                'Content-Type': 'text/xml',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>'));
-      return promise.catch(e => {
-        expect(e.retriable).to.exist;
-        expect(e.retriable).to.be.true;
-      });
-    });
-
-    it('should error on non truthy responseXML', () => {
-      const promise = docFetcher.fetchDocument('/index.html');
-      xhrCreated.then(
-          xhr => xhr.respond(
-              200, {
-                'Content-Type': 'application/json',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '{"hello": "world"}'));
-      return promise.catch(e => {
-        expect(e.message)
-            .to.contain('responseXML should exist');
-      });
-    });
-  });
-
-  describe('interceptor', () => {
-    const origin = 'https://acme.com';
-    let sendMessageStub;
-    let interceptionEnabledWin;
-    let optedInDoc;
-    let viewer;
-
-    beforeEach(() => {
-      setupMockXhr();
-      optedInDoc = window.document.implementation.createHTMLDocument('');
-      optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
-
-      ampdocServiceForStub.returns({
-        isSingleDoc: () => true,
-        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
-      });
-      viewer = {
-        hasCapability: () => true,
-        isTrustedViewer: () => Promise.resolve(true),
-        sendMessageAwaitResponse: getDefaultResponsePromise,
-        whenFirstVisible: () => Promise.resolve(),
-      };
-      sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
-      sendMessageStub.returns(getDefaultResponsePromise());
-      ampdocViewerStub.returns(viewer);
-      interceptionEnabledWin = {
-        location: {
-          href: `${origin}/path`,
-        },
-        Response: window.Response,
-      };
-    });
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-
-    function getDefaultResponsePromise() {
-      return Promise.resolve({init: getDefaultResponseOptions()});
-    }
-
-    function getDefaultResponseOptions() {
-      return {
-        headers: [
-          ['AMP-Access-Control-Allow-Source-Origin', origin],
-        ],
-      };
-    }
-
-    it('should return correct document response', () => {
-      sendMessageStub.returns(
-          Promise.resolve({
-            body: '<html><body>Foo</body></html>',
-            init: {
-              headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-            },
-          }));
-      const docFetcher = new DocumentFetcher(interceptionEnabledWin);
-
-      return docFetcher.fetchDocument('https://www.some-url.org/some-resource/').then(doc => {
-        expect(docFetcher.viewerResponded_).to.equals(true);
-        expect(doc).to.have.nested.property('body.textContent')
-            .that.equals('Foo');
-      });
     });
   });
 });
