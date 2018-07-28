@@ -34,6 +34,7 @@ describe('DocumentFetcher', function() {
   }
 
   beforeEach(() => {
+    setupMockXhr();
     sandbox = sinon.sandbox.create();
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
@@ -46,16 +47,16 @@ describe('DocumentFetcher', function() {
     });
   });
 
+  afterEach(() => {
+    sandbox.restore();
+    sandbox.resetBehavior();
+  });
+
   describe('#fetchDocument', () => {
     beforeEach(() => {
-      setupMockXhr();
       docFetcher = new DocumentFetcher({
         location: {href: 'https://acme.com/path'},
       });
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should be able to fetch a document', () => {
