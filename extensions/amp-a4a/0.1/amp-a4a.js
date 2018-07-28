@@ -24,6 +24,7 @@ import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
   assertHttpsUrl,
+  getCorsUrl,
   tryDecodeUriComponent,
 } from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
@@ -1491,7 +1492,7 @@ export class AmpA4A extends AMP.BaseElement {
   renderViaIframeGet_(adUrl) {
     this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
     return this.iframeRenderHelper_(dict({
-      'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      'src': getCorsUrl(this.win, adUrl),
       'name': JSON.stringify(
           getContextMetadata(this.win, this.element, this.sentinel)),
     }));
