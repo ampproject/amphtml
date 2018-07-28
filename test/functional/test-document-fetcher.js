@@ -83,4 +83,70 @@ describe('DocumentFetcher', function() {
       return promise;
     });
   });
+
+  describe('interceptor', () => {
+    const origin = 'https://acme.com';
+    let sendMessageStub;
+    let interceptionEnabledWin;
+    let optedInDoc;
+    let viewer;
+
+    beforeEach(() => {
+      optedInDoc = window.document.implementation.createHTMLDocument('');
+      optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
+
+      ampdocServiceForStub.returns({
+        isSingleDoc: () => true,
+        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+      });
+      viewer = {
+        hasCapability: () => true,
+        isTrustedViewer: () => Promise.resolve(true),
+        sendMessageAwaitResponse: getDefaultResponsePromise,
+        whenFirstVisible: () => Promise.resolve(),
+      };
+      sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      sendMessageStub.returns(getDefaultResponsePromise());
+      ampdocViewerStub.returns(viewer);
+      interceptionEnabledWin = {
+        location: {
+          href: `${origin}/path`,
+        },
+        Response: window.Response,
+      };
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    function getDefaultResponsePromise() {
+      return Promise.resolve({init: getDefaultResponseOptions()});
+    }
+
+    function getDefaultResponseOptions() {
+      return {
+        headers: [
+          ['AMP-Access-Control-Allow-Source-Origin', origin],
+        ],
+      };
+    }
+
+    it('should return correct document response', () => {
+      sendMessageStub.returns(
+          Promise.resolve({
+            body: '<html><body>Foo</body></html>',
+            init: {
+              headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+            },
+          }));
+      const docFetcher = new DocumentFetcher(interceptionEnabledWin);
+
+      return docFetcher.fetchDocument('https://www.some-url.org/some-resource/').then(doc => {
+        expect(docFetcher.viewerResponded_).to.equals(true);
+        expect(doc).to.have.nested.property('body.textContent')
+            .that.equals('Foo');
+      });
+    });
+  });
 });
