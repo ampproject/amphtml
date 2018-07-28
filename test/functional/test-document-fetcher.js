@@ -179,6 +179,10 @@ describe('DocumentFetcher', function() {
       };
     });
 
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     function getDefaultResponsePromise() {
       return Promise.resolve({init: getDefaultResponseOptions()});
     }
