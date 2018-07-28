@@ -34,8 +34,8 @@ describe('DocumentFetcher', function() {
   }
 
   beforeEach(() => {
-    setupMockXhr();
     sandbox = sinon.sandbox.create();
+    setupMockXhr();
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({
