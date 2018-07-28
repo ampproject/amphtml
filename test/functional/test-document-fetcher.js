@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {DocumentFetcher} from '../../src/document-fetcher';
 import {Services} from '../../src/services';
 
-describes.realWin('DocumentFetcher', {amp: true}, function() {
+describe('DocumentFetcher', function() {
+  let sandbox;
   let xhrCreated;
   let docFetcher;
   let ampdocServiceForStub;
@@ -32,6 +34,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
   }
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({
@@ -41,6 +44,10 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
       isSingleDoc: () => false,
       getAmpDoc: () => ampdocViewerStub,
     });
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   describe('#fetchDocument', () => {
@@ -78,6 +85,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           xhr => xhr.respond(
               400, {
                 'Content-Type': 'text/xml',
+                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
               },
               '<html></html>'));
       return promise.catch(e => {
