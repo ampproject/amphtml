@@ -51,6 +51,10 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
       });
     });
 
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     it('should be able to fetch a document', () => {
       const promise = docFetcher.fetchDocument('/index.html').then(doc => {
         expect(doc.nodeType).to.equal(9);
@@ -78,6 +82,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           xhr => xhr.respond(
               400, {
                 'Content-Type': 'text/xml',
+                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
               },
               '<html></html>'));
       return promise.catch(e => {
@@ -146,7 +151,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     let viewer;
 
     beforeEach(() => {
-      setupMockXhr();
       optedInDoc = window.document.implementation.createHTMLDocument('');
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
