@@ -23,6 +23,10 @@
  * </amp-story>
  * </code>
  */
+import {
+  Action,
+  getStoreService,
+} from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {
   AnimationManager,
@@ -132,6 +136,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -281,6 +288,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       this.advancement_.start();
       this.maybeStartAnimations();
+      this.checkPageHasAudio_();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -306,7 +314,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   beforeVisible() {
     return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
   }
-
 
   /**
    * @return {!Promise}
@@ -742,6 +749,20 @@ export class AmpStoryPage extends AMP.BaseElement {
         eventInit);
   }
 
+  /**
+  * Checks if the page has any audio
+  * @private
+  */
+  checkPageHasAudio_() {
+    const hasBGPageAudio = this.element.hasAttribute('background-audio');
+    const videos = this.getAllVideos_();
+    const hasVideoWithAudio = videos.find(function(video) {
+      return video.hasAttribute('noaudio') == false;
+    });
+
+    this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO,
+        (hasBGPageAudio || (!!hasVideoWithAudio)));
+  }
 
   /**
    * @private

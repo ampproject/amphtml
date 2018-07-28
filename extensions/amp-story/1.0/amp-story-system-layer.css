@@ -46,7 +46,6 @@
   display: flex !important;
   flex-direction: row !important;
   justify-content: flex-end !important;
-  float: right !important;
 }
 
 .i-amphtml-story-button {

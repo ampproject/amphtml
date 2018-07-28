@@ -845,7 +845,6 @@ export class AmpStory extends AMP.BaseElement {
         }
       });
     }
-    this.updateSoundPage_();
   }
 
 
@@ -857,7 +856,6 @@ export class AmpStory extends AMP.BaseElement {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to previous page.');
     activePage.previous();
-    this.updateSoundPage_();
   }
 
 
@@ -923,7 +921,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.activePage_ = targetPage;
 
-    this.updateSoundPage_();
     this.systemLayer_.resetDeveloperLogs();
     this.systemLayer_.setDeveloperLogContextString(this.activePage_.element.id);
 
@@ -1830,16 +1827,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_AUDIO,
         containsMediaElementWithAudio || hasStoryAudio);
-  }
-
-  /**
-   *
-   * @private
-   */
-  updateSoundPage_() {
-    const hasPageAudio = this.activePage_.element.hasAttribute('background-audio');
-    this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO,
-        hasPageAudio);
   }
 
   /** @private */
