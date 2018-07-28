@@ -19,7 +19,6 @@ import {DocumentFetcher} from '../../src/document-fetcher';
 import {Services} from '../../src/services';
 
 describe('DocumentFetcher', function() {
-  let mockXhr;
   let sandbox;
   let xhrCreated;
   let docFetcher;
@@ -30,7 +29,7 @@ describe('DocumentFetcher', function() {
   this.timeout(5000);
 
   function setupMockXhr() {
-    mockXhr = sandbox.useFakeXMLHttpRequest();
+    const mockXhr = sandbox.useFakeXMLHttpRequest();
     xhrCreated = new Promise(resolve => mockXhr.onCreate = resolve);
   }
 
@@ -47,11 +46,6 @@ describe('DocumentFetcher', function() {
     });
   });
 
-  after(() => {
-    sandbox.restore();
-    mockXhr.restore();
-  });
-
   describe('#fetchDocument', () => {
     beforeEach(() => {
       setupMockXhr();
@@ -62,7 +56,6 @@ describe('DocumentFetcher', function() {
 
     afterEach(() => {
       sandbox.restore();
-      mockXhr.restore();
     });
 
     it('should be able to fetch a document', () => {
