@@ -1038,6 +1038,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element2.style.width).to.equal('50vw');
     });
 
+    it('should not apply sizes if width is present', () => {
+      const element1 = new ElementClass();
+      element1.setAttribute('sizes', '100vw');
+      element1.setAttribute('width', '50px');
+      element1.applySizesAndMediaQuery();
+      expect(element1.style.width).to.equal('');
+    });
+
     it('should apply heights condition', () => {
       const element1 = new ElementClass();
       element1.sizerElement = doc.createElement('div');
