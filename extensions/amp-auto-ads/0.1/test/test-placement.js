@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import '../../../amp-ad/0.1/amp-ad';
 import {AdTracker} from '../ad-tracker';
-import * as AmpAd from '../../../amp-ad/0.1/amp-ad';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {Services} from '../../../../src/services';
 
