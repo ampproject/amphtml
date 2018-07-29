@@ -1118,13 +1118,13 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         hostName + '/dist/amp-shadow.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp-inabox.js');
+        hostName + '/dist/amp-inabox-lite.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
     if (inabox) {
       file = file.replace(/<html [^>]*>/, '<html amp4ads>');
-      file = file.replace(/\/dist\/amp\.js/g, '/dist/amp-inabox.js');
+      file = file.replace(/\/dist\/amp\.js/g, '/dist/amp-inabox-lite.js');
     }
   } else if (mode == 'compiled') {
     file = file.replace(
@@ -1143,7 +1143,7 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         /\/dist.3p\/current\/(.*)\.max.html/g,
         hostName + '/dist.3p/current-min/$1.html');
     if (inabox) {
-      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
+      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-lite-v0.js');
     }
   }
   return file;
