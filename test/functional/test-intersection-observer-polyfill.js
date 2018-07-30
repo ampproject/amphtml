@@ -308,29 +308,29 @@ describe('IntersectionObserverPolyfill', () => {
       // 2nd tick with 0.1 does fire
       io.tick(layoutRectLtwh(0, 90, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 3rd tick with 0.9 doesn't fire
       io.tick(layoutRectLtwh(0, 10, 100, 100));
       expect(callbackSpy).to.not.be.called;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 4rd tick with 1 does fire
       io.tick(layoutRectLtwh(0, 0, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 5th tick with 1 doesn't fire
       io.tick(layoutRectLtwh(0, 0, 100, 100));
       expect(callbackSpy).to.not.be.called;
       // 6th tick with 0.9 does fire
       io.tick(layoutRectLtwh(0, 10, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 7th tick with 0.1 doesn't fire
       io.tick(layoutRectLtwh(0, 90, 100, 100));
       expect(callbackSpy).to.not.be.called;
       // 8th tick with 0 does fire
       io.tick(layoutRectLtwh(0, 100, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 9th tick with 0 doesn't fire
       io.tick(layoutRectLtwh(0, 100, 100, 100));
       expect(callbackSpy).to.not.be.called;

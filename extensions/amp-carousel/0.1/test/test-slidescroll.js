@@ -999,7 +999,7 @@ describes.realWin('SlideScroll', {
         expect(showSlideSpy).to.have.been.calledWith(0);
 
         // Don't call showSlide_() if slide is not finite.
-        showSlideSpy.reset();
+        showSlideSpy.resetHistory();
         impl.mutatedAttributesCallback({slide: Number.POSITIVE_INFINITY});
         expect(showSlideSpy.called).to.be.false;
       });
@@ -1110,7 +1110,7 @@ describes.realWin('SlideScroll', {
           expect(showSlideSpy).to.be.calledOnce;
 
           // Unlayout
-          showSlideSpy.reset();
+          showSlideSpy.resetHistory();
           impl.unlayoutCallback();
 
           // Test that showSlide_ due to goToSlide(index=4) is not called before
