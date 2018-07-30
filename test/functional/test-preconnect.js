@@ -82,6 +82,10 @@ describe('preconnect', () => {
     setPreconnectFeaturesForTesting(null);
   });
 
+  it('should be fine', () => {
+    expect(true).to.be.equal(true);
+  });
+
   it('should preconnect', () => {
     isSafari = false;
     return getPreconnectIframe().then(iframe => {
