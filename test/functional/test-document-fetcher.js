@@ -29,12 +29,12 @@ describe('DocumentFetcher', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
     setupMockXhr();
   });
 
   afterEach(() => {
-    sandbox.restore();
+    sinon.restore();
   });
 
   describe('#fetchDocument', () => {
