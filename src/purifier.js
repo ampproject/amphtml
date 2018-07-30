@@ -109,10 +109,12 @@ export const WHITELISTED_ATTRS = [
   'on',
   'option',
   'placeholder',
+  // Attributes related to amp-form.
+  'submitting',
   'submit-success',
   'submit-error',
-  // Attributes consumed by amp-form
   'validation-for',
+  'verify-error',
   'visible-when-invalid',
   // HTML attributes that are scrubbed by Caja but we handle specially.
   'href',
