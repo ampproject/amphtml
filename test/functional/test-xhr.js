@@ -19,13 +19,13 @@ import {
   FetchResponse,
   assertSuccess,
   fetchPolyfill,
-  xhrServiceForTesting,
-} from '../../src/service/xhr-impl';
+} from '../../src/utils/xhr-utils';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
 import {getCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
+import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {
@@ -505,10 +505,11 @@ describe.configure().skipSafari().run('XHR', function() {
             xhr => xhr.respond(
                 400, {
                   'Content-Type': 'text/xml',
+                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
                 },
                 '<html></html>'));
         return promise.catch(e => {
-          expect(e.retriable).to.be.undefined;
+          expect(e.retriable).to.be.equal(false);
           expect(e.retriable).to.not.equal(true);
         });
       });
@@ -584,10 +585,11 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should be able to fetch a document', () => {
         const promise = xhr.fetchText('/text.html');
-        expect(fetchStub.calledWith('/text.html', {
+        expect(fetchStub).to.be.calledWith('/text.html', {
           method: 'GET',
           headers: {'Accept': 'text/plain'},
-        })).to.be.true;
+          requireAmpResponseSourceOrigin: true
+        });
         return promise.then(res => {
           return res.text();
         }).then(text => {
