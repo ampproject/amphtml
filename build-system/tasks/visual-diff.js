@@ -27,7 +27,8 @@ const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
-const {execOrDie, execScriptAsync} = require('../exec');
+const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {execScriptAsync} = require('../exec');
 const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
 const {gitBranchName, gitCommitterEmail} = require('../git');
 
@@ -342,13 +343,11 @@ async function runVisualTests(page, visualTestsConfig) {
 /**
  * Cleans up any existing AMP config from the runtime and 3p frame.
  */
-function cleanupAmpConfig() {
+async function cleanupAmpConfig() {
   log('verbose', 'Cleaning up existing AMP config');
-  AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
-    execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} --remove`,
-        {'stdio': 'ignore'});
-  });
+  for (const targetFile of AMP_RUNTIME_TARGET_FILES) {
+    await removeConfig(targetFile);
+  }
 }
 
 /**
@@ -356,13 +355,17 @@ function cleanupAmpConfig() {
  *
  * @param {string} config Config to apply. One of 'canary' or 'prod'.
  */
-function applyAmpConfig(config) {
+async function applyAmpConfig(config) {
   log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
-  AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
-    execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} --${config}`,
-        {'stdio': 'ignore'});
-  });
+  const baseConfigFile =
+      'build-system/global-configs/' + config + '-config.json';
+
+  for (const targetFile of AMP_RUNTIME_TARGET_FILES) {
+    await removeConfig(targetFile);
+    await applyConfig(config, targetFile, baseConfigFile,
+        /* opt_localDev */ true, /* opt_localBranch */ true,
+        /* opt_branch */ null, /* opt_fortesting */ true);
+  }
 }
 
 /**
@@ -379,7 +382,6 @@ async function generateSnapshots(percy, page, webpages) {
     await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
     await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
-  cleanupAmpConfig();
 
   const numUnfilteredTests = webpages.length;
   webpages = webpages.filter(webpage => !webpage.flaky);
@@ -409,6 +411,7 @@ async function generateSnapshots(percy, page, webpages) {
     log('travis', colors.cyan(config), ': ');
     await snapshotWebpages(percy, page, webpages, config);
   }
+  await cleanupAmpConfig();
 }
 
 /**
