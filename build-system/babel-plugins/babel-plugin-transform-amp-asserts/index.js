@@ -35,7 +35,7 @@ const removableDevAsserts = [
 const removableUserAsserts = ['fine'];
 
 
-export default function(babel) {
+module.exports = function(babel) {
   const {types: t} = babel;
   return {
     visitor: {
