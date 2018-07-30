@@ -385,53 +385,48 @@ export class Bind {
    */
   ingestAndApply(ingestible) {
     // TODO: Still need to remove old bindings.
-    // TODO: Polish the implementation of this function.
 
     return this.initializePromise_.then(() => {
       const bindings = /** @type {!Array<!BindBindingDef>} */ ([]);
       const boundElements = /** @type {!Array<!BoundElementDef>} */ ([]);
-      const expressionToElements = /** @type {!Object<string, !Array<!Element>>} */ (map());
+      const expressionToElements =
+        /** @type {!Object<string, !Array<!Element>>} */ (map());
+      const elements = /** @type{!Array<!Element>>} */ ([]);
 
+      // Unpack `ingestible` array into structs used internally by this service.
       ingestible.forEach(i => {
-        const element = i['element'];
-        const property = i['property'];
-        const expression = i['expression'];
+        const {'element': el, 'property': property, 'expression': expr} = i;
 
-        const boundProperty = {property, expressionString: expression, previousResult: undefined};
-        const index = findIndex(boundElements, be => be.element === element);
+        const boundProperty = /** @type {!BoundPropertyDef} */ (
+          {property, expressionString: expr}
+        );
+        const index = findIndex(boundElements, be => be.element === el);
         if (index < 0) {
-          boundElements.push({element, boundProperties: [boundProperty]});
+          boundElements.push({element: el, boundProperties: [boundProperty]});
         } else {
           boundElements[index].boundProperties.push(boundProperty);
         }
 
-        bindings.push({tagName: element.tagName, property, expressionString: expression});
+        bindings.push({tagName: el.tagName, property, expressionString: expr});
 
-        if (!expressionToElements[expression]) {
-          expressionToElements[expression] = [];
+        if (!expressionToElements[expr]) {
+          expressionToElements[expr] = [];
         }
-        expressionToElements[expression].push(element);
+        expressionToElements[expr].push(el);
+
+        elements.push(el);
       });
 
+      // Merge the structs with existing data.
       this.boundElements_ = this.boundElements_.concat(boundElements);
       Object.assign(this.expressionToElements_, expressionToElements);
 
       return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
-        // Report each parse error.
-        Object.keys(parseErrors).forEach(expressionString => {
-          const elements = this.expressionToElements_[expressionString];
-          if (elements.length > 0) {
-            this.reportWorkerError_(parseErrors[expressionString],
-                `${TAG}: Expression compile error in "${expressionString}".`,
-                elements[0]);
-          }
-        });
-
-        const elements = ingestible.map(i => i.element);
+        this.reportParseErrors_(parseErrors);
+        // Evaluate and apply changes to elements in `ingestible`.
         return this.evaluate_().then(results =>
           this.applyElements_(results, elements));
       });
-
     });
   }
 
@@ -622,15 +617,7 @@ export class Bind {
         return bindings.length;
       } else {
         return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
-          // Report each parse error.
-          Object.keys(parseErrors).forEach(expressionString => {
-            const elements = this.expressionToElements_[expressionString];
-            if (elements.length > 0) {
-              this.reportWorkerError_(parseErrors[expressionString],
-                  `${TAG}: Expression compile error in "${expressionString}".`,
-                  elements[0]);
-            }
-          });
+          this.reportParseErrors_(parseErrors);
           return bindings.length;
         });
       }
@@ -1300,6 +1287,21 @@ export class Bind {
    */
   ww_(method, opt_args) {
     return invokeWebWorker(this.win_, method, opt_args, this.localWin_);
+  }
+
+  /**
+   * @param {!Array<!Object>} parseErrors
+   */
+  reportParseErrors_(parseErrors) {
+    // Report each parse error.
+    Object.keys(parseErrors).forEach(expressionString => {
+      const elements = this.expressionToElements_[expressionString];
+      if (elements.length > 0) {
+        this.reportWorkerError_(parseErrors[expressionString],
+            `${TAG}: Expression compile error in "${expressionString}".`,
+            elements[0]);
+      }
+    });
   }
 
   /**
