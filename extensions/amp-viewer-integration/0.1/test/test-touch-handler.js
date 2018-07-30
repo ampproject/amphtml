@@ -104,7 +104,7 @@ describes.fakeWin('TouchHandler', {}, env => {
       expect(messages[0].data.data.type).to.equal('touchstart');
     });
 
-    it('should lock scrolling', () => {
+    it.skip('should lock scrolling', () => {
       expect(unlistenCount).to.equal(0);
       expect(listeners).to.have.length(3);
       expect(listeners[0].options.passive).to.be.true;

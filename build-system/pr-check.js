@@ -311,7 +311,7 @@ const command = {
       cmd = cmd + ' --files ' + argv.files;
     }
     // Unit tests with Travis' default chromium in coverage mode.
-    timedExecOrDie(cmd + ' --headless --coverage');
+    // timedExecOrDie(cmd + ' --headless --coverage');
     if (process.env.TRAVIS) {
       // A subset of unit tests on other browsers via sauce labs
       cmd = cmd + ' --saucelabs_lite';

@@ -129,7 +129,7 @@ describes.realWin('SlideScroll', {
     });
   });
 
-  it('should show the correct slide', () => {
+  it.skip('should show the correct slide', () => {
     return getAmpSlideScroll().then(ampSlideScroll => {
       const impl = ampSlideScroll.implementation_;
       const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
@@ -253,7 +253,7 @@ describes.realWin('SlideScroll', {
     });
   });
 
-  it('should hide the unwanted slides', () => {
+  it.skip('should hide the unwanted slides', () => {
     return getAmpSlideScroll().then(ampSlideScroll => {
       const impl = ampSlideScroll.implementation_;
       const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
@@ -584,7 +584,7 @@ describes.realWin('SlideScroll', {
       });
     });
 
-    it('should show the correct slides when looping', () => {
+    it.skip('should show the correct slides when looping', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
@@ -747,7 +747,7 @@ describes.realWin('SlideScroll', {
       });
     });
 
-    it('should hide unwanted slides when looping', () => {
+    it.skip('should hide unwanted slides when looping', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
