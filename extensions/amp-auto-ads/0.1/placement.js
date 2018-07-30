@@ -191,14 +191,14 @@ export class Placement {
             .then(() => {
               return this.resources_.attemptChangeSize(this.getAdElement(),
                   sizing.height || TARGET_AD_HEIGHT_PX,
-                  undefined, this.margins_)
-                  .then(() => {
-                    this.state_ = PlacementState.PLACED;
-                    return this.state_;
-                  }, () => {
-                    this.state_ = PlacementState.RESIZE_FAILED;
-                    return this.state_;
-                  });
+                  undefined, this.margins_);
+            })
+            .then(() => {
+              this.state_ = PlacementState.PLACED;
+              return this.state_;
+            }, () => {
+              this.state_ = PlacementState.RESIZE_FAILED;
+              return this.state_;
             });
       });
     });
