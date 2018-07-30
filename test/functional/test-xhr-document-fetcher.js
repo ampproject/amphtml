@@ -151,6 +151,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     let viewer;
 
     beforeEach(() => {
+      setupMockXhr();
       optedInDoc = window.document.implementation.createHTMLDocument('');
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
