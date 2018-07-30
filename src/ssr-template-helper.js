@@ -93,7 +93,8 @@ export class SsrTemplateHelper {
       }
     }
     const data = dict({
-      'originalRequest': toStructuredCloneable(fetchData.xhrUrl, fetchData.fetchOpt),
+      'originalRequest':
+          toStructuredCloneable(fetchData.xhrUrl, fetchData.fetchOpt),
       'data': elementAttrsAsJson,
       'sourceAmpComponent': this.sourceComponent_,
     });

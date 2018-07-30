@@ -215,98 +215,8 @@ export class Xhr {
       });
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
-            this.fromStructuredCloneable_(response, init.responseType));
+            fromStructuredCloneable(response, init.responseType));
     });
-  }
-
-  /**
-   * De-serializes a fetch response that was made possible to be passed to
-   * `postMessage()`, i.e., can be cloned using the
-   * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
-   *
-   * The response is assumed to be serialized in the following way:
-   *
-   * 1. Transform the entries in the headers of the response into an
-   * `!Array<!Array<string>>` holding the list of header entries, where each
-   * element in the array is a header entry (key-value pair) represented as a
-   * 2-element array. The header key is case-insensitive.
-   *
-   * 2. Include the header entry list and `status` and `statusText` properties
-   * of the response in as `headers`, `status` and `statusText` properties of
-   * `init`.
-   *
-   * 3. Include the body of the response serialized as string in `body`.
-   *
-   * 4. Return a new object having properties `body` and `init`.
-   *
-   * The response is de-serialized in the following way:
-   *
-   * 1. If the `Response` type is supported and `responseType` is not
-   * document, pass `body` and `init` directly to the constructor of `Response`.
-   *
-   * 2. Otherwise, populate a fake XHR object to pass to `FetchResponse` as if
-   * the response is returned by the fetch polyfill.
-   *
-   * 3. If `responseType` is `document`, also parse the body and populate
-   * `responseXML` as a `Document` type.
-   *
-   * @param {JsonObject|string|undefined} response The structurally-cloneable
-   *     response to convert back to a regular Response.
-   * @param {string|undefined} responseType The original response type used to
-   *     initiate the XHR.
-   * @return {!FetchResponse|!Response} The deserialized regular response.
-   * @private
-   */
-  fromStructuredCloneable_(response, responseType) {
-    user().assert(isObject(response), 'Object expected: %s', response);
-
-    const isDocumentType = responseType == 'document';
-    if (typeof this.win.Response === 'function' && !isDocumentType) {
-      // Use native `Response` type if available for performance. If response
-      // type is `document`, we must fall back to `FetchResponse` polyfill
-      // because callers would then rely on the `responseXML` property being
-      // present, which is not supported by the Response type.
-      return new this.win.Response(response['body'], response['init']);
-    }
-
-    const lowercasedHeaders = map();
-    const data = {
-      status: 200,
-      statusText: 'OK',
-      responseText: (response['body'] ? String(response['body']) : ''),
-      /**
-       * @param {string} name
-       * @return {string}
-       */
-      getResponseHeader(name) {
-        return lowercasedHeaders[String(name).toLowerCase()] || null;
-      },
-    };
-
-    if (response['init']) {
-      const init = response['init'];
-      if (isArray(init.headers)) {
-        init.headers.forEach(entry => {
-          const headerName = entry[0];
-          const headerValue = entry[1];
-          lowercasedHeaders[String(headerName).toLowerCase()] =
-              String(headerValue);
-        });
-      }
-      if (init.status) {
-        data.status = parseInt(init.status, 10);
-      }
-      if (init.statusText) {
-        data.statusText = String(init.statusText);
-      }
-    }
-
-    if (isDocumentType) {
-      data.responseXML =
-          new DOMParser().parseFromString(data.responseText, 'text/html');
-    }
-
-    return new FetchResponse(data);
   }
 
   /**
@@ -326,46 +236,10 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, init = {}) {
-    // Do not append __amp_source_origin if explicitly disabled.
-    if (init.ampCors !== false) {
-      input = this.getCorsUrl(this.win, input);
-    } else {
-      init.requireAmpResponseSourceOrigin = false;
-    }
-    if (init.requireAmpResponseSourceOrigin === true) {
-      dev().error('XHR',
-          'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
-    }
-    if (init.requireAmpResponseSourceOrigin === undefined) {
-      init.requireAmpResponseSourceOrigin = true;
-    }
-    // For some same origin requests, add AMP-Same-Origin: true header to allow
-    // publishers to validate that this request came from their own origin.
-    const currentOrigin = getWinOrigin(this.win);
+    const {inputMod, initMod} = setAmpCors(input, init);
     const targetOrigin = parseUrlDeprecated(input).origin;
-    if (currentOrigin == targetOrigin) {
-      init['headers'] = init['headers'] || {};
-      init['headers']['AMP-Same-Origin'] = 'true';
-    }
-    // In edge a `TypeMismatchError` is thrown when body is set to null.
-    dev().assert(init.body !== null, 'fetch `body` can not be `null`');
-    return this.fetch_(input, init).then(response => {
-      const allowSourceOriginHeader = response.headers.get(
-          ALLOW_SOURCE_ORIGIN_HEADER);
-      if (allowSourceOriginHeader) {
-        const sourceOrigin = getSourceOrigin(this.win.location.href);
-        // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
-        // ensure that it's equal to the current source origin.
-        user().assert(allowSourceOriginHeader == sourceOrigin,
-            `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
-              ` equal to the current: ${allowSourceOriginHeader}` +
-              ` vs ${sourceOrigin}`);
-      } else if (init.requireAmpResponseSourceOrigin) {
-        // If the `AMP-Access-Control-Allow-Source-Origin` header is not
-        // returned but required, return error.
-        user().assert(false, 'Response must contain the' +
-            ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
-      }
+    return this.fetch_(inputMod, initMod).then(response => {
+      validateFetchResponse(response);
       return response;
     }, reason => {
       throw user().createExpectedError('XHR', 'Failed fetching' +
@@ -831,4 +705,150 @@ export function toStructuredCloneable(input, init) {
     newInit.body = fromIterator(init.body.entries());
   }
   return {input, init: newInit};
+}
+
+/**
+ * De-serializes a fetch response that was made possible to be passed to
+ * `postMessage()`, i.e., can be cloned using the
+ * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
+ *
+ * The response is assumed to be serialized in the following way:
+ *
+ * 1. Transform the entries in the headers of the response into an
+ * `!Array<!Array<string>>` holding the list of header entries, where each
+ * element in the array is a header entry (key-value pair) represented as a
+ * 2-element array. The header key is case-insensitive.
+ *
+ * 2. Include the header entry list and `status` and `statusText` properties
+ * of the response in as `headers`, `status` and `statusText` properties of
+ * `init`.
+ *
+ * 3. Include the body of the response serialized as string in `body`.
+ *
+ * 4. Return a new object having properties `body` and `init`.
+ *
+ * The response is de-serialized in the following way:
+ *
+ * 1. If the `Response` type is supported and `responseType` is not
+ * document, pass `body` and `init` directly to the constructor of `Response`.
+ *
+ * 2. Otherwise, populate a fake XHR object to pass to `FetchResponse` as if
+ * the response is returned by the fetch polyfill.
+ *
+ * 3. If `responseType` is `document`, also parse the body and populate
+ * `responseXML` as a `Document` type.
+ *
+ * @param {JsonObject|string|undefined} response The structurally-cloneable
+ *     response to convert back to a regular Response.
+ * @param {string|undefined} responseType The original response type used to
+ *     initiate the XHR.
+ * @return {!FetchResponse|!Response} The deserialized regular response.
+ */
+export function fromStructuredCloneable(response, responseType) {
+  user().assert(isObject(response), 'Object expected: %s', response);
+
+  const isDocumentType = responseType == 'document';
+  if (typeof this.win.Response === 'function' && !isDocumentType) {
+    // Use native `Response` type if available for performance. If response
+    // type is `document`, we must fall back to `FetchResponse` polyfill
+    // because callers would then rely on the `responseXML` property being
+    // present, which is not supported by the Response type.
+    return new this.win.Response(response['body'], response['init']);
+  }
+
+  const lowercasedHeaders = map();
+  const data = {
+    status: 200,
+    statusText: 'OK',
+    responseText: (response['body'] ? String(response['body']) : ''),
+    /**
+     * @param {string} name
+     * @return {string}
+     */
+    getResponseHeader(name) {
+      return lowercasedHeaders[String(name).toLowerCase()] || null;
+    },
+  };
+
+  if (response['init']) {
+    const init = response['init'];
+    if (isArray(init.headers)) {
+      init.headers.forEach(entry => {
+        const headerName = entry[0];
+        const headerValue = entry[1];
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+            String(headerValue);
+      });
+    }
+    if (init.status) {
+      data.status = parseInt(init.status, 10);
+    }
+    if (init.statusText) {
+      data.statusText = String(init.statusText);
+    }
+  }
+
+  if (isDocumentType) {
+    data.responseXML =
+        new DOMParser().parseFromString(data.responseText, 'text/html');
+  }
+
+  return new FetchResponse(data);
+}
+
+/**
+ * Set the AMP CORs data on the FetchInitDef.
+ * @param {string} input
+ * @param {!FetchInitDef} init
+ * @return {input: string, init: !FetchInitDef}
+ */
+export function setAmpCors(input, init) {
+  // Do not append __amp_source_origin if explicitly disabled.
+  if (init.ampCors !== false) {
+    input = this.getCorsUrl(this.win, input);
+  } else {
+    init.requireAmpResponseSourceOrigin = false;
+  }
+  if (init.requireAmpResponseSourceOrigin === true) {
+    dev().error('XHR',
+        'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
+  }
+  if (init.requireAmpResponseSourceOrigin === undefined) {
+    init.requireAmpResponseSourceOrigin = true;
+  }
+  // For some same origin requests, add AMP-Same-Origin: true header to allow
+  // publishers to validate that this request came from their own origin.
+  const currentOrigin = getWinOrigin(this.win);
+  const targetOrigin = parseUrlDeprecated(input).origin;
+  if (currentOrigin == targetOrigin) {
+    init['headers'] = init['headers'] || {};
+    init['headers']['AMP-Same-Origin'] = 'true';
+  }
+  // In edge a `TypeMismatchError` is thrown when body is set to null.
+  dev().assert(init.body !== null, 'fetch `body` can not be `null`');
+
+  return {input, init};
+}
+
+/**
+ * @param {!FetchInitDef} init
+ * @param {!Promise<!FetchResponse>} response
+ */
+export function validateFetchResponse(init, response) {
+  const allowSourceOriginHeader = response.headers.get(
+      ALLOW_SOURCE_ORIGIN_HEADER);
+  if (allowSourceOriginHeader) {
+    const sourceOrigin = getSourceOrigin(this.win.location.href);
+    // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
+    // ensure that it's equal to the current source origin.
+    user().assert(allowSourceOriginHeader == sourceOrigin,
+        `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+          ` equal to the current: ${allowSourceOriginHeader}` +
+          ` vs ${sourceOrigin}`);
+  } else if (init.requireAmpResponseSourceOrigin) {
+    // If the `AMP-Access-Control-Allow-Source-Origin` header is not
+    // returned but required, return error.
+    user().assert(false, 'Response must contain the' +
+        ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
+  }
 }

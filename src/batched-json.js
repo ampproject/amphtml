@@ -62,7 +62,7 @@ export function batchFetchJsonFor(
 }
 
 /**
- * Handles url replacement and constructs the FetchInitiJsonDef required for a
+ * Handles url replacement and constructs the FetchInitJsonDef required for a
  * fetch.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element

@@ -27,6 +27,7 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {fromStructuredCloneable, setAmpCors, validateFetchResponse} from '../../../src/service/xhr-impl';
 import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
@@ -263,17 +264,23 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_() {
+    let fetchData;
     return constructBatchFetchData(
         this.getAmpDoc(),
         this.element,
         this.element.getAttribute('src'),
         this.getPolicy_()).then(batchFetchData => {
+      // TODO(alabiaga): add this to constructBatchFetchData.
+      fetchData =
+          setAmpCors(batchFetchData.xhrUrl, batchFetchData.fetchOpt);
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-          this.element, batchFetchData);
-    }).then(resp => {
-      const data = getData(resp);
+          this.element, fetchData);
+    }).then(response => {
+      const fetchResponse =
+          fromStructuredCloneable(response, fetchData.responseType);
+      validateFetchResponse(fetchData, fetchResponse);
       user().assert(
-          resp && (typeof data !== 'undefined'),
+          response && (typeof fetchResponse.responseXml !== 'undefined'),
           'Response missing the \'data\' field');
       return this.scheduleRender_(data);
     }, error => {
