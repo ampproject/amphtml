@@ -1,14 +1,18 @@
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {once} from '../../../src/utils/function';
-import {Deferred} from '../../../src/utils/promise';
 import {whenDocumentReady} from '../../../src/document-ready';
 
 import Tracking from './tracking';
 
 import DomainResolver from './affiliate-link-resolver';
+
+import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewrite/constants';
+import LinkRewriterService from '../../../src/service/link-rewrite/link-rewrite-service';
+
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
-import LinkRewriterService, {events as linkRewriterEvents} from './link-rewriter';
+
 /*** TODO:
  * - Fix issue with analytics reporting links with macro variables.
  * - Add amp-specific analytics variable (is_amp, canonical_url, original_page...)
@@ -42,6 +46,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Where everything stats
+   */
   startSkimcore_() {
     const trackingService = new Tracking(this.element, this.skimOptions_);
     const domainResolverService = new DomainResolver(
@@ -50,7 +57,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
         this.resolveSessionDataONCE_,
     );
 
-    const skimlinksLinkRewriter = this.setupAffiliateLinkManager_(trackingService, domainResolverService);
+    const skimlinksLinkRewriter = this.initSkimlinksLinkRewriter(trackingService, domainResolverService);
 
     // Fire impression tracking after we have received beaconRequest
     // TODO: Should this be fired onexit?
@@ -64,6 +71,10 @@ export class AmpSkimlinks extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Resolve promise
+   * @param {*} beaconData
+   */
   resolveSessionData_(beaconData) {
     this.hasCalledBeacon = true;
     this.userSessionDataDeferred_.resolve({
@@ -71,6 +82,10 @@ export class AmpSkimlinks extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Fallback
+   * @param {*} domainResolverService
+   */
   callBeaconIfNotAlreadyDone_(domainResolverService) {
     if (!this.hasCalledBeacon) {
       domainResolverService.fetchDomainResolverApi([])
@@ -78,8 +93,13 @@ export class AmpSkimlinks extends AMP.BaseElement {
     }
   }
 
-  setupAffiliateLinkManager_(trackingService, domainResolverService) {
-    const resolveFunction = getBoundFunction(domainResolverService, 'resolveUnknownAnchors')
+  /**
+   * Initialise skimlinks link rewriter
+   * @param {*} trackingService
+   * @param {*} domainResolverService
+   */
+  initSkimlinksLinkRewriter(trackingService, domainResolverService) {
+    const resolveFunction = getBoundFunction(domainResolverService, 'resolveUnknownAnchors');
     const options = {
       linkSelector: this.skimOptions_.linkSelector,
     };
@@ -92,11 +112,11 @@ export class AmpSkimlinks extends AMP.BaseElement {
     );
 
     // HACK TO MAKE SURE WE ALWAYS CALL WAYPOINT in case there are no links to resolve in the page.
-    skimlinksLinkRewriter.events.listen(linkRewriterEvents.PAGE_SCANNED, () => {
+    skimlinksLinkRewriter.events.on(linkRewriterEvents.PAGE_SCANNED, () => {
       this.callBeaconIfNotAlreadyDone_(domainResolverService);
     });
 
-    skimlinksLinkRewriter.events.listen(linkRewriterEvents.CLICK, eventData => {
+    skimlinksLinkRewriter.events.on(linkRewriterEvents.CLICK, eventData => {
       const wasStolenFromSkim = eventData.replacedBy !== SKIMLINKS_REWRITER_ID;
       const hasAffiliated = eventData.hasReplaced;
       if (wasStolenFromSkim || !hasAffiliated) {

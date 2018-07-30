@@ -4,9 +4,16 @@ import {
 } from './affiliate-links-manager';
 import {parseUrlDeprecated} from '../../../src/url';
 
-import {AnchorRewriteData, AnchorRewriteDataResponse } from "./link-rewriter"
+import {AnchorRewriteData, AnchorRewriteDataResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
+
 
 export default class AffiliateLinkResolver {
+  /**
+   *
+   * @param {*} xhr
+   * @param {*} skimOptions
+   * @param {*} beaconApiCallback
+   */
   constructor(xhr, skimOptions, beaconApiCallback) {
     this.xhr_ = xhr;
     this.pubcode_ = skimOptions.pubcode;
@@ -15,6 +22,11 @@ export default class AffiliateLinkResolver {
     this.beaconApiCallback_ = beaconApiCallback;
   }
 
+  /**
+   *
+   * @param {*} anchorList
+   * @return {Promise}
+   */
   resolveUnknownAnchors(anchorList) {
     const alreadyResolved = this.resolveAnchorsRewriteData(anchorList);
     let willBeResolvedPromise = null;
@@ -31,10 +43,18 @@ export default class AffiliateLinkResolver {
     return new AnchorRewriteDataResponse(alreadyResolved, willBeResolvedPromise);
   }
 
+  /**
+   * Get replacement url.
+   * @param {*} anchor
+   */
   getWaypointUrl_(anchor) {
     return `https://go.redirectingat.com?id=${this.pubcode_}&url=${anchor.href}`;
   }
 
+  /**
+   * Build list of AnchorRewriteData
+   * @param {*} anchorList
+   */
   resolveAnchorsRewriteData(anchorList) {
     const anchorListNormalised = anchorList.map(anchor => {
       const status = this.getDomainAffiliateStatus_(this.getLinkDomain(anchor));
@@ -50,6 +70,10 @@ export default class AffiliateLinkResolver {
     return anchorListNormalised;
   }
 
+  /**
+   * Get affiliate status of one domain
+   * @param {*} domain
+   */
   getDomainAffiliateStatus_(domain) {
     if (this.isExcludedDomain_(domain)) {
       return LINK_STATUS__IGNORE_LINK;
@@ -58,6 +82,10 @@ export default class AffiliateLinkResolver {
     return this.domains_[domain] || LINK_STATUS__UNKNOWN;
   }
 
+  /**
+   * Get list of domains we don't have information about from a list of anchor.
+   * @param {*} anchorList
+   */
   getNewDomains_(anchorList) {
     const domains = anchorList.map(this.getLinkDomain);
 
@@ -74,6 +102,10 @@ export default class AffiliateLinkResolver {
     }), []);
   }
 
+  /**
+   * Save domains as unknown status in the internal state.
+   * @param {string[]} domains
+   */
   markDomainsAsUnknown(domains) {
     domains.forEach(domain => {
       const domainStatus = this.domains_[domain];
@@ -89,6 +121,11 @@ export default class AffiliateLinkResolver {
     });
   }
 
+  /**
+   * Get the list of anchors for which the domain of the href is in the `domainsToAsk` list.
+   * @param {*} anchorList
+   * @param {string[]} domainsToAsk
+   */
   getPendingAnchors_(anchorList, domainsToAsk) {
     return anchorList.reduce((acc, anchor) => {
       const anchorDomain = this.getLinkDomain(anchor);
@@ -100,6 +137,11 @@ export default class AffiliateLinkResolver {
     }, []);
   }
 
+  /**
+   * Resolve in an asynchronous way.
+   * @param {*} anchorList
+   * @param {*} domainsToAsk
+   */
   resolvedUnknownAnchorsAsync_(anchorList, domainsToAsk) {
     return this.fetchDomainResolverApi(domainsToAsk).then(data => {
       // DomainResolverApi (beaconApi) returns extra meta-data that we want to handle
@@ -112,6 +154,10 @@ export default class AffiliateLinkResolver {
     });
   }
 
+  /**
+   * Call beacon
+   * @param {*} domains
+   */
   fetchDomainResolverApi(domains) {
     const data = {
       pubcode: this.pubcode_,
@@ -134,6 +180,11 @@ export default class AffiliateLinkResolver {
     });
   }
 
+  /**
+   *
+   * @param {*} allDomains
+   * @param {*} affiliateDomains
+   */
   updateDomainsStatusMapPostFetch_(allDomains, affiliateDomains) {
     allDomains.forEach(domain => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
@@ -141,10 +192,18 @@ export default class AffiliateLinkResolver {
     });
   }
 
+  /**
+   *
+   * @param {*} anchor
+   */
   getLinkDomain(anchor) {
     return parseUrlDeprecated(anchor.href).hostname;
   }
 
+  /**
+   *
+   * @param {*} domain
+   */
   isExcludedDomain_(domain) {
     // Should update the isExcluded list as a side effect for caching
     if (!this.excludedDomains_.length) {
