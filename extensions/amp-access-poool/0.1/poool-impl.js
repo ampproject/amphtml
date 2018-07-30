@@ -203,7 +203,7 @@ export class PooolVendor {
    * @private
    */
   giveAccessOnPooolRelease_() {
-    const articleBody = document.getElementsByClassName('article-body')[0];
+    const articleBody = document.getElementById('poool-access');
     articleBody.setAttribute('amp-access-poool', '');
   }
 

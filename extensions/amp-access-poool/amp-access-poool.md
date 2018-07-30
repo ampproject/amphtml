@@ -57,9 +57,9 @@ For more informations about modes, check our [documentation](https://dev.poool.f
 ### HTML sections
 
 __Set poool-widget section, which contain poool paywall when access isn't granted.__
-Set the poool-widget section bellow both shown and hidden content like the following examle.
-First section is article preview, always shown to readers.
-Second section need an access (`amp-access="access"` attribute) to be displayed.
+Set the poool-widget section bellow both shown and hidden content like the following example.
+First section is the article preview, always shown to readers.
+Second section need an access (`amp-access="access"` attribute) to be displayed. Moreover, this section require an id `poool-access`.
 Third section is poool, called when access isn't granted (`amp-access="NOT access"` attribute).
 
 ```html
@@ -70,7 +70,7 @@ Third section is poool, called when access isn't granted (`amp-access="NOT acces
   </p>
 </section>
 
-<section amp-access="access" amp-access-hide class="article-body" itemprop="articleBody">
+<section id="poool-access" amp-access="access" amp-access-hide class="article-body" itemprop="articleBody">
   <p>
     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
     Curabitur ullamcorper turpis vel commodo scelerisque.
@@ -110,7 +110,7 @@ Configuration is similar to AMP Access, but no authorization, pingback and login
 </script>
 ```
 
-__Example: Show a paywall for a user in a custom group/segment called "myCustomSegment"__
+__Example: Show a paywall for a user in a custom group/segment called "amp-custom-segment"__
 
 ```html
 <script id="amp-access" type="application/json">
