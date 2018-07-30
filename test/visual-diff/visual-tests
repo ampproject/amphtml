@@ -793,6 +793,9 @@
       "name": "amp-mustache - Amp By Example"
     },
     {
+      "flaky": true,
+      // Component in this page creates an iframe to an error page, and this error page has a timestamp that keeps changing
+      // e.g., https://percy.io/ampproject/amphtml/builds/897650/view/52736490/411?mode=diff&browser=firefox&snapshot=52736490
       "url": "examples/visual-tests/amp-by-example/components/amp-o2-player/index.html",
       "name": "amp-o2-player - Amp By Example"
     },
