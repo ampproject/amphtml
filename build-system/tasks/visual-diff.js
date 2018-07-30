@@ -439,8 +439,6 @@ async function snapshotWebpages(percy, page, webpages) {
     const {name, url, viewport} = webpage;
     log('verbose', 'Visual diff test', colors.yellow(name));
 
-    await enableExperiments(page, webpage['experiments']);
-
     if (viewport) {
       log('verbose', 'Setting explicit viewport size of',
           colors.yellow(`${viewport.width}×${viewport.height}`));
@@ -513,7 +511,6 @@ async function snapshotWebpages(percy, page, webpages) {
     }
 
     await percy.snapshot(name, page, snapshotOptions);
-    await clearExperiments(page);
     log('travis', colors.cyan('●'));
   }
   log('travis', '\n');
@@ -660,33 +657,6 @@ async function waitForSelectorExistence(page, selector) {
     attempt++;
   } while (attempt < CSS_SELECTOR_RETRY_ATTEMPTS);
   return false;
-}
-
-/**
- * Enables the given AMP experiments.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {!Array<string>} experiments List of experiments to enable.
- */
-async function enableExperiments(page, experiments) {
-  if (experiments) {
-    log('verbose', 'Setting AMP experiments',
-        colors.cyan(experiments.join(', ')));
-    await page.setCookie({
-      name: 'AMP_EXP',
-      value: experiments.join('%2C'),
-      domain: HOST,
-    });
-  }
-}
-
-/**
- * Clears all AMP experiment cookies.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- */
-async function clearExperiments(page) {
-  await page.deleteCookie({name: 'AMP_EXP', domain: HOST});
 }
 
 /**
