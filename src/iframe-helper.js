@@ -81,15 +81,9 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @param {!Element} iframe the iframe element who's context will trigger the
  *     event
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @param {boolean=} opt_isInsensitive is set to true if data is not considered
- *     sensitive and event origin check doesn't need to take place
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
-function getOrCreateListenForEvents(
-  parentWin,
-  iframe,
-  opt_is3P,
-  opt_isInsensitive) {
+function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   const {origin} = parseUrlDeprecated(iframe.src);
   const sentinel = getSentinel_(iframe, opt_is3P);
   const listenSentinel = getListenForSentinel(parentWin, sentinel, true);
@@ -97,9 +91,6 @@ function getOrCreateListenForEvents(
   let windowEvents;
   for (let i = 0; i < listenSentinel.length; i++) {
     const we = listenSentinel[i];
-    if (opt_isInsensitive === true) {
-      we.opt_isInsensitive = opt_isInsensitive;
-    }
     if (we.frame === iframe) {
       windowEvents = we;
       break;
@@ -126,12 +117,7 @@ function getOrCreateListenForEvents(
  * @param {?Window} triggerWin the window that triggered the event
  * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
  */
-function getListenForEvents(
-  parentWin,
-  sentinel,
-  origin,
-  triggerWin) {
-
+function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   const listenSentinel = getListenForSentinel(parentWin, sentinel);
 
   if (!listenSentinel) {
@@ -145,12 +131,11 @@ function getListenForEvents(
   for (let i = 0; i < listenSentinel.length; i++) {
     const we = listenSentinel[i];
     const {contentWindow} = we.frame;
-    const {opt_isInsensitive} = we;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
     } else if (sentinel === 'amp') {
-      if (contentWindow == triggerWin &&
-        (we.origin == origin || opt_isInsensitive === true)) {
+      // A non-3P code path, origin must match.
+      if (we.origin === origin && contentWindow == triggerWin) {
         windowEvents = we;
         break;
       }
@@ -229,7 +214,6 @@ function registerGlobalListenerIfNeeded(parentWin) {
         event.origin,
         event.source
     );
-
     if (!listenForEvents) {
       return;
     }
@@ -263,18 +247,10 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @param {boolean=} opt_includingNestedWindows set to true if a messages from
  *     nested frames should also be accepted.
- * @param {boolean=} opt_isInsensitive is set to true if data is not considered
- *     sensitive and event origin check doesn't need to take place
  * @return {!UnlistenDef}
  */
 export function listenFor(
-  iframe,
-  typeOfMessage,
-  callback,
-  opt_is3P,
-  opt_includingNestedWindows,
-  opt_isInsensitive) {
-
+  iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
   dev().assert(iframe.src, 'only iframes with src supported');
   dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
@@ -286,9 +262,9 @@ export function listenFor(
   const listenForEvents = getOrCreateListenForEvents(
       parentWin,
       iframe,
-      opt_is3P,
-      opt_isInsensitive
+      opt_is3P
   );
+
 
   let events = listenForEvents[typeOfMessage] ||
     (listenForEvents[typeOfMessage] = []);
