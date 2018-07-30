@@ -16,14 +16,20 @@
 
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
-import {Action, StateProperty} from '../amp-story-store-service';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
+import {AmpStoryConsent} from '../amp-story-consent';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
+import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -40,6 +46,7 @@ describes.realWin('amp-story', {
   let win;
   let element;
   let story;
+  let replaceStateStub;
 
   /**
    * @param {!Element} container
@@ -87,6 +94,11 @@ describes.realWin('amp-story', {
   beforeEach(() => {
     win = env.win;
 
+    replaceStateStub = sandbox.stub(win.history, 'replaceState');
+
+    sandbox.stub(Services, 'storyStoreService')
+        .callsFake(() => new AmpStoryStoreService(win));
+
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
@@ -94,6 +106,7 @@ describes.realWin('amp-story', {
     registerServiceBuilder(win, 'localization', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
+
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
@@ -339,9 +352,6 @@ describes.realWin('amp-story', {
   });
 
   it('should update page id in browser history', () => {
-    // Have to stub this because tests run in iframe and you can't write
-    // history from another domain (about:srcdoc).
-    const replaceStub = sandbox.stub(win.history, 'replaceState');
     const firstPageId = 'page-zero';
     const pageCount = 2;
     createPages(story.element, pageCount, [firstPageId, 'page-1']);
@@ -349,7 +359,7 @@ describes.realWin('amp-story', {
     story.buildCallback();
     return story.layoutCallback()
         .then(() => {
-          return expect(replaceStub).to.have.been.calledWith(
+          return expect(replaceStateStub).to.have.been.calledWith(
               {ampStoryPageId: firstPageId},
               '',
           );
@@ -357,9 +367,6 @@ describes.realWin('amp-story', {
   });
 
   it('should NOT update page id in browser history if ad', () => {
-    // Have to stub this because tests run in iframe and you can't write
-    // history from another domain (about:srcdoc)
-    const replaceStub = sandbox.stub(win.history, 'replaceState');
     const firstPageId = 'i-amphtml-ad-page-1';
     const pageCount = 2;
     const pages = createPages(story.element, pageCount,
@@ -370,12 +377,11 @@ describes.realWin('amp-story', {
     story.buildCallback();
     return story.layoutCallback()
         .then(() => {
-          return expect(replaceStub).to.not.have.been.called;
+          return expect(replaceStateStub).to.not.have.been.called;
         });
   });
 
   it('should not set first page to active when rendering paused story', () => {
-    sandbox.stub(win.history, 'replaceState');
     createPages(story.element, 2, ['cover', 'page-1']);
 
     story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
@@ -390,7 +396,12 @@ describes.realWin('amp-story', {
 
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
-      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -425,7 +436,12 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story after the consent is resolved', () => {
-      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -468,7 +484,12 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story if the consent was already resolved', () => {
-      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -507,7 +528,6 @@ describes.realWin('amp-story', {
 
   describe('amp-story pause/resume callbacks', () => {
     it('should pause the story when tab becomes inactive', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       sandbox.stub(story.documentState_, 'isHidden').returns(true);
@@ -529,7 +549,6 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story when tab becomes active', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       sandbox.stub(story.documentState_, 'isHidden').returns(false);
@@ -553,7 +572,6 @@ describes.realWin('amp-story', {
     });
 
     it('should pause the story when viewer becomes inactive', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       story.buildCallback();
@@ -567,7 +585,6 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story when viewer becomes active', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
@@ -583,7 +600,6 @@ describes.realWin('amp-story', {
     });
 
     it('should keep the story paused on resume when previously paused', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
@@ -643,7 +659,6 @@ describes.realWin('amp-story', {
 
   describe('desktop attributes', () => {
     it('should add next page attribute', () => {
-      sandbox.stub(win.history, 'replaceState');
       sandbox.stub(utils, 'setAttributeInMutate').callsFake(
           (el, attr) => el.element.setAttribute(attr, ''));
 
@@ -657,7 +672,6 @@ describes.realWin('amp-story', {
     });
 
     it('should add previous page attribute', () => {
-      sandbox.stub(win.history, 'replaceState');
       sandbox.stub(story, 'maybePreloadBookend_').returns();
       sandbox.stub(utils, 'setAttributeInMutate').callsFake(
           (el, attr) => el.element.setAttribute(attr, ''));
@@ -673,7 +687,6 @@ describes.realWin('amp-story', {
     });
 
     it('should add previous visited attribute', () => {
-      sandbox.stub(win.history, 'replaceState');
       sandbox.stub(story, 'maybePreloadBookend_').returns();
       sandbox.stub(utils, 'setAttributeInMutate').callsFake(
           (el, attr) => el.element.setAttribute(attr, ''));
@@ -691,7 +704,6 @@ describes.realWin('amp-story', {
 
   describe('amp-story audio', () => {
     it('should register and preload the background audio', () => {
-      sandbox.stub(win.history, 'replaceState');
       const src = 'https://example.com/foo.mp3';
       story.element.setAttribute('background-audio', src);
       const registerStub = sandbox.stub(story.mediaPool_, 'register');
@@ -782,7 +794,6 @@ describes.realWin('amp-story', {
     });
 
     it('should mute the page and unmute the next page upon navigation', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
       story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
@@ -848,7 +859,6 @@ describes.realWin('amp-story', {
   // is checked in.
   describe('amp-access navigation', () => {
     it.skip('should set the access state to true if next page blocked', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
       story.buildCallback();
@@ -866,7 +876,6 @@ describes.realWin('amp-story', {
     });
 
     it.skip('should not navigate if next page is blocked by paywall', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
       story.buildCallback();

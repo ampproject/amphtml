@@ -22,15 +22,16 @@ import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {computedStyle, setImportantStyles} from '../../../src/style';
-import {createCustomEvent} from '../../../src/event-helper';
+import {computedStyle, px, setImportantStyles} from '../../../src/style';
+import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/friendly-iframe-embed';
+import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
-import {tryFocus} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -60,17 +61,37 @@ const AnimationPresets = {
   'fly-in-bottom': {
     openStyle: dict({'transform': 'translate(0, 0)'}),
     closedStyle: dict({'transform': 'translate(0, 100%)'}),
-    durationSeconds: 0.3,
+    durationSeconds: 0.2,
   },
   'fly-in-top': {
     openStyle: dict({'transform': 'translate(0, 0)'}),
     closedStyle: dict({'transform': 'translate(0, -100%)'}),
-    durationSeconds: 0.3,
+    durationSeconds: 0.2,
   },
 };
 
 /** @private @const {string} */
 const DEFAULT_ANIMATION = 'fade-in';
+
+/**
+ * @param {!Element} ctx
+ * @return {!Element}
+ */
+function renderCloseButtonHeader(ctx) {
+  return htmlFor(ctx)`
+    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
+      <div>Ad</div>
+      <i-amphtml-ad-close-button class="amp-ad-close-button">
+      </i-amphtml-ad-close-button>
+    </i-amphtml-ad-close-header>`;
+}
+
+/**
+ * @param {!Element} header
+ */
+function showCloseButtonHeader(header) {
+  header.classList.add('amp-ad-close-header');
+}
 
 class AmpLightbox extends AMP.BaseElement {
 
@@ -117,6 +138,9 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private @const {string} */
     this.animationPreset_ =
         (element.getAttribute('animate-in') || DEFAULT_ANIMATION).toLowerCase();
+
+    /** @private {?Element} */
+    this.closeButtonHeader_ = null;
 
     /** @const {function()} */
     this.boundReschedule_ = debounce(this.win, () => {
@@ -281,6 +305,7 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     this.handleAutofocus_();
+    this.maybeRenderCloseButtonHeader_();
 
     // TODO (jridgewell): expose an API accomodating this per PR #14676
     this.mutateElement(() => {
@@ -307,6 +332,37 @@ class AmpLightbox extends AMP.BaseElement {
     });
 
     this.active_ = true;
+  }
+
+  /** @private */
+  maybeRenderCloseButtonHeader_() {
+    const {element} = this;
+
+    if (element.getAttribute('close-button') == null) {
+      return;
+    }
+
+    const header = renderCloseButtonHeader(element);
+
+    this.closeButtonHeader_ = header;
+
+    listenOnce(header, 'click', () => this.close());
+
+    element.insertBefore(header, this.container_);
+
+    let headerHeight;
+
+    this.measureMutateElement(() => {
+      headerHeight = header./*OK*/getBoundingClientRect().height;
+    }, () => {
+      // Done in vsync in order to apply transition.
+      showCloseButtonHeader(header);
+
+      setImportantStyles(dev().assertElement(this.container_), {
+        'margin-top': px(headerHeight),
+        'min-height': `calc(100vh - ${px(headerHeight)})`,
+      });
+    });
   }
 
   /**
@@ -338,6 +394,10 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', '');
     }
+    if (this.closeButtonHeader_) {
+      removeElement(this.closeButtonHeader_);
+      this.closeButtonHeader_ = null;
+    }
     this.getViewport().leaveLightboxMode(this.element)
         .then(() => this.finalizeClose_());
   }
@@ -347,13 +407,10 @@ class AmpLightbox extends AMP.BaseElement {
    */
   finalizeClose_() {
     const {element} = this;
-
-    st.setStyles(element, this.getAnimationPresetDef_().closedStyle);
-
     const event = ++this.eventCounter_;
 
     const collapseAndReschedule = () => {
-      // Don't collapse on transitionend if there was a previous event.
+      // Don't collapse on transitionend if there was a subsequent event.
       if (event != this.eventCounter_) {
         return;
       }
@@ -361,8 +418,16 @@ class AmpLightbox extends AMP.BaseElement {
       this.boundReschedule_();
     };
 
-    element.addEventListener('transitionend', collapseAndReschedule);
-    element.addEventListener('animationend', collapseAndReschedule);
+    // Disable transition for ads since the frame gets immediately collapsed.
+    if (this.isInAd_()) {
+      st.resetStyles(element, ['transition']);
+      collapseAndReschedule();
+    } else {
+      element.addEventListener('transitionend', collapseAndReschedule);
+      element.addEventListener('animationend', collapseAndReschedule);
+    }
+
+    st.setStyles(element, this.getAnimationPresetDef_().closedStyle);
 
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -373,6 +438,14 @@ class AmpLightbox extends AMP.BaseElement {
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
     this.triggerEvent_(LightboxEvents.CLOSE);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isInAd_() {
+    return getMode(this.win).runtime == 'inabox' || isInFie(this.element);
   }
 
   /**

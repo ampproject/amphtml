@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {dev} from '../src/log';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isLayoutSizeDefined} from '../src/layout';
 import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
@@ -56,7 +57,7 @@ export class AmpImg extends BaseElement {
           value => mutations[value] !== undefined);
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
-      this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
+      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
   }
 
@@ -126,7 +127,7 @@ export class AmpImg extends BaseElement {
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
-    this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
+    guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);
     this.element.appendChild(this.img_);
   }
@@ -164,24 +165,6 @@ export class AmpImg extends BaseElement {
       this.unlistenLoad_ = null;
     }
     return true;
-  }
-
-  /**
-   * Sets the img src to the first url in the srcset if srcset is defined but
-   * src is not.
-   * @private
-   */
-  guaranteeSrcForSrcsetUnsupportedBrowsers_() {
-    // The <img> tag does not have a src and does not support srcset
-    if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
-      const srcset = this.element.getAttribute('srcset');
-      const matches = /\S+/.exec(srcset);
-      if (matches == null) {
-        return;
-      }
-      const srcseturl = matches[0];
-      this.img_.setAttribute('src', srcseturl);
-    }
   }
 
   /**

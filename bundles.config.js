@@ -104,7 +104,6 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-compare-slider', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-consent',
     version: '0.1',
@@ -152,6 +151,12 @@ exports.extensionBundles = [
   {
     name: 'amp-image-lightbox',
     version: '0.1', options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-image-slider',
+    version: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},
@@ -347,7 +352,7 @@ exports.extensionBundles = [
   {
     name: 'amp-video-iframe',
     version: '0.1',
-    type: TYPES.MISC,
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-video-service',

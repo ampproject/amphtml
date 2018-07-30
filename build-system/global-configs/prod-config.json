@@ -19,6 +19,7 @@
   "amp-apester-media": 1,
   "amp-ima-video": 1,
   "amp-playbuzz": 1,
+  "amp-story-navigation-performance": 0,
   "chunked-amp": 1,
   "amp-auto-ads": 1,
   "amp-auto-ads-adsense-holdout": 0.1,
@@ -37,7 +38,8 @@
   "amp-story-v1": 1,
   "expAdsenseUnconditionedCanonical": 0,
   "expAdsenseCanonical": 0,
+  "font-display-swap": 1,
   "amp-date-picker": 1,
-  "url-replacement-v2": 0.5,
+  "url-replacement-v2": 0,
   "inline-styles": 1
 }

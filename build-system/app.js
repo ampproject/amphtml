@@ -1123,6 +1123,7 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
     if (inabox) {
+      file = file.replace(/<html [^>]*>/, '<html amp4ads>');
       file = file.replace(/\/dist\/amp\.js/g, '/dist/amp-inabox.js');
     }
   } else if (mode == 'compiled') {
@@ -1252,6 +1253,7 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
 
   enableCors(req, res, origin, opt_exposeHeaders);
 }
+
 
 function generateInfo(filePath) {
   const mode = pc.env.SERVE_MODE;

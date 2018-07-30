@@ -17,9 +17,10 @@
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-1.0.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 import {renderAsElement} from './simple-template';
 
 
@@ -114,7 +115,7 @@ export class ViewportWarningLayer {
     this.platform_ = Services.platformFor(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;
@@ -133,12 +134,14 @@ export class ViewportWarningLayer {
       return;
     }
 
-    this.isBuilt_ = true;
+    const template = this.getViewportWarningOverlayTemplate_();
+    if (!template) {
+      return;
+    }
 
+    this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
-    this.overlayEl_ =
-        renderAsElement(
-            this.win_.document, this.getViewportWarningOverlayTemplate_());
+    this.overlayEl_ = renderAsElement(this.win_.document, template);
 
     createShadowRootWithStyle(root, this.overlayEl_, CSS);
 
@@ -215,12 +218,18 @@ export class ViewportWarningLayer {
 
   /**
    * Returns the overlay corresponding to the device currently used.
-   * @return {!./simple-template.ElementDef} template
+   * @return {?./simple-template.ElementDef} template
    * @private
    */
   getViewportWarningOverlayTemplate_() {
-    return (this.platform_.isIos() || this.platform_.isAndroid()) ?
-      LANDSCAPE_ORIENTATION_WARNING_TEMPLATE :
-      DESKTOP_SIZE_WARNING_TEMPLATE;
+    if (this.platform_.isIos() || this.platform_.isAndroid()) {
+      return LANDSCAPE_ORIENTATION_WARNING_TEMPLATE;
+    }
+
+    if (!isExperimentOn(this.win_, 'disable-amp-story-desktop')) {
+      return DESKTOP_SIZE_WARNING_TEMPLATE;
+    }
+
+    return null;
   }
 }

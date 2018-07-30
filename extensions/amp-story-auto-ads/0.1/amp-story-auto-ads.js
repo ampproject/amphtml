@@ -61,6 +61,8 @@ const CTA_TYPES = {
   SHOP: 'Shop Now',
   READ: 'Read Now',
   INSTALL: 'Install Now',
+  LISTEN: 'Listen Now',
+  SUBSCRIBE: 'Subscribe Now',
 };
 
 /** @const */

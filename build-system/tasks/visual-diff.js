@@ -32,7 +32,7 @@ const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
 const {gitBranchName, gitCommitterEmail} = require('../git');
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
-const SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
+const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
 const SNAPSHOT_EMPTY_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
@@ -53,6 +53,9 @@ const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
 const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
 const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
+
+const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
+    path.resolve(__dirname, 'visual-diff-wrapper.snippet.js'), 'utf8');
 
 const preVisualDiffTasks =
     (argv.nobuild || argv.verify_status) ? [] : ['build'];
@@ -419,15 +422,29 @@ async function generateSnapshots(percy, page, webpages) {
  */
 async function snapshotWebpages(percy, page, webpages, config) {
   for (const webpage of webpages) {
-    const {url} = webpage;
+    const {url, viewport} = webpage;
     const name = `${webpage.name} (${config})`;
     log('verbose', 'Visual diff test', colors.yellow(name));
 
     await enableExperiments(page, webpage['experiments']);
+
+    const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
+
+    if (viewport) {
+      snapshotOptions.widths = [viewport.width];
+      log('verbose', 'Setting explicit viewport size of',
+          colors.yellow(`${viewport.width}×${viewport.height}`));
+      await page.setViewport({
+        width: viewport.width,
+        height: viewport.height,
+      });
+    }
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
     // Puppeteer is flaky when it comes to catching navigation requests, so
     // ignore timeouts. If this was a real non-loading page, this will be caught
-    // in the resulting Percy build.
+    // in the resulting Percy build. Navigate to an empty page first to support
+    // different webpages that only modify the #anchor name.
+    await page.goto('about:blank');
     await page.goto(`${BASE_URL}/${url}`).catch(() => {});
 
     // Try to wait until there are no more network requests. This method is
@@ -437,7 +454,28 @@ async function snapshotWebpages(percy, page, webpages, config) {
 
     await verifyCssElements(page, url, webpage.forbidden_css,
         webpage.loading_incomplete_css, webpage.loading_complete_css);
-    await percy.snapshot(name, page, SNAPSHOT_OPTIONS);
+
+    if (webpage.enable_percy_javascript) {
+      snapshotOptions.enableJavaScript = true;
+      // Remove all scripts that have an external source, leaving only those
+      // scripts that are inlined in the page inside a <script> tag.
+      await page.evaluate(
+          'document.head.querySelectorAll("script[src]").forEach(' +
+          'node => node./*OK*/remove())');
+    }
+
+    if (viewport) {
+      log('verbose', 'Wrapping viewport-constrained page in an iframe');
+      await page.evaluate(WRAP_IN_IFRAME_SCRIPT
+          .replace(/__WIDTH__/g, viewport.width)
+          .replace(/__HEIGHT__/g, viewport.height));
+      await page.setViewport({
+        width: VIEWPORT_WIDTH,
+        height: VIEWPORT_HEIGHT,
+      });
+    }
+
+    await percy.snapshot(name, page, snapshotOptions);
     await clearExperiments(page);
     log('travis', colors.cyan('●'));
   }
