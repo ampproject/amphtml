@@ -150,7 +150,8 @@ export class ViewportWarningLayer {
     createShadowRootWithStyle(root, this.overlayEl_, CSS);
 
     // Initializes the UI state now that the component is built.
-    this.onUIStateUpdate_(this.storeService_.get(StateProperty.UI_STATE));
+    this.onUIStateUpdate_(/** @type {!UIType} */
+        (this.storeService_.get(StateProperty.UI_STATE)));
 
     this.vsync_.mutate(() => {
       this.storyElement_.insertBefore(root, this.storyElement_.firstChild);

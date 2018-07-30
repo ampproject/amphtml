@@ -332,7 +332,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.isDesktop_()) {
       const uiState =
           isExperimentOn(this.win, 'amp-story-scroll') ?
-              UIType.SCROLL : UIType.DESKTOP;
+            UIType.SCROLL : UIType.DESKTOP;
       this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
     }
 
@@ -1223,7 +1223,7 @@ export class AmpStory extends AMP.BaseElement {
 
     if (this.isDesktop_()) {
       uiState = isExperimentOn(this.win, 'amp-story-scroll') ?
-          UIType.SCROLL : UIType.DESKTOP;
+        UIType.SCROLL : UIType.DESKTOP;
     }
 
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
