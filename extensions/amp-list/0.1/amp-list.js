@@ -90,9 +90,6 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
-
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
   }
@@ -104,10 +101,10 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
 
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
-        TAG, this.viewer_, this.templates_);
+        TAG, viewer, this.templates_);
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
@@ -264,8 +261,6 @@ export class AmpList extends AMP.BaseElement {
   ssrTemplate_() {
     return this.ssrTemplateHelper_.fetchAndRenderTemplate(
         this.element).then(resp => {
-      // TODO(alabiaga): Since this is related to the viewer,
-      // this should be a 3rd log type?
       const data = getData(resp);
       user().assert(
           resp && (typeof data !== 'undefined'),
