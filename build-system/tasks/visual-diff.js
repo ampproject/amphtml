@@ -449,19 +449,20 @@ async function snapshotWebpages(percy, page, webpages) {
     }
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`),
         'on tab', colors.cyan(`#${pageId + 1}`));
+
+    // Navigate to an empty page first to support different webpages that only
+    // modify the #anchor name.
+    await page.goto('about:blank');
+
     // Puppeteer is flaky when it comes to catching navigation requests, so
     // ignore timeouts. If this was a real non-loading page, this will be caught
-    // in the resulting Percy build. Navigate to an empty page first to support
-    // different webpages that only modify the #anchor name.
-    await page.goto('about:blank');
-    await page.goto(`${BASE_URL}/${url}`).catch(() => {});
-
-    // Try to wait until there are no more network requests. This method is
-    // flaky since Puppeteer doesn't always understand Chrome's network
-    // activity, so ignore timeouts.
-    navigationPromises[pageId] =
-        page.waitForNavigation({waitUntil: 'networkidle2'})
-            .then(() => pageId).catch(() => pageId);
+    // in the resulting Percy build. Also attempt to wait until there are no
+    // more network requests. This method is flaky since Puppeteer doesn't
+    // always understand Chrome's network activity, so ignore timeouts again.
+    navigationPromises[pageId] = Promise.all([
+      page.goto(`${BASE_URL}/${url}`),
+      page.waitForNavigation({waitUntil: 'networkidle2'}),
+    ]).then(() => pageId).catch(() => pageId);
   }
 
   while (Object.keys(navigationPromises).length > 0) {
