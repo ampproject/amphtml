@@ -176,8 +176,19 @@ export class AmpImageSlider extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.element.appendChild(this.container_);
       // Ensure ampdoc exists on the amp-imgs
-      this.leftMask_.appendChild(this.leftAmpImage_);
-      this.rightMask_.appendChild(this.rightAmpImage_);
+      if (this.leftLabelWrapper_) {
+        this.leftMask_.insertBefore(this.leftAmpImage_,
+            this.leftLabelWrapper_);
+      } else {
+        this.leftMask_.appendChild(this.leftAmpImage_);
+      }
+
+      if (this.rightLabelWrapper_) {
+        this.rightMask_.insertBefore(this.rightAmpImage_,
+            this.rightLabelWrapper_);
+      } else {
+        this.rightMask_.appendChild(this.rightAmpImage_);
+      }
     });
   }
 
@@ -267,11 +278,12 @@ export class AmpImageSlider extends AMP.BaseElement {
   buildBar_() {
     this.bar_ = this.doc_.createElement('div');
     this.barStick_ = this.doc_.createElement('div');
-    this.container_.appendChild(this.bar_);
     this.bar_.appendChild(this.barStick_);
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
+
+    this.container_.appendChild(this.bar_);
   }
 
   /**
