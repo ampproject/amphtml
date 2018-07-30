@@ -75,6 +75,7 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/cc');
   rimraf.sync('build/fake-module');
   rimraf.sync('build/patched-module');
+  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
@@ -246,6 +247,8 @@ function compile(entryModuleFilenames, outputDir,
       'node_modules/promise-pjs/promise.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
+      'node_modules/document-register-element/build/' +
+          'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.

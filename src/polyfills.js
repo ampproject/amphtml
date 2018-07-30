@@ -23,8 +23,15 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
+import {isExperimentOn} from './experiments';
+import {installCustomElements as registerElement} from
+  'document-register-element/build/document-register-element.patched';
 
-installCustomElements(self, class {});
+if (isExperimentOn(self, 'custom-elements-v1')) {
+  installCustomElements(self, class {});
+} else {
+  registerElement(self, 'auto');
+}
 installDOMTokenListToggle(self);
 installMathSign(self);
 installObjectAssign(self);

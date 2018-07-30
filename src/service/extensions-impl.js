@@ -41,7 +41,10 @@ import {installImg} from '../../builtins/amp-img';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
+import {installCustomElements as registerElement} from
+  'document-register-element/build/document-register-element.patched';
 import {startsWith} from '../string';
 import {toWin} from '../types';
 
@@ -419,7 +422,7 @@ export class Extensions {
     setParentWindow(childWin, parentWin);
 
     // Install necessary polyfills.
-    installPolyfillsInChildWindow(childWin);
+    installPolyfillsInChildWindow(parentWin, childWin);
 
     // Install runtime styles.
     installStylesLegacy(childWin.document, cssText, /* callback */ null,
@@ -659,12 +662,17 @@ export function stubLegacyElements(win) {
 
 /**
  * Install polyfills in the child window (friendly iframe).
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-function installPolyfillsInChildWindow(childWin) {
+function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, class {});
+  if (isExperimentOn(parentWin, 'custom-elements-v1')) {
+    installCustomElements(childWin, class {});
+  } else {
+    registerElement(childWin, 'auto');
+  }
 }
 
 
