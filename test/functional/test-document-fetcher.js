@@ -30,15 +30,21 @@ describe('DocumentFetcher', function() {
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
-    setupMockXhr();
   });
 
   afterEach(() => {
-    sinon.restore();
+    sandbox.restore();
   });
 
   describe('#fetchDocument', () => {
+    it('test XMLHttpResquest', () => {
+      expect(XMLHttpRequest.prototype).to.not.be.null;
+      setupMockXhr();
+      expect(XMLHttpRequest.prototype).to.not.be.null;
+    });
+
     it('should be able to fetch a document', () => {
+      setupMockXhr();
       expect(xhrCreated).to.not.be.null;
     });
   });
