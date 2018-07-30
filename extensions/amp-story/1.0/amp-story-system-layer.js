@@ -16,6 +16,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
@@ -264,16 +265,16 @@ export class SystemLayer {
       this.onCanShowSharingUisUpdate_(show);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
-    }, true /** callToInitialize */);
-
     this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
       this.onHasAudioStateUpdate_(hasAudio);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
+      this.onUIStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
@@ -336,23 +337,6 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to desktop state updates and triggers the desktop UI.
-   * @param {boolean} isDesktop
-   * @private
-   */
-  onDesktopStateUpdate_(isDesktop) {
-    if (isDesktop) {
-      this.buildSharePill_();
-    }
-
-    this.vsync_.mutate(() => {
-      isDesktop ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
-    });
-  }
-
-  /**
    * Reacts to has audio state updates, displays the audio controls if needed.
    * @param {boolean} hasAudio
    * @private
@@ -373,6 +357,23 @@ export class SystemLayer {
       isMuted ?
         this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
         this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+    });
+  }
+
+  /**
+   * Reacts to desktop state updates and triggers the desktop UI.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    if ([UIType.SCROLL, UIType.DESKTOP].includes(uiState)) {
+      this.buildSharePill_();
+    }
+
+    this.vsync_.mutate(() => {
+      uiState === UIType.DESKTOP ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
