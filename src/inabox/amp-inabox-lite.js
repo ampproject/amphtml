@@ -115,7 +115,7 @@ self.document.documentElement.setAttribute('amp-version',
 
 /**
  * Install ampdoc-level services.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Object<string, string>=} opt_initParams
  */
 function installAmpdocServices(ampdoc, opt_initParams) {
