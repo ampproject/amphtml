@@ -15,15 +15,10 @@
  */
 
 import * as sinon from 'sinon';
-import {DocumentFetcher} from '../../src/document-fetcher';
-import {Services} from '../../src/services';
 
 describe('DocumentFetcher', function() {
   let sandbox;
   let xhrCreated;
-  let docFetcher;
-  let ampdocServiceForStub;
-  let ampdocViewerStub;
 
   // Given XHR calls give tests more time.
   this.timeout(5000);
@@ -36,32 +31,15 @@ describe('DocumentFetcher', function() {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     setupMockXhr();
-    ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
-    ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
-    ampdocViewerStub.returns({
-      whenFirstVisible: () => Promise.resolve(),
-    });
-    ampdocServiceForStub.returns({
-      isSingleDoc: () => false,
-      getAmpDoc: () => ampdocViewerStub,
-    });
   });
 
   afterEach(() => {
     sandbox.restore();
-    sandbox.resetBehavior();
   });
 
   describe('#fetchDocument', () => {
-    beforeEach(() => {
-      docFetcher = new DocumentFetcher({
-        location: {href: 'https://acme.com/path'},
-      });
-    });
-
     it('should be able to fetch a document', () => {
       expect(xhrCreated).to.not.be.null;
-      expect(docFetcher).to.not.be.null;
     });
   });
 });
