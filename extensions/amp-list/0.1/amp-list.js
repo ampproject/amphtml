@@ -263,7 +263,7 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_() {
-    constructBatchFetchData(
+    return constructBatchFetchData(
         this.getAmpDoc(),
         this.element,
         this.element.getAttribute('src'),
