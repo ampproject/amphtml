@@ -67,9 +67,6 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {
-  extractUrlExperimentId,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -89,6 +86,7 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -103,8 +101,11 @@ const DOUBLECLICK_BASE_URL =
 /** @const {string} */
 const RTC_SUCCESS = '2';
 
+/** @const {string} */
+const DOUBLECLICK_SRA_EXP = 'doubleclickSraExp';
+
 /** @const @enum{string} */
-const DOUBLECLICK_EXPERIMENT_FEATURE = {
+const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
@@ -291,38 +292,32 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {?string} urlExperimentId
+   * Executes page level experiment diversion and pushes any experiment IDs
+   * onto this.experimentIds.
    * @visibleForTesting
    */
-  setPageLevelExperiments(urlExperimentId) {
+  setPageLevelExperiments() {
     if (!isCdnProxy(this.win) && !isExperimentOn(
         this.win, 'expDfpInvOrigDeprecated')) {
       this.experimentIds.push('21060933');
     }
-    const experimentId = {
-      // SRA
-      '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
-      '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
-      '9': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER,
-    }[urlExperimentId];
-    switch (experimentId) {
-      case undefined:
-        break;
-      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL:
-      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA:
-      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER:
-        // For SRA experiments, do not include pages that are using refresh.
-        if (this.win.document./*OK*/querySelector(
-            'meta[name=amp-ad-enable-refresh], ' +
-            'amp-ad[type=doubleclick][data-enable-refresh]')) {
-          break;
-        }
-      default:
-        dev().info(
-            TAG,
-            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-        this.experimentIds.push(experimentId);
-    }
+    const experimentInfoMap =
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+        // If SRA and refresh are not enabled, select into experiments that
+        // enable by default.
+        [DOUBLECLICK_SRA_EXP]: {
+          isTrafficEligible: () => !this.win.document./*OK*/querySelector(
+              'meta[name=amp-ad-enable-refresh], ' +
+              'amp-ad[type=doubleclick][data-enable-refresh], ' +
+              'meta[name=amp-ad-doubleclick-sra]'),
+          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+              key => RDOUBLECLICK_SRA_EXP_BRANCHES[key]),
+        },
+      });
+    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    Object.keys(setExps).forEach(expName =>
+      setExps[expName] && this.experimentIds.push(setExps[expName]));
   }
 
   /** @private */
@@ -349,15 +344,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
-    this.setPageLevelExperiments(
-        extractUrlExperimentId(this.win, this.element));
+    this.setPageLevelExperiments();
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search)) ||
         !!this.win.document.querySelector(
             'meta[name=amp-ad-doubleclick-sra]') ||
         !!this.experimentIds.filter(exp =>
-          exp == DOUBLECLICK_EXPERIMENT_FEATURE.SRA ||
-          exp == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER).length;
+          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA ||
+          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER).length;
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
