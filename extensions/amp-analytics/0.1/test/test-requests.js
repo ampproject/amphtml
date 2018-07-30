@@ -144,41 +144,24 @@ describes.realWin('Requests', {amp: 1}, env => {
         //Should be number
         const r1 = {'baseUrl': 'r', 'batchInterval': 'invalid'};
         const r2 = {'baseUrl': 'r', 'batchInterval': ['invalid']};
-        try {
-          new RequestHandler(analyticsMock, r1, preconnect, spy, false);
-          throw new Error('should never happen');
-        } catch (e) {
-          expect(e).to.match(/Invalid batchInterval value/);
-        }
-        try {
-          new RequestHandler(analyticsMock, r2, preconnect, spy, false);
-          throw new Error('should never happen');
-        } catch (e) {
-          expect(e).to.match(/Invalid batchInterval value/);
-        }
+        allowConsoleError(() => {
+          expect(() => {
+            new RequestHandler(analyticsMock, r1, preconnect, spy, false);
+            new RequestHandler(analyticsMock, r2, preconnect, spy, false);
+          }).to.throw(/Invalid batchInterval value/);
+        });
 
         //Should be greater than BATCH_INTERVAL_MIN
         const r3 = {'baseUrl': 'r', 'batchInterval': 0.01};
         const r4 = {'baseUrl': 'r', 'batchInterval': [-1, 5]};
         const r5 = {'baseUrl': 'r', 'batchInterval': [1, 0.01]};
-        try {
-          new RequestHandler(analyticsMock, r3, preconnect, spy, false);
-          throw new Error('should never happen');
-        } catch (e) {
-          expect(e).to.match(/Invalid batchInterval value/);
-        }
-        try {
-          new RequestHandler(analyticsMock, r4, preconnect, spy, false);
-          throw new Error('should never happen');
-        } catch (e) {
-          expect(e).to.match(/Invalid batchInterval value/);
-        }
-        try {
-          new RequestHandler(analyticsMock, r5, preconnect, spy, false);
-          throw new Error('should never happen');
-        } catch (e) {
-          expect(e).to.match(/Invalid batchInterval value/);
-        }
+        allowConsoleError(() => {
+          expect(() => {
+            new RequestHandler(analyticsMock, r3, preconnect, spy, false);
+            new RequestHandler(analyticsMock, r4, preconnect, spy, false);
+            new RequestHandler(analyticsMock, r5, preconnect, spy, false);
+          }).to.throw(/Invalid batchInterval value/);
+        });
       });
 
       it('should schedule send request with interval array', function* () {
@@ -371,23 +354,22 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should throw error when defined on non batched request', () => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r', 'batchPlugin': '_ping_'};
-        try {
-          new RequestHandler(analyticsMock, r, preconnect, spy, false);
-        } catch (e) {
-          expect(e).to.match(
-              /batchPlugin cannot be set on non-batched request/);
-        }
+        allowConsoleError(() => {
+          expect(() => {
+            new RequestHandler(analyticsMock, r, preconnect, spy, false);
+          }).to.throw(/batchPlugin cannot be set on non-batched request/);
+        });
       });
 
       it('should throw error with unsupported batchPlugin', () => {
         const spy = sandbox.spy();
         const r =
             {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': 'invalid'};
-        try {
-          new RequestHandler(analyticsMock, r, preconnect, spy, false);
-        } catch (e) {
-          expect(e).to.match(/unsupported batch plugin/);
-        }
+        allowConsoleError(() => {
+          expect(() => {
+            new RequestHandler(analyticsMock, r, preconnect, spy, false);
+          }).to.throw(/unsupported batch plugin/);
+        });
       });
 
       it('should handle batchPlugin function error', function* () {
@@ -556,7 +538,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       function* () {
         const spy = sandbox.spy();
         const r = {
-          'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
+          'baseUrl': 'r1&BASE_VALUE&foo=${foo}',
           'useBody': true,
         };
         const handler = new RequestHandler(
@@ -586,5 +568,39 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
         expect(spy.args[0][2]).to.equal(
             '{"key1":"val1","key2":"val2","key3":"val3","base":"val_base"}');
+      });
+
+  it('should throw error if useBody and extraUrlParams is present in url',
+      function* () {
+        const spy = sandbox.spy();
+        const r = {
+          'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
+          'useBody': true,
+        };
+        const handler = new RequestHandler(
+            analyticsMock, r, preconnect, spy, false);
+        const expansionOptions = new ExpansionOptions({
+          'param1': 'PARAM_1',
+          'param2': 'PARAM_2',
+          'param3': 'PARAM_3',
+          'foo': 'TOUPPERCASE(BASE64(foo))',
+        });
+        const bindings = {
+          'PARAM_1': 'val1',
+          'PARAM_2': () => 'val2',
+          'PARAM_3': Promise.resolve('val3'),
+          'BASE_VALUE': 'val_base',
+        };
+        const params = {
+          'extraUrlParams': {
+            'key1': '${param1}',
+            'key2': '${param2}',
+            'key3': '${param3}',
+            'base': 'BASE_VALUE',
+          },
+        };
+        handler.send({}, params, expansionOptions, bindings);
+        expectAsyncConsoleError(/unable to use extraUrlParams/);
+        yield macroTask();
       });
 });

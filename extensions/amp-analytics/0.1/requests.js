@@ -283,6 +283,10 @@ export class RequestHandler {
         }
         extraUrlParamStrs.requestUrl = requestUrl;
       } else {
+        // Throw user error to avoid payload duplication in body and queryParams
+        user().assert(baseUrl.indexOf('${extraUrlParams}') === -1,
+            'Invalid request: unable to use extraUrlParams' +
+            ' as query string with useBody');
         if (this.batchInterval_) {
           extraUrlParamStrs.requestBody = paramStrs;
         } else {
