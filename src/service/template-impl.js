@@ -166,9 +166,7 @@ export class Templates {
       return Promise.resolve([]);
     }
     return this.getImplementation_(templateElement).then(impl => {
-      return array.map(item => {
-        return this.render_(impl, item);
-      });
+      return array.map(item => this.render_(impl, item));
     });
   }
 
@@ -184,8 +182,7 @@ export class Templates {
    */
   findAndRenderTemplate(parent, data, opt_querySelector) {
     return this.renderTemplate(
-        this.findTemplate(parent, opt_querySelector),
-        data);
+        this.findTemplate(parent, opt_querySelector), data);
   }
 
   /**
@@ -201,8 +198,7 @@ export class Templates {
    */
   findAndRenderTemplateArray(parent, array, opt_querySelector) {
     return this.renderTemplateArray(
-        this.findTemplate(parent, opt_querySelector),
-        array);
+        this.findTemplate(parent, opt_querySelector), array);
   }
 
   /**
