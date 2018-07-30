@@ -375,6 +375,21 @@ function runSanitizerTests() {
       expect(purifyHtml(html))
           .to.equal('<form action-xhr="https://foo.com"></form><p></p>');
     });
+
+    it('should allow <amp-form>-related attributes', () => {
+      expect(purifyHtml('<div submitting></div>'))
+          .to.equal('<div submitting=""></div>');
+      expect(purifyHtml('<div submit-success></div>'))
+          .to.equal('<div submit-success=""></div>');
+      expect(purifyHtml('<div submit-error></div>'))
+          .to.equal('<div submit-error=""></div>');
+      expect(purifyHtml('<div verify-error></div>'))
+          .to.equal('<div verify-error=""></div>');
+      expect(purifyHtml('<span visible-when-invalid="valueMissing"></span>'))
+          .to.equal('<span visible-when-invalid="valueMissing"></span>');
+      expect(purifyHtml('<span validation-for="form1"></span>'))
+          .to.equal('<span validation-for="form1"></span>');
+    });
   });
 
   describe('purifyTagsForTripleMustache', () => {
