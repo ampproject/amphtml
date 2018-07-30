@@ -170,10 +170,6 @@ See [documentation](http://dev.poool.fr/doc/sdk#login_button_enabled) for more i
 Enable/disable paywall signature, shown under post content when the post has been unlocked by user.
 See [documentation](http://dev.poool.fr/doc/sdk#signature_enabled) for more informations.
 
-##### userIsPremium
-Used to tell Poool if current user is a premium user or not.
-See [documentation](http://dev.poool.fr/doc/sdk#user_is_premium) for more informations.
-
 ##### videoClient
 Set default video client (vast, googima) for video widget.
 See [documentation](http://dev.poool.fr/doc/sdk#video_client) for more informations.
