@@ -22,13 +22,13 @@ import {
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from './url';
+import {dev, user} from './log';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
-import {user} from './log';
 
 /** @private @const {string} */
 const TAG = 'purifier';
@@ -221,7 +221,7 @@ const PURIFY_CONFIG = {
 
 /**
  * @param {string} dirty
- * @return {{clean: !Node, bindings: Array<{element: !Element, property: string, expression: string}>}}
+ * @return {{clean: !Element, bindings: !Array<!JsonObject>}}
  */
 export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
@@ -242,9 +242,9 @@ export function purifyHtml(dirty) {
   let allowedAttributes;
   const allowedAttributesChanges = [];
 
-  // List of <amp-bind> bindings (tuple of tag, property, expression).
+  // List of <amp-bind> bindings -- {tag, property, expression} tuples.
   // Collecting them here is an optimization to obviate DOM scanning later.
-  const bindings = /** @type {!Array<{element: !Element, property: string, expression: string}>} */ ([]);
+  const bindings = /** @type {!Array<!JsonObject>} */ ([]);
 
   /**
    * @param {!Node} node
@@ -334,7 +334,11 @@ export function purifyHtml(dirty) {
     if (binding) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`data-amp-bind-${property}`, attrValue);
-      bindings.push({element: node, property, expression: attrValue});
+      bindings.push(dict({
+        'element': dev().assertElement(node),
+        'property': property,
+        'expression': attrValue,
+      }));
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {

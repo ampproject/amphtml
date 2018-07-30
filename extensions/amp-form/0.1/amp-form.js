@@ -825,18 +825,16 @@ export class AmpForm {
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
-        p = this.templates_.findAndRenderTemplate(container, data)
-            .then(rendered => {
-              rendered.id = messageId;
-              rendered.setAttribute('i-amphtml-rendered', '');
-              container.appendChild(rendered);
-              const renderedEvent = createCustomEvent(
-                  this.win_,
-                  AmpEvents.DOM_UPDATE,
-                  /* detail */ null,
-                  {bubbles: true});
-              container.dispatchEvent(renderedEvent);
-            });
+        p = this.templates_.findAndRenderTemplate(container, data).then(r => {
+          const {element} = r;
+          element.id = messageId;
+          element.setAttribute('i-amphtml-rendered', '');
+          container.appendChild(element);
+
+          const event = createCustomEvent(this.win_,
+              AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
+          container.dispatchEvent(event);
+        });
       } else {
         // TODO(vializ): This is to let AMP know that the AMP elements inside
         // this container are now visible so they get scheduled for layout.
@@ -847,11 +845,9 @@ export class AmpForm {
         this.resources_.mutateElement(container, () => {});
       }
     }
-
     if (getMode().test) {
       this.renderTemplatePromise_ = p;
     }
-
     return p;
   }
 

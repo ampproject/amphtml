@@ -97,8 +97,7 @@ export class AmpMustache extends AMP.BaseTemplate {
       html = mustacheRender(this.template_, mustacheData);
     }
     const {clean, bindings} = purifyHtml(html);
-    this.bindings = bindings; // HACK(choumx)
-    return clean;
+    return {element: clean, metadata: dict({'bindings': bindings})};
   }
 }
 

@@ -26,7 +26,6 @@ import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
  * {@link https://docs.google.com/document/d/1q-5MPQHnOHLF_uL7lQsGZdzuBgrPTkCy2PdRP-YCbOw/edit#}
  */
 
-
 /**
  * @typedef {function(new:BaseTemplate, !Element, !Window)}
  */
@@ -69,7 +68,7 @@ export class BaseTemplate {
   /**
    * To be implemented by subclasses.
    * @param {!JsonObject|string} unusedData
-   * @return {!Element}
+   * @return {!RenderedTemplateDef}
    */
   render(unusedData) {
     throw new Error('Not implemented');
@@ -146,7 +145,7 @@ export class Templates {
    * Renders the specified template element using the supplied data.
    * @param {!Element} templateElement
    * @param {!JsonObject} data
-   * @return {!Promise<!Element>}
+   * @return {!Promise<!RenderedTemplateDef>}
    */
   renderTemplate(templateElement, data) {
     return this.getImplementation_(templateElement).then(impl => {
@@ -159,7 +158,7 @@ export class Templates {
    * and returns an array of resulting elements.
    * @param {!Element} templateElement
    * @param {!Array<!JsonObject>} array
-   * @return {!Promise<!Array<!Element>>}
+   * @return {!Promise<!Array<!RenderedTemplateDef>>}
    */
   renderTemplateArray(templateElement, array) {
     if (array.length == 0) {
@@ -178,7 +177,7 @@ export class Templates {
    * @param {!Element} parent
    * @param {!JsonObject} data
    * @param {string=} opt_querySelector
-   * @return {!Promise<!Element>}
+   * @return {!Promise<!RenderedTemplateDef>}
    */
   findAndRenderTemplate(parent, data, opt_querySelector) {
     return this.renderTemplate(
@@ -194,7 +193,7 @@ export class Templates {
    * @param {!Element} parent
    * @param {!Array<!JsonObject>} array
    * @param {string=} opt_querySelector
-   * @return {!Promise<!Array<!Element>>}
+   * @return {!Promise<!Array<!RenderedTemplateDef>>}
    */
   findAndRenderTemplateArray(parent, array, opt_querySelector) {
     return this.renderTemplateArray(
@@ -224,12 +223,6 @@ export class Templates {
     user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
     return templateElement;
-  }
-
-  /** TODO */
-  findTemplateImplementation(parent, opt_querySelector) {
-    const template = this.findTemplate(parent, opt_querySelector);
-    return this.getImplementation_(template);
   }
 
   /**
@@ -337,7 +330,7 @@ export class Templates {
   /**
    * @param {!BaseTemplate} impl
    * @param {!JsonObject} data
-   * @return {!Element}
+   * @return {!RenderedTemplateDef}
    * @private
    */
   render_(impl, data) {

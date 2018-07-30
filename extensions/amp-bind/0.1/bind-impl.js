@@ -379,15 +379,23 @@ export class Bind {
         'Timed out waiting for amp-bind to process rendered template.');
   }
 
-  /** TODO */
-  ingestAndApply(ingestable) {
+  /**
+   * @param {!Array<!JsonObject>} ingestible
+   * @return {!Promise}
+   */
+  ingestAndApply(ingestible) {
+    // TODO: Still need to remove old bindings.
+    // TODO: Polish the implementation of this function.
+
     return this.initializePromise_.then(() => {
       const bindings = /** @type {!Array<!BindBindingDef>} */ ([]);
       const boundElements = /** @type {!Array<!BoundElementDef>} */ ([]);
       const expressionToElements = /** @type {!Object<string, !Array<!Element>>} */ (map());
 
-      ingestable.forEach(i => {
-        const {element, property, expression} = i;
+      ingestible.forEach(i => {
+        const element = i['element'];
+        const property = i['property'];
+        const expression = i['expression'];
 
         const boundProperty = {property, expressionString: expression, previousResult: undefined};
         const index = findIndex(boundElements, be => be.element === element);
@@ -419,7 +427,7 @@ export class Bind {
           }
         });
 
-        const elements = ingestable.map(i => i.element);
+        const elements = ingestible.map(i => i.element);
         return this.evaluate_().then(results =>
           this.applyElements_(results, elements));
       });

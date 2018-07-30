@@ -86,7 +86,8 @@ export class AmpMustache extends AMP.BaseTemplate {
       }
       html = mustacheRender(this.template_, mustacheData);
     }
-    return this.serializeHtml_(html);
+    const element = this.serializeHtml_(html);
+    return {element, metadata: null};
   }
 
   /**
