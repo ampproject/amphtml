@@ -66,6 +66,14 @@ export let FetchInitDef;
 export let FetchInitJsonDef;
 
 /**
+ * @typedef {{
+ *  xhrUrl: string,
+ *  fetchOpt: !JsonObject
+ * }}
+ */
+export let FetchData;
+
+/**
  * A record version of `XMLHttpRequest` that has all the necessary properties
  * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
  * serialized response returned by the viewer.
@@ -203,65 +211,12 @@ export class Xhr {
         return;
       }
       const messagePayload = dict({
-        'originalRequest': this.toStructuredCloneable_(input, init),
+        'originalRequest': toStructuredCloneable(input, init),
       });
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
             this.fromStructuredCloneable_(response, init.responseType));
     });
-  }
-
-  /**
-   * Serializes a fetch request so that it can be passed to `postMessage()`,
-   * i.e., can be cloned using the
-   * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
-   *
-   * The request is serialized in the following way:
-   *
-   * 1. If the `init.body` is a `FormData`, set content-type header to
-   * `multipart/form-data` and transform `init.body` into an
-   * `!Array<!Array<string>>` holding the list of form entries, where each
-   * element in the array is a form entry (key-value pair) represented as a
-   * 2-element array.
-   *
-   * 2. Return a new object having properties `input` and the transformed
-   * `init`.
-   *
-   * The serialized request is assumed to be de-serialized in the following way:
-   *
-   * 1.If content-type header starts with `multipart/form-data`
-   * (case-insensitive), transform the entry array in `init.body` into a
-   * `FormData` object.
-   *
-   * 2. Pass `input` and transformed `init` to `fetch` (or the constructor of
-   * `Request`).
-   *
-   * Currently only `FormData` used in `init.body` is handled as it's the only
-   * type being used in AMP runtime that needs serialization. The `Headers` type
-   * also needs serialization, but callers should not be passing `Headers`
-   * object in `init`, as that fails `fetchPolyfill` on browsers that don't
-   * support fetch. Some serialization-needing types for `init.body` such as
-   * `ArrayBuffer` and `Blob` are already supported by the structured clone
-   * algorithm. Other serialization-needing types such as `URLSearchParams`
-   * (which is not supported in IE and Safari) and `FederatedCredentials` are
-   * not used in AMP runtime.
-   *
-   * @param {string} input The URL of the XHR to convert to structured
-   *     cloneable.
-   * @param {!FetchInitDef} init The options of the XHR to convert to structured
-   *     cloneable.
-   * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
-   *     cloneable request.
-   * @private
-   */
-  toStructuredCloneable_(input, init) {
-    const newInit = Object.assign({}, init);
-    if (isFormDataWrapper(init.body)) {
-      newInit.headers = newInit.headers || {};
-      newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
-      newInit.body = fromIterator(init.body.entries());
-    }
-    return {input, init: newInit};
   }
 
   /**
@@ -824,4 +779,56 @@ export function xhrServiceForTesting(window) {
  */
 export function installXhrService(window) {
   registerServiceBuilder(window, 'xhr', Xhr);
+}
+
+/**
+  * Serializes a fetch request so that it can be passed to `postMessage()`,
+  * i.e., can be cloned using the
+  * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
+  *
+  * The request is serialized in the following way:
+  *
+  * 1. If the `init.body` is a `FormData`, set content-type header to
+  * `multipart/form-data` and transform `init.body` into an
+  * `!Array<!Array<string>>` holding the list of form entries, where each
+  * element in the array is a form entry (key-value pair) represented as a
+  * 2-element array.
+  *
+  * 2. Return a new object having properties `input` and the transformed
+  * `init`.
+  *
+  * The serialized request is assumed to be de-serialized in the following way:
+  *
+  * 1.If content-type header starts with `multipart/form-data`
+  * (case-insensitive), transform the entry array in `init.body` into a
+  * `FormData` object.
+  *
+  * 2. Pass `input` and transformed `init` to `fetch` (or the constructor of
+  * `Request`).
+  *
+  * Currently only `FormData` used in `init.body` is handled as it's the only
+  * type being used in AMP runtime that needs serialization. The `Headers` type
+  * also needs serialization, but callers should not be passing `Headers`
+  * object in `init`, as that fails `fetchPolyfill` on browsers that don't
+  * support fetch. Some serialization-needing types for `init.body` such as
+  * `ArrayBuffer` and `Blob` are already supported by the structured clone
+  * algorithm. Other serialization-needing types such as `URLSearchParams`
+  * (which is not supported in IE and Safari) and `FederatedCredentials` are
+  * not used in AMP runtime.
+  *
+  * @param {string} input The URL of the XHR to convert to structured
+  *     cloneable.
+  * @param {!FetchInitDef} init The options of the XHR to convert to structured
+  *     cloneable.
+  * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
+  *     cloneable request.
+  */
+export function toStructuredCloneable(input, init) {
+  const newInit = Object.assign({}, init);
+  if (isFormDataWrapper(init.body)) {
+    newInit.headers = newInit.headers || {};
+    newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
+    newInit.body = fromIterator(init.body.entries());
+  }
+  return {input, init: newInit};
 }

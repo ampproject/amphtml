@@ -23,6 +23,7 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
+  constructBatchFetchData,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
@@ -230,10 +231,10 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
+    const itemsExpr = this.element.getAttribute('items') || 'items';
     if (this.ssrTemplateHelper_.isSupported()) {
-      return this.ssrTemplate_(this.element.getAttribute('src'));
+      return this.ssrTemplate_();
     } else {
-      const itemsExpr = this.element.getAttribute('items') || 'items';
       return this.fetch_(itemsExpr).then(items => {
         if (this.element.hasAttribute('single-item')) {
           user().assert(typeof items !== 'undefined',
@@ -262,21 +263,23 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_() {
-    return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+    constructBatchFetchData(
+        this.getAmpDoc(),
         this.element,
-        // TODO(alabiaga): build fetch object here...pull out logic from
-        // batchFetchJsonFor..
-        this.ssrTemplateHelper_.buildFetchDataObj_())
-        .then(resp => {
-          const data = getData(resp);
-          user().assert(
-              resp && (typeof data !== 'undefined'),
-              'Response missing the \'data\' field');
-          return this.scheduleRender_(data);
-        }, error => {
-          throw user().createError('Error proxying amp-list templates', error);
-        }).then(
-            () => this.onFetchSuccess_(), error => this.onFetchError_(error));
+        this.element.getAttribute('src'),
+        this.getPolicy_()).then(batchFetchData => {
+      return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+          this.element, batchFetchData);
+    }).then(resp => {
+      const data = getData(resp);
+      user().assert(
+          resp && (typeof data !== 'undefined'),
+          'Response missing the \'data\' field');
+      return this.scheduleRender_(data);
+    }, error => {
+      throw user().createError('Error proxying amp-list templates', error);
+    }).then(
+        () => this.onFetchSuccess_(), error => this.onFetchError_(error));
   }
 
   /**
@@ -420,16 +423,24 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    const ampdoc = this.getAmpDoc();
+    return batchFetchJsonFor(
+        this.getAmpDoc(), this.element, itemsExpr, this.getPolicy_());
+  }
+
+  /**
+   * return {UrlReplacementPolicy}
+   */
+  getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     let policy = UrlReplacementPolicy.OPT_IN;
     if (src == this.initialSrc_ ||
-      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+      (getSourceOrigin(src)
+          == getSourceOrigin(this.getAmpDoc().win.location))) {
       policy = UrlReplacementPolicy.ALL;
     }
-    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
+    return policy;
   }
 
   /** @private */

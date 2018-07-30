@@ -22,9 +22,9 @@ import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
-
+import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {FormEvents} from './form-events';
-import {SOURCE_ORIGIN_PARAM} from '../../../src/url';
+import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -34,8 +34,8 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -59,14 +59,6 @@ import {tryResolve} from '../../../src/utils/promise';
 
 /** @type {string} */
 const TAG = 'amp-form';
-
-/**
- * @typedef {{
- *  xhrUrl: string,
- *  fetchOptions: !../../../src/service/xhr-impl.FetchInitDef
- * }}
- */
-let FetchDataObj;
 
 /**
  * A list of external dependencies that can be included in forms.
@@ -243,6 +235,43 @@ export class AmpForm {
       this.handleClearAction_();
     }
     return null;
+  }
+
+  /**
+   * Builds fetch data related info.
+   * @param {string} url
+   * @param {string} method
+   * @param {!Object<string, string>=} opt_extraFields
+   * @return {!../../../src/service/xhr-impl.FetchData}
+   */
+  buildFetchData(url, method, opt_extraFields) {
+    let xhrUrl, body;
+    const isHeadOrGet = method == 'GET' || method == 'HEAD';
+
+    if (isHeadOrGet) {
+      this.assertNoSensitiveFields_();
+      const values = this.getFormAsObject_();
+      if (opt_extraFields) {
+        deepMerge(values, opt_extraFields);
+      }
+      xhrUrl = addParamsToUrl(url, values);
+    } else {
+      xhrUrl = url;
+      body = new FormDataWrapper(this.form_);
+      for (const key in opt_extraFields) {
+        body.append(key, opt_extraFields[key]);
+      }
+    }
+
+    return {
+      'xhrUrl': xhrUrl,
+      'fetchOpt': dict({
+        'body': body,
+        'method': method,
+        'credentials': 'include',
+        'headers': dict({'Accept': 'application/json'}),
+      }),
+    };
   }
 
   /**
@@ -468,7 +497,7 @@ export class AmpForm {
         // and only deal with submit-success or submit-error.
         return this.ssrTemplateHelper_.fetchAndRenderTemplate(
             this.form_,
-            this.buildFetchDataObj_(
+            this.buildFetchData(
                 dev().assertString(this.xhrAction_), this.method_),
             this.getResponseTemplates_());
       }).then(
@@ -587,10 +616,9 @@ export class AmpForm {
    */
   doXhr_(url, method, opt_extraFields) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    const fetchData =
-        this.ssrTemplateHelper_.buildFetchDataObj_(
-            url, method, opt_extraFields);
-    return this.xhr_.fetch(fetchData.xhrUrl, fetchData.fetchOptions);
+    const fetchData = this.buildFetchData(
+        url, method, opt_extraFields);
+    return this.xhr_.fetch(fetchData.xhrUrl, fetchData.fetchOpt);
   }
 
   /**
