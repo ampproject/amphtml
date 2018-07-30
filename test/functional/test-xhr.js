@@ -588,7 +588,7 @@ describe.configure().skipSafari().run('XHR', function() {
         expect(fetchStub).to.be.calledWith('/text.html', {
           method: 'GET',
           headers: {'Accept': 'text/plain'},
-          requireAmpResponseSourceOrigin: true
+          requireAmpResponseSourceOrigin: true,
         });
         return promise.then(res => {
           return res.text();

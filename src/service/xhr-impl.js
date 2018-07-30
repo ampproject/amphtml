@@ -15,11 +15,10 @@
  */
 
 import {Services} from '../services';
-import {assertSuccess, fetchPolyfill, getViewerInterceptResponse, setupInit, setupInput} from '../utils/xhr-utils';
+import {assertSuccess, fetchPolyfill, getViewerInterceptResponse, setupInit, setupInput, verifyAmpCORSHeaders} from '../utils/xhr-utils';
 import {dev, user} from '../log';
 import {
   getCorsUrl,
-  getSourceOrigin,
   parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
@@ -75,10 +74,6 @@ let XMLHttpRequestDef;
 
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
-
-/** @private @const {string} */
-const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
-
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -160,23 +155,7 @@ export class Xhr {
     input = setupInput(this.win, input, init);
 
     return this.fetch_(input, init).then(response => {
-      const allowSourceOriginHeader = response.headers.get(
-          ALLOW_SOURCE_ORIGIN_HEADER);
-      if (allowSourceOriginHeader) {
-        const sourceOrigin = getSourceOrigin(this.win.location.href);
-        // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
-        // ensure that it's equal to the current source origin.
-        user().assert(allowSourceOriginHeader == sourceOrigin,
-            `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
-              ` equal to the current: ${allowSourceOriginHeader}` +
-              ` vs ${sourceOrigin}`);
-      } else if (init.requireAmpResponseSourceOrigin) {
-        // If the `AMP-Access-Control-Allow-Source-Origin` header is not
-        // returned but required, return error.
-        user().assert(false, 'Response must contain the' +
-            ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
-      }
-      return response;
+      return verifyAmpCORSHeaders(this.win, response, init);
     }, reason => {
       const targetOrigin = parseUrlDeprecated(input).origin;
       throw user().createExpectedError('XHR', 'Failed fetching' +

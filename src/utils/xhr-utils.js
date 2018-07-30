@@ -18,7 +18,7 @@ import {Services} from '../services';
 import {dev, user} from '../log';
 import {dict, map} from './object';
 import {fromIterator} from './array';
-import {getCorsUrl, getWinOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
+import {getCorsUrl, getSourceOrigin, getWinOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
@@ -27,6 +27,9 @@ import {utf8Encode} from './bytes';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
+
+/** @private @const {string} */
+const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 
 /**
  * Serializes a fetch request so that it can be passed to `postMessage()`,
@@ -164,6 +167,7 @@ export function fromStructuredCloneable(response, responseType) {
   }
 
   if (isDocumentType) {
+    // TODO(prateekbh): remove this when integrating document fetcher.
     data.responseXML =
         new DOMParser().parseFromString(data.responseText, 'text/html');
   }
@@ -306,6 +310,32 @@ function normalizeMethod_(method) {
   return method;
 }
 
+/**
+ * Verifies if response has the correct headers
+ * @param {!Window} win
+ * @param {!FetchResponse} response
+ * @param {!FetchInitDef} init
+ * @return {!FetchResponse}
+ */
+export function verifyAmpCORSHeaders(win, response, init) {
+  const allowSourceOriginHeader = response.headers.get(
+      ALLOW_SOURCE_ORIGIN_HEADER);
+  if (allowSourceOriginHeader) {
+    const sourceOrigin = getSourceOrigin(win.location.href);
+    // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
+    // ensure that it's equal to the current source origin.
+    user().assert(allowSourceOriginHeader == sourceOrigin,
+        `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+          ` equal to the current: ${allowSourceOriginHeader}` +
+          ` vs ${sourceOrigin}`);
+  } else if (init.requireAmpResponseSourceOrigin) {
+    // If the `AMP-Access-Control-Allow-Source-Origin` header is not
+    // returned but required, return error.
+    user().assert(false, 'Response must contain the' +
+        ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
+  }
+  return response;
+}
 
 // TODO(prateekbh): move everything below this line into the polyfill
 /** @private @enum {number} Allowed fetch responses. */
