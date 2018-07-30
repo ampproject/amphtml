@@ -78,7 +78,7 @@ function log(mode, ...messages) {
       messages.unshift(colors.green('INFO:'));
       break;
     case 'warning':
-      messages.unshift(colors.yellow('YELLOW:'));
+      messages.unshift(colors.yellow('WARNING:'));
       break;
     case 'error':
       messages.unshift(colors.red('ERROR:'));
