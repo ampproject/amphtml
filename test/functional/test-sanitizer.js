@@ -321,7 +321,7 @@ function runSanitizerTests() {
           .to.equal('<span visible-when-invalid="valueMissing"></span>');
       expect(sanitizeHtml('<span validation-for="form1"></span>'))
           .to.equal('<span validation-for="form1"></span>');
-      });
+    });
   });
 
   describe('sanitizeTagsForTripleMustache', () => {
