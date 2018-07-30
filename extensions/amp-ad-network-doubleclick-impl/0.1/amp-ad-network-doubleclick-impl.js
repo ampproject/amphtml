@@ -302,22 +302,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.experimentIds.push('21060933');
     }
     const experimentInfoMap =
-        /** @type {!Object<string,
+    /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
-        // If SRA and refresh are not enabled, select into experiments that
-        // enable by default.
+        // Only select into SRA experiments if SRA not already explicitly
+        // enabled and refresh is not being used by any slot.
         [DOUBLECLICK_SRA_EXP]: {
           isTrafficEligible: () => !this.win.document./*OK*/querySelector(
               'meta[name=amp-ad-enable-refresh], ' +
               'amp-ad[type=doubleclick][data-enable-refresh], ' +
               'meta[name=amp-ad-doubleclick-sra]'),
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-              key => RDOUBLECLICK_SRA_EXP_BRANCHES[key]),
+              key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
         },
       });
-    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
       setExps[expName] && this.experimentIds.push(setExps[expName]));
+  }
+
+  /**
+   * For easier unit testing.
+   * @param {!Object<string, !../../../src/experiments.ExperimentInfo>} experimentInfoMap
+   */
+  randomlySelectUnsetExperiments_(experimentInfoMap) {
+    return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
   }
 
   /** @private */
@@ -1058,7 +1066,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]') ||
                         this.experimentIds.includes(
-                            DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER)) {
+                            DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER)) {
                       // If publisher has explicitly enabled SRA mode (not
                       // experiment), then assume error is network failure,
                       // collapse slot, reset url to empty string to ensure
