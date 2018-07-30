@@ -18,6 +18,7 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
+  UIType,
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
@@ -109,10 +110,10 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledWith(false);
   });
 
-  it('should toggle the desktop state', () => {
+  it('should toggle the desktop state when setting a UI State', () => {
     const listenerSpy = sandbox.spy();
     storeService.subscribe(StateProperty.DESKTOP_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_DESKTOP, true);
+    storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });

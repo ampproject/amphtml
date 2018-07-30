@@ -30,6 +30,7 @@ import './amp-story-page';
 import {
   Action,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
@@ -329,7 +330,10 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
 
     if (this.isDesktop_()) {
-      this.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
+      const uiState =
+          isExperimentOn(this.win, 'amp-story-scroll') ?
+            UIType.SCROLL : UIType.DESKTOP;
+      this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
     }
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -531,13 +535,13 @@ export class AmpStory extends AMP.BaseElement {
       this.onCurrentPageIdUpdate_(pageId);
     });
 
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
-    }, true /** callToInitialize */);
-
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
       this.onPausedStateUpdate_(isPaused);
     });
+
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
@@ -692,8 +696,8 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
           // button is visible.
-
-          if (!this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+          const uiState = this.storeService_.get(StateProperty.UI_STATE);
+          if (uiState === UIType.MOBILE) {
             this.shareMenu_.build();
           }
 
@@ -1215,10 +1219,16 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     this.updateViewportSizeStyles_();
 
-    const isDesktop = this.isDesktop_();
-    this.storeService_.dispatch(Action.TOGGLE_DESKTOP, isDesktop);
+    let uiState = UIType.MOBILE;
 
-    if (isDesktop) {
+    if (this.isDesktop_()) {
+      uiState = isExperimentOn(this.win, 'amp-story-scroll') ?
+        UIType.SCROLL : UIType.DESKTOP;
+    }
+
+    this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
+
+    if (uiState !== UIType.MOBILE) {
       this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, false);
       return;
     }
@@ -1260,30 +1270,39 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Reacts to desktop state updates.
-   * @param {boolean} isDesktop
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
    * @private
    */
-  onDesktopStateUpdate_(isDesktop) {
-    if (isDesktop) {
-      this.vsync_.mutate(() => {
-        this.element.setAttribute('desktop', '');
-      });
-      if (!this.background_) {
-        this.background_ = new AmpStoryBackground(this.win, this.element);
-        this.background_.attach();
-      }
-      if (this.activePage_) {
-        this.updateBackground_(this.activePage_.element, /* initial */ true);
-      }
-    } else {
-      // Preloads and prerenders the share menu as the share button gets visible
-      // on the mobile UI. No-op if already built.
-      this.shareMenu_.build();
+  onUIStateUpdate_(uiState) {
+    this.vsync_.mutate(() => {
+      this.element.removeAttribute('desktop');
+      this.element.removeAttribute('scroll');
+    });
 
-      this.vsync_.mutate(() => {
-        this.element.removeAttribute('desktop');
-      });
+    switch (uiState) {
+      case UIType.MOBILE:
+        // Preloads and prerenders the share menu as the share button gets
+        // visible on the mobile UI. No-op if already built.
+        this.shareMenu_.build();
+        break;
+      case UIType.DESKTOP:
+        this.vsync_.mutate(() => {
+          this.element.setAttribute('desktop', '');
+        });
+        if (!this.background_) {
+          this.background_ = new AmpStoryBackground(this.win, this.element);
+          this.background_.attach();
+        }
+        if (this.activePage_) {
+          this.updateBackground_(this.activePage_.element, /* initial */ true);
+        }
+        break;
+      case UIType.SCROLL:
+        this.vsync_.mutate(() => {
+          this.element.setAttribute('scroll', '');
+        });
+        break;
     }
   }
 

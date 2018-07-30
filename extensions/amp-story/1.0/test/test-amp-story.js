@@ -20,6 +20,7 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
+  UIType,
 } from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
@@ -198,7 +199,7 @@ describes.realWin('amp-story', {
   it('should not prerender/load the share menu on desktop', () => {
     createPages(story.element, 2);
 
-    story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
+    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
 
     const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
 
