@@ -65,7 +65,7 @@ describe('DocumentFetcher', function() {
         expect(docFetcher.viewerResponded_).to.equals(false);
         expect(doc.firstChild.textContent).to.equals('Foo');
       });
-      xhrCreated.then(xhr => {
+      return xhrCreated.then(xhr => {
         expect(xhr.requestHeaders['Accept']).to.equal('text/html');
         xhr.respond(
             200, {
@@ -76,8 +76,8 @@ describe('DocumentFetcher', function() {
             },
             '<html><body>Foo</body></html>');
         expect(xhr.responseType).to.equal('document');
+        return promise;
       });
-      return promise;
     });
   });
 });
