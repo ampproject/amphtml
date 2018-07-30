@@ -560,7 +560,7 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
   - `timerSpec` Specification for triggers of type `timer`. The unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
-    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
+    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. An addtional request will be triggered when the `maxTimerLength` has been reached. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
 ```javascript
@@ -666,6 +666,20 @@ In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpos
 ```
 
 To learn more, see [this example that implements iframe transport client API] (https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed.
+
+##### Referrer Policy
+
+Referrer policy can be specified as `referrerPolicy` field in the `transport` config. Currently only `no-referrer` is supported.
+Referrer policy is only available for `image` transport. If `referrerPolicy: no-referrer` is specified, the `beacon` & `xhrpost` transports are overridden to `false`.
+
+```javascript
+"transport": {
+  "beacon": false,
+  "xhrpost": false,
+  "image": true,
+  "referrerPolicy": "no-referrer"
+}
+```
 
 ## Validation
 

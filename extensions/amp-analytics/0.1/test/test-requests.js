@@ -16,8 +16,7 @@
 
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
-import {REPLACEMENT_EXP_NAME} from '../../../../src/service/url-replacements-impl';
-import {RequestHandler, expandConfigRequest} from '../requests';
+import {RequestHandler} from '../requests';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -397,11 +396,8 @@ describes.realWin('Requests', {amp: 1}, env => {
         const handler = new RequestHandler(
             analyticsMock, r, preconnect, spy, false);
         // Overwrite batchPlugin function
-        handler.batchingPlugin_ = () => {
-          allowConsoleError(() => {
-            throw new Error('test');
-          });
-        };
+        handler.batchingPlugin_ = () => {throw new Error('test');};
+        expectAsyncConsoleError(/test/);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
         clock.tick(1000);
@@ -456,38 +452,6 @@ describes.realWin('Requests', {amp: 1}, env => {
     });
   });
 
-  //TODO: Move the expansion related tests here.
-
-  it('expandConfigRequest function', () => {
-    let config = {
-      'requests': {
-        'foo': 'test',
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'baz': {
-          'baseUrl': 'test2',
-        },
-        'foobar': {},
-      },
-    };
-    config = expandConfigRequest(config);
-    expect(config).to.jsonEqual({
-      'requests': {
-        'foo': {
-          'baseUrl': 'test',
-        },
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'baz': {
-          'baseUrl': 'test2',
-        },
-        'foobar': {},
-      },
-    });
-  });
-
   it('should replace dynamic bindings', function* () {
     const spy = sandbox.spy();
     const r = {
@@ -521,7 +485,7 @@ describes.realWin('Requests', {amp: 1}, env => {
   });
 
   it('should replace bindings with v2 flag', function* () {
-    toggleExperiment(env.win, REPLACEMENT_EXP_NAME, true);
+    toggleExperiment(env.win, 'url-replacement-v2', true);
     const spy = sandbox.spy();
     const r = {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
@@ -532,8 +496,9 @@ describes.realWin('Requests', {amp: 1}, env => {
       'param1': 'PARAM_1',
       'param2': 'PARAM_2',
       'param3': 'PARAM_3',
-      'foo': 'TOUPPERCASE(BASE64(foo))',
-    });
+      'foo': '$TOUPPERCASE($BASE64(foo))',
+    }, /* opt_iterations */ 2, /* opt_noencode */ true);
+
     const bindings = {
       'PARAM_1': 'val1',
       'PARAM_2': () => 'val2',
@@ -552,7 +517,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledOnce;
     expect(spy.args[0][0]).to.equal(
         'r1&key1=val1&key2=val2&key3=val3&val_base&foo=ZM9V');
-    toggleExperiment(env.win, REPLACEMENT_EXP_NAME);
+    toggleExperiment(env.win, 'url-replacement-v2');
   });
 
   it('should send empty body when useBody is not set',

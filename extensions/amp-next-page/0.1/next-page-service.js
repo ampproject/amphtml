@@ -42,7 +42,7 @@ const TAG = 'amp-next-page';
  * @typedef {{
  *   ampUrl: string,
  *   amp: ?Object,
- *   recUnit: ?Element,
+ *   recUnit: {el: ?Element, isObserving: boolean},
  *   cancelled: boolean
  * }}
  */
@@ -140,17 +140,14 @@ export class NextPageService {
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
         new MultidocManager(win, Services.ampdocServiceFor(win),
-          Services.extensionsFor(win), Services.timerFor(win));
+            Services.extensionsFor(win), Services.timerFor(win));
 
     installPositionObserverServiceForDoc(ampDoc);
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
-    this.documentRefs_.push({
-      ampUrl: win.document.location.href,
-      amp: {title: win.document.title},
-      recUnit: null,
-      cancelled: false,
-    });
+    const documentRef =
+        createDocumentRef(win.document.location.url, win.document.title);
+    this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
 
     this.viewport_.onScroll(() => this.scrollHandler_());
@@ -219,12 +216,7 @@ export class NextPageService {
   appendNextArticle_() {
     if (this.nextArticle_ < this.config_.pages.length) {
       const next = this.config_.pages[this.nextArticle_];
-      const documentRef = {
-        ampUrl: next.ampUrl,
-        amp: null,
-        recUnit: null,
-        cancelled: false,
-      };
+      const documentRef = createDocumentRef(next.ampUrl);
       this.documentRefs_.push(documentRef);
 
       const container = this.win_.document.createElement('div');
@@ -235,7 +227,7 @@ export class NextPageService {
 
       const articleLinks = this.createArticleLinks_(this.nextArticle_);
       container.appendChild(articleLinks);
-      documentRef.recUnit = articleLinks;
+      documentRef.recUnit.el = articleLinks;
 
       const shadowRoot = this.win_.document.createElement('div');
       container.appendChild(shadowRoot);
@@ -265,13 +257,16 @@ export class NextPageService {
               return;
             }
 
-            this.positionObserver_.unobserve(articleLinks);
+            if (documentRef.recUnit.isObserving) {
+              this.positionObserver_.unobserve(articleLinks);
+              documentRef.recUnit.isObserving = true;
+            }
             this.resources_.mutateElement(container, () => {
               try {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
 
-                setStyle(documentRef.recUnit, 'display', 'none');
+                setStyle(documentRef.recUnit.el, 'display', 'none');
                 this.documentQueued_ = false;
                 resolve();
               } catch (e) {
@@ -415,8 +410,10 @@ export class NextPageService {
    */
   articleLinksPositionUpdate_(documentRef) {
     documentRef.cancelled = true;
-    if (documentRef.recUnit) {
-      this.positionObserver_.unobserve(documentRef.recUnit);
+    if (documentRef.recUnit.isObserving) {
+      this.positionObserver_.unobserve(
+          dev().assertElement(documentRef.recUnit.el));
+      documentRef.recUnit.isObserving = false;
     }
   }
 
@@ -447,8 +444,8 @@ export class NextPageService {
 
     const urlService = Services.urlForDoc(dev().assertElement(this.element_));
     const {title} = documentRef.amp;
-    const {pathname} = urlService.parse(documentRef.ampUrl);
-    this.win_.history.replaceState({}, title, pathname);
+    const {pathname, search} = urlService.parse(documentRef.ampUrl);
+    this.win_.history.replaceState({}, title, pathname + search);
   }
 
   /**
@@ -463,4 +460,23 @@ export class NextPageService {
     const vars = {toURL, fromURL};
     triggerAnalyticsEvent(dev().assertElement(this.element_), eventType, vars);
   }
+}
+
+/**
+ * Creates a new {@link DocumentRef} for the specified URL.
+ * @param {string} ampUrl AMP URL of the document.
+ * @param {string=} title Document title, if known before loading.
+ * @return {!DocumentRef} Ref object initialised with the given URL.
+ */
+function createDocumentRef(ampUrl, title) {
+  const amp = (title) ? {title} : null;
+  return {
+    ampUrl,
+    amp,
+    recUnit: {
+      el: null,
+      isObserving: false,
+    },
+    cancelled: false,
+  };
 }

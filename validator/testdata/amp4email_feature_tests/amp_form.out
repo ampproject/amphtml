@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -86,6 +86,14 @@ amp4email_feature_tests/amp_form.html:67:4 The attribute '[type]' may not appear
 |      <div submitting>
 >>     ^~~~~~~~~
 amp4email_feature_tests/amp_form.html:71:4 The attribute 'submitting' may not appear in tag 'div'. [DISALLOWED_HTML]
+|        Submitting form...
+|      </div>
+|    </form>
+|    <!-- Invalid: invalid usage of submitting attribute -->
+|    <form method="get" action-xhr="https://example.com/subscribe">
+|      <div submitting template="mytemplate">
+>>     ^~~~~~~~~
+amp4email_feature_tests/amp_form.html:77:4 The attribute 'submitting' may not appear in tag 'FORM DIV [submit-success][template]'. [DISALLOWED_HTML]
 |        Submitting form...
 |      </div>
 |    </form>

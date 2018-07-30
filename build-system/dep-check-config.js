@@ -39,6 +39,14 @@ exports.rules = [
   // Global rules
   {
     filesMatching: '**/*.js',
+    mustNotDependOn: 'src/video-iframe-integration.js',
+    whitelist: [
+      // Do not extend this whitelist.
+      // video-iframe-integration.js is an entry point.
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
       // DEPRECATED! Do not extend this whitelist. Use src/purifier.js instead.
@@ -195,6 +203,8 @@ exports.rules = [
       'extensions/amp-video-service/**->' +
           'src/service/video-service-interface.js',
       'extensions/amp-video/0.1/amp-video.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
           'src/service/video-manager-impl.js',

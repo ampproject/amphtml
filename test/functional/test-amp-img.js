@@ -19,8 +19,8 @@ import {AmpImg, installImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
+import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
@@ -125,54 +125,20 @@ describe('amp-img', () => {
     windowWidth = 320;
     screenWidth = 4000;
     return getImg({
-      srcset: 'bad.jpg 2000w, /examples/img/sample.jpg 1000w',
+      srcset: SRCSET_STRING,
       width: 300,
       height: 200,
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
-      expect(img.hasAttribute('referrerpolicy')).to.be.false;
-    });
-  });
-
-  it('should load larger image on larger screen', () => {
-    windowWidth = 3000;
-    screenWidth = 300;
-    return getImg({
-      srcset: '/examples/img/sample.jpg?large 2000w, ' +
-          '/examples/img/small.jpg?small 1000w',
-      width: 300,
-      height: 200,
-    }).then(ampImg => {
-      const img = ampImg.querySelector('img');
-      expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal(
-          '/examples/img/sample.jpg?large');
-      expect(img.hasAttribute('referrerpolicy')).to.be.false;
-    });
-  });
-
-  it('should fall back to screen width for srcset', () => {
-    windowWidth = 0;
-    screenWidth = 3000;
-    return getImg({
-      srcset: '/examples/img/sample.jpg?large 2000w, ' +
-          '/examples/img/small.jpg?small 1000w',
-      width: 300,
-      height: 200,
-    }).then(ampImg => {
-      const img = ampImg.querySelector('img');
-      expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal(
-          '/examples/img/sample.jpg?large');
+      expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
       expect(img.hasAttribute('referrerpolicy')).to.be.false;
     });
   });
 
   it('should preconnect to the the first srcset url if src is not set', () => {
     return getImg({
-      srcset: 'http://google.com/bad.jpg 2000w, /examples/img/sample.jpg 1000w',
+      srcset: SRCSET_STRING,
       width: 300,
       height: 200,
     }).then(ampImg => {
@@ -181,7 +147,7 @@ describe('amp-img', () => {
       impl.preconnectCallback(true);
       expect(impl.preconnect.url.called).to.be.true;
       expect(impl.preconnect.url).to.have.been.calledWith(
-          'http://google.com/bad.jpg'
+          '/examples/img/hero@1x.jpg'
       );
     });
   });
@@ -212,9 +178,7 @@ describe('amp-img', () => {
     });
   });
 
-  // This test is relevant to the amp-img-native-srcset experiment
   it('should propagate srcset and sizes', () => {
-    toggleExperiment(iframe.win, 'amp-img-native-srcset', true, true);
     return getImg({
       src: '/examples/img/sample.jpg',
       srcset: SRCSET_STRING,
@@ -222,8 +186,6 @@ describe('amp-img', () => {
       width: 320,
       height: 240,
     }).then(ampImg => {
-      expect(isExperimentOn(iframe.win, 'amp-img-native-srcset'))
-          .to.equal(true);
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
       expect(img.getAttribute('sizes')).to
@@ -234,11 +196,14 @@ describe('amp-img', () => {
   describe('#fallback on initial load', () => {
     let el;
     let impl;
-    let toggleElSpy;
+    let toggleFallbackSpy;
+    let togglePlaceholderSpy;
+    let errorSpy;
+    let toggleSpy;
 
     beforeEach(() => {
       el = document.createElement('amp-img');
-      el.setAttribute('src', 'test.jpg');
+      el.setAttribute('src', '/examples/img/sample.jpg');
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
       el.getResources = () => Services.resourcesForDoc(document);
@@ -246,7 +211,11 @@ describe('amp-img', () => {
       impl.createdCallback();
       sandbox.stub(impl, 'getLayoutWidth').returns(100);
       el.toggleFallback = function() {};
-      toggleElSpy = sandbox.spy(el, 'toggleFallback');
+      el.togglePlaceholder = function() {};
+      toggleFallbackSpy = sandbox.spy(el, 'toggleFallback');
+      togglePlaceholderSpy = sandbox.spy(el, 'togglePlaceholder');
+      errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
+      toggleSpy = sandbox.spy(impl, 'toggleFallback');
 
       impl.getVsync = function() {
         return {
@@ -262,149 +231,103 @@ describe('amp-img', () => {
       };
     });
 
-    it('should not display fallback if loading succeeds', () => {
-      sandbox.stub(impl, 'loadPromise').returns(Promise.resolve());
-      const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
-      const toggleSpy = sandbox.spy(impl, 'toggleFallback');
-      impl.buildCallback();
+    afterEach(() => {
+      impl.unlayoutCallback();
+    });
 
+    it('should not display fallback if loading succeeds', () => {
+      impl.buildCallback();
       expect(errorSpy).to.have.not.been.called;
       expect(toggleSpy).to.have.not.been.called;
-      expect(toggleElSpy).to.have.not.been.called;
+      expect(toggleFallbackSpy).to.have.not.been.called;
 
       return impl.layoutCallback().then(() => {
         expect(errorSpy).to.have.not.been.called;
         expect(toggleSpy).to.have.not.been.called;
-        expect(toggleElSpy).to.have.not.been.called;
+        expect(toggleFallbackSpy).to.have.not.been.called;
+        expect(togglePlaceholderSpy).to.have.not.been.called;
       });
     });
 
     it('should display fallback if loading fails', () => {
-      sandbox.stub(impl, 'loadPromise').returns(Promise.reject());
-      const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
-      const toggleSpy = sandbox.spy(impl, 'toggleFallback');
+      el.setAttribute('src', 'non-existent.jpg');
       impl.buildCallback();
       expect(errorSpy).to.have.not.been.called;
       expect(toggleSpy).to.have.not.been.called;
-      expect(toggleElSpy).to.have.not.been.called;
-
+      expect(toggleFallbackSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
         expect(errorSpy).to.be.calledOnce;
         expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
-        expect(toggleElSpy.firstCall.args[0]).to.be.true;
+        expect(toggleFallbackSpy.firstCall.args[0]).to.be.true;
       });
     });
 
     it('should hide child placeholder elements if loading fails', () => {
-      sandbox.stub(impl, 'loadPromise').returns(Promise.reject());
-      const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
-      const toggleSpy = sandbox.spy(impl, 'toggleFallback');
-      const togglePlaceholderSpy = sandbox.spy(impl, 'togglePlaceholder');
+      el.setAttribute('src', 'non-existent.jpg');
       impl.buildCallback();
       expect(errorSpy).to.have.not.been.called;
       expect(toggleSpy).to.have.not.been.called;
       expect(togglePlaceholderSpy).to.have.not.been.called;
-      expect(toggleElSpy).to.have.not.been.called;
-
+      expect(toggleFallbackSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
         expect(errorSpy).to.be.calledOnce;
         expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
         expect(togglePlaceholderSpy).to.be.calledOnce;
         expect(togglePlaceholderSpy.firstCall.args[0]).to.be.false;
-        expect(toggleElSpy.firstCall.args[0]).to.be.true;
+        expect(toggleFallbackSpy.firstCall.args[0]).to.be.true;
       });
     });
 
-    it('should fallback only once', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise');
-      loadStub
-          .onCall(0).returns(Promise.reject())
-          .onCall(1).returns(Promise.resolve());
-      loadStub.returns(Promise.resolve());
-      const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
-      const toggleSpy = sandbox.spy(impl, 'toggleFallback');
+    it('should fallback once and remove fallback once image loads', () => {
+      el.setAttribute('src', 'non-existent.jpg');
       impl.buildCallback();
       expect(errorSpy).to.have.not.been.called;
       expect(toggleSpy).to.have.not.been.called;
-      expect(toggleElSpy).to.have.not.been.called;
-
+      expect(toggleFallbackSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
         expect(errorSpy).to.be.calledOnce;
         expect(toggleSpy).to.be.calledOnce;
         expect(toggleSpy.firstCall.args[0]).to.be.true;
-        expect(toggleElSpy).to.be.calledOnce;
-        expect(toggleElSpy.firstCall.args[0]).to.be.true;
-        expect(errorSpy).to.be.calledOnce;
-        return impl.layoutCallback();
-      }).then(() => {
-        expect(errorSpy).to.be.calledOnce;
-        expect(toggleSpy).to.be.calledOnce;
-        expect(toggleElSpy).to.be.calledOnce;
-        return impl.layoutCallback();
-      }).then(() => {
-        expect(errorSpy).to.be.calledOnce;
-        expect(toggleSpy).to.be.calledOnce;
-        expect(toggleElSpy).to.be.calledOnce;
-      });
-    });
-
-    it('should remove the fallback if src is successfully updated', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise');
-      loadStub.onCall(0).returns(Promise.reject());
-      loadStub.returns(Promise.resolve());
-      impl.buildCallback();
-
-      expect(toggleElSpy).to.have.not.been.called;
-
-      return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy).to.be.calledOnce;
-        expect(toggleElSpy.getCall(0).args[0]).to.be.true;
+        expect(toggleFallbackSpy).to.be.calledOnce;
+        expect(toggleFallbackSpy.firstCall.args[0]).to.be.true;
         expect(impl.img_).to.have.class('i-amphtml-ghost');
-        impl.img_.setAttribute('src', 'test-1000.jpg');
-        return impl.layoutCallback().then(() => {
-          expect(toggleElSpy).to.have.callCount(2);
-          expect(toggleElSpy.getCall(1).args[0]).to.be.false;
-          expect(impl.img_).to.not.have.class('i-amphtml-ghost');
-        });
+
+        // On load, remove fallback
+        const loadEvent = createCustomEvent(iframe.win, 'load');
+        impl.img_.dispatchEvent(loadEvent);
+
+        expect(errorSpy).to.be.calledOnce;
+        expect(toggleSpy).to.have.callCount(2);
+        expect(toggleSpy.getCall(1).args[0]).to.be.false;
+        expect(toggleFallbackSpy).to.have.callCount(2);
+        expect(toggleFallbackSpy.getCall(1).args[0]).to.be.false;
+        expect(impl.img_).to.not.have.class('i-amphtml-ghost');
+
+        // On further error, do not bring back the fallback image
+        const errorEvent = createCustomEvent(iframe.win, 'error');
+        impl.img_.dispatchEvent(errorEvent);
+
+        expect(errorSpy).to.be.calledTwice;
+        expect(toggleSpy).to.have.callCount(2);
+        expect(toggleFallbackSpy).to.have.callCount(2);
+        expect(impl.img_).to.not.have.class('i-amphtml-ghost');
       });
     });
 
-    it('should not remove the fallback if src is not updated', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise');
-      loadStub.onCall(0).returns(Promise.reject());
-      loadStub.returns(Promise.resolve());
+    it('should not remove the fallback if fetching fails', () => {
+      el.setAttribute('src', 'non-existent.jpg');
       impl.buildCallback();
-
       expect(el).to.not.have.class('i-amphtml-ghost');
-      expect(toggleElSpy).to.have.not.been.called;
+      expect(toggleFallbackSpy).to.have.not.been.called;
       return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy).to.be.calledOnce;
-        expect(toggleElSpy.getCall(0).args[0]).to.be.true;
-        expect(impl.img_).to.have.class('i-amphtml-ghost');
-        return impl.layoutCallback().then(() => {
-          expect(toggleElSpy).to.be.calledOnce;
-          expect(impl.img_).to.have.class('i-amphtml-ghost');
-        });
-      });
-    });
-
-    it('should not remove the fallback if src is updated but ' +
-       'fails fetching', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise');
-      loadStub.returns(Promise.reject());
-      impl.buildCallback();
-
-      expect(el).to.not.have.class('i-amphtml-ghost');
-      expect(toggleElSpy).to.have.not.been.called;
-      return impl.layoutCallback().catch(() => {
-        expect(toggleElSpy).to.be.calledOnce;
-        expect(toggleElSpy.getCall(0).args[0]).to.be.true;
+        expect(toggleFallbackSpy).to.be.calledOnce;
+        expect(toggleFallbackSpy.getCall(0).args[0]).to.be.true;
         expect(impl.img_).to.have.class('i-amphtml-ghost');
         impl.img_.setAttribute('src', 'test-1000.jpg');
         return impl.layoutCallback().catch(() => {
-          expect(toggleElSpy).to.be.calledOnce;
+          expect(toggleFallbackSpy).to.be.calledOnce;
           expect(impl.img_).to.have.class('i-amphtml-ghost');
         });
       });
@@ -448,5 +371,7 @@ describe('amp-img', () => {
     expect(img.getAttribute('aria-label')).to.equal('Hello');
     expect(img.getAttribute('aria-labelledby')).to.equal('id2');
     expect(img.getAttribute('aria-describedby')).to.equal('id3');
+    impl.unlayoutCallback();
   });
+
 });

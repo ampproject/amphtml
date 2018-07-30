@@ -27,6 +27,7 @@ import {
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {BaseElement} from '../../../../src/base-element';
+import {Deferred} from '../../../../src/utils/promise';
 import {
   EXPERIMENT_ATTRIBUTE,
 } from '../../../../ads/google/a4a/utils';
@@ -50,11 +51,12 @@ import {
   getTargetingAndExclusions,
   getTfcd,
   isAdTest,
+  sraBlockCallbackHandler,
 } from '../sra-utils';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 const config = {amp: true, allowExternalResources: true};
 
@@ -633,5 +635,65 @@ describes.realWin('Doubleclick SRA', config , env => {
     it('should handle mixture of all possible scenarios', () => executeTest(
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
           {networkId: 8901, instances: 3, invalidInstances: 1}]));
+  });
+
+  describe('#sraBlockCallbackHandler', () => {
+    const creative = 'foo';
+    it('should call top resolver with FetchResponse', () => {
+      const headerObj = {a: 'b', c: 123};
+      const slotDeferred = new Deferred();
+      const sraRequestAdUrlResolvers = [
+        slotDeferred.resolve, {resolve: () => {throw new Error();}}];
+      sraBlockCallbackHandler(
+          creative, headerObj, /* done */false, sraRequestAdUrlResolvers);
+      expect(sraRequestAdUrlResolvers.length).to.equal(1);
+      return slotDeferred.promise.then(fetchResponse => {
+        expect(fetchResponse.headers.get('a')).to.equal('b');
+        expect(fetchResponse.headers.get('c')).to.equal('123');
+        expect(fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase()))
+            .to.equal(XORIGIN_MODE.SAFEFRAME);
+        expect(fetchResponse.headers.has('unknown')).to.be.false;
+        return fetchResponse.arrayBuffer().then(buffer =>
+          expect(utf8Decode(buffer)).to.equal(creative));
+      });
+    });
+
+    it('should handle multiple blocks', () => {
+      const blocks = [
+        {
+          headers: {foo: 'bar', yes: false, who: 123},
+          creative: 'creative1',
+          deferred: new Deferred(),
+        },
+        {
+          headers: {bar: 'foo', no: true, who: 456},
+          creative: '2creative',
+          deferred: new Deferred(),
+        },
+        {
+          headers: {asd: 'asd', gsd: 'sdf', basd: 123},
+          creative: 'crea3tive',
+          deferred: new Deferred(),
+        },
+      ];
+      const promises = [];
+      const resolvers = blocks.map(block => block.deferred.resolve);
+      for (let i = 1; i <= blocks.length; i++) {
+        const {creative, headers, deferred} = blocks[i - 1];
+        sraBlockCallbackHandler(
+            creative, headers, resolvers.length == 1, resolvers);
+        expect(resolvers.length).to.equal(blocks.length - i);
+        promises.push(deferred.promise.then(fetchResponse => {
+          Object.keys(headers).forEach(name => expect(
+              fetchResponse.header.get(name)).to.equal(String(headers[name])));
+          expect(fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase()))
+              .to.equal(XORIGIN_MODE.SAFEFRAME);
+          expect(fetchResponse.headers.has('unknown')).to.be.false;
+          return fetchResponse.arrayBuffer().then(buffer =>
+            expect(utf8Decode(buffer)).to.equal(creative));
+        }));
+      }
+      return promises;
+    });
   });
 });

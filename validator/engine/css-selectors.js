@@ -409,7 +409,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
     const current = tokenStream.current().tokenType;
     if (current === parse_css.TokenType.IDENT) {
       const ident =
-          /** @type {!parse_css.IdentToken} */ (tokenStream.current());
+      /** @type {!parse_css.IdentToken} */ (tokenStream.current());
       value = ident.value;
       tokenStream.consume();
     } else if (current === parse_css.TokenType.STRING) {
@@ -516,7 +516,7 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
   } else if (
     tokenStream.current().tokenType === parse_css.TokenType.FUNCTION_TOKEN) {
     const funcToken =
-        /** @type {!parse_css.FunctionToken} */ (tokenStream.current());
+    /** @type {!parse_css.FunctionToken} */ (tokenStream.current());
     const func = parse_css.extractAFunction(tokenStream);
     tokenStream.consume();
     return firstColon.copyPosTo(

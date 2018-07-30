@@ -132,6 +132,15 @@ export class Url {
   isSecure(url) {
     return isSecureUrlDeprecated(this.parse(url));
   }
+
+  /**
+   * Returns the correct origin for a given window.
+   * @param {!Window} win
+   * @return {string} origin
+   */
+  getWinOrigin(win) {
+    return win.origin || this.parse(win.location.href).origin;
+  }
 }
 
 

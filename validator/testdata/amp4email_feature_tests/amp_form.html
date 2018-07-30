@@ -72,5 +72,11 @@
       Submitting form...
     </div>
   </form>
+  <!-- Invalid: invalid usage of submitting attribute -->
+  <form method="get" action-xhr="https://example.com/subscribe">
+    <div submitting template="mytemplate">
+      Submitting form...
+    </div>
+  </form>
 </body>
 </html>

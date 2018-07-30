@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData} from '../3p/3p';
 import {setStyles} from '../src/style';
 
@@ -25,7 +26,7 @@ function forEachOnObject(theObject, callback) {
   if (typeof theObject === 'object' && theObject !== null) {
     if (typeof callback === 'function') {
       for (const key in theObject) {
-        if (theObject.hasOwnProperty(key)) {
+        if (hasOwn(theObject, key)) {
           callback(key, theObject[key]);
         }
       }

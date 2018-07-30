@@ -104,6 +104,8 @@ import {
   installBuiltinElements,
   installExtensionsService,
 } from '../src/service/extensions-impl';
+import {installCustomElements} from
+  'document-register-element/build/document-register-element.patched';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {
@@ -112,8 +114,6 @@ import {
 import {setStyles} from '../src/style';
 import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';

@@ -265,7 +265,16 @@ export class VariableSource {
     // The keys must be sorted to ensure that the longest keys are considered
     // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
     keys.sort((s1, s2) => s2.length - s1.length);
-    const all = keys.join('|');
+    // Keys that start with a `$` need to be escaped so that they do not
+    // interfere with the regex that is constructed.
+    const escaped = keys.map(key => {
+      if (key[0] === '$') {
+        return '\\' + key;
+      }
+      return key;
+    });
+
+    const all = escaped.join('|');
     // Match the given replacement patterns, as well as optionally
     // arguments to the replacement behind it in parentheses.
     // Example string that match

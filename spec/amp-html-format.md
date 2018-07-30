@@ -23,7 +23,7 @@ AMP HTML is a subset of HTML for authoring content pages such as news articles i
 Being a subset of HTML, it puts some restrictions on the full set of tags and functionality available through HTML but it does not require the development of new rendering engines: existing user agents can render AMP HTML just like all other HTML.
 
 {% call callout('Watch', type='read') %}
-If you're primarily interested in what's allowed in AMP and what isn't, watch our [primer video on AMP's limitations](https://www.youtube.com/watch?v=Gv8A4CktajQ). 
+If you're primarily interested in what's allowed in AMP and what isn't, watch our [primer video on AMP's limitations](https://www.youtube.com/watch?v=Gv8A4CktajQ).
 {% endcall %}
 
 Also, AMP HTML documents can be uploaded to a web server and served just like any other HTML document; no special configuration for the server is necessary. However, they are also designed to be optionally served through specialized AMP serving systems that proxy AMP documents. These documents serve them from their own origin and are allowed to apply transformations to the document that provide additional performance benefits. An incomplete list of optimizations such a serving system might do is:
@@ -218,8 +218,6 @@ Conditional HTML comments are not allowed.
 
 Attribute names starting with `on` (such as `onclick` or `onmouseover`) are disallowed in AMP HTML. The attribute with the literal name `on` (no suffix) is allowed.
 
-The `style` attribute must not be used.
-
 XML-related attributes, such as xmlns, xml:lang, xml:base, and xml:space are disallowed in AMP HTML.
 
 Internal AMP attributes prefixed with `i-amp-` are disallowed in AMP HTML.
@@ -285,7 +283,7 @@ In the following examples `<property>` needs to be in the whitelist above.
 `overflow` (and `overflow-y`, `overflow-x`) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
 
 #### Maximum size
-It is a validation error if the author stylesheet is larger than 50,000 bytes.
+It is a validation error if the author stylesheet or inline styles together are larger than 50,000 bytes.
 
 ### Keyframes stylesheet
 
@@ -440,7 +438,7 @@ Extended templates are not shipped with the AMP runtime and have to be downloade
 Extended components are loaded by including a `<script>` tag in the head of the document like this:
 
 ```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 ```
 
 The `<script>` tag must have an `async` attribute and must have a `custom-template` attribute referencing the type of the
