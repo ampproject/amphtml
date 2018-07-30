@@ -380,18 +380,33 @@ export class Bind {
   }
 
   /**
+   * Similar to scanAndApply(), but instead of being given new elements to scan,
+   * the caller provides an array of {element, property, expression} tuples
+   * that correspond to new bindings. The tuples are provided as JsonObject
+   * since they cross a binary boundary.
+   *
+   * Bindings in `removedElements` are removed after evaluation/apply.
+   *
    * @param {!Array<!JsonObject>} ingestible
+   * @param {!Array<!Element>} removedElements
    * @return {!Promise}
    */
-  ingestAndApply(ingestible) {
-    // TODO: Still need to remove old bindings.
-
+  ingestAndApply(ingestible, removedElements) {
     return this.initializePromise_.then(() => {
+      // Early-out if max number of bindings has already been exceeded.
+      // This can happen since we purge old bindings in `removedElements`
+      // _after_ adding new ones (rather than before) as an optimization.
+      if (this.numberOfBindings() > this.maxNumberOfBindings_) {
+        this.emitMaxBindingsExceededError_();
+        this.removeBindingsForNodes_(removedElements);
+        return;
+      }
+
       const bindings = /** @type {!Array<!BindBindingDef>} */ ([]);
       const boundElements = /** @type {!Array<!BoundElementDef>} */ ([]);
       const expressionToElements =
         /** @type {!Object<string, !Array<!Element>>} */ (map());
-      const elements = /** @type{!Array<!Element>>} */ ([]);
+      const elements = /** @type {!Array<!Element>} */ ([]);
 
       // Unpack `ingestible` array into structs used internally by this service.
       ingestible.forEach(i => {
@@ -426,6 +441,13 @@ export class Bind {
         // Evaluate and apply changes to elements in `ingestible`.
         return this.evaluate_().then(results =>
           this.applyElements_(results, elements));
+      }).then(() => {
+        // Remove bindings at the end to reduce evaluation/apply latency.
+        // Don't chain this promise since this is a non-blocking clean up task.
+        this.removeBindingsForNodes_(removedElements).then(removed => {
+          dev().info(TAG, '⤷', 'Δ:', (bindings.length - removed),
+              ', ∑:', this.numberOfBindings());
+        });
       });
     });
   }
@@ -598,11 +620,8 @@ export class Bind {
         Object.assign(this.expressionToElements_, expressionToElements);
 
         if (limitExceeded) {
-          dev().expectedError(TAG, 'Maximum number of bindings reached ' +
-              `(${this.maxNumberOfBindings_}). Additional elements with ` +
-              'bindings will be ignored.');
+          this.emitMaxBindingsExceededError_();
         }
-
         return bindings;
       });
     });
@@ -1290,7 +1309,7 @@ export class Bind {
   }
 
   /**
-   * @param {!Array<!Object>} parseErrors
+   * @param {!Object<string, !BindEvaluatorErrorDef>} parseErrors
    */
   reportParseErrors_(parseErrors) {
     // Report each parse error.
@@ -1305,7 +1324,7 @@ export class Bind {
   }
 
   /**
-   * @param {{message: string, stack:string}} e
+   * @param {!BindEvaluatorErrorDef} e
    * @param {string} message
    * @param {!Element=} opt_element
    * @return {!Error}
@@ -1327,6 +1346,15 @@ export class Bind {
       return;
     }
     reportError(error, opt_element);
+  }
+
+  /**
+   * Emit a runtime error for exceeding the maximum number of bindings.
+   */
+  emitMaxBindingsExceededError_() {
+    dev().expectedError(TAG, 'Maximum number of bindings reached ' +
+      `(${this.maxNumberOfBindings_}). Additional elements with ` +
+      'bindings will be ignored.');
   }
 
   /**

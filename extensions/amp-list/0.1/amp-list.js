@@ -360,11 +360,12 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve(elements);
     }
     const updateWith = bind => {
+      const removedElements = [this.container_];
       // Instead of another experiment, use the new `binding` attribute as an
       // opt-in for the faster `ingestAndApply()` API.
       const promise = supportsIngestion && this.element.hasAttribute('binding')
-        ? bind.ingestAndApply(bindings)
-        : bind.scanAndApply(elements, [this.container_]);
+        ? bind.ingestAndApply(bindings, removedElements)
+        : bind.scanAndApply(/* added */ elements, removedElements);
       return promise.then(() => elements, () => elements);
     };
 
