@@ -32,7 +32,7 @@ const TAG_ = 'amp-analytics.Transport';
 /**
  * @param {!Window} win
  * @param {string} request
- * @param {!Object<string, string>} transportOptions
+ * @param {!Object<string, string|boolean>} transportOptions
  * @param {string} body
  */
 export function sendRequest(win, request, transportOptions, body) {
