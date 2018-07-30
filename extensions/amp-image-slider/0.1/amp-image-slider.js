@@ -149,6 +149,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.buildImageWrappers_();
     this.buildBar_();
     this.buildHint_();
+    this.checkARIA_();
 
     this.registerAction('seekTo', invocation => {
       const {args} = invocation;
@@ -315,6 +316,26 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.hint_.appendChild(rightHintIcon);
     this.hint_.classList.add('i-amphtml-image-slider-hint');
     this.bar_.appendChild(this.hint_);
+  }
+
+  /**
+   * Check if aria attributes are correctly set
+   * If not, apply default and warn user in console
+   * @private
+   */
+  checkARIA_() {
+    const leftAmpImage = dev().assertElement(this.leftAmpImage_);
+    const rightAmpImage = dev().assertElement(this.rightAmpImage_);
+    if (!leftAmpImage.hasAttribute('aria-valuetext')) {
+      user().warn(
+          'aria-valuetext for accessibility is not set for left image');
+      leftAmpImage.setAttribute('aria-valuetext', 'left image');
+    }
+    if (!rightAmpImage.hasAttribute('aria-valuetext')) {
+      user().warn(
+          'aria-valuetext for accessibility is not set for right image');
+      rightAmpImage.setAttribute('aria-valuetext', 'right image');
+    }
   }
 
   /**
