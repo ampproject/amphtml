@@ -408,30 +408,12 @@ function runSanitizerTests() {
           .to.be.equal('ac');
     });
 
-    it('should output style attributes if inline styles enabled', () => {
-      toggleExperiment(self, 'inline-styles', true,
-          /* opt_transientExperiment */ true);
-      expect(purifyTagsForTripleMustache(
-          '<b style="color: red">abc</b>'))
-          .to.be.equal('<b style="color: red">abc</b>');
-    });
-
     it('should compensate for broken markup', () => {
       expect(purifyTagsForTripleMustache('<b>a<i>b')).to.be.equal(
           '<b>a<i>b</i></b>');
     });
 
     describe('should sanitize `style` attribute', () => {
-      beforeEach(() => {
-        toggleExperiment(self, 'inline-styles', true,
-            /* opt_transientExperiment */ true);
-      });
-
-      afterEach(() => {
-        toggleExperiment(self, 'inline-styles', false,
-            /* opt_transientExperiment */ true);
-      });
-
       it('should allow valid styles',() => {
         expect(purifyHtml('<div style="color:blue">Test</div>'))
             .to.equal('<div style="color:blue">Test</div>');

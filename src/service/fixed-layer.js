@@ -470,13 +470,11 @@ export class FixedLayer {
    * @private
    */
   warnAboutInlineStylesIfNecessary_(element) {
-    if (isExperimentOn(this.ampdoc.win, 'inline-styles')) {
-      if (element.hasAttribute('style')
-          && (element.style.top || element.style.bottom)) {
-        user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
-            'CSS rules are not supported yet for fixed or sticky elements ' +
-            '(#14186). Unexpected behavior may occur.', element);
-      }
+    if (element.hasAttribute('style')
+        && (element.style.top || element.style.bottom)) {
+      user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
+          'CSS rules are not supported yet for fixed or sticky elements ' +
+          '(#14186). Unexpected behavior may occur.', element);
     }
   }
 
