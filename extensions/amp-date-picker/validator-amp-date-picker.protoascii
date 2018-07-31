@@ -176,6 +176,7 @@ attr_lists: {
 attr_lists: {
   name: "amp-date-picker-range-type-attributes"
   attrs: { name: "end-input-selector" }
+  attrs: { name: "minimum-nights" }
   attrs: { name: "start-input-selector" }
 }
 
