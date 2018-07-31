@@ -51,6 +51,18 @@
             reset-on-refresh>
     <div></div>
   </amp-list>
+  <!-- Valid: amp-list with src and reset-on-refresh="fetch" attributes -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            reset-on-refresh="fetch">
+    <div></div>
+  </amp-list>
+  <!-- Valid: amp-list with src and reset-on-refresh="always" attributes -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            reset-on-refresh="always">
+    <div></div>
+  </amp-list>
   <!-- Valid: amp-list with [src] and reset-on-refresh attributes -->
   <amp-list width=10 height=10
             [src]="foo.bar"
