@@ -24,10 +24,7 @@ import {
 } from './form-verifiers';
 import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {FormEvents} from './form-events';
-import {
-  SOURCE_ORIGIN_PARAM,
-  addParamsToUrl,
-} from '../../../src/url';
+import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -62,7 +59,6 @@ import {tryResolve} from '../../../src/utils/promise';
 
 /** @type {string} */
 const TAG = 'amp-form';
-
 
 /**
  * A list of external dependencies that can be included in forms.
@@ -242,6 +238,43 @@ export class AmpForm {
   }
 
   /**
+   * Builds fetch data related info.
+   * @param {string} url
+   * @param {string} method
+   * @param {!Object<string, string>=} opt_extraFields
+   * @return {!../../../src/service/xhr-impl.FetchData}
+   */
+  buildFetchData(url, method, opt_extraFields) {
+    let xhrUrl, body;
+    const isHeadOrGet = method == 'GET' || method == 'HEAD';
+
+    if (isHeadOrGet) {
+      this.assertNoSensitiveFields_();
+      const values = this.getFormAsObject_();
+      if (opt_extraFields) {
+        deepMerge(values, opt_extraFields);
+      }
+      xhrUrl = addParamsToUrl(url, values);
+    } else {
+      xhrUrl = url;
+      body = new FormDataWrapper(this.form_);
+      for (const key in opt_extraFields) {
+        body.append(key, opt_extraFields[key]);
+      }
+    }
+
+    return {
+      'xhrUrl': xhrUrl,
+      'fetchOpt': dict({
+        'body': body,
+        'method': method,
+        'credentials': 'include',
+        'headers': dict({'Accept': 'application/json'}),
+      }),
+    };
+  }
+
+  /**
    * Returns a promise that will be resolved when all dependencies used inside
    * the form tag are loaded and built (e.g. amp-selector) or 2 seconds timeout
    * - whichever is first.
@@ -277,7 +310,7 @@ export class AmpForm {
       this.validator_.onBlur(e);
     }, true);
 
-    // If the viewer can render templates, then form verifier is not applicable.
+    // Form verification is not supported when SSRing templates is enabled.
     if (!this.ssrTemplateHelper_.isSupported()) {
       this.form_.addEventListener('change', e => {
         this.verifier_.onCommit().then(({updatedElements, errors}) => {
@@ -462,25 +495,51 @@ export class AmpForm {
             this.form_, FormEvents.SUBMIT, /* event */ null, trust);
         // Note that we do not render templates for the submitting state
         // and only deal with submit-success or submit-error.
-        return this.ssrTemplateHelper_.fetchAndRenderTemplate(this.form_);
+        return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+            this.form_,
+            this.buildFetchData(
+                dev().assertString(this.xhrAction_), this.method_),
+            this.getResponseTemplates_());
       }).then(
           resp => this.handleSsrTemplateSuccess_(resp),
-          error => this.handleSsrTemplateFailure_(/** @type {!JsonObject} */ (error)));
+          error => this.handleSsrTemplateFailure_(
+              /** @type {!JsonObject} */ (error)));
     } else {
       p = varSubPromise
           .then(() => {
             this.submittingWithTrust_(trust);
             return this.doActionXhr_();
           })
-          .then(response => this.handleXhrSubmitSuccess_(
-              /* !../../../src/service/xhr-impl.FetchResponse */ response),
-          error => {
-            return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-          });
+          .then(response => this.handleXhrSubmitSuccess_(response),
+              error => {
+                return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+              });
     }
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
     }
+  }
+
+  /**
+   * If present, finds and returns the success and error response templates.
+   * Note that we do not render the submitting state template and only
+   * deal with submit-success or submit-error.
+   * @return {!../../../src/ssr-template-helper.SsrTemplateDef}
+   */
+  getResponseTemplates_() {
+    const successContainer =
+        this.form_.querySelector('div[submit-success]');
+    const errorContainer = this.form_.querySelector('div[submit-error]');
+    let successTemplate;
+    let errorTemplate;
+    if (successContainer) {
+      successTemplate =
+          this.templates_.maybeFindTemplate(successContainer);
+    }
+    if (errorContainer) {
+      errorTemplate = this.templates_.maybeFindTemplate(errorContainer);
+    }
+    return {successTemplate, errorTemplate};
   }
 
   /**
@@ -492,7 +551,7 @@ export class AmpForm {
     user().error(TAG, `Form submission failed: ${error}`);
     return tryResolve(() => {
       this.renderTemplate_(error || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, error); // do we need this?
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
       });
     });
   }
@@ -557,32 +616,9 @@ export class AmpForm {
    */
   doXhr_(url, method, opt_extraFields) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    let xhrUrl, body;
-    const isHeadOrGet = method == 'GET' || method == 'HEAD';
-
-    if (isHeadOrGet) {
-      this.assertNoSensitiveFields_();
-      const values = this.getFormAsObject_();
-      if (opt_extraFields) {
-        deepMerge(values, opt_extraFields);
-      }
-      xhrUrl = addParamsToUrl(url, values);
-    } else {
-      xhrUrl = url;
-      body = new FormDataWrapper(this.form_);
-      for (const key in opt_extraFields) {
-        body.append(key, opt_extraFields[key]);
-      }
-    }
-
-    return this.xhr_.fetch(xhrUrl, {
-      body,
-      method,
-      credentials: 'include',
-      headers: dict({
-        'Accept': 'application/json',
-      }),
-    });
+    const fetchData = this.buildFetchData(
+        url, method, opt_extraFields);
+    return this.xhr_.fetch(fetchData.xhrUrl, fetchData.fetchOpt);
   }
 
   /**
@@ -677,8 +713,7 @@ export class AmpForm {
   }
 
   /**
-   * Throws an error related to viewer render template handling.
-   * supported.
+   * Asserts that SSR support is the same as value.
    * @param {boolean} value
    * @param {string} msg
    * @private

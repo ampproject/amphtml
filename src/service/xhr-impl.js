@@ -66,6 +66,14 @@ export let FetchInitDef;
 export let FetchInitJsonDef;
 
 /**
+ * @typedef {{
+ *  xhrUrl: string,
+ *  fetchOpt: !FetchInitJsonDef
+ * }}
+ */
+export let FetchData;
+
+/**
  * A record version of `XMLHttpRequest` that has all the necessary properties
  * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
  * serialized response returned by the viewer.
@@ -203,155 +211,12 @@ export class Xhr {
         return;
       }
       const messagePayload = dict({
-        'originalRequest': this.toStructuredCloneable_(input, init),
+        'originalRequest': toStructuredCloneable(input, init),
       });
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
-            this.fromStructuredCloneable_(response, init.responseType));
+            fromStructuredCloneable(this.win, response, init.responseType));
     });
-  }
-
-  /**
-   * Serializes a fetch request so that it can be passed to `postMessage()`,
-   * i.e., can be cloned using the
-   * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
-   *
-   * The request is serialized in the following way:
-   *
-   * 1. If the `init.body` is a `FormData`, set content-type header to
-   * `multipart/form-data` and transform `init.body` into an
-   * `!Array<!Array<string>>` holding the list of form entries, where each
-   * element in the array is a form entry (key-value pair) represented as a
-   * 2-element array.
-   *
-   * 2. Return a new object having properties `input` and the transformed
-   * `init`.
-   *
-   * The serialized request is assumed to be de-serialized in the following way:
-   *
-   * 1.If content-type header starts with `multipart/form-data`
-   * (case-insensitive), transform the entry array in `init.body` into a
-   * `FormData` object.
-   *
-   * 2. Pass `input` and transformed `init` to `fetch` (or the constructor of
-   * `Request`).
-   *
-   * Currently only `FormData` used in `init.body` is handled as it's the only
-   * type being used in AMP runtime that needs serialization. The `Headers` type
-   * also needs serialization, but callers should not be passing `Headers`
-   * object in `init`, as that fails `fetchPolyfill` on browsers that don't
-   * support fetch. Some serialization-needing types for `init.body` such as
-   * `ArrayBuffer` and `Blob` are already supported by the structured clone
-   * algorithm. Other serialization-needing types such as `URLSearchParams`
-   * (which is not supported in IE and Safari) and `FederatedCredentials` are
-   * not used in AMP runtime.
-   *
-   * @param {string} input The URL of the XHR to convert to structured
-   *     cloneable.
-   * @param {!FetchInitDef} init The options of the XHR to convert to structured
-   *     cloneable.
-   * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
-   *     cloneable request.
-   * @private
-   */
-  toStructuredCloneable_(input, init) {
-    const newInit = Object.assign({}, init);
-    if (isFormDataWrapper(init.body)) {
-      newInit.headers = newInit.headers || {};
-      newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
-      newInit.body = fromIterator(init.body.entries());
-    }
-    return {input, init: newInit};
-  }
-
-  /**
-   * De-serializes a fetch response that was made possible to be passed to
-   * `postMessage()`, i.e., can be cloned using the
-   * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
-   *
-   * The response is assumed to be serialized in the following way:
-   *
-   * 1. Transform the entries in the headers of the response into an
-   * `!Array<!Array<string>>` holding the list of header entries, where each
-   * element in the array is a header entry (key-value pair) represented as a
-   * 2-element array. The header key is case-insensitive.
-   *
-   * 2. Include the header entry list and `status` and `statusText` properties
-   * of the response in as `headers`, `status` and `statusText` properties of
-   * `init`.
-   *
-   * 3. Include the body of the response serialized as string in `body`.
-   *
-   * 4. Return a new object having properties `body` and `init`.
-   *
-   * The response is de-serialized in the following way:
-   *
-   * 1. If the `Response` type is supported and `responseType` is not
-   * document, pass `body` and `init` directly to the constructor of `Response`.
-   *
-   * 2. Otherwise, populate a fake XHR object to pass to `FetchResponse` as if
-   * the response is returned by the fetch polyfill.
-   *
-   * 3. If `responseType` is `document`, also parse the body and populate
-   * `responseXML` as a `Document` type.
-   *
-   * @param {JsonObject|string|undefined} response The structurally-cloneable
-   *     response to convert back to a regular Response.
-   * @param {string|undefined} responseType The original response type used to
-   *     initiate the XHR.
-   * @return {!FetchResponse|!Response} The deserialized regular response.
-   * @private
-   */
-  fromStructuredCloneable_(response, responseType) {
-    user().assert(isObject(response), 'Object expected: %s', response);
-
-    const isDocumentType = responseType == 'document';
-    if (typeof this.win.Response === 'function' && !isDocumentType) {
-      // Use native `Response` type if available for performance. If response
-      // type is `document`, we must fall back to `FetchResponse` polyfill
-      // because callers would then rely on the `responseXML` property being
-      // present, which is not supported by the Response type.
-      return new this.win.Response(response['body'], response['init']);
-    }
-
-    const lowercasedHeaders = map();
-    const data = {
-      status: 200,
-      statusText: 'OK',
-      responseText: (response['body'] ? String(response['body']) : ''),
-      /**
-       * @param {string} name
-       * @return {string}
-       */
-      getResponseHeader(name) {
-        return lowercasedHeaders[String(name).toLowerCase()] || null;
-      },
-    };
-
-    if (response['init']) {
-      const init = response['init'];
-      if (isArray(init.headers)) {
-        init.headers.forEach(entry => {
-          const headerName = entry[0];
-          const headerValue = entry[1];
-          lowercasedHeaders[String(headerName).toLowerCase()] =
-              String(headerValue);
-        });
-      }
-      if (init.status) {
-        data.status = parseInt(init.status, 10);
-      }
-      if (init.statusText) {
-        data.statusText = String(init.statusText);
-      }
-    }
-
-    if (isDocumentType) {
-      data.responseXML =
-          new DOMParser().parseFromString(data.responseText, 'text/html');
-    }
-
-    return new FetchResponse(data);
   }
 
   /**
@@ -371,46 +236,10 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, init = {}) {
-    // Do not append __amp_source_origin if explicitly disabled.
-    if (init.ampCors !== false) {
-      input = this.getCorsUrl(this.win, input);
-    } else {
-      init.requireAmpResponseSourceOrigin = false;
-    }
-    if (init.requireAmpResponseSourceOrigin === true) {
-      dev().error('XHR',
-          'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
-    }
-    if (init.requireAmpResponseSourceOrigin === undefined) {
-      init.requireAmpResponseSourceOrigin = true;
-    }
-    // For some same origin requests, add AMP-Same-Origin: true header to allow
-    // publishers to validate that this request came from their own origin.
-    const currentOrigin = getWinOrigin(this.win);
+    const {xhrUrl, fetchOpt} = setAmpCors(this.win, input, init);
     const targetOrigin = parseUrlDeprecated(input).origin;
-    if (currentOrigin == targetOrigin) {
-      init['headers'] = init['headers'] || {};
-      init['headers']['AMP-Same-Origin'] = 'true';
-    }
-    // In edge a `TypeMismatchError` is thrown when body is set to null.
-    dev().assert(init.body !== null, 'fetch `body` can not be `null`');
-    return this.fetch_(input, init).then(response => {
-      const allowSourceOriginHeader = response.headers.get(
-          ALLOW_SOURCE_ORIGIN_HEADER);
-      if (allowSourceOriginHeader) {
-        const sourceOrigin = getSourceOrigin(this.win.location.href);
-        // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
-        // ensure that it's equal to the current source origin.
-        user().assert(allowSourceOriginHeader == sourceOrigin,
-            `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
-              ` equal to the current: ${allowSourceOriginHeader}` +
-              ` vs ${sourceOrigin}`);
-      } else if (init.requireAmpResponseSourceOrigin) {
-        // If the `AMP-Access-Control-Allow-Source-Origin` header is not
-        // returned but required, return error.
-        user().assert(false, 'Response must contain the' +
-            ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
-      }
+    return this.fetch_(xhrUrl, fetchOpt).then(response => {
+      validateFetchResponse(this.win, response, init);
       return response;
     }, reason => {
       throw user().createExpectedError('XHR', 'Failed fetching' +
@@ -824,4 +653,205 @@ export function xhrServiceForTesting(window) {
  */
 export function installXhrService(window) {
   registerServiceBuilder(window, 'xhr', Xhr);
+}
+
+/**
+  * Serializes a fetch request so that it can be passed to `postMessage()`,
+  * i.e., can be cloned using the
+  * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
+  *
+  * The request is serialized in the following way:
+  *
+  * 1. If the `init.body` is a `FormData`, set content-type header to
+  * `multipart/form-data` and transform `init.body` into an
+  * `!Array<!Array<string>>` holding the list of form entries, where each
+  * element in the array is a form entry (key-value pair) represented as a
+  * 2-element array.
+  *
+  * 2. Return a new object having properties `input` and the transformed
+  * `init`.
+  *
+  * The serialized request is assumed to be de-serialized in the following way:
+  *
+  * 1.If content-type header starts with `multipart/form-data`
+  * (case-insensitive), transform the entry array in `init.body` into a
+  * `FormData` object.
+  *
+  * 2. Pass `input` and transformed `init` to `fetch` (or the constructor of
+  * `Request`).
+  *
+  * Currently only `FormData` used in `init.body` is handled as it's the only
+  * type being used in AMP runtime that needs serialization. The `Headers` type
+  * also needs serialization, but callers should not be passing `Headers`
+  * object in `init`, as that fails `fetchPolyfill` on browsers that don't
+  * support fetch. Some serialization-needing types for `init.body` such as
+  * `ArrayBuffer` and `Blob` are already supported by the structured clone
+  * algorithm. Other serialization-needing types such as `URLSearchParams`
+  * (which is not supported in IE and Safari) and `FederatedCredentials` are
+  * not used in AMP runtime.
+  *
+  * @param {string} input The URL of the XHR to convert to structured
+  *     cloneable.
+  * @param {!FetchInitDef} init The options of the XHR to convert to structured
+  *     cloneable.
+  * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
+  *     cloneable request.
+  */
+export function toStructuredCloneable(input, init) {
+  const newInit = Object.assign({}, init);
+  if (isFormDataWrapper(init.body)) {
+    newInit.headers = newInit.headers || {};
+    newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
+    newInit.body = fromIterator(init.body.entries());
+  }
+  return {input, init: newInit};
+}
+
+/**
+ * De-serializes a fetch response that was made possible to be passed to
+ * `postMessage()`, i.e., can be cloned using the
+ * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
+ *
+ * The response is assumed to be serialized in the following way:
+ *
+ * 1. Transform the entries in the headers of the response into an
+ * `!Array<!Array<string>>` holding the list of header entries, where each
+ * element in the array is a header entry (key-value pair) represented as a
+ * 2-element array. The header key is case-insensitive.
+ *
+ * 2. Include the header entry list and `status` and `statusText` properties
+ * of the response in as `headers`, `status` and `statusText` properties of
+ * `init`.
+ *
+ * 3. Include the body of the response serialized as string in `body`.
+ *
+ * 4. Return a new object having properties `body` and `init`.
+ *
+ * The response is de-serialized in the following way:
+ *
+ * 1. If the `Response` type is supported and `responseType` is not
+ * document, pass `body` and `init` directly to the constructor of `Response`.
+ *
+ * 2. Otherwise, populate a fake XHR object to pass to `FetchResponse` as if
+ * the response is returned by the fetch polyfill.
+ *
+ * 3. If `responseType` is `document`, also parse the body and populate
+ * `responseXML` as a `Document` type.
+ *
+ * @param {!Window} win
+ * @param {JsonObject|string|undefined} response The structurally-cloneable
+ *     response to convert back to a regular Response.
+ * @param {string|undefined} responseType The original response type used to
+ *     initiate the XHR.
+ * @return {!FetchResponse|!Response} The deserialized regular response.
+ */
+export function fromStructuredCloneable(win, response, responseType) {
+  user().assert(isObject(response), 'Object expected: %s', response);
+
+  const isDocumentType = responseType == 'document';
+  if (typeof win.Response === 'function' && !isDocumentType) {
+    // Use native `Response` type if available for performance. If response
+    // type is `document`, we must fall back to `FetchResponse` polyfill
+    // because callers would then rely on the `responseXML` property being
+    // present, which is not supported by the Response type.
+    return new win.Response(response['body'], response['init']);
+  }
+
+  const lowercasedHeaders = map();
+  const data = {
+    status: 200,
+    statusText: 'OK',
+    responseText: (response['body'] ? String(response['body']) : ''),
+    /**
+     * @param {string} name
+     * @return {string}
+     */
+    getResponseHeader(name) {
+      return lowercasedHeaders[String(name).toLowerCase()] || null;
+    },
+  };
+
+  if (response['init']) {
+    const init = response['init'];
+    if (isArray(init.headers)) {
+      init.headers.forEach(entry => {
+        const headerName = entry[0];
+        const headerValue = entry[1];
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+            String(headerValue);
+      });
+    }
+    if (init.status) {
+      data.status = parseInt(init.status, 10);
+    }
+    if (init.statusText) {
+      data.statusText = String(init.statusText);
+    }
+  }
+
+  if (isDocumentType) {
+    data.responseXML =
+        new DOMParser().parseFromString(data.responseText, 'text/html');
+  }
+
+  return new FetchResponse(data);
+}
+
+/**
+ * Set the AMP CORs data on the FetchInitDef.
+ * @param {!Window} win
+ * @param {string} input
+ * @param {!FetchInitDef} init
+ * @return {!FetchData}
+ */
+export function setAmpCors(win, input, init) {
+  // Do not append __amp_source_origin if explicitly disabled.
+  if (init.ampCors !== false) {
+    input = getCorsUrl(win, input);
+  } else {
+    init.requireAmpResponseSourceOrigin = false;
+  }
+  if (init.requireAmpResponseSourceOrigin === true) {
+    dev().error('XHR',
+        'requireAmpResponseSourceOrigin is deprecated, use ampCors instead');
+  }
+  if (init.requireAmpResponseSourceOrigin === undefined) {
+    init.requireAmpResponseSourceOrigin = true;
+  }
+  // For some same origin requests, add AMP-Same-Origin: true header to allow
+  // publishers to validate that this request came from their own origin.
+  const currentOrigin = getWinOrigin(win);
+  const targetOrigin = parseUrlDeprecated(input).origin;
+  if (currentOrigin == targetOrigin) {
+    init['headers'] = init['headers'] || {};
+    init['headers']['AMP-Same-Origin'] = 'true';
+  }
+  // In edge a `TypeMismatchError` is thrown when body is set to null.
+  dev().assert(init.body !== null, 'fetch `body` can not be `null`');
+
+  return {'xhrUrl': input, 'fetchOpt': init};
+}
+
+/**
+ * @param {!Window} win
+ * @param {!FetchResponse|Response} response
+ * @param {!FetchInitDef=} init
+ */
+export function validateFetchResponse(win, response, init) {
+  const allowSourceOriginHeader = response.headers.get(
+      ALLOW_SOURCE_ORIGIN_HEADER);
+  if (allowSourceOriginHeader) {
+    const sourceOrigin = getSourceOrigin(win.location.href);
+    // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
+    // ensure that it's equal to the current source origin.
+    user().assert(allowSourceOriginHeader == sourceOrigin,
+        `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+          ` equal to the current: ${allowSourceOriginHeader}` +
+          ` vs ${sourceOrigin}`);
+  } else if (init.requireAmpResponseSourceOrigin) {
+    // If the `AMP-Access-Control-Allow-Source-Origin` header is not
+    // returned but required, return error.
+    user().assert(false, 'Response must contain the' +
+        ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
+  }
 }

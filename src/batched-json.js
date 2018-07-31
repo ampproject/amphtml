@@ -49,7 +49,30 @@ export function batchFetchJsonFor(
   opt_urlReplacement = UrlReplacementPolicy.NONE)
 {
   const url = assertHttpsUrl(element.getAttribute('src'), element);
+  return constructBatchFetchData(ampdoc, element, url, opt_urlReplacement)
+      .then(data => {
+        return Services.batchedXhrFor(ampdoc.win)
+            .fetchJson(data['src'], data['fetchOpts']);
+      }).then(res => res.json()).then(data => {
+        if (data == null) {
+          throw new Error('Response is undefined.');
+        }
+        return getValueForExpr(data, opt_expr || '.');
+      });
+}
 
+/**
+ * Handles url replacement and constructs the FetchInitJsonDef required for a
+ * fetch.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} element
+ * @param {string} url
+ * @param {!UrlReplacementPolicy} opt_urlReplacement If ALL, replaces all URL
+ *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ * @return {!Promise<!./service/xhr-impl.FetchData>}
+ */
+export function constructBatchFetchData(
+  ampdoc, element, url, opt_urlReplacement) {
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
   const srcPromise = (opt_urlReplacement >= UrlReplacementPolicy.OPT_IN)
@@ -74,11 +97,7 @@ export function batchFetchJsonFor(
     } else {
       opts.requireAmpResponseSourceOrigin = false;
     }
-    return Services.batchedXhrFor(ampdoc.win).fetchJson(src, opts);
-  }).then(res => res.json()).then(data => {
-    if (data == null) {
-      throw new Error('Response is undefined.');
-    }
-    return getValueForExpr(data, opt_expr || '.');
+
+    return {src, opts};
   });
 }
