@@ -294,11 +294,9 @@ function compile(entryModuleFilenames, outputDir,
           '!build/fake-module/src/polyfills.js',
           '!build/fake-module/src/polyfills/**/*.js',
           '!build/fake-polyfills/src/polyfills.js',
-          '!src/polyfills/*.js',
-          // TODO(prateekbh): I don't understand how to add
-          // src/polyfills/custom-elements.js to the _needed_ polyfills.
           'build/fake-polyfills/**/*.js');
       polyfillsShadowList.forEach(polyfillFile => {
+        srcs.push(`!src/polyfills/${polyfillFile}.js`);
         fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
             'export function install() {}');
       });
