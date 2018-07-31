@@ -370,10 +370,7 @@ const command = {
     const {status} = timedExec(cmd);
     if (status != 0) {
       console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Found errors while running', colors.cyan(cmd) +
-          '. Here are the last 100 lines from',
-          colors.cyan('chromedriver.log') + ':\n');
-      exec('tail -n 100 chromedriver.log');
+          'Found errors while running', colors.cyan(cmd));
     }
   },
   verifyVisualDiffTests: function() {
