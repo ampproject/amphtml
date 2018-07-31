@@ -1160,7 +1160,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   let bundler = browserify(entryPoint, {debug: true})
       .transform(babelify, {
         compact: false,
-        plugins: argv.preprocessing ? [require.resolve('./build-system/babel-plugins/babel-plugin-transform-amp-asserts')] : [],
         presets: [
           ['env', {
             targets: {

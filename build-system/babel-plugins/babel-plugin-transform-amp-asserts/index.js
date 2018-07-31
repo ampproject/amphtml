@@ -15,7 +15,7 @@
  */
 
 function isRemovableMethod(t, node, names) {
-  if (!node || node.type !== 'Identifier') {
+  if (!node || !t.isIdentifier(node)) {
     return false;
   }
   return names.some(x => {
@@ -40,18 +40,21 @@ module.exports = function(babel) {
   return {
     visitor: {
       CallExpression(path) {
-        const isMemberAndCallExpression = t.isMemberExpression(path.node.callee)
-            && t.isCallExpression(path.node.callee.object);
+        const {callee} = path.node;
+        const isMemberAndCallExpression = t.isMemberExpression(callee)
+            && t.isCallExpression(callee.object);
 
-        const isRemovableDevCall = isMemberAndCallExpression &&
-            t.isIdentifier(path.node.callee.object.callee, {name: 'dev'}) &&
-            isRemovableMethod(t, path.node.callee.property,
-                removableDevAsserts);
+        if (!isMemberAndCallExpression) {
+          return;
+        }
 
-        const isRemovableUserCall = isMemberAndCallExpression &&
-            t.isIdentifier(path.node.callee.object.callee, {name: 'user'}) &&
-            isRemovableMethod(t, path.node.callee.property,
-                removableUserAsserts);
+        const logCallee = callee.object.callee;
+        const {property} = callee;
+        const isRemovableDevCall = t.isIdentifier(logCallee, {name: 'dev'}) &&
+            isRemovableMethod(t, property, removableDevAsserts);
+
+        const isRemovableUserCall = t.isIdentifier(logCallee, {name: 'user'}) &&
+            isRemovableMethod(t, property, removableUserAsserts);
 
         if (!(isRemovableDevCall || isRemovableUserCall)) {
           return;
@@ -71,4 +74,4 @@ module.exports = function(babel) {
       },
     },
   };
-}
+};
