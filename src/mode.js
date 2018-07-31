@@ -60,6 +60,7 @@ export function getMode(opt_win) {
  * @return {!ModeDef}
  */
 function getMode_(win) {
+  // TODO(erwinmombay): simplify the logic here
   const AMP_CONFIG = self.AMP_CONFIG || {};
 
   // Magic constants that are replaced by closure compiler.
