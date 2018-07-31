@@ -107,7 +107,7 @@ config.run('amp-image-slider', function() {
     function expectByBarLeftPos(leftPos) {
       expect(sliderImpl.bar_.getBoundingClientRect().left)
           .to.equal(leftPos);
-      expect(sliderImpl.leftMask_.getBoundingClientRect().right)
+      expect(sliderImpl.rightMask_.getBoundingClientRect().left)
           .to.equal(leftPos);
       // amp-imgs should stay where they are
       expect(sliderImpl.leftAmpImage_.getBoundingClientRect().left)

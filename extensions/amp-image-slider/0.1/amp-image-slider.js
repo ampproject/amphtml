@@ -247,22 +247,10 @@ export class AmpImageSlider extends AMP.BaseElement {
   buildImageWrappers_() {
     this.leftMask_ = this.doc_.createElement('div');
     this.rightMask_ = this.doc_.createElement('div');
-    this.container_.appendChild(this.rightMask_);
     this.container_.appendChild(this.leftMask_);
-
-    this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
-
-    if (this.rightLabel_) {
-      this.rightLabelWrapper_ = this.doc_.createElement('div');
-      this.rightLabelWrapper_.classList
-          .add('i-amphtml-image-slider-right-label-wrapper');
-      this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
-      this.rightLabelWrapper_.appendChild(this.rightLabel_);
-      this.rightMask_.appendChild(this.rightLabelWrapper_);
-    }
+    this.container_.appendChild(this.rightMask_);
 
     this.leftMask_.classList.add('i-amphtml-image-slider-left-mask');
-    this.leftAmpImage_.classList.add('i-amphtml-image-slider-image-on-top');
 
     if (this.leftLabel_) {
       this.leftLabelWrapper_ = this.doc_.createElement('div');
@@ -271,6 +259,17 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.leftLabel_.classList.add('i-amphtml-image-slider-left-label');
       this.leftLabelWrapper_.appendChild(this.leftLabel_);
       this.leftMask_.appendChild(this.leftLabelWrapper_);
+    }
+
+    this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
+    this.rightAmpImage_.classList.add('i-amphtml-image-slider-image-on-top');
+    if (this.rightLabel_) {
+      this.rightLabelWrapper_ = this.doc_.createElement('div');
+      this.rightLabelWrapper_.classList
+          .add('i-amphtml-image-slider-right-label-wrapper');
+      this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
+      this.rightLabelWrapper_.appendChild(this.rightLabel_);
+      this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
   }
 
@@ -679,10 +678,10 @@ export class AmpImageSlider extends AMP.BaseElement {
     leftPercentage = this.limitPercentage_(leftPercentage);
 
     this.updateTranslateX_(this.bar_, leftPercentage);
-    this.updateTranslateX_(this.leftMask_, leftPercentage - 1);
-    this.updateTranslateX_(this.leftAmpImage_, 1 - leftPercentage);
-    if (this.leftLabelWrapper_) {
-      this.updateTranslateX_(this.leftLabelWrapper_, 1 - leftPercentage);
+    this.updateTranslateX_(this.rightMask_, leftPercentage);
+    this.updateTranslateX_(this.rightAmpImage_, -leftPercentage);
+    if (this.rightLabelWrapper_) {
+      this.updateTranslateX_(this.rightLabelWrapper_, -leftPercentage);
     }
   }
 
