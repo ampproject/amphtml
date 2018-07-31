@@ -264,6 +264,7 @@ export class AmpList extends AMP.BaseElement {
    */
   ssrTemplate_() {
     let fetchData;
+    const {win} = this;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
     return constructBatchFetchData(
@@ -272,14 +273,14 @@ export class AmpList extends AMP.BaseElement {
         this.element.getAttribute('src'),
         this.getPolicy_()).then(batchFetchData => {
       fetchData =
-          setAmpCors(this.win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
+          setAmpCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
       setupJsonFetchInit(batchFetchData.fetchOpt);
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, fetchData);
     }).then(response => {
       const fetchResponse =
-          fromStructuredCloneable(this.win, response, fetchData.responseType);
-      validateFetchResponse(this.win, fetchResponse, fetchData.fetchOpt);
+          fromStructuredCloneable(win, response, fetchData.responseType);
+      validateFetchResponse(win, fetchResponse, fetchData.fetchOpt);
       return fetchResponse.json();
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);

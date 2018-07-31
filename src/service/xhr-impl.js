@@ -377,7 +377,7 @@ function setupInit(opt_init, opt_accept) {
 }
 
 /**
- * @param {!FetchInitJsonDef} init
+ * @param {?FetchInitJsonDef=} init
  * @return {!FetchInitJsonDef}
  */
 export function setupJsonFetchInit(init) {
