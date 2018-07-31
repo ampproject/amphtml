@@ -7,7 +7,13 @@ import {
 } from './affiliate-links-manager';
 
 export default class Tracking {
-  constructor(element, skimOptions) {
+  /**
+   * Use tracking instance to track page impressions,
+   * link impressions and non-affiliated clicks.
+   * @param {*} element
+   * @param {*} skimOptions
+   */
+  constructor(element, skimOptions, pageImpressionId) {
     // 'layoutCallback' from custom-element base class needs be executed in order to have analytics working.
     // Analytics are not setup until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(element);
@@ -22,10 +28,17 @@ export default class Tracking {
     this.referer_ = '${documentReferrer}';
     this.externalReferer_ = '${externalReferrer}';
     this.timezone_ = '${timezone}';
-    this.pageImpressionId_ = generatePageImpressionId();
+    this.pageImpressionId_ = pageImpressionId;
     this.customTrackingId_ = skimOptions.customTrackingId;
   }
 
+
+  /**
+   * Send Page impression and link impressions
+   * @param {*} userSessionData
+   * @param {*} anchorStatusMap
+   * @param {*} startTime
+   */
   sendImpressionTracking(userSessionData, anchorStatusMap, startTime) {
     if (!this.tracking_) {
       return;
@@ -49,6 +62,10 @@ export default class Tracking {
     this.sendLinkImpressionData_(commonData, urls);
   }
 
+  /**
+   * Send tracking to register non-affiliated click.
+   * @param {*} anchor
+   */
   sendNaClickTracking(anchor) {
     if (!this.tracking_) {
       return;
@@ -71,6 +88,12 @@ export default class Tracking {
     });
   }
 
+  /**
+   * Page impression tracking request
+   * @param {*} commonData
+   * @param {*} numberAffiliateLinks
+   * @param {*} startTime
+   */
   sendPageImpressionTracking_(commonData, numberAffiliateLinks, startTime) {
     const data = Object.assign({
       slc: numberAffiliateLinks,
@@ -85,6 +108,11 @@ export default class Tracking {
     });
   }
 
+  /**
+   * Link impressions tracking request
+   * @param {*} commonData
+   * @param {*} urls
+   */
   sendLinkImpressionData_(commonData, urls) {
     const data = Object.assign({
       dl: urls, // DO WE NEED TO REPLACE URL FIRST? ISN'T THIS DONE AUTOMATICALLY?
@@ -96,17 +124,6 @@ export default class Tracking {
       data: JSON.stringify(data), rnd: '123',
     });
   }
-}
-
-function generatePageImpressionId() {
-  let str = '';
-  for (let i = 0; i < 8; i++) {
-    str += Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-  }
-
-  return str;
 }
 
 /**

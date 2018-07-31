@@ -3,6 +3,7 @@ import {AnchorRewriteDataResponse,createAnchorReplacementTuple} from '../../../.
 import {Services} from '../../../../src/services';
 import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
 import AffiliateLinkResolver, {DOMAIN_RESOLVER_URL, LINK_STATUS__AFFILIATE, LINK_STATUS__NON_AFFILIATE, LINK_STATUS__UNKNOWN} from '../affiliate-link-resolver';
+import { generatePageImpressionId } from '../utils';
 
 describes.realWin('amp-skimlinks', {
   amp: {
@@ -428,6 +429,7 @@ describes.realWin('amp-skimlinks', {
       let queryParams;
       let anchor;
       const destinationUrl = 'https://test.com/path/to?isAdmin=true';
+      const PAGE_IMPRESSION_ID = 'fake_page_impression_id';
 
       function getQueryParams(url) {
         return parseQueryString(
@@ -440,7 +442,12 @@ describes.realWin('amp-skimlinks', {
           pubcode,
           customTrackingId,
         };
-        const resolver = new AffiliateLinkResolver({}, skimOptions, () => { });
+        const resolver = new AffiliateLinkResolver(
+          {},
+          skimOptions,
+          () => {},
+          PAGE_IMPRESSION_ID
+        );
         return resolver.getWaypointUrl_(anchor);
       }
 
@@ -469,8 +476,8 @@ describes.realWin('amp-skimlinks', {
       it.skip('Sends the xguid (GUID)', () => {
         expect(queryParams.xguid).to.equal('');
       });
-      it.skip('Sends the xuuid (impression id)', () => {
-        expect(queryParams.xuuid).to.equal('');
+      it('Sends the xuuid (impression id)', () => {
+        expect(queryParams.xuuid).to.equal(PAGE_IMPRESSION_ID);
       });
       it.skip('Sends the xtz (timezone)', () => {
         expect(queryParams.xtz).to.equal('');

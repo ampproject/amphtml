@@ -10,8 +10,8 @@ import DomainResolver from './affiliate-link-resolver';
 import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewrite/constants';
 import LinkRewriterService from '../../../src/service/link-rewrite/link-rewrite-service';
 
+import {generatePageImpressionId, getBoundFunction} from './utils';
 import {getAmpSkimlinksOptions} from './skim-options';
-import {getBoundFunction} from './utils';
 
 /*** TODO:
  * - Fix issue with analytics reporting links with macro variables.
@@ -50,11 +50,13 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Where everything stats
    */
   startSkimcore_() {
-    const trackingService = new Tracking(this.element, this.skimOptions_);
+    const pageImpressionId = generatePageImpressionId();
+    const trackingService = new Tracking(this.element, this.skimOptions_, pageImpressionId);
     const domainResolverService = new DomainResolver(
         this.xhr_,
         this.skimOptions_,
         this.resolveSessionDataONCE_,
+        pageImpressionId
     );
 
     const skimlinksLinkRewriter = this.initSkimlinksLinkRewriter(trackingService, domainResolverService);

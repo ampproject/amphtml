@@ -16,13 +16,14 @@ export default class AffiliateLinkResolver {
    * @param {*} xhr
    * @param {*} skimOptions
    * @param {*} beaconApiCallback
+   * @param {*} pageImpressionId
    */
-  constructor(xhr, skimOptions, beaconApiCallback) {
+  constructor(xhr, skimOptions, beaconApiCallback, pageImpressionId) {
     this.xhr_ = xhr;
     this.skimOptions_ = skimOptions;
     this.domains_ = {};
-    this.excludedDomains_ = skimOptions.excludedDomains || [];
     this.beaconApiCallback_ = beaconApiCallback;
+    this.pageImpressionId_ = pageImpressionId;
   }
 
   /**
@@ -60,7 +61,7 @@ export default class AffiliateLinkResolver {
       pref: null,
       xcreo: null,
       xguid: null,
-      xuuid: null,
+      xuuid: this.pageImpressionId_,
       xtz: null,
       xed: null,
     };
@@ -232,13 +233,14 @@ export default class AffiliateLinkResolver {
    * @param {*} domain
    */
   isExcludedDomain_(domain) {
+    const {excludedDomains} = this.skimOptions_;
     // Should update the isExcluded list as a side effect for caching
-    if (!this.excludedDomains_.length) {
+    if (!excludedDomains || !excludedDomains.length) {
       return false;
     }
 
     // TODO: Validate subdomain (*.nordstrom.com)
-    if (this.excludedDomains_.indexOf(domain) === -1) {
+    if (excludedDomains.indexOf(domain) === -1) {
       return false;
     }
 
