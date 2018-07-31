@@ -107,6 +107,7 @@ const attributesToForward = [
   'min',
   'month-format',
   'number-of-months',
+  'minimum-nights',
 ];
 
 /** @enum {string} */

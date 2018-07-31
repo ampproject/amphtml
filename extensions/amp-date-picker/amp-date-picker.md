@@ -338,6 +338,11 @@ If no `week-day-format` is present, the weekdays display as the first character 
 
 The locale to use for rendering the calendar view. The default locale is `"en"`.
 
+##### minimum-nights
+
+The number of nights that the user must select in a date range. The default is `"1"`.
+A value of `"0"` allows users to select the same date for the start and end dates.
+
 ##### number-of-months
 
 The number of months to display at one time in the calendar view. The default is `"1"`.
