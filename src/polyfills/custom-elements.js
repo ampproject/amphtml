@@ -56,6 +56,7 @@ const INVALID_NAMES = [
 
 /**
  * Asserts that the custom element name conforms to the spec.
+ *
  * @param {!Function} SyntaxError
  * @param {string} name
  */
@@ -67,6 +68,7 @@ function assertValidName(SyntaxError, name) {
 
 /**
  * Does win have a full Custom Elements registry?
+ *
  * @param {!Window} win
  * @return {boolean}
  */
@@ -82,6 +84,7 @@ function hasCustomElements(win) {
 
 /**
  * Was HTMLElement already patched for this window?
+ *
  * @param {!Window} win
  * @return {boolean}
  */
@@ -90,6 +93,9 @@ function isPatched(win) {
   return tag.indexOf('[native code]') === -1;
 }
 
+/**
+ * The public Custom Elements API.
+ */
 class CustomElementRegistry {
   /**
    * @param {!Window} win
@@ -347,27 +353,28 @@ class Registry {
   }
 
   /**
-   * TODO
+   * Upgrades custom elements descendants of root (but not including root).
+   *
+   * When called with an opt_query, it both upgrades and connects the custom
+   * elements (this is used during the custom element define algorithm).
+   *
    * @param {!Node} root
    * @param {string=} opt_query
    */
   upgrade(root, opt_query) {
-    // root was undefined, opt_query defined, comes from define
-    // root defined, opt_query undefined, User call (don't connect)
-    // root defined, opt_query undefined, importNode (don't connect)
-    // root defined, opt_query undefined, cloneNode (don't connect)
-    // root defined, opt_query undefined, innerHTML (don't connect)
+    // Only CustomElementRegistry.p.define provides a query (the newly defined
+    // custom element). In this case, we are both upgrading _and_ connecting
+    // the custom elements.
+    const newlyDefined = !!opt_query;
     const query = opt_query || this.query_;
     const upgradeCandidates = this.queryAll_(root, query);
-    // TODO
-    const newlyDefined = !!opt_query;
 
     for (let i = 0; i < upgradeCandidates.length; i++) {
       const candidate = upgradeCandidates[i];
-      if (root) {
-        this.upgradeSelf(candidate);
-      } else {
+      if (newlyDefined) {
         this.connectedCallback_(candidate);
+      } else {
+        this.upgradeSelf(candidate);
       }
     }
   }
@@ -504,6 +511,7 @@ function polyfill(win) {
   const registry = new Registry(win);
   const customElements = new CustomElementRegistry(win, registry);
 
+  // Expose the custom element registry.
   // Object.getOwnPropertyDescriptor(window, 'customElements')
   // {get: ƒ, set: undefined, enumerable: true, configurable: true}
   Object.defineProperty(win, 'customElements', {
@@ -513,8 +521,9 @@ function polyfill(win) {
     value: customElements,
   });
 
-  // Object.getOwnPropertyDescriptor(Document.prototype, 'createElement')
-  // {value: ƒ, writable: true, enumerable: true, configurable: true}
+  // Patch createElement to immediately upgrade the custom element.
+  // This has the added benefit that it avoids the "already created but needs
+  // constructor code run" chicken-and-egg problem.
   Document.prototype.createElement = function createElementPolyfill(name) {
     const def = registry.getByName(name);
     if (def) {
@@ -523,8 +532,8 @@ function polyfill(win) {
     return createElement.apply(this, arguments);
   };
 
-  // Object.getOwnPropertyDescriptor(Document.prototype, 'importNode')
-  // {value: ƒ, writable: true, enumerable: true, configurable: true}
+  // Patch importNode to immediately upgrade custom elements.
+  // TODO(jridgewell): Can fire adoptedCallback for cross doc imports.
   Document.prototype.importNode = function importNodePolyfill() {
     const imported = importNode.apply(this, arguments);
     if (imported) {
@@ -534,8 +543,7 @@ function polyfill(win) {
     return imported;
   };
 
-  // Object.getOwnPropertyDescriptor(Node.prototype, 'cloneNode')
-  // {value: ƒ, writable: true, enumerable: true, configurable: true}
+  // Patch cloneNode to immediately upgrade custom elements.
   Node.prototype.cloneNode = function cloneNodePolyfill() {
     const cloned = cloneNode.apply(this, arguments);
     registry.upgradeSelf(cloned);
@@ -543,8 +551,9 @@ function polyfill(win) {
     return cloned;
   };
 
-  // Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML')
-  // {get: ƒ, set: ƒ, enumerable: true, configurable: true}
+  // Patch the innerHTML setter to immediately upgrade custom elements.
+  // Note, this could technically fire connectedCallbacks if this node was
+  // connected, but we leave that to the Mutation Observer.
   const innerHTMLDesc = Object.getOwnPropertyDescriptor(Element.prototype,
       'innerHTML');
   const innerHTMLSetter = innerHTMLDesc.set;
@@ -562,24 +571,50 @@ function polyfill(win) {
   function HTMLElementPolyfill() {
     const {constructor} = this;
 
+    // If we're upgrading an already created custom element, we can't create
+    // another new node (by the spec, it must be the same node).
     let el = registry.current();
+
+    // If there's not a already created custom element, we're being invoked via
+    // `new`ing the constructor.
+    //
+    // Technically, we could get here via createElement, but we patched that.
+    // If it the custom element was registered, the patch turned it into a
+    // `new` call.
+    // If it was not registered, the native createElement is used. And if
+    // native createElement is being used and we got to this code, we're really
+    // in an infinite loop (a native createElement call just below) so we've
+    // got bigger problems.
+    //
+    // So just take my word we got here via `new`.
     if (!el) {
+      // The custom element definition is an invariant. If the custom element
+      // is registered, everything works. If it's not, it throws in the member
+      // property access (only defined custom elements can be directly
+      // constructed via `new`).
       const def = registry.getByConstructor(constructor);
       el = createElement.call(document, def.name);
     }
+
+    // Finally, if the node was already constructed, we need to reset it's
+    // prototype to the custom element prototype. And if it wasn't already
+    // constructed, we created a new node via native createElement, and we need
+    // to reset it's prototype. Basically always reset the prototype.
     Object.setPrototypeOf(el, constructor.prototype);
     return el;
   }
   subClass(Object, HTMLElement, HTMLElementPolyfill);
 
-  // Object.getOwnPropertyDescriptor(window, 'HTMLElement')
-  // {value: ƒ, writable: true, enumerable: false, configurable: true}
+  // Expose the polyfilled HTMLElement constructor for everyone to extend from.
   win.HTMLElement = HTMLElementPolyfill;
 }
 
 /**
  * Wraps HTMLElement in a Reflect.construct constructor, so that transpiled
  * classes can `_this = superClass.call(this)` during their construction.
+ *
+ * This is only used when Custom Elements v1 is already available _and_ we're
+ * using transpiled classes (which use ES5 construction idioms).
  *
  * @param {!Window} win
  */
@@ -590,12 +625,15 @@ function wrapHTMLElement(win) {
   function HTMLElementWrapper() {
     const ctor = /** @type {function(...?):?|undefined} */(
       /** @type {!HTMLElement} */(this).constructor);
+
+    // Reflect.construct allows us to construct a new HTMLElement without using
+    // `new` (which will always fail because native HTMLElement is a restricted
+    // constructor).
     return Reflect.construct(HTMLElement, [], ctor);
   }
   subClass(Object, HTMLElement, HTMLElementWrapper);
 
-  // Object.getOwnPropertyDescriptor(window, 'HTMLElement')
-  // {value: ƒ, writable: true, enumerable: false, configurable: true}
+  // Expose the wrapped HTMLElement constructor for everyone to extend from.
   win.HTMLElement = HTMLElementWrapper;
 }
 
