@@ -153,14 +153,14 @@ export class AmpList extends AMP.BaseElement {
       } else if (typeof src === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
-        this.resetIfNecessary_();
+        this.resetIfNecessary_(/* isFetch */ false);
         this.scheduleRender_(isArray(src) ? src : [src]);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
-      this.resetIfNecessary_();
+      this.resetIfNecessary_(/* isFetch */ false);
       this.scheduleRender_(isArray(state) ? state : [state]);
     }
   }
@@ -189,11 +189,21 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * If `reset-on-refresh` attribute exists, then removes any previously
-   * rendered children and displays placeholder, loading indicator, etc.
+   * Removes any previously rendered children and displays placeholder, loading
+   * indicator, etc. depending on the value of `reset-on-refresh` attribute.
+   *
+   *     <amp-list reset-on-refresh="fetch|always">
+   *
+   * - "fetch": Reset only on network requests.
+   * - "always": Reset on network request OR rendering with local data.
+   *
+   * Default is "fetch" if no value is specified (boolean attribute).
+   *
+   * @param {boolean=} isFetch
    */
-  resetIfNecessary_() {
-    if (this.element.hasAttribute('reset-on-refresh')) {
+  resetIfNecessary_(isFetch = true) {
+    if ((isFetch && this.element.hasAttribute('reset-on-refresh'))
+      || this.element.getAttribute('reset-on-refresh') === 'always') {
       // Placeholder and loading don't need a mutate context.
       this.togglePlaceholder(true);
       this.toggleLoading(true, /* opt_force */ true);
