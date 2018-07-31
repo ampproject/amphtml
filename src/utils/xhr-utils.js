@@ -96,7 +96,6 @@ export let FetchInitDef;
 export function toStructuredCloneable(input, init) {
   const newInit = Object.assign({}, init);
   if (isFormDataWrapper(init.body)) {
-    newInit.headers = newInit.headers || {};
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
     newInit.body = fromIterator(init.body.entries());
   }
@@ -283,6 +282,9 @@ export function setupInit(opt_init, opt_accept) {
     init.headers['Accept'] = opt_accept;
   }
 
+  // In edge a `TypeMismatchError` is thrown when body is set to null.
+  dev().assert(init.body !== null, 'fetch `body` can not be `null`');
+
   return init;
 }
 
@@ -314,8 +316,7 @@ export function setupAMPCors(win, input, init) {
     init['headers'] = init['headers'] || {};
     init['headers']['AMP-Same-Origin'] = 'true';
   }
-  // In edge a `TypeMismatchError` is thrown when body is set to null.
-  dev().assert(init.body !== null, 'fetch `body` can not be `null`');
+
   return init;
 }
 
