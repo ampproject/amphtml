@@ -263,13 +263,11 @@ export function setupInput(win, input, init) {
 /**
  * Sets up and normalizes the FetchInitDef
  *
- * @param {!Window} win
- * @param {string} input
  * @param {?FetchInitDef=} opt_init Fetch options object.
  * @param {string=} opt_accept The HTTP Accept header value.
  * @return {!FetchInitDef}
  */
-export function setupInit(win, input, opt_init, opt_accept) {
+export function setupInit(opt_init, opt_accept) {
   const init = opt_init || {};
 
   // In particular, Firefox does not tolerate `null` values for
@@ -285,6 +283,18 @@ export function setupInit(win, input, opt_init, opt_accept) {
     init.headers['Accept'] = opt_accept;
   }
 
+  return init;
+}
+
+/**
+ *
+ * Sets up AMPSpecific CORS headers.
+ * @param {!Window} win
+ * @param {string} input
+ * @param {?FetchInitDef=} init
+ * @return {!FetchInitDef}
+ */
+export function setupAMPCors(win, input, init) {
   // Do not append __amp_source_origin if explicitly disabled.
   if (init.ampCors === false) {
     init.requireAmpResponseSourceOrigin = false;

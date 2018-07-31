@@ -15,7 +15,7 @@
  */
 
 import {Services} from './services';
-import {getViewerInterceptResponse, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
+import {getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
 import {parseUrlDeprecated} from './url';
 import {user} from './log';
 
@@ -29,7 +29,8 @@ import {user} from './log';
  * @ignore
  */
 export function fetchDocument(win, input, opt_init) {
-  const init = setupInit(win, input, opt_init, 'text/html');
+  let init = setupInit(opt_init, 'text/html');
+  init = setupAMPCors(win, input, init);
   input = setupInput(win, input, init);
   const ampdocService = Services.ampdocServiceFor(win);
   const ampdocSingle_ =
@@ -42,7 +43,7 @@ export function fetchDocument(win, input, opt_init) {
         if (interceptorResponse) {
           // TODO(prateekbh): get rid of this heck and do domparsing here
           // when integrating document fetcher.
-          return interceptorResponse.document_();
+          return interceptorResponse.document();
         }
 
         return xhrRequest_(input, init).then(({xhr, response}) => {

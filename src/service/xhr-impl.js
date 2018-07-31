@@ -15,7 +15,15 @@
  */
 
 import {Services} from '../services';
-import {assertSuccess, fetchPolyfill, getViewerInterceptResponse, setupInit, setupInput, verifyAmpCORSHeaders} from '../utils/xhr-utils';
+import {
+  assertSuccess,
+  fetchPolyfill,
+  getViewerInterceptResponse,
+  setupAMPCors,
+  setupInit,
+  setupInput,
+  verifyAmpCORSHeaders,
+} from '../utils/xhr-utils';
 import {dev, user} from '../log';
 import {
   getCorsUrl,
@@ -120,7 +128,7 @@ export class Xhr {
    */
   fetchAmpCors_(input, init = {}) {
     input = setupInput(this.win, input, init);
-
+    init = setupAMPCors(this.win, input, init);
     return this.fetch_(input, init).then(response => {
       return verifyAmpCORSHeaders(this.win, response, init);
     }, reason => {
@@ -144,7 +152,7 @@ export class Xhr {
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetchJson(input, opt_init, opt_allowFailure) {
-    const init = setupInit(this.win, input, opt_init, 'application/json');
+    const init = setupInit(opt_init, 'application/json');
     if (init.method == 'POST' && !isFormDataWrapper(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
@@ -166,7 +174,7 @@ export class Xhr {
         init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
       }
     }
-    return this.fetchWithoutInitSetup_(input, init);
+    return this.fetch(input, init);
   }
 
   /**
@@ -182,8 +190,7 @@ export class Xhr {
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetchText(input, opt_init) {
-    return this.fetchWithoutInitSetup_(input,
-        setupInit(this.win, input, opt_init, 'text/plain'));
+    return this.fetch(input, setupInit(opt_init, 'text/plain'));
   }
 
   /**
@@ -197,9 +204,9 @@ export class Xhr {
    * @return {!Promise<!Document>}
    */
   fetchDocument(input, opt_init) {
-    const init = setupInit(this.win, input, opt_init, 'text/html');
+    const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
-    return this.fetchWithoutInitSetup_(input, init)
+    return this.fetch(input, init)
         .then(response =>
           /** @type {!../utils/xhr-utils.FetchResponse} */(response).document());
   }
@@ -210,17 +217,7 @@ export class Xhr {
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetch(input, opt_init) {
-    const init = setupInit(this.win, input, opt_init);
-    return this.fetchAmpCors_(input, init).then(response =>
-      assertSuccess(response));
-  }
-
-  /**
-   * @param {string} input URL
-   * @param {!../utils/xhr-utils.FetchInitDef=} init Fetch options object.
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
-   */
-  fetchWithoutInitSetup_(input, init) {
+    const init = setupInit(opt_init);
     return this.fetchAmpCors_(input, init).then(response =>
       assertSuccess(response));
   }
