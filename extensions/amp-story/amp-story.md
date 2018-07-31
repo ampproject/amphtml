@@ -121,15 +121,35 @@ The following guidelines apply to the image for the publisher logo:
 <table>
   <tr>
     <td>
-      <img alt="Logo with blue text on white background"   src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" />
+<amp-img alt="Logo with blue text on white background"
+    layout="fixed"
+    width="107" height="112" 
+    src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
+  <noscript>
+    <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
+  </noscript>
+</amp-img>
       Preferred
     </td>
     <td>
-      <img alt="Logo with white text on blue background"   src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" />
+<amp-img alt="Logo with white text on blue background"
+    layout="fixed"
+    width="107" height="101" 
+    src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
+  <noscript>
+    <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
+  </noscript>
+</amp-img>
       Preferred
     </td>
-    <td>
-      <img alt="Logo with blue text on blue background"   src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" />
+<amp-img alt="Logo with blue text on blue background"
+    layout="fixed"
+    width="103" height="102" 
+    src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
+  <noscript>
+    <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
+  </noscript>
+</amp-img>
       Avoid this
     </td>
   </tr>
