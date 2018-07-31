@@ -262,8 +262,41 @@ describes.realWin('amp-skimlinks', {
 
 
       describe('Calls the beacon callback', () => {
-        beforeEach(() => {
+        let apiCallback;
+        let stubXhr;
+        let beaconData;
 
+        beforeEach(() => {
+          apiCallback = env.sandbox.spy();
+          beaconData = {
+            'merchant_domains': ['merchant1.com', 'merchant2.com'],
+          };
+          stubXhr = createStubXhr(xhr, beaconData);
+        });
+
+        it('Should call the callback if provided', () => {
+          const resolver = new AffiliateLinkResolver(stubXhr, {}, apiCallback);
+
+          const response = resolver.resolveUnknownAnchors(anchorList);
+          return response.asyncData.then(() => {
+            expect(apiCallback.calledOnce).to.be.true;
+          });
+        });
+
+        it('Should provide the beacon data', () => {
+          const resolver = new AffiliateLinkResolver(stubXhr, {}, apiCallback);
+          const response = resolver.resolveUnknownAnchors(anchorList);
+          return response.asyncData.then(() => {
+            expect(apiCallback.withArgs(beaconData).calledOnce).to.be.true;
+          });
+        });
+
+        it('Should not call the callback if api request is not made', () => {
+          const resolver = new AffiliateLinkResolver(stubXhr, {}, apiCallback);
+
+          const response = resolver.resolveUnknownAnchors([]);
+          expect(response.asyncData).to.be.null;
+          expect(apiCallback.calledOnce).to.be.false;
         });
       });
 
