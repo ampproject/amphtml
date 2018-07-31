@@ -69,7 +69,7 @@ function getMode_(win) {
   const IS_DEV = true;
   const IS_MINIFIED = false;
 
-  const localDevEnabled = !!self.AMP_CONFIG.localDev;
+  const localDevEnabled = !!AMP_CONFIG.localDev;
   const runningTests = (!!AMP_CONFIG.test) || (
     IS_DEV && !!(win.AMP_TEST || win.__karma__));
   const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
