@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {
@@ -27,7 +28,7 @@ import {isExperimentOn} from './experiments';
 import {installCustomElements as registerElement} from
   'document-register-element/build/document-register-element.patched';
 
-if (isExperimentOn(self, 'custom-elements-v1')) {
+if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
   installCustomElements(self, class {});
 } else {
   registerElement(self, 'auto');
