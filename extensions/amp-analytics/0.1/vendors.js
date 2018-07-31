@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from './iframe-transport-vendors';
-
 /**
  * @const {!JsonObject}
  */
@@ -2094,7 +2092,13 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'bg': {
+    'transport': {
+      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
+    },
+  },
 });
+
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
@@ -2104,6 +2108,3 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
-
-// Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
-Object.assign(ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG);
