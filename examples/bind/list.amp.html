@@ -23,11 +23,23 @@
       quantity: 1976,
       unitPrice: 3.50
     }, {
-      name: 'ice cream',
+      name: 'burger',
       quantity: 108,
       unitPrice: 6.50
     }]
-  })">Show Other Foods</button>
+  })">Show Junk Food (local)</button>
+
+  <button on="tap:AMP.setState({
+    src: [{
+      name: 'cake',
+      quantity: 424,
+      unitPrice: 14.2
+    }, {
+      name: 'ice cream',
+      quantity: 23,
+      unitPrice: 0.78
+    }]
+  })">Show Desserts (local)</button>
 
   <button on="tap:AMP.setState({foo: foo+1})">increment foo</button>
 
@@ -40,18 +52,22 @@
   </template>
 
   <h3>Default</h3>
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template" reset-on-refresh>
+    <div placeholder>(Placeholder)</div>
   </amp-list>
 
   <h3>binding="always"</h3>
-  <amp-list binding="always" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  <amp-list binding="always" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template" reset-on-refresh>
+    <div placeholder>(Placeholder)</div>
   </amp-list>
 
   <h3>binding="refresh"</h3>
-  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  <amp-list binding="refresh" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template" reset-on-refresh>
+    <div placeholder>(Placeholder)</div>
   </amp-list>
 
   <h3>binding="no"</h3>
-  <amp-list binding="no" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template">
+  <amp-list binding="no" layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="100" template="my-template" reset-on-refresh>
+    <div placeholder>(Placeholder)</div>
   </amp-list>
 </body>
