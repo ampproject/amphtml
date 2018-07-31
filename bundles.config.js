@@ -269,6 +269,9 @@ exports.extensionBundles = [
     version: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
+    extraBundles: [
+      'third_party/react-dates/bundle.js',
+    ],
   },
   {
     name: 'amp-image-viewer',
@@ -320,6 +323,11 @@ exports.extensionBundles = [
     version: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
+    extraBundles: [
+      'third_party/d3/d3.js',
+      'third_party/d3-geo-projection/d3-geo-projection.js',
+      'third_party/vega/vega.js',
+    ],
   },
   {name: 'amp-google-vrview-image', version: '0.1', type: TYPES.MISC},
   {

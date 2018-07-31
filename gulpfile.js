@@ -985,13 +985,6 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
 }
 
 const MODULE_SEPARATOR = ';';
-const EXTENSION_BUNDLE_MAP = {
-  'amp-viz-vega.js': [
-    'third_party/d3/d3.js',
-    'third_party/d3-geo-projection/d3-geo-projection.js',
-    'third_party/vega/vega.js',
-  ],
-};
 
 /**
  * Allows (ap|pre)pending to the already compiled, minified JS file
@@ -1000,7 +993,12 @@ const EXTENSION_BUNDLE_MAP = {
  * @param {string} destFilePath File path to the compiled JS file
  */
 function appendToCompiledFile(srcFilename, destFilePath) {
-  const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
+  const extensionName = srcFilename.replace(/\.js$/, '');
+  const config = extensionBundles.find(e => e.name == extensionName);
+  if (!config) {
+    return;
+  }
+  const bundleFiles = config.extraBundles;
   if (bundleFiles) {
     const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
     fs.writeFileSync(destFilePath, newSource, 'utf8');
