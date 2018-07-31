@@ -24,7 +24,6 @@ import {
 } from './url';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
-import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';

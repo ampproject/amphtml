@@ -24,7 +24,6 @@ import {
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
-import {isExperimentOn} from '../experiments';
 
 const TAG = 'FixedLayer';
 

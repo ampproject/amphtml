@@ -21,7 +21,6 @@ import {
   rewriteAttributeValue,
   rewriteAttributesForElement,
 } from '../../src/purifier';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('DOMPurify-based', () => {
   runSanitizerTests();

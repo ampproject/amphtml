@@ -18,7 +18,6 @@ import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../src/sanitizer';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('Caja-based', () => {
   runSanitizerTests();

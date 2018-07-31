@@ -18,7 +18,6 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 
