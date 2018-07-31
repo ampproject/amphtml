@@ -87,9 +87,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {boolean} */
     this.disableHint_ = this.element.hasAttribute('disable-hint');
     /** @private {number} */
-    this.hintInactiveInterval_ = 10000;
+    this.hintReappearInterval_ = 10000;
     /** @private {boolean} */
-    this.shouldHintLoop_ = false;
+    this.shouldHintReappear_ = false;
     /** @private {number|null} */
     this.hintTimeoutHandle_ = null;
     /** @private {boolean} */
@@ -233,7 +233,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (!this.disableHint_) {
       // need to clear timeout handle inside
       // thus not directly calling animateHideHint_
-      this.resetHintInterval_(true); // no restart
+      this.resetHintReappear_(true); // no restart
       this.isHintHidden_ = true;
     }
     this.unregisterEvents_();
@@ -304,14 +304,14 @@ export class AmpImageSlider extends AMP.BaseElement {
       return;
     }
 
-    if (this.hint_.hasAttribute('hint-loop')) {
-      this.shouldHintLoop_ = true;
+    if (this.hint_.hasAttribute('hint-reappear')) {
+      this.shouldHintReappear_ = true;
     }
 
-    if (this.hint_.hasAttribute('hint-inactive-interval')) {
-      this.hintInactiveInterval_ =
-          Number(this.hint_.getAttribute('hint-inactive-interval')) ||
-          this.hintInactiveInterval_;
+    if (this.hint_.hasAttribute('hint-reappear-interval')) {
+      this.hintReappearInterval_ =
+          Number(this.hint_.getAttribute('hint-reappear-interval')) ||
+          this.hintReappearInterval_;
     }
 
     const leftHintIcon = htmlFor(this.doc_)
@@ -380,23 +380,23 @@ export class AmpImageSlider extends AMP.BaseElement {
       // We need the initial offset, yet gesture event seems not providing
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
-        this.resetHintInterval_(true);
+        this.resetHintReappear_(true);
       }
       this.pointerMoveX_(
           e.data.startX + e.data.deltaX);
       if (e.data.last) {
         // Reset hint reappearance timeout if needed
-        this.resetHintInterval_(!this.shouldHintLoop_);
+        this.resetHintReappear_(!this.shouldHintReappear_);
       }
     });
 
     this.gestures_.onPointerDown(e => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX);
-      // Use !this.shouldHintLoop here
+      // Use !this.shouldHintReappear_ here
       // It is possible that after onPointerDown
       // SwipeXRecognizer callback is not triggered
-      this.resetHintInterval_(!this.shouldHintLoop_);
+      this.resetHintReappear_(!this.shouldHintReappear_);
     });
   }
 
@@ -420,7 +420,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @param {boolean=} opt_noRestart
    * @private
    */
-  resetHintInterval_(opt_noRestart) {
+  resetHintReappear_(opt_noRestart) {
     if (this.disableHint_) {
       return;
     }
@@ -441,7 +441,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     // Use timer instead of default setTimeout
     this.hintTimeoutHandle_ = Services.timerFor(this.win).delay(() => {
       this.animateShowHint_();
-    }, this.hintInactiveInterval_);
+    }, this.hintReappearInterval_);
   }
 
   /**
@@ -481,7 +481,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.unlistenMouseUp_ =
         listen(this.win, 'mouseup', this.onMouseUp_.bind(this));
 
-    this.resetHintInterval_(true);
+    this.resetHintReappear_(true);
   }
 
   /**
@@ -504,7 +504,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);
 
-    this.resetHintInterval_(!this.shouldHintLoop_);
+    this.resetHintReappear_(!this.shouldHintReappear_);
   }
 
   /**
@@ -518,7 +518,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       return;
     }
 
-    this.resetHintInterval_(!this.shouldHintLoop_);
+    this.resetHintReappear_(!this.shouldHintReappear_);
 
     switch (e.key.toLowerCase()) {
       case 'arrowleft':
