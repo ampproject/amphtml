@@ -236,6 +236,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
   },
   {
+    id: 'amp-story-scroll',
+    name: 'Scrollable experience for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/16465',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
+  },
+  {
     id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',

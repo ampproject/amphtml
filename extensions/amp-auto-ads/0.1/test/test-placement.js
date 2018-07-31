@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import '../../../amp-ad/0.1/amp-ad';
 import {AdTracker} from '../ad-tracker';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {Services} from '../../../../src/services';
-
 
 describes.realWin('placement', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',
+    extensions: ['amp-ad'],
   },
 }, env => {
   let win, doc, ampdoc;
@@ -62,7 +63,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -72,10 +73,12 @@ describes.realWin('placement', {
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, sizing, adTracker)
-          .then(() => {
-            expect(placements[0].getAdElement()).to.equal(anchor.childNodes[0]);
-          });
+
+      const result = placements[0].placeAd(attributes, sizing, adTracker);
+      env.flushVsync();
+      return result.then(() => {
+        expect(placements[0].getAdElement()).to.equal(anchor.childNodes[0]);
+      });
     });
 
     it('should throw an error if ad not placed', () => {
@@ -228,7 +231,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const baseAttributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
         'data-custom-att-1': 'val-1',
         'data-custom-att-2': 'val-2',
       };
@@ -244,7 +247,7 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.getAttribute('data-custom-att-1'))
@@ -273,7 +276,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const baseAttributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
         'data-custom-att-1': 'val-1',
         'data-custom-att-2': 'val-2',
       };
@@ -292,7 +295,7 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.getAttribute('width')).to.equal('300');
@@ -320,7 +323,7 @@ describes.realWin('placement', {
             pos: 2,
             type: 1,
             attributes: {
-              'type': 'ad-network-type2',
+              'type': 'adsense',
               'data-custom-att-1': 'val-1',
               'data-custom-att-2': 'val-2',
             },
@@ -330,7 +333,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const baseAttributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
         'data-custom-att-2': 'val-3',
         'data-custom-att-3': 'val-4',
       };
@@ -346,7 +349,7 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type2');
+            expect(adElement.getAttribute('type')).to.equal('adsense');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.getAttribute('data-custom-att-1'))
@@ -377,7 +380,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const baseAttributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -397,7 +400,7 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.classList.contains(
@@ -428,7 +431,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -442,7 +445,7 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('5px');
@@ -474,7 +477,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -488,7 +491,7 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('5px');
@@ -520,7 +523,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -534,7 +537,7 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('');
@@ -564,7 +567,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -578,7 +581,7 @@ describes.realWin('placement', {
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('');
@@ -612,7 +615,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -654,7 +657,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -702,7 +705,7 @@ describes.realWin('placement', {
       const sizing = {};
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       return placements[0].placeAd(attributes, sizing, adTracker)
@@ -733,7 +736,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -770,7 +773,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -808,7 +811,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -846,7 +849,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};
@@ -888,7 +891,7 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
       const sizing = {};

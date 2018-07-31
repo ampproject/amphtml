@@ -90,9 +90,6 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
-
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
   }
@@ -104,10 +101,10 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
 
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
-        TAG, this.viewer_, this.templates_);
+        TAG, viewer, this.templates_);
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
@@ -151,22 +148,20 @@ export class AmpList extends AMP.BaseElement {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
           this.resetIfNecessary_();
-          return this.fetchList_();
+          this.fetchList_();
         }
       } else if (typeof src === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
-        this.resetIfNecessary_();
-        const items = isArray(src) ? src : [src];
-        this.scheduleRender_(items);
+        this.resetIfNecessary_(/* isFetch */ false);
+        this.scheduleRender_(isArray(src) ? src : [src]);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
-      this.resetIfNecessary_();
-      const items = isArray(state) ? state : [state];
-      this.scheduleRender_(items);
+      this.resetIfNecessary_(/* isFetch */ false);
+      this.scheduleRender_(isArray(state) ? state : [state]);
     }
   }
 
@@ -180,39 +175,40 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Wraps `toggleFallback()`. Runs in a mutate context by default but can be
-   * disabled by passing false to `mutate`.
+   * Wraps `toggleFallback()`. Must be called in a mutate context.
    * @param {boolean} show
-   * @param {boolean=} mutate
    * @private
    */
-  toggleFallback_(show, mutate = true) {
+  toggleFallback_(show) {
     // Early-out if toggling would be a no-op.
     if (!show && !this.fallbackDisplayed_) {
       return;
     }
-    const toggle = value => {
-      this.toggleFallback(value);
-      this.fallbackDisplayed_ = value;
-    };
-    if (mutate) {
-      this.mutateElement(() => toggle(show));
-    } else {
-      toggle(show);
-    }
+    this.toggleFallback(show);
+    this.fallbackDisplayed_ = show;
   }
 
   /**
-   * If `reset-on-refresh` attribute exists, then removes any previously
-   * rendered children and displays placeholder, loading indicator, etc.
+   * Removes any previously rendered children and displays placeholder, loading
+   * indicator, etc. depending on the value of `reset-on-refresh` attribute.
+   *
+   *     <amp-list reset-on-refresh="fetch|always">
+   *
+   * - "fetch": Reset only on network requests.
+   * - "always": Reset on network request OR rendering with local data.
+   *
+   * Default is "fetch" if no value is specified (boolean attribute).
+   *
+   * @param {boolean=} isFetch
    */
-  resetIfNecessary_() {
-    if (this.element.hasAttribute('reset-on-refresh')) {
+  resetIfNecessary_(isFetch = true) {
+    if ((isFetch && this.element.hasAttribute('reset-on-refresh'))
+      || this.element.getAttribute('reset-on-refresh') === 'always') {
       // Placeholder and loading don't need a mutate context.
       this.togglePlaceholder(true);
       this.toggleLoading(true, /* opt_force */ true);
       this.mutateElement(() => {
-        this.toggleFallback_(false, /* mutate */ false);
+        this.toggleFallback_(false);
         removeChildren(dev().assertElement(this.container_));
       });
     }
@@ -253,7 +249,7 @@ export class AmpList extends AMP.BaseElement {
         return this.scheduleRender_(items);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
-      }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
+      }).catch(error => this.showFallback_(error));
     }
   }
 
@@ -264,16 +260,14 @@ export class AmpList extends AMP.BaseElement {
   ssrTemplate_() {
     return this.ssrTemplateHelper_.fetchAndRenderTemplate(
         this.element).then(resp => {
-      // TODO(alabiaga): Since this is related to the viewer,
-      // this should be a 3rd log type?
       const data = getData(resp);
       user().assert(
           resp && (typeof data !== 'undefined'),
-          'Response missing the \'data\' field');
+          'Response missing the "data" field.');
       return this.scheduleRender_(data);
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
+    }).catch(error => this.showFallback_(error));
   }
 
   /**
@@ -387,8 +381,9 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
-
     this.mutateElement(() => {
+      this.hideFallbackAndPlaceholder_();
+
       removeChildren(dev().assertElement(this.container_));
       elements.forEach(element => {
         if (!element.hasAttribute('role')) {
@@ -429,32 +424,33 @@ export class AmpList extends AMP.BaseElement {
     return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
   }
 
-  /** @private */
-  onFetchSuccess_() {
+  /**
+   * Must be called in mutate context.
+   * @private
+   */
+  hideFallbackAndPlaceholder_() {
+    this.toggleLoading(false);
     if (this.getFallback()) {
-      // Hide in case fallback was displayed for a previous fetch.
       this.toggleFallback_(false);
     }
     this.togglePlaceholder(false);
-    this.toggleLoading(false);
   }
 
   /**
    * @param {*=} error
+   * @throws {!Error} If fallback element is not present.
    * @private
-   * @throws {!Error} throws error if fallback element is not present.
    */
-  onFetchError_(error) {
+  showFallback_(error) {
     this.toggleLoading(false);
     if (this.getFallback()) {
-      this.toggleFallback(true);
+      this.toggleFallback_(true);
       this.togglePlaceholder(false);
     } else {
       throw error;
     }
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpList);
