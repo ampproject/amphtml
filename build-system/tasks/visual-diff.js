@@ -58,6 +58,9 @@ const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
 const preVisualDiffTasks =
     (argv.nobuild || argv.verify_status) ? [] : ['build'];
 
+const browsers_ = [];
+let webServerProcess_;
+
 /**
  * Logs a message to the console.
  *
@@ -133,7 +136,7 @@ function setPercyBranch() {
  *     and reachable.
  */
 async function launchWebServer() {
-  const gulpServeAsync = execScriptAsync(
+  webServerProcess_ = execScriptAsync(
       `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
       {
         stdio: argv.webserver_debug ?
@@ -141,17 +144,13 @@ async function launchWebServer() {
           'ignore',
       });
 
-  gulpServeAsync.on('close', code => {
+  webServerProcess_.on('close', code => {
     code = code || 0;
     if (code != 0) {
       log('error', colors.cyan("'serve'"),
           `errored with code ${code}. Cannot continue with visual diff tests`);
       process.exit(code);
     }
-  });
-
-  process.on('exit', async() => {
-    await shutdown(gulpServeAsync);
   });
 
   let resolver, rejecter;
@@ -164,25 +163,9 @@ async function launchWebServer() {
     port: PORT,
     retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
   }).on('connected', () => {
-    return resolver(gulpServeAsync);
+    return resolver(webServerProcess_);
   }).on('timeout', rejecter);
   return deferred;
-}
-
-/**
- * Kill the webserver process and this own process.
- *
- * @param {!ChildProcess} webServerProcess the webserver process to shut down.
- */
-async function shutdown(webServerProcess) {
-  if (!webServerProcess.killed) {
-    // Explicitly exit the webserver.
-    webServerProcess.kill();
-    // The child node process has an asynchronous stdout. See #10409.
-    await sleep(100);
-  }
-  // TODO(rsimha): clean up this exit.
-  process.exit();
 }
 
 /**
@@ -288,8 +271,9 @@ async function launchBrowsers(numPages) {
 
   const pages = [];
   for (let i = 0; i < numPages; i++) {
-    const browser = await puppeteer.launch(browserOptions);
-    process.on('exit', browser.close);
+    const browser = await puppeteer.launch(browserOptions)
+        .catch(err => log.fatal(err));
+    browsers_.push(browser);
 
     const page = (await browser.pages())[0];
     await page.setViewport({
@@ -693,6 +677,7 @@ async function createEmptyBuild(page) {
  * Runs the AMP visual diff tests.
  */
 async function visualDiff() {
+  setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
 
@@ -715,14 +700,14 @@ async function visualDiff() {
   setDebuggingLevel();
 
   // Launch a local web server.
-  const webServerProcess = await launchWebServer().catch(reason => {
+  await launchWebServer().catch(reason => {
     log('fatal', `Failed to start a web server: ${reason}`);
   });
 
   if (argv.skip) {
     const page = (await launchBrowsers(1))[0];
     await createEmptyBuild(page);
-    await shutdown(webServerProcess);
+    process.exit(0);
     return;
   }
 
@@ -732,8 +717,25 @@ async function visualDiff() {
           path.resolve(__dirname, '../../test/visual-diff/visual-tests'),
           'utf8'));
   await runVisualTests(visualTestsConfig);
+  process.exit(0);
+}
 
-  await shutdown(webServerProcess);
+function setupCleanup_() {
+  process.on('exit', cleanup_);
+  process.on('SIGINT', cleanup_);
+  process.on('uncaughtException', cleanup_);
+}
+
+async function cleanup_() {
+  for (const browser of browsers_) {
+    await browser.close();
+  }
+  if (!webServerProcess_.killed) {
+    // Explicitly exit the webserver.
+    webServerProcess_.kill();
+    // The child node process has an asynchronous stdout. See #10409.
+    await sleep(100);
+  }
 }
 
 gulp.task(
