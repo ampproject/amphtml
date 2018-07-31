@@ -45,7 +45,7 @@ The process is
 - Create "Intent to change" issue.
 - Allow for at least 2 weeks of open discussion.
 - Wait for 3 LGTMs from core committers.
-- (Announce)[#Announcements] change on the mailing list.
+- [Announce](#announcements) change on the mailing list.
 - Start warning for pages that might break via the developer console.
 - Give developers 6 weeks to apply changes.
 - Apply new behavior to old content in a way that minimizes breakage.

@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, StateProperty} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 import {LocalizedStringId} from './localization';
@@ -165,7 +170,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -260,10 +265,6 @@ export class SystemLayer {
       this.onCanShowSharingUisUpdate_(show);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
-    }, true /** callToInitialize */);
-
     this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
       this.onHasAudioStateUpdate_(hasAudio);
     }, true /** callToInitialize */);
@@ -272,8 +273,16 @@ export class SystemLayer {
       this.onMutedStateUpdate_(isMuted);
     }, true /** callToInitialize */);
 
+    this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
+      this.onUIStateUpdate_(isDesktop);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
       this.onPageIndexUpdate_(index);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
     }, true /** callToInitialize */);
   }
 
@@ -328,23 +337,6 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to desktop state updates and triggers the desktop UI.
-   * @param {boolean} isDesktop
-   * @private
-   */
-  onDesktopStateUpdate_(isDesktop) {
-    if (isDesktop) {
-      this.buildSharePill_();
-    }
-
-    this.vsync_.mutate(() => {
-      isDesktop ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
-    });
-  }
-
-  /**
    * Reacts to has audio state updates, displays the audio controls if needed.
    * @param {boolean} hasAudio
    * @private
@@ -369,12 +361,42 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to desktop state updates and triggers the desktop UI.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    if ([UIType.SCROLL, UIType.DESKTOP].includes(uiState)) {
+      this.buildSharePill_();
+    }
+
+    this.vsync_.mutate(() => {
+      uiState === UIType.DESKTOP ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
+    });
+  }
+
+  /**
    * Reacts to the active page index changing.
    * @param {number} index
    */
   onPageIndexUpdate_(index) {
     this.vsync_.mutate(() => {
       this.getShadowRoot().classList.toggle('first-page-active', index === 0);
+    });
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState ?
+        this.getShadowRoot().setAttribute('dir', 'rtl') :
+        this.getShadowRoot().removeAttribute('dir');
     });
   }
 
@@ -445,7 +467,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ =
         renderSimpleTemplate(this.win_.document, SHARE_WIDGET_PILL_CONTAINER);
 
-    const shareWidget = new ShareWidget(this.win_);
+    const shareWidget = new ShareWidget(this.win_, this.parentEl_);
 
     this.sharePillContainerNode_
         .querySelector('.i-amphtml-story-share-pill')
