@@ -274,10 +274,11 @@ export class AmpList extends AMP.BaseElement {
         this.getPolicy_()).then(batchFetchData => {
       fetchData =
           setAmpCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
-      setupJsonFetchInit(batchFetchData.fetchOpt);
+      setupJsonFetchInit(fetchData.fetchOpt);
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, fetchData);
     }).then(response => {
+      // Construct the fetch response and validate.
       const fetchResponse =
           fromStructuredCloneable(win, response, fetchData.responseType);
       validateFetchResponse(win, fetchResponse, fetchData.fetchOpt);
