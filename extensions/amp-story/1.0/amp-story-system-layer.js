@@ -311,20 +311,10 @@ export class SystemLayer {
       this.onCanShowSharingUisUpdate_(show);
     }, true /** callToInitialize */);
 
-<<<<<<< HEAD
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
-    }, true /** callToInitialize */);
-
     this.storeService_.subscribe(StateProperty.STORY_HAS_AUDIO_STATE,
         hasAudio => {
           this.onStoryHasAudioStateUpdate_(hasAudio);
         }, true /** callToInitialize */);
-=======
-    this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
-      this.onHasAudioStateUpdate_(hasAudio);
-    }, true /** callToInitialize */);
->>>>>>> upstream/master
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
