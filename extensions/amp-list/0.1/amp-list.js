@@ -414,7 +414,10 @@ export class AmpList extends AMP.BaseElement {
     return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
   }
 
-  /** @private */
+  /**
+   * Must be called in mutate context.
+   * @private
+   */
   hideFallbackAndPlaceholder_() {
     this.toggleLoading(false);
     if (this.getFallback()) {
@@ -425,20 +428,19 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {*=} error
-   * @private
    * @throws {!Error} If fallback element is not present.
+   * @private
    */
   showFallback_(error) {
     this.toggleLoading(false);
     if (this.getFallback()) {
-      this.toggleFallback(true);
+      this.toggleFallback_(true);
       this.togglePlaceholder(false);
     } else {
       throw error;
     }
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpList);
