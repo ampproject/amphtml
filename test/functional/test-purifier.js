@@ -26,6 +26,43 @@ import {toggleExperiment} from '../../src/experiments';
 describe('DOMPurify-based', () => {
   runSanitizerTests();
 
+  describe('<script>', () => {
+    it('should not allow plain <script> tags', () => {
+      expect(purifyHtml('<script>alert(1)</script>')).to.equal('');
+    });
+
+    it('should not allow script[type="text/javascript"]', () => {
+      expect(purifyHtml('<script type="text/javascript">alert(1)</script>'))
+          .to.equal('');
+    });
+
+    it('should not allow script[type="application/javascript"]', () => {
+      const html = '<script type="application/javascript">alert(1)</script>';
+      expect(purifyHtml(html)).to.equal('');
+    });
+
+    it('should allow script[type="application/json"]', () => {
+      const html = '<script type="application/json">{}</script>';
+      expect(purifyHtml(html)).to.equal(html);
+    });
+
+    it('should allow script[type="application/ld+json"]', () => {
+      const html = '<script type="application/ld+json">{}</script>';
+      expect(purifyHtml(html)).to.equal(html);
+    });
+
+    it('should not allow insecure <script> tags around secure ones', () => {
+      const html = '<script type="application/json">{}</script>';
+      // Should not allow an insecure tag following a secure one.
+      expect(purifyHtml(html + '<script>alert(1)</script>')).to.equal(html);
+      // Should not allow an insecure tag preceding a secure one.
+      expect(purifyHtml('<script>alert(1)</script>' + html)).to.equal(html);
+      // Should not allow an insecure tag containing a secure one.
+      expect(purifyHtml('<script>alert(1)' +
+          '<script type="application/json">{}</script></script>')).to.equal('');
+    });
+  });
+
   describe('for <amp-bind>', () => {
     it('should rewrite [text] and [class] attributes', () => {
       expect(purifyHtml('<p [text]="foo"></p>')).to.be
@@ -337,6 +374,21 @@ function runSanitizerTests() {
             '<p action-xhr="https://foo.com"></p>';
       expect(purifyHtml(html))
           .to.equal('<form action-xhr="https://foo.com"></form><p></p>');
+    });
+
+    it('should allow <amp-form>-related attributes', () => {
+      expect(purifyHtml('<div submitting></div>'))
+          .to.equal('<div submitting=""></div>');
+      expect(purifyHtml('<div submit-success></div>'))
+          .to.equal('<div submit-success=""></div>');
+      expect(purifyHtml('<div submit-error></div>'))
+          .to.equal('<div submit-error=""></div>');
+      expect(purifyHtml('<div verify-error></div>'))
+          .to.equal('<div verify-error=""></div>');
+      expect(purifyHtml('<span visible-when-invalid="valueMissing"></span>'))
+          .to.equal('<span visible-when-invalid="valueMissing"></span>');
+      expect(purifyHtml('<span validation-for="form1"></span>'))
+          .to.equal('<span validation-for="form1"></span>');
     });
   });
 

@@ -40,7 +40,6 @@ const {green, yellow, cyan, red, bold} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
-const tooManyTestsToFix = 15;
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
@@ -75,21 +74,21 @@ function getConfig() {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
       browsers: argv.saucelabs ? [
         // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Android_latest',
-        'SL_Chrome_45',
-        'SL_Chrome_android',
-        'SL_Chrome_latest',
-        'SL_Firefox_latest',
-        'SL_Safari_latest',
-        // TODO(rsimha, #15510): Enable these.
-        // 'SL_iOS_latest',
-        // 'SL_Edge_latest',
+        'SL_Chrome_67',
+        'SL_Firefox_61',
+        'SL_Safari_11',
+        // TODO(rsimha, #16687): Enable after Sauce disconnects are resolved.
+        // 'SL_Chrome_Android_7',
+        // 'SL_Chrome_45',
+        // 'SL_Android_6',
+        // 'SL_iOS_11',
+        // 'SL_Edge_17',
         // 'SL_IE_11',
       ] : [
         // With --saucelabs_lite, a subset of the unit tests are run.
         // Only browsers that support chai-as-promised may be included below.
         // TODO(rsimha-amp): Add more browsers to this list. #6039.
-        'SL_Safari_latest',
+        'SL_Safari_11',
       ],
     });
   }
@@ -458,9 +457,6 @@ function runTests() {
       });
     }
     c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
-    if (testsToRun.length < tooManyTestsToFix) {
-      c.client.failOnConsoleError = true;
-    }
   } else if (argv.integration) {
     c.files = c.files.concat(
         config.commonIntegrationTestPaths, config.integrationTestPaths);
@@ -482,8 +478,10 @@ function runTests() {
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: (!!argv.saucelabs) || (!!argv.saucelabs_lite),
+    singlePass: !!argv.single_pass,
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
+    propertiesObfuscated: !!argv.single_pass,
   };
 
   if (argv.compiled) {
@@ -604,8 +602,7 @@ function runTests() {
     resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
-      log(green(
-          'Running tests in parallel on ' + c.browsers.length +
+      log(green('Running tests on ' + c.browsers.length +
           ' Sauce Labs browser(s)...'));
     } else {
       log(green('Running tests locally...'));
@@ -617,8 +614,15 @@ function runTests() {
       console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
     }
   }).on('browser_complete', function(browser) {
+    const result = browser.lastResult;
+    // Prevent cases where Karma detects zero tests and still passes. #16851.
+    if (result.total == 0) {
+      log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
+      if (!argv.watch) {
+        process.exit(1);
+      }
+    }
     if (shouldCollapseSummary) {
-      const result = browser.lastResult;
       let message = browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +
           ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';

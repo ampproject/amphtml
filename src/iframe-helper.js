@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {addAttributesToElement, closestBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
+import {setStyle} from './style';
 import {tryParseJson} from './json';
 
 /**
@@ -463,4 +465,67 @@ export class SubscriptionApi {
     this.unlisten_();
     this.clientWindows_.length = 0;
   }
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function looksLikeTrackingIframe(element) {
+  const box = element.getLayoutBox();
+  // This heuristic is subject to change.
+  if (box.width > 10 || box.height > 10) {
+    return false;
+  }
+  // Iframe is not tracking iframe if open with user interaction
+  return !closestBySelector(element, '.i-amphtml-overlay');
+}
+
+// Most common ad sizes
+// Array of [width, height] pairs.
+const adSizes = [
+  [300, 250],
+  [320, 50],
+  [300, 50],
+  [320, 100],
+];
+
+/**
+ * Guess whether this element might be an ad.
+ * @param {!Element} element An amp-iframe element.
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isAdLike(element) {
+  const box = element.getLayoutBox();
+  const {height, width} = box;
+  for (let i = 0; i < adSizes.length; i++) {
+    const refWidth = adSizes[i][0];
+    const refHeight = adSizes[i][1];
+    if (refHeight > height) {
+      continue;
+    }
+    if (refWidth > width) {
+      continue;
+    }
+    // Fuzzy matching to account for padding.
+    if (height - refHeight <= 20 && width - refWidth <= 20) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @param {!Element} iframe
+ * @private
+ */
+export function disableScrollingOnIframe(iframe) {
+  addAttributesToElement(iframe, dict({'scrolling': 'no'}));
+
+  // This shouldn't work, but it does on Firefox.
+  // https://stackoverflow.com/a/15494969
+  setStyle(iframe, 'overflow', 'hidden');
+
+  return iframe;
 }

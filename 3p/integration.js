@@ -59,6 +59,7 @@ import {urls} from '../src/config';
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
 import {bodymovinanimation} from './bodymovinanimation';
+import {embedly} from './embedly';
 import {facebook} from './facebook';
 import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
@@ -104,6 +105,7 @@ import {adverline} from '../ads/adverline';
 import {adverticum} from '../ads/adverticum';
 import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
+import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
@@ -167,6 +169,7 @@ import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
+import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mytarget} from '../ads/mytarget';
@@ -245,6 +248,7 @@ import {zucks} from '../ads/zucks';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
+  aja: true,
   _ping_: true,
   '24smi': true,
   bringhub: true,
@@ -253,6 +257,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   kuadio: true,
   'mantis-recommend': true,
+  miximedia: true,
   mywidget: true,
   outbrain: true,
   plista: true,
@@ -307,6 +312,7 @@ register('adverline', adverline);
 register('adverticum', adverticum);
 register('advertserve', advertserve);
 register('affiliateb', affiliateb);
+register('aja', aja);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('appvador', appvador);
@@ -333,6 +339,7 @@ register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('eadv', eadv);
 register('eas', eas);
+register('embedly', embedly);
 register('engageya', engageya);
 register('epeex', epeex);
 register('eplanning', eplanning);
@@ -377,6 +384,7 @@ register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
 register('microad', microad);
+register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mytarget', mytarget);

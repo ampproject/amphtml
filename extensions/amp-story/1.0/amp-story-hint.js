@@ -17,7 +17,11 @@
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/utils/object';
 import {renderAsElement} from './simple-template';
@@ -144,7 +148,7 @@ export class AmpStoryHint {
     this.hintTimeout_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -183,7 +187,7 @@ export class AmpStoryHint {
    * @private
    */
   showHint_(hintClass) {
-    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE) {
       return;
     }
 

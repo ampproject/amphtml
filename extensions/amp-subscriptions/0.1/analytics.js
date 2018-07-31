@@ -24,6 +24,8 @@ export const SubscriptionAnalyticsEvents = {
   ACTION_DELEGATED: 'subscriptions-action-delegated',
   ENTITLEMENT_RESOLVED: 'subscriptions-entitlement-resolved',
   STARTED: 'subscriptions-started',
+  ACCESS_GRANTED: 'subscriptions-access-granted',
+  ACCESS_DENIED: 'subscriptions-access-denied',
 };
 
 export class SubscriptionAnalytics {

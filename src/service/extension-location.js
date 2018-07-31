@@ -25,7 +25,11 @@ import {urls} from '../config';
  */
 function calculateScriptBaseUrl(location, opt_isLocalDev) {
   if (opt_isLocalDev) {
-    return `${location.protocol}//${location.host}/dist`;
+    let prefix = `${location.protocol}//${location.host}`;
+    if (location.protocol == 'about:') {
+      prefix = '';
+    }
+    return `${prefix}/dist`;
   }
   return urls.cdn;
 }
@@ -42,8 +46,13 @@ export function calculateExtensionScriptUrl(location, extensionId,
   opt_extensionVersion, opt_isLocalDev) {
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
-  const extensionVersion = opt_extensionVersion || '0.1';
-  return `${base}/rtv/${rtv}/v0/${extensionId}-${extensionVersion}.js`;
+  if (opt_extensionVersion == null) {
+    opt_extensionVersion = '0.1';
+  }
+  const extensionVersion = opt_extensionVersion
+    ? '-' + opt_extensionVersion
+    : '';
+  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}.js`;
 }
 
 /**

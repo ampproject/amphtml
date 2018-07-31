@@ -40,16 +40,17 @@ export let CreativeData;
 export class FriendlyFrameRenderer extends Renderer {
 
   /**
-   * Creates an instance of FriendlyFrameRenderer.
+   * Constructs a FriendlyFrameRenderer instance. The instance values here are
+   * used by TemplateRenderer, which inherits from FriendlyFrameRenderer.
    */
   constructor() {
     super();
 
     /**
      * @type {?Element}
-     * @private
+     * @protected
      */
-    this.iframe_ = null;
+    this.iframe = null;
   }
 
   /** @override */
@@ -58,13 +59,13 @@ export class FriendlyFrameRenderer extends Renderer {
     creativeData = /** @type {CreativeData} */ (creativeData);
 
     const {size, requestUrl: adUrl} = context;
-    const {creativeMetaData} = creativeData;
+    const {creativeMetadata} = creativeData;
 
     dev().assert(size, 'missing creative size');
     dev().assert(adUrl, 'missing ad request url');
 
     // Create and setup friendly iframe.
-    this.iframe_ = /** @type {!HTMLIFrameElement} */(
+    this.iframe = /** @type {!HTMLIFrameElement} */(
       createElementWithAttributes(
           /** @type {!Document} */(element.ownerDocument),
           'iframe',
@@ -81,8 +82,8 @@ export class FriendlyFrameRenderer extends Renderer {
     // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
 
     const fontsArray = [];
-    if (creativeMetaData.customStylesheets) {
-      creativeMetaData.customStylesheets.forEach(s => {
+    if (creativeMetadata.customStylesheets) {
+      creativeMetadata.customStylesheets.forEach(s => {
         const href = s['href'];
         if (href) {
           fontsArray.push(href);
@@ -91,11 +92,11 @@ export class FriendlyFrameRenderer extends Renderer {
     }
 
     return installFriendlyIframeEmbed(
-        this.iframe_, element, {
+        this.iframe, element, {
           host: element,
           url: /** @type {string} */ (adUrl),
-          html: creativeMetaData.minifiedCreative,
-          extensionIds: creativeMetaData.customElementExtensions || [],
+          html: creativeMetadata.minifiedCreative,
+          extensionIds: creativeMetadata.customElementExtensions || [],
           fonts: fontsArray,
         }, embedWin => {
           installUrlReplacementsForEmbed(context.ampDoc, embedWin,
@@ -103,7 +104,7 @@ export class FriendlyFrameRenderer extends Renderer {
         })
         .then(friendlyIframeEmbed => {
           setFriendlyIframeEmbedVisible(
-              friendlyIframeEmbed, context.isInViewport());
+              friendlyIframeEmbed, element.isInViewport());
           // Ensure visibility hidden has been removed (set by boilerplate).
           const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
               friendlyIframeEmbed.win.document;

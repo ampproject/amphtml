@@ -210,7 +210,7 @@ The following is a proposed list of AMP components that are supported in AMP ema
 
 ### Specifying CSS in an AMP document
 
-All CSS in any AMP document must be included in a `<style amp-custom>` tag within the header. Inline style attributes are not allowed in AMP.
+All CSS in any AMP document must be included in a `<style amp-custom>` tag within the header or as inline `style` attributes.
 
 ```html
 ...
@@ -289,7 +289,7 @@ The following is a fictional email that includes an updated list of featured pro
   <meta charset="utf-8">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <style amp4email-boilerplate>body{visibility:hidden}</style>
 </head>
 <body>

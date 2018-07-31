@@ -77,7 +77,7 @@ export function metaJsonCreativeGrouper(callback) {
   return function(line, done) {
     if (first) {
       const metadata =
-          /** @type {!Object<string, *>} */(tryParseJson(first) || {});
+      /** @type {!Object<string, *>} */(tryParseJson(first) || {});
       const lowerCasedMetadata =
           Object.keys(metadata).reduce((newObj, key) => {
             newObj[key.toLowerCase()] = metadata[key];

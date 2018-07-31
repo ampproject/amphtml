@@ -19,6 +19,7 @@ import {
   closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -169,20 +170,29 @@ export class Placement {
    *     injected <amp-ad>. Specific attributes will override defaults, but be
    *     overridden by placement specific attributes defined in the
    *     configuration.
+   * @param {!./ad-network-config.SizeInfoDef} sizing
    * @param {!./ad-tracker.AdTracker} adTracker
    * @return {!Promise<!PlacementState>}
    */
-  placeAd(baseAttributes, adTracker) {
+  placeAd(baseAttributes, sizing, adTracker) {
     return this.getEstimatedPosition().then(yPosition => {
       return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = this.createAdElement_(baseAttributes);
-        this.injector_(this.anchorElement_, this.adElement_);
-        return this.resources_.attemptChangeSize(this.adElement_,
-            TARGET_AD_HEIGHT_PX, undefined, this.margins_)
+        this.adElement_ = this.createAdElement_(baseAttributes, sizing.width);
+        this.injector_(this.anchorElement_, this.getAdElement());
+
+        // CustomElement polyfill does not call connectedCallback synchronously.
+        // So we explicitly wait for CustomElement to be ready.
+        return whenUpgradedToCustomElement(this.getAdElement())
+            .then(() => this.getAdElement().whenBuilt())
+            .then(() => {
+              return this.resources_.attemptChangeSize(this.getAdElement(),
+                  sizing.height || TARGET_AD_HEIGHT_PX,
+                  undefined, this.margins_);
+            })
             .then(() => {
               this.state_ = PlacementState.PLACED;
               return this.state_;
@@ -196,13 +206,15 @@ export class Placement {
 
   /**
    * @param {!JsonObject<string, string>} baseAttributes
+   * @param {number|undefined} width
    * @return {!Element}
    * @private
    */
-  createAdElement_(baseAttributes) {
+  createAdElement_(baseAttributes, width) {
     const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
-      'layout': 'fixed-height',
+      'layout': width ? 'fixed' : 'fixed-height',
       'height': '0',
+      'width': width ? width : 'auto',
       'class': 'i-amphtml-layout-awaiting-size',
     }), baseAttributes, this.attributes_));
     return createElementWithAttributes(
@@ -219,7 +231,7 @@ export class Placement {
 export function getPlacementsFromConfigObj(ampdoc, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
-    user().warn(TAG, 'No placements in config');
+    user().info(TAG, 'No placements in config');
     return [];
   }
   const placements = [];

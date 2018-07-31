@@ -18,8 +18,8 @@ tags: {  # amp-access
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-access"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -32,7 +32,6 @@ tags: {  # amp-access (json)
   unique: true
   mandatory_parent: "HEAD"
   requires_extension: "amp-access"
-  requires_extension: "amp-analytics"
   satisfies: "amp-access extension .json script"
   excludes: "amp-subscriptions extension .json script"
   attrs: {
