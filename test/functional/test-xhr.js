@@ -17,12 +17,12 @@
 import * as sinon from 'sinon';
 import {
   FetchResponse,
-  assertSuccess,
   fetchPolyfill,
   xhrServiceForTesting,
 } from '../../src/service/xhr-impl';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
+import {assertSuccess} from '../../src/xhr-base';
 import {getCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
@@ -382,7 +382,7 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       // TODO(#16916): Make this test work with synchronous throws.
-      it.skip('should do simple JSON fetch', () => {
+      it('should do simple JSON fetch', () => {
         sandbox.stub(user(), 'assert');
         return xhr.fetchJson('http://localhost:31862/get?k=v1')
             .then(res => res.json())
