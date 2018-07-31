@@ -57,7 +57,6 @@
   border-radius: 50% !important;
   box-sizing: border-box !important;
   position: relative !important;
-  float: right !important;
   pointer-events: auto !important;
 
 
@@ -128,26 +127,47 @@
   padding-right: 48px !important; 
 }
 
+[info] [dir=rtl] .i-amphtml-message-container {
+  /* 48px for info button, add width to padding for 
+  * additional story buttons */
+  padding-right: auto !important; 
+  padding-left: 48px !important; 
+}
+
 .i-amphtml-message-container {
   width: max-content !important;
   transition-property: opacity, transform !important;
   float: right !important;
-  opacity: 0 !important;
+  /*opacity: 0 !important;*/
   position: absolute !important;
   top: 14px !important;
   right: 48px !important;
 }
 
+[dir=rtl] .i-amphtml-message-container {
+  right: auto !important;
+}
+
 [messagedisplay="noshow"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.3s cubic-bezier(1, 0.0, 0.2, 1) 0.3s !important;
+  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.2s cubic-bezier(0.0, 0.0, 1, 1) 0.3s !important;
   transform: translateX(15%) !important;
   opacity: 0 !important;
+  
+}
+
+[dir=rtl][messagedisplay="noshow"] .i-amphtml-message-container {
+  transform: translateX(50%) !important;
 }
 
 [messagedisplay="show"] .i-amphtml-message-container {
   transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
   opacity: 1 !important;
   transform: translateX(1%) !important;
+  
+}
+
+[dir=rtl][messagedisplay="show"] .i-amphtml-message-container {
+  transform: translateX(100%) !important;
 }
 
 .i-amphtml-story-mute-text,

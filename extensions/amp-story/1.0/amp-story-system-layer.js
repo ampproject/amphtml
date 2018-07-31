@@ -264,6 +264,7 @@ export class SystemLayer {
       this.getShadowRoot().removeAttribute('info');
     }
 
+    this.getShadowRoot().setAttribute('messagedisplay', 'noshow');
     return this.getRoot();
   }
 
