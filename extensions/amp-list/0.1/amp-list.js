@@ -28,7 +28,6 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {fromStructuredCloneable, setAmpCors, validateFetchResponse} from '../../../src/service/xhr-impl';
-import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -272,21 +271,19 @@ export class AmpList extends AMP.BaseElement {
         this.getPolicy_()).then(batchFetchData => {
       // TODO(alabiaga): add this to constructBatchFetchData.
       fetchData =
-          setAmpCors(batchFetchData.xhrUrl, batchFetchData.fetchOpt);
+          setAmpCors(this.win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, fetchData);
     }).then(response => {
       const fetchResponse =
-          fromStructuredCloneable(response, fetchData.responseType);
-      validateFetchResponse(fetchData, fetchResponse);
-      user().assert(
-          response && (typeof fetchResponse.responseXml !== 'undefined'),
-          'Response missing the \'data\' field');
-      return this.scheduleRender_(data);
+          fromStructuredCloneable(this.win, response, fetchData.responseType);
+      validateFetchResponse(this.win, fetchResponse, fetchData.fetchOpt);
+      return fetchResponse.json();
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(
-        () => this.onFetchSuccess_(), error => this.onFetchError_(error));
+    }).then(json => this.scheduleRender_(json))
+        .then(() => this.onFetchSuccess_(),
+            error => this.onFetchError_(error));
   }
 
   /**

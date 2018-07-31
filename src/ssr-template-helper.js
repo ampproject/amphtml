@@ -15,9 +15,7 @@
  */
 
 import {Capability} from './service/viewer-impl';
-import {FormDataWrapper} from './form-data-wrapper';
-import {addParamsToUrl} from './url';
-import {deepMerge, dict, map} from './utils/object';
+import {dict, map} from './utils/object';
 import {iterateCursor} from './dom';
 import {toStructuredCloneable} from './service/xhr-impl';
 

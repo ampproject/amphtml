@@ -68,7 +68,7 @@ export let FetchInitJsonDef;
 /**
  * @typedef {{
  *  xhrUrl: string,
- *  fetchOpt: !JsonObject
+ *  fetchOpt: !FetchInitJsonDef
  * }}
  */
 export let FetchData;
@@ -215,7 +215,7 @@ export class Xhr {
       });
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
-            fromStructuredCloneable(response, init.responseType));
+            fromStructuredCloneable(this.win, response, init.responseType));
     });
   }
 
@@ -236,10 +236,10 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, init = {}) {
-    const {inputMod, initMod} = setAmpCors(input, init);
+    const {xhrUrl, fetchOpt} = setAmpCors(this.win, input, init);
     const targetOrigin = parseUrlDeprecated(input).origin;
-    return this.fetch_(inputMod, initMod).then(response => {
-      validateFetchResponse(response);
+    return this.fetch_(xhrUrl, fetchOpt).then(response => {
+      validateFetchResponse(this.win, response, init);
       return response;
     }, reason => {
       throw user().createExpectedError('XHR', 'Failed fetching' +
@@ -738,22 +738,23 @@ export function toStructuredCloneable(input, init) {
  * 3. If `responseType` is `document`, also parse the body and populate
  * `responseXML` as a `Document` type.
  *
+ * @param {!Window} win
  * @param {JsonObject|string|undefined} response The structurally-cloneable
  *     response to convert back to a regular Response.
  * @param {string|undefined} responseType The original response type used to
  *     initiate the XHR.
  * @return {!FetchResponse|!Response} The deserialized regular response.
  */
-export function fromStructuredCloneable(response, responseType) {
+export function fromStructuredCloneable(win, response, responseType) {
   user().assert(isObject(response), 'Object expected: %s', response);
 
   const isDocumentType = responseType == 'document';
-  if (typeof this.win.Response === 'function' && !isDocumentType) {
+  if (typeof win.Response === 'function' && !isDocumentType) {
     // Use native `Response` type if available for performance. If response
     // type is `document`, we must fall back to `FetchResponse` polyfill
     // because callers would then rely on the `responseXML` property being
     // present, which is not supported by the Response type.
-    return new this.win.Response(response['body'], response['init']);
+    return new win.Response(response['body'], response['init']);
   }
 
   const lowercasedHeaders = map();
@@ -798,14 +799,15 @@ export function fromStructuredCloneable(response, responseType) {
 
 /**
  * Set the AMP CORs data on the FetchInitDef.
+ * @param {!Window} win
  * @param {string} input
  * @param {!FetchInitDef} init
- * @return {input: string, init: !FetchInitDef}
+ * @return {!FetchData}
  */
-export function setAmpCors(input, init) {
+export function setAmpCors(win, input, init) {
   // Do not append __amp_source_origin if explicitly disabled.
   if (init.ampCors !== false) {
-    input = this.getCorsUrl(this.win, input);
+    input = getCorsUrl(win, input);
   } else {
     init.requireAmpResponseSourceOrigin = false;
   }
@@ -818,7 +820,7 @@ export function setAmpCors(input, init) {
   }
   // For some same origin requests, add AMP-Same-Origin: true header to allow
   // publishers to validate that this request came from their own origin.
-  const currentOrigin = getWinOrigin(this.win);
+  const currentOrigin = getWinOrigin(win);
   const targetOrigin = parseUrlDeprecated(input).origin;
   if (currentOrigin == targetOrigin) {
     init['headers'] = init['headers'] || {};
@@ -827,18 +829,19 @@ export function setAmpCors(input, init) {
   // In edge a `TypeMismatchError` is thrown when body is set to null.
   dev().assert(init.body !== null, 'fetch `body` can not be `null`');
 
-  return {input, init};
+  return {'xhrUrl': input, 'fetchOpt': init};
 }
 
 /**
- * @param {!FetchInitDef} init
- * @param {!Promise<!FetchResponse>} response
+ * @param {!Window} win
+ * @param {!FetchResponse|Response} response
+ * @param {!FetchInitDef=} init
  */
-export function validateFetchResponse(init, response) {
+export function validateFetchResponse(win, response, init) {
   const allowSourceOriginHeader = response.headers.get(
       ALLOW_SOURCE_ORIGIN_HEADER);
   if (allowSourceOriginHeader) {
-    const sourceOrigin = getSourceOrigin(this.win.location.href);
+    const sourceOrigin = getSourceOrigin(win.location.href);
     // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
     // ensure that it's equal to the current source origin.
     user().assert(allowSourceOriginHeader == sourceOrigin,
