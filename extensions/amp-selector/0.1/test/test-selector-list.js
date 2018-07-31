@@ -19,14 +19,17 @@ import {AmpList} from '../../../amp-list/0.1/amp-list';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {AmpSelector} from '../amp-selector';
 import {Deferred} from '../../../../src/utils/promise';
+import {Services} from '../../../../src/services';
 import {createCustomEvent} from '../../../../src/event-helper';
 import {poll} from '../../../../testing/iframe';
 
+// TODO(kevinkassimo): These tests appear to be failing at HEAD.
 describes.realWin('amp-selector amp-list interaction', {
   amp: {
     extensions: ['amp-list', 'amp-selector', 'amp-mustache'],
   },
 }, function(env) {
+  let sandbox;
   let win, doc, ampdoc;
   let parent;
   let selector;
@@ -41,6 +44,7 @@ describes.realWin('amp-selector amp-list interaction', {
   beforeEach(() => {
     win = env.win;
     win.AMP.registerTemplate('amp-mustache', AmpMustache);
+    sandbox = env.sandbox;
 
     doc = win.document;
     ampdoc = env.ampdoc;
@@ -52,8 +56,10 @@ describes.realWin('amp-selector amp-list interaction', {
     parent.addEventListener(AmpEvents.DOM_UPDATE, () => {
       updateDeferred.resolve();
     });
-    const selectorElement = doc.createElement('div');
+    const selectorElement = doc.createElement('amp-selector');
     selectorElement.getAmpDoc = () => ampdoc;
+
+    Services.resourcesForDoc(ampdoc).add(selectorElement);
 
     AmpSelector.prototype.init_ = sandbox.spy(AmpSelector.prototype, 'init_');
     const origMaybeRefreshOnUpdate =
@@ -65,16 +71,22 @@ describes.realWin('amp-selector amp-list interaction', {
       }
     };
     selector = new AmpSelector(selectorElement);
+    selectorElement.connectedCallback();
     parent.appendChild(selector.element);
     selector.buildCallback();
 
-    listElement = doc.createElement('div');
+    listElement = doc.createElement('amp-list');
     listElement.setAttribute('src', '/list.json');
+    listElement.setAttribute('layout', 'responsive');
+    listElement.setAttribute('width', '100');
+    listElement.setAttribute('height', '100');
     listElement.getAmpDoc = () => ampdoc;
     listElement.getFallback = () => null;
     listElement.toggleLoading = () => null;
     listElement.togglePlaceholder = () => null;
     listElement.getResources = () => win.services.resources.obj;
+
+    Services.resourcesForDoc(ampdoc).add(listElement);
 
     templateElement = doc.createElement('template');
     templateElement.setAttribute('type', 'amp-mustache');
