@@ -100,6 +100,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @private {Gestures|null} */
     this.gestures_ = null;
+
+    /** @private {boolean} */
+    this.isEventRegistered_ = false; // for test purpose
   }
 
   /** @override */
@@ -560,12 +563,16 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   registerEvents_() {
+    if (this.isEventRegistered_) {
+      return;
+    }
     this.unlistenMouseDown_ =
         listen(dev().assertElement(this.container_),
             'mousedown', this.onMouseDown_.bind(this));
     this.unlistenKeyDown_ =
         listen(this.element, 'keydown', this.onKeyDown_.bind(this));
     this.registerTouchGestures_();
+    this.isEventRegistered_ = true;
   }
 
   /**
@@ -578,6 +585,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.unlisten_(this.unlistenMouseUp_);
     this.unlisten_(this.unlistenKeyDown_);
     this.unregisterTouchGestures_();
+    this.isEventRegistered_ = false;
   }
 
   /**
