@@ -257,32 +257,10 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitJsonDef=} opt_init
-   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!FetchResponse>}
    */
-  fetchJson(input, opt_init, opt_allowFailure) {
-    const init = setupInit(opt_init, 'application/json');
-    if (init.method == 'POST' && !isFormDataWrapper(init.body)) {
-      // Assume JSON strict mode where only objects or arrays are allowed
-      // as body.
-      dev().assert(
-          allowedJsonBodyTypes_.some(test => test(init.body)),
-          'body must be of type object or array. %s',
-          init.body
-      );
-
-      // Content should be 'text/plain' to avoid CORS preflight.
-      init.headers['Content-Type'] = init.headers['Content-Type'] ||
-          'text/plain;charset=utf-8';
-      const headerContentType = init.headers['Content-Type'];
-      // Cast is valid, because we checked that it is not form data above.
-      if (headerContentType === 'application/x-www-form-urlencoded') {
-        init.body =
-          serializeQueryString(/** @type {!JsonObject} */ (init.body));
-      } else {
-        init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
-      }
-    }
+  fetchJson(input, opt_init) {
+    const init = setupJsonFetchInit(opt_init);
     return this.fetch(input, init);
   }
 
@@ -396,6 +374,35 @@ function setupInit(opt_init, opt_accept) {
     init.headers['Accept'] = opt_accept;
   }
   return init;
+}
+
+/**
+ * @param {!FetchInitJsonDef} init
+ * @return {!FetchInitJsonDef}
+ */
+export function setupJsonFetchInit(init) {
+  const fetchInit = setupInit(init, 'application/json');
+  if (fetchInit.method == 'POST' && !isFormDataWrapper(fetchInit.body)) {
+    // Assume JSON strict mode where only objects or arrays are allowed
+    // as body.
+    dev().assert(
+        allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
+        'body must be of type object or array. %s',
+        fetchInit.body
+    );
+    // Content should be 'text/plain' to avoid CORS preflight.
+    fetchInit.headers['Content-Type'] = fetchInit.headers['Content-Type'] ||
+        'text/plain;charset=utf-8';
+    const headerContentType = fetchInit.headers['Content-Type'];
+    // Cast is valid, because we checked that it is not form data above.
+    if (headerContentType === 'application/x-www-form-urlencoded') {
+      fetchInit.body =
+        serializeQueryString(/** @type {!JsonObject} */ (fetchInit.body));
+    } else {
+      fetchInit.body = JSON.stringify(/** @type {!JsonObject} */ (fetchInit.body));
+    }
+  }
+  return fetchInit;
 }
 
 

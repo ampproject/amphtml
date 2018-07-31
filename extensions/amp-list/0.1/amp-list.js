@@ -27,7 +27,7 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {fromStructuredCloneable, setAmpCors, validateFetchResponse} from '../../../src/service/xhr-impl';
+import {fromStructuredCloneable, setAmpCors, setupJsonFetchInit, validateFetchResponse} from '../../../src/service/xhr-impl';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -264,14 +264,16 @@ export class AmpList extends AMP.BaseElement {
    */
   ssrTemplate_() {
     let fetchData;
+    // Construct the fetch init data that would be called by the viewer
+    // passed in as the 'originalRequest'.
     return constructBatchFetchData(
         this.getAmpDoc(),
         this.element,
         this.element.getAttribute('src'),
         this.getPolicy_()).then(batchFetchData => {
-      // TODO(alabiaga): add this to constructBatchFetchData.
       fetchData =
           setAmpCors(this.win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
+      setupJsonFetchInit(batchFetchData.fetchOpt);
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, fetchData);
     }).then(response => {

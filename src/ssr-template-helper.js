@@ -69,7 +69,7 @@ export class SsrTemplateHelper {
   /**
    * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
-   * @param {!./service/xhr-impl.FetchData} fetchData
+   * @param {!./service/xhr-impl.FetchData} fetchData The fetch/XHR related data.
    * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.

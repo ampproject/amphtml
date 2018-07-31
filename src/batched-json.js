@@ -79,7 +79,7 @@ export function constructBatchFetchData(
     ? urlReplacements.expandUrlAsync(url)
     : Promise.resolve(url);
 
-  return srcPromise.then(src => {
+  return srcPromise.then(xhrUrl => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
     if (opt_urlReplacement == UrlReplacementPolicy.OPT_IN) {
@@ -91,13 +91,13 @@ export function constructBatchFetchData(
             `<${element.tagName}> element. See https://bit.ly/amp-var-subs.`);
       }
     }
-    const opts = {};
+    const fetchOpt = {};
     if (element.hasAttribute('credentials')) {
-      opts.credentials = element.getAttribute('credentials');
+      fetchOpt.credentials = element.getAttribute('credentials');
     } else {
-      opts.requireAmpResponseSourceOrigin = false;
+      fetchOpt.requireAmpResponseSourceOrigin = false;
     }
 
-    return {src, opts};
+    return {xhrUrl, fetchOpt};
   });
 }
