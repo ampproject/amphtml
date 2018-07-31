@@ -17,6 +17,7 @@
 import {BaseElement} from '../src/base-element';
 import {dev} from '../src/log';
 import {isExperimentOn} from '../src/experiments';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isLayoutSizeDefined} from '../src/layout';
 import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
@@ -60,7 +61,7 @@ export class AmpImg extends BaseElement {
           value => mutations[value] !== undefined);
       this.propagateAttributes(
           attrs, this.img_, /* opt_removeMissingAttrs */ true);
-      this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
+      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
   }
 
@@ -136,7 +137,7 @@ export class AmpImg extends BaseElement {
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
-    this.guaranteeSrcForSrcsetUnsupportedBrowsers_();
+    guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);
     this.element.appendChild(this.img_);
   }
@@ -155,7 +156,7 @@ export class AmpImg extends BaseElement {
   layoutCallback() {
     this.initialize_();
     const img = dev().assertElement(this.img_);
-    this.unlistenError_ = listen(img, 'load', () => this.renderImg_());
+    this.unlistenLoad_ = listen(img, 'load', () => this.renderImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
