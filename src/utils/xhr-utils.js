@@ -32,6 +32,25 @@ const allowedMethods_ = ['GET', 'POST'];
 const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 
 /**
+ * The "init" argument of the Fetch API. Currently, only "credentials: include"
+ * is implemented.  Note ampCors with explicit false indicates that
+ * __amp_source_origin should not be appended to the URL to allow for
+ * potential caching or response across pages.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
+ * @typedef {{
+ *   body: (!Object|!Array|undefined|string),
+ *   credentials: (string|undefined),
+ *   headers: (!JsonObject|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+export let FetchInitDef;
+
+/**
  * Serializes a fetch request so that it can be passed to `postMessage()`,
  * i.e., can be cloned using the
  * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
@@ -466,10 +485,10 @@ export function assertSuccess(response) {
  */
 export class FetchResponse {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
 
     /** @const {number} */
@@ -559,10 +578,10 @@ export class FetchResponse {
  */
 export class FetchResponseHeaders {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
   }
 

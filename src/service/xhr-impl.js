@@ -27,25 +27,6 @@ import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
 
 /**
- * The "init" argument of the Fetch API. Currently, only "credentials: include"
- * is implemented.  Note ampCors with explicit false indicates that
- * __amp_source_origin should not be appended to the URL to allow for
- * potential caching or response across pages.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- *
- * @typedef {{
- *   body: (!Object|!Array|undefined|string),
- *   credentials: (string|undefined),
- *   headers: (!JsonObject|undefined),
- *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
- * }}
- */
-export let FetchInitDef;
-
-/**
  * Special case for fetchJson
  * @typedef {{
  *   body: (!JsonObject|!FormData|undefined),
@@ -108,8 +89,8 @@ export class Xhr {
    * be either the native fetch or our polyfill.
    *
    * @param {string} input
-   * @param {!FetchInitDef} init
-   * @return {!Promise<!FetchResponse>|!Promise<!Response>}
+   * @param {!../utils/xhr-utils.FetchInitDef} init
+   * @return {!Promise<!../utils/xhr-utils.FetchResponse>|!Promise<!Response>}
    * @private
    */
   fetch_(input, init) {
@@ -147,8 +128,8 @@ export class Xhr {
    *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
-   * @param {!FetchInitDef=} init
-   * @return {!Promise<!FetchResponse>}
+   * @param {!../utils/xhr-utils.FetchInitDef=} init
+   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    * @private
    */
   fetchAmpCors_(input, init = {}) {
@@ -174,7 +155,7 @@ export class Xhr {
    * @param {string} input
    * @param {?FetchInitJsonDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
-   * @return {!Promise<!FetchResponse>}
+   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(this.win, input, opt_init, 'application/json');
@@ -211,8 +192,8 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!FetchResponse>}
+   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init
+   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetchText(input, opt_init) {
     return this.fetchWithoutInitSetup_(input,
@@ -226,7 +207,7 @@ export class Xhr {
    * Fetch response type.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
+   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init
    * @return {!Promise<!Document>}
    */
   fetchDocument(input, opt_init) {
@@ -238,8 +219,8 @@ export class Xhr {
 
   /**
    * @param {string} input URL
-   * @param {?FetchInitDef=} opt_init Fetch options object.
-   * @return {!Promise<!FetchResponse>}
+   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init Fetch options object.
+   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetch(input, opt_init) {
     const init = setupInit(this.win, input, opt_init);
@@ -249,8 +230,8 @@ export class Xhr {
 
   /**
    * @param {string} input URL
-   * @param {?FetchInitDef=} init Fetch options object.
-   * @return {!Promise<!FetchResponse>}
+   * @param {?../utils/xhr-utils.FetchInitDef=} init Fetch options object.
+   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetchWithoutInitSetup_(input, init) {
     return this.fetchAmpCors_(input, init).then(response =>
@@ -265,7 +246,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {!FetchInitDef=} opt_init
+   * @param {!../utils/xhr-utils.FetchInitDef=} opt_init
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
