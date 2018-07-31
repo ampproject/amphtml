@@ -40,7 +40,6 @@ const {green, yellow, cyan, red, bold} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
-const tooManyTestsToFix = 15;
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
@@ -458,9 +457,6 @@ function runTests() {
       });
     }
     c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
-    if (testsToRun.length < tooManyTestsToFix) {
-      c.client.failOnConsoleError = true;
-    }
   } else if (argv.integration) {
     c.files = c.files.concat(
         config.commonIntegrationTestPaths, config.integrationTestPaths);
@@ -476,10 +472,6 @@ function runTests() {
     c.files = c.files.concat(config.a4aTestPaths);
   } else {
     c.files = c.files.concat(config.testPaths);
-  }
-
-  if (argv.travis_like) {
-    c.client.failOnConsoleError = false;
   }
 
   // c.client is available in test browser via window.parent.karma.config
