@@ -153,7 +153,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(preventDefaultSpy).to.be.calledOnce;
     expect(tgt.checkValidity).to.be.calledOnce;
     sandbox.restore();
-    preventDefaultSpy.reset();
+    preventDefaultSpy.resetHistory();
     tgt.checkValidity.reset();
 
     tgt.checkValidity = sandbox.stub().returns(false);

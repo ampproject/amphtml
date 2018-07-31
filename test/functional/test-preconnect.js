@@ -72,7 +72,7 @@ describe('preconnect', () => {
     // to test for preload/preconnect support.
     preloadSupported = false;
     preconnectSupported = false;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
     clock = sandbox.useFakeTimers();
   });
 

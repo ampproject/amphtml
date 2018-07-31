@@ -240,7 +240,7 @@ describes.realWin('Events', {amp: 1}, env => {
       return getElementSpy.returnValues[1].then(() => {
         expect(handler).to.be.calledOnce;
         expect(handler2).to.not.be.called;
-        handler.reset();
+        handler.resetHistory();
         tracker.trigger(new AnalyticsEvent(child2, 'custom-event'));
       }).then(() => {
         expect(handler).to.not.be.called;

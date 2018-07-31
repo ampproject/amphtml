@@ -1497,7 +1497,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       });
     });
 
-    it('should block AMP elements', () => {
+    it.skip('should block AMP elements', () => {
       const r1 = resources.getResourceForElement(amp1);
       const r2 = resources.getResourceForElement(amp2);
       sandbox.stub(r1, 'whenBuilt').callsFake(() => Promise.resolve());

@@ -358,7 +358,7 @@ const forbiddenTerms = {
       'src/ssr-template-helper.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
-      'src/service/xhr-impl.js',
+      'src/xhr-base.js',
     ],
   },
   // Privacy sensitive
@@ -388,7 +388,7 @@ const forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/error.js',
-      'src/service/xhr-impl.js',
+      'src/xhr-base.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
