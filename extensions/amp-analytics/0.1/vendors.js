@@ -2109,17 +2109,20 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-setIframeTransports();
+mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
 
 /**
- * Sets iframe transports.
+ * Merges iframe transport config.
+ *
+ * @param {!JsonObject} config
+ * @param {!JsonObject} iframeTransportConfig
  */
-function setIframeTransports() {
-  for (const vendor in IFRAME_TRANSPORTS) {
-    if (hasOwn(IFRAME_TRANSPORTS, vendor)) {
-      const url = IFRAME_TRANSPORTS[vendor];
-      ANALYTICS_CONFIG[vendor]['transport'] = Object.assign(
-          {}, ANALYTICS_CONFIG[vendor]['transport'], {'iframe': url});
+function mergeIframeTransportConfig(config, iframeTransportConfig) {
+  for (const vendor in iframeTransportConfig) {
+    if (hasOwn(iframeTransportConfig, vendor)) {
+      const url = iframeTransportConfig[vendor];
+      config[vendor]['transport'] =
+          Object.assign({}, config[vendor]['transport'], {'iframe': url});
     }
   }
 }
