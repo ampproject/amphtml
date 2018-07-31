@@ -26,7 +26,7 @@ import {registerElement} from '../src/service/custom-element-registry';
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-  'aria-describedby', 'aria-labelledby','srcset', 'src', 'sizes'];
+  'aria-describedby', 'aria-labelledby','srcset', 'src', 'sizes', 'blur'];
 
 export class AmpImg extends BaseElement {
 
@@ -155,12 +155,13 @@ export class AmpImg extends BaseElement {
   layoutCallback() {
     this.initialize_();
     const img = dev().assertElement(this.img_);
-    this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
+    this.unlistenError_ = listen(img, 'load', () => this.renderImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    return this.loadPromise(img);
+    const prom =  this.loadPromise(img);
+    return prom;
   }
 
   /** @override */
@@ -185,7 +186,7 @@ export class AmpImg extends BaseElement {
     // The <img> tag does not have a src and does not support srcset
     if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
       const srcset = this.element.getAttribute('srcset');
-      const matches = /\S+/.exec(srcset);
+      const matches = /\S+/.exec(srcset);  
       if (matches == null) {
         return;
       }
@@ -202,6 +203,20 @@ export class AmpImg extends BaseElement {
     const placeholder = this.getPlaceholder();
     if (placeholder && placeholder.classList.contains('i-amphtml-blur')) {
       this.hasBlurredPlaceHolder_ = true;
+      this.element.classList.add('i-amphtml-blur-loading');
+    }
+  }
+
+  /**
+   * @private
+   * Animates the fully rendered either through a fade in on top of a blurry
+   * placeholder if one exists, or hiding the fallback if not
+   */
+  renderImg_() {
+    if(this.hasBlurredPlaceHolder_){
+      this.element.classList.add('i-amphtml-blur-loaded');
+    } else {
+      this.hideFallbackImg_();    
     }
   }
 
@@ -217,6 +232,7 @@ export class AmpImg extends BaseElement {
       });
     }
   }
+
 
   /**
    * If the image fails to load, show a fallback or placeholder instead.

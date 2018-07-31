@@ -167,6 +167,27 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   display: inline-block;
 }
 
+
+
+.i-amphtml-blur-loading .i-amphtml-fill-content {
+  opacity: 0 !important;
+}
+
+.i-amphtml-blur-loaded .i-amphtml-fill-content {
+  opacity: 1 !important;
+  transition: opacity 1s cubic-bezier(0.33, 0.33, 1, 1) !important;
+}
+
+.i-amphtml-blur-loading .i-amphtml-blur {
+  opacity: 1 !important;
+}
+
+.i-amphtml-blur-loaded .i-amphtml-blur {
+  opacity: 0 !important;
+  transition: opacity 1s cubic-bezier(0.33, 0.33, 1, 1) 1s !important;
+}
+
+
 .i-amphtml-layout-nodisplay,
 [layout=nodisplay]:not(.i-amphtml-layout-nodisplay)
 {
@@ -392,7 +413,7 @@ i-amphtml-sizer {
   display: block;
 }
 
-.i-amphtml-element > [placeholder].hidden,
+.i-amphtml-element:not(.i-amphtml-blur-loaded, .i-amphtml-blur-loading) > [placeholder].hidden,
 .i-amphtml-element > [placeholder].amp-hidden {
   visibility: hidden;
 }
