@@ -140,7 +140,9 @@ export class AmpImageSlider extends AMP.BaseElement {
         '2 <amp-img>s must be provided for comparison');
 
     // TODO(kqian): remove this after layer launch
-    if (!isExperimentOn(this.win, 'layers')) {
+    if (!isExperimentOn(this.win, 'layers') ||
+      this.element.getOwner() !== null) {
+      // see comment in layoutCallback
       // When layers not enabled
       this.setAsOwner(dev().assertElement(this.leftAmpImage_));
       this.setAsOwner(dev().assertElement(this.rightAmpImage_));
@@ -718,8 +720,18 @@ export class AmpImageSlider extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
 
-    // TODO(kqian): remove this after layer launch
-    if (!isExperimentOn(this.win, 'layers')) {
+    // TODO(kqian): remove this after layer launch.
+    // Extensions such as amp-carousel still uses .setAsOwner()
+    // This would break the rendering of the images
+    // as carousel will call .scheduleLayout on the slider but not images
+    // while Resources would found amp-imgs' parent has owner and
+    // refuse to run the normal scheduling in discoverWork_.
+    if (!isExperimentOn(this.win, 'layers') ||
+        this.element.getOwner() !== null) {
+      // this.element might not have owner in buildCallback
+      this.setAsOwner(dev().assertElement(this.leftAmpImage_));
+      this.setAsOwner(dev().assertElement(this.rightAmpImage_));
+      // Manually handle layout
       this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
       this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
     }
