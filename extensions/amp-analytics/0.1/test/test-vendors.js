@@ -77,7 +77,7 @@ describes.realWin('amp-analytics', {
         continue;
       }
       actualResults[vendor] = {};
-      describe('analytics vendor: ' + vendor, function () {
+      describe('analytics vendor: ' + vendor, () => {
         beforeEach(() => {
           if (!config.triggers) {
             expectAsyncConsoleError(noTriggersError);
@@ -91,7 +91,7 @@ describes.realWin('amp-analytics', {
                 Services.urlReplacementsForDoc(ampdoc);
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
-                function (name) {
+                name => {
                   expect(this.replacements_).to.have.property(name);
 
                   const defaultValue = `_${name.toLowerCase()}_`;
@@ -110,7 +110,7 @@ describes.realWin('amp-analytics', {
             const variables = variableServiceFor(ampdoc.win);
             const {encodeVars} = variables;
             sandbox.stub(variables, 'encodeVars').callsFake(
-                function (name, val) {
+                (name, val) => {
                   val = encodeVars.call(this, name, val);
                   if (val == '') {
                     return '$' + name;
