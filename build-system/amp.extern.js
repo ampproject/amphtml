@@ -690,5 +690,3 @@ var WebAnimationSelectorDef;
  * }}
  */
 var WebAnimationSubtargetDef;
-
-// react-dates externs

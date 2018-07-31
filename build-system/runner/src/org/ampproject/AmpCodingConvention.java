@@ -33,19 +33,14 @@ import java.util.Collection;
  * A coding convention for AMP.
  */
 public final class AmpCodingConvention extends CodingConventions.Proxy {
-
-  private boolean singleFileCompilation;
-
   /** By default, decorate the ClosureCodingConvention. */
-  public AmpCodingConvention(boolean singleFileCompilation) {
+  public AmpCodingConvention() {
     this(new ClosureCodingConvention());
-    this.singleFileCompilation = singleFileCompilation;
   }
 
   /** Decorates a wrapped CodingConvention. */
   public AmpCodingConvention(CodingConvention convention) {
     super(convention);
-    singleFileCompilation = false;
   }
 
   @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
@@ -53,13 +48,9 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
         new AssertionFunctionSpec("user.assert", JSTypeNative.TRUTHY),
         new AssertionFunctionSpec("dev.assert", JSTypeNative.TRUTHY),
         new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSTypeNative.TRUTHY),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "!Element"),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
         new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number"),
-        new AssertionFunctionSpec("$Log$$module$src$log.prototype.assert", JSTypeNative.TRUTHY),
-        new AssertFunctionByTypeName("$Log$$module$src$log.prototype.assertElement", "!Element"),
-        new AssertFunctionByTypeName("$Log$$module$src$log.prototype.assertString", "string"),
-        new AssertFunctionByTypeName("$Log$$module$src$log.prototype.assertNumber", "number")
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")
     );
   }
 
@@ -82,14 +73,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     // See https://github.com/ampproject/amphtml/issues/10118
     if (name.equals("cssText$$module$build$css")) {
       return true;
-    }
-
-    if (name.contains("_interopRequireDefault")) {
-      return true;
-    }
-
-    if (singleFileCompilation) {
-      return false;
     }
 
     if (local) {
@@ -118,9 +101,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * between compilation unit.
    */
   @Override public boolean blockRenamingForProperty(String name) {
-    if (singleFileCompilation) {
-      return false;
-    }
     return isExported(name, false);
   }
 }
