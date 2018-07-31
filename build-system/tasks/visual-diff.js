@@ -48,7 +48,7 @@ const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
     CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
 const AMP_RUNTIME_TARGET_FILES = [
-  'dist/amp.js', 'dist.3p/current/integration.js'];
+  'dist/amp.js', 'dist/amp-esm.js', 'dist.3p/current/integration.js'];
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
 const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
