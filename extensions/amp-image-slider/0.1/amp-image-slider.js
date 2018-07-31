@@ -338,15 +338,27 @@ export class AmpImageSlider extends AMP.BaseElement {
   checkARIA_() {
     const leftAmpImage = dev().assertElement(this.leftAmpImage_);
     const rightAmpImage = dev().assertElement(this.rightAmpImage_);
-    if (!leftAmpImage.hasAttribute('aria-valuetext')) {
-      user().warn(
-          'aria-valuetext for accessibility is not set for left image');
-      leftAmpImage.setAttribute('aria-valuetext', 'left image');
+
+    if (!leftAmpImage.hasAttribute('aria-label')) {
+      let leftAltText = 'left image';
+      if (leftAmpImage.hasAttribute('alt')) {
+        leftAltText = leftAmpImage.getAttribute('alt');
+      } else {
+        user().warn('"alt" is not specified for left image. ' +
+          'Add "alt" attribute for better accessibility');
+      }
+      leftAmpImage.setAttribute('aria-label', leftAltText);
     }
-    if (!rightAmpImage.hasAttribute('aria-valuetext')) {
-      user().warn(
-          'aria-valuetext for accessibility is not set for right image');
-      rightAmpImage.setAttribute('aria-valuetext', 'right image');
+
+    if (!rightAmpImage.hasAttribute('aria-label')) {
+      let rightAltText = 'right image';
+      if (rightAmpImage.hasAttribute('alt')) {
+        rightAltText = rightAmpImage.getAttribute('alt');
+      } else {
+        user().warn('"alt" is not specified for right image. ' +
+          'Add "alt" attribute for better accessibility');
+      }
+      rightAmpImage.setAttribute('aria-label', rightAltText);
     }
   }
 
