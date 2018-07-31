@@ -20,8 +20,10 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
+  UIType,
 } from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
+import {AmpStoryConsent} from '../amp-story-consent';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
@@ -197,7 +199,7 @@ describes.realWin('amp-story', {
   it('should not prerender/load the share menu on desktop', () => {
     createPages(story.element, 2);
 
-    story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
+    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
 
     const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
 
@@ -395,6 +397,13 @@ describes.realWin('amp-story', {
 
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
+
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
       consentEl.appendChild(storyConsentEl);
@@ -428,6 +437,13 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story after the consent is resolved', () => {
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
+
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
       consentEl.appendChild(storyConsentEl);
@@ -469,6 +485,13 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story if the consent was already resolved', () => {
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
+
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
       consentEl.appendChild(storyConsentEl);
