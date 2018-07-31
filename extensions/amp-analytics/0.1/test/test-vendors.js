@@ -15,32 +15,18 @@
  */
 
 import {ANALYTICS_CONFIG} from '../vendors';
-import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../iframe-transport-vendors';
+import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {hasOwn} from '../../../../src/utils/object';
-import {isSecureUrlDeprecated} from '../../../../src/url';
 
-describe('analytics vendors', () => {
+describe('iframe transport', () => {
 
-  it('should contain only iframe transport in ' +
-      'ANALYTICS_IFRAME_TRANSPORT_CONFIG', () => {
-    for (const vendor in ANALYTICS_IFRAME_TRANSPORT_CONFIG) {
-      const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
-      expect(Object.keys(vendorITEntry).length).to.equal(1);
-      expect(vendorITEntry.transport).to.exist;
-      expect(Object.keys(vendorITEntry.transport).length).to.equal(1);
-      expect(vendorITEntry.transport.iframe).to.exist;
-      expect(isSecureUrlDeprecated(vendorITEntry.transport.iframe)).to.be.true;
-    }
-  });
-
-  it('Should not contain iframe transport in ANALYTICS_CONFIG (other than' +
-      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG)', () => {
+  it('Should not contain iframe transport if not whitelisted', () => {
     for (const vendor in ANALYTICS_CONFIG) {
       const vendorEntry = ANALYTICS_CONFIG[vendor];
       if (hasOwn(vendorEntry, 'transport') &&
           hasOwn(vendorEntry.transport, 'iframe')) {
-        const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
-        expect(vendorITEntry).to.exist;
+        expect(vendorEntry['transport']['iframe'])
+            .to.equal(IFRAME_TRANSPORTS[vendor]);
       }
     }
   });
