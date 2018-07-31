@@ -81,7 +81,7 @@ amp-story[standalone][desktop] {
   z-index: 1 !important;
 }
 
-[desktop] amp-story-page {
+[desktop] amp-story-page[distance] {
   transform: scale(1.0) translateX(50vw) translateY(0%) !important;
   opacity: .05 !important;
   transform-origin: left !important;
