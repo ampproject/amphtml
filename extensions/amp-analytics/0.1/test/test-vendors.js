@@ -16,7 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
-import {IFRAME_TRANSPORTS} from '../vendors';
+import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from
