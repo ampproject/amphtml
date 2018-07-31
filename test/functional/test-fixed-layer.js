@@ -1031,9 +1031,6 @@ describes.sandboxed('FixedLayer', {}, () => {
     });
 
     it('should user error when inline styles may be overriden', () => {
-      toggleExperiment(ampdoc.win, 'inline-styles', true,
-          /* opt_transientExperiment */ true);
-
       // Set both attribute and property since element1 is a fake element.
       element1.setAttribute('style', 'bottom: 10px');
       element1.style.bottom = '10px';
@@ -1311,9 +1308,6 @@ describes.sandboxed('FixedLayer', {}, () => {
     });
 
     it('should user error when inline styles may be overriden', () => {
-      toggleExperiment(ampdoc.win, 'inline-styles', true,
-          /* opt_transientExperiment */ true);
-
       // Set both attribute and property since element1 is a fake element.
       element1.setAttribute('style', 'bottom: 10px');
       element1.style.bottom = '10px';
