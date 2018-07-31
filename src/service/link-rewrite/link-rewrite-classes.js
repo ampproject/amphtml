@@ -1,18 +1,38 @@
 import {user} from '../../log';
 
-export class AnchorRewriteData {
-  /**
-   *
-   * @param {*} anchor
-   * @param {*} newUrl
-   * @param {*} metaData
-   */
-  constructor(anchor, newUrl, metaData) {
-    this.anchor = anchor;
-    this.initialUrl = anchor.href;
-    this.metaData = metaData || {};
-    this.replacementUrl = newUrl || null;
+/**
+ *
+ * @param {*} anchor
+ * @param {*} newUrl
+ */
+export function createAnchorReplacementTuple(anchor, newUrl) {
+  return [anchor, newUrl];
+}
+
+/**
+ *
+ * @param {Array} tuple
+ */
+export function isAnchorReplacementTuple(tuple) {
+  if (!Array.isArray(tuple)) {
+    return false;
   }
+
+  if (tuple.length !== 2) {
+    return false;
+  }
+
+  const anchor = tuple[0];
+  const url = tuple[1];
+  if (!anchor || anchor.tagName !== 'A') {
+    return false;
+  }
+  // url === null means no replacement
+  if (url && typeof url !== 'string') {
+    return false;
+  }
+
+  return true;
 }
 
 

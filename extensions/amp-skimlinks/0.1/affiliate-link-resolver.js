@@ -1,7 +1,7 @@
 
 import {parseUrlDeprecated} from '../../../src/url';
 
-import {AnchorRewriteData, AnchorRewriteDataResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
+import {createAnchorReplacementTuple, AnchorRewriteDataResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
 
 
 export const LINK_STATUS__AFFILIATE = 'affiliate';
@@ -31,12 +31,12 @@ export default class AffiliateLinkResolver {
    * @return {Promise}
    */
   resolveUnknownAnchors(anchorList) {
-    const alreadyResolved = this.resolveAnchorsRewriteData(anchorList);
+    const alreadyResolved = this.mapToAnchorReplacementTuple_(anchorList);
     let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);
     if (domainsToAsk.length) {
-      // Set domains to LINK_STATUS__UNKNOWN to mark them as aready requested.
+      // Set domains to LINK_STATUS__UNKNOWN to mark them as already requested.
       this.markDomainsAsUnknown(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
       const pendingAnchors = this.getPendingAnchors_(anchorList, domainsToAsk);
@@ -55,19 +55,19 @@ export default class AffiliateLinkResolver {
   }
 
   /**
-   * Build list of AnchorRewriteData
+   * Build list of AnchorReplacementTuple
    * @param {*} anchorList
    */
-  resolveAnchorsRewriteData(anchorList) {
+  mapToAnchorReplacementTuple_(anchorList) {
     const anchorListNormalised = anchorList.map(anchor => {
       const status = this.getDomainAffiliateStatus_(this.getLinkDomain(anchor));
       // Always replace unknown, we will overwrite them after asking beacon if needed
       if (status === LINK_STATUS__AFFILIATE || status === LINK_STATUS__UNKNOWN) {
         const replacementUrl = this.getWaypointUrl_(anchor);
-        return new AnchorRewriteData(anchor, replacementUrl);
+        return createAnchorReplacementTuple(anchor, replacementUrl);
       }
 
-      return new AnchorRewriteData(anchor);
+      return createAnchorReplacementTuple(anchor, null);
     });
 
     return anchorListNormalised;
@@ -153,7 +153,7 @@ export default class AffiliateLinkResolver {
 
       this.updateDomainsStatusMapPostFetch_(domainsToAsk, data.merchant_domains || []);
 
-      return this.resolveAnchorsRewriteData(anchorList);
+      return this.mapToAnchorReplacementTuple_(anchorList);
     });
   }
 

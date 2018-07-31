@@ -1,12 +1,8 @@
-import {
-  getService,
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service';
 
 import {Services} from '../../../../src/services';
 
-import AffiliateLinkResolver, {DOMAIN_RESOLVER_URL, LINK_STATUS__AFFILIATE, LINK_STATUS__NON_AFFILIATE} from '../affiliate-link-resolver';
+import {AnchorRewriteDataResponse,createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-classes';
+import AffiliateLinkResolver, {DOMAIN_RESOLVER_URL, LINK_STATUS__AFFILIATE, LINK_STATUS__NON_AFFILIATE, LINK_STATUS__UNKNOWN} from '../affiliate-link-resolver';
 
 describes.realWin('amp-skimlinks', {
   amp: {
@@ -50,20 +46,44 @@ describes.realWin('amp-skimlinks', {
   //     }));
   // }
 
+  function createStubXhr(xhr, data) {
+    const response = {
+      json: () => {return Promise.resolve(data);},
+    };
+
+    return {
+      fetchJson: env.sandbox.stub().returns(Promise.resolve(response)),
+    };
+  }
+
+  describe('skimOptions', () => {
+    it('Should always exclude internal domains', () => {
+
+    });
+  });
+
   describe('AffiliateLinkResolver', () => {
 
     describe('resolveUnknownAnchors', () => {
+      const alreadyResolvedDomains = {
+        'merchant1.com': LINK_STATUS__AFFILIATE,
+        'non-merchant.com': LINK_STATUS__NON_AFFILIATE,
+        'merchant2.com': LINK_STATUS__AFFILIATE,
+      };
       let resolver;
       let anchorList;
       let mock;
 
-      describe('Calls "fetchDomainResolverApi" function with correct parameters', () => {
-        const alreadyResolvedDomains = {
-          'merchant1.com': LINK_STATUS__AFFILIATE,
-          'non-merchant.com': LINK_STATUS__NON_AFFILIATE,
-          'merchant2.com': LINK_STATUS__AFFILIATE,
-        };
+      beforeEach(() => {
+        anchorList = [
+          'http://merchant1.com',
+          'http://non-merchant.com',
+          'https://merchant2.com',
+        ].map(createAnchor);
+      });
 
+
+      describe('Calls "fetchDomainResolverApi" function with the right domains', () => {
         beforeEach(() => {
           resolver = new AffiliateLinkResolver({}, {
             excludedDomains: ['excluded-merchant.com'],
@@ -91,6 +111,17 @@ describes.realWin('amp-skimlinks', {
           resolver.resolveUnknownAnchors(anchorList);
         });
 
+        it('Should make the list of requested domains unique', () => {
+          anchorList = [createAnchor('https://merchant1.com')].concat(anchorList);
+          mock.expects('fetchDomainResolverApi').once().withArgs([
+            'merchant1.com',
+            'non-merchant.com',
+            'merchant2.com',
+          ]).returns(Promise.resolve({}));
+
+
+          resolver.resolveUnknownAnchors(anchorList);
+        });
 
         it('Should only ask for new domains the next times', () => {
           // Set the domains like if we had already done a call to the API.
@@ -134,7 +165,32 @@ describes.realWin('amp-skimlinks', {
             createAnchor('https://www.excluded-merchant.com'),
           ].concat(anchorList));
         });
+
+        it('Should not send already requested domains when the request is still flying', () => {
+          // Simulate pending request with unresolved Promise.
+          // fetch should be called only once!
+          mock.expects('fetchDomainResolverApi').once().returns(new Promise((() => {})));
+          const response = resolver.resolveUnknownAnchors(anchorList);
+
+          let requestIsPending = true;
+
+          // First request
+          response.asyncData.then(() => {
+            requestIsPending = false;
+          });
+
+          expect(requestIsPending).to.be.true;
+          // Second request, first request should still be pending.
+          resolver.resolveUnknownAnchors(anchorList);
+          expect(requestIsPending).to.be.true;
+          expect(resolver.domains_).to.deep.equal({
+            'merchant1.com': LINK_STATUS__UNKNOWN,
+            'non-merchant.com': LINK_STATUS__UNKNOWN,
+            'merchant2.com': LINK_STATUS__UNKNOWN,
+          });
+        });
       });
+
 
 
       describe('Does correct request to domain resolver API', () => {
@@ -204,7 +260,109 @@ describes.realWin('amp-skimlinks', {
         });
       });
 
+
+      describe('Calls the beacon callback', () => {
+        beforeEach(() => {
+
+        });
+      });
+
+
+
+      describe('Returns the correct data', () => {
+        beforeEach(() => {
+          const stubXhr = createStubXhr(xhr, {
+            'merchant_domains': ['merchant1.com', 'merchant2.com'],
+          });
+          resolver = new AffiliateLinkResolver(stubXhr, {
+            excludedDomains: ['excluded-merchant.com'],
+          }, () => { });
+        });
+
+        it('Should return an AnchorRewriteDataResponse instance', () => {
+          const response = resolver.resolveUnknownAnchors([]);
+          expect(response).to.be.an.instanceof(AnchorRewriteDataResponse);
+        });
+
+        it('Should affiliate unknown links by default until the API gives an answer', () => {
+          const response = resolver.resolveUnknownAnchors(anchorList);
+          // Replace all the unknown in the synchronous reponse,
+          // asynchronous response will then overwrite it later.
+          const expectedSyncData = anchorList.map(a => {
+            return createAnchorReplacementTuple(a, resolver.getWaypointUrl_(a));
+          });
+
+          expect(response.syncData).to.deep.equal(expectedSyncData);
+        });
+
+        it('Should set "asyncData" field in the returned object when only unknown domains', () => {
+          const response = resolver.resolveUnknownAnchors(anchorList);
+          const expectedAsyncData = [
+            createAnchorReplacementTuple(anchorList[0], resolver.getWaypointUrl_(anchorList[0])),
+            createAnchorReplacementTuple(anchorList[1], null),
+            createAnchorReplacementTuple(anchorList[2], resolver.getWaypointUrl_(anchorList[2])),
+          ];
+
+          expect(response.asyncData).to.be.an.instanceof(Promise);
+          return response.asyncData.then(anchorReplacementTuple => {
+            expect(anchorReplacementTuple).to.deep.equal(expectedAsyncData);
+          });
+        });
+
+        it('Should only set the "syncData" field in the returned object when no new domains', () => {
+          resolver.domains_ = alreadyResolvedDomains;
+          const response = resolver.resolveUnknownAnchors(anchorList);
+          const expectedSyncData = [
+            createAnchorReplacementTuple(anchorList[0], resolver.getWaypointUrl_(anchorList[0])),
+            createAnchorReplacementTuple(anchorList[1], null),
+            createAnchorReplacementTuple(anchorList[2], resolver.getWaypointUrl_(anchorList[2])),
+          ];
+          expect(response.syncData).to.deep.equal(expectedSyncData);
+          expect(response.asyncData).to.be.null;
+        });
+
+        it('Should not replace excluded domains', () => {
+          const excludedAnchor = createAnchor('https://www.excluded-merchant.com');
+          const response = resolver.resolveUnknownAnchors([excludedAnchor]);
+
+          const expectedSyncData = [
+            createAnchorReplacementTuple(excludedAnchor, null),
+          ];
+
+          expect(response.syncData).to.deep.equal(expectedSyncData);
+          expect(response.asyncData).to.be.null;
+        });
+
+        it('Should only return the "pending" anchors in the asyncData', () => {
+          const initialAnchor = createAnchor('https://initial-merchant.com');
+          resolver.domains_ = {
+            'initial-merchant.com': LINK_STATUS__AFFILIATE,
+          };
+          // Initial anchor should not be in the asyncData list
+          const expectedAsyncData = [
+            createAnchorReplacementTuple(anchorList[0], resolver.getWaypointUrl_(anchorList[0])),
+            createAnchorReplacementTuple(anchorList[1], null),
+            createAnchorReplacementTuple(anchorList[2], resolver.getWaypointUrl_(anchorList[2])),
+          ];
+
+          const response = resolver.resolveUnknownAnchors(
+              [initialAnchor].concat(anchorList)
+          );
+
+          expect(response.syncData.length).to.equal(4);
+          expect(response.syncData).to.deep.include(
+              createAnchorReplacementTuple(initialAnchor, resolver.getWaypointUrl_(initialAnchor)),
+          );
+          expect(response.asyncData).to.be.an.instanceof(Promise);
+          return response.asyncData.then(anchorReplacementTuple => {
+            expect(anchorReplacementTuple).to.deep.equal(expectedAsyncData);
+          });
+        });
+
+      });
     });
+
+
 
     describe('getLinkDomain_', () => {
       const resolver = new AffiliateLinkResolver({}, {}, () => { });
@@ -232,6 +390,11 @@ describes.realWin('amp-skimlinks', {
         const anchor = createAnchor('http://www.test.com/hello-word?test=1');
         expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
       });
+    });
+
+
+
+    describe('getWaypointUrl_', () => {
 
     });
   });

@@ -1,6 +1,6 @@
 import {user} from '../../log';
 
-import {AnchorRewriteData, AnchorRewriteDataResponse} from './link-rewrite-classes';
+import { createAnchorReplacementTuple, isAnchorReplacementTuple, AnchorRewriteDataResponse} from './link-rewrite-classes';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import EventMessenger from './event-messenger';
 
@@ -13,7 +13,7 @@ export default class LinkRewriter {
    */
   constructor(name, resolveUnknownLinks, options) {
     this.name = name;
-    this.askAnchorRewriteStatus_ = resolveUnknownLinks;
+    this.resolveUnknownLinks_ = resolveUnknownLinks;
     this.linkSelector = options.linkSelector;
     this.anchorReplacementMap_ = new Map();
     this.restoreDelay_ = 300; //ms
@@ -31,7 +31,7 @@ export default class LinkRewriter {
       return null;
     }
 
-    return this.anchorReplacementMap_.get(anchor).replacementUrl;
+    return this.anchorReplacementMap_.get(anchor);
   }
 
   /**
@@ -96,9 +96,9 @@ export default class LinkRewriter {
       // Note: Only anchors with a status will be considered in the click handlers.
       // (Other anchors are assumed to be the ones exluded by linkSelector_)
       this.updateAnchorMap_(unknownAnchors.map(anchor => {
-        return new AnchorRewriteData(anchor);
+        return createAnchorReplacementTuple(anchor);
       }));
-      const response = this.askAnchorRewriteStatus_(unknownAnchors);
+      const response = this.resolveUnknownLinks_(unknownAnchors);
       user().assert(
           response instanceof AnchorRewriteDataResponse,
           // TODO: add link to readme
@@ -136,14 +136,14 @@ export default class LinkRewriter {
 
   /**
   * Update the state of the internal Anchor to replacement url Map.
-  * @param {*} anchorRewriteDataList
+  * @param {*} anchorReplacementTupleList
   */
-  updateAnchorMap_(anchorRewriteDataList) {
-    anchorRewriteDataList.forEach(anchorRewriteData => {
-      user().assert(anchorRewriteData instanceof AnchorRewriteData,
-          'Expected instance of "AnchorRewriteData"'
+  updateAnchorMap_(anchorReplacementTupleList) {
+    anchorReplacementTupleList.forEach(replacementTuple => {
+      user().assert(isAnchorReplacementTuple(replacementTuple),
+          'Expected anchorReplacementTuple, use "createAnchorReplacementTuple()"'
       );
-      this.anchorReplacementMap_.set(anchorRewriteData.anchor, anchorRewriteData);
+      this.anchorReplacementMap_.set(replacementTuple[0], replacementTuple[1]);
     });
   }
 
