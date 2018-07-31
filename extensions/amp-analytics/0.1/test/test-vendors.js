@@ -16,6 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
+import {IFRAME_TRANSPORTS} from '../vendors';
 
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from
@@ -30,20 +31,13 @@ import {variableServiceFor} from '../variables';
 
 describe('iframe transport', () => {
 
-  /*
-   * Vendors who have IAB viewability certification may use iframe transport
-   * (see ../amp-analytics.md and ../integrating-analytics.md). In this case,
-   * put only the specification of the iframe location in the object below,
-   * and put everything else (requests, triggers, etc.) in the object above.
-   */
-  const iframeTransportAllowedVendors = ['bg'];
-
-  it('Should not contain iframe transport if whitelisted', () => {
+  it('Should not contain iframe transport if not whitelisted', () => {
     for (const vendor in ANALYTICS_CONFIG) {
       const vendorEntry = ANALYTICS_CONFIG[vendor];
       if (hasOwn(vendorEntry, 'transport') &&
           hasOwn(vendorEntry.transport, 'iframe')) {
-        expect(iframeTransportAllowedVendors).to.contain(vendor);
+        expect(vendorEntry['transport']['iframe'])
+            .to.equal(IFRAME_TRANSPORTS[vendor]);
       }
     }
   });

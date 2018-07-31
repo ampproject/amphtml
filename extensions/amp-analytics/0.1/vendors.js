@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../../../src/utils/object';
+
 /**
  * @const {!JsonObject}
  */
@@ -2093,9 +2095,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   },
 
   'bg': {
-    'transport': {
-      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
-    },
   },
 });
 
@@ -2108,3 +2107,28 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+/**
+ * Vendors who have IAB viewability certification may use iframe transport
+ * (see ../amp-analytics.md and ../integrating-analytics.md). In this case,
+ * put only the specification of the iframe location in the object below,
+ * and put everything else (requests, triggers, etc.) in the object above.
+ */
+export const IFRAME_TRANSPORTS = {
+  'bg': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
+};
+
+setIframeTransports();
+
+/**
+ * Sets iframe transports.
+ */
+function setIframeTransports() {
+  for (const vendor in IFRAME_TRANSPORTS) {
+    if (hasOwn(IFRAME_TRANSPORTS, vendor)) {
+      const url = IFRAME_TRANSPORTS[vendor];
+      ANALYTICS_CONFIG[vendor]['transport'] = Object.assign(
+          {}, ANALYTICS_CONFIG[vendor]['transport'], {'iframe': url});
+    }
+  }
+}
