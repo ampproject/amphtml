@@ -23,7 +23,7 @@ AMP HTML is a subset of HTML for authoring content pages such as news articles i
 Being a subset of HTML, it puts some restrictions on the full set of tags and functionality available through HTML but it does not require the development of new rendering engines: existing user agents can render AMP HTML just like all other HTML.
 
 {% call callout('Watch', type='read') %}
-If you're primarily interested in what's allowed in AMP and what isn't, watch our [primer video on AMP's limitations](https://www.youtube.com/watch?v=Gv8A4CktajQ). 
+If you're primarily interested in what's allowed in AMP and what isn't, watch our [primer video on AMP's limitations](https://www.youtube.com/watch?v=Gv8A4CktajQ).
 {% endcall %}
 
 Also, AMP HTML documents can be uploaded to a web server and served just like any other HTML document; no special configuration for the server is necessary. However, they are also designed to be optionally served through specialized AMP serving systems that proxy AMP documents. These documents serve them from their own origin and are allowed to apply transformations to the document that provide additional performance benefits. An incomplete list of optimizations such a serving system might do is:
@@ -256,7 +256,7 @@ The following @-rules are allowed in stylesheets:
 
 #### Author stylesheets
 
-Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
+Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document or inline styles.
 
 `@keyframes` rules are allowed in the `<style amp-custom>`. However, if they are too many of them, it's recommended to place them in the additional `<style amp-keyframes>` tag, which must be located at the end of the AMP document. For details, see the [Keyframes stylesheet](#keyframes-stylesheet) section of this document.
 
