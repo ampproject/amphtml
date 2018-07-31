@@ -333,7 +333,7 @@ function normalizeMethod_(method) {
  * Verifies if response has the correct headers
  * @param {!Window} win
  * @param {!FetchResponse} response
- * @param {!FetchInitDef} init
+ * @param {!../utils/xhr-utils.FetchInitDef=} init
  * @return {!FetchResponse}
  */
 export function verifyAmpCORSHeaders(win, response, init) {
@@ -357,6 +357,20 @@ export function verifyAmpCORSHeaders(win, response, init) {
 }
 
 // TODO(prateekbh): move everything below this line into the polyfill
+/**
+ * A record version of `XMLHttpRequest` that has all the necessary properties
+ * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
+ * serialized response returned by the viewer.
+ * @typedef {{
+ *   status: number,
+ *   statusText: string,
+ *   responseText: string,
+ *   responseXML: ?Document,
+ *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
+ * }}
+ */
+let XMLHttpRequestDef;
+
 /** @private @enum {number} Allowed fetch responses. */
 const allowedFetchTypes_ = {
   document: 1,
@@ -485,10 +499,10 @@ export function assertSuccess(response) {
  */
 export class FetchResponse {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
     this.xhr_ = xhr;
 
     /** @const {number} */
@@ -578,10 +592,10 @@ export class FetchResponse {
  */
 export class FetchResponseHeaders {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
     this.xhr_ = xhr;
   }
 

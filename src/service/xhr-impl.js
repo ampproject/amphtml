@@ -39,20 +39,6 @@ import {isFormDataWrapper} from '../form-data-wrapper';
  */
 export let FetchInitJsonDef;
 
-/**
- * A record version of `XMLHttpRequest` that has all the necessary properties
- * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
- * serialized response returned by the viewer.
- * @typedef {{
- *   status: number,
- *   statusText: string,
- *   responseText: string,
- *   responseXML: ?Document,
- *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
- * }}
- */
-let XMLHttpRequestDef;
-
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
 
@@ -230,7 +216,7 @@ export class Xhr {
 
   /**
    * @param {string} input URL
-   * @param {?../utils/xhr-utils.FetchInitDef=} init Fetch options object.
+   * @param {!../utils/xhr-utils.FetchInitDef=} init Fetch options object.
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetchWithoutInitSetup_(input, init) {
