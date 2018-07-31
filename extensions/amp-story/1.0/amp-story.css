@@ -183,37 +183,31 @@ amp-story-page[active] {
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
  * we don't want to schedule any further pages. */
 
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container:not([active]) {
+amp-story-page:not([active]) {
   transform: translateY(1000%) !important;
 }
 
 amp-story-page[active],
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="0"],
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="1"] {
+amp-story-page[distance="0"],
+amp-story-page[distance="1"] {
   transform: translateY(0) !important;
 }
 
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="2"] {
+amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[active] {
+amp-story-page[active] {
   transition: filter 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-.i-amphtml-story-bookend-active:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[active] {
+.i-amphtml-story-bookend-active amp-story-page[active] {
   filter: blur(3px) !important;
   transition: filter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 /* TODO(gmajoulet): move the overlay to the bookend styles. */
-.i-amphtml-story-bookend-active > amp-story-page[active]::after {
+.i-amphtml-story-bookend-active amp-story-page[active]::after {
   content: '' !important;
   display: block !important;
   left: 0 !important;
