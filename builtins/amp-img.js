@@ -161,8 +161,7 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const prom =  this.loadPromise(img);
-    return prom;
+    return this.loadPromise(img);
   }
 
   /** @override */
@@ -187,7 +186,7 @@ export class AmpImg extends BaseElement {
     // The <img> tag does not have a src and does not support srcset
     if (!this.img_.hasAttribute('src') && 'srcset' in this.img_ == false) {
       const srcset = this.element.getAttribute('srcset');
-      const matches = /\S+/.exec(srcset);  
+      const matches = /\S+/.exec(srcset);
       if (matches == null) {
         return;
       }
@@ -233,7 +232,6 @@ export class AmpImg extends BaseElement {
       });
     }
   }
-
 
   /**
    * If the image fails to load, show a fallback or placeholder instead.

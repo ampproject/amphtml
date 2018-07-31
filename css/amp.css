@@ -167,8 +167,6 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   display: inline-block;
 }
 
-
-
 .i-amphtml-blur-loading .i-amphtml-fill-content {
   opacity: 0 !important;
 }
@@ -186,7 +184,6 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   opacity: 0 !important;
   transition: opacity 1s cubic-bezier(0.33, 0.33, 1, 1) 1s !important;
 }
-
 
 .i-amphtml-layout-nodisplay,
 [layout=nodisplay]:not(.i-amphtml-layout-nodisplay)
