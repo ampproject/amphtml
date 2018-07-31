@@ -1,8 +1,8 @@
 
-import {parseUrlDeprecated} from '../../../src/url';
+import {addParamsToUrl,parseUrlDeprecated} from '../../../src/url';
 
-import {createAnchorReplacementTuple, AnchorRewriteDataResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
-
+import {AFFILIATION_API,XCUST_ATTRIBUTE_NAME} from './constants';
+import {AnchorRewriteDataResponse, createAnchorReplacementTuple} from '../../../src/service/link-rewrite/link-rewrite-classes';
 
 export const LINK_STATUS__AFFILIATE = 'affiliate';
 export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
@@ -19,7 +19,7 @@ export default class AffiliateLinkResolver {
    */
   constructor(xhr, skimOptions, beaconApiCallback) {
     this.xhr_ = xhr;
-    this.pubcode_ = skimOptions.pubcode;
+    this.skimOptions_ = skimOptions;
     this.domains_ = {};
     this.excludedDomains_ = skimOptions.excludedDomains || [];
     this.beaconApiCallback_ = beaconApiCallback;
@@ -51,7 +51,24 @@ export default class AffiliateLinkResolver {
    * @param {*} anchor
    */
   getWaypointUrl_(anchor) {
-    return `https://go.redirectingat.com?id=${this.pubcode_}&url=${anchor.href}`;
+    const {pubcode, customTrackingId} = this.skimOptions_;
+    const xcust = anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId;
+    const queryParams = {
+      id: pubcode,
+      url: anchor.href,
+      sref: null,
+      pref: null,
+      xcreo: null,
+      xguid: null,
+      xuuid: null,
+      xtz: null,
+      xed: null,
+    };
+    if (xcust) {
+      queryParams.xcust = xcust;
+    }
+
+    return addParamsToUrl(AFFILIATION_API, queryParams);
   }
 
   /**
@@ -163,7 +180,7 @@ export default class AffiliateLinkResolver {
    */
   fetchDomainResolverApi(domains) {
     const data = {
-      pubcode: this.pubcode_,
+      pubcode: this.skimOptions_.pubcode,
       page: '',
       domains,
     };
@@ -191,7 +208,9 @@ export default class AffiliateLinkResolver {
   updateDomainsStatusMapPostFetch_(allDomains, affiliateDomains) {
     allDomains.forEach(domain => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
-      this.domains_[domain] = isAffiliateDomain ? LINK_STATUS__AFFILIATE : LINK_STATUS__NON_AFFILIATE;
+      this.domains_[domain] = isAffiliateDomain ?
+        LINK_STATUS__AFFILIATE :
+        LINK_STATUS__NON_AFFILIATE;
     });
   }
 

@@ -1,7 +1,7 @@
 
-import {Services} from '../../../../src/services';
-
 import {AnchorRewriteDataResponse,createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-classes';
+import {Services} from '../../../../src/services';
+import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
 import AffiliateLinkResolver, {DOMAIN_RESOLVER_URL, LINK_STATUS__AFFILIATE, LINK_STATUS__NON_AFFILIATE, LINK_STATUS__UNKNOWN} from '../affiliate-link-resolver';
 
 describes.realWin('amp-skimlinks', {
@@ -10,6 +10,8 @@ describes.realWin('amp-skimlinks', {
   },
 }, env => {
   let win, ampdoc, document, xhr;
+  const pubcode = 'pubXcode';
+
   // let xhrMock;
 
   function createAnchor(href) {
@@ -194,12 +196,10 @@ describes.realWin('amp-skimlinks', {
 
 
       describe('Does correct request to domain resolver API', () => {
-        const pubCode = 'pubXcode';
-
         beforeEach(() => {
           mock = env.sandbox.mock(xhr);
           resolver = new AffiliateLinkResolver(xhr, {
-            pubcode: pubCode,
+            pubcode,
           }, () => {});
         });
 
@@ -210,7 +210,7 @@ describes.realWin('amp-skimlinks', {
         it('Should call the correct url', () => {
           const domains = ['domain1.com', 'domain2.com'];
           const expectedData = {
-            pubcode: pubCode,
+            pubcode,
             page: '',
             domains,
           };
@@ -231,7 +231,7 @@ describes.realWin('amp-skimlinks', {
         it('Should use the corret fetch options', () => {
           const domains = ['domain1.com', 'domain2.com'];
           const expectedData = {
-            pubcode: pubCode,
+            pubcode,
             page: '',
             domains,
           };
@@ -400,10 +400,6 @@ describes.realWin('amp-skimlinks', {
     describe('getLinkDomain_', () => {
       const resolver = new AffiliateLinkResolver({}, {}, () => { });
 
-      beforeEach(() => {
-
-      });
-
       it('Removes  http protocol', () => {
         const anchor = createAnchor('http://test.com');
         expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
@@ -428,7 +424,87 @@ describes.realWin('amp-skimlinks', {
 
 
     describe('getWaypointUrl_', () => {
+      let replacementUrl;
+      let queryParams;
+      let anchor;
+      const destinationUrl = 'https://test.com/path/to?isAdmin=true';
 
+      function getQueryParams(url) {
+        return parseQueryString(
+            parseUrlDeprecated(url).search
+        );
+      }
+
+      function generateWaypointUrl(anchor, customTrackingId) {
+        const skimOptions = {
+          pubcode,
+          customTrackingId,
+        };
+        const resolver = new AffiliateLinkResolver({}, skimOptions, () => { });
+        return resolver.getWaypointUrl_(anchor);
+      }
+
+      beforeEach(() => {
+        anchor = createAnchor(destinationUrl);
+        replacementUrl = generateWaypointUrl(anchor);
+        queryParams = getQueryParams(replacementUrl);
+      });
+
+      it('Sends the pubcode', () => {
+        expect(queryParams.id).to.equal(pubcode);
+      });
+      it('Sends the destination url', () => {
+        expect(queryParams.url).to.equal(destinationUrl);
+      });
+
+      it.skip('Sends the sref', () => {
+        expect(queryParams.sref).to.equal('');
+      });
+      it.skip('Sends the pref', () => {
+        expect(queryParams.pref).to.equal('');
+      });
+      it.skip('Sends the xcreo (creative)', () => {
+        expect(queryParams.xcreo).to.equal('');
+      });
+      it.skip('Sends the xguid (GUID)', () => {
+        expect(queryParams.xguid).to.equal('');
+      });
+      it.skip('Sends the xuuid (impression id)', () => {
+        expect(queryParams.xuuid).to.equal('');
+      });
+      it.skip('Sends the xtz (timezone)', () => {
+        expect(queryParams.xtz).to.equal('');
+      });
+      it.skip('Sends the xed ()', () => {
+        expect(queryParams.xed).to.equal('');
+      });
+
+      describe.skip('custom-tracking-id', () => {
+        it('Does not send the xcust (custom tracking id) if not provided as skimOption', () => {
+          expect(queryParams.xcust).to.be.undefined;
+        });
+
+        it('Sends the xcust (custom tracking id) if provided on the link', () => {
+          anchor.setAttribute('linkTrackingId');
+          queryParams = getQueryParams(replacementUrl);
+          expect(queryParams.xcust).to.be.equal('linkTrackingId');
+        });
+
+        it('Sends the xcust (custom tracking id) if provided as skimOption', () => {
+          replacementUrl = generateWaypointUrl(anchor, 'globalTrackingId');
+          queryParams = getQueryParams(replacementUrl);
+          expect(queryParams.xcust).to.be.equal('globalTrackingId');
+        });
+
+
+        it('Sends the xcust (custom tracking id) if provided on the link and as skimOption', () => {
+          anchor.setAttribute('linkTrackingId');
+          replacementUrl = generateWaypointUrl('globalTrackingId');
+          queryParams = getQueryParams(replacementUrl);
+          expect(queryParams.xcust).to.be.equal('linkTrackingId');
+        });
+
+      });
     });
   });
 
