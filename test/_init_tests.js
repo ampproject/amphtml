@@ -315,14 +315,7 @@ function warnForConsoleError() {
       }
     }
 
-    // We're throwing an error. Clean up other expected errors since they will
-    // never appear.
-    expectedAsyncErrors = [];
-
     const errorMessage = message.split('\n', 1)[0]; // First line.
-    const {failOnConsoleError} = window.__karma__.config;
-    const terminator = failOnConsoleError ? '\'' : '';
-    const separator = failOnConsoleError ? '\n' : '\'\n';
     const helpMessage = '    The test "' + testName + '"' +
         ' resulted in a call to console.error. (See above line.)\n' +
         '    ⤷ If the error is not expected, fix the code that generated ' +
@@ -333,14 +326,9 @@ function warnForConsoleError() {
             'error> });\'\n' +
         '    ⤷ If the error is expected (and asynchronous), use the ' +
             'following pattern at the top of the test:\n' +
-        '        \'expectAsyncConsoleError(<string or regex>[, number of' +
-        ' times the error message repeats]);' + terminator;
-    // TODO(rsimha, #14406): Simply throw here after all tests are fixed.
-    if (failOnConsoleError) {
-      throw new Error(errorMessage + separator + helpMessage);
-    } else {
-      originalConsoleError(errorMessage + separator + helpMessage);
-    }
+        '        \'expectAsyncConsoleError(<string or regex>[, <number of' +
+        ' times the error message repeats>]);';
+    originalConsoleError(errorMessage + '\'\n' + helpMessage);
   });
   this.expectAsyncConsoleError = function(message, repeat = 1) {
     expectedAsyncErrors.push.apply(
@@ -355,7 +343,7 @@ function warnForConsoleError() {
       const helpMessage =
           'The test "' + testName + '" contains an "allowConsoleError" block ' +
           'that didn\'t result in a call to console.error.';
-      throw new Error(helpMessage);
+      originalConsoleError(helpMessage);
     }
     warnForConsoleError();
     return result;
