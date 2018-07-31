@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
 import {hasOwn} from '../../../src/utils/object';
 
 /**
@@ -2107,16 +2108,6 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
-
-/**
- * Vendors who have IAB viewability certification may use iframe transport
- * (see ../amp-analytics.md and ../integrating-analytics.md). In this case,
- * put only the specification of the iframe location in the object below,
- * and put everything else (requests, triggers, etc.) in the object above.
- */
-export const IFRAME_TRANSPORTS = {
-  'bg': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
-};
 
 setIframeTransports();
 
