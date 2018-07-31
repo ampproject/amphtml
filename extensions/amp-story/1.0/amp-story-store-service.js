@@ -198,17 +198,6 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
-            [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-            [StateProperty.CAN_SHOW_BOOKEND]: false,
-            [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-            [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
-            [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-            [StateProperty.BOOKEND_STATE]: false,
-            [StateProperty.DESKTOP_STATE]: false,
-            [StateProperty.STORY_HAS_AUDIO_STATE]: false,
-            [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
-            [StateProperty.MUTED_STATE]: true,
-            [StateProperty.SUPPORTED_BROWSER_STATE]: false,
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.SHARE_MENU_STATE]: !!data,
           }));
