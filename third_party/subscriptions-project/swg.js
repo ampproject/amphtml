@@ -13,11 +13,1649 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.22 */
-'use strict';
-import { ActivityPorts } from 'web-activities/activity-ports';
+/** Version: 0.1.22.23 */
+/**
+ * @license
+ * Copyright 2017 The Web Activities Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*eslint no-unused-vars: 0*/
 
 
+/**
+ * @enum {string}
+ */
+const ActivityMode = {
+  IFRAME: 'iframe',
+  POPUP: 'popup',
+  REDIRECT: 'redirect',
+};
+
+
+/**
+ * The result code used for `ActivityResult`.
+ * @enum {string}
+ */
+const ActivityResultCode = {
+  OK: 'ok',
+  CANCELED: 'canceled',
+  FAILED: 'failed',
+};
+
+
+/**
+ * The result of an activity. The activity implementation returns this object
+ * for a successful result, a cancelation or a failure.
+ * @struct
+ */
+class ActivityResult {
+  /**
+   * @param {!ActivityResultCode} code
+   * @param {*} data
+   * @param {!ActivityMode} mode
+   * @param {string} origin
+   * @param {boolean} originVerified
+   * @param {boolean} secureChannel
+   */
+  constructor(code, data, mode, origin, originVerified, secureChannel) {
+    /** @const {!ActivityResultCode} */
+    this.code = code;
+    /** @const {*} */
+    this.data = code == ActivityResultCode.OK ? data : null;
+    /** @const {!ActivityMode} */
+    this.mode = mode;
+    /** @const {string} */
+    this.origin = origin;
+    /** @const {boolean} */
+    this.originVerified = originVerified;
+    /** @const {boolean} */
+    this.secureChannel = secureChannel;
+    /** @const {boolean} */
+    this.ok = code == ActivityResultCode.OK;
+    /** @const {?Error} */
+    this.error = code == ActivityResultCode.FAILED ?
+        new Error(String(data) || '') :
+        null;
+  }
+}
+
+
+/**
+ * The activity request that different types of hosts can be started with.
+ * @typedef {{
+ *   requestId: string,
+ *   returnUrl: string,
+ *   args: ?Object,
+ *   origin: (string|undefined),
+ *   originVerified: (boolean|undefined),
+ * }}
+ */
+let ActivityRequest;
+
+
+/**
+ * The activity "open" options used for popups and redirects.
+ *
+ * - returnUrl: override the return URL. By default, the current URL will be
+ *   used.
+ * - skipRequestInUrl: removes the activity request from the URL, in case
+ *   redirect is used. By default, the activity request is appended to the
+ *   activity URL. This option can be used if the activity request is passed
+ *   to the activity by some alternative means.
+ *
+ * @typedef {{
+ *   returnUrl: (string|undefined),
+ *   skipRequestInUrl: (boolean|undefined),
+ *   width: (number|undefined),
+ *   height: (number|undefined),
+ * }}
+ */
+let ActivityOpenOptions;
+
+
+/**
+ * Activity client-side binding. The port provides limited ways to communicate
+ * with the activity and receive signals and results from it. Not every type
+ * of activity exposes a port.
+ *
+ * @interface
+ */
+class ActivityPort {
+
+  /**
+   * Returns the mode of the activity: iframe, popup or redirect.
+   * @return {!ActivityMode}
+   */
+  getMode() {}
+
+  /**
+   * Accepts the result when ready. The client should verify the activity's
+   * mode, origin, verification and secure channel flags before deciding
+   * whether or not to trust the result.
+   *
+   * Returns the promise that yields when the activity has been completed and
+   * either a result, a cancelation or a failure has been returned.
+   *
+   * @return {!Promise<!ActivityResult>}
+   */
+  acceptResult() {}
+}
+
+
+
+/** DOMException.ABORT_ERR name */
+const ABORT_ERR_NAME = 'AbortError';
+
+/** DOMException.ABORT_ERR = 20 */
+const ABORT_ERR_CODE = 20;
+
+/** @type {?HTMLAnchorElement} */
+let aResolver;
+
+
+/**
+ * @param {string} urlString
+ * @return {!HTMLAnchorElement}
+ */
+function parseUrl(urlString) {
+  if (!aResolver) {
+    aResolver = /** @type {!HTMLAnchorElement} */ (document.createElement('a'));
+  }
+  aResolver.href = urlString;
+  return /** @type {!HTMLAnchorElement} */ (aResolver);
+}
+
+
+/**
+ * @param {!Location|!URL|!HTMLAnchorElement} loc
+ * @return {string}
+ */
+function getOrigin(loc) {
+  if (loc.origin) {
+    return loc.origin;
+  }
+  // Make sure that the origin is normalized. Specifically on IE, host sometimes
+  // includes the default port, which is not per standard.
+  const protocol = loc.protocol;
+  let host = loc.host;
+  if (protocol == 'https:' && host.indexOf(':443') == host.length - 4) {
+    host = host.replace(':443', '');
+  } else if (protocol == 'http:' && host.indexOf(':80') == host.length - 3) {
+    host = host.replace(':80', '');
+  }
+  return protocol + '//' + host;
+}
+
+
+/**
+ * @param {string} urlString
+ * @return {string}
+ */
+function getOriginFromUrl(urlString) {
+  return getOrigin(parseUrl(urlString));
+}
+
+
+/**
+ * @param {string} urlString
+ * @return {string}
+ */
+function removeFragment(urlString) {
+  const index = urlString.indexOf('#');
+  if (index == -1) {
+    return urlString;
+  }
+  return urlString.substring(0, index);
+}
+
+
+/**
+ * Parses and builds Object of URL query string.
+ * @param {string} query The URL query string.
+ * @return {!Object<string, string>}
+ */
+function parseQueryString(query) {
+  if (!query) {
+    return {};
+  }
+  return (/^[?#]/.test(query) ? query.slice(1) : query)
+      .split('&')
+      .reduce((params, param) => {
+        const item = param.split('=');
+        const key = decodeURIComponent(item[0] || '');
+        const value = decodeURIComponent(item[1] || '');
+        if (key) {
+          params[key] = value;
+        }
+        return params;
+      }, {});
+}
+
+
+/**
+ * @param {string} queryString  A query string in the form of "a=b&c=d". Could
+ *   be optionally prefixed with "?" or "#".
+ * @param {string} param The param to get from the query string.
+ * @return {?string}
+ */
+function getQueryParam(queryString, param) {
+  return parseQueryString(queryString)[param];
+}
+
+
+/**
+ * Add a query-like parameter to the fragment string.
+ * @param {string} url
+ * @param {string} param
+ * @param {string} value
+ * @return {string}
+ */
+function addFragmentParam(url, param, value) {
+  return url +
+      (url.indexOf('#') == -1 ? '#' : '&') +
+      encodeURIComponent(param) + '=' + encodeURIComponent(value);
+}
+
+
+/**
+ * @param {string} queryString  A query string in the form of "a=b&c=d". Could
+ *   be optionally prefixed with "?" or "#".
+ * @param {string} param The param to remove from the query string.
+ * @return {?string}
+ */
+function removeQueryParam(queryString, param) {
+  if (!queryString) {
+    return queryString;
+  }
+  const search = encodeURIComponent(param) + '=';
+  let index = -1;
+  do {
+    index = queryString.indexOf(search, index);
+    if (index != -1) {
+      const prev = index > 0 ? queryString.substring(index - 1, index) : '';
+      if (prev == '' || prev == '?' || prev == '#' || prev == '&') {
+        let end = queryString.indexOf('&', index + 1);
+        if (end == -1) {
+          end = queryString.length;
+        }
+        queryString =
+            queryString.substring(0, index) +
+            queryString.substring(end + 1);
+      } else {
+        index++;
+      }
+    }
+  } while (index != -1 && index < queryString.length);
+  return queryString;
+}
+
+
+/**
+ * @param {!ActivityRequest} request
+ * @return {string}
+ */
+function serializeRequest(request) {
+  const map = {
+    'requestId': request.requestId,
+    'returnUrl': request.returnUrl,
+    'args': request.args,
+  };
+  if (request.origin !== undefined) {
+    map['origin'] = request.origin;
+  }
+  if (request.originVerified !== undefined) {
+    map['originVerified'] = request.originVerified;
+  }
+  return JSON.stringify(map);
+}
+
+
+/**
+ * Creates or emulates a DOMException of AbortError type.
+ * See https://heycam.github.io/webidl/#aborterror.
+ * @param {!Window} win
+ * @param {string=} opt_message
+ * @return {!DOMException}
+ */
+function createAbortError(win, opt_message) {
+  const message = 'AbortError' + (opt_message ? ': ' + opt_message : '');
+  let error = null;
+  if (typeof win['DOMException'] == 'function') {
+    // TODO(dvoytenko): remove typecast once externs are fixed.
+    const constr = /** @type {function(new:DOMException, string, string)} */ (
+        win['DOMException']);
+    try {
+      error = new constr(message, ABORT_ERR_NAME);
+    } catch (e) {
+      // Ignore. In particular, `new DOMException()` fails in Edge.
+    }
+  }
+  if (!error) {
+    // TODO(dvoytenko): remove typecast once externs are fixed.
+    const constr = /** @type {function(new:DOMException, string)} */ (
+        Error);
+    error = new constr(message);
+    error.name = ABORT_ERR_NAME;
+    error.code = ABORT_ERR_CODE;
+  }
+  return error;
+}
+
+
+/**
+ * Resolves the activity result as a promise:
+ *  - `OK` result is yielded as the promise's payload;
+ *  - `CANCEL` result is rejected with the `AbortError`;
+ *  - `FAILED` result is rejected with the embedded error.
+ *
+ * @param {!Window} win
+ * @param {!ActivityResult} result
+ * @param {function((!ActivityResult|!Promise))} resolver
+ */
+function resolveResult(win, result, resolver) {
+  if (result.ok) {
+    resolver(result);
+  } else {
+    const error = result.error || createAbortError(win);
+    error.activityResult = result;
+    resolver(Promise.reject(error));
+  }
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isIeBrowser(win) {
+  // MSIE and Trident are typical user agents for IE browsers.
+  const nav = win.navigator;
+  return /Trident|MSIE|IEMobile/i.test(nav && nav.userAgent);
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isEdgeBrowser(win) {
+  const nav = win.navigator;
+  return /Edge/i.test(nav && nav.userAgent);
+}
+
+
+
+const SENTINEL = '__ACTIVITIES__';
+
+
+/**
+ * The messenger helper for activity's port and host.
+ */
+class Messenger {
+
+  /**
+   * @param {!Window} win
+   * @param {!Window|function():?Window} targetOrCallback
+   * @param {?string} targetOrigin
+   */
+  constructor(win, targetOrCallback, targetOrigin) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {!Window|function():?Window} */
+    this.targetOrCallback_ = targetOrCallback;
+
+    /**
+     * May start as unknown (`null`) until received in the first message.
+     * @private {?string}
+     */
+    this.targetOrigin_ = targetOrigin;
+
+    /** @private {?Window} */
+    this.target_ = null;
+
+    /** @private {boolean} */
+    this.acceptsChannel_ = false;
+
+    /** @private {?MessagePort} */
+    this.port_ = null;
+
+    /** @private {?function(string, ?Object)} */
+    this.onCommand_ = null;
+
+    /** @private {?function(!Object)} */
+    this.onCustomMessage_ = null;
+
+    /**
+     * @private {?Object<string, !ChannelHolder>}
+     */
+    this.channels_ = null;
+
+    /** @private @const */
+    this.boundHandleEvent_ = this.handleEvent_.bind(this);
+  }
+
+  /**
+   * Connect the port to the host or vice versa.
+   * @param {function(string, ?Object)} onCommand
+   */
+  connect(onCommand) {
+    if (this.onCommand_) {
+      throw new Error('already connected');
+    }
+    this.onCommand_ = onCommand;
+    this.win_.addEventListener('message', this.boundHandleEvent_);
+  }
+
+  /**
+   * Disconnect messenger.
+   */
+  disconnect() {
+    if (this.onCommand_) {
+      this.onCommand_ = null;
+      if (this.port_) {
+        closePort(this.port_);
+        this.port_ = null;
+      }
+      this.win_.removeEventListener('message', this.boundHandleEvent_);
+      if (this.channels_) {
+        for (const k in this.channels_) {
+          const channelObj = this.channels_[k];
+          if (channelObj.port1) {
+            closePort(channelObj.port1);
+          }
+          if (channelObj.port2) {
+            closePort(channelObj.port2);
+          }
+        }
+        this.channels_ = null;
+      }
+    }
+  }
+
+  /**
+   * Returns whether the messenger has been connected already.
+   * @return {boolean}
+   */
+  isConnected() {
+    return this.targetOrigin_ != null;
+  }
+
+  /**
+   * Returns the messaging target. Only available when connection has been
+   * establihsed.
+   * @return {!Window}
+   */
+  getTarget() {
+    const target = this.getOptionalTarget_();
+    if (!target) {
+      throw new Error('not connected');
+    }
+    return target;
+  }
+
+  /**
+   * @return {?Window}
+   * @private
+   */
+  getOptionalTarget_() {
+    if (this.onCommand_ && !this.target_) {
+      if (typeof this.targetOrCallback_ == 'function') {
+        this.target_ = this.targetOrCallback_();
+      } else {
+        this.target_ = /** @type {!Window} */ (this.targetOrCallback_);
+      }
+    }
+    return this.target_;
+  }
+
+  /**
+   * Returns the messaging origin. Only available when connection has been
+   * establihsed.
+   * @return {string}
+   */
+  getTargetOrigin() {
+    if (this.targetOrigin_ == null) {
+      throw new Error('not connected');
+    }
+    return this.targetOrigin_;
+  }
+
+  /**
+   * The host sends this message to the client to indicate that it's ready to
+   * start communicating. The client is expected to respond back with the
+   * "start" command. See `sendStartCommand` method.
+   */
+  sendConnectCommand() {
+    // TODO(dvoytenko): MessageChannel is critically necessary for IE/Edge,
+    // since window messaging doesn't always work. It's also preferred as an API
+    // for other browsers: it's newer, cleaner and arguably more secure.
+    // Unfortunately, browsers currently do not propagate user gestures via
+    // MessageChannel, only via window messaging. This should be re-enabled
+    // once browsers fix user gesture propagation.
+    // See:
+    // Safari: https://bugs.webkit.org/show_bug.cgi?id=186593
+    // Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=851493
+    // Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=1469422
+    const acceptsChannel = isIeBrowser(this.win_) || isEdgeBrowser(this.win_);
+    this.sendCommand('connect', {'acceptsChannel': acceptsChannel});
+  }
+
+  /**
+   * The client sends this message to the host upon receiving the "connect"
+   * message to start the main communication channel. As a payload, the message
+   * will contain the provided start arguments.
+   * @param {?Object} args
+   */
+  sendStartCommand(args) {
+    let channel = null;
+    if (this.acceptsChannel_ && typeof this.win_.MessageChannel == 'function') {
+      channel = new this.win_.MessageChannel();
+    }
+    if (channel) {
+      this.sendCommand('start', args, [channel.port2]);
+      // It's critical to switch to port messaging only after "start" has been
+      // sent. Otherwise, it won't be delivered.
+      this.switchToChannel_(channel.port1);
+    } else {
+      this.sendCommand('start', args);
+    }
+  }
+
+  /**
+   * Sends the specified command from the port to the host or vice versa.
+   * @param {string} cmd
+   * @param {?Object=} opt_payload
+   * @param {?Array=} opt_transfer
+   */
+  sendCommand(cmd, opt_payload, opt_transfer) {
+    const data = {
+      'sentinel': SENTINEL,
+      'cmd': cmd,
+      'payload': opt_payload || null,
+    };
+    if (this.port_) {
+      this.port_.postMessage(data, opt_transfer || undefined);
+    } else {
+      const target = this.getTarget();
+      // Only "connect" command is allowed to use `targetOrigin == '*'`
+      const targetOrigin =
+          cmd == 'connect' ?
+          (this.targetOrigin_ != null ? this.targetOrigin_ : '*') :
+          this.getTargetOrigin();
+      target.postMessage(data, targetOrigin, opt_transfer || undefined);
+    }
+  }
+
+  /**
+   * Sends a message to the client.
+   * @param {!Object} payload
+   */
+  customMessage(payload) {
+    this.sendCommand('msg', payload);
+  }
+
+  /**
+   * Registers a callback to receive messages from the client.
+   * @param {function(!Object)} callback
+   */
+  onCustomMessage(callback) {
+    this.onCustomMessage_ = callback;
+  }
+
+  /**
+   * @param {string=} opt_name
+   * @return {!Promise<!MessagePort>}
+   */
+  startChannel(opt_name) {
+    const name = opt_name || '';
+    const channelObj = this.getChannelObj_(name);
+    if (!channelObj.port1) {
+      const channel = new this.win_.MessageChannel();
+      channelObj.port1 = channel.port1;
+      channelObj.port2 = channel.port2;
+      channelObj.resolver(channelObj.port1);
+    }
+    if (channelObj.port2) {
+      // Not yet sent.
+      this.sendCommand('cnset', {'name': name}, [channelObj.port2]);
+      channelObj.port2 = null;
+    }
+    return channelObj.promise;
+  }
+
+  /**
+   * @param {string=} opt_name
+   * @return {!Promise<!MessagePort>}
+   */
+  askChannel(opt_name) {
+    const name = opt_name || '';
+    const channelObj = this.getChannelObj_(name);
+    if (!channelObj.port1) {
+      this.sendCommand('cnget', {'name': name});
+    }
+    return channelObj.promise;
+  }
+
+  /**
+   * @param {string} name
+   * @param {!MessagePort} port
+   * @private
+   */
+  receiveChannel_(name, port) {
+    const channelObj = this.getChannelObj_(name);
+    channelObj.port1 = port;
+    channelObj.resolver(port);
+  }
+
+  /**
+   * @param {string} name
+   * @return {!ChannelHolder}
+   */
+  getChannelObj_(name) {
+    if (!this.channels_) {
+      this.channels_ = {};
+    }
+    let channelObj = this.channels_[name];
+    if (!channelObj) {
+      let resolver;
+      const promise = new Promise(resolve => {
+        resolver = resolve;
+      });
+      channelObj = {
+        port1: null,
+        port2: null,
+        resolver,
+        promise,
+      };
+      this.channels_[name] = channelObj;
+    }
+    return channelObj;
+  }
+
+  /**
+   * @param {!MessagePort} port
+   * @private
+   */
+  switchToChannel_(port) {
+    if (this.port_) {
+      closePort(this.port_);
+    }
+    this.port_ = port;
+    this.port_.onmessage = event => {
+      const data = event.data;
+      const cmd = data && data['cmd'];
+      const payload = data && data['payload'] || null;
+      if (cmd) {
+        this.handleCommand_(cmd, payload, event);
+      }
+    };
+    // Even though all messaging will switch to ports, the window-based message
+    // listener will be preserved just in case the host is refreshed and needs
+    // another connection.
+  }
+
+  /**
+   * @param {!MessageEvent} event
+   * @private
+   */
+  handleEvent_(event) {
+    const data = event.data;
+    if (!data || data['sentinel'] != SENTINEL) {
+      return;
+    }
+    const cmd = data['cmd'];
+    if (this.port_ && cmd != 'connect' && cmd != 'start') {
+      // Messaging channel has already taken over. However, the "connect" and
+      // "start" commands are allowed to proceed in case re-connection is
+      // requested.
+      return;
+    }
+    const origin = /** @type {string} */ (event.origin);
+    const payload = data['payload'] || null;
+    if (this.targetOrigin_ == null && cmd == 'start') {
+      this.targetOrigin_ = origin;
+    }
+    if (this.targetOrigin_ == null && event.source) {
+      if (this.getOptionalTarget_() == event.source) {
+        this.targetOrigin_ = origin;
+      }
+    }
+    // Notice that event.source may differ from the target because of
+    // friendly-iframe intermediaries.
+    if (origin != this.targetOrigin_) {
+      return;
+    }
+    this.handleCommand_(cmd, payload, event);
+  }
+
+  /**
+   * @param {string} cmd
+   * @param {?Object} payload
+   * @param {!MessageEvent} event
+   * @private
+   */
+  handleCommand_(cmd, payload, event) {
+    if (cmd == 'connect') {
+      if (this.port_) {
+        // In case the port has already been open - close it to reopen it
+        // again later.
+        closePort(this.port_);
+        this.port_ = null;
+      }
+      this.acceptsChannel_ = payload && payload['acceptsChannel'] || false;
+      this.onCommand_(cmd, payload);
+    } else if (cmd == 'start') {
+      const port = event.ports && event.ports[0];
+      if (port) {
+        this.switchToChannel_(port);
+      }
+      this.onCommand_(cmd, payload);
+    } else if (cmd == 'msg') {
+      if (this.onCustomMessage_ != null && payload != null) {
+        this.onCustomMessage_(payload);
+      }
+    } else if (cmd == 'cnget') {
+      const name = payload['name'];
+      this.startChannel(name);
+    } else if (cmd == 'cnset') {
+      const name = payload['name'];
+      const port = event.ports[0];
+      this.receiveChannel_(name, /** @type {!MessagePort} */ (port));
+    } else {
+      this.onCommand_(cmd, payload);
+    }
+  }
+}
+
+
+/**
+ * @param {!MessagePort} port
+ */
+function closePort(port) {
+  try {
+    port.close();
+  } catch (e) {
+    // Ignore.
+  }
+}
+
+
+
+
+/**
+ * The `ActivityPort` implementation for the iframe case. Unlike other types
+ * of activities, iframe-based activities are always connected and can react
+ * to size requests.
+ *
+ * @implements {ActivityPort}
+ */
+class ActivityIframePort {
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} opt_args
+   */
+  constructor(iframe, url, opt_args) {
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ = iframe;
+    /** @private @const {string} */
+    this.url_ = url;
+    /** @private @const {?Object} */
+    this.args_ = opt_args || null;
+
+    /** @private @const {!Window} */
+    this.win_ = /** @type {!Window} */ (this.iframe_.ownerDocument.defaultView);
+
+    /** @private @const {string} */
+    this.targetOrigin_ = getOriginFromUrl(url);
+
+    /** @private {boolean} */
+    this.connected_ = false;
+
+    /** @private {?function()} */
+    this.connectedResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.connectedPromise_ = new Promise(resolve => {
+      this.connectedResolver_ = resolve;
+    });
+
+    /** @private {?function()} */
+    this.readyResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.readyPromise_ = new Promise(resolve => {
+      this.readyResolver_ = resolve;
+    });
+
+    /** @private {?function((!ActivityResult|!Promise))} */
+    this.resultResolver_ = null;
+
+    /** @private @const {!Promise<!ActivityResult>} */
+    this.resultPromise_ = new Promise(resolve => {
+      this.resultResolver_ = resolve;
+    });
+
+    /** @private {?function(number)} */
+    this.onResizeRequest_ = null;
+
+    /** @private {?number} */
+    this.requestedHeight_ = null;
+
+    /** @private @const {!Messenger} */
+    this.messenger_ = new Messenger(
+        this.win_,
+        () => this.iframe_.contentWindow,
+        this.targetOrigin_);
+  }
+
+  /** @override */
+  getMode() {
+    return ActivityMode.IFRAME;
+  }
+
+  /**
+   * Waits until the activity port is connected to the host.
+   * @return {!Promise}
+   */
+  connect() {
+    if (!this.win_.document.documentElement.contains(this.iframe_)) {
+      throw new Error('iframe must be in DOM');
+    }
+    this.messenger_.connect(this.handleCommand_.bind(this));
+    this.iframe_.src = this.url_;
+    return this.connectedPromise_;
+  }
+
+  /**
+   * Disconnect the activity binding and cleanup listeners.
+   */
+  disconnect() {
+    this.connected_ = false;
+    this.messenger_.disconnect();
+  }
+
+  /** @override */
+  acceptResult() {
+    return this.resultPromise_;
+  }
+
+  /**
+   * Sends a message to the host.
+   * @param {!Object} payload
+   */
+  message(payload) {
+    this.messenger_.customMessage(payload);
+  }
+
+  /**
+   * Registers a callback to receive messages from the host.
+   * @param {function(!Object)} callback
+   */
+  onMessage(callback) {
+    this.messenger_.onCustomMessage(callback);
+  }
+
+  /**
+   * Creates a new communication channel or returns an existing one.
+   * @param {string=} opt_name
+   * @return {!Promise<!MessagePort>}
+   */
+  messageChannel(opt_name) {
+    return this.messenger_.askChannel(opt_name);
+  }
+
+  /**
+   * Returns a promise that yields when the iframe is ready to be interacted
+   * with.
+   * @return {!Promise}
+   */
+  whenReady() {
+    return this.readyPromise_;
+  }
+
+  /**
+   * Register a callback to handle resize requests. Once successfully resized,
+   * ensure to call `resized()` method.
+   * @param {function(number)} callback
+   */
+  onResizeRequest(callback) {
+    this.onResizeRequest_ = callback;
+    Promise.resolve().then(() => {
+      if (this.requestedHeight_ != null) {
+        callback(this.requestedHeight_);
+      }
+    });
+  }
+
+  /**
+   * Signals back to the activity implementation that the client has updated
+   * the activity's size.
+   */
+  resized() {
+    if (!this.connected_) {
+      return;
+    }
+    const height = this.iframe_.offsetHeight;
+    this.messenger_.sendCommand('resized', {'height': height});
+  }
+
+  /**
+   * @param {string} cmd
+   * @param {?Object} payload
+   * @private
+   */
+  handleCommand_(cmd, payload) {
+    if (cmd == 'connect') {
+      // First ever message. Indicates that the receiver is listening.
+      this.connected_ = true;
+      this.messenger_.sendStartCommand(this.args_);
+      this.connectedResolver_();
+    } else if (cmd == 'result') {
+      // The last message. Indicates that the result has been received.
+      if (this.resultResolver_) {
+        const code = /** @type {!ActivityResultCode} */ (payload['code']);
+        const data =
+            code == ActivityResultCode.FAILED ?
+            new Error(payload['data'] || '') :
+            payload['data'];
+        const result = new ActivityResult(
+            code,
+            data,
+            ActivityMode.IFRAME,
+            this.messenger_.getTargetOrigin(),
+            /* originVerified */ true,
+            /* secureChannel */ true);
+        resolveResult(this.win_, result, this.resultResolver_);
+        this.resultResolver_ = null;
+        this.messenger_.sendCommand('close');
+        this.disconnect();
+      }
+    } else if (cmd == 'ready') {
+      if (this.readyResolver_) {
+        this.readyResolver_();
+        this.readyResolver_ = null;
+      }
+    } else if (cmd == 'resize') {
+      this.requestedHeight_ = /** @type {number} */ (payload['height']);
+      if (this.onResizeRequest_) {
+        this.onResizeRequest_(this.requestedHeight_);
+      }
+    }
+  }
+}
+
+
+
+
+/**
+ * The `ActivityPort` implementation for the standalone window activity
+ * client executed as a popup.
+ *
+ * @implements {ActivityPort}
+ */
+class ActivityWindowPort {
+
+  /**
+   * @param {!Window} win
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?ActivityOpenOptions=} opt_options
+   */
+  constructor(win, requestId, url, target, opt_args, opt_options) {
+    const isValidTarget =
+        target &&
+        (target == '_blank' || target == '_top' || target[0] != '_');
+    if (!isValidTarget) {
+      throw new Error('The only allowed targets are "_blank", "_top"' +
+          ' and name targets');
+    }
+
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {string} */
+    this.requestId_ = requestId;
+    /** @private @const {string} */
+    this.url_ = url;
+    /** @private @const {string} */
+    this.openTarget_ = target;
+    /** @private @const {?Object} */
+    this.args_ = opt_args || null;
+    /** @private @const {?ActivityOpenOptions} */
+    this.options_ = opt_options || null;
+
+    /** @private {?function((!ActivityResult|!Promise))} */
+    this.resultResolver_ = null;
+
+    /** @private @const {!Promise<!ActivityResult>} */
+    this.resultPromise_ = new Promise(resolve => {
+      this.resultResolver_ = resolve;
+    });
+
+    /** @private {?Window} */
+    this.targetWin_ = null;
+
+    /** @private {?number} */
+    this.heartbeatInterval_ = null;
+
+    /** @private {?Messenger} */
+    this.messenger_ = null;
+  }
+
+  /** @override */
+  getMode() {
+    return this.openTarget_ == '_top' ?
+        ActivityMode.REDIRECT :
+        ActivityMode.POPUP;
+  }
+
+  /**
+   * Opens the activity in a window, either as a popup or via redirect.
+   *
+   * Returns the promise that will yield when the window returns or closed.
+   * Notice, that this promise may never complete if "redirect" mode was used.
+   *
+   * @return {!Promise}
+   */
+  open() {
+    return this.openInternal_();
+  }
+
+  /**
+   * @return {?Window}
+   */
+  getTargetWin() {
+    return this.targetWin_;
+  }
+
+  /**
+   * Disconnect the activity binding and cleanup listeners.
+   */
+  disconnect() {
+    if (this.heartbeatInterval_) {
+      this.win_.clearInterval(this.heartbeatInterval_);
+      this.heartbeatInterval_ = null;
+    }
+    if (this.messenger_) {
+      this.messenger_.disconnect();
+      this.messenger_ = null;
+    }
+    if (this.targetWin_) {
+      // Try to close the popup window. The host will also try to do the same.
+      try {
+        this.targetWin_.close();
+      } catch (e) {
+        // Ignore.
+      }
+      this.targetWin_ = null;
+    }
+    this.resultResolver_ = null;
+  }
+
+  /** @override */
+  acceptResult() {
+    return this.resultPromise_;
+  }
+
+  /**
+   * This method wraps around window's open method. It first tries to execute
+   * `open` call with the provided target and if it fails, it retries the call
+   * with the `_top` target. This is necessary given that in some embedding
+   * scenarios, such as iOS' WKWebView, navigation to `_blank` and other targets
+   * is blocked by default.
+   * @return {!Promise}
+   * @private
+   */
+  openInternal_() {
+    const featuresStr = this.buildFeatures_();
+
+    // Protectively, the URL will contain the request payload, unless explicitly
+    // directed not to via `skipRequestInUrl` option.
+    let url = this.url_;
+    if (!(this.options_ && this.options_.skipRequestInUrl)) {
+      const returnUrl =
+          this.options_ && this.options_.returnUrl ||
+          removeFragment(this.win_.location.href);
+      const requestString = serializeRequest({
+        requestId: this.requestId_,
+        returnUrl,
+        args: this.args_,
+      });
+      url = addFragmentParam(url, '__WA__', requestString);
+    }
+
+    // Open the window.
+    let targetWin;
+    let openTarget = this.openTarget_;
+    // IE does not support CORS popups - the popup has to fallback to redirect
+    // mode.
+    if (openTarget != '_top') {
+      if (isIeBrowser(this.win_)) {
+        openTarget = '_top';
+      }
+    }
+    // Try first with the specified target. If we're inside the WKWebView or
+    // a similar environments, this method is expected to fail by default for
+    // all targets except `_top`.
+    try {
+      targetWin = this.win_.open(url, openTarget, featuresStr);
+    } catch (e) {
+      // Ignore.
+    }
+    // Then try with `_top` target.
+    if (!targetWin && openTarget != '_top') {
+      openTarget = '_top';
+      try {
+        targetWin = this.win_.open(url, openTarget);
+      } catch (e) {
+        // Ignore.
+      }
+    }
+
+    // Setup the target window.
+    if (targetWin) {
+      this.targetWin_ = targetWin;
+      if (openTarget != '_top') {
+        this.setupPopup_();
+      }
+    } else {
+      this.disconnectWithError_(new Error('failed to open window'));
+    }
+
+    // Return result promise, even though it may never complete.
+    return this.resultPromise_.catch(() => {
+      // Ignore. Call to the `acceptResult()` should fail if needed.
+    });
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  buildFeatures_() {
+    // The max width and heights are calculated as following:
+    // MaxSize = AvailSize - ControlsSize
+    // ControlsSize = OuterSize - InnerSize
+    const screen = this.win_.screen;
+    const availWidth = screen.availWidth || screen.width;
+    const availHeight = screen.availHeight || screen.height;
+    const isTop = this.isTopWindow_();
+    const isEdge = isEdgeBrowser(this.win_);
+    // Limit controls to 100px width and height. Notice that it's only
+    // possible to calculate controls size in the top window, not in iframes.
+    // Notice that the Edge behavior is somewhat unique. If we can't find the
+    // right width/height, it will launch in the full-screen. Other browsers
+    // deal with such cases more gracefully.
+    const controlsWidth =
+        isTop && this.win_.outerWidth > this.win_.innerWidth ?
+        Math.min(100, this.win_.outerWidth - this.win_.innerWidth) :
+        (isEdge ? 100 : 0);
+    const controlsHeight =
+        isTop && this.win_.outerHeight > this.win_.innerHeight ?
+        Math.min(100, this.win_.outerHeight - this.win_.innerHeight) :
+        (isEdge ? 100 : 0);
+    // With all the adjustments, at least 50% of the available width/height
+    // should be made available to a popup.
+    const maxWidth = Math.max(availWidth - controlsWidth, availWidth * 0.5);
+    const maxHeight = Math.max(availHeight - controlsHeight, availHeight * 0.5);
+    let w = Math.floor(Math.min(600, maxWidth * 0.9));
+    let h = Math.floor(Math.min(600, maxHeight * 0.9));
+    if (this.options_) {
+      if (this.options_.width) {
+        w = Math.min(this.options_.width, maxWidth);
+      }
+      if (this.options_.height) {
+        h = Math.min(this.options_.height, maxHeight);
+      }
+    }
+    const x = Math.floor((screen.width - w) / 2);
+    const y = Math.floor((screen.height - h) / 2);
+    const features = {
+      'height': h,
+      'width': w,
+      'resizable': 'yes',
+      'scrollbars': 'yes',
+    };
+    // Do not set left/top in Edge: it fails.
+    if (!isEdge) {
+      features['left'] = x;
+      features['top'] = y;
+    }
+    let featuresStr = '';
+    for (const f in features) {
+      if (featuresStr) {
+        featuresStr += ',';
+      }
+      featuresStr += `${f}=${features[f]}`;
+    }
+    return featuresStr;
+  }
+
+  /**
+   * This method only exists to make iframe/top emulation possible in tests.
+   * Otherwise `window.top` cannot be overridden.
+   * @return {boolean}
+   * @private
+   */
+  isTopWindow_() {
+    return this.win_ == this.win_.top;
+  }
+
+  /** @private */
+  setupPopup_() {
+    // Keep alive to catch the window closing, which would indicate
+    // "cancel" signal.
+    this.heartbeatInterval_ = this.win_.setInterval(() => {
+      this.check_(/* delayCancel */ true);
+    }, 500);
+
+    // Start up messaging. The messaging is explicitly allowed to proceed
+    // without origin check b/c all arguments have already been passed in
+    // the URL and special handling is enforced when result is delivered.
+    this.messenger_ = new Messenger(
+        this.win_,
+        /** @type {!Window} */ (this.targetWin_),
+        /* targetOrigin */ null);
+    this.messenger_.connect(this.handleCommand_.bind(this));
+  }
+
+  /**
+   * @param {boolean=} opt_delayCancel
+   * @private
+   */
+  check_(opt_delayCancel) {
+    if (!this.targetWin_ || this.targetWin_.closed) {
+      if (this.heartbeatInterval_) {
+        this.win_.clearInterval(this.heartbeatInterval_);
+        this.heartbeatInterval_ = null;
+      }
+      // Give a chance for the result to arrive, but otherwise consider the
+      // responce to be empty.
+      this.win_.setTimeout(() => {
+        try {
+          this.result_(ActivityResultCode.CANCELED, /* data */ null);
+        } catch (e) {
+          this.disconnectWithError_(e);
+        }
+      }, opt_delayCancel ? 3000 : 0);
+    }
+  }
+
+  /**
+   * @param {!Error} reason
+   * @private
+   */
+  disconnectWithError_(reason) {
+    if (this.resultResolver_) {
+      this.resultResolver_(Promise.reject(reason));
+    }
+    this.disconnect();
+  }
+
+  /**
+   * @param {!ActivityResultCode} code
+   * @param {*} data
+   * @private
+   */
+  result_(code, data) {
+    if (this.resultResolver_) {
+      const isConnected = this.messenger_.isConnected();
+      const result = new ActivityResult(
+          code,
+          data,
+          ActivityMode.POPUP,
+          isConnected ?
+              this.messenger_.getTargetOrigin() :
+              getOriginFromUrl(this.url_),
+          /* originVerified */ isConnected,
+          /* secureChannel */ isConnected);
+      resolveResult(this.win_, result, this.resultResolver_);
+      this.resultResolver_ = null;
+    }
+    if (this.messenger_) {
+      this.messenger_.sendCommand('close');
+    }
+    this.disconnect();
+  }
+
+  /**
+   * @param {string} cmd
+   * @param {?Object} payload
+   * @private
+   */
+  handleCommand_(cmd, payload) {
+    if (cmd == 'connect') {
+      // First ever message. Indicates that the receiver is listening.
+      this.messenger_.sendStartCommand(this.args_);
+    } else if (cmd == 'result') {
+      // The last message. Indicates that the result has been received.
+      const code = /** @type {!ActivityResultCode} */ (payload['code']);
+      const data =
+          code == ActivityResultCode.FAILED ?
+          new Error(payload['data'] || '') :
+          payload['data'];
+      this.result_(code, data);
+    } else if (cmd == 'check') {
+      this.win_.setTimeout(() => this.check_(), 200);
+    }
+  }
+}
+
+
+/**
+ * @param {!Window} win
+ * @param {string} fragment
+ * @param {string} requestId
+ * @return {?ActivityPort}
+ */
+function discoverRedirectPort(win, fragment, requestId) {
+  // Try to find the result in the fragment.
+  const paramName = '__WA_RES__';
+  const fragmentParam = getQueryParam(fragment, paramName);
+  if (!fragmentParam) {
+    return null;
+  }
+  const response = /** @type {?Object} */ (JSON.parse(
+      decodeURIComponent(fragmentParam)));
+  if (!response || response['requestId'] != requestId) {
+    return null;
+  }
+
+  // Remove the found param from the fragment.
+  const cleanFragment = removeQueryParam(win.location.hash, paramName) || '';
+  if (cleanFragment != win.location.hash) {
+    if (win.history && win.history.replaceState) {
+      try {
+        win.history.replaceState(win.history.state, '', cleanFragment);
+      } catch (e) {
+        // Ignore.
+      }
+    }
+  }
+
+  const code = response['code'];
+  const data = response['data'];
+  const origin = response['origin'];
+  const referrerOrigin = win.document.referrer &&
+      getOriginFromUrl(win.document.referrer);
+  const originVerified = origin == referrerOrigin;
+  return new ActivityWindowRedirectPort(
+      win,
+      code,
+      data,
+      origin,
+      originVerified);
+}
+
+
+/**
+ * The `ActivityPort` implementation for the standalone window activity
+ * client executed as a popup.
+ *
+ * @implements {ActivityPort}
+ */
+class ActivityWindowRedirectPort {
+
+  /**
+   * @param {!Window} win
+   * @param {!ActivityResultCode} code
+   * @param {*} data
+   * @param {string} targetOrigin
+   * @param {boolean} targetOriginVerified
+   */
+  constructor(win, code, data, targetOrigin, targetOriginVerified) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {!ActivityResultCode} */
+    this.code_ = code;
+    /** @private @const {*} */
+    this.data_ = data;
+    /** @private {string} */
+    this.targetOrigin_ = targetOrigin;
+    /** @private {boolean} */
+    this.targetOriginVerified_ = targetOriginVerified;
+  }
+
+  /** @override */
+  getMode() {
+    return ActivityMode.REDIRECT;
+  }
+
+  /** @override */
+  acceptResult() {
+    const result = new ActivityResult(
+        this.code_,
+        this.data_,
+        ActivityMode.REDIRECT,
+        this.targetOrigin_,
+        this.targetOriginVerified_,
+        /* secureChannel */ false);
+    return new Promise(resolve => {
+      resolveResult(this.win_, result, resolve);
+    });
+  }
+}
+
+
+
+
+/**
+ * The page-level activities manager ports. This class is intended to be used
+ * as a singleton. It can start activities of all modes: iframe, popup, and
+ * redirect.
+ */
+class ActivityPorts {
+
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @const {string} */
+    this.version = '1.13';
+
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {string} */
+    this.fragment_ = win.location.hash;
+
+    /**
+     * @private @const {!Object<string, !Array<function(!ActivityPort)>>}
+     */
+    this.requestHandlers_ = {};
+
+    /**
+     * The result buffer is indexed by `requestId`.
+     * @private @const {!Object<string, !ActivityPort>}
+     */
+    this.resultBuffer_ = {};
+  }
+
+  /**
+   * Start an activity within the specified iframe.
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} opt_args
+   * @return {!Promise<!ActivityIframePort>}
+   */
+  openIframe(iframe, url, opt_args) {
+    const port = new ActivityIframePort(iframe, url, opt_args);
+    return port.connect().then(() => port);
+  }
+
+  /**
+   * Start an activity in a separate window. The result will be delivered
+   * to the `onResult` callback.
+   *
+   * The activity can be opened in two modes: "popup" and "redirect". This
+   * depends on the `target` value, but also on the browser/environment.
+   *
+   * The allowed `target` values are `_blank`, `_top` and name targets. The
+   * `_self`, `_parent` and similar targets are not allowed.
+   *
+   * The `_top` target indicates that the activity should be opened as a
+   * "redirect", while other targets indicate that the activity should be
+   * opened as a popup. The activity client will try to honor the requested
+   * target. However, it's not always possible. Some environments do not
+   * allow popups and they either force redirect or fail the window open
+   * request. In this case, the activity will try to fallback to the "redirect"
+   * mode.
+   *
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?ActivityOpenOptions=} opt_options
+   * @return {{targetWin: ?Window}}
+   */
+  open(requestId, url, target, opt_args, opt_options) {
+    const port = new ActivityWindowPort(
+        this.win_, requestId, url, target, opt_args, opt_options);
+    port.open().then(() => {
+      // Await result if possible. Notice that when falling back to "redirect",
+      // the result will never arrive through this port.
+      this.consumeResultAll_(requestId, port);
+    });
+    return {targetWin: port.getTargetWin()};
+  }
+
+  /**
+   * Registers the callback for the result of the activity opened with the
+   * specified `requestId` (see the `open()` method). The callback is a
+   * function that takes a single `ActivityPort` argument. The client
+   * can use this object to verify the port using it's origin, verified and
+   * secure channel flags. Then the client can call
+   * `ActivityPort.acceptResult()` method to accept the result.
+   *
+   * The activity result is handled via a separate callback because of a
+   * possible redirect. So use of direct callbacks and/or promises is not
+   * possible in that case.
+   *
+   * A typical implementation would look like:
+   * ```
+   * ports.onResult('request1', function(port) {
+   *   port.acceptResult().then(function(result) {
+   *     // Only verified origins are allowed.
+   *     if (result.origin == expectedOrigin &&
+   *         result.originVerified &&
+   *         result.secureChannel) {
+   *       handleResultForRequest1(result);
+   *     }
+   *   });
+   * })
+   *
+   * ports.open('request1', request1Url, '_blank');
+   * ```
+   *
+   * @param {string} requestId
+   * @param {function(!ActivityPort)} callback
+   */
+  onResult(requestId, callback) {
+    let handlers = this.requestHandlers_[requestId];
+    if (!handlers) {
+      handlers = [];
+      this.requestHandlers_[requestId] = handlers;
+    }
+    handlers.push(callback);
+
+    // Consume available result.
+    const availableResult = this.discoverResult_(requestId);
+    if (availableResult) {
+      this.consumeResult_(availableResult, callback);
+    }
+  }
+
+  /**
+   * @param {string} requestId
+   * @return {?ActivityPort}
+   * @private
+   */
+  discoverResult_(requestId) {
+    let port = this.resultBuffer_[requestId];
+    if (!port && this.fragment_) {
+      port = discoverRedirectPort(
+          this.win_, this.fragment_, requestId);
+      if (port) {
+        this.resultBuffer_[requestId] = port;
+      }
+    }
+    return port;
+  }
+
+  /**
+   * @param {!ActivityPort} port
+   * @param {function(!ActivityPort)} callback
+   * @private
+   */
+  consumeResult_(port, callback) {
+    Promise.resolve().then(() => {
+      callback(port);
+    });
+  }
+
+  /**
+   * @param {string} requestId
+   * @param {!ActivityPort} port
+   * @private
+   */
+  consumeResultAll_(requestId, port) {
+    // Find and execute handlers.
+    const handlers = this.requestHandlers_[requestId];
+    if (handlers) {
+      handlers.forEach(handler => {
+        this.consumeResult_(port, handler);
+      });
+    }
+    // Buffer the result for callbacks that may arrive in the future.
+    this.resultBuffer_[requestId] = port;
+  }
+}
+
+
+
+var activityPorts = {
+  ActivityPorts,
+  ActivityIframePort,
+  ActivityMode,
+  ActivityOpenOptions,
+  ActivityPort,
+  ActivityRequest,
+  ActivityResult,
+  ActivityResultCode,
+  ActivityWindowPort,
+};
+var activityPorts_1 = activityPorts.ActivityPorts;
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Throws an error if the first argument isn't trueish.
@@ -84,7 +1722,21 @@ function toString(val) {
   return /** @type {string} */ (val);
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -103,7 +1755,21 @@ function map(opt_initial) {
   return obj;
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Polyfill for String.prototype.startsWith.
@@ -118,7 +1784,21 @@ function startsWith(string, prefix) {
   return string.lastIndexOf(prefix, 0) == 0;
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /** @type {Object<string, string>} */
 let propertyNameCache;
@@ -391,7 +2071,21 @@ function resetAllStyles(element) {
   setImportantStyles(element, defaultStyles);
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /** @const {string} */
 const styleType = 'text/css';
@@ -471,7 +2165,21 @@ function injectStyleSheet(doc, styleText) {
   return styleElement;
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -498,7 +2206,21 @@ function msg(map, langOrElement) {
   return map['en'];
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /** @type {!Object<string, string>} */
 const TITLE_LANG_MAP = {
@@ -606,7 +2328,21 @@ class ButtonApi {
 
 const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /** @enum {number} */
@@ -850,7 +2586,21 @@ class Callbacks {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -900,7 +2650,21 @@ class View {
   shouldFadeBody() {}
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -914,7 +2678,21 @@ function isCancelError(error) {
   return (error['name'] === 'AbortError');
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /** @const {!Object<string, string>} */
 const iframeAttributes = {
@@ -1081,7 +2859,21 @@ class ActivityIframeView extends View {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -1304,7 +3096,21 @@ class Entitlement {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -1360,7 +3166,21 @@ class UserData {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -1457,7 +3277,21 @@ class PurchaseData {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -1521,7 +3355,21 @@ class DeferredAccountCreationResponse {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Character mapping from base64url to base64.
@@ -1602,9 +3450,37 @@ function base64UrlDecodeToBytes(str) {
   return stringToBytes(encoded);
 }
 
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Simple wrapper around JSON.parse that casts the return value
@@ -1637,7 +3513,21 @@ function tryParseJson(json, opt_onFailed) {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -1688,9 +3578,37 @@ class JwtHelper {
   }
 }
 
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /** @enum {string} */
@@ -1724,7 +3642,21 @@ function defaultConfig() {
   };
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -1751,7 +3683,7 @@ let cache;
  * @param {boolean=} opt_nocache
  * @return {!LocationDef}
  */
-function parseUrl(url, opt_nocache) {
+function parseUrl$1(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
     cache = self.UrlCache || (self.UrlCache = Object.create(null));
@@ -1847,7 +3779,21 @@ function addQueryParam(url, param, value) {
   return url + fragment;
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /** @private @const {!Array<string>} */
@@ -1909,7 +3855,7 @@ class Xhr {
     // TODO (avimehta): Figure out if CORS needs be handled the way AMP does it.
     const init = setupInit(opt_init);
     return this.fetch_(input, init).then(response => response, reason => {
-      const targetOrigin = parseUrl(input).origin;
+      const targetOrigin = parseUrl$1(input).origin;
       throw new Error('XHR Failed fetching' +
           ` (${targetOrigin}/...):`, reason && reason.message);
     }).then(response => assertSuccess(response));
@@ -2193,7 +4139,21 @@ class FetchResponseHeaders {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Have to put these in the map to avoid compiler optimization. Due to
@@ -2213,7 +4173,7 @@ const CACHE_KEYS = {
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl('https://news.google.com').origin;
+  return parseUrl$1('https://news.google.com').origin;
 }
 
 
@@ -2251,7 +4211,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.22',
+    '_client': 'SwG 0.1.22.23',
   });
 }
 
@@ -2273,7 +4233,21 @@ function cacheParam(cacheKey) {
   return String(period <= 1 ? now : Math.floor(now / period));
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const PAY_REQUEST_ID = 'swg-pay';
 
@@ -2579,7 +4553,21 @@ function parseUserData(swgData) {
   return new UserData(idToken, jwt);
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -2707,11 +4695,39 @@ class DeferredAccountFlow {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url('data:image/svg+xml;charset=utf-8;base64,DQo8c3ZnIHZlcnNpb249IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxMTY2NCIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDExNjY0IDM2Ij48ZGVmcz48cGF0aCBpZD0iYSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWRhc2hhcnJheT0iNTguOSIgZD0iTTE4IDUuNUExMi41IDEyLjUgMCAxIDEgNS41IDE4IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48ZyBpZD0iYiI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3Ni42NiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuMzIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzUuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTc1LjE0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3NC4xMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzIuNzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTcxLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE2OC43OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNjYuMDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyNCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTYyLjczIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE1OS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNTUuMDQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQzMikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTUxLjA1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE0Ny4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNDMuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTQwLjU0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzNy43MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjEyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMzUuMjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTMyLjk4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2ODQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzMS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjkuMjYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDc1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTI3LjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyNi4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODI4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjUuMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjQuMDEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkwMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIzLjA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMi4xOSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjEuNDMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMDgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMC43NyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTA0NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIwLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTkuNjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExMTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOS4yNiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4Ljg5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMTg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTguNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOC4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4LjEzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzMzIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNy44OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjgyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjcyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDc2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuNDYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE2LjI5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTg0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTUuMjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExMy45NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTY1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTEyLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjkyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDkuOTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEwNy4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc2NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTAzLjk2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDAuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijk2LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI5Mi4zNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iODguNTYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijg1LjA3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI4MS45MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzkuMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijc2LjYxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3NC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTI0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3Mi40NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzAuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxOTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Ny43OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY1LjQ5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzQwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjMuNjgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Mi4yNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjQ4NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjU1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5Ljg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjc3MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuMzQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI4NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48ZyBpZD0iYyI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjcwLjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTk2KSIgb3BhY2l0eT0iLjA1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIgb3BhY2l0eT0iLjEiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjcuNzkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyNjgpIiBvcGFjaXR5PSIuMTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIiBvcGFjaXR5PSIuMiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NS40OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM0MCkiIG9wYWNpdHk9Ii4yNSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiIG9wYWNpdHk9Ii4zIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYzLjY4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDEyKSIgb3BhY2l0eT0iLjM1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIgb3BhY2l0eT0iLjQiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjIuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0ODQpIiBvcGFjaXR5PSIuNDUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiIG9wYWNpdHk9Ii41Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYxLjIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1NTYpIiBvcGFjaXR5PSIuNTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIiBvcGFjaXR5PSIuNiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2MC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjI4KSIgb3BhY2l0eT0iLjY1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIiBvcGFjaXR5PSIuNyIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS44NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjcwMCkiIG9wYWNpdHk9Ii43NSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiIG9wYWNpdHk9Ii44Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI3NzIpIiBvcGFjaXR5PSIuODUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiIG9wYWNpdHk9Ii45Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjM0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODQ0KSIgb3BhY2l0eT0iLjk1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48L2RlZnM+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjNDI4NWY0Ii8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjZGI0NDM3Ii8+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjZGI0NDM3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTE2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2MiIHN0cm9rZT0iI2Y0YjQwMCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjkxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNiIiBzdHJva2U9IiNmNGI0MDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MzIpIi8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjMGY5ZDU4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2IiIHN0cm9rZT0iIzBmOWQ1OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODc0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNjIiBzdHJva2U9IiM0Mjg1ZjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg3NDgpIi8+PC9zdmc+');background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Returns a promise which is resolved after the given duration of animation
@@ -2739,7 +4755,21 @@ function transition(el, props, durationMillis, curve) {
   });
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 class Graypane {
@@ -2829,7 +4859,21 @@ class Graypane {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -2901,7 +4945,21 @@ class LoadingView {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /** @const {!Object<string|number>} */
 const friendlyIframeAttributes = {
@@ -2988,7 +5046,21 @@ class FriendlyIframe {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const Z_INDEX = 2147483647;
 
@@ -3424,7 +5496,21 @@ class Dialog {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const POPUP_Z_INDEX = 2147483647;
 
@@ -3547,7 +5633,21 @@ class DialogManager {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -3613,7 +5713,21 @@ function whenDocumentReady(doc) {
   });
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /** @implements {Doc} */
@@ -3689,7 +5803,21 @@ function resolveDoc(input) {
   return /** @type {!Doc} */ (input);
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /** @const {!Object<string, string|number>} */
 const toastImportantStyles = {
@@ -3831,7 +5959,21 @@ class Toast {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const SERVICE_ID = 'subscribe.google.com';
 const TOAST_STORAGE_KEY = 'toast';
@@ -4142,7 +6284,21 @@ class EntitlementsManager {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -4182,7 +6338,21 @@ class XhrFetcher {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -4207,7 +6377,21 @@ function acceptPortResultData(
   });
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const LINK_REQUEST_ID = 'swg-link';
 
@@ -4481,7 +6665,21 @@ class LinkSaveFlow {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 class LoginPromptApi {
@@ -4546,7 +6744,21 @@ class LoginPromptApi {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 class LoginNotificationApi {
@@ -4606,7 +6818,21 @@ class LoginNotificationApi {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 class WaitForSubscriptionLookupApi {
@@ -4665,7 +6891,21 @@ class WaitForSubscriptionLookupApi {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 class OffersApi {
@@ -4712,7 +6952,21 @@ class OffersApi {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Offers view is closable when request was originated from 'AbbrvOfferFlow'
@@ -4968,11 +7222,53 @@ class AbbrvOfferFlow {
   }
 }
 
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-
-
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 class Preconnect {
@@ -5033,7 +7329,21 @@ class Preconnect {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const PREFIX = 'subscribe.google.com';
 
@@ -5120,7 +7430,21 @@ function storageKey(key) {
   return PREFIX + ':' + key;
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 /**
@@ -5163,7 +7487,7 @@ class ConfiguredRuntime {
     this.dialogManager_ = new DialogManager(this.doc_);
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = new ActivityPorts(this.win_);
+    this.activityPorts_ = new activityPorts_1(this.win_);
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
@@ -5407,7 +7731,21 @@ class ConfiguredRuntime {
   }
 }
 
-
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 export {
