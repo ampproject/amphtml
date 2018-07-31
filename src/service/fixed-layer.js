@@ -871,9 +871,6 @@ class TransferLayerShadow {
    * @param {!Document} doc
    */
   constructor(doc) {
-    /** @private @const {!Document} */
-    this.doc_ = doc;
-
     /** @private @const {!Element} */
     this.layer_ = doc.createElement('div');
     this.layer_.id = 'i-amphtml-fixed-layer';
