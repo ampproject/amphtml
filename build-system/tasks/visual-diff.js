@@ -268,14 +268,15 @@ function verifyBuildStatus(status, buildId) {
 }
 
 /**
- * Launches a Puppeteer controlled browser.
+ * Launches multiple Puppeteer controlled browsers and returns a page in each.
  *
- * Waits until the browser is up and reachable, and ties its lifecycle to this
- * process's lifecycle.
+ * Waits until the browsers are up and reachable, and ties their lifecycle to
+ * this process's lifecycle.
  *
- * @return {!puppeteer.Browser} a Puppeteer controlled browser.
+ * @param {int} numPages how many pages to open.
+ * @return {!Array<!puppeteer.Page>} a Puppeteer controlled page.
  */
-async function launchBrowser() {
+async function launchBrowsers(numPages) {
   const browserOptions = {
     args: ['--no-sandbox', '--disable-extensions'],
     dumpio: argv.chrome_debug,
@@ -285,22 +286,12 @@ async function launchBrowser() {
     browserOptions['args'].push('--disable-gpu');
   }
 
-  const browser = await puppeteer.launch(browserOptions);
-  process.on('exit', browser.close);
-  return browser;
-}
-
-/**
- * Open new tabs and return an array of Puppeteer controlled pages for them.
- *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {int} numPages how many pages to open.
- * @return {!Array<!puppeteer.Page>} an array of Puppeteer controlled pages.
- */
-async function getBrowserPages(browser, numPages) {
   const pages = [];
-  for (let pageId = 0; pageId < numPages; pageId++) {
-    const page = await browser.newPage();
+  for (let i = 0; i < numPages; i++) {
+    const browser = await puppeteer.launch(browserOptions);
+    process.on('exit', browser.close);
+
+    const page = (await browser.pages())[0];
     await page.setViewport({
       width: VIEWPORT_WIDTH,
       height: VIEWPORT_HEIGHT,
@@ -315,11 +306,10 @@ async function getBrowserPages(browser, numPages) {
 /**
  * Runs the visual tests.
  *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {!JsonObject} visualTestsConfig JSON object containing the config for
  *     the visual tests.
  */
-async function runVisualTests(browser, visualTestsConfig) {
+async function runVisualTests(visualTestsConfig) {
   // Create a Percy client and start a build.
   const percy = createPercyPuppeteerController(
       visualTestsConfig.assets_dir, visualTestsConfig.assets_base_url);
@@ -329,7 +319,7 @@ async function runVisualTests(browser, visualTestsConfig) {
   log('info', 'Started Percy build', colors.cyan(buildId));
 
   // Take the snapshots.
-  await generateSnapshots(percy, browser, visualTestsConfig.webpages);
+  await generateSnapshots(percy, visualTestsConfig.webpages);
 
   // Tell Percy we're finished taking snapshots and check if the build failed
   // early.
@@ -376,11 +366,10 @@ function createPercyPuppeteerController(assetsDir, assetsBaseUrl) {
  * set of given webpages.
  *
  * @param {!Percy} percy a Percy-Puppeteer controller.
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function generateSnapshots(percy, browser, webpages) {
+async function generateSnapshots(percy, webpages) {
   const numUnfilteredTests = webpages.length;
   webpages = webpages.filter(webpage => !webpage.flaky);
   if (numUnfilteredTests != webpages.length) {
@@ -400,7 +389,7 @@ async function generateSnapshots(percy, browser, webpages) {
     log('info', 'Executing', colors.cyan(webpages.length), 'visual diff tests');
   }
 
-  const pages = await getBrowserPages(browser, NUM_PARALLEL_PAGES);
+  const pages = await launchBrowsers(NUM_PARALLEL_PAGES);
   if (argv.master) {
     await pages[0].goto(
         `${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
@@ -725,15 +714,14 @@ async function visualDiff() {
   }
   setDebuggingLevel();
 
-  // Launch a browser and local web server.
-  const browser = await launchBrowser();
+  // Launch a local web server.
   const webServerProcess = await launchWebServer().catch(reason => {
     log('fatal', `Failed to start a web server: ${reason}`);
   });
 
   if (argv.skip) {
-    const pages = await getBrowserPages(browser, 1);
-    await createEmptyBuild(pages[0]);
+    const page = (await launchBrowsers(1))[0];
+    await createEmptyBuild(page);
     await shutdown(webServerProcess);
     return;
   }
@@ -743,7 +731,7 @@ async function visualDiff() {
       fs.readFileSync(
           path.resolve(__dirname, '../../test/visual-diff/visual-tests'),
           'utf8'));
-  await runVisualTests(browser, visualTestsConfig);
+  await runVisualTests(visualTestsConfig);
 
   await shutdown(webServerProcess);
 }
