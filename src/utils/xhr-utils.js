@@ -426,7 +426,7 @@ export function fetchPolyfill(input, init) {
       }
     };
     xhr.onerror = () => {
-      reject(user().createExpectedError('Network failure'));
+      reject(user().createExpectedError('Request failure'));
     };
     xhr.onabort = () => {
       reject(user().createExpectedError('Request aborted'));
@@ -562,9 +562,8 @@ export class FetchResponse {
   /**
    * Reads the xhr responseXML.
    * @return {!Promise<!Document>}
-   * @private
    */
-  document_() {
+  document() {
     dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     user().assert(this.xhr_.responseXML,

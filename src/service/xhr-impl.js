@@ -200,7 +200,8 @@ export class Xhr {
     const init = setupInit(this.win, input, opt_init, 'text/html');
     init.responseType = 'document';
     return this.fetchWithoutInitSetup_(input, init)
-        .then(response => response.document_());
+        .then(response =>
+          /** @type {!../utils/xhr-utils.FetchResponse} */(response).document());
   }
 
   /**
