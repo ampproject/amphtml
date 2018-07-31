@@ -121,6 +121,7 @@
 [dir=rtl] .i-amphtml-story-progress-value {
   transform-origin: right !important;
 }
+
 [info] .i-amphtml-message-container {
   /* 48px for info button, add width to padding for 
   * additional story buttons */
