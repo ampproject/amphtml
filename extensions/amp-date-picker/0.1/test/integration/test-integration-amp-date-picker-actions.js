@@ -18,7 +18,7 @@ import * as lolex from 'lolex';
 import {poll} from '../../../../../testing/iframe';
 
 const config = describe.configure().ifNewChrome().skipSinglePass();
-config.run('amp-date-picker', function() {
+config.skip('amp-date-picker', function() {
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];
