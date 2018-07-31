@@ -31,7 +31,6 @@ let CustomElementConstructorDef;
  * @typedef {{
  *  name: string,
  *  ctor: !CustomElementConstructorDef,
- *  observedAttributes: !Array<string>,
  *  connectedCallback: (function()|null),
  *  disconnectedCallback: (function()|null),
  * }}
@@ -116,6 +115,8 @@ class CustomElementRegistry {
   }
 
   /**
+   * Register the custom element.
+   *
    * @param {string} name
    * @param {!CustomElementConstructorDef} ctor
    * @param {!Object=} options
@@ -135,11 +136,11 @@ class CustomElementRegistry {
     }
 
     const proto = ctor.prototype;
+
+    // TODO(jridgewell): Support adoptedCallback and attributeChangedCallback
     const lifecycleCallbacks = {
       'connectedCallback': null,
       'disconnectedCallback': null,
-      // 'adoptedCallback': null,
-      // 'attributeChangedCallback': null,
     };
 
     for (const callbackName in lifecycleCallbacks) {
@@ -149,14 +150,11 @@ class CustomElementRegistry {
       }
     }
 
-    const observedAttributes = (lifecycleCallbacks['attributeChangedCallback']
-      && ctor['observedAttributes']) || [];
+    // TODO(jridgewell): If attributeChangedCallback, gather observedAttributes
+    this.registry_.add(name, ctor, lifecycleCallbacks);
 
-    this.registry_.add(name, ctor, lifecycleCallbacks,
-        observedAttributes);
-
-    this.registry_.upgrade(null, name);
-
+    // If anyone is waiting for this custom element to be defined, resolve
+    // their promise.
     const whens = this.whens_;
     const when = whens[name];
     if (when) {
@@ -166,6 +164,8 @@ class CustomElementRegistry {
   }
 
   /**
+   * Get the constructor of the (already defined) custom element.
+   *
    * @param {string} name
    * @return {!CustomElementConstructorDef|undefined}
    */
@@ -177,6 +177,9 @@ class CustomElementRegistry {
   }
 
   /**
+   * Returns a promise that waits until the custom element is defined.
+   * If the custom element is already defined, returns a resolved promise.
+   *
    * @param {string} name
    * @return {!Promise<undefined>}
    */
@@ -205,6 +208,8 @@ class CustomElementRegistry {
   }
 
   /**
+   * Upgrade all custom elements inside root.
+   *
    * @param {!Node} root
    */
   upgrade(root) {
@@ -212,6 +217,11 @@ class CustomElementRegistry {
   }
 }
 
+/**
+ * This internal APIs necessary to run the CustomElementRegistry.
+ * Since Registry is never exposed externally, all methods are actually
+ * available on the instance.
+ */
 class Registry {
   /**
    * @param {!Window} win
@@ -221,6 +231,11 @@ class Registry {
      * @private @const
      */
     this.win_ = win;
+
+    /**
+     * @private @const
+     */
+    this.doc_ = win.document;
 
     /**
      * @type {!Object<string, !CustomElementDef>}
@@ -241,18 +256,32 @@ class Registry {
      */
     this.current_ = null;
 
+    // Mutation Observers are conveniently available in every browser we care
+    // about. When a node is connected to the root document, all custom
+    // elements (including that node iteself) will be upgraded and call
+    // connectedCallback. When a node is disconnectedCallback from the root
+    // document, all custom elements will call disconnectedCallback.
     const observer = new win.MutationObserver(records => {
       if (records) {
         this.handleRecords_(records);
       }
     });
-    observer.observe(win.document, {
+    observer.observe(this.doc_, {
       childList: true,
       subtree: true,
     });
   }
 
   /**
+   * The currently-being-upgraded custom element.
+   *
+   * When an already created (through the DOM parsing APIs, or innerHTML)
+   * custom element node is being upgraded, we can't just create a new node
+   * (it's illegal in the spec). But we still need to run the custom element's
+   * constructor code on the node. We avoid this conundrum by running the
+   * constructor while returning this current node in the HTMLElement
+   * class constructor (the base class of all custom elements).
+   *
    * @return {Element}
    */
   current() {
@@ -262,6 +291,8 @@ class Registry {
   }
 
   /**
+   * Finds the custom element definition by name.
+   *
    * @param {string} name
    * @return {CustomElementDef|undefined}
    */
@@ -273,6 +304,8 @@ class Registry {
   }
 
   /**
+   * Finds the custom element definition by constructor instance.
+   *
    * @param {CustomElementConstructorDef} ctor
    * @return {CustomElementDef|undefined}
    */
@@ -288,35 +321,46 @@ class Registry {
   }
 
   /**
+   * Registers the custom element definition, and upgrades all elements by that
+   * name in the root document.
+   *
    * @param {string} name
    * @param {!CustomElementConstructorDef} ctor
    * @param {!Object} lifecycleCallbacks
-   * @param {!Array<string>} observedAttributes
    */
-  add(name, ctor, lifecycleCallbacks, observedAttributes) {
+  add(name, ctor, lifecycleCallbacks) {
+    // TODO(jridgewell): Record adoptedCallback, attributeChangedCallback, and
+    // observedAttributes.
+    this.definitions_[name] = {
+      name,
+      ctor,
+      connectedCallback: lifecycleCallbacks['connectedCallback'],
+      disconnectedCallback: lifecycleCallbacks['disconnectedCallback'],
+    };
+
     if (this.query_) {
       this.query_ += ',';
     }
     this.query_ += name;
 
-    this.definitions_[name] = {
-      name,
-      ctor,
-      observedAttributes,
-      connectedCallback: lifecycleCallbacks['connectedCallback'],
-      disconnectedCallback: lifecycleCallbacks['disconnectedCallback'],
-      // lifecycleCallbacks['adoptedCallback'],
-      // lifecycleCallbacks['attributeChangedCallback'],
-    };
+    this.upgrade(this.doc_, name);
   }
 
   /**
-   * @param {Node} root
+   * TODO
+   * @param {!Node} root
    * @param {string=} opt_query
    */
   upgrade(root, opt_query) {
+    // root was undefined, opt_query defined, comes from define
+    // root defined, opt_query undefined, User call (don't connect)
+    // root defined, opt_query undefined, importNode (don't connect)
+    // root defined, opt_query undefined, cloneNode (don't connect)
+    // root defined, opt_query undefined, innerHTML (don't connect)
     const query = opt_query || this.query_;
     const upgradeCandidates = this.queryAll_(root, query);
+    // TODO
+    const newlyDefined = !!opt_query;
 
     for (let i = 0; i < upgradeCandidates.length; i++) {
       const candidate = upgradeCandidates[i];
@@ -329,6 +373,9 @@ class Registry {
   }
 
   /**
+   * Upgrades the custom element node, if a custom element has been registered
+   * by this name.
+   *
    * @param {!Node} node
    */
   upgradeSelf(node) {
@@ -341,14 +388,12 @@ class Registry {
   }
 
   /**
-   * @param {Node} root
+   * @param {!Node} root
    * @param {string} query
    * @return {!Array|!NodeList}
    */
   queryAll_(root, query) {
-    if (!root) {
-      root = this.win_.document;
-    } else if (!query || !root.querySelectorAll) {
+    if (!query || !root.querySelectorAll) {
       // Nothing to do...
       return [];
     }
@@ -357,6 +402,8 @@ class Registry {
   }
 
   /**
+   * Upgrades the (already created via DOM parsing) custom element.
+   *
    * @param {!Element} node
    * @param {!CustomElementDef} def
    */
@@ -366,13 +413,14 @@ class Registry {
       return;
     }
 
-    this.current_ = node;
     // Despite how it looks, this is not a useless construction.
     // HTMLElementPolyfill (the base class of all custom elements) will return
     // the current node, allowing the custom element's subclass constructor to
     // run on the node. The node itself is already constructed, so the return
     // value is just the node.
+    this.current_ = node;
     const el = new ctor();
+
     if (el !== node) {
       throw new this.win_.Error(
           'Constructor illegally returned a different instance.');
@@ -380,6 +428,10 @@ class Registry {
   }
 
   /**
+   * Fires connectedCallback on the custom element, if it has one.
+   * This also upgrades the custom element, since it may not have been
+   * accessible via the root document before (a detached DOM tree).
+   *
    * @param {!Node} node
    */
   connectedCallback_(node) {
@@ -392,7 +444,10 @@ class Registry {
       node.connectedCallback();
     }
   }
+
   /**
+   * Fires disconnectedCallback on the custom element, if it has one.
+   *
    * @param {!Node} node
    */
   disconnectedCallback_(node) {
@@ -402,6 +457,11 @@ class Registry {
   }
 
   /**
+   * Handle all the Mutation Observer's Mutation Records.
+   * All added custom elements will be upgraded (if not already) and call
+   * connectedCallback. All removed custom elements will call
+   * disconnectedCallback.
+   *
    * @param {!Array<!MutationRecord>} records
    */
   handleRecords_(records) {
@@ -520,6 +580,7 @@ function polyfill(win) {
 /**
  * Wraps HTMLElement in a Reflect.construct constructor, so that transpiled
  * classes can `_this = superClass.call(this)` during their construction.
+ *
  * @param {!Window} win
  */
 function wrapHTMLElement(win) {
@@ -540,6 +601,7 @@ function wrapHTMLElement(win) {
 
 /**
  * Setups up prototype inheritance
+ *
  * @param {!Object} Object
  * @param {!Function} superClass
  * @param {!Function} subClass
@@ -558,7 +620,17 @@ function subClass(Object, superClass, subClass) {
 }
 
 /**
- * Polyfills Custom Elements v1 API
+ * Polyfills Custom Elements v1 API. This has 4 modes:
+ *
+ * 1. Custom elements v1 already supported, using native classes
+ * 2. Custom elements v1 already supported, using transpiled classes
+ * 3. Custom elements v1 not supported, using native classes
+ * 4. Custom elements v1 not supported, using transpiled classes
+ *
+ * In mode 1, nothing is done. In mode 2, a minimal polyfill is used to support
+ * extending the HTMLElement base class. In mode 3 and 4, a full polyfill is
+ * done.
+ *
  * @param {!Window} win
  * @param {!Function} ctor
  */
@@ -567,15 +639,16 @@ export function install(win, ctor) {
     return;
   }
 
-  const {Object, Reflect} = win;
   let install = true;
   let installWrapper = false;
 
   if (hasCustomElements(win)) {
     // If ctor is constructable without new, it's a function. That means it was
-    // compiled down, and we need to force the polyfill because all you cannot
-    // extend HTMLElement without native classes.
+    // compiled down, and we need to do the minimal polyfill because all you
+    // cannot extend HTMLElement without native classes.
     try {
+      const {Object, Reflect} = win;
+
       // "Construct" ctor using ES5 idioms
       const instance = Object.create(ctor.prototype);
       ctor.call(instance);
