@@ -1,11 +1,14 @@
-import {
-  LINK_STATUS__AFFILIATE, LINK_STATUS__IGNORE_LINK, LINK_STATUS__NON_AFFILIATE,
-  LINK_STATUS__UNKNOWN,
-} from './affiliate-links-manager';
+
 import {parseUrlDeprecated} from '../../../src/url';
 
 import {AnchorRewriteData, AnchorRewriteDataResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
 
+
+export const LINK_STATUS__AFFILIATE = 'affiliate';
+export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
+export const LINK_STATUS__IGNORE_LINK = 'ignore';
+export const LINK_STATUS__UNKNOWN = 'unknown';
+export const DOMAIN_RESOLVER_URL = 'https://r.skimresources.com/api';
 
 export default class AffiliateLinkResolver {
   /**
@@ -18,7 +21,7 @@ export default class AffiliateLinkResolver {
     this.xhr_ = xhr;
     this.pubcode_ = skimOptions.pubcode;
     this.domains_ = {};
-    this.excludedDomains_ = skimOptions.excludedDomains;
+    this.excludedDomains_ = skimOptions.excludedDomains || [];
     this.beaconApiCallback_ = beaconApiCallback;
   }
 
@@ -148,7 +151,7 @@ export default class AffiliateLinkResolver {
       // oustide of the resolveUnknownDomains process.
       this.beaconApiCallback_(data);
 
-      this.updateDomainsStatusMapPostFetch_(domainsToAsk, data.merchant_domains);
+      this.updateDomainsStatusMapPostFetch_(domainsToAsk, data.merchant_domains || []);
 
       return this.resolveAnchorsRewriteData(anchorList);
     });
@@ -165,8 +168,8 @@ export default class AffiliateLinkResolver {
       domains,
     };
 
-    const beaconUrl = `https://r.skimresources.com/api?data=${JSON.stringify(data)}`;
-    const postReq = {
+    const beaconUrl = `${DOMAIN_RESOLVER_URL}?data=${JSON.stringify(data)}`;
+    const fetchOptions = {
       method: 'GET',
       // Disabled AMP CORS for dev
       requireAmpResponseSourceOrigin: false,
@@ -175,7 +178,7 @@ export default class AffiliateLinkResolver {
       credentials: 'include',
     };
 
-    return this.xhr_.fetchJson(beaconUrl, postReq).then(res => {
+    return this.xhr_.fetchJson(beaconUrl, fetchOptions).then(res => {
       return res.json();
     });
   }
@@ -197,7 +200,12 @@ export default class AffiliateLinkResolver {
    * @param {*} anchor
    */
   getLinkDomain(anchor) {
-    return parseUrlDeprecated(anchor.href).hostname;
+    let {hostname} = parseUrlDeprecated(anchor.href);
+    if (hostname.indexOf('www.') === 0) {
+      hostname = hostname.replace('www.', '');
+    }
+
+    return hostname;
   }
 
   /**
