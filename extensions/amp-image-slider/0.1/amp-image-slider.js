@@ -726,15 +726,10 @@ export class AmpImageSlider extends AMP.BaseElement {
     // as carousel will call .scheduleLayout on the slider but not images
     // while Resources would found amp-imgs' parent has owner and
     // refuse to run the normal scheduling in discoverWork_.
-    if (!isExperimentOn(this.win, 'layers') ||
-        this.element.getOwner() !== null) {
-      // this.element might not have owner in buildCallback
-      this.setAsOwner(dev().assertElement(this.leftAmpImage_));
-      this.setAsOwner(dev().assertElement(this.rightAmpImage_));
-      // Manually handle layout
-      this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
-      this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
-    }
+    // SIMPLER SOL: simply always call scheduleLayout no matter what
+
+    this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
+    this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
 
     this.registerEvents_();
 
