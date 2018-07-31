@@ -31,7 +31,7 @@ import {Deferred} from '../../../../src/utils/promise';
 import {
   EXPERIMENT_ATTRIBUTE,
 } from '../../../../ads/google/a4a/utils';
-import {FetchResponseHeaders, Xhr} from '../../../../src/service/xhr-impl';
+import {FetchResponseHeaders} from '../../../../src/utils/xhr-utils';
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
@@ -53,6 +53,7 @@ import {
   isAdTest,
   sraBlockCallbackHandler,
 } from '../sra-utils';
+import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
