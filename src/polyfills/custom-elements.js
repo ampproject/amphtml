@@ -82,7 +82,7 @@ function hasCustomElements(win) {
 }
 
 /**
- * Was HTMLElement already patched this window?
+ * Was HTMLElement already patched for this window?
  * @param {!Window} win
  * @return {boolean}
  */
