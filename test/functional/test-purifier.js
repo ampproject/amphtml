@@ -66,15 +66,15 @@ describe('DOMPurify-based', () => {
   describe('for <amp-bind>', () => {
     it('should rewrite [text] and [class] attributes', () => {
       expect(purifyHtml('<p [text]="foo"></p>')).to.be
-          .equal('<p data-amp-bind-text="foo"></p>');
+          .equal('<p data-amp-bind-text="foo" i-amphtml-binding=""></p>');
       expect(purifyHtml('<p [class]="bar"></p>')).to.be
-          .equal('<p data-amp-bind-class="bar"></p>');
+          .equal('<p data-amp-bind-class="bar" i-amphtml-binding=""></p>');
     });
 
     it('should NOT rewrite values of binding attributes', () => {
       // Should not change "foo.bar".
-      expect(purifyHtml('<a [href]="foo.bar">link</a>'))
-          .to.equal('<a data-amp-bind-href="foo.bar">link</a>');
+      expect(purifyHtml('<a [href]="foo.bar">link</a>')).to.equal(
+          '<a data-amp-bind-href="foo.bar" i-amphtml-binding="">link</a>');
     });
   });
 
@@ -374,6 +374,21 @@ function runSanitizerTests() {
             '<p action-xhr="https://foo.com"></p>';
       expect(purifyHtml(html))
           .to.equal('<form action-xhr="https://foo.com"></form><p></p>');
+    });
+
+    it('should allow <amp-form>-related attributes', () => {
+      expect(purifyHtml('<div submitting></div>'))
+          .to.equal('<div submitting=""></div>');
+      expect(purifyHtml('<div submit-success></div>'))
+          .to.equal('<div submit-success=""></div>');
+      expect(purifyHtml('<div submit-error></div>'))
+          .to.equal('<div submit-error=""></div>');
+      expect(purifyHtml('<div verify-error></div>'))
+          .to.equal('<div verify-error=""></div>');
+      expect(purifyHtml('<span visible-when-invalid="valueMissing"></span>'))
+          .to.equal('<span visible-when-invalid="valueMissing"></span>');
+      expect(purifyHtml('<span validation-for="form1"></span>'))
+          .to.equal('<span validation-for="form1"></span>');
     });
   });
 

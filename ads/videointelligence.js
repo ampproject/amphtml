@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-import '../amp-compare-slider';
+import {loadScript, validateData} from '../3p/3p';
 
-describes.realWin('amp-compare-slider', {
-  amp: {
-    extensions: ['amp-compare-slider'],
-  },
-}, env => {
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function videointelligence(global, data) {
 
-  let win;
-  let element;
+  validateData(data, ['publisherId', 'channelId']);
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-compare-slider');
-    win.document.body.appendChild(element);
-  });
-
-});
+  loadScript(global, 'https://s.vi-serve.com/tagLoaderAmp.js');
+}
