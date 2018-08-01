@@ -85,12 +85,23 @@
     .my-right-hint {
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='32px' width='16px'><text x='0' y='15' fill='red' font-size='1'>-&gt;</text></svg>");
     }
+
+    .lightbox {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      color: white;
+      text-align: center;
+      background-color: rgba(0,0,0,0.75);
+    }
   </style>
   <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
   <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
   <!-- <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script> -->
   <!-- to make this work during testing, cp dist/ww.max.js to dist/ww.js -->
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <!-- test lightbox cover issue -->
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <!-- viewer integration -->
   <script async src="https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -309,12 +320,30 @@
     </amp-image-slider>
 
     <p>Has ARIA labels</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill" aria-valuetext="Mountain"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill" aria-valuetext="Ocean"></amp-img>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" aria-label="check out the following images">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill" alt="Mountain"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill" alt="Ocean"></amp-img>
       <div before class="label">BEFORE</div>
       <div after class="label">AFTER</div>
     </amp-image-slider>
+
+    <h1>Test lightbox overlay</h1>
+    <p>No slider should lay on top of this lightbox</p>
+    <amp-lightbox id="my-lightbox"
+      layout="nodisplay">
+      <div class="lightbox"
+        on="tap:my-lightbox.close"
+        role="button"
+        tabindex="0">
+        <h1>Hello World!</h1>
+      </div>
+    </amp-lightbox>
+    <button class="ampstart-btn caps m2"
+      on="tap:my-lightbox"
+      role="button"
+      tabindex="0">
+      Open lightbox
+    </button>
   </main>
 </body>
 </html>

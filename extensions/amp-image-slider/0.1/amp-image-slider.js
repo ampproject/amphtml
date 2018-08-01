@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
@@ -170,25 +171,14 @@ export class AmpImageSlider extends AMP.BaseElement {
     }, ActionTrust.LOW);
 
     const initialPercentString = this.element.getAttribute('initial-percent');
+    const hasAriaLabel = this.element.hasAttribute('aria-label');
     // TODO(kqian): move this before building child components on issue
     // This is the only step when content tree is attached to document
     return this.mutateElement(() => {
       this.element.appendChild(this.container_);
       // Ensure ampdoc exists on the amp-imgs
-      if (this.leftLabelWrapper_) {
-        this.leftMask_.insertBefore(this.leftAmpImage_,
-            this.leftLabelWrapper_);
-      } else {
-        this.leftMask_.appendChild(this.leftAmpImage_);
-      }
-
-      if (this.rightLabelWrapper_) {
-        this.rightMask_.insertBefore(this.rightAmpImage_,
-            this.rightLabelWrapper_);
-      } else {
-        this.rightMask_.appendChild(this.rightAmpImage_);
-      }
-
+      this.leftMask_.appendChild(this.leftAmpImage_);
+      this.rightMask_.appendChild(this.rightAmpImage_);
       // Set initial positioning
       if (initialPercentString) {
         const initialPercent = Number(initialPercentString);
@@ -196,6 +186,10 @@ export class AmpImageSlider extends AMP.BaseElement {
           user().error('initial percent must be a number.');
         }
         this.updatePositions_(initialPercent);
+      }
+      // Set aria label if not provided
+      if (!hasAriaLabel) {
+        this.element.setAttribute('aria-label', 'comparing images');
       }
     });
   }
@@ -346,26 +340,26 @@ export class AmpImageSlider extends AMP.BaseElement {
     const leftAmpImage = dev().assertElement(this.leftAmpImage_);
     const rightAmpImage = dev().assertElement(this.rightAmpImage_);
 
-    if (!leftAmpImage.hasAttribute('aria-label')) {
-      let leftAltText = 'left image';
-      if (leftAmpImage.hasAttribute('alt')) {
-        leftAltText = leftAmpImage.getAttribute('alt');
-      } else {
-        user().warn('"alt" is not specified for left image. ' +
-          'Add "alt" attribute for better accessibility');
-      }
-      leftAmpImage.setAttribute('aria-label', leftAltText);
+    if (!leftAmpImage.hasAttribute('alt')) {
+      // On LOAD_START, img tags are not yet constructed
+      leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+        if (leftAmpImage.childElementCount > 0) {
+          this.mutateElement(() => {
+            leftAmpImage.firstChild.setAttribute('alt', 'left image');
+          });
+        }
+      });
     }
 
-    if (!rightAmpImage.hasAttribute('aria-label')) {
-      let rightAltText = 'right image';
-      if (rightAmpImage.hasAttribute('alt')) {
-        rightAltText = rightAmpImage.getAttribute('alt');
-      } else {
-        user().warn('"alt" is not specified for right image. ' +
-          'Add "alt" attribute for better accessibility');
-      }
-      rightAmpImage.setAttribute('aria-label', rightAltText);
+    if (!rightAmpImage.hasAttribute('alt')) {
+      // On LOAD_START, img tags are not yet constructed
+      rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+        if (rightAmpImage.childElementCount > 0) {
+          this.mutateElement(() => {
+            rightAmpImage.firstChild.setAttribute('alt', 'right image');
+          });
+        }
+      });
     }
   }
 
