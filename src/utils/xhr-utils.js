@@ -184,12 +184,6 @@ export function fromStructuredCloneable(response, responseType) {
     }
   }
 
-  if (isDocumentType) {
-    // TODO(prateekbh): remove this when integrating document fetcher.
-    data.responseXML =
-        new DOMParser().parseFromString(data.responseText, 'text/html');
-  }
-
   return new FetchResponse(data);
 }
 

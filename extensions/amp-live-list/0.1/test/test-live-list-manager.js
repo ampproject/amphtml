@@ -331,6 +331,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
+      console.log(xhrs);
       xhrs[0].then(
           xhr => xhr.respond(
               200, {
@@ -341,12 +342,10 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        xhrs[1].then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
+        xhrs[1].then(xhr => {
+          console.log('done');
+          xhr.respond(415, {'Content-Type': 'text/xml'},'<html></html>');
+        });
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.backoffClock_).to.be.null;
         return manager.poller_.lastWorkPromise_.then(() => {
