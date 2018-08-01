@@ -104,7 +104,9 @@ import {
   installBuiltinElements,
   installExtensionsService,
 } from '../src/service/extensions-impl';
-import {install as installCustomElements} from '../src/service/ampdoc-impl';
+import {
+  install as installCustomElements,
+} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {
