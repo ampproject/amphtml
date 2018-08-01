@@ -739,11 +739,13 @@ export class Bind {
   }
 
   /**
-   * Scans the element for bindings and stores them in ivars.
+   * Scans the element for bindings and adds up to |quota| to `outBindings`.
+   * Also updates ivars `boundElements_` and `expressionToElements_`.
    * @param {!Element} element
    * @param {number} quota
    * @param {!Array<!BindBindingDef>} outBindings
-   * @return {boolean}
+   * @return {boolean} Returns true if `element` contains more than `quota`
+   *     bindings. Otherwise, returns false.
    */
   scanElement_(element, quota, outBindings) {
     let quotaExceeded = false;
