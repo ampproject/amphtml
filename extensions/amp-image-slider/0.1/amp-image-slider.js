@@ -393,7 +393,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.gestures_.onPointerDown(e => {
       // Ensure touchstart changes slider position
-      this.pointerMoveX_(e.touches[0].pageX);
+      this.pointerMoveX_(e.touches[0].pageX, true);
       // Use !this.shouldHintReappear_ here
       // It is possible that after onPointerDown
       // SwipeXRecognizer callback is not triggered
@@ -470,7 +470,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   onMouseDown_(e) {
     e.preventDefault();
-    this.pointerMoveX_(e.pageX);
+    this.pointerMoveX_(e.pageX, true);
 
     // In case, clear up remnants
     // This is to prevent right mouse button down when left still down
@@ -659,15 +659,34 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Move slider based on given pointer x position
    * Do NOT wrap this in mutateElement!
    * @param {number} pointerX
+   * @param {boolean} opt_recal recalibrate rect
    * @private
    */
-  pointerMoveX_(pointerX) {
-    const {width, left, right} = this.getLayoutBox();
-    const newPos = Math.max(left, Math.min(pointerX, right));
-    const newPercentage = (newPos - left) / width;
-    this.mutateElement(() => {
-      this.updatePositions_(newPercentage);
-    });
+  pointerMoveX_(pointerX, opt_recal = false) {
+    if (!opt_recal) {
+      const {width, left, right} = this.getLayoutBox();
+      const newPos = Math.max(left, Math.min(pointerX, right));
+      const newPercentage = (newPos - left) / width;
+      this.mutateElement(() => {
+        this.updatePositions_(newPercentage);
+      });
+    } else {
+      // Fix cases where getLayoutBox() cannot be trusted!
+      // This is to address the "snap to leftmost" bug that occurs on
+      // pointer down after scrolling away and back 3+ slides
+      // layoutBox is not updated correctly when first landed on page
+      let width, left, right;
+      this.measureMutateElement(() => {
+        const rect = this.element./*OK*/getBoundingClientRect();
+        width = rect.width;
+        left = rect.left;
+        right = rect.right;
+      }, () => {
+        const newPos = Math.max(left, Math.min(pointerX, right));
+        const newPercentage = (newPos - left) / width;
+        this.updatePositions_(newPercentage);
+      });
+    }
   }
 
   /**
@@ -720,14 +739,12 @@ export class AmpImageSlider extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
 
-    // TODO(kqian): remove this after layer launch.
     // Extensions such as amp-carousel still uses .setAsOwner()
-    // This would break the rendering of the images
-    // as carousel will call .scheduleLayout on the slider but not images
+    // This would break the rendering of the images as carousel
+    // will call .scheduleLayout on the slider but not the contents
     // while Resources would found amp-imgs' parent has owner and
     // refuse to run the normal scheduling in discoverWork_.
     // SIMPLER SOL: simply always call scheduleLayout no matter what
-
     this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
     this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
 
