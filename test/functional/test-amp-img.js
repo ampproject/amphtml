@@ -22,12 +22,7 @@ import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
 import {toggleExperiment} from '../../src/experiments';
-import { AmpDocSingle } from '../../src/service/ampdoc-impl';
 
-
-describes.realWin('AmpImg', {
-  amp: true
-}, env => {
 describe('amp-img', () => {
   let sandbox;
   let screenWidth;
@@ -214,7 +209,6 @@ describe('amp-img', () => {
       el.setAttribute('height', 100);
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
-
       impl = new AmpImg(el);
       impl.createdCallback();
       sandbox.stub(impl, 'getLayoutWidth').returns(100);
@@ -372,8 +366,6 @@ describe('amp-img', () => {
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
     el.getPlaceholder = sandbox.stub();
-
-
     const impl = new AmpImg(el);
     impl.buildCallback();
     impl.layoutCallback();
@@ -383,7 +375,6 @@ describe('amp-img', () => {
     expect(img.getAttribute('aria-describedby')).to.equal('id3');
     impl.unlayoutCallback();
   });
-
 
   describe('blurred image placeholder', () => {
     let el;
@@ -395,22 +386,22 @@ describe('amp-img', () => {
       getImgWithBlur(true, true);
     });
 
-    afterEach(()=>{
+    afterEach(() => {
       impl.unlayoutCallback();
     });
 
-    function getImgWithBlur(addPlacholder, addBlurClass){
+    function getImgWithBlur(addPlacholder, addBlurClass) {
       el = document.createElement('amp-img');
       img = document.createElement('img');
-      if(addPlacholder){
+      if (addPlacholder) {
         img.setAttribute('placeholder', '');
       }
-      if(addBlurClass){
+      if (addBlurClass) {
         img.classList.add('i-amphtml-blur');
       }
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
-      el.getPlaceholder = () => {return img};
+      el.getPlaceholder = () => {return img;};
       impl = new AmpImg(el);
     }
 
@@ -425,48 +416,53 @@ describe('amp-img', () => {
       expect(impl.hasBlurredPlaceHolder_).to.be.false;
 
       el = document.createElement('amp-img');
-      el.getPlaceholder = () => {return undefined};
+      el.getPlaceholder = () => {return undefined;};
       impl = new AmpImg(el);
       impl.buildCallback();
       impl.layoutCallback();
       expect(impl.hasBlurredPlaceHolder_).to.be.false;
 
       el = document.createElement('amp-img');
-      el.getPlaceholder = () => {return undefined};
+      el.getPlaceholder = () => {return undefined;};
       impl = new AmpImg(el);
       impl.buildCallback();
       impl.layoutCallback();
       expect(impl.hasBlurredPlaceHolder_).to.be.false;
-
     });
 
     it('should fade in the image if the blurry placheolder exists', () => {
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.element.classList.contains('i-amphtml-blur-loading')).to.be.true;
+      expect(impl.element.classList.contains(
+          'i-amphtml-blur-loading')).to.be.true;
+
       const loadEvent = createCustomEvent(iframe.win, 'load');
       impl.img_.dispatchEvent(loadEvent);
-      expect(impl.element.classList.contains('i-amphtml-blur-loaded')).to.be.true;
+      expect(impl.element.classList.contains(
+          'i-amphtml-blur-loaded')).to.be.true;
 
       getImgWithBlur(true, false);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.element.classList.contains('i-amphtml-blur-loading')).to.be.false;
+      expect(impl.element.classList.contains(
+          'i-amphtml-blur-loading')).to.be.false;
+
       impl.img_.dispatchEvent(loadEvent);
-      expect(impl.element.classList.contains('i-amphtml-blur-loaded')).to.be.false;
+      expect(impl.element.classList.contains(
+          'i-amphtml-blur-loaded')).to.be.false;
     });
-
-
 
     it('should properly display a fade in animation', () => {
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.element.classList.contains('i-amphtml-blur-loading')).to.be.true;
-      expect(impl.element.classList.contains('i-amphtml-blur-loaded')).to.be.false;
+      expect(impl.element.classList.contains(
+          'i-amphtml-blur-loading')).to.be.true;
+      expect(impl.element.classList.contains(
+          'i-amphtml-blur-loaded')).to.be.false;
       const loadEvent = createCustomEvent(iframe.win, 'load');
       impl.img_.dispatchEvent(loadEvent);
-      expect(impl.element.classList.contains('i-amphtml-blur-loaded')).to.be.true;
+      expect(impl.element.classList.contains(
+          'i-amphtml-blur-loaded')).to.be.true;
     });
   });
-});
 });
