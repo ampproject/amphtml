@@ -214,6 +214,13 @@ export class AmpDoc {
   }
 
   /**
+   * Whether the runtime should recognize this document as an intended invalid
+   * amp page. This is triggered by the absense of 'amp' or '⚡' in the html tag.
+   * @return {boolean}
+   */
+  isNonStandardAmp() {}
+
+  /**
    * Whether the runtime in the single-doc mode. Alternative is the shadow-doc
    * mode that supports multiple documents per a single window.
    * @return {boolean}
@@ -376,6 +383,12 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
+  isNonStandardAmp() {
+    const docElement = this.win.document.documentElement;
+    return !(docElement.hasAttribute('amp') || docElement.hasAttribute('⚡'));
+  }
+
+  /** @override */
   isSingleDoc() {
     return true;
   }
@@ -461,6 +474,11 @@ export class AmpDocShadow extends AmpDoc {
 
     /** @private {function()|undefined} */
     this.readyResolver_ = readyDeferred.resolve;
+  }
+
+  /** @override */
+  isNonStandardAmp() {
+    return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
 
   /** @override */

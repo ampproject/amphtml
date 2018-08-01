@@ -88,6 +88,7 @@ export class DocInfo {
         ? parseUrlDeprecated(canonicalTag.href).href
         : sourceUrl;
     }
+
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
