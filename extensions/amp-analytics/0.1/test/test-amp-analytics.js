@@ -208,9 +208,11 @@ describes.realWin('amp-analytics', {
       actualResults[vendor] = {};
       describe('analytics vendor: ' + vendor, function() {
         beforeEach(() => {
-          if (!config.triggers) {
-            expectAsyncConsoleError(noTriggersError);
-          }
+          // Remove all the triggers to prevent unwanted requests, for instance
+          // one from a "visible" trigger. Those unwanted requests are a source
+          // of test flakiness. Especially they will alternate value of var
+          // $requestCount.
+          config.triggers = {};
         });
 
         for (const name in config.requests) {
