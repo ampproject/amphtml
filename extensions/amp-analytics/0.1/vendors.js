@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from './iframe-transport-vendors';
+import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
+import {hasOwn} from '../../../src/utils/object';
 
 /**
  * @const {!JsonObject}
@@ -2270,5 +2271,20 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-// Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
-Object.assign(ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG);
+mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
+
+/**
+ * Merges iframe transport config.
+ *
+ * @param {!JsonObject} config
+ * @param {!JsonObject} iframeTransportConfig
+ */
+function mergeIframeTransportConfig(config, iframeTransportConfig) {
+  for (const vendor in iframeTransportConfig) {
+    if (hasOwn(iframeTransportConfig, vendor)) {
+      const url = iframeTransportConfig[vendor];
+      config[vendor]['transport'] =
+          Object.assign({}, config[vendor]['transport'], {'iframe': url});
+    }
+  }
+}
