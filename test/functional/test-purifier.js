@@ -66,15 +66,15 @@ describe('DOMPurify-based', () => {
   describe('for <amp-bind>', () => {
     it('should rewrite [text] and [class] attributes', () => {
       expect(purifyHtml('<p [text]="foo"></p>')).to.be
-          .equal('<p data-amp-bind-text="foo"></p>');
+          .equal('<p data-amp-bind-text="foo" i-amphtml-binding=""></p>');
       expect(purifyHtml('<p [class]="bar"></p>')).to.be
-          .equal('<p data-amp-bind-class="bar"></p>');
+          .equal('<p data-amp-bind-class="bar" i-amphtml-binding=""></p>');
     });
 
     it('should NOT rewrite values of binding attributes', () => {
       // Should not change "foo.bar".
-      expect(purifyHtml('<a [href]="foo.bar">link</a>'))
-          .to.equal('<a data-amp-bind-href="foo.bar">link</a>');
+      expect(purifyHtml('<a [href]="foo.bar">link</a>')).to.equal(
+          '<a data-amp-bind-href="foo.bar" i-amphtml-binding="">link</a>');
     });
   });
 

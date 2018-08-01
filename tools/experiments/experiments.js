@@ -321,6 +321,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
+  {
+    id: 'faster-bind-scan',
+    name: 'Enables faster scanning of dynamic markup for bindings',
+    spec: 'https://github.com/ampproject/amphtml/pull/17229',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
+  },
 ];
 
 if (getMode().localDev) {

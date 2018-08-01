@@ -314,18 +314,16 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      this.templates_.findAndRenderTemplate(
-          this.element, /** @type {!JsonObject} */ (current.data))
-          .then(element => {
-            this.container_.appendChild(element);
-          })
-          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+      const json = /** @type {!JsonObject} */ (current.data);
+      this.templates_.findAndRenderTemplate(this.element, json)
+          .then(element => this.container_.appendChild(element))
+          .then(onFulfilledCallback, onRejectedCallback);
     } else {
-      this.templates_.findAndRenderTemplateArray(
-          this.element, /** @type {!Array} */ (current.data))
-          .then(elements => this.updateBindingsForElements_(elements))
+      const array = /** @type {!Array} */ (current.data);
+      this.templates_.findAndRenderTemplateArray(this.element, array)
+          .then(results => this.updateBindings_(results))
           .then(elements => this.render_(elements))
-          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+          .then(onFulfilledCallback, onRejectedCallback);
     }
   }
 
@@ -337,17 +335,22 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindingsForElements_(elements) {
+  updateBindings_(elements) {
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {
       return Promise.resolve(elements);
     }
+    const updateWith = bind => {
+      // Forward elements to chained promise on success or failure.
+      return bind.scanAndApply(elements, [this.container_])
+          .then(() => elements, () => elements);
+    };
     // "refresh": Do _not_ block on retrieval of the Bind service before the
     // first mutation (AMP.setState).
     if (binding === 'refresh') {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
-        return this.updateBindingsWith_(this.bind_, elements);
+        return updateWith(this.bind_);
       } else {
         return Promise.resolve(elements);
       }
@@ -356,23 +359,11 @@ export class AmpList extends AMP.BaseElement {
     // in the newly rendered `elements`.
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
-        return this.updateBindingsWith_(bind, elements);
+        return updateWith(bind);
       } else {
         return Promise.resolve(elements);
       }
     });
-  }
-
-  /**
-   * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
-   * @param {!Array<!Element>} elements
-   * @return {!Promise<!Array<!Element>>}
-   */
-  updateBindingsWith_(bind, elements) {
-    // Forward elements to chained promise on success or failure.
-    const forwardElements = () => elements;
-    return bind.scanAndApply(elements, [this.container_])
-        .then(forwardElements, forwardElements);
   }
 
   /**
