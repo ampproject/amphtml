@@ -329,6 +329,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
+- [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
 - [UAS](../../ads/uas.md)
