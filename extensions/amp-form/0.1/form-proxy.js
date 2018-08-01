@@ -129,19 +129,19 @@ function createFormProxyConstr(win) {
         // A method call. Call the original prototype method via `call`.
         const method = property.value;
         FormProxyProto[name] = function() {
-          return method.apply(this.form_, arguments);
+          return method.apply(/** @type {!FormProxy} */(this).form_, arguments);
         };
       } else {
         // A read/write property. Call the original prototype getter/setter.
         const spec = {};
         if (property.get) {
           spec.get = function() {
-            return property.get.call(this.form_);
+            return property.get.call(/** @type {!FormProxy} */(this).form_);
           };
         }
         if (property.set) {
-          spec.set = function(value) {
-            return property.set.call(this.form_, value);
+          spec.set = function(v) {
+            return property.set.call(/** @type {!FormProxy} */(this).form_, v);
           };
         }
         win.Object.defineProperty(FormProxyProto, name, spec);
