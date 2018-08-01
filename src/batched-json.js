@@ -48,8 +48,8 @@ export function batchFetchJsonFor(
   opt_expr = '.',
   opt_urlReplacement = UrlReplacementPolicy.NONE)
 {
-  const url = assertHttpsUrl(element.getAttribute('src'), element);
-  return constructBatchFetchData(ampdoc, element, url, opt_urlReplacement)
+  assertHttpsUrl(element.getAttribute('src'), element);
+  return constructBatchFetchData(ampdoc, element, opt_urlReplacement)
       .then(data => {
         return Services.batchedXhrFor(ampdoc.win)
             .fetchJson(data['src'], data['fetchOpts']);
@@ -66,19 +66,17 @@ export function batchFetchJsonFor(
  * fetch.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
- * @param {string} url
  * @param {!UrlReplacementPolicy} opt_urlReplacement If ALL, replaces all URL
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
  * @return {!Promise<!./service/xhr-impl.FetchData>}
  */
 export function constructBatchFetchData(
-  ampdoc, element, url, opt_urlReplacement) {
+  ampdoc, element, opt_urlReplacement) {
+  const url = element.getAttribute('src');
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
   const srcPromise = (opt_urlReplacement >= UrlReplacementPolicy.OPT_IN)
-    ? urlReplacements.expandUrlAsync(url)
-    : Promise.resolve(url);
-
+    ? urlReplacements.expandUrlAsync(url) : Promise.resolve(url);
   return srcPromise.then(xhrUrl => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).

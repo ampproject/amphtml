@@ -42,6 +42,12 @@ import {
   setFormForElement,
 } from '../../../src/form';
 import {
+  fromStructuredCloneable,
+  setAmpCors,
+  setupInit,
+  validateFetchResponse,
+} from '../../../src/service/xhr-impl';
+import {
   getFormValidator,
   isCheckValiditySupported,
 } from './form-validators';
@@ -486,22 +492,27 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmit_(varSubsFields, trust) {
+
     this.setState_(FormState.SUBMITTING);
     const varSubPromise = this.doVarSubs_(varSubsFields);
     let p;
+    let fetchData;
     if (this.ssrTemplateHelper_.isSupported()) {
       p = varSubPromise.then(() => {
         this.actions_.trigger(
             this.form_, FormEvents.SUBMIT, /* event */ null, trust);
         // Note that we do not render templates for the submitting state
         // and only deal with submit-success or submit-error.
+        fetchData = this.buildFetchData(
+            dev().assertString(this.xhrAction_), this.method_);
+        setupInit(fetchData.fetchOpt);
+        setAmpCors(this.win_, fetchData.xhrUrl, fetchData.fetchOpt);
         return this.ssrTemplateHelper_.fetchAndRenderTemplate(
             this.form_,
-            this.buildFetchData(
-                dev().assertString(this.xhrAction_), this.method_),
+            fetchData,
             this.getResponseTemplates_());
       }).then(
-          resp => this.handleSsrTemplateSuccess_(resp),
+          resp => this.handleSsrTemplateSuccess_(resp, fetchData),
           error => this.handleSsrTemplateFailure_(
               /** @type {!JsonObject} */ (error)));
     } else {
@@ -624,10 +635,15 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject} response
+   * @param {!../../../src/service/xhr-impl.FetchData} fetchData
    * @return {!Promise}
    * @private visible for testing
    */
-  handleSsrTemplateSuccess_(response) {
+  handleSsrTemplateSuccess_(response, fetchData) {
+    // Construct the fetch response and validate.
+    const fetchResponse =
+        fromStructuredCloneable(this.win_, response, fetchData.responseType);
+    validateFetchResponse(this.win_, fetchResponse, fetchData.fetchOpt);
     return this.handleSubmitSuccess_(Promise.resolve(response['data']));
   }
 

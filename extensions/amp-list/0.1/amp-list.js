@@ -27,7 +27,13 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {fromStructuredCloneable, setAmpCors, setupJsonFetchInit, validateFetchResponse} from '../../../src/service/xhr-impl';
+import {
+  fromStructuredCloneable,
+  setAmpCors,
+  setupInit,
+  setupJsonFetchInit,
+  validateFetchResponse,
+} from '../../../src/service/xhr-impl';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -270,11 +276,11 @@ export class AmpList extends AMP.BaseElement {
     return constructBatchFetchData(
         this.getAmpDoc(),
         this.element,
-        this.element.getAttribute('src'),
         this.getPolicy_()).then(batchFetchData => {
       fetchData =
           setAmpCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
       setupJsonFetchInit(fetchData.fetchOpt);
+      setupInit(fetchData.fetchOpt);
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, fetchData);
     }).then(response => {
@@ -282,7 +288,7 @@ export class AmpList extends AMP.BaseElement {
       const fetchResponse =
           fromStructuredCloneable(win, response, fetchData.responseType);
       validateFetchResponse(win, fetchResponse, fetchData.fetchOpt);
-      return fetchResponse.json();
+      return fetchResponse;
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
     }).then(json => this.scheduleRender_(json))
