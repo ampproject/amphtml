@@ -430,6 +430,21 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       );
     }
 
+    if (argv.with_inabox_lite) {
+      promises.push(
+          // Entry point for inabox runtime.
+          compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
+            toName: 'amp-inabox-lite.js',
+            minifiedName: 'amp4ads-lite-v0.js',
+            includePolyfills: true,
+            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
+    }
+
     promises.push(
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify),
