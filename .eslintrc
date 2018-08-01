@@ -133,7 +133,7 @@
     "no-trailing-spaces": 2,
     "no-unused-expressions": 0,
     "no-unused-vars": [2, {
-      "argsIgnorePattern": "^(var_|opt_|unused)",
+      "argsIgnorePattern": "^(var_args$|opt_|unused)",
       "varsIgnorePattern": "(AmpElement|Def|Interface)$"
     }],
     "no-useless-call": 2,
