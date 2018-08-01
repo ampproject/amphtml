@@ -102,7 +102,12 @@ example:
 </html>
 ```
 
-Inline `style` attributes are not allowed, as per the AMP spec.
+Inline `style` attributes are also allowed. For example:
+```html
+  <p style="color:blue;font-weight:bold;">AMPlify!</p>
+
+```
+
 
 ### Width, Height, and Layout
 
