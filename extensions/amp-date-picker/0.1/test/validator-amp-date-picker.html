@@ -99,6 +99,9 @@
     <template date-template dates="2018-01-01" default type="amp-mustache"></template>
     <template date-template dates="2018-01-01" default id="dates-with-default-and-id" type="amp-mustache"></template>
   </amp-date-picker>
+  <!-- Valid: range amp-date-picker with minimum nights -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" minimum-nights="0">
+  </amp-date-picker>
 
   <!-- Invalid: single amp-date-picker with start-input-selector -->
   <amp-date-picker type="single" mode="static" start-input-selector="#a3" layout="fixed-height" height="360">
@@ -133,5 +136,11 @@
   <!-- Invalid: amp-date-picker templates outside amp-date-picker -->
   <template info-template type="amp-mustache"></template>
   <template date-template dates="2018-01-01" type="amp-mustache"></template>
+  <!-- Invalid: amp-date-picker with bad minimum nights -->
+  <amp-date-picker type="range" layout="fixed-height" height="360" minimum-nights="zero">
+  </amp-date-picker>
+  <!-- Invalid: single amp-date-picker with minimum nights -->
+  <amp-date-picker layout="fixed-height" height="360" minimum-nights="0">
+  </amp-date-picker>
 </body>
 </html>

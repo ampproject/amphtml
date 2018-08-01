@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from './iframe-transport-vendors';
-import {deepMerge} from '../../../src/utils/object';
+import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
+import {hasOwn} from '../../../src/utils/object';
 
 /**
  * @const {!JsonObject}
@@ -2228,7 +2228,10 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'bg': {
+  },
 });
+
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
@@ -2239,10 +2242,20 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-// Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
-const mergedConfigs = deepMerge(
-    ANALYTICS_CONFIG,
-    ANALYTICS_IFRAME_TRANSPORT_CONFIG,
-    1
-);
-Object.assign(ANALYTICS_CONFIG, mergedConfigs);
+mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
+
+/**
+ * Merges iframe transport config.
+ *
+ * @param {!JsonObject} config
+ * @param {!JsonObject} iframeTransportConfig
+ */
+function mergeIframeTransportConfig(config, iframeTransportConfig) {
+  for (const vendor in iframeTransportConfig) {
+    if (hasOwn(iframeTransportConfig, vendor)) {
+      const url = iframeTransportConfig[vendor];
+      config[vendor]['transport'] =
+          Object.assign({}, config[vendor]['transport'], {'iframe': url});
+    }
+  }
+}

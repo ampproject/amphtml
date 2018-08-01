@@ -56,14 +56,14 @@ describe('Caja-based', () => {
   describe('for <amp-bind>', () => {
     it('should output [text] and [class] attributes', () => {
       expect(sanitizeHtml('<p [text]="foo" [class]="bar"></p>')).to.be
-          .equal('<p [text]="foo" [class]="bar"></p>');
+          .equal('<p [text]="foo" i-amphtml-binding [class]="bar"></p>');
     });
 
     it('should NOT rewrite values of binding attributes', () => {
       // Should not change "foo.bar". Adding `target` attribute is not necessary
       // (but harmless) since <amp-bind> will use rewriteAttributesForElement().
-      expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
-          .to.equal('<a [href]="foo.bar" target="_top">link</a>');
+      expect(sanitizeHtml('<a [href]="foo.bar">link</a>')).to.equal(
+          '<a [href]="foo.bar" i-amphtml-binding target="_top">link</a>');
     });
   });
 });
@@ -306,6 +306,21 @@ function runSanitizerTests() {
     it('should allow form::action-xhr', () => {
       expect(sanitizeHtml('<form action-xhr="https://foo.com/bar"></form>'))
           .to.equal('<form action-xhr="https://foo.com/bar"></form>');
+    });
+
+    it('should allow <amp-form>-related attributes', () => {
+      expect(sanitizeHtml('<div submitting></div>'))
+          .to.equal('<div submitting=""></div>');
+      expect(sanitizeHtml('<div submit-success></div>'))
+          .to.equal('<div submit-success=""></div>');
+      expect(sanitizeHtml('<div submit-error></div>'))
+          .to.equal('<div submit-error=""></div>');
+      expect(sanitizeHtml('<div verify-error></div>'))
+          .to.equal('<div verify-error=""></div>');
+      expect(sanitizeHtml('<span visible-when-invalid="valueMissing"></span>'))
+          .to.equal('<span visible-when-invalid="valueMissing"></span>');
+      expect(sanitizeHtml('<span validation-for="form1"></span>'))
+          .to.equal('<span validation-for="form1"></span>');
     });
   });
 
