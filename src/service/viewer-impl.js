@@ -466,7 +466,7 @@ export class Viewer {
 
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
-    this.whenFirstVisiblePromise_.then(() => {
+    this.whenFirstVisible().then(() => {
       this.maybeUpdateFragmentForCct();
     });
   }
