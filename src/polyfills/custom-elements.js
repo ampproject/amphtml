@@ -31,8 +31,6 @@ let CustomElementConstructorDef;
  * @typedef {{
  *  name: string,
  *  ctor: !CustomElementConstructorDef,
- *  connectedCallback: (function()|null),
- *  disconnectedCallback: (function()|null),
  * }}
  */
 let CustomElementDef;
@@ -304,29 +302,12 @@ class Registry {
       throw new Error('duplicate definition');
     }
 
-    const proto = ctor.prototype;
-
-    // TODO(jridgewell): Support adoptedCallback and attributeChangedCallback
-    const lifecycleCallbacks = {
-      'connectedCallback': null,
-      'disconnectedCallback': null,
-    };
-
-    for (const callbackName in lifecycleCallbacks) {
-      const callback = proto[callbackName];
-      if (callback) {
-        lifecycleCallbacks[callbackName] = /** @type {function()} */(callback);
-      }
-    }
-
+    // TODO(jridgewell): Record connectedCallback, disconnectedCallback,
+    // adoptedCallback, attributeChangedCallback, and observedAttributes.
     // TODO(jridgewell): If attributeChangedCallback, gather observedAttributes
-    // TODO(jridgewell): Record adoptedCallback, attributeChangedCallback, and
-    // observedAttributes.
     this.definitions_[name] = {
       name,
       ctor,
-      connectedCallback: lifecycleCallbacks['connectedCallback'],
-      disconnectedCallback: lifecycleCallbacks['disconnectedCallback'],
     };
 
     this.observe_(name);
