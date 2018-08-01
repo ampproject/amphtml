@@ -96,7 +96,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.isHintHidden_ = false;
 
     /** @private {boolean} */
-    this.disabled_ = false; // for now, will be set later
+    this.gestureDisabled_ = false; // for now, will be set later
 
     /** @private {Gestures|null} */
     this.gestures_ = null;
@@ -107,6 +107,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // TODO(kqian): remove after launch
     // From https://github.com/ampproject/amphtml/pull/16688
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
@@ -159,23 +160,16 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.registerAction('seekTo', invocation => {
       const {args} = invocation;
       if (args) {
-        let value;
-        if (args['value'] !== undefined) {
-          value = args['value'];
-          user().assertNumber(value,
+        if (args['percent'] !== undefined) {
+          const percent = args['percent'];
+          user().assertNumber(percent,
               'value to seek to must be a number');
-        } else if (args['percent'] !== undefined) {
-          value = args['percent'];
-          user().assertNumber(value,
-              'percent to seek to must be a number');
-          value *= 0.01; // percentage to 0-1 value
-        }
-        if (value !== undefined) {
-          this.updatePositions_(value);
+          this.updatePositions_(percent);
         }
       }
     }, ActionTrust.LOW);
 
+    const initialPercentString = this.element.getAttribute('initial-percent');
     // TODO(kqian): move this before building child components on issue
     // This is the only step when content tree is attached to document
     return this.mutateElement(() => {
@@ -194,16 +188,25 @@ export class AmpImageSlider extends AMP.BaseElement {
       } else {
         this.rightMask_.appendChild(this.rightAmpImage_);
       }
+
+      // Set initial positioning
+      if (initialPercentString) {
+        const initialPercent = Number(initialPercentString);
+        if (isNaN(initialPercent)) {
+          user().error('initial percent must be a number.');
+        }
+        this.updatePositions_(initialPercent);
+      }
     });
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const newDisabled = mutations['disabled'];
-    if (newDisabled) {
-      this.disable_(); // this.disabled_ is set in this call
+    const newGestureDisabled = mutations['disable-gesture'];
+    if (newGestureDisabled) {
+      this.disableGesture_(); // this.gestureDisabled_ is set in this call
     } else {
-      this.enable_(); // this.disabled_ is set in this call
+      this.enableGesture_(); // this.gestureDisabled_ is set in this call
     }
   }
 
@@ -211,8 +214,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Enable user interaction
    * @private
    */
-  enable_() {
-    if (!this.disabled_) {
+  enableGesture_() {
+    if (!this.gestureDisabled_) {
       return;
     }
     // Show hint if needed
@@ -220,15 +223,15 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.animateShowHint_();
     }
     this.registerEvents_();
-    this.disabled_ = false;
+    this.gestureDisabled_ = false;
   }
 
   /**
    * Disable user interaction
    * @private
    */
-  disable_() {
-    if (this.disabled_) {
+  disableGesture_() {
+    if (this.gestureDisabled_) {
       return;
     }
     // Hide hint if needed
@@ -239,7 +242,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.isHintHidden_ = true;
     }
     this.unregisterEvents_();
-    this.disabled_ = true;
+    this.gestureDisabled_ = true;
   }
 
   /**
@@ -735,6 +738,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // TODO(kqian): remove after launch
     // From https://github.com/ampproject/amphtml/pull/16688
     user().assert(isExperimentOn(this.win, 'amp-image-slider'),
         'Experiment <amp-image-slider> disabled');
@@ -750,9 +754,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.registerEvents_();
 
-    // disabled is checked here instead, after all construction is done
-    if (this.element.hasAttribute('disabled')) {
-      this.disable_();
+    // disable-gesture is checked here instead, after all construction is done
+    if (this.element.hasAttribute('disable-gesture')) {
+      this.disableGesture_();
     }
 
     return Promise.resolve();

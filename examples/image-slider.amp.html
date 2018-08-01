@@ -165,16 +165,23 @@
       <div hint left-hint-class="my-left-hint" right-hint-class="my-right-hint"></div>
     </amp-image-slider>
 
+    <h1>Initial Percent</h1>
+    <p>30% to the left</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" initial-percent="0.3">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
     <h1><code>seekTo</code> action</h1>
 
-    <p>Position Observer with Seeking</p>
+    <p>Position Observer with Seeking (gesture disabled)</p>
     <div>
       <amp-position-observer
         intersection-ratios="1"
-        on="scroll:observed.seekTo(value=event.percent)"
+        on="scroll:observed.seekTo(percent=event.percent)"
         layout="nodisplay">
       </amp-position-observer>
-      <amp-image-slider id="observed" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-image-slider id="observed" tabindex="0" layout="responsive" width="1024" height="600" disable-gesture>
         <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
         <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
         <div before class="label">BEFORE</div>
@@ -191,8 +198,8 @@
     </amp-image-slider>
     <div class="flex">
       <button on="tap:seekable.seekTo(percent=0)">Click me to Seek to Left</button>
-      <button on="tap:seekable.seekTo(percent=50)">Click me to Seek to Center</button>
-      <button on="tap:seekable.seekTo(percent=100)">Click me to Seek to Right</button>
+      <button on="tap:seekable.seekTo(percent=0.5)">Click me to Seek to Center</button>
+      <button on="tap:seekable.seekTo(percent=1)">Click me to Seek to Right</button>
     </div>
 
     <h1>Tab + Keyboard</h1>
@@ -205,9 +212,9 @@
     </amp-image-slider>
 
     <!--
-    <h1>Toggle <code>disabled</code> (for user interaction, <code>seekTo</code> will still work)</h1>
-    <p>Toggling disabled with One-time hint (will be recreated on enable, but if keep enabled, would only appear once)</p>
-    <amp-image-slider id="disableDemo" tabindex="11" layout="responsive" width="1024" height="600" [disabled]="disableDemo.disabled">
+    <h1>Toggle <code>disable-gesture</code> (for user interaction, <code>seekTo</code> will still work)</h1>
+    <p>Toggling disable-gesture with One-time hint (will be recreated on enable, but if keep enabled, would only appear once)</p>
+    <amp-image-slider id="disableDemo" tabindex="11" layout="responsive" width="1024" height="600" [disable-gesture]="disableDemo.disabled">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
@@ -219,8 +226,8 @@
       <button on="tap:AMP.setState({disableDemo: {disabled: true}})">Disable</button>
     </div>
 
-    <p>Toggling disabled with Hint Reappearing</p>
-    <amp-image-slider id="disableDemo1" tabindex="12" layout="responsive" width="1024" height="600" [disabled]="disableDemo1.disabled">
+    <p>Toggling disable-gesture with Hint Reappearing</p>
+    <amp-image-slider id="disableDemo1" tabindex="12" layout="responsive" width="1024" height="600" [disable-gesture]="disableDemo1.disabled">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
@@ -233,8 +240,8 @@
       <button on="tap:AMP.setState({disableDemo1: {disabled: true}})">Disable</button>
     </div>
 
-    <p>Toggling disabled with NO hint</p>
-    <amp-image-slider id="disableDemo2" tabindex="13" layout="responsive" width="1024" height="600" disable-hint [disabled]="disableDemo2.disabled">
+    <p>Toggling disable-gesture with NO hint</p>
+    <amp-image-slider id="disableDemo2" tabindex="13" layout="responsive" width="1024" height="600" disable-hint [disable-gesture]="disableDemo2.disabled">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
