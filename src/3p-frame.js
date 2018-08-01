@@ -129,11 +129,12 @@ export function getIframe(
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
+  iframe.setAttribute('allow', 'autoplay');
   if (isExperimentOn(parentWindow, 'no-sync-xhr-in-ads')) {
     // Block synchronous XHR in ad. These are very rare, but super bad for UX
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
-    iframe.setAttribute('allow', 'sync-xhr \'none\';');
+    iframe.setAttribute('allow', 'autoplay; sync-xhr \'none\';');
   }
   iframe.setAttribute('data-amp-3p-sentinel',
       attributes['_context']['sentinel']);
