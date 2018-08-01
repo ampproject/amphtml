@@ -68,7 +68,7 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @typedef {{boundElements: !Array<BoundElementDef>, bindings: !Array<!BindBindingDef>, expressionToElements: !Object<string, !Array<!Element>>, limitExceeded: boolean}}
+ * @typedef {{bindings: !Array<!BindBindingDef>, limitExceeded: boolean}}
  */
 let NodeScanDef;
 
@@ -360,21 +360,54 @@ export class Bind {
    * Returned promise is resolved when all operations complete.
    * If they don't complete within `timeout` ms, the promise is rejected.
    *
-   * @param {!Array<!Element>} added
-   * @param {!Array<!Element>} removed
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
    * @param {number} timeout Timeout in milliseconds.
    * @return {!Promise}
    */
-  scanAndApply(added, removed, timeout = 2000) {
-    dev().info(TAG, 'rescan:', added, removed);
-    const promise = this.removeThenAdd_(removed, added)
-        .then(deltas => {
-          // Don't reevaluate/apply if there are no bindings.
-          if (deltas.added > 0) {
-            return this.evaluate_().then(results =>
-              this.applyElements_(results, added));
-          }
-        });
+  scanAndApply(addedElements, removedElements, timeout = 2000) {
+    dev().info(TAG, 'rescan:', addedElements, removedElements);
+    // Helper function for cleaning up bindings in removed elements.
+    const cleanup = added => {
+      this.removeBindingsForNodes_(removedElements).then(removed => {
+        dev().info(TAG,
+            '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
+      });
+      return Promise.resolve();
+    };
+    // Early-out if max number of bindings has already been exceeded.
+    // This can happen since we purge old bindings in `removedElements`
+    // _after_ adding new ones (rather than before) as an optimization.
+    if (this.numberOfBindings() > this.maxNumberOfBindings_) {
+      this.emitMaxBindingsExceededError_();
+      return cleanup(0);
+    }
+    const bindings = [];
+    addedElements.forEach(ae => {
+      const elements = ae.querySelectorAll('[i-amphtml-binding]');
+      for (let i = 0; i < elements.length; i++) {
+        this.scanElement_(elements[i], Math.POSITIVE_INFINITY, bindings);
+      }
+    });
+    const added = bindings.length;
+    if (added === 0) {
+      return cleanup(0);
+    }
+    const promise = this.sendBindingsToWorker_(bindings).then(() => {
+      return this.evaluate_().then(r => this.applyElements_(r, addedElements));
+    }).then(() => {
+      // Remove bindings at the end to reduce evaluation/apply latency.
+      // Don't chain this promise since this is a non-blocking clean up task.
+      cleanup(added);
+    });
+    // const promise = this.removeThenAdd_(removed, added)
+    //     .then(deltas => {
+    //       // Don't reevaluate/apply if there are no bindings.
+    //       if (deltas.added > 0) {
+    //         return this.evaluate_().then(results =>
+    //           this.applyElements_(results, added));
+    //       }
+    //     });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
   }
@@ -539,19 +572,10 @@ export class Bind {
         : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
-        const {
-          boundElements, bindings, expressionToElements, limitExceeded,
-        } = results;
-
-        this.boundElements_ = this.boundElements_.concat(boundElements);
-        Object.assign(this.expressionToElements_, expressionToElements);
-
+        const {bindings, limitExceeded} = results;
         if (limitExceeded) {
-          dev().expectedError(TAG, 'Maximum number of bindings reached ' +
-              `(${this.maxNumberOfBindings_}). Additional elements with ` +
-              'bindings will be ignored.');
+          this.emitMaxBindingsExceededError_();
         }
-
         return bindings;
       });
     });
@@ -562,22 +586,36 @@ export class Bind {
       // `results` is a 2D array where results[i] is an array of bindings.
       // Flatten this into a 1D array of bindings via concat.
       const bindings = Array.prototype.concat.apply([], results);
-      if (bindings.length == 0) {
-        return bindings.length;
-      } else {
-        return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
-          // Report each parse error.
-          Object.keys(parseErrors).forEach(expressionString => {
-            const elements = this.expressionToElements_[expressionString];
-            if (elements.length > 0) {
-              this.reportWorkerError_(parseErrors[expressionString],
-                  `${TAG}: Expression compile error in "${expressionString}".`,
-                  elements[0]);
-            }
-          });
-          return bindings.length;
-        });
-      }
+      return (bindings.length > 0) ? this.sendBindingsToWorker_(bindings) : 0;
+    });
+  }
+
+  /**
+   * TODO(choumx)
+   */
+  emitMaxBindingsExceededError_() {
+    dev().expectedError(TAG, 'Maximum number of bindings reached ' +
+        `(${this.maxNumberOfBindings_}). Additional elements with ` +
+        'bindings will be ignored.');
+  }
+
+  /**
+   * TODO(choumx)
+   * @param {!Array<!BindBindingDef>} bindings
+   * @return {!Promise<number>}
+   */
+  sendBindingsToWorker_(bindings) {
+    return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
+      // Report each parse error.
+      Object.keys(parseErrors).forEach(expressionString => {
+        const elements = this.expressionToElements_[expressionString];
+        if (elements.length > 0) {
+          this.reportWorkerError_(parseErrors[expressionString],
+              `${TAG}: Expression compile error in "${expressionString}".`,
+              elements[0]);
+        }
+      });
+      return bindings.length;
     });
   }
 
@@ -640,22 +678,15 @@ export class Bind {
    * @private
    */
   scanNode_(node, limit) {
-    /** @type {!Array<BoundElementDef>} */
-    const boundElements = [];
     /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
-    /** @type {!Object<string, !Array<!Element>>} */
-    const expressionToElements = map();
-
     const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
       ? node : node.ownerDocument, 'ownerDocument is null.');
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
         /* entityReferenceExpansion */ false);
-
     // Set to true if number of bindings in `node` exceeds `limit`.
     let limitExceeded = false;
-
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
@@ -669,26 +700,10 @@ export class Bind {
         return !walker.nextNode();
       }
       const element = dev().assertElement(node);
-      const {tagName} = element;
-
-      let boundProperties = this.scanElement_(element);
-      // Stop scanning once |limit| bindings are reached.
-      if (bindings.length + boundProperties.length > limit) {
-        boundProperties = boundProperties.slice(0, limit - bindings.length);
+      const remainingQuota = limit - bindings.length;
+      if (this.scanElement_(element, remainingQuota, bindings)) {
         limitExceeded = true;
       }
-      if (boundProperties.length > 0) {
-        boundElements.push({element, boundProperties});
-      }
-      boundProperties.forEach(boundProperty => {
-        const {property, expressionString} = boundProperty;
-        bindings.push({tagName, property, expressionString});
-
-        if (!expressionToElements[expressionString]) {
-          expressionToElements[expressionString] = [];
-        }
-        expressionToElements[expressionString].push(element);
-      });
       return !walker.nextNode() || limitExceeded;
     };
 
@@ -711,9 +726,7 @@ export class Bind {
         }
         // If we scanned all elements, resolve. Otherwise, continue chunking.
         if (completed) {
-          resolve({
-            boundElements, bindings, expressionToElements, limitExceeded,
-          });
+          resolve({bindings, limitExceeded});
         } else {
           chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
         }
@@ -723,17 +736,47 @@ export class Bind {
   }
 
   /**
+   * TODO(choumx)
+   * @param {!Element} element
+   * @param {number} quota
+   * @param {!Array<!BindBindingDef>} outBindings
+   * @return {boolean}
+   */
+  scanElement_(element, quota, outBindings) {
+    let quotaExceeded = false;
+    let boundProperties = this.boundPropertiesInElement_(element);
+    // Stop scanning once |limit| bindings are reached.
+    if (boundProperties.length > quota) {
+      boundProperties = boundProperties.slice(0, quota);
+      quotaExceeded = true;
+    }
+    if (boundProperties.length > 0) {
+      this.boundElements_.push({element, boundProperties});
+    }
+    const {tagName} = element;
+    boundProperties.forEach(boundProperty => {
+      const {property, expressionString} = boundProperty;
+      outBindings.push({tagName, property, expressionString});
+      if (!this.expressionToElements_[expressionString]) {
+        this.expressionToElements_[expressionString] = [];
+      }
+      this.expressionToElements_[expressionString].push(element);
+    });
+    return quotaExceeded;
+  }
+
+  /**
    * Returns bound properties for an element.
    * @param {!Element} element
    * @return {!Array<{property: string, expressionString: string}>}
    * @private
    */
-  scanElement_(element) {
+  boundPropertiesInElement_(element) {
     const boundProperties = [];
     const attrs = element.attributes;
     for (let i = 0, numberOfAttrs = attrs.length; i < numberOfAttrs; i++) {
       const attr = attrs[i];
-      const boundProperty = this.scanAttribute_(attr, element);
+      const boundProperty = this.boundPropertyInAttribute_(attr, element);
       if (boundProperty) {
         boundProperties.push(boundProperty);
       }
@@ -749,7 +792,7 @@ export class Bind {
    * @return {?{property: string, expressionString: string}}
    * @private
    */
-  scanAttribute_(attribute, element) {
+  boundPropertyInAttribute_(attribute, element) {
     const tag = element.tagName;
     const attr = attribute.name;
 
