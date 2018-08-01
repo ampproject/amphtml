@@ -316,7 +316,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isSupported()) {
       const json = /** @type {!JsonObject} */ (current.data);
       this.templates_.findAndRenderTemplate(this.element, json)
-          .then(result => this.container_.appendChild(result.element))
+          .then(element => this.container_.appendChild(element))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
       const array = /** @type {!Array} */ (current.data);
@@ -350,7 +350,7 @@ export class AmpList extends AMP.BaseElement {
     // first mutation (AMP.setState).
     if (binding === 'refresh') {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
-        return updateWith(this.bind_, elements);
+        return updateWith(this.bind_);
       } else {
         return Promise.resolve(elements);
       }
@@ -359,7 +359,7 @@ export class AmpList extends AMP.BaseElement {
     // in the newly rendered `elements`.
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
-        return updateWith(bind, elements);
+        return updateWith(bind);
       } else {
         return Promise.resolve(elements);
       }

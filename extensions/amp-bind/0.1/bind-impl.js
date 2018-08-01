@@ -386,7 +386,7 @@ export class Bind {
     addedElements.forEach(ae => {
       const elements = ae.querySelectorAll('[i-amphtml-binding]');
       for (let i = 0; i < elements.length; i++) {
-        this.scanElement_(elements[i], Math.POSITIVE_INFINITY, bindings);
+        this.scanElement_(elements[i], Number.POSITIVE_INFINITY, bindings);
       }
     });
     const added = bindings.length;
