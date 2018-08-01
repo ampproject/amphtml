@@ -128,36 +128,7 @@ class CustomElementRegistry {
    * @param {!Object=} options
    */
   define(name, ctor, options) {
-    const {Error, SyntaxError} = this.win_;
-
-    if (options) {
-      throw new Error('Extending native custom elements is not supported');
-    }
-
-    assertValidName(SyntaxError, name);
-
-    if (this.registry_.getByName(name) ||
-        this.registry_.getByConstructor(ctor)) {
-      throw new Error('duplicate definition');
-    }
-
-    const proto = ctor.prototype;
-
-    // TODO(jridgewell): Support adoptedCallback and attributeChangedCallback
-    const lifecycleCallbacks = {
-      'connectedCallback': null,
-      'disconnectedCallback': null,
-    };
-
-    for (const callbackName in lifecycleCallbacks) {
-      const callback = proto[callbackName];
-      if (callback) {
-        lifecycleCallbacks[callbackName] = /** @type {function()} */(callback);
-      }
-    }
-
-    // TODO(jridgewell): If attributeChangedCallback, gather observedAttributes
-    this.registry_.add(name, ctor, lifecycleCallbacks);
+    this.registry_.define(name, ctor, options);
 
     // If anyone is waiting for this custom element to be defined, resolve
     // their promise.
@@ -261,21 +232,6 @@ class Registry {
      * @private {Element}
      */
     this.current_ = null;
-
-    // Mutation Observers are conveniently available in every browser we care
-    // about. When a node is connected to the root document, all custom
-    // elements (including that node iteself) will be upgraded and call
-    // connectedCallback. When a node is disconnectedCallback from the root
-    // document, all custom elements will call disconnectedCallback.
-    const observer = new win.MutationObserver(records => {
-      if (records) {
-        this.handleRecords_(records);
-      }
-    });
-    observer.observe(this.doc_, {
-      childList: true,
-      subtree: true,
-    });
   }
 
   /**
@@ -332,9 +288,38 @@ class Registry {
    *
    * @param {string} name
    * @param {!CustomElementConstructorDef} ctor
-   * @param {!Object} lifecycleCallbacks
+   * @param {!Object|undefined} options
    */
-  add(name, ctor, lifecycleCallbacks) {
+  define(name, ctor, options) {
+    const {Error, SyntaxError} = this.win_;
+
+    if (options) {
+      throw new Error('Extending native custom elements is not supported');
+    }
+
+    assertValidName(SyntaxError, name);
+
+    if (this.registry_.getByName(name) ||
+        this.registry_.getByConstructor(ctor)) {
+      throw new Error('duplicate definition');
+    }
+
+    const proto = ctor.prototype;
+
+    // TODO(jridgewell): Support adoptedCallback and attributeChangedCallback
+    const lifecycleCallbacks = {
+      'connectedCallback': null,
+      'disconnectedCallback': null,
+    };
+
+    for (const callbackName in lifecycleCallbacks) {
+      const callback = proto[callbackName];
+      if (callback) {
+        lifecycleCallbacks[callbackName] = /** @type {function()} */(callback);
+      }
+    }
+
+    // TODO(jridgewell): If attributeChangedCallback, gather observedAttributes
     // TODO(jridgewell): Record adoptedCallback, attributeChangedCallback, and
     // observedAttributes.
     this.definitions_[name] = {
@@ -344,11 +329,7 @@ class Registry {
       disconnectedCallback: lifecycleCallbacks['disconnectedCallback'],
     };
 
-    if (this.query_) {
-      this.query_ += ',';
-    }
-    this.query_ += name;
-
+    this.observe_(name);
     this.upgrade(this.doc_, name);
   }
 
@@ -447,6 +428,8 @@ class Registry {
       return;
     }
     this.upgradeSelf_(/** @type {!Element} */(node), def);
+    // TODO(jridgewell): It may be appropriate to adoptCallback, if the node
+    // used to be in another doc.
     if (node.connectedCallback) {
       node.connectedCallback();
     }
@@ -461,6 +444,41 @@ class Registry {
     if (node.disconnectedCallback) {
       node.disconnectedCallback();
     }
+  }
+
+  /**
+   * Records name as a registered custom element to observe.
+   *
+   * Starts the Mutation Observer if this is the first registered custom
+   * element. This is deferred until the first custom element is defined to
+   * speed up initial rendering of the page.
+   *
+   * Mutation Observers are conveniently available in every browser we care
+   * about. When a node is connected to the root document, all custom
+   * elements (including that node iteself) will be upgraded and call
+   * connectedCallback. When a node is disconnectedCallback from the root
+   * document, all custom elements will call disconnectedCallback.
+   *
+   * @param {string} name
+   */
+  observe_(name) {
+    if (this.query_) {
+      this.query_ += `,${name}`;
+      return;
+    }
+
+    this.query_ = name;
+
+    // The first registered name starts the mutation observer.
+    const observer = new this.win_.MutationObserver(records => {
+      if (records) {
+        this.handleRecords_(records);
+      }
+    });
+    observer.observe(this.doc_, {
+      childList: true,
+      subtree: true,
+    });
   }
 
   /**
