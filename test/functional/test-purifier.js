@@ -170,7 +170,6 @@ function runSanitizerTests() {
     it('should NOT output security-sensitive markup', () => {
       expect(purifyHtml('a<script>b</script>c')).to.be.equal('ac');
       expect(purifyHtml('a<script>b<img>d</script>c')).to.be.equal('ac');
-      expect(purifyHtml('a<style>b</style>c')).to.be.equal('ac');
       expect(purifyHtml('a<img>c')).to.be.equal('ac');
       expect(purifyHtml('a<iframe></iframe>c')).to.be.equal('ac');
       expect(purifyHtml('a<frame></frame>c')).to.be.equal('ac');
@@ -295,26 +294,20 @@ function runSanitizerTests() {
     });
 
     it('should NOT output security-sensitive attributes', () => {
-      allowConsoleError(() => {
-        expect(purifyHtml('a<a onclick="alert">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(purifyHtml('a<a style="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(purifyHtml('a<a STYLE="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(purifyHtml('a<a href="javascript:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purifyHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purifyHtml('a<a href="vbscript:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purifyHtml('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purifyHtml('a<a href="data:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purifyHtml('a<a href="DATA:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-      });
+      expect(purifyHtml('a<a onclick="alert">b</a>')).to.be.equal(
+          'a<a>b</a>');
+      expect(purifyHtml('a<a href="javascript:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purifyHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purifyHtml('a<a href="vbscript:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purifyHtml('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purifyHtml('a<a href="data:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purifyHtml('a<a href="DATA:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
     });
 
     it('should NOT output blacklisted values for class attributes', () => {
