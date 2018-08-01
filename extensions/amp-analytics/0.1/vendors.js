@@ -2096,6 +2096,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   },
 
   'moat': {
+    'vars': {
+      'element': ':root',
+    },
     'requests': {
       'load': '{' +
         '"type": "load",' +
