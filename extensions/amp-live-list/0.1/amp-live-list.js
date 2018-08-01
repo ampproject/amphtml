@@ -17,7 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout} from '../../../src/layout';
 import {LiveListManager, liveListManagerForDoc} from './live-list-manager';
 import {childElementByAttr} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';

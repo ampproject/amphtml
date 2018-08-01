@@ -22,7 +22,6 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {openWindowDialog} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
