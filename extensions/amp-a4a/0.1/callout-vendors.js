@@ -83,6 +83,11 @@ export const RTC_VENDORS = {
     macros: ['PUB_ID', 'PARAMS'],
     disableKeyAppend: true,
   },
+  criteo: {
+    url: 'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&href=HREF',
+    macros: ['ZONE_ID', 'NETWORK_ID', 'PUBLISHER_SUB_ID', 'LINE_ITEM_RANGES'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
