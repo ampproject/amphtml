@@ -152,6 +152,7 @@ const forbiddenTerms = {
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/service/action-impl.js',
       'src/service/standard-actions-impl.js',
       'src/runtime.js',
@@ -198,6 +199,7 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/ampdoc-impl.js',
       'testing/describes.js',
       'testing/iframe.js',
@@ -209,12 +211,14 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/performance-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/storage-impl.js',
     ],
@@ -229,6 +233,7 @@ const forbiddenTerms = {
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
@@ -238,6 +243,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -267,6 +273,7 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',

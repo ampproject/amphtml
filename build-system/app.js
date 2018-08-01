@@ -333,7 +333,7 @@ function proxyToAmpProxy(req, res, mode) {
             'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
-    const inabox = req.query['inabox'] == '1';
+    const inabox = req.query['inabox'];
     // TODO(ccordry): Remove this when story v01 is depricated.
     const storyV1 = req.query['story_v'] === '1';
     const urlPrefix = getUrlPrefix(req);
@@ -686,7 +686,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
 // Examples:
 // http://localhost:8000/inabox/examples/animations.amp.html
 // http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox/', (req, res) => {
+app.use('/inabox/:version/', (req, res) => {
   let adUrl = req.url;
   const templatePath = '/build-system/server-inabox-template.html';
   const urlPrefix = getUrlPrefix(req);
@@ -696,7 +696,7 @@ app.use('/inabox/', (req, res) => {
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  adUrl = addQueryParam(adUrl, 'inabox', req.params['version']);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
         .replace(/AD_URL/g, adUrl)
@@ -738,7 +738,7 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
 app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
-  const inabox = req.query['inabox'] == '1';
+  const inabox = req.query['inabox'];
   const stream = Number(req.query['stream']);
   fs.readFileAsync(pc.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
@@ -1118,13 +1118,19 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         hostName + '/dist/amp-shadow.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp-inabox.js');
+        hostName + '/dist/amp-inabox-lite.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
     if (inabox) {
+      let filename;
+      if (inabox == '1') {
+        filename = '/dist/amp-inabox.js';
+      } else if (inabox == '2') {
+        filename = '/dist/amp-inabox-lite.js';
+      }
       file = file.replace(/<html [^>]*>/, '<html amp4ads>');
-      file = file.replace(/\/dist\/amp\.js/g, '/dist/amp-inabox.js');
+      file = file.replace(/\/dist\/amp\.js/g, filename);
     }
   } else if (mode == 'compiled') {
     file = file.replace(
@@ -1143,7 +1149,13 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         /\/dist.3p\/current\/(.*)\.max.html/g,
         hostName + '/dist.3p/current-min/$1.html');
     if (inabox) {
-      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
+      let filename;
+      if (inabox == '1') {
+        filename = '/dist/amp4ads-v0.js';
+      } else if (inabox == '2') {
+        filename = '/dist/amp4ads-lite-v0.js';
+      }
+      file = file.replace(/\/dist\/v0\.js/g, filename);
     }
   }
   return file;
