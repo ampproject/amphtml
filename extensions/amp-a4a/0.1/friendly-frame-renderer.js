@@ -19,7 +19,6 @@ import {Renderer} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,

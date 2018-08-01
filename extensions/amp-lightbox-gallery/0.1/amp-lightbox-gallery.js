@@ -98,7 +98,7 @@ let manager_;
  *   element: !Element
  * }}
  */
-let LightboxElementMetadataDef_;
+let LightboxElementMetadataDef;
 
 /**
  * @private visible for testing.
@@ -132,7 +132,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {!Object<string,!Array<!LightboxElementMetadataDef_>>} */
+    /** @private {!Object<string,!Array<!LightboxElementMetadataDef>>} */
     this.elementsMetadata_ = {
       default: [],
     };
@@ -709,7 +709,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * @return {!LightboxElementMetadataDef_}
+   * @return {!LightboxElementMetadataDef}
    * @private
    */
   getCurrentElement_() {
