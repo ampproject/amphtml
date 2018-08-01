@@ -364,7 +364,7 @@ export class Bind {
   scanAndApply(addedElements, removedElements, timeout = 2000) {
     dev().info(TAG, 'rescan:', addedElements, removedElements);
     let promise;
-    if (isExperimentOn(this.win, 'faster-bind-scan')) {
+    if (isExperimentOn(this.win_, 'faster-bind-scan')) {
       /**
        * Helper function for cleaning up bindings in removed elements.
        * @param {number} added
