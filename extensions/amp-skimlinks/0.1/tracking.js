@@ -1,4 +1,8 @@
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
+import {generatePageImpressionId} from './utils';
+
+import {XCUST_ATTRIBUTE_NAME} from './constants';
+
 
 export const TRACKING_API_URL = 'https://t.skimresources.com/api';
 import {
@@ -13,7 +17,7 @@ export default class Tracking {
    * @param {*} element
    * @param {*} skimOptions
    */
-  constructor(element, skimOptions, pageImpressionId) {
+  constructor(element, skimOptions) {
     // 'layoutCallback' from custom-element base class needs be executed in order to have analytics working.
     // Analytics are not setup until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(element);
@@ -23,15 +27,33 @@ export default class Tracking {
 
     this.analytics_ = analyticsBuilder.build();
     this.tracking_ = skimOptions.tracking;
-    this.pubcode_ = skimOptions.pubcode;
-    // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
-    this.referer_ = '${documentReferrer}';
-    this.externalReferer_ = '${externalReferrer}';
-    this.timezone_ = '${timezone}';
-    this.pageImpressionId_ = pageImpressionId;
-    this.customTrackingId_ = skimOptions.customTrackingId;
+
+    this.trackingInfo_ = {
+      pubcode: skimOptions.pubcode,
+      // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
+      referrer: '${documentReferrer}',
+      externalReferrer: '${documentReferrer}',
+      timezone: '${timezone}',
+      pageImpressionId: generatePageImpressionId(),
+      customTrackingId: skimOptions.customTrackingId,
+      guid: null,
+    };
   }
 
+  /**
+   *
+   */
+  getTrackingInfo() {
+    return this.trackingInfo_;
+  }
+
+  /**
+   * Update tracking info
+   * @param {*} newInfo
+   */
+  setTrackingInfo(newInfo) {
+    this.trackingInfo_ = Object.assign(this.trackingInfo_, newInfo);
+  }
 
   /**
    * Send Page impression and link impressions
@@ -43,13 +65,14 @@ export default class Tracking {
     if (!this.tracking_) {
       return;
     }
+    const {pageImpressionId, timezone, pubcode} = this.trackingInfo_;
 
     const commonData = {
       pag: window.location.href, // TODO: is this the same as this.referer_?
       guid: userSessionData.guid,
-      uuid: this.pageImpressionId_,
-      tz: this.timezone_,
-      pub: this.pubcode_,
+      uuid: pageImpressionId,
+      tz: timezone,
+      pub: pubcode,
     };
 
     const {
@@ -70,16 +93,24 @@ export default class Tracking {
     if (!this.tracking_) {
       return;
     }
+    const {
+      pageImpressionId,
+      timezone,
+      pubcode,
+      referrer,
+      externalReferrer,
+      customTrackingId,
+    } = this.trackingInfo_;
 
     const data = {
-      pubcode: this.pubcode_,
-      referrer: this.referer_,
-      pref: this.externalReferer_,
+      pubcode,
+      referrer,
+      pref: externalReferrer,
       site: 'false',
       url: anchor.href,
-      custom: anchor.customTrackingId || this.customTrackingId_,
-      xtz: this.timezone_,
-      uuid: this.pageImpressionId,
+      custom: anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId,
+      xtz: timezone,
+      uuid: pageImpressionId,
       product: '1',
     };
 
@@ -95,11 +126,13 @@ export default class Tracking {
    * @param {*} startTime
    */
   sendPageImpressionTracking_(commonData, numberAffiliateLinks, startTime) {
+    const {customTrackingId, externalReferrer} = this.trackingInfo_;
+
     const data = Object.assign({
       slc: numberAffiliateLinks,
       jsl: new Date().getTime() - startTime, // How long did it take to send the tracking
-      pref: this.externalReferer_,
-      uc: this.customTrackingId_,
+      pref: externalReferrer,
+      uc: customTrackingId,
       t: 1,
     }, commonData);
 

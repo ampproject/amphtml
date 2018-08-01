@@ -1,9 +1,10 @@
 
 import {AnchorRewriteDataResponse,createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-classes';
 import {Services} from '../../../../src/services';
+import {XCUST_ATTRIBUTE_NAME} from '../constants';
 import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
 import AffiliateLinkResolver, {DOMAIN_RESOLVER_URL, LINK_STATUS__AFFILIATE, LINK_STATUS__NON_AFFILIATE, LINK_STATUS__UNKNOWN} from '../affiliate-link-resolver';
-import { generatePageImpressionId } from '../utils';
+
 
 describes.realWin('amp-skimlinks', {
   amp: {
@@ -34,21 +35,6 @@ describes.realWin('amp-skimlinks', {
     env.sandbox.restore();
   });
 
-
-  // it('Runs one test', () => {
-  //   expect(true).to.be.true;
-  // });
-
-  // function mockXhrResponse(url, response) {
-  //   xhrMock
-  //     .expects('fetchJson')
-  //     .returns(Promise.resolve({
-  //       json() {
-  //         return Promise.resolve(response);
-  //       },
-  //     }));
-  // }
-
   function createStubXhr(xhr, data) {
     const response = {
       json: () => {return Promise.resolve(data);},
@@ -59,6 +45,21 @@ describes.realWin('amp-skimlinks', {
     };
   }
 
+  function createGetTrackingInfoStub(data) {
+    return () => {
+      return Object.assign({
+        pubcode,
+        // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
+        referrer: 'referrer',
+        externalReferrer: 'external_referrer',
+        timezone: 'timezone',
+        pageImpressionId: 'page_impression_id',
+        customTrackingId: null,
+        guid: 'user_guid',
+      }, data);
+    };
+  }
+
   describe('skimOptions', () => {
     it('Should always exclude internal domains', () => {
 
@@ -66,6 +67,13 @@ describes.realWin('amp-skimlinks', {
   });
 
   describe('AffiliateLinkResolver', () => {
+    let getTrackingInfo;
+    let apiCallback;
+
+    beforeEach(() => {
+      getTrackingInfo = createGetTrackingInfoStub();
+      apiCallback = env.sandbox.stub();
+    });
 
     describe('resolveUnknownAnchors', () => {
       const alreadyResolvedDomains = {
@@ -88,9 +96,12 @@ describes.realWin('amp-skimlinks', {
 
       describe('Calls "fetchDomainResolverApi" function with the right domains', () => {
         beforeEach(() => {
-          resolver = new AffiliateLinkResolver({}, {
-            excludedDomains: ['excluded-merchant.com'],
-          }, () => {});
+          resolver = new AffiliateLinkResolver(
+              {},
+              {excludedDomains: ['excluded-merchant.com']},
+              getTrackingInfo,
+              apiCallback,
+          );
 
           anchorList = [
             'http://merchant1.com',
@@ -199,9 +210,12 @@ describes.realWin('amp-skimlinks', {
       describe('Does correct request to domain resolver API', () => {
         beforeEach(() => {
           mock = env.sandbox.mock(xhr);
-          resolver = new AffiliateLinkResolver(xhr, {
-            pubcode,
-          }, () => {});
+          resolver = new AffiliateLinkResolver(
+              xhr,
+              {pubcode},
+              getTrackingInfo,
+              apiCallback,
+          );
         });
 
         afterEach(() => {
@@ -263,21 +277,19 @@ describes.realWin('amp-skimlinks', {
 
 
       describe('Calls the beacon callback', () => {
-        let apiCallback;
         let stubXhr;
         let beaconData;
+        let resolver;
 
         beforeEach(() => {
-          apiCallback = env.sandbox.spy();
           beaconData = {
             'merchant_domains': ['merchant1.com', 'merchant2.com'],
           };
           stubXhr = createStubXhr(xhr, beaconData);
+          resolver = new AffiliateLinkResolver(stubXhr, {}, getTrackingInfo, apiCallback);
         });
 
         it('Should call the callback if provided', () => {
-          const resolver = new AffiliateLinkResolver(stubXhr, {}, apiCallback);
-
           const response = resolver.resolveUnknownAnchors(anchorList);
           return response.asyncData.then(() => {
             expect(apiCallback.calledOnce).to.be.true;
@@ -285,7 +297,6 @@ describes.realWin('amp-skimlinks', {
         });
 
         it('Should provide the beacon data', () => {
-          const resolver = new AffiliateLinkResolver(stubXhr, {}, apiCallback);
           const response = resolver.resolveUnknownAnchors(anchorList);
           return response.asyncData.then(() => {
             expect(apiCallback.withArgs(beaconData).calledOnce).to.be.true;
@@ -293,8 +304,6 @@ describes.realWin('amp-skimlinks', {
         });
 
         it('Should not call the callback if api request is not made', () => {
-          const resolver = new AffiliateLinkResolver(stubXhr, {}, apiCallback);
-
           const response = resolver.resolveUnknownAnchors([]);
           expect(response.asyncData).to.be.null;
           expect(apiCallback.calledOnce).to.be.false;
@@ -308,9 +317,12 @@ describes.realWin('amp-skimlinks', {
           const stubXhr = createStubXhr(xhr, {
             'merchant_domains': ['merchant1.com', 'merchant2.com'],
           });
-          resolver = new AffiliateLinkResolver(stubXhr, {
-            excludedDomains: ['excluded-merchant.com'],
-          }, () => { });
+          resolver = new AffiliateLinkResolver(
+              stubXhr,
+              {excludedDomains: ['excluded-merchant.com']},
+              getTrackingInfo,
+              apiCallback,
+          );
         });
 
         it('Should return an AnchorRewriteDataResponse instance', () => {
@@ -399,7 +411,7 @@ describes.realWin('amp-skimlinks', {
 
 
     describe('getLinkDomain_', () => {
-      const resolver = new AffiliateLinkResolver({}, {}, () => { });
+      const resolver = new AffiliateLinkResolver({}, {}, getTrackingInfo, apiCallback);
 
       it('Removes  http protocol', () => {
         const anchor = createAnchor('http://test.com');
@@ -429,7 +441,6 @@ describes.realWin('amp-skimlinks', {
       let queryParams;
       let anchor;
       const destinationUrl = 'https://test.com/path/to?isAdmin=true';
-      const PAGE_IMPRESSION_ID = 'fake_page_impression_id';
 
       function getQueryParams(url) {
         return parseQueryString(
@@ -438,15 +449,11 @@ describes.realWin('amp-skimlinks', {
       }
 
       function generateWaypointUrl(anchor, customTrackingId) {
-        const skimOptions = {
-          pubcode,
-          customTrackingId,
-        };
         const resolver = new AffiliateLinkResolver(
-          {},
-          skimOptions,
-          () => {},
-          PAGE_IMPRESSION_ID
+            {},
+            {},
+            createGetTrackingInfoStub({customTrackingId}),
+            apiCallback
         );
         return resolver.getWaypointUrl_(anchor);
       }
@@ -464,35 +471,42 @@ describes.realWin('amp-skimlinks', {
         expect(queryParams.url).to.equal(destinationUrl);
       });
 
-      it.skip('Sends the sref', () => {
-        expect(queryParams.sref).to.equal('');
-      });
-      it.skip('Sends the pref', () => {
-        expect(queryParams.pref).to.equal('');
-      });
-      it.skip('Sends the xcreo (creative)', () => {
-        expect(queryParams.xcreo).to.equal('');
-      });
-      it.skip('Sends the xguid (GUID)', () => {
-        expect(queryParams.xguid).to.equal('');
-      });
-      it('Sends the xuuid (impression id)', () => {
-        expect(queryParams.xuuid).to.equal(PAGE_IMPRESSION_ID);
-      });
-      it.skip('Sends the xtz (timezone)', () => {
-        expect(queryParams.xtz).to.equal('');
-      });
-      it.skip('Sends the xed ()', () => {
-        expect(queryParams.xed).to.equal('');
+      it('Sends the sref', () => {
+        expect(queryParams.sref).to.equal('referrer');
       });
 
-      describe.skip('custom-tracking-id', () => {
+      it('Sends the pref', () => {
+        expect(queryParams.pref).to.equal('external_referrer');
+      });
+
+      it('Sends the xcreo (creative)', () => {
+        expect(queryParams.xcreo).to.equal('FIXME_AMP_CREATIVE');
+      });
+
+      it('Sends the xguid (GUID)', () => {
+        expect(queryParams.xguid).to.equal('user_guid');
+      });
+
+      it('Sends the xuuid (impression id)', () => {
+        expect(queryParams.xuuid).to.equal('page_impression_id');
+      });
+
+      it('Sends the xtz (timezone)', () => {
+        expect(queryParams.xtz).to.equal('timezone');
+      });
+
+      it('Sends xs (source app)', () => {
+        expect(queryParams.xs).to.equal('1');
+      });
+
+      describe('custom-tracking-id', () => {
         it('Does not send the xcust (custom tracking id) if not provided as skimOption', () => {
           expect(queryParams.xcust).to.be.undefined;
         });
 
         it('Sends the xcust (custom tracking id) if provided on the link', () => {
-          anchor.setAttribute('linkTrackingId');
+          anchor.setAttribute(XCUST_ATTRIBUTE_NAME, 'linkTrackingId');
+          replacementUrl = generateWaypointUrl(anchor);
           queryParams = getQueryParams(replacementUrl);
           expect(queryParams.xcust).to.be.equal('linkTrackingId');
         });
@@ -505,8 +519,8 @@ describes.realWin('amp-skimlinks', {
 
 
         it('Sends the xcust (custom tracking id) if provided on the link and as skimOption', () => {
-          anchor.setAttribute('linkTrackingId');
-          replacementUrl = generateWaypointUrl('globalTrackingId');
+          anchor.setAttribute(XCUST_ATTRIBUTE_NAME, 'linkTrackingId');
+          replacementUrl = generateWaypointUrl(anchor, 'globalTrackingId');
           queryParams = getQueryParams(replacementUrl);
           expect(queryParams.xcust).to.be.equal('linkTrackingId');
         });

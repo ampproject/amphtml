@@ -1,8 +1,9 @@
 
 import {addParamsToUrl,parseUrlDeprecated} from '../../../src/url';
 
-import {AFFILIATION_API,XCUST_ATTRIBUTE_NAME} from './constants';
+import {AFFILIATION_API,AMP_CREATIVE,XCUST_ATTRIBUTE_NAME} from './constants';
 import {AnchorRewriteDataResponse, createAnchorReplacementTuple} from '../../../src/service/link-rewrite/link-rewrite-classes';
+import {once} from '../../../src/utils/function';
 
 export const LINK_STATUS__AFFILIATE = 'affiliate';
 export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
@@ -15,15 +16,16 @@ export default class AffiliateLinkResolver {
    *
    * @param {*} xhr
    * @param {*} skimOptions
+   * @param {*} getTrackingInfo
    * @param {*} beaconApiCallback
-   * @param {*} pageImpressionId
    */
-  constructor(xhr, skimOptions, beaconApiCallback, pageImpressionId) {
+  constructor(xhr, skimOptions, getTrackingInfo, beaconApiCallback) {
     this.xhr_ = xhr;
     this.skimOptions_ = skimOptions;
     this.domains_ = {};
     this.beaconApiCallback_ = beaconApiCallback;
-    this.pageImpressionId_ = pageImpressionId;
+    this.getTrackingInfo_ = getTrackingInfo;
+    this.onBeaconCallbackONCE = once(this.onBeaconCallback_);
   }
 
   /**
@@ -52,18 +54,31 @@ export default class AffiliateLinkResolver {
    * @param {*} anchor
    */
   getWaypointUrl_(anchor) {
-    const {pubcode, customTrackingId} = this.skimOptions_;
+    if (!anchor) {
+      return null;
+    }
+
+    const {
+      pubcode,
+      referrer,
+      externalReferrer,
+      timezone,
+      pageImpressionId,
+      customTrackingId,
+      guid,
+    } = this.getTrackingInfo_();
+
     const xcust = anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId;
     const queryParams = {
       id: pubcode,
       url: anchor.href,
-      sref: null,
-      pref: null,
-      xcreo: null,
-      xguid: null,
-      xuuid: this.pageImpressionId_,
-      xtz: null,
-      xed: null,
+      sref: referrer,
+      pref: externalReferrer,
+      xcreo: AMP_CREATIVE,
+      xguid: guid,
+      xuuid: pageImpressionId,
+      xtz: timezone,
+      xs: '1', // Always use source_app=1 (skimlinks)
     };
     if (xcust) {
       queryParams.xcust = xcust;
