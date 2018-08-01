@@ -589,9 +589,7 @@ export class Bind {
     });
   }
 
-  /**
-   * TODO(choumx)
-   */
+  /** Emits console error stating that the binding limit was exceeded. */
   emitMaxBindingsExceededError_() {
     dev().expectedError(TAG, 'Maximum number of bindings reached ' +
         `(${this.maxNumberOfBindings_}). Additional elements with ` +
@@ -599,7 +597,7 @@ export class Bind {
   }
 
   /**
-   * TODO(choumx)
+   * Sends new bindings to the web worker for parsing.
    * @param {!Array<!BindBindingDef>} bindings
    * @return {!Promise<number>}
    */
@@ -735,7 +733,7 @@ export class Bind {
   }
 
   /**
-   * TODO(choumx)
+   * Scans the element for bindings and stores them in ivars.
    * @param {!Element} element
    * @param {number} quota
    * @param {!Array<!BindBindingDef>} outBindings
