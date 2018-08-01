@@ -333,6 +333,9 @@ export function purifyHtml(dirty) {
     if (isBinding) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`data-amp-bind-${property}`, attrValue);
+      // Set a custom attribute to mark this element as containing a binding.
+      // This is an optimization that obviates the need for DOM scan later.
+      node.setAttribute('i-amphtml-binding', '');
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
