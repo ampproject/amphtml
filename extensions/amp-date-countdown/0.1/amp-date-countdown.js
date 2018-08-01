@@ -75,9 +75,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {function(!Element)} */
-    this.boundRendered_ = this.rendered_.bind(this);
-
     //Note: One of end-date, timestamp-ms, timestamp-seconds is required.
     /** @private {string} */
     this.endDate_ = this.element.getAttribute('end-date');
@@ -169,7 +166,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     items['data'] = Object.assign(DIFF, this.localeWordList_);
     this.templates_
         .findAndRenderTemplate(this.element, items['data'])
-        .then(this.boundRendered_);
+        .then(rendered => this.rendered_(rendered.element));
   }
 
   /**

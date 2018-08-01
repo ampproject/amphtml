@@ -22,13 +22,13 @@ import {
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from './url';
+import {dev, user} from './log';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
 import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
-import {user} from './log';
 
 /** @private @const {string} */
 const TAG = 'purifier';
@@ -225,7 +225,7 @@ const PURIFY_CONFIG = {
 
 /**
  * @param {string} dirty
- * @return {string}
+ * @return {{clean: !Element, bindings: !Array<!JsonObject>}}
  */
 export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
@@ -234,6 +234,8 @@ export function purifyHtml(dirty) {
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
     'FORCE_BODY': true,
+    // Avoid need for serializing to/from string by returning Node directly.
+    'RETURN_DOM': true,
   });
 
   // Reference to DOMPurify's `allowedTags` whitelist.
@@ -243,6 +245,10 @@ export function purifyHtml(dirty) {
   // Reference to DOMPurify's `allowedAttributes` whitelist.
   let allowedAttributes;
   const allowedAttributesChanges = [];
+
+  // List of <amp-bind> bindings -- {tag, property, expression} tuples.
+  // Collecting them here is an optimization to obviate DOM scanning later.
+  const bindings = /** @type {!Array<!JsonObject>} */ ([]);
 
   /**
    * @param {!Node} node
@@ -328,11 +334,15 @@ export function purifyHtml(dirty) {
     // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
     // after sanitization, which fails because `[]` are not valid attr chars.
-    const isBinding = attrName[0] == '['
-        && attrName[attrName.length - 1] == ']';
-    if (isBinding) {
+    const binding = attrName[0] == '[' && attrName[attrName.length - 1] == ']';
+    if (binding) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`data-amp-bind-${property}`, attrValue);
+      bindings.push(dict({
+        'element': dev().assertElement(node),
+        'property': property,
+        'expression': attrValue,
+      }));
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
@@ -380,9 +390,9 @@ export function purifyHtml(dirty) {
   DOMPurify.addHook('afterSanitizeElements', afterSanitizeElements);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  const purified = DOMPurify.sanitize(dirty, config);
+  const body = DOMPurify.sanitize(`<div>${dirty}</div>`, config);
   DOMPurify.removeAllHooks();
-  return purified;
+  return {clean: body.firstElementChild, bindings};
 }
 
 /**

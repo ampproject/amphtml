@@ -513,6 +513,15 @@ AMP.require;
 var TransitionDef;
 
 ///////////////////
+// Template externs
+///////////////////
+
+/**
+ * @typedef {{element: !Element, metadata: ?JsonObject}}
+ */
+let RenderedTemplateDef;
+
+///////////////////
 // amp-bind externs
 ///////////////////
 
@@ -562,9 +571,9 @@ let BindEvaluateBindingsResultDef;
  */
 let BindEvaluateExpressionResultDef;
 
-/////////////////////////////
-////// Web Anmomation externs
-/////////////////////////////
+////////////////////////
+// Web Animation externs
+/////////////////////////
 /**
  * @typedef {
  *   !WebMultiAnimationDef|

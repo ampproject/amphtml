@@ -115,13 +115,13 @@ export class AmpAdCustom extends AMP.BaseElement {
       try {
         Services.templatesFor(this.win)
             .findAndRenderTemplate(this.element, templateData)
-            .then(renderedElement => {
+            .then(rendered => {
               // Get here when the template has been rendered Clear out the
               // child template and replace it by the rendered version Note that
               // we can't clear templates that's not ad's child because they
               // maybe used by other ad component.
               removeChildren(this.element);
-              this.element.appendChild(renderedElement);
+              this.element.appendChild(rendered.element);
               this.signals().signal(CommonSignals.INI_LOAD);
             });
       } catch (e) {

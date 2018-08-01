@@ -87,12 +87,10 @@ export class LocalSubscriptionPlatformRenderer {
       }
       if (candidate.tagName == 'TEMPLATE') {
         return this.templates_.renderTemplate(candidate, authResponse)
-            .then(element => {
-              const renderState =
-                /** @type {!JsonObject} */(authResponse);
-              return this.renderActionsInNode_(
-                  renderState,
-                  element);
+            .then(rendered => {
+              const {element} = rendered;
+              const renderState = /** @type {!JsonObject} */(authResponse);
+              return this.renderActionsInNode_(renderState, element);
             });
       }
       const clone = candidate.cloneNode(true);

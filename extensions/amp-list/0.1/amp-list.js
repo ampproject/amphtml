@@ -314,18 +314,16 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      this.templates_.findAndRenderTemplate(
-          this.element, /** @type {!JsonObject} */ (current.data))
-          .then(element => {
-            this.container_.appendChild(element);
-          })
-          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+      const json = /** @type {!JsonObject} */ (current.data);
+      this.templates_.findAndRenderTemplate(this.element, json)
+          .then(result => this.container_.appendChild(result.element))
+          .then(onFulfilledCallback, onRejectedCallback);
     } else {
-      this.templates_.findAndRenderTemplateArray(
-          this.element, /** @type {!Array} */ (current.data))
-          .then(elements => this.updateBindingsForElements_(elements))
+      const array = /** @type {!Array} */ (current.data);
+      this.templates_.findAndRenderTemplateArray(this.element, array)
+          .then(results => this.updateBindings_(results))
           .then(elements => this.render_(elements))
-          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+          .then(onFulfilledCallback, onRejectedCallback);
     }
   }
 
@@ -333,21 +331,44 @@ export class AmpList extends AMP.BaseElement {
    * Scans for, evaluates and applies any bindings in the given elements.
    * Ensures that rendered content is up-to-date with the latest bindable state.
    * Can be skipped by setting binding="no" or binding="refresh" attribute.
-   * @param {!Array<!Element>} elements
+   * @param {!Array<!RenderedTemplateDef>} results
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindingsForElements_(elements) {
+  updateBindings_(results) {
+    const elements = [];
+    const bindings = [];
+    // Not all template versions support returning binding metadata.
+    const supportsIngestion = results.some(r => !!r.metadata);
+    // Flatten `results` into `elements` and `bindings` arrays.
+    results.forEach(r => {
+      const {element, metadata} = r;
+      elements.push(element);
+      if (supportsIngestion) {
+        Array.prototype.push.apply(bindings, metadata['bindings']);
+      }
+    });
+
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {
       return Promise.resolve(elements);
     }
+    const updateWith = bind => {
+      const removedElements = [this.container_];
+      // Instead of another experiment, use the new `binding` attribute as an
+      // opt-in for the faster `ingestAndApply()` API.
+      const promise = supportsIngestion && this.element.hasAttribute('binding')
+        ? bind.ingestAndApply(bindings, removedElements)
+        : bind.scanAndApply(/* added */ elements, removedElements);
+      return promise.then(() => elements, () => elements);
+    };
+
     // "refresh": Do _not_ block on retrieval of the Bind service before the
     // first mutation (AMP.setState).
     if (binding === 'refresh') {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
-        return this.updateBindingsWith_(this.bind_, elements);
+        return updateWith(this.bind_);
       } else {
         return Promise.resolve(elements);
       }
@@ -356,23 +377,11 @@ export class AmpList extends AMP.BaseElement {
     // in the newly rendered `elements`.
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
-        return this.updateBindingsWith_(bind, elements);
+        return updateWith(bind);
       } else {
         return Promise.resolve(elements);
       }
     });
-  }
-
-  /**
-   * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
-   * @param {!Array<!Element>} elements
-   * @return {!Promise<!Array<!Element>>}
-   */
-  updateBindingsWith_(bind, elements) {
-    // Forward elements to chained promise on success or failure.
-    const forwardElements = () => elements;
-    return bind.scanAndApply(elements, [this.container_])
-        .then(forwardElements, forwardElements);
   }
 
   /**

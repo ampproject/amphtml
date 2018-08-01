@@ -75,8 +75,9 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<!Element>} Promise which resolves after rendering completes.
    */
   render(templateValues, element) {
-    return Services.templatesFor(this.win_)
-        .findAndRenderTemplate(element, templateValues);
+    const templates = Services.templatesFor(this.win_);
+    return templates.findAndRenderTemplate(element, templateValues)
+        .then(rendered => rendered.element);
   }
 
   /**

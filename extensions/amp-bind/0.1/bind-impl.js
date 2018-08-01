@@ -24,7 +24,7 @@ import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {filterSplice} from '../../../src/utils/array';
+import {filterSplice, findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
@@ -380,6 +380,79 @@ export class Bind {
   }
 
   /**
+   * Similar to scanAndApply(), but instead of being given new elements to scan,
+   * the caller provides an array of {element, property, expression} tuples
+   * that correspond to new bindings. The tuples are provided as JsonObject
+   * since they cross a binary boundary.
+   *
+   * Bindings in `removedElements` are removed after evaluation/apply.
+   *
+   * @param {!Array<!JsonObject>} ingestible
+   * @param {!Array<!Element>} removedElements
+   * @return {!Promise}
+   */
+  ingestAndApply(ingestible, removedElements) {
+    return this.initializePromise_.then(() => {
+      // Early-out if max number of bindings has already been exceeded.
+      // This can happen since we purge old bindings in `removedElements`
+      // _after_ adding new ones (rather than before) as an optimization.
+      if (this.numberOfBindings() > this.maxNumberOfBindings_) {
+        this.emitMaxBindingsExceededError_();
+        this.removeBindingsForNodes_(removedElements);
+        return;
+      }
+
+      const bindings = /** @type {!Array<!BindBindingDef>} */ ([]);
+      const boundElements = /** @type {!Array<!BoundElementDef>} */ ([]);
+      const expressionToElements =
+        /** @type {!Object<string, !Array<!Element>>} */ (map());
+      const elements = /** @type {!Array<!Element>} */ ([]);
+
+      // Unpack `ingestible` array into structs used internally by this service.
+      ingestible.forEach(i => {
+        const {'element': el, 'property': property, 'expression': expr} = i;
+
+        const boundProperty = /** @type {!BoundPropertyDef} */ (
+          {property, expressionString: expr}
+        );
+        const index = findIndex(boundElements, be => be.element === el);
+        if (index < 0) {
+          boundElements.push({element: el, boundProperties: [boundProperty]});
+        } else {
+          boundElements[index].boundProperties.push(boundProperty);
+        }
+
+        bindings.push({tagName: el.tagName, property, expressionString: expr});
+
+        if (!expressionToElements[expr]) {
+          expressionToElements[expr] = [];
+        }
+        expressionToElements[expr].push(el);
+
+        elements.push(el);
+      });
+
+      // Merge the structs with existing data.
+      this.boundElements_ = this.boundElements_.concat(boundElements);
+      Object.assign(this.expressionToElements_, expressionToElements);
+
+      return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
+        this.reportParseErrors_(parseErrors);
+        // Evaluate and apply changes to elements in `ingestible`.
+        return this.evaluate_().then(results =>
+          this.applyElements_(results, elements));
+      }).then(() => {
+        // Remove bindings at the end to reduce evaluation/apply latency.
+        // Don't chain this promise since this is a non-blocking clean up task.
+        this.removeBindingsForNodes_(removedElements).then(removed => {
+          dev().info(TAG, '⤷', 'Δ:', (bindings.length - removed),
+              ', ∑:', this.numberOfBindings());
+        });
+      });
+    });
+  }
+
+  /**
    * Returns the stringified value of the global state for a given field-based
    * expression, e.g. "foo.bar.baz".
    * @param {string} expr
@@ -547,11 +620,8 @@ export class Bind {
         Object.assign(this.expressionToElements_, expressionToElements);
 
         if (limitExceeded) {
-          dev().expectedError(TAG, 'Maximum number of bindings reached ' +
-              `(${this.maxNumberOfBindings_}). Additional elements with ` +
-              'bindings will be ignored.');
+          this.emitMaxBindingsExceededError_();
         }
-
         return bindings;
       });
     });
@@ -566,15 +636,7 @@ export class Bind {
         return bindings.length;
       } else {
         return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
-          // Report each parse error.
-          Object.keys(parseErrors).forEach(expressionString => {
-            const elements = this.expressionToElements_[expressionString];
-            if (elements.length > 0) {
-              this.reportWorkerError_(parseErrors[expressionString],
-                  `${TAG}: Expression compile error in "${expressionString}".`,
-                  elements[0]);
-            }
-          });
+          this.reportParseErrors_(parseErrors);
           return bindings.length;
         });
       }
@@ -1247,7 +1309,22 @@ export class Bind {
   }
 
   /**
-   * @param {{message: string, stack:string}} e
+   * @param {!Object<string, !BindEvaluatorErrorDef>} parseErrors
+   */
+  reportParseErrors_(parseErrors) {
+    // Report each parse error.
+    Object.keys(parseErrors).forEach(expressionString => {
+      const elements = this.expressionToElements_[expressionString];
+      if (elements.length > 0) {
+        this.reportWorkerError_(parseErrors[expressionString],
+            `${TAG}: Expression compile error in "${expressionString}".`,
+            elements[0]);
+      }
+    });
+  }
+
+  /**
+   * @param {!BindEvaluatorErrorDef} e
    * @param {string} message
    * @param {!Element=} opt_element
    * @return {!Error}
@@ -1269,6 +1346,15 @@ export class Bind {
       return;
     }
     reportError(error, opt_element);
+  }
+
+  /**
+   * Emit a runtime error for exceeding the maximum number of bindings.
+   */
+  emitMaxBindingsExceededError_() {
+    dev().expectedError(TAG, 'Maximum number of bindings reached ' +
+      `(${this.maxNumberOfBindings_}). Additional elements with ` +
+      'bindings will be ignored.');
   }
 
   /**

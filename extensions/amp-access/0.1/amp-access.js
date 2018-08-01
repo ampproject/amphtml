@@ -483,9 +483,8 @@ export class AccessService {
     if (!template) {
       return Promise.reject(new Error('template not found'));
     }
-
-    const rendered = this.templates_.renderTemplate(template, response);
-    return rendered.then(element => {
+    return this.templates_.renderTemplate(template, response).then(result => {
+      const {element} = result;
       return this.vsync_.mutatePromise(() => {
         element.setAttribute('amp-access-template', '');
         element[TEMPLATE_PROP] = template;

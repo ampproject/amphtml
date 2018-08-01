@@ -1431,7 +1431,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   renderTemplateElement_(template, opt_data = /** @type {!JsonObject} */ ({})) {
-    return this.templates_.renderTemplate(template, opt_data);
+    return this.templates_.renderTemplate(template, opt_data)
+        .then(rendered => rendered.element);
   }
 
   /**
@@ -1449,7 +1450,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   renderTemplate_(template, opt_data, opt_fallback = '') {
     if (template) {
       return this.renderTemplateElement_(template, opt_data)
-          .then(rendered => this.getRenderedTemplateString_(rendered));
+          .then(element => this.getRenderedTemplateString_(element));
     } else {
       return Promise.resolve(opt_fallback);
     }
