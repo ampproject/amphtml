@@ -168,8 +168,10 @@ describe('Viewer', () => {
     windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+    return Promise.resolve().then(() => {
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+    });
   });
 
   it('should merge fragments within custom tab', () => {
@@ -180,8 +182,10 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    return Promise.resolve(() => {
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    });
   });
 
   it('should not duplicate ampshare when merging', () => {
@@ -192,8 +196,10 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    return Promise.resolve(() => {
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    });
   });
 
   it('should remove multiple ampshares when merging', () => {
@@ -206,8 +212,10 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    return Promise.resolve(() => {
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    });
   });
 
   it('should remove extra ampshare even when it\'s first', () => {
@@ -218,8 +226,10 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
+    return Promise.resolve(() => {
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          '#ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
+    });
   });
 
   it('should remove extra ampshare even when it\'s sandwiched', () => {
@@ -233,8 +243,10 @@ describe('Viewer', () => {
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.getParam('note')).to.equal('ok');
     expect(viewer.isCctEmbedded()).to.be.true;
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#note=ok&ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
+    return Promise.resolve(() => {
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          '#note=ok&ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
+    });
   });
 
   it('should clear fragment when click param is present', () => {
@@ -257,8 +269,10 @@ describe('Viewer', () => {
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         'http://www.example.com');
     expect(viewer.getParam('click')).to.equal('abc');
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+    return Promise.resolve(() => {
+      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+          '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+    });
   });
 
   it('should configure visibilityState visible by default', () => {
