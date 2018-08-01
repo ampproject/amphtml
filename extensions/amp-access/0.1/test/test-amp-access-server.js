@@ -15,6 +15,7 @@
  */
 
 import * as lolex from 'lolex';
+import * as DocumentFetcher from '../../../../src/document-fetcher';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
 
@@ -91,13 +92,14 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     let clientAdapter;
     let clientAdapterMock;
     let xhrMock;
+    let docFetcherMock;
     let responseDoc;
     let targetElement1, targetElement2;
 
     beforeEach(() => {
       adapter = new AccessServerAdapter(ampdoc, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
-
+      docFetcherMock = sandbox.mock(DocumentFetcher);
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
         getAuthorizationTimeout: () => 3000,
@@ -131,6 +133,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     afterEach(() => {
       clientAdapterMock.verify();
       xhrMock.verify();
+      docFetcherMock.restore();
     });
 
     describe('authorize', () => {
@@ -139,7 +142,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
         clientAdapterMock.expects('authorize').returns(p).once();
-        xhrMock.expects('fetchDocument').never();
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
       });
@@ -148,7 +151,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
         clientAdapterMock.expects('authorize').returns(p).once();
-        xhrMock.expects('fetchDocument').never();
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
       });
@@ -172,7 +175,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             'OTHER': '123',
           },
         };
-        xhrMock.expects('fetchDocument')
+        docFetcherMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
@@ -214,7 +217,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             'OTHER': '123',
           },
         };
-        xhrMock.expects('fetchDocument')
+        docFetcherMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
@@ -251,7 +254,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             'OTHER': '123',
           },
         };
-        xhrMock.expects('fetchDocument')
+        docFetcherMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),

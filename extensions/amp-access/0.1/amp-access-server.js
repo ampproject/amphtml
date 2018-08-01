@@ -22,6 +22,7 @@ import {escapeCssSelectorIdent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
+import { fetchDocument } from '../../../src/document-fetcher';
 
 /** @const {string} */
 const TAG = 'amp-access-server';
@@ -152,7 +153,7 @@ export class AccessServerAdapter {
       // CORS preflight request.
       return this.timer_.timeoutPromise(
           this.clientAdapter_.getAuthorizationTimeout(),
-          this.xhr_.fetchDocument(this.serviceUrl_, {
+          fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
             headers: dict({

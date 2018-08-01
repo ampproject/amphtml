@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as DocumentFetcher from '../../../../src/document-fetcher';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
@@ -118,6 +119,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
     let clientAdapter;
     let clientAdapterMock;
     let xhrMock;
+    let docFetcherMock;
     let jwtMock;
     let responseDoc;
     let targetElement1, targetElement2;
@@ -126,6 +128,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
       jwtMock = sandbox.mock(adapter.jwtHelper_);
+      docFetcherMock = sandbox.mock(DocumentFetcher);
 
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
@@ -159,6 +162,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
     afterEach(() => {
       clientAdapterMock.verify();
       xhrMock.verify();
+      docFetcherMock.restore();
       jwtMock.verify();
     });
 
@@ -169,7 +173,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const p = Promise.resolve();
         const stub = sandbox.stub(adapter, 'authorizeOnClient_').callsFake(
             () => p);
-        xhrMock.expects('fetchDocument').never();
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
         expect(stub).to.be.calledOnce;
@@ -180,7 +184,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const p = Promise.resolve();
         const stub = sandbox.stub(adapter, 'authorizeOnClient_').callsFake(
             () => p);
-        xhrMock.expects('fetchDocument').never();
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
         expect(stub).to.be.calledOnce;
@@ -190,7 +194,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const p = Promise.resolve();
         const stub = sandbox.stub(adapter, 'authorizeOnServer_').callsFake(
             () => p);
-        xhrMock.expects('fetchDocument').never();
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
         expect(stub).to.be.calledOnce;
@@ -201,7 +205,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const jwt = {'amp_authdata': authdata};
         sandbox.stub(adapter, 'fetchJwt_').callsFake(
             () => Promise.resolve({jwt}));
-        xhrMock.expects('fetchDocument').never();
+        docFetcherMock.expects('fetchDocument').never();
         return adapter.authorizeOnClient_().then(result => {
           expect(result).to.equal(authdata);
         });
@@ -219,7 +223,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           'state': 'STATE1',
           'jwt': encoded,
         });
-        xhrMock.expects('fetchDocument')
+        docFetcherMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: request,
@@ -253,7 +257,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           'state': 'STATE1',
           'jwt': encoded,
         });
-        xhrMock.expects('fetchDocument')
+        docFetcherMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: request,
@@ -289,7 +293,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           'state': 'STATE1',
           'jwt': encoded,
         });
-        xhrMock.expects('fetchDocument')
+        docFetcherMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: request,
