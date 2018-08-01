@@ -29,7 +29,8 @@ import {toggleExperiment} from '../../src/experiments';
  * @return {string}
  */
 function purify(html) {
-  return purifyHtml(html).innerHTML;
+  const body = purifyHtml(html);
+  return body.innerHTML;
 }
 
 describe('DOMPurify-based', () => {

@@ -224,8 +224,9 @@ const PURIFY_CONFIG = {
 };
 
 /**
+ * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
- * @return {string}
+ * @return {!Node}
  */
 export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
