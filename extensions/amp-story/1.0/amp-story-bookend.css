@@ -125,9 +125,22 @@
 
 .i-amphtml-story-bookend-article-text-content {
   width: 100% !important;
-  flex: 1;
-  overflow: hidden;
+  flex: 1 !important;
+  overflow: hidden !important;
   padding-right: 10px !important;
+}
+
+.i-amphtml-story-bookend-article-heading,
+.i-amphtml-story-bookend-text,
+.i-amphtml-story-bookend-consent-button {
+  font-weight: 400 !important;
+  font-size: 16px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: #fff !important;
+  line-height: 1.45em !important;
+  max-height: 4.35em !important;
+  margin: 0 0 8px !important;
 }
 
 .i-amphtml-story-bookend-component {
@@ -149,28 +162,22 @@
 }
 
 @media (min-width: 640px) {
-  .i-amphtml-story-bookend-component {
-    max-width: 50% !important;
+  .i-amphtml-story-bookend-component-set {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+  }
+
+  .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
+    /** Leave some horizontal space between cards. */
+    max-width: calc(50%-12px) !important;
   }
 }
 
 @media (min-width: 960px) {
-  .i-amphtml-story-bookend-component {
+  .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
     max-width: 33% !important;
   }
-}
-
-.i-amphtml-story-bookend-article-heading,
-.i-amphtml-story-bookend-text,
-.i-amphtml-story-bookend-consent-button {
-  font-weight: 400 !important;
-  font-size: 16px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  color: #fff !important;
-  line-height: 1.45em !important;
-  max-height: 4.35em !important;
-  margin: 0 0 8px !important;
 }
 
 .i-amphtml-story-bookend-text {
@@ -258,7 +265,7 @@
   overflow: hidden !important;
   display: flex !important;
   box-sizing: border-box !important;
-  max-height: 110px !important;
+  max-height: 120px !important;
   justify-content: space-between !important;
 }
 
@@ -290,11 +297,11 @@
   margin: 0 32px !important;
 }
 
-[desktop] .i-amphtml-story-bookend-component-set {
+/* [desktop] .i-amphtml-story-bookend-component-set {
   display: flex !important;
   flex-wrap: wrap !important;
   justify-content: space-between !important;
-}
+} */
 
 .i-amphtml-story-bookend-cta-link-wrapper,
 .i-amphtml-story-bookend-textbox {
@@ -400,15 +407,15 @@
 }
 
 @media (min-width: 952px) {
-  [desktop] .i-amphtml-story-bookend-component {
+  [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
     /** Leave some horizontal space between cards. */
     max-width: calc(50%-12px) !important;
   }
 }
 
 @media (min-width: 1272px) {
-  [desktop] .i-amphtml-story-bookend-component {
+  [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
     /** Leave some horizontal space between cards. */
-    max-width: calc(50%-12px) !important;
+    max-width: calc(33%-12px) !important;
   }
 }

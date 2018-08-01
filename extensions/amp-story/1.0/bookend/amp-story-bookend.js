@@ -149,14 +149,16 @@ const buildPromptConsentTemplate = consentId => {
     children: [
       {
         tag: 'h3',
-        attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
+        attrs: dict({'class': 'i-amphtml-story-bookend-heading ' +
+          ' i-amphtml-story-bookend-component'}),
         localizedStringId:
             LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE,
       },
       {
         tag: 'h2',
         attrs: dict({
-          'class': 'i-amphtml-story-bookend-consent-button',
+          'class': 'i-amphtml-story-bookend-consent-button ' +
+            'i-amphtml-story-bookend-component',
           'on': `tap:${consentId}.prompt`,
           'role': 'button',
           'aria-label': 'Change data privacy settings',
