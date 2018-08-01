@@ -68,11 +68,6 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @typedef {{bindings: !Array<!BindBindingDef>, limitExceeded: boolean}}
- */
-let NodeScanDef;
-
-/**
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
@@ -367,7 +362,11 @@ export class Bind {
    */
   scanAndApply(addedElements, removedElements, timeout = 2000) {
     dev().info(TAG, 'rescan:', addedElements, removedElements);
-    // Helper function for cleaning up bindings in removed elements.
+    /**
+     * Helper function for cleaning up bindings in removed elements.
+     * @param {number} added
+     * @return {!Promise}
+     */
     const cleanup = added => {
       this.removeBindingsForNodes_(removedElements).then(removed => {
         dev().info(TAG,
@@ -674,7 +673,7 @@ export class Bind {
    * a tuple containing bound elements and binding data for the evaluator.
    * @param {!Node} node
    * @param {number} limit
-   * @return {!Promise<NodeScanDef>}
+   * @return {!Promise<{bindings: !Array<!BindBindingDef>, limitExceeded: boolean}>}
    * @private
    */
   scanNode_(node, limit) {
