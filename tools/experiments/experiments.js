@@ -236,6 +236,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
   },
   {
+    id: 'amp-story-scroll',
+    name: 'Scrollable experience for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/16465',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
+  },
+  {
     id: 'inline-styles',
     name: 'Enables the usage of inline styles for non fixed elements',
     spec: 'https://github.com/ampproject/amphtml/issues/11881',
@@ -314,6 +320,12 @@ const EXPERIMENTS = [
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
+  },
+  {
+    id: 'faster-bind-scan',
+    name: 'Enables faster scanning of dynamic markup for bindings',
+    spec: 'https://github.com/ampproject/amphtml/pull/17229',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
   },
 ];
 

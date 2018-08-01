@@ -104,13 +104,17 @@ export const WHITELISTED_ATTRS = [
   'fallback',
   'heights',
   'layout',
+  'min-font-size',
+  'max-font-size',
   'on',
   'option',
   'placeholder',
+  // Attributes related to amp-form.
+  'submitting',
   'submit-success',
   'submit-error',
-  // Attributes consumed by amp-form
   'validation-for',
+  'verify-error',
   'visible-when-invalid',
   // HTML attributes that are scrubbed by Caja but we handle specially.
   'href',
@@ -329,6 +333,9 @@ export function purifyHtml(dirty) {
     if (isBinding) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`data-amp-bind-${property}`, attrValue);
+      // Set a custom attribute to mark this element as containing a binding.
+      // This is an optimization that obviates the need for DOM scan later.
+      node.setAttribute('i-amphtml-binding', '');
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {

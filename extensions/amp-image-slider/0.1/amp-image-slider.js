@@ -289,8 +289,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
-
-    this.container_.appendChild(this.bar_);
   }
 
   /**
