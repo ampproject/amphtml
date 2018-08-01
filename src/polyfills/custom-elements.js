@@ -297,8 +297,8 @@ class Registry {
 
     assertValidName(SyntaxError, name);
 
-    if (this.registry_.getByName(name) ||
-        this.registry_.getByConstructor(ctor)) {
+    if (this.getByName(name) ||
+        this.getByConstructor(ctor)) {
       throw new Error('duplicate definition');
     }
 
@@ -411,6 +411,8 @@ class Registry {
     this.upgradeSelf_(/** @type {!Element} */(node), def);
     // TODO(jridgewell): It may be appropriate to adoptCallback, if the node
     // used to be in another doc.
+    // TODO(jridgewell): I should be calling the definitions connectedCallback
+    // with node as the context.
     if (node.connectedCallback) {
       node.connectedCallback();
     }
@@ -422,6 +424,8 @@ class Registry {
    * @param {!Node} node
    */
   disconnectedCallback_(node) {
+    // TODO(jridgewell): I should be calling the definitions connectedCallback
+    // with node as the context.
     if (node.disconnectedCallback) {
       node.disconnectedCallback();
     }
