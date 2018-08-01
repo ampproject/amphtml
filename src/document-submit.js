@@ -23,12 +23,21 @@ import {
 } from './url';
 import {Services} from './services';
 import {dev, user} from './log';
+import {getElementServiceIfAvailableForDoc} from './element-service';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
-  ampdoc.getRootNode().addEventListener('submit', onDocumentFormSubmit_, true);
+  // Register global submit event listener only if the amp-form
+  // extension is used. Allowing the usage of native forms, otherwise.
+  getElementServiceIfAvailableForDoc(ampdoc, 'amp-form', 'amp-form')
+      .then(ampFormService => {
+        if (ampFormService) {
+          ampdoc.getRootNode().addEventListener(
+              'submit', onDocumentFormSubmit_, true);
+        }
+      });
 }
 
 

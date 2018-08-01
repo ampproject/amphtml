@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import * as elementService from '../../src/element-service';
+import * as sinon from 'sinon';
 import {Services} from '../../src/services';
-import {onDocumentFormSubmit_} from '../../src/document-submit';
+import {installGlobalSubmitListenerForDoc, onDocumentFormSubmit_} from '../../src/document-submit';
 
 describe('test-document-submit onDocumentFormSubmit_', () => {
   let sandbox;
@@ -46,6 +48,36 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     sandbox.restore();
   });
 
+  describe('installGlobalSubmitListenerForDoc', () => {
+    let headNode;
+    let ampDoc;
+    beforeEach(() => {
+      headNode = document.createElement('html');
+      ampDoc = {
+        getRootNode: () => headNode,
+      };
+    });
+
+    afterEach(() => sandbox.reset());
+
+    it('should not register submit listener if amp-form is not registered.',
+        () => {
+          sandbox.stub(elementService, 'getElementServiceIfAvailableForDoc')
+              .returns(Promise.resolve(null));
+          sandbox.spy(headNode, 'addEventListener');
+          installGlobalSubmitListenerForDoc(ampDoc);
+          expect(headNode.addEventListener).not.to.have.been.called;
+        });
+
+    it('should register submit listener if amp-form extension is registered.',
+        () => {
+          sandbox.stub(elementService, 'getElementServiceIfAvailableForDoc')
+              .returns(Promise.resolve({}));
+          sandbox.spy(headNode, 'addEventListener');
+          installGlobalSubmitListenerForDoc(ampDoc);
+          expect(headNode.addEventListener).to.have.been.called;
+        });
+  });
 
   it('should check target and action attributes', () => {
     tgt.removeAttribute('action');
