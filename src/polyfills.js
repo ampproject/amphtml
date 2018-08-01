@@ -24,14 +24,14 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
-import {isExperimentOn} from './experiments';
-import {installCustomElements as registerElement} from
+import {installCustomElements as installRegisterElement} from
   'document-register-element/build/document-register-element.patched';
+import {isExperimentOn} from './experiments';
 
 if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
   installCustomElements(self, class {});
 } else {
-  registerElement(self, 'auto');
+  installRegisterElement(self, 'auto');
 }
 installDOMTokenListToggle(self);
 installMathSign(self);

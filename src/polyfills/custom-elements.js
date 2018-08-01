@@ -115,7 +115,7 @@ class CustomElementRegistry {
      * @private
      * @const
      */
-    this.whens_ = this.win_.Object.create(null);
+    this.pendingDefines_ = this.win_.Object.create(null);
   }
 
   /**
@@ -130,11 +130,11 @@ class CustomElementRegistry {
 
     // If anyone is waiting for this custom element to be defined, resolve
     // their promise.
-    const whens = this.whens_;
-    const when = whens[name];
-    if (when) {
-      when.resolve();
-      delete whens[name];
+    const pending = this.pendingDefines_;
+    const deferred = pending[name];
+    if (deferred) {
+      deferred.resolve();
+      delete pending[name];
     }
   }
 
@@ -166,15 +166,15 @@ class CustomElementRegistry {
       return Promise.resolve();
     }
 
-    const whens = this.whens_;
-    const when = whens[name];
-    if (when) {
-      return when.promise;
+    const pending = this.pendingDefines_;
+    const deferred = pending[name];
+    if (deferred) {
+      return deferred.promise;
     }
 
     let resolve;
     const promise = new /*OK*/Promise(res => resolve = res);
-    whens[name] = {
+    pending[name] = {
       promise,
       resolve,
     };
@@ -299,7 +299,7 @@ class Registry {
 
     if (this.getByName(name) ||
         this.getByConstructor(ctor)) {
-      throw new Error('duplicate definition');
+      throw new Error(`duplicate definition "${name}"`);
     }
 
     // TODO(jridgewell): Record connectedCallback, disconnectedCallback,

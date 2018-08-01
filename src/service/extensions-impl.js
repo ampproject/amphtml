@@ -40,11 +40,11 @@ import {install as installDocContains} from '../polyfills/document-contains';
 import {installImg} from '../../builtins/amp-img';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
+import {installCustomElements as installRegisterElement} from
+  'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
 import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
-import {installCustomElements as registerElement} from
-  'document-register-element/build/document-register-element.patched';
 import {startsWith} from '../string';
 import {toWin} from '../types';
 
@@ -671,7 +671,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   if (isExperimentOn(parentWin, 'custom-elements-v1')) {
     installCustomElements(childWin, class {});
   } else {
-    registerElement(childWin, 'auto');
+    installRegisterElement(childWin, 'auto');
   }
 }
 
