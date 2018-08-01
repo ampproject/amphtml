@@ -82,7 +82,7 @@
   text-transform: uppercase !important;
   font-size: 12px !important;
   padding-bottom: 8px !important;
-  margin: 48px 0 8px !important;
+  margin: 0 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
   color: rgba(255, 255, 255, 0.54) !important;
   font-weight: 700 !important;
@@ -118,7 +118,6 @@
 .i-amphtml-story-bookend-article {
   text-decoration: none !important;
   color: inherit !important;
-  margin: 24px 0 !important;
   display: flex !important;
   justify-content: space-between !important;
   max-height: 104px !important;
@@ -133,6 +132,7 @@
 
 .i-amphtml-story-bookend-component {
   width: 100% !important;
+  margin-bottom: 24px !important;
 }
 
 .i-amphtml-story-bookend-landscape,
@@ -145,7 +145,6 @@
   overflow: hidden !important;
   flex: 1 0 320px !important;
   min-width: 33% !important;
-  margin: 24px 0 !important;
   /* padding: 0 32px !important; */
 }
 
@@ -247,7 +246,7 @@
 .i-amphtml-story-bookend-article-image,
 .i-amphtml-story-bookend-replay-image,
 .i-amphtml-story-bookend-replay-icon {
-  margin-left: 24px !important;
+  /* margin-left: 24px !important; */
   position: relative !important;
   flex: none !important;
 }
@@ -306,7 +305,6 @@
   overflow: hidden !important;
   flex: 1 0 320px !important;
   justify-content: space-between !important;
-  margin: 24px 0 !important;
 }
 
 .i-amphtml-story-bookend-textbox {
