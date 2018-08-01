@@ -27,3 +27,6 @@
 export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ ({
   'bg': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
 });
+export const ANALYTICS_IFRAME_TRANSPORT_CONFIG = /** @type {!JsonObject} */ ({
+  'bg': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
+});
