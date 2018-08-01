@@ -365,6 +365,7 @@ describe('amp-img', () => {
     el.setAttribute('aria-label', 'Hello');
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
+    
     el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
     impl.buildCallback();
