@@ -56,14 +56,14 @@ describe('Caja-based', () => {
   describe('for <amp-bind>', () => {
     it('should output [text] and [class] attributes', () => {
       expect(sanitizeHtml('<p [text]="foo" [class]="bar"></p>')).to.be
-          .equal('<p [text]="foo" [class]="bar"></p>');
+          .equal('<p [text]="foo" i-amphtml-binding [class]="bar"></p>');
     });
 
     it('should NOT rewrite values of binding attributes', () => {
       // Should not change "foo.bar". Adding `target` attribute is not necessary
       // (but harmless) since <amp-bind> will use rewriteAttributesForElement().
-      expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
-          .to.equal('<a [href]="foo.bar" target="_top">link</a>');
+      expect(sanitizeHtml('<a [href]="foo.bar">link</a>')).to.equal(
+          '<a [href]="foo.bar" i-amphtml-binding target="_top">link</a>');
     });
   });
 });
