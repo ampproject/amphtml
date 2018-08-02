@@ -592,7 +592,7 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
  * Extracts configuration used to build amp-analytics element for active view.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
+ * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
  * @return {?JsonObject} config or null if invalid/missing.
@@ -874,7 +874,7 @@ export function isCdnProxy(win) {
 
 /**
  * Populates the fields of the given Nameframe experiment config object.
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
+ * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} headers
  * @param {!NameframeExperimentConfig} nameframeConfig
  */
 export function setNameframeExperimentConfigs(headers, nameframeConfig) {
