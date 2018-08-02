@@ -275,7 +275,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     setupElementFunctions(div);
     container.appendChild(div);
     const iframe = getIframe(window, div, 'none');
-    expect(iframe.getAttribute('allow')).to.equal(null);
+    expect(iframe.getAttribute('allow')).to.equal('autoplay');
   });
 
   it('should set feature policy for sync-xhr with exp on', () => {
@@ -284,7 +284,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     setupElementFunctions(div);
     container.appendChild(div);
     const iframe = getIframe(window, div, 'none');
-    expect(iframe.getAttribute('allow')).to.equal('sync-xhr \'none\';');
+    expect(iframe.getAttribute('allow')).to.equal('autoplay; sync-xhr \'none\';');
   });
 
   it('should pick the right bootstrap url for local-dev mode', () => {
