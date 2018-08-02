@@ -294,11 +294,13 @@ export class AmpStoryConsent extends AMP.BaseElement {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
-    this.mutateElement(() => {
+    const mutator = () => {
       rtlState ?
         this.storyConsentEl_.setAttribute('dir', 'rtl') :
         this.storyConsentEl_.removeAttribute('dir');
-    });
+    };
+
+    this.element.getResources().mutateElement(this.storyConsentEl_, mutator);
   }
 
   /**
