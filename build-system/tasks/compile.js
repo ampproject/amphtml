@@ -20,7 +20,7 @@ const closureCompiler = require('gulp-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('../internal-version') ;
+const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
@@ -142,7 +142,6 @@ function compile(entryModuleFilenames, outputDir,
         stream.on('error', reject);
         stream.pipe(
             replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-            .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
             .pipe(shortenLicense())
             .pipe(gulp.dest(outputDir));
       });
@@ -176,9 +175,6 @@ function compile(entryModuleFilenames, outputDir,
     wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
-    }
-    if (/development/.test(internalRuntimeToken)) {
-      throw new Error('Should compile with a prod token');
     }
     let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
@@ -401,7 +397,6 @@ function compile(entryModuleFilenames, outputDir,
       stream = stream
           .pipe(rename(outputFilename))
           .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-          .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
           .pipe(shortenLicense())
           .pipe(gulp.dest(outputDir))
           .on('end', function() {
