@@ -91,18 +91,20 @@ config.run('amp-image-slider', function() {
       return event;
     }
 
-    function calibrateSlider() {
+    function prepareSlider() {
       sliderImpl = slider.implementation_;
-      sliderImpl.mutateElement = cb => cb();
+      sliderImpl.measureElement = function(cb) { cb(); };
+      sliderImpl.measureMutateElement = function(cb1, cb2) { cb1(); cb2(); };
+      sliderImpl.mutateElement = function(cb) { cb(); };
       rect = slider.getBoundingClientRect();
     }
 
     function prep() {
       return waitForImageSlider()
-          .then(calibrateSlider);
+          .then(prepareSlider);
     }
 
-    // A bunch of expects to check if the slider has slide to
+    // A bunch of expects to check if the slider has slided to
     // where we intended
     function expectByBarLeftPos(leftPos) {
       expect(sliderImpl.bar_.getBoundingClientRect().left)
