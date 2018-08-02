@@ -17,6 +17,7 @@
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
@@ -24,7 +25,6 @@ import {
 } from '../../../src/service';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
-import { fetchDocument } from '../../../src/document-fetcher';
 
 const SERVICE_ID = 'liveListManager';
 

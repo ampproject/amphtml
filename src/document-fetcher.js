@@ -95,12 +95,12 @@ function xhrRequest_(input, init) {
         const body = 'response' in xhr
           ? xhr.response : xhr.responseText;
         const response = new Response(/** @type {string} */ (body || ''), /** @type {!ResponseInit} */ (options));
-        return assertSuccess(response).then(response => {
-          return {
+        assertSuccess(response).then(response => {
+          resolve({
             response,
             xhr,
-          };
-        });
+          });
+        }).catch(e => reject(e));
       }
     };
     xhr.onerror = () => {
