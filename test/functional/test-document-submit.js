@@ -52,7 +52,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     let headNode;
     let ampDoc;
     beforeEach(() => {
-      headNode = document.createElement('html');
+      headNode = document.createElement('body');
       ampDoc = {
         getRootNode: () => headNode,
       };
@@ -65,8 +65,9 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
           sandbox.stub(elementService, 'getElementServiceIfAvailableForDoc')
               .returns(Promise.resolve(null));
           sandbox.spy(headNode, 'addEventListener');
-          installGlobalSubmitListenerForDoc(ampDoc);
-          expect(headNode.addEventListener).not.to.have.been.called;
+          installGlobalSubmitListenerForDoc(ampDoc).then(() => {
+            expect(headNode.addEventListener).not.to.have.been.called;
+          });
         });
 
     it('should register submit listener if amp-form extension is registered.',
@@ -74,8 +75,9 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
           sandbox.stub(elementService, 'getElementServiceIfAvailableForDoc')
               .returns(Promise.resolve({}));
           sandbox.spy(headNode, 'addEventListener');
-          installGlobalSubmitListenerForDoc(ampDoc);
-          expect(headNode.addEventListener).to.have.been.called;
+          installGlobalSubmitListenerForDoc(ampDoc).then(() => {
+            expect(headNode.addEventListener).called;
+          });
         });
   });
 
