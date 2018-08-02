@@ -184,6 +184,13 @@ export function fromStructuredCloneable(response, responseType) {
     }
   }
 
+  // TODO(prateekbh): remove responseXML after everything is moved to polyfill
+  // it's not used right now, but its tough to remove this due to typings.
+  if (isDocumentType) {
+    data.responseXML =
+        new DOMParser().parseFromString(data.responseText, 'text/html');
+  }
+
   return new FetchResponse(data);
 }
 
@@ -476,7 +483,7 @@ function isRetriable(status) {
 
 /**
  * Returns the response if successful or otherwise throws an error.
- * @param {!FetchResponse} response
+ * @param {!FetchResponse|!Response} response
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */

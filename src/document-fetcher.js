@@ -15,7 +15,7 @@
  */
 import {Services} from './services';
 import {assertSuccess, getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
-import {parseUrlDeprecated} from './url';
+import {dict} from './utils/object';
 import {user} from './log';
 
 /**
@@ -23,7 +23,7 @@ import {user} from './log';
  *
  * @param {!Window} win
  * @param {string} input
- * @param {?FetchInitDef=} opt_init
+ * @param {?./utils/xhr-utils.FetchInitDef=} opt_init
  * @return {!Promise<!Document>}
  * @ignore
  */
@@ -53,7 +53,7 @@ export function fetchDocument(win, input, opt_init) {
  *
  *
  * @param {string} input
- * @param {!FetchInitDef} init
+ * @param {!./utils/xhr-utils.FetchInitDef} init
  * @private
  */
 function xhrRequest_(input, init) {
@@ -119,7 +119,7 @@ function xhrRequest_(input, init) {
  * @return {JsonObject}
  */
 function parseHeaders(rawHeaders) {
-  const headers = {};
+  const headers = dict({});
   // Replace instances of \r\n and \n followed by at least one
   // space or horizontal tab with a space
   // https://tools.ietf.org/html/rfc7230#section-3.2

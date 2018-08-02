@@ -19,10 +19,10 @@ import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/dom';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import { fetchDocument } from '../../../src/document-fetcher';
 
 /** @const {string} */
 const TAG = 'amp-access-server';
