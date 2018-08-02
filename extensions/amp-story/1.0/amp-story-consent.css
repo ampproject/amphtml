@@ -56,6 +56,10 @@
   overflow: hidden !important;
 }
 
+[dir=rtl] .i-amphtml-story-consent-container {
+  text-align: right !important;
+}
+
 .i-amphtml-story-consent-fullbleed .i-amphtml-story-consent-container {
   margin: 88px 0px 72px !important;
   padding: 0 8px !important;
