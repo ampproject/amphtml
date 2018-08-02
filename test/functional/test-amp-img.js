@@ -365,7 +365,7 @@ describe('amp-img', () => {
     el.setAttribute('aria-label', 'Hello');
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
-    
+
     el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
     impl.buildCallback();
@@ -383,7 +383,7 @@ describe('amp-img', () => {
     let impl;
 
     beforeEach(() => {
-      toggleExperiment(iframe.win, 'blurry-placeholder', true);
+      toggleExperiment(iframe.win, 'blurry-placeholder', true, true);
       getImgWithBlur(true, true);
     });
 
@@ -391,10 +391,18 @@ describe('amp-img', () => {
       impl.unlayoutCallback();
     });
 
-    function getImgWithBlur(addPlacholder, addBlurClass) {
+    /**
+     * Creates an amp-img with an image child that could potentially be a
+     * blurry placeholder.
+     * @param {boolean} addPlaceholder Whether the child should have a
+     *     placeholder attribute.
+     * @param {boolean} addBlurClass Whether the child should have the
+     *     class that allows it to be a blurred placeholder.
+     */
+    function getImgWithBlur(addPlaceholder, addBlurClass) {
       el = document.createElement('amp-img');
       img = document.createElement('img');
-      if (addPlacholder) {
+      if (addPlaceholder) {
         img.setAttribute('placeholder', '');
       }
       if (addBlurClass) {
@@ -409,61 +417,54 @@ describe('amp-img', () => {
     it('should correctly detect if a blurry image child exists', () => {
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.hasBlurredPlaceHolder_).to.be.true;
+      expect(el).to.have.class('i-amphtml-blur-loading');
 
       getImgWithBlur(true, false);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.hasBlurredPlaceHolder_).to.be.false;
+      expect(el).to.not.have.class('i-amphtml-blur-loading');
 
       el = document.createElement('amp-img');
       el.getPlaceholder = () => {return undefined;};
       impl = new AmpImg(el);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.hasBlurredPlaceHolder_).to.be.false;
+      expect(el).to.not.have.class('i-amphtml-blur-loading');
 
       el = document.createElement('amp-img');
       el.getPlaceholder = () => {return undefined;};
       impl = new AmpImg(el);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.hasBlurredPlaceHolder_).to.be.false;
+      expect(el).to.not.have.class('i-amphtml-blur-loading');
     });
 
     it('should fade in the image if the blurry placheolder exists', () => {
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.element.classList.contains(
-          'i-amphtml-blur-loading')).to.be.true;
+      expect(el).to.have.class('i-amphtml-blur-loading');
 
       const loadEvent = createCustomEvent(iframe.win, 'load');
       impl.img_.dispatchEvent(loadEvent);
-      expect(impl.element.classList.contains(
-          'i-amphtml-blur-loaded')).to.be.true;
+      expect(el).to.have.class('i-amphtml-blur-loaded');
 
       getImgWithBlur(true, false);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.element.classList.contains(
-          'i-amphtml-blur-loading')).to.be.false;
+      expect(el).to.not.have.class('i-amphtml-blur-loading');
 
       impl.img_.dispatchEvent(loadEvent);
-      expect(impl.element.classList.contains(
-          'i-amphtml-blur-loaded')).to.be.false;
+      expect(el).to.not.have.class('i-amphtml-blur-loaded');
     });
 
     it('should properly display a fade in animation', () => {
       impl.buildCallback();
       impl.layoutCallback();
-      expect(impl.element.classList.contains(
-          'i-amphtml-blur-loading')).to.be.true;
-      expect(impl.element.classList.contains(
-          'i-amphtml-blur-loaded')).to.be.false;
+      expect(el).to.have.class('i-amphtml-blur-loading');
+      expect(el).to.not.have.class('i-amphtml-blur-loaded');
       const loadEvent = createCustomEvent(iframe.win, 'load');
       impl.img_.dispatchEvent(loadEvent);
-      expect(impl.element.classList.contains(
-          'i-amphtml-blur-loaded')).to.be.true;
+      expect(el).to.have.class('i-amphtml-blur-loaded');
     });
   });
 });

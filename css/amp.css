@@ -167,7 +167,7 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   display: inline-block;
 }
 
-.i-amphtml-blur-loading .i-amphtml-fill-content {
+.i-amphtml-blur-loading > .i-amphtml-fill-content {
   opacity: 0 !important;
 }
 
@@ -410,6 +410,10 @@ i-amphtml-sizer {
   display: block;
 }
 
+/**
+ * Hides the placeholder immediately after the image loads. The exception is if
+ * the placeholder is a blurry image, which needs to be faded on top of.
+ */
 .i-amphtml-element:not(.i-amphtml-blur-loaded, .i-amphtml-blur-loading) > [placeholder].hidden,
 .i-amphtml-element > [placeholder].amp-hidden {
   visibility: hidden;

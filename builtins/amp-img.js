@@ -27,7 +27,7 @@ import {registerElement} from '../src/service/custom-element-registry';
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-  'aria-describedby', 'aria-labelledby','srcset', 'src', 'sizes', 'blur'];
+  'aria-describedby', 'aria-labelledby','srcset', 'src', 'sizes'];
 
 export class AmpImg extends BaseElement {
 
@@ -49,9 +49,6 @@ export class AmpImg extends BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
-
-    /**@private {boolean} */
-    this.hasBlurredPlaceHolder_ = false;
   }
 
   /** @override */
@@ -156,7 +153,7 @@ export class AmpImg extends BaseElement {
   layoutCallback() {
     this.initialize_();
     const img = dev().assertElement(this.img_);
-    this.unlistenLoad_ = listen(img, 'load', () => this.renderImg_());
+    this.unlistenLoad_ = listen(img, 'load', () => this.onImgLoad_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
@@ -178,24 +175,23 @@ export class AmpImg extends BaseElement {
   }
 
   /**
-   * Checks to see if there is a placeholder that is blurred
+   * If a blurry placeholder exists, hides the child until it's fully loaded.
    * @private
    */
   checkBlur_() {
     const placeholder = this.getPlaceholder();
     if (!!placeholder && placeholder.classList.contains('i-amphtml-blur')) {
-      this.hasBlurredPlaceHolder_ = true;
       this.element.classList.add('i-amphtml-blur-loading');
     }
   }
 
   /**
+   * Animates the fully rendered either through a fading in on top of a blurry
+   * placeholder if one exists, or hiding the fallback if not.
    * @private
-   * Animates the fully rendered either through a fade in on top of a blurry
-   * placeholder if one exists, or hiding the fallback if not
    */
-  renderImg_() {
-    if (this.hasBlurredPlaceHolder_) {
+  onImgLoad_() {
+    if (this.element.classList.contains('i-amphtml-blur-loading')) {
       this.element.classList.add('i-amphtml-blur-loaded');
     } else {
       this.hideFallbackImg_();
