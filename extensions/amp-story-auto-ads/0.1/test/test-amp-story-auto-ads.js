@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as analytics from '../../../../src/analytics';
-import * as sinon from 'sinon';
 import {AmpStoryAutoAds} from '../amp-story-auto-ads';
 import {macroTask} from '../../../../testing/yield';
 

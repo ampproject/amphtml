@@ -72,6 +72,7 @@
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
     "amphtml-internal/no-has-own-property-method": 1,
+    "amphtml-internal/no-import": 2,
     "amphtml-internal/no-mixed-operators": 2,
     "amphtml-internal/no-spread": 2,
     "amphtml-internal/no-style-property-setting": 2,
