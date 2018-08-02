@@ -24,7 +24,6 @@ import '../../../amp-ad/0.1/amp-ad';
 // methods in tests.
 import * as analytics from '../../../../src/analytics';
 import * as analyticsExtension from '../../../../src/extension-analytics';
-import * as sinon from 'sinon';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 import {
   AmpA4A,
@@ -78,7 +77,7 @@ describe('amp-a4a', () => {
   let getResourceStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     fetchMock = null;
     getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
         'getSigningServiceNames');
@@ -2256,7 +2255,7 @@ describe('amp-a4a', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {
@@ -2348,7 +2347,7 @@ describe('amp-a4a', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {

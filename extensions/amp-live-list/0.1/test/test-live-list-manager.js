@@ -32,7 +32,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;

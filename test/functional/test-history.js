@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   History,
@@ -540,7 +539,7 @@ describe('HistoryBindingVirtual', () => {
   let viewer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     onStateUpdated = sandbox.spy();
     viewer = {

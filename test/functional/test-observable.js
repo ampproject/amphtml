@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Observable} from '../../src/observable';
 
 describe('Observable', () => {
@@ -23,7 +22,7 @@ describe('Observable', () => {
   let observable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     observable = new Observable();
   });
 

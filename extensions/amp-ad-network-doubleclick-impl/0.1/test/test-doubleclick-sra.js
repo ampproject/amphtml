@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import '../../../amp-ad/0.1/amp-ad';
-import * as sinon from 'sinon';
 import {
   AmpA4A,
   EXPERIMENT_FEATURE_HEADER_NAME,

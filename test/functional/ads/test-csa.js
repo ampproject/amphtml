@@ -15,7 +15,6 @@
  */
 
 import * as _3p from '../../../3p/3p';
-import * as sinon from 'sinon';
 import {
   AD_TYPE,
   callbackWithBackfill,
@@ -55,7 +54,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
   let win;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     return createIframePromise(true).then(iframe => {
       win = iframe.win;
       win.context = {

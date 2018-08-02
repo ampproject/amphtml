@@ -106,9 +106,6 @@ describes.realWin('amp-app-banner', {
   }
 
   function testSetupAndShowBanner() {
-    // TODO(alanorozco, #15844): Unskip.
-    this.skip();
-
     return getAppBanner({iosMeta, androidManifest}).then(banner => {
       return banner.implementation_.isDismissed().then(() => {
         expect(banner.parentElement).to.not.be.null;
@@ -160,7 +157,8 @@ describes.realWin('amp-app-banner', {
       });
     });
 
-    it('should show banner and set up correctly', testSetupAndShowBanner);
+    // TODO(alanorozco, #15844): Unskip.
+    it.skip('should show banner and set up correctly', testSetupAndShowBanner);
 
     it('should throw if open button is missing', testButtonMissing);
 

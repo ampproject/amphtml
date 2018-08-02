@@ -15,7 +15,6 @@
  */
 
 import * as rds from '../../src/render-delaying-services';
-import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';

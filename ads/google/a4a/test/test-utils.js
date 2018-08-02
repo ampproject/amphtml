@@ -16,7 +16,6 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as sinon from 'sinon';
 import {
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
@@ -110,7 +109,7 @@ describe('Google A4A utils', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {
@@ -283,7 +282,7 @@ describe('Google A4A utils', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {
@@ -706,7 +705,7 @@ describe('Google A4A utils', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {

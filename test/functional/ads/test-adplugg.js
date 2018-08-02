@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   adplugg,
 } from '../../../ads/adplugg';
@@ -31,7 +30,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
   beforeEach(() => {
 
     // Set up our test sandbox.
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     return createIframePromise(true).then(iframe => {
       // Simulate the iframe that adplugg will be called inside.
       win = iframe.win;

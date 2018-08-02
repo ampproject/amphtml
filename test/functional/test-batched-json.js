@@ -42,7 +42,7 @@ describe('batchFetchJsonFor', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     urlReplacements = {
       expandUrlAsync: sandbox.stub(),

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {Services} from '../../src/services';
@@ -49,7 +48,7 @@ describe('Activity getTotalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     // start at something other than 0
@@ -252,7 +251,7 @@ describe('Activity getIncrementalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     // start at something other than 0

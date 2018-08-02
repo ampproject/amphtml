@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {exponentialBackoff, exponentialBackoffClock}
   from '../../src/exponential-backoff';
 
@@ -25,7 +24,7 @@ describe('exponentialBackoff', () => {
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     sandbox.stub(Math, 'random').callsFake(() => 1);
   });

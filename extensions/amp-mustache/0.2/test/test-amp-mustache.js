@@ -26,7 +26,7 @@ describe('amp-mustache 0.2', () => {
   let viewerCanRenderTemplates = false;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     templateElement = document.createElement('template');
     const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
     getServiceForDocStub.returns({

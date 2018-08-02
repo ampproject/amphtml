@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Observable} from '../../src/observable';
 import {
   createCustomEvent,
@@ -46,7 +45,7 @@ describe('EventHelper', () => {
   let removeEventListenerStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {

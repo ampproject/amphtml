@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {calcVelocity, continueMotion} from '../../src/motion';
 
 
@@ -62,7 +61,7 @@ describe('Motion continueMotion', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {

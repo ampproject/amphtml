@@ -154,12 +154,12 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith('amp-consent:test', true);
-        storageSetSpy.reset();
+        storageSetSpy.resetHistory();
         instance.update(CONSENT_ITEM_STATE.REJECTED);
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith('amp-consent:test', false);
-        storageSetSpy.reset();
+        storageSetSpy.resetHistory();
         instance.update(-1);
         yield macroTask();
         expect(storageSetSpy).to.not.be.called;

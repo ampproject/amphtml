@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {
   CryptographicValidator,
@@ -40,7 +39,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
 
   beforeEach(() => {
     validator = new CryptographicValidator();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     userErrorStub = sandbox.stub(user(), 'error');
   });
 

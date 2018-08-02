@@ -19,7 +19,6 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as sinon from 'sinon';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -784,7 +783,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.element.appendChild(placeholder);
       impl.element.appendChild(fallback);
       impl.size_ = {width: 123, height: 456};
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => sandbox.restore());

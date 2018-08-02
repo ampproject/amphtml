@@ -479,7 +479,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         vh.update_(1);
         clock.tick(20);
         vh.update_(1);
-        eventSpy.reset();
+        eventSpy.resetHistory();
         expect(eventSpy).to.not.be.called;
         clock.tick(1001);
         promiseResolver();
@@ -1048,7 +1048,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.update();
       expect(eventSpy).to.be.calledOnce;
 
-      eventSpy.reset();
+      eventSpy.resetHistory();
       visibility = 1;
       clock.tick(200);
       vh.update();

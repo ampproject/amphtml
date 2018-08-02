@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
@@ -38,7 +37,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   let testIndex = 0;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     const ampdocService = Services.ampdocServiceFor(window);
     const ampdoc = ampdocService.getAmpDoc();
     const adElement = document.createElement('container-element');

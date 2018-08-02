@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {
@@ -1213,7 +1212,7 @@ describe('Viewport META', () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,

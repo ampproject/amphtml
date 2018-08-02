@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {
   AnalyticsEventType,
@@ -299,7 +298,7 @@ describe('amp-analytics.instrumentation OLD', function() {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     const docState = Services.documentStateFor(window);
     sandbox.stub(docState, 'isHidden').callsFake(() => false);
     ampdoc = new AmpDocSingle(window);
