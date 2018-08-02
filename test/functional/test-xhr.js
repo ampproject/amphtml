@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   FetchResponse,
   assertSuccess,
@@ -74,7 +73,7 @@ describe.configure().skipSafari().run('XHR', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({

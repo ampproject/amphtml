@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 'use strict';
-
-const argv = require('minimist')(process.argv.slice(2));
-
-// Used to e.g. references the ads binary from the runtime to get
-// version lock.
-exports.VERSION = argv.version ?
-  String(argv.version) : String(Date.now());
+ const imports = ['sinon'];
+ module.exports = function(context) {
+  return {
+    ImportDeclaration(node) {
+      const name = node.source.value;
+      if (imports.includes(name)) {
+        context.report(node, `Importing ${name} is forbidden.`);
+      }
+    },
+  };
+};
