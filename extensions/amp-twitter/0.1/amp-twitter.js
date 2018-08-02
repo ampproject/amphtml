@@ -114,7 +114,7 @@ class AmpTwitter extends AMP.BaseElement {
   updateForLoadingState_() {
     this.element.setAttribute('loading', 'start');
     // Set an explicit height so we can animate it.
-    this./*OK*/changeHeight(this.element.getBoundingClientRect().height);
+    this./*OK*/changeHeight(this.element./*REVIEW*/getBoundingClientRect().height);
   }
 
   /**
