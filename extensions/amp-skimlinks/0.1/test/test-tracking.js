@@ -33,19 +33,12 @@ describes.realWin('test-tracking', {
       // mock.verify();
     });
 
-    function setupTrackingService(skimOptions, extractAnchorTrackingInfoResponse, trackingInfo) {
-      extractAnchorTrackingInfoResponse = Object.assign(
-          {numberAffiliateLinks: 0, urls: []},
-          extractAnchorTrackingInfoResponse,
-      );
+    function setupTrackingService(skimOptions, trackingInfo) {
       trackingInfo = Object.assign(
           {pageImpressionId: 'page-imp-id', guid: 'guid'},
           trackingInfo
       );
       const trackingService = helpers.createTrackingWithStubAnalytics(skimOptions);
-      trackingService.extractAnchorTrackingInfo_ = env.sandbox.stub()
-          .returns(extractAnchorTrackingInfoResponse);
-
       trackingService.setTrackingInfo(trackingInfo);
 
       return trackingService;
@@ -131,7 +124,7 @@ describes.realWin('test-tracking', {
           jsl: 200,
           t: 1,
         };
-        trackingService = setupTrackingService(null, null, {
+        trackingService = setupTrackingService(null, {
           pageImpressionId: expectedData.uuid,
           guid: expectedData.guid,
         });
@@ -176,11 +169,11 @@ describes.realWin('test-tracking', {
           tz: 'TIMEZONE',
           uuid: 'page-impressions-id',
           guid: 'user-guid',
-          dl: [],
+          dl: {},
           hae: 0,
           typ: 'l',
         };
-        trackingService = setupTrackingService(null, null, {
+        trackingService = setupTrackingService(null, {
           pageImpressionId: expectedData.uuid,
           guid: expectedData.guid,
         });
