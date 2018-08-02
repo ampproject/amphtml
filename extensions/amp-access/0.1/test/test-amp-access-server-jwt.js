@@ -16,7 +16,6 @@
 
 import * as DocumentFetcher from '../../../../src/document-fetcher';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {getMode} from '../../../../src/mode';
 import {isUserErrorMessage} from '../../../../src/log';
