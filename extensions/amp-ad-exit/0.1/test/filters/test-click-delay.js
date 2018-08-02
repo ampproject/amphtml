@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {ClickDelayFilter} from '../../filters/click-delay';
 import {FilterType} from '../../filters/filter';
 
@@ -25,7 +24,7 @@ describe('click-delay', () => {
     startTimingEvent: 'navigationStart',
   };
   let sandbox;
-  beforeEach(() => sandbox = sinon.sandbox.create());
+  beforeEach(() => sandbox = sinon.sandbox);
   afterEach(() => sandbox.restore());
 
   it('should use performance timing', () => {

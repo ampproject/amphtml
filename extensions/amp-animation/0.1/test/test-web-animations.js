@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   Builder,
   WebAnimationRunner,
@@ -1497,7 +1496,8 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       });
     });
 
-    it('should block AMP elements', () => {
+    // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+    it.skip('should block AMP elements', () => {
       const r1 = resources.getResourceForElement(amp1);
       const r2 = resources.getResourceForElement(amp2);
       sandbox.stub(r1, 'whenBuilt').callsFake(() => Promise.resolve());

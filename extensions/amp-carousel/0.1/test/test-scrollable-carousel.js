@@ -91,8 +91,9 @@ describes.realWin('test-scrollable-carousel', {
     });
   });
 
-  it('should behave correctly when clicking on next button and the space ' +
-      'to the right is MORE than containerWidth', () => {
+  // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+  it.skip('should behave correctly when clicking on next button and the ' +
+      'space to the right is MORE than containerWidth', () => {
     return getAmpScrollableCarousel().then(carousel => {
       const impl = carousel.implementation_;
       const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
@@ -140,8 +141,9 @@ describes.realWin('test-scrollable-carousel', {
     });
   });
 
-  it('should behave correctly when clicking on next button and the space ' +
-      'to the right is LESS than containerWidth', () => {
+  // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+  it.skip('should behave correctly when clicking on next button and the ' +
+      'space to the right is LESS than containerWidth', () => {
     return getAmpScrollableCarousel().then(carousel => {
       const impl = carousel.implementation_;
 
@@ -191,8 +193,9 @@ describes.realWin('test-scrollable-carousel', {
     });
   });
 
-  it('should behave correctly when clicking on previous button and the space ' +
-      'to the left is MORE than containerWidth', () => {
+  // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+  it.skip('should behave correctly when clicking on previous button and the ' +
+      'space to the left is MORE than containerWidth', () => {
     return getAmpScrollableCarousel().then(carousel => {
       const impl = carousel.implementation_;
 
@@ -246,8 +249,9 @@ describes.realWin('test-scrollable-carousel', {
     });
   });
 
-  it('should behave correctly when clicking on previous button and the space ' +
-      'to the left is LESS than containerWidth', () => {
+  // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+  it.skip('should behave correctly when clicking on previous button and the ' +
+      'space to the left is LESS than containerWidth', () => {
     return getAmpScrollableCarousel().then(carousel => {
       const impl = carousel.implementation_;
 

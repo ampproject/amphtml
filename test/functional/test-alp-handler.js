@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
 import {parseUrlDeprecated} from '../../src/url';
 
@@ -28,7 +27,7 @@ describe('alp-handler', () => {
   let image;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     image = undefined;
     win = {
       location: {},

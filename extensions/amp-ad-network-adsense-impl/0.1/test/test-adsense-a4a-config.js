@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   ADSENSE_EXPERIMENTS,
   ADSENSE_EXP_NAMES,
@@ -39,7 +38,7 @@ describe('adsense-a4a-config', () => {
   let testFixture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     mockWin = {
       location: parseUrlDeprecated('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
       document: {

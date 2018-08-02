@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
@@ -79,7 +78,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       sentinel: 's-1234',
     };
 
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
       expect(url).to.equal(templateUrl);
       return Promise.resolve(data.adTemplate);

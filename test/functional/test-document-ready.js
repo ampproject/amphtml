@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {isDocumentReady,
   onDocumentReady,
@@ -31,7 +30,7 @@ describe('documentReady', () => {
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'loading',

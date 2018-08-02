@@ -15,7 +15,6 @@
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {getMode} from '../../src/mode';
 import {installPerformanceService} from '../../src/service/performance-impl';

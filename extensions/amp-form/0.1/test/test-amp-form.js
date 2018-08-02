@@ -16,7 +16,6 @@
 
 import '../../../amp-mustache/0.1/amp-mustache';
 import '../../../amp-selector/0.1/amp-selector';
-import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
   AmpForm,

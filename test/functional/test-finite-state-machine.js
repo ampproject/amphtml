@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {FiniteStateMachine} from '../../src/finite-state-machine';
 
 describe('Finite State Machine', () => {
@@ -26,7 +25,7 @@ describe('Finite State Machine', () => {
     let other;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       fsm = new FiniteStateMachine('init');
       spy = sandbox.spy();
       other = sandbox.spy();

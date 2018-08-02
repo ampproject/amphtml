@@ -255,7 +255,7 @@ describes.realWin('amp-analytics', {
             // Wait for event queue to clear and reset sendRequestSpy
             // to avoid pageView pings.
             yield macroTask();
-            sendRequestSpy.reset();
+            sendRequestSpy.resetHistory();
 
 
             analytics.handleEvent_({

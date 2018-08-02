@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 import {
   LoadTask,
   MuteTask,
@@ -34,7 +33,7 @@ describes.realWin('media-tasks', {}, () => {
   let vsyncApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     el = document.createElement('video');
 
     // Mock vsync

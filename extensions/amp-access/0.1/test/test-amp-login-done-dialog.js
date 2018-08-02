@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 
 
@@ -30,7 +29,7 @@ describe('LoginDoneDialog', () => {
   let closeButton;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     messageListener = undefined;

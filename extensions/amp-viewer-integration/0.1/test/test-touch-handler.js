@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Messaging} from '../messaging/messaging';
 import {TouchHandler} from '../touch-handler';
 

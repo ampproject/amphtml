@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
@@ -26,7 +25,7 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     return createFixtureIframe('test/fixtures/actions.html', 500).then(f => {
       fixture = f;

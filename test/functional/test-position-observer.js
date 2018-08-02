@@ -102,12 +102,12 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         clock.tick(2);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         top++;
         win.dispatchEvent(new Event('scroll'));
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         top++;
         clock.tick(1);
         yield macroTask();
@@ -115,7 +115,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         // stop fire scroll update after 500ms timeout
         // Make the number larger to avoid window scroll event
         clock.tick(5001);
-        spy.reset();
+        spy.resetHistory();
         top++;
         clock.tick(1);
         yield macroTask();
@@ -154,7 +154,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
           relativePos: 'inside',
           viewportRect: layoutRectLtwh(0, 0, sizes.width, sizes.height),
         });
-        spy.reset();
+        spy.resetHistory();
         top = -5;
         posOb.updateAllEntries();
         yield macroTask();
@@ -163,7 +163,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
           relativePos: 'top',
           viewportRect: layoutRectLtwh(0, 0, sizes.width, sizes.height),
         });
-        spy.reset();
+        spy.resetHistory();
         top = sizes.height - 5;
         posOb.updateAllEntries();
         yield macroTask();
@@ -187,7 +187,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         const spy = sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         yield macroTask();
-        spy.reset();
+        spy.resetHistory();
         top = -11;
         posOb.updateAllEntries();
         yield macroTask();
@@ -196,7 +196,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
           relativePos: 'top',
           viewportRect: layoutRectLtwh(0, 0, sizes.width, sizes.height),
         });
-        spy.reset();
+        spy.resetHistory();
         elem.style.top = sizes.height + 1;
         posOb.updateAllEntries();
         yield macroTask();
@@ -209,7 +209,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
           relativePos: 'inside',
           viewportRect: layoutRectLtwh(0, 0, sizes.width, sizes.height),
         });
-        spy.reset();
+        spy.resetHistory();
         top = sizes.height + 5;
         posOb.updateAllEntries();
         yield macroTask();

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
@@ -37,7 +36,7 @@ describes.realWin('amp-live-list', {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdoc = new AmpDocSingle(win);
     elem = document.createElement('amp-live-list');
     elem.getAmpDoc = () => ampdoc;

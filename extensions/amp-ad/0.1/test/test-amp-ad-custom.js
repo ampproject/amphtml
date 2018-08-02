@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpAdCustom} from '../amp-ad-custom';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
@@ -27,7 +26,7 @@ describe('Amp custom ad', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
