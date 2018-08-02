@@ -183,7 +183,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
+    /** @protected {!Deferred<?../../../src/utils/xhr-utils.FetchResponse>} */
     this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
