@@ -45,10 +45,6 @@ export function fetchDocument(win, input, opt_init) {
         return xhrRequest_(input, init).then(({xhr, response}) => {
           verifyAmpCORSHeaders(win, response, init);
           return xhr.responseXML;
-        }, reason => {
-          const targetOrigin = parseUrlDeprecated(input).origin;
-          throw user().createExpectedError('XHR', 'Failed fetching' +
-              ` (${targetOrigin}/...):`, reason && reason.message);
         });
       });
 }
