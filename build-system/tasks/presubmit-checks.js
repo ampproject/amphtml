@@ -885,12 +885,13 @@ function isInTestFolder(path) {
 
 /**
  * Check if file is inside the build-system/babel-plugins test/fixture folder.
- * @param {string} path
+ * @param {string} filePath
  * @return {boolean}
  */
-function isInBuildSystemFixtureFolder(path) {
-  return path.indexOf('build-system/babel-plugins') == 0 &&
-      /test\/fixtures/.test(path);
+function isInBuildSystemFixtureFolder(filePath) {
+  const folder = path.dirname(filePath);
+  return folder.startsWith('build-system/babel-plugins') &&
+    folder.includes('test/fixtures');
 }
 
 /**
