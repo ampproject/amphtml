@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
 import {VideoUtils} from '../../src/utils/video';
@@ -243,7 +242,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
     });
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       klass = createFakeVideoPlayerClass(env.win);
       video = env.createAmpElement('amp-test-fake-videoplayer', klass);
       impl = video.implementation_;
@@ -274,7 +273,7 @@ describe.configure().ifNewChrome().run('Autoplay support', () => {
   let playStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     video = {
       setAttribute() {},

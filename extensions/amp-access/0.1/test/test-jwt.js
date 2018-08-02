@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {JwtHelper} from '../jwt';
 import {pemToBytes} from '../../../../src/utils/pem';
 
@@ -35,7 +34,7 @@ describe('JwtHelper', () => {
   let helper;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     helper = new JwtHelper(window);
   });
 
