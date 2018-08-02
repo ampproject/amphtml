@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 
 describe('DocumentFetcher', function() {
