@@ -32,7 +32,7 @@ exports.createModuleCompatibleES5Bundle = function(src) {
   return gulp.src('dist/' + src)
       .pipe($$.sourcemaps.init({loadMaps: true}))
       .pipe($$.rename(src.replace(/\.js$/, '-module.js')))
-      .pipe($$.regexpSourcemaps(/(global\?global:\w*})\(this\)/, '$1(self)'))
+      .pipe($$.regexpSourcemaps(/(global\?global:\w*})\(this\)/, '$1(self)', 'module-global'))
       .pipe($$.sourcemaps.write('./'))
       .pipe(gulp.dest('dist'));
 };
