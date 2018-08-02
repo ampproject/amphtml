@@ -400,7 +400,6 @@ export class Bind {
             .then(results => this.applyElements_(results, addedElements));
       }).then(() => {
         // Remove bindings at the end to reduce evaluation/apply latency.
-        // Don't chain this promise since this is a non-blocking clean up task.
         cleanup(added);
       });
     } else {
@@ -749,10 +748,9 @@ export class Bind {
    */
   scanElement_(element, quota, outBindings) {
     let quotaExceeded = false;
-    let boundProperties = this.boundPropertiesInElement_(element);
-    // Stop scanning once |limit| bindings are reached.
+    const boundProperties = this.boundPropertiesInElement_(element);
     if (boundProperties.length > quota) {
-      boundProperties = boundProperties.slice(0, quota);
+      boundProperties.length = quota;
       quotaExceeded = true;
     }
     if (boundProperties.length > 0) {
