@@ -23,7 +23,7 @@ const gulp = require('gulp');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const rename = require('gulp-rename');
-const replace = require('gulp-replace');
+const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const {highlight} = require('cli-highlight');
@@ -141,7 +141,7 @@ function compile(entryModuleFilenames, outputDir,
         stream.on('end', resolve);
         stream.on('error', reject);
         stream.pipe(
-            replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+            replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
             .pipe(shortenLicense())
             .pipe(gulp.dest(outputDir));
       });
