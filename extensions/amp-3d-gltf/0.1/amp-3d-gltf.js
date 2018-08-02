@@ -95,14 +95,21 @@ export class Amp3dGltf extends AMP.BaseElement {
         getOption('src', string, ''),
         this.element);
 
+    const useAlpha = getOption('alpha', bool, false);
+
     this.context_ = dict({
       'src': resolveRelativeUrl(src, this.getAmpDoc().getUrl()),
       'renderer': {
-        'alpha': getOption('alpha', bool, false),
+        'alpha': useAlpha,
         'antialias': getOption('antialiasing', bool, true),
       },
-      'maxPixelRatio':
-          getOption('maxPixelRatio', number, devicePixelRatio || 1),
+      'rendererSettings': {
+        'clearAlpha': useAlpha ? 0 : 1,
+        'clearColor':
+            getOption('clearColor', string, '#fff'),
+        'maxPixelRatio':
+            getOption('maxPixelRatio', number, devicePixelRatio || 1),
+      },
       'controls': {
         'enableZoom': getOption('enableZoom', bool, true),
         'autoRotate': getOption('autoRotate', bool, false),

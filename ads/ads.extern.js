@@ -75,6 +75,7 @@ THREE.WebGLRenderer = class {
     /** @type {?Element} */ this.domElement = null;}};
 THREE.WebGLRenderer.prototype.setSize
 THREE.WebGLRenderer.prototype.setPixelRatio
+THREE.WebGLRenderer.prototype.setClearColor
 THREE.WebGLRenderer.prototype.render
 
 THREE.Light = class extends THREE.Object3D {};

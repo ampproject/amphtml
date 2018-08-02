@@ -44,6 +44,9 @@ tags: {  # <amp-3d-gltf>
     value: "true"
   }
   attrs: {
+    name: "clearcolor"
+  }
+  attrs: {
     name: "enablezoom"
     value: "false"
     value: "true"

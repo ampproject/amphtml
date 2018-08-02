@@ -147,8 +147,12 @@ export default class GltfViewer {
 
     this.renderer_.setPixelRatio(
         Math.min(
-            this.options_['maxPixelRatio'],
+            this.options_['rendererSettings']['maxPixelRatio'],
             devicePixelRatio));
+    this.renderer_.setClearColor(
+        this.options_['rendererSettings']['clearColor'],
+        this.options_['rendererSettings']['clearAlpha']
+    );
   }
 
   /**

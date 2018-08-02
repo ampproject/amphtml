@@ -71,6 +71,10 @@ Default value is `false`.
 
 A Boolean attribute that specifies whether to turn on antialiasing. Default value is `false`.
 
+##### clearColor [optional]
+
+A string that must contain valid CSS color, that will be used to fill free space on canvas. 
+
 ##### maxPixelRatio [optional]
 
 A numeric value that specifies the upper limit for the pixelRatio render option. The default is `window.devicePixelRatio`.
