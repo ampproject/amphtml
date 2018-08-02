@@ -2100,7 +2100,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'element': ':root',
     },
     'requests': {
-      'load': JSON.stringify({
+      'load': /** @type {!JsonObject} */ JSON.stringify({
         'type': 'load',
         'pcode': '${pcode}',
         'l0t': '${l0t}',
@@ -2147,21 +2147,21 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'requestCount': '${requestCount}',
         'timeStamp': '${timestamp}',
       }),
-      'unload': JSON.stringify({
+      'unload': /** @type {!JsonObject} */ JSON.stringify({
         'type': 'unload',
         'pcode': '${pcode}',
         'l0t': '${l0t}',
         'requestCount': '${requestCount}',
         'timeStamp': '${timestamp}',
       }),
-      'click': JSON.stringify({
+      'click': /** @type {!JsonObject} */ JSON.stringify({
         'type': 'click',
         'pcode': '${pcode}',
         'l0t': '${l0t}',
         'requestCount': '${requestCount}',
         'timeStamp': '${timestamp}',
       }),
-      'viewability': JSON.stringify({
+      'viewability': /** @type {!JsonObject} */ JSON.stringify({
         'type': 'viewability',
         'pcode': '${pcode}',
         'l0t': '${l0t}',
@@ -2180,7 +2180,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'timeStamp': '${timestamp}',
         'requestCount': '${requestCount}',
       }),
-      'iframe': JSON.stringify({
+      'iframe': /** @type {!JsonObject} */ JSON.stringify({
         'type': 'iframe',
         'pcode': '${pcode}',
         'height': '${elementHeight}',
