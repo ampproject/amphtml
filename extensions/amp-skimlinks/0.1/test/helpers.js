@@ -1,4 +1,5 @@
 import {pubcode} from './constants';
+import Tracking from '../tracking';
 
 const helpersFactory = env => {
   const {win} = env;
@@ -34,6 +35,36 @@ const helpersFactory = env => {
           guid: 'user_guid',
         }, data);
       };
+    },
+
+    createTrackingWithStubAnalytics(skimOptions, anchorTrackingInfoResponse, ) {
+      skimOptions = Object.assign({
+        tracking: true,
+        pubcode,
+      }, skimOptions);
+
+      anchorTrackingInfoResponse = Object.assign({
+
+      });
+
+      class StubTracking extends Tracking {
+        setupAnalytics_() {
+          return {
+            trigger: env.sandbox.stub(),
+          };
+        }
+      }
+
+      return new StubTracking(env, skimOptions);
+    },
+
+    getAnalyticsUrlVars(trackingService, eventName) {
+      const stub = trackingService.analytics_.trigger;
+      expect(stub.withArgs(eventName).calledOnce).to.be.true;
+      const analyticsData = stub.withArgs(eventName).args[0][1];
+      expect(analyticsData).to.be.an('object');
+
+      return analyticsData;
     },
   };
 };
