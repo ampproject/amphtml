@@ -67,6 +67,7 @@ amp-image-slider amp-img > img {
 }
 
 .i-amphtml-image-slider-bar-stick {
+  float: left; /* fix RTL */
   width: 0;
   height: 100%;
   border: 0.5px solid white;
@@ -109,7 +110,6 @@ amp-image-slider amp-img > img {
   color: white;
   top: 0;
   bottom: 0;
-  font-weight: bold;
   transform: translate(-50%);
   z-index: 3;
   display: flex;

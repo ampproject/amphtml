@@ -141,8 +141,7 @@ export class AmpImageSlider extends AMP.BaseElement {
         '2 <amp-img>s must be provided for comparison');
 
     // TODO(kqian): remove this after layer launch
-    if (!isExperimentOn(this.win, 'layers') ||
-      this.element.getOwner() !== null) {
+    if (!isExperimentOn(this.win, 'layers')) {
       // see comment in layoutCallback
       // When layers not enabled
       this.setAsOwner(dev().assertElement(this.leftAmpImage_));
@@ -179,9 +178,6 @@ export class AmpImageSlider extends AMP.BaseElement {
       // Set initial positioning
       if (initialPercentString) {
         const initialPercent = Number(initialPercentString);
-        if (isNaN(initialPercent)) {
-          return;
-        }
         this.updatePositions_(initialPercent);
       }
     });
@@ -633,7 +629,7 @@ export class AmpImageSlider extends AMP.BaseElement {
         this.updatePositions_(newPercentage);
       });
     } else {
-      // Fix cases where getLayoutBox() cannot be trusted!
+      // Fix cases where getLayoutBox() cannot be trusted (when in carousel)!
       // This is to address the "snap to leftmost" bug that occurs on
       // pointer down after scrolling away and back 3+ slides
       // layoutBox is not updated correctly when first landed on page
@@ -654,17 +650,17 @@ export class AmpImageSlider extends AMP.BaseElement {
   /**
    * Update element positions based on percentage
    * Should be wrapped inside mutateElement
-   * @param {number} leftPercentage
+   * @param {number} percentFromLeft
    * @private
    */
-  updatePositions_(leftPercentage) {
-    leftPercentage = this.limitPercentage_(leftPercentage);
+  updatePositions_(percentFromLeft) {
+    percentFromLeft = this.limitPercentage_(percentFromLeft);
 
-    this.updateTranslateX_(this.bar_, leftPercentage);
-    this.updateTranslateX_(this.rightMask_, leftPercentage);
-    this.updateTranslateX_(this.rightAmpImage_, -leftPercentage);
+    this.updateTranslateX_(this.bar_, percentFromLeft);
+    this.updateTranslateX_(this.rightMask_, percentFromLeft);
+    this.updateTranslateX_(this.rightAmpImage_, -percentFromLeft);
     if (this.rightLabelWrapper_) {
-      this.updateTranslateX_(this.rightLabelWrapper_, -leftPercentage);
+      this.updateTranslateX_(this.rightLabelWrapper_, -percentFromLeft);
     }
   }
 
