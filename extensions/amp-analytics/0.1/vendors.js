@@ -2100,7 +2100,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'element': ':root',
     },
     'requests': {
-      'load': /** @type {!JsonObject} */ JSON.stringify({
+      'load': JSON.stringify(/** @type {!JsonObject} */ ({
         'type': 'load',
         'pcode': '${pcode}',
         'l0t': '${l0t}',
@@ -2146,22 +2146,22 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         },
         'requestCount': '${requestCount}',
         'timeStamp': '${timestamp}',
-      }),
-      'unload': /** @type {!JsonObject} */ JSON.stringify({
+      })),
+      'unload': JSON.stringify(/** @type {!JsonObject} */ ({
         'type': 'unload',
         'pcode': '${pcode}',
         'l0t': '${l0t}',
         'requestCount': '${requestCount}',
         'timeStamp': '${timestamp}',
-      }),
-      'click': /** @type {!JsonObject} */ JSON.stringify({
+      })),
+      'click': JSON.stringify(/** @type {!JsonObject} */ ({
         'type': 'click',
         'pcode': '${pcode}',
         'l0t': '${l0t}',
         'requestCount': '${requestCount}',
         'timeStamp': '${timestamp}',
-      }),
-      'viewability': /** @type {!JsonObject} */ JSON.stringify({
+      })),
+      'viewability': JSON.stringify(/** @type {!JsonObject} */ ({
         'type': 'viewability',
         'pcode': '${pcode}',
         'l0t': '${l0t}',
@@ -2179,8 +2179,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'opacity': '${opacity}',
         'timeStamp': '${timestamp}',
         'requestCount': '${requestCount}',
-      }),
-      'iframe': /** @type {!JsonObject} */ JSON.stringify({
+      })),
+      'iframe': JSON.stringify(/** @type {!JsonObject} */ ({
         'type': 'iframe',
         'pcode': '${pcode}',
         'height': '${elementHeight}',
@@ -2188,7 +2188,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'x': '${elementX}',
         'y': '${elementY}',
         'requestCount': '${requestCount}',
-      }),
+      })),
     },
     'triggers': {
       'load': {
