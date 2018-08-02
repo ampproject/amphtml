@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {debounce, throttle} from '../../../src/utils/rate-limit';
 
 describe('function utils', () => {
@@ -23,7 +22,7 @@ describe('function utils', () => {
     let clock;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
     });
 
@@ -37,7 +36,7 @@ describe('function utils', () => {
 
       throttledCallback(1);
       expect(callback).to.be.calledWith(1); // let 1st call through immediately
-      callback.reset();
+      callback.resetHistory();
 
       clock.tick(20);
       throttledCallback(2);
@@ -53,7 +52,7 @@ describe('function utils', () => {
       clock.tick(1);
       expect(callback).to.be.calledOnce;
       expect(callback).to.be.calledWith(5);
-      callback.reset();
+      callback.resetHistory();
 
       clock.tick(10);
       throttledCallback(6);
@@ -94,7 +93,7 @@ describe('function utils', () => {
     let clock;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
     });
 
@@ -111,7 +110,7 @@ describe('function utils', () => {
       clock.tick(100);
       expect(callback).to.have.been.calledWith(1);
 
-      callback.reset();
+      callback.resetHistory();
       debounced(1);
       expect(callback).to.not.have.been.called;
       debounced(2);
