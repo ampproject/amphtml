@@ -138,7 +138,6 @@
   width: max-content !important;
   transition-property: opacity, transform !important;
   float: right !important;
-  /*opacity: 0 !important;*/
   position: absolute !important;
   top: 14px !important;
   right: 48px !important;
@@ -146,40 +145,39 @@
 
 [dir=rtl] .i-amphtml-message-container {
   right: auto !important;
+  left: 48px !important;
 }
 
 [messagedisplay="noshow"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.2s cubic-bezier(0.0, 0.0, 1, 1) 0.3s !important;
+  transition: opacity 0.2s cubic-bezier(0.33, 0.33, 1, 1), transform 0.2s cubic-bezier(0.1, 0.4, 1, 1) 0.5s !important;
   transform: translateX(15%) !important;
   opacity: 0 !important;
-  
 }
 
 [dir=rtl][messagedisplay="noshow"] .i-amphtml-message-container {
-  transform: translateX(50%) !important;
+  transform: translateX(1%) !important;
 }
 
 [messagedisplay="show"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: opacity 0.2s cubic-bezier(0.33, 0.33, 1, 1), transform 0.2s cubic-bezier(0.33, 0.33, 1, 1) !important;
   opacity: 1 !important;
   transform: translateX(1%) !important;
-  
 }
 
 [dir=rtl][messagedisplay="show"] .i-amphtml-message-container {
-  transform: translateX(100%) !important;
+  transform: translateX(10%) !important;
 }
 
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text  {
-  width: max-content;
+  width: max-content !important;
 }
 
 .i-amphtml-story-sound-display{
-  display: inline-block;
+  display: inline-block !important;
   height: 46px !important;
-  position: relative;
+  position: relative !important;
 }
 
 
