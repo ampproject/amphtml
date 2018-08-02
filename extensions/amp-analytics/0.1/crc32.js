@@ -22,8 +22,26 @@
  */
 const CRC32_KEY = 0xEDB88320;
 
-/** @const {Array<number>} */
-const CRC_TABLE = makeCrcTable();
+/** @private {?Array<number>} */
+let crcTable = null;
+
+/**
+ * Returns CRC32 checksum for provided string.
+ * @param {string} str
+ * @return {number}
+ */
+export function crc32(str) {
+  if (!crcTable) {
+    crcTable = makeCrcTable();
+  }
+  // Shrink to 32 bits.
+  let crc = -1 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    const lookupIndex = (crc ^ str.charCodeAt(i)) & 0xFF;
+    crc = (crc >>> 8) ^ crcTable[lookupIndex];
+  }
+  return (crc ^ (-1)) >>> 0;
+}
 
 /**
  * Generates CRC lookup table.
@@ -43,19 +61,4 @@ function makeCrcTable() {
     crcTable[i] = c;
   }
   return crcTable;
-}
-
-/**
- * Returns CRC32 checksum for provided string.
- * @param {string} str
- * @return {number}
- */
-export function crc32(str) {
-  // Shrink to 32 bits.
-  let crc = -1 >>> 0;
-  for (let i = 0; i < str.length; i++) {
-    const lookupIndex = (crc ^ str.charCodeAt(i)) & 0xFF;
-    crc = (crc >>> 8) ^ CRC_TABLE[lookupIndex];
-  }
-  return (crc ^ (-1)) >>> 0;
 }
