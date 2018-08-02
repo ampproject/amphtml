@@ -18,6 +18,17 @@ describes.realWin('test-tracking', {
     helpers = helpersFactory(env);
   });
 
+  function setupTrackingService(skimOptions, trackingInfo) {
+    trackingInfo = Object.assign(
+        {pageImpressionId: 'page-imp-id', guid: 'guid'},
+        trackingInfo
+    );
+    const trackingService = helpers.createTrackingWithStubAnalytics(skimOptions);
+    trackingService.setTrackingInfo(trackingInfo);
+
+    return trackingService;
+  }
+
   afterEach(() => {
     env.sandbox.restore();
   });
@@ -33,16 +44,6 @@ describes.realWin('test-tracking', {
       // mock.verify();
     });
 
-    function setupTrackingService(skimOptions, trackingInfo) {
-      trackingInfo = Object.assign(
-          {pageImpressionId: 'page-imp-id', guid: 'guid'},
-          trackingInfo
-      );
-      const trackingService = helpers.createTrackingWithStubAnalytics(skimOptions);
-      trackingService.setTrackingInfo(trackingInfo);
-
-      return trackingService;
-    }
 
     function createFakeAnchorReplacementMap() {
       const map = new Map();
@@ -134,7 +135,7 @@ describes.realWin('test-tracking', {
         expect(urlVars.data).to.be.a.string;
         const trackingData = JSON.parse(urlVars.data);
         // Test 'jsl' separately since we can't controle its value.
-        expect(trackingData.jsl).to.be.lt(2000); // Arbitrary number
+        expect(trackingData.jsl).to.be.a('number').but.not.to.equal(0); // Arbitrary number
         trackingData.jsl = expectedData.jsl; // Already verified, replace by fixed value.
         expect(trackingData).to.deep.equal(expectedData);
       });
@@ -201,9 +202,56 @@ describes.realWin('test-tracking', {
 
       expect(trackingData.hae).to.equal(1);
     });
+
   });
 
-  describe.skip('sendNaClickTracking', () => {
+  describe('sendNaClickTracking', () => {
+    it('Should send non-affiliate click tracking', () => {
+      const anchor = helpers.createAnchor('https://non-merchant.com/test');
+      const expectedData = {
+        pubcode,
+        referrer: 'CANONICAL_URL',
+        pref: 'DOCUMENT_REFERRER',
+        url: anchor.href,
+        xtz: 'TIMEZONE',
+        uuid: 'page-impressions-id',
+        site: 'false',
+        product: '1',
+      };
 
+      const trackingService = setupTrackingService(null, {
+        pageImpressionId: expectedData.uuid,
+        guid: expectedData.guid,
+      });
+
+      trackingService.sendNaClickTracking(anchor);
+      const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'non-affiliate-click');
+      expect(urlVars.data).to.be.a.string;
+      const trackingData = JSON.parse(urlVars.data);
+      expect(trackingData).to.deep.equal(expectedData);
+    });
+
+    it('Should not send tracking if "tracking" skimOption is false', () => {
+      const trackingService = setupTrackingService({tracking: false});
+
+      const anchor = helpers.createAnchor('https://non-merchant.com/test');
+
+      trackingService.sendNaClickTracking(anchor);
+
+      const stub = trackingService.analytics_.trigger;
+      expect(stub.withArgs('non-affiliate-click').calledOnce).to.be.false;
+    });
+
+    it('Should send the global xcust with the na tracking', () => {
+
+    });
+
+    it('Should send xcust set on the link with the na tracking', () => {
+
+    });
+
+    it('Should prioritise xcust set on the link over global xcust with the na tracking', () => {
+
+    });
   });
 });
