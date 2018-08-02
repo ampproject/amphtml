@@ -284,8 +284,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
           .classList.toggle('i-amphtml-story-consent-fullbleed', isFullBleed);
     };
 
-    this.element.getResources()
-        .measureMutateElement(this.storyConsentEl_, measurer, mutator);
+    this.measureMutateElement(this.storyConsentEl_, measurer, mutator);
   }
 
   /**
@@ -300,7 +299,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentEl_.removeAttribute('dir');
     };
 
-    this.element.getResources().mutateElement(this.storyConsentEl_, mutator);
+    this.mutateElement(this.storyConsentEl_, mutator);
   }
 
   /**
