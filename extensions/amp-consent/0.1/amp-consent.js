@@ -625,7 +625,7 @@ export class AmpConsent extends AMP.BaseElement {
         this.user().error(TAG, 'child element of <amp-consent> with ' +
           `promptUI id ${promptUI} not found`);
       }
-      this.consentUI_[instanceId] = /** @type {!Element} */ (element);
+      this.consentUI_[instanceId] = dev().assertElement(element);
     }
 
     // Get current consent state

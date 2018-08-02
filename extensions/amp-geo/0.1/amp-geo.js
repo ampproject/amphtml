@@ -101,7 +101,7 @@ const mode = {
  *   ISOCountryGroups: !Array<string>
  * }}
  */
-export const GeoDef = {};
+export let GeoDef;
 
 
 export class AmpGeo extends AMP.BaseElement {
@@ -139,7 +139,7 @@ export class AmpGeo extends AMP.BaseElement {
               `${TAG} Unable to parse JSON`)
       ) : {};
 
-    /** @type {!Promise<!Object<string, (string|Array<string>)>>} */
+    /** @type {!Promise<!GeoDef>} */
     const geo = this.addToBody_(config || {});
 
     /* resolve the service promise singleton we stashed earlier */
@@ -274,7 +274,7 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * Adds the given country groups to HTML element as classes
    * @param {Object} config
-   * @return {!Promise<!Object<string, (string|Array<string>)>>} service response
+   * @return {!Promise<!GeoDef>} service response
    * @private
    */
   addToBody_(config) {
