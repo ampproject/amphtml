@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import {utf8Encode} from '../../../src/utils/bytes';
+=======
+>>>>>>> clean up
 
 /**
  * Standard key for CRC32

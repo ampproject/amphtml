@@ -86,7 +86,7 @@ describes.realWin('Linker', {
     return expect(result).to.eventually.equal(expected);
   });
 
-  it('appends many key value pairs', () => {
+  it.only('appends many key value pairs', () => {
     const config = {
       url: 'https://www.google.com',
       key: '_foo',

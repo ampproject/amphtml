@@ -17,7 +17,8 @@
 
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-import {crc32String} from './crc32';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {crc32} from './crc32';
 
 /** @const {string} */
 const DELIMITER = '~';
@@ -60,6 +61,7 @@ export class Linker {
     } = config;
 
     return this.resolveMacros_(pairs).then(expandedPairs => {
+      debugger;
       const parameter = this.generateParam_(version, expandedPairs);
       return addParamToUrl(url, key, parameter);
     });
@@ -69,25 +71,27 @@ export class Linker {
   /**
    * Go through key value pairs and resolve any macros that may exist.
    * @param {(Object<string, string>|undefined)} pairs
-   * @return {Promise<string>}
+   * @return {Promise<Object<string, string>}
    */
   resolveMacros_(pairs) {
-    const expandedPairs = {};
+    const keys = Object.keys(pairs);
     const expansionPromises = [];
 
-    for (const key in pairs) {
+    keys.forEach(key => {
       // TODO(ccordry): change this to call new expander once fully launched.
       const promise = this.urlReplacementService_.expandStringAsync(pairs[key]);
-      // Add value promises into array so that we can keep track of resolution.
-      // Also add to new obj, so that we can still keep track of key-value
-      // pairs.
       expansionPromises.push(promise);
-      expandedPairs[key] = promise;
-    }
-
-    return Promise.all(expansionPromises).then(() => {
-      return expandedPairs;
     });
+
+    return Promise.all(expansionPromises)
+    // .then(() => {
+    //   debugger;
+    //   const expandedPairs = {};
+    //   keys.forEach((key, i) => {
+    //     expandedPairs[key] = expansionPromises[i];
+    //   });
+    //   return expandedPairs;
+    // });
   }
 
 
@@ -107,15 +111,16 @@ export class Linker {
 
   /**
    * Create a unique checksum hashing the fingerprint and a few other values.
-   * base64(CRC32(fingerprint + timestampRoundedInMin + kv pairs))
+   * base36(CRC32(fingerprint + timestampRoundedInMin + kv pairs))
    * @param {?Object<string, string>} encodedPairs
    * @return {string}
    */
   getCheckSum_(encodedPairs) {
     const fingerprint = this.getFingerprint_();
     const timestamp = this.getRoundedTimestamp_();
-    const goo = crc32String(fingerprint + timestamp + encodedPairs);
-    return b64EncodeUnicode(goo);
+    const crc = crc32(fingerprint + timestamp + encodedPairs);
+    // Encoded to base36 for less bytes.
+    return crc.toString(36);
   }
 
 
@@ -145,8 +150,8 @@ export class Linker {
     let result = DELIMITER;
 
     keys.forEach(key => {
-      const encodedKey = b64EncodeUnicode(key);
-      const encodedVal = b64EncodeUnicode(expandedPairs[key]);
+      const encodedKey = base64UrlEncodeFromString(key);
+      const encodedVal = base64UrlEncodeFromString(expandedPairs[key]);
       result += encodedKey + DELIMITER + encodedVal;
     });
 
@@ -161,19 +166,4 @@ export class Linker {
   getRoundedTimestamp_() {
     return Math.round(Date.now() / TIME_TOLERANCE);
   }
-}
-
-
-/**
- * Escape the given string with UTF-8 then base64 encode it.
- * @param {string} str
- */
-function b64EncodeUnicode(str) {
-  // first we use encodeURIComponent to get percent-encoded UTF-8,
-  // then we convert the percent encodings into raw bytes which
-  // can be fed into btoa.
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-      function toSolidBytes(match, p1) {
-        return String.fromCharCode('0x' + p1);
-      }));
 }
