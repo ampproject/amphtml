@@ -45,7 +45,7 @@ describe('DocumentFetcher', function() {
   });
 
   after(() => {
-    sandbox.restore();
+    sinon.restore();
   });
 
   describe('#dummy test', () => {
