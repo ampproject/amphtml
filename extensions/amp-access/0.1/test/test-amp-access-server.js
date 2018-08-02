@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
 import * as DocumentFetcher from '../../../../src/document-fetcher';
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
 
@@ -176,7 +177,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           },
         };
         docFetcherMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
               headers: {
@@ -218,7 +219,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           },
         };
         docFetcherMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
               headers: {
@@ -255,7 +256,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           },
         };
         docFetcherMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
               headers: {

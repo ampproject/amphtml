@@ -224,7 +224,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           'jwt': encoded,
         });
         docFetcherMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: request,
               headers: {
@@ -258,7 +258,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           'jwt': encoded,
         });
         docFetcherMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: request,
               headers: {
@@ -294,7 +294,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           'jwt': encoded,
         });
         docFetcherMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: request,
               headers: {
