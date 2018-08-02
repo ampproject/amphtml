@@ -24,7 +24,6 @@ import {
 } from './url';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
-import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -231,7 +230,6 @@ const PURIFY_CONFIG = {
 export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
     'ADD_ATTR': WHITELISTED_ATTRS,
-    'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
     'FORCE_BODY': true,
@@ -480,10 +478,7 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
 
   // Inline styles are not allowed.
   if (attrName == 'style') {
-    if (isExperimentOn(self, 'inline-styles')) {
-      return !INVALID_INLINE_STYLE_REGEX.test(attrValue);
-    }
-    return false;
+    return !INVALID_INLINE_STYLE_REGEX.test(attrValue);
   }
 
   // Don't allow CSS class names with internal AMP prefix.

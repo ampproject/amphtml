@@ -18,7 +18,6 @@ import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../src/sanitizer';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('Caja-based', () => {
   runSanitizerTests();
@@ -112,7 +111,6 @@ function runSanitizerTests() {
     it('should NOT output security-sensitive markup', () => {
       expect(sanitizeHtml('a<script>b</script>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<script>b<img>d</script>c')).to.be.equal('ac');
-      expect(sanitizeHtml('a<style>b</style>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<frame></frame>c')).to.be.equal('ac');
@@ -240,10 +238,6 @@ function runSanitizerTests() {
       allowConsoleError(() => {
         expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal(
             'a<a>b</a>');
-        expect(sanitizeHtml('a<a style="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(sanitizeHtml('a<a STYLE="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
         expect(sanitizeHtml('a<a href="javascript:alert">b</a>')).to.be.equal(
             'a<a target="_top">b</a>');
         expect(sanitizeHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
@@ -355,30 +349,12 @@ function runSanitizerTests() {
           .to.be.equal('ac');
     });
 
-    it('should output style attributes if inline styles enabled', () => {
-      toggleExperiment(self, 'inline-styles', true,
-          /* opt_transientExperiment */ true);
-      expect(sanitizeTagsForTripleMustache(
-          '<b style="color: red">abc</b>'))
-          .to.be.equal('<b style="color: red">abc</b>');
-    });
-
     it('should compensate for broken markup', () => {
       expect(sanitizeTagsForTripleMustache('<b>a<i>b')).to.be.equal(
           '<b>a<i>b</i></b>');
     });
 
     describe('should sanitize `style` attribute', () => {
-      beforeEach(() => {
-        toggleExperiment(self, 'inline-styles', true,
-            /* opt_transientExperiment */ true);
-      });
-
-      afterEach(() => {
-        toggleExperiment(self, 'inline-styles', false,
-            /* opt_transientExperiment */ true);
-      });
-
       it('should allow valid styles',() => {
         expect(sanitizeHtml('<div style="color:blue">Test</div>'))
             .to.equal('<div style="color:blue">Test</div>');

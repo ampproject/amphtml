@@ -21,7 +21,6 @@ import {
   rewriteAttributeValue,
   rewriteAttributesForElement,
 } from '../../src/purifier';
-import {toggleExperiment} from '../../src/experiments';
 
 /**
  * Helper that serializes output of purifyHtml() to string.
@@ -181,7 +180,6 @@ function runSanitizerTests() {
     it('should NOT output security-sensitive markup', () => {
       expect(purify('a<script>b</script>c')).to.be.equal('ac');
       expect(purify('a<script>b<img>d</script>c')).to.be.equal('ac');
-      expect(purify('a<style>b</style>c')).to.be.equal('ac');
       expect(purify('a<img>c')).to.be.equal('ac');
       expect(purify('a<iframe></iframe>c')).to.be.equal('ac');
       expect(purify('a<frame></frame>c')).to.be.equal('ac');
@@ -306,26 +304,20 @@ function runSanitizerTests() {
     });
 
     it('should NOT output security-sensitive attributes', () => {
-      allowConsoleError(() => {
-        expect(purify('a<a onclick="alert">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(purify('a<a style="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(purify('a<a STYLE="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(purify('a<a href="javascript:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purify('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purify('a<a href="vbscript:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purify('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purify('a<a href="data:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-        expect(purify('a<a href="DATA:alert">b</a>')).to.be.equal(
-            'a<a target="_top">b</a>');
-      });
+      expect(purify('a<a onclick="alert">b</a>')).to.be.equal(
+          'a<a>b</a>');
+      expect(purify('a<a href="javascript:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purify('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purify('a<a href="vbscript:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purify('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purify('a<a href="data:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
+      expect(purify('a<a href="DATA:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
     });
 
     it('should NOT output blacklisted values for class attributes', () => {
@@ -433,30 +425,12 @@ function runSanitizerTests() {
           .to.be.equal('ac');
     });
 
-    it('should output style attributes if inline styles enabled', () => {
-      toggleExperiment(self, 'inline-styles', true,
-          /* opt_transientExperiment */ true);
-      expect(purifyTagsForTripleMustache(
-          '<b style="color: red">abc</b>'))
-          .to.be.equal('<b style="color: red">abc</b>');
-    });
-
     it('should compensate for broken markup', () => {
       expect(purifyTagsForTripleMustache('<b>a<i>b')).to.be.equal(
           '<b>a<i>b</i></b>');
     });
 
     describe('should sanitize `style` attribute', () => {
-      beforeEach(() => {
-        toggleExperiment(self, 'inline-styles', true,
-            /* opt_transientExperiment */ true);
-      });
-
-      afterEach(() => {
-        toggleExperiment(self, 'inline-styles', false,
-            /* opt_transientExperiment */ true);
-      });
-
       it('should allow valid styles',() => {
         expect(purify('<div style="color:blue">Test</div>'))
             .to.equal('<div style="color:blue">Test</div>');
