@@ -171,7 +171,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     }, ActionTrust.LOW);
 
     const initialPercentString = this.element.getAttribute('initial-percent');
-    const hasAriaLabel = this.element.hasAttribute('aria-label');
     // TODO(kqian): move this before building child components on issue
     // This is the only step when content tree is attached to document
     return this.mutateElement(() => {
@@ -186,10 +185,6 @@ export class AmpImageSlider extends AMP.BaseElement {
           user().error('initial percent must be a number.');
         }
         this.updatePositions_(initialPercent);
-      }
-      // Set aria label if not provided
-      if (!hasAriaLabel) {
-        this.element.setAttribute('aria-label', 'comparing images');
       }
     });
   }
@@ -340,27 +335,43 @@ export class AmpImageSlider extends AMP.BaseElement {
     const leftAmpImage = dev().assertElement(this.leftAmpImage_);
     const rightAmpImage = dev().assertElement(this.rightAmpImage_);
 
-    if (!leftAmpImage.hasAttribute('alt')) {
-      // On LOAD_START, img tags are not yet constructed
-      leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-        if (leftAmpImage.childElementCount > 0) {
-          this.mutateElement(() => {
-            leftAmpImage.firstChild.setAttribute('alt', 'left image');
-          });
-        }
-      });
-    }
+    leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (leftAmpImage.childElementCount > 0) {
+        const img = leftAmpImage.firstChild;
+        let newAltText;
+        this.measureMutateElement(() => {
+          const ariaSuffix =
+            leftAmpImage.getAttribute('data-left-image-aria-suffix')
+              || 'left image';
+          if (leftAmpImage.hasAttribute('alt')) {
+            newAltText = `${leftAmpImage.getAttribute('alt')} ${ariaSuffix}`;
+          } else {
+            newAltText = ariaSuffix;
+          }
+        }, () => {
+          img.setAttribute('alt', newAltText);
+        });
+      }
+    });
 
-    if (!rightAmpImage.hasAttribute('alt')) {
-      // On LOAD_START, img tags are not yet constructed
-      rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-        if (rightAmpImage.childElementCount > 0) {
-          this.mutateElement(() => {
-            rightAmpImage.firstChild.setAttribute('alt', 'right image');
-          });
-        }
-      });
-    }
+    rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (rightAmpImage.childElementCount > 0) {
+        const img = rightAmpImage.firstChild;
+        let newAltText;
+        this.measureMutateElement(() => {
+          const ariaSuffix =
+            rightAmpImage.getAttribute('data-right-image-aria-suffix')
+              || 'right image';
+          if (rightAmpImage.hasAttribute('alt')) {
+            newAltText = `${rightAmpImage.getAttribute('alt')} ${ariaSuffix}`;
+          } else {
+            newAltText = ariaSuffix;
+          }
+        }, () => {
+          img.setAttribute('alt', newAltText);
+        });
+      }
+    });
   }
 
   /**
@@ -520,9 +531,13 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     switch (e.key.toLowerCase()) {
       case 'arrowleft':
+        e.preventDefault();
+        e.stopPropagation();
         this.stepLeft_();
         break;
       case 'arrowright':
+        e.preventDefault();
+        e.stopPropagation();
         this.stepRight_();
         break;
       case 'pageup':

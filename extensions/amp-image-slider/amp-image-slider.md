@@ -58,4 +58,4 @@ The slider could also take 2 optional `div`s for labels, which are used to add e
 
 By default, once the slider is loaded, the compared images will be separated by a vertical bar, with helpful arrow hints displayed at its center. User could press mouse button down or touch to move the slider to the position of the pointer, and could then move the pointer to drag the slider bar left and right. For the left image, only part that is left to the bar is displayed; similar for the right image to only display the right portion.
 
-TODO: add description for keyboard once settled.
+If we specify `tabindex` on `amp-image-slider`, users are also allowed to move the slider using keyboard. Pressing down left and right arrow moves the slider bar one step towards the corresponding direction. Pressing Home would bring the slider to the center, PageUp and PageDown to the left and right end of the slider body.
