@@ -123,7 +123,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = isExperimentOn(this.win, 'amp-carousel-scroll-snap');
+    this.shouldDisableCssSnap_ = !isExperimentOn(this.win, 'amp-carousel-scroll-snap');
   }
 
   /** @override */
