@@ -1317,17 +1317,6 @@ describe('Viewer', () => {
           test('https://google', false);
           test('https://www.google', false);
         });
-
-    describe('tests for b/32626673', () => {
-      test('www.google.com', true, true);
-      test('www.google.com', false, /* not in webview */ false);
-      test('www.google.de', true, true);
-      test('www.google.co.uk', true, true);
-      test(':www.google.de', false, true);
-      test('news.google.de', false, true);
-      test('www.google.de/', false, true);
-      test('www.acme.com', false, true);
-    });
   });
 
   describe('referrer', () => {
