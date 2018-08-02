@@ -116,7 +116,7 @@ describe('amp-mustache 0.1', () => {
           value: /*eslint no-script-url: 0*/ 'javascript:alert();',
         });
         expect(result./*OK*/innerHTML).to.equal(
-            'value = <a data-="" target="_top">abc</a>');
+            'value = <a data-="" style="color:red;" target="_top">abc</a>');
       });
     });
 
