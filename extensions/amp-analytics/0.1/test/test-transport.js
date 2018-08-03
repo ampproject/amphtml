@@ -110,6 +110,61 @@ describe('amp-analytics.transport', () => {
     assertCallCounts(0, 0, 0);
   });
 
+  it('beacon uses requestBodyDef url when available', () => {
+    const beaconStub = sandbox
+        .stub(Transport, 'sendRequestUsingBeacon').returns(true);
+    const bodyUrl = 'https://example.com/test/body';
+    const bodyPayload = {test: 'test'};
+
+    sendRequest(window, 'https://example.com/test', {
+      beacon: true, xhrpost: false, image: false,
+    }, {url: bodyUrl, payload: bodyPayload});
+
+    expect(beaconStub.getCall(0).args[1]).to.equal(bodyUrl);
+    expect(beaconStub.getCall(0).args[2]).to.equal(JSON.stringify(bodyPayload));
+  });
+
+  it('xhr uses requestBodyDef url when available', () => {
+    const xhrStub = sandbox
+        .stub(Transport, 'sendRequestUsingXhr').returns(true);
+    const bodyUrl = 'https://example.com/test/body';
+    const bodyPayload = {test: 'test'};
+
+    sendRequest(window, 'https://example.com/test', {
+      beacon: false, xhrpost: true, image: false,
+    }, {url: bodyUrl, payload: bodyPayload});
+
+    expect(xhrStub.getCall(0).args[1]).to.equal(bodyUrl);
+    expect(xhrStub.getCall(0).args[2]).to.equal(JSON.stringify(bodyPayload));
+  });
+
+  it('image uses requestBodyDef url when available', () => {
+    const imageStub = sandbox
+        .stub(Transport, 'sendRequestUsingImage').returns(true);
+    const bodyUrl = 'https://example.com/test/body';
+    const bodyPayload = {test: 'test'};
+    const requestUrl = 'https://example.com/test';
+
+    sendRequest(window, requestUrl, {
+      beacon: false, xhrpost: false, image: true,
+    }, {url: bodyUrl, payload: bodyPayload});
+
+
+    expect(imageStub.getCall(0).args[1]).to.equal(requestUrl);
+  });
+
+  it('sends empty body when body is null', () => {
+    const beaconStub = sandbox
+        .stub(Transport, 'sendRequestUsingBeacon').returns(true);
+    const requestUrl = 'https://example.com/test';
+    sendRequest(window, requestUrl, {
+      beacon: true, xhrpost: false, image: false,
+    }, null);
+
+    expect(beaconStub.getCall(0).args[1]).to.equal(requestUrl);
+    expect(beaconStub.getCall(0).args[2]).to.equal('');
+  });
+
   it('asserts that urls are https', () => {
     allowConsoleError(() => { expect(() => {
       sendRequest(window, 'http://example.com/test');

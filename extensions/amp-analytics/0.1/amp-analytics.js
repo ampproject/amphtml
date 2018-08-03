@@ -40,6 +40,7 @@ import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
 import {isArray} from '../../../src/types';
 import {isEnumValue} from '../../../src/types';
+import {requestBodyDef} from './requests';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
@@ -664,10 +665,10 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * @param {string} request The full request string to send.
    * @param {!JsonObject} trigger
-   * @param {string} body The full request body to send as a stringified json.
+   * @param {requestBodyDef} requestBody The full request body to send as a stringified json.
    * @private
    */
-  sendRequest_(request, trigger, body) {
+  sendRequest_(request, trigger, requestBody) {
     if (!request) {
       const TAG = this.getName_();
       this.user().error(TAG, 'Request not sent. Contents empty.');
@@ -686,7 +687,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       sendRequest(this.win,
           request,
           this.config_['transport'] || {},
-          body);
+          requestBody);
     }
   }
 

@@ -33,12 +33,20 @@ const TAG = 'AMP-ANALYTICS';
 
 const BATCH_INTERVAL_MIN = 200;
 
+/**
+ * @typedef {{
+ *   url: string,
+ *   payload: (JsonObject|Array<JsonObject>),
+ * }}
+ */
+export let requestBodyDef;
+
 export class RequestHandler {
   /**
    * @param {!Element} ampAnalyticsElement
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
-   * @param {function(string, !JsonObject, string)} handler
+   * @param {function(string, !JsonObject, requestBodyDef)} handler
    * @param {boolean} isSandbox
    */
   constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
@@ -95,7 +103,7 @@ export class RequestHandler {
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
 
-    /** @private {function(string, !JsonObject, string)} */
+    /** @private {function(string, !JsonObject, requestBodyDef)} */
     this.handler_ = handler;
 
     /** @const @private {!Object|undefined} */
@@ -161,12 +169,10 @@ export class RequestHandler {
     const extraUrlParamsPromise = this.expandExtraUrlParams_(
         configParams, triggerParams, expansionOption)
         .then(expandExtraUrlParams => {
-          const expandedExtraUrlParamsStr = this.useBody_ ?
-            JSON.stringify(expandExtraUrlParams) :
-            this.getExtraUrlParamsString_(expandExtraUrlParams);
-
           return this.urlReplacementService_.expandUrlAsync(
-              expandedExtraUrlParamsStr, bindings, this.whiteList_);
+              this.getExtraUrlParamsString_(expandExtraUrlParams),
+              bindings,
+              this.whiteList_);
         });
 
     if (this.batchingPlugin_) {
@@ -176,12 +182,8 @@ export class RequestHandler {
         'extraUrlParams': null,
       });
       this.batchSegmentPromises_.push(extraUrlParamsPromise.then(str => {
-        if (!this.useBody_) {
-          batchSegment['extraUrlParams'] =
-            parseQueryString(str);
-        } else {
-          batchSegment['extraUrlParams'] = str;
-        }
+        batchSegment['extraUrlParams'] = parseQueryString(str);
+
         return batchSegment;
       }));
     }
@@ -269,33 +271,46 @@ export class RequestHandler {
     return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
       const extraUrlParamStrs = {
         requestUrl: baseUrl,
-        requestBody: '',
+        requestBody: null,
       };
       let requestUrl;
-      if (!this.useBody_) {
-        filterSplice(paramStrs, item => {return !!item;});
-        const extraUrlParams = paramStrs.join('&');
-        if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
-          requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParams);
-        } else {
-          requestUrl =
-            appendEncodedParamStringToUrl(baseUrl, extraUrlParams);
-        }
-        extraUrlParamStrs.requestUrl = requestUrl;
+      // Throw user error to avoid payload duplication in body and queryParams
+      user().assert(
+          !(this.useBody_ && baseUrl.indexOf('${extraUrlParams}') !== -1),
+          'Invalid request: unable to use extraUrlParams' +
+          ' as query string with useBody');
+
+      filterSplice(paramStrs, item => {return !!item;});
+      const extraUrlParams = paramStrs.join('&');
+      if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
+        requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParams);
       } else {
-        // Throw user error to avoid payload duplication in body and queryParams
-        user().assert(baseUrl.indexOf('${extraUrlParams}') === -1,
-            'Invalid request: unable to use extraUrlParams' +
-            ' as query string with useBody');
+        requestUrl =
+          appendEncodedParamStringToUrl(baseUrl, extraUrlParams);
+      }
+      extraUrlParamStrs.requestUrl = requestUrl;
+      if (this.useBody_) {
+        const paramBodyStrs = this.getExtraUrlParamsStringsAsBody(paramStrs);
+
+        extraUrlParamStrs.requestBody = {
+          url: baseUrl,
+          payload: paramBodyStrs[0],
+        };
         if (this.batchInterval_) {
-          extraUrlParamStrs.requestBody = paramStrs;
-        } else {
-          extraUrlParamStrs.requestBody = paramStrs[0];
+          extraUrlParamStrs.requestBody.payload = paramBodyStrs;
         }
       }
 
       return extraUrlParamStrs;
     });
+  }
+
+  /**
+   * Parse extraUrlParams as query string to Objects
+   * @param {!Array<string>} paramStrs
+   */
+  getExtraUrlParamsStringsAsBody(paramStrs) {
+    return paramStrs.map(paramStr => parseQueryString(paramStr));
   }
 
   /**

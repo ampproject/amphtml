@@ -87,9 +87,9 @@ describes.realWin('Requests', {amp: 1}, env => {
             clock.tick(1000);
             yield macroTask();
             expect(spy).to.be.calledOnce;
-            expect(spy.args[0][2][0]).to.equal('{"e1":"e1"}');
-            expect(spy.args[0][2][1]).to.equal('{"e2":"&e2"}');
-            expect(spy.args[0][2][2]).to.equal('{"e3":""}');
+            expect(spy.args[0][2].payload[0]).to.deep.equal({e1: 'e1'});
+            expect(spy.args[0][2].payload[1]).to.deep.equal({e2: '&e2'});
+            expect(spy.args[0][2].payload[2]).to.deep.equal({e3: ''});
           });
 
       it('should work properly with no batch', function* () {
@@ -102,7 +102,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledTwice;
-        expect(spy.args[0][2]).to.equal('');
+        expect(spy.args[0][2]).to.equal(null);
       });
 
 
@@ -502,7 +502,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     toggleExperiment(env.win, 'url-replacement-v2');
   });
 
-  it('should send empty body when useBody is not set',
+  it('should send null bodyDef when useBody is not set',
       function* () {
         const spy = sandbox.spy();
         const r = {
@@ -531,7 +531,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, params, expansionOptions, bindings);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        expect(spy.args[0][2]).to.equal('');
+        expect(spy.args[0][2]).to.equal(null);
       });
 
   it('should send expanded extraUrlParams as body when useBody is set to true',
@@ -566,8 +566,13 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, params, expansionOptions, bindings);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        expect(spy.args[0][2]).to.equal(
-            '{"key1":"val1","key2":"val2","key3":"val3","base":"val_base"}');
+        expect(spy.args[0][2].payload).to.deep.equal(
+            {
+              key1: 'val1',
+              key2: 'val2',
+              key3: 'val3',
+              base: 'val_base',
+            });
       });
 
   it('should throw error if useBody and extraUrlParams is present in url',
