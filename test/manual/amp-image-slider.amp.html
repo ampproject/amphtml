@@ -1,0 +1,120 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-image-slider example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    #content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .flex {
+      display: flex;
+      justify-content: space-between
+    }
+
+    .label {
+      color: white;
+      border: 4px solid white;
+      padding: 1em;
+      font-family: Arial, Helvetica, sans-serif;
+      box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
+    }
+
+    .top-label {
+      top: 0;
+    }
+
+    .center-y-label {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .bottom-label {
+      bottom: 0;
+    }
+
+    .left-label-left {
+      left: 0;
+    }
+
+    .left-label-center {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-label-right {
+      right: 0;
+      left: auto;
+    }
+
+    .right-label-left {
+      left: 0;
+      right: auto;
+    }
+
+    .right-label-center {
+      right: 50%;
+      transform: translateX(50%);
+    }
+
+    .right-label-right {
+      right: 0;
+    }
+
+    .left-label-center-xy {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .right-label-center-xy {
+      right: 50%;
+      top: 50%;
+      transform: translate(50%, -50%);
+    }
+  </style>
+  <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <main id="content">
+    <h1>P0 TESTS</h1>
+
+    <p>NO labels; NO whatever modifications</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <p>Labels with NO positioning rules specified (default to both top, left label to left, right label to right)</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Labels with positioning rules specified</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div before class="label left-label-center-xy">BEFORE</div>
+      <div after class="label right-label-center-xy">AFTER</div>
+    </amp-image-slider>
+
+    <p>Has Alt</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill" alt="Mountain"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill" alt="Ocean"></amp-img>
+      <div before class="label">BEFORE</div>
+      <div after class="label">AFTER</div>
+    </amp-image-slider>
+  </main>
+</body>
+</html>
