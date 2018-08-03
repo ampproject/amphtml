@@ -567,8 +567,8 @@ amp-story .amp-video-eq,
   bottom: 12px !important;
 }
 
-[dir=rtl] amp-story .amp-video-eq,
-.i-amphtml-story-spinner {
+[dir=rtl]amp-story .amp-video-eq,
+[dir=rtl] .i-amphtml-story-spinner {
   left: 12px !important;
   right: auto !important;
 }
