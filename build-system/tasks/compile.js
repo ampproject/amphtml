@@ -396,7 +396,7 @@ function compile(entryModuleFilenames, outputDir,
     if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
           .pipe(rename(outputFilename))
-          .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+          .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
           .pipe(shortenLicense())
           .pipe(gulp.dest(outputDir))
           .on('end', function() {
