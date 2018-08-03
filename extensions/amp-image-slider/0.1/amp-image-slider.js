@@ -131,8 +131,6 @@ export class AmpImageSlider extends AMP.BaseElement {
           this.leftLabel_ = child;
         } else if (child.hasAttribute('after')) {
           this.rightLabel_ = child;
-        } else if (child.hasAttribute('hint')) {
-          this.hint_ = child;
         }
       }
     }
@@ -281,38 +279,26 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   buildHint_() {
-    if (this.hint_) {
-      this.hint_.parentNode.removeChild(this.hint_);
-    } else {
-      this.hint_ = this.doc_.createElement('div');
-    }
     if (this.disableHint_) {
-      this.hint_ = null;
       return;
     }
 
-    if (this.hint_.hasAttribute('hint-reappear')) {
+    this.hint_ = this.doc_.createElement('div');
+
+    if (this.element.hasAttribute('hint-reappear')) {
       this.shouldHintReappear_ = true;
     }
 
-    if (this.hint_.hasAttribute('hint-reappear-interval')) {
+    if (this.element.hasAttribute('hint-reappear-interval')) {
       this.hintReappearInterval_ =
-          Number(this.hint_.getAttribute('hint-reappear-interval')) ||
+          Number(this.element.getAttribute('hint-reappear-interval')) ||
           this.hintReappearInterval_;
     }
 
     const leftHintIcon = htmlFor(this.doc_)
-    `<div class="i-amphtml-image-slider-hint-left-arrow"></div>`;
+    `<div class="amp-image-slider-hint-left-arrow"></div>`;
     const rightHintIcon = htmlFor(this.doc_)
-    `<div class="i-amphtml-image-slider-hint-right-arrow"></div>`;
-
-    if (this.hint_.hasAttribute('left-hint-class')) {
-      leftHintIcon.classList.add(this.hint_.getAttribute('left-hint-class'));
-    }
-
-    if (this.hint_.hasAttribute('right-hint-class')) {
-      rightHintIcon.classList.add(this.hint_.getAttribute('right-hint-class'));
-    }
+    `<div class="amp-image-slider-hint-right-arrow"></div>`;
 
     this.hint_.appendChild(leftHintIcon);
     this.hint_.appendChild(rightHintIcon);
