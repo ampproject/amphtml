@@ -68,24 +68,24 @@ amp-twitter {
   opacity: 0;
 }
 
-amp-twitter[loading="start"] .i-amphtml-twitter-placeholder-svg {
+amp-twitter[i-amphtml-loading="start"] .i-amphtml-twitter-placeholder-svg {
   transition-duration: 250ms;
   transform: scale(1);
   opacity: 1;
 }
 
-amp-twitter[loading="done"] .i-amphtml-twitter-placeholder {
+amp-twitter[i-amphtml-loading="done"] .i-amphtml-twitter-placeholder {
   border: none;
 }
 
-amp-twitter[loading="done"] .i-amphtml-twitter-placeholder-svg  {
+amp-twitter[i-amphtml-loading="done"] .i-amphtml-twitter-placeholder-svg  {
   transition-duration: 250ms;
   transition-timing-function: ease-out;
   transform: scale(12);
   opacity: 0;
 }
 
-amp-twitter[loading="done"]  .i-amphtml-twitter-iframe {
+amp-twitter[i-amphtml-loading="done"]  .i-amphtml-twitter-iframe {
   opacity: 1;
 }
 
