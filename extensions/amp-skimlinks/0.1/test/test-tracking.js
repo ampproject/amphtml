@@ -1,7 +1,15 @@
+import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {Services} from '../../../../src/services';
 import {XCUST_ATTRIBUTE_NAME} from '../constants';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
+
+import {
+  LINKS_IMPRESSIONS_TRACKING_URL,
+  NA_CLICK_TRACKING_URL,
+  PAGE_IMPRESSION_TRACKING_URL,
+} from '../constants';
+
 
 describes.realWin('test-tracking', {
   amp: {
@@ -82,11 +90,14 @@ describes.realWin('test-tracking', {
     //   trackingService.sendImpressionTracking({}, new Map(), startTime);
     // });
 
-    describe.only('amp-analytics setup', () => {
+    describe('amp-analytics setup', () => {
       it('Should generate a page impression id', () => {
         const trackingService1 = helpers.createTrackingWithStubAnalytics();
-        const trackingService2 = helpers.createTrackingWithStubAnalytics();
         const impressionId1 = trackingService1.trackingInfo_.pageImpressionId;
+        // Restore the already stub CustomEventReporterBuilder.prototype
+        // inside `createTrackingWithStubAnalytics` to avoid errors.
+        env.sandbox.restore();
+        const trackingService2 = helpers.createTrackingWithStubAnalytics();
         const impressionId2 = trackingService2.trackingInfo_.pageImpressionId;
         expect(impressionId1.length).to.equal(32);
         expect(impressionId1).to.not.equal(impressionId2);
@@ -97,17 +108,33 @@ describes.realWin('test-tracking', {
       });
 
       it('Setup the page-impressions analytics correctly', () => {
-
+        helpers.createTrackingWithStubAnalytics();
+        const trackStub = CustomEventReporterBuilder.prototype.track;
+        expect(trackStub.withArgs(
+            'page-impressions',
+            PAGE_IMPRESSION_TRACKING_URL
+        ).calledOnce).to.be.true;
       });
 
       it('Setup the link-impressions analytics correctly', () => {
-
+        helpers.createTrackingWithStubAnalytics();
+        const trackStub = CustomEventReporterBuilder.prototype.track;
+        expect(trackStub.withArgs(
+            'link-impressions',
+            LINKS_IMPRESSIONS_TRACKING_URL,
+        ).calledOnce).to.be.true;
       });
 
       it('Setup the non-affiliate-click analytics correctly', () => {
-
+        helpers.createTrackingWithStubAnalytics();
+        const trackStub = CustomEventReporterBuilder.prototype.track;
+        expect(trackStub.withArgs(
+            'non-affiliate-click',
+            NA_CLICK_TRACKING_URL,
+        ).calledOnce).to.be.true;
       });
     });
+
 
     it('Should call both page impressions and link impressions analytics', () => {
       trackingService = helpers.createTrackingWithStubAnalytics();
@@ -179,6 +206,11 @@ describes.realWin('test-tracking', {
         const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'page-impressions');
         const trackingData = JSON.parse(urlVars.data);
         expect(trackingData.uc).to.equal('xcust-id');
+      });
+
+      it('Should replace the values correctly', () => {
+        // const setupUrl = trackStub.withArgs('page-impressions').args[0][1];
+        // expect(setupUrl).to.equal();
       });
     });
 

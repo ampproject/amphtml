@@ -1,3 +1,4 @@
+import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {pubcode} from './constants';
 import Tracking from '../tracking';
 
@@ -37,25 +38,40 @@ const helpersFactory = env => {
       };
     },
 
-    createTrackingWithStubAnalytics(skimOptions, anchorTrackingInfoResponse, ) {
+    createTrackingWithStubAnalytics(skimOptions) {
       skimOptions = Object.assign({
         tracking: true,
         pubcode,
       }, skimOptions);
 
-      anchorTrackingInfoResponse = Object.assign({
+      // anchorTrackingInfoResponse = Object.assign({
 
+      // });
+
+      // class CustomEventReporterBuilderStub() {
+      //   constructor() {
+      //     this.track = env.sandbox.stub();
+      //     this.build = env.sandbox.stub();
+      //     this.trigger = env.sandbox.stub();
+      //   }
+      // }
+      env.sandbox.stub(CustomEventReporterBuilder.prototype, 'track');
+      env.sandbox.stub(CustomEventReporterBuilder.prototype, 'build').returns({
+        trigger: env.sandbox.stub(),
       });
+      // env.sandbox.stub(CustomEventReporterBuilder.prototype, 'trigger');
 
-      class StubTracking extends Tracking {
-        setupAnalytics_() {
-          return {
-            trigger: env.sandbox.stub(),
-          };
-        }
-      }
+      // class StubTracking extends Tracking {
+      //   setupAnalytics_() {
+      //     return {
+      //       trigger: env.sandbox.stub(),
+      //     };
+      //   }
+      // }
 
-      return new StubTracking(env, skimOptions);
+      // return new StubTracking(env, skimOptions);
+
+      return new Tracking(env, skimOptions);
     },
 
     getAnalyticsUrlVars(trackingService, eventName) {

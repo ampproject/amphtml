@@ -4,11 +4,13 @@ import {generatePageImpressionId} from './utils';
 import {XCUST_ATTRIBUTE_NAME} from './constants';
 
 
-export const TRACKING_API_URL = 'https://t.skimresources.com/api';
+
 import {
-  LINK_STATUS__AFFILIATE,
-  LINK_STATUS__UNKNOWN,
+  LINKS_IMPRESSIONS_TRACKING_URL,
+  NA_CLICK_TRACKING_URL,
+  PAGE_IMPRESSION_TRACKING_URL,
 } from './constants';
+
 
 export default class Tracking {
   /**
@@ -18,7 +20,6 @@ export default class Tracking {
    * @param {*} skimOptions
    */
   constructor(element, skimOptions) {
-
     this.tracking_ = skimOptions.tracking;
 
     this.trackingInfo_ = {
@@ -43,10 +44,10 @@ export default class Tracking {
     // 'layoutCallback' from custom-element base class needs be executed in order to have analytics working.
     // Analytics are not setup until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(element);
-    analyticsBuilder.track('page-impressions', `${TRACKING_API_URL}/track.php?data=\${data}`);
+    analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
     // analyticsBuilder.track('page-impressions', `${TRACKING_API_URL}/track.php?canonnical=CANONICAL_URL&ampdoc=AMPDOC_URL&source=SOURCE_URL&document_referrer=\${documentReferrer}`);
-    analyticsBuilder.track('link-impressions', `${TRACKING_API_URL}/link?data=\${data}`);
-    analyticsBuilder.track('non-affiliate-click', `${TRACKING_API_URL}/?call=track&rnd=\${rnd}&data=\${data}`, {beacon: true});
+    analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
+    analyticsBuilder.track('non-affiliate-click', NA_CLICK_TRACKING_URL);
 
     return analyticsBuilder.build();
   }
