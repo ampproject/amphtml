@@ -16,24 +16,11 @@
 
 
 import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {crc32} from './crc32';
 
 /** @const {string} */
 const DELIMITER = '~';
-
-/** @const {number} */
-const TIME_TOLERANCE = 60000; // 60 seconds.
-
-/** @typedef {{
-    url: string,
-    key: string,
-    version: string,
-    pairs: (Object<string, string>|undefined)
-  }} */
-export let LinkerConfigDef;
-
 
 /**
  * Creates a new query string parameter to be used for cross-domain ID syncing.
@@ -49,29 +36,21 @@ export class Linker {
   /**
    * Creates the linker param from the given config, and returns the url with
    * the given param attached.
-   * @param {!LinkerConfigDef} config
-   * @return {string}
+   * @param {string} version
+   * @param {Object<string,string>} pairs
+   * @return {Promise<string>}
    */
-  create(config) {
-    const {
-      key,
-      pairs,
-      url,
-      version,
-    } = config;
-
+  create(version, pairs) {
     return this.resolveMacros_(pairs).then(expandedPairs => {
-      debugger;
-      const parameter = this.generateParam_(version, expandedPairs);
-      return addParamToUrl(url, key, parameter);
+      return this.generateParam_(version, expandedPairs);
     });
   }
 
 
   /**
    * Go through key value pairs and resolve any macros that may exist.
-   * @param {(Object<string, string>|undefined)} pairs
-   * @return {Promise<Object<string, string>}
+   * @param {Object<string,string>} pairs
+   * @return {Promise<Object<string, string>>}
    */
   resolveMacros_(pairs) {
     const keys = Object.keys(pairs);
@@ -84,14 +63,15 @@ export class Linker {
     });
 
     return Promise.all(expansionPromises)
-    // .then(() => {
-    //   debugger;
-    //   const expandedPairs = {};
-    //   keys.forEach((key, i) => {
-    //     expandedPairs[key] = expansionPromises[i];
-    //   });
-    //   return expandedPairs;
-    // });
+        .then(expandedVals => {
+          // Now that we have the resolved values, reassociate them back with
+          // their keys.
+          const expandedPairs = {};
+          keys.forEach((key, i) => {
+            expandedPairs[key] = expandedVals[i];
+          });
+          return expandedPairs;
+        });
   }
 
 
@@ -126,14 +106,15 @@ export class Linker {
 
   /**
    * Generates a semi-unique value for page visitor.
-   * User Agent + timezone + language.
+   * User Agent + ~ + timezone + ~ + language.
    * @return {string}
    */
   getFingerprint_() {
     const date = new Date();
     const timezone = date.getTimezoneOffset();
 
-    return navigator.userAgent + timezone + navigator.language;
+    const language = navigator.userLanguage || navigator.language;
+    return navigator.userAgent + DELIMITER + timezone + DELIMITER + language;
   }
 
   /**
@@ -147,12 +128,11 @@ export class Linker {
       return '';
     }
 
-    let result = DELIMITER;
+    let result = '';
 
     keys.forEach(key => {
-      const encodedKey = base64UrlEncodeFromString(key);
       const encodedVal = base64UrlEncodeFromString(expandedPairs[key]);
-      result += encodedKey + DELIMITER + encodedVal;
+      result += DELIMITER + key + DELIMITER + encodedVal;
     });
 
     return result;
@@ -164,6 +144,7 @@ export class Linker {
    * @return {number}
    */
   getRoundedTimestamp_() {
-    return Math.round(Date.now() / TIME_TOLERANCE);
+    // Timestamp in minutes, floored.
+    return Math.floor(Date.now() / 60000);
   }
 }

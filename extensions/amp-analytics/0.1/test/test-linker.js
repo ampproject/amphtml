@@ -31,65 +31,23 @@ describes.realWin('Linker', {
     sandbox.useFakeTimers();
   });
 
-  it('generates param with checksum and version', () => {
-    const config = {
-      url: 'https://www.google.com',
-      key: '_foo',
+  const tests = [
+    {
+      description: 'generates param with checksum and version',
       version: '1',
-    };
-
-    const result = linker.create(config);
-    const expected = 'https://www.google.com?_foo=' +
-      '1~MTAwMTc5NzYxMQ%3D%3D';
-    return expect(result).to.eventually.equal(expected);
-  });
-
-  it('uses the correct urls', () => {
-    const config = {
-      url: 'https://www.example.com',
-      key: '_foo',
-      version: '1',
-    };
-
-    const result = linker.create(config);
-    const expected = 'https://www.example.com?_foo=' +
-      '1~MTAwMTc5NzYxMQ%3D%3D';
-    return expect(result).to.eventually.equal(expected);
-  });
-
-  it('uses the correct queryparam name', () => {
-    const config = {
-      url: 'https://www.example.com',
-      key: 'cool',
-      version: '1',
-    };
-
-    const result = linker.create(config);
-    const expected = 'https://www.example.com?cool=' +
-      '1~MTAwMTc5NzYxMQ%3D%3D';
-    return expect(result).to.eventually.equal(expected);
-  });
-
-  it('appends one key value pair', () => {
-    const config = {
-      url: 'https://www.google.com',
-      key: '_foo',
+      pairs: {},
+      output: '1~7raowy',
+    },
+    {
+      description: 'appends one key value pair',
       version: '1',
       pairs: {
         key1: 'value1',
       },
-    };
-
-    const result = linker.create(config);
-    const expected = 'https://www.google.com?_foo=' +
-      '1~LTE2NzczNTE4ODE%3D~a2V5MQ%3D%3D~W29iamVjdCBQcm9taXNlXQ%3D%3D';
-    return expect(result).to.eventually.equal(expected);
-  });
-
-  it.only('appends many key value pairs', () => {
-    const config = {
-      url: 'https://www.google.com',
-      key: '_foo',
+      output: '1~13jbg4c~key1~dmFsdWUx',
+    },
+    {
+      description: 'appends many key value pairs',
       version: '1',
       pairs: {
         key1: 'value1',
@@ -97,25 +55,26 @@ describes.realWin('Linker', {
         color: 'green',
         car: 'honda',
       },
-    };
+      output: '1~193jzt~key1~dmFsdWUx~name~Ym9i~color~Z3JlZW4.~car~aG9uZGE.',
+    },
+  ];
 
-    const result = linker.create(config);
-    const expected = 'https://www.google.com?_foo=1~MjE0NTkzMTc5Nw%3D%3D~' +
-    'a2V5MQ%3D%3D~W29iamVjdCBQcm9taXNlXQ%3D%3DbmFtZQ%3D%3D~' +
-    'W29iamVjdCBQcm9taXNlXQ%3D%3DY29sb3I%3D~W29iamVjdCBQcm9taXNlXQ%3D%3DY2Fy' +
-    '~W29iamVjdCBQcm9taXNlXQ%3D%3D';
-    return expect(result).to.eventually.equal(expected);
+  tests.forEach(test => {
+    it(test.description, () => {
+      const result = linker.create(test.version, test.pairs);
+      return expect(result).to.eventually.equal(test.output);
+    });
   });
 
   it('resolves macros', () => {
-    const config = {
-      url: 'https://www.google.com',
-      key: '_foo',
+    const test = {
+      description: 'resolves macros',
       version: '1',
       pairs: {
         cid: 'CLIENT_ID(_ga)',
         referrer: 'DOCUMENT_REFERRER',
       },
+      output: '',
     };
 
     const urlService = linker.urlReplacementService_;
@@ -124,10 +83,7 @@ describes.realWin('Linker', {
     expandStub.withArgs('CLIENT_ID(_ga)').resolves('12345');
     expandStub.withArgs('DOCUMENT_REFERRER').resolves('https://www.example.com');
 
-    const result = linker.create(config);
-    const expected = 'https://www.google.com?_foo=1~LTE5MTczMjU1NjU%3D~' +
-    'Y2lk~W29iamVjdCBQcm9taXNlXQ%3D%3DcmVmZXJyZXI%3D~' +
-    'W29iamVjdCBQcm9taXNlXQ%3D%3D';
-    return expect(result).to.eventually.equal(expected);
+    const result = linker.create(test.version, test.pairs);
+    return expect(result).to.eventually.equal(test.output);
   });
 });
