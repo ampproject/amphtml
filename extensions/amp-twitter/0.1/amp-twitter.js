@@ -34,7 +34,7 @@ class AmpTwitter extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @param {?Element} */
+    /** @private {?Element} */
     this.userPlaceholder_ = null;
   }
 
@@ -93,7 +93,7 @@ class AmpTwitter extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'twitter', null,
         {allowFullscreen: true});
     this.applyFillContent(iframe);
-    iframe.classList.add('i-amp-html-twitter-iframe');
+    iframe.classList.add('i-amphtml-twitter-iframe');
 
     this.updateForLoadingState_();
     listenFor(iframe, MessageType.EMBED_SIZE, data => {
@@ -112,9 +112,10 @@ class AmpTwitter extends AMP.BaseElement {
    * @private
    */
   updateForLoadingState_() {
-    this.element.setAttribute('loading', 'start');
+    this.element.setAttribute('i-amphtml-loading', 'start');
     // Set an explicit height so we can animate it.
-    this./*OK*/changeHeight(this.element./*REVIEW*/getBoundingClientRect().height);
+    this./*OK*/changeHeight(
+        this.element./*REVIEW*/getBoundingClientRect().height);
   }
 
   /**
@@ -128,7 +129,7 @@ class AmpTwitter extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      this.element.setAttribute('loading', 'done');
+      this.element.setAttribute('i-amphtml-loading', 'done');
       this./*OK*/changeHeight(height);
     });
   }
