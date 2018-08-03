@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 
 import {
   FriendlyIframeEmbed,
@@ -41,7 +40,7 @@ describe('friendly-iframe-embed', () => {
   let resourcesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     const extensions = Services.extensionsFor(window);
     const resources = Services.resourcesForDoc(window.document);

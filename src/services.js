@@ -323,18 +323,20 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+   * @return {?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
    */
   static storyStoreService(win) {
-    return getService(win, 'story-store');
+    return (/** @type {?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+      (getExistingServiceOrNull(win, 'story-store')));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
+   * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */
   static storyRequestService(win) {
-    return getService(win, 'story-request');
+    return (/** @type {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
+      (getExistingServiceOrNull(win, 'story-request')));
   }
 
   /**

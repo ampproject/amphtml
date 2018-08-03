@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from '../amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  UIType,
+  getStoreService,
+} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
@@ -29,6 +34,7 @@ import {dev, user} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';
+import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
 import {throttle} from '../../../../src/utils/rate-limit';
@@ -196,14 +202,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
     const {win} = this;
 
-    /** @private @const {!../amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(win);
-
-    /** @private {!ScrollableShareWidget} */
-    this.shareWidget_ = ScrollableShareWidget.create(win);
+    /** @private {?ScrollableShareWidget} */
+    this.shareWidget_ = null;
 
     /** @private @const {!../amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(win);
+    this.storeService_ = getStoreService(win);
   }
 
   /**
@@ -222,6 +225,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
     createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
 
     this.replayButton_ = this.buildReplayButton_();
+
+    this.shareWidget_ =
+        ScrollableShareWidget.create(
+            this.win, dev().assertElement(this.element.parentElement));
 
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
@@ -276,8 +283,8 @@ export class AmpStoryBookend extends AMP.BaseElement {
       this.onCanShowSharingUisUpdate_(show);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
   }
 
@@ -323,12 +330,16 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * Reacts to desktop state updates.
-   * @param {boolean} isDesktop
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
    * @private
    */
-  onDesktopStateUpdate_(isDesktop) {
-    this.toggleDesktopAttribute_(isDesktop);
+  onUIStateUpdate_(uiState) {
+    this.mutateElement(() => {
+      uiState === UIType.DESKTOP ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
+    });
   }
 
   /**
@@ -357,7 +368,11 @@ export class AmpStoryBookend extends AMP.BaseElement {
       return Promise.resolve(this.config_);
     }
 
-    return this.requestService_.loadBookendConfig().then(response => {
+    const requestService =
+        getRequestService(
+            this.win, dev().assertElement(this.element.parentElement));
+
+    return requestService.loadBookendConfig().then(response => {
       if (!response) {
         return null;
       }
@@ -466,19 +481,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
   toggle_(show) {
     this.mutateElement(() => {
       this.getShadowRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
-    });
-  }
-
-  /**
-   * Toggles the bookend desktop UI.
-   * @param {boolean} isDesktop
-   * @private
-   */
-  toggleDesktopAttribute_(isDesktop) {
-    this.mutateElement(() => {
-      isDesktop ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
     });
   }
 

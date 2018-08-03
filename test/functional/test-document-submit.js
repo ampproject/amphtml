@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {onDocumentFormSubmit_} from '../../src/document-submit';
 
@@ -26,7 +25,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   let stopImmediatePropagationSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     preventDefaultSpy = sandbox.spy();
     stopImmediatePropagationSpy = sandbox.spy();
     tgt = document.createElement('form');
@@ -153,7 +152,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(preventDefaultSpy).to.be.calledOnce;
     expect(tgt.checkValidity).to.be.calledOnce;
     sandbox.restore();
-    preventDefaultSpy.reset();
+    preventDefaultSpy.resetHistory();
     tgt.checkValidity.reset();
 
     tgt.checkValidity = sandbox.stub().returns(false);
