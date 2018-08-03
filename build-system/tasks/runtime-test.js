@@ -562,8 +562,6 @@ function runTests() {
     }
     if (argv.coverage) {
       if (process.env.TRAVIS) {
-        log(green('INFO: ') + 'Uploading code coverage report to ' +
-            cyan('https://codecov.io/gh/ampproject/amphtml') + '...');
         const codecovCmd =
             './node_modules/.bin/codecov --file=test/coverage/lcov.info';
         let flags = '';
@@ -572,6 +570,9 @@ function runTests() {
         } else if (argv.integration) {
           flags = ' --flags=integration_tests';
         }
+        log(green('INFO: ') + 'Uploading code coverage report to ' +
+            cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
+            cyan(codecovCmd + flags) + '...');
         const output = getStdout(codecovCmd + flags);
         const viewReportPrefix = 'View report at: ';
         const viewReport = output.match(viewReportPrefix + '.*');

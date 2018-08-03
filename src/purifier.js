@@ -24,7 +24,6 @@ import {
 } from './url';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
-import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -224,16 +223,18 @@ const PURIFY_CONFIG = {
 };
 
 /**
+ * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
- * @return {string}
+ * @return {!Node}
  */
 export function purifyHtml(dirty) {
   const config = Object.assign({}, PURIFY_CONFIG, {
     'ADD_ATTR': WHITELISTED_ATTRS,
-    'FORBID_ATTR': isExperimentOn(self, 'inline-styles') ? [] : ['style'],
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
     'FORCE_BODY': true,
+    // Avoid need for serializing to/from string by returning Node directly.
+    'RETURN_DOM': true,
   });
 
   // Reference to DOMPurify's `allowedTags` whitelist.
@@ -383,9 +384,9 @@ export function purifyHtml(dirty) {
   DOMPurify.addHook('afterSanitizeElements', afterSanitizeElements);
   DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  const purified = DOMPurify.sanitize(dirty, config);
+  const body = DOMPurify.sanitize(dirty, config);
   DOMPurify.removeAllHooks();
-  return purified;
+  return body;
 }
 
 /**
@@ -477,10 +478,7 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
 
   // Inline styles are not allowed.
   if (attrName == 'style') {
-    if (isExperimentOn(self, 'inline-styles')) {
-      return !INVALID_INLINE_STYLE_REGEX.test(attrValue);
-    }
-    return false;
+    return !INVALID_INLINE_STYLE_REGEX.test(attrValue);
   }
 
   // Don't allow CSS class names with internal AMP prefix.

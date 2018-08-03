@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FetchResponse} from '../../src/service/xhr-impl';
+import {FetchResponse} from '../../src/utils/xhr-utils';
 import {Services} from '../../src/services';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
 

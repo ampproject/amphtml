@@ -242,12 +242,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
   },
   {
-    id: 'inline-styles',
-    name: 'Enables the usage of inline styles for non fixed elements',
-    spec: 'https://github.com/ampproject/amphtml/issues/11881',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
-  },
-  {
     id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
@@ -326,6 +320,17 @@ const EXPERIMENTS = [
     name: 'Enables faster scanning of dynamic markup for bindings',
     spec: 'https://github.com/ampproject/amphtml/pull/17229',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
+  },
+  {
+    id: 'custom-elements-v1',
+    name: 'Enable a new custom elements v1 polyfill',
+    spec: 'https://github.com/ampproject/amphtml/pull/17205',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
+  },
+  {
+    id: 'amp-carousel-scroll-snap',
+    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
 ];
 

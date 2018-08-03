@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../../amp-image-slider';
+
 import {poll} from '../../../../../testing/iframe';
-import {toggleExperiment} from '../../../../../src/experiments';
 
 const config = describe.configure().ifNewChrome();
 config.run('amp-image-slider', function() {
-  this.timeout(10000);
+  this.timeout(20000);
 
   const sliderBody = `
     <amp-image-slider id="slider" layout="responsive" width="1000" height="500">
@@ -54,25 +53,29 @@ config.run('amp-image-slider', function() {
     let slider;
     let sliderImpl;
     let rect;
+    let bar_, container_, rightMask_, leftAmpImage_, rightAmpImage_;
+
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+    });
 
     function waitForImageSlider() {
       return poll('wait for amp-image-slider to complete', () => {
-        win = env.win;
-        doc = win.document;
+        slider = doc.getElementsByTagName('amp-image-slider')[0];
 
-        const sliders = doc.getElementsByTagName('amp-image-slider');
-        if (sliders.length === 0) {
+        if (!slider) {
           return false;
         }
 
-        slider = sliders[0];
         sliderImpl = slider.implementation_;
 
         if (!sliderImpl) {
           return false;
         }
-
-        return sliderImpl.isEventRegistered_;
+        // layoutCallback is called
+        // this is the same as CommonSignal.LOAD_END
+        return !!slider.signals().get('load-end');
       });
     }
 
@@ -91,41 +94,72 @@ config.run('amp-image-slider', function() {
       return event;
     }
 
-    function calibrateSlider() {
+    function prepareSlider() {
       sliderImpl = slider.implementation_;
-      sliderImpl.mutateElement = cb => cb();
       rect = slider.getBoundingClientRect();
     }
 
     function prep() {
       return waitForImageSlider()
-          .then(calibrateSlider);
+          .then(() => timeout(env.win, 1000))
+          .then(prepareSlider);
     }
 
-    // A bunch of expects to check if the slider has slide to
+    // A bunch of expects to check if the slider has slided to
     // where we intended
     function expectByBarLeftPos(leftPos) {
-      expect(sliderImpl.bar_.getBoundingClientRect().left)
+      slider = doc.querySelector('amp-image-slider');
+      bar_ = slider.querySelector('.i-amphtml-image-slider-bar');
+      container_ =
+          slider.querySelector('.i-amphtml-image-slider-container');
+      rightMask_ =
+          slider.querySelector('.i-amphtml-image-slider-right-mask');
+      const ampImgs = slider.getElementsByTagName('amp-img');
+      leftAmpImage_ = ampImgs[0];
+      rightAmpImage_ = ampImgs[1];
+
+      expect(bar_.getBoundingClientRect().left)
           .to.equal(leftPos);
-      expect(sliderImpl.rightMask_.getBoundingClientRect().left)
+      expect(rightMask_.getBoundingClientRect().left)
           .to.equal(leftPos);
       // amp-imgs should stay where they are
-      expect(sliderImpl.leftAmpImage_.getBoundingClientRect().left)
+      expect(leftAmpImage_.getBoundingClientRect().left)
           .to.equal(rect.left);
-      expect(sliderImpl.rightAmpImage_.getBoundingClientRect().left)
+      expect(rightAmpImage_.getBoundingClientRect().left)
           .to.equal(rect.left);
     }
 
-    beforeEach(() => {
-      win = env.win;
-      toggleExperiment(win, 'amp-image-slider', true, false);
+    it('should construct', () => {
+      let slider, container_, rightMask_, bar_;
+      return prep()
+          .then(() => {
+            const sliders = doc.getElementsByTagName('amp-image-slider');
+            expect(sliders.length).to.be.greaterThan(0);
+            slider = sliders[0];
+            container_ = slider
+                .querySelector('.i-amphtml-image-slider-container');
+            expect(!!container_).to.be.true;
+            rightMask_ = slider.querySelector('.i-amphtml-image-slider-bar');
+            expect(!!rightMask_).to.be.true;
+            bar_ = slider.querySelector('.i-amphtml-image-slider-bar');
+            expect(!!bar_).to.be.true;
+            const ampImgs = slider.getElementsByTagName('amp-img');
+            expect(ampImgs.length).to.equal(2);
+            expect(!!ampImgs[0]).to.be.true;
+            expect(!!ampImgs[1]).to.be.true;
+          });
     });
 
     it('should animate moving bar to position on mousedown', () => {
-      let leftQuarterPos, centerPos;
+      let leftQuarterPos, centerPos, container_;
+      let slider;
       return prep()
           .then(() => {
+            slider = doc.querySelector('amp-image-slider');
             sliderImpl = slider.implementation_;
+            container_ =
+              slider.querySelector(
+                  '.i-amphtml-image-slider-container');
             leftQuarterPos = rect.left + 0.25 * rect.width;
             const mouseDownEvent =
                 createFakeEvent(
@@ -133,7 +167,9 @@ config.run('amp-image-slider', function() {
                     leftQuarterPos,
                     0
                 );
-            sliderImpl.container_.dispatchEvent(mouseDownEvent);
+
+            container_.dispatchEvent(mouseDownEvent);
+            return timeout(env.win, 500);
           })
           .then(() => {
             expectByBarLeftPos(leftQuarterPos);
@@ -146,7 +182,8 @@ config.run('amp-image-slider', function() {
                     centerPos,
                     0
                 );
-            sliderImpl.container_.dispatchEvent(mouseDownEvent);
+            container_.dispatchEvent(mouseDownEvent);
+            return timeout(env.win, 500);
           })
           .then(() => {
             expectByBarLeftPos(centerPos);
@@ -155,8 +192,10 @@ config.run('amp-image-slider', function() {
 
     it('should animate moving bar to position on touch', () => {
       let leftQuarterPos, centerPos;
+      let slider;
       return prep()
           .then(() => {
+            slider = doc.querySelector('amp-image-slider');
             sliderImpl = slider.implementation_;
             leftQuarterPos = rect.left + 0.25 * rect.width;
             const touchStartEvent =
@@ -166,6 +205,7 @@ config.run('amp-image-slider', function() {
                     0
                 );
             slider.dispatchEvent(touchStartEvent);
+            return timeout(env.win, 500);
           })
           .then(() => {
             expectByBarLeftPos(leftQuarterPos);
@@ -179,20 +219,28 @@ config.run('amp-image-slider', function() {
                     0
                 );
             slider.dispatchEvent(touchStartEvent);
+            return timeout(env.win, 500);
           })
           .then(() => {
             expectByBarLeftPos(centerPos);
           });
     });
 
+    function timeout(win, ms) {
+      return new Promise(resolve => win.setTimeout(resolve, ms));
+    }
+
     it('should follow mouse drag', () => {
+      let slider;
       let mouseDownEvent, mouseMoveEvent, mouseUpEvent;
       let centerPos, leftQuarterPos, rightQuarterPos, rightBeyondPos;
-      let container_;
       return prep()
           .then(() => {
+            slider = doc.querySelector('amp-image-slider');
             sliderImpl = slider.implementation_;
-            container_ = sliderImpl.container_;
+            container_ =
+              slider.querySelector(
+                  '.i-amphtml-image-slider-container');
 
             centerPos = rect.left + 0.5 * rect.width;
             leftQuarterPos = rect.left + 0.25 * rect.width;
@@ -206,6 +254,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             container_.dispatchEvent(mouseDownEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(centerPos);
 
             // Mouse button is still down, move to somewhere on slider
@@ -215,6 +266,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseMoveEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(leftQuarterPos);
 
             // Mouse button is still down, move to somewhere outside of slider
@@ -225,6 +279,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseMoveEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(rect.right);
 
             // Mouse button is still down, move back to inside the slider
@@ -235,6 +292,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseMoveEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(rightQuarterPos);
 
             // Release mouse button
@@ -244,6 +304,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseUpEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(rightQuarterPos);
 
             // Mouse button is now up, should no longer follow mouse move
@@ -253,15 +316,20 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseMoveEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(rightQuarterPos);
           });
     });
 
     it('should follow touch drag', () => {
+      let slider;
       let touchStartEvent, touchMoveEvent, touchEndEvent;
       let centerPos, leftQuarterPos, rightQuarterPos, rightBeyondPos;
       return prep()
           .then(() => {
+            slider = doc.querySelector('amp-image-slider');
             centerPos = rect.left + 0.5 * rect.width;
             leftQuarterPos = rect.left + 0.25 * rect.width;
             rightQuarterPos = rect.left + 0.75 * rect.width;
@@ -274,6 +342,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchStartEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(centerPos);
 
             // Touch is still down, move to somewhere on slider
@@ -283,6 +354,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchMoveEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(leftQuarterPos);
 
             // Touch is still down, move to somewhere outside of slider
@@ -293,6 +367,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchMoveEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(rect.right);
 
             // Touch is still down, move back to inside the slider
@@ -303,6 +380,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchMoveEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(rightQuarterPos);
 
             // Release touch
@@ -312,6 +392,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchEndEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(rightQuarterPos);
 
             // Mouse button is now up, should no longer follow mouse move
@@ -321,6 +404,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchMoveEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
             expectByBarLeftPos(rightQuarterPos);
           });
     });

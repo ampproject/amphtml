@@ -143,39 +143,30 @@
     </amp-image-slider>
 
     <p>Reemerging hint (default to no interaction for 10s)</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
+        hint-reappear>
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
       <div after class="label">AFTER</div>
-      <div hint hint-reappear></div>
     </amp-image-slider>
 
     <p>Reemerging hint (customized to no interaction for 2s)</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
+        hint-reappear hint-reappear-interval="2000">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
       <div after class="label">AFTER</div>
-      <div hint hint-reappear hint-reappear-interval="2000"></div>
     </amp-image-slider>
 
     <p>Instantly reemerging hint (customized to no interaction for 0.001s)</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
+        hint-reappear hint-reappear-interval="1">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div before class="label">BEFORE</div>
       <div after class="label">AFTER</div>
-      <div hint hint-reappear hint-reappear-interval="1"></div>
-    </amp-image-slider>
-
-    <p>Hint with custom styling</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
-      <div hint left-hint-class="my-left-hint" right-hint-class="my-right-hint"></div>
     </amp-image-slider>
 
     <h1>Initial Percent</h1>
