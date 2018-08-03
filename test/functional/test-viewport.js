@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {
@@ -1213,7 +1212,7 @@ describe('Viewport META', () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
@@ -1399,6 +1398,7 @@ describe('createViewport', () => {
       ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       viewer = Services.viewerForDoc(ampDoc);
+      win.getComputedStyle = () => ({});
     });
 
     it('should bind to "natural" when not iframed', () => {
@@ -1472,7 +1472,6 @@ describe('createViewport', () => {
           .callsFake(() => 12);
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
-      win.getComputedStyle = () => ({});
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
@@ -1486,7 +1485,6 @@ describe('createViewport', () => {
           .callsFake(() => 10);
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
-      win.getComputedStyle = () => ({});
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);

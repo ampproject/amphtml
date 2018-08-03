@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpAdExit} from '../amp-ad-exit';
 import {FilterType} from '../filters/filter';
 import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
@@ -164,7 +163,7 @@ describes.realWin('amp-ad-exit', {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create({useFakeTimers: true});
+    sandbox = sinon.createSandbox({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
     addAdDiv();

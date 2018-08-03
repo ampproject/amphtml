@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
 import {
   installFormProxy,
@@ -38,7 +37,7 @@ describes.repeated('installFormProxy', {
   let sandbox;
 
   before(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     // Stub only to work around the fact that there's no Ampdoc, so the service
     // cannot be retrieved.
