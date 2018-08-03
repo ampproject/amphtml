@@ -86,7 +86,8 @@ amp-image-slider amp-img > img {
 
 .i-amphtml-image-slider-left-label {
   position: absolute;
-  left: 0;
+  left: auto;
+  right: auto;
 }
 
 .i-amphtml-image-slider-right-label-wrapper {
@@ -99,7 +100,8 @@ amp-image-slider amp-img > img {
 
 .i-amphtml-image-slider-right-label {
   position: absolute;
-  right: 0;
+  left: auto;
+  right: auto; /* avoid stretching */
 }
 
 .i-amphtml-image-slider-hint {
@@ -127,19 +129,42 @@ amp-image-slider amp-img > img {
 .amp-image-slider-hint-left-arrow {
   display: inline-block !important;
   background-size: 32px 16px;
-  margin-right: 15px !important;
   width: 32px;
   height: 16px;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8"><g data-name="Layer 2"><path d="M4 5h12V3H4V0L0 4l4 4z" fill="#fff" data-name="Layer 1"/></g></svg>');
   filter: drop-shadow(3px 3px 4px black);
 }
 
+.i-amphtml-image-slider-hint-left-arrow-wrapper {
+  width: 40px;
+  height: 40px;
+  margin-right: 15px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
 .amp-image-slider-hint-right-arrow {
   display: inline-block !important;
   background-size: 32px 16px;
-  margin-left: 15px !important;
   width: 32px;
   height: 16px;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg width="32" height="16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="a" d="M32.02 22H8v4h24.02v6L40 24l-7.98-8z"/></defs><g transform="translate(-8 -16)" fill="none" fill-rule="evenodd"><mask id="b" fill="#fff"><use xlink:href="#a"/></mask><g mask="url(#b)" fill="#F1F3F4"><path d="M0 0h48v48H0z"/></g></g></svg>');
   filter: drop-shadow(3px 3px 4px black);
+}
+
+.i-amphtml-image-slider-hint-right-arrow-wrapper {
+  width: 40px;
+  height: 40px;
+  margin-left: 15px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.amp-image-slider-hint-arrow-background {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
 }
