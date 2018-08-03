@@ -236,10 +236,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
   },
   {
-    id: 'inline-styles',
-    name: 'Enables the usage of inline styles for non fixed elements',
-    spec: 'https://github.com/ampproject/amphtml/issues/11881',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
+    id: 'amp-story-scroll',
+    name: 'Scrollable experience for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/16465',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
   },
   {
     id: 'url-replacement-v2',
@@ -304,10 +304,27 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'amp-orientation-observer',
-    name: 'Enables actions based on the orientation of a mobile device',
-    spec: 'https://github.com/ampproject/amphtml/issues/14740',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/16075',
+    id: 'amp-image-slider',
+    name: 'Enables the experimental amp-image-slider for image comparison',
+    spec: 'TODO',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17165',
+  },
+  {
+    id: 'blurry-placeholder',
+    name: 'Enables a blurred image placeholder as an amp-img loads',
+    spec: 'https://github.com/ampproject/amphtml/issues/15146',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
+  },
+  {
+    id: 'faster-bind-scan',
+    name: 'Enables faster scanning of dynamic markup for bindings',
+    spec: 'https://github.com/ampproject/amphtml/pull/17229',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
+  },
+  {
+    id: 'amp-carousel-scroll-snap',
+    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
     id: 'video-dock',

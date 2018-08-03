@@ -32,7 +32,7 @@ const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
 const {gitBranchName, gitCommitterEmail} = require('../git');
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
-const SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
+const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
 const SNAPSHOT_EMPTY_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
@@ -78,7 +78,7 @@ function log(mode, ...messages) {
       messages.unshift(colors.green('INFO:'));
       break;
     case 'warning':
-      messages.unshift(colors.yellow('YELLOW:'));
+      messages.unshift(colors.yellow('WARNING:'));
       break;
     case 'error':
       messages.unshift(colors.red('ERROR:'));
@@ -428,7 +428,7 @@ async function snapshotWebpages(percy, page, webpages, config) {
 
     await enableExperiments(page, webpage['experiments']);
 
-    const snapshotOptions = Object.assign({}, SNAPSHOT_OPTIONS);
+    const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
 
     if (viewport) {
       snapshotOptions.widths = [viewport.width];
@@ -442,7 +442,9 @@ async function snapshotWebpages(percy, page, webpages, config) {
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
     // Puppeteer is flaky when it comes to catching navigation requests, so
     // ignore timeouts. If this was a real non-loading page, this will be caught
-    // in the resulting Percy build.
+    // in the resulting Percy build. Navigate to an empty page first to support
+    // different webpages that only modify the #anchor name.
+    await page.goto('about:blank');
     await page.goto(`${BASE_URL}/${url}`).catch(() => {});
 
     // Try to wait until there are no more network requests. This method is

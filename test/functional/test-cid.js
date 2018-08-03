@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import * as log from '../../src/log';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
@@ -67,7 +65,7 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
@@ -789,7 +787,6 @@ describes.realWin('cid', {amp: true}, env => {
     sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
-    const rethrowAsyncStub = sandbox.stub(log, 'rethrowAsync');
     cid.get({scope: 'foo'}, hasConsent)
         .then(result => {
           scopedCid = result;
@@ -799,12 +796,8 @@ describes.realWin('cid', {amp: true}, env => {
     clock.tick(9999);
     yield macroTask();
     expect(resolved).to.be.false;
-    clock.tick(1);
-    yield macroTask();
-    expect(resolved).to.be.true;
     expect(scopedCid).to.be.undefined;
     yield macroTask();
-    expect(rethrowAsyncStub).to.be.calledOnce;
   });
 
   describe('pub origin, CID API opt in', () => {

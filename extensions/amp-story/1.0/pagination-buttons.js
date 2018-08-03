@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action} from './amp-story-store-service';
+import {Action, getStoreService} from './amp-story-store-service';
 import {EventType, dispatch} from './events';
-import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
@@ -153,7 +152,7 @@ export class PaginationButtons {
   /** @param {!Window} win */
   constructor(win) {
     const doc = win.document;
-    const storeService = Services.storyStoreService(win);
+    const storeService = getStoreService(win);
 
     /** @private @const {!PaginationButton} */
     this.forwardButton_ =
