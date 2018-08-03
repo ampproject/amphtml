@@ -613,8 +613,8 @@ const forbiddenTerms = {
     ],
   },
   'this\\.skip\\(\\)': {
-    message: 'Use of `this.skip()` is forbidden. Use `this.skipTest()` ' +
-        'from within a `before()` block instead. See #17245.',
+    message: 'Use of `this.skip()` is forbidden in test files. Use ' +
+        '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
     whitelist: [
       'test/_init_tests.js',

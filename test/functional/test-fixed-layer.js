@@ -1332,7 +1332,7 @@ describes.realWin('FixedLayer', {}, env => {
   let shadowRoot;
   let container;
 
-  // Can only test when SD is supported.
+  // Can only test when Shadow DOM is available.
   describe.configure().if(() => Element.prototype.attachShadow).run('shadow ' +
       'transfer', function() {
     beforeEach(function() {

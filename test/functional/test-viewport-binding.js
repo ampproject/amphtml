@@ -445,7 +445,7 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
   let vsync;
   let child;
 
-  // Can only test when SD is supported.
+  // Can only test when Shadow DOM is available.
   describe.configure().if(() => Element.prototype.attachShadow).run('Viewport' +
       'BindingIosEmbedShadowRoot_', function() {
     beforeEach(function() {
