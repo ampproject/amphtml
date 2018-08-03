@@ -344,7 +344,7 @@ export class AmpImageSlider extends AMP.BaseElement {
             leftAmpImage.getAttribute('data-left-image-aria-suffix')
               || 'left image';
           if (leftAmpImage.hasAttribute('alt')) {
-            newAltText = `${leftAmpImage.getAttribute('alt')} ${ariaSuffix}`;
+            newAltText = `${leftAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
           } else {
             newAltText = ariaSuffix;
           }
@@ -363,7 +363,7 @@ export class AmpImageSlider extends AMP.BaseElement {
             rightAmpImage.getAttribute('data-right-image-aria-suffix')
               || 'right image';
           if (rightAmpImage.hasAttribute('alt')) {
-            newAltText = `${rightAmpImage.getAttribute('alt')} ${ariaSuffix}`;
+            newAltText = `${rightAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
           } else {
             newAltText = ariaSuffix;
           }
