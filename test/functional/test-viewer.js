@@ -160,18 +160,19 @@ describe('Viewer', () => {
     expect(viewer.getParam('test')).to.equal('1');
   });
 
-  it('should set ampshare fragment within custom tab', () => {
+  it('should set ampshare fragment within custom tab', function*() {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/';
     windowApi.location.hash = '';
     windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         '#ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
-  it('should merge fragments within custom tab', () => {
+  it('should merge fragments within custom tab', function*() {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#test=1';
     windowApi.location.hash = '#test=1';
@@ -179,11 +180,12 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
-  it('should not duplicate ampshare when merging', () => {
+  it('should not duplicate ampshare when merging', function*() {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#test=1&ampshare=old';
     windowApi.location.hash = '#test=1&ampshare=old';
@@ -191,11 +193,12 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
-  it('should remove multiple ampshares when merging', () => {
+  it('should remove multiple ampshares when merging', function*() {
     windowApi.parent = windowApi;
     windowApi.location.href =
         'http://www.example.com/#test=1&ampshare=a&ampshare=b&ampshare=c';
@@ -205,11 +208,12 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
-  it('should remove extra ampshare even when it\'s first', () => {
+  it('should remove extra ampshare even when it\'s first', function*() {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#ampshare=old&test=1';
     windowApi.location.hash = '#ampshare=old&test=1';
@@ -217,11 +221,12 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         '#ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
   });
 
-  it('should remove extra ampshare even when it\'s sandwiched', () => {
+  it('should remove extra ampshare even when it\'s sandwiched', function*() {
     windowApi.parent = windowApi;
     windowApi.location.href =
         'http://www.example.com/#note=ok&ampshare=old&test=1';
@@ -232,6 +237,7 @@ describe('Viewer', () => {
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.getParam('note')).to.equal('ok');
     expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         '#note=ok&ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
   });
@@ -247,7 +253,7 @@ describe('Viewer', () => {
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
-  it('should restore fragment within custom tab with click param', () => {
+  it('should restore fragment within custom tab with click param', function*() {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';
     windowApi.location.hash = '#click=abc';
@@ -256,6 +262,7 @@ describe('Viewer', () => {
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         'http://www.example.com');
     expect(viewer.getParam('click')).to.equal('abc');
+    yield viewer.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         '#ampshare=http%3A%2F%2Fwww.example.com%2F');
   });

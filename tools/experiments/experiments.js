@@ -328,6 +328,17 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/8562',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
   },
+  {
+    id: 'custom-elements-v1',
+    name: 'Enable a new custom elements v1 polyfill',
+    spec: 'https://github.com/ampproject/amphtml/pull/17205',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
+  },
+  {
+    id: 'amp-carousel-scroll-snap',
+    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
+  },
 ];
 
 if (getMode().localDev) {

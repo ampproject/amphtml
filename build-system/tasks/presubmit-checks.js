@@ -545,6 +545,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/log.js', // Has actual implementation of assertElement.
       'dist.3p/current/integration.js', // Includes the previous.
+      'src/polyfills/custom-elements.js',
     ],
   },
   'startupChunk\\(': {
@@ -610,6 +611,14 @@ const forbiddenTerms = {
     whitelist: [
       'viewer-api/swipe-api.js',
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
+    ],
+  },
+  'this\\.skip\\(\\)': {
+    message: 'Use of `this.skip()` is forbidden in test files. Use ' +
+        '`this.skipTest()` from within a `before()` block instead. See #17245.',
+    checkInTestFolder: true,
+    whitelist: [
+      'test/_init_tests.js',
     ],
   },
 };
