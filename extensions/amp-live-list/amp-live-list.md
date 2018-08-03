@@ -47,7 +47,7 @@ limitations under the License.
 
 ## Behavior
 
-`amp-live-list` updates the DOM with content that is provided live on the client
+`amp-live-list` provides instant content updates from the client
 without user interaction, such as refreshing or navigating to a different page.
 The core use case for this component
 is live blogs: coverage for breaking news or live events where the user can stay
