@@ -321,6 +321,13 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/pull/17229',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
   },
+  {
+    id: 'no-initial-intersection',
+    name: 'Do not invoke context.observeIntersection callback with ' +
+        'initialintersection',
+    spec: 'https://github.com/ampproject/amphtml/issues/8562',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
+  },
 ];
 
 if (getMode().localDev) {

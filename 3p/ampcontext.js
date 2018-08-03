@@ -18,6 +18,7 @@ import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev} from '../src/log';
 import {dict} from '../src/utils/object';
+import {isExperimentOn} from '../src/experiments';
 import {isObject} from '../src/types';
 import {nextTick} from './3p';
 import {parseUrlDeprecated} from '../src/url';
@@ -172,13 +173,15 @@ export class AbstractAmpContext {
           callback(intersection.changes);
         });
 
-    // Call the callback with the value that was transmitted when the
-    // iframe was drawn. Called in nextTick, so that callers don't
-    // have to specially handle the sync case.
-    // TODO(lannka, #8562): Deprecate this behavior
-    nextTick(this.win_, () => {
-      callback([this.initialIntersection]);
-    });
+    if (!isExperimentOn(this.win_, 'no-initial-intersection')) {
+      // Call the callback with the value that was transmitted when the
+      // iframe was drawn. Called in nextTick, so that callers don't
+      // have to specially handle the sync case.
+      // TODO(lannka, #8562): Deprecate this behavior
+      nextTick(this.win_, () => {
+        callback([this.initialIntersection]);
+      });
+    }
 
     return unlisten;
   }
