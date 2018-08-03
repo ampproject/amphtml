@@ -52,10 +52,6 @@ const originalConsoleError = console/*OK*/.error;
 let initialGlobalState;
 let initialWindowState;
 
-// TODO(rsimha, #17245): Temporary. Remove this. Needed due to
-// https://github.com/mochajs/mocha/issues/2148.
-let sandboxCreated;
-
 // All exposed describes.
 global.describes = describes;
 
@@ -390,17 +386,22 @@ function preventAsyncErrorThrows() {
   stubAsyncErrorThrows();
 }
 
+before(function() {
+  // This is a more robust version of `this.skip()`. See #17245.
+  this.skipTest = function() {
+    if (this._runnable.title != '"before all" hook') {
+      throw new Error('skipTest() can only be called from within before()');
+    }
+    this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.
+    this.skip();
+  };
+});
+
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  if (sandboxCreated) {
-    sinon.sandbox.restore();
-    consoleErrorSandbox.restore();
-    rethrowAsyncSandbox.restore();
-  }
   sinon.sandbox = sinon.createSandbox();
-  sandboxCreated = true;
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
@@ -430,7 +431,6 @@ afterEach(function() {
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
   sinon.sandbox.restore();
-  sandboxCreated = false;
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);

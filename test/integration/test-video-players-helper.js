@@ -38,7 +38,7 @@ function skipIfAutoplayUnsupported(win) {
     if (isSupported) {
       return;
     }
-    this.skip();
+    this.skipTest();
   });
 }
 
@@ -229,23 +229,29 @@ export function runVideoPlayerIntegrationTests(
           });
         });
 
-        it('should trigger ended analytics when the video ends', function() {
-          return getVideoPlayer(
-              {
-                outsideView: false,
-                autoplay: true,
-              }
-          ).then(r => {
-            // TODO(cvializ): Better way to detect which classes implement
-            // methods needed for tracking?
-            const {tagName} = r.video;
-            if (tagName !== 'AMP-VIDEO' &&
-            tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
-              this.skip();
-              return;
-            }
 
-            video = r.video;
+        describe('should trigger ended analytics', () => {
+          let player;
+          before(function() {
+            return getVideoPlayer(
+                {
+                  outsideView: false,
+                  autoplay: true,
+                }
+            ).then(r => {
+              // TODO(cvializ): Better way to detect which classes implement
+              // methods needed for tracking?
+              const {tagName} = r.video;
+              if (tagName !== 'AMP-VIDEO' &&
+              tagName !== 'AMP-TEST-FAKE-VIDEOPLAYER') {
+                this.skipTest();
+                return;
+              }
+              player = r;
+            });
+          });
+          it('when the video ends', function() {
+            video = player.video;
             return listenOncePromise(video, VideoAnalyticsEvents.ENDED);
           });
         });
