@@ -145,6 +145,8 @@ export default class GltfViewer {
     setStyle(el, 'left', 0);
     document.body.appendChild(this.renderer_.domElement);
 
+    this.renderer_.gammaOutput = true;
+    this.renderer_.gammaFactor = 2.2;
     this.renderer_.setPixelRatio(
         Math.min(
             this.options_['rendererSettings']['maxPixelRatio'],
