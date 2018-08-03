@@ -126,7 +126,7 @@ export default class Tracking {
     };
 
     this.analytics_.trigger('non-affiliate-click', {
-      data: JSON.stringify(data), rnd: '123',
+      data: JSON.stringify(data), rnd: 'RANDOM',
     });
   }
 
@@ -166,7 +166,7 @@ export default class Tracking {
     }, commonData);
 
     this.analytics_.trigger('link-impressions', {
-      data: JSON.stringify(data), rnd: '123',
+      data: JSON.stringify(data),
     });
   }
 

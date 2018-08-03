@@ -278,5 +278,17 @@ describes.realWin('test-tracking', {
       const trackingData = JSON.parse(urlVars.data);
       expect(trackingData.custom).to.equal('xcust-id-on-link');
     });
+
+    it('Should add the rnd query parameter', () => {
+      const trackingService = setupTrackingService({customTrackingId: 'xcust-id'});
+
+      const anchor = helpers.createAnchor('https://non-merchant.com/test');
+      anchor.setAttribute(XCUST_ATTRIBUTE_NAME, 'xcust-id-on-link');
+
+      trackingService.sendNaClickTracking(anchor);
+      const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'non-affiliate-click');
+
+      expect(urlVars.rnd).to.be.equal('RANDOM');
+    });
   });
 });
