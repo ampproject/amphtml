@@ -392,7 +392,7 @@ before(function() {
     if (this._runnable.title != '"before all" hook') {
       throw new Error('skipTest() can only be called from within before()');
     }
-    this.test.parent.pending = true;
+    this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.
     this.skip();
   };
 });

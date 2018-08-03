@@ -1333,7 +1333,8 @@ describes.realWin('FixedLayer', {}, env => {
   let container;
 
   // Can only test when SD is supported.
-  describe.configure().ifChrome('shadow transfer', function() {
+  describe.configure().if(() => Element.prototype.attachShadow).run('shadow ' +
+      'transfer', function() {
     beforeEach(function() {
       win = env.win;
       doc = win.document;
