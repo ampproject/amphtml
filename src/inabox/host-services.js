@@ -94,7 +94,9 @@ export class Visibility {
    *
    * @param {function(!VisibilityDataDef)} unusedCallback
    */
-  onVisibilityChange(unusedCallback) {}
+  onVisibilityChange(unusedCallback) {
+    throwUnsupportedError();
+  }
 }
 
 /**
@@ -121,17 +123,23 @@ export class Fullscreen {
    * Request to expand the given element to fullscreen overlay.
    *
    * @param {!Element} unusedTargetElement
-   * @return {!Promise<boolean>}
+   * @return {!Promise<boolean>} promise resolves to a boolean
+   *     indicating if the request if fulfilled
    */
-  enterFullscreen(unusedTargetElement) {}
+  enterFullscreenOverlay(unusedTargetElement) {
+    throwUnsupportedError();
+  }
 
   /**
    * Request to exit from fullscreen overlay.
    *
    * @param {!Element} unusedTargetElement
-   * @return {!Promise<boolean>}
+   * @return {!Promise<boolean>} promise resolves to a boolean
+   *     indicating if the request if fulfilled
    */
-  exitFullscreen(unusedTargetElement) {}
+  exitFullscreenOverlay(unusedTargetElement) {
+    throwUnsupportedError();
+  }
 }
 
 /**
@@ -145,7 +153,17 @@ export class Exit {
    * Request to navigate to URL.
    *
    * @param {string} unusedUrl
-   * @return {!Promise<boolean>}
+   * @return {!Promise<boolean>} promise resolves to a boolean
+   *     indicating if the request if fulfilled
    */
-  openUrl(unusedUrl) {}
+  openUrl(unusedUrl) {
+    throwUnsupportedError();
+  }
+}
+
+/**
+ * Throw unsupported error.
+ */
+function throwUnsupportedError() {
+  throw new Error('Unsupported operation');
 }
