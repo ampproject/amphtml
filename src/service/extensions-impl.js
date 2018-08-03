@@ -32,8 +32,7 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import {installCustomElements} from
-  'document-register-element/build/document-register-element.patched';
+import {install as installCustomElements} from '../polyfills/custom-elements';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
@@ -41,7 +40,10 @@ import {install as installDocContains} from '../polyfills/document-contains';
 import {installImg} from '../../builtins/amp-img';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
+import {installCustomElements as installRegisterElement} from
+  'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {startsWith} from '../string';
 import {toWin} from '../types';
@@ -420,7 +422,7 @@ export class Extensions {
     setParentWindow(childWin, parentWin);
 
     // Install necessary polyfills.
-    installPolyfillsInChildWindow(childWin);
+    installPolyfillsInChildWindow(parentWin, childWin);
 
     // Install runtime styles.
     installStylesLegacy(childWin.document, cssText, /* callback */ null,
@@ -660,12 +662,17 @@ export function stubLegacyElements(win) {
 
 /**
  * Install polyfills in the child window (friendly iframe).
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-function installPolyfillsInChildWindow(childWin) {
+function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, 'auto');
+  if (isExperimentOn(parentWin, 'custom-elements-v1')) {
+    installCustomElements(childWin, class {});
+  } else {
+    installRegisterElement(childWin, 'auto');
+  }
 }
 
 

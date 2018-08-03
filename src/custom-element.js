@@ -1756,11 +1756,11 @@ function isInternalOrServiceNode(node) {
  * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For testing only.
  * @return {!Object} Prototype of element.
  */
-export function createAmpElementProtoForTesting(
+export function createAmpElementForTesting(
   win, name, opt_implementationClass) {
-  const ElementProto = createCustomElementClass(win, name).prototype;
+  const Element = createCustomElementClass(win, name);
   if (getMode().test && opt_implementationClass) {
-    ElementProto.implementationClassForTesting = opt_implementationClass;
+    Element.prototype.implementationClassForTesting = opt_implementationClass;
   }
-  return ElementProto;
+  return Element;
 }
