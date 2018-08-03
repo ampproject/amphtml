@@ -16,7 +16,7 @@ limitations under the License.
 
 # <a name="`amp-image-slider`">amp-image-slider</a> `amp-image-slider`
 
-This is an EXPERIMENTAL component.
+This is an __EXPERIMENTAL__ component.
 
 <table>
   <tr>
@@ -33,13 +33,29 @@ This is an EXPERIMENTAL component.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>responsive, TODO</td>
+    <td>fixed, responsive, intrinsic</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>TODO</td>
+    <td><a href="https://ampbyexample.com/components/amp-image-slider/">amp-image-slider example</a></td>
   </tr>
 </table>
 
 ## Behavior
-TODO. This component is under construction. Examples would be added soon.
+
+`amp-image-slider` is required to have exactly 2 `amp-img`s as its children, with the first one becoming the image displaying on the left, and the second on the right.
+
+The slider could also take 2 optional `div`s for labels, which are used to add extra information that overlay on top of the images. The label on the left image requires the `before` attribute to be present, while the right labels requires the `after` attribute.
+
+```html
+<amp-image-slider layout="responsive" width="100" height="200">
+  <amp-img src="/green-apple.jpg" alt="A green apple"></amp-img>
+  <amp-img src="/red-apple.jpg" alt="A red apple"></amp-img>
+  <div before>This apple is green</div>
+  <div after>This apple is red</div>
+</amp-image-slider>
+```
+
+By default, once the slider is loaded, the compared images will be separated by a vertical bar, with helpful arrow hints displayed at its center. User could press mouse button down or touch to move the slider to the position of the pointer, and could then move the pointer to drag the slider bar left and right. For the left image, only part that is left to the bar is displayed; similar for the right image to only display the right portion.
+
+If we specify `tabindex` on `amp-image-slider`, users are also allowed to move the slider using keyboard. Pressing down left and right arrow moves the slider bar one step towards the corresponding direction. Pressing Home would bring the slider to the center, PageUp and PageDown to the left and right end of the slider body.
