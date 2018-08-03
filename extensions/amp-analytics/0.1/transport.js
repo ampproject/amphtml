@@ -34,19 +34,19 @@ const TAG_ = 'amp-analytics.Transport';
  * @param {!Window} win
  * @param {string} request
  * @param {!Object<string, string|boolean>} transportOptions
- * @param {!requestBodyDef} body
+ * @param {!requestBodyDef} requestBody
  */
-export function sendRequest(win, request, transportOptions, body) {
+export function sendRequest(win, request, transportOptions, requestBody) {
   assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
 
   const referrerPolicy = transportOptions['referrerPolicy'];
-  let requestBody = '',
-      requestUrl = request;
+  let body = '',
+      url = request;
 
-  if (body) {
-    requestBody = JSON.stringify(body.payload);
-    requestUrl = body.url;
+  if (requestBody) {
+    body = JSON.stringify(requestBody.payload);
+    url = requestBody.url;
   }
 
   if (referrerPolicy === 'no-referrer') {
@@ -55,11 +55,11 @@ export function sendRequest(win, request, transportOptions, body) {
   }
 
   if (transportOptions['beacon'] &&
-    Transport.sendRequestUsingBeacon(win, requestUrl, requestBody)) {
+    Transport.sendRequestUsingBeacon(win, url, body)) {
     return;
   }
   if (transportOptions['xhrpost'] &&
-    Transport.sendRequestUsingXhr(win, requestUrl, requestBody)) {
+    Transport.sendRequestUsingXhr(win, url, body)) {
     return;
   }
   const image = transportOptions['image'];

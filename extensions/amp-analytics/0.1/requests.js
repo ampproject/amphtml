@@ -294,11 +294,8 @@ export class RequestHandler {
 
         extraUrlParamStrs.requestBody = {
           url: baseUrl,
-          payload: paramBodyStrs[0],
+          payload: this.batchInterval_ ? paramBodyStrs : paramBodyStrs[0],
         };
-        if (this.batchInterval_) {
-          extraUrlParamStrs.requestBody.payload = paramBodyStrs;
-        }
       }
 
       return extraUrlParamStrs;
@@ -326,7 +323,7 @@ export class RequestHandler {
     return Promise.all(batchSegmentsPromise).then(batchSegments => {
       const batchSegmentsStrs = {
         requestUrl: '',
-        requestBody: '',
+        requestBody: null,
       };
       try {
         batchSegmentsStrs.requestUrl =
