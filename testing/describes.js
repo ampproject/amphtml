@@ -95,7 +95,7 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {createAmpElementProtoForTesting} from '../src/custom-element';
+import {createAmpElementForTesting} from '../src/custom-element';
 import {createElementWithAttributes} from '../src/dom';
 import {cssText} from '../build/css';
 import {doNotLoadExternalResourcesInTest} from './iframe';
@@ -103,8 +103,9 @@ import {
   installBuiltinElements,
   installExtensionsService,
 } from '../src/service/extensions-impl';
-import {installCustomElements} from
-  'document-register-element/build/document-register-element.patched';
+import {
+  install as installCustomElements,
+} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {
@@ -586,7 +587,7 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win);
+          installCustomElements(win, class {});
         }
 
         // Intercept event listeners
@@ -860,7 +861,7 @@ function installAmpAdStylesPromise(win) {
 function createAmpElement(win, opt_name, opt_implementationClass) {
   // Create prototype and constructor.
   const name = opt_name || 'amp-element';
-  const proto = createAmpElementProtoForTesting(win, name);
+  const proto = createAmpElementForTesting(win, name).prototype;
   const ctor = function() {
     const el = win.document.createElement(name);
     el.__proto__ = proto;
