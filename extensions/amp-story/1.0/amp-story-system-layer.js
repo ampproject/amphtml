@@ -435,15 +435,6 @@ export class SystemLayer {
   }
 
   /**
-   * @param {string} pageId The page id of the new active page.
-   * @public
-   */
-  setActivePageId(pageId) {
-    // TODO(newmuis) avoid passing progress logic through system-layer
-    this.progressBar_.setActiveSegmentId(pageId);
-  }
-
-  /**
    * @param {string} pageId The id of the page whose progress should be
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the
