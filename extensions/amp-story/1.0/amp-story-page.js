@@ -603,6 +603,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {number} progress The progress from 0.0 to 1.0.
    */
   emitProgress_(progress) {
+    // Don't emit progress for ads, since the progress bar is hidden.
+    if (this.isAd()) {
+      return;
+    }
+
     const payload = dict({
       'pageId': this.element.id,
       'progress': progress,
