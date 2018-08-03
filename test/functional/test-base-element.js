@@ -18,7 +18,7 @@ import {BaseElement} from '../../src/base-element';
 import {LayoutPriority} from '../../src/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
@@ -32,10 +32,8 @@ describes.realWin('BaseElement', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    doc.registerElement('amp-test-element', {
-      prototype: createAmpElementProtoForTesting(win,
-          'amp-test-element', BaseElement),
-    });
+    win.customElements.define('amp-test-element',
+        createAmpElementForTesting(win, 'amp-test-element', BaseElement));
     customElement = doc.createElement('amp-test-element');
     element = new BaseElement(customElement);
   });
