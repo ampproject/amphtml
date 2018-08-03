@@ -1,6 +1,32 @@
-# Settings for code coverage PR comments from https://codecov.io
-comment:
-  layout: "header, diff, flags, footer"
-  behavior: default
-  require_base: no
-  require_head: yes
+# Settings for https://codecov.io integration
+
+# See https://docs.codecov.io/docs/pull-request-comments
+comment: off
+
+# See https://docs.codecov.io/v4.3.0/docs/commit-status
+coverage:
+  status:
+    project:
+      default: off
+      unit_tests:
+        flags: unit_tests
+        target: auto
+        threshold: 100 # Passing check no matter what the coverage is
+        base: auto
+      integration_tests:
+        flags: integration_tests
+        target: auto
+        threshold: 100 # Passing check no matter what the coverage is
+        base: auto
+    patch:
+      default: off
+      unit_tests:
+        flags: unit_tests
+        target: 100 # Target 100% coverage for diffs
+        threshold: 100 # Passing check no matter what the coverage is
+        base: auto
+      integration_tests:
+        flags: integration_tests
+        target: 100 # Target 100% coverage for diffs
+        threshold: 100 # Passing check no matter what the coverage is
+        base: auto

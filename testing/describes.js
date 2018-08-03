@@ -30,7 +30,7 @@
  *     describe('myTest', () => {
  *       // I gotta do this sandbox creation and restore for every test? Ugh...
  *       let sandbox;
- *       beforeEach(() => { sandbox = sinon.sandbox.create(); })
+ *       beforeEach(() => { sandbox = sinon.sandbox; })
  *       it('stubbing', () => { sandbox.stub(foo, 'bar'); });
  *       afterEach(() => { sandbox.restore(); });
  *     });
@@ -79,7 +79,6 @@
  * and `integration` below.
  */
 
-import * as sinon from 'sinon';
 import {BaseElement} from '../src/base-element';
 import {CSS} from '../build/amp-ad-0.1.css.js';
 import {
@@ -426,7 +425,7 @@ class SandboxFixture {
     // Sandbox.
     let {sandbox} = global;
     if (!sandbox) {
-      sandbox = global.sandbox = sinon.sandbox.create();
+      sandbox = global.sandbox = sinon.sandbox;
       this.sandboxOwner_ = true;
     }
     env.sandbox = sandbox;

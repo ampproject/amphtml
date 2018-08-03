@@ -242,12 +242,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
   },
   {
-    id: 'inline-styles',
-    name: 'Enables the usage of inline styles for non fixed elements',
-    spec: 'https://github.com/ampproject/amphtml/issues/11881',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
-  },
-  {
     id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
@@ -320,6 +314,12 @@ const EXPERIMENTS = [
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
+  },
+  {
+    id: 'faster-bind-scan',
+    name: 'Enables faster scanning of dynamic markup for bindings',
+    spec: 'https://github.com/ampproject/amphtml/pull/17229',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
   },
 ];
 
