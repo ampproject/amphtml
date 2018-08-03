@@ -430,6 +430,8 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
     this.timeoutId_ = this.timer_.delay(() => this.onAdvance(), this.delayMs_);
 
+    this.onProgressUpdate();
+
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
       return !this.isRunning();
@@ -591,6 +593,8 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
     listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
         {capture: true});
+
+    this.onProgressUpdate();
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();

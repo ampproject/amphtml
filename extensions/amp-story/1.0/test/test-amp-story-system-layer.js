@@ -41,7 +41,6 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     progressBarStub = {
       build: sandbox.stub().returns(progressBarRoot),
       getRoot: sandbox.stub().returns(progressBarRoot),
-      setActiveSegmentId: sandbox.spy(),
       updateProgress: sandbox.spy(),
     };
 
@@ -75,13 +74,6 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     systemLayer.initializeListeners_();
 
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
-  });
-
-  it('should set the active page index', () => {
-    [0, 1, 2, 3, 4].forEach(index => {
-      systemLayer.setActivePageId(index);
-      progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
-    });
   });
 
   it('should set an attribute to toggle the UI when an ad is shown', () => {
