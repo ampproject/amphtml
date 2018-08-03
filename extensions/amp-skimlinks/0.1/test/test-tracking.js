@@ -1,4 +1,5 @@
 import {Services} from '../../../../src/services';
+import {XCUST_ATTRIBUTE_NAME} from '../constants';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
 
@@ -243,15 +244,39 @@ describes.realWin('test-tracking', {
     });
 
     it('Should send the global xcust with the na tracking', () => {
+      const trackingService = setupTrackingService({customTrackingId: 'xcust-id'});
 
+      const anchor = helpers.createAnchor('https://non-merchant.com/test');
+
+      trackingService.sendNaClickTracking(anchor);
+
+      const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'non-affiliate-click');
+      const trackingData = JSON.parse(urlVars.data);
+      expect(trackingData.custom).to.equal('xcust-id');
     });
 
     it('Should send xcust set on the link with the na tracking', () => {
+      const trackingService = setupTrackingService();
 
+      const anchor = helpers.createAnchor('https://non-merchant.com/test');
+      anchor.setAttribute(XCUST_ATTRIBUTE_NAME, 'xcust-id-on-link');
+
+      trackingService.sendNaClickTracking(anchor);
+      const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'non-affiliate-click');
+      const trackingData = JSON.parse(urlVars.data);
+      expect(trackingData.custom).to.equal('xcust-id-on-link');
     });
 
     it('Should prioritise xcust set on the link over global xcust with the na tracking', () => {
+      const trackingService = setupTrackingService({customTrackingId: 'xcust-id'});
 
+      const anchor = helpers.createAnchor('https://non-merchant.com/test');
+      anchor.setAttribute(XCUST_ATTRIBUTE_NAME, 'xcust-id-on-link');
+
+      trackingService.sendNaClickTracking(anchor);
+      const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'non-affiliate-click');
+      const trackingData = JSON.parse(urlVars.data);
+      expect(trackingData.custom).to.equal('xcust-id-on-link');
     });
   });
 });
