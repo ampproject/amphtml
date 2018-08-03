@@ -382,8 +382,8 @@ Notes:
 
 * This will force a clean build and run all the PR checks one by one.
 * Just like on Travis, a failing check will prevent subsequent checks from being run.
-* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
-* The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#testing-on-sauce-labs).
+* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#running-visual-diff-tests-locally) guide.
+* The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described in the [Testing](TESTING.md#testing-on-sauce-labs) guide.
 
 ## Adding tests for your change
 
