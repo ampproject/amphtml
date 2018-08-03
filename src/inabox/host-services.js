@@ -17,7 +17,7 @@
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from './service';
+} from '../service';
 
 const ServiceNames = {
   VISIBILITY: 'host-visibility',
@@ -28,7 +28,7 @@ const ServiceNames = {
 export class HostServices {
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!Visibility>}
    */
   static visibilityForDoc(elementOrAmpDoc) {
@@ -37,7 +37,7 @@ export class HostServices {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @param {!Visibility} impl
    */
   static installVisibilityServiceForDoc(elementOrAmpDoc, impl) {
@@ -46,7 +46,7 @@ export class HostServices {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!Visibility>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
@@ -55,7 +55,7 @@ export class HostServices {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @param {!Fullscreen} impl
    */
   static installFullscreenServiceForDoc(elementOrAmpDoc, impl) {
@@ -64,7 +64,7 @@ export class HostServices {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!Exit>}
    */
   static exitForDoc(elementOrAmpDoc) {
@@ -73,7 +73,7 @@ export class HostServices {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @param {!Exit} impl
    */
   static installExitServiceForDoc(elementOrAmpDoc, impl) {
@@ -90,7 +90,8 @@ export class HostServices {
 export class Visibility {
 
   /**
-   * Register a callback for scroll events.
+   * Register a callback for visibility change events.
+   *
    * @param {function(!VisibilityDataDef)} unusedCallback
    */
   onVisibilityChange(unusedCallback) {}
