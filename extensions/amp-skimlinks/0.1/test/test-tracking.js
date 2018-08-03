@@ -30,6 +30,21 @@ describes.realWin('test-tracking', {
     return trackingService;
   }
 
+  function createFakeAnchorReplacementMap() {
+    const map = new Map();
+    const a1 = helpers.createAnchor('http://merchant1.com/');
+    const a2 = helpers.createAnchor('http://merchant2.com/');
+    const a3 = helpers.createAnchor('http://non-merchant.com/');
+    const a4 = helpers.createAnchor('http://merchant1.com/');
+
+    map.set(a1, `https://goredirectingat.com/url=${a1.href}`);
+    map.set(a2, `https://goredirectingat.com/url=${a2.href}`);
+    map.set(a3, null);
+    map.set(a4, `https://goredirectingat.com/url=${a4.href}`);
+
+    return map;
+  }
+
   afterEach(() => {
     env.sandbox.restore();
   });
@@ -46,20 +61,6 @@ describes.realWin('test-tracking', {
     });
 
 
-    function createFakeAnchorReplacementMap() {
-      const map = new Map();
-      const a1 = helpers.createAnchor('http://merchant1.com/');
-      const a2 = helpers.createAnchor('http://merchant2.com/');
-      const a3 = helpers.createAnchor('http://non-merchant.com/');
-      const a4 = helpers.createAnchor('http://merchant1.com/');
-
-      map.set(a1, `https://goredirectingat.com/url=${a1.href}`);
-      map.set(a2, `https://goredirectingat.com/url=${a2.href}`);
-      map.set(a3, null);
-      map.set(a4, `https://goredirectingat.com/url=${a4.href}`);
-
-      return map;
-    }
 
     // it('Should call impression and link tracking', () => {
     //   trackingService = helpers.createTrackingWithStubAnalytics();
@@ -81,11 +82,29 @@ describes.realWin('test-tracking', {
     //   trackingService.sendImpressionTracking({}, new Map(), startTime);
     // });
 
-    describe.skip('amp-analytics setup', () => {
+    describe.only('amp-analytics setup', () => {
       it('Should generate a page impression id', () => {
+        const trackingService1 = helpers.createTrackingWithStubAnalytics();
+        const trackingService2 = helpers.createTrackingWithStubAnalytics();
+        const impressionId1 = trackingService1.trackingInfo_.pageImpressionId;
+        const impressionId2 = trackingService2.trackingInfo_.pageImpressionId;
+        expect(impressionId1.length).to.equal(32);
+        expect(impressionId1).to.not.equal(impressionId2);
+      });
+
+      it('Set the sendBeacon flag to true', () => {
 
       });
-      it('Set the sendBeacon flag to true', () => {
+
+      it('Setup the page-impressions analytics correctly', () => {
+
+      });
+
+      it('Setup the link-impressions analytics correctly', () => {
+
+      });
+
+      it('Setup the non-affiliate-click analytics correctly', () => {
 
       });
     });
