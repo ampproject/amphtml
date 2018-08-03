@@ -115,7 +115,7 @@
 }
 
 [dir=rtl] .i-amphtml-story-page-progress-value {
-   transform-origin: right !important;
+  transform-origin: right !important;
 }
 
 .i-amphtml-story-mute-audio-control,
