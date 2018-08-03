@@ -21,7 +21,7 @@ import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {poll} from '../../testing/iframe';
 
 
@@ -113,14 +113,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
       container = doc.createElement('div');
       doc.body.appendChild(container);
 
-      ElementClass = doc.registerElement('amp-test', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-test', TestElement),
-      });
-      StubElementClass = doc.registerElement('amp-stub', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-stub', ElementStub),
-      });
+      ElementClass = createAmpElementForTesting(win, 'amp-test', TestElement);
+      StubElementClass = createAmpElementForTesting(win, 'amp-stub',
+          ElementStub);
+
+      win.customElements.define('amp-test', ElementClass);
+      win.customElements.define('amp-stub', StubElementClass);
+
       win.ampExtendedElements['amp-test'] = TestElement;
       win.ampExtendedElements['amp-stub'] = ElementStub;
       ampdoc.declareExtension('amp-stub');
@@ -1469,9 +1468,9 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    StubElementClass = doc.registerElement('amp-stub2', {
-      prototype: createAmpElementProtoForTesting(win, 'amp-stub2', ElementStub),
-    });
+    StubElementClass = createAmpElementForTesting(win, 'amp-stub2',
+        ElementStub);
+    win.customElements.define('amp-stub2', StubElementClass);
     env.ampdoc.declareExtension('amp-stub2');
     element = new StubElementClass();
   });
@@ -1647,10 +1646,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
       win = env.win;
       doc = win.document;
       clock = lolex.install({target: win});
-      ElementClass = doc.registerElement('amp-test-loader', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-test-loader', TestElement),
-      });
+      ElementClass = createAmpElementForTesting(win, 'amp-test-loader',
+          TestElement);
+      win.customElements.define('amp-test-loader', ElementClass);
       win.ampExtendedElements['amp-test-loader'] = TestElement;
       LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
       resources = Services.resourcesForDoc(doc);
@@ -1986,10 +1984,9 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    ElementClass = doc.registerElement('amp-test-overflow', {
-      prototype: createAmpElementProtoForTesting(
-          win, 'amp-test-overflow', TestElement),
-    });
+    ElementClass = createAmpElementForTesting(win, 'amp-test-overflow',
+        TestElement);
+    win.customElements.define('amp-test-overflow', ElementClass);
     resources = Services.resourcesForDoc(doc);
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();

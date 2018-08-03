@@ -25,8 +25,7 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {installCustomElements} from
-  'document-register-element/build/document-register-element.patched';
+import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStylesLegacy} from '../src/style-installer';
@@ -232,7 +231,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
           Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
-      installCustomElements(iframe.contentWindow);
+      installCustomElements(iframe.contentWindow, class {});
       installAmpdocServices(ampdoc);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.

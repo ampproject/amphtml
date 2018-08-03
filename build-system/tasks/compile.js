@@ -278,21 +278,19 @@ function compile(entryModuleFilenames, outputDir,
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
     if (options.includeOnlyESMLevelPolyfills) {
-      const polyfillsShadowList = [
-        'array-includes.js',
-        'document-contains.js',
-        'domtokenlist-toggle.js',
-        'math-sign.js',
-        'object-assign.js',
-        'promise.js',
-      ];
+      const polyfills = fs.readdirSync('src/polyfills');
+      const polyfillsShadowList = polyfills.filter(p => {
+        // custom-elements polyfill must be included.
+        return p !== 'custom-elements.js';
+      });
       srcs.push(
           '!build/fake-module/src/polyfills.js',
           '!build/fake-module/src/polyfills/**/*.js',
           '!build/fake-polyfills/src/polyfills.js',
-          '!src/polyfills/*.js',
+          'src/polyfills/custom-elements.js',
           'build/fake-polyfills/**/*.js');
       polyfillsShadowList.forEach(polyfillFile => {
+        srcs.push(`!src/polyfills/${polyfillFile}`);
         fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
             'export function install() {}');
       });
