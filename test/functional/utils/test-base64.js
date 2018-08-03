@@ -174,10 +174,17 @@ describe('base64EncodeFromBytes', () => {
 describe('base64EncodeFromString', () => {
   it('should handle unicode and non-unicode strings', () => {
     expect(base64UrlEncodeFromString('')).to.equal('');
+    expect(base64UrlEncodeFromString('      ')).to.equal('ICAgICAg');
     expect(base64UrlEncodeFromString('helloworld')).to
         .equal('aGVsbG93b3JsZA..');
+    expect(base64UrlEncodeFromString('hello world')).to
+        .equal('aGVsbG8gd29ybGQ.');
+    expect(base64UrlEncodeFromString(' hello world ')).to
+        .equal('IGhlbGxvIHdvcmxkIA..');
     expect(base64UrlEncodeFromString('✓ à la mode')).to
         .equal('4pyTIMOgIGxhIG1vZGU.');
     expect(base64UrlEncodeFromString('\n')).to.equal('Cg..');
+    expect(base64UrlEncodeFromString('$#!@#$%^&*()')).to
+        .equal('JCMhQCMkJV4mKigp');
   });
 });
