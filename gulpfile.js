@@ -57,6 +57,9 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 const extensions = {};
 const extensionAliasFilePath = {};
 
+// All a4a extensions.
+const adExtensions = ['amp-a4a'];
+
 const {green, red, cyan} = colors;
 
 const minifiedRuntimeTarget = 'dist/v0.js';
@@ -139,6 +142,9 @@ function declareExtension(name, version, options) {
     extensions[`${name}-${v}`] =
         Object.assign({name, version: v}, defaultOptions, options);
   });
+  if (name.startsWith('amp-ad-network-')) {
+    adExtensions.push(name);
+  }
 }
 
 /**
@@ -238,6 +244,12 @@ function getExtensionsToBuild() {
   if (!!argv.extensions_from) {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
+  }
+
+  if (extensionsToBuild.indexOf('amp-ad') > -1) {
+    // Build every amp a4a extension now. Need to expand feature once vendor
+    // number exceeds 10.
+    extensionsToBuild = dedupe(extensionsToBuild.concat(adExtensions));
   }
 
   return extensionsToBuild;
