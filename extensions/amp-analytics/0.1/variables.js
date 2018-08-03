@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {base64UrlEncodeFromString} from '../base64';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
