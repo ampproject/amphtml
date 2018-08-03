@@ -70,10 +70,9 @@ A few things to note:
 * Include tests when contributing code.  There are plenty of tests that you can use as examples.
 * A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
 
-### Reading commit messages
+### Reading pull requests
 
-The AMP Project uses emojis in pull requests to communicate categories. Here is the key:
-
+The AMP Project uses the following emojis in pull requests to communicate categories:
 * ✨ New feature (`:sparkles:`)  
 * 🐛 Bug fix (`:bug:`)  
 * 🔥 P0 fix (`:fire:`)  
