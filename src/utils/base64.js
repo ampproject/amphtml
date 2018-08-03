@@ -63,7 +63,7 @@ export function base64UrlEncodeFromBytes(bytes) {
 /**
  * Converts a string into base64url encoded string.
  * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
- * @param {stiring} str
+ * @param {string} str
  * @return {string}
  */
 export function base64UrlEncodeFromString(str) {
