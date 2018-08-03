@@ -702,8 +702,8 @@ true/false)` to enable.
 
 ## Example of using your extension
 
-This is optional but it greatly helps users to understand and demo how
-your element works and provides an easy start-point for them to
+This greatly helps users to understand and demonstrate how
+your element works, and provides an easy start-point for them to
 experiment with it. This is basically where you actually build an AMP
 HTML document and use your element in it by creating a file in the
 `examples/` directory, usually with the `my-element.amp.html` file
