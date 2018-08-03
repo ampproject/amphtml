@@ -57,15 +57,6 @@ export function base64DecodeToBytes(str) {
  */
 export function base64UrlEncodeFromBytes(bytes) {
   const str = bytesToString(bytes);
-  return base64UrlEncodeFromString(str);
-}
-
-/**
- * Converts a string into base64url encoded string.
- * @param {string} str
- * @return {string}
- */
-export function base64UrlEncodeFromString(str) {
   return btoa(str).replace(/[+/=]/g, ch => base64UrlEncodeSubs[ch]);
 }
 
