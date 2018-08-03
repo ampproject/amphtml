@@ -104,7 +104,7 @@ export class Visibility {
  * interpretation of position and size depends on the use case.
  *
  * @typedef {{
- *   visibleRect: (?./layout-rect.LayoutRectDef),
+ *   visibleRect: (?../layout-rect.LayoutRectDef),
  *   visibleRatio: number
  * }}
  */
