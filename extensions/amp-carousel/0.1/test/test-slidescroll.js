@@ -94,22 +94,6 @@ describes.realWin('SlideScroll', {
     });
   });
 
-  it('should create start/end markers when scroll-snap is available', () => {
-    return getAmpSlideScroll().then(ampSlideScroll => {
-      const impl = ampSlideScroll.implementation_;
-      ampSlideScroll.style['scrollSnapType'] = '';
-      ampSlideScroll.style['webkitScrollSnapType'] = '';
-      ampSlideScroll.style['msScrollSnapType'] = '';
-      impl.buildCarousel();
-      expect(
-          ampSlideScroll.getElementsByClassName(
-              'i-amphtml-carousel-start-marker').length).to.be.at.least(1);
-      expect(
-          ampSlideScroll.getElementsByClassName(
-              'i-amphtml-carousel-end-marker').length).to.be.at.least(1);
-    });
-  });
-
   it('should go to the correct slide on button click', () => {
     return getAmpSlideScroll().then(ampSlideScroll => {
       const impl = ampSlideScroll.implementation_;

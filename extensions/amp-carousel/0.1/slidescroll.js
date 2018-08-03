@@ -23,10 +23,10 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -123,8 +123,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = startsWith(
-        Services.platformFor(this.win).getIosVersionString(), '10.3');
+    this.shouldDisableCssSnap_ = !isExperimentOn(
+        this.win, 'amp-carousel-scroll-snap');
   }
 
   /** @override */
