@@ -47,7 +47,7 @@ const testVectors = [
   },
   {
     input: '漢字',
-    output: 325357704,
+    output: 2573319087,
   },
   {
     input: '    spaces',
