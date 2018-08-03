@@ -971,6 +971,11 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
+    // Step out if trying to navigate to the currently active page.
+    if (this.activePage_ && (this.activePage_.element.id === targetPageId)) {
+      return Promise.resolve();
+    }
+
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
 
