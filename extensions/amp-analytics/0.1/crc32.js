@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /**
  * Standard key for CRC32
@@ -34,10 +35,13 @@ export function crc32(str) {
   if (!crcTable) {
     crcTable = makeCrcTable();
   }
+
+  const bytes = utf8Encode(str);
+
   // Shrink to 32 bits.
   let crc = -1 >>> 0;
-  for (let i = 0; i < str.length; i++) {
-    const lookupIndex = (crc ^ str.charCodeAt(i)) & 0xFF;
+  for (let i = 0; i < bytes.length; i++) {
+    const lookupIndex = (crc ^ bytes[i]) & 0xFF;
     crc = (crc >>> 8) ^ crcTable[lookupIndex];
   }
   return (crc ^ (-1)) >>> 0;
