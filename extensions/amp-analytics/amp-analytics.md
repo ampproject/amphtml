@@ -420,7 +420,7 @@ Notice that selector can be used to only specify a single element, not a collect
 The element visibility trigger waits for the signal specified by the `waitFor` property in `visibilitySpec` before tracking element visibility. If `waitFor` is not specified, it waits for element's [`ini-load`](#initial-load-trigger) signal. See `waitFor` docs for more details.
 
 
-##### Error trigger
+##### Error trigger (In experiment)
 
 The user error event (`"on": "user-error"`) is triggered when an error occurs that is attributable to the author of the page or to software that is used in publishing the page. This includes, but not limited to, misconfiguration of an AMP component, misconfigured ads, or failed assertions. User errors are also reported in the developer console.
 
