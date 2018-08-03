@@ -58,6 +58,9 @@ export class ProgressBar {
     /** @private {number} */
     this.activeSegmentIndex_ = 0;
 
+    /** @private {number} */
+    this.activeSegmentProgress_ = 1;
+
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
 
@@ -104,34 +107,11 @@ export class ProgressBar {
     return this.getRoot();
   }
 
-
   /**
    * @return {!Element}
    */
   getRoot() {
     return dev().assertElement(this.root_);
-  }
-
-
-  /**
-   * @param {string} segmentId The index of the new active segment.
-   * @public
-   */
-  setActiveSegmentId(segmentId) {
-    this.assertVaildSegmentId_(segmentId);
-    const segmentIndex = this.segmentIdMap_[segmentId];
-
-    for (let i = 0; i < this.segmentCount_; i++) {
-      if (i < segmentIndex) {
-        this.updateProgressByIndex_(i, 1.0,
-            /* withTransition */ i == segmentIndex - 1);
-      } else {
-        // The active segment manages its own progress by firing PAGE_PROGRESS
-        // events to amp-story.
-        this.updateProgressByIndex_(i, 0.0, /* withTransition */ (
-          segmentIndex != 0 && this.activeSegmentIndex_ != 1));
-      }
-    }
   }
 
   /**
@@ -152,9 +132,73 @@ export class ProgressBar {
   updateProgress(segmentId, progress) {
     this.assertVaildSegmentId_(segmentId);
     const segmentIndex = this.segmentIdMap_[segmentId];
+
     this.updateProgressByIndex_(segmentIndex, progress);
+
+    // If updating progress for a new segment, update all the other progress
+    // bar segments.
+    if (this.activeSegmentIndex_ !== segmentIndex) {
+      this.updateSegments_(
+          segmentIndex,
+          progress,
+          this.activeSegmentIndex_,
+          this.activeSegmentProgress_);
+    }
+
+    this.activeSegmentProgress_ = progress;
+    this.activeSegmentIndex_ = segmentIndex;
   }
 
+  /**
+   * Updates all the progress bar segments, and decides whether the update has
+   * to be animated.
+   * @param {number} activeSegmentIndex
+   * @param {number} activeSegmentProgress
+   * @param {number} prevSegmentIndex
+   * @param {number} prevSegmentProgress
+   * @private
+   */
+  updateSegments_(
+    activeSegmentIndex,
+    activeSegmentProgress,
+    prevSegmentIndex,
+    prevSegmentProgress) {
+    let shouldAnimatePreviousSegment = false;
+
+    // Animating the transition from one full segment to another, which is the
+    // most common case.
+    if (prevSegmentProgress === 1 && activeSegmentProgress === 1) {
+      shouldAnimatePreviousSegment = true;
+    }
+
+    // When navigating forward, animate the previous segment only if the
+    // following one does not get fully filled.
+    if (activeSegmentIndex > prevSegmentIndex && activeSegmentProgress !== 1) {
+      shouldAnimatePreviousSegment = true;
+    }
+
+    // When navigating backward, animate the previous segment only if the
+    // following one gets fully filled.
+    if (prevSegmentIndex > activeSegmentIndex && activeSegmentProgress === 1) {
+      shouldAnimatePreviousSegment = true;
+    }
+
+    for (let i = 0; i < this.segmentCount_; i++) {
+      // Active segment already gets updated through update progress events
+      // dispatched by its amp-story-page.
+      if (i === activeSegmentIndex) {
+        continue;
+      }
+
+      const progress = i < activeSegmentIndex ? 1 : 0;
+
+      // Only animate the segment corresponding to the previous page, if needed.
+      const withTransition =
+          shouldAnimatePreviousSegment ? (i === prevSegmentIndex) : false;
+
+      this.updateProgressByIndex_(i, progress, withTransition);
+    }
+  }
 
   /**
    * @param {number} segmentIndex The index of the progress bar segment whose progress should be
@@ -165,8 +209,6 @@ export class ProgressBar {
    * @public
    */
   updateProgressByIndex_(segmentIndex, progress, withTransition = true) {
-    this.activeSegmentIndex_ = segmentIndex;
-
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
     const nthChildIndex = segmentIndex + 1;
