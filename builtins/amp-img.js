@@ -103,11 +103,6 @@ export class AmpImg extends BaseElement {
       return;
     }
 
-    // Checks to see if the images has a blurry image placeholder
-    //if (isExperimentOn(this.win, 'blurry-placeholder')) {
-      //this.checkBlur_();
-    //}
-
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
@@ -153,14 +148,11 @@ export class AmpImg extends BaseElement {
   layoutCallback() {
     this.initialize_();
     const img = dev().assertElement(this.img_);
-    console.log("r");
     this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
     if (this.getLayoutWidth() <= 0) {
-      console.log("f");
       return Promise.resolve();
     }
-    console.log("p");
     return this.loadPromise(img);
   }
 
