@@ -92,13 +92,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   /** @override */
-  firstAttachedCallback() {
-    // Fire onMeasureChanged in case we upgraded _after_ the element's
-    // measurements were really last changed.
-    this.onMeasureChanged();
-  }
-
-  /** @override */
   onMeasureChanged() {
     const width = this.getLayoutWidth();
     this.mutateElement(() => {
