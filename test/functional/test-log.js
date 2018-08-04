@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   Log,
   LogLevel,
@@ -43,7 +42,7 @@ describe('Logging', () => {
   let timeoutSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     mode = {};
     window.AMP_MODE = mode;
@@ -678,7 +677,7 @@ describe('Logging', () => {
     let element2;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
     });

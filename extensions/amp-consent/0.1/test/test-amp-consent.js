@@ -577,7 +577,7 @@ describes.realWin('amp-consent', {
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
       expect(updateConsentInstanceStateSpy).to.be.calledThrice;
-      updateConsentInstanceStateSpy.reset();
+      updateConsentInstanceStateSpy.resetHistory();
       expect(updateConsentInstanceStateSpy).to.not.be.called;
     });
 

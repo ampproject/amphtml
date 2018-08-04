@@ -30,7 +30,7 @@
  *     describe('myTest', () => {
  *       // I gotta do this sandbox creation and restore for every test? Ugh...
  *       let sandbox;
- *       beforeEach(() => { sandbox = sinon.sandbox.create(); })
+ *       beforeEach(() => { sandbox = sinon.sandbox; })
  *       it('stubbing', () => { sandbox.stub(foo, 'bar'); });
  *       afterEach(() => { sandbox.restore(); });
  *     });
@@ -79,7 +79,6 @@
  * and `integration` below.
  */
 
-import * as sinon from 'sinon';
 import {BaseElement} from '../src/base-element';
 import {CSS} from '../build/amp-ad-0.1.css.js';
 import {
@@ -96,7 +95,7 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {createAmpElementProtoForTesting} from '../src/custom-element';
+import {createAmpElementForTesting} from '../src/custom-element';
 import {createElementWithAttributes} from '../src/dom';
 import {cssText} from '../build/css';
 import {doNotLoadExternalResourcesInTest} from './iframe';
@@ -104,8 +103,9 @@ import {
   installBuiltinElements,
   installExtensionsService,
 } from '../src/service/extensions-impl';
-import {installCustomElements} from
-  'document-register-element/build/document-register-element.patched';
+import {
+  install as installCustomElements,
+} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {
@@ -426,7 +426,7 @@ class SandboxFixture {
     // Sandbox.
     let {sandbox} = global;
     if (!sandbox) {
-      sandbox = global.sandbox = sinon.sandbox.create();
+      sandbox = global.sandbox = sinon.sandbox;
       this.sandboxOwner_ = true;
     }
     env.sandbox = sandbox;
@@ -587,7 +587,7 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win);
+          installCustomElements(win, class {});
         }
 
         // Intercept event listeners
@@ -861,7 +861,7 @@ function installAmpAdStylesPromise(win) {
 function createAmpElement(win, opt_name, opt_implementationClass) {
   // Create prototype and constructor.
   const name = opt_name || 'amp-element';
-  const proto = createAmpElementProtoForTesting(win, name);
+  const proto = createAmpElementForTesting(win, name).prototype;
   const ctor = function() {
     const el = win.document.createElement(name);
     el.__proto__ = proto;
