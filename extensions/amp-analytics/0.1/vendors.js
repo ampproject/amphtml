@@ -2094,6 +2094,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       },
     },
   },
+  
   'oracleInfinityAnalytics': {
     'transport': {
       'beacon': false,
