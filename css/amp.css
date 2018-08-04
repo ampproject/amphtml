@@ -23,7 +23,7 @@
  * to be computed to `auto` on both the `body` and `html` elements so they both
  * potentially get a scrolling box. See #3108 for more details.
  */
-html {
+ html {
   overflow-x: hidden !important;
 }
 html, body {
@@ -167,22 +167,14 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   display: inline-block;
 }
 
-.i-amphtml-blur-loading > .i-amphtml-fill-content {
+.i-amphtml-fade-out .i-amphtml-blur {
   opacity: 0 !important;
+  transition: opacity 1s 1s !important;
 }
 
-.i-amphtml-blur-loaded .i-amphtml-fill-content {
-  opacity: 1 !important;
-  transition: opacity 1s cubic-bezier(0.33, 0.33, 1, 1) !important;
-}
-
-.i-amphtml-blur-loading .i-amphtml-blur {
-  opacity: 1 !important;
-}
-
-.i-amphtml-blur-loaded .i-amphtml-blur {
-  opacity: 0 !important;
-  transition: opacity 1s cubic-bezier(0.33, 0.33, 1, 1) 1s !important;
+.i-amphtml-blur{
+  filter: blur(20px) !important;
+  transform: scale(1.1) !important;
 }
 
 .i-amphtml-layout-nodisplay,
@@ -270,7 +262,8 @@ i-amphtml-sizer {
   display: block !important;
 }
 
-.i-amphtml-fill-content {
+.i-amphtml-fill-content,
+.i-amphtml-blur {
   display: block;
   /* These lines are a work around to this issue in iOS:     */
   /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
@@ -410,11 +403,7 @@ i-amphtml-sizer {
   display: block;
 }
 
-/**
- * Hides the placeholder immediately after the image loads. The exception is if
- * the placeholder is a blurry image, which needs to be faded on top of.
- */
-.i-amphtml-element:not(.i-amphtml-blur-loaded, .i-amphtml-blur-loading) > [placeholder].hidden,
+.i-amphtml-element > [placeholder].hidden,
 .i-amphtml-element > [placeholder].amp-hidden {
   visibility: hidden;
 }

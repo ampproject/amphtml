@@ -104,9 +104,9 @@ export class AmpImg extends BaseElement {
     }
 
     // Checks to see if the images has a blurry image placeholder
-    if (isExperimentOn(this.win, 'blurry-placeholder')) {
-      this.checkBlur_();
-    }
+    //if (isExperimentOn(this.win, 'blurry-placeholder')) {
+      //this.checkBlur_();
+    //}
 
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
@@ -153,11 +153,14 @@ export class AmpImg extends BaseElement {
   layoutCallback() {
     this.initialize_();
     const img = dev().assertElement(this.img_);
-    this.unlistenLoad_ = listen(img, 'load', () => this.onImgLoad_());
+    console.log("r");
+    this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
     if (this.getLayoutWidth() <= 0) {
+      console.log("f");
       return Promise.resolve();
     }
+    console.log("p");
     return this.loadPromise(img);
   }
 
@@ -174,27 +177,14 @@ export class AmpImg extends BaseElement {
     return true;
   }
 
-  /**
-   * If a blurry placeholder exists, hides the child until it's fully loaded.
-   * @private
-   */
-  checkBlur_() {
+  /** @override */
+  firstLayoutCompleted() {
     const placeholder = this.getPlaceholder();
-    if (!!placeholder && placeholder.classList.contains('i-amphtml-blur')) {
-      this.element.classList.add('i-amphtml-blur-loading');
-    }
-  }
-
-  /**
-   * Animates the fully rendered either through a fading in on top of a blurry
-   * placeholder if one exists, or hiding the fallback if not.
-   * @private
-   */
-  onImgLoad_() {
-    if (this.element.classList.contains('i-amphtml-blur-loading')) {
-      this.element.classList.add('i-amphtml-blur-loaded');
+    if (isExperimentOn(this.win, 'blurry-placeholder') && placeholder && 
+      placeholder.classList.contains('i-amphtml-blur')) {
+      this.element.classList.add('i-amphtml-fade-out');
     } else {
-      this.hideFallbackImg_();
+      this.togglePlaceholder(false);
     }
   }
 
