@@ -34,7 +34,6 @@ import {dev} from '../../src/log';
 import {loadPromise} from '../../src/event-helper';
 import {preconnectForElement} from '../../src/preconnect';
 import {toggleExperiment} from '../../src/experiments';
-import {validateData} from '../../3p/3p';
 
 describe.configure().ifNewChrome().run('3p-frame', () => {
 
@@ -246,7 +245,8 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
       const c = win.document.getElementById('c');
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
-      validateData(win.context.data, ['ping', 'testAttr']);
+      expect(win.context.data).to.have.property('ping', 'pong');
+      expect(win.context.data).to.have.property('testAttr', 'value');
       document.head.removeChild(link);
     });
   });

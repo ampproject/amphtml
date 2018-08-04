@@ -322,6 +322,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
   },
   {
+    id: 'no-initial-intersection',
+    name: 'Do not invoke context.observeIntersection callback with ' +
+        'initialintersection',
+    spec: 'https://github.com/ampproject/amphtml/issues/8562',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
+  },
+  {
     id: 'custom-elements-v1',
     name: 'Enable a new custom elements v1 polyfill',
     spec: 'https://github.com/ampproject/amphtml/pull/17205',
