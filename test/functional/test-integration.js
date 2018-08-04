@@ -230,9 +230,11 @@ describe('3p integration.js', () => {
     validateAllowedTypes(get('d-123.ampproject.net'), 'twitter');
     validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'adtech');
     validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'a9');
-    expect(() => {
-      validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    allowConsoleError(() => {
+      expect(() => {
+        validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
+      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    });
   });
 
   it('should validate types on custom host', () => {
@@ -244,12 +246,16 @@ describe('3p integration.js', () => {
     validateAllowedTypes(defaultHost, 'twitter');
     validateAllowedTypes(defaultHost, 'facebook');
     validateAllowedTypes(defaultHost, 'doubleclick');
-    expect(() => {
-      validateAllowedTypes(defaultHost, 'not present');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
-    expect(() => {
-      validateAllowedTypes(defaultHost, 'adtech');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    allowConsoleError(() => {
+      expect(() => {
+        validateAllowedTypes(defaultHost, 'not present');
+      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    });
+    allowConsoleError(() => {
+      expect(() => {
+        validateAllowedTypes(defaultHost, 'adtech');
+      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    });
     validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
   });
 

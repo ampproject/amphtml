@@ -301,7 +301,7 @@ let experimentToggles = {};
  * @return {boolean}
  */
 export function isExperimentOn(experimentId) {
-  return !!experimentToggles[experimentId];
+  return experimentToggles && !!experimentToggles[experimentId];
 }
 
 /**
