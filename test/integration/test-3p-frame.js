@@ -36,7 +36,7 @@ import {preconnectForElement} from '../../src/preconnect';
 import {toggleExperiment} from '../../src/experiments';
 import {validateData} from '../../3p/3p';
 
-describe.configure().ifNewChrome().run('3p-frame', () => {
+describe.skip('3p-frame', () => {
 
   let clock;
   let sandbox;
