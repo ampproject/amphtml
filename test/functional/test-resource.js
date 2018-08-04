@@ -134,7 +134,7 @@ describes.realWin('Resource', {amp: true}, env => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').returns(Promise.resolve()).once();
     elementMock.expects('updateLayoutBox')
-        .withExactArgs(box)
+        .withExactArgs(box, true)
         .once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.layoutBox_ = box;
