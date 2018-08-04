@@ -18,9 +18,8 @@ import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev} from '../src/log';
 import {dict} from '../src/utils/object';
-import {isExperimentOn} from './3p';
+import {isExperimentOn, nextTick} from './3p';
 import {isObject} from '../src/types';
-import {nextTick} from './3p';
 import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
 
