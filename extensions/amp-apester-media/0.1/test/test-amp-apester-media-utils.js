@@ -13,39 +13,215 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../utils';
-import {Services} from '../../../../src/services';
 
-describes.realWin(
-    'amp-apester-media-utils',
-    {},
-    env => {
-      let win;
-      let xhrMock;
+import {extractArticleTags, extractElementTags, extractTags, extratctTitle} from '../utils';
 
-      beforeEach(() => {
-        win = env.win;
-      });
+describes.realWin('amp-apester-media-utils', {}, unused => {
+  // let win;
 
-      afterEach(() => {
-        if (xhrMock) {
-          xhrMock.verify();
-        }
-      });
+  beforeEach(() => {
+    document.body.textContent = '';
+    document.head.textContent = '';
+  });
 
-    
-      //todo responsive layout isn't fully supported yet, just a stub
-      it('Extract tags properly', () => {
-        return getApester(
-            {
-              'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-              width: '500',
-            },
-            true
-        ).then(ape => {
-          const iframe = ape.querySelector('iframe');
-          expect(iframe.className).to.match(/i-amphtml-fill-content/);
-        });
-      });
+  //todo responsive layout isn't fully supported yet, just a stub
+  it('Extract element tags as empty array when there is no element', () => {
+    const expected = [];
+    const tags = extractElementTags();
+    expect(tags).to.deep.equal(expected);
+  });
 
-);
+  it('Extract element tags when tags are defined', () => {
+    const expected = ['word1', 'word2', 'word3', 'word4'];
+    const element = document.createElement('amp-apester-media');
+    element.setAttribute('data-apester-tags', expected.join(','));
+    const tags = extractElementTags(element);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Extract element tags when tags are defined', () => {
+    const expected = ['word1', 'word2', 'word3', 'word4'];
+    const element = document.createElement('amp-apester-media');
+    element.setAttribute('data-apester-tags', expected.join(','));
+    const tags = extractElementTags(element);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Extract title works well with no dl json', () => {
+    const expected = [];
+    const tags = extratctTitle(document);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Extract title works well with dl json', () => {
+    const expected = ['Test', 'Apester', 'Units', 'here'];
+    const element = document.createElement('script');
+    element.setAttribute('type', 'application/ld+json');
+    const jsonDl = `{
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "author": {
+        "@type": "Person",
+        "name": "Bla Bla"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Apester"
+      },
+      "headline": "Test Apester Units is nt here",
+      "datePublished": "2018-03-28T19:24:00+02:00",
+      "dateModified": "2018-03-28T19:24:00+02:00"
+    }`;
+    element.text = jsonDl;
+    document.body.appendChild(element);
+    const tags = extratctTitle(document);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Extract title cuts', () => {
+    const expected = ['Test', 'Apester', 'Units', 'here', 'this'];
+    const element = document.createElement('script');
+    element.setAttribute('type', 'application/ld+json');
+    const jsonDl = `{
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "author": {
+        "@type": "Person",
+        "name": "Bla Bla"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Apester"
+      },
+      "headline": "Test Apester Units is nt here this not visable ",
+      "datePublished": "2018-03-28T19:24:00+02:00",
+      "dateModified": "2018-03-28T19:24:00+02:00"
+    }`;
+    element.text = jsonDl;
+    document.body.appendChild(element);
+    const tags = extratctTitle(document);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Extract title works with few jsonDl', () => {
+    const expected = ['Tag0', 'Tag1', 'Tag2'];
+    for (let i = 0; i < 3; i++) {
+      const element = document.createElement('script');
+      element.setAttribute('type', 'application/ld+json');
+      const jsonDl = `{
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "author": {
+          "@type": "Person",
+          "name": "Bla Bla"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Apester"
+        },
+        "headline": "Tag${i} ",
+        "datePublished": "2018-03-28T19:24:00+02:00",
+        "dateModified": "2018-03-28T19:24:00+02:00"
+      }`;
+      element.text = jsonDl;
+      document.body.appendChild(element);
+    }
+
+    const tags = extratctTitle(document);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Should return empty array if there is no meta tags', () => {
+    const expected = [];
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'keywords');
+    meta.setAttribute('content', '');
+    document.head.appendChild(meta);
+    const tags = extractArticleTags(document);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Should not return array with meta tags', () => {
+    const expected = [];
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'keywords');
+    meta.setAttribute('content', '');
+    document.head.appendChild(meta);
+    const tags = extractArticleTags(document);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Should return array with meta tags', () => {
+    const expected = ['this is', 'the', 'tag'];
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'keywords');
+    meta.setAttribute('content', 'this is, the, tag');
+    document.head.appendChild(meta);
+    const tags = extractArticleTags(document);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Should not extract title when there is meta keywords', () => {
+    const expected = ['sport', 'eddie jones', 'england rugby union team', 'argentina rugby union team', 'rugby union'];
+    const element = document.createElement('amp-apester-media');
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'keywords');
+    meta.setAttribute('content', 'sport,Eddie Jones,England Rugby Union Team,Argentina Rugby Union Team,Rugby Union');
+    document.head.appendChild(meta);
+
+    const scriptElement = document.createElement('script');
+    scriptElement.setAttribute('type', 'application/ld+json');
+    const jsonDl = `{
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "author": {
+        "@type": "Person",
+        "name": "Bla Bla"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Apester"
+      },
+      "headline": "Test Apester Units is nt here this not visable ",
+      "datePublished": "2018-03-28T19:24:00+02:00",
+      "dateModified": "2018-03-28T19:24:00+02:00"
+    }`;
+    scriptElement.text = jsonDl;
+    document.body.appendChild(scriptElement);
+
+    const tags = extractTags(document, element);
+    expect(tags).to.deep.equal(expected);
+  });
+
+  it('Should extract title when there is no meta keywords', () => {
+    const expected = ['test', 'apester', 'units'];
+    const element = document.createElement('amp-apester-media');
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'keywords');
+    meta.setAttribute('content', '');
+    document.head.appendChild(meta);
+
+    const scriptElement = document.createElement('script');
+    scriptElement.setAttribute('type', 'application/ld+json');
+    const jsonDl = `{
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "author": {
+        "@type": "Person",
+        "name": "Bla Bla"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Apester"
+      },
+      "headline": "Test Apester Units ",
+      "datePublished": "2018-03-28T19:24:00+02:00",
+      "dateModified": "2018-03-28T19:24:00+02:00"
+    }`;
+    scriptElement.text = jsonDl;
+    document.body.appendChild(scriptElement);
+
+    const tags = extractTags(document, element);
+    expect(tags).to.deep.equal(expected);
+  });
+});
