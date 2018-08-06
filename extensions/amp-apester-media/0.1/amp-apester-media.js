@@ -68,6 +68,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.seen_ = false;
     /** @private {?Element}  */
     this.iframe_ = null;
+    /** @private {?Element}  */
+    this.placeholder_ = null;
     /** @private {boolean}  */
     this.ready_ = false;
     /** @private {?number|undefined}  */
@@ -216,7 +218,12 @@ class AmpApesterMedia extends AMP.BaseElement {
         .fetchJson(url, {
           requireAmpResponseSourceOrigin: false,
         })
-        .then(res => res.json());
+        .then(res => {
+          if (res['status'] === 200) {
+            return res.json();
+          }
+          return res;
+        });
   }
 
   /** @param {string} id
@@ -288,6 +295,10 @@ class AmpApesterMedia extends AMP.BaseElement {
     const vsync = Services.vsyncFor(this.win);
     return this.queryMedia_().then(
         response => {
+          if (!response || response['status'] === 204) {
+            dev().error(TAG, 'Display', 'No Content for provided tag');
+            return this.unlayoutCallback();
+          }
           const payload = response['payload'];
           // If it's a playlist we choose a media randomly.
           // The response will be an array.
@@ -314,8 +325,7 @@ class AmpApesterMedia extends AMP.BaseElement {
               .then(() => {
                 return this.loadPromise(iframe).then(() => {
                   return vsync.mutatePromise(() => {
-                    this.iframe_.classList
-                        .add('i-amphtml-apester-iframe-ready');
+                    this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
                     if (media['campaignData']) {
                       this.iframe_.contentWindow./*OK*/ postMessage(
                           /** @type {JsonObject} */ ({
@@ -374,6 +384,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       transform: 'translate(-50%, -50%)',
     });
     placeholder.appendChild(image);
+    this.placeholder_ = placeholder;
     return placeholder;
   }
 
@@ -391,7 +402,11 @@ class AmpApesterMedia extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
-    return true; //Call layoutCallback again.
+    if (this.placeholder_) {
+      removeElement(this.placeholder_);
+      this.placeholder_ = null;
+    }
+    return false;
   }
 
   /**
