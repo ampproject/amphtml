@@ -127,9 +127,9 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
 
       if (child.tagName.toLowerCase() === 'div') {
-        if (child.hasAttribute('before')) {
+        if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
-        } else if (child.hasAttribute('after')) {
+        } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
         }
       }
@@ -300,8 +300,28 @@ export class AmpImageSlider extends AMP.BaseElement {
     const rightHintIcon = htmlFor(this.doc_)
     `<div class="amp-image-slider-hint-right-arrow"></div>`;
 
-    this.hint_.appendChild(leftHintIcon);
-    this.hint_.appendChild(rightHintIcon);
+    const leftBackground = htmlFor(this.doc_)
+    `<div class="i-amphtml-image-slider-hint-left-arrow-wrapper">
+    </div>`;
+    const rightBackground = htmlFor(this.doc_)
+    `<div class="i-amphtml-image-slider-hint-right-arrow-wrapper">
+    </div>`;
+    const isIE = Services.platformFor(this.win).isIe();
+    if (isIE) {
+      leftBackground.classList
+          .add('amp-image-slider-hint-arrow-background');
+      leftBackground.classList
+          .add('i-amphtml-image-slider-ie');
+      rightBackground.classList
+          .add('amp-image-slider-hint-arrow-background');
+      rightBackground.classList
+          .add('i-amphtml-image-slider-ie');
+    }
+    leftBackground.appendChild(leftHintIcon);
+    rightBackground.appendChild(rightHintIcon);
+    this.hint_.appendChild(leftBackground);
+    this.hint_.appendChild(rightBackground);
+
     this.hint_.classList.add('i-amphtml-image-slider-hint');
     this.bar_.appendChild(this.hint_);
   }
