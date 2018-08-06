@@ -929,7 +929,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraDeferred = new Deferred();
     const checkStillCurrent = this.verifyStillCurrent();
     // InitiateSraRequests resolves when all blocks have had their SRA
-    // responses returned such that sraDeferred being null indicates this
+    // responses returned such that sraDeferred being non-null indicates this
     // element was somehow not included so report.
     this.initiateSraRequests().then(() => {
       checkStillCurrent();
@@ -1037,9 +1037,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // Only contained invalid elements.
                 return;
               }
-              // Determine if more than one block for this element, if not do
-              // not set sra request promise which results in sending as non-SRA
-              // request (benefit is it allows direct cache method).
+              // If not within no recovery SRA experiment, determine if more
+              // than one block for this element, if not do not set sra request
+              // promise which results in sending as non-SRA request (benefit
+              // is it allows direct cache method).
               if (!noFallbackExp && typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
                 typeInstances[0].sraDeferred.resolve(null);
