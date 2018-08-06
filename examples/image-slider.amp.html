@@ -116,20 +116,20 @@
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
     </amp-image-slider>
 
-    <p>Labels with NO positioning rules specified (default to both top, left label to left, right label to right)</p>
+    <p>Labels with NO positioning rules specified (default to both top left)</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
 
     <p>Labels with positioning rules specified</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label left-label-center-xy">BEFORE</div>
-      <div after class="label right-label-center-xy">AFTER</div>
+      <div first class="label left-label-center-xy">BEFORE</div>
+      <div second class="label right-label-center-xy">AFTER</div>
     </amp-image-slider>
 
     <h1>Customizable Hints</h1>
@@ -138,8 +138,8 @@
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" disable-hint>
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
 
     <p>Reemerging hint (default to no interaction for 10s)</p>
@@ -147,8 +147,8 @@
         hint-reappear>
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
 
     <p>Reemerging hint (customized to no interaction for 2s)</p>
@@ -156,8 +156,8 @@
         hint-reappear hint-reappear-interval="2000">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
 
     <p>Instantly reemerging hint (customized to no interaction for 0.001s)</p>
@@ -165,8 +165,8 @@
         hint-reappear hint-reappear-interval="1">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
 
     <h1>Initial Percent</h1>
@@ -188,8 +188,8 @@
       <amp-image-slider id="observed" tabindex="0" layout="responsive" width="1024" height="600" disable-gesture>
         <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
         <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-        <div before class="label">BEFORE</div>
-        <div after class="label">AFTER</div>
+        <div first class="label">BEFORE</div>
+        <div second class="label">AFTER</div>
       </amp-image-slider>
     </div>
 
@@ -197,8 +197,8 @@
     <amp-image-slider id="seekable" tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
     <div class="flex">
       <button on="tap:seekable.seekTo(percent=0)">Click me to Seek to Left</button>
@@ -211,8 +211,8 @@
     <amp-image-slider tabindex="0" step-size="0.2" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
 
     <!--
@@ -221,8 +221,8 @@
     <amp-image-slider id="disableDemo" tabindex="11" layout="responsive" width="1024" height="600" [disable-gesture]="disableDemo.disabled">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
     <div class="flex">
       <button on="tap:AMP.setState({disableDemo: {disabled: false}})">Enable</button>
@@ -231,12 +231,12 @@
     </div>
 
     <p>Toggling disable-gesture with Hint Reappearing</p>
-    <amp-image-slider id="disableDemo1" tabindex="12" layout="responsive" width="1024" height="600" [disable-gesture]="disableDemo1.disabled">
+    <amp-image-slider id="disableDemo1" tabindex="12" layout="responsive" width="1024" height="600" [disable-gesture]="disableDemo1.disabled"
+        hint-reappear hint-reappear-interval="1000">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
-      <div hint hint-reappear hint-reappear-interval="1000"></div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
     <div class="flex">
       <button on="tap:AMP.setState({disableDemo1: {disabled: false}})">Enable</button>
@@ -248,8 +248,8 @@
     <amp-image-slider id="disableDemo2" tabindex="13" layout="responsive" width="1024" height="600" disable-hint [disable-gesture]="disableDemo2.disabled">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
     <div class="flex">
       <button on="tap:AMP.setState({disableDemo2: {disabled: false}})">Enable</button>
@@ -294,28 +294,28 @@
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
     </amp-image-slider>
 
-    <p>Labels with NO positioning rules specified (default to both top, left label to left, right label to right)</p>
+    <p>Labels with NO positioning rules specified (default to both top left)</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
 
     <p>Labels with positioning rules specified</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label left-label-center-xy">BEFORE</div>
-      <div after class="label right-label-center-xy">AFTER</div>
+      <div first class="label left-label-center-xy">BEFORE</div>
+      <div second class="label right-label-center-xy">AFTER</div>
     </amp-image-slider>
 
     <p>Has ARIA labels</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" aria-label="check out the following images">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill" alt="Mountain"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill" alt="Ocean"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
 
     <h1>Test lightbox overlay</h1>

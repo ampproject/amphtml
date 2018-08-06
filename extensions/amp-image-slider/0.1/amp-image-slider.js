@@ -127,9 +127,9 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
 
       if (child.tagName.toLowerCase() === 'div') {
-        if (child.hasAttribute('before')) {
+        if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
-        } else if (child.hasAttribute('after')) {
+        } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
         }
       }
@@ -241,19 +241,20 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.leftLabel_) {
       this.leftLabelWrapper_ = this.doc_.createElement('div');
       this.leftLabelWrapper_.classList
-          .add('i-amphtml-image-slider-left-label-wrapper');
-      this.leftLabel_.classList.add('i-amphtml-image-slider-left-label');
+          .add('i-amphtml-image-slider-label-wrapper');
       this.leftLabelWrapper_.appendChild(this.leftLabel_);
       this.leftMask_.appendChild(this.leftLabelWrapper_);
     }
 
     this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
-    this.rightAmpImage_.classList.add('i-amphtml-image-slider-image-on-top');
+    this.rightMask_.classList.add('i-amphtml-image-slider-push-right');
+    this.rightAmpImage_.classList.add('i-amphtml-image-slider-push-left');
     if (this.rightLabel_) {
       this.rightLabelWrapper_ = this.doc_.createElement('div');
       this.rightLabelWrapper_.classList
-          .add('i-amphtml-image-slider-right-label-wrapper');
-      this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
+          .add('i-amphtml-image-slider-label-wrapper');
+      this.rightLabelWrapper_.classList
+          .add('i-amphtml-image-slider-push-left');
       this.rightLabelWrapper_.appendChild(this.rightLabel_);
       this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
@@ -269,7 +270,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.bar_.appendChild(this.barStick_);
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
+    this.bar_.classList.add('i-amphtml-image-slider-push-right');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
+    this.barStick_.classList.add('i-amphtml-image-slider-push-left');
 
     this.container_.appendChild(this.bar_);
   }
@@ -303,6 +306,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.hint_.appendChild(leftHintIcon);
     this.hint_.appendChild(rightHintIcon);
     this.hint_.classList.add('i-amphtml-image-slider-hint');
+    this.hint_.classList.add('i-amphtml-image-slider-push-left');
     this.bar_.appendChild(this.hint_);
   }
 

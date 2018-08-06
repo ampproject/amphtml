@@ -45,14 +45,14 @@ This is an __EXPERIMENTAL__ component.
 
 `amp-image-slider` is required to have exactly 2 `amp-img`s as its children, with the first one becoming the image displaying on the left, and the second on the right.
 
-The slider could also take 2 optional `div`s for labels, which are used to add extra information that overlay on top of the images. The label on the left image requires the `before` attribute to be present, while the right labels requires the `after` attribute.
+The slider could also take 2 optional `div`s for labels, which are used to add extra information that overlay on top of the images. The label on the left image requires the `first` attribute to be present, while the right labels requires the `second` attribute. Custom classes could be added to adjust styling and position (using `top`, `right`, `bottom`, `left` properties). Notice that by default, both labels would show at the top left corner of images.
 
 ```html
 <amp-image-slider layout="responsive" width="100" height="200">
   <amp-img src="/green-apple.jpg" alt="A green apple"></amp-img>
   <amp-img src="/red-apple.jpg" alt="A red apple"></amp-img>
-  <div before>This apple is green</div>
-  <div after>This apple is red</div>
+  <div first>This apple is green</div>
+  <div second>This apple is red</div>
 </amp-image-slider>
 ```
 
