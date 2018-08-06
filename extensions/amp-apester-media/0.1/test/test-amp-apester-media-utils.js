@@ -57,7 +57,7 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
     const expected = ['Test', 'Apester', 'Units', 'here'];
     const element = document.createElement('script');
     element.setAttribute('type', 'application/ld+json');
-    const jsonDl = `{
+    const jsonLd = `{
       "@context": "https://schema.org",
       "@type": "NewsArticle",
       "author": {
@@ -72,7 +72,7 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
       "datePublished": "2018-03-28T19:24:00+02:00",
       "dateModified": "2018-03-28T19:24:00+02:00"
     }`;
-    element.text = jsonDl;
+    element.text = jsonLd;
     document.body.appendChild(element);
     const tags = extratctTitle(document);
     expect(tags).to.deep.equal(expected);
@@ -82,7 +82,7 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
     const expected = ['Test', 'Apester', 'Units', 'here', 'this'];
     const element = document.createElement('script');
     element.setAttribute('type', 'application/ld+json');
-    const jsonDl = `{
+    const jsonLd = `{
       "@context": "https://schema.org",
       "@type": "NewsArticle",
       "author": {
@@ -97,18 +97,18 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
       "datePublished": "2018-03-28T19:24:00+02:00",
       "dateModified": "2018-03-28T19:24:00+02:00"
     }`;
-    element.text = jsonDl;
+    element.text = jsonLd;
     document.body.appendChild(element);
     const tags = extratctTitle(document);
     expect(tags).to.deep.equal(expected);
   });
 
-  it('Extract title works with few jsonDl', () => {
+  it('Extract title works with few jsonLd', () => {
     const expected = ['Tag0', 'Tag1', 'Tag2'];
     for (let i = 0; i < 3; i++) {
       const element = document.createElement('script');
       element.setAttribute('type', 'application/ld+json');
-      const jsonDl = `{
+      const jsonLd = `{
         "@context": "https://schema.org",
         "@type": "NewsArticle",
         "author": {
@@ -123,7 +123,7 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
         "datePublished": "2018-03-28T19:24:00+02:00",
         "dateModified": "2018-03-28T19:24:00+02:00"
       }`;
-      element.text = jsonDl;
+      element.text = jsonLd;
       document.body.appendChild(element);
     }
 
@@ -171,7 +171,7 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
 
     const scriptElement = document.createElement('script');
     scriptElement.setAttribute('type', 'application/ld+json');
-    const jsonDl = `{
+    const jsonLd = `{
       "@context": "https://schema.org",
       "@type": "NewsArticle",
       "author": {
@@ -186,7 +186,7 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
       "datePublished": "2018-03-28T19:24:00+02:00",
       "dateModified": "2018-03-28T19:24:00+02:00"
     }`;
-    scriptElement.text = jsonDl;
+    scriptElement.text = jsonLd;
     document.body.appendChild(scriptElement);
 
     const tags = extractTags(document, element);
@@ -203,7 +203,7 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
 
     const scriptElement = document.createElement('script');
     scriptElement.setAttribute('type', 'application/ld+json');
-    const jsonDl = `{
+    const jsonLd = `{
       "@context": "https://schema.org",
       "@type": "NewsArticle",
       "author": {
@@ -218,7 +218,7 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
       "datePublished": "2018-03-28T19:24:00+02:00",
       "dateModified": "2018-03-28T19:24:00+02:00"
     }`;
-    scriptElement.text = jsonDl;
+    scriptElement.text = jsonLd;
     document.body.appendChild(scriptElement);
 
     const tags = extractTags(document, element);
