@@ -239,6 +239,23 @@ Causes `amp-list` to treat the returned result as if it were a single element ar
 
 Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
 
+By default, this will only trigger on refreshes that cause a network fetch. To reset on all refreshes, use `reset-on-refresh="always"`.
+
+#### binding (optional)
+
+Controls refreshing behavior of `amp-list` on pages that also use `amp-bind`. Specifically, controls whether or not to block render on the evaluation of bindings (bracket attributes e.g. `[text]`) in rendered `amp-list` children.
+
+We recommend using `binding="no"` or `binding="refresh"` for faster `amp-list` performance.
+
+- `binding="no"`: Never block render **(fastest)**.
+  - Use this on all `amp-list` elements that don't render bindings.
+- `binding="refresh"`: Don't block render on initial load **(faster)**.
+  - Use this on `amp-list` elements that do render bindings.
+- `binding="always"`: Always block render **(slow)**.
+  - Only use this when it's not possible to server-side render the content displayed by the `amp-list.`
+
+If `binding` attribute is not provided, default is `always`.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
