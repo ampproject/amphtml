@@ -177,7 +177,17 @@ invocation:
       %}
   | expr '.' NAME '(' arrow_function ')'
       %{
-        $$ = new AstNode(AstNodeType.INVOCATION, [$expr, $arrow_function], $NAME);
+        {
+          const array = new AstNode(AstNodeType.ARRAY, [$arrow_function]);
+          $$ = new AstNode(AstNodeType.INVOCATION, [$expr, array], $NAME);
+        }
+      %}
+  | expr '.' NAME '(' arrow_function ',' expr ')'
+      %{
+        {
+          const array = new AstNode(AstNodeType.ARRAY, [$arrow_function, $expr2]);
+          $$ = new AstNode(AstNodeType.INVOCATION, [$expr1, array], $NAME);
+        }
       %}
   ;
 
@@ -253,9 +263,9 @@ variable:
 
 literal:
     primitive
-      ${
+      %{
         $$ = $1;
-      }
+      %}
   | object_literal
       %{
         $$ = $1;
