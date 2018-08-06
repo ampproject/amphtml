@@ -32,17 +32,17 @@ export function fetchDocument(win, input, opt_init) {
   init = setupAMPCors(win, input, init);
   input = setupInput(win, input, init);
   const ampdocService = Services.ampdocServiceFor(win);
-  const ampdocSingle_ =
+  const ampdocSingle =
   ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   init.responseType = 'document';
-  return getViewerInterceptResponse(win, ampdocSingle_, input, init)
+  return getViewerInterceptResponse(win, ampdocSingle, input, init)
       .then(interceptorResponse => {
         if (interceptorResponse) {
           return interceptorResponse.text().then(body =>
             new DOMParser().parseFromString(body, 'text/html')
           );
         }
-        return xhrRequest_(input, init).then(({xhr, response}) => {
+        return xhrRequest(input, init).then(({xhr, response}) => {
           verifyAmpCORSHeaders(win, response, init);
           return xhr.responseXML;
         });
@@ -56,7 +56,7 @@ export function fetchDocument(win, input, opt_init) {
  * @param {!./utils/xhr-utils.FetchInitDef} init
  * @private
  */
-function xhrRequest_(input, init) {
+function xhrRequest(input, init) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open(init.method || 'GET', input, true);
@@ -64,11 +64,10 @@ function xhrRequest_(input, init) {
     xhr.responseType = 'document';
     // Incoming headers are in fetch format,
     // so we need to convert them into xhr.
-    if (init.headers) {
-      for (const header in init.headers) {
-        xhr.setRequestHeader(header, init.headers[header]);
-      }
+    for (const header in init.headers) {
+      xhr.setRequestHeader(header, init.headers[header]);
     }
+
     xhr.onreadystatechange = () => {
       if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
         return;
@@ -91,12 +90,9 @@ function xhrRequest_(input, init) {
         const body = 'response' in xhr
           ? xhr.response : xhr.responseText;
         const response = new Response(/** @type {string} */ (body || ''), /** @type {!ResponseInit} */ (options));
-        assertSuccess(response).then(response => {
-          resolve({
-            response,
-            xhr,
-          });
-        }).catch(e => reject(e));
+        const promise = assertSuccess(response)
+            .then(response => ({response, xhr}));
+        resolve(promise);
       }
     };
     xhr.onerror = () => {
