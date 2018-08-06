@@ -25,10 +25,6 @@ amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
   overflow: hidden !important;
 }
 
-[dir=rtl] {
-  text-align: right !important;
-}
-
 amp-consent {
   position: absolute !important;
   top: 0 !important;

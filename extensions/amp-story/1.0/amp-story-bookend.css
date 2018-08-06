@@ -30,7 +30,7 @@
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-[dir=rtl] {
+[dir=rtl].i-amphtml-story-bookend {
   text-align: right !important;
 }
 
@@ -128,6 +128,11 @@
   padding-right: 10px !important;
 }
 
+[dir=rtl] .i-amphtml-story-bookend-article-text-content {
+  padding-right: 0px !important;
+  padding-left: 10px !important;
+}
+
 .i-amphtml-story-bookend-article-heading,
 .i-amphtml-story-bookend-text,
 .i-amphtml-story-bookend-consent-button {
@@ -154,8 +159,6 @@
   text-decoration: none !important;
   color: inherit !important;
   overflow: hidden !important;
-  flex: 1 0 320px !important;
-  min-width: 33% !important;
 }
 
 @media (min-width: 640px) {
@@ -166,14 +169,20 @@
   }
 
   .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
-    /** Leave some horizontal space between cards. */
-    max-width: calc(50%-12px) !important;
+    /**
+    * 12px to match 24px margin-bottom with margin between 2 elements.
+    */
+    width: calc(50% - 12px) !important;
   }
 }
 
 @media (min-width: 960px) {
   .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
-    max-width: 33% !important;
+    /**
+    * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
+    * 16px = (24px * 2) / 3
+    */
+    width: calc(33% - 16px) !important;
   }
 }
 
@@ -254,7 +263,7 @@
 }
 
 .i-amphtml-story-bookend-replay {
-  margin: 0 32px !important;
+  margin: 0 24px !important;
   overflow: hidden !important;
   display: flex !important;
   max-height: 120px !important;
@@ -285,8 +294,8 @@
 }
 
 .i-amphtml-story-bookend-component-set {
-  margin: 0 32px !important;
-  margin-bottom: 32px !important;
+  margin: 0 24px !important;
+  margin-bottom: 24px !important;
 }
 
 .i-amphtml-story-bookend-cta-link-wrapper,
@@ -296,7 +305,6 @@
   box-sizing: border-box !important;
   color: inherit !important;
   overflow: hidden !important;
-  flex: 1 0 320px !important;
   justify-content: space-between !important;
 }
 
@@ -395,14 +403,19 @@
 
 @media (min-width: 952px) {
   [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
-    /** Leave some horizontal space between cards. */
-    max-width: calc(50%-12px) !important;
+    /**
+    * 12px to match 24px margin-bottom with margin between 2 elements.
+    */
+    width: calc(50% - 12px) !important;
   }
 }
 
 @media (min-width: 1272px) {
   [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
-    /** Leave some horizontal space between cards. */
-    max-width: calc(33%-12px) !important;
+    /**
+    * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
+    * 16px = (24px * 2) / 3
+    */
+    width: calc(33% - 16px) !important;
   }
 }

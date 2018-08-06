@@ -101,8 +101,8 @@ amp-story-page[active] .i-amphtml-story-ad-link {
 }
 
 [dir=rtl] .i-amphtml-story-ad-attribution {
-  margin-left:0px !important;
-  margin-right:16px !important;
+  margin-left: 0px !important;
+  margin-right: 16px !important;
 }
 
 amp-story[ad-showing][desktop] .i-amphtml-story-ad-attribution {
