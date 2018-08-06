@@ -70,12 +70,16 @@ export class BaseCarousel extends AMP.BaseElement {
    * @param {string} className
    * @param {function()} onInteraction
    */
-  buildButton(className, onInteraction) {
+  buildButton(className, onInteraction, ariaName) {
     const button = this.element.ownerDocument.createElement('div');
     button.tabIndex = 0;
     button.classList.add('amp-carousel-button');
     button.classList.add(className);
     button.setAttribute('role', 'button');
+    const icon = this.element.ownerDocument.createElement('div');
+    icon.classList.add('amp-carousel-button-icon');
+    button.appendChild(icon);
+
     button.onkeydown = event => {
       if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
         if (!event.defaultPrevented) {
@@ -85,6 +89,14 @@ export class BaseCarousel extends AMP.BaseElement {
       }
     };
     button.onclick = onInteraction;
+    if (this.element.hasAttribute(`data-${ariaName}-button-aria-label`)) {
+      button.setAttribute('aria-label',
+          this.element.getAttribute(`data-${ariaName}-button-aria-label`));
+     } else {
+      const upperCaseName = ariaName[0].toUpperCase() + ariaName.slice(1);
+      button.setAttribute('aria-label',
+          `${upperCaseName} item in carousel`);
+     }
 
     return button;
   }
@@ -95,12 +107,12 @@ export class BaseCarousel extends AMP.BaseElement {
   buildButtons() {
     this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
       this.interactionPrev();
-    });
+    }, 'previous');
     this.element.appendChild(this.prevButton_);
 
     this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
-    });
+    }, 'next');
     this.element.appendChild(this.nextButton_);
   }
 
