@@ -38,6 +38,7 @@ import {
   resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
 import {
@@ -1415,20 +1416,72 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       });
 
       describe('#setPageLevelExperiments', () => {
-
+        let randomlySelectUnsetExperimentsStub;
+        beforeEach(() => {
+          randomlySelectUnsetExperimentsStub =
+            sandbox.stub(impl, 'randomlySelectUnsetExperiments_');
+          sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
+          sandbox.stub(impl, 'getAmpDoc').returns({});
+          sandbox.stub(Services, 'viewerForDoc').returns(
+              {whenFirstVisible: () => new Deferred().promise});
+        });
         afterEach(() => {
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
         });
 
         it('should set invalid origin fix experiment if on canonical', () => {
-          impl.setPageLevelExperiments('');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
           expect(impl.experimentIds.includes('21060933')).to.be.true;
         });
 
         it('should not set invalid origin fix if exp on', () => {
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
-          impl.setPageLevelExperiments('');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
           expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
+
+        it('should select SRA experiments', () => {
+          randomlySelectUnsetExperimentsStub.returns(
+              {doubleclickSraExp: '117152667'});
+          impl.buildCallback();
+          expect(impl.experimentIds.includes('117152667')).to.be.true;
+          expect(impl.useSra).to.be.true;
+        });
+
+        describe('should properly limit SRA traffic', () => {
+          let experimentInfoMap;
+          beforeEach(() => {
+            randomlySelectUnsetExperimentsStub.returns({});
+            impl.setPageLevelExperiments();
+            // args format is call array followed by parameter array so expect
+            // first call, first param.
+            experimentInfoMap = randomlySelectUnsetExperimentsStub
+                .args[0][0]['doubleclickSraExp'];
+            expect(experimentInfoMap).to.be.ok;
+            expect(impl.useSra).to.be.false;
+          });
+
+          it('should allow by default', () =>
+            expect(experimentInfoMap.isTrafficEligible()).to.be.true);
+
+          it('should not allow if refresh meta', () => {
+            doc.head.appendChild(createElementWithAttributes(
+                doc, 'meta', {name: 'amp-ad-enable-refresh'}));
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
+
+          it('should not allow if sra meta', () => {
+            doc.head.appendChild(createElementWithAttributes(
+                doc, 'meta', {name: 'amp-ad-doubleclick-sra'}));
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
+
+          it('should not allow if block level refresh', () => {
+            impl.element.setAttribute('data-enable-refresh', '');
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
         });
       });
 
