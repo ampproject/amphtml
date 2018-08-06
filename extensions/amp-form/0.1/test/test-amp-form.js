@@ -1239,7 +1239,7 @@ describes.repeated('', {
 
     describe('User Validity', () => {
       it('should manage valid/invalid on input/fieldset/form on submit', () => {
-        expectAsyncConsoleError(/Form submission failed.*/);
+        expectAsyncConsoleError(/Form submission failed/);
         setReportValiditySupportedForTesting(false);
         return getAmpForm(getForm(/*button1*/ true)).then(ampForm => {
           const form = ampForm.form_;
@@ -1478,7 +1478,7 @@ describes.repeated('', {
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
-      expectAsyncConsoleError(/Form submission failed.*/);
+      expectAsyncConsoleError(/Form submission failed/);
       this.timeout(3000);
       return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;

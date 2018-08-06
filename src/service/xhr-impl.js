@@ -47,6 +47,15 @@ import {isFormDataWrapper} from '../form-data-wrapper';
  */
 export let FetchInitJsonDef;
 
+/**
+ * @typedef {{
+ *  xhrUrl: string,
+ *  fetchOpt: !FetchInitJsonDef
+ * }}
+ */
+export let FetchData;
+
+
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
 
