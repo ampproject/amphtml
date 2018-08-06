@@ -59,8 +59,6 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
       };
     });
 
-    afterEach(() => sandbox.reset());
-
     it('should not register submit listener if amp-form is not registered.',
         () => {
           const script = document.createElement('script');

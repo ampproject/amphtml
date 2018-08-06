@@ -208,7 +208,7 @@ export function extensionScriptsInNode(head) {
  * installation.
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @param {string} extensionId
- * return {!Promise<boolean>}
+ * @return {boolean}
  */
 export function isExtensionScriptInNode(head, extensionId) {
   return extensionScriptsInNode(head).includes(extensionId);
@@ -233,7 +233,7 @@ function waitForExtensionIfPresent(win, extension, head) {
 
   // TODO(jpettitt) investigate registerExtension to short circuit
   // the dom call in extensionScriptsInNode()
-  if (!isExtensionScriptInNode(head)) {
+  if (!isExtensionScriptInNode(head, extension)) {
     return Promise.resolve();
   }
 
