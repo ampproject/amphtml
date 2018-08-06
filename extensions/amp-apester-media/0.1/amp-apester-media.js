@@ -295,7 +295,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     const vsync = Services.vsyncFor(this.win);
     return this.queryMedia_().then(
         response => {
-          if (!response || response.status === 204) {
+          if (!response || response['status'] === 204) {
             dev().error(TAG, 'Display', 'No Content for provided tag');
             return this.unlayoutCallback();
           }
