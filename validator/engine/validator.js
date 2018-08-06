@@ -526,6 +526,11 @@ class ParsedTagSpec {
      * @type {boolean}
      * @private
      */
+    this.isTypeJson_ = false;
+    /**
+     * @type {boolean}
+     * @private
+     */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
     /**
      * ParsedAttributes keyed by name.
@@ -647,6 +652,14 @@ class ParsedTagSpec {
       if (spec.implicit) {
         this.implicitAttrspecs_.push(attrId);
       }
+      if (spec.name === 'type' && spec.valueCasei.length > 0) {
+        for (const v of spec.valueCasei) {
+          if ('application/json' === v) {
+            this.isTypeJson_ = true;
+            break;
+          }
+        }
+      }
       if (spec.valueUrl) {
         this.containsUrl_ = true;
       }
@@ -704,6 +717,15 @@ class ParsedTagSpec {
     if (this.hasReferencePoints())
     {return new ReferencePointMatcher(rules, this.referencePoints_, lineCol);}
     return null;
+  }
+
+  /**
+   * Returns true if this tagSpec contains an attribute of name "type" and value
+   * "application/json".
+   * @return {boolean}
+   */
+  isTypeJson() {
+    return this.isTypeJson_;
   }
 
   /**
@@ -1550,6 +1572,16 @@ class TagStack {
    */
   parentHasChildWithLastChildRule() {
     return this.parentLastChildTagName().length > 0;
+  }
+
+  /**
+   * @return {boolean} true if this within <script type=application/json>. Else
+   * false.
+   */
+  isScriptTypeJsonChild() {
+    return (this.parentStackEntry_().tagName === 'SCRIPT') &&
+        (this.parentStackEntry_().tagSpec !== null) &&
+        this.parentStackEntry_().tagSpec.isTypeJson();
   }
 
   /**
@@ -5134,6 +5166,17 @@ amp.validator.ValidationHandler =
         if (this.context_.getTagStack().isStyleAmpCustomChild()) {
           this.context_.addStyleAmpCustomByteSize(byteLength(text));
         }
+        // Validate that JSON can be parsed.
+        if (this.context_.getTagStack().isScriptTypeJsonChild()) {
+          try {
+            JSON.parse(text);
+          } catch (e) {
+            this.context_.addWarning(
+                amp.validator.ValidationError.Code.INVALID_JSON_CDATA,
+                this.context_.getLineCol(), /* params */[], '',
+                this.validationResult_);
+          }
+        }
         const matcher = this.context_.getTagStack().cdataMatcher();
         if (matcher !== null)
         {matcher.match(text, this.context_, this.validationResult_);}
@@ -5486,7 +5529,9 @@ amp.validator.categorizeError = function(error) {
   if (error.code ===
           amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST ||
       error.code ===
-          amp.validator.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED) {
+          amp.validator.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED ||
+      error.code ===
+          amp.validator.ValidationError.Code.INVALID_JSON_CDATA) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
 

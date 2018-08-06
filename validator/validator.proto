@@ -635,7 +635,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 106
+  // NEXT AVAILABLE TAG: 107
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -670,6 +670,7 @@ message ValidationError {
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
+    INVALID_JSON_CDATA = 106;
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
     MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE = 14;

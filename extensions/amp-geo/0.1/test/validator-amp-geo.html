@@ -39,6 +39,12 @@
       }
     }
     </script>
+    <!-- Invalid: AMP Runtime can't parse json with comments. -->
+    <script type="application/json">
+    {
+      // Comment, should break parsing and result in a warning.
+    }
+    </script>
   </amp-geo>
 </body>
 </html>

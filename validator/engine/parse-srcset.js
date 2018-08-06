@@ -95,7 +95,6 @@ parse_srcset.parseSrcset = function(srcset) {
   const seenWidthOrPixelDensity = new goog.structs.Set();
   /** @type {!parse_srcset.SrcsetParsingResult} */
   const result = new parse_srcset.SrcsetParsingResult();
-  /** @type {!Array<parse_srcset.SrcsetSourceDef>} */
   const {srcsetImages} = result;
   let source;
   while (source = imageCandidateRegex.exec(srcset)) {
