@@ -46,6 +46,7 @@ import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
 import {once} from '../../utils/function';
 import {px, resetStyles, setImportantStyles, translate} from '../../style';
+import {urls} from '../../config';
 
 
 /** @private @const {number} */
@@ -479,7 +480,7 @@ export class VideoDocking {
   register(video) {
     user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
         '`video-dock` experiment must be on to use `dock` on `amp-video`: ' +
-        'https://cdn.ampproject.org/experiments.html');
+        `${urls.cdn}/experiments.html`);
 
     this.install_();
 
