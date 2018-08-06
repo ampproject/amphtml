@@ -34,13 +34,25 @@
   <!-- Valid: element with responsive layout -->
   <amp-google-document-embed src="https://www.example.com/document.pdf" width="800" height="600" layout="responsive">
   </amp-google-document-embed>
+  <!-- Valid: element with src and bind [src] -->
+  <amp-google-document-embed src="https://www.example.com/document.pdf" [src]="'https://www.example.com/document.pdf'" width="800" height="600" layout="responsive">
+  </amp-google-document-embed>
+  <!-- Valid: element with title -->
+  <amp-google-document-embed src="https://www.example.com/document.pdf" title="One great doc" width="800" height="600" layout="responsive">
+  </amp-google-document-embed>
+  <!-- Valid: element with bind [title] -->
+  <amp-google-document-embed src="https://www.example.com/document.pdf" title="One great doc" [title]="'Another great doc'" width="800" height="600" layout="responsive">
+  </amp-google-document-embed>
   <!-- Invalid: element without src -->
   <amp-google-document-embed width="800" height="600">
   </amp-google-document-embed>
   <!-- Invalid: element with empty src -->
   <amp-google-document-embed src="" width="800" height="600">
   </amp-google-document-embed>
-  <!-- Inalid: element with http src -->
+  <!-- Invalid: element with empty src but bind [src] -->
+  <amp-google-document-embed src="" [src]="'https://www.example.com/document.pdf'" width="800" height="600">
+  </amp-google-document-embed>
+  <!-- Invalid: element with http src -->
   <amp-google-document-embed src="http://www.example.com/document.pdf" width="800" height="600">
   </amp-google-document-embed>
   <!-- Invalid: element with relative src -->
