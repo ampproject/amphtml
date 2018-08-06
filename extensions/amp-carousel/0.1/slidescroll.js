@@ -723,7 +723,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
-    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
+    const curve = bezierCurve(0.8, 0, 0.6, 1); // ease-in
     const duration = 80;
     const slidesContainer = dev().assertElement(this.slidesContainer_);
     return Animation.animate(slidesContainer, pos => {
