@@ -78,6 +78,12 @@ export class BaseCarousel extends AMP.BaseElement {
     button.setAttribute('role', 'button');
     const icon = this.element.ownerDocument.createElement('div');
     icon.classList.add('amp-carousel-button-icon');
+    const isIE = Services.platformFor(this.win).isIe();
+    console.log(isIE);
+    if (isIE) {
+      button.classList
+          .add('amp-carousel-button-background');
+    }
     button.appendChild(icon);
 
     button.onkeydown = event => {
@@ -92,11 +98,11 @@ export class BaseCarousel extends AMP.BaseElement {
     if (this.element.hasAttribute(`data-${ariaName}-button-aria-label`)) {
       button.setAttribute('aria-label',
           this.element.getAttribute(`data-${ariaName}-button-aria-label`));
-     } else {
+    } else {
       const upperCaseName = ariaName[0].toUpperCase() + ariaName.slice(1);
       button.setAttribute('aria-label',
           `${upperCaseName} item in carousel`);
-     }
+    }
 
     return button;
   }

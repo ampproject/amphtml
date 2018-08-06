@@ -79,6 +79,13 @@ amp-carousel[controls] .amp-carousel-button,
 
 }
 
+.amp-carousel-button-background {
+  background-color: rgba(0, 0, 0, .5);
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  transform: translateY(-50%);  
+}
+
 .i-amphtml-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
   animation: i-amphtml-carousel-hint 1s ease-in 3s 1 normal both;
 }
