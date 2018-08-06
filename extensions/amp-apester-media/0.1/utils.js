@@ -88,7 +88,9 @@ export function extractElementTags(element) {
  * @return {!Array<string>}
  */
 export function extratctTitle(root) {
-  const scriptTags = root.querySelectorAll('script[type="application/ld+json"]');
+  const scriptTags = root.querySelectorAll(
+      'script[type="application/ld+json"]'
+  );
   return Array.prototype.map
       .call(scriptTags, scriptTag => {
         if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
@@ -114,7 +116,9 @@ export function extratctTitle(root) {
  * @param {*} root
  */
 export function extractArticleTags(root) {
-  const metaKeywords = root.querySelector('meta[name="keywords"]') || {content: ''};
+  const metaKeywords = root.querySelector('meta[name="keywords"]') || {
+    content: '',
+  };
   return metaKeywords.content
       .trim()
       .split(',')
@@ -124,6 +128,7 @@ export function extractArticleTags(root) {
 
 /**
  * Extracts tags from a given element and document.
+ * @param {!Node} doc
  * @param {!Element} element
  * @return {Array<string>}
  */
@@ -131,9 +136,13 @@ export function extractTags(doc, element) {
   const root = doc.getRootNode();
   const extractedTags = extractElementTags(element) || [];
   const articleMetaTags = extractArticleTags(root);
-  const concatedTags = extractedTags.concat(articleMetaTags.length ? articleMetaTags : extratctTitle(root) || []);
+  const concatedTags = extractedTags.concat(
+      articleMetaTags.length ? articleMetaTags : extratctTitle(root) || []
+  );
   const loweredCase = concatedTags.map(tag => tag.toLowerCase().trim());
-  const noDuplication = loweredCase.filter((item, pos, self) => self.indexOf(item) === pos);
+  const noDuplication = loweredCase.filter(
+      (item, pos, self) => self.indexOf(item) === pos
+  );
   return noDuplication;
 }
 

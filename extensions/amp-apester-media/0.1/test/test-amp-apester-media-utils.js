@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {extractArticleTags, extractElementTags, extractTags, extratctTitle} from '../utils';
+import {
+  extractArticleTags,
+  extractElementTags,
+  extractTags,
+  extratctTitle,
+} from '../utils';
 
 describes.realWin('amp-apester-media-utils', {}, unused => {
   // let win;
@@ -162,11 +167,21 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
   });
 
   it('Should not extract title when there is meta keywords', () => {
-    const expected = ['sport', 'eddie jones', 'england rugby union team', 'argentina rugby union team', 'rugby union'];
+    const expected = [
+      'sport',
+      'eddie jones',
+      'england rugby union team',
+      'argentina rugby union team',
+      'rugby union',
+    ];
     const element = document.createElement('amp-apester-media');
     const meta = document.createElement('meta');
     meta.setAttribute('name', 'keywords');
-    meta.setAttribute('content', 'sport,Eddie Jones,England Rugby Union Team,Argentina Rugby Union Team,Rugby Union');
+    meta.setAttribute(
+        'content',
+        'sport,Eddie Jones,England Rugby Union Team,' +
+        'Argentina Rugby Union Team,Rugby Union'
+    );
     document.head.appendChild(meta);
 
     const scriptElement = document.createElement('script');

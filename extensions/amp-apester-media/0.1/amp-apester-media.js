@@ -19,7 +19,13 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {extractTags, getPlatform, registerEvent, setFullscreenOff, setFullscreenOn} from './utils';
+import {
+  extractTags,
+  getPlatform,
+  registerEvent,
+  setFullscreenOff,
+  setFullscreenOn,
+} from './utils';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 
@@ -127,8 +133,12 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.height_ = getLengthNumeral(height);
     this.random_ = false;
     this.mediaAttribute_ = user().assert(
-        this.element.getAttribute('data-apester-media-id') || (this.random_ = this.element.getAttribute('data-apester-channel-token')),
-        'Either the data-apester-media-id or the data-apester-channel-token ' + 'attributes must be specified for <amp-apester-media> %s',
+        this.element.getAttribute('data-apester-media-id') ||
+        (this.random_ = this.element.getAttribute(
+            'data-apester-channel-token'
+        )),
+        'Either the data-apester-media-id or the data-apester-channel-token' +
+        'attributes must be specified for <amp-apester-media> %s',
         this.element
     );
     this.embedOptions_ = {
@@ -136,7 +146,9 @@ class AmpApesterMedia extends AMP.BaseElement {
       idOrToken: this.mediaAttribute_,
       inative: this.element.getAttribute('data-apester-inative') === 'true',
       fallback: this.element.getAttribute('data-apester-fallback'),
-      distributionChannelId: this.element.getAttribute('data-apester-channel-id'),
+      distributionChannelId: this.element.getAttribute(
+          'data-apester-channel-id'
+      ),
       renderer: true,
       tags: extractTags(this.getAmpDoc(), this.element),
     };
@@ -161,8 +173,17 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {string}
    **/
   buildUrl_() {
-    const {idOrToken, playlist, inative, distributionChannelId, fallback, tags} = this.embedOptions_;
-    const encodedMediaAttribute = encodeURIComponent(dev().assertString(this.mediaAttribute_));
+    const {
+      idOrToken,
+      playlist,
+      inative,
+      distributionChannelId,
+      fallback,
+      tags,
+    } = this.embedOptions_;
+    const encodedMediaAttribute = encodeURIComponent(
+        dev().assertString(this.mediaAttribute_)
+    );
     let suffix = '';
     const queryParams = dict();
     queryParams['renderer'] = false;
@@ -203,12 +224,19 @@ class AmpApesterMedia extends AMP.BaseElement {
   constructUrlFromMedia_(id) {
     const queryParams = dict();
     queryParams['channelId'] = this.embedOptions_.distributionChannelId;
-    queryParams['type'] = this.embedOptions_.playlist ? 'playlist' : 'editorial';
+    queryParams['type'] = this.embedOptions_.playlist
+      ? 'playlist'
+      : 'editorial';
     queryParams['platform'] = getPlatform();
-    queryParams['cannonicalUrl'] = Services.documentInfoForDoc(this.element).canonicalUrl;
+    queryParams['cannonicalUrl'] = Services.documentInfoForDoc(
+        this.element
+    ).canonicalUrl;
     queryParams['sdk'] = 'amp';
 
-    return addParamsToUrl(`${this.rendererBaseUrl_}/interaction/${encodeURIComponent(id)}`, queryParams);
+    return addParamsToUrl(
+        `${this.rendererBaseUrl_}/interaction/${encodeURIComponent(id)}`,
+        queryParams
+    );
   }
 
   /** @param {string} src
@@ -253,8 +281,12 @@ class AmpApesterMedia extends AMP.BaseElement {
     const svg = this.element.ownerDocument.createElement('svg');
     const defs = this.element.ownerDocument.createElement('defs');
     const filter = this.element.ownerDocument.createElement('filter');
-    const feGaussianBlur = this.element.ownerDocument.createElement('feGaussianBlur');
-    const feColorMatrix = this.element.ownerDocument.createElement('feColorMatrix');
+    const feGaussianBlur = this.element.ownerDocument.createElement(
+        'feGaussianBlur'
+    );
+    const feColorMatrix = this.element.ownerDocument.createElement(
+        'feColorMatrix'
+    );
     const feBlend = this.element.ownerDocument.createElement('feBlend');
     svg.setAttribute('version', '1.1');
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -264,7 +296,10 @@ class AmpApesterMedia extends AMP.BaseElement {
     feGaussianBlur.setAttribute('stdDeviation', '10');
     feColorMatrix.setAttribute('in', 'blur');
     feColorMatrix.setAttribute('mode', 'matrix');
-    feColorMatrix.setAttribute('values', '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7');
+    feColorMatrix.setAttribute(
+        'values',
+        '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7'
+    );
     feColorMatrix.setAttribute('result', 'amp-apester-goo');
     feBlend.setAttribute('in2', 'amp-apester-goo');
     feBlend.setAttribute('in', 'SourceGraphic');
@@ -304,7 +339,10 @@ class AmpApesterMedia extends AMP.BaseElement {
             : payload);
           const src = this.constructUrlFromMedia_(media['interactionId']);
           const iframe = this.constructIframe_(src);
-          this.intersectionObserverApi_ = new IntersectionObserverApi(this, iframe);
+          this.intersectionObserverApi_ = new IntersectionObserverApi(
+              this,
+              iframe
+          );
 
           this.mediaId_ = media['interactionId'];
           this.iframe_ = iframe;
@@ -319,7 +357,8 @@ class AmpApesterMedia extends AMP.BaseElement {
               .then(() => {
                 return this.loadPromise(iframe).then(() => {
                   return vsync.mutatePromise(() => {
-                    this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
+                    this.iframe_.classList
+                        .add('i-amphtml-apester-iframe-ready');
                     if (media['campaignData']) {
                       this.iframe_.contentWindow./*OK*/ postMessage(
                           /** @type {JsonObject} */ ({
@@ -362,7 +401,10 @@ class AmpApesterMedia extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.element.ownerDocument.createElement('div');
     if (this.element.hasAttribute('aria-label')) {
-      placeholder.setAttribute('aria-label', 'Loading - ' + this.element.getAttribute('aria-label'));
+      placeholder.setAttribute(
+          'aria-label',
+          'Loading - ' + this.element.getAttribute('aria-label')
+      );
     } else {
       placeholder.setAttribute('aria-label', 'Loading video');
     }
