@@ -146,7 +146,7 @@ export class AmpConsent extends AMP.BaseElement {
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
             .then(manager => {
               this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (
-                  manager);
+                manager);
               this.generateDefaultPolicy_();
               const policyKeys = Object.keys(this.policyConfig_);
               for (let i = 0; i < policyKeys.length; i++) {
@@ -159,14 +159,14 @@ export class AmpConsent extends AMP.BaseElement {
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_STATE_MANAGER)
             .then(manager => {
               this.consentStateManager_ = /** @type {!ConsentStateManager} */ (
-                  manager);
+                manager);
             });
 
     const notificationUiManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), NOTIFICATION_UI_MANAGER)
             .then(manager => {
               this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (
-                  manager);
+                manager);
             });
 
     Promise.all([
@@ -310,7 +310,7 @@ export class AmpConsent extends AMP.BaseElement {
       setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
     });
     const displayInstance = /** @type {string} */ (
-        this.currentDisplayInstance_);
+      this.currentDisplayInstance_);
     if (this.dialogResolver_[displayInstance]) {
       this.dialogResolver_[displayInstance]();
       this.dialogResolver_[displayInstance] = null;
