@@ -32,6 +32,12 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.domain_ = '';
 
+    /** @private {string} */
+    this.siteId_ = '';
+
+    /** @private {string} */
+    this.playerId_ = '';
+
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
   }
@@ -65,31 +71,31 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
         this.element.getAttribute('data-domain'),
         'The data-domain attribute is required for <amp-springboard-player> %s',
         this.element);
+    this.siteId_ = user().assert(
+        this.element.getAttribute('data-site-id'),
+        'The data-site-id attribute is required for' +
+        '<amp-springboard-player> %s',
+        this.element);
+    this.playerId_ = user().assert(
+        this.element.getAttribute('data-player-id'),
+        'The data-player-id attribute is required for' +
+        '<amp-springboard-player> %s',
+        this.element);
   }
 
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    const siteId = user().assert(
-        this.element.getAttribute('data-site-id'),
-        'The data-site-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
-    const playerId = user().assert(
-        this.element.getAttribute('data-player-id'),
-        'The data-player-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
     const items = this.element.getAttribute('data-items') || '10';
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.id = playerId + '_' + this.contentId_;
+    iframe.id = this.playerId_ + '_' + this.contentId_;
     iframe.src = 'https://cms.springboardplatform.com/embed_iframe/' +
-        encodeURIComponent(siteId) + '/' +
+        encodeURIComponent(this.siteId_) + '/' +
         encodeURIComponent(this.mode_) +
         '/' + encodeURIComponent(this.contentId_) + '/' +
-        encodeURIComponent(playerId) + '/' +
+        encodeURIComponent(this.playerId_) + '/' +
         encodeURIComponent(this.domain_) +
         '/' + encodeURIComponent(items);
     this.applyFillContent(iframe);

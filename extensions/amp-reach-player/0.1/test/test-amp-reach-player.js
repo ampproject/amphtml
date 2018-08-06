@@ -40,7 +40,8 @@ describes.realWin('amp-reach-player', {
       reach.setAttribute('layout', 'responsive');
     }
     doc.body.appendChild(reach);
-    return reach.build().then(() => reach.layoutCallback()).then(() => reach);
+    return reach.build().then(() => { reach.layoutCallback(); })
+        .then(() => reach);
   }
 
   it('renders', () => {
