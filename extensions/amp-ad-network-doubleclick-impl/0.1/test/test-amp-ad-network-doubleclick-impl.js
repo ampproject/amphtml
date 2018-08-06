@@ -1431,21 +1431,21 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         });
 
         it('should set invalid origin fix experiment if on canonical', () => {
-          randomlySelectUnsetExperimentsStub.returns([]);
+          randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
           expect(impl.experimentIds.includes('21060933')).to.be.true;
         });
 
         it('should not set invalid origin fix if exp on', () => {
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
-          randomlySelectUnsetExperimentsStub.returns([]);
+          randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
           expect(impl.experimentIds.includes('21060933')).to.be.true;
         });
 
         it('should select SRA experiments', () => {
           randomlySelectUnsetExperimentsStub.returns(
-              {doubleclickSraExp: ['117152667']});
+              {doubleclickSraExp: '117152667'});
           impl.buildCallback();
           expect(impl.experimentIds.includes('117152667')).to.be.true;
           expect(impl.useSra).to.be.true;
@@ -1454,7 +1454,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         describe('should properly limit SRA traffic', () => {
           let experimentInfoMap;
           beforeEach(() => {
-            randomlySelectUnsetExperimentsStub.returns([]);
+            randomlySelectUnsetExperimentsStub.returns({});
             impl.setPageLevelExperiments();
             // args format is call array followed by parameter array so expect
             // first call, first param.

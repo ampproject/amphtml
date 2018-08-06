@@ -323,6 +323,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * For easier unit testing.
    * @param {!Object<string, !../../../src/experiments.ExperimentInfo>} experimentInfoMap
+   * @return {!Object<string, string>}
    */
   randomlySelectUnsetExperiments_(experimentInfoMap) {
     return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
