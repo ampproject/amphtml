@@ -37,6 +37,7 @@ tags: {  # <amp-google-document-embed>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  # <amp-bind>
   attrs: { name: "[src]" }
   attrs: { name: "[title]" }
   attr_lists: "extended-amp-global"

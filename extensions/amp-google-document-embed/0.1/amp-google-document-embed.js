@@ -28,10 +28,10 @@
  */
 
 import {addParamToUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
 
 export const TAG = 'amp-google-document-embed';
 
@@ -103,11 +103,11 @@ export class AmpDriveViewer extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
         value => mutations[value] !== undefined);
-    this.propagateAttributes(
-        attrs, this.iframe_, /* opt_removeMissingAttrs */ true);
+    const iframe = dev().assertElement(this.iframe_);
+    this.propagateAttributes(attrs, iframe, /* opt_removeMissingAttrs */ true);
     const src = mutations['src'];
     if (src) {
-      this.iframe_.src = this.getSrc_(src);
+      iframe.src = this.getSrc_(src);
     }
   }
 
