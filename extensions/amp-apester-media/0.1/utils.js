@@ -129,7 +129,7 @@ export function extractArticleTags(root) {
 /**
  * Extracts tags from a given element and document.
  * @param {!Node} doc
- * @param {!Element} element
+ * @param {!Node} element
  * @return {Array<string>}
  */
 export function extractTags(doc, element) {
