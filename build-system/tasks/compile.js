@@ -220,6 +220,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-video-service/**/*.js',
       // Needed to access ConsentPolicyManager from other extensions
       'extensions/amp-consent/**/*.js',
+      // Needed to access AmpGeo type for service locator
+      'extensions/amp-geo/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',

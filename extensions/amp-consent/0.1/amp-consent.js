@@ -92,7 +92,7 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?Element} */
     this.postPromptUI_ = null;
 
-    /** @private {!Object<string, function()>} */
+    /** @private {!Object<string, ?function()>} */
     this.dialogResolver_ = map();
 
     /** @private {!Object<string, boolean>} */
@@ -145,7 +145,8 @@ export class AmpConsent extends AMP.BaseElement {
     const consentPolicyManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
             .then(manager => {
-              this.consentPolicyManager_ = manager;
+              this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (
+                manager);
               this.generateDefaultPolicy_();
               const policyKeys = Object.keys(this.policyConfig_);
               for (let i = 0; i < policyKeys.length; i++) {
@@ -157,13 +158,15 @@ export class AmpConsent extends AMP.BaseElement {
     const consentStateManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_STATE_MANAGER)
             .then(manager => {
-              this.consentStateManager_ = manager;
+              this.consentStateManager_ = /** @type {!ConsentStateManager} */ (
+                manager);
             });
 
     const notificationUiManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), NOTIFICATION_UI_MANAGER)
             .then(manager => {
-              this.notificationUiManager_ = manager;
+              this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (
+                manager);
             });
 
     Promise.all([
@@ -306,11 +309,13 @@ export class AmpConsent extends AMP.BaseElement {
       // !important.
       setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
     });
-    if (this.dialogResolver_[this.currentDisplayInstance_]) {
-      this.dialogResolver_[this.currentDisplayInstance_]();
-      this.dialogResolver_[this.currentDisplayInstance_] = null;
+    const displayInstance = /** @type {string} */ (
+      this.currentDisplayInstance_);
+    if (this.dialogResolver_[displayInstance]) {
+      this.dialogResolver_[displayInstance]();
+      this.dialogResolver_[displayInstance] = null;
     }
-    this.consentUIPendingMap_[this.currentDisplayInstance_] = false;
+    this.consentUIPendingMap_[displayInstance] = false;
     this.currentDisplayInstance_ = null;
   }
 
@@ -620,7 +625,7 @@ export class AmpConsent extends AMP.BaseElement {
         this.user().error(TAG, 'child element of <amp-consent> with ' +
           `promptUI id ${promptUI} not found`);
       }
-      this.consentUI_[instanceId] = element;
+      this.consentUI_[instanceId] = dev().assertElement(element);
     }
 
     // Get current consent state
