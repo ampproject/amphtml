@@ -785,8 +785,9 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => {
           this.hasBookend_().then(hasBookend => {
             if (hasBookend && bookendActive) {
-              this.showBookend_();
+              return this.showBookend_();
             }
+            return Promise.resolve();
           });
         });
 
@@ -1638,9 +1639,10 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Shows the bookend overlay.
    * @private
+   * @return {!Promise}
    */
   showBookend_() {
-    this.buildAndPreloadBookend_().then(() => {
+    return this.buildAndPreloadBookend_().then(() => {
       this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
     });
   }
