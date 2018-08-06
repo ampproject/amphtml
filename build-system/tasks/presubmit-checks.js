@@ -893,6 +893,17 @@ function isInTestFolder(path) {
 }
 
 /**
+ * Check if file is inside the build-system/babel-plugins test/fixture folder.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isInBuildSystemFixtureFolder(filePath) {
+  const folder = path.dirname(filePath);
+  return folder.startsWith('build-system/babel-plugins') &&
+    folder.includes('test/fixtures');
+}
+
+/**
  * Strip Comments
  * @param {string} contents
  */
@@ -932,9 +943,9 @@ function matchTerms(file, terms) {
     const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
-    if (Array.isArray(whitelist) &&
+    if (isInBuildSystemFixtureFolder(relative) || (Array.isArray(whitelist) &&
       (whitelist.indexOf(relative) != -1 ||
-      (isInTestFolder(relative) && !checkInTestFolder))) {
+      (isInTestFolder(relative) && !checkInTestFolder)))) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build

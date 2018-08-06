@@ -272,6 +272,7 @@ function stopSauceConnect() {
 const command = {
   testBuildSystem: function() {
     timedExecOrDie('gulp ava');
+    timedExecOrDie('node node_modules/jest/bin/jest.js');
   },
   testDocumentLinks: function() {
     timedExecOrDie('gulp check-links');
