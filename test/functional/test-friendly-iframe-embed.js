@@ -774,8 +774,10 @@ describe('friendly-iframe-embed', () => {
       const scrollTop = 0;
       stubViewportScrollTop(scrollTop);
 
-      expect(() => fie.enterFullOverlayMode())
-          .to.throw(/Only .?amp-ad.? is allowed/);
+      allowConsoleError(() => {
+        expect(() => fie.enterFullOverlayMode())
+            .to.throw(/Only .?amp-ad.? is allowed/);
+      });
     });
 
     it('resizes body and fixed container when entering', function* () {
