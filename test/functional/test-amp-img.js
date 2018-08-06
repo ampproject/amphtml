@@ -383,8 +383,8 @@ describe('amp-img', () => {
     let impl;
 
     beforeEach(() => {
-      toggleExperiment(iframe.win, 'blurry-placeholder', true, true);
       getImgWithBlur(true, true);
+      toggleExperiment(impl.win, 'blurry-placeholder', true, true);
     });
 
     afterEach(() => {
@@ -410,61 +410,48 @@ describe('amp-img', () => {
       }
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
-      el.getPlaceholder = () => {return img;};
+      el.getPlaceholder = sandbox.stub();
+      el.togglePlaceholder = sandbox.stub();
       impl = new AmpImg(el);
+      impl.layoutWidth_ = 200;
+
     }
 
     it('should correctly detect if a blurry image child exists', () => {
+      el.getPlaceholder = () => {return img;};
       impl.buildCallback();
       impl.layoutCallback();
-      expect(el).to.have.class('i-amphtml-blur-loading');
+      impl.firstLayoutCompleted();
+      expect(el).to.have.class('i-amphtml-fade-out');
 
       getImgWithBlur(true, false);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(el).to.not.have.class('i-amphtml-blur-loading');
+      impl.firstLayoutCompleted();
+      expect(el).to.not.have.class('i-amphtml-fade-out');
 
-      el = document.createElement('amp-img');
-      el.getPlaceholder = () => {return undefined;};
-      impl = new AmpImg(el);
+      getImgWithBlur(false, true);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(el).to.not.have.class('i-amphtml-blur-loading');
+      impl.firstLayoutCompleted();
+      expect(el).to.not.have.class('i-amphtml-fade-out');
 
-      el = document.createElement('amp-img');
-      el.getPlaceholder = () => {return undefined;};
-      impl = new AmpImg(el);
+      getImgWithBlur(false, false);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(el).to.not.have.class('i-amphtml-blur-loading');
+      impl.firstLayoutCompleted();
+      expect(el).to.not.have.class('i-amphtml-fade-out');
     });
 
-    it('should fade in the image if the blurry placheolder exists', () => {
+    it('should fade out only after the image has loaded', () => {
+      el.getPlaceholder = () => {return img;};
       impl.buildCallback();
       impl.layoutCallback();
-      expect(el).to.have.class('i-amphtml-blur-loading');
-
+      expect(el).to.not.have.class('i-amphtml-fade-out');
       const loadEvent = createCustomEvent(iframe.win, 'load');
       impl.img_.dispatchEvent(loadEvent);
-      expect(el).to.have.class('i-amphtml-blur-loaded');
-
-      getImgWithBlur(true, false);
-      impl.buildCallback();
-      impl.layoutCallback();
-      expect(el).to.not.have.class('i-amphtml-blur-loading');
-
-      impl.img_.dispatchEvent(loadEvent);
-      expect(el).to.not.have.class('i-amphtml-blur-loaded');
-    });
-
-    it('should properly display a fade in animation', () => {
-      impl.buildCallback();
-      impl.layoutCallback();
-      expect(el).to.have.class('i-amphtml-blur-loading');
-      expect(el).to.not.have.class('i-amphtml-blur-loaded');
-      const loadEvent = createCustomEvent(iframe.win, 'load');
-      impl.img_.dispatchEvent(loadEvent);
-      expect(el).to.have.class('i-amphtml-blur-loaded');
+      impl.firstLayoutCompleted();
+      expect(el).to.have.class('i-amphtml-fade-out');
     });
   });
 });
