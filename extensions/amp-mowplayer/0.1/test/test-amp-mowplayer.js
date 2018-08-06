@@ -82,10 +82,10 @@ describes.realWin('amp-mowplayer', {
         expect(iframe.src).to.equal(EXAMPLE_VIDEOID_URL);
       });
     });
-	
-	it('requires data-mediaid', () => allowConsoleError(() =>
-		getMowPlayer({}).should.eventually.be.rejectedWith(
-			/The data-mediaid attribute is required for/)));
+
+    it('requires data-mediaid', () => allowConsoleError(() =>
+      getMowPlayer({}).should.eventually.be.rejectedWith(
+          /The data-mediaid attribute is required for/)));
 
     it('should send events from mowplayer to the amp element', () => {
       return getMowPlayer({'data-mediaid': datasource}).then(mp => {

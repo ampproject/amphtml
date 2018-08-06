@@ -105,8 +105,8 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {	  
-	this.mediaid_ = user().assert(
+  buildCallback() {
+    this.mediaid_ = user().assert(
         (this.element.getAttribute('data-mediaid')),
         '/The data-mediaid attribute is required for <amp-mowplayer> %s',
         this.element);
@@ -260,7 +260,7 @@ class AmpMowplayer extends AMP.BaseElement {
     }
 
   }
-  
+
   /**
    * Sends 'listening' message to the Mowplayer iframe to listen for events.
    * @private
