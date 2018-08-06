@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 import {
   ANIMATIONS_DISABLED_CLASS,
   AmpGwdRuntimeService,
@@ -92,7 +91,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         // part of the service's public API, but stubbing it here is the only
         // way to verify it is called. Revisit if another solution becomes
         // available.
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.sandbox;
         initializeSpy =
             sandbox.spy(AmpGwdRuntimeService.prototype, 'initialize_');
       });

@@ -42,8 +42,8 @@ const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-m
 const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
-const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 const {transpileTs} = require('./build-system/typescript');
+const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
@@ -207,7 +207,7 @@ function buildExtensions(options) {
   }
 
   const extensionsToBuild = options.compileAll ?
-    [] : processExtensionsFromArgs();
+    [] : getExtensionsToBuild();
 
   const results = [];
   for (const key in extensions) {
@@ -228,7 +228,7 @@ function buildExtensions(options) {
  * and return a list of the referenced extensions.
  * @return {!Array<string>}
  */
-function processExtensionsFromArgs() {
+function getExtensionsToBuild() {
   let extensionsToBuild = [];
 
   if (!!argv.extensions) {
@@ -430,6 +430,21 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       );
     }
 
+    if (argv.with_inabox_lite) {
+      promises.push(
+          // Entry point for inabox runtime.
+          compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
+            toName: 'amp-inabox-lite.js',
+            minifiedName: 'amp4ads-lite-v0.js',
+            includePolyfills: true,
+            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
+    }
+
     promises.push(
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify),
@@ -624,7 +639,13 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return promise;
     }
   }
-  return promise.then(() => buildExtensionJs(path, name, version, options));
+  return promise.then(() => {
+    if (argv.single_pass) {
+      return Promise.resolve();
+    } else {
+      return buildExtensionJs(path, name, version, options);
+    }
+  });
 }
 
 /**
@@ -673,10 +694,6 @@ function buildExtensionCss(path, name, version, options) {
  * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
-  if (argv.single_pass) {
-    console.log('Skipping extension JS build in single pass mode', name);
-    return;
-  }
   const filename = options.filename || name + '.js';
   return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
     toName: `${name}-${version}.max.js`,
@@ -757,10 +774,8 @@ function parseExtensionFlags() {
         argv.extensions = MINIMAL_EXTENSION_SET.join(',');
       }
 
-      const extensions = argv.extensions.split(',');
-      const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
       log(green('Building extension(s):'),
-          cyan(dedupe(extensions.concat(extensionsFrom)).join(', ')));
+          cyan(getExtensionsToBuild().join(', ')));
 
       if (maybeAddVideoService()) {
         log(green('⤷ Video component(s) being built, added'),
@@ -856,9 +871,20 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    printConfigHelp('gulp dist --fortesting');
+    let cmd = 'gulp dist --fortesting';
+    if (argv.single_pass) {
+      cmd = cmd + ' --single_pass';
+    }
+    printConfigHelp(cmd);
   }
-  parseExtensionFlags();
+  if (argv.single_pass) {
+    if (!process.env.TRAVIS) {
+      log(green('Not building any AMP extensions in'), cyan('single_pass'),
+          green('mode.'));
+    }
+  } else {
+    parseExtensionFlags();
+  }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(() => {
         return Promise.all([
@@ -915,7 +941,7 @@ function copyAliasExtensions() {
     return Promise.resolve();
   }
 
-  const extensionsToBuild = processExtensionsFromArgs();
+  const extensionsToBuild = getExtensionsToBuild();
 
   for (const key in extensionAliasFilePath) {
     if (extensionsToBuild.length > 0 &&
@@ -1157,8 +1183,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
-      .pipe($$.replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
-      .pipe($$.replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
+      .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
       .pipe($$.wrap, wrapper)
       .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true});
 

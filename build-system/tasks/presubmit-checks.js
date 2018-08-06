@@ -152,6 +152,7 @@ const forbiddenTerms = {
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/service/action-impl.js',
       'src/service/standard-actions-impl.js',
       'src/runtime.js',
@@ -198,6 +199,7 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/ampdoc-impl.js',
       'testing/describes.js',
       'testing/iframe.js',
@@ -209,12 +211,14 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/performance-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/storage-impl.js',
     ],
@@ -229,6 +233,7 @@ const forbiddenTerms = {
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
@@ -238,6 +243,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -267,6 +273,7 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
@@ -358,7 +365,7 @@ const forbiddenTerms = {
       'src/ssr-template-helper.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
-      'src/service/xhr-impl.js',
+      'src/utils/xhr-utils.js',
     ],
   },
   // Privacy sensitive
@@ -388,7 +395,7 @@ const forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/error.js',
-      'src/service/xhr-impl.js',
+      'src/utils/xhr-utils.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
@@ -538,6 +545,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/log.js', // Has actual implementation of assertElement.
       'dist.3p/current/integration.js', // Includes the previous.
+      'src/polyfills/custom-elements.js',
     ],
   },
   'startupChunk\\(': {
@@ -603,6 +611,14 @@ const forbiddenTerms = {
     whitelist: [
       'viewer-api/swipe-api.js',
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
+    ],
+  },
+  'this\\.skip\\(\\)': {
+    message: 'Use of `this.skip()` is forbidden in test files. Use ' +
+        '`this.skipTest()` from within a `before()` block instead. See #17245.',
+    checkInTestFolder: true,
+    whitelist: [
+      'test/_init_tests.js',
     ],
   },
 };
