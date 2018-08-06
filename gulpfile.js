@@ -42,8 +42,8 @@ const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-m
 const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
-const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 const {transpileTs} = require('./build-system/typescript');
+const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
@@ -428,6 +428,21 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
           })
       );
+    }
+
+    if (argv.with_inabox_lite) {
+      promises.push(
+          // Entry point for inabox runtime.
+          compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
+            toName: 'amp-inabox-lite.js',
+            minifiedName: 'amp4ads-lite-v0.js',
+            includePolyfills: true,
+            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
     }
 
     promises.push(
@@ -1168,8 +1183,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
-      .pipe($$.replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
-      .pipe($$.replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
+      .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
       .pipe($$.wrap, wrapper)
       .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true});
 
