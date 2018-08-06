@@ -33,7 +33,7 @@ PASS
 |    <script id="amp-access" type="application/json">
 |      {
 |        "contents": "currently untested",
-|        "laterpay": {},
+|        "laterpay": {}
 |      }
 |    </script>
 |  </head>
