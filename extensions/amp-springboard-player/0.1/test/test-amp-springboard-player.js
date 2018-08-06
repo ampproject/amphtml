@@ -38,7 +38,7 @@ describes.realWin('amp-springboard-player', {
     sp.setAttribute('height', '270');
     sp.setAttribute('layout', 'responsive');
     doc.body.appendChild(sp);
-    return sp.build().then(() => sp.layoutCallback()).then(() => sp);
+    return sp.build().then(() => { sp.layoutCallback(); }).then(() => sp);
   }
 
   it('renders', () => {

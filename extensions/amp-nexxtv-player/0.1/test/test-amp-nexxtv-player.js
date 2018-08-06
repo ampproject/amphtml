@@ -44,7 +44,7 @@ describes.realWin('amp-nexxtv-player', {
     // see yt test implementation
     doc.body.appendChild(nexxtv);
     return nexxtv.build().then(() => {
-      return nexxtv.layoutCallback();
+      nexxtv.layoutCallback();
     }).then(() => {
       const nexxTimerIframe = nexxtv.querySelector('iframe');
       nexxtv.implementation_.handleNexxMessage_({

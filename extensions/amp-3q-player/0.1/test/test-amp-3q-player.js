@@ -42,13 +42,12 @@ describes.realWin('amp-3q-player', {
     }
     doc.body.appendChild(player);
     return player.build().then(() => {
-      const layoutPromise = player.layoutCallback();
+      player.layoutCallback();
       const iframe = player.querySelector('iframe');
       player.implementation_.sdnBridge_({
         source: iframe.contentWindow,
         data: JSON.stringify({data: 'ready'}),
       });
-      return layoutPromise;
     }).then(() => {
       return player;
     });

@@ -57,7 +57,7 @@ describes.realWin('amp-brid-player', {
       });
     });
     doc.body.appendChild(bc);
-    return bc.build().then(() => bc.layoutCallback()).then(() => bc);
+    return bc.build().then(() => { bc.layoutCallback(); }).then(() => bc);
   }
 
   it('renders', () => {
