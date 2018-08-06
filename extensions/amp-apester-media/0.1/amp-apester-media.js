@@ -28,6 +28,7 @@ import {
 } from './utils';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {setStyles} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-apester-media';
@@ -62,7 +63,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     /**
      * @const @private {string}
      */
-    this.loaderUrl_ = 'https://images.apester.com/images%2Floader.gif';
+    this.loaderUrl_ = 'https://static.apester.com/js/assets/loader.gif';
     /** @private {boolean}  */
     this.seen_ = false;
     /** @private {?Element}  */
@@ -259,57 +260,13 @@ class AmpApesterMedia extends AMP.BaseElement {
   /**
    * @return {!Element}
    */
-  constructLoaderStructure_() {
-    const blobs = this.element.ownerDocument.createElement('div');
-    const blobLeft = this.element.ownerDocument.createElement('div');
-    const blobRight = this.element.ownerDocument.createElement('div');
-    const logo = this.element.ownerDocument.createElement('div');
-    blobs.classList.add('amp-apester-loader-blobs');
-    blobLeft.classList.add('amp-apester-loader-blob');
-    blobRight.classList.add('amp-apester-loader-blob');
-    logo.classList.add('amp-apester-loader-logo');
-    blobs.appendChild(blobLeft);
-    blobs.appendChild(blobRight);
-    blobs.appendChild(logo);
-    return blobs;
-  }
-
-  /**
-   * @return {!Element}
-   */
-  constructLoaderSVG_() {
-    const svg = this.element.ownerDocument.createElement('svg');
-    const defs = this.element.ownerDocument.createElement('defs');
-    const filter = this.element.ownerDocument.createElement('filter');
-    const feGaussianBlur = this.element.ownerDocument.createElement(
-        'feGaussianBlur'
-    );
-    const feColorMatrix = this.element.ownerDocument.createElement(
-        'feColorMatrix'
-    );
-    const feBlend = this.element.ownerDocument.createElement('feBlend');
-    svg.setAttribute('version', '1.1');
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    filter.setAttribute('id', 'amp-apester-goo');
-    feGaussianBlur.setAttribute('in', 'SourceGraphic');
-    feGaussianBlur.setAttribute('results', 'blur');
-    feGaussianBlur.setAttribute('stdDeviation', '10');
-    feColorMatrix.setAttribute('in', 'blur');
-    feColorMatrix.setAttribute('mode', 'matrix');
-    feColorMatrix.setAttribute(
-        'values',
-        '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7'
-    );
-    feColorMatrix.setAttribute('result', 'amp-apester-goo');
-    feBlend.setAttribute('in2', 'amp-apester-goo');
-    feBlend.setAttribute('in', 'SourceGraphic');
-    feBlend.setAttribute('result', 'mix');
-    svg.appendChild(defs);
-    defs.appendChild(filter);
-    filter.appendChild(feGaussianBlur);
-    filter.appendChild(feColorMatrix);
-    filter.appendChild(feBlend);
-    return svg;
+  constructLoaderImg_() {
+    const img = this.element.ownerDocument.createElement('amp-img');
+    img.setAttribute('src', this.loaderUrl_);
+    img.setAttribute('layout', 'fixed');
+    img.setAttribute('width', '100');
+    img.setAttribute('height', '100');
+    return img;
   }
 
   /**
@@ -357,8 +314,7 @@ class AmpApesterMedia extends AMP.BaseElement {
               .then(() => {
                 return this.loadPromise(iframe).then(() => {
                   return vsync.mutatePromise(() => {
-                    this.iframe_.classList
-                        .add('i-amphtml-apester-iframe-ready');
+                    this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
                     if (media['campaignData']) {
                       this.iframe_.contentWindow./*OK*/ postMessage(
                           /** @type {JsonObject} */ ({
@@ -400,19 +356,23 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.element.ownerDocument.createElement('div');
+    const image = this.constructLoaderImg_();
     if (this.element.hasAttribute('aria-label')) {
       placeholder.setAttribute(
           'aria-label',
           'Loading - ' + this.element.getAttribute('aria-label')
       );
     } else {
-      placeholder.setAttribute('aria-label', 'Loading video');
+      placeholder.setAttribute('aria-label', 'Loading Apester Media');
     }
     placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('layout', 'fill');
     placeholder.className = 'amp-apester-loader';
-    placeholder.appendChild(this.constructLoaderStructure_());
-    placeholder.appendChild(this.constructLoaderSVG_());
+    setStyles(image, {
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    });
+    placeholder.appendChild(image);
     return placeholder;
   }
 
