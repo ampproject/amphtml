@@ -125,8 +125,10 @@ config.run('amp-image-slider', function() {
       const ampImgs = slider.getElementsByTagName('amp-img');
       leftAmpImage_ = ampImgs[0];
       rightAmpImage_ = ampImgs[1];
-      leftLabel_ = slider.querySelector('.i-amphtml-image-slider-left-label');
-      rightLabel_ = slider.querySelector('.i-amphtml-image-slider-right-label');
+      leftLabel_ = slider.querySelectorAll(
+          '.i-amphtml-image-slider-label-wrapper')[0];
+      rightLabel_ = slider.querySelectorAll(
+          '.i-amphtml-image-slider-label-wrapper')[1];
 
       expect(bar_.getBoundingClientRect().left)
           .to.equal(leftPos);
