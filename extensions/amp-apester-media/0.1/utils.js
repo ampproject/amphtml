@@ -72,7 +72,7 @@ export function getPlatform() {
 
 /**
  * Extracts tags from a given element .
- * @param {!Element} element
+ * @param {!Node} element
  */
 export function extractElementTags(element) {
   const tagsAttribute = element && element.getAttribute('data-apester-tags');
