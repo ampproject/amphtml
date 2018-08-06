@@ -361,7 +361,7 @@ describes.realWin('Doubleclick SRA', config , env => {
     });
   });
 
-  describe.only('#initiateSraRequests', () => {
+  describe('#initiateSraRequests', () => {
     let xhrMock;
 
     function createA4aSraInstance(networkId) {
@@ -631,7 +631,7 @@ describes.realWin('Doubleclick SRA', config , env => {
     it('should handle xhr failure by not sending subsequent request',
         () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));
 
-    it.only('should handle xhr failure by via subsequent request if implicit',
+    it('should handle xhr failure by via subsequent request if implicit',
         () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}],
             true));
 
