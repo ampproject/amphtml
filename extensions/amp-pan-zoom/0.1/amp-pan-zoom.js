@@ -168,12 +168,24 @@ export class AmpPanZoom extends AMP.BaseElement {
         return;
       }
       const scale = args['scale'] || 1;
-      this.updatePanZoomBounds_(scale);
-      const x = this.boundX_(args['x'] || 0, /*allowExtent*/ false);
-      const y = this.boundY_(args['y'] || 0, /*allowExtent*/ false);
-      return this.set_(scale, x, y, /*animate*/ true)
-          .then(() => this.onZoomRelease_());
+      const x = args['x'] || 0;
+      const y = args['y'] || 0;
+      return this.transform(x, y, scale);
     });
+  }
+
+  /**
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {number} scale
+   */
+  transform(x, y, scale) {
+    this.updatePanZoomBounds_(scale);
+    const boundX = this.boundX_(x, /*allowExtent*/ false);
+    const boundY = this.boundY_(y, /*allowExtent*/ false);
+    return this.set_(scale, boundX, boundY, /*animate*/ true)
+        .then(() => this.onZoomRelease_());
   }
 
   /** @override */
@@ -185,6 +197,9 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.element.hasAttribute('controls')) {
+      this.createZoomButtons_();
+    }
     return this.resetContentDimensions_().then(this.setupGestures_());
   }
 
@@ -224,6 +239,30 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   elementIsSupported_(element) {
     return ELIGIBLE_TAGS[element.tagName];
+  }
+
+  /**
+   * Creates zoom buttoms
+   */
+  createZoomButtons_() {
+    const zoomInButton = this.element.ownerDocument.createElement('div');
+    zoomInButton.classList.add('i-amphtml-pan-zoom-in-button');
+    zoomInButton.classList.add('i-amphtml-pan-zoom-button');
+    zoomInButton.addEventListener('click', () => {
+      this.transform(0, 0, this.maxScale_);
+    });
+
+    const zoomOutButton = this.element.ownerDocument.createElement('div');
+    zoomOutButton.classList.add('i-amphtml-pan-zoom-out-button');
+    zoomOutButton.classList.add('i-amphtml-pan-zoom-button');
+    zoomOutButton.addEventListener('click', () => {
+      this.transform(0, 0, this.minScale_);
+    });
+
+    this.mutateElement(() => {
+      this.element.appendChild(zoomInButton);
+      this.element.appendChild(zoomOutButton);
+    });
   }
 
   /**
