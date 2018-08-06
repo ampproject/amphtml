@@ -99,6 +99,18 @@ export class AmpDriveViewer extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
+        value => mutations[value] !== undefined);
+    this.propagateAttributes(
+        attrs, this.iframe_, /* opt_removeMissingAttrs */ true);
+    const src = mutations['src'];
+    if (src) {
+      this.iframe_.src = this.getSrc_(src);
+    }
+  }
+
   /**
    * Get the iframe source. Google Docs are special cased since they display
    * using their own embed URL.
