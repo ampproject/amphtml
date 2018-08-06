@@ -359,10 +359,6 @@ export class BindExpression {
               throw new Error(`Unexpected argument type in ${method}().`);
             }
             return validFunction.apply(caller, params);
-          } else if (typeof params == 'function') {
-            // Special case: `params` may be an arrow function, which are only
-            // supported as the sole argument to functions like Array#find.
-            return validFunction.call(caller, params);
           }
         }
 

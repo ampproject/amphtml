@@ -651,10 +651,7 @@ describe('BindExpression', () => {
     it('Array#reduce()', () => {
       const a = [1, 2, 3];
       expect(evaluate('a.reduce((x, y) => x + y)', {a})).to.equal(6);
-
-      // Only support arrow functions as the only parameter in applicable
-      // function invocations (don't support optional `thisArg`, etc.).
-      expect(() => evaluate('a.reduce((x, y)) => x + y, 0)', {a})).to.throw();
+      expect(evaluate('a.reduce((x, y) => x + y, 4)', {a})).to.equal(10);
     });
 
     it('Array#filter', () => {
