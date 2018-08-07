@@ -826,7 +826,7 @@ export class HistoryBindingVirtual_ {
 
     /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = this.viewer_.onMessage('historyPopped',
-        this.onHistoryPopped_.bind(this));
+        data => this.onHistoryPopped_(data));
   }
 
   /** @override */
