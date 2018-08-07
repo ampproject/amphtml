@@ -465,6 +465,21 @@ describes.fakeWin('AccessService authorization', {
     });
   });
 
+  it('should execute the onApplyAuthorizations registered callbacks', () => {
+    expectGetReaderId('reader1');
+    adapterMock.expects('authorize')
+        .withExactArgs()
+        .returns(Promise.resolve({access: true}))
+        .once();
+
+    const applyAuthorizationsStub = sandbox.stub();
+    service.onApplyAuthorizations(applyAuthorizationsStub);
+
+    return service.runAuthorization_().then(() => {
+      expect(applyAuthorizationsStub).to.have.been.calledOnce;
+    });
+  });
+
   it('should run authorization for broadcast events on same origin', () => {
     let broadcastHandler;
     sandbox.stub(service.viewer_, 'onBroadcast').callsFake(handler => {
