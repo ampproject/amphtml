@@ -78,22 +78,33 @@
       transform: translate(50%, -50%);
     }
 
-    .reversed-hint .amp-image-slider-left-hint {
+    .reversed-hint .amp-image-slider-hint-left {
       background-size: 64px 32px;
       width: 64px;
       height: 32px;
-      margin-right: 30px !important;
       background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cg data-name='Layer 2'%3E%3Cpath d='M12 5H0V3h12V0l4 4-4 4z' fill='%23fff' data-name='Layer 1'/%3E%3C/g%3E%3C/svg%3E");
       filter: drop-shadow(3px 3px 4px black);
     }
 
-    .reversed-hint .amp-image-slider-right-hint {
+    .reversed-hint .amp-image-slider-hint-right {
       background-size: 64px 32px;
       width: 64px;
       height: 32px;
-      margin-left: 30px !important;
       background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cg data-name='Layer 2'%3E%3Cpath d='M4 5h12V3H4V0L0 4l4 4z' fill='%23fff' data-name='Layer 1'/%3E%3C/g%3E%3C/svg%3E");
       filter: drop-shadow(3px 3px 4px black);
+    }
+
+    .centered-hint .amp-image-slider-hint-left {
+      display: none;
+    }
+
+    .centered-hint .amp-image-slider-hint-right {
+      width: 10px;
+      height: 60px;
+      margin-left: 0;
+      margin-right: 0;
+      filter: none;
+      background-color: white;
     }
 
     .lightbox {
@@ -105,7 +116,7 @@
       background-color: rgba(0,0,0,0.75);
     }
 
-    .hint-hidden .amp-image-slider-left-hint, .hint-hidden .amp-image-slider-right-hint {
+    .hint-hidden .amp-image-slider-hint-left, .hint-hidden .amp-image-slider-hint-right {
       display: none;
     }
   </style>
@@ -165,6 +176,14 @@
       <div second class="label">AFTER</div>
     </amp-image-slider>
 
+    <p>Fully customized hint (centering a box)</p>
+    <amp-image-slider class="centered-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
     <p>No Reemerging hint</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
         disable-hint-reappear>
@@ -180,6 +199,7 @@
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
     </amp-image-slider>
+    -->
 
     <h1><code>seekTo</code> action</h1>
 
@@ -211,6 +231,7 @@
       <button on="tap:seekable.seekTo(percent=1)">Click me to Seek to Right</button>
     </div>
 
+    <!--
     <h1>Tab + Keyboard</h1>
     <p>Move step set to 20%, Home for Center, PageUp for Left, PageDown for Right</p>
     <amp-image-slider tabindex="0" step-size="0.2" layout="responsive" width="1024" height="600">
@@ -218,7 +239,8 @@
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
-    </amp-image-slider> -->
+    </amp-image-slider>
+    -->
 
     <h1>Inside Carousel</h1>
 

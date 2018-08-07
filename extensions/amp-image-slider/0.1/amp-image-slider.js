@@ -282,13 +282,16 @@ export class AmpImageSlider extends AMP.BaseElement {
           this.hintReappearInterval_;
     }
 
+    const hintArrowWrapper = this.doc_.createElement('div');
     this.hintLeftArrow_ = htmlFor(this.doc_)
     `<div class="amp-image-slider-hint-left"></div>`;
-    this.hindRightArrow_ = htmlFor(this.doc_)
+    this.hintRightArrow_ = htmlFor(this.doc_)
     `<div class="amp-image-slider-hint-right"></div>`;
 
-    this.hint_.appendChild(this.hintLeftArrow_);
-    this.hint_.appendChild(this.hindRightArrow_);
+    hintArrowWrapper.appendChild(this.hintLeftArrow_);
+    hintArrowWrapper.appendChild(this.hintRightArrow_);
+
+    this.hint_.appendChild(hintArrowWrapper);
     this.hint_.classList.add('i-amphtml-image-slider-hint');
     this.hint_.classList.add('i-amphtml-image-slider-push-left');
     this.bar_.appendChild(this.hint_);
@@ -603,13 +606,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     // Fix Edge arrow position not updated glitch
     if (Services.platformFor(this.win).isEdge()) {
       setStyles(dev().assertElement(this.hintLeftArrow_), {
-        'text-align': 'center',
-      });
-      setStyles(dev().assertElement(this.hintLeftArrow_), {
         'text-align': '',
-      });
-      setStyles(dev().assertElement(this.hintRightArrow_), {
-        'text-align': 'center',
       });
       setStyles(dev().assertElement(this.hintRightArrow_), {
         'text-align': '',
