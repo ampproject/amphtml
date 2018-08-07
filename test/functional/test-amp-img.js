@@ -386,6 +386,7 @@ describe('amp-img', () => {
      *     placeholder attribute.
      * @param {boolean} addBlurClass Whether the child should have the
      *     class that allows it to be a blurred placeholder.
+     * @return {AmpImg} An amp-img object potentially with a blurry placeholder
      */
     function getImgWithBlur(addPlaceholder, addBlurClass) {
       const el = document.createElement('amp-img');
