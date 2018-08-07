@@ -22,6 +22,7 @@ import {dict} from '../../../src/utils/object';
 import {
   extractTags,
   getPlatform,
+  isMobileDevice,
   registerEvent,
   setFullscreenOff,
   setFullscreenOn,
@@ -50,11 +51,11 @@ class AmpApesterMedia extends AMP.BaseElement {
     /**
      * @const @private {string}
      */
-    this.rendererBaseUrl_ = 'https://renderer.apester.com';
+    this.rendererBaseUrl_ = 'http://renderer.apester.local.com';
     /**
      * @const @private {string}
      */
-    this.displayBaseUrl_ = 'https://display.apester.com';
+    this.displayBaseUrl_ = 'http://display.apester.local.com';
     /**
      * @const @private {string}
      */
@@ -366,17 +367,12 @@ class AmpApesterMedia extends AMP.BaseElement {
                 }
                 this.togglePlaceholder(false);
                 this.ready_ = true;
-                let height = 0;
-                if (media && media['data'] && media['data']['size']) {
-                  height = media['data']['size']['height'];
-                }
-                if (height != this.height_) {
-                  this.height_ = height;
-                  if (this.random_) {
-                    this./*OK*/ attemptChangeHeight(height);
-                  } else {
-                    this./*OK*/ changeHeight(height);
-                  }
+                const size = media && media['data'] && media['data']['size'];
+                const platform = isMobileDevice() ? 'mobile' : 'desktop';
+                if (size && size[platform]) {
+                  this./*OK*/ attemptChangeSize(size[platform]['height'], size[platform]['width']);
+                } else if (size) {
+                  this./*OK*/ attemptChangeSize(size['height'], size['width']);
                 }
               });
             });
@@ -458,8 +454,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     registerEvent(
         apesterEventNames.RESIZE_UNIT,
         data => {
-          if (this.mediaId_ === data.id && data.height) {
-            this.attemptChangeHeight(data.height);
+          if (this.mediaId_ === data.id) {
+            this.attemptChangeSize(data.height, data.width);
           }
         },
         this.win,
