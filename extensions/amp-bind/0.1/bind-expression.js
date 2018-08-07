@@ -104,7 +104,7 @@ function generateFunctionWhitelist() {
 
   /**
    * Needs to be wrapped to avoid a duplicate name conflict with the deprecated
-   * splice function above.
+   * sort function above.
    * @return {!Function}
    */
   function instanceSort() {
@@ -570,6 +570,7 @@ export class BindExpression {
    * instead of operating in-place.
    * @param {string} method
    * @return {boolean}
+   * @private
    */
   isCustomInstanceFunction_(method) {
     return method === 'sort' || method === 'splice';
@@ -579,6 +580,7 @@ export class BindExpression {
    * @param {string} method
    * @param {!Array} params
    * @return {boolean}
+   * @private
    */
   containsInvalidArgument_(method, params) {
     // Don't allow objects as parameters except for certain functions.
