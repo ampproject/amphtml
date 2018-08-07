@@ -234,7 +234,7 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (this.ssrTemplateHelper_.isSupported()) {
-      return this.ssrTemplate_(this.element.getAttribute('src'));
+      return this.ssrTemplate_();
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
       return this.fetch_(itemsExpr).then(items => {
@@ -273,16 +273,16 @@ export class AmpList extends AMP.BaseElement {
         this.getAmpDoc(),
         this.element,
         this.getPolicy_()).then(batchFetchData => {
-      fetchData =
+      batchFetchData.fetchOpt =
           setupAMPCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
-      setupJsonFetchInit(fetchData.fetchOpt);
-      setupInit(fetchData.fetchOpt);
+      setupJsonFetchInit(batchFetchData.fetchOpt);
+      setupInit(batchFetchData.fetchOpt);
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-          this.element, fetchData);
+          this.element, batchFetchData);
     }).then(response => {
       // Construct the fetch response and validate.
       const fetchResponse =
-          fromStructuredCloneable(win, response, fetchData.responseType);
+          fromStructuredCloneable(response, fetchData.responseType);
       verifyAmpCORSHeaders(win, fetchResponse, fetchData.fetchOpt);
       return fetchResponse;
     }, error => {
@@ -444,6 +444,32 @@ export class AmpList extends AMP.BaseElement {
     }
     return policy;
   }
+
+  /** @private */
+  onFetchSuccess_() {
+    if (this.getFallback()) {
+      // Hide in case fallback was displayed for a previous fetch.
+      this.toggleFallback_(false);
+    }
+    this.togglePlaceholder(false);
+    this.toggleLoading(false);
+  }
+
+  /**
+   * @param {*=} error
+   * @private
+   * @throws {!Error} throws error if fallback element is not present.
+   */
+  onFetchError_(error) {
+    this.toggleLoading(false);
+    if (this.getFallback()) {
+      this.toggleFallback(true);
+      this.togglePlaceholder(false);
+    } else {
+      throw error;
+    }
+  }
+
 
   /**
    * Must be called in mutate context.

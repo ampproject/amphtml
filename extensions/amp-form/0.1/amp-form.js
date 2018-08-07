@@ -43,7 +43,7 @@ import {
 } from '../../../src/form';
 import {
   fromStructuredCloneable,
-  setupAmpCors,
+  setupAMPCors,
   setupInit,
   verifyAmpCORSHeaders,
 } from '../../../src/utils/xhr-utils';
@@ -504,8 +504,8 @@ export class AmpForm {
         // and only deal with submit-success or submit-error.
         fetchData = this.buildFetchData(
             dev().assertString(this.xhrAction_), this.method_);
-        setupInit(this.win_, fetchData.xhrUrl, fetchData.fetchOpt);
-        setupAmpCors(this.win_, fetchData.xhrUrl, fetchData.fetchOpt);
+        setupInit(fetchData.fetchOpt);
+        setupAMPCors(this.win_, fetchData.xhrUrl, fetchData.fetchOpt);
         return this.ssrTemplateHelper_.fetchAndRenderTemplate(
             this.form_,
             fetchData,
@@ -641,7 +641,7 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
-   * @param {!JsonObject} response
+   * @param {!JsonObject|string|undefined} response
    * @param {!../../../src/service/xhr-impl.FetchData} fetchData
    * @return {!Promise}
    * @private visible for testing

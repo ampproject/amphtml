@@ -215,7 +215,6 @@ export class Xhr {
   }
 }
 
-
 /**
  * @param {!Window} window
  * @return {!Xhr}
