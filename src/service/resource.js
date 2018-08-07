@@ -786,6 +786,7 @@ export class Resource {
    * @return {number}
    */
   layersDistanceRatio_(currentScore, layout, depth) {
+    currentScore = currentScore || 0;
     const depthPenalty = 1 + (depth / 10);
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalViewportsFromParent() +
