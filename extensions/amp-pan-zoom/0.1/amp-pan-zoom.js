@@ -141,6 +141,9 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     /** @private */
     this.resetOnResize_ = false;
+
+    /** @private {?Element} */
+    this.zoomButton_ = null;
   }
 
   /** @override */
@@ -198,7 +201,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (this.element.hasAttribute('controls')) {
-      this.createZoomButtons_();
+      this.createZoomButton_();
     }
     return this.resetContentDimensions_().then(this.setupGestures_());
   }
@@ -244,24 +247,23 @@ export class AmpPanZoom extends AMP.BaseElement {
   /**
    * Creates zoom buttoms
    */
-  createZoomButtons_() {
-    const zoomInButton = this.element.ownerDocument.createElement('div');
-    zoomInButton.classList.add('i-amphtml-pan-zoom-in-button');
-    zoomInButton.classList.add('i-amphtml-pan-zoom-button');
-    zoomInButton.addEventListener('click', () => {
-      this.transform(0, 0, this.maxScale_);
+  createZoomButton_() {
+    this.zoomButton_ = this.element.ownerDocument.createElement('div');
+    this.zoomButton_.classList.add('i-amphtml-pan-zoom-in-button');
+    this.zoomButton_.classList.add('i-amphtml-pan-zoom-button');
+    this.zoomButton_.addEventListener('click', () => {
+      if (this.zoomButton_.classList.contains('i-amphtml-pan-zoom-in-button')) {
+        this.transform(0, 0, this.maxScale_);
+        this.zoomButton_.classList.remove('i-amphtml-pan-zoom-in-button');
+        this.zoomButton_.classList.add('i-amphtml-pan-zoom-out-button');
+      } else {
+        this.transform(0, 0, this.minScale_);
+        this.zoomButton_.classList.add('i-amphtml-pan-zoom-in-button');
+        this.zoomButton_.classList.remove('i-amphtml-pan-zoom-out-button');
+      }
     });
-
-    const zoomOutButton = this.element.ownerDocument.createElement('div');
-    zoomOutButton.classList.add('i-amphtml-pan-zoom-out-button');
-    zoomOutButton.classList.add('i-amphtml-pan-zoom-button');
-    zoomOutButton.addEventListener('click', () => {
-      this.transform(0, 0, this.minScale_);
-    });
-
     this.mutateElement(() => {
-      this.element.appendChild(zoomInButton);
-      this.element.appendChild(zoomOutButton);
+      this.element.appendChild(this.zoomButton_);
     });
   }
 
@@ -679,8 +681,12 @@ export class AmpPanZoom extends AMP.BaseElement {
       // After the scale is updated, also register or unregister panning
       if (this.scale_ <= 1) {
         this.unregisterPanningGesture_();
+        this.zoomButton_.classList.add('i-amphtml-pan-zoom-in-button');
+        this.zoomButton_.classList.remove('i-amphtml-pan-zoom-out-button');
       } else {
         this.registerPanningGesture_();
+        this.zoomButton_.classList.remove('i-amphtml-pan-zoom-in-button');
+        this.zoomButton_.classList.add('i-amphtml-pan-zoom-out-button');
       }
     });
   }
