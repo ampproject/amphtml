@@ -188,7 +188,7 @@ as clock becomes less than 50% visible.
 
 ## Attributes
 
-#### target-id (optional)
+#### target (optional)
 Specifies the ID of the element to observe. If **not specified**, the **parent** of `<amp-position-observer>` is used as the target.
 
 #### intersection-ratios (optional)
