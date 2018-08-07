@@ -283,9 +283,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     }
 
     this.hintLeftArrow_ = htmlFor(this.doc_)
-    `<div class="amp-image-slider-left-hint"></div>`;
+    `<div class="amp-image-slider-hint-left"></div>`;
     this.hindRightArrow_ = htmlFor(this.doc_)
-    `<div class="amp-image-slider-right-hint"></div>`;
+    `<div class="amp-image-slider-hint-right"></div>`;
 
     this.hint_.appendChild(this.hintLeftArrow_);
     this.hint_.appendChild(this.hindRightArrow_);

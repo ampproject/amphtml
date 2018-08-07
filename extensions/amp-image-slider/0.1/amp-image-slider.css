@@ -103,7 +103,7 @@ amp-image-slider amp-img > img {
   opacity: 0;
 }
 
-.amp-image-slider-left-hint {
+.amp-image-slider-hint-left {
   background-size: 32px 16px;
   width: 32px;
   height: 16px;
@@ -112,7 +112,7 @@ amp-image-slider amp-img > img {
   filter: drop-shadow(3px 3px 4px black);
 }
 
-.amp-image-slider-right-hint {
+.amp-image-slider-hint-right {
   background-size: 32px 16px;
   width: 32px;
   height: 16px;
