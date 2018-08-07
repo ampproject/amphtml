@@ -414,7 +414,6 @@ describe('amp-img', () => {
       el.togglePlaceholder = sandbox.stub();
       impl = new AmpImg(el);
       impl.layoutWidth_ = 200;
-
     }
 
     it('should correctly detect if a blurry image child exists', () => {

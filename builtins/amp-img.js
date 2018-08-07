@@ -21,7 +21,7 @@ import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
-import { setImportantStyles } from '../src/style';
+import {setImportantStyles} from '../src/style';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -103,7 +103,6 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
-
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
