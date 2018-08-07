@@ -206,16 +206,15 @@ export function extensionScriptsInNode(head) {
 /**
  * Waits for body to be present then verifies that an extension script is
  * present in head for installation.
- * @param {!Promise<!Element>} whenbodyAvailPromise
- * @param {HTMLHeadElement|Element|ShadowRoot} head
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} extensionId
  * @return {!Promise<boolean>}
  */
-export function isExtensionScriptInNode(
-  whenbodyAvailPromise, head, extensionId) {
-  return whenbodyAvailPromise
+export function isExtensionScriptInNode(ampdoc, extensionId) {
+  return ampdoc.whenBodyAvailable()
       .then(() => {
-        return extensionScriptInNode(head, extensionId);
+        return extensionScriptInNode(
+            ampdoc.getHeadNode(), extensionId);
       });
 }
 
