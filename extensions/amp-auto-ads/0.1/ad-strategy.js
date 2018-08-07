@@ -39,8 +39,10 @@ export class AdStrategy {
    *     additional data atrributes specified by the placement.
    * @param {!SizeInfoDef} sizing
    * @param {!./ad-tracker.AdTracker} adTracker
+   * @param {boolean} isResponsiveEnabled
    */
-  constructor(placements, baseAttributes, sizing, adTracker) {
+  constructor(placements, baseAttributes, sizing, adTracker,
+    isResponsiveEnabled = false) {
     this.availablePlacements_ = placements.slice(0);
 
     /** @private {!JsonObject<string, string>} */
@@ -54,6 +56,9 @@ export class AdStrategy {
 
     /** @type {number} */
     this.adsPlaced_ = 0;
+
+    /** @private {boolean} */
+    this.isResponsiveEnabled_ = isResponsiveEnabled;
   }
 
   /**
@@ -96,7 +101,10 @@ export class AdStrategy {
       return Promise.resolve(false);
     }
     return nextPlacement.placeAd(
-        this.baseAttributes_, this.sizing_, this.adTracker_)
+        this.baseAttributes_,
+        this.sizing_,
+        this.adTracker_,
+        this.isResponsiveEnabled_)
         .then(state => {
           if (state == PlacementState.PLACED) {
             this.adTracker_.addAd(nextPlacement.getAdElement());
