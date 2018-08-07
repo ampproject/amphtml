@@ -61,11 +61,11 @@ amp-carousel[controls] .amp-carousel-button,
 }
 
 .amp-carousel-button.amp-carousel-button-prev {
-  left: 0px;
+  left: 16px;
 }
 
 .amp-carousel-button.amp-carousel-button-next {
-  right: 0px;
+  right: 16px;
 }
 
 .amp-carousel-button-prev .amp-carousel-button-icon {
