@@ -847,7 +847,11 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * Note: Not all viewers support `pushHistory` responses yet.
+   * `pushHistory`
+   *
+   *   Request:  {'stackIndex': string}
+   *   Response: undefined | {'stackIndex': string}
+   *
    * @override
    */
   push(opt_stateUpdate) {
@@ -856,7 +860,7 @@ export class HistoryBindingVirtual_ {
     );
     return this.viewer_.sendMessageAwaitResponse('pushHistory', message)
         .then(response => {
-          // Return the message if responses aren't supported.
+          // Return the message if response is undefined.
           const newState = /** @type {!HistoryStateDef} */ (
             response || message
           );
@@ -866,7 +870,11 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * Note: Not all viewers support `popHistory` responses yet.
+   * `popHistory`
+   *
+   *   Request:  {'stackIndex': string}
+   *   Response: undefined | {'stackIndex': string}
+   *
    * @override
    */
   pop(stackIndex) {
@@ -876,7 +884,7 @@ export class HistoryBindingVirtual_ {
     const message = dict({'stackIndex': this.stackIndex_});
     return this.viewer_.sendMessageAwaitResponse('popHistory', message)
         .then(response => {
-          // Note: Return the new stackIndex if responses aren't supported.
+          // Return the new stack index if response is undefined.
           const newState = /** @type {!HistoryStateDef} */ (
             response || dict({'stackIndex': this.stackIndex_ - 1})
           );
@@ -886,7 +894,11 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * Note: Not all viewers support `replace()` yet.
+   * `replaceHistory`
+   *
+   *   Request:   {'fragment': string}
+   *   Response:  undefined | {'stackIndex': string}
+   *
    * @override
    */
   replace(opt_stateUpdate) {
@@ -902,45 +914,52 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * Note: Not all viewers support `get()` yet.
+   * Note: Only returns the current `stackIndex`, no `title`, `data`, etc.
    * @override
    */
   get() {
-    return this.viewer_.sendMessageAwaitResponse('getHistory', undefined,
-        /* cancelUnsent */ true).then(response => {
-      return {
-        fragment: response['fragment'],
-        stackIndex: response['stackIndex'],
-        data: response['data'],
-        title: response['title'],
-      };
-    });
+    return Promise.resolve({'stackIndex': this.stackIndex_});
   }
 
   /**
-   * @param {!JsonObject} historyState
+   * `historyPopped` (from viewer)
+   *
+   *   Request:  {'newStackIndex': number} | {'stackIndex': number}
+   *   Response: undefined
+   *
+   * @param {!JsonObject} data
    * @private
    */
-  onHistoryPopped_(historyState) {
-    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (historyState));
+  onHistoryPopped_(data) {
+    if (data['newStackIndex'] !== undefined) {
+      data['stackIndex'] = data['newStackIndex'];
+    }
+    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (data));
   }
 
   /**
-   * @param {!HistoryStateDef=} historyState
+   * @param {!HistoryStateDef=} state
    * @private
    */
-  updateHistoryState_(historyState) {
-    if (this.stackIndex_ != historyState.stackIndex) {
-      dev().fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
-          historyState.stackIndex);
-      this.stackIndex_ = historyState.stackIndex;
+  updateHistoryState_(state) {
+    const {stackIndex} = state;
+    if (this.stackIndex_ != stackIndex) {
+      dev().fine(TAG_, `stackIndex: ${this.stackIndex_} -> ${stackIndex}`);
+      this.stackIndex_ = stackIndex;
       if (this.onStateUpdated_) {
-        this.onStateUpdated_(historyState);
+        this.onStateUpdated_(state);
       }
     }
   }
 
-  /** @override */
+  /**
+   * `getFragment`
+   *
+   *   Request:  undefined
+   *   Response: string
+   *
+   * @override
+   */
   getFragment() {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve('');
@@ -960,14 +979,21 @@ export class HistoryBindingVirtual_ {
         });
   }
 
-  /** @override */
+  /**
+   * `replaceHistory`
+   *
+   *   Request:   {'fragment': string}
+   *   Response:  undefined | {'stackIndex': string}
+   *
+   * @override
+   */
   updateFragment(fragment) {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve();
     }
     return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
         'replaceHistory', dict({'fragment': fragment}),
-        /* cancelUnsent */true));
+        /* cancelUnsent */ true));
   }
 }
 

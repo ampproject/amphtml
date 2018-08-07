@@ -304,12 +304,12 @@ export class Bind {
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result))
         .then(() => {
-          this.history_.replace({
-            data: {
+          this.history_.replace(dict({
+            'data': {
               'amp-bind': this.state_,
             },
-            title: this.localWin_.document.title,
-          });
+            'title': this.localWin_.document.title,
+          }));
         });
     return this.setStatePromise_;
   }
