@@ -40,5 +40,6 @@
   "font-display-swap": 1,
   "amp-date-picker": 1,
   "url-replacement-v2": 1,
-  "inline-styles": 1
+  "inline-styles": 1,
+  "doubleclickSraExp": 0.01
 }
