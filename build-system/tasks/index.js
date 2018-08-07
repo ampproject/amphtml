@@ -27,6 +27,7 @@ require('./compile-css-expr');
 require('./create-golden-css');
 require('./csvify-size');
 require('./dep-check');
+require('./firebase');
 require('./get-zindex');
 require('./gen-codeowners');
 require('./extension-generator');

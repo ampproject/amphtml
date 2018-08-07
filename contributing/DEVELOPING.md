@@ -99,6 +99,8 @@ Command                                                                 | Descri
 `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode.
 `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.
 `gulp visual-diff --grep=<regular-expression-pattern>`                  | Same as above, but executes only those tests whose name matches the regular expression pattern.
+`gulp firebase`                                                         | Generates a folder `firebase` and copies over all files from `examples` and `test/manual` for firebase deployment.
+`gulp firebase --file path/to/file`                                     | Same as above, but copies over the file specified as `firebase/index.html`.
 
 ## Manual testing
 
@@ -284,6 +286,17 @@ you will need set the `AMP_TESTING_HOST` environment variable. (On heroku this
 is done through
 `heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
 
+### Testing with Firebase
+For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory, setting the `public` folder to `firebase` (a `firebase` folder can be generated with the command, `gulp firebase`).
+```
+npm install -g firebase-tools
+firebase login
+firebase init
+gulp firebase
+firebase deploy
+```
+
+`gulp firebase` will generate a `firebase` folder and copy over all files from `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP.
 
 ## Repository Layout
 <pre>
