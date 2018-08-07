@@ -69,6 +69,7 @@ export class BaseCarousel extends AMP.BaseElement {
    * Builds a carousel button for next/prev.
    * @param {string} className
    * @param {function()} onInteraction
+   * @param {string} ariaName
    */
   buildButton(className, onInteraction, ariaName) {
     const button = this.element.ownerDocument.createElement('div');
@@ -79,10 +80,8 @@ export class BaseCarousel extends AMP.BaseElement {
     const icon = this.element.ownerDocument.createElement('div');
     icon.classList.add('amp-carousel-button-icon');
     const isIE = Services.platformFor(this.win).isIe();
-    console.log(isIE);
     if (isIE) {
-      button.classList
-          .add('amp-carousel-button-background');
+      button.classList.add('amp-carousel-button-background');
     }
     button.appendChild(icon);
 
