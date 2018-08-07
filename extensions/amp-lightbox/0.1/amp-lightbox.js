@@ -257,6 +257,18 @@ class AmpLightbox extends AMP.BaseElement {
         .then(() => this.finalizeOpen_());
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const active = mutations['active'];
+    if (active !== undefined) {
+      if (active) {
+        this.activate();
+      } else {
+        this.close();
+      }
+    }
+  }
+
   /**
    * Any child of the lightbox with the autofocus attribute should be focused
    * after the lightbox opens.
