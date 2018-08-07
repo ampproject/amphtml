@@ -128,12 +128,11 @@ export function extractArticleTags(root) {
 
 /**
  * Extracts tags from a given element and document.
- * @param {!./service/ampdoc-impl.AmpDoc} doc
+ * @param {!Node} root
  * @param {!Node} element
  * @return {Array<string>}
  */
-export function extractTags(doc, element) {
-  const root = doc.getRootNode();
+export function extractTags(root, element) {
   const extractedTags = extractElementTags(element) || [];
   const articleMetaTags = extractArticleTags(root);
   const concatedTags = extractedTags.concat(
