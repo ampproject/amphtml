@@ -128,7 +128,7 @@ export function extractArticleTags(root) {
 
 /**
  * Extracts tags from a given element and document.
- * @param {!Node} doc
+ * @param {!./service/ampdoc-impl.AmpDoc} doc
  * @param {!Node} element
  * @return {Array<string>}
  */
