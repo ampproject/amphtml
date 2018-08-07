@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev, user} from '../log';
-import {isArray} from '../types';
+import {isArray, isObject} from '../types';
 import {map} from '../utils/object';
 import {parseJson} from '../json';
 import {utf8Encode} from '../utils/bytes';
@@ -55,7 +55,7 @@ let XMLHttpRequestDef;
  */
 export function fetchPolyfill(input, init) {
   return new Promise(function(resolve, reject) {
-    const xhr = createXhrRequest(init.method || 'GET', input);
+    const xhr = createXhrRequest((init.method || 'GET').toUpperCase(), input);
 
     if (init.credentials == 'include') {
       xhr.withCredentials = true;
@@ -247,6 +247,8 @@ export function Response(body, init = {}) {
     },
   }, init);
 
+  init.status = init.status || 200;
+
   if (isArray(init.headers)) {
     init.headers.forEach(entry => {
       const headerName = entry[0];
@@ -254,6 +256,11 @@ export function Response(body, init = {}) {
       lowercasedHeaders[String(headerName).toLowerCase()] =
           String(headerValue);
     });
+  } else if (isObject(init.headers)) {
+    for (const key in init.headers) {
+      lowercasedHeaders[String(key).toLowerCase()] =
+          String(init.headers[key]);
+    }
   }
   if (init.status) {
     data.status = parseInt(init.status, 10);
