@@ -41,5 +41,6 @@
   "amp-date-picker": 1,
   "url-replacement-v2": 1,
   "inline-styles": 1,
-  "doubleclickSraExp": 0.01
+  "doubleclickSraExp": 0.01,
+  "doubleclickSraReportExcludedBlock": 0.1
 }
