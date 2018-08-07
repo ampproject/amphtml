@@ -123,9 +123,8 @@ export class SafeframeHostApi {
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
    * @param {{width:number, height:number}} creativeSize
-   * @param {?string} fluidImpressionUrl
    */
-  constructor(baseInstance, isFluid, creativeSize, fluidImpressionUrl) {
+  constructor(baseInstance, isFluid, creativeSize) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
@@ -164,9 +163,6 @@ export class SafeframeHostApi {
     this.initialCreativeSize_ =
       /** @private {{width:number, height:number}} */
       (Object.assign({}, creativeSize));
-
-    /** @private {?string} */
-    this.fluidImpressionUrl_ = fluidImpressionUrl;
 
     /** @private {?Promise} */
     this.delay_ = null;
@@ -712,13 +708,13 @@ export class SafeframeHostApi {
     const iframe = dev().assertElement(this.baseInstance_.iframe);
     const iframeHeight = parseInt(getStyle(iframe, 'height'), 10) || 0;
     if (iframeHeight != newHeight) {
-      setStyles(iframe, {height: `${newHeight}px`});
+      setStyles(iframe, {
+        height: `${newHeight}px`,
+        width: '100%'
+      });
+      setStyles(this.baseInstance_.element, {width: '100%'});
     }
-    if (this.fluidImpressionUrl_) {
-      this.baseInstance_.fireDelayedImpressions(
-          this.fluidImpressionUrl_);
-      this.fluidImpressionUrl_ = null;
-    }
+    this.baseInstance_.fireFluidDelayedImpression();
     this.iframe_.contentWindow./*OK*/postMessage(
         JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
         SAFEFRAME_ORIGIN);
@@ -746,3 +742,5 @@ export function removeSafeframeListener() {
   window.removeEventListener('message', safeframeListener, false);
   safeframeListenerCreated_ = false;
 }
+
+

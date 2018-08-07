@@ -67,6 +67,9 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {
+  extractUrlExperimentId,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -86,7 +89,6 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -101,11 +103,8 @@ const DOUBLECLICK_BASE_URL =
 /** @const {string} */
 const RTC_SUCCESS = '2';
 
-/** @const {string} */
-const DOUBLECLICK_SRA_EXP = 'doubleclickSraExp';
-
 /** @const @enum{string} */
-const DOUBLECLICK_SRA_EXP_BRANCHES = {
+const DOUBLECLICK_EXPERIMENT_FEATURE = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
@@ -184,7 +183,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?../../../src/utils/xhr-utils.FetchResponse>} */
+    /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
     this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
@@ -292,41 +291,38 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * Executes page level experiment diversion and pushes any experiment IDs
-   * onto this.experimentIds.
+   * @param {?string} urlExperimentId
    * @visibleForTesting
    */
-  setPageLevelExperiments() {
+  setPageLevelExperiments(urlExperimentId) {
     if (!isCdnProxy(this.win) && !isExperimentOn(
         this.win, 'expDfpInvOrigDeprecated')) {
       this.experimentIds.push('21060933');
     }
-    const experimentInfoMap =
-    /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-        // Only select into SRA experiments if SRA not already explicitly
-        // enabled and refresh is not being used by any slot.
-        [DOUBLECLICK_SRA_EXP]: {
-          isTrafficEligible: () => !this.win.document./*OK*/querySelector(
-              'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'),
-          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-              key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
-        },
-      });
-    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
-      setExps[expName] && this.experimentIds.push(setExps[expName]));
-  }
-
-  /**
-   * For easier unit testing.
-   * @param {!Object<string, !../../../src/experiments.ExperimentInfo>} experimentInfoMap
-   * @return {!Object<string, string>}
-   */
-  randomlySelectUnsetExperiments_(experimentInfoMap) {
-    return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    const experimentId = {
+      // SRA
+      '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
+      '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
+      '9': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER,
+    }[urlExperimentId];
+    switch (experimentId) {
+      case undefined:
+        break;
+      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL:
+      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA:
+      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER:
+        // For SRA experiments, do not include pages that are using refresh.
+        if (this.win.document./*OK*/querySelector(
+            'meta[name=amp-ad-enable-refresh], ' +
+            'amp-ad[type=doubleclick][data-enable-refresh]')) {
+          break;
+        }
+      default:
+        dev().info(
+            TAG,
+            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        this.experimentIds.push(experimentId);
+    }
   }
 
   /** @private */
@@ -353,14 +349,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
-    this.setPageLevelExperiments();
+    this.setPageLevelExperiments(
+        extractUrlExperimentId(this.win, this.element));
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search)) ||
         !!this.win.document.querySelector(
             'meta[name=amp-ad-doubleclick-sra]') ||
         !!this.experimentIds.filter(exp =>
-          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA ||
-          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER).length;
+          exp == DOUBLECLICK_EXPERIMENT_FEATURE.SRA ||
+          exp == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER).length;
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
@@ -684,7 +681,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  extractSize(responseHeaders) {
+  extractSize(responseHeaders) {debugger;
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.troubleshootData_.creativeId =
@@ -698,7 +695,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
-    let size = super.extractSize(responseHeaders);
+    let size = {width: 300, height: 250};//super.extractSize(responseHeaders);
     if (size) {
       this.returnedSize_ = size;
       this.handleResize_(size.width, size.height);
@@ -868,6 +865,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // creative will be centered instead of left-aligned.
       this.element.removeAttribute('height');
       setStyles(this.element, {width: `${size.width}px`});
+    } else if (this.isFluidRequest_ && this.isVerifiedAmpCreative) {
+      // This is an AMP fluid creative that will be rendered in a friendly
+      // frame.
+      dev().assert(this.iframe.contentWindow &&
+          this.iframe.contentWindow.document,
+      'Attempted to access cross-origin frame');
+      this.attemptChangeHeight(
+          this.iframe.contentWindow.document.body./*OK*/scrollHeight)
+          .then(() => this.fireFluidDelayedImpression());
     }
 
     this.refreshManager_ = this.refreshManager_ ||
@@ -963,6 +969,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 })));
       } catch (unusedError) {}
     });
+  }
+
+  /**
+   * Fires the fluid delayed impression, if the URL is available.
+   */
+  fireFluidDelayedImpression() {
+    if (this.fluidImpressionUrl_) {
+      this.fireDelayedImpressions(this.fluidImpressionUrl_);
+      this.fluidImpressionUrl_ = null;
+    }
   }
 
   /**
@@ -1067,7 +1083,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     } else if (!!this.win.document.querySelector(
                         'meta[name=amp-ad-doubleclick-sra]') ||
                         this.experimentIds.includes(
-                            DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER)) {
+                            DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER)) {
                       // If publisher has explicitly enabled SRA mode (not
                       // experiment), then assume error is network failure,
                       // collapse slot, reset url to empty string to ensure
@@ -1141,8 +1157,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
             this, this.isFluidRequest_,
-            /** @type {{height, width}} */(creativeSize),
-            this.fluidImpressionUrl_);
+            /** @type {{height, width}} */(creativeSize));
 
     return this.safeframeApi_.getSafeframeNameAttr();
   }
@@ -1294,3 +1309,5 @@ export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
 export function resetTokensToInstancesMap() {
   tokensToInstances = {};
 }
+
+

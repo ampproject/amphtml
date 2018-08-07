@@ -249,8 +249,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?AMP.AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
 
-    /** @private {boolean} whether creative has been verified as AMP */
-    this.isVerifiedAmpCreative_ = false;
+    /** @type {boolean} whether creative has been verified as AMP */
+    this.isVerifiedAmpCreative = false;
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
@@ -423,7 +423,7 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   renderOutsideViewport() {
     // Ensure non-verified AMP creatives are throttled.
-    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win) &&
+    if (!this.isVerifiedAmpCreative && is3pThrottled(this.win) &&
         !this.inNonAmpPreferenceExp()) {
       return false;
     }
@@ -775,7 +775,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Need to know if creative was verified as part of render outside
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
-          this.isVerifiedAmpCreative_ = !!creative;
+          this.isVerifiedAmpCreative = !!creative;
           return creative && utf8Decode(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
@@ -1097,7 +1097,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
-    this.isVerifiedAmpCreative_ = false;
+    this.isVerifiedAmpCreative = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         this.getNonAmpCreativeRenderingMethod();
@@ -1186,7 +1186,7 @@ export class AmpA4A extends AMP.BaseElement {
    * headers. Must be less than or equal to the original size of the ad slot
    * along each dimension. May be overridden by network.
    *
-   * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} responseHeaders
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
    * @return {?SizeInfoDef}
    */
   extractSize(responseHeaders) {
@@ -1249,7 +1249,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
-   * @return {!Promise<?../../../src/utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<?../../../src/service/xhr-impl.FetchResponse>}
    * @protected
    */
   sendXhrRequest(adUrl) {
@@ -1803,3 +1803,7 @@ export function signatureVerifierFor(win) {
   return win[propertyName] ||
       (win[propertyName] = new SignatureVerifier(win, signingServerURLs));
 }
+
+
+
+
