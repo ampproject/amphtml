@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {FetchResponse, assertSuccess, getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
 import {Services} from './services';
-import {assertSuccess, getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
-import {dict} from './utils/object';
 import {user} from './log';
 
 /**
@@ -32,17 +31,17 @@ export function fetchDocument(win, input, opt_init) {
   init = setupAMPCors(win, input, init);
   input = setupInput(win, input, init);
   const ampdocService = Services.ampdocServiceFor(win);
-  const ampdocSingle_ =
+  const ampdocSingle =
   ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   init.responseType = 'document';
-  return getViewerInterceptResponse(win, ampdocSingle_, input, init)
+  return getViewerInterceptResponse(win, ampdocSingle, input, init)
       .then(interceptorResponse => {
         if (interceptorResponse) {
           return interceptorResponse.text().then(body =>
             new DOMParser().parseFromString(body, 'text/html')
           );
         }
-        return xhrRequest_(input, init).then(({xhr, response}) => {
+        return xhrRequest(input, init).then(({xhr, response}) => {
           verifyAmpCORSHeaders(win, response, init);
           return xhr.responseXML;
         });
@@ -56,7 +55,7 @@ export function fetchDocument(win, input, opt_init) {
  * @param {!./utils/xhr-utils.FetchInitDef} init
  * @private
  */
-function xhrRequest_(input, init) {
+function xhrRequest(input, init) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open(init.method || 'GET', input, true);
@@ -64,11 +63,10 @@ function xhrRequest_(input, init) {
     xhr.responseType = 'document';
     // Incoming headers are in fetch format,
     // so we need to convert them into xhr.
-    if (init.headers) {
-      for (const header in init.headers) {
-        xhr.setRequestHeader(header, init.headers[header]);
-      }
+    for (const header in init.headers) {
+      xhr.setRequestHeader(header, init.headers[header]);
     }
+
     xhr.onreadystatechange = () => {
       if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
         return;
@@ -83,20 +81,10 @@ function xhrRequest_(input, init) {
       // whole document loading to complete. This is fine for the use cases
       // we have now, but may need to be reimplemented later.
       if (xhr.readyState == /* COMPLETE */ 4) {
-        const options = {
-          status: xhr.status,
-          statusText: xhr.statusText,
-          headers: parseHeaders(xhr.getAllResponseHeaders()),
-        };
-        const body = 'response' in xhr
-          ? xhr.response : xhr.responseText;
-        const response = new Response(/** @type {string} */ (body || ''), /** @type {!ResponseInit} */ (options));
-        assertSuccess(response).then(response => {
-          resolve({
-            response,
-            xhr,
-          });
-        }).catch(e => reject(e));
+        const response = new FetchResponse(xhr);
+        const promise = assertSuccess(response)
+            .then(response => ({response, xhr}));
+        resolve(promise);
       }
     };
     xhr.onerror = () => {
@@ -111,26 +99,4 @@ function xhrRequest_(input, init) {
       xhr.send();
     }
   });
-}
-
-/**
- *
- * @param {string} rawHeaders
- * @return {JsonObject}
- */
-function parseHeaders(rawHeaders) {
-  const headers = dict({});
-  // Replace instances of \r\n and \n followed by at least one
-  // space or horizontal tab with a space
-  // https://tools.ietf.org/html/rfc7230#section-3.2
-  const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
-  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
-    const parts = line.split(':');
-    const key = parts.shift().trim();
-    if (key) {
-      const value = parts.join(':').trim();
-      headers[key] = value;
-    }
-  });
-  return headers;
 }
