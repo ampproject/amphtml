@@ -470,7 +470,8 @@ describes.realWin('Doubleclick SRA', config , env => {
      *    instances:number,
      *    xhrFail:(boolean|undefined),
      *    invalidInstances:number,
-     *    nestHeaders:(boolean|undefined)}}>} items
+     *    nestHeaders:(boolean|undefined),
+     *    expIds:(boolean|Array<string>)}}>} items
      * @param {boolean=} opt_implicitSra where SRA implicitly enabled (meaning
      *    pub did not enable via meta).
      */
@@ -487,6 +488,7 @@ describes.realWin('Doubleclick SRA', config , env => {
       const networkNestHeaders = [];
       const attemptCollapseSpy =
         sandbox.spy(BaseElement.prototype, 'attemptCollapse');
+      const expIds = [];
       let expectedAttemptCollapseCalls = 0;
       items.forEach(network => {
         if (typeof network == 'number') {
@@ -513,6 +515,7 @@ describes.realWin('Doubleclick SRA', config , env => {
         networkNestHeaders[network.networkId] = network.nestHeaders;
         expectedAttemptCollapseCalls +=
             network.xhrFail && !opt_implicitSra ? network.instances : 0;
+        expIds[network.networkId] = network.expIds || [];
       });
       const grouping = {};
       const groupingPromises = {};
@@ -528,6 +531,7 @@ describes.realWin('Doubleclick SRA', config , env => {
       let idx = 0;
       const layoutCallbacks = [];
       const getLayoutCallback = (impl, creative, isSra, noRender) => {
+        impl.experimentIds.concat(expIds);
         impl.buildCallback();
         impl.onLayoutMeasure();
         return impl.layoutCallback().then(() => {
@@ -557,7 +561,8 @@ describes.realWin('Doubleclick SRA', config , env => {
       Object.keys(grouping).forEach(networkId => {
         const validInstances = grouping[networkId].filter(impl =>
           impl.element.getAttribute('data-test-invalid') != 'true');
-        const isSra = validInstances.length > 1;
+        const isSra = validInstances.length > 1 &&
+            !validInstances[0].experimentIds.includes('21062235');
         const sraResponses = [];
         validInstances.forEach(impl => {
           const creative = `slot${idx++}`;
@@ -618,6 +623,9 @@ describes.realWin('Doubleclick SRA', config , env => {
 
     it('should not send SRA request if only 1 slot is valid', () =>
       executeTest([{networkId: 1234, instances: 1, invalidInstances: 2}]));
+
+    it('should send SRA request if only 1 slot and no recovery exp', () =>
+      executeTest([{networkId: 1234, instances: 1, expIds: ['21062235']}]));
 
     it('should handle xhr failure by not sending subsequent request',
         () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));
