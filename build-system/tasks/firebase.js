@@ -17,14 +17,14 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
 const path = require('path');
-
 
 function generateFirebaseFolder() {
   fs.mkdirpSync('firebase');
   if (argv.file) {
-    console.log(colors.green(`Processing file: ${argv.file}.`));
-    console.log(colors.green('Writing file to firebase.index.html.'));
+    log(colors.green(`Processing file: ${argv.file}.`));
+    log(colors.green('Writing file to firebase.index.html.'));
     fs.copyFileSync(/*src*/ argv.file, 'firebase/index.html',
         {overwrite: true});
     replaceUrls('firebase/index.html');
@@ -39,7 +39,7 @@ function generateFirebaseFolder() {
     manualTests.filter(fileName => path.extname(fileName) == '.html')
         .forEach(file => replaceUrls('firebase/manual/' + file));
   }
-  console.log(colors.green('Copying local amp files from dist folder.'));
+  log(colors.green('Copying local amp files from dist folder.'));
   fs.copySync('dist', 'firebase/dist', {overwrite: true});
   fs.copyFileSync('firebase/dist/ww.max.js',
       'firebase/dist/ww.js', {overwrite: true});
@@ -48,7 +48,7 @@ function generateFirebaseFolder() {
 function replaceUrls(filePath) {
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
-      console.error(colors.red(err));
+      log(colors.red(err));
     }
     let result = data.replace(/https:\/\/cdn\.ampproject\.org\/v0\.js/g, '/dist/amp.js');
     if (argv.min) {
@@ -58,7 +58,7 @@ function replaceUrls(filePath) {
     }
     fs.writeFile(filePath, result, 'utf8', err => {
       if (err) {
-        console.error(colors.red(err));
+        log(colors.red(err));
       }
     });
   });
