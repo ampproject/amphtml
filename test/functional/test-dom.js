@@ -16,7 +16,7 @@
 
 import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 import {toArray} from '../../src/types';
 
@@ -1041,10 +1041,8 @@ describes.realWin('DOM', {
       const element = doc.createElement('amp-test');
       doc.body.appendChild(element);
       env.win.setTimeout(() => {
-        doc.registerElement('amp-test', {
-          prototype: createAmpElementProtoForTesting(
-              env.win, 'amp-test', TestElement),
-        });
+        env.win.customElements.define('amp-test', createAmpElementForTesting(
+            env.win, 'amp-test', TestElement));
       }, 100);
       return dom.whenUpgradedToCustomElement(element).then(element => {
         expect(element.whenBuilt).to.exist;
