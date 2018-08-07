@@ -133,8 +133,18 @@ describes.realWin('AmpForm Integration', {
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => {
-        expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
+        // TODO(alabiaga): the recursive nature in comment below is because of
+        // the global submit listener via document-submit.js. This is no longer
+        // valid as the head doesn't have the script present.
+        // This should be fixed to test this behavior.
 
+        // Due to recursive nature of 'on=submit:sameform.submit' we expect
+        // the action handler to be called twice, the first time for the
+        // actual user submission.
+        // The second time in response to the `submit` event being triggered
+        // and sameform.submit being invoked.
+        //expect(ampForm.handleSubmitAction_).to.have.been.calledTwice;
+        expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
         // However, only the first invocation should be handled completely.
         // and any subsequent calls should be stopped early-on.
         expect(ampForm.handleXhrSubmit_).to.have.been.calledOnce;
