@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const path = require('path');
@@ -22,8 +23,8 @@ const path = require('path');
 function generateFirebaseFolder() {
   fs.mkdirpSync('firebase');
   if (argv.file) {
-    process.stdout.write(`Processing file: ${argv.file}\n`);
-    process.stdout.write('Writing file to firebase.index.html\n');
+    console.log(colors.green(`Processing file: ${argv.file}.`));
+    console.log(colors.green('Writing file to firebase.index.html.'));
     fs.copyFileSync(/*src*/ argv.file, 'firebase/index.html',
         {overwrite: true});
     replaceUrls('firebase/index.html');
@@ -38,21 +39,26 @@ function generateFirebaseFolder() {
     manualTests.filter(fileName => path.extname(fileName) == '.html')
         .forEach(file => replaceUrls('firebase/manual/' + file));
   }
-  process.stdout.write('Copying local amp files from dist folder\n');
+  console.log(colors.green('Copying local amp files from dist folder.'));
   fs.copySync('dist', 'firebase/dist', {overwrite: true});
+  fs.copyFileSync('firebase/dist/ww.max.js',
+      'firebase/dist/ww.js', {overwrite: true});
 }
 
 function replaceUrls(filePath) {
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
-      process.stdout.write(err);
+      console.error(colors.red(err));
     }
     let result = data.replace(/https:\/\/cdn\.ampproject\.org\/v0\.js/g, '/dist/amp.js');
-    result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.max.js');
-
-    fs.writeFileSync(filePath, result, 'utf8', err => {
+    if (argv.min) {
+      result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.js');
+    } else {
+      result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.max.js');
+    }
+    fs.writeFile(filePath, result, 'utf8', err => {
       if (err) {
-        process.stdout.write(err);
+        console.error(colors.red(err));
       }
     });
   });
@@ -66,5 +72,6 @@ gulp.task(
     {
       options: {
         'file': 'File to deploy to firebase as index.html',
+        'min': 'Source from minified files',
       },
     });
