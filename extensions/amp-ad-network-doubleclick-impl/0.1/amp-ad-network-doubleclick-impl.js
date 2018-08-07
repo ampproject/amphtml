@@ -81,11 +81,11 @@ import {isExperimentOn} from '../../../src/experiments';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isSecureUrlDeprecated, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
+import {parseQueryString} from '../../../src/url';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
@@ -757,7 +757,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
     // will not be started until resumeCallback).
     sraRequests = null;
-    this.sraDeferred = new Deferred();
+    this.sraDeferred = null;
     this.qqid_ = null;
     this.consentState = null;
     this.getAdUrlDeferred = new Deferred();
@@ -929,12 +929,31 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.useSra) {
       return super.sendXhrRequest(adUrl);
     }
+    this.sraDeferred = new Deferred();
+    const checkStillCurrent = this.verifyStillCurrent();
+    // InitiateSraRequests resolves when all blocks have had their SRA
+    // responses returned such that sraDeferred being non-null indicates this
+    // element was somehow not included so report.
+    this.initiateSraRequests().then(() => {
+      checkStillCurrent();
+      if (!this.sraDeferred) {
+        dev().warn(TAG, `SRA failed to include element ${this.ifi_}`);
+        if (isExperimentOn(this.win, 'doubleclickSraReportExcludedBlock')) {
+          this.getAmpDoc().getBody().appendChild(createElementWithAttributes(
+              this.win.document, 'amp-pixel', dict({'src':
+              'https://pagead2.googlesyndication.com/pagead/gen_204?' +
+                  `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`})));
+        }
+      }
+    });
     // Wait for SRA request which will call response promise when this block's
-    // response has been returned.
-    this.initiateSraRequests();
-    // Null response indicates single slot should execute using non-SRA method.
-    return this.sraDeferred.promise.then(
-        response => response || super.sendXhrRequest(adUrl));
+    // response has been returned. Null response indicates single slot should
+    // execute using non-SRA method.
+    return this.sraDeferred.promise.then(response => {
+      checkStillCurrent();
+      this.sraDeferred = null;
+      return response || super.sendXhrRequest(adUrl);
+    });
   }
 
   /**
@@ -948,7 +967,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     impressions.split(',').forEach(url => {
       try {
-        if (!isSecureUrlDeprecated(url)) {
+        if (!Services.urlForDoc(this.getAmpDoc()).isSecure(url)) {
           dev().warn(TAG, `insecure impression url: ${url}`);
           return;
         }
@@ -983,23 +1002,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - group by networkID allowing for separate SRA requests
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
+   * @return {!Promise}
    * @visibleForTesting
    */
   initiateSraRequests() {
-    if (sraRequests) {
-      return;
-    }
     // Use cancellation of the first slot's promiseId as indication of
     // unlayoutCallback execution.  Assume that if called for one slot, it will
     // be called for all and we should cancel SRA execution.
     const checkStillCurrent = this.verifyStillCurrent();
-    sraRequests = this.groupSlotsForSra()
+    const noFallbackExp = this.experimentIds.includes(
+        DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER);
+    sraRequests = sraRequests || this.groupSlotsForSra()
         .then(groupIdToBlocksAry => {
           checkStillCurrent();
+          const sraRequestPromises = [];
           Object.keys(groupIdToBlocksAry).forEach(networkId => {
             const blocks = dev().assert(groupIdToBlocksAry[networkId]);
             // TODO: filter blocks with SRA disabled?
-            Promise.all(blocks).then(instances => {
+            sraRequestPromises.push(Promise.all(blocks).then(instances => {
               dev().assert(instances.length);
               checkStillCurrent();
               // Exclude any instances that do not have an adPromise_ as this
@@ -1020,10 +1040,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // Only contained invalid elements.
                 return;
               }
-              // Determine if more than one block for this element, if not do
-              // not set sra request promise which results in sending as non-SRA
-              // request (benefit is it allows direct cache method).
-              if (typeInstances.length == 1) {
+              // If not within no recovery SRA experiment, determine if more
+              // than one block for this element, if not do not set sra request
+              // promise which results in sending as non-SRA request (benefit
+              // is it allows direct cache method).
+              if (!noFallbackExp && typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
@@ -1054,8 +1075,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   })
                   .then(response => {
                     checkStillCurrent();
-                    return lineDelimitedStreamer(
-                        this.win, response, slotCallback);
+                    lineDelimitedStreamer(this.win, response, slotCallback);
+                    return Promise.all(typeInstances.map(
+                        instance => instance.sraDeferred.promise));
                   })
                   .catch(error => {
                     if (isCancellation(error)) {
@@ -1064,10 +1086,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       // appropriately.
                       typeInstances.forEach(instance =>
                         instance.sraDeferred.reject(error));
-                    } else if (!!this.win.document.querySelector(
-                        'meta[name=amp-ad-doubleclick-sra]') ||
-                        this.experimentIds.includes(
-                            DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER)) {
+                    } else if (noFallbackExp ||
+                      !!this.win.document.querySelector(
+                          'meta[name=amp-ad-doubleclick-sra]')) {
                       // If publisher has explicitly enabled SRA mode (not
                       // experiment), then assume error is network failure,
                       // collapse slot, reset url to empty string to ensure
@@ -1093,9 +1114,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         instance.sraDeferred.resolve(null));
                     }
                   });
-            });
+            }));
           });
+          return Promise.all(sraRequestPromises);
         });
+    return sraRequests;
   }
 
   /**

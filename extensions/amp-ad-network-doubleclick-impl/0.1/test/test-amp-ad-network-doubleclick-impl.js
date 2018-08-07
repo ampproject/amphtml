@@ -1262,6 +1262,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       });
 
       describe('#fireDelayedImpressions', () => {
+        let isSecureStub;
         beforeEach(() => {
           element = createElementWithAttributes(doc, 'amp-ad', {
             'width': '200',
@@ -1269,6 +1270,9 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
             'type': 'doubleclick',
           });
           impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.getAmpDoc = () => {};
+          isSecureStub = sandbox.stub();
+          sandbox.stub(Services, 'urlForDoc').returns({isSecure: isSecureStub});
         });
 
         it('should handle null impressions', () => {
@@ -1278,35 +1282,32 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         });
 
         it('should not include non-https', () => {
-          impl.fireDelayedImpressions('http://f.com?a=b,https://b.net?c=d');
+          const urls = ['http://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.withArgs(urls[0]).returns(false);
+          isSecureStub.withArgs(urls[1]).returns(true);
+          impl.fireDelayedImpressions(urls.join());
           expect(env.win.document.querySelectorAll('amp-pixel').length)
               .to.equal(1);
           expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
+              `amp-pixel[src="${urls[1]}"][referrerpolicy=""]`))
               .to.be.ok;
         });
 
         it('should append amp-pixel w/o scrubReferer', () => {
-          impl.fireDelayedImpressions('https://f.com?a=b,https://b.net?c=d');
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://f.com?a=b"][referrerpolicy=""]'))
-              .to.be.ok;
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
-              .to.be.ok;
+          const urls = ['https://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.returns(true);
+          impl.fireDelayedImpressions(urls.join());
+          urls.forEach(url => expect(env.win.document.querySelector(
+              `amp-pixel[src="${url}"][referrerpolicy=""]`)).to.be.ok);
         });
 
-        it('should append amp-pixel wwith scrubReferer', () => {
-          impl.fireDelayedImpressions(
-              'https://f.com?a=b,https://b.net?c=d', true);
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://f.com?a=b"]' +
-              '[referrerpolicy="no-referrer"]'))
-              .to.be.ok;
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"]' +
-              '[referrerpolicy="no-referrer"]'))
-              .to.be.ok;
+        it('should append amp-pixel with scrubReferer', () => {
+          const urls = ['https://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.returns(true);
+          impl.fireDelayedImpressions(urls.join(), true);
+          urls.forEach(url => expect(env.win.document.querySelector(
+              `amp-pixel[src="${url}"][referrerpolicy="no-referrer"]`))
+              .to.be.ok);
         });
       });
 
