@@ -22,14 +22,12 @@ import {
 } from '../utils';
 
 describes.realWin('amp-apester-media-utils', {}, unused => {
-  // let win;
 
   beforeEach(() => {
     document.body.textContent = '';
     document.head.textContent = '';
   });
 
-  //todo responsive layout isn't fully supported yet, just a stub
   it('Extract element tags as empty array when there is no element', () => {
     const expected = [];
     const tags = extractElementTags();
