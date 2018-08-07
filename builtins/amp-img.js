@@ -21,6 +21,7 @@ import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
+import { setImportantStyles } from '../src/style';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -169,14 +170,14 @@ export class AmpImg extends BaseElement {
     return true;
   }
 
-  /** @override */
+  /** @override **/
   firstLayoutCompleted() {
     const placeholder = this.getPlaceholder();
-    if (isExperimentOn(this.win, 'blurry-placeholder') && placeholder && 
-      placeholder.classList.contains('i-amphtml-blur')) {
-      this.element.classList.add('i-amphtml-fade-out');
-    } else {
+    if (!(placeholder && placeholder.classList.contains('i-amphtml-blur') &&
+      isExperimentOn(this.win, 'blurry-placeholder'))) {
       this.togglePlaceholder(false);
+    } else {
+      setImportantStyles(placeholder, {'opacity': 0});
     }
   }
 

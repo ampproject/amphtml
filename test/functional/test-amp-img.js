@@ -422,36 +422,36 @@ describe('amp-img', () => {
       impl.buildCallback();
       impl.layoutCallback();
       impl.firstLayoutCompleted();
-      expect(el).to.have.class('i-amphtml-fade-out');
+      expect(img.style.opacity).to.equal('0');
 
       getImgWithBlur(true, false);
       impl.buildCallback();
       impl.layoutCallback();
       impl.firstLayoutCompleted();
-      expect(el).to.not.have.class('i-amphtml-fade-out');
+      expect(img.style.opacity).to.be.equal('');
 
       getImgWithBlur(false, true);
       impl.buildCallback();
       impl.layoutCallback();
       impl.firstLayoutCompleted();
-      expect(el).to.not.have.class('i-amphtml-fade-out');
+      expect(img.style.opacity).to.be.equal('');
 
       getImgWithBlur(false, false);
       impl.buildCallback();
       impl.layoutCallback();
       impl.firstLayoutCompleted();
-      expect(el).to.not.have.class('i-amphtml-fade-out');
+      expect(img.style.opacity).to.be.equal('');
     });
 
     it('should fade out only after the image has loaded', () => {
       el.getPlaceholder = () => {return img;};
       impl.buildCallback();
       impl.layoutCallback();
-      expect(el).to.not.have.class('i-amphtml-fade-out');
+      expect(img.style.opacity).to.be.equal('');
       const loadEvent = createCustomEvent(iframe.win, 'load');
       impl.img_.dispatchEvent(loadEvent);
       impl.firstLayoutCompleted();
-      expect(el).to.have.class('i-amphtml-fade-out');
+      expect(img.style.opacity).to.be.equal('0');
     });
   });
 });
