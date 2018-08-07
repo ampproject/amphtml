@@ -33,11 +33,11 @@ export function installGlobalSubmitListenerForDoc(ampdoc) {
   // Register global submit event listener only if the amp-form
   // extension is used. Allowing the usage of native forms, otherwise.
   return isExtensionScriptInNode(
-      ampdoc.win,
+      ampdoc.whenBodyAvailable(),
       ampdoc.getHeadNode(),
       'amp-form')
-      .then(isAmpFormExtension => {
-        if (isAmpFormExtension) {
+      .then(ampFormInstalled => {
+        if (ampFormInstalled) {
           ampdoc.getRootNode().addEventListener(
               'submit', onDocumentFormSubmit_, true);
         }

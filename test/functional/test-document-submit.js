@@ -56,7 +56,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
       ampdoc = {
         getHeadNode: () => headNode,
         getRootNode: () => rootNode,
-        win: {document: {documentElement: {body: {}}}},
+        whenBodyAvailable: () => Promise.resolve({}),
       };
     });
 
@@ -75,7 +75,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
         () => {
           ampdoc.getHeadNode().appendChild(createScript('amp-list'));
           sandbox.spy(rootNode, 'addEventListener');
-          installGlobalSubmitListenerForDoc(ampdoc).then(() => {
+          return installGlobalSubmitListenerForDoc(ampdoc).then(() => {
             expect(rootNode.addEventListener).not.to.have.been.called;
           });
         });
@@ -84,7 +84,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
         () => {
           ampdoc.getHeadNode().appendChild(createScript('amp-form'));
           sandbox.spy(rootNode, 'addEventListener');
-          installGlobalSubmitListenerForDoc(ampdoc).then(() => {
+          return installGlobalSubmitListenerForDoc(ampdoc).then(() => {
             expect(rootNode.addEventListener).called;
           });
         });

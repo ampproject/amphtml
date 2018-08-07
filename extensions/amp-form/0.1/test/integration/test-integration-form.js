@@ -133,12 +133,7 @@ describes.realWin('AmpForm Integration', {
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => {
-        // Due to recursive nature of 'on=submit:sameform.submit' we expect
-        // the action handler to be called twice, the first time for the
-        // actual user submission.
-        // The second time in response to the `submit` event being triggered
-        // and sameform.submit being invoked.
-        expect(ampForm.handleSubmitAction_).to.have.been.calledTwice;
+        expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
 
         // However, only the first invocation should be handled completely.
         // and any subsequent calls should be stopped early-on.

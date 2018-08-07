@@ -206,13 +206,14 @@ export function extensionScriptsInNode(head) {
 /**
  * Waits for body to be present then verifies that an extension script is
  * present in head for installation.
- * @param {!Window} win
+ * @param {!Promise<!Element>} whenbodyAvailPromise
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @param {string} extensionId
  * @return {!Promise<boolean>}
  */
-export function isExtensionScriptInNode(win, head, extensionId) {
-  return dom.waitForBodyPromise(win.document)
+export function isExtensionScriptInNode(
+  whenbodyAvailPromise, head, extensionId) {
+  return whenbodyAvailPromise
       .then(() => {
         return extensionScriptInNode(head, extensionId);
       });
