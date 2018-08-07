@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-
 amp-story[scroll] {
-  contain: none !important;
+  overflow-y: auto !important;
 }
 
 [scroll] amp-story-page {
@@ -24,6 +23,6 @@ amp-story[scroll] {
   height: 100vh !important;
 }
 
-amp-story[scroll] > amp-story-page.i-amphtml-layout-container[distance] {
+[scroll] amp-story-page[distance] {
   transform: none !important;
 }
