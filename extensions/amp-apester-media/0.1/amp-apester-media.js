@@ -219,6 +219,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           requireAmpResponseSourceOrigin: false,
         })
         .then(res => {
+          console.log(res);
           if (res.status === 200) {
             return res.json();
           }
