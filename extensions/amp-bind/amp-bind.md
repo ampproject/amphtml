@@ -227,7 +227,7 @@ null || 'default' // 'default'
     <th>Example</th>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code><sup>2</sup></a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code><sup>1</sup></a></td>
     <td class="col-thirty">
       <code>concat</code><br>
       <code>filter</code><br>
@@ -239,12 +239,12 @@ null || 'default' // 'default'
       <code>reduce</code><br>
       <code>slice</code><br>
       <code>some</code><br>
+      <code>sort</code> (not-in-place)<br>
+      <code>splice</code> (not-in-place)<br>
     </td>
     <td>
-      <pre>// Returns true.
-[1, 2, 3].includes(1)</pre>
-      <pre>// Returns [2, 3].
-[1, 2, 3].filter(x => x >= 2)</pre>
+      <pre>// Returns [1, 2, 3].
+[3, 2, 1].sort()</pre>
       <pre>// Returns [1, 3, 5].
 [1, 2, 3].map((x, i) => x + i)</pre>
       <pre>// Returns 6.
@@ -285,7 +285,7 @@ null || 'default' // 'default'
     </td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>3</sup></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>2</sup></td>
     <td>
       <code>abs</code><br>
       <code>ceil</code><br>
@@ -301,7 +301,7 @@ abs(-1)</pre>
     </td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object"><code>Object</code></a><sup>3</sup></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object"><code>Object</code></a><sup>2</sup></td>
     <td>
       <code>keys</code><br>
       <code>values</code>
@@ -314,7 +314,7 @@ values({a: 1, b: 2}</pre>
   </tr>
   <tr>
     <td>
-      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>3</sup>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>2</sup>
     </td>
     <td>
       <code>encodeURI</code><br>
@@ -325,25 +325,10 @@ values({a: 1, b: 2}</pre>
 encodeURIComponent('Hello world')</pre>
     </td>
   </tr>
-  <tr>
-    <td>
-      <a href="#custom-built-in-functions">Custom built-ins</a><sup>3</sup>
-    </td>
-    <td>
-      <code>splice</code><br>
-      <code>sort</code>
-    </td>
-    <td>
-      <pre>// Returns a new array [1, 47 ,3]. Does not splice in-place.
-splice([1, 2, 3], 1, 1, 47)</pre>
-      <pre>// Returns a new array: [1, 2, 3]. Does not sort in-place.
-sort([2, 1, 3])</pre>
-    </td>
-  </tr>
 </table>
 
-<sup>2</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`.<br>
-<sup>3</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+<sup>1</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`. Also, `sort()` and `splice()` return modified copies instead of operating in-place.<br>
+<sup>2</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
 
 #### Defining macros with `amp-bind-macro`
 
