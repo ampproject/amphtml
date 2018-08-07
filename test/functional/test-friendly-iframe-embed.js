@@ -60,6 +60,12 @@ describe('friendly-iframe-embed', () => {
     sandbox.restore();
   });
 
+  function stubViewportScrollTop(scrollTop) {
+    sandbox.stub(Services, 'viewportForDoc').returns({
+      getScrollTop: () => scrollTop,
+    });
+  }
+
   it('should follow main install steps', () => {
 
     // Resources are not involved.
@@ -756,10 +762,7 @@ describe('friendly-iframe-embed', () => {
       const fie = createFie(bodyElementMock, 'amp-ad');
 
       const scrollTop = 0;
-
-      sandbox.stub(Services, 'viewportForDoc').returns({
-        getScrollTop: () => scrollTop,
-      });
+      stubViewportScrollTop(scrollTop);
 
       expect(() => fie.enterFullOverlayMode()).to.not.throw();
     });
@@ -769,13 +772,12 @@ describe('friendly-iframe-embed', () => {
       const fie = createFie(bodyElementMock, 'not-an-amp-ad');
 
       const scrollTop = 0;
+      stubViewportScrollTop(scrollTop);
 
-      sandbox.stub(Services, 'viewportForDoc').returns({
-        getScrollTop: () => scrollTop,
+      allowConsoleError(() => {
+        expect(() => fie.enterFullOverlayMode())
+            .to.throw(/Only .?amp-ad.? is allowed/);
       });
-
-      expect(() => fie.enterFullOverlayMode())
-          .to.throw(/Only .?amp-ad.? is allowed/);
     });
 
     it('resizes body and fixed container when entering', function* () {
@@ -783,10 +785,7 @@ describe('friendly-iframe-embed', () => {
       const fie = createFie(bodyElementMock);
 
       const scrollTop = 45;
-
-      sandbox.stub(Services, 'viewportForDoc').returns({
-        getScrollTop: () => scrollTop,
-      });
+      stubViewportScrollTop(scrollTop);
 
       yield fie.enterFullOverlayMode();
 
@@ -815,10 +814,7 @@ describe('friendly-iframe-embed', () => {
       const fie = createFie(bodyElementMock);
 
       const scrollTop = 19;
-
-      sandbox.stub(Services, 'viewportForDoc').returns({
-        getScrollTop: () => scrollTop,
-      });
+      stubViewportScrollTop(scrollTop);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();
