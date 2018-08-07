@@ -171,7 +171,7 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
 .i-amphtml-blur {
   filter: blur(20px) !important;
   transform: scale(1.1) !important;
-  transition: opacity 1s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-layout-nodisplay,

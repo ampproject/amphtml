@@ -378,6 +378,9 @@ describe('amp-img', () => {
   });
 
   describe('blurred image placeholder', () => {
+    beforeEach(() => {
+      toggleExperiment(window, 'blurry-placeholder', true, true);
+    });
 
     /**
      * Creates an amp-img with an image child that could potentially be a
@@ -393,7 +396,7 @@ describe('amp-img', () => {
       const img = document.createElement('img');
       if (addPlaceholder) {
         img.setAttribute('placeholder', '');
-        el.getPlaceholder = () => {return img;};
+        el.getPlaceholder = () => img;
       } else {
         el.getPlaceholder = sandbox.stub();
       }
@@ -403,10 +406,8 @@ describe('amp-img', () => {
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       const impl = new AmpImg(el);
-      impl.layoutWidth_ = 200;
-
+      sandbox.stub(impl, 'getLayoutWidth').returns(200);
       impl.togglePlaceholder = sandbox.stub();
-      toggleExperiment(impl.win, 'blurry-placeholder', true, true);
       return impl;
     }
 
@@ -418,7 +419,7 @@ describe('amp-img', () => {
       let el = impl.element;
       let img = el.firstChild;
       expect(img.style.opacity).to.equal('0');
-
+      expect(impl.togglePlaceholder).to.not.be.called;
 
       impl = getImgWithBlur(true, false);
       impl.buildCallback();
