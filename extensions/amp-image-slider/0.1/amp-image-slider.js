@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
@@ -127,9 +128,9 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
 
       if (child.tagName.toLowerCase() === 'div') {
-        if (child.hasAttribute('before')) {
+        if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
-        } else if (child.hasAttribute('after')) {
+        } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
         }
       }
@@ -152,6 +153,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.buildImageWrappers_();
     this.buildBar_();
     this.buildHint_();
+    this.checkARIA_();
 
     this.registerAction('seekTo', invocation => {
       const {args} = invocation;
@@ -241,19 +243,20 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.leftLabel_) {
       this.leftLabelWrapper_ = this.doc_.createElement('div');
       this.leftLabelWrapper_.classList
-          .add('i-amphtml-image-slider-left-label-wrapper');
-      this.leftLabel_.classList.add('i-amphtml-image-slider-left-label');
+          .add('i-amphtml-image-slider-label-wrapper');
       this.leftLabelWrapper_.appendChild(this.leftLabel_);
       this.leftMask_.appendChild(this.leftLabelWrapper_);
     }
 
     this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
-    this.rightAmpImage_.classList.add('i-amphtml-image-slider-image-on-top');
+    this.rightMask_.classList.add('i-amphtml-image-slider-push-right');
+    this.rightAmpImage_.classList.add('i-amphtml-image-slider-push-left');
     if (this.rightLabel_) {
       this.rightLabelWrapper_ = this.doc_.createElement('div');
       this.rightLabelWrapper_.classList
-          .add('i-amphtml-image-slider-right-label-wrapper');
-      this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
+          .add('i-amphtml-image-slider-label-wrapper');
+      this.rightLabelWrapper_.classList
+          .add('i-amphtml-image-slider-push-left');
       this.rightLabelWrapper_.appendChild(this.rightLabel_);
       this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
@@ -269,7 +272,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.bar_.appendChild(this.barStick_);
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
+    this.bar_.classList.add('i-amphtml-image-slider-push-right');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
+    this.barStick_.classList.add('i-amphtml-image-slider-push-left');
 
     this.container_.appendChild(this.bar_);
   }
@@ -303,7 +308,54 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.hint_.appendChild(leftHintIcon);
     this.hint_.appendChild(rightHintIcon);
     this.hint_.classList.add('i-amphtml-image-slider-hint');
+    this.hint_.classList.add('i-amphtml-image-slider-push-left');
     this.bar_.appendChild(this.hint_);
+  }
+
+  /**
+   * Check if aria attributes are correctly set
+   * If not, apply default and warn user in console
+   * @private
+   */
+  checkARIA_() {
+    const leftAmpImage = dev().assertElement(this.leftAmpImage_);
+    const rightAmpImage = dev().assertElement(this.rightAmpImage_);
+    leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (leftAmpImage.childElementCount > 0) {
+        const img = leftAmpImage.firstChild;
+        let newAltText;
+        this.measureMutateElement(() => {
+          const ariaSuffix =
+            leftAmpImage.getAttribute('data-left-image-aria-suffix')
+              || 'left image';
+          if (leftAmpImage.hasAttribute('alt')) {
+            newAltText = `${leftAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
+          } else {
+            newAltText = ariaSuffix;
+          }
+        }, () => {
+          img.setAttribute('alt', newAltText);
+        });
+      }
+    });
+    rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (rightAmpImage.childElementCount > 0) {
+        const img = rightAmpImage.firstChild;
+        let newAltText;
+        this.measureMutateElement(() => {
+          const ariaSuffix =
+            rightAmpImage.getAttribute('data-right-image-aria-suffix')
+              || 'right image';
+          if (rightAmpImage.hasAttribute('alt')) {
+            newAltText = `${rightAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
+          } else {
+            newAltText = ariaSuffix;
+          }
+        }, () => {
+          img.setAttribute('alt', newAltText);
+        });
+      }
+    });
   }
 
   /**

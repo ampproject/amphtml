@@ -95,6 +95,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
   },
   {
+    id: 'amp-auto-ads-adsense-responsive',
+    name: 'AMP Auto Ads AdSense Responsive',
+    spec: '',
+    cleanupIssue: '',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -320,6 +326,13 @@ const EXPERIMENTS = [
     name: 'Enables faster scanning of dynamic markup for bindings',
     spec: 'https://github.com/ampproject/amphtml/pull/17229',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
+  },
+  {
+    id: 'no-initial-intersection',
+    name: 'Do not invoke context.observeIntersection callback with ' +
+        'initialintersection',
+    spec: 'https://github.com/ampproject/amphtml/issues/8562',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
   },
   {
     id: 'custom-elements-v1',
