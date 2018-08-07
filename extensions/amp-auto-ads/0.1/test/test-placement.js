@@ -591,6 +591,104 @@ describes.realWin('placement', {
           });
     });
 
+    it('should resize to full-width responsive correctly in ltr',
+        () => {
+          const anchor = doc.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const resource = Services.resourcesForDoc(anchor);
+          sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(win, 'getComputedStyle').callsFake(() => {
+            return {direction: 'ltr'};
+          });
+          sandbox.stub(resource, 'getElementLayoutBox').callsFake(() => {
+            return Promise.resolve({left: 20});
+          });
+
+          const placements = getPlacementsFromConfigObj(ampdoc, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+
+          const attributes = {
+            'type': '_ping_',
+          };
+
+          const sizing = {};
+
+          const adTracker = new AdTracker([], {
+            initialMinSpacing: 0,
+            subsequentMinSpacing: [],
+            maxAdCount: 10,
+          });
+          return placements[0].placeAd(attributes, sizing, adTracker, true)
+              .then(placementState => {
+                expect(resource.attemptChangeSize).to.have.been.calledWith(
+                    anchor.firstChild, 150, 300, {left: -20});
+                expect(placementState).to.equal(PlacementState.PLACED);
+              });
+        });
+
+    it('should resize to full-width responsive correctly in rtl',
+        () => {
+          const anchor = doc.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const resource = Services.resourcesForDoc(anchor);
+          sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(win, 'getComputedStyle').callsFake(() => {
+            return {direction: 'rtl'};
+          });
+          sandbox.stub(resource, 'getElementLayoutBox').callsFake(() => {
+            return Promise.resolve({left: 20});
+          });
+
+          const placements = getPlacementsFromConfigObj(ampdoc, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+
+          const attributes = {
+            'type': '_ping_',
+          };
+
+          const sizing = {};
+
+          const adTracker = new AdTracker([], {
+            initialMinSpacing: 0,
+            subsequentMinSpacing: [],
+            maxAdCount: 10,
+          });
+          return placements[0].placeAd(attributes, sizing, adTracker, true)
+              .then(placementState => {
+                expect(resource.attemptChangeSize).to.have.been.calledWith(
+                    anchor.firstChild, 150, 300, {right: 20});
+                expect(placementState).to.equal(PlacementState.PLACED);
+              });
+        });
+
     it('should report placement placed when resize allowed', () => {
       const anchor = doc.createElement('div');
       anchor.id = 'anId';
@@ -632,6 +730,49 @@ describes.realWin('placement', {
             expect(placementState).to.equal(PlacementState.PLACED);
           });
     });
+
+    it('should report resize failed when resize not allowed - responsive',
+        () => {
+          const anchor = doc.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const resource = Services.resourcesForDoc(anchor);
+          sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+            return Promise.reject(new Error('Resize failed'));
+          });
+
+          const placements = getPlacementsFromConfigObj(ampdoc, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+
+          const attributes = {
+            'type': '_ping_',
+          };
+
+          const sizing = {};
+
+          const adTracker = new AdTracker([], {
+            initialMinSpacing: 0,
+            subsequentMinSpacing: [],
+            maxAdCount: 10,
+          });
+          return placements[0].placeAd(attributes, sizing, adTracker, true)
+              .then(placementState => {
+                expect(resource.attemptChangeSize).to.have.been.calledWith(
+                    anchor.firstChild, 150, 300, undefined);
+                expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
+              });
+        });
 
     it('should report resize failed when resize not allowed', () => {
       const anchor = doc.createElement('div');
