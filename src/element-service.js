@@ -204,13 +204,28 @@ export function extensionScriptsInNode(head) {
 }
 
 /**
+ * Waits for body to be present then verifies that an extension script is
+ * present in head for installation.
+ * @param {!Window} win
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
+ * @param {string} extensionId
+ * @return {!Promise<boolean>}
+ */
+export function isExtensionScriptInNode(win, head, extensionId) {
+  return dom.waitForBodyPromise(win.document)
+      .then(() => {
+        return extensionScriptInNode(head, extensionId);
+      });
+}
+
+/**
  * Verifies that an extension script is present in head for
  * installation.
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @param {string} extensionId
- * @return {boolean}
+ * @private
  */
-export function isExtensionScriptInNode(head, extensionId) {
+function extensionScriptInNode(head, extensionId) {
   return extensionScriptsInNode(head).includes(extensionId);
 }
 
@@ -233,7 +248,7 @@ function waitForExtensionIfPresent(win, extension, head) {
 
   // TODO(jpettitt) investigate registerExtension to short circuit
   // the dom call in extensionScriptsInNode()
-  if (!isExtensionScriptInNode(head, extension)) {
+  if (!extensionScriptInNode(head, extension)) {
     return Promise.resolve();
   }
 

@@ -337,10 +337,12 @@ describes.realWin('in single ampdoc', {
       extension.setAttribute('custom-element', 'amp-form');
       extension.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-form-0.1.js');
       ampdoc.getHeadNode().appendChild(extension);
-      expect(isExtensionScriptInNode(
-          ampdoc.getHeadNode(), 'amp-form')).to.equal(true);
-      expect(isExtensionScriptInNode(
-          ampdoc.getHeadNode(), 'amp-list')).to.equal(false);
+      return isExtensionScriptInNode(
+          ampdoc.win,
+          ampdoc.getHeadNode(),
+          'amp-form').then(isAmpForminNode => {
+        expect(isAmpForminNode).to.equal(true);
+      });
     });
   });
 });

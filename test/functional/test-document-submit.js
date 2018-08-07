@@ -47,38 +47,46 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   });
 
   describe('installGlobalSubmitListenerForDoc', () => {
-    let ampDoc;
+    let ampdoc;
     let headNode;
     let rootNode;
     beforeEach(() => {
       headNode = document.createElement('head');
       rootNode = document.createElement('html');
-      ampDoc = {
+      ampdoc = {
         getHeadNode: () => headNode,
         getRootNode: () => rootNode,
+        win: {document: {documentElement: {body: {}}}},
       };
     });
 
+    /**
+     * @param {string} extension
+     */
+    const createScript = extension => {
+      const script = document.createElement('script');
+      script.setAttribute('src',
+          'https://cdn.ampproject.org/v0/' + extension + '-0.1.js');
+      script.setAttribute('custom-element', extension);
+      return script;
+    };
+
     it('should not register submit listener if amp-form is not registered.',
         () => {
-          const script = document.createElement('script');
-          script.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
-          script.setAttribute('custom-element', 'amp-list');
-          ampDoc.getHeadNode().appendChild(script);
+          ampdoc.getHeadNode().appendChild(createScript('amp-list'));
           sandbox.spy(rootNode, 'addEventListener');
-          installGlobalSubmitListenerForDoc(ampDoc);
-          expect(rootNode.addEventListener).not.to.have.been.called;
+          installGlobalSubmitListenerForDoc(ampdoc).then(() => {
+            expect(rootNode.addEventListener).not.to.have.been.called;
+          });
         });
 
     it('should register submit listener if amp-form extension is registered.',
         () => {
-          const script = document.createElement('script');
-          script.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-form-0.1.js');
-          script.setAttribute('custom-element', 'amp-form');
-          ampDoc.getHeadNode().appendChild(script);
+          ampdoc.getHeadNode().appendChild(createScript('amp-form'));
           sandbox.spy(rootNode, 'addEventListener');
-          installGlobalSubmitListenerForDoc(ampDoc);
-          expect(rootNode.addEventListener).called;
+          installGlobalSubmitListenerForDoc(ampdoc).then(() => {
+            expect(rootNode.addEventListener).called;
+          });
         });
   });
 
