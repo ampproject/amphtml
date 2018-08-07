@@ -45,7 +45,7 @@ FILL THIS IN. What does this extension do?
 
 ## Attributes
 
-##### data-media-id
+##### data-mediaid
 
 The Mowplayer media id. This is an alphanumeric sequence that can be found in the [Content](https://video.mowplayer.com/publisher/videos) section in your Mowplayer platform.
 

@@ -17,8 +17,6 @@
 tags: {  # amp-mowplayer
   html_format: AMP
   tag_name: "SCRIPT"
-  satisfies: "amp-mowplayer extension .js script"
-  requires: "amp-mowplayer"
   extension_spec: {
     name: "mowplayer"
     allowed_versions: "0.1"
@@ -29,10 +27,8 @@ tags: {  # amp-mowplayer
 tags: {  # <amp-mowplayer>
   html_format: AMP
   tag_name: "AMP-MOWPLAYER"
-  satisfies: "amp-mowplayer"
-  requires: "amp-mowplayer extension .js script"
   attrs: {
-    name: "data-media-id"
+    name: "data-mediaid"
     mandatory: true
   }
   amp_layout: {
