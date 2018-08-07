@@ -314,7 +314,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Finds the container scene. Either parent of the component or specified by
-   * `target-id` attribute.
+   * `target` attribute.
    * @return {!Element} scene element.
    * @private
    */
