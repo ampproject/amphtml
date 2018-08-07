@@ -169,9 +169,7 @@
   }
 
   .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
-    /**
-    * 12px to match 24px margin-bottom with margin between 2 elements.
-    */
+    /* 12px to match 24px margin-bottom with margin between 2 elements. */
     width: calc(50% - 12px) !important;
   }
 }
@@ -179,9 +177,9 @@
 @media (min-width: 960px) {
   .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
     /**
-    * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
-    * 16px = (24px * 2) / 3
-    */
+     * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
+     * 16px = (24px * 2) / 3
+     */
     width: calc(33% - 16px) !important;
   }
 }
@@ -403,9 +401,7 @@
 
 @media (min-width: 952px) {
   [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
-    /**
-    * 12px to match 24px margin-bottom with margin between 2 elements.
-    */
+    /* 12px to match 24px margin-bottom with margin between 2 elements. */
     width: calc(50% - 12px) !important;
   }
 }
@@ -413,9 +409,9 @@
 @media (min-width: 1272px) {
   [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
     /**
-    * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
-    * 16px = (24px * 2) / 3
-    */
+     * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
+     * 16px = (24px * 2) / 3
+     */
     width: calc(33% - 16px) !important;
   }
 }
