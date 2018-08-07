@@ -24,6 +24,7 @@ import {
 } from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
+import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
@@ -378,17 +379,21 @@ describes.realWin('amp-story', {
 
   it('should not block layoutCallback when bookend xhr fails', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
+
     sandbox.stub(story, 'getHistoryState_')
         .withArgs('ampStoryBookendActive')
         .returns(true);
+    sandbox.stub(AmpStoryBookend.prototype, 'build');
+    const bookendXhr = sandbox
+        .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
+        .returns(Promise.reject());
 
     story.buildCallback();
 
-    const bookendXhr =
-      sandbox.stub(story, 'showBookend_').returns(Promise.reject());
-
     return story.layoutCallback().then(() => {
       expect(bookendXhr).to.have.been.calledOnce;
+      expect(story.element.classList.contains('i-amphtml-story-loaded'))
+          .to.be.true;
     }).catch(error => {
       expect(error).to.be.undefined;
     });
