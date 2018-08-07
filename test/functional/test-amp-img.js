@@ -378,18 +378,6 @@ describe('amp-img', () => {
   });
 
   describe('blurred image placeholder', () => {
-    let el;
-    let img;
-    let impl;
-
-    beforeEach(() => {
-      getImgWithBlur(true, true);
-      toggleExperiment(impl.win, 'blurry-placeholder', true, true);
-    });
-
-    afterEach(() => {
-      impl.unlayoutCallback();
-    });
 
     /**
      * Creates an amp-img with an image child that could potentially be a
@@ -400,57 +388,63 @@ describe('amp-img', () => {
      *     class that allows it to be a blurred placeholder.
      */
     function getImgWithBlur(addPlaceholder, addBlurClass) {
-      el = document.createElement('amp-img');
-      img = document.createElement('img');
+      const el = document.createElement('amp-img');
+      const img = document.createElement('img');
       if (addPlaceholder) {
         img.setAttribute('placeholder', '');
+        el.getPlaceholder = () => {return img;};
+      } else {
+        el.getPlaceholder = sandbox.stub();
       }
       if (addBlurClass) {
         img.classList.add('i-amphtml-blur');
       }
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
-      el.getPlaceholder = sandbox.stub();
-      el.togglePlaceholder = sandbox.stub();
-      impl = new AmpImg(el);
+      const impl = new AmpImg(el);
       impl.layoutWidth_ = 200;
+
+      impl.togglePlaceholder = sandbox.stub();
+      toggleExperiment(impl.win, 'blurry-placeholder', true, true);
+      return impl;
     }
 
-    it('should correctly detect if a blurry image child exists', () => {
-      el.getPlaceholder = () => {return img;};
+    it('should set placeholder opacity to 0 on image load', () => {
+      let impl = getImgWithBlur(true, true);
       impl.buildCallback();
       impl.layoutCallback();
       impl.firstLayoutCompleted();
+      let el = impl.element;
+      let img = el.firstChild;
       expect(img.style.opacity).to.equal('0');
 
-      getImgWithBlur(true, false);
-      impl.buildCallback();
-      impl.layoutCallback();
-      impl.firstLayoutCompleted();
-      expect(img.style.opacity).to.be.equal('');
 
-      getImgWithBlur(false, true);
+      impl = getImgWithBlur(true, false);
       impl.buildCallback();
       impl.layoutCallback();
       impl.firstLayoutCompleted();
+      el = impl.element;
+      img = el.firstChild;
       expect(img.style.opacity).to.be.equal('');
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
 
-      getImgWithBlur(false, false);
+      impl = getImgWithBlur(false, true);
       impl.buildCallback();
       impl.layoutCallback();
       impl.firstLayoutCompleted();
+      el = impl.element;
+      img = el.firstChild;
       expect(img.style.opacity).to.be.equal('');
-    });
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
 
-    it('should fade out only after the image has loaded', () => {
-      el.getPlaceholder = () => {return img;};
+      impl = getImgWithBlur(false, false);
       impl.buildCallback();
       impl.layoutCallback();
-      expect(img.style.opacity).to.be.equal('');
-      const loadEvent = createCustomEvent(iframe.win, 'load');
-      impl.img_.dispatchEvent(loadEvent);
       impl.firstLayoutCompleted();
-      expect(img.style.opacity).to.be.equal('0');
+      el = impl.element;
+      img = el.firstChild;
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+      impl.unlayoutCallback();
     });
   });
 });
