@@ -563,7 +563,6 @@ describes.realWin('Doubleclick SRA', config , env => {
           impl.element.getAttribute('data-test-invalid') != 'true');
         const isSra = validInstances.length > 1 &&
             !validInstances[0].experimentIds.includes('21062235');
-        console.log('isSra', isSra);
         const sraResponses = [];
         validInstances.forEach(impl => {
           const creative = `slot${idx++}`;
