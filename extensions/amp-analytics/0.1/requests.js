@@ -25,9 +25,8 @@ import {appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';
-import {hasOwn, map} from '../../../src/utils/object';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {isObject} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 import {parseQueryString} from '../../../src/url';
 
 const TAG = 'AMP-ANALYTICS';
@@ -417,33 +416,4 @@ export class RequestHandler {
       this.refreshBatchInterval_();
     }, interval);
   }
-}
-
-/**
- * Expand config's request to object
- * @param {!JsonObject} config
- */
-export function expandConfigRequest(config) {
-  if (!config['requests']) {
-    return config;
-  }
-  for (const k in config['requests']) {
-    if (hasOwn(config['requests'], k)) {
-      config['requests'][k] = expandRequestStr(config['requests'][k]);
-    }
-  }
-  return config;
-}
-
-/**
- * Expand single request to an object
- * @param {!JsonObject} request
- */
-function expandRequestStr(request) {
-  if (isObject(request)) {
-    return request;
-  }
-  return {
-    'baseUrl': request,
-  };
 }

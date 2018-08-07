@@ -16,11 +16,44 @@
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
+import {registerServiceBuilder} from '../../../src/service';
 
 
 /** @type {string} */
 const TAG = 'amp-story';
+
+
+/**
+ * Util function to retrieve the store service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param  {!Window} win
+ * @return {!AmpStoryStoreService}
+ */
+export const getStoreService = win => {
+  let service = Services.storyStoreService(win);
+
+  if (!service) {
+    service = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => service);
+  }
+
+  return service;
+};
+
+
+/**
+ * Different UI experiences to display the story.
+ * @const @enum {number}
+ */
+export const UIType = {
+  MOBILE: 0,
+  DESKTOP: 1,
+  SCROLL: 2,
+};
 
 
 /**
@@ -43,6 +76,7 @@ const TAG = 'amp-story';
  *    rtlstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
+ *    uistate: !UIType,
  *    consentid: ?string,
  *    currentpageid: string,
  * }}
@@ -73,6 +107,7 @@ export const StateProperty = {
   RTL_STATE: 'rtlstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
+  UI_STATE: 'uistate',
 
   // App data.
   CONSENT_ID: 'consentid',
@@ -88,7 +123,6 @@ export const Action = {
   TOGGLE_ACCESS: 'toggleaccess',
   TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
-  TOGGLE_DESKTOP: 'toggledesktop',
   TOGGLE_INFO_DIALOG: 'toggleinfodialog',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_LANDSCAPE: 'togglelandscape',
@@ -97,6 +131,7 @@ export const Action = {
   TOGGLE_RTL: 'togglertl',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
+  TOGGLE_UI: 'toggleui',
 };
 
 
@@ -127,10 +162,6 @@ const actions = (state, action, data) => {
       }
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
-    // Triggers the desktop UI.
-    case Action.TOGGLE_DESKTOP:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
       return /** @type {!State} */ (Object.assign(
@@ -152,6 +183,9 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_PAUSED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.PAUSED_STATE]: !!data}));
+    case Action.TOGGLE_RTL:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.RTL_STATE]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
@@ -161,10 +195,13 @@ const actions = (state, action, data) => {
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.SHARE_MENU_STATE]: !!data,
           }));
-    // Triggers right to left experience.
-    case Action.TOGGLE_RTL:
+    case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.RTL_STATE]: !!data}));
+          {}, state, {
+            // Keep DESKTOP_STATE for compatiblity with v0.1.
+            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP,
+            [StateProperty.UI_STATE]: data,
+          }));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));
@@ -206,7 +243,7 @@ export class AmpStoryStoreService {
    * @return {*}
    */
   get(key) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Unknown state ${key}.`);
       return;
     }
@@ -221,7 +258,7 @@ export class AmpStoryStoreService {
    *                                     triggered with current value.
    */
   subscribe(key, listener, callToInitialize = false) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
     }
@@ -279,6 +316,7 @@ export class AmpStoryStoreService {
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
+      [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,

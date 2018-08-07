@@ -21,11 +21,12 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -122,8 +123,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = startsWith(
-        Services.platformFor(this.win).getIosVersionString(), '10.3');
+    this.shouldDisableCssSnap_ = !isExperimentOn(
+        this.win, 'amp-carousel-scroll-snap');
   }
 
   /** @override */
@@ -208,7 +209,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   isLoopingEligible() {
-    return this.noOfSlides_ > 2;
+    return this.noOfSlides_ > 1;
   }
 
   /** @override */
@@ -604,7 +605,7 @@ export class AmpSlideScroll extends BaseSlides {
       showIndexArr.push(prevIndex);
     }
     showIndexArr.push(newIndex);
-    if (nextIndex != null) {
+    if (nextIndex != null && nextIndex !== prevIndex) {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {
@@ -620,7 +621,6 @@ export class AmpSlideScroll extends BaseSlides {
       dev().error(TAG, error);
       return false;
     }
-
     this.updateInViewport(newSlideInView, true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
@@ -657,7 +657,8 @@ export class AmpSlideScroll extends BaseSlides {
     if (slideChanged) {
       const name = 'slideChange';
       const event =
-          createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+          createCustomEvent(this.win, `slidescroll.${name}`,
+              dict({'index': newIndex}));
       this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
@@ -722,7 +723,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
-    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
+    const curve = bezierCurve(0.8, 0, 0.6, 1); // ease-in
     const duration = 80;
     const slidesContainer = dev().assertElement(this.slidesContainer_);
     return Animation.animate(slidesContainer, pos => {

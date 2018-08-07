@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -135,7 +134,7 @@ describes.realWin('Resource', {amp: true}, env => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').returns(Promise.resolve()).once();
     elementMock.expects('updateLayoutBox')
-        .withExactArgs(box)
+        .withExactArgs(box, true)
         .once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.layoutBox_ = box;
@@ -900,8 +899,8 @@ describe('Resource idleRenderOutsideViewport', () => {
   let isWithinViewportRatio;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
+    sandbox = sinon.sandbox;
     idleRenderOutsideViewport = sandbox.stub();
     element = {
       idleRenderOutsideViewport,
@@ -958,7 +957,7 @@ describe('Resource renderOutsideViewport', () => {
   let resolveWithinViewportSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       ownerDocument: {defaultView: window},

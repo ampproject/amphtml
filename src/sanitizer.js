@@ -93,8 +93,9 @@ function sanitizeWithCaja(html) {
     }
   };
 
-  // Caja doesn't support SVG.
-  const cajaBlacklistedTags = Object.assign({'svg': true}, BLACKLISTED_TAGS);
+  // No Caja support for <script> or <svg>.
+  const cajaBlacklistedTags = Object.assign(
+      {'script': true, 'svg': true}, BLACKLISTED_TAGS);
 
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {
@@ -174,6 +175,7 @@ function sanitizeWithCaja(html) {
         }
         return;
       }
+      let emittedBindingMarker = false;
       emit('<');
       emit(tagName);
       for (let i = 0; i < attribs.length; i += 2) {
@@ -200,6 +202,12 @@ function sanitizeWithCaja(html) {
           emit(htmlSanitizer.escapeAttrib(rewrite));
         }
         emit('"');
+        // Set a custom attribute to mark this element as containing a binding.
+        // This is an optimization that obviates the need for DOM scan later.
+        if (isBinding[i] && !emittedBindingMarker) {
+          emit(' i-amphtml-binding');
+          emittedBindingMarker = true;
+        }
       }
       emit('>');
     },

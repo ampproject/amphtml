@@ -70,6 +70,23 @@ A few things to note:
 * Include tests when contributing code.  There are plenty of tests that you can use as examples.
 * A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
 
+### Reading pull requests
+
+The AMP Project uses the following emojis in pull requests to communicate categories:
+* ✨ New feature (`:sparkles:`)  
+* 🐛 Bug fix (`:bug:`)  
+* 🔥 P0 fix (`:fire:`)  
+* ✅ Tests (`:white_check_mark:`)  
+* 🚀 Performance improvements (`:rocket:`)  
+* 🖍 CSS / Styling (`:crayon:`)  
+* ♿ Accessibility (`:wheelchair:`)  
+* 🌐 Internationalization (`:globe_with_meridians:`)  
+* 📖 Documentation (`:book:`)  
+* 🏗 Infrastructure / Tooling / Builds / CI (`:building_construction:`)  
+* ⏪ Reverting a previous change (`:rewind:`)  
+* ♻️ Refactoring (like moving around code w/o any changes) (`:recycle:`)  
+* 🚮 Deleting code (`:put_litter_in_its_place:`)
+
 ## Contributing features
 
 Follow this process for contributing new features:
@@ -119,7 +136,7 @@ Technical issues, designs, etc. are discussed using several different channels:
 - [Slack](https://amphtml.slack.com) ([signup](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877))
   - the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/details/) channel is the main channel for you to discuss/ask questions about *contributing* to the open source project
   - if you're *new to contributing* to AMP stop by [#welcome-contributors](https://amphtml.slack.com/messages/C432AFMFE/details/) to say hi!
-  - if you have a question about *using AMP on your site*, consider using [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html) first; if you can't find answers there the [#using-amp](https://amphtml.slack.com/messages/C9HPA6HGB/details/) Slack channel is available
+  - **NOTE: if you have a question about *using AMP on your site*, use [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html) rather than Slack** as Stack Overflow is more actively monitored for these types of questions
   - there are many other Slack channels for more specific topics; after you join our Slack click on the "Channels" header to find other channels you want to participate in
 - the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss)
 

@@ -14,18 +14,34 @@
  * limitations under the License.
  */
 
+import {
+  LayoutMarginsChangeDef,
+  cloneLayoutMarginsChangeDef,
+} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+import {clamp} from '../../../src/utils/math';
 import {
   closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAttributesFromConfigObj} from './attributes';
 
 /** @const */
 const TAG = 'amp-auto-ads';
+
+/**
+ * @typedef {{
+ *   width: (number|undefined),
+ *   height: (number|undefined),
+ *   margins: (LayoutMarginsChangeDef|undefined),
+ * }}
+ */
+let PlacementSizingDef;
 
 /**
  * TODO: Specify this via the configuration.
@@ -169,40 +185,105 @@ export class Placement {
    *     injected <amp-ad>. Specific attributes will override defaults, but be
    *     overridden by placement specific attributes defined in the
    *     configuration.
+   * @param {!./ad-network-config.SizeInfoDef} sizing
    * @param {!./ad-tracker.AdTracker} adTracker
+   * @param {boolean} isResponsiveEnabled
    * @return {!Promise<!PlacementState>}
    */
-  placeAd(baseAttributes, adTracker) {
+  placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then(yPosition => {
       return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = this.createAdElement_(baseAttributes);
-        this.injector_(this.anchorElement_, this.adElement_);
-        return this.resources_.attemptChangeSize(this.adElement_,
-            TARGET_AD_HEIGHT_PX, undefined, this.margins_)
-            .then(() => {
-              this.state_ = PlacementState.PLACED;
-              return this.state_;
-            }, () => {
-              this.state_ = PlacementState.RESIZE_FAILED;
-              return this.state_;
+        this.adElement_ = this.createAdElement_(baseAttributes, sizing.width);
+        this.injector_(this.anchorElement_, this.getAdElement());
+
+        return this.getPlacementSizing_(sizing, isResponsiveEnabled)
+            .then(placement => {
+            // CustomElement polyfill does not call connectedCallback
+            // synchronously. So we explicitly wait for CustomElement to be
+            // ready.
+              return whenUpgradedToCustomElement(this.getAdElement())
+                  .then(() => this.getAdElement().whenBuilt())
+                  .then(() => {
+                    return this.resources_.attemptChangeSize(
+                        this.getAdElement(),
+                        placement.height,
+                        placement.width,
+                        placement.margins);
+                  }) .then(() => {
+                    this.state_ = PlacementState.PLACED;
+                    return this.state_;
+                  }, () => {
+                    this.state_ = PlacementState.RESIZE_FAILED;
+                    return this.state_;
+                  });
             });
       });
     });
   }
 
   /**
+   * Gets instructions for the placement in terms of height, width and margins.
+   * If responsive is on, ad should be placed at full viewport width and a
+   * proportionate height, and the margins are adjusted so that the ad edges
+   * stick to both ends of the viewport.
+   * @param {!./ad-network-config.SizeInfoDef} sizing
+   * @param {boolean} isResponsiveEnabled
+   * @return {!Promise<!PlacementSizingDef>}
+   * @private
+   */
+  getPlacementSizing_(sizing, isResponsiveEnabled) {
+    if (isResponsiveEnabled) {
+      const viewport = this.resources_.getViewport();
+      const viewportWidth = viewport.getWidth();
+      const viewportHeight = viewport.getHeight();
+      const responsiveHeight =
+        getResponsiveHeightForContext_(viewportWidth, viewportHeight);
+      let margins = cloneLayoutMarginsChangeDef(this.margins_);
+      return Services.resourcesForDoc(this.anchorElement_)
+          .getElementLayoutBox(this.anchorElement_)
+          .then(layoutBox => {
+            const direction =
+                  computedStyle(this.ampdoc.win, this.anchorElement_)
+                      ['direction'];
+            if (layoutBox.left !== 0) {
+              margins = margins || {};
+              if (direction == 'rtl') {
+                margins.right = layoutBox.left;
+              } else {
+                margins.left = -layoutBox.left;
+              }
+            }
+          })
+          .then(() => {
+            return Promise.resolve({
+              width: viewportWidth,
+              height: responsiveHeight,
+              margins,
+            });
+          });
+    } else {
+      return Promise.resolve(/** @type {!PlacementSizingDef} */ ({
+        height: (sizing.height || TARGET_AD_HEIGHT_PX),
+        margins: this.margins_,
+      }));
+    }
+  }
+
+  /**
    * @param {!JsonObject<string, string>} baseAttributes
+   * @param {number|undefined} width
    * @return {!Element}
    * @private
    */
-  createAdElement_(baseAttributes) {
+  createAdElement_(baseAttributes, width) {
     const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
-      'layout': 'fixed-height',
+      'layout': width ? 'fixed' : 'fixed-height',
       'height': '0',
+      'width': width ? width : 'auto',
       'class': 'i-amphtml-layout-awaiting-size',
     }), baseAttributes, this.attributes_));
     return createElementWithAttributes(
@@ -219,7 +300,7 @@ export class Placement {
 export function getPlacementsFromConfigObj(ampdoc, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
-    user().warn(TAG, 'No placements in config');
+    user().info(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
@@ -344,4 +425,20 @@ function isPositionValid(anchorElement, position) {
     }
     return false;
   });
+}
+
+
+/**
+ * Calculates the appropriate height for a full-width responsive ad.
+ * @param {number} viewportWidth
+ * @param {number} viewportHeight
+ * @return {number}
+ * @private
+ */
+function getResponsiveHeightForContext_(viewportWidth, viewportHeight) {
+  const minHeight = 100;
+  const maxHeight = Math.min(300, viewportHeight);
+  // We aim for a 6:5 aspect ratio.
+  const idealHeight = Math.round(viewportWidth / 1.2);
+  return clamp(idealHeight, minHeight, maxHeight);
 }

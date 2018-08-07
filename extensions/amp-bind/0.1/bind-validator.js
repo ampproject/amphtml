@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ownProperty} from '../../../src/utils/object';
+import {hasOwn, ownProperty} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
 import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
@@ -165,7 +165,7 @@ export class BindValidator {
       if (match !== null) {
         const protocol = match[1].toLowerCase().trim();
         // hasOwnProperty() needed since nested objects are not prototype-less.
-        if (!allowedProtocols.hasOwnProperty(protocol)) {
+        if (!hasOwn(allowedProtocols, protocol)) {
           return false;
         }
       }
@@ -221,6 +221,10 @@ function createElementRules_() {
     },
     'AMP-CAROUSEL': {
       'slide': null,
+    },
+    'AMP-GOOGLE-DOCUMENT-EMBED': {
+      'src': null,
+      'title': null,
     },
     'AMP-IFRAME': {
       'src': null,

@@ -15,9 +15,9 @@
  */
 
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';
@@ -28,9 +28,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {boolean} */
-    this.isExperimentOn_ = false;
 
     /** @private {string} */
     this.imageSrc_ = '';
@@ -47,11 +44,8 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
-    if (!this.isExperimentOn_) {
-      dev().warn(TAG, `TAG ${TAG} disabled`);
-      return;
-    }
+    user().assert(isExperimentOn(this.win, 'amp-google-vrview-image'),
+        'TAG amp-google-vrview-image disabled');
 
     this.imageSrc_ = assertHttpsUrl(this.element.getAttribute('src'),
         this.element);
@@ -90,12 +84,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
-    if (!this.isExperimentOn_) {
-      dev().warn(TAG, `TAG ${TAG} disabled`);
-      return Promise.resolve();
-    }
-
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.onload = () => {
       // Chrome does not reflect the iframe readystate.

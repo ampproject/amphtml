@@ -20,8 +20,12 @@ import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {isObject} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Encode} from '../../../src/utils/bytes';
+
+/** @type {string} */
+const TAG = 'amp-ad-network-doubleclick-impl';
 
 /**
  * @const {string}
@@ -198,8 +202,8 @@ export function getTargetingAndExclusions(impls) {
  */
 export function getExperimentIds(impls) {
   const eids = {};
-  const deid = impls.length &&
-     /(?:#|,)deid=([\d,]+)/i.exec(impls[0].win.location.hash) || [];
+  const deid = (impls.length &&
+     /(?:#|,)deid=([\d,]+)/i.exec(impls[0].win.location.hash)) || [];
   (deid[1] || '').split(',').forEach(eid => eid && (eids[eid] = 1));
   impls.forEach(impl => impl.experimentIds.forEach(eid => eids[eid] = 1));
   const eidKeys = Object.keys(eids).join();
@@ -300,13 +304,20 @@ function serializeItem_(key, value) {
 }
 
 /**
+ * Callback for streaming SRA response given creative and JSON parsed Object
+ * containing headers (as if request had been sent via non-SRA flow).  Creative
+ * and headers object is converted to XHR FetchResponse object and passed to
+ * resolver popped off stack of resolvers (in order of expected block responses)
+ * such that sendXhrRequest is resolved from standard A4A flow.  Done boolean
+ * used to verify array of resolvers is empty once all results are returned.
  * @param {string} creative
  * @param {!Object<string,string>} headersObj
  * @param {boolean} done
- * @param {!Array<function(?../../../src/service/xhr-impl.FetchResponse)>} sraRequestAdUrlResolvers
+ * @param {!Array<function(?../../../src/utils/xhr-utils.FetchResponse)>} sraRequestAdUrlResolvers
+ * @param {string} sraUrl url of SRA request for error reporting
  */
 export function sraBlockCallbackHandler(
-    creative, headersObj, done, sraRequestAdUrlResolvers) {
+  creative, headersObj, done, sraRequestAdUrlResolvers, sraUrl) {
   const headerNames = Object.keys(headersObj);
   if (headerNames.length == 1 &&
       isObject(headersObj[headerNames[0]])) {
@@ -326,7 +337,7 @@ export function sraBlockCallbackHandler(
   // Construct pseudo fetch response to be passed down the A4A
   // promise chain for this block.
   const headers =
-/** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
+/** @type {?../../../src/utils/xhr-utils.FetchResponseHeaders} */
 ({
   get: name => {
     // TODO(keithwrightbos) - fix upstream so response writes
@@ -340,7 +351,7 @@ export function sraBlockCallbackHandler(
   has: name => !!headersObj[name.toLowerCase()],
 });
   const fetchResponse =
-/** @type {?../../../src/service/xhr-impl.FetchResponse} */
+/** @type {?../../../src/utils/xhr-utils.FetchResponse} */
 ({
   headers,
   arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
@@ -349,12 +360,11 @@ export function sraBlockCallbackHandler(
   // should match the order of blocks declared in the ad url.
   // This allows the block to start rendering while the SRA
   // response is streaming back to the client.
-  dev().assert(sraRequestAdUrlResolvers.shift())(
-      fetchResponse);
+  dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
   // If done, expect array to be empty (ensures ad response
   // included data for all slots).
   if (done && sraRequestAdUrlResolvers.length) {
     dev().warn(TAG, 'Premature end of SRA response',
         sraRequestAdUrlResolvers.length, sraUrl);
   }
-};
+}

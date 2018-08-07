@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as analytics from '../../../../src/analytics';
-import * as sinon from 'sinon';
 import {AmpStoryAutoAds} from '../amp-story-auto-ads';
 import {macroTask} from '../../../../testing/yield';
 
@@ -98,6 +97,10 @@ describes.realWin('amp-story-auto-ads', {
       ad.getImpl = () => Promise.resolve(fakeImpl);
       sandbox.stub(autoAds, 'createAdElement_').returns(ad);
       autoAds.adPageEls_ = [ad];
+
+      const page = win.document.createElement('amp-story-page');
+      sandbox.stub(autoAds, 'createPageElement_').returns(page);
+      page.getImpl = () => Promise.resolve({delegateVideoAutoplay: () => {}});
 
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.createAdPage_();

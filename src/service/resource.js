@@ -328,7 +328,7 @@ export class Resource {
       this.isBuilding_ = false;
       if (this.hasBeenMeasured()) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
-        this.element.updateLayoutBox(this.getLayoutBox());
+        this.element.updateLayoutBox(this.getLayoutBox(), true);
       } else {
         this.state_ = ResourceState.NOT_LAID_OUT;
       }

@@ -109,7 +109,7 @@ export class AccessServerJwtAdapter {
     this.serverState_ = stateElement ?
       stateElement.getAttribute('content') : null;
 
-    const isInExperiment = isExperimentOn(ampdoc.win, TAG);
+    const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server-jwt');
 
     /** @private @const {boolean} */
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
@@ -316,9 +316,9 @@ export class AccessServerJwtAdapter {
           this.xhr_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: request,
-            headers: {
+            headers: dict({
               'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            }),
             requireAmpResponseSourceOrigin: false,
           })).then(response => {
         dev().fine(TAG, 'Authorization response: ', response);
