@@ -1084,7 +1084,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                       // Cancellation should be propagated to slot promises
                       // causing their adPromise chains within A4A to handle
                       // appropriately.
-                      typeInstances.forEach(instance =>
+                      typeInstances.forEach(instance => instance.sraDeferred &&
                         instance.sraDeferred.reject(error));
                     } else if (noFallbackExp ||
                       !!this.win.document.querySelector(
