@@ -262,13 +262,19 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   onLayoutMeasure() {
+    if (this.hasNativeSnapPoints_) {
+      // The state being calculated after this short circuit is only needed if
+      // CSS Scroll Snap is not enabled.
+      return;
+    }
+
     this.slideWidth_ = this.getLayoutWidth();
     if (this.slideIndex_ !== null) {
       // Reset scrollLeft on orientationChange.
       this.slidesContainer_./*OK*/scrollLeft =
           this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
+      this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
     }
-    this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
   /** @override */
