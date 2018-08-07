@@ -34,19 +34,14 @@ const HISTORY_PROP_ = 'AMP.History';
 /** @typedef {number} */
 let HistoryIdDef;
 
-/** @typedef {{
-  stackIndex: HistoryIdDef,
-  title: string,
-  fragment: string,
-  data: (Object<string,*>|undefined)
-}} */
+/**
+ * @typedef {{stackIndex: HistoryIdDef, title: string, fragment: string, data: (!JsonObject|undefined)}}
+ */
 let HistoryStateDef;
 
-/** @typedef {{
-  title: (string|undefined),
-  fragment: (string|undefined),
-  data: (Object<string,*>|undefined)
-}} */
+/**
+ * @typedef {{title: (string|undefined), fragment: (string|undefined), data: (!JsonObject|undefined)}}
+ */
 let HistoryStateUpdateDef;
 
 /**
@@ -699,7 +694,9 @@ export class HistoryBindingNatural_ {
       state[HISTORY_PROP_] = stackIndex;
       this.replaceState_(state);
     }
-    this.updateHistoryState_(this.mergeStateUpdate_(/** @type {!HistoryStateDef} */ (state), {stackIndex}));
+    const newState = this.mergeStateUpdate_(
+        /** @type {!HistoryStateDef} */ (state), {stackIndex});
+    this.updateHistoryState_(newState);
   }
 
   /**
@@ -748,7 +745,9 @@ export class HistoryBindingNatural_ {
     const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
     state[HISTORY_PROP_] = stackIndex;
     this.replaceState_(state, title, url);
-    this.updateHistoryState_(this.mergeStateUpdate_(/** @type {!HistoryStateDef} */ (state), {stackIndex}));
+    const newState = this.mergeStateUpdate_(
+        /** @type {!HistoryStateDef} */ (state), {stackIndex});
+    this.updateHistoryState_(newState);
   }
 
   /**
@@ -783,19 +782,19 @@ export class HistoryBindingNatural_ {
   }
 
   /**
-   * @param {!HistoryStateDef|null} state
-   * @param {!HistoryStateUpdateDef|null} stateUpdate
+   * @param {?HistoryStateDef} state
+   * @param {!HistoryStateUpdateDef} update
    * @return {!HistoryStateDef}
    */
-  mergeStateUpdate_(state, stateUpdate) {
-    const mergedData = Object.assign({}, (state && state.data) || {},
-        (stateUpdate && stateUpdate.data) || {});
-    return /** @type {!HistoryStateDef} */(Object.assign(
-        {}, state, stateUpdate, {data: mergedData}));
+  mergeStateUpdate_(state, update) {
+    const mergedData = /** @type {!JsonObject} */ (
+      Object.assign({}, (state && state.data) || {}, update.data || {})
+    );
+    return /** @type {!HistoryStateDef} */ (
+      Object.assign({}, state || {}, update, {data: mergedData})
+    );
   }
-
 }
-
 
 /**
  * Implementation of HistoryBindingInterface that assumes a virtual history that
@@ -914,11 +913,17 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * Note: Only returns the current `stackIndex`, no `title`, `data`, etc.
+   * Note: Only returns the current `stackIndex`.
    * @override
    */
   get() {
-    return Promise.resolve({'stackIndex': this.stackIndex_});
+    // Not sure why this type coercion is necessary, but CC complains otherwise.
+    return Promise.resolve(/** @type {!HistoryStateDef} */ ({
+      data: undefined,
+      fragment: '',
+      stackIndex: this.stackIndex_,
+      title: '',
+    }));
   }
 
   /**
@@ -938,7 +943,7 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {!HistoryStateDef=} state
+   * @param {!HistoryStateDef} state
    * @private
    */
   updateHistoryState_(state) {
