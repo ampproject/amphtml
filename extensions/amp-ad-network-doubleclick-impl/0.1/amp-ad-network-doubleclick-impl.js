@@ -86,7 +86,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments'
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -939,10 +939,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (!this.sraDeferred) {
         dev().warn(TAG, `SRA failed to include element ${this.ifi_}`);
         if (isExperimentOn(this.win, 'doubleclickSraReportExcludedBlock')) {
-          const src = 'https://pagead2.googlesyndication.com/pagead/gen_204?' +
-              `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`;
           this.getAmpDoc().getBody().appendChild(createElementWithAttributes(
-            this.win.document, 'amp-pixel', dict({src})));
+              this.win.document, 'amp-pixel', dict({'src':
+              'https://pagead2.googlesyndication.com/pagead/gen_204?' +
+                  `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`})));
         }
       }
     });
