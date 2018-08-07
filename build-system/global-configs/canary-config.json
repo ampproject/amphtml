@@ -28,11 +28,11 @@
   "as-use-attr-for-format": 0.01,
   "a4aFastFetchDoubleclickLaunched": 0,
   "a4aFastFetchAdSenseLaunched": 0,
-  "3p-use-ampcontext": 1,
   "no-sync-xhr-in-ads": 1,
   "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
   "svg-in-mustache": 1,
+  "amp-carousel-scroll-snap": 1,
   "amp-consent": 1,
   "amp-img-native-srcset": 1,
   "amp-story-v1": 1,
@@ -40,5 +40,7 @@
   "expAdsenseCanonical": 0,
   "font-display-swap": 1,
   "amp-date-picker": 1,
-  "inline-styles": 1
+  "inline-styles": 1,
+  "doubleclickSraExp": 0.01,
+  "doubleclickSraReportExcludedBlock": 0.1
 }

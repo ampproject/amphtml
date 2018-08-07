@@ -910,8 +910,6 @@ export class AmpStory extends AMP.BaseElement {
     } else {
       this.storeService_.dispatch(Action.TOGGLE_AD, false);
       removeAttributeInMutate(this, Attributes.AD_SHOWING);
-      // TODO(alanorozco): decouple this using NavigationState
-      this.systemLayer_.setActivePageId(targetPageId);
     }
 
     // TODO(alanorozco): check if autoplay
@@ -973,6 +971,11 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
+    // Step out if trying to navigate to the currently active page.
+    if (this.activePage_ && (this.activePage_.element.id === targetPageId)) {
+      return Promise.resolve();
+    }
+
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
 
@@ -983,8 +986,6 @@ export class AmpStory extends AMP.BaseElement {
       // target page as fast as possible.
       () => {
         oldPage && oldPage.element.removeAttribute('active');
-
-        this.systemLayer_.setActivePageId(targetPageId);
 
         // Starts playing the page, if the story is not paused.
         // Note: navigation is prevented when the story is paused, this test
