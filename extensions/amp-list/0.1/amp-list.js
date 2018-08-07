@@ -29,11 +29,11 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {
   fromStructuredCloneable,
-  setAmpCors,
+  setupAMPCors,
   setupInit,
   setupJsonFetchInit,
-  validateFetchResponse,
-} from '../../../src/service/xhr-impl';
+  verifyAmpCORSHeaders,
+} from '../../../src/utils/xhr-utils';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -274,7 +274,7 @@ export class AmpList extends AMP.BaseElement {
         this.element,
         this.getPolicy_()).then(batchFetchData => {
       fetchData =
-          setAmpCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
+          setupAMPCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
       setupJsonFetchInit(fetchData.fetchOpt);
       setupInit(fetchData.fetchOpt);
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
@@ -283,7 +283,7 @@ export class AmpList extends AMP.BaseElement {
       // Construct the fetch response and validate.
       const fetchResponse =
           fromStructuredCloneable(win, response, fetchData.responseType);
-      validateFetchResponse(win, fetchResponse, fetchData.fetchOpt);
+      verifyAmpCORSHeaders(win, fetchResponse, fetchData.fetchOpt);
       return fetchResponse;
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);

@@ -15,7 +15,7 @@
  */
 
 import {dict} from './utils/object';
-import {toStructuredCloneable} from './service/xhr-impl';
+import {toStructuredCloneable} from './service/xhr-utils';
 
 /**
  * @typedef {{

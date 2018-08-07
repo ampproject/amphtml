@@ -43,10 +43,10 @@ import {
 } from '../../../src/form';
 import {
   fromStructuredCloneable,
-  setAmpCors,
+  setupAmpCors,
   setupInit,
-  validateFetchResponse,
-} from '../../../src/service/xhr-impl';
+  verifyAmpCORSHeaders,
+} from '../../../src/utils/xhr-utils';
 import {
   getFormValidator,
   isCheckValiditySupported,
@@ -504,8 +504,8 @@ export class AmpForm {
         // and only deal with submit-success or submit-error.
         fetchData = this.buildFetchData(
             dev().assertString(this.xhrAction_), this.method_);
-        setupInit(fetchData.fetchOpt);
-        setAmpCors(this.win_, fetchData.xhrUrl, fetchData.fetchOpt);
+        setupInit(this.win_, fetchData.xhrUrl, fetchData.fetchOpt);
+        setupAmpCors(this.win_, fetchData.xhrUrl, fetchData.fetchOpt);
         return this.ssrTemplateHelper_.fetchAndRenderTemplate(
             this.form_,
             fetchData,
@@ -649,8 +649,8 @@ export class AmpForm {
   handleSsrTemplateSuccess_(response, fetchData) {
     // Construct the fetch response and validate.
     const fetchResponse =
-        fromStructuredCloneable(this.win_, response, fetchData.responseType);
-    validateFetchResponse(this.win_, fetchResponse, fetchData.fetchOpt);
+        fromStructuredCloneable(response, fetchData.responseType);
+    verifyAmpCORSHeaders(this.win_, fetchResponse, fetchData.fetchOpt);
     return this.handleSubmitSuccess_(Promise.resolve(response['data']));
   }
 
