@@ -413,6 +413,11 @@ Only binding to the following components and attributes are allowed:
     <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
+    <td><code>&lt;amp-google-document-embed&gt;</code></td>
+    <td><code>[src]</code></td>
+    <td>Displays the document at the updated URL.</td>
+  </tr>
+  <tr>
     <td><code>&lt;amp-iframe&gt;</code></td>
     <td><code>[src]</code></td>
     <td>Changes the iframe's source URL.</td>
