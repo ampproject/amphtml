@@ -358,7 +358,6 @@ describes.realWin('amp-story', {
   });
 
   it('should update bookend status in browser history', () => {
-    const replaceStub = sandbox.stub(win.history, 'replaceState');
     const pageCount = 1;
     createPages(story.element, pageCount, ['last-page']);
 
@@ -370,10 +369,29 @@ describes.realWin('amp-story', {
         .then(() => {
           story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
 
-          return expect(replaceStub).to.have.been.calledWith(
+          return expect(replaceStateStub).to.have.been.calledWith(
               {ampStoryBookendActive: true}, '',
           );
         });
+  });
+
+
+  it('should not block layoutCallback when bookend xhr fails', () => {
+    createPages(story.element, 2, ['cover', 'page-1']);
+    sandbox.stub(story, 'getHistoryState_')
+        .withArgs('ampStoryBookendActive')
+        .returns(true);
+
+    story.buildCallback();
+
+    const bookendXhr =
+      sandbox.stub(story, 'showBookend_').returns(Promise.reject());
+
+    return story.layoutCallback().then(() => {
+      expect(bookendXhr).to.have.been.calledOnce;
+    }).catch(error => {
+      expect(error).to.be.undefined;
+    });
   });
 
   it('should NOT update page id in browser history if ad', () => {
