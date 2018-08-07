@@ -872,7 +872,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.iframe.contentWindow.document,
       'Attempted to access cross-origin frame');
       this.attemptChangeHeight(
-          this.iframe.contentWindow.document.body.scrollHeight)
+          this.iframe.contentWindow.document.body./*OK*/scrollHeight)
           .then(() => this.fireFluidDelayedImpression());
     }
 
