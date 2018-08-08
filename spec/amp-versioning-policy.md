@@ -9,14 +9,14 @@
 ## Versioning
 
 - We use [semver](http://semver.org/) terminology, but see below for changes from simple semver.
-- AMP and its extensions are versioned. There is also an **AMP release** that corresponds to the precise code. Each major and minor version may correspond to many AMP releases.
+- The AMP JS library and its extensions are versioned. There is also an **AMP release** that corresponds to the precise code. Each major and minor version may correspond to many AMP releases.
 - AMP is **released** about once per week and each release has a unique version number. With each release, AMP pages are rendered with the latest code for the respective major/minor versions of the AMP JS library and extensions.
 
-### AMP JS Library
+### AMP JS library
 
 The AMP JS library is distributed via its major version only. The major version is expected to change rarely if ever (on the order of less than once per year).
 
-### AMP Extensions
+### AMP extensions
 
 Each AMP extension is versioned independently. Publishers of AMP documents can choose the major and minor version of an extension; they cannot choose the patch version. 
 
@@ -44,9 +44,9 @@ For breaking changes, the major version of an extension (or more rarely) the mai
 In some cases, the AMP project may decide that an existing feature or API must be removed. Such changes must follow the AMP deprecations process prior to removal. Deprecations must be publicly discussed and provide significant user benefit that justifies additional work for page developers.
 
 Process:
-- Create "Intent to Implement" issue.
+- Create [INTENT TO IMPLEMENT](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) issue.
 - Allow for at least 2 weeks of open discussion.
-- Wait for 3 LGTMs from core committers.
+- Wait for 3 approvals from core committers.
 - [Announce](#announcements) change on the mailing list.
 - Start warning for pages that might break via the developer console.
 - Give developers 6 weeks to apply changes.
