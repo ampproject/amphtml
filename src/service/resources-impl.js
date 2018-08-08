@@ -242,7 +242,7 @@ export class Resources {
         this.schedulePass();
       });
 
-      /** @private @const {function(number|undefined, !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
+      /** @private @const {function((number|undefined), !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
       this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
     }
 
