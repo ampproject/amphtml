@@ -271,16 +271,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   buildHint_() {
     this.hint_ = this.doc_.createElement('div');
 
-    if (this.element.hasAttribute('hint-reappear')) {
-      this.shouldHintReappear_ = true;
-    }
-
-    if (this.element.hasAttribute('hint-reappear-interval')) {
-      this.hintReappearInterval_ =
-          Number(this.element.getAttribute('hint-reappear-interval')) ||
-          this.hintReappearInterval_;
-    }
-
     const hintArrowWrapper = this.doc_.createElement('div');
     this.hintLeftArrow_ = htmlFor(this.doc_)
     `<div class="amp-image-slider-hint-left"></div>`;
