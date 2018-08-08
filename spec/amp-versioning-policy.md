@@ -4,7 +4,7 @@
 
 - Reduce overall JS URL entropy. AMP aims to provide as few versions of the JS library and extensions as possible to improve cache hit rates for these requests.
 - Avoid breaking existing pages.
-- Keep all users of AMP on secure and performant versions of the library.
+- Keep all users of AMP on secure and updated versions of the library.
 - Enable all AMP developers to keep their AMP pages up-to-date.
 
 ## Versioning
@@ -58,9 +58,10 @@ Process:
 
 Old versions of the AMP JS library and extensions may eventually be declared invalid by the AMP Validator. Such changes must also follow AMP's deprecations policy and additional deprecation rules prior to invalidation. 
 
-- A version may not be deprecated until a new version is released and stable for at least 1 month.
-- A version may not be invalidated until it has been deprecated for at least 1 year.
-- A version may be removed if its used by fewer than 0.1% of crawler-accessible AMP pages.
+- A version must not be deprecated until a new version is released and stable for at least 1 month.
+- A version must not be invalidated until it has been deprecated for at least 1 year.
+
+Versions must not be removed (i.e. binaries deleted) except in the case of security issues.
 
 ## Announcements
 
