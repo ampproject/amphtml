@@ -372,12 +372,9 @@ class AmpApesterMedia extends AMP.BaseElement {
                 const size = media && media['data'] && media['data']['size'];
                 const platform = isMobileDevice() ? 'mobile' : 'desktop';
                 if (size && size[platform]) {
-                  console.log(`Changing size to height ${size[platform]['height']} and width ${size[platform]['width']}`);
                   this.changeSize(size[platform]['height'], size[platform]['width']);
-                  // this./*OK*/ attemptChangeHeight(size[platform]['height'], size[platform]['width']);
                 } else if (size) {
                   this.changeSize(size['height'], size['width']);
-                  console.log(`Changing size to height ${size['height']} and width ${size['width']}`);
                 }
               });
             });
