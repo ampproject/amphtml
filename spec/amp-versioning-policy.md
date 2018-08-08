@@ -4,7 +4,8 @@
 
 - Reduce overall JS URL entropy. AMP aims to provide as few versions of the JS library and extensions as possible to improve cache hit rates for these requests.
 - Avoid breaking existing pages.
-- Keep all users of AMP on secure versions of the library.
+- Keep all users of AMP on secure and performant versions of the library.
+- Enable all AMP developers to keep their AMP pages up-to-date.
 
 ## Versioning
 
