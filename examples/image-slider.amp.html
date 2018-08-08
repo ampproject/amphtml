@@ -14,7 +14,7 @@
 
     .flex {
       display: flex;
-      justify-content: space-between
+      justify-content: space-between;
     }
 
     .label {
@@ -78,14 +78,6 @@
       transform: translate(50%, -50%);
     }
 
-    .my-left-hint {
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='32px' width='16px'><text x='0' y='15' fill='red' font-size='1'>&lt;-</text></svg>");
-    }
-
-    .my-right-hint {
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='32px' width='16px'><text x='0' y='15' fill='red' font-size='1'>-&gt;</text></svg>");
-    }
-
     .lightbox {
       position: absolute;
       width: 100%;
@@ -134,129 +126,14 @@
 
     <h1>Customizable Hints</h1>
 
-    <p>Disable hint</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" disable-hint>
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-
-    <p>Reemerging hint (default to no interaction for 10s)</p>
+    <p>No Reemerging hint</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
-        hint-reappear>
+        disable-hint-reappear>
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
     </amp-image-slider>
-
-    <p>Reemerging hint (customized to no interaction for 2s)</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
-        hint-reappear hint-reappear-interval="2000">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-
-    <p>Instantly reemerging hint (customized to no interaction for 0.001s)</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
-        hint-reappear hint-reappear-interval="1">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-
-    <h1>Initial Percent</h1>
-    <p>30% to the left</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" initial-percent="0.3">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-    </amp-image-slider>
-
-    <h1><code>seekTo</code> action</h1>
-
-    <p>Position Observer with Seeking (gesture disabled)</p>
-    <div>
-      <amp-position-observer
-        intersection-ratios="1"
-        on="scroll:observed.seekTo(percent=event.percent)"
-        layout="nodisplay">
-      </amp-position-observer>
-      <amp-image-slider id="observed" tabindex="0" layout="responsive" width="1024" height="600" disable-gesture>
-        <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-        <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-        <div first class="label">BEFORE</div>
-        <div second class="label">AFTER</div>
-      </amp-image-slider>
-    </div>
-
-    <p>Example of seeking</p>
-    <amp-image-slider id="seekable" tabindex="0" layout="responsive" width="1024" height="600">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-    <div class="flex">
-      <button on="tap:seekable.seekTo(percent=0)">Click me to Seek to Left</button>
-      <button on="tap:seekable.seekTo(percent=0.5)">Click me to Seek to Center</button>
-      <button on="tap:seekable.seekTo(percent=1)">Click me to Seek to Right</button>
-    </div>
-
-    <h1>Tab + Keyboard</h1>
-    <p>Move step set to 20%, Home for Center, PageUp for Left, PageDown for Right</p>
-    <amp-image-slider tabindex="0" step-size="0.2" layout="responsive" width="1024" height="600">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-
-    <!--
-    <h1>Toggle <code>disable-gesture</code> (for user interaction, <code>seekTo</code> will still work)</h1>
-    <p>Toggling disable-gesture with One-time hint (will be recreated on enable, but if keep enabled, would only appear once)</p>
-    <amp-image-slider id="disableDemo" tabindex="11" layout="responsive" width="1024" height="600" [disable-gesture]="disableDemo.disabled">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-    <div class="flex">
-      <button on="tap:AMP.setState({disableDemo: {disabled: false}})">Enable</button>
-      <button on="tap:disableDemo.seekTo(percent=0)">Seek to Left</button>
-      <button on="tap:AMP.setState({disableDemo: {disabled: true}})">Disable</button>
-    </div>
-
-    <p>Toggling disable-gesture with Hint Reappearing</p>
-    <amp-image-slider id="disableDemo1" tabindex="12" layout="responsive" width="1024" height="600" [disable-gesture]="disableDemo1.disabled"
-        hint-reappear hint-reappear-interval="1000">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-    <div class="flex">
-      <button on="tap:AMP.setState({disableDemo1: {disabled: false}})">Enable</button>
-      <button on="tap:disableDemo1.seekTo(percent=0)">Seek to Left</button>
-      <button on="tap:AMP.setState({disableDemo1: {disabled: true}})">Disable</button>
-    </div>
-
-    <p>Toggling disable-gesture with NO hint</p>
-    <amp-image-slider id="disableDemo2" tabindex="13" layout="responsive" width="1024" height="600" disable-hint [disable-gesture]="disableDemo2.disabled">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-    <div class="flex">
-      <button on="tap:AMP.setState({disableDemo2: {disabled: false}})">Enable</button>
-      <button on="tap:disableDemo2.seekTo(percent=0)">Seek to Left</button>
-      <button on="tap:AMP.setState({disableDemo2: {disabled: true}})">Disable</button>
-    </div>
-    -->
 
     <h1>Inside Carousel</h1>
 
