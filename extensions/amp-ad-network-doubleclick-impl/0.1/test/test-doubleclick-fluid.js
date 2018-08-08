@@ -235,6 +235,8 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     return impl.adPromise_.then(() => {
       return impl.layoutCallback().then(() => {
         expect(impl.iframe.style.height).to.equal('250px');
+        expect(impl.iframe.style.width).to.equal('100%');
+        expect(impl.element.style.width).to.equal('100%');
       });
     });
   });

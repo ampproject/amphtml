@@ -20,7 +20,7 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
 
@@ -712,7 +712,11 @@ export class SafeframeHostApi {
     const iframe = dev().assertElement(this.baseInstance_.iframe);
     const iframeHeight = parseInt(getStyle(iframe, 'height'), 10) || 0;
     if (iframeHeight != newHeight) {
-      setStyles(iframe, {height: `${newHeight}px`});
+      setStyles(iframe, {
+        height: `${newHeight}px`,
+        width: '100%',
+      });
+      setStyle(this.baseInstance_.element, 'width', '100%');
     }
     if (this.fluidImpressionUrl_) {
       this.baseInstance_.fireDelayedImpressions(
