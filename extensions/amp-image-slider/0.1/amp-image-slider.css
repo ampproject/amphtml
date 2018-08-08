@@ -104,23 +104,30 @@ amp-image-slider amp-img > img {
   opacity: 0;
 }
 
+.i-amphtml-image-slider-hint-grid {
+  display: inline-grid;
+  display: -ms-inline-grid;
+  grid-template-columns: auto auto;
+  -ms-grid-columns: auto auto;
+}
+
 .amp-image-slider-hint-left {
-  display: inline-block;
-  margin-right: 30px;
-  background-size: 32px 16px;
-  width: 32px;
+  /* display: inline-block; */
+  /* margin-right: 30px; */
+  background-size: 64px 16px;
+  width: 64px;
   height: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8"><g data-name="Layer 2"><path d="M4 5h12V3H4V0L0 4l4 4z" fill="#fff" data-name="Layer 1"/></g></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 8"><g data-name="Layer 2"><path d="M4 5h12V3H4V0L0 4l4 4z" fill="#fff" data-name="Layer 1"/></g></svg>');
   filter: drop-shadow(3px 3px 4px black);
 }
 
 .amp-image-slider-hint-right {
-  display: inline-block;
-  margin-left: 30px;
-  background-size: 32px 16px;
-  width: 32px;
+  /* display: inline-block; */
+  /* margin-left: 30px; */
+  background-size: 64px 16px;
+  width: 64px;
   height: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8"><g data-name="Layer 2"><path d="M12 5h-12V3H12V0L16 4l-4 4z" fill="#fff" data-name="Layer 1"/></g></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 8"><g data-name="Layer 2"><path d="M28 5h-12V3H28V0L32 4l-4 4z" fill="#fff" data-name="Layer 1"/></g></svg>');
   filter: drop-shadow(3px 3px 4px black);
 }
 

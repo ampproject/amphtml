@@ -283,6 +283,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     }
 
     const hintArrowWrapper = this.doc_.createElement('div');
+    hintArrowWrapper.classList.add('i-amphtml-image-slider-hint-grid');
     this.hintLeftArrow_ = htmlFor(this.doc_)
     `<div class="amp-image-slider-hint-left"></div>`;
     this.hintRightArrow_ = htmlFor(this.doc_)
