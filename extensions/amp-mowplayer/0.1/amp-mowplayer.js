@@ -31,7 +31,6 @@ import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
   fullscreenExit,
-  getDataParamsFromAttributes,
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
@@ -127,12 +126,10 @@ class AmpMowplayer extends AMP.BaseElement {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
-    const {element} = this;
-    const params = getDataParamsFromAttributes(element);
-    const src = addParamsToUrl('https://cdn.mowplayer.com/player.html',
-        Object.assign(dict({
-          'code': this.mediaid_,
-        }), params));
+    const params = dict({
+      'code': this.mediaid_,
+    });
+    const src = addParamsToUrl('https://cdn.mowplayer.com/player.html',params);
 
     return this.videoIframeSrc_ = src;
   }
@@ -186,14 +183,6 @@ class AmpMowplayer extends AMP.BaseElement {
       return;
     }
     this.sendCommand_('loadVideoById', [this.mediaid_]);
-  }
-
-  /**
-   * @return {?string}
-   * @private
-   */
-  getMediaId_() {
-    return this.element.getAttribute('data-mediaid');
   }
 
   /**
