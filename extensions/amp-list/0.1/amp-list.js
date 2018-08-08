@@ -278,7 +278,6 @@ export class AmpList extends AMP.BaseElement {
           setupAMPCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
       setupJsonFetchInit(batchFetchData.fetchOpt);
       setupInit(batchFetchData.fetchOpt);
-      this.element.getAttribute('items') || 'items';
       const ampListAttributes = dict({
         'ampListAttributes': {
           'items': this.element.getAttribute('items') || 'items',

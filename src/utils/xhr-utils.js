@@ -378,9 +378,9 @@ function normalizeMethod_(method) {
 /**
  * Verifies if response has the correct headers
  * @param {!Window} win
- * @param {!FetchResponse} response
+ * @param {!FetchResponse|!Response} response
  * @param {!FetchInitDef=} init
- * @return {!FetchResponse}
+ * @return {!FetchResponse|!Response}
  */
 export function verifyAmpCORSHeaders(win, response, init) {
   const allowSourceOriginHeader = response.headers.get(

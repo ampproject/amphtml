@@ -86,15 +86,15 @@ export class SsrTemplateHelper {
             fetchData,
             mustacheTemplate,
             opt_templates,
-            opt_attributes,
+            opt_attributes
         ));
   }
 
   /**
    * @param {!./service/xhr-impl.FetchData} fetchData
-   * @param {string} mustacheTemplate
+   * @param {string|undefined} mustacheTemplate
    * @param {?SsrTemplateDef=} opt_templates
-   * @param {!JsonObject=} opt_attributes
+   * @param {?JsonObject=} opt_attributes
    */
   buildPayload_(fetchData, mustacheTemplate, opt_templates, opt_attributes) {
     const ampComponent = dict({
