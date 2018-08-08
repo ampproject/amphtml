@@ -29,7 +29,6 @@
 
 import {addParamToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 
@@ -75,8 +74,6 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-google-document-embed'),
-        'Experiment amp-google-document-embed is disabled');
     user().assert(
         this.element.getAttribute('src'),
         'The src attribute is required for <amp-google-document-embed> %s',

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {TAG} from '../amp-google-document-embed';
-import {toggleExperiment} from '../../../../src/experiments';
+import '../amp-google-document-embed';
 
 describes.realWin('amp-google-document-embed', {
   amp: {
@@ -27,7 +26,6 @@ describes.realWin('amp-google-document-embed', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    toggleExperiment(win, TAG, true);
   });
 
   function getDriveViewer(src, opt_responsive) {
