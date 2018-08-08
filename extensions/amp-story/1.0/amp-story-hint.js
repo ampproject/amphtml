@@ -168,6 +168,10 @@ export class AmpStoryHint {
     this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
+    }, true /** callToInitialize */);
+
     this.vsync_.mutate(() => {
       this.parentEl_.appendChild(root);
     });
@@ -255,6 +259,19 @@ export class AmpStoryHint {
 
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.add('i-amphtml-hidden');
+    });
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState ?
+        this.hintContainer_.setAttribute('dir', 'rtl') :
+        this.hintContainer_.removeAttribute('dir');
     });
   }
 }
