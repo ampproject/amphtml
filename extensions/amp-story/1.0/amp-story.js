@@ -746,7 +746,6 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
     const bookendActive = !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
 
@@ -766,6 +765,7 @@ export class AmpStory extends AMP.BaseElement {
             this.upgradeCtaAnchorTagsForTracking_(page, index);
           });
         })
+        .then(() => this.initializeBookend_())
         .then(() => this.switchTo_(initialPageId))
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
@@ -780,16 +780,9 @@ export class AmpStory extends AMP.BaseElement {
             new InfoDialog(this.win, this.element) : null;
           if (infoDialog) {
             infoDialog.build();
-          }
-        })
-        .then(() => {
-          this.hasBookend_().then(hasBookend => {
-            if (hasBookend && bookendActive) {
-              return this.showBookend_();
-            }
-            return Promise.resolve();
-          });
-        });
+          }}
+        )
+        .then(() => this.checkForReturnToBookend_());
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
@@ -1637,6 +1630,22 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Checks if user returned from another page back to the bookend page and
+   * displays it.
+   * @return {!Promise}
+   * @private
+   */
+  checkForReturnToBookend_() {
+    const bookendActive = !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
+
+    if (bookendActive) {
+      return this.showBookend_().then(() => bookendActive);
+    }
+    return Promise.resolve();
+  }
+
+
+  /**
    * Shows the bookend overlay.
    * @private
    * @return {!Promise}
@@ -1849,6 +1858,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Initializes bookend.
+   * @return {!Promise}
    * @private
    */
   initializeBookend_() {
@@ -1859,7 +1869,7 @@ export class AmpStory extends AMP.BaseElement {
       this.element.appendChild(bookendEl);
     }
 
-    bookendEl.getImpl().then(
+    return bookendEl.getImpl().then(
         bookendImpl => {
           this.bookend_ = bookendImpl;
         });
