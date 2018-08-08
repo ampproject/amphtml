@@ -114,7 +114,7 @@
   will-change: transform, transition !important;
 }
 
-[dir=rtl] .i-amphtml-story-progress-value {
+[dir=rtl] .i-amphtml-story-page-progress-value {
   transform-origin: right !important;
 }
 
