@@ -38,5 +38,20 @@
     <div first class="red">BEFORE</div>
     <div second class="green">AFTER</div>
   </amp-image-slider>
+
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+  </amp-image-slider>
+
+  <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
+    <span>BAD CONTENT</span>
+    <amp-img src="/1.jpg" layout="fill"></amp-img>
+    <amp-img src="/2.jpg" layout="fill"></amp-img>
+    <div first class="red">BEFORE</div>
+    <div second class="green">AFTER</div>
+  </amp-image-slider>
+
+  <div first>Should not be exposed</div>
+  <div second>Should not be exposed</div>
 </body>
 </html>

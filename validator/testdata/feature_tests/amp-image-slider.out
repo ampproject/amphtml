@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |
@@ -39,5 +39,28 @@ PASS
 |      <div first class="red">BEFORE</div>
 |      <div second class="green">AFTER</div>
 |    </amp-image-slider>
+|
+|    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
+>>   ^~~~~~~~~
+feature_tests/amp-image-slider.html:42:2 Tag 'amp-image-slider' must have a minimum of 2 child tags - saw 1 child tags. (see https://www.ampproject.org/docs/reference/components/amp-image-slider) [GENERIC]
+|      <amp-img src="/1.jpg" layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
+|      <span>BAD CONTENT</span>
+>>     ^~~~~~~~~
+feature_tests/amp-image-slider.html:47:4 Tag 'span' is disallowed as child of tag 'amp-image-slider'. Child tag must be one of ['amp-img', 'div']. (see https://www.ampproject.org/docs/reference/components/amp-image-slider) [AMP_TAG_PROBLEM]
+|      <amp-img src="/1.jpg" layout="fill"></amp-img>
+|      <amp-img src="/2.jpg" layout="fill"></amp-img>
+|      <div first class="red">BEFORE</div>
+|      <div second class="green">AFTER</div>
+|    </amp-image-slider>
+|
+|    <div first>Should not be exposed</div>
+>>   ^~~~~~~~~
+feature_tests/amp-image-slider.html:54:2 The attribute 'first' may not appear in tag 'div'. [DISALLOWED_HTML]
+|    <div second>Should not be exposed</div>
+>>   ^~~~~~~~~
+feature_tests/amp-image-slider.html:55:2 The attribute 'second' may not appear in tag 'div'. [DISALLOWED_HTML]
 |  </body>
 |  </html>
