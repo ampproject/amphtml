@@ -143,11 +143,6 @@ describes.realWin('AmpForm Integration', {
 
       form.dispatchEvent(new Event('submit'));
       return fetch.then(() => {
-        // TODO(alabiaga): the recursive nature in comment below is because of
-        // the global submit listener via document-submit.js. This is no longer
-        // valid as the head doesn't have the script present.
-        // This should be fixed to test this behavior.
-
         // Due to recursive nature of 'on=submit:sameform.submit' we expect
         // the action handler to be called twice, the first time for the
         // actual user submission.
