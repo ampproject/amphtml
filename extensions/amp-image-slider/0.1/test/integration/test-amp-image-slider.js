@@ -21,21 +21,33 @@ config.run('amp-image-slider', function() {
   this.timeout(20000);
 
   const sliderBody = `
-    <amp-image-slider id="slider" layout="responsive" width="1000" height="500">
+    <amp-image-slider tabindex="0" id="slider"
+        layout="responsive" width="1000" height="500">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div before class="label">BEFORE</div>
-      <div after class="label">AFTER</div>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
     </amp-image-slider>
+    <button id="button" on="tap:slider.seekTo(percent=0.1)">seekTo 10%</button>
+    <p class="para">HUGE PADDING</p>
   `;
 
   const css = `
+  #slider .amp-image-slider-hint-left {
+    width: 64px;
+    height: 32px;
+    background-width: 64px;
+    background-height: 32px;
+  }
   .label {
     color: white;
     border: 4px solid white;
     padding: 1em;
     font-family: Arial, Helvetica, sans-serif;
     box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
+  }
+  .para {
+    height: 10000px;
   }
   `;
 
@@ -54,6 +66,7 @@ config.run('amp-image-slider', function() {
     let sliderImpl;
     let rect;
     let bar_, container_, rightMask_, leftAmpImage_, rightAmpImage_;
+    let leftLabel_, rightLabel_;
 
     beforeEach(() => {
       win = env.win;
@@ -94,6 +107,16 @@ config.run('amp-image-slider', function() {
       return event;
     }
 
+    function timeout(win, ms) {
+      return new Promise(resolve => win.setTimeout(resolve, ms));
+    }
+
+    function createKeyDownEvent(key) {
+      return new KeyboardEvent('keydown', {
+        key,
+      });
+    }
+
     function prepareSlider() {
       sliderImpl = slider.implementation_;
       rect = slider.getBoundingClientRect();
@@ -108,7 +131,7 @@ config.run('amp-image-slider', function() {
     // A bunch of expects to check if the slider has slided to
     // where we intended
     function expectByBarLeftPos(leftPos) {
-      slider = doc.querySelector('amp-image-slider');
+      slider = doc.querySelector('#slider');
       bar_ = slider.querySelector('.i-amphtml-image-slider-bar');
       container_ =
           slider.querySelector('.i-amphtml-image-slider-container');
@@ -117,16 +140,27 @@ config.run('amp-image-slider', function() {
       const ampImgs = slider.getElementsByTagName('amp-img');
       leftAmpImage_ = ampImgs[0];
       rightAmpImage_ = ampImgs[1];
+      leftLabel_ = slider.querySelectorAll(
+          '.i-amphtml-image-slider-label-wrapper')[0];
+      rightLabel_ = slider.querySelectorAll(
+          '.i-amphtml-image-slider-label-wrapper')[1];
 
-      expect(bar_.getBoundingClientRect().left)
-          .to.equal(leftPos);
-      expect(rightMask_.getBoundingClientRect().left)
-          .to.equal(leftPos);
+      const roundedLeftPos = Math.round(leftPos);
+      const roundedRectLeft = Math.round(rect.left);
+
+      expect(Math.round(bar_.getBoundingClientRect().left))
+          .to.equal(roundedLeftPos);
+      expect(Math.round(rightMask_.getBoundingClientRect().left))
+          .to.equal(roundedLeftPos);
       // amp-imgs should stay where they are
-      expect(leftAmpImage_.getBoundingClientRect().left)
-          .to.equal(rect.left);
-      expect(rightAmpImage_.getBoundingClientRect().left)
-          .to.equal(rect.left);
+      expect(Math.round(leftAmpImage_.getBoundingClientRect().left))
+          .to.equal(roundedRectLeft);
+      expect(Math.round(rightAmpImage_.getBoundingClientRect().left))
+          .to.equal(roundedRectLeft);
+      expect(Math.round(leftLabel_.getBoundingClientRect().left))
+          .to.equal(roundedRectLeft);
+      expect(Math.round(rightLabel_.getBoundingClientRect().left))
+          .to.equal(roundedRectLeft);
     }
 
     it('should construct', () => {
@@ -225,10 +259,6 @@ config.run('amp-image-slider', function() {
             expectByBarLeftPos(centerPos);
           });
     });
-
-    function timeout(win, ms) {
-      return new Promise(resolve => win.setTimeout(resolve, ms));
-    }
 
     it('should follow mouse drag', () => {
       let slider;
@@ -408,6 +438,54 @@ config.run('amp-image-slider', function() {
           })
           .then(() => {
             expectByBarLeftPos(rightQuarterPos);
+          });
+    });
+
+    it('should follow keyboard buttons', () => {
+      let slider;
+      let keyDownEvent;
+      let centerPos, pos40Percent;
+      return prep()
+          .then(() => {
+            slider = doc.querySelector('amp-image-slider');
+            slider.focus();
+            centerPos = rect.left + 0.5 * rect.width;
+            pos40Percent = rect.left + 0.4 * rect.width;
+
+            keyDownEvent = createKeyDownEvent('ArrowLeft');
+            slider.dispatchEvent(keyDownEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            expectByBarLeftPos(pos40Percent);
+
+            keyDownEvent = createKeyDownEvent('ArrowRight');
+            slider.dispatchEvent(keyDownEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            expectByBarLeftPos(centerPos);
+
+            keyDownEvent = createKeyDownEvent('PageUp');
+            slider.dispatchEvent(keyDownEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            expectByBarLeftPos(rect.left);
+
+            keyDownEvent = createKeyDownEvent('Home');
+            slider.dispatchEvent(keyDownEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            expectByBarLeftPos(centerPos);
+
+            keyDownEvent = createKeyDownEvent('PageDown');
+            slider.dispatchEvent(keyDownEvent);
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            expectByBarLeftPos(rect.right);
           });
     });
   });

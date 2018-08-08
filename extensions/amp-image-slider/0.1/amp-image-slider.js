@@ -16,8 +16,8 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
-import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
@@ -69,6 +69,10 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     /** @private {Element|null} */
     this.hint_ = null;
+    /** @private {Element|null} */
+    this.hintLeftArrow_ = null;
+    /** @private {Element|null} */
+    this.hintRightArrow_ = null;
 
     /** @private {UnlistenDef|null} */
     this.unlistenMouseDown_ = null;
@@ -85,15 +89,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       (Number(this.element.getAttribute('step-size')) || 0.1) : 0.1;
 
     /** @private {boolean} */
-    this.disableHint_ = this.element.hasAttribute('disable-hint');
-    /** @private {number} */
-    this.hintReappearInterval_ = 10000;
-    /** @private {boolean} */
-    this.shouldHintReappear_ = false;
-    /** @private {number|null} */
-    this.hintTimeoutHandle_ = null;
-    /** @private {boolean} */
-    this.isHintHidden_ = false;
+    this.shouldHintReappear_ =
+      !this.element.hasAttribute('disable-hint-reappear');
 
     /** @private {boolean} */
     this.gestureDisabled_ = false; // for now, will be set later
@@ -127,9 +124,9 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
 
       if (child.tagName.toLowerCase() === 'div') {
-        if (child.hasAttribute('before')) {
+        if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
-        } else if (child.hasAttribute('after')) {
+        } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
         }
       }
@@ -152,6 +149,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.buildImageWrappers_();
     this.buildBar_();
     this.buildHint_();
+    this.checkARIA_();
 
     this.registerAction('seekTo', invocation => {
       const {args} = invocation;
@@ -160,7 +158,9 @@ export class AmpImageSlider extends AMP.BaseElement {
           const percent = args['percent'];
           user().assertNumber(percent,
               'value to seek to must be a number');
-          this.updatePositions_(percent);
+          this.mutateElement(() => {
+            this.updatePositions_(percent);
+          });
         }
       }
     }, ActionTrust.LOW);
@@ -199,10 +199,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (!this.gestureDisabled_) {
       return;
     }
-    // Show hint if needed
-    if (!this.disableHint_) {
-      this.animateShowHint_();
-    }
     this.registerEvents_();
     this.gestureDisabled_ = false;
   }
@@ -214,13 +210,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   disableGesture_() {
     if (this.gestureDisabled_) {
       return;
-    }
-    // Hide hint if needed
-    if (!this.disableHint_) {
-      // need to clear timeout handle inside
-      // thus not directly calling animateHideHint_
-      this.resetHintReappear_(true); // no restart
-      this.isHintHidden_ = true;
     }
     this.unregisterEvents_();
     this.gestureDisabled_ = true;
@@ -241,19 +230,20 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.leftLabel_) {
       this.leftLabelWrapper_ = this.doc_.createElement('div');
       this.leftLabelWrapper_.classList
-          .add('i-amphtml-image-slider-left-label-wrapper');
-      this.leftLabel_.classList.add('i-amphtml-image-slider-left-label');
+          .add('i-amphtml-image-slider-label-wrapper');
       this.leftLabelWrapper_.appendChild(this.leftLabel_);
       this.leftMask_.appendChild(this.leftLabelWrapper_);
     }
 
     this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
-    this.rightAmpImage_.classList.add('i-amphtml-image-slider-image-on-top');
+    this.rightMask_.classList.add('i-amphtml-image-slider-push-right');
+    this.rightAmpImage_.classList.add('i-amphtml-image-slider-push-left');
     if (this.rightLabel_) {
       this.rightLabelWrapper_ = this.doc_.createElement('div');
       this.rightLabelWrapper_.classList
-          .add('i-amphtml-image-slider-right-label-wrapper');
-      this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
+          .add('i-amphtml-image-slider-label-wrapper');
+      this.rightLabelWrapper_.classList
+          .add('i-amphtml-image-slider-push-left');
       this.rightLabelWrapper_.appendChild(this.rightLabel_);
       this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
@@ -269,7 +259,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.bar_.appendChild(this.barStick_);
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
+    this.bar_.classList.add('i-amphtml-image-slider-push-right');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
+    this.barStick_.classList.add('i-amphtml-image-slider-push-left');
 
     this.container_.appendChild(this.bar_);
   }
@@ -279,31 +271,67 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   buildHint_() {
-    if (this.disableHint_) {
-      return;
-    }
-
     this.hint_ = this.doc_.createElement('div');
 
-    if (this.element.hasAttribute('hint-reappear')) {
-      this.shouldHintReappear_ = true;
-    }
+    const hintArrowWrapper = this.doc_.createElement('div');
+    this.hintLeftArrow_ = htmlFor(this.doc_)
+    `<div class="amp-image-slider-hint-left"></div>`;
+    this.hintRightArrow_ = htmlFor(this.doc_)
+    `<div class="amp-image-slider-hint-right"></div>`;
 
-    if (this.element.hasAttribute('hint-reappear-interval')) {
-      this.hintReappearInterval_ =
-          Number(this.element.getAttribute('hint-reappear-interval')) ||
-          this.hintReappearInterval_;
-    }
+    hintArrowWrapper.appendChild(this.hintLeftArrow_);
+    hintArrowWrapper.appendChild(this.hintRightArrow_);
 
-    const leftHintIcon = htmlFor(this.doc_)
-    `<div class="amp-image-slider-hint-left-arrow"></div>`;
-    const rightHintIcon = htmlFor(this.doc_)
-    `<div class="amp-image-slider-hint-right-arrow"></div>`;
-
-    this.hint_.appendChild(leftHintIcon);
-    this.hint_.appendChild(rightHintIcon);
+    this.hint_.appendChild(hintArrowWrapper);
     this.hint_.classList.add('i-amphtml-image-slider-hint');
+    this.hint_.classList.add('i-amphtml-image-slider-push-left');
     this.bar_.appendChild(this.hint_);
+  }
+
+  /**
+   * Check if aria attributes are correctly set
+   * If not, apply default and warn user in console
+   * @private
+   */
+  checkARIA_() {
+    const leftAmpImage = dev().assertElement(this.leftAmpImage_);
+    const rightAmpImage = dev().assertElement(this.rightAmpImage_);
+    leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (leftAmpImage.childElementCount > 0) {
+        const img = leftAmpImage.firstChild;
+        let newAltText;
+        this.measureMutateElement(() => {
+          const ariaSuffix =
+            leftAmpImage.getAttribute('data-left-image-aria-suffix')
+              || 'left image';
+          if (leftAmpImage.hasAttribute('alt')) {
+            newAltText = `${leftAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
+          } else {
+            newAltText = ariaSuffix;
+          }
+        }, () => {
+          img.setAttribute('alt', newAltText);
+        });
+      }
+    });
+    rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (rightAmpImage.childElementCount > 0) {
+        const img = rightAmpImage.firstChild;
+        let newAltText;
+        this.measureMutateElement(() => {
+          const ariaSuffix =
+            rightAmpImage.getAttribute('data-right-image-aria-suffix')
+              || 'right image';
+          if (rightAmpImage.hasAttribute('alt')) {
+            newAltText = `${rightAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
+          } else {
+            newAltText = ariaSuffix;
+          }
+        }, () => {
+          img.setAttribute('alt', newAltText);
+        });
+      }
+    });
   }
 
   /**
@@ -318,26 +346,18 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.gestures_ = Gestures.get(this.element);
 
     this.gestures_.onGesture(SwipeXRecognizer, e => {
-      // We need the initial offset, yet gesture event seems not providing
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
-        this.resetHintReappear_(true);
+        this.animateHideHint_();
       }
       this.pointerMoveX_(
           e.data.startX + e.data.deltaX);
-      if (e.data.last) {
-        // Reset hint reappearance timeout if needed
-        this.resetHintReappear_(!this.shouldHintReappear_);
-      }
     });
 
     this.gestures_.onPointerDown(e => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX, true);
-      // Use !this.shouldHintReappear_ here
-      // It is possible that after onPointerDown
-      // SwipeXRecognizer callback is not triggered
-      this.resetHintReappear_(!this.shouldHintReappear_);
+      this.animateHideHint_();
     });
   }
 
@@ -354,44 +374,13 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Reset interval when the hint would reappear
-   * Call this when an user interaction is done
-   * Specify opt_noRestart to true if no intent to start a timeout for
-   * showing hint again.
-   * @param {boolean=} opt_noRestart
-   * @private
-   */
-  resetHintReappear_(opt_noRestart) {
-    if (this.disableHint_) {
-      return;
-    }
-
-    if (!this.isHintHidden_) {
-      this.animateHideHint_();
-    }
-
-    if (this.hintTimeoutHandle_ !== null) {
-      Services.timerFor(this.win).cancel(this.hintTimeoutHandle_);
-    }
-
-    if (opt_noRestart === true) {
-      this.hintTimeoutHandle_ = null;
-      return;
-    }
-
-    // Use timer instead of default setTimeout
-    this.hintTimeoutHandle_ = Services.timerFor(this.win).delay(() => {
-      this.animateShowHint_();
-    }, this.hintReappearInterval_);
-  }
-
-  /**
    * Show hint with animation
    * @private
    */
   animateShowHint_() {
-    this.hint_.classList.remove('i-amphtml-image-slider-hint-hidden');
-    this.isHintHidden_ = false;
+    this.mutateElement(() => {
+      this.hint_.classList.remove('i-amphtml-image-slider-hint-hidden');
+    });
   }
 
   /**
@@ -399,8 +388,9 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   animateHideHint_() {
-    this.hint_.classList.add('i-amphtml-image-slider-hint-hidden');
-    this.isHintHidden_ = true;
+    this.mutateElement(() => {
+      this.hint_.classList.add('i-amphtml-image-slider-hint-hidden');
+    });
   }
 
   /**
@@ -422,7 +412,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.unlistenMouseUp_ =
         listen(this.win, 'mouseup', this.onMouseUp_.bind(this));
 
-    this.resetHintReappear_(true);
+    this.animateHideHint_();
   }
 
   /**
@@ -444,8 +434,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     e.preventDefault();
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);
-
-    this.resetHintReappear_(!this.shouldHintReappear_);
   }
 
   /**
@@ -459,7 +447,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       return;
     }
 
-    this.resetHintReappear_(!this.shouldHintReappear_);
+    this.animateHideHint_();
 
     switch (e.key.toLowerCase()) {
       case 'arrowleft':
@@ -717,6 +705,15 @@ export class AmpImageSlider extends AMP.BaseElement {
   /** @override */
   resumeCallback() {
     this.registerEvents_();
+  }
+
+  /** @override */
+  viewportCallback(inViewport) {
+    // Show hint if back into viewport and user does not explicitly
+    // disable this
+    if (inViewport && this.shouldHintReappear_) {
+      this.animateShowHint_();
+    }
   }
 }
 
