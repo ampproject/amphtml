@@ -438,8 +438,8 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /**
    * Changes the apester-media size.
-   * @param {*} height
-   * @param {*} width
+   * @param {number} height
+   * @param {number} width
    */
   changeSize(height, width) {
     this./*OK*/ attemptChangeHeight(height);
