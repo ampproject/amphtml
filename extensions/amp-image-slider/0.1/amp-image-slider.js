@@ -346,7 +346,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.gestures_ = Gestures.get(this.element);
 
     this.gestures_.onGesture(SwipeXRecognizer, e => {
-      // We need the initial offset, yet gesture event seems not providing
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
         this.animateHideHint_();
@@ -358,9 +357,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.gestures_.onPointerDown(e => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX, true);
-      // Use !this.shouldHintReappear_ here
-      // It is possible that after onPointerDown
-      // SwipeXRecognizer callback is not triggered
       this.animateHideHint_();
     });
   }
