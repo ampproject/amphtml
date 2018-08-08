@@ -445,7 +445,6 @@ describe('amp-img', () => {
       el = impl.element;
       img = el.firstChild;
       expect(impl.togglePlaceholder).to.have.been.calledWith(false);
-      impl.unlayoutCallback();
     });
   });
 });
