@@ -9,7 +9,7 @@
 ## Versioning
 
 - We use [semver](http://semver.org/) terminology, but see below for changes from simple semver.
-- The AMP JS library and its extensions are versioned. There is also an **AMP release** that corresponds to the precise code. Each major and minor version may correspond to many AMP releases.
+- The AMP JS library and its extensions are versioned. There is also an **[AMP release](https://github.com/ampproject/amphtml/releases/)** that corresponds to the precise code. Each major and minor version may correspond to many AMP releases.
 - AMP is **released** about once per week and each release has a unique version number. With each release, AMP pages are rendered with the latest code for the respective major/minor versions of the AMP JS library and extensions.
 
 ### AMP JS library
@@ -20,7 +20,8 @@ The AMP JS library is distributed via its major version only. The major version 
 
 Each AMP extension is versioned independently. Publishers of AMP documents can choose the major and minor version of an extension; they cannot choose the patch version. 
 
-Extension minor versions may be changed for breaking changes in behavior or generated DOM structure *without* breaking API changes. Extension major versions *must* be changed for any breaking API changes.
+- Minor versions may be changed for breaking behavior changes *without* breaking API changes.
+- Major versions *must* be changed for any breaking API changes.
 
 ## Breaking changes
 
