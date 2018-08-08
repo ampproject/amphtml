@@ -532,7 +532,6 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
 
 describe('HistoryBindingVirtual', () => {
   let sandbox;
-  let clock;
 
   let history;
   let viewer;
@@ -542,7 +541,6 @@ describe('HistoryBindingVirtual', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
     onStateUpdated = sandbox.spy();
     viewer = {
       onMessage: sandbox.stub().returns(() => {}),
