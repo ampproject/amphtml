@@ -230,7 +230,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-  it('should set height on iframe', () => {
+  it('should style iframe and element correctly', () => {
     createScaffoldingForFluidRendering(impl, sandbox);
     return impl.adPromise_.then(() => {
       return impl.layoutCallback().then(() => {
