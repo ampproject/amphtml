@@ -433,11 +433,7 @@ The user error event (`"on": "user-error"`) is triggered when an error occurs th
 }
 ```
 
-NOTE:
-- The feature is right now behind an experiment flag `user-error-reporting`. Read [this](https://github.com/ampproject/amphtml/blob/master/tools/experiments/README.md#amp-experiments) to turn on the experiemnt.
-- There is a [known issue](https://github.com/ampproject/amphtml/issues/10891) that it still reports errors from A4A iframe embeds, which are irrelevant to the page.
-- If you are OK with the above known issue and want to opt-in this feature for your site, please file an issue and contact AMP team.
-- Please report any bugs you see.
+NOTE: There is a [known issue](https://github.com/ampproject/amphtml/issues/10891) that it still reports errors from A4A iframe embeds, which are irrelevant to the page.
 
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 
