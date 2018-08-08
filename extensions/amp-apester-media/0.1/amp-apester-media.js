@@ -19,6 +19,8 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {setStyle} from '../../../src/style';
+
 import {
   extractTags,
   getPlatform,
@@ -370,9 +372,12 @@ class AmpApesterMedia extends AMP.BaseElement {
                 const size = media && media['data'] && media['data']['size'];
                 const platform = isMobileDevice() ? 'mobile' : 'desktop';
                 if (size && size[platform]) {
-                  this./*OK*/ attemptChangeSize(size[platform]['height'], size[platform]['width']);
+                  console.log(`Changing size to height ${size[platform]['height']} and width ${size[platform]['width']}`);
+                  this.changeSize(size[platform]['height'], size[platform]['width']);
+                  // this./*OK*/ attemptChangeHeight(size[platform]['height'], size[platform]['width']);
                 } else if (size) {
-                  this./*OK*/ attemptChangeSize(size['height'], size['width']);
+                  this.changeSize(size['height'], size['width']);
+                  console.log(`Changing size to height ${size['height']} and width ${size['width']}`);
                 }
               });
             });
@@ -423,6 +428,15 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /**
+   * Changes the apester-media size.
+   * @param {*} height
+   * @param {*} width
+   */
+  changeSize(height, width) {
+    this./*OK*/ attemptChangeHeight(height);
+    setStyle(this.element, 'max-width', width);
+  }
+  /**
    * Registers to apester events.
    * @private
    */
@@ -455,7 +469,8 @@ class AmpApesterMedia extends AMP.BaseElement {
         apesterEventNames.RESIZE_UNIT,
         data => {
           if (this.mediaId_ === data.id) {
-            this.attemptChangeSize(data.height, data.width);
+            console.log(`Changing size to height ${data.height} and width ${data.width}`);
+            this.changeSize(data.height, data.width);
           }
         },
         this.win,
