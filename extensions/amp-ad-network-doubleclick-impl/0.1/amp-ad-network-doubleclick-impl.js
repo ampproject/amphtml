@@ -868,9 +868,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     } else if (this.isFluidRequest_ && this.isVerifiedAmpCreative) {
       // This is an AMP fluid creative that will be rendered in a friendly
       // frame.
-      dev().assert(this.iframe.contentWindow &&
-          this.iframe.contentWindow.document,
-      'Attempted to access cross-origin frame');
+      dev().assert(this.iframe && this.iframe.contentWindow &&
+          this.iframe.contentWindow.document &&
+          this.iframe.contentWindow.document.body,
+      'Attempting to expand fluid creative without properly set up ' +
+          'friendly frame.');
       this.attemptChangeHeight(
           this.iframe.contentWindow.document.body./*OK*/scrollHeight)
           .then(() => this.fireFluidDelayedImpression());
