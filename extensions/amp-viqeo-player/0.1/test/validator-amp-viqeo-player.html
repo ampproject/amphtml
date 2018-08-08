@@ -13,6 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+<!--
+  Test Description:
+  This tests validation for the amp-viqeo-player tag.
+-->
 <!doctype html>
 <html ⚡>
 <head>
@@ -28,6 +32,22 @@ limitations under the License.
 <amp-viqeo-player
         data-profileid="184"
         data-videoid="b51b70cdbb06248f4438"
+        width="640"
+        height="400"
+        layout="responsive"
+        autoplay>
+</amp-viqeo-player>
+<!-- not valid: the mandatory attribute 'data-profileid' is missing in tag -->
+<amp-viqeo-player
+        data-videoid="b51b70cdbb06248f4438"
+        width="640"
+        height="400"
+        layout="responsive"
+        autoplay>
+</amp-viqeo-player>
+<!-- not valid: the mandatory attribute 'data-videoid' is missing in tag -->
+<amp-viqeo-player
+        data-profileid="184"
         width="640"
         height="400"
         layout="responsive"
