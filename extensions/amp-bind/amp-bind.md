@@ -415,7 +415,7 @@ Only binding to the following components and attributes are allowed:
   <tr>
     <td><code>&lt;amp-google-document-embed&gt;</code></td>
     <td><code>[src]</code><br><code>[title]</code></td>
-    <td>Changes the document's source URL.<br>Changes the document's title.</td>
+    <td>Displays the document at the updated URL.<br>Changes the document's title.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-iframe&gt;</code></td>
