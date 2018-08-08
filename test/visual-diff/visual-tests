@@ -315,6 +315,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         "amp-story-page#page-2[active]"
       ]
     },
@@ -324,6 +325,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-grid-template-fill"
       ]
     },
@@ -333,6 +335,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-grid-template-vertical"
       ]
     },
@@ -342,6 +345,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-grid-template-horizontal"
       ]
     },
@@ -354,6 +358,7 @@
       ],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-grid-template-thirds"
       ]
     },
@@ -363,6 +368,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         "amp-story-page#the-one-with-the-cta-layer[active]"
       ]
     },
@@ -371,7 +377,8 @@
       "name": "amp-story: embed mode 1 (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
-        ".i-amphtml-story-loaded"
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill"
       ]
     },
     {
@@ -379,7 +386,8 @@
       "name": "amp-story: embed mode 2 (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
-        ".i-amphtml-story-loaded"
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill"
       ]
     },
     {
@@ -388,6 +396,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-bookend"
       ]
     },
@@ -397,6 +406,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-consent"
       ]
     },
@@ -406,6 +416,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-fallback",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
@@ -460,6 +471,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         "amp-story-page#page-2[active]"
       ]
     },
@@ -469,6 +481,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-bookend"
       ]
     },
@@ -478,6 +491,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-consent"
       ]
     },
