@@ -259,9 +259,9 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const active = mutations['active'];
-    if (active !== undefined) {
-      if (active) {
+    const open = mutations['open'];
+    if (open !== undefined) {
+      if (open) {
         this.activate();
       } else {
         this.close();

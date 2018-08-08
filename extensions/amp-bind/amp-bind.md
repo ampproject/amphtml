@@ -429,7 +429,7 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-lightbox&gt;</code></td>
-    <td><code>[active]</code><sup>*</sup></td>
+    <td><code>[open]</code><sup>*</sup></td>
     <td>
       Toggles display of the lightbox. Tip: Use <code>on="lightboxClose: AMP.setState(...)"</code> to update variables when the lightbox is closed.
     </td>

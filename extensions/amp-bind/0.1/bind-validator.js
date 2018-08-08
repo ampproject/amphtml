@@ -244,7 +244,7 @@ function createElementRules_() {
       },
     },
     'AMP-LIGHTBOX': {
-      'active': null,
+      'open': null,
     },
     'AMP-LIST': {
       'src': {

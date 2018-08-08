@@ -55,7 +55,7 @@ tags: {  # <amp-lightbox>
   attrs: { name: "from" }
   attrs: { name: "scrollable" }
   # <amp-bind>
-  attrs: { name: "[active]" }
+  attrs: { name: "[open]" }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY
