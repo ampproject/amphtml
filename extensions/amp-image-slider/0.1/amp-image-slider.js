@@ -17,7 +17,6 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {Gestures} from '../../../src/gesture';
-import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
@@ -602,15 +601,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.updateTranslateX_(this.rightAmpImage_, -percentFromLeft);
     if (this.rightLabelWrapper_) {
       this.updateTranslateX_(this.rightLabelWrapper_, -percentFromLeft);
-    }
-    // Fix Edge arrow position not updated glitch
-    if (Services.platformFor(this.win).isEdge()) {
-      setStyles(dev().assertElement(this.hintLeftArrow_), {
-        'text-align': '',
-      });
-      setStyles(dev().assertElement(this.hintRightArrow_), {
-        'text-align': '',
-      });
     }
   }
 
