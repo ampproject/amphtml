@@ -20,10 +20,10 @@ const closureCompiler = require('gulp-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('../internal-version') ;
+const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const rename = require('gulp-rename');
-const replace = require('gulp-replace');
+const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const {highlight} = require('cli-highlight');
@@ -141,8 +141,7 @@ function compile(entryModuleFilenames, outputDir,
         stream.on('end', resolve);
         stream.on('error', reject);
         stream.pipe(
-            replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-            .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+            replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
             .pipe(shortenLicense())
             .pipe(gulp.dest(outputDir));
       });
@@ -176,9 +175,6 @@ function compile(entryModuleFilenames, outputDir,
     wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
-    }
-    if (/development/.test(internalRuntimeToken)) {
-      throw new Error('Should compile with a prod token');
     }
     let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
@@ -224,6 +220,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-video-service/**/*.js',
       // Needed to access ConsentPolicyManager from other extensions
       'extensions/amp-consent/**/*.js',
+      // Needed to access AmpGeo type for service locator
+      'extensions/amp-geo/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',
@@ -282,21 +280,19 @@ function compile(entryModuleFilenames, outputDir,
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
     if (options.includeOnlyESMLevelPolyfills) {
-      const polyfillsShadowList = [
-        'array-includes.js',
-        'document-contains.js',
-        'domtokenlist-toggle.js',
-        'math-sign.js',
-        'object-assign.js',
-        'promise.js',
-      ];
+      const polyfills = fs.readdirSync('src/polyfills');
+      const polyfillsShadowList = polyfills.filter(p => {
+        // custom-elements polyfill must be included.
+        return p !== 'custom-elements.js';
+      });
       srcs.push(
           '!build/fake-module/src/polyfills.js',
           '!build/fake-module/src/polyfills/**/*.js',
           '!build/fake-polyfills/src/polyfills.js',
-          '!src/polyfills/*.js',
+          'src/polyfills/custom-elements.js',
           'build/fake-polyfills/**/*.js');
       polyfillsShadowList.forEach(polyfillFile => {
+        srcs.push(`!src/polyfills/${polyfillFile}`);
         fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
             'export function install() {}');
       });
@@ -400,8 +396,7 @@ function compile(entryModuleFilenames, outputDir,
     if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
           .pipe(rename(outputFilename))
-          .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-          .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+          .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
           .pipe(shortenLicense())
           .pipe(gulp.dest(outputDir))
           .on('end', function() {

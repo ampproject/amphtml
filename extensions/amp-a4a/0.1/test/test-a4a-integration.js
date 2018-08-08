@@ -20,7 +20,6 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as sinon from 'sinon';
 import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {MockA4AImpl, TEST_URL} from './utils';
@@ -89,7 +88,7 @@ describe('integration test: a4a', () => {
   let a4aElement;
   let a4aRegistry;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     a4aRegistry = getA4ARegistry();
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {
