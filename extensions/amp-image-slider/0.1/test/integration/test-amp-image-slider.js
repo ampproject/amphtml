@@ -145,19 +145,22 @@ config.run('amp-image-slider', function() {
       rightLabel_ = slider.querySelectorAll(
           '.i-amphtml-image-slider-label-wrapper')[1];
 
-      expect(bar_.getBoundingClientRect().left)
-          .to.equal(leftPos);
-      expect(rightMask_.getBoundingClientRect().left)
-          .to.equal(leftPos);
+      const roundedLeftPos = Math.round(leftPos);
+      const roundedRectLeft = Math.round(rect.left);
+
+      expect(Math.round(bar_.getBoundingClientRect().left))
+          .to.equal(roundedLeftPos);
+      expect(Math.round(rightMask_.getBoundingClientRect().left))
+          .to.equal(roundedLeftPos);
       // amp-imgs should stay where they are
-      expect(leftAmpImage_.getBoundingClientRect().left)
-          .to.equal(rect.left);
-      expect(rightAmpImage_.getBoundingClientRect().left)
-          .to.equal(rect.left);
-      expect(leftLabel_.getBoundingClientRect().left)
-          .to.equal(rect.left);
-      expect(rightLabel_.getBoundingClientRect().left)
-          .to.equal(rect.left);
+      expect(Math.round(leftAmpImage_.getBoundingClientRect().left))
+          .to.equal(roundedRectLeft);
+      expect(Math.round(rightAmpImage_.getBoundingClientRect().left))
+          .to.equal(roundedRectLeft);
+      expect(Math.round(leftLabel_.getBoundingClientRect().left))
+          .to.equal(roundedRectLeft);
+      expect(Math.round(rightLabel_.getBoundingClientRect().left))
+          .to.equal(roundedRectLeft);
     }
 
     it('should construct', () => {
