@@ -303,13 +303,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'amp-google-document-embed',
-    name: 'Enables the experiment amp-google-document-embed component' +
-        ' which is a wrapper around the Google Drive document viewer embed.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'amp-image-slider',
     name: 'Enables the experimental amp-image-slider for image comparison',
     spec: 'TODO',
