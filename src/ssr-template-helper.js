@@ -65,9 +65,11 @@ export class SsrTemplateHelper {
    * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.
+   * @param {?JsonObject=} opt_attributes Additional JSON to send to viewer.
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
-  fetchAndRenderTemplate(element, fetchData, opt_templates = null) {
+  fetchAndRenderTemplate(
+    element, fetchData, opt_templates = null, opt_attributes = null) {
     let mustacheTemplate;
     if (!opt_templates) {
       const template = this.templates_.maybeFindTemplate(element);
@@ -78,10 +80,37 @@ export class SsrTemplateHelper {
             this.templates_.findTemplate(element));
       }
     }
+    return this.viewer_.sendMessageAwaitResponse(
+        'viewerRenderTemplate',
+        this.buildPayload_(
+            fetchData,
+            mustacheTemplate,
+            opt_templates,
+            opt_attributes,
+        ));
+  }
+
+  /**
+   * @param {!./service/xhr-impl.FetchData} fetchData
+   * @param {string} mustacheTemplate
+   * @param {?SsrTemplateDef=} opt_templates
+   * @param {!JsonObject=} opt_attributes
+   */
+  buildPayload_(fetchData, mustacheTemplate, opt_templates, opt_attributes) {
+    const ampComponent = dict({
+      'type': this.sourceComponent_,
+    });
+    ampComponent['successTemplate'] = dict({'type': 'amp-mustache'});
+    ampComponent['errorTemplate'] = dict({'type': 'amp-mustache'});
+    ampComponent['successTemplate']['payload'] = opt_templates
+      ? this.xmls_.serializeToString(opt_templates['successTemplate'])
+      : mustacheTemplate;
+    ampComponent['errorTemplate']['payload'] = opt_templates
+      ? this.xmls_.serializeToString(opt_templates['errorTemplate']) : null;
     const data = dict({
       'originalRequest':
           toStructuredCloneable(fetchData.xhrUrl, fetchData.fetchOpt),
-      'sourceAmpComponent': this.sourceComponent_,
+      'ampComponent': ampComponent,
     });
     data['successTemplate'] = opt_templates
       ? this.xmls_.serializeToString(opt_templates['successTemplate'])

@@ -27,6 +27,7 @@ import {
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   fromStructuredCloneable,
   setupAMPCors,
@@ -277,8 +278,16 @@ export class AmpList extends AMP.BaseElement {
           setupAMPCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
       setupJsonFetchInit(batchFetchData.fetchOpt);
       setupInit(batchFetchData.fetchOpt);
+      this.element.getAttribute('items') || 'items';
+      const ampListAttributes = dict({
+        'ampListAttributes': {
+          'items': this.element.getAttribute('items') || 'items',
+          'singleItem': this.element.getAttribute('single-item'),
+          'maxItems': this.element.getAttribute('max-items'),
+        },
+      });
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-          this.element, batchFetchData);
+          this.element, batchFetchData, null, ampListAttributes);
     }).then(response => {
       // Construct the fetch response and validate.
       const fetchResponse =
