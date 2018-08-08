@@ -315,7 +315,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         "amp-story-page#page-2[active]"
       ]
     },
@@ -325,7 +325,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-grid-template-fill"
       ]
     },
@@ -335,7 +335,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-grid-template-vertical"
       ]
     },
@@ -345,7 +345,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-grid-template-horizontal"
       ]
     },
@@ -358,7 +358,7 @@
       ],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-grid-template-thirds"
       ]
     },
@@ -368,7 +368,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         "amp-story-page#the-one-with-the-cta-layer[active]"
       ]
     },
@@ -386,7 +386,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill"
+        ".i-amphtml-story-share-pill-label"
       ]
     },
     {
@@ -395,7 +395,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-bookend"
       ]
     },
@@ -405,7 +405,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-consent"
       ]
     },
@@ -415,7 +415,6 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-fallback",
-        ".i-amphtml-story-share-pill",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
@@ -470,7 +469,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         "amp-story-page#page-2[active]"
       ]
     },
@@ -480,7 +479,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-bookend"
       ]
     },
@@ -490,7 +489,7 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-pill",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-consent"
       ]
     },
