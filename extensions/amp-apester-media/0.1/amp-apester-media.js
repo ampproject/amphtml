@@ -378,12 +378,12 @@ class AmpApesterMedia extends AMP.BaseElement {
                     const platform = isMobileDevice() ?
                       'mobile' : 'desktop';
                     if (size && size[platform]) {
-                      this.changeSize(
+                      this.changeUnitSize(
                           size[platform]['height'],
                           size[platform]['width']
                       );
                     } else if (size) {
-                      this.changeSize(size['height'], size['width']);
+                      this.changeUnitSize(size['height'], size['width']);
                     }
                   });
                 });
@@ -441,7 +441,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @param {number} height
    * @param {number} width
    */
-  changeSize(height, width) {
+  changeUnitSize(height, width) {
     this./*OK*/ attemptChangeHeight(height);
     setStyle(this.element, 'max-width', width);
   }
@@ -478,7 +478,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         apesterEventNames.RESIZE_UNIT,
         data => {
           if (this.mediaId_ === data.id) {
-            this.changeSize(data.height, data.width);
+            this.changeUnitSize(data.height, data.width);
           }
         },
         this.win,
