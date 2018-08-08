@@ -466,7 +466,9 @@ export class Viewer {
 
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
-    this.maybeUpdateFragmentForCct();
+    this.whenFirstVisible().then(() => {
+      this.maybeUpdateFragmentForCct();
+    });
   }
 
   /**
@@ -886,12 +888,6 @@ export class Viewer {
    * @private
    */
   isTrustedViewerOrigin_(urlString) {
-    // TEMPORARY HACK due to a misbehaving native app. See b/32626673
-    // In native apps all security bets are off anyway, and in browser
-    // origins never take the form that is matched here.
-    if (this.isWebviewEmbedded_ && /^www\.[.a-z]+$/.test(urlString)) {
-      return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
-    }
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
     if (url.protocol != 'https:') {

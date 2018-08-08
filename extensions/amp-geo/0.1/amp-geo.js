@@ -92,6 +92,17 @@ const mode = {
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
 };
 
+/**
+ * @typedef {{
+ *   ISOCountry: string,
+ *   matchedISOCountryGroups: !Array<string>,
+ *   allISOCountryGroups: !Array<string>,
+ *   isInCountryGroup: GEO_IN_GROUP,
+ *   ISOCountryGroups: !Array<string>
+ * }}
+ */
+export let GeoDef;
+
 
 export class AmpGeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -128,7 +139,7 @@ export class AmpGeo extends AMP.BaseElement {
               `${TAG} Unable to parse JSON`)
       ) : {};
 
-    /** @type {!Promise<!Object<string, (string|Array<string>)>>} */
+    /** @type {!Promise<!GeoDef>} */
     const geo = this.addToBody_(config || {});
 
     /* resolve the service promise singleton we stashed earlier */
@@ -263,7 +274,7 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * Adds the given country groups to HTML element as classes
    * @param {Object} config
-   * @return {!Promise<!Object<string, (string|Array<string>)>>} service response
+   * @return {!Promise<!GeoDef>} service response
    * @private
    */
   addToBody_(config) {
