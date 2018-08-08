@@ -25,6 +25,9 @@ const allowedFetchTypes_ = {
   text: 2,
 };
 
+/** @private @const {!Array<string>} */
+const allowedMethods = ['GET', 'POST'];
+
 /**
  * A record version of `XMLHttpRequest` that has all the necessary properties
  * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
@@ -55,7 +58,7 @@ let XMLHttpRequestDef;
  */
 export function fetchPolyfill(input, init) {
   return new Promise(function(resolve, reject) {
-    const xhr = createXhrRequest((init.method || 'GET').toUpperCase(), input);
+    const xhr = createXhrRequest(normalizeMethod(init.method || 'GET'), input);
 
     if (init.credentials == 'include') {
       xhr.withCredentials = true;
@@ -195,6 +198,26 @@ class FetchResponse {
     return /** @type {!Promise<!ArrayBuffer>} */ (
       this.drainText_().then(utf8Encode));
   }
+}
+
+/**
+ * Normalized method name by uppercasing.
+ * @param {string|undefined} method
+ * @return {string}
+ * @private
+ */
+function normalizeMethod(method) {
+  if (method === undefined) {
+    return 'GET';
+  }
+  method = method.toUpperCase();
+  dev().assert(
+      allowedMethods.includes(method),
+      'Only one of %s is currently allowed. Got %s',
+      allowedMethods.join(', '),
+      method
+  );
+  return method;
 }
 
 

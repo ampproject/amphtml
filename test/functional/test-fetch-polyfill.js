@@ -10,8 +10,47 @@ describes.sandboxed('fetch', {}, () => {
       xhrCreated = new Promise(resolve => mockXhr.onCreate = resolve);
     }
 
+    beforeEach(() => {
+      sandbox = sinon.sandbox;
+      setupMockXhr();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     it('should allow GET and POST methods', () => {
-      expect(true).to.be.equals(false);
+      const get = fetchPolyfill.bind(this, '/get?k=v1');
+      const post = fetchPolyfill.bind(this, '/post', {
+        method: 'POST',
+        body: {
+          hello: 'world',
+        },
+      });
+      const put = fetchPolyfill.bind(this, '/put', {
+        method: 'PUT',
+        body: {
+          hello: 'world',
+        },
+      });
+      const patch = fetchPolyfill.bind(this, '/patch', {
+        method: 'PATCH',
+        body: {
+          hello: 'world',
+        },
+      });
+      const deleteMethod = fetchPolyfill.bind(this, '/delete', {
+        method: 'DELETE',
+        body: {
+          id: 3,
+        },
+      });
+
+      expect(get).to.not.throw();
+      expect(post).to.not.throw();
+      allowConsoleError(() => { expect(put).to.throw(); });
+      allowConsoleError(() => { expect(patch).to.throw(); });
+      allowConsoleError(() => { expect(deleteMethod).to.throw(); });
     });
 
     it('should allow FormData as body', () => {
