@@ -58,7 +58,7 @@ const extensions = {};
 const extensionAliasFilePath = {};
 
 // All a4a extensions.
-const adExtensions = ['amp-a4a'];
+const adVendors = [];
 
 const {green, red, cyan} = colors;
 
@@ -143,7 +143,9 @@ function declareExtension(name, version, options) {
         Object.assign({name, version: v}, defaultOptions, options);
   });
   if (name.startsWith('amp-ad-network-')) {
-    adExtensions.push(name);
+    // Get the ad network name
+    name = name.slice(15, -5);
+    adVendors.push(name);
   }
 }
 
@@ -246,12 +248,6 @@ function getExtensionsToBuild() {
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
 
-  if (extensionsToBuild.indexOf('amp-ad') > -1) {
-    // Build every amp a4a extension now. Need to expand feature once vendor
-    // number exceeds 10.
-    extensionsToBuild = dedupe(extensionsToBuild.concat(adExtensions));
-  }
-
   return extensionsToBuild;
 }
 
@@ -272,9 +268,21 @@ function getExtensionsFromArg(examples) {
     const html = fs.readFileSync(example, 'utf8');
     const customElementTemplateRe = /custom-(element|template)="([^"]+)"/g;
     const extensionNameMatchIndex = 2;
+    let hasAd = false;
     let match;
     while ((match = customElementTemplateRe.exec(html))) {
+      if (match[extensionNameMatchIndex] == 'amp-ad') {
+        hasAd = true;
+      }
       extensions.push(match[extensionNameMatchIndex]);
+    }
+    if (hasAd) {
+      for (let i = 0; i < adVendors.length; i++) {
+        if (html.includes(`type="${adVendors[i]}"`)) {
+          extensions.push('amp-a4a');
+          extensions.push(`amp-ad-network-${adVendors[i]}-impl`);
+        }
+      }
     }
   });
 
