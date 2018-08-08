@@ -351,37 +351,47 @@ class AmpApesterMedia extends AMP.BaseElement {
           this.iframe_ = iframe;
           this.registerToApesterEvents_();
 
-          return vsync.mutatePromise(() => {
-            const overflow = this.constructOverflow_();
-            this.element.appendChild(overflow);
-            this.element.appendChild(iframe);
-          }).then(() => {
-            return this.loadPromise(iframe).then(() => {
-              return vsync.mutatePromise(() => {
-                this.iframe_.classList
-                    .add('i-amphtml-apester-iframe-ready');
-                if (media['campaignData']) {
-                  this.iframe_.contentWindow./*OK*/ postMessage(
-                      /** @type {JsonObject} */ ({type: 'campaigns',
-                        data: media['campaignData']}),
-                      '*'
-                  );
-                }
-                this.togglePlaceholder(false);
-                this.ready_ = true;
-                const size = media && media['data'] && media['data']['size'];
-                const platform = isMobileDevice() ? 'mobile' : 'desktop';
-                if (size && size[platform]) {
-                  this.changeSize(size[platform]['height'], size[platform]['width']);
-                } else if (size) {
-                  this.changeSize(size['height'], size['width']);
-                }
+          return vsync
+              .mutatePromise(() => {
+                const overflow = this.constructOverflow_();
+                this.element.appendChild(overflow);
+                this.element.appendChild(iframe);
+              })
+              .then(() => {
+                return this.loadPromise(iframe).then(() => {
+                  return vsync.mutatePromise(() => {
+                    this.iframe_.classList
+                        .add('i-amphtml-apester-iframe-ready');
+                    if (media['campaignData']) {
+                      this.iframe_.contentWindow./*OK*/ postMessage(
+                          /** @type {JsonObject} */ ({
+                            type: 'campaigns',
+                            data: media['campaignData'],
+                          }),
+                          '*'
+                      );
+                    }
+                    this.togglePlaceholder(false);
+                    this.ready_ = true;
+                    const size = media && media['data']
+                      && media['data']['size'];
+                    const platform = isMobileDevice() ?
+                      'mobile' : 'desktop';
+                    if (size && size[platform]) {
+                      this.changeSize(
+                          size[platform]['height'],
+                          size[platform]['width']
+                      );
+                    } else if (size) {
+                      this.changeSize(size['height'], size['width']);
+                    }
+                  });
+                });
+              })
+              .catch(error => {
+                dev().error(TAG, 'Display', error);
+                return undefined;
               });
-            });
-          }).catch(error => {
-            dev().error(TAG, 'Display', error);
-            return undefined;
-          });
         },
         error => {
           dev().error(TAG, 'Display', error);
@@ -394,12 +404,14 @@ class AmpApesterMedia extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.element.ownerDocument.createElement('div');
     if (this.element.hasAttribute('aria-label')) {
-      placeholder.setAttribute('aria-label', 'Loading - '
-          + this.element.getAttribute('aria-label'));
+      placeholder.setAttribute(
+          'aria-label',
+          'Loading - ' + this.element.getAttribute('aria-label')
+      );
     } else {
       placeholder.setAttribute('aria-label', 'Loading video');
     }
-    placeholder.setAttribute('placeholder','');
+    placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('layout', 'fill');
     placeholder.className = 'amp-apester-loader';
     placeholder.appendChild(this.constructLoaderStructure_());
@@ -466,7 +478,6 @@ class AmpApesterMedia extends AMP.BaseElement {
         apesterEventNames.RESIZE_UNIT,
         data => {
           if (this.mediaId_ === data.id) {
-            console.log(`Changing size to height ${data.height} and width ${data.width}`);
             this.changeSize(data.height, data.width);
           }
         },
