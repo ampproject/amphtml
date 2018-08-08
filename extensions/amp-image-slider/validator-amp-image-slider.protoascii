@@ -49,7 +49,7 @@ tags: {  # <amp-image-slider>
 tags: {
   html_format: AMP
   tag_name: "DIV"
-  spec_name: "AMP-IMAGE-SLIDER [first]"
+  spec_name: "AMP-IMAGE-SLIDER > DIV [first]"
   mandatory_parent: "AMP-IMAGE-SLIDER"
   attrs: {
     name: "first"
@@ -60,7 +60,7 @@ tags: {
 tags: {
   html_format: AMP
   tag_name: "DIV"
-  spec_name: "AMP-IMAGE-SLIDER [second]"
+  spec_name: "AMP-IMAGE-SLIDER > DIV [second]"
   mandatory_parent: "AMP-IMAGE-SLIDER"
   attrs: {
     name: "second"
