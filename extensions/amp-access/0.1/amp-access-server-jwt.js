@@ -21,6 +21,7 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/dom';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -313,7 +314,7 @@ export class AccessServerJwtAdapter {
       // CORS preflight request.
       return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
-          this.xhr_.fetchDocument(this.serviceUrl_, {
+          fetchDocument(this.ampdoc.win, this.serviceUrl_, {
             method: 'POST',
             body: request,
             headers: dict({
