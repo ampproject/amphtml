@@ -780,12 +780,13 @@ export class Resource {
    * calculation based on tree depth and number of layer scrolls it would take
    * to view the element.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @return {number}
    */
   layersDistanceRatio_(currentScore, layout, depth) {
+    currentScore = currentScore || 0;
     const depthPenalty = 1 + (depth / 10);
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalViewportsFromParent() +
