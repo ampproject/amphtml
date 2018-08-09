@@ -21,7 +21,6 @@ import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
@@ -68,11 +67,13 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.barStick_ = null;
 
     /** @private {Element|null} */
-    this.hint_ = null;
-    /** @private {Element|null} */
     this.hintLeftArrow_ = null;
     /** @private {Element|null} */
     this.hintRightArrow_ = null;
+    /** @private {Element|null} */
+    this.hintLeftBody_ = null;
+    /** @private {Element|null} */
+    this.hintRightBody_ = null;
 
     /** @private {UnlistenDef|null} */
     this.unlistenMouseDown_ = null;
@@ -271,21 +272,34 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   buildHint_() {
-    this.hint_ = this.doc_.createElement('div');
+    // Switch to attach left and right hint separately
+    // and translate each of the two independently.
+    // This addresses:
+    // 1. Safari glitch that causes flashing arrows when 2 arrows are placed
+    //   in any kind of normal DOM flow (inline-block, flex, grid, etc.)
+    // 2. Edge glitch that forgets to update second child position if its
+    //   parent have updated its own transform
+    this.hintLeftBody_ = this.doc_.createElement('div');
+    this.hintLeftBody_.classList.add('i-amphtml-image-slider-hint');
+    this.hintRightBody_ = this.doc_.createElement('div');
+    this.hintRightBody_.classList.add('i-amphtml-image-slider-hint');
 
-    const hintArrowWrapper = this.doc_.createElement('div');
-    this.hintLeftArrow_ = htmlFor(this.doc_)
-    `<div class="amp-image-slider-hint-left"></div>`;
-    this.hintRightArrow_ = htmlFor(this.doc_)
-    `<div class="amp-image-slider-hint-right"></div>`;
+    const leftHintWrapper = this.doc_.createElement('div');
+    leftHintWrapper.classList.add('i-amphtml-image-slider-hint-left-wrapper');
+    const rightHintWrapper = this.doc_.createElement('div');
+    rightHintWrapper.classList.add('i-amphtml-image-slider-hint-right-wrapper');
 
-    hintArrowWrapper.appendChild(this.hintLeftArrow_);
-    hintArrowWrapper.appendChild(this.hintRightArrow_);
+    this.hintLeftArrow_ = this.doc_.createElement('div');
+    this.hintLeftArrow_.classList.add('amp-image-slider-hint-left');
+    this.hintRightArrow_ = this.doc_.createElement('div');
+    this.hintRightArrow_.classList.add('amp-image-slider-hint-right');
 
-    this.hint_.appendChild(hintArrowWrapper);
-    this.hint_.classList.add('i-amphtml-image-slider-hint');
-    this.hint_.classList.add('i-amphtml-image-slider-push-left');
-    this.bar_.appendChild(this.hint_);
+    leftHintWrapper.appendChild(this.hintLeftArrow_);
+    rightHintWrapper.appendChild(this.hintRightArrow_);
+    this.hintLeftBody_.appendChild(leftHintWrapper);
+    this.hintRightBody_.appendChild(rightHintWrapper);
+    this.container_.appendChild(this.hintLeftBody_);
+    this.container_.appendChild(this.hintRightBody_);
   }
 
   /**
@@ -379,7 +393,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   animateShowHint_() {
     this.mutateElement(() => {
-      this.hint_.classList.remove('i-amphtml-image-slider-hint-hidden');
+      this.hintLeftBody_.classList
+          .remove('i-amphtml-image-slider-hint-hidden');
+      this.hintRightBody_.classList
+          .remove('i-amphtml-image-slider-hint-hidden');
     });
   }
 
@@ -389,7 +406,8 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   animateHideHint_() {
     this.mutateElement(() => {
-      this.hint_.classList.add('i-amphtml-image-slider-hint-hidden');
+      this.hintLeftBody_.classList.add('i-amphtml-image-slider-hint-hidden');
+      this.hintRightBody_.classList.add('i-amphtml-image-slider-hint-hidden');
     });
   }
 
@@ -633,6 +651,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.updateTranslateX_(this.bar_, percentFromLeft);
     this.updateTranslateX_(this.rightMask_, percentFromLeft);
     this.updateTranslateX_(this.rightAmpImage_, -percentFromLeft);
+    const adjustedDeltaFromLeft = percentFromLeft - 0.5;
+    this.updateTranslateX_(this.hintLeftBody_, adjustedDeltaFromLeft);
+    this.updateTranslateX_(this.hintRightBody_, adjustedDeltaFromLeft);
     if (this.rightLabelWrapper_) {
       this.updateTranslateX_(this.rightLabelWrapper_, -percentFromLeft);
     }
