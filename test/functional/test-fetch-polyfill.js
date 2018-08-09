@@ -80,6 +80,22 @@ describes.sandboxed('fetch', {}, () => {
       return xhrCreated.then(xhr => expect(xhr.method).to.equal('POST'));
     });
 
+    it('should parse and pass the headers', () => {
+      const headers = {
+        'Content-type': 'application/json;charset=utf-8',
+        'HEADER-2': 'VALUE-2',
+      };
+      fetchPolyfill('/get?k=v1', {
+        method: 'post',
+        headers,
+      });
+      return xhrCreated.then(xhr => {
+        for (const key in headers) {
+          expect(xhr.requestHeaders[key]).to.be.equal(headers[key]);
+        }
+      });
+    });
+
   });
 
   describe('Response', () => {
