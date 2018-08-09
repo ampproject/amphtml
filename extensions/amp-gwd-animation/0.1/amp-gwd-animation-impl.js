@@ -456,10 +456,12 @@ export class AmpGwdRuntimeService {
       return;
     }
 
-    const timelineEvent = createCustomEvent(
-        this.ampdoc_.win,
-        GWD_TIMELINE_EVENT,
-        dict({'eventName': userEventName, 'sourceEvent': event}));
+    const detail = dict({
+      'eventName': userEventName,
+      'sourceEvent': event,
+    });
+    const timelineEvent =
+        createCustomEvent(this.ampdoc_.win, GWD_TIMELINE_EVENT, detail);
 
     this.ampdoc_.getRootNode().dispatchEvent(timelineEvent);
   }
