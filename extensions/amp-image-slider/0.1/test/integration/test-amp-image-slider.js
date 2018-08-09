@@ -123,6 +123,10 @@ config.run('amp-image-slider', function() {
           .then(prepareSlider);
     }
 
+    function timeout(win, ms) {
+      return new Promise(resolve => win.setTimeout(resolve, ms));
+    }
+
     // A bunch of expects to check if the slider has slided to
     // where we intended
     // Returns true/false for position checks
@@ -444,6 +448,57 @@ config.run('amp-image-slider', function() {
             keyDownEvent = createKeyDownEvent('PageDown');
             slider.dispatchEvent(keyDownEvent);
             return pollByBarLeftPos(rect.right);
+          });
+    });
+
+    it('should seekTo correct position', () => {
+      let button;
+      let pos10Percent;
+      return prep()
+          .then(() => {
+            button = doc.querySelector('#button');
+            pos10Percent = rect.left + 0.1 * rect.width;
+            button.click();
+            return pollByBarLeftPos(pos10Percent);
+          });
+    });
+
+    it('should show hint again on scroll back and into viewport', () => {
+      let slider, container_, hint;
+      let mouseDownEvent;
+      return prep()
+          .then(() => {
+            slider = doc.getElementById('slider');
+            container_ = slider
+                .querySelector('.i-amphtml-image-slider-container');
+            hint = slider.querySelectorAll('.i-amphtml-image-slider-hint')[0];
+            mouseDownEvent = createFakeEvent(
+                'mousedown',
+                0,
+                0
+            );
+            container_.dispatchEvent(mouseDownEvent);
+            return poll('should receive hidden class', () => {
+              return hint.classList
+                  .contains('i-amphtml-image-slider-hint-hidden');
+            }, () => {});
+          })
+          .then(() => {
+            env.win.scrollTo({
+              top: 3000,
+            });
+            // Have to use timeout here,
+            // no indication of proper viewportCallback trigger
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            env.win.scrollTo({
+              top: 0,
+            });
+            return poll('should remove hidden class', () => {
+              return !hint.classList
+                  .contains('i-amphtml-image-slider-hint-hidden');
+            }, () => {});
           });
     });
   });
