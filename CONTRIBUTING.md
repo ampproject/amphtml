@@ -106,7 +106,7 @@ Contributing to AMP involves two phases:
      - [Instructions and Guidelines for building an AMP component](./contributing/building-an-amp-extension.md)
      - Learn to create your first component in this [codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0)
      - Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
-   - **Integrating third-party software, embeds, services**: [Guidelines](/3p/README.md)
+   - **Integrating third-party software, embeds, services**: [Guidelines](./3p/README.md)
 1. [Commit your files](./contributing/getting-started-e2e.md#edit-files-and-commit-them).
 1. [Test your changes](./contributing/getting-started-e2e.md#testing-your-changes): A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
 1. [Put your new component behind an experiment flag](./contributing/building-an-amp-extension.md#experiments).
