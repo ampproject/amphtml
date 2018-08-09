@@ -58,7 +58,8 @@ let XMLHttpRequestDef;
  */
 export function fetchPolyfill(input, init) {
   return new Promise(function(resolve, reject) {
-    const xhr = createXhrRequest(normalizeMethod(init.method || 'GET'), input);
+    const requestMethod = normalizeMethod(init.method || 'GET');
+    const xhr = createXhrRequest(requestMethod, input);
 
     if (init.credentials == 'include') {
       xhr.withCredentials = true;
@@ -98,7 +99,7 @@ export function fetchPolyfill(input, init) {
       reject(user().createExpectedError('Request aborted'));
     };
 
-    if (init.method == 'POST') {
+    if (requestMethod == 'POST') {
       xhr.send(init.body);
     } else {
       xhr.send();

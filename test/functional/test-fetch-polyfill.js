@@ -96,6 +96,31 @@ describes.sandboxed('fetch', {}, () => {
       });
     });
 
+    it('should pass the body to xhr request', () => {
+      const bodyData = {
+        hello: 'world',
+      };
+
+      fetchPolyfill('/get?k=v1', {
+        method: 'post',
+        body: JSON.stringify(bodyData),
+      });
+      return xhrCreated.then(xhr => {
+        console.log(xhr);
+        expect(xhr.requestBody).to.be.equal(JSON.stringify(bodyData));
+      });
+    });
+
+    it('should make xhr request withCredentials for creds include', () => {
+      fetchPolyfill('/get?k=v1', {
+        credentials: 'include',
+      });
+      return xhrCreated.then(xhr => {
+        console.log(xhr);
+        expect(xhr.withCredentials).to.be.equal(true);
+      });
+    });
+
   });
 
   describe('Response', () => {
