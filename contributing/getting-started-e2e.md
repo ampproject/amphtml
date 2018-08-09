@@ -99,7 +99,7 @@ If you are new to Git it may seem surprising that there are three different repo
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase.  If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository.  Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease:  if you aren't currently a [core committer](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) to the amphtml project, you can't actually make changes to the amphtml repository directly. So go ahead and try out different Git commands without worrying you're going to break things for other people!
+One thing that might put your mind at ease:  if you aren't currently a [core committer](../GOVERNANCE.md) to the amphtml project, you can't actually make changes to the amphtml repository directly. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 To create your fork on GitHub and your local copy of that fork:
@@ -382,14 +382,14 @@ Notes:
 
 * This will force a clean build and run all the PR checks one by one.
 * Just like on Travis, a failing check will prevent subsequent checks from being run.
-* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
-* The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#testing-on-sauce-labs).
+* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
+* The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described in the [Testing](TESTING.md#testing-on-sauce-labs) guide.
 
 ## Adding tests for your change
 
 If your change was not already covered by existing tests, you will generally be expected to add some tests that show your new code works correctly and to prevent other people from breaking your code in the future.
 
-The amphtml unit tests use the [Mocha](https://mochajs.org/) framework, the [Chai](http://chaijs.com/) assertion library and the [Sinon](http://sinonjs.org/) mocking library.  The specifics of the tests you will need to add will vary depending on the issue/feature you are working on.  If you are fixing a bug in an existing component there should already be tests in the test directory for that component that you can look at for guidance.  For example the [amp-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video/amp-video.md) component has [tests](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video/0.1/test/test-amp-video.js).
+The amphtml unit tests use the [Mocha](https://mochajs.org/) framework, the [Chai](http://chaijs.com/) assertion library and the [Sinon](http://sinonjs.org/) mocking library.  The specifics of the tests you will need to add will vary depending on the issue/feature you are working on.  If you are fixing a bug in an existing component there should already be tests in the test directory for that component that you can look at for guidance.  For example the [amp-video](../extensions/amp-video/amp-video.md) component has [tests](../extensions/amp-video/0.1/test/test-amp-video.js).
 
 You can run the tests in a single file by running `gulp test --files=<file to test>`, e.g. for amp-video:
 
@@ -450,7 +450,7 @@ Note that you *can* edit files in your branch directly on GitHub using the web U
 
 # Send a Pull Request (i.e. request a code review)
 
-In order for your changes to become part of the amphtml repository, you will need to get your code reviewed by one of the [core committers](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; once a core committer approves it he or she will handle the merge for you.
+In order for your changes to become part of the amphtml repository, you will need to get your code reviewed by one of the [core committers](../GOVERNANCE.md) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; once a core committer approves it he or she will handle the merge for you.
 
 Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner.  If that banner isn't visible, go to your GitHub fork at
 `https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.
@@ -463,7 +463,7 @@ amproject/amphtml / master … <username>/amphtml / <branch name>
 
 Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.  Make sure to refer to any Issues that you are fixing (by typing "Issue #" and selecting it from the autocomplete) so that people can see which issue you are fixing and people watching the issue will see that there's a PR for it.
 
-The reviewer should be one of the [core committers](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) and ideally someone who is familiar with the change you are making (e.g. someone you've been communicating with through an associated GitHub issue).
+The reviewer should be one of the [core committers](../GOVERNANCE.md) and ideally someone who is familiar with the change you are making (e.g. someone you've been communicating with through an associated GitHub issue).
 
 When you're done click "Create pull request."  This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
@@ -471,7 +471,7 @@ On the Pull Request page you can see that a few checks are running:
 
 * The tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
 
-* The system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for the amphtml project you'll need to sign an agreement.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code) documentation.
+* The system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for the amphtml project you'll need to sign an agreement.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](../CONTRIBUTING.md#contributing-code) documentation.
 
 * Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
 
@@ -530,7 +530,7 @@ The [Release Schedule](release-schedule.md) doc has more details on the release 
 
 # ⚡⚡⚡... (Next steps)
 
-Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future [contributions](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md) to the project.** :)
+Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future [contributions](../CONTRIBUTING.md) to the project.** :)
 
 If you're looking for ideas on your next contribution feel free to reach out to anyone you worked with on your first contribution or let us know in the [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack.  (We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.)
 
