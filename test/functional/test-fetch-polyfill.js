@@ -1,4 +1,6 @@
-import {fetchPolyfill, Response} from '../../src/polyfills/fetch';
+import {FormDataWrapper} from '../../src/form-data-wrapper';
+import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
+
 
 describes.sandboxed('fetch', {}, () => {
 
@@ -54,20 +56,30 @@ describes.sandboxed('fetch', {}, () => {
     });
 
     it('should allow FormData as body', () => {
-      expect(true).to.be.equals(false);
+      const formData = new FormDataWrapper();
+      sandbox.stub(JSON, 'stringify');
+      formData.append('name', 'John Miller');
+      formData.append('age', 56);
+      const post = fetchPolyfill.bind(this, '/post', {
+        method: 'POST',
+        body: formData,
+      });
+      expect(post).to.not.throw();
+      expect(JSON.stringify.called).to.be.false;
     });
 
     it('should do `GET` as default method', () => {
-      expect(true).to.be.equals(false);
-    });
-
-    it('should normalize GET method name to uppercase', () => {
-      expect(true).to.be.equals(false);
+      fetchPolyfill('/get?k=v1');
+      return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
     });
 
     it('should normalize POST method name to uppercase', () => {
-      expect(true).to.be.equals(false);
+      fetchPolyfill('/get?k=v1', {
+        method: 'post',
+      });
+      return xhrCreated.then(xhr => expect(xhr.method).to.equal('POST'));
     });
+
   });
 
   describe('Response', () => {
