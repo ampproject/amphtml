@@ -78,7 +78,7 @@ module.exports = function(babel) {
           // no argument is passed in.
           path.replaceWith(t.identifier('undefined'));
         }
-      },
+      }
     },
   };
 };
