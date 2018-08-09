@@ -27,7 +27,7 @@ const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const {highlight} = require('cli-highlight');
-const {singlePassCompile} = require('../get-dep-graph');
+const {singlePassCompile} = require('../single-pass');
 
 const isProdBuild = !!argv.type;
 const queue = [];
