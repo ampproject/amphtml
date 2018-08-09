@@ -133,7 +133,6 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     afterEach(() => {
       clientAdapterMock.verify();
       xhrMock.verify();
-      docFetcherMock.restore();
     });
 
     describe('authorize', () => {
