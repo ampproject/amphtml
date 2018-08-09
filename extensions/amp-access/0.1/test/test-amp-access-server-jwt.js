@@ -161,7 +161,6 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
     afterEach(() => {
       clientAdapterMock.verify();
       xhrMock.verify();
-      docFetcherMock.restore();
       jwtMock.verify();
     });
 
