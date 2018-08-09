@@ -243,6 +243,9 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-LIGHTBOX': {
+      'open': null,
+    },
     'AMP-LIST': {
       'src': {
         'allowedProtocols': {
