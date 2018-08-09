@@ -97,8 +97,28 @@ export class AmpMustache extends AMP.BaseTemplate {
       html = mustacheRender(this.template_, mustacheData);
     }
     const body = purifyHtml(`<div>${html}</div>`);
+    this.fixSvgImages_(body);
     const div = body.firstElementChild;
     return this.unwrap(div);
+  }
+
+  /**
+   * <image xlink:href="..."> fetches the image but fails to render when
+   * using RETURN_DOM with DOMPurify. Setting the attribute manually appears
+   * to fix it. Doesn't happen with "href" attribute. See b/112204851.
+   * @param {!Element} element
+   */
+  fixSvgImages_(element) {
+    const namespace = 'http://www.w3.org/1999/xlink';
+    const attr = 'xlink:href';
+
+    const images = element.querySelectorAll('image');
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i];
+      if (img.hasAttribute(attr)) {
+        img.setAttributeNS(namespace, attr, img.getAttribute(attr));
+      }
+    }
   }
 }
 
