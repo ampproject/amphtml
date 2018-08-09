@@ -42,7 +42,7 @@ config.run('amp-image-slider', function() {
   .label {
     color: white;
     border: 4px solid white;
-    padding: 1em;
+    padding: 16px;
     font-family: Arial, Helvetica, sans-serif;
     box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
   }
@@ -192,6 +192,20 @@ config.run('amp-image-slider', function() {
             expect(ampImgs.length).to.equal(2);
             expect(!!ampImgs[0]).to.be.true;
             expect(!!ampImgs[1]).to.be.true;
+          });
+    });
+
+    it('should apply custom styling', () => {
+      let slider, leftHintArrow, leftLabel;
+      return prep()
+          .then(() => {
+            slider = doc.getElementById('slider');
+            leftHintArrow = slider.querySelector('.amp-image-slider-hint-left');
+            leftLabel = slider.querySelector('.label');
+            expect(env.win.getComputedStyle(leftHintArrow)['width'])
+                .to.equal('64px');
+            expect(env.win.getComputedStyle(leftLabel)['padding'])
+                .to.equal('16px');
           });
     });
 
