@@ -86,22 +86,9 @@ describe('AMP GWD Animation', () => {
       let impl;
       let page1Elem;
       let sandbox;
-      let initializeSpy;
-
-      before(() => {
-        // The service's bodyAvailable callback will execute once the iframe is
-        // ready but before any beforEach hooks, so test that the service
-        // initializes by spying on the method here.
-        // TODO(sklobovskaya): initialize_() should remain private as it's not
-        // part of the service's public API, but stubbing it here is the only
-        // way to verify it is called. Revisit if another solution becomes
-        // available.
-        sandbox = sinon;
-        initializeSpy =
-            sandbox.spy(AmpGwdRuntimeService.prototype, 'initialize_');
-      });
 
       beforeEach(() => {
+        sandbox = sinon.sandbox;
         ampdoc = env.ampdoc;
 
         ampdoc.getBody().innerHTML =
@@ -126,6 +113,13 @@ describe('AMP GWD Animation', () => {
 
         impl = element.implementation_;
         page1Elem = ampdoc.getRootNode().getElementById('page1');
+
+        // Manually invoke initialize_(). This is normally done automatically on
+        // bodyAvailable, but bodyAvailable fires before beforeEach so it's
+        // necessary to call it a second time once the test DOM is actually
+        // ready so the initialization can perform setup on the DOM.
+        const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
+        runtime.initialize_();
       });
 
       afterEach(() => {
@@ -145,22 +139,8 @@ describe('AMP GWD Animation', () => {
       });
       */
 
-      it('should initialize on bodyAvailable', () => {
-        // Waiting for bodyAvailable is only necessary here to avoid JS errors
-        // caused by beforeEach building the element after a test case
-        // environment has already been disposed.
-        return ampdoc.whenBodyAvailable().then(() => {
-          expect(initializeSpy).to.be.called;
-          sandbox.restore();
-        });
-      });
-
       it('should initially enable animations on GWD page 1', () => {
         return ampdoc.whenBodyAvailable().then(() => {
-          // Execute the initialize step (normally executed on bodyAvailable).
-          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
-          runtime.initialize_();
-
           // Page 1 should have been enabled.
           const page1 = ampdoc.getRootNode().getElementById('page1');
           expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
@@ -186,11 +166,8 @@ describe('AMP GWD Animation', () => {
           const page1 = ampdoc.getRootNode().getElementById('page1');
           const page2 = ampdoc.getRootNode().getElementById('page2');
 
-          // Activate page 1.
-          // TODO(sklobovskaya): This is normally done by initialize_, but is
-          // not done in the test environment due to initialize_ executing
-          // before beforeEach which sets up the test DOM. Would be nice to fix.
-          runtime.setCurrentPage(0);
+          // Verify the first page was activated on initialization.
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
 
           // Trigger a setCurrentPage action as though it originated from a
           // pagedeck slideChange event and verify that page 2 is activated.

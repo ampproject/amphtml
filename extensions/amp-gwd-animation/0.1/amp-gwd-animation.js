@@ -180,10 +180,8 @@ export class GwdAnimation extends AMP.BaseElement {
         'Cannot execute action because the GWD service is not registered.');
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
-    const invocationObj = /** @type {!JsonObject} */ (
-      Object.assign({}, invocation));
     const actionArgs =
-        argPaths.map(argPath => getValueForExpr(invocationObj, argPath));
+        argPaths.map(argPath => getValueForExpr(invocation, argPath));
 
     service[invocation.method].apply(service, actionArgs);
   }
