@@ -5666,13 +5666,24 @@ glogg@^1.0.0:
   dependencies:
     sparkles "^1.0.0"
 
-google-closure-compiler@20180506.0.0:
-  version "20180506.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20180506.0.0.tgz#f59cc34dbf8c9a4f48fba3ebb2cf098d25e345ab"
+google-closure-compiler-linux@^20180716.0.0:
+  version "20180716.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20180716.0.0.tgz#b0dc9aa4751085b46002d6a300146df73fa87d35"
+
+google-closure-compiler-osx@^20180716.0.0:
+  version "20180716.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20180716.0.0.tgz#5691c07580578dfea3205e90a6a2968d23b85bd9"
+
+google-closure-compiler@20180716.0.1:
+  version "20180716.0.1"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20180716.0.1.tgz#48deb2b1dfe4c118adcb70dd104cf4fa2b9508d7"
   dependencies:
     chalk "^1.0.0"
     vinyl "^2.0.1"
     vinyl-sourcemaps-apply "^0.2.0"
+  optionalDependencies:
+    google-closure-compiler-linux "^20180716.0.0"
+    google-closure-compiler-osx "^20180716.0.0"
 
 google-closure-compiler@^20151015.0.0:
   version "20151015.7.0"
