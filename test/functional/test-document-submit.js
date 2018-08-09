@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../src/services';
-import {onDocumentFormSubmit_} from '../../src/document-submit';
+import {installGlobalSubmitListenerForDoc, onDocumentFormSubmit_} from '../../src/document-submit';
 
 describe('test-document-submit onDocumentFormSubmit_', () => {
   let sandbox;
@@ -46,6 +46,49 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     sandbox.restore();
   });
 
+  describe('installGlobalSubmitListenerForDoc', () => {
+    let ampdoc;
+    let headNode;
+    let rootNode;
+    beforeEach(() => {
+      headNode = document.createElement('head');
+      rootNode = document.createElement('html');
+      ampdoc = {
+        getHeadNode: () => headNode,
+        getRootNode: () => rootNode,
+        whenBodyAvailable: () => Promise.resolve({}),
+      };
+    });
+
+    /**
+     * @param {string} extension
+     */
+    const createScript = extension => {
+      const script = document.createElement('script');
+      script.setAttribute('src',
+          'https://cdn.ampproject.org/v0/' + extension + '-0.1.js');
+      script.setAttribute('custom-element', extension);
+      return script;
+    };
+
+    it('should not register submit listener if amp-form is not registered.',
+        () => {
+          ampdoc.getHeadNode().appendChild(createScript('amp-list'));
+          sandbox.spy(rootNode, 'addEventListener');
+          return installGlobalSubmitListenerForDoc(ampdoc).then(() => {
+            expect(rootNode.addEventListener).not.to.have.been.called;
+          });
+        });
+
+    it('should register submit listener if amp-form extension is registered.',
+        () => {
+          ampdoc.getHeadNode().appendChild(createScript('amp-form'));
+          sandbox.spy(rootNode, 'addEventListener');
+          return installGlobalSubmitListenerForDoc(ampdoc).then(() => {
+            expect(rootNode.addEventListener).called;
+          });
+        });
+  });
 
   it('should check target and action attributes', () => {
     tgt.removeAttribute('action');

@@ -23,12 +23,22 @@ import {
 } from './url';
 import {Services} from './services';
 import {dev, user} from './log';
+import {isExtensionScriptInNode} from './element-service';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise}
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
-  ampdoc.getRootNode().addEventListener('submit', onDocumentFormSubmit_, true);
+  // Register global submit event listener only if the amp-form
+  // extension is used. Allowing the usage of native forms, otherwise.
+  return isExtensionScriptInNode(ampdoc, 'amp-form')
+      .then(ampFormInstalled => {
+        if (ampFormInstalled) {
+          ampdoc.getRootNode().addEventListener(
+              'submit', onDocumentFormSubmit_, true);
+        }
+      });
 }
 
 
