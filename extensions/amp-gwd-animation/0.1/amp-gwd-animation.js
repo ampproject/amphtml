@@ -28,7 +28,7 @@ import {user} from '../../../src/log';
 /**
  * Returns a value at any level in an object structure addressed by dot-notation
  * list of fields, such as `field1.field2`. If any field in a chain does not
- * not exist or is not an object or array, returns `undefined`.
+ * exist or is not an object or array, returns `undefined`.
  *
  * This function is mostly identical to the one in src/json, with the main
  * difference being that it does not limit the navigable properties to only the
