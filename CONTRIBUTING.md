@@ -140,7 +140,7 @@ We recommend you handle signing/being covered by a CLA *before* you send a pull 
 
 **Make sure that the email you associate with your CLA is the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
 
-* **If you are contributing code on your own behalf** you can sign the ([individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
+* **If you are contributing code on your own behalf** you can sign the [individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
 * **If you are planning on contributing code on behalf of your company:**
   * Your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process that may take a couple of days.  To ensure you can get your code reviewed and merged quickly please start this process as soon as possible.  The signer of your corporate CLA will associate a Google Group to the corporate CLA, and any email address added to this Google Group will be considered to be covered by this corporate CLA.
   * To be covered by your company's corporate CLA the owner of the Google Group associated with the corporate CLA (someone at your company) will need to add your address to this Google Group.
