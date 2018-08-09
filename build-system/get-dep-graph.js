@@ -24,8 +24,8 @@ const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const through = require('through2');
-const TopologicalSort = require('topological-sort');
 const {extensionBundles, TYPES} = require('../bundles.config');
+const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
 
@@ -206,7 +206,8 @@ exports.getGraph = function(entryModules, config) {
     resolve = res;
     reject = rej;
   });
-  const topo = new TopologicalSort({});
+  const nodes = new Map();
+  const topo = new TopologicalSort(nodes);
   const graph = {
     entryModules,
     // Lookup whether a module is a dep of a given entry module
