@@ -3,14 +3,6 @@
     "config:base"
   ],
   "statusCheckVerify": true,
-  "ignoreDeps": [
-    "babel-polyfill",
-    "document-register-element",
-    "dompurify",
-    "promise-pjs",
-    "web-activities",
-    "web-animations-js"
-  ],
   "includePaths": [
     "package.json"
   ]
