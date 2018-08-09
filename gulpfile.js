@@ -1154,6 +1154,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
 
   const entryPoint = path.join(srcDir, srcFilename);
+  console.log('compileJs', entryPoint);
 
   // Transpile TS to Closure-annotated JS before actual bundling or compile.
   if (options.typeScript) {
