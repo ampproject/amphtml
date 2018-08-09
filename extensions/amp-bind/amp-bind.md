@@ -74,6 +74,7 @@ In the following example, tapping the button changes the `<p>` element's text fr
 
 1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button.  After tapping the button, the state is `{foo: 'amp-bind'}`.
 2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello' + foo`, which concatenates the string literal `'Hello '` and the variable state `foo`.
+There is a limit of 100 operands what can be used in an expression.
 3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
 
 {% call callout('Note', type='note') %}
@@ -227,7 +228,7 @@ null || 'default' // 'default'
     <th>Example</th>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code><sup>1</sup></a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code></a><sup>1</sup></td>
     <td class="col-thirty">
       <code>concat</code><br>
       <code>filter</code><br>
@@ -409,13 +410,13 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-carousel type=slides&gt;</code></td>
-    <td><code>[slide]</code><sup>1</sup></td>
+    <td><code>[slide]</code><sup>*</sup></td>
     <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-google-document-embed&gt;</code></td>
-    <td><code>[src]</code></td>
-    <td>Displays the document at the updated URL.</td>
+    <td><code>[src]</code><br><code>[title]</code></td>
+    <td>Displays the document at the updated URL.<br>Changes the document's title.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-iframe&gt;</code></td>
@@ -428,6 +429,13 @@ Only binding to the following components and attributes are allowed:
     <td>When binding to <code>[src]</code>, make sure you also bind to <code>[srcset]</code> in order to make the binding work on cache.<br>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
   </tr>
   <tr>
+    <td><code>&lt;amp-lightbox&gt;</code></td>
+    <td><code>[open]</code><sup>*</sup></td>
+    <td>
+      Toggles display of the lightbox. Tip: Use <code>on="lightboxClose: AMP.setState(...)"</code> to update variables when the lightbox is closed.
+    </td>
+  </tr>
+  <tr>
     <td><code>&lt;amp-list&gt;</code></td>
     <td><code>[src]</code></td>
     <td>
@@ -437,7 +445,7 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-selector&gt;</code></td>
-    <td><code>[selected]</code><sup>1</sup></td>
+    <td><code>[selected]</code><sup>*</sup></td>
     <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
@@ -511,7 +519,7 @@ Only binding to the following components and attributes are allowed:
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
   </tr>
 </table>
-<sup>1</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
+<sup>*</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
 
 ## Debugging
 
