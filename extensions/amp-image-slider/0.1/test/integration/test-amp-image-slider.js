@@ -89,7 +89,7 @@ config.run('amp-image-slider', function() {
         // layoutCallback is called
         // this is the same as CommonSignal.LOAD_END
         return !!slider.signals().get('load-end');
-      }, 1000);
+      });
     }
 
     function createFakeEvent(type, x, y) {
@@ -167,7 +167,7 @@ config.run('amp-image-slider', function() {
           return true;
         }
         return false;
-      }, 500);
+      }, () => { return `${leftPos} is not reached.`; });
     }
 
     it('should construct', () => {
