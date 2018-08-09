@@ -36,7 +36,7 @@ Before you start writing code, consult these resources for guidance and guidelin
   - [Instructions and Guidelines for building an AMP component](building-an-amp-extension.md)
   - Learn to create your first component in this [codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0)
   - Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
-- **Integrating third-party software, embeds, services**: [Guidelines](https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+- **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
 
 ## Testing
 
