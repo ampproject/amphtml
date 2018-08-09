@@ -59,10 +59,10 @@
 <body>
 
     <amp-state id="listStyle">
-        <script type="application/json">
-          "list"
-        </script>
-      </amp-state>
+      <script type="application/json">
+        "list"
+      </script>
+    </amp-state>
 <article>
   <h1>AMP List Resize Manual Test</h1>
 
@@ -115,6 +115,44 @@
         <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
         {{title}}
       </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
+  </amp-list>
+
+
+
+  <h2>AMP List Resize After Changing Src</h2>
+  <amp-state id="query">
+    <script type="application/json">
+      ""
+    </script>
+  </amp-state>
+
+  <input on="
+      change:AMP.setState({
+        query: event.value,
+      });
+      input-debounced:AMP.setState({
+        query: event.value
+      });
+    " value="" [value]="query"
+    list="locations">
+
+  <amp-list
+    width="396"
+    height="80"
+    layout=responsive
+    src="/search/countries"
+    [src]="'/search/countries?q=' + query">
+    <template type="amp-mustache">
+      {{#results}}
+      <div class="story-entry" >
+        {{name}}
+        is a country
+      </div>
+      {{/results}}
     </template>
     <div overflow>
       SEE MORE
