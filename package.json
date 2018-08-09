@@ -206,6 +206,8 @@
       "/test/fixtures/",
       "<rootDir>/build/"
     ],
-    "reporters": ["jest-dot-reporter"]
+    "reporters": [
+      "jest-dot-reporter"
+    ]
   }
 }
