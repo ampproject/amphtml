@@ -864,7 +864,9 @@ export const adConfig = {
       'https://cdn2.teads.tv',
       'https://a.teads.tv',
       'https://t.teads.tv',
+      'https://r.teads.tv',
     ],
+    consentHandlingOverride: true,
   },
 
   'triplelift': {},

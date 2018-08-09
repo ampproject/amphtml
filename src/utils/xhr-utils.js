@@ -344,7 +344,7 @@ function normalizeMethod_(method) {
  * Verifies if response has the correct headers
  * @param {!Window} win
  * @param {!FetchResponse} response
- * @param {!../utils/xhr-utils.FetchInitDef=} init
+ * @param {!FetchInitDef=} init
  * @return {!FetchResponse}
  */
 export function verifyAmpCORSHeaders(win, response, init) {
