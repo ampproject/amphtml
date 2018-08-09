@@ -227,7 +227,8 @@ export class LayoutLayers {
    */
   getScrolledPosition(element, opt_ancestor) {
     const layout = this.add(element);
-    return layout.getScrolledPosition(opt_ancestor);
+    const pos = layout.getScrolledPosition(opt_ancestor);
+    return positionLt(Math.round(pos.left), Math.round(pos.top));
   }
 
   /**
@@ -242,7 +243,8 @@ export class LayoutLayers {
    */
   getOffsetPosition(element, opt_ancestor) {
     const layout = this.add(element);
-    return layout.getOffsetPosition(opt_ancestor);
+    const pos = layout.getOffsetPosition(opt_ancestor);
+    return positionLt(Math.round(pos.left), Math.round(pos.top));
   }
 
   /**
@@ -253,7 +255,8 @@ export class LayoutLayers {
    */
   getSize(element) {
     const layout = this.add(element);
-    return layout.getSize();
+    const size = layout.getSize();
+    return sizeWh(Math.round(size.width), Math.round(size.height));
   }
 
   /**
