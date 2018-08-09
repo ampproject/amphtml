@@ -222,6 +222,10 @@ function createElementRules_() {
     'AMP-CAROUSEL': {
       'slide': null,
     },
+    'AMP-GOOGLE-DOCUMENT-EMBED': {
+      'src': null,
+      'title': null,
+    },
     'AMP-IFRAME': {
       'src': null,
     },
@@ -238,6 +242,9 @@ function createElementRules_() {
       'srcset': {
         'alternativeName': 'src',
       },
+    },
+    'AMP-LIGHTBOX': {
+      'open': null,
     },
     'AMP-LIST': {
       'src': {

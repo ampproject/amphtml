@@ -42,10 +42,10 @@ amp-story-auto-ads/0.1/test/validator-amp-story-auto-ads.html:34:2 The tag 'AMP-
 |      <amp-story-auto-ads>
 |        <script type="application/json">
 |        {
-|           "ad-attributes": {
-|             type: "custom"
-|             data-src: "https://adserver.com/getad?slot=abcd1234"
-|           }
+|          "ad-attributes": {
+|            "type": "custom",
+|            "data-src": "https://adserver.com/getad?slot=abcd1234"
+|          }
 |        }
 |        </script>
 |

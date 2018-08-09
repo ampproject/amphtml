@@ -95,6 +95,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
   },
   {
+    id: 'amp-auto-ads-adsense-responsive',
+    name: 'AMP Auto Ads AdSense Responsive',
+    spec: '',
+    cleanupIssue: '',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -297,13 +303,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'amp-google-document-embed',
-    name: 'Enables the experiment amp-google-document-embed component' +
-        ' which is a wrapper around the Google Drive document viewer embed.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'amp-image-slider',
     name: 'Enables the experimental amp-image-slider for image comparison',
     spec: 'TODO',
@@ -320,6 +319,24 @@ const EXPERIMENTS = [
     name: 'Enables faster scanning of dynamic markup for bindings',
     spec: 'https://github.com/ampproject/amphtml/pull/17229',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
+  },
+  {
+    id: 'no-initial-intersection',
+    name: 'Do not invoke context.observeIntersection callback with ' +
+        'initialintersection',
+    spec: 'https://github.com/ampproject/amphtml/issues/8562',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
+  },
+  {
+    id: 'custom-elements-v1',
+    name: 'Enable a new custom elements v1 polyfill',
+    spec: 'https://github.com/ampproject/amphtml/pull/17205',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
+  },
+  {
+    id: 'amp-carousel-scroll-snap',
+    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
 ];
 
