@@ -468,11 +468,13 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.animateHideHint_();
 
     switch (e.key.toLowerCase()) {
+      case 'left': // Edge non-standard, pre EdgeHTML 17
       case 'arrowleft':
         e.preventDefault();
         e.stopPropagation();
         this.stepLeft_();
         break;
+      case 'right': // Edge non-standard, pre EdgeHTML 17
       case 'arrowright':
         e.preventDefault();
         e.stopPropagation();
