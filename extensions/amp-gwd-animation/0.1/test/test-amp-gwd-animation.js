@@ -20,6 +20,7 @@ import {
   GOTO_COUNTER_PROP,
   GWD_PAGE_WRAPPER_CLASS,
   GWD_SERVICE_NAME,
+  GWD_TIMELINE_EVENT,
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
@@ -29,9 +30,10 @@ import {
   addAction,
 } from '../amp-gwd-animation';
 import {Services} from '../../../../src/services';
+import {createCustomEvent} from '../../../../src/event-helper';
 import {getServiceForDoc} from '../../../../src/service';
 
-describes.sandboxed('AMP GWD Animation', {}, () => {
+describe('AMP GWD Animation', () => {
   /**
    * Creates a test amp-gwd-animation element in the given document.
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -55,14 +57,17 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
    * @param {!Object} invocation Action invocation to execute.
    */
   function invokeWithSomeArgsUndefined(impl, invocation) {
-    for (const argName in invocation.args) {
-      // Temporarily delete the arg and test that the function can be executed
-      // without errors.
-      const oldValue = invocation.args[argName];
-      delete invocation.args[argName];
-      impl.executeAction(invocation);
-      invocation.args[argName] = oldValue;
-    }
+    // These invocations are expected to generate console errors in most cases.
+    allowConsoleError(() => {
+      for (const argName in invocation.args) {
+        // Temporarily delete the arg and test that the function can be executed
+        // without errors.
+        const oldValue = invocation.args[argName];
+        delete invocation.args[argName];
+        impl.executeAction(invocation);
+        invocation.args[argName] = oldValue;
+      }
+    });
   }
 
   describes.repeated('in single and shadow doc', {
@@ -91,7 +96,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         // part of the service's public API, but stubbing it here is the only
         // way to verify it is called. Revisit if another solution becomes
         // available.
-        sandbox = sinon.sandbox;
+        sandbox = sinon;
         initializeSpy =
             sandbox.spy(AmpGwdRuntimeService.prototype, 'initialize_');
       });
@@ -415,22 +420,28 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
       it('should execute gotoAndPlayNTimes', () => {
         return ampdoc.whenBodyAvailable().then(() => {
+          const testEvent = createCustomEvent(
+              ampdoc.win, GWD_TIMELINE_EVENT, {'eventName': 'event-1'});
+
           // Invoking gotoAndPlayNTimes with a negative N value is a no-op.
           const invocationWithBadNValue = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: -5},
-            event: {eventName: 'event-1'},
+            event: testEvent,
             satisfiesTrust: () => true,
           };
 
-          impl.executeAction(invocationWithBadNValue);
+          allowConsoleError(() => {
+            impl.executeAction(invocationWithBadNValue);
+          });
           expect(page1Elem.classList.contains('foo')).to.be.false;
+
 
           // Initialize a valid gotoAndPlayNTimes invocation from some event.
           const invocation = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: 2},
-            event: {eventName: 'event-1'},
+            event: testEvent,
             satisfiesTrust: () => true,
           };
 
@@ -456,10 +467,12 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
           // gotoAndPlayNTimes invocations originating from a different timeline
           // event begin their own counters.
+          const testEvent2 = createCustomEvent(
+              ampdoc.win, GWD_TIMELINE_EVENT, {'eventName': 'event-2'});
           const invocationFromEvent2 = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: 1},
-            event: {eventName: 'event-2'}, // Different event.
+            event: testEvent2,
             satisfiesTrust: () => true,
           };
 
