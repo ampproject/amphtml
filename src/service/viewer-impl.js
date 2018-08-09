@@ -802,16 +802,6 @@ export class Viewer {
   }
 
   /**
-   * Returns the promise that will yield the viewer URL value. It's by default
-   * the current page's URL. The trusted viewers are allowed to override this
-   * value.
-   * @return {!Promise<string>}
-   */
-  getViewerUrl() {
-    return this.viewerUrl_;
-  }
-
-  /**
    * Possibly return the messaging origin if set. This would be the origin
    * of the parent viewer.
    * @return {?string}
