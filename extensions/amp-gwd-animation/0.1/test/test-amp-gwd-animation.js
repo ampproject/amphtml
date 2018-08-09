@@ -15,7 +15,6 @@
  */
 import {
   ANIMATIONS_DISABLED_CLASS,
-  AmpGwdRuntimeService,
   CURRENT_LABEL_ANIMATION_ATTR,
   GOTO_COUNTER_PROP,
   GWD_PAGE_WRAPPER_CLASS,
@@ -161,7 +160,6 @@ describe('AMP GWD Animation', () => {
 
       it('should change the current page on pagedeck slideChange', () => {
         return ampdoc.whenBodyAvailable().then(() => {
-          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
           const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
           const page1 = ampdoc.getRootNode().getElementById('page1');
           const page2 = ampdoc.getRootNode().getElementById('page2');
