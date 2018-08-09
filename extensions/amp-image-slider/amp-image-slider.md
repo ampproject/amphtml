@@ -59,3 +59,5 @@ Once the slider is loaded, the compared images are separated by a vertical bar, 
 Users can mouse down or touch to move the slider to the position of the pointer, and can then move the pointer to drag the slider bar left or right. For the left image, only the part that is left to the bar is displayed; similarly for the right image, to only display the right portion.
 
 If you specify `tabindex` on the `amp-image-slider` element, users can navigate the slider with their keyboards. Pressing the  down, left, or right arrow moves the slider bar one step towards the corresponding direction. Pressing the Home key brings the slider to the center. Pressing the PageUp or PageDown keys moves to the left or right end of the slider body.
+
+The hints that shows at the center of the vertical bar will disappear once user starts interacting with the slider (such as clicking the mouse button, touch the slider, and pressing keys to move the slider). The hints would reappear if it then leaves the viewport and goes back in again. To stop such reappearing behavior, add the `disable-hint-reappear` attribute to the image slider.
