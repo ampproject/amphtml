@@ -91,3 +91,6 @@ moment.Locale.longDateFormat = function (format) {};
 
 /** @return {moment.Locale} */
 moment.prototype.localeData = function () {};
+
+/** @return {!moment} */
+moment.prototype.duration = function () {};

@@ -548,7 +548,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {string} date
    */
   handleSetDateFromString_(date) {
-    const momentDate = this.createMoment_(date);
+    const momentDate = this.createOffsetMoment_(date);
     return this.handleSetDate_(momentDate);
   }
 
@@ -569,8 +569,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {?string} endDate
    */
   handleSetDatesFromString_(startDate, endDate) {
-    const momentStart = startDate ? this.createMoment_(startDate) : null;
-    const momentEnd = endDate ? this.createMoment_(endDate) : null;
+    const momentStart = startDate ? this.createOffsetMoment_(startDate) : null;
+    const momentEnd = endDate ? this.createOffsetMoment_(endDate) : null;
     this.handleSetDates_(momentStart, momentEnd);
   }
 
@@ -603,10 +603,11 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Forgivingly parse an input string into a moment object, preferring the
-   * date picker's configured format.
+   * Forgivingly parse an ISO8601 input string into a moment object,
+   * preferring the date picker's configured format.
    * @param {string} input The input date string to parse
    * @return {?moment}
+   * @private
    */
   createMoment_(input) {
     if (!input) {
@@ -614,6 +615,26 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
     const moment = this.moment_(input, this.format_);
     return moment.isValid() ? moment : this.moment_(input);
+  }
+
+  /**
+   * Parse an ISO8601 date or duration.
+   * @param {string} input The input date string to parse
+   * @return {?moment}
+   * @private
+   */
+  createOffsetMoment_(input) {
+    if (!input) {
+      return null;
+    }
+    const isISO8601Duration = (input[0] == 'P');
+
+    if (isISO8601Duration) {
+      const duration = this.moment_.duration(input);
+      return this.moment_().add(duration);
+    } else {
+      return this.createMoment_(input);
+    }
   }
 
   /**
@@ -649,15 +670,25 @@ export class AmpDatePicker extends AMP.BaseElement {
    * the AMP element.
    */
   getInitialState_() {
-    const date = this.dateField_ && this.dateField_.value ?
-      this.createMoment_(this.dateField_.value) :
-      null;
-    const startDate = this.startDateField_ && this.startDateField_.value ?
-      this.createMoment_(this.startDateField_.value) :
-      null;
-    const endDate = this.endDateField_ && this.endDateField_.value ?
-      this.createMoment_(this.endDateField_.value) :
-      null;
+    const {element} = this;
+    const date = this.createOffsetMoment_(element.getAttribute('date') ||
+        (this.dateField_ && this.dateField_.value));
+    const startDate = this.createOffsetMoment_(
+        element.getAttribute('start-date') ||
+        (this.startDateField_ && this.startDateField_.value));
+    const endDate = this.createOffsetMoment_(
+        element.getAttribute('end-date') ||
+        (this.endDateField_ && this.endDateField_.value));
+
+    if (date && this.dateField_) {
+      this.dateField_.value = this.getFormattedDate_(date);
+    }
+    if (startDate && this.startDateField_) {
+      this.startDateField_.value = this.getFormattedDate_(startDate);
+    }
+    if (endDate && this.endDateField_) {
+      this.endDateField_.value = this.getFormattedDate_(endDate);
+    }
 
     return map({
       date,
