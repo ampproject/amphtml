@@ -16,11 +16,10 @@
 
 /**
  * @fileoverview "Unit" test for bind-impl.js. Runs as an integration test
- *               because it requires building web-worker binary.
+ * because it requires building web-worker binary.
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';

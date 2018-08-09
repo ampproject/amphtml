@@ -19,8 +19,8 @@ tags: {
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-date-picker"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -176,6 +176,10 @@ attr_lists: {
 attr_lists: {
   name: "amp-date-picker-range-type-attributes"
   attrs: { name: "end-input-selector" }
+  attrs: {
+    name: "minimum-nights"
+    value_regex: "[0-9]+"
+  }
   attrs: { name: "start-input-selector" }
 }
 

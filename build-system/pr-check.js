@@ -272,6 +272,7 @@ function stopSauceConnect() {
 const command = {
   testBuildSystem: function() {
     timedExecOrDie('gulp ava');
+    timedExecOrDie('node node_modules/jest/bin/jest.js');
   },
   testDocumentLinks: function() {
     timedExecOrDie('gulp check-links');
@@ -344,6 +345,13 @@ const command = {
       timedExecOrDie(cmd + ' --headless');
     }
   },
+  runSinglePassCompiledIntegrationTests: function() {
+    timedExecOrDie('rm -R dist');
+    timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
+    timedExecOrDie('gulp test --integration --nobuild --headless '
+        + '--compiled --single_pass');
+    timedExecOrDie('rm -R dist');
+  },
   runVisualDiffTests: function(opt_mode) {
     if (process.env.TRAVIS) {
       process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
@@ -363,10 +371,7 @@ const command = {
     const {status} = timedExec(cmd);
     if (status != 0) {
       console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Found errors while running', colors.cyan(cmd) +
-          '. Here are the last 100 lines from',
-          colors.cyan('chromedriver.log') + ':\n');
-      exec('tail -n 100 chromedriver.log');
+          'Found errors while running', colors.cyan(cmd));
     }
   },
   verifyVisualDiffTests: function() {
@@ -422,6 +427,7 @@ function runAllCommands() {
     }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
+    command.runSinglePassCompiledIntegrationTests();
   }
 }
 
@@ -610,6 +616,11 @@ function main() {
     }
     if (buildTargets.has('VALIDATOR')) {
       command.buildValidator();
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.runSinglePassCompiledIntegrationTests();
     }
   }
 

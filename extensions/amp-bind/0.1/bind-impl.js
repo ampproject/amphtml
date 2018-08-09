@@ -16,11 +16,8 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
-import {BindExpressionResultDef} from './bind-expression';
 import {BindValidator} from './bind-validator';
-import {BindingDef} from './bind-evaluator';
 import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
@@ -28,11 +25,13 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {filterSplice} from '../../../src/utils/array';
+import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
@@ -59,7 +58,7 @@ const MAX_MERGE_DEPTH = 10;
 /**
  * A bound property, e.g. [property]="expression".
  * `previousResult` is the result of this expression during the last evaluation.
- * @typedef {{property: string, expressionString: string, previousResult: (./bind-expression.BindExpressionResultDef|undefined)}}
+ * @typedef {{property: string, expressionString: string, previousResult: (BindExpressionResultDef|undefined)}}
  */
 let BoundPropertyDef;
 
@@ -68,11 +67,6 @@ let BoundPropertyDef;
  * @typedef {{boundProperties: !Array<BoundPropertyDef>, element: !Element}}
  */
 let BoundElementDef;
-
-/**
- * @typedef {{boundElements: !Array<BoundElementDef>, bindings: !Array<./bind-evaluator.BindingDef>, expressionToElements: !Object<string, !Array<!Element>>, limitExceeded: boolean}}
- */
-let NodeScanDef;
 
 /**
  * A map of tag names to arrays of attributes that do not have non-bind
@@ -278,8 +272,8 @@ export class Bind {
       this.signals_.signal('FIRST_MUTATE');
 
       const scope = dict();
-      if (event && event.detail) {
-        scope['event'] = event.detail;
+      if (event && getDetail(/** @type {!Event} */ (event))) {
+        scope['event'] = getDetail(/** @type {!Event} */ (event));
       }
       switch (method) {
         case 'setState':
@@ -362,21 +356,62 @@ export class Bind {
    * Returned promise is resolved when all operations complete.
    * If they don't complete within `timeout` ms, the promise is rejected.
    *
-   * @param {!Array<!Element>} added
-   * @param {!Array<!Element>} removed
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
    * @param {number} timeout Timeout in milliseconds.
    * @return {!Promise}
    */
-  scanAndApply(added, removed, timeout = 2000) {
-    dev().info(TAG, 'rescan:', added, removed);
-    const promise = this.removeThenAdd_(removed, added)
-        .then(deltas => {
-          // Don't reevaluate/apply if there are no bindings.
-          if (deltas.added > 0) {
-            return this.evaluate_().then(results =>
-              this.applyElements_(results, added));
-          }
+  scanAndApply(addedElements, removedElements, timeout = 2000) {
+    dev().info(TAG, 'rescan:', addedElements, removedElements);
+    let promise;
+    if (isExperimentOn(this.win_, 'faster-bind-scan')) {
+      /**
+       * Helper function for cleaning up bindings in removed elements.
+       * @param {number} added
+       * @return {!Promise}
+       */
+      const cleanup = added => {
+        this.removeBindingsForNodes_(removedElements).then(removed => {
+          dev().info(TAG,
+              '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
         });
+        return Promise.resolve();
+      };
+      // Early-out if max number of bindings has already been exceeded.
+      // This can happen since we purge old bindings in `removedElements`
+      // _after_ adding new ones (rather than before) as an optimization.
+      if (this.numberOfBindings() > this.maxNumberOfBindings_) {
+        this.emitMaxBindingsExceededError_();
+        return cleanup(0);
+      }
+      const bindings = [];
+      addedElements.forEach(ae => {
+        const elements = ae.querySelectorAll('[i-amphtml-binding]');
+        for (let i = 0; i < elements.length; i++) {
+          this.scanElement_(elements[i], Number.POSITIVE_INFINITY, bindings);
+        }
+      });
+      const added = bindings.length;
+      if (added === 0) {
+        return cleanup(0);
+      }
+      promise = this.sendBindingsToWorker_(bindings).then(() => {
+        return this.evaluate_()
+            .then(results => this.applyElements_(results, addedElements));
+      }).then(() => {
+        // Remove bindings at the end to reduce evaluation/apply latency.
+        cleanup(added);
+      });
+    } else {
+      promise = this.removeThenAdd_(removedElements, addedElements)
+          .then(deltas => {
+            // Don't reevaluate/apply if there are no bindings.
+            if (deltas.added > 0) {
+              return this.evaluate_().then(results =>
+                this.applyElements_(results, addedElements));
+            }
+          });
+    }
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
   }
@@ -496,8 +531,7 @@ export class Bind {
    */
   addMacros_() {
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
-    const macros =
-      /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+    const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')
@@ -542,19 +576,10 @@ export class Bind {
         : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
-        const {
-          boundElements, bindings, expressionToElements, limitExceeded,
-        } = results;
-
-        this.boundElements_ = this.boundElements_.concat(boundElements);
-        Object.assign(this.expressionToElements_, expressionToElements);
-
+        const {bindings, limitExceeded} = results;
         if (limitExceeded) {
-          dev().expectedError(TAG, 'Maximum number of bindings reached ' +
-              `(${this.maxNumberOfBindings_}). Additional elements with ` +
-              'bindings will be ignored.');
+          this.emitMaxBindingsExceededError_();
         }
-
         return bindings;
       });
     });
@@ -565,22 +590,34 @@ export class Bind {
       // `results` is a 2D array where results[i] is an array of bindings.
       // Flatten this into a 1D array of bindings via concat.
       const bindings = Array.prototype.concat.apply([], results);
-      if (bindings.length == 0) {
-        return bindings.length;
-      } else {
-        return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
-          // Report each parse error.
-          Object.keys(parseErrors).forEach(expressionString => {
-            const elements = this.expressionToElements_[expressionString];
-            if (elements.length > 0) {
-              this.reportWorkerError_(parseErrors[expressionString],
-                  `${TAG}: Expression compile error in "${expressionString}".`,
-                  elements[0]);
-            }
-          });
-          return bindings.length;
-        });
-      }
+      return (bindings.length > 0) ? this.sendBindingsToWorker_(bindings) : 0;
+    });
+  }
+
+  /** Emits console error stating that the binding limit was exceeded. */
+  emitMaxBindingsExceededError_() {
+    dev().expectedError(TAG, 'Maximum number of bindings reached ' +
+        `(${this.maxNumberOfBindings_}). Additional elements with ` +
+        'bindings will be ignored.');
+  }
+
+  /**
+   * Sends new bindings to the web worker for parsing.
+   * @param {!Array<!BindBindingDef>} bindings
+   * @return {!Promise<number>}
+   */
+  sendBindingsToWorker_(bindings) {
+    return this.ww_('bind.addBindings', [bindings]).then(parseErrors => {
+      // Report each parse error.
+      Object.keys(parseErrors).forEach(expressionString => {
+        const elements = this.expressionToElements_[expressionString];
+        if (elements.length > 0) {
+          this.reportWorkerError_(parseErrors[expressionString],
+              `${TAG}: Expression compile error in "${expressionString}".`,
+              elements[0]);
+        }
+      });
+      return bindings.length;
     });
   }
 
@@ -607,7 +644,7 @@ export class Bind {
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
     // bound to elements.
-    const deletedExpressions = [];
+    const deletedExpressions = /** @type {!Array<string>} */ ([]);
     for (const expression in this.expressionToElements_) {
       const elements = this.expressionToElements_[expression];
       filterSplice(elements, element => {
@@ -639,27 +676,19 @@ export class Bind {
    * a tuple containing bound elements and binding data for the evaluator.
    * @param {!Node} node
    * @param {number} limit
-   * @return {!Promise<NodeScanDef>}
+   * @return {!Promise<{bindings: !Array<!BindBindingDef>, limitExceeded: boolean}>}
    * @private
    */
   scanNode_(node, limit) {
-    /** @type {!Array<BoundElementDef>} */
-    const boundElements = [];
-    /** @type {!Array<./bind-evaluator.BindingDef>} */
+    /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
-    /** @type {!Object<string, !Array<!Element>>} */
-    const expressionToElements = map();
-
-
     const doc = dev().assert(node.nodeType == Node.DOCUMENT_NODE
       ? node : node.ownerDocument, 'ownerDocument is null.');
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
     const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
         /* entityReferenceExpansion */ false);
-
     // Set to true if number of bindings in `node` exceeds `limit`.
     let limitExceeded = false;
-
     // Helper function for scanning the tree walker's next node.
     // Returns true if the walker has no more nodes.
     const scanNextNode_ = () => {
@@ -673,26 +702,10 @@ export class Bind {
         return !walker.nextNode();
       }
       const element = dev().assertElement(node);
-      const {tagName} = element;
-
-      let boundProperties = this.scanElement_(element);
-      // Stop scanning once |limit| bindings are reached.
-      if (bindings.length + boundProperties.length > limit) {
-        boundProperties = boundProperties.slice(0, limit - bindings.length);
+      const remainingQuota = limit - bindings.length;
+      if (this.scanElement_(element, remainingQuota, bindings)) {
         limitExceeded = true;
       }
-      if (boundProperties.length > 0) {
-        boundElements.push({element, boundProperties});
-      }
-      boundProperties.forEach(boundProperty => {
-        const {property, expressionString} = boundProperty;
-        bindings.push({tagName, property, expressionString});
-
-        if (!expressionToElements[expressionString]) {
-          expressionToElements[expressionString] = [];
-        }
-        expressionToElements[expressionString].push(element);
-      });
       return !walker.nextNode() || limitExceeded;
     };
 
@@ -715,9 +728,7 @@ export class Bind {
         }
         // If we scanned all elements, resolve. Otherwise, continue chunking.
         if (completed) {
-          resolve({
-            boundElements, bindings, expressionToElements, limitExceeded,
-          });
+          resolve({bindings, limitExceeded});
         } else {
           chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
         }
@@ -727,17 +738,48 @@ export class Bind {
   }
 
   /**
+   * Scans the element for bindings and adds up to |quota| to `outBindings`.
+   * Also updates ivars `boundElements_` and `expressionToElements_`.
+   * @param {!Element} element
+   * @param {number} quota
+   * @param {!Array<!BindBindingDef>} outBindings
+   * @return {boolean} Returns true if `element` contains more than `quota`
+   *     bindings. Otherwise, returns false.
+   */
+  scanElement_(element, quota, outBindings) {
+    let quotaExceeded = false;
+    const boundProperties = this.boundPropertiesInElement_(element);
+    if (boundProperties.length > quota) {
+      boundProperties.length = quota;
+      quotaExceeded = true;
+    }
+    if (boundProperties.length > 0) {
+      this.boundElements_.push({element, boundProperties});
+    }
+    const {tagName} = element;
+    boundProperties.forEach(boundProperty => {
+      const {property, expressionString} = boundProperty;
+      outBindings.push({tagName, property, expressionString});
+      if (!this.expressionToElements_[expressionString]) {
+        this.expressionToElements_[expressionString] = [];
+      }
+      this.expressionToElements_[expressionString].push(element);
+    });
+    return quotaExceeded;
+  }
+
+  /**
    * Returns bound properties for an element.
    * @param {!Element} element
    * @return {!Array<{property: string, expressionString: string}>}
    * @private
    */
-  scanElement_(element) {
+  boundPropertiesInElement_(element) {
     const boundProperties = [];
     const attrs = element.attributes;
     for (let i = 0, numberOfAttrs = attrs.length; i < numberOfAttrs; i++) {
       const attr = attrs[i];
-      const boundProperty = this.scanAttribute_(attr, element);
+      const boundProperty = this.boundPropertyInAttribute_(attr, element);
       if (boundProperty) {
         boundProperties.push(boundProperty);
       }
@@ -753,7 +795,7 @@ export class Bind {
    * @return {?{property: string, expressionString: string}}
    * @private
    */
-  scanAttribute_(attribute, element) {
+  boundPropertyInAttribute_(attribute, element) {
     const tag = element.tagName;
     const attr = attribute.name;
 
@@ -805,7 +847,7 @@ export class Bind {
 
   /**
    * Reevaluates all expressions and returns a map of expressions to results.
-   * @return {!Promise<!Object<string, ./bind-expression.BindExpressionResultDef>>}
+   * @return {!Promise<!Object<string, BindExpressionResultDef>>}
    * @private
    */
   evaluate_() {
@@ -832,7 +874,7 @@ export class Bind {
   /**
    * Verifies expression results vs. current DOM state and returns an
    * array of bindings with mismatches (if any).
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {Object<string, BindExpressionResultDef>} results
    * @param {?Array<!Element>=} elements If provided, only verifies bindings
    *     contained within the given elements. Otherwise, verifies all bindings.
    * @param {boolean=} warn If true, emits a user warning for verification
@@ -903,8 +945,8 @@ export class Bind {
    * will only return properties that need to be updated along with their
    * new value.
    * @param {!Array<!BoundPropertyDef>} boundProperties
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
-   * @return {!Array<{boundProperty: !BoundPropertyDef, newValue: !./bind-expression.BindExpressionResultDef}>}
+   * @param {Object<string, BindExpressionResultDef>} results
+   * @return {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>}
    * @private
    */
   calculateUpdates_(boundProperties, results) {
@@ -926,7 +968,7 @@ export class Bind {
 
   /**
    * Applies expression results to all elements in the document.
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {Object<string, BindExpressionResultDef>} results
    * @param {boolean=} opt_isAmpStateMutation
    * @return {!Promise}
    * @private
@@ -948,7 +990,7 @@ export class Bind {
 
   /**
    * Applies expression results to only given elements and their descendants.
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {Object<string, BindExpressionResultDef>} results
    * @param {!Array<!Element>} elements
    * @return {!Promise}
    */
@@ -968,7 +1010,7 @@ export class Bind {
 
   /**
    * Applies expression results to a single BoundElementDef.
-   * @param {Object<string, ./bind-expression.BindExpressionResultDef>} results
+   * @param {Object<string, BindExpressionResultDef>} results
    * @param {BoundElementDef} boundElement
    * @return {!Promise}
    */
@@ -979,7 +1021,7 @@ export class Bind {
       return Promise.resolve();
     }
     return this.resources_.mutateElement(element, () => {
-      const mutations = dict();
+      const mutations = map();
       let width, height;
 
       updates.forEach(update => {
@@ -1021,8 +1063,8 @@ export class Bind {
    * Mutates the bound property of `element` with `newValue`.
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
-   * @param {./bind-expression.BindExpressionResultDef} newValue
-   * @return {?{name: string, value:./bind-expression.BindExpressionResultDef}}
+   * @param {BindExpressionResultDef} newValue
+   * @return {?{name: string, value:BindExpressionResultDef}}
    * @private
    */
   applyBinding_(boundProperty, element, newValue) {
@@ -1133,7 +1175,7 @@ export class Bind {
    * Otherwise, returns a tuple containing the expected and actual values.
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
-   * @param {./bind-expression.BindExpressionResultDef} expectedValue
+   * @param {BindExpressionResultDef} expectedValue
    * @return {?{expected: *, actual: *}}
    * @private
    */

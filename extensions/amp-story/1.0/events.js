@@ -55,13 +55,16 @@ export const EventType = {
 
   // Triggered when a page has loaded at least one frame of all of its media.
   PAGE_LOADED: 'ampstory:pageload',
+
+  // Dispatches an action to the amp-story store service. Only works under test.
+  DISPATCH_ACTION: 'ampstory:dispatchaction',
 };
 
 /**
  * @param {!Window} win
  * @param {!EventTarget} source
  * @param {string} eventName
- * @param {!Object=} payload
+ * @param {!JsonObject=} payload
  * @param {!CustomEventInit=} eventInit
  */
 export function dispatch(win, source, eventName, payload = undefined,

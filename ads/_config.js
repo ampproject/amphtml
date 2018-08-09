@@ -864,7 +864,9 @@ export const adConfig = {
       'https://cdn2.teads.tv',
       'https://a.teads.tv',
       'https://t.teads.tv',
+      'https://r.teads.tv',
     ],
+    consentHandlingOverride: true,
   },
 
   'triplelift': {},
@@ -896,6 +898,11 @@ export const adConfig = {
       'https://ad.jp.ap.valuecommerce.com',
       'https://ad.omks.valuecommerce.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  'videointelligence': {
+    preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
   },
 

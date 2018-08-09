@@ -21,8 +21,8 @@ tags: {  # amp-bind
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-bind"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     # amp-bind has no associated tag which indicates usage of the extension.
     # TODO(gregable): Implement a mechanism to associate attributes with
     # extension usage and then set this to GRANDFATHERED or ERROR.

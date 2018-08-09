@@ -121,9 +121,6 @@ export class MediaPool {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(win);
-
     /**
      * The function used to retrieve the distance between an element and the
      * current position in the document.
@@ -224,24 +221,22 @@ export class MediaPool {
       this.allocated[type] = [];
       this.unallocated[type] = [];
 
-      this.vsync_.mutate(() => {
-        // Reverse-looping is generally faster and Closure would usually make
-        // this optimization automatically. However, it skips it due to a
-        // comparison with the itervar below, so we have to roll it by hand.
-        for (let i = count; i > 0; i--) {
-          const mediaEl = /** @type {!HTMLMediaElement} */
-              // Use seed element at end of set to prevent wasting it.
-              (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
-          const sources = this.getDefaultSource_(type);
-          mediaEl.setAttribute('pool-element', elId++);
-          this.enqueueMediaElementTask_(mediaEl,
-              new UpdateSourcesTask(sources));
-          // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
-          // is returned.  If so, we should adjust the pool size/distribution
-          // between media types.
-          this.unallocated[type].push(mediaEl);
-        }
-      });
+      // Reverse-looping is generally faster and Closure would usually make
+      // this optimization automatically. However, it skips it due to a
+      // comparison with the itervar below, so we have to roll it by hand.
+      for (let i = count; i > 0; i--) {
+        const mediaEl = /** @type {!HTMLMediaElement} */
+            // Use seed element at end of set to prevent wasting it.
+            (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
+        const sources = this.getDefaultSource_(type);
+        mediaEl.setAttribute('pool-element', elId++);
+        this.enqueueMediaElementTask_(mediaEl,
+            new UpdateSourcesTask(sources));
+        // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
+        // is returned.  If so, we should adjust the pool size/distribution
+        // between media types.
+        this.unallocated[type].push(mediaEl);
+      }
     });
   }
 
@@ -493,7 +488,11 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then(impl => impl.resetOnDomChange());
+    componentEl.getImpl().then(impl => {
+      if (impl.resetOnDomChange) {
+        impl.resetOnDomChange();
+      }
+    });
   }
 
 

@@ -291,7 +291,7 @@ export class RealTimeConfigManager {
     Object.keys(this.rtcConfig_.vendors || []).forEach(vendor => {
       const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
       const url = vendorObject ? vendorObject.url : '';
-      const errorReportingUrl = vendorObject ?
+      const errorReportingUrl = vendorObject && vendorObject.errorReportingUrl ?
         vendorObject.errorReportingUrl : '';
       if (!url) {
         return this.promiseArray_.push(

@@ -175,6 +175,7 @@ function sanitizeWithCaja(html) {
         }
         return;
       }
+      let emittedBindingMarker = false;
       emit('<');
       emit(tagName);
       for (let i = 0; i < attribs.length; i += 2) {
@@ -201,6 +202,12 @@ function sanitizeWithCaja(html) {
           emit(htmlSanitizer.escapeAttrib(rewrite));
         }
         emit('"');
+        // Set a custom attribute to mark this element as containing a binding.
+        // This is an optimization that obviates the need for DOM scan later.
+        if (isBinding[i] && !emittedBindingMarker) {
+          emit(' i-amphtml-binding');
+          emittedBindingMarker = true;
+        }
       }
       emit('>');
     },

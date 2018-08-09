@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Action} from './amp-story-store-service';
+import {Action, StateProperty, getStoreService} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
@@ -184,7 +184,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     this.scrollableEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {?Object} */
     this.storyConsentConfig_ = null;
@@ -249,6 +249,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentEl_.querySelector('.i-amphtml-story-consent-overflow');
     this.scrollableEl_.addEventListener(
         'scroll', throttle(this.win, () => this.onScroll_(), 100));
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -280,8 +284,22 @@ export class AmpStoryConsent extends AMP.BaseElement {
           .classList.toggle('i-amphtml-story-consent-fullbleed', isFullBleed);
     };
 
-    this.element.getResources()
-        .measureMutateElement(this.storyConsentEl_, measurer, mutator);
+    this.measureMutateElement(measurer, mutator, this.storyConsentEl_);
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    const mutator = () => {
+      rtlState ?
+        this.storyConsentEl_.setAttribute('dir', 'rtl') :
+        this.storyConsentEl_.removeAttribute('dir');
+    };
+
+    this.mutateElement(mutator, this.storyConsentEl_);
   }
 
   /**
