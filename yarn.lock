@@ -10911,9 +10911,9 @@ react-addons-shallow-compare@15.6.2, react-addons-shallow-compare@^15.6.2:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
 
-react-dates@17.1.0:
-  version "17.1.0"
-  resolved "https://registry.yarnpkg.com/react-dates/-/react-dates-17.1.0.tgz#97f4bcf81e68711599834561ec6fb0d69b7ffcde"
+react-dates@17.1.1:
+  version "17.1.1"
+  resolved "https://registry.yarnpkg.com/react-dates/-/react-dates-17.1.1.tgz#4703d701546c9f2edae86df7feb8648f6a02b247"
   dependencies:
     airbnb-prop-types "^2.10.0"
     consolidated-events "^1.1.1 || ^2.0.0"
