@@ -65,7 +65,7 @@ In the following example, tapping the button changes the `<p>` element's text fr
 ```html
 <p [text]="'Hello ' + foo">Hello World</p>
 
-<button on="tap:AMP.setState({foo: 'amp-bind'})">
+<button on="tap:AMP.setState({foo: 'amp-bind'})">Change text</button>
 ```
 
 ### How does it work?
@@ -73,12 +73,12 @@ In the following example, tapping the button changes the `<p>` element's text fr
 `amp-bind` has three main components:
 
 1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button.  After tapping the button, the state is `{foo: 'amp-bind'}`.
-2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello' + foo`, which concatenates the string literal `'Hello '` and the variable state `foo`.
+2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the state variable `foo`.
 There is a limit of 100 operands what can be used in an expression.
 3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
 
 {% call callout('Note', type='note') %}
-`amp-bind` does not evaluate expressions on page load, so there's no risk of content jumping unexpectedly. `amp-bind` also takes special care to ensure speed, security and performance on AMP pages.
+`amp-bind` does not evaluate expressions on page load, so there's no risk of content jumping unexpectedly. In the example, the `<p>` element thus needs to have a default value, hence its definition being `<p [text]="'Hello ' + foo">Hello World</p>` rather than `<p [text]="'Hello ' + foo">World</p>`.`amp-bind` also takes special care to ensure speed, security and performance on AMP pages.
 {% endcall %}
 
 ### A slightly more complex example
