@@ -33,6 +33,7 @@ For more information, see  [Giraff's documentation](https://www.giraff.io/help).
 ### Optional parameters
 
 - `data-widget-id`
+- `data-server-name`
 
 ### Required parameters
 
