@@ -6,7 +6,6 @@ If the build has been red for some time, please send a note to the [#contributin
 
 ## Buildcop Tasks
 
-* Subscribe to the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack as a 
 * Ensure the [master build](https://travis-ci.org/ampproject/amphtml/branches) remains green.  Your goal is to keep the build from being red for more than an hour.
   * Note that yellow builds are in the process of being created/tested so you do not need to do anything special with them.
   * Keep an eye out for emails sent to an address starting with amp-build-cop.  **You are encouraged to set up a filter so that these emails will stand out to you.**
