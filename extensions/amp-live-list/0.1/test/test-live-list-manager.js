@@ -342,8 +342,11 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
         xhrs[1].then(xhr => {
-          xhr.respond(415, {'Content-Type': 'text/xml'},'<html></html>');
-        });
+            xhr.respond(
+                415,{
+                  'Content-Type': 'text/xml',	
+                },	
+                '<html></html>'));
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.backoffClock_).to.be.null;
         return manager.poller_.lastWorkPromise_.then(() => {
