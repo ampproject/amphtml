@@ -116,7 +116,7 @@ Contributing to AMP involves two phases:
 1. Prepare for your code review:
    - [ ] [Correct test coverage](./contributing/TESTING.md)
    - [ ] [Code follows style and design guidelines](./contributing/DEVELOPING.md#guidelines--style)
-   - [ ] [Documentation for your feature](./contributing/building-an-amp-extension.md#element-usage-documentation-and-tests)
+   - [ ] [Documentation for your feature](./contributing/building-an-amp-extension.md#documenting-your-element)
    - [ ] [Presubmit passes (no lint and type check errors, tests are passing)](./build-system/enable-git-pre-push.sh#L17-L20)
    - [ ] [Validation rules and validation tests provided](./contributing/building-an-amp-extension.md#allowing-proper-validations)
    - [ ] [Feature is behind an experiment flag](./contributing/building-an-amp-extension.md#experiments)
