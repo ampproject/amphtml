@@ -27,6 +27,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
+import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -124,7 +125,10 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {boolean} */
     this.shouldDisableCssSnap_ = !isExperimentOn(
-        this.win, 'amp-carousel-scroll-snap');
+        this.win, 'amp-carousel-scroll-snap') ||
+        startsWith(
+            Services.platformFor(this.win).getIosVersionString(),
+            '10.3');
   }
 
   /** @override */
