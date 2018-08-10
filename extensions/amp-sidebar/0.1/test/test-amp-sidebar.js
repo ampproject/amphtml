@@ -21,7 +21,6 @@ import {KeyCodes} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 
-
 describes.realWin('amp-sidebar 0.1 version', {
   win: { /* window spec */
     location: '...',
