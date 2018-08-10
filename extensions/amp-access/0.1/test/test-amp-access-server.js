@@ -16,7 +16,6 @@
 
 import * as DocumentFetcher from '../../../../src/document-fetcher';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
 
@@ -134,7 +133,6 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     afterEach(() => {
       clientAdapterMock.verify();
       xhrMock.verify();
-      docFetcherMock.restore();
     });
 
     describe('authorize', () => {

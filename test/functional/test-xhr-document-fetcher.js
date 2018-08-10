@@ -37,6 +37,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
       getAmpDoc: () => ampdocViewerStub,
     });
   });
+
   describe('#fetchDocument', () => {
     const win = {location: {href: 'https://acme.com/path'}};
     beforeEach(() => {
@@ -45,6 +46,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     afterEach(() => {
       sandbox.restore();
     });
+
     it('should be able to fetch a document', () => {
       const promise = fetchDocument(win,'/index.html').then(doc => {
         expect(doc.nodeType).to.equal(9);
