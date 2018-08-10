@@ -58,9 +58,6 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = null;
 
-    /** @private {boolean} */
-    this.hasNativeSnapPoints_ = false;
-
     /** @private {!Array<!Element>} */
     this.slides_ = [];
 
@@ -108,9 +105,6 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {number} */
     this.slideWidth_ = 0;
 
-    /** @private {number} */
-    this.previousScrollLeft_ = 0;
-
     /** @private {!Array<?string>} */
     this.dataSlideIdArr_ = [];
 
@@ -121,10 +115,6 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
-
-    /** @private {boolean} */
-    this.shouldDisableCssSnap_ = !isExperimentOn(
-        this.win, 'amp-carousel-scroll-snap');
   }
 
   /** @override */
@@ -136,13 +126,6 @@ export class AmpSlideScroll extends BaseSlides {
   buildSlides() {
     this.vsync_ = this.getVsync();
     this.action_ = Services.actionServiceForDoc(this.element);
-
-    this.hasNativeSnapPoints_ = (
-      getStyle(this.element, 'scrollSnapType') != undefined);
-
-    if (this.shouldDisableCssSnap_) {
-      this.hasNativeSnapPoints_ = false;
-    }
 
     this.element.classList.add('i-amphtml-slidescroll');
 
@@ -158,19 +141,14 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.setAttribute('aria-live', 'polite');
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     // https://bugs.webkit.org/show_bug.cgi?id=169800
-    if (this.shouldDisableCssSnap_) {
-      this.slidesContainer_.classList.add('i-amphtml-slidescroll-no-snap');
-    }
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
-    if (this.hasNativeSnapPoints_) {
-      const start = this.win.document.createElement('div');
-      start.classList.add('i-amphtml-carousel-start-marker');
-      this.slidesContainer_.appendChild(start);
+    const start = this.win.document.createElement('div');
+    start.classList.add('i-amphtml-carousel-start-marker');
+    this.slidesContainer_.appendChild(start);
 
-      const end = this.win.document.createElement('div');
-      end.classList.add('i-amphtml-carousel-end-marker');
-      this.slidesContainer_.appendChild(end);
-    }
+    const end = this.win.document.createElement('div');
+    end.classList.add('i-amphtml-carousel-end-marker');
+    this.slidesContainer_.appendChild(end);
     this.element.appendChild(this.slidesContainer_);
 
     this.slides_.forEach((slide, index) => {
@@ -226,9 +204,6 @@ export class AmpSlideScroll extends BaseSlides {
    */
   touchMoveHandler_() {
     this.clearAutoplay();
-    if (!this.hasNativeSnapPoints_) {
-      return;
-    }
     this.hasTouchMoved_ = true;
     if (this.touchEndTimeout_) {
       Services.timerFor(this.win).cancel(this.touchEndTimeout_);
@@ -244,8 +219,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (this.scrollTimeout_) {
         Services.timerFor(this.win).cancel(this.scrollTimeout_);
       }
-      const timeout = this.shouldDisableCssSnap_ ? IOS_TOUCH_TIMEOUT
-        : NATIVE_TOUCH_TIMEOUT;
+      const timeout = NATIVE_TOUCH_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
       this.touchEndTimeout_ = Services.timerFor(this.win).delay(() => {
         const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
@@ -262,19 +236,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   onLayoutMeasure() {
-    if (this.hasNativeSnapPoints_) {
-      // The state being calculated after this short circuit is only needed if
-      // CSS Scroll Snap is not enabled.
-      return;
-    }
-
     this.slideWidth_ = this.getLayoutWidth();
-    if (this.slideIndex_ !== null) {
-      // Reset scrollLeft on orientationChange.
-      this.slidesContainer_./*OK*/scrollLeft =
-          this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
-      this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
-    }
   }
 
   /** @override */
@@ -351,55 +313,17 @@ export class AmpSlideScroll extends BaseSlides {
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
 
-    if (!this.isIos_) {
-      this.handleCustomElasticScroll_(currentScrollLeft);
-    }
-
     if (!this.touchEndTimeout_) {
-      const timeout = this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : (
-        this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
+      const timeout = NATIVE_SNAP_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
         if (this.snappingInProgress_) {
           return;
         }
-        if (this.hasNativeSnapPoints_) {
-          this.updateOnScroll_(currentScrollLeft);
-        } else {
-          this.customSnap_(currentScrollLeft);
-        }
+        this.updateOnScroll_(currentScrollLeft);
       }, timeout);
     }
     this.previousScrollLeft_ = currentScrollLeft;
-  }
-
-  /**
-   * Handles custom elastic scroll (snap points polyfill).
-   * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   */
-  handleCustomElasticScroll_(currentScrollLeft) {
-    const scrollWidth = this.slidesContainer_./*OK*/scrollWidth;
-    if (this.elasticScrollState_ == -1 &&
-        currentScrollLeft >= this.previousScrollLeft_) {
-      // Elastic Scroll is reversing direction take control.
-      this.customSnap_(currentScrollLeft).then(() => {
-        this.elasticScrollState_ = 0;
-      });
-    } else if (this.elasticScrollState_ == 1 &&
-        currentScrollLeft <= this.previousScrollLeft_) {
-      // Elastic Scroll is reversing direction take control.
-      this.customSnap_(currentScrollLeft).then(() => {
-        this.elasticScrollState_ = 0;
-      });
-    } else if (currentScrollLeft < 0) {
-      // Direction = -1.
-      this.elasticScrollState_ = -1;
-    } else if ((currentScrollLeft + this.slideWidth_) > scrollWidth) {
-      // Direction = +1.
-      this.elasticScrollState_ = 1;
-    } else {
-      this.elasticScrollState_ = 0;
-    }
   }
 
   /**
