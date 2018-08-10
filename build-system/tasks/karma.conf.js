@@ -65,7 +65,8 @@ module.exports = {
     transform: [
       ['babelify', {compact: false, sourceMapsAbsolute: true}],
     ],
-    bundleDelay: 1200,
+    // Prevent "cannot find module" errors on Travis. See #14166.
+    bundleDelay: process.env.TRAVIS ? 5000 : 1200,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
