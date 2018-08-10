@@ -41,6 +41,12 @@ export class Linker {
    * @return {Promise<string>}
    */
   create(version, pairs) {
+    if (!pairs || !Object.keys(pairs).length) {
+      return Promise.resolve('');
+    }
+
+    // TODO: Replace resolveMacros after talking with Hongfei
+    // Should I use VariableService.expandTemplate here??
     return this.resolveMacros_(pairs).then(expandedPairs => {
       return this.generateParam_(version, expandedPairs);
     });
@@ -97,8 +103,8 @@ export class Linker {
    */
   getCheckSum_(encodedPairs) {
     const fingerprint = this.getFingerprint_();
-    const timestamp = this.getRoundedTimestamp_();
-    const crc = crc32(fingerprint + timestamp + encodedPairs);
+    const timestamp = this.getMinSinceEpoch_();
+    const crc = crc32([fingerprint, timestamp, encodedPairs].join(DELIMITER));
     // Encoded to base36 for less bytes.
     return crc.toString(36);
   }
@@ -117,6 +123,7 @@ export class Linker {
     return navigator.userAgent + DELIMITER + timezone + DELIMITER + language;
   }
 
+
   /**
    * After macros have resolved, encode their values and join them together.
    * @param {?Object<string, string>} expandedPairs
@@ -124,10 +131,6 @@ export class Linker {
    */
   encodePairs_(expandedPairs) {
     const keys = Object.keys(expandedPairs);
-    if (!keys.length) {
-      return '';
-    }
-
     let result = '';
 
     keys.forEach(key => {
@@ -143,7 +146,7 @@ export class Linker {
    * Rounded time used to check if t2 - t1 is within our time tolerance.
    * @return {number}
    */
-  getRoundedTimestamp_() {
+  getMinSinceEpoch_() {
     // Timestamp in minutes, floored.
     return Math.floor(Date.now() / 60000);
   }

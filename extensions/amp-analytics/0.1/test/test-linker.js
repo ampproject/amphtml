@@ -33,10 +33,19 @@ describes.realWin('Linker', {
 
   const tests = [
     {
+      description: 'returns empty string if no pairs given',
+      version: '1',
+      pairs: {
+      },
+      output: '',
+    },
+    {
       description: 'generates param with checksum and version',
       version: '1',
-      pairs: {},
-      output: '1~7raowy',
+      pairs: {
+        foo: '123',
+      },
+      output: '1~mf9onh~foo~MTIz',
     },
     {
       description: 'appends one key value pair',
@@ -44,7 +53,7 @@ describes.realWin('Linker', {
       pairs: {
         key1: 'value1',
       },
-      output: '1~13jbg4c~key1~dmFsdWUx',
+      output: '1~1pinp2k~key1~dmFsdWUx',
     },
     {
       description: 'appends many key value pairs',
@@ -55,7 +64,7 @@ describes.realWin('Linker', {
         color: 'green',
         car: 'honda',
       },
-      output: '1~193jzt~key1~dmFsdWUx~name~Ym9i~color~Z3JlZW4.~car~aG9uZGE.',
+      output: '1~fgkeaa~key1~dmFsdWUx~name~Ym9i~color~Z3JlZW4.~car~aG9uZGE.',
     },
   ];
 
@@ -72,9 +81,9 @@ describes.realWin('Linker', {
       version: '1',
       pairs: {
         cid: 'CLIENT_ID(_ga)',
-        referrer: 'DOCUMENT_REFERRER',
+        ref: 'DOCUMENT_REFERRER',
       },
-      output: '',
+      output: '1~wqs6ww~cid~MTIzNDU.~ref~aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
     };
 
     const urlService = linker.urlReplacementService_;
