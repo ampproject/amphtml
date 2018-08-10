@@ -100,7 +100,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
     // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');
-    root./*OK*/innerHTML = body.innerHTML;
+    root./*OK*/innerHTML = body./*OK*/innerHTML;
     return this.unwrap(root);
   }
 }
