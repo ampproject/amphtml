@@ -312,7 +312,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     const rightAmpImage = dev().assertElement(this.rightAmpImage_);
     leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
       if (leftAmpImage.childElementCount > 0) {
-        const img = leftAmpImage.firstChild;
+        const img = leftAmpImage.querySelector('img');
         let newAltText;
         this.measureMutateElement(() => {
           const ariaSuffix =
@@ -330,7 +330,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     });
     rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
       if (rightAmpImage.childElementCount > 0) {
-        const img = rightAmpImage.firstChild;
+        const img = rightAmpImage.querySelector('img');
         let newAltText;
         this.measureMutateElement(() => {
           const ariaSuffix =
@@ -711,7 +711,15 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.disableGesture_();
     }
 
-    return Promise.resolve();
+    return Promise.all([
+      dev().assertElement(this.leftAmpImage_)
+          .signals().whenSignal(CommonSignals.LOAD_END),
+      dev().assertElement(this.rightAmpImage_)
+          .signals().whenSignal(CommonSignals.LOAD_END),
+    ]).then(() => {
+      // Turn on main container visibility
+      this.container_.classList.add('i-amphtml-image-slider-images-ready');
+    });
   }
 
   /** @override */

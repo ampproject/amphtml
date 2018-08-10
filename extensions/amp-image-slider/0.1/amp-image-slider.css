@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
- .i-amphtml-image-slider-container {
+
+.i-amphtml-image-slider-container {
   position: absolute;
   top: 0;
   right: 0;
@@ -22,6 +23,15 @@
   left: 0;
   /* Fix iOS translate + overflow: hidden bug */
   transform: translateZ(0);
+  /* Remove webkit tap highlight grayish color */
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  /* By default not showing */
+  visibility: hidden;
+}
+
+.i-amphtml-image-slider-images-ready {
+  /* show container when images are loaded */
+  visibility: visible;
 }
 
 .i-amphtml-image-slider-left-mask {

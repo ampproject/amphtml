@@ -106,6 +106,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-FACEBOOK-PAGE': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
+  'AMP-IMAGE-SLIDER': true,
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
   'AMP-OOYALA-PLAYER': true,
