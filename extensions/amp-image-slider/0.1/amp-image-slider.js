@@ -312,7 +312,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     const rightAmpImage = dev().assertElement(this.rightAmpImage_);
     leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
       if (leftAmpImage.childElementCount > 0) {
-        const img = leftAmpImage.firstChild;
+        const img = leftAmpImage.querySelector('img');
         let newAltText;
         this.measureMutateElement(() => {
           const ariaSuffix =
@@ -330,7 +330,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     });
     rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
       if (rightAmpImage.childElementCount > 0) {
-        const img = rightAmpImage.firstChild;
+        const img = rightAmpImage.querySelector('img');
         let newAltText;
         this.measureMutateElement(() => {
           const ariaSuffix =
