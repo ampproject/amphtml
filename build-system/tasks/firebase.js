@@ -20,49 +20,43 @@ const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const path = require('path');
 
-function generateFirebaseFolder() {
-  fs.mkdirpSync('firebase');
+async function copyAndReplaceUrls(src, dest) {
+  await fs.copy(src, dest, {overwrite: true});
+  const files = await fs.readdir(dest);
+  const promises = files.filter(fileName => path.extname(fileName) == '.html')
+      .map(file => replaceUrls(dest + '/' + file));
+  await Promise.all(promises);
+}
+
+async function generateFirebaseFolder() {
+  await fs.mkdirp('firebase');
   if (argv.file) {
     log(colors.green(`Processing file: ${argv.file}.`));
     log(colors.green('Writing file to firebase.index.html.'));
-    fs.copyFileSync(/*src*/ argv.file, 'firebase/index.html',
+    await fs.copyFile(/*src*/ argv.file, 'firebase/index.html',
         {overwrite: true});
-    replaceUrls('firebase/index.html');
-
+    await replaceUrls('firebase/index.html');
   } else {
-    fs.copySync('test/manual', 'firebase/manual', {overwrite: true});
-    fs.copySync('examples', 'firebase/examples', {overwrite: true});
-    const examples = fs.readdirSync('firebase/examples');
-    const manualTests = fs.readdirSync('firebase/manual');
-    examples.filter(fileName => path.extname(fileName) == '.html')
-        .forEach(file => replaceUrls('firebase/examples/' + file));
-    manualTests.filter(fileName => path.extname(fileName) == '.html')
-        .forEach(file => replaceUrls('firebase/manual/' + file));
+    await Promise.all([
+      copyAndReplaceUrls('test/manual', 'firebase/manual'),
+      copyAndReplaceUrls('examples', 'firebase/examples'),
+    ]);
   }
   log(colors.green('Copying local amp files from dist folder.'));
-  fs.copySync('dist', 'firebase/dist', {overwrite: true});
-  fs.copyFileSync('firebase/dist/ww.max.js',
-      'firebase/dist/ww.js', {overwrite: true});
+  await fs.copy('dist', 'firebase/dist', {overwrite: true});
+  await fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js',
+      {overwrite: true});
 }
 
-function replaceUrls(filePath) {
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-      log(colors.red(err));
-    }
-    let result = data.replace(/https:\/\/cdn\.ampproject\.org\/v0\.js/g, '/dist/amp.js');
-    if (argv.min) {
-      result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.js');
-    } else {
-      result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.max.js');
-    }
-    fs.writeFile(filePath, result, 'utf8', err => {
-      if (err) {
-        log(colors.red(err));
-      }
-    });
-  });
-
+async function replaceUrls(filePath) {
+  const data = await fs.readFile(filePath, 'utf8');
+  let result = data.replace(/https:\/\/cdn\.ampproject\.org\/v0\.js/g, '/dist/amp.js');
+  if (argv.min) {
+    result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.js');
+  } else {
+    result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.max.js');
+  }
+  await fs.writeFile(filePath, result, 'utf8');
 }
 
 gulp.task(
