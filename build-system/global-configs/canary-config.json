@@ -39,6 +39,7 @@
   "expAdsenseCanonical": 0,
   "font-display-swap": 1,
   "amp-date-picker": 1,
+  "amp-carousel-scroll-snap": 1,
   "user-error-reporting": 1,
   "inline-styles": 1,
   "doubleclickSraExp": 0.01,
