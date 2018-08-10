@@ -93,9 +93,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.shouldHintReappear_ =
       !this.element.hasAttribute('disable-hint-reappear');
 
-    /** @private {boolean} */
-    this.gestureDisabled_ = false; // for now, will be set later
-
     /** @private {Gestures|null} */
     this.gestures_ = null;
 
@@ -180,40 +177,6 @@ export class AmpImageSlider extends AMP.BaseElement {
         this.updatePositions_(initialPercent);
       }
     });
-  }
-
-  /** @override */
-  mutatedAttributesCallback(mutations) {
-    const newGestureDisabled = mutations['disable-gesture'];
-    if (newGestureDisabled) {
-      this.disableGesture_(); // this.gestureDisabled_ is set in this call
-    } else {
-      this.enableGesture_(); // this.gestureDisabled_ is set in this call
-    }
-  }
-
-  /**
-   * Enable user interaction
-   * @private
-   */
-  enableGesture_() {
-    if (!this.gestureDisabled_) {
-      return;
-    }
-    this.registerEvents_();
-    this.gestureDisabled_ = false;
-  }
-
-  /**
-   * Disable user interaction
-   * @private
-   */
-  disableGesture_() {
-    if (this.gestureDisabled_) {
-      return;
-    }
-    this.unregisterEvents_();
-    this.gestureDisabled_ = true;
   }
 
   /**
@@ -705,11 +668,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
 
     this.registerEvents_();
-
-    // disable-gesture is checked here instead, after all construction is done
-    if (this.element.hasAttribute('disable-gesture')) {
-      this.disableGesture_();
-    }
 
     return Promise.resolve();
   }
