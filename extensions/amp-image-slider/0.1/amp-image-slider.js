@@ -711,7 +711,15 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.disableGesture_();
     }
 
-    return Promise.resolve();
+    return Promise.all([
+      dev().assertElement(this.leftAmpImage_)
+          .signals().whenSignal(CommonSignals.LOAD_END),
+      dev().assertElement(this.rightAmpImage_)
+          .signals().whenSignal(CommonSignals.LOAD_END),
+    ]).then(() => {
+      // Turn on main container visibility
+      this.container_.classList.add('i-amphtml-image-slider-images-ready');
+    });
   }
 
   /** @override */
