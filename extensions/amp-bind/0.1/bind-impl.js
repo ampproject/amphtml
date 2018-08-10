@@ -305,10 +305,8 @@ export class Bind {
         .then(result => this.setState(result))
         .then(() => {
           this.history_.replace({
-            data: {
-              'amp-bind': this.state_,
-            },
-            title: this.localWin_.document.title,
+            'data': dict({'amp-bind': this.state_}),
+            'title': this.localWin_.document.title,
           });
         });
     return this.setStatePromise_;
@@ -339,10 +337,8 @@ export class Bind {
       return this.setState(result)
           .then(() => {
             this.history_.push(onPop, {
-              data: {
-                'amp-bind': this.state_,
-              },
-              title: this.localWin_.document.title,
+              'data': dict({'amp-bind': this.state_}),
+              'title': this.localWin_.document.title,
             });
           });
     });
