@@ -88,6 +88,10 @@ To send data to a specific URL:
 1.  Determine what data you want to capture and track, and [specify those details in the configuration data](#specifying-configuration-data).
 2.  In the [`requests`](#requests) configuration object, specify the type of request to track (e.g., pageview, specific triggered events) and the url(s) of where you want to send the tracking data to.
 
+{% call callout('Note', type='note') %}
+When processing AMP URLs in the referrer header of analytics requests, strip out or ignore the `usqp` parameter. This parameter is used by Google to trigger experiments for the Google AMP Cache.
+{% endcall %}
+
 *Example: Sending data to a URL*
 
 Here's a simple example that tracks page views.  Every time a page is visible, the trigger event fires, and sends the pageview data to a defined URL along with a random ID.
@@ -433,11 +437,7 @@ The user error event (`"on": "user-error"`) is triggered when an error occurs th
 }
 ```
 
-NOTE:
-- The feature is right now behind an experiment flag `user-error-reporting`. Read [this](https://github.com/ampproject/amphtml/blob/master/tools/experiments/README.md#amp-experiments) to turn on the experiemnt.
-- There is a [known issue](https://github.com/ampproject/amphtml/issues/10891) that it still reports errors from A4A iframe embeds, which are irrelevant to the page.
-- If you are OK with the above known issue and want to opt-in this feature for your site, please file an issue and contact AMP team.
-- Please report any bugs you see.
+NOTE: There is a [known issue](https://github.com/ampproject/amphtml/issues/10891) that it still reports errors from A4A iframe embeds, which are irrelevant to the page.
 
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 

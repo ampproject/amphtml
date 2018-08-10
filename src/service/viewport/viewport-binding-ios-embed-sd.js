@@ -327,13 +327,19 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   /** @override */
   disableScroll() {
     // TODO(jridgewell): Recursively disable scroll
-    setImportantStyles(this.scroller_, {'overflow-y': 'hidden'});
+    setImportantStyles(this.scroller_, {
+      'overflow-y': 'hidden',
+      'position': 'fixed',
+    });
   }
 
   /** @override */
   resetScroll() {
     // TODO(jridgewell): Recursively disable scroll
-    setImportantStyles(this.scroller_, {'overflow-y': 'auto'});
+    setImportantStyles(this.scroller_, {
+      'overflow-y': 'auto',
+      'position': 'absolute',
+    });
   }
 
   /** @override */

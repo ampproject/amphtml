@@ -244,6 +244,8 @@ Pingback is optional. It's only enabled when the "pingbackUrl" property is speci
 
 As the body, pingback POST request recieves the entitlement object returned by the "winning" authorization endpoint.
 
+**Important:** Due to issue #[17393](https://github.com/ampproject/amphtml/issues/17393), the pingback data JSON object is being sent with `Content-type: text/plain` instead of the correct `application/json`. Developers should accept both content types to prevent a breaking change when this is resolved.
+
 
 ## Actions
 
