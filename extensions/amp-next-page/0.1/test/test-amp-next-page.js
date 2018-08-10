@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import * as DocFetcher from '../../../../src/document-fetcher';
 import {AmpNextPage} from '../amp-next-page';
 import {Services} from '../../../../src/services';
 import {getServicePromiseForDoc} from '../../../../src/service';
@@ -32,6 +32,7 @@ env => {
   let element;
   let nextPage;
   let xhrMock;
+  let fetchDocumentMock;
   let viewport;
   let sizes;
 
@@ -58,7 +59,7 @@ env => {
     sandbox.stub(Services.documentInfoForDoc(element), 'sourceUrl').value('/');
 
     xhrMock = sandbox.mock(Services.xhrFor(win));
-
+    fetchDocumentMock = sandbox.mock(DocFetcher);
     sandbox.stub(Services.resourcesForDoc(ampdoc), 'mutateElement')
         .callsFake((unused, mutator) => {
           mutator();
@@ -103,7 +104,7 @@ env => {
 
     it('does not fetch the next document before 3 viewports away',
         function* () {
-          xhrMock.expects('fetchDocument').never();
+          fetchDocumentMock.expects('fetchDocument').never();
           sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
             // 4x viewports away
             return Promise.resolve(
@@ -115,7 +116,7 @@ env => {
         });
 
     it('fetches the next document within 3 viewports away', function* () {
-      xhrMock.expects('fetchDocument').returns(Promise.resolve());
+      fetchDocumentMock.expects('fetchDocument').returns(Promise.resolve());
 
       sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
         // 1x viewport away
@@ -128,7 +129,7 @@ env => {
     });
 
     it('only fetches the next document once', function*() {
-      xhrMock.expects('fetchDocument')
+      fetchDocumentMock.expects('fetchDocument')
           // Promise which is never resolved.
           .returns(new Promise(() => {}))
           .once();
@@ -147,7 +148,7 @@ env => {
 
     it('adds the hidden class to hideSelector elements', function* () {
       const exampleDoc = createExampleDocument(doc);
-      xhrMock.expects('fetchDocument')
+      fetchDocumentMock.expects('fetchDocument')
           .returns(Promise.resolve(exampleDoc))
           .once();
 
@@ -184,7 +185,7 @@ env => {
           '<amp-analytics id="analytics1"></amp-analytics>';
       exampleDoc.body.innerHTML +=
           '<amp-analytics id="analytics2"></amp-analytics>';
-      xhrMock.expects('fetchDocument')
+      fetchDocumentMock.expects('fetchDocument')
           .returns(Promise.resolve(exampleDoc))
           .once();
 
