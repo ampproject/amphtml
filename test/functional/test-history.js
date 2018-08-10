@@ -531,16 +531,16 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
 
 
 describe('HistoryBindingVirtual', () => {
-
   let sandbox;
-  let clock;
-  let onStateUpdated;
+
   let history;
   let viewer;
 
+  let onStateUpdated;
+  let onHistoryPopped;
+
   beforeEach(() => {
     sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
     onStateUpdated = sandbox.spy();
     viewer = {
       onMessage: sandbox.stub().returns(() => {}),
@@ -548,6 +548,8 @@ describe('HistoryBindingVirtual', () => {
     };
     history = new HistoryBindingVirtual_(window, viewer);
     history.setOnStateUpdated(onStateUpdated);
+
+    onHistoryPopped = viewer.onMessage.firstCall.args[1];
   });
 
   afterEach(() => {
@@ -558,22 +560,23 @@ describe('HistoryBindingVirtual', () => {
   it('should initialize correctly', () => {
     expect(history.stackIndex_).to.equal(0);
     expect(onStateUpdated).to.have.not.been.called;
-    expect(viewer.onMessage.firstCall.args[0]).to.not.equal(undefined);
+
+    expect(viewer.onMessage).to.be.calledOnce;
+    expect(viewer.onMessage).to.be.calledWith('historyPopped');
   });
 
-  describe('pushHistory', () => {
-    // Some viewers don't support `pushHistory` responses yet.
+  describe('`pushHistory` API', () => {
     it('viewer does not support responses', () => {
-      return history.push().then(historyState => {
+      return history.push().then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWith(
-            'pushHistory', sinon.match({stackIndex: 1}));
+        expect(viewer.sendMessageAwaitResponse)
+            .to.be.calledWithMatch('pushHistory', {stackIndex: 1});
 
-        expect(historyState.stackIndex).to.equal(1);
+        expect(state.stackIndex).to.equal(1);
         expect(history.stackIndex_).to.equal(1);
 
         expect(onStateUpdated).to.be.calledOnce;
-        expect(onStateUpdated.getCall(0).args[0].stackIndex).to.equal(1);
+        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1});
       });
     });
 
@@ -583,12 +586,12 @@ describe('HistoryBindingVirtual', () => {
           .withArgs('pushHistory', {stackIndex: 1, title})
           .returns(Promise.resolve({stackIndex: 1, title}));
 
-      return history.push({title}).then(historyState => {
+      return history.push({title}).then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWith(
-            'pushHistory', sinon.match({stackIndex: 1, title}));
+        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
+            'pushHistory', {stackIndex: 1, title});
 
-        expect(historyState.stackIndex).to.equal(1);
+        expect(state.stackIndex).to.equal(1);
         expect(history.stackIndex_).to.equal(1);
 
         expect(onStateUpdated).to.be.calledOnce;
@@ -597,102 +600,100 @@ describe('HistoryBindingVirtual', () => {
     });
   });
 
-  describe('popHistory', () => {
-    // Some viewers don't support `popHistory` responses yet.
+  describe('`popHistory` API', () => {
     it('viewer does not support responses', () => {
-      return history.push().then(historyState => {
-        return history.pop(historyState.stackIndex).then(historyState => {
-          expect(historyState.stackIndex).to.equal(0);
-          expect(history.stackIndex_).to.equal(0);
+      return history.pop(0).then(state => {
+        expect(state.stackIndex).to.equal(-1);
+        expect(history.stackIndex_).to.equal(-1);
 
-          expect(onStateUpdated).to.be.calledTwice;
-          expect(onStateUpdated.lastCall)
-              .to.be.calledWithMatch({stackIndex: 0});
-        });
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: -1});
       });
     });
 
     it('viewer supports responses', () => {
+      viewer.sendMessageAwaitResponse
+          .withArgs('popHistory', sinon.match({stackIndex: 0}))
+          .returns(Promise.resolve({stackIndex: -123, title: 'title'}));
+
+      return history.pop(0).then(state => {
+        expect(state).to.deep.equal({stackIndex: -123, title: 'title'});
+        expect(history.stackIndex_).to.equal(-123);
+
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated)
+            .to.be.calledWithMatch({stackIndex: -123, title: 'title'});
+      });
+    });
+  });
+
+  describe('`replaceHistory` API', () => {
+    it('viewer does not support responses', () => {
+      viewer.sendMessageAwaitResponse
+          .withArgs('replaceHistory', {stackIndex: 123, title: 'title'});
+
+      return history.replace({title: 'title'}).then(state => {
+        expect(history.stackIndex_).to.equal(0);
+        expect(state).to.deep.equal({stackIndex: 0, title: 'title'});
+
+        expect(onStateUpdated).to.not.be.called;
+      });
+    });
+
+    it('viewer supports responses', () => {
+      viewer.sendMessageAwaitResponse
+          .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
+          .returns(Promise.resolve({stackIndex: 123, title: 'different'}));
+
+      return history.replace({stackIndex: 123, title: 'title'}).then(state => {
+        expect(history.stackIndex_).to.equal(123);
+        expect(state).to.deep.equal({stackIndex: 123, title: 'different'});
+
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated)
+            .to.be.calledWithMatch({stackIndex: 123, title: 'different'});
+      });
+    });
+  });
+
+  describe('`historyPopped` API', () => {
+    it('pushes and pops', () => {
       const title = 'title';
       viewer.sendMessageAwaitResponse
           .withArgs('pushHistory', {stackIndex: 1, title})
           .returns(Promise.resolve({stackIndex: 1, title}));
-      viewer.sendMessageAwaitResponse
-          .withArgs('popHistory', {stackIndex: 1})
-          .returns(Promise.resolve({stackIndex: 0, title}));
 
-      return history.push({title}).then(historyState => {
-        return history.pop(historyState.stackIndex).then(historyState => {
-          expect(historyState.stackIndex).to.equal(0);
-          expect(historyState.title).to.equal(title);
-          expect(history.stackIndex_).to.equal(0);
+      return history.push({title}).then(state => {
+        expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+        expect(viewer.sendMessageAwaitResponse)
+            .to.be.calledWithMatch('pushHistory', {stackIndex: 1, title});
 
-          expect(onStateUpdated).to.have.callCount(2);
-          expect(onStateUpdated.firstCall)
-              .to.be.calledWithMatch({stackIndex: 1, title});
-          expect(onStateUpdated.secondCall)
-              .to.be.calledWithMatch({stackIndex: 0, title});
-        });
+        expect(state).to.deep.equal({stackIndex: 1, title});
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
+
+        onHistoryPopped({stackIndex: 0, title});
+
+        expect(history.stackIndex_).to.equal(0);
+        expect(onStateUpdated).to.be.calledTwice;
+        expect(onStateUpdated.lastCall)
+            .to.be.calledWithMatch({stackIndex: 0, title});
       });
     });
-  });
 
-  it('should send replace state to viewer', () => {
-    const title = 'title';
-    const replaceTitle = 'replaceTitle';
-    viewer.sendMessageAwaitResponse
-        .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
-    viewer.sendMessageAwaitResponse
-        .withArgs('replaceHistory', {stackIndex: 1, title: replaceTitle})
-        .returns(Promise.resolve({stackIndex: 1, title: replaceTitle}));
-    return history.push({title}).then(historyState => {
-      expect(historyState.stackIndex).to.equal(1);
-      return history.replace({title: replaceTitle}).then(() => {
-        expect(history.stackIndex_).to.equal(1);
-      });
-    });
-  });
-
-  it('should send get state to viewer', () => {
-    const title = 'title';
-    viewer.sendMessageAwaitResponse
-        .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
-    viewer.sendMessageAwaitResponse
-        .withArgs('getHistory')
-        .returns(Promise.resolve({stackIndex: 1, title}));
-    return history.push({title}).then(historyState => {
-      expect(historyState.stackIndex).to.equal(1);
-      expect(history.stackIndex_).to.equal(1);
-      return history.get().then(historyState => {
-        expect(historyState.stackIndex).to.equal(1);
-        expect(historyState.title).to.deep.equal(title);
-        expect(history.stackIndex_).to.equal(1);
-      });
-    });
-  });
-
-  it('should update its state and notify on history.back', () => {
-    const title = 'title';
-    viewer.sendMessageAwaitResponse
-        .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
-    return history.push({title}).then(historyState => {
-      expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-      expect(viewer.sendMessageAwaitResponse).to.be.calledWith(
-          'pushHistory', sinon.match({stackIndex: 1, title}));
-      expect(historyState).to.deep.equal({stackIndex: 1, title});
+    it('sends {stackIndex: <number>, title: <string>}', () => {
+      const title = 'title';
+      onHistoryPopped({stackIndex: 123, title});
+      expect(history.stackIndex_).to.equal(123);
       expect(onStateUpdated).to.be.calledOnce;
-      expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
+      expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 123, title});
+    });
 
-      viewer.onMessage.firstCall.args[1]({stackIndex: 0, title});
-      clock.tick(1);
-
-      expect(history.stackIndex_).to.equal(0);
-      expect(onStateUpdated).to.have.callCount(2);
-      expect(onStateUpdated.firstCall).to.be.calledWith({stackIndex: 1, title});
-      expect(onStateUpdated.lastCall).to.be.calledWith({stackIndex: 0, title});
+    it('sends {newStackIndex: <number>}', () => {
+      onHistoryPopped({newStackIndex: 123});
+      expect(history.stackIndex_).to.equal(123);
+      expect(onStateUpdated).to.be.calledOnce;
+      expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 123});
     });
   });
 });
