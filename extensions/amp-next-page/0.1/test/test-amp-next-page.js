@@ -22,7 +22,6 @@ import {macroTask} from '../../../../testing/yield';
 import {setStyle} from '../../../../src/style';
 import {toggleExperiment} from '../../../../src/experiments';
 
-
 describes.realWin('amp-next-page component', {
   amp: {
     extensions: ['amp-next-page'],
@@ -74,7 +73,6 @@ env => {
 
   afterEach(() => {
     xhrMock.verify();
-    fetchDocumentMock.restore();
     toggleExperiment(win, 'amp-next-page', false);
   });
 
