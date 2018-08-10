@@ -244,7 +244,7 @@ Pingback is optional. It's only enabled when the "pingbackUrl" property is speci
 
 As the body, pingback POST request recieves the entitlement object returned by the "winning" authorization endpoint.
 
-**Important:** The pingback JSON object is sent with `Content-type: text/plain`.  This is intentional as it removes the need for CORS preflight check.
+**Important:** The pingback JSON object is sent with `Content-type: text/plain`.  This is intentional as it removes the need for a CORS preflight check.
 
 ## Actions
 
