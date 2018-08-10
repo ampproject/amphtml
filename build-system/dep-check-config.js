@@ -128,6 +128,7 @@ exports.rules = [
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
+      '3p/viqeoplayer.js->src/event-helper.js',
     ],
   },
   {
@@ -209,6 +210,8 @@ exports.rules = [
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-viqeo-player/0.1/amp-viqeo-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brightcove/0.1/amp-brightcove.js->' +
           'src/service/video-manager-impl.js',
