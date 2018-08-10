@@ -29,6 +29,12 @@ config.run('amp-image-slider', function() {
       <div second class="label">AFTER</div>
     </amp-image-slider>
     <button id="button" on="tap:slider.seekTo(percent=0.1)">seekTo 10%</button>
+    <amp-image-slider tabindex="0" id="s2"
+        layout="responsive" width="1000" height="500" disable-hint-reappear>
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
     <p class="para">HUGE PADDING</p>
   `;
 
@@ -75,7 +81,7 @@ config.run('amp-image-slider', function() {
 
     function waitForImageSlider() {
       return poll('wait for amp-image-slider to complete', () => {
-        slider = doc.getElementsByTagName('amp-image-slider')[0];
+        slider = doc.querySelector('#slider');
 
         if (!slider) {
           return false;
@@ -180,7 +186,7 @@ config.run('amp-image-slider', function() {
           .then(() => {
             const sliders = doc.getElementsByTagName('amp-image-slider');
             expect(sliders.length).to.be.greaterThan(0);
-            slider = sliders[0];
+            slider = doc.querySelector('#slider');
             container_ = slider
                 .querySelector('.i-amphtml-image-slider-container');
             expect(!!container_).to.be.true;
@@ -195,11 +201,11 @@ config.run('amp-image-slider', function() {
           });
     });
 
-    it('should apply custom styling', () => {
+    it('should apply custom styling on labels and hints', () => {
       let slider, leftHintArrow, leftLabel;
       return prep()
           .then(() => {
-            slider = doc.getElementById('slider');
+            slider = doc.querySelector('#slider');
             leftHintArrow = slider.querySelector('.amp-image-slider-hint-left');
             leftLabel = slider.querySelector('.label');
             expect(env.win.getComputedStyle(leftHintArrow)['width'])
@@ -214,7 +220,7 @@ config.run('amp-image-slider', function() {
       let slider;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             sliderImpl = slider.implementation_;
             container_ =
               slider.querySelector(
@@ -248,7 +254,7 @@ config.run('amp-image-slider', function() {
       let slider;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             sliderImpl = slider.implementation_;
             leftQuarterPos = rect.left + 0.25 * rect.width;
             const touchStartEvent =
@@ -279,7 +285,7 @@ config.run('amp-image-slider', function() {
       let centerPos, leftQuarterPos, rightQuarterPos, rightBeyondPos;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             sliderImpl = slider.implementation_;
             container_ =
               slider.querySelector(
@@ -359,7 +365,7 @@ config.run('amp-image-slider', function() {
       let centerPos, leftQuarterPos, rightQuarterPos, rightBeyondPos;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             centerPos = rect.left + 0.5 * rect.width;
             leftQuarterPos = rect.left + 0.25 * rect.width;
             rightQuarterPos = rect.left + 0.75 * rect.width;
@@ -434,7 +440,7 @@ config.run('amp-image-slider', function() {
       let centerPos, pos40Percent;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             slider.focus();
             centerPos = rect.left + 0.5 * rect.width;
             pos40Percent = rect.left + 0.4 * rect.width;
@@ -482,7 +488,7 @@ config.run('amp-image-slider', function() {
       let mouseDownEvent;
       return prep()
           .then(() => {
-            slider = doc.getElementById('slider');
+            slider = doc.querySelector('#slider');
             container_ = slider
                 .querySelector('.i-amphtml-image-slider-container');
             hint = slider.querySelectorAll('.i-amphtml-image-slider-hint')[0];
@@ -511,6 +517,45 @@ config.run('amp-image-slider', function() {
             });
             return poll('should remove hidden class', () => {
               return !hint.classList
+                  .contains('i-amphtml-image-slider-hint-hidden');
+            }, () => {});
+          });
+    });
+
+    it('should show hint again with disable-hint-reappear', () => {
+      let slider, container_, hint;
+      let mouseDownEvent;
+      return prep()
+          .then(() => {
+            slider = doc.querySelector('#s2');
+            container_ = slider
+                .querySelector('.i-amphtml-image-slider-container');
+            hint = slider.querySelectorAll('.i-amphtml-image-slider-hint')[0];
+            mouseDownEvent = createFakeEvent(
+                'mousedown',
+                0,
+                0
+            );
+            container_.dispatchEvent(mouseDownEvent);
+            return poll('should receive hidden class', () => {
+              return hint.classList
+                  .contains('i-amphtml-image-slider-hint-hidden');
+            }, () => {});
+          })
+          .then(() => {
+            env.win.scrollTo({
+              top: 3000,
+            });
+            // Have to use timeout here,
+            // no indication of proper viewportCallback trigger
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            env.win.scrollTo({
+              top: 0,
+            });
+            return poll('should remove hidden class', () => {
+              return hint.classList
                   .contains('i-amphtml-image-slider-hint-hidden');
             }, () => {});
           });
