@@ -1,0 +1,6 @@
+amp-accordion [i-amphtml-measure] {
+  /* Need to use CSS (not inline style) to use !important. Overrides a rule
+   * in amp.css */
+  position: fixed !important;
+  opacity: 0;
+}
