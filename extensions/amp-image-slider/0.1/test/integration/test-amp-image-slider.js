@@ -28,15 +28,26 @@ config.run('amp-image-slider', function() {
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
     </amp-image-slider>
+    <button id="button" on="tap:slider.seekTo(percent=0.1)">seekTo 10%</button>
+    <p class="para">HUGE PADDING</p>
   `;
 
   const css = `
+  #slider .amp-image-slider-hint-left {
+    width: 64px;
+    height: 32px;
+    background-width: 64px;
+    background-height: 32px;
+  }
   .label {
     color: white;
     border: 4px solid white;
     padding: 1em;
     font-family: Arial, Helvetica, sans-serif;
     box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
+  }
+  .para {
+    height: 10000px;
   }
   `;
 
@@ -109,14 +120,14 @@ config.run('amp-image-slider', function() {
 
     function prep() {
       return waitForImageSlider()
-          .then(() => timeout(env.win, 1000))
           .then(prepareSlider);
     }
 
     // A bunch of expects to check if the slider has slided to
     // where we intended
-    function expectByBarLeftPos(leftPos) {
-      slider = doc.querySelector('amp-image-slider');
+    // Returns true/false for position checks
+    function isOkByBarLeftPos(leftPos) {
+      slider = doc.querySelector('#slider');
       bar_ = slider.querySelector('.i-amphtml-image-slider-bar');
       container_ =
           slider.querySelector('.i-amphtml-image-slider-container');
@@ -130,19 +141,33 @@ config.run('amp-image-slider', function() {
       rightLabel_ = slider.querySelectorAll(
           '.i-amphtml-image-slider-label-wrapper')[1];
 
-      expect(bar_.getBoundingClientRect().left)
-          .to.equal(leftPos);
-      expect(rightMask_.getBoundingClientRect().left)
-          .to.equal(leftPos);
-      // amp-imgs should stay where they are
-      expect(leftAmpImage_.getBoundingClientRect().left)
-          .to.equal(rect.left);
-      expect(rightAmpImage_.getBoundingClientRect().left)
-          .to.equal(rect.left);
-      expect(leftLabel_.getBoundingClientRect().left)
-          .to.equal(rect.left);
-      expect(rightLabel_.getBoundingClientRect().left)
-          .to.equal(rect.left);
+      const roundedLeftPos = Math.round(leftPos);
+      const roundedRectLeft = Math.round(rect.left);
+
+      return Math.round(bar_.getBoundingClientRect().left)
+          === roundedLeftPos &&
+        Math.round(rightMask_.getBoundingClientRect().left)
+          === roundedLeftPos &&
+        Math.round(leftAmpImage_.getBoundingClientRect().left)
+          === roundedRectLeft &&
+        Math.round(rightAmpImage_.getBoundingClientRect().left)
+          === roundedRectLeft &&
+        Math.round(leftLabel_.getBoundingClientRect().left)
+          === roundedRectLeft &&
+        Math.round(rightLabel_.getBoundingClientRect().left)
+          === roundedRectLeft;
+    }
+
+    // Poll for 500ms.
+    // If all elements are at correct position in 500ms, resolve
+    // Otherwise, pass expected value to reject.
+    function pollByBarLeftPos(leftPos) {
+      return poll('examine position correctness', () => {
+        if (isOkByBarLeftPos(leftPos)) {
+          return true;
+        }
+        return false;
+      }, () => { return `${leftPos} is not reached.`; });
     }
 
     it('should construct', () => {
@@ -185,10 +210,7 @@ config.run('amp-image-slider', function() {
                 );
 
             container_.dispatchEvent(mouseDownEvent);
-            return timeout(env.win, 500);
-          })
-          .then(() => {
-            expectByBarLeftPos(leftQuarterPos);
+            return pollByBarLeftPos(leftQuarterPos);
           })
           .then(() => {
             centerPos = rect.left + 0.5 * rect.width;
@@ -199,10 +221,7 @@ config.run('amp-image-slider', function() {
                     0
                 );
             container_.dispatchEvent(mouseDownEvent);
-            return timeout(env.win, 500);
-          })
-          .then(() => {
-            expectByBarLeftPos(centerPos);
+            return pollByBarLeftPos(centerPos);
           });
     });
 
@@ -221,10 +240,7 @@ config.run('amp-image-slider', function() {
                     0
                 );
             slider.dispatchEvent(touchStartEvent);
-            return timeout(env.win, 500);
-          })
-          .then(() => {
-            expectByBarLeftPos(leftQuarterPos);
+            return pollByBarLeftPos(leftQuarterPos);
           })
           .then(() => {
             centerPos = rect.left + 0.5 * rect.width;
@@ -235,16 +251,9 @@ config.run('amp-image-slider', function() {
                     0
                 );
             slider.dispatchEvent(touchStartEvent);
-            return timeout(env.win, 500);
-          })
-          .then(() => {
-            expectByBarLeftPos(centerPos);
+            return pollByBarLeftPos(centerPos);
           });
     });
-
-    function timeout(win, ms) {
-      return new Promise(resolve => win.setTimeout(resolve, ms));
-    }
 
     it('should follow mouse drag', () => {
       let slider;
@@ -270,11 +279,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             container_.dispatchEvent(mouseDownEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(centerPos);
           })
           .then(() => {
-            expectByBarLeftPos(centerPos);
-
             // Mouse button is still down, move to somewhere on slider
             mouseMoveEvent = createFakeEvent(
                 'mousemove',
@@ -282,11 +289,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseMoveEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(leftQuarterPos);
           })
           .then(() => {
-            expectByBarLeftPos(leftQuarterPos);
-
             // Mouse button is still down, move to somewhere outside of slider
             // The bar position should be capped at right border
             mouseMoveEvent = createFakeEvent(
@@ -295,11 +300,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseMoveEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(rect.right);
           })
           .then(() => {
-            expectByBarLeftPos(rect.right);
-
             // Mouse button is still down, move back to inside the slider
             // The bar position should still be updated
             mouseMoveEvent = createFakeEvent(
@@ -308,11 +311,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseMoveEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(rightQuarterPos);
           })
           .then(() => {
-            expectByBarLeftPos(rightQuarterPos);
-
             // Release mouse button
             mouseUpEvent = createFakeEvent(
                 'mouseup',
@@ -320,11 +321,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseUpEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(rightQuarterPos);
           })
           .then(() => {
-            expectByBarLeftPos(rightQuarterPos);
-
             // Mouse button is now up, should no longer follow mouse move
             mouseMoveEvent = createFakeEvent(
                 'mousemove',
@@ -332,10 +331,7 @@ config.run('amp-image-slider', function() {
                 0
             );
             win.dispatchEvent(mouseMoveEvent);
-            return timeout(env.win, 500);
-          })
-          .then(() => {
-            expectByBarLeftPos(rightQuarterPos);
+            return pollByBarLeftPos(rightQuarterPos);
           });
     });
 
@@ -358,11 +354,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchStartEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(centerPos);
           })
           .then(() => {
-            expectByBarLeftPos(centerPos);
-
             // Touch is still down, move to somewhere on slider
             touchMoveEvent = createFakeEvent(
                 'touchmove',
@@ -370,11 +364,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchMoveEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(leftQuarterPos);
           })
           .then(() => {
-            expectByBarLeftPos(leftQuarterPos);
-
             // Touch is still down, move to somewhere outside of slider
             // The bar position should be capped at right border
             touchMoveEvent = createFakeEvent(
@@ -383,11 +375,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchMoveEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(rect.right);
           })
           .then(() => {
-            expectByBarLeftPos(rect.right);
-
             // Touch is still down, move back to inside the slider
             // The bar position should still be updated
             touchMoveEvent = createFakeEvent(
@@ -396,11 +386,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchMoveEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(rightQuarterPos);
           })
           .then(() => {
-            expectByBarLeftPos(rightQuarterPos);
-
             // Release touch
             touchEndEvent = createFakeEvent(
                 'touchend',
@@ -408,11 +396,9 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchEndEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(rightQuarterPos);
           })
           .then(() => {
-            expectByBarLeftPos(rightQuarterPos);
-
             // Mouse button is now up, should no longer follow mouse move
             touchMoveEvent = createFakeEvent(
                 'touchmove',
@@ -420,58 +406,44 @@ config.run('amp-image-slider', function() {
                 0
             );
             slider.dispatchEvent(touchMoveEvent);
-            return timeout(env.win, 500);
-          })
-          .then(() => {
-            expectByBarLeftPos(rightQuarterPos);
+            return pollByBarLeftPos(rightQuarterPos);
           });
     });
 
     it('should follow keyboard buttons', () => {
       let slider;
       let keyDownEvent;
-      let centerPos, Pos40Percent;
+      let centerPos, pos40Percent;
       return prep()
           .then(() => {
             slider = doc.querySelector('amp-image-slider');
             slider.focus();
             centerPos = rect.left + 0.5 * rect.width;
-            Pos40Percent = rect.left + 0.4 * rect.width;
+            pos40Percent = rect.left + 0.4 * rect.width;
 
             keyDownEvent = createKeyDownEvent('ArrowLeft');
             slider.dispatchEvent(keyDownEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(pos40Percent);
           })
           .then(() => {
-            expectByBarLeftPos(Pos40Percent);
-
             keyDownEvent = createKeyDownEvent('ArrowRight');
             slider.dispatchEvent(keyDownEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(centerPos);
           })
           .then(() => {
-            expectByBarLeftPos(centerPos);
-
             keyDownEvent = createKeyDownEvent('PageUp');
             slider.dispatchEvent(keyDownEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(rect.left);
           })
           .then(() => {
-            expectByBarLeftPos(rect.left);
-
             keyDownEvent = createKeyDownEvent('Home');
             slider.dispatchEvent(keyDownEvent);
-            return timeout(env.win, 500);
+            return pollByBarLeftPos(centerPos);
           })
           .then(() => {
-            expectByBarLeftPos(centerPos);
-
             keyDownEvent = createKeyDownEvent('PageDown');
             slider.dispatchEvent(keyDownEvent);
-            return timeout(env.win, 500);
-          })
-          .then(() => {
-            expectByBarLeftPos(rect.right);
+            return pollByBarLeftPos(rect.right);
           });
     });
   });

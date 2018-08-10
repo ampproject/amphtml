@@ -21,6 +21,7 @@ import {
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
   getElementServiceIfAvailableForDocInEmbedScope,
+  isExtensionScriptInNode,
 } from '../../src/element-service';
 import {
   installServiceInEmbedScope,
@@ -329,6 +330,17 @@ describes.realWin('in single ampdoc', {
       }).then(service => {
         expect(service).to.deep.equal({str: 'fake1'});
       });
+    });
+
+    it('isExtensionScriptInNode', () => {
+      const extension = document.createElement('script');
+      extension.setAttribute('custom-element', 'amp-form');
+      extension.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-form-0.1.js');
+      ampdoc.getHeadNode().appendChild(extension);
+      return isExtensionScriptInNode(ampdoc, 'amp-form')
+          .then(ampFormInstalled => {
+            expect(ampFormInstalled).to.equal(true);
+          });
     });
   });
 });
