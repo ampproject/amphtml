@@ -96,9 +96,12 @@ export class AmpMustache extends AMP.BaseTemplate {
       }
       html = mustacheRender(this.template_, mustacheData);
     }
-    const body = purifyHtml(`<div>${html}</div>`);
-    const div = body.firstElementChild;
-    return this.unwrap(div);
+    const body = purifyHtml(html);
+    // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
+    // https://github.com/cure53/DOMPurify/pull/295
+    const root = this.win.document.createElement('div');
+    root./*OK*/innerHTML = body./*OK*/innerHTML;
+    return this.unwrap(root);
   }
 }
 
