@@ -44,6 +44,11 @@ In this basic example, the `amp-pixel` issues a simple GET request to the given 
     layout="nodisplay"></amp-pixel>
 ```
 
+{% call callout('Note', type='note') %}
+When processing AMP URLs in the referrer header of analytics requests, strip out or ignore the `usqp` parameter. This parameter is used by Google to trigger experiments for the Google AMP Cache.
+{% endcall %}
+
+
 ## Attributes
 
 ##### src (required)
