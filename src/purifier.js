@@ -131,7 +131,7 @@ export const WHITELISTED_ATTRS = [
 ];
 
 /**
- * Attributes that are only whitelisted for specific tags.
+ * Attributes that are only whitelisted for specific, non-AMP elements.
  * @const {!Object<string, !Array<string>>}
  */
 export const WHITELISTED_ATTRS_BY_TAGS = {
@@ -305,25 +305,36 @@ export function purifyHtml(dirty) {
     let {attrValue} = data;
     allowedAttributes = data.allowedAttributes;
 
-    // `<A>` has special target rules:
-    // - Default target is "_top";
-    // - Allowed targets are "_blank", "_top";
-    // - All other targets are rewritted to "_top".
-    if (tagName == 'a' && attrName == 'target') {
-      const lowercaseValue = attrValue.toLowerCase();
-      if (!WHITELISTED_TARGETS.includes(lowercaseValue)) {
-        attrValue = '_top';
-      } else {
-        // Always use lowercase values for `target` attr.
-        attrValue = lowercaseValue;
-      }
-    }
-
-    // Allow if attribute is in tag-specific whitelist.
-    const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tagName];
-    if (attrsByTags && attrsByTags.includes(attrName)) {
+    const allowAttribute = () => {
       allowedAttributes[attrName] = true;
       allowedAttributesChanges.push(attrName);
+    };
+
+    // Allow all attributes for AMP elements. This avoids the need to whitelist
+    // nonstandard attributes for every component e.g. amp-lightbox[scrollable].
+    const isAmpElement = startsWith(tagName, 'amp-');
+    if (isAmpElement) {
+      allowAttribute();
+    } else {
+      // `<A>` has special target rules:
+      // - Default target is "_top";
+      // - Allowed targets are "_blank", "_top";
+      // - All other targets are rewritted to "_top".
+      if (tagName == 'a' && attrName == 'target') {
+        const lowercaseValue = attrValue.toLowerCase();
+        if (!WHITELISTED_TARGETS.includes(lowercaseValue)) {
+          attrValue = '_top';
+        } else {
+          // Always use lowercase values for `target` attr.
+          attrValue = lowercaseValue;
+        }
+      }
+
+      // For non-AMP elements, allow attributes in tag-specific whitelist.
+      const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tagName];
+      if (attrsByTags && attrsByTags.includes(attrName)) {
+        allowAttribute();
+      }
     }
 
     // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
