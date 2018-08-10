@@ -318,7 +318,7 @@
   text-decoration: none !important;
   width: calc(50% - 6px) !important;
   cursor: pointer !important;
-  margin-bottom: 12px;
+  margin-bottom: 12px !important;
 }
 
 .i-amphtml-story-bookend-cta-link:nth-child(2n+1):last-child {
