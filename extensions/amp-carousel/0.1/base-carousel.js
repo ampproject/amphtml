@@ -89,7 +89,9 @@ export class BaseCarousel extends AMP.BaseElement {
     const {userAgent} = navigator;
     if (!(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(userAgent))) { // detecting laptop & desktop
       console.log('HELLO DESKTOP');
-      setStyles(button, {transform: 'scale(3)'});
+      if (this.element.hasAttribute('scale')) {
+        setStyles(button, {transform: 'scale(' + this.element.getAttribute('scale') + ')'});
+      }
     }
 
     button.appendChild(icon);
