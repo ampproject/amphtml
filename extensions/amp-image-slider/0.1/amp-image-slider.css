@@ -22,6 +22,8 @@
   left: 0;
   /* Fix iOS translate + overflow: hidden bug */
   transform: translateZ(0);
+  /* Remove webkit tap highlight grayish color */
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
 .i-amphtml-image-slider-left-mask {
