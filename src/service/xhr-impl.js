@@ -194,24 +194,6 @@ export class Xhr {
   }
 
   /**
-   * Creates an XHR request with responseType=document
-   * and returns a promise for the initialized `Document`.
-   * Note this does not return a `Response`, since this is not a standard
-   * Fetch response type.
-   *
-   * @param {string} input
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init
-   * @return {!Promise<!Document>}
-   */
-  fetchDocument(input, opt_init) {
-    const init = setupInit(opt_init, 'text/html');
-    init.responseType = 'document';
-    return this.fetch(input, init)
-        .then(response =>
-          /** @type {!../utils/xhr-utils.FetchResponse} */(response).document());
-  }
-
-  /**
    * @param {string} input URL
    * @param {?../utils/xhr-utils.FetchInitDef=} opt_init Fetch options object.
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
