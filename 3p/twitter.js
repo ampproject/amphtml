@@ -18,7 +18,7 @@
 
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
-import {startsWith} from './src/string';
+import {startsWith} from '../src/string';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
