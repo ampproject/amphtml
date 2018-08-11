@@ -18,6 +18,7 @@
 
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
+import {startsWith} from './src/string';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -73,7 +74,7 @@ export function twitter(global, data) {
       twttr.widgets.createTimeline(
           // Extract properties starting with 'timeline'.
           Object.keys(data)
-              .filter(prop => prop.startsWith('timeline'))
+              .filter(prop => startsWith(prop, 'timeline'))
               .reduce((newData, prop) => {
                 newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
                 return newData;
