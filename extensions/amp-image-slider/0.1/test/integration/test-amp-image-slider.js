@@ -71,8 +71,13 @@ config.run('amp-image-slider', function() {
     let slider;
     let sliderImpl;
     let rect;
-    let bar_, container_, rightMask_, leftAmpImage_, rightAmpImage_;
-    let leftLabel_, rightLabel_;
+    let bar_;
+    let container_;
+    let rightMask_;
+    let leftAmpImage_;
+    let rightAmpImage_;
+    let leftLabel_;
+    let rightLabel_;
 
     beforeEach(() => {
       win = env.win;
@@ -181,7 +186,10 @@ config.run('amp-image-slider', function() {
     }
 
     it('should construct', () => {
-      let slider, container_, rightMask_, bar_;
+      let slider;
+      let container_;
+      let rightMask_;
+      let bar_;
       return prep()
           .then(() => {
             const sliders = doc.getElementsByTagName('amp-image-slider');
@@ -189,20 +197,22 @@ config.run('amp-image-slider', function() {
             slider = doc.querySelector('#slider');
             container_ = slider
                 .querySelector('.i-amphtml-image-slider-container');
-            expect(!!container_).to.be.true;
+            expect(container_).to.not.be.null;
             rightMask_ = slider.querySelector('.i-amphtml-image-slider-bar');
-            expect(!!rightMask_).to.be.true;
+            expect(rightMask_).to.not.be.null;
             bar_ = slider.querySelector('.i-amphtml-image-slider-bar');
-            expect(!!bar_).to.be.true;
+            expect(bar_).to.not.be.null;
             const ampImgs = slider.getElementsByTagName('amp-img');
             expect(ampImgs.length).to.equal(2);
-            expect(!!ampImgs[0]).to.be.true;
-            expect(!!ampImgs[1]).to.be.true;
+            expect(ampImgs[0]).to.not.be.null;
+            expect(ampImgs[1]).to.not.be.null;
           });
     });
 
     it('should apply custom styling on labels and hints', () => {
-      let slider, leftHintArrow, leftLabel;
+      let slider;
+      let leftHintArrow;
+      let leftLabel;
       return prep()
           .then(() => {
             slider = doc.querySelector('#slider');
@@ -216,7 +226,9 @@ config.run('amp-image-slider', function() {
     });
 
     it('should animate moving bar to position on mousedown', () => {
-      let leftQuarterPos, centerPos, container_;
+      let leftQuarterPos;
+      let centerPos;
+      let container_;
       let slider;
       return prep()
           .then(() => {
@@ -250,7 +262,8 @@ config.run('amp-image-slider', function() {
     });
 
     it('should animate moving bar to position on touch', () => {
-      let leftQuarterPos, centerPos;
+      let leftQuarterPos;
+      let centerPos;
       let slider;
       return prep()
           .then(() => {
@@ -281,8 +294,13 @@ config.run('amp-image-slider', function() {
 
     it('should follow mouse drag', () => {
       let slider;
-      let mouseDownEvent, mouseMoveEvent, mouseUpEvent;
-      let centerPos, leftQuarterPos, rightQuarterPos, rightBeyondPos;
+      let mouseDownEvent;
+      let mouseMoveEvent;
+      let mouseUpEvent;
+      let centerPos;
+      let leftQuarterPos;
+      let rightQuarterPos;
+      let rightBeyondPos;
       return prep()
           .then(() => {
             slider = doc.querySelector('#slider');
@@ -361,8 +379,13 @@ config.run('amp-image-slider', function() {
 
     it('should follow touch drag', () => {
       let slider;
-      let touchStartEvent, touchMoveEvent, touchEndEvent;
-      let centerPos, leftQuarterPos, rightQuarterPos, rightBeyondPos;
+      let touchStartEvent;
+      let touchMoveEvent;
+      let touchEndEvent;
+      let centerPos;
+      let leftQuarterPos;
+      let rightQuarterPos;
+      let rightBeyondPos;
       return prep()
           .then(() => {
             slider = doc.querySelector('#slider');
@@ -437,7 +460,8 @@ config.run('amp-image-slider', function() {
     it('should follow keyboard buttons', () => {
       let slider;
       let keyDownEvent;
-      let centerPos, pos40Percent;
+      let centerPos;
+      let pos40Percent;
       return prep()
           .then(() => {
             slider = doc.querySelector('#slider');
@@ -472,19 +496,19 @@ config.run('amp-image-slider', function() {
     });
 
     it('should seekTo correct position', () => {
-      let button;
-      let pos10Percent;
       return prep()
           .then(() => {
-            button = doc.querySelector('#button');
-            pos10Percent = rect.left + 0.1 * rect.width;
+            const button = doc.querySelector('#button');
+            const pos10Percent = rect.left + 0.1 * rect.width;
             button.click();
             return pollByBarLeftPos(pos10Percent);
           });
     });
 
     it('should show hint again on scroll back and into viewport', () => {
-      let slider, container_, hint;
+      let slider;
+      let container_;
+      let hint;
       let mouseDownEvent;
       return prep()
           .then(() => {
@@ -501,7 +525,7 @@ config.run('amp-image-slider', function() {
             return poll('should receive hidden class', () => {
               return hint.classList
                   .contains('i-amphtml-image-slider-hint-hidden');
-            }, () => {});
+            });
           })
           .then(() => {
             env.win.scrollTo({
@@ -518,12 +542,14 @@ config.run('amp-image-slider', function() {
             return poll('should remove hidden class', () => {
               return !hint.classList
                   .contains('i-amphtml-image-slider-hint-hidden');
-            }, () => {});
+            });
           });
     });
 
     it('should show hint again with disable-hint-reappear', () => {
-      let slider, container_, hint;
+      let slider;
+      let container_;
+      let hint;
       let mouseDownEvent;
       return prep()
           .then(() => {
@@ -540,7 +566,7 @@ config.run('amp-image-slider', function() {
             return poll('should receive hidden class', () => {
               return hint.classList
                   .contains('i-amphtml-image-slider-hint-hidden');
-            }, () => {});
+            });
           })
           .then(() => {
             env.win.scrollTo({
@@ -557,7 +583,7 @@ config.run('amp-image-slider', function() {
             return poll('should remove hidden class', () => {
               return hint.classList
                   .contains('i-amphtml-image-slider-hint-hidden');
-            }, () => {});
+            });
           });
     });
   });

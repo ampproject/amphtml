@@ -163,7 +163,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
     }, ActionTrust.LOW);
 
-    const initialPercentString =
+    const initialPositionString =
         this.element.getAttribute('initial-slider-position');
     // TODO(kqian): move this before building child components on issue
     // This is the only step when content tree is attached to document
@@ -173,9 +173,9 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.leftMask_.appendChild(this.leftAmpImage_);
       this.rightMask_.appendChild(this.rightAmpImage_);
       // Set initial positioning
-      if (initialPercentString) {
-        const initialPercent = Number(initialPercentString);
-        this.updatePositions_(initialPercent);
+      if (initialPositionString) {
+        const initialPosition = Number(initialPositionString);
+        this.updatePositions_(initialPosition);
       }
     });
   }

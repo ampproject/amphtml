@@ -128,7 +128,7 @@ amp-image-slider amp-img > img {
   background-size: 56px 16px;
   width: 56px;
   height: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g data-name="Layer 2"><path d="M4 5h12V3H4V0L0 4l4 4z" fill="#fff" data-name="Layer 1"/></g></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g><path d="M4 5h12V3H4V0L0 4l4 4z" fill="#fff"/></g></svg>');
   filter: drop-shadow(3px 3px 4px black);
 }
 
@@ -136,6 +136,6 @@ amp-image-slider amp-img > img {
   background-size: 56px 16px;
   width: 56px;
   height: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g data-name="Layer 2"><path d="M24 5h-12V3H24V0L28 4l-4 4z" fill="#fff" data-name="Layer 1"/></g></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g><path d="M24 5h-12V3H24V0L28 4l-4 4z" fill="#fff"/></g></svg>');
   filter: drop-shadow(3px 3px 4px black);
 }
