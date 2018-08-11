@@ -69,6 +69,19 @@ export function twitter(global, data) {
     } else if (data.momentid) {
       twttr.widgets.createMoment(data.momentid, tweet, data)
           ./*OK*/then(el => tweetCreated(twttr, el));
+    } else if (data.timelineSourceType) {
+      twttr.widgets.createTimeline(
+          // Extract properties starting with 'timeline'.
+          Object.keys(data)
+              .filter(prop => prop.startsWith('timeline'))
+              .reduce((newData, prop) => {
+                newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
+                return newData;
+              }, {}),
+          tweet,
+          data
+      )
+          ./*OK*/then(el => tweetCreated(twttr, el));
     }
   });
 
@@ -106,6 +119,15 @@ export function twitter(global, data) {
     context.updateDimensions(
         container./*OK*/offsetWidth,
         height + /* margins */ 20);
+  }
+
+  /**
+   * @param {string} input
+   * @param {string} prefix
+   */
+  function stripPrefixCamelCase(input, prefix) {
+    const stripped = input.replace(new RegExp('^' + prefix), '');
+    return stripped.charAt(0).toLowerCase() + stripped.substr(1);
   }
 }
 
