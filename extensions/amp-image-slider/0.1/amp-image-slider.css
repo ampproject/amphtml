@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- .i-amphtml-image-slider-container {
+.i-amphtml-image-slider-container {
   position: absolute;
   top: 0;
   right: 0;
@@ -93,6 +93,7 @@ amp-image-slider amp-img > img {
 
 .i-amphtml-image-slider-hint-hidden {
   opacity: 0;
+  transition: opacity linear 0.4s;
 }
 
 .i-amphtml-image-slider-hint {
@@ -102,7 +103,7 @@ amp-image-slider amp-img > img {
   bottom: 0;
   left: 0;
   z-index: 2;
-  transition: opacity 0.3s;
+  transition: opacity ease-in 0.4s;
 }
 
 .i-amphtml-image-slider-hint-left-wrapper {
