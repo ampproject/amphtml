@@ -167,6 +167,13 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   display: inline-block;
 }
 
+
+.i-amphtml-blur {
+  filter: blur(20px) !important;
+  transform: scale(1.1) !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
 .i-amphtml-layout-nodisplay,
 [layout=nodisplay]:not(.i-amphtml-layout-nodisplay)
 {
@@ -252,7 +259,8 @@ i-amphtml-sizer {
   display: block !important;
 }
 
-.i-amphtml-fill-content {
+.i-amphtml-fill-content,
+.i-amphtml-blur {
   display: block;
   /* These lines are a work around to this issue in iOS:     */
   /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
