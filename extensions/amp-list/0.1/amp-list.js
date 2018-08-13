@@ -94,6 +94,12 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
+
+    /** @private */
+    this.resizeExperimentOn_ = isExperimentOn(this.win, 'amp-list-resize');
+
+    /** @private */
+    this.isSetToLayoutContainer_ = false;
   }
 
   /** @override */
@@ -390,7 +396,7 @@ export class AmpList extends AMP.BaseElement {
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
 
-      if (!isExperimentOn(this.win, 'amp-list-resize')) {
+      if (!this.resizeExperimentOn_) {
         // Change height if needed.
         this.measureElement(() => {
           const scrollHeight = this.container_./*OK*/scrollHeight;
@@ -402,10 +408,11 @@ export class AmpList extends AMP.BaseElement {
       }
     }, this.container_);
 
-    if (isExperimentOn(this.getWin(), 'amp-list-resize')) {
+    if (this.resizeExperimentOn_ && !this.isSetToLayoutContainer_) {
       this.mutateElement(() => {
         this.changeToLayoutContainer_();
       });
+      this.isSetToLayoutContainer_ = true;
     }
   }
 
