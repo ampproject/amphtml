@@ -374,6 +374,7 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
+
     this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
 
@@ -389,19 +390,23 @@ export class AmpList extends AMP.BaseElement {
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
 
-      // Change height if needed.
-      this.measureElement(() => {
-        if (isExperimentOn(this.getWin(), 'amp-list-resize')) {
-          this.changeToLayoutContainer_();
-        } else {
+      if (!isExperimentOn(this.win, 'amp-list-resize')) {
+        // Change height if needed.
+        this.measureElement(() => {
           const scrollHeight = this.container_./*OK*/scrollHeight;
           const height = this.element./*OK*/offsetHeight;
           if (scrollHeight > height) {
             this.attemptChangeHeight(scrollHeight).catch(() => {});
           }
-        }
-      });
+        });
+      }
     }, this.container_);
+
+    if (isExperimentOn(this.getWin(), 'amp-list-resize')) {
+      this.mutateElement(() => {
+        this.changeToLayoutContainer_();
+      });
+    }
   }
 
   /**
@@ -411,7 +416,9 @@ export class AmpList extends AMP.BaseElement {
   changeToLayoutContainer_() {
     this.element.setAttribute('layout', 'container');
     const sizer = this.element.querySelector('i-amphtml-sizer');
-    this.element.removeChild(sizer);
+    if (sizer) {
+      this.element.removeChild(sizer);
+    }
     this.container_.classList.remove('i-amphtml-fill-content');
     this.container_.classList.remove('i-amphtml-replaced-content');
     const overflowElement = this.element.querySelector('[overflow]');
