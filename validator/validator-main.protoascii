@@ -940,6 +940,10 @@ tags: {  # Special custom 'author' spreadsheet for AMP
         type: PARSE_AS_RULES
       }
       at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
         name: 'supports'
         type: PARSE_AS_RULES
       }
@@ -1084,6 +1088,10 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       at_rule_spec: {
         name: 'media'
         type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
       }
       at_rule_spec: {
         name: '$DEFAULT'  # matches if none of the above match
