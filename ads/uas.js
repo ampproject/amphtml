@@ -67,6 +67,7 @@ export function uas(global, data) {
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/phoenix.js', () => {
     global.Phoenix.EQ.push(function() {
       global.Phoenix.enableSingleRequestCallMode();
+      global.Phoenix.setInfo('AMP', 1);// Need to set the AMP flag
       global.Phoenix.setInfo('ACCID', data.accId);
       global.Phoenix.setInfo('PAGEURL', global.context.location.href);
       data.pageURL && global.Phoenix.setInfo('PAGEURL', data.pageURL);
