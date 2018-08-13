@@ -38,7 +38,7 @@ describes.realWin('amp-hulu', {
       hulu.setAttribute('layout', 'responsive');
     }
     doc.body.appendChild(hulu);
-    return hulu.build().then(() => hulu.layoutCallback()).then(() => hulu);
+    return hulu.build().then(() => { hulu.layoutCallback(); return hulu; });
   }
 
   it('renders', () => {
