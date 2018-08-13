@@ -66,33 +66,21 @@ describes.realWin('Linker', {
       },
       output: '1~fgkeaa~key1~dmFsdWUx~name~Ym9i~color~Z3JlZW4.~car~aG9uZGE.',
     },
+    {
+      description: 'fake macros',
+      version: '1',
+      pairs: {
+        cid: '12345',
+        ref: 'https://www.example.com',
+      },
+      output: '1~wqs6ww~cid~MTIzNDU.~ref~aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
+    },
   ];
 
   tests.forEach(test => {
     it(test.description, () => {
       const result = linker.create(test.version, test.pairs);
-      return expect(result).to.eventually.equal(test.output);
+      return expect(result).to.equal(test.output);
     });
-  });
-
-  it('resolves macros', () => {
-    const test = {
-      description: 'resolves macros',
-      version: '1',
-      pairs: {
-        cid: 'CLIENT_ID(_ga)',
-        ref: 'DOCUMENT_REFERRER',
-      },
-      output: '1~wqs6ww~cid~MTIzNDU.~ref~aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
-    };
-
-    const urlService = linker.urlReplacementService_;
-    const expandStub = sandbox.stub(urlService, 'expandStringAsync');
-
-    expandStub.withArgs('CLIENT_ID(_ga)').resolves('12345');
-    expandStub.withArgs('DOCUMENT_REFERRER').resolves('https://www.example.com');
-
-    const result = linker.create(test.version, test.pairs);
-    return expect(result).to.eventually.equal(test.output);
   });
 });

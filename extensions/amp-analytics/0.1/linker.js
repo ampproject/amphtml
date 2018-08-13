@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-
-import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {crc32} from './crc32';
 
@@ -27,57 +25,19 @@ const DELIMITER = '~';
  * &<paramName>=<version>~<checksum>~<key1>~<value1>~<key2>~<value2>...
  */
 export class Linker {
-  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} doc */
-  constructor(doc) {
-    this.urlReplacementService_ = Services.urlReplacementsForDoc(doc);
-  }
-
-
   /**
    * Creates the linker param from the given config, and returns the url with
    * the given param attached.
    * @param {string} version
    * @param {Object<string,string>} pairs
-   * @return {Promise<string>}
+   * @return {string}
    */
   create(version, pairs) {
     if (!pairs || !Object.keys(pairs).length) {
-      return Promise.resolve('');
+      return '';
     }
 
-    // TODO: Replace resolveMacros after talking with Hongfei
-    // Should I use VariableService.expandTemplate here??
-    return this.resolveMacros_(pairs).then(expandedPairs => {
-      return this.generateParam_(version, expandedPairs);
-    });
-  }
-
-
-  /**
-   * Go through key value pairs and resolve any macros that may exist.
-   * @param {Object<string,string>} pairs
-   * @return {Promise<Object<string, string>>}
-   */
-  resolveMacros_(pairs) {
-    const keys = Object.keys(pairs);
-    const expansionPromises = [];
-
-    keys.forEach(key => {
-      // TODO(ccordry): change this to call new expander once fully launched.
-      const promise = this.urlReplacementService_.expandStringAsync(pairs[key]);
-      expansionPromises.push(promise);
-    });
-
-    return Promise.all(expansionPromises)
-        .then(expandedVals => {
-          // Now that we have the resolved values, reassociate them back with
-          // their keys.
-          const expandedPairs = {};
-          keys.forEach((key, i) => {
-            expandedPairs[key] = expandedVals[i];
-          });
-          return expandedPairs;
-        });
+    return this.generateParam_(version, pairs);
   }
 
 
@@ -85,11 +45,11 @@ export class Linker {
    * Generate the completed querystring.
    * <paramName>=<version>~<checksum>~<key1>~<value1>~<key2>~<value2>...
    * @param {string} version
-   * @param {?Object<string, string>} expandedPairs
+   * @param {Object<string, string>} pairs
    * @return {string}
    */
-  generateParam_(version, expandedPairs) {
-    const encodedPairs = this.encodePairs_(expandedPairs);
+  generateParam_(version, pairs) {
+    const encodedPairs = this.encodePairs_(pairs);
     const checksum = this.getCheckSum_(encodedPairs);
     return version + DELIMITER + checksum + encodedPairs;
   }
@@ -98,7 +58,7 @@ export class Linker {
   /**
    * Create a unique checksum hashing the fingerprint and a few other values.
    * base36(CRC32(fingerprint + timestampRoundedInMin + kv pairs))
-   * @param {?Object<string, string>} encodedPairs
+   * @param {Object<string, string>} encodedPairs
    * @return {string}
    */
   getCheckSum_(encodedPairs) {
@@ -125,16 +85,16 @@ export class Linker {
 
 
   /**
-   * After macros have resolved, encode their values and join them together.
-   * @param {?Object<string, string>} expandedPairs
+   * Encode all values & join them together. Do not encode keys.
+   * @param {Object<string, string>} pairs
    * @return {string}
    */
-  encodePairs_(expandedPairs) {
-    const keys = Object.keys(expandedPairs);
+  encodePairs_(pairs) {
+    const keys = Object.keys(pairs);
     let result = '';
 
     keys.forEach(key => {
-      const encodedVal = base64UrlEncodeFromString(expandedPairs[key]);
+      const encodedVal = base64UrlEncodeFromString(pairs[key]);
       result += DELIMITER + key + DELIMITER + encodedVal;
     });
 
