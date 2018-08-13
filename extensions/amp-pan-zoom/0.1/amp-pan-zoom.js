@@ -262,9 +262,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         this.zoomButton_.classList.remove('i-amphtml-pan-zoom-out-button');
       }
     });
-    this.mutateElement(() => {
-      this.element.appendChild(this.zoomButton_);
-    });
+    this.element.appendChild(this.zoomButton_);
   }
 
   /**
