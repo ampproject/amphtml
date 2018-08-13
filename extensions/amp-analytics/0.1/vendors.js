@@ -1571,6 +1571,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '&ap=${ap}' +
         '&co=${co}' +
         '&cp=${cp}' +
+        '&ps=${ps}' +
         '&host=${canonicalHost}' +
         '&path=${canonicalPath}',
     },
