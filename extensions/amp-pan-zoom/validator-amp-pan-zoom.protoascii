@@ -29,7 +29,10 @@ tags: {  # <amp-pan-zoom>
   html_format: EXPERIMENTAL
   tag_name: "AMP-PAN-ZOOM"
   requires_extension: "amp-pan-zoom"
-
+  attrs: {
+    name: "controls"
+    value: ""
+  }
   attrs: {
     name: "initial-scale"
     value_regex: "[0-9]+(\\.[0-9]+)?"
