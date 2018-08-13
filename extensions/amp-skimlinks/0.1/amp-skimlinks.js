@@ -5,9 +5,9 @@ import {whenDocumentReady} from '../../../src/document-ready';
 
 import Tracking from './tracking';
 
-import AffiliateLinkResolver from './affiliate-link-resolver';
-
+import {SKIMLINKS_REWRITER_ID} from './constants';
 import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewrite/constants';
+import AffiliateLinkResolver from './affiliate-link-resolver';
 import LinkRewriterService from '../../../src/service/link-rewrite/link-rewrite-service';
 
 import {getAmpSkimlinksOptions} from './skim-options';
@@ -23,7 +23,6 @@ import {getBoundFunction} from './utils';
 
 const startTime = new Date().getTime();
 
-const SKIMLINKS_REWRITER_ID = 'amp-skimlinks';
 
 export class AmpSkimlinks extends AMP.BaseElement {
   /**
@@ -36,37 +35,36 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
-    this.resolveSessionDataONCE_ = once(this.resolveSessionData_.bind(this));
+    this.onBeaconCallbacknDataONCE_ = once(this.onBeaconCallback_.bind(this));
     this.userSessionDataDeferred_ = new Deferred();
     this.linkRewriterService = new LinkRewriterService(this.ampDoc_);
-
-    whenDocumentReady(this.ampDoc_).then(() => {
+    return whenDocumentReady(this.ampDoc_).then(() => {
       window.t2 = new Date().getTime();
       this.startSkimcore_();
     });
   }
 
   /**
-   * Where everything stats
+   * Where everything start
    */
   startSkimcore_() {
-    const trackingService = new Tracking(this.element, this.skimOptions_);
-    const domainResolverService = new AffiliateLinkResolver(
+    this.trackingService = new Tracking(this.element, this.skimOptions_);
+    this.domainResolverService = new AffiliateLinkResolver(
         this.xhr_,
         this.skimOptions_,
-        getBoundFunction(trackingService, 'getTrackingInfo'),
-        this.resolveSessionDataONCE_
+        getBoundFunction(this.trackingService, 'getTrackingInfo'),
+        this.onBeaconCallbackONCE_
     );
 
-    const skimlinksLinkRewriter = this.initSkimlinksLinkRewriter(trackingService, domainResolverService);
+    this.skimlinksLinkRewriter = this.initSkimlinksLinkRewriter(this.trackingService,this.domainResolverService);
 
     // Fire impression tracking after we have received beaconRequest
     // TODO: Should this be fired onexit?
     this.userSessionDataDeferred_.promise.then(userSessionData => {
       window.t3 = new Date().getTime();
-      trackingService.sendImpressionTracking(
+      this.trackingService.sendImpressionTracking(
           userSessionData,
-          skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
+          this.skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
           startTime,
       );
     });
@@ -76,7 +74,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Resolve promise
    * @param {*} beaconData
    */
-  resolveSessionData_(beaconData) {
+  onBeaconCallback_(beaconData) {
     this.hasCalledBeacon = true;
     this.userSessionDataDeferred_.resolve({
       guid: beaconData.guid,
@@ -85,47 +83,53 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   /**
    * Fallback
-   * @param {*} domainResolverService
    */
-  callBeaconIfNotAlreadyDone_(domainResolverService) {
+  callBeaconIfNotAlreadyDone_() {
     if (!this.hasCalledBeacon) {
-      domainResolverService.fetchDomainResolverApi([])
-          .then(this.resolveSessionDataONCE_);
+      this.domainResolverService.fetchDomainResolverApi([])
+          .then(this.onBeaconCallbacknDataONCE_);
     }
   }
 
   /**
    * Initialise skimlinks link rewriter
-   * @param {*} trackingService
-   * @param {*} domainResolverService
    */
-  initSkimlinksLinkRewriter(trackingService, domainResolverService) {
-    const resolveFunction = getBoundFunction(domainResolverService, 'resolveUnknownAnchors');
+  initSkimlinksLinkRewriter() {
+    const resolveFunction = getBoundFunction(this.domainResolverService, 'resolveUnknownAnchors');
     const options = {
       linkSelector: this.skimOptions_.linkSelector,
     };
 
-    const skimlinksLinkRewriter = this.linkRewriterService.registerLinkRewriter(
+    this.skimlinksLinkRewriter = this.linkRewriterService.registerLinkRewriter(
         this.element,
         SKIMLINKS_REWRITER_ID,
         resolveFunction,
         options
     );
 
-    // HACK TO MAKE SURE WE ALWAYS CALL WAYPOINT in case there are no links to resolve in the page.
-    skimlinksLinkRewriter.events.on(linkRewriterEvents.PAGE_SCANNED, () => {
-      this.callBeaconIfNotAlreadyDone_(domainResolverService);
-    });
+    // HACK TO MAKE SURE WE ALWAYS CALL BEACON API in case there are no links to resolve in the page.
+    this.skimlinksLinkRewriter.events.on(
+        linkRewriterEvents.PAGE_SCANNED,
+        this.callBeaconIfNotAlreadyDone_.bind(this)
+    );
+    this.skimlinksLinkRewriter.events.on(
+        linkRewriterEvents.CLICK,
+        this.onClick_.bind(this)
+    );
 
-    skimlinksLinkRewriter.events.on(linkRewriterEvents.CLICK, eventData => {
-      const wasStolenFromSkim = eventData.replacedBy !== SKIMLINKS_REWRITER_ID;
-      const hasAffiliated = eventData.hasReplaced;
-      if (wasStolenFromSkim || !hasAffiliated) {
-        trackingService.sendNaClickTracking(eventData.anchor);
-      }
-    });
+    return this.skimlinksLinkRewriter;
+  }
 
-    return skimlinksLinkRewriter;
+  /**
+   *
+   * @param {*} eventData
+   */
+  onClick_(eventData) {
+    const wasStolenFromSkim = eventData.replacedBy !== SKIMLINKS_REWRITER_ID;
+    const hasAffiliated = eventData.hasReplaced;
+    if (wasStolenFromSkim || !hasAffiliated) {
+      this.trackingService.sendNaClickTracking(eventData.anchor);
+    }
   }
 
   /** @override */

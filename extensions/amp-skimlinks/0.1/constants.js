@@ -2,6 +2,8 @@ export const XCUST_ATTRIBUTE_NAME = 'data-skimlinks-custom-tracking-id';
 export const AFFILIATION_API = 'https://go.redirectingat.com';
 export const AMP_CREATIVE = 'FIXME_AMP_CREATIVE';
 
+export const SKIMLINKS_REWRITER_ID = 'amp-skimlinks';
+
 export const TRACKING_API_URL = 'https://t.skimresources.com/api';
 export const PAGE_IMPRESSION_TRACKING_URL =
     `${TRACKING_API_URL}/track.php?data=\${data}`;

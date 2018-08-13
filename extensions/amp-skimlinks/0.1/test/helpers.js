@@ -1,6 +1,8 @@
+import {AmpSkimlinks} from '../amp-skimlinks';
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {pubcode} from './constants';
 import Tracking from '../tracking';
+
 
 const helpersFactory = env => {
   const {win} = env;
@@ -38,38 +40,19 @@ const helpersFactory = env => {
       };
     },
 
+    stubCustomEventReporterBuilder() {
+      env.sandbox.stub(CustomEventReporterBuilder.prototype, 'track');
+      env.sandbox.stub(CustomEventReporterBuilder.prototype, 'build').returns({
+        trigger: env.sandbox.stub(),
+      });
+    },
+
     createTrackingWithStubAnalytics(skimOptions) {
       skimOptions = Object.assign({
         tracking: true,
         pubcode,
       }, skimOptions);
-
-      // anchorTrackingInfoResponse = Object.assign({
-
-      // });
-
-      // class CustomEventReporterBuilderStub() {
-      //   constructor() {
-      //     this.track = env.sandbox.stub();
-      //     this.build = env.sandbox.stub();
-      //     this.trigger = env.sandbox.stub();
-      //   }
-      // }
-      env.sandbox.stub(CustomEventReporterBuilder.prototype, 'track');
-      env.sandbox.stub(CustomEventReporterBuilder.prototype, 'build').returns({
-        trigger: env.sandbox.stub(),
-      });
-      // env.sandbox.stub(CustomEventReporterBuilder.prototype, 'trigger');
-
-      // class StubTracking extends Tracking {
-      //   setupAnalytics_() {
-      //     return {
-      //       trigger: env.sandbox.stub(),
-      //     };
-      //   }
-      // }
-
-      // return new StubTracking(env, skimOptions);
+      this.stubCustomEventReporterBuilder();
 
       return new Tracking(env, skimOptions);
     },
@@ -81,6 +64,16 @@ const helpersFactory = env => {
       expect(analyticsData).to.be.an('object');
 
       return analyticsData;
+    },
+
+    createAmpSkimlinks(extensionAttrs) {
+      const el = document.createElement('amp-skimlinks');
+      for (const k in extensionAttrs) {
+        el.setAttribute(k, extensionAttrs[k]);
+      }
+      el.getAmpDoc = () => env.ampdoc;
+
+      return new AmpSkimlinks(el);
     },
   };
 };

@@ -16,6 +16,7 @@ export function getAmpSkimlinksOptions(element, location) {
     excludedDomains: getExcludedDomains_(element, location),
     tracking: getTrackingStatus_(element),
     customTrackingId: getCustomTrackingId_(element),
+    linkSelector: getLinkSelector_(element),
   };
 }
 
@@ -59,4 +60,10 @@ function getCustomTrackingId_(element) {
   }
 
   return customTrackingId;
+}
+
+function getLinkSelector_(element) {
+  const linkSelector = element.getAttribute('link-selector');
+
+  return linkSelector || null;
 }
