@@ -143,7 +143,8 @@ function declareExtension(name, version, options) {
         Object.assign({name, version: v}, defaultOptions, options);
   });
   if (name.startsWith('amp-ad-network-')) {
-    // Get the ad network name
+    // Get the ad network name. All ad network extensions are named
+    // in the format `amp-ad-network-${name}-impl`
     name = name.slice(15, -5);
     adVendors.push(name);
   }
