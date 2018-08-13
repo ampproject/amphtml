@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
+import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -316,10 +317,7 @@ class AmpAccordion extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       // We set position and opacity to avoid a FOUC while measuring height
-      setStyles(sectionChild, {
-        opacity: 0,
-        position: 'fixed',
-      });
+      sectionChild.setAttribute('i-amphtml-measure', '');
       if (!section.hasAttribute('expanded')) {
         this.triggerEvent_('expand', section);
         section.setAttribute('expanded', '');
@@ -333,10 +331,9 @@ class AmpAccordion extends AMP.BaseElement {
                 viewportHeight);
           },
           () => {
+            sectionChild.removeAttribute('i-amphtml-measure');
             setStyles(sectionChild, {
-              'opacity': '',
               'height': 0,
-              'position': '',
             });
           });
     }).then(() => {
@@ -518,5 +515,5 @@ class AmpAccordion extends AMP.BaseElement {
 
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAccordion);
+  AMP.registerElement(TAG, AmpAccordion, CSS);
 });
