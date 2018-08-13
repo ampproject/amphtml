@@ -313,12 +313,12 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   showControls() {
-    // Not supported.
+    this.sendCommand_('showControls');
   }
 
   /** @override */
   hideControls() {
-    // Not supported.
+    this.sendCommand_('hideControls');
   }
 
   /** @override */
