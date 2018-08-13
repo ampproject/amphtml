@@ -17,7 +17,7 @@
 import {
   getValueForExpr,
   recreateNonProtoObject,
-  recursiveEquals,
+  deepEquals,
   tryParseJson,
 } from '../../src/json';
 
@@ -166,54 +166,63 @@ describe('json', () => {
   });
 
 
-  describe('recursiveEquals', () => {
+  describe('deepEquals', () => {
     it('should throw on non-finite depth arg', () => {
       expect(() => {
-        recursiveEquals({}, {}, Number.POSITIVE_INFINITY);
-      }).to.throw(/must be finite/);
+        deepEquals({}, {}, Number.POSITIVE_INFINITY);
+      }).to.throw(/Invalid depth/);
     });
 
     it('should handle null and empty objects', () => {
-      expect(recursiveEquals(null, null)).to.be.true;
-      expect(recursiveEquals({}, {})).to.be.true;
+      expect(deepEquals(null, null)).to.be.true;
+      expect(deepEquals({}, {})).to.be.true;
     });
 
     it('should check strict equality', () => {
-      expect(recursiveEquals({x: 1}, {x: 1})).to.be.true;
-      expect(recursiveEquals({x: false}, {x: false})).to.be.true;
-      expect(recursiveEquals({x: 'abc'}, {x: 'abc'})).to.be.true;
+      expect(deepEquals({x: 1}, {x: 1})).to.be.true;
+      expect(deepEquals({x: false}, {x: false})).to.be.true;
+      expect(deepEquals({x: 'abc'}, {x: 'abc'})).to.be.true;
 
-      expect(recursiveEquals({x: 1}, {x: true})).to.be.false;
-      expect(recursiveEquals({x: true}, {x: 1})).to.be.false;
+      expect(deepEquals({x: 1}, {x: true})).to.be.false;
+      expect(deepEquals({x: true}, {x: 1})).to.be.false;
 
-      expect(recursiveEquals({x: 1}, {x: '1'})).to.be.false;
-      expect(recursiveEquals({x: '1'}, {x: 1})).to.be.false;
+      expect(deepEquals({x: 1}, {x: '1'})).to.be.false;
+      expect(deepEquals({x: '1'}, {x: 1})).to.be.false;
 
-      expect(recursiveEquals({x: undefined}, {x: null})).to.be.false;
-      expect(recursiveEquals({x: null}, {x: undefined})).to.be.false;
+      expect(deepEquals({x: undefined}, {x: null})).to.be.false;
+      expect(deepEquals({x: null}, {x: undefined})).to.be.false;
 
-      expect(recursiveEquals({x: {}}, {x: '[object Object]'})).to.be.false;
-      expect(recursiveEquals({x: '[object Object]'}, {x: {}})).to.be.false;
+      expect(deepEquals({x: {}}, {x: '[object Object]'})).to.be.false;
+      expect(deepEquals({x: '[object Object]'}, {x: {}})).to.be.false;
     });
 
     it('should check deep equality in nested arrays and objects', () => {
-      expect(recursiveEquals({x: {y: 1}}, {x: {y: 1}})).to.be.true;
-      expect(recursiveEquals({x: {y: 1}}, {x: {}})).to.be.false;
-      expect(recursiveEquals({x: {y: 1}}, {x: {y: 0}})).to.be.false;
-      expect(recursiveEquals({x: {y: 1}}, {x: {y: 1, z: 2}})).to.be.false;
+      expect(deepEquals({x: {y: 1}}, {x: {y: 1}})).to.be.true;
+      expect(deepEquals({x: {y: 1}}, {x: {}})).to.be.false;
+      expect(deepEquals({x: {y: 1}}, {x: {y: 0}})).to.be.false;
+      expect(deepEquals({x: {y: 1}}, {x: {y: 1, z: 2}})).to.be.false;
 
-      expect(recursiveEquals({x: [1, 2, 3]}, {x: [1, 2, 3]})).to.be.true;
-      expect(recursiveEquals({x: [1, 2, 3]}, {x: []})).to.be.false;
-      expect(recursiveEquals({x: [1, 2, 3]}, {x: [1, 2, 3, 4]})).to.be.false;
-      expect(recursiveEquals({x: [1, 2, 3]}, {x: [3, 2, 1]})).to.be.false;
+      expect(deepEquals({x: [1, 2, 3]}, {x: [1, 2, 3]})).to.be.true;
+      expect(deepEquals({x: [1, 2, 3]}, {x: []})).to.be.false;
+      expect(deepEquals({x: [1, 2, 3]}, {x: [1, 2, 3, 4]})).to.be.false;
+      expect(deepEquals({x: [1, 2, 3]}, {x: [3, 2, 1]})).to.be.false;
+
+      expect(deepEquals([1, 2, [3, 4]], [1, 2, [3, 4]])).to.be.true;
+      expect(deepEquals([1, 2, []], [1, 2, []])).to.be.true;
+      expect(deepEquals([1, 2, [3, 4]], [1, 2, [3, 4, 5]])).to.be.false;
+    });
+
+    it('should check array order', () => {
+      expect(deepEquals([1, 2], [2, 1])).to.be.false;
+      expect(deepEquals([1, 2, [3, 4]], [1, 2, [4, 3]])).to.be.false;
     });
 
     it('should stop recursing once depth arg is exceeded', () => {
-      expect(recursiveEquals({x: 1}, {x: 1}, /* depth */ 1)).to.be.true;
-      expect(recursiveEquals({x: 1}, {x: 0}, /* depth */ 1)).to.be.false;
+      expect(deepEquals({x: 1}, {x: 1}, /* depth */ 1)).to.be.true;
+      expect(deepEquals({x: 1}, {x: 0}, /* depth */ 1)).to.be.false;
 
-      expect(recursiveEquals({x: {y: 1}}, {x: {y: 1}}, 1)).to.be.false;
-      expect(recursiveEquals({x: []}, {x: []}, 1)).to.be.false;
+      expect(deepEquals({x: {y: 1}}, {x: {y: 1}}, 1)).to.be.false;
+      expect(deepEquals({x: []}, {x: []}, 1)).to.be.false;
     });
   });
 });

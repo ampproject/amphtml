@@ -22,6 +22,7 @@ import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
+import {deepEquals, parseJson} from '../../../src/json';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {filterSplice} from '../../../src/utils/array';
@@ -35,7 +36,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
-import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
@@ -953,7 +953,7 @@ export class Bind {
       // Support equality checks for arrays of objects containing arrays.
       // Useful for rendering amp-list with amp-bind state via [src].
       if (newValue === undefined ||
-          recursiveEquals(newValue, previousResult, /* depth */ 5)) {
+          deepEquals(newValue, previousResult, /* depth */ 10)) {
       } else {
         boundProperty.previousResult = newValue;
         updates.push({boundProperty, newValue});
