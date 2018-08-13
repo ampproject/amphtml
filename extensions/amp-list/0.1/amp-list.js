@@ -32,7 +32,6 @@ import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {toggle} from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -426,12 +425,10 @@ export class AmpList extends AMP.BaseElement {
     if (sizer) {
       this.element.removeChild(sizer);
     }
+    this.element.classList.remove('i-amphtml-layout-size-defined');
+    this.element.classList.remove('i-amphtml-layout-responsive');
     this.container_.classList.remove('i-amphtml-fill-content');
     this.container_.classList.remove('i-amphtml-replaced-content');
-    const overflowElement = this.element.querySelector('[overflow]');
-    if (overflowElement) {
-      toggle(overflowElement, false);
-    }
   }
 
   /**
