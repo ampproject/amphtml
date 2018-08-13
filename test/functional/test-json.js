@@ -15,9 +15,9 @@
  */
 
 import {
+  deepEquals,
   getValueForExpr,
   recreateNonProtoObject,
-  deepEquals,
   tryParseJson,
 } from '../../src/json';
 
