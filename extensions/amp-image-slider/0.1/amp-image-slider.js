@@ -18,6 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
+import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
@@ -99,6 +100,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {Gestures|null} */
     this.gestures_ = null;
 
+    /** @private {boolean} */
+    this.isEdge_ = Services.platformFor(this.win).isEdge();
+
     /** @public {boolean} */
     this.isEventRegistered = false; // for test purpose
   }
@@ -178,6 +182,12 @@ export class AmpImageSlider extends AMP.BaseElement {
       if (initialPercentString) {
         const initialPercent = Number(initialPercentString);
         this.updatePositions_(initialPercent);
+      }
+      // Prevent Edge horizontal swipe for go back/forward
+      if (this.isEdge_) {
+        setStyles(this.element, {
+          'touch-action': 'pan-y', // allow browser only default y behavior
+        });
       }
     });
   }
