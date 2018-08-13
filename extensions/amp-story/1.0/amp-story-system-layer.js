@@ -476,6 +476,7 @@ export class SystemLayer {
 
   /**
    * Handles click events on the mute and unmute buttons.
+   * @param {boolean} mute Specifies if the audio is being muted or unmuted.
    * @private
    */
   onAudioIconClick_(mute) {
