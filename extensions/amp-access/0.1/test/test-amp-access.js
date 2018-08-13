@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessService} from '../amp-access';
 import {AmpEvents} from '../../../../src/amp-events';
@@ -463,6 +462,21 @@ describes.fakeWin('AccessService authorization', {
     }).then(() => {
       expect(later.elementOn).not.to.have.attribute('amp-access-hide');
       expect(later.elementOff).to.have.attribute('amp-access-hide');
+    });
+  });
+
+  it('should execute the onApplyAuthorizations registered callbacks', () => {
+    expectGetReaderId('reader1');
+    adapterMock.expects('authorize')
+        .withExactArgs()
+        .returns(Promise.resolve({access: true}))
+        .once();
+
+    const applyAuthorizationsStub = sandbox.stub();
+    service.onApplyAuthorizations(applyAuthorizationsStub);
+
+    return service.runAuthorization_().then(() => {
+      expect(applyAuthorizationsStub).to.have.been.calledOnce;
     });
   });
 

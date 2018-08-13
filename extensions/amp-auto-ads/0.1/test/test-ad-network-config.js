@@ -87,6 +87,18 @@ describes.realWin('ad-network-config', {
           'url=https%3A%2F%2Ffoo.bar%2Fbaz');
     });
 
+    it('should not be responsive-enabled if experiment is off', () => {
+      toggleExperiment(env.win, 'amp-auto-ads-adsense-responsive', false);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isResponsiveEnabled(env.win)).to.be.false;
+    });
+
+    it('should be responsive-enabled if experiment is on', () => {
+      toggleExperiment(env.win, 'amp-auto-ads-adsense-responsive', true);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.isResponsiveEnabled(env.win)).to.be.true;
+    });
+
     // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.
     it.skip('should truncate the URL if it\'s too long', () => {
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
@@ -200,6 +212,11 @@ describes.realWin('ad-network-config', {
         ],
         maxAdCount: 8,
       });
+    });
+
+    it('should not be responsive-enabled', () => {
+      const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
+      expect(adNetwork.isResponsiveEnabled(env.win)).to.be.false;
     });
   });
 

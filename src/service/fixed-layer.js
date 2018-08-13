@@ -24,7 +24,6 @@ import {
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
-import {isExperimentOn} from '../experiments';
 
 const TAG = 'FixedLayer';
 
@@ -470,13 +469,11 @@ export class FixedLayer {
    * @private
    */
   warnAboutInlineStylesIfNecessary_(element) {
-    if (isExperimentOn(this.ampdoc.win, 'inline-styles')) {
-      if (element.hasAttribute('style')
-          && (element.style.top || element.style.bottom)) {
-        user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
-            'CSS rules are not supported yet for fixed or sticky elements ' +
-            '(#14186). Unexpected behavior may occur.', element);
-      }
+    if (element.hasAttribute('style')
+        && (element.style.top || element.style.bottom)) {
+      user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
+          'CSS rules are not supported yet for fixed or sticky elements ' +
+          '(#14186). Unexpected behavior may occur.', element);
     }
   }
 
@@ -874,9 +871,6 @@ class TransferLayerShadow {
    * @param {!Document} doc
    */
   constructor(doc) {
-    /** @private @const {!Document} */
-    this.doc_ = doc;
-
     /** @private @const {!Element} */
     this.layer_ = doc.createElement('div');
     this.layer_.id = 'i-amphtml-fixed-layer';

@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import '../amp-compare-slider';
-
-describes.realWin('amp-compare-slider', {
-  amp: {
-    extensions: ['amp-compare-slider'],
-  },
-}, env => {
-
-  let win;
-  let element;
-
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-compare-slider');
-    win.document.body.appendChild(element);
-  });
-
-});
+dev().assert(1 + 1);
+dev().assert(dev().assert(2 + 2));
+dev().assert();
+let result = dev().assert(dev(), 'hello', 'world');
+let result2 = dev().assert();

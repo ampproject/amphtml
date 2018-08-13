@@ -256,7 +256,7 @@ The following @-rules are allowed in stylesheets:
 
 #### Author stylesheets
 
-Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
+Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document or inline styles.
 
 `@keyframes` rules are allowed in the `<style amp-custom>`. However, if they are too many of them, it's recommended to place them in the additional `<style amp-keyframes>` tag, which must be located at the end of the AMP document. For details, see the [Keyframes stylesheet](#keyframes-stylesheet) section of this document.
 

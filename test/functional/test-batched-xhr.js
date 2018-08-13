@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FetchResponse} from '../../src/service/xhr-impl';
+import {FetchResponse} from '../../src/utils/xhr-utils';
 import {Services} from '../../src/services';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
 
@@ -129,51 +129,6 @@ describes.sandboxed('BatchedXhr', {}, env => {
         xhr.fetchJson('/get?k=v1', {method: 'POST', body: {}}),
       ]).then(() => {
         expect(fetchStub).to.be.calledTwice;
-      });
-    });
-  });
-
-  describes.realWin('#fetchDocument', {}, env => {
-    const TEST_CONTENT = '<b>Hello, world';
-    const TEST_RESPONSE_TEXT = '<!doctype html><html><body>' + TEST_CONTENT;
-    let xhr;
-    let fetchStub;
-    let testResponseDoc;
-
-    beforeEach(() => {
-      const doc = env.win.document;
-      testResponseDoc = doc.implementation.createHTMLDocument();
-      testResponseDoc.body.innerHTML = TEST_CONTENT;
-      const mockXhr = {
-        status: 200,
-        responseText: TEST_RESPONSE_TEXT,
-        responseXML: testResponseDoc,
-        responseType: 'text/html',
-      };
-      xhr = batchedXhrServiceForTesting(env.win);
-      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
-          () => Promise.resolve(new FetchResponse(mockXhr)));
-    });
-
-    it('should fetch document GET requests once for identical URLs', () => {
-      return Promise.all([
-        xhr.fetchDocument('/get?k=v1'),
-        xhr.fetchDocument('/get?k=v1'),
-      ]).then(results => {
-        expect(fetchStub).to.be.calledOnce;
-        expect(results[0].isEqualNode(testResponseDoc)).to.be.true;
-        expect(results[1].isEqualNode(testResponseDoc)).to.be.true;
-      });
-    });
-
-    it('should not cache for POST requests', () => {
-      return Promise.all([
-        xhr.fetchDocument('/get?k=v1', {method: 'POST', body: {}}),
-        xhr.fetchDocument('/get?k=v1', {method: 'POST', body: {}}),
-      ]).then(results => {
-        expect(fetchStub).to.be.calledTwice;
-        expect(results[0].isEqualNode(testResponseDoc)).to.be.true;
-        expect(results[1].isEqualNode(testResponseDoc)).to.be.true;
       });
     });
   });

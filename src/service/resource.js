@@ -328,7 +328,7 @@ export class Resource {
       this.isBuilding_ = false;
       if (this.hasBeenMeasured()) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
-        this.element.updateLayoutBox(this.getLayoutBox());
+        this.element.updateLayoutBox(this.getLayoutBox(), true);
       } else {
         this.state_ = ResourceState.NOT_LAID_OUT;
       }
@@ -780,12 +780,13 @@ export class Resource {
    * calculation based on tree depth and number of layer scrolls it would take
    * to view the element.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @return {number}
    */
   layersDistanceRatio_(currentScore, layout, depth) {
+    currentScore = currentScore || 0;
     const depthPenalty = 1 + (depth / 10);
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalViewportsFromParent() +
