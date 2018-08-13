@@ -84,7 +84,7 @@
   <div class="split"></div>
 
   <h2>AMP List Resize with Accordion</h2>
-  <amp-list width="396" height="80" layout=responsive
+  <amp-list width="396" height="80" layout=responsive reset-on-refresh
       src="/test/manual/amp-list-data.json">
     <template type="amp-mustache">
       <div class="story-entry">
@@ -102,6 +102,9 @@
     </template>
     <div overflow>
       SEE MORE
+    </div>
+    <div placeholder>
+      Placeholder
     </div>
   </amp-list>
 
@@ -145,6 +148,7 @@
     height="80"
     layout=responsive
     src="/search/countries"
+    reset-on-refresh
     [src]="'/search/countries?q=' + query">
     <template type="amp-mustache">
       {{#results}}
@@ -157,7 +161,12 @@
     <div overflow>
       SEE MORE
     </div>
+    <div placeholder>
+      Placeholder
+    </div>
   </amp-list>
+
+
 </article>
 </body>
 </html>
