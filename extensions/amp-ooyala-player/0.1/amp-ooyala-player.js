@@ -46,14 +46,14 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /**@private {?string} */
-    this.embedCode_ = null;
+    /**@private {string} */
+    this.embedCode_ = '';
 
-    /**@private {?string} */
-    this.pCode_ = null;
+    /**@private {string} */
+    this.pCode_ = '';
 
-    /**@private {?string} */
-    this.playerId_ = null;
+    /**@private {string} */
+    this.playerId_ = '';
 
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
