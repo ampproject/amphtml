@@ -124,7 +124,7 @@ describes.realWin('amp-viqeo-player', {
 
     doc.body.appendChild(viqeoElement);
     return viqeoElement.build()
-        .then(viqeoElement.layoutCallback.bind(viqeoElement))
+        .then(() => { viqeoElement.layoutCallback.bind(viqeoElement); })
         .then(() => {
           const videoManager =
             Services.videoManagerForDoc(doc);
