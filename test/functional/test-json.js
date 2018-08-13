@@ -175,13 +175,24 @@ describe('json', () => {
 
     it('should handle null and empty objects', () => {
       expect(deepEquals(null, null)).to.be.true;
+
       expect(deepEquals({}, {})).to.be.true;
+      expect(deepEquals({}, null)).to.be.false;
+
+      expect(deepEquals([], [])).to.be.true;
+      expect(deepEquals([], null)).to.be.false;
     });
 
     it('should check strict equality', () => {
       expect(deepEquals({x: 1}, {x: 1})).to.be.true;
       expect(deepEquals({x: false}, {x: false})).to.be.true;
       expect(deepEquals({x: 'abc'}, {x: 'abc'})).to.be.true;
+
+      expect(deepEquals({x: ''}, {x: false})).to.be.false;
+      expect(deepEquals({x: false}, {x: ''})).to.be.false;
+
+      expect(deepEquals({x: ''}, {x: 0})).to.be.false;
+      expect(deepEquals({x: 0}, {x: ''})).to.be.false;
 
       expect(deepEquals({x: 1}, {x: true})).to.be.false;
       expect(deepEquals({x: true}, {x: 1})).to.be.false;
@@ -205,7 +216,6 @@ describe('json', () => {
       expect(deepEquals({x: [1, 2, 3]}, {x: [1, 2, 3]})).to.be.true;
       expect(deepEquals({x: [1, 2, 3]}, {x: []})).to.be.false;
       expect(deepEquals({x: [1, 2, 3]}, {x: [1, 2, 3, 4]})).to.be.false;
-      expect(deepEquals({x: [1, 2, 3]}, {x: [3, 2, 1]})).to.be.false;
 
       expect(deepEquals([1, 2, [3, 4]], [1, 2, [3, 4]])).to.be.true;
       expect(deepEquals([1, 2, []], [1, 2, []])).to.be.true;
@@ -217,12 +227,22 @@ describe('json', () => {
       expect(deepEquals([1, 2, [3, 4]], [1, 2, [4, 3]])).to.be.false;
     });
 
-    it('should stop recursing once depth arg is exceeded', () => {
-      expect(deepEquals({x: 1}, {x: 1}, /* depth */ 1)).to.be.true;
-      expect(deepEquals({x: 1}, {x: 0}, /* depth */ 1)).to.be.false;
+    it('should not check object key order', () => {
+      expect(deepEquals({x: 1, y: 2, z: 3}, {y: 2, z: 3, x: 1})).to.be.true;
+    });
 
-      expect(deepEquals({x: {y: 1}}, {x: {y: 1}}, 1)).to.be.false;
-      expect(deepEquals({x: []}, {x: []}, 1)).to.be.false;
+    it('should stop diving once depth arg is exceeded', () => {
+      let depth = 0;
+      expect(deepEquals(1, 1, depth)).to.be.true;
+      expect(deepEquals('a', 'a', depth)).to.be.true;
+      expect(deepEquals([], [], depth)).to.be.false;
+      expect(deepEquals({}, {}, depth)).to.be.false;
+
+      depth = 1;
+      expect(deepEquals({x: 1}, {x: 1}, depth)).to.be.true;
+      expect(deepEquals([1, 2], [1, 2], depth)).to.be.true;
+      expect(deepEquals({x: {y: 1}}, {x: {y: 1}}, depth)).to.be.false;
+      expect(deepEquals({x: []}, {x: []}, depth)).to.be.false;
     });
   });
 });
