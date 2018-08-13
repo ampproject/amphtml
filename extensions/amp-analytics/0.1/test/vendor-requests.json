@@ -236,7 +236,7 @@
     "click": "https://$host/b/ss/$reportSuites/0/amp-1.0/s_random_?vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_&pe=lnk_o&pev1=$linkUrl&pev2=$linkName"
   },
   "infonline": {
-    "pageview": "$url?st=$st&sv=ke&ap=1&co=$co&cp=$cp&host=_canonical_host_&path=_canonical_path_"
+    "pageview": "$url?st=$st&sv=ke&ap=1&co=$co&cp=$cp&ps=$ps&host=_canonical_host_&path=_canonical_path_"
   },
   "oewa": {
     "pageview": "$url?s=$s&amp=1&cp=$cp&host=_canonical_host_&path=_canonical_path_"
