@@ -290,9 +290,9 @@ export class SystemLayer {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
-        this.onMuteAudioClick_();
+        this.onAudioIconClick_(true);
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
-        this.onUnmuteAudioClick_();
+        this.onAudioIconClick_(false);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_();
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
@@ -475,24 +475,11 @@ export class SystemLayer {
   }
 
   /**
-   * Handles click events on the mute button.
+   * Handles click events on the mute and unmute buttons.
    * @private
    */
-  onMuteAudioClick_() {
-    this.storeService_.dispatch(Action.TOGGLE_MUTED, true);
-    const hideTimeout = 1500;
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute('messagedisplay', 'show');
-      this.hideAfterTimeout_(hideTimeout);
-    });
-  }
-
-  /**
-   * Handles click events on the unmute button.
-   * @private
-   */
-  onUnmuteAudioClick_() {
-    this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+  onAudioIconClick_(mute) {
+    this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
     const hideTimeout = 1500;
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute('messagedisplay', 'show');

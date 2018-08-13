@@ -757,18 +757,19 @@ export class AmpStoryPage extends AMP.BaseElement {
     const hasBGPageAudio = this.element.hasAttribute('background-audio');
     if (hasBGPageAudio) {
       this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+      return;
+    }
+
+    const hasAmpAudio = this.element.querySelector('amp-audio');
+    if (hasAmpAudio) {
+      this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+      return;
     }
 
     const videos = this.element.querySelectorAll('amp-video');
-    let index = 0;
-    while (index < videos.length) {
-      if (videos[index].hasAttribute('noaudio')) {
-        index++;
-      } else {
-        break;
-      }
-    }
-    const hasVideoWithAudio = (index < videos.length);
+    const hasVideoWithAudio = Array.prototype.some.call(videos, video => {
+      return !video.hasAttribute('noaudio');
+    });
 
     this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO,
         hasVideoWithAudio);
