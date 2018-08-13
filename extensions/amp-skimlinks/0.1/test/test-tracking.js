@@ -1,13 +1,13 @@
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
-import {Services} from '../../../../src/services';
-import {XCUST_ATTRIBUTE_NAME} from '../constants';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
+
 
 import {
   LINKS_IMPRESSIONS_TRACKING_URL,
   NA_CLICK_TRACKING_URL,
   PAGE_IMPRESSION_TRACKING_URL,
+  XCUST_ATTRIBUTE_NAME,
 } from '../constants';
 
 
@@ -16,14 +16,11 @@ describes.realWin('test-tracking', {
     extensions: ['amp-skimlinks'],
   },
 }, env => {
-  let win, ampdoc, document, xhr;
+  let win;
   let helpers;
   const startTime = new Date().getTime();
   beforeEach(() => {
     win = env.win;
-    document = win.document;
-    ampdoc = env.ampdoc;
-    xhr = Services.xhrFor(win);
     helpers = helpersFactory(env);
   });
 
@@ -58,37 +55,7 @@ describes.realWin('test-tracking', {
   });
 
   describe('sendImpressionTracking', () => {
-    let mock;
     let trackingService;
-    beforeEach(() => {
-
-    });
-
-    afterEach(() => {
-      // mock.verify();
-    });
-
-
-
-    // it('Should call impression and link tracking', () => {
-    //   trackingService = helpers.createTrackingWithStubAnalytics();
-    //   mock = env.sandbox.mock(trackingService);
-    //   // use .returns to avoid calling the actual function
-    //   mock.expects('sendPageImpressionTracking_').once().returns();
-    //   // use .returns to avoid calling the actual function
-    //   mock.expects('sendLinkImpressionTracking_').once().returns();
-
-    //   trackingService.sendImpressionTracking({}, new Map(), startTime);
-    // });
-
-    // it('Should not call impression and link tracking if tracking is false', () => {
-    //   trackingService = helpers.createTrackingWithStubAnalytics({tracking: false});
-    //   mock = env.sandbox.mock(trackingService);
-    //   mock.expects('sendPageImpressionTracking_').never();
-    //   mock.expects('sendLinkImpressionTracking_').never();
-
-    //   trackingService.sendImpressionTracking({}, new Map(), startTime);
-    // });
 
     describe('amp-analytics setup', () => {
       it('Should generate a page impression id', () => {
@@ -182,7 +149,7 @@ describes.realWin('test-tracking', {
         expect(urlVars.data).to.be.a.string;
         const trackingData = JSON.parse(urlVars.data);
         // Test 'jsl' separately since we can't controle its value.
-        expect(trackingData.jsl).to.be.a('number').but.not.to.equal(0); // Arbitrary number
+        expect(trackingData.jsl).to.be.a('number').but.not.to.equal(0);
         trackingData.jsl = expectedData.jsl; // Already verified, replace by fixed value.
         expect(trackingData).to.deep.equal(expectedData);
       });
@@ -206,11 +173,6 @@ describes.realWin('test-tracking', {
         const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'page-impressions');
         const trackingData = JSON.parse(urlVars.data);
         expect(trackingData.uc).to.equal('xcust-id');
-      });
-
-      it('Should replace the values correctly', () => {
-        // const setupUrl = trackStub.withArgs('page-impressions').args[0][1];
-        // expect(setupUrl).to.equal();
       });
     });
 
