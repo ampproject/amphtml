@@ -35,7 +35,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
-    this.onBeaconCallbacknDataONCE_ = once(this.onBeaconCallback_.bind(this));
+    this.onBeaconCallbackONCE_ = once(this.onBeaconCallback_.bind(this));
     this.userSessionDataDeferred_ = new Deferred();
     this.linkRewriterService = new LinkRewriterService(this.ampDoc_);
     return whenDocumentReady(this.ampDoc_).then(() => {
@@ -87,7 +87,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   callBeaconIfNotAlreadyDone_() {
     if (!this.hasCalledBeacon) {
       this.domainResolverService.fetchDomainResolverApi([])
-          .then(this.onBeaconCallbacknDataONCE_);
+          .then(this.onBeaconCallbackONCE_);
     }
   }
 

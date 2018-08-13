@@ -107,6 +107,32 @@ describes.realWin('amp-skimlinks', {
     });
   });
 
+  describe('On beacon callback', () => {
+    beforeEach(() => {
+      helpers.stubCustomEventReporterBuilder();
+      env.sandbox.stub(DocumentReady, 'whenDocumentReady').returns(Promise.resolve());
+      return ampSkimlinks.buildCallback().then(() => {
+        env.sandbox.stub(ampSkimlinks.trackingService, 'sendImpressionTracking');
+      });
+    });
+
+    it('Should set hasCalledBeacon to true', () => {
+      expect(ampSkimlinks.hasCalledBeacon).to.be.false;
+      ampSkimlinks.onBeaconCallbackONCE_({});
+      expect(ampSkimlinks.hasCalledBeacon).to.be.true;
+    });
+
+    it('Should call sendImpressionTracking', done => {
+      expect(ampSkimlinks.trackingService.sendImpressionTracking.calledOnce).to.be.false;
+      ampSkimlinks.onBeaconCallbackONCE_({});
+      // Wait for next tick
+      setTimeout(() => {
+        expect(ampSkimlinks.trackingService.sendImpressionTracking.calledOnce).to.be.true;
+        done();
+      }, 0);
+    });
+  });
+
   describe('On click callback', () => {
     let stub;
 
