@@ -51,7 +51,7 @@ describe('unruly', () => {
     };
     unruly(mockGlobal, mockData, scriptLoader);
     expect(expectedGlobal).to.equal(mockGlobal);
-    expect(expectedUrl).to.equal('https://video.unrulymedia.com/amp-demo/native-loader.js');
+    expect(expectedUrl).to.equal('https://video.unrulymedia.com/native/native-loader.js');
   });
 
   it('should throw if siteId is not provided', () => {
@@ -60,9 +60,13 @@ describe('unruly', () => {
 
     const scriptLoader = () => {};
 
-    expect(
-        () => unruly(mockGlobal, mockData, scriptLoader)
-    ).to.throw();
+    allowConsoleError(
+        () => {
+          expect(
+              () => unruly(mockGlobal, mockData, scriptLoader)
+          ).to.throw();
+        }
+    );
   });
 
 });
