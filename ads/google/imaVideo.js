@@ -848,6 +848,8 @@ function onProgressClick(event) {
   // instead of clicking and dragging.
   clearInterval(hideControlsTimeout);
   onProgressMove(event);
+  event.preventDefault();
+  event.stopPropagation();
   clearInterval(uiTicker);
   document.addEventListener(mouseMoveEvent, onProgressMove);
   document.addEventListener(mouseUpEvent, onProgressClickEnd);
@@ -1122,6 +1124,16 @@ function onMessage(global, event) {
         muteAdsManagerOnLoaded = false;
       }
       postMessage({event: VideoEvents.UNMUTED});
+      break;
+    case 'hideControls':
+      if (!adsActive) {
+        hideControls();
+      }
+      break;
+    case 'showControls':
+      if (!adsActive) {
+        showControls();
+      }
       break;
     case 'resize':
       if (msg.args && msg.args.width && msg.args.height) {
