@@ -249,17 +249,17 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   createZoomButton_() {
     this.zoomButton_ = this.element.ownerDocument.createElement('div');
-    this.zoomButton_.classList.add('i-amphtml-pan-zoom-in-button');
-    this.zoomButton_.classList.add('i-amphtml-pan-zoom-button');
+    this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
+    this.zoomButton_.classList.add('amp-pan-zoom-button');
     this.zoomButton_.addEventListener('click', () => {
-      if (this.zoomButton_.classList.contains('i-amphtml-pan-zoom-in-button')) {
+      if (this.zoomButton_.classList.contains('amp-pan-zoom-in-icon')) {
         this.transform(0, 0, this.maxScale_);
-        this.zoomButton_.classList.remove('i-amphtml-pan-zoom-in-button');
-        this.zoomButton_.classList.add('i-amphtml-pan-zoom-out-button');
+        this.zoomButton_.classList.remove('amp-pan-zoom-in-icon');
+        this.zoomButton_.classList.add('amp-pan-zoom-out-icon');
       } else {
         this.transform(0, 0, this.minScale_);
-        this.zoomButton_.classList.add('i-amphtml-pan-zoom-in-button');
-        this.zoomButton_.classList.remove('i-amphtml-pan-zoom-out-button');
+        this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
+        this.zoomButton_.classList.remove('amp-pan-zoom-out-icon');
       }
     });
     this.element.appendChild(this.zoomButton_);
@@ -679,12 +679,12 @@ export class AmpPanZoom extends AMP.BaseElement {
       // After the scale is updated, also register or unregister panning
       if (this.scale_ <= 1) {
         this.unregisterPanningGesture_();
-        this.zoomButton_.classList.add('i-amphtml-pan-zoom-in-button');
-        this.zoomButton_.classList.remove('i-amphtml-pan-zoom-out-button');
+        this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
+        this.zoomButton_.classList.remove('amp-pan-zoom-out-icon');
       } else {
         this.registerPanningGesture_();
-        this.zoomButton_.classList.remove('i-amphtml-pan-zoom-in-button');
-        this.zoomButton_.classList.add('i-amphtml-pan-zoom-out-button');
+        this.zoomButton_.classList.remove('amp-pan-zoom-in-icon');
+        this.zoomButton_.classList.add('amp-pan-zoom-out-icon');
       }
     });
   }
