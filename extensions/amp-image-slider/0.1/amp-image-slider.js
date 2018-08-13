@@ -149,6 +149,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.buildImageWrappers_();
     this.buildBar_();
+    // Notice: hints are attached after amp-img finished loading
     this.buildHint_();
     this.checkARIA_();
 
@@ -298,8 +299,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     rightHintWrapper.appendChild(this.hintRightArrow_);
     this.hintLeftBody_.appendChild(leftHintWrapper);
     this.hintRightBody_.appendChild(rightHintWrapper);
-    this.container_.appendChild(this.hintLeftBody_);
-    this.container_.appendChild(this.hintRightBody_);
+    // Notice: hints are attached after amp-img finished loading
   }
 
   /**
@@ -717,8 +717,13 @@ export class AmpImageSlider extends AMP.BaseElement {
       dev().assertElement(this.rightAmpImage_)
           .signals().whenSignal(CommonSignals.LOAD_END),
     ]).then(() => {
-      // Turn on main container visibility
-      this.container_.classList.add('i-amphtml-image-slider-images-ready');
+      // Notice: hints are attached after amp-img finished loading
+      this.container_.appendChild(this.hintLeftBody_);
+      this.container_.appendChild(this.hintRightBody_);
+    }, () => {
+      // Do the same thing when signal rejects
+      this.container_.appendChild(this.hintLeftBody_);
+      this.container_.appendChild(this.hintRightBody_);
     });
   }
 
