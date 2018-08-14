@@ -16,7 +16,9 @@ limitations under the License.
 
 # amp-access-iframe-api
 
-The access iframe is an experimental implementation of access protocol. It requires "amp-access-iframe" experiment turned on in the AMP document for it to work.
+The access iframe is an implementation of access protocol.
+
+The npm package is available: https://www.npmjs.com/package/amp-access-iframe-api.
 
 The `AmpAccessIframeApi` is the entry point for access iframe implementation. As its main parameter it requires an instance of `AccessController`, which simply implements all methods of access protocol such as `authorize` and `pingback`.
 
