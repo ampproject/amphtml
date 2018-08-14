@@ -741,6 +741,11 @@
       "name": "amp-image-lightbox - Amp By Example"
     },
     {
+      "url": "examples/visual-tests/amp-by-example/components/amp-image-slider/index.html",
+      "name": "amp-image-slider - Amp By Example",
+      "experiments": ["amp-image-slider"]
+    },
+    {
       "url": "examples/visual-tests/amp-by-example/components/amp-ima-video/index.html",
       "name": "amp-ima-video - Amp By Example"
     },
