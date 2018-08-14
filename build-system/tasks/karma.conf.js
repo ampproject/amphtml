@@ -228,7 +228,7 @@ module.exports = {
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
     captureConsole: true,
-    verboseLogging: true,
+    verboseLogging: false,
   },
 
   singleRun: true,
