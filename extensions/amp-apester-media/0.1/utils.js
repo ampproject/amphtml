@@ -16,6 +16,7 @@
 
 import * as events from '../../../src/event-helper';
 import {isJsonLdScriptTag} from '../../../src/dom';
+import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 
 const rules = [
@@ -88,17 +89,15 @@ export function extractElementTags(element) {
  * @return {!Array<string>}
  */
 export function extratctTitle(root) {
-  const scriptTags = root.querySelectorAll(
-      'script[type="application/ld+json"]'
+  const scriptTags = toArray(root.querySelectorAll(
+      'script[type="application/ld+json"]')
   );
-  return Array.prototype.map
-      .call(scriptTags, scriptTag => {
-        if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
-          return {};
-        }
-        return tryParseJson(scriptTag.textContent) || {};
-      })
-      .map(jsonLd => jsonLd && jsonLd['headline'])
+  return scriptTags.map(scriptTag => {
+    if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
+      return {};
+    }
+    return tryParseJson(scriptTag.textContent) || {};
+  }).map(jsonLd => jsonLd && jsonLd['headline'])
       .filter(e => typeof e === 'string')
       .map(title =>
         title
