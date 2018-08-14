@@ -4817,6 +4817,7 @@ tags: {  # <amp-layout>
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: CONTAINER
   }
 }
 tags: {  # <amp-pixel>

@@ -30,7 +30,7 @@
   <a href="https://google.com/fake">fake link</a>
 
   <h2>fake3pAd send no-content</h2>
-  <div>
+    <div>
     <amp-ad width=300 height=250
         type="_ping_"
         data-url='not-exist'
@@ -96,14 +96,16 @@
   </div>
 
   <h2>Below viewport fake3pAd send no-content</h2>
-  <div>
+  <amp-layout id='layout-container'>
+    <div>Advertisment</div>
     <amp-ad width=300 height=250
         type="_ping_"
         data-url='not-exist'
         data-valid='false'
+        data-ad-container-id='layout-container'
         data-enable-io='true'>
     </amp-ad>
-  </div>
+  </amp-layout>
 
   <div class="fixed">
     <amp-ad width=300 height=50

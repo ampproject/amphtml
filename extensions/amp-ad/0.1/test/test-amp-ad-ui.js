@@ -17,6 +17,7 @@
 import * as adHelper from '../../../../src/ad-helper';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {setStyles} from '../../../../src/style';
 
 describes.realWin('amp-ad-ui handler', {
@@ -49,6 +50,21 @@ describes.realWin('amp-ad-ui handler', {
       uiHandler.applyNoContentUI();
       expect(collapseSpy).to.be.calledOnce;
       expect(attemptCollapseSpy).to.not.be.called;
+    });
+
+    it('should collapse ad amp-layout container if there is one', () => {
+      adElement = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'data-ad-container-id': 'test',
+      });
+      const container = createElementWithAttributes(env.win.document,
+          'amp-layout', {'id': 'test'});
+      container.appendChild(adElement);
+      env.win.document.body.appendChild(container);
+      adImpl = new BaseElement(adElement);
+      uiHandler = new AmpAdUIHandler(adImpl);
+      const adAttemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      uiHandler.applyNoContentUI();
+      expect(adAttemptCollapseSpy).to.not.be.called;
     });
 
     it('should try to collapse element first', () => {
