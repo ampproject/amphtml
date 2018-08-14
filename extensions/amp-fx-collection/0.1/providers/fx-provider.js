@@ -174,24 +174,12 @@ export class FxElement {
   /**
    * Preset effect behaves differently for elements that are initially above
    * the fold.
-   *
-   * Normally, preset factor is spread across a whole viewport height however
-   * for elements above the fold, we should only apply the animation after
-   * between the element and top of the page.
    * @return {!Promise<number>}
    * @private
    */
   getAdjustedViewportHeight_() {
     return this.resources_.measureElement(() => {
-      const viewportHeight = this.viewport_.getHeight();
-
-      let offsetTop = 0;
-      for (let node = this.element_; node; node = node./*OK*/offsetParent) {
-        offsetTop += node./*OK*/offsetTop;
-      }
-      const aboveTheFold = (offsetTop < viewportHeight);
-
-      return aboveTheFold ? offsetTop : viewportHeight;
+      return this.viewport_.getHeight();
     });
   }
 
