@@ -26,7 +26,6 @@ describes.realWin(
     env => {
       let win, doc;
       let xhrMock;
-      let changeSizeSpy;
       let attemptChangeSizeSpy;
 
       beforeEach(() => {
@@ -81,7 +80,6 @@ describes.realWin(
           ? playlistResponse
           : regularResponse;
 
-        changeSizeSpy = sandbox.spy(media.implementation_, 'changeHeight');
         attemptChangeSizeSpy = sandbox.spy(
             media.implementation_,
             'attemptChangeHeight'
@@ -134,8 +132,8 @@ describes.realWin(
               .to.equal('/interaction/5aaa70c79aaf0c5443078d31');
           expect(qs.get('sdk')).to.equal('amp');
           expect(qs.get('type')).to.equal('editorial');
-          expect(changeSizeSpy).to.be.calledOnce;
-          expect(changeSizeSpy.args[0][0]).to.equal('404');
+          expect(attemptChangeSizeSpy).to.be.calledOnce;
+          expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
         });
       });
       it('propagates aria label to placeholder image', () => {

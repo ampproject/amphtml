@@ -156,6 +156,7 @@
 
 .amp-apester-fullscreen {
   background: rgba(34, 36, 38, 0.97) !important;
+  max-width: none !important;
   position: fixed !important;
   width: 100vw !important;
   height: 100vh !important;
