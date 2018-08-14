@@ -3,6 +3,7 @@ import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../../../../src/service/link-rewrite/constants';
 import LinkRewriterService from '../../../../src/service/link-rewrite/link-rewrite-service';
 import helpersFactory from './helpers';
+import * as SkimOptionsModule from '../skim-options';
 
 
 describes.realWin('amp-skimlinks', {
@@ -29,9 +30,8 @@ describes.realWin('amp-skimlinks', {
 
   describe('skimOptions', () => {
     it('Should raise an error if publisher-code is missing', () => {
-      // ampSkimlinks = helpers.createAmpSkimlinks();
       ampSkimlinks = helpers.createAmpSkimlinks();
-      // Use allowConsoleError to avoid other test failling because this one throw an error.
+      // Use allowConsoleError to avoid other test failling because this one throws an error.
       allowConsoleError(() => expect(() => {
         ampSkimlinks.buildCallback();
       }).to.throw());
@@ -49,12 +49,36 @@ describes.realWin('amp-skimlinks', {
   });
 
   describe('When loading the amp-skimlinks extension', () => {
-
     it('Should start skimcore on buildCallback', () => {
       env.sandbox.stub(DocumentReady, 'whenDocumentReady').returns(Promise.resolve());
-      ampSkimlinks.startSkimcore_ = env.sandbox.stub();
+      env.sandbox.stub(ampSkimlinks, 'startSkimcore_');
       return ampSkimlinks.buildCallback().then(() => {
         expect(ampSkimlinks.startSkimcore_.calledOnce).to.be.true;
+      });
+    });
+
+    it('Should parse options', () => {
+      env.sandbox.stub(DocumentReady, 'whenDocumentReady').returns(Promise.resolve());
+      env.sandbox.spy(SkimOptionsModule, 'getAmpSkimlinksOptions');
+      const options = {
+        'publisher-code': '666X666',
+        'excluded-domains': 'amazon.com,amazon.fr',
+        'tracking': false,
+        'custom-tracking-id': 'campaignX',
+        'link-selector': '.content a',
+      };
+      ampSkimlinks = helpers.createAmpSkimlinks(options);
+      env.sandbox.stub(ampSkimlinks, 'startSkimcore_');
+
+      return ampSkimlinks.buildCallback().then(() => {
+        expect(SkimOptionsModule.getAmpSkimlinksOptions.calledOnce).to.be.true;
+        expect(ampSkimlinks.skimOptions_).to.deep.equal({
+          pubcode: options['publisher-code'],
+          excludedDomains: options['excluded-domains'].split(','),
+          tracking: options['tracking'],
+          customTrackingId: options['custom-tracking-id'],
+          linkSelector: options['link-selector'],
+        });
       });
     });
 

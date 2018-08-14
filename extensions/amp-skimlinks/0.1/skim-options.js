@@ -27,9 +27,10 @@ function getExcludedDomains_(element, location) {
   if (excludedDomainsAttr) {
     excludedDomains = excludedDomainsAttr.split(',');
   }
-
-  // Always push current domain to ignore internal links.
-  excludedDomains.push(location.hostname);
+  if (location.hostname) {
+    // Push current domain to ignore internal links.
+    excludedDomains.push(location.hostname);
+  }
 
   return excludedDomains;
 }
@@ -38,6 +39,7 @@ function getPubCode_(element) {
   const pubCode = element.getAttribute('publisher-code');
   assertSkimOption(pubCode, errors.INVALID_PUBCODE);
 
+  return pubCode
 }
 
 function getTrackingStatus_(element) {
