@@ -95,6 +95,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
   },
   {
+    id: 'amp-auto-ads-adsense-responsive',
+    name: 'AMP Auto Ads AdSense Responsive',
+    spec: '',
+    cleanupIssue: '',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -242,12 +248,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
   },
   {
-    id: 'inline-styles',
-    name: 'Enables the usage of inline styles for non fixed elements',
-    spec: 'https://github.com/ampproject/amphtml/issues/11881',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
-  },
-  {
     id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
@@ -320,6 +320,30 @@ const EXPERIMENTS = [
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
+  },
+  {
+    id: 'faster-bind-scan',
+    name: 'Enables faster scanning of dynamic markup for bindings',
+    spec: 'https://github.com/ampproject/amphtml/pull/17229',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
+  },
+  {
+    id: 'no-initial-intersection',
+    name: 'Do not invoke context.observeIntersection callback with ' +
+        'initialintersection',
+    spec: 'https://github.com/ampproject/amphtml/issues/8562',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
+  },
+  {
+    id: 'custom-elements-v1',
+    name: 'Enable a new custom elements v1 polyfill',
+    spec: 'https://github.com/ampproject/amphtml/pull/17205',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
+  },
+  {
+    id: 'amp-carousel-scroll-snap',
+    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
 ];
 

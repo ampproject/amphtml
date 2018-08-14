@@ -72,6 +72,7 @@
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
     "amphtml-internal/no-has-own-property-method": 1,
+    "amphtml-internal/no-import": 2,
     "amphtml-internal/no-mixed-operators": 2,
     "amphtml-internal/no-spread": 2,
     "amphtml-internal/no-style-property-setting": 2,
@@ -133,8 +134,8 @@
     "no-trailing-spaces": 2,
     "no-unused-expressions": 0,
     "no-unused-vars": [2, {
-      "argsIgnorePattern": "^var_|opt_|unused",
-      "varsIgnorePattern": "AmpElement|Def|Interface$"
+      "argsIgnorePattern": "^(var_args$|opt_|unused)",
+      "varsIgnorePattern": "(AmpElement|Def|Interface)$"
     }],
     "no-useless-call": 2,
     "no-useless-concat": 2,

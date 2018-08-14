@@ -43,11 +43,10 @@ import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
 let consoleErrorSandbox;
-let consoleErrorStub;
-let consoleInfoLogWarnSandbox;
 let testName;
 let expectedAsyncErrors;
 let rethrowAsyncSandbox;
+const originalConsoleError = console/*OK*/.error;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -269,73 +268,62 @@ it.configure = function() {
   return new TestConfig(it);
 };
 
-// Used to check if an unrestored sandbox exists
-const sandboxes = [];
-const {create} = sinon.sandbox;
-sinon.sandbox.create = function(config) {
-  const sandbox = create.call(sinon.sandbox, config);
-  sandboxes.push(sandbox);
+/**
+ * Prints a warning when a console error is detected during a test.
+ * @param {*} messages One or more error messages
+ */
+function printWarning(...messages) {
+  const message = messages.join(' ');
 
-  const {restore} = sandbox;
-  sandbox.restore = function() {
-    const i = sandboxes.indexOf(sandbox);
-    if (i > -1) {
-      sandboxes.splice(i, 1);
-    }
-    return restore.call(sandbox);
-  };
-  return sandbox;
-};
-
-// Used during normal test execution, to detect unexpected console errors.
-function warnForConsoleError() {
-  if (consoleErrorSandbox) {
-    consoleErrorSandbox.restore();
+  // Match equal strings.
+  if (expectedAsyncErrors.includes(message)) {
+    expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
+    return;
   }
-  expectedAsyncErrors = [];
-  consoleErrorSandbox = sinon.sandbox.create();
-  const originalConsoleError = console/*OK*/.error;
-  consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
-    const message = messages.join(' ');
 
-    // Match equal strings.
-    if (expectedAsyncErrors.includes(message)) {
-      expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
-      return;
-    }
-
-    // Match regex.
-    for (let i = 0; i < expectedAsyncErrors.length; i++) {
-      const expectedError = expectedAsyncErrors[i];
-      if (typeof expectedError != 'string') {
-        if (expectedError.test(message)) {
-          expectedAsyncErrors.splice(i, 1);
-          return;
-        }
+  // Match regex.
+  for (let i = 0; i < expectedAsyncErrors.length; i++) {
+    const expectedError = expectedAsyncErrors[i];
+    if (typeof expectedError != 'string') {
+      if (expectedError.test(message)) {
+        expectedAsyncErrors.splice(i, 1);
+        return;
       }
     }
+  }
 
-    const errorMessage = message.split('\n', 1)[0]; // First line.
-    const helpMessage = '    The test "' + testName + '"' +
-        ' resulted in a call to console.error. (See above line.)\n' +
-        '    ⤷ If the error is not expected, fix the code that generated ' +
-            'the error.\n' +
-        '    ⤷ If the error is expected (and synchronous), use the following ' +
-            'pattern to wrap the test code that generated the error:\n' +
-        '        \'allowConsoleError(() => { <code that generated the ' +
-            'error> });\'\n' +
-        '    ⤷ If the error is expected (and asynchronous), use the ' +
-            'following pattern at the top of the test:\n' +
-        '        \'expectAsyncConsoleError(<string or regex>[, <number of' +
-        ' times the error message repeats>]);';
-    originalConsoleError(errorMessage + '\'\n' + helpMessage);
-  });
+  const errorMessage = message.split('\n', 1)[0]; // First line.
+  const helpMessage = '    The test "' + testName + '"' +
+      ' resulted in a call to console.error. (See above line.)\n' +
+      '    ⤷ If the error is not expected, fix the code that generated ' +
+          'the error.\n' +
+      '    ⤷ If the error is expected (and synchronous), use the following ' +
+          'pattern to wrap the test code that generated the error:\n' +
+      '        \'allowConsoleError(() => { <code that generated the ' +
+          'error> });\'\n' +
+      '    ⤷ If the error is expected (and asynchronous), use the ' +
+          'following pattern at the top of the test:\n' +
+      '        \'expectAsyncConsoleError(<string or regex>[, <number of' +
+      ' times the error message repeats>]);';
+  originalConsoleError(errorMessage + '\'\n' + helpMessage);
+}
+
+/**
+ * Used during normal test execution, to detect unexpected console errors.
+ */
+function warnForConsoleError() {
+  expectedAsyncErrors = [];
+  consoleErrorSandbox = sinon.createSandbox();
+  const consoleErrorStub =
+      consoleErrorSandbox.stub(console, 'error').callsFake(printWarning);
+
   this.expectAsyncConsoleError = function(message, repeat = 1) {
     expectedAsyncErrors.push.apply(
         expectedAsyncErrors, Array(repeat).fill(message));
   };
   this.allowConsoleError = function(func) {
-    dontWarnForConsoleError();
+    consoleErrorStub.reset();
+    consoleErrorStub.callsFake(() => {});
     const result = func();
     try {
       expect(consoleErrorStub).to.have.been.called;
@@ -344,23 +332,16 @@ function warnForConsoleError() {
           'The test "' + testName + '" contains an "allowConsoleError" block ' +
           'that didn\'t result in a call to console.error.';
       originalConsoleError(helpMessage);
+    } finally {
+      consoleErrorStub.callsFake(printWarning);
     }
-    warnForConsoleError();
     return result;
   };
 }
 
-// Used during sections of tests where an error is expected.
-function dontWarnForConsoleError() {
-  if (consoleErrorSandbox) {
-    consoleErrorSandbox.restore();
-  }
-  consoleErrorSandbox = sinon.sandbox.create();
-  consoleErrorStub =
-      consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
-}
-
-// Used to restore error level logging after each test.
+/**
+ * Used to restore error level logging after each test.
+ */
 function restoreConsoleError() {
   consoleErrorSandbox.restore();
   if (expectedAsyncErrors.length > 0) {
@@ -373,31 +354,25 @@ function restoreConsoleError() {
   expectedAsyncErrors = [];
 }
 
-// Used to silence info, log, and warn level logging during each test.
-function stubConsoleInfoLogWarn() {
-  if (consoleInfoLogWarnSandbox) {
-    consoleInfoLogWarnSandbox.restore();
-  }
-  consoleInfoLogWarnSandbox = sinon.sandbox.create();
-  consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
-  consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
-  consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
-}
-
-// Used to restore info, log, and warn level logging after each test.
-function restoreConsoleInfoLogWarn() {
-  if (consoleInfoLogWarnSandbox) {
-    consoleInfoLogWarnSandbox.restore();
+/**
+ * Used to silence info, log, and warn level logging during each test, unless
+ * verbose mode is enabled.
+ */
+function maybeStubConsoleInfoLogWarn() {
+  const {verboseLogging} = window.__karma__.config;
+  if (!verboseLogging) {
+    sinon.sandbox.stub(console, 'info').callsFake(() => {});
+    sinon.sandbox.stub(console, 'log').callsFake(() => {});
+    sinon.sandbox.stub(console, 'warn').callsFake(() => {});
   }
 }
 
-// Used to precent asynchronous throwing of errors during each test.
+/**
+ * Used to precent asynchronous throwing of errors during each test.
+ */
 function preventAsyncErrorThrows() {
   this.stubAsyncErrorThrows = function() {
-    if (rethrowAsyncSandbox) {
-      rethrowAsyncSandbox.restore();
-    }
-    rethrowAsyncSandbox = sinon.sandbox.create();
+    rethrowAsyncSandbox = sinon.createSandbox();
     rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
       const error = log.createErrorVargs.apply(null, args);
       self.reportError(error);
@@ -405,22 +380,29 @@ function preventAsyncErrorThrows() {
     });
   };
   this.restoreAsyncErrorThrows = function() {
-    if (rethrowAsyncSandbox) {
-      rethrowAsyncSandbox.restore();
-    }
+    rethrowAsyncSandbox.restore();
   };
   setReportError(reportError);
   stubAsyncErrorThrows();
 }
 
+before(function() {
+  // This is a more robust version of `this.skip()`. See #17245.
+  this.skipTest = function() {
+    if (this._runnable.title != '"before all" hook') {
+      throw new Error('skipTest() can only be called from within before()');
+    }
+    this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.
+    this.skip();
+  };
+});
+
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  const {verboseLogging} = window.__karma__.config;
-  if (!verboseLogging) {
-    stubConsoleInfoLogWarn();
-  }
+  sinon.sandbox = sinon.createSandbox();
+  maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
   initialGlobalState = Object.keys(global);
@@ -442,13 +424,14 @@ function beforeTest() {
   Services.resourcesForDoc(ampdoc).ampInitComplete();
 }
 
-// Global cleanup of tags added during tests. Cool to add more
-// to selector.
+/**
+ * Global cleanup of tags added during tests. Cool to add more to selector.
+ */
 afterEach(function() {
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
+  sinon.sandbox.restore();
   restoreConsoleError();
-  restoreConsoleInfoLogWarn();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
@@ -485,19 +468,6 @@ afterEach(function() {
         delete global[globalState[i]];
       }
     }
-  }
-  const forgotGlobal = !!global.sandbox;
-  if (forgotGlobal) {
-    // The error will be thrown later to give possibly other sandboxes a
-    // chance to restore themselves.
-    delete global.sandbox;
-  }
-  if (sandboxes.length > 0) {
-    sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
-    throw new Error('You forgot to restore your sandbox!');
-  }
-  if (forgotGlobal) {
-    throw new Error('You forgot to clear global sandbox!');
   }
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +

@@ -208,9 +208,11 @@ describes.realWin('amp-analytics', {
       actualResults[vendor] = {};
       describe('analytics vendor: ' + vendor, function() {
         beforeEach(() => {
-          if (!config.triggers) {
-            expectAsyncConsoleError(noTriggersError);
-          }
+          // Remove all the triggers to prevent unwanted requests, for instance
+          // one from a "visible" trigger. Those unwanted requests are a source
+          // of test flakiness. Especially they will alternate value of var
+          // $requestCount.
+          config.triggers = {};
         });
 
         for (const name in config.requests) {
@@ -253,7 +255,7 @@ describes.realWin('amp-analytics', {
             // Wait for event queue to clear and reset sendRequestSpy
             // to avoid pageView pings.
             yield macroTask();
-            sendRequestSpy.reset();
+            sendRequestSpy.resetHistory();
 
 
             analytics.handleEvent_({
