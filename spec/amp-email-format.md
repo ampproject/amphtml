@@ -266,7 +266,11 @@ Embedding AMP within an email is simple, add a new MIME part with a content type
   </noscript>
 </amp-img>
 
-It is important to note that the `text/x-amp-html` part must be nested under a `multipart/alternative` node, it will not be recognized by the email client otherwise. Also, some email clients will only render the last MIME part, so we recommend placing the `text/x-amp-html` MIME part *before* the `text/html` MIME part. See the following example:
+Important things to note:
+- The `text/x-amp-html` part must be nested under a `multipart/alternative` node, it will not be recognized by the email client otherwise.
+- Some email clients will only render the last MIME part, so we recommend placing the `text/x-amp-html` MIME part *before* the `text/html` MIME part.
+
+See the following example:
 
 ```text
 From:  Person A <persona@gmail.com>
