@@ -120,28 +120,6 @@ describes.sandboxed('fetch', {}, () => {
         expect(xhr.withCredentials).to.be.equal(true);
       });
     });
-
-    it('should return text from a full XHR request', () => {
-      const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
-          response => {
-            expect(response).to.be.instanceof(FetchResponse);
-            return response.text().then(result => {
-              expect(result).to.equal(TEST_TEXT);
-            });
-          });
-      xhrCreated.then(
-          xhr => xhr.respond(
-              200, {
-                'Content-Type': 'text/plain',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin':
-                    'https://acme.com',
-              },
-              TEST_TEXT));
-      return promise;
-    });
-
   });
 
   describe('Response', () => {
