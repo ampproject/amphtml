@@ -16,7 +16,6 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -29,7 +28,7 @@ import {dict} from '../../../src/utils/object';
 import {numeric, px, setStyles as setStylesTransition} from '../../../src/transition';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {tryFocus} from '../../../src/dom';
 
 const TAG = 'amp-accordion';
@@ -317,7 +316,10 @@ class AmpAccordion extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       // We set position and opacity to avoid a FOUC while measuring height
-      sectionChild.setAttribute('i-amphtml-measure', '');
+      setImportantStyles(sectionChild, {
+        'position': 'fixed',
+        'opacity': '0',
+      });
       if (!section.hasAttribute('expanded')) {
         this.triggerEvent_('expand', section);
         section.setAttribute('expanded', '');
@@ -331,8 +333,9 @@ class AmpAccordion extends AMP.BaseElement {
                 viewportHeight);
           },
           () => {
-            sectionChild.removeAttribute('i-amphtml-measure');
             setStyles(sectionChild, {
+              'position': '',
+              'opacity': '',
               'height': 0,
             });
           });
@@ -515,5 +518,5 @@ class AmpAccordion extends AMP.BaseElement {
 
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAccordion, CSS);
+  AMP.registerElement(TAG, AmpAccordion);
 });
