@@ -112,6 +112,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
     // Root model starts invisible.
     expect(root.getRootVisibility()).to.equal(0);
+    expect(root.getRootMinOpacity()).to.equal(1);
   });
 
   it('should initialize correctly foregrounded', () => {
@@ -127,6 +128,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     // Root model starts invisible.
     expect(root.parent).to.be.null;
     expect(root.getRootVisibility()).to.equal(1);
+    expect(root.getRootMinOpacity()).to.equal(1);
   });
 
   it('should resolve root layout box', () => {
@@ -431,6 +433,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(state.backgrounded).to.equal(0);
       expect(state.backgroundedAtStart).to.equal(0);
       expect(state.totalTime).to.equal(12);
+      expect(state.opacity).to.equal(1);
 
       expect(state.elementX).to.equal(11);
       expect(state.elementY).to.equal(21);
@@ -461,6 +464,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(disposed).to.be.calledOnce;
       expect(root.models_).to.have.length(0);
 
+      expect(state.opacity).to.equal(1);
       expect(state.totalVisibleTime).to.equal(0);
       expect(state.firstSeenTime).to.equal(22);
       expect(state.backgrounded).to.equal(0);
@@ -987,6 +991,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     ampElement.id = 'abc';
     ampElement.setAttribute('width', '100');
     ampElement.setAttribute('height', '100');
+    ampElement.style.opacity = 0.5;
     doc.body.appendChild(ampElement);
     return new Promise(resolve => {
       if (resources.getResourceForElementOptional(ampElement)) {
@@ -1067,6 +1072,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         loadTimeVisibility: 25,
         maxVisiblePercentage: 25,
         minVisiblePercentage: 25,
+        opacity: 0.5,
         totalVisibleTime: 5,
         maxContinuousVisibleTime: 5,
         intersectionRatio: 0.25,
