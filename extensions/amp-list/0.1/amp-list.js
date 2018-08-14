@@ -381,7 +381,6 @@ export class AmpList extends AMP.BaseElement {
 
     this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
-
       removeChildren(dev().assertElement(this.container_));
       elements.forEach(element => {
         if (!element.hasAttribute('role')) {
@@ -394,7 +393,13 @@ export class AmpList extends AMP.BaseElement {
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
 
-      if (!resizeExperimentOn) {
+      if (resizeExperimentOn) {
+        // This needs to be gated behind the experiment 'amp-list-resize'
+        if (!this.isSetToLayoutContainer_) {
+          this.changeToLayoutContainer_();
+          this.isSetToLayoutContainer_ = true;
+        }
+      } else {
         // Change height if needed.
         this.measureElement(() => {
           const scrollHeight = this.container_./*OK*/scrollHeight;
@@ -404,13 +409,7 @@ export class AmpList extends AMP.BaseElement {
           }
         });
       }
-    }, this.container_);
-
-    // This needs to be gated behind the experiment 'amp-list-resize'
-    if (resizeExperimentOn && !this.isSetToLayoutContainer_) {
-      this.changeToLayoutContainer_();
-      this.isSetToLayoutContainer_ = true;
-    }
+    });
   }
 
   /**
@@ -418,25 +417,22 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
-    this.mutateElement(() => {
-      this.element.setAttribute('layout', 'container');
-      const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
-      if (sizer) {
-        this.element.removeChild(sizer);
-      }
-      this.element.classList.remove(
-          'i-amphtml-layout-size-defined', 'i-amphtml-layout-responsive');
-      this.container_.classList.remove(
-          'i-amphtml-fill-content', 'i-amphtml-replaced-content');
-      // The overflow element is generally hidden with visibility hidden,
-      // but after changing to layout container, this causes an undesirable
-      // empty white space so we hide it with display none instead.
-      const overflowElement = this.getOverflowElement();
-      if (overflowElement) {
-        toggle(overflowElement, false);
-      }
-    });
-
+    this.element.setAttribute('layout', 'container');
+    const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
+    if (sizer) {
+      this.element.removeChild(sizer);
+    }
+    this.element.classList.remove(
+        'i-amphtml-layout-size-defined', 'i-amphtml-layout-responsive');
+    this.container_.classList.remove(
+        'i-amphtml-fill-content', 'i-amphtml-replaced-content');
+    // The overflow element is generally hidden with visibility hidden,
+    // but after changing to layout container, this causes an undesirable
+    // empty white space so we hide it with display none instead.
+    const overflowElement = this.getOverflowElement();
+    if (overflowElement) {
+      toggle(overflowElement, false);
+    }
   }
 
   /**
