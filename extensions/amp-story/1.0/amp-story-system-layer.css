@@ -29,6 +29,7 @@
   box-sizing: border-box !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   pointer-events: none !important;
+  font-family: 'Roboto', sans-serif !important;
 }
 
 .i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
@@ -59,10 +60,8 @@
   position: relative !important;
   pointer-events: auto !important;
 
-
   /* for svg backgrounds: */
   background: center center no-repeat !important;
-  display: flex !important;
 }
 
 .i-amphtml-story-button:active {
@@ -137,11 +136,9 @@
 .i-amphtml-message-container {
   width: max-content !important;
   transition-property: opacity, transform !important;
-  float: right !important;
   position: absolute !important;
   top: 14px !important;
   right: 48px !important;
-  font-family: 'Roboto', sans-serif !important;
 }
 
 [dir=rtl] .i-amphtml-message-container {
@@ -150,7 +147,7 @@
 }
 
 [messagedisplay="noshow"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.33, 0.33, 1, 1), transform 0.2s cubic-bezier(0.1, 0.4, 1, 1) 0.5s !important;
+  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 0.5s !important;
   transform: translateX(10px) !important;
   opacity: 0 !important;
 }
@@ -160,27 +157,22 @@
 }
 
 [messagedisplay="show"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.33, 0.33, 1, 1), transform 0.2s cubic-bezier(0.33, 0.33, 1, 1) !important;
+  transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   opacity: 1 !important;
-  transform: translateX(0px) !important;
-}
-
-[dir=rtl][messagedisplay="show"] .i-amphtml-message-container {
   transform: translateX(0px) !important;
 }
 
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
-.i-amphtml-story-unmute-no-sound-text  {
+.i-amphtml-story-unmute-no-sound-text {
   width: max-content !important;
 }
 
-.i-amphtml-story-sound-display{
+.i-amphtml-story-sound-display {
   display: inline-block !important;
   height: 46px !important;
   position: relative !important;
 }
-
 
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
