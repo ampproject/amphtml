@@ -248,49 +248,52 @@ class FetchResponseHeaders {
     return this.xhr_.getResponseHeader(name) != null;
   }
 }
-/**
- * Returns instance of Response.
- * @param {?ResponseBodyInit=} body
- * @param {!ResponseInit=} init
- */
-export function Response(body, init = {}) {
-  const lowercasedHeaders = map();
-  const data = Object.assign({
-    status: 200,
-    statusText: 'OK',
-    responseText: (body ? String(body) : ''),
-    /**
-     * @param {string} name
-     * @return {string}
-     */
-    getResponseHeader(name) {
-      return lowercasedHeaders[String(name).toLowerCase()] || null;
-    },
-  }, init);
 
-  init.status = init.status || 200;
+export class Response extends FetchResponse {
+  /**
+   * Returns instance of Response.
+   * @param {?ResponseBodyInit=} body
+   * @param {!ResponseInit=} init
+   */
+  constructor(body, init = {}) {
+    const lowercasedHeaders = map();
+    const data = Object.assign({
+      status: 200,
+      statusText: 'OK',
+      responseText: (body ? String(body) : ''),
+      /**
+       * @param {string} name
+       * @return {string}
+       */
+      getResponseHeader(name) {
+        return lowercasedHeaders[String(name).toLowerCase()] || null;
+      },
+    }, init);
 
-  if (isArray(init.headers)) {
-    init.headers.forEach(entry => {
-      const headerName = entry[0];
-      const headerValue = entry[1];
-      lowercasedHeaders[String(headerName).toLowerCase()] =
-          String(headerValue);
-    });
-  } else if (isObject(init.headers)) {
-    for (const key in init.headers) {
-      lowercasedHeaders[String(key).toLowerCase()] =
-          String(init.headers[key]);
+    init.status = init.status || 200;
+
+    if (isArray(init.headers)) {
+      init.headers.forEach(entry => {
+        const headerName = entry[0];
+        const headerValue = entry[1];
+        lowercasedHeaders[String(headerName).toLowerCase()] =
+            String(headerValue);
+      });
+    } else if (isObject(init.headers)) {
+      for (const key in init.headers) {
+        lowercasedHeaders[String(key).toLowerCase()] =
+            String(init.headers[key]);
+      }
     }
-  }
-  if (init.status) {
-    data.status = parseInt(init.status, 10);
-  }
-  if (init.statusText) {
-    data.statusText = String(init.statusText);
-  }
+    if (init.status) {
+      data.status = parseInt(init.status, 10);
+    }
+    if (init.statusText) {
+      data.statusText = String(init.statusText);
+    }
 
-  return new FetchResponse(/** @type {XMLHttpRequestDef} */(data));
+    super(/** @type {XMLHttpRequestDef} */(data));
+  }
 }
 
 /**
