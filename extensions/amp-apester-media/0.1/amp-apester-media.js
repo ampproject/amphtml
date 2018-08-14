@@ -140,7 +140,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         (this.random_ = this.element.getAttribute(
             'data-apester-channel-token'
         )),
-        'Either the data-apester-media-id or the data-apester-channel-token' + 
+        'Either the data-apester-media-id or the data-apester-channel-token ' +
         'attributes must be specified for <amp-apester-media> %s',
         this.element
     );
