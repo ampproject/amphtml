@@ -19,7 +19,7 @@
  */
 
 import '../polyfills';
-import {Navigation} from '../service/navigation';
+import {ClickHandler} from '../service/clickhandler';
 import {Services} from '../services';
 import {
   adopt,
@@ -42,7 +42,7 @@ import {stubElementsForDoc} from '../service/custom-element-registry';
 import {installActionServiceForDoc} from '../service/action-impl';
 import {installCidService} from '../service/cid-impl';
 import {installDocumentInfoServiceForDoc} from '../service/document-info-impl';
-import {installGlobalNavigationHandlerForDoc} from '../service/navigation';
+import {installGlobalClickHandlerForDoc} from '../service/clickhandler';
 import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHistoryServiceForDoc} from '../service/history-impl';
 import {installResourcesServiceForDoc} from '../service/resources-impl';
@@ -96,7 +96,7 @@ installStylesForDoc(ampdoc, fullCss, () => {
   // Pre-stub already known elements.
   stubElementsForDoc(ampdoc);
 
-  Navigation.installAnchorClickInterceptor(ampdoc, self);
+  ClickHandler.installAnchorClickInterceptor(ampdoc, self);
   makeBodyVisible(self.document, /* waitForServices */ true); // TODO: to be simplified
 
   Services.resourcesForDoc(ampdoc).ampInitComplete();
@@ -130,6 +130,6 @@ function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc); // TODO: to be simplified
-  installGlobalNavigationHandlerForDoc(ampdoc);
+  installGlobalClickHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }

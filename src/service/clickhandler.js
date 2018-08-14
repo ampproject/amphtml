@@ -33,7 +33,7 @@ import {
 } from '../service';
 import {toWin} from '../types';
 
-const TAG = 'navigation';
+const TAG = 'clickhandler';
 /** @private @const {string} */
 const EVENT_TYPE_CLICK = 'click';
 /** @private @const {string} */
@@ -43,18 +43,18 @@ const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /**
- * Install navigation service for ampdoc, which handles navigations from anchor
+ * Install clickhandler service for ampdoc, which handles anchor
  * tag clicks and other runtime features like AMP.navigateTo().
  *
  * Immediately instantiates the service.
  *
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
-export function installGlobalNavigationHandlerForDoc(ampdoc) {
+export function installGlobalClickHandlerForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       TAG,
-      Navigation,
+      ClickHandler,
       /* opt_instantiate */ true);
 }
 
@@ -73,7 +73,7 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
  * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
-export class Navigation {
+export class ClickHandler {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
@@ -140,7 +140,7 @@ export class Navigation {
   /** @override */
   adoptEmbedWindow(embedWin) {
     installServiceInEmbedScope(embedWin, TAG,
-        new Navigation(this.ampdoc, embedWin.document));
+        new ClickHandler(this.ampdoc, embedWin.document));
   }
 
   /**

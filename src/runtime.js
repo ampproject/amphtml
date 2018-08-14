@@ -48,7 +48,7 @@ import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installDocumentStateService} from './service/document-state';
-import {installGlobalNavigationHandlerForDoc} from './service/navigation';
+import {installGlobalClickHandlerForDoc} from './service/clickhandler';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installInputService} from './input';
@@ -119,7 +119,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
-  installGlobalNavigationHandlerForDoc(ampdoc);
+  installGlobalClickHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
 

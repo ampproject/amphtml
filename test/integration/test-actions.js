@@ -66,7 +66,7 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
 
             // This is brittle but I don't know how else to stub
             // window navigation.
-            const navigationService = fixture.win.services.navigation.obj;
+            const navigationService = fixture.win.services.clickhandler.obj;
             const navigateTo = sandbox.stub(navigationService, 'navigateTo');
 
             button.click();

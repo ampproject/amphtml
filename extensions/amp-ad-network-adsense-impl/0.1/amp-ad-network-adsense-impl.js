@@ -24,7 +24,7 @@ import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Navigation} from '../../../src/service/navigation';
+import {ClickHandler} from '../../../src/service/clickhandler';
 import {
   QQID_HEADER,
   ValidAdContainerTypes,
@@ -416,7 +416,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);
-      Navigation.installAnchorClickInterceptor(
+      ClickHandler.installAnchorClickInterceptor(
           this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
