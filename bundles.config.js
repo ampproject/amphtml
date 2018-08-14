@@ -74,6 +74,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-audio', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-audioburst-audio', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-auto-ads', version: '0.1', type: TYPES.AD},
   {name: 'amp-beopinion', version: '0.1', type: TYPES.MISC},
   {name: 'amp-bind', version: '0.1', type: TYPES.MISC},
