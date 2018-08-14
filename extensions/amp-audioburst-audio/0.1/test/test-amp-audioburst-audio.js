@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpAudioburstAudio} from '../amp-audioburst-audio';
+// import {AmpAudioburstAudio} from '../amp-audioburst-audio';
 
 describes.realWin('amp-audioburst-audio', {
   amp: {
     extensions: ['amp-audioburst-audio'],
-  }
+  },
 }, env => {
 
   let win;
