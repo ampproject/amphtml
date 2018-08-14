@@ -97,11 +97,16 @@
     </script>
   </amp-state>
 
-    <amp-state id="scale">
-      <script type="application/json">
-        1
-      </script>
-    </amp-state>
+  <amp-state id="scale">
+    <script type="application/json">
+      1
+    </script>
+  </amp-state>
+  <amp-state id="shouldHide">
+    <script type="application/json">
+      false
+    </script>
+  </amp-state>
 <article>
   <h1>AMP Pan Zoom</h1>
   <h2>AMP Pan Zoom Basic Example</h2>
@@ -279,6 +284,59 @@
         </g>
       </svg>
     </amp-pan-zoom>
+
+    <h2>AMP Pan-Zoom Toggle Visibility Example</h2>
+    <p>Double tap or pinch to zoom in and out. This tests all initial configurations. </p>
+    <p [text]="'Current scale: ' + transform.scale + ', x: ' + transform.x + ', y: ' + transform.y">Current scale: 1</p>
+    <button on="tap:pan-target.toggleVisibility">Click to toggle visibility</button>
+    <button on="tap:AMP.setState({shouldHide: true})">Click to hide</button>
+    <button on="tap:AMP.setState({shouldHide: false})">Click to show</button>
+      <amp-pan-zoom
+          id="pan-target"
+          [hidden]="shouldHide"
+          layout="responsive"
+          on="transformEnd:AMP.setState({transform: {scale: event.scale, x: event.x, y: event.y}})"
+          height="3"
+          width="4"
+          max-scale="5"
+          initial-scale="2"
+          initial-x="150"
+          initial-y="100">
+        <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
+
+            <rect class="area-half" x="5" y="5" />
+            <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+                <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="10" y="10" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 2 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 2})" x="30" y="10" tabindex="0" role="button" />
+              <rect class="seat-taken" x="10" y="30" />
+              <rect class="seat-free" [class]="seat == 3 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 3})" x="30" y="30" tabindex="0" role="button" />
+            </g>
+
+            <rect class="area-full" x="55" y="5" />
+            <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-taken" x="60" y="10" />
+              <rect class="seat-taken" x="80" y="10" />
+              <rect class="seat-taken" x="60" y="30" />
+              <rect class="seat-taken" x="80" y="30" />
+            </g>
+
+            <rect class="area-free" x="5" y="55" />
+            <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+                <rect class="seat-free" [class]="seat == 4 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 4})" x="10" y="60" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 6 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 6})" x="30" y="60" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 7 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 7})" x="10" y="80" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 10 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 10})" x="30" y="80" tabindex="0" role="button" />
+            </g>
+
+            <rect class="area-free" x="55" y="55" />
+            <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+                <rect class="seat-free" [class]="seat == 5 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 5})" x="60" y="60" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 8 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 8})" x="80" y="60" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 11 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 11})" x="60" y="80" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 12 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 12})" x="80" y="80" tabindex="0" role="button" />
+            </g>
+          </svg>
+      </amp-pan-zoom>
 </article>
 </body>
 </html>
