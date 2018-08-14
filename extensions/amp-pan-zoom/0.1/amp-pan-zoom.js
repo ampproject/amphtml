@@ -208,7 +208,6 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.resetContentDimensions_();
     this.cleanupGestures_();
   }
 
@@ -334,17 +333,15 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   resetContentDimensions_() {
     const content = dev().assertElement(this.content_);
-    return this.measureElement(() => this.measure_()).then(() => {
-      return this.mutateElement(() => {
-        // Set the actual dimensions of the content
-        setStyles(content, {
-          width: px(this.contentBox_.width),
-          height: px(this.contentBox_.height),
-        });
-        // Update translation and scaling
-        this.updatePanZoom_();
-      }, content);
-    });
+    return this.measureMutateElement(() => this.measure_(), () => {
+      // Set the actual dimensions of the content
+      setStyles(content, {
+        width: px(this.contentBox_.width),
+        height: px(this.contentBox_.height),
+      });
+      // Update translation and scaling
+      this.updatePanZoom_();
+    }, content);
   }
 
   /** @private */
