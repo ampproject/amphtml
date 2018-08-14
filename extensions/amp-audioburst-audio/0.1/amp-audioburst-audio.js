@@ -31,8 +31,10 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {listen} from '../../../src/event-helper';
 import {setStyle, setStyles} from '../../../src/style';
+
 
 export class AmpAudioburstAudio extends AMP.BaseElement {
 
@@ -40,6 +42,8 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private */
+    this.viewport_ = null;
     /** @private {string} */
     this.burstSrc_ = undefined;
     /** @private {string} */
@@ -88,6 +92,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.viewport_ = Services.viewportForDoc(this.getAmpDoc());
     this.burstSrc_ = this.element.getAttribute('src');
     this.fullShowSrc_ = this.element.getAttribute('fullShow');
     this.fullShowPosition_ =
@@ -149,7 +154,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
 
     /** Full Show Button */
     const fullShowButton = this.win.document.createElement('button');
-    fullShowButton.innerText = 'Keep Listening';
+    fullShowButton.textContent = 'Keep Listening';
     setStyles(fullShowButton, {
       'text-align': 'center',
       'margin': '1.5em auto',
@@ -165,7 +170,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
       if (this.burstSaveTime_) {
         this.audio_.src = this.burstSrc_;
         this.audio_.currentTime = this.burstSaveTime_;
-        fullShowButton.innerText = 'Keep Listening';
+        fullShowButton.textContent = 'Keep Listening';
         this.burstSaveTime_ = undefined;
       } else {
         this.burstSaveTime_ = this.audio_.currentTime;
@@ -173,7 +178,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
         this.audio_.src = this.fullShowSrc_;
         this.audio_.currentTime =
           this.fullShowPosition_ + this.burstSaveTime_ - 2;
-        fullShowButton.innerText = 'Back To Burst';
+        fullShowButton.textContent = 'Back To Burst';
       }
     });
     /** Slider */
@@ -244,8 +249,8 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
     if (this.audio_) {
       this.currentTime = this.audio_.currentTime;
       if (this.currentTimeEl_) {
-        this.currentTimeEl_.innerText = this.convertTime_(this.currentTime);
-        this.currentTimeEl_.innerText += ' / ';
+        this.currentTimeEl_.textContent = this.convertTime_(this.currentTime);
+        this.currentTimeEl_.textContent += ' / ';
         this.updateSlider_();
       }
     }
@@ -256,7 +261,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
     if (this.audio_) {
       this.duration = this.audio_.duration;
       if (this.durationEl_) {
-        this.durationEl_.innerText = this.convertTime_(this.duration);
+        this.durationEl_.textContent = this.convertTime_(this.duration);
       }
     }
   }
@@ -374,7 +379,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
     slider.appendChild(sliderL2);
 
     const setAudioPosition = x => {
-      const rectangle = slider.getBoundingClientRect();
+      const rectangle = this.viewport_.getLayoutRect(slider);
       const eventX = x ? x : 0;
       if (rectangle && this.audio_) {
         const percent = (eventX - rectangle.x) / rectangle.width;
@@ -433,7 +438,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
    * @param {number} seconds
   */
   convertTime_(seconds) {
-    if (seconds == undefined) {
+    if (seconds == undefined || seconds === 0) {
       return '0:00';
     }
     let result = '';
