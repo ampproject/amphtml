@@ -254,12 +254,10 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.zoomButton_.addEventListener('click', () => {
       if (this.zoomButton_.classList.contains('amp-pan-zoom-in-icon')) {
         this.transform(0, 0, this.maxScale_);
-        this.zoomButton_.classList.remove('amp-pan-zoom-in-icon');
-        this.zoomButton_.classList.add('amp-pan-zoom-out-icon');
+        this.toggleZoomButtonOut_();
       } else {
         this.transform(0, 0, this.minScale_);
-        this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
-        this.zoomButton_.classList.remove('amp-pan-zoom-out-icon');
+        this.toggleZoomButtonIn_();
       }
     });
     this.element.appendChild(this.zoomButton_);
@@ -669,6 +667,26 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
+   * @private
+   */
+  toggleZoomButtonIn_() {
+    if (this.zoomButton_) {
+      this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
+      this.zoomButton_.classList.remove('amp-pan-zoom-out-icon');
+    }
+  }
+
+  /**
+   * @private
+   */
+  toggleZoomButtonOut_() {
+    if (this.zoomButton_) {
+      this.zoomButton_.classList.remove('amp-pan-zoom-in-icon');
+      this.zoomButton_.classList.add('amp-pan-zoom-out-icon');
+    }
+  }
+
+  /**
    * Performs actions after the gesture that was performing zooming has been
    * released.
    * @return {!Promise}
@@ -679,12 +697,10 @@ export class AmpPanZoom extends AMP.BaseElement {
       // After the scale is updated, also register or unregister panning
       if (this.scale_ <= 1) {
         this.unregisterPanningGesture_();
-        this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
-        this.zoomButton_.classList.remove('amp-pan-zoom-out-icon');
+        this.toggleZoomButtonIn_();
       } else {
         this.registerPanningGesture_();
-        this.zoomButton_.classList.remove('amp-pan-zoom-in-icon');
-        this.zoomButton_.classList.add('amp-pan-zoom-out-icon');
+        this.toggleZoomButtonOut_();
       }
     });
   }
