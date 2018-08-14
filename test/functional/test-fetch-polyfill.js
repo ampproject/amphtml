@@ -121,6 +121,27 @@ describes.sandboxed('fetch', {}, () => {
       });
     });
 
+    it('should return text from a full XHR request', () => {
+      const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
+          response => {
+            expect(response).to.be.instanceof(FetchResponse);
+            return response.text().then(result => {
+              expect(result).to.equal(TEST_TEXT);
+            });
+          });
+      xhrCreated.then(
+          xhr => xhr.respond(
+              200, {
+                'Content-Type': 'text/plain',
+                'Access-Control-Expose-Headers':
+                    'AMP-Access-Control-Allow-Source-Origin',
+                'AMP-Access-Control-Allow-Source-Origin':
+                    'https://acme.com',
+              },
+              TEST_TEXT));
+      return promise;
+    });
+
   });
 
   describe('Response', () => {
@@ -216,41 +237,6 @@ describes.sandboxed('fetch', {}, () => {
                 /Body already used/);
           });
     });
-
-    // scenarios.forEach(test => {
-    //   if (test.desc === 'Polyfill') {
-    //     // FetchRequest is only returned by the Polyfill version of Xhr.
-    //     describe('#text', () => {
-    //       let xhr;
-
-    //       beforeEach(() => {
-    //         xhr = xhrServiceForTesting(test.win);
-    //         setupMockXhr();
-    //       });
-
-    //       it('should return text from a full XHR request', () => {
-    //         const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
-    //             response => {
-    //               expect(response).to.be.instanceof(FetchResponse);
-    //               return response.text().then(result => {
-    //                 expect(result).to.equal(TEST_TEXT);
-    //               });
-    //             });
-    //         xhrCreated.then(
-    //             xhr => xhr.respond(
-    //                 200, {
-    //                   'Content-Type': 'text/plain',
-    //                   'Access-Control-Expose-Headers':
-    //                       'AMP-Access-Control-Allow-Source-Origin',
-    //                   'AMP-Access-Control-Allow-Source-Origin':
-    //                       'https://acme.com',
-    //                 },
-    //                 TEST_TEXT));
-    //         return promise;
-    //       });
-    //     });
-    //   }
-    // });
   });
 
 });

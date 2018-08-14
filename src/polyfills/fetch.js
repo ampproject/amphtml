@@ -19,13 +19,13 @@ import {map} from '../utils/object';
 import {parseJson} from '../json';
 import {utf8Encode} from '../utils/bytes';
 
-/** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = {
+/** @enum {number} Allowed fetch responses. */
+const allowedFetchTypes = {
   document: 1,
   text: 2,
 };
 
-/** @private @const {!Array<string>} */
+/** @const {!Array<string>} */
 const allowedMethods = ['GET', 'POST'];
 
 /**
@@ -36,7 +36,6 @@ const allowedMethods = ['GET', 'POST'];
  *   status: number,
  *   statusText: string,
  *   responseText: string,
- *   responseXML: ?Document,
  *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
  * }}
  */
@@ -54,7 +53,6 @@ let XMLHttpRequestDef;
  * @param {string} input
  * @param {!Object|RequestInit=} init
  * @return {!Promise<!FetchResponse>}
- * @private Visible for testing
  */
 export function fetchPolyfill(input, init) {
   return new Promise(function(resolve, reject) {
@@ -65,7 +63,7 @@ export function fetchPolyfill(input, init) {
       xhr.withCredentials = true;
     }
 
-    if (init.responseType in allowedFetchTypes_) {
+    if (init.responseType in allowedFetchTypes) {
       xhr.responseType = init.responseType;
     }
 
@@ -111,7 +109,6 @@ export function fetchPolyfill(input, init) {
  * @param {string} method
  * @param {string} url
  * @return {!XMLHttpRequest}
- * @private
  */
 function createXhrRequest(method, url) {
   const xhr = new XMLHttpRequest();
@@ -130,10 +127,10 @@ function createXhrRequest(method, url) {
  */
 class FetchResponse {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
+   * @param {!XMLHttpRequest|!XMLHttpRequestDef} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
+    /** @private @const {!XMLHttpRequest|!XMLHttpRequestDef} */
     this.xhr_ = xhr;
 
     /** @const {number} */
@@ -304,7 +301,7 @@ export function Response(body, init = {}) {
  */
 export function install(win) {
   if (!win.fetch) {
-    win.prototype.fetch = /** @type {function(string, RequestInit):!Promise} */ (fetchPolyfill);
+    win.fetch = /** @type {function(string, RequestInit):!Promise} */ (fetchPolyfill);
     win.Response = Response;
   }
 }
