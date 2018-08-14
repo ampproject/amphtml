@@ -31,6 +31,19 @@ export class AmpAdUIHandler {
     /** @private @const {!Document} */
     this.doc_ = baseInstance.win.document;
 
+    this.containerElement_ = null;
+
+    if (this.element_.hasAttribute('data-ad-container-id')) {
+      const id = this.element_.getAttribute('data-ad-container-id');
+      const container = this.doc_.getElementById(id);
+      if (container && container.tagName == 'AMP-LAYOUT' &&
+          container.contains(this.element_)) {
+        // Parent <amp-layout> component with reference id can serve as the
+        // ad container
+        this.containerElement_ = container;
+      }
+    }
+
     if (!baseInstance.getFallback()) {
       const fallback = this.addDefaultUiComponent_('fallback');
       if (fallback) {
@@ -57,8 +70,20 @@ export class AmpAdUIHandler {
       this.baseInstance_./*OK*/collapse();
       return;
     }
+
+    let attemptCollapsePromise;
+    if (this.containerElement_) {
+      // Collapse the container element if there's one
+      attemptCollapsePromise = this.element_.getResources().attemptCollapse(
+          this.containerElement_);
+      attemptCollapsePromise.then(() => {
+      });
+    } else {
+      attemptCollapsePromise = this.baseInstance_.attemptCollapse();
+    }
+
     // The order here is collapse > user provided fallback > default fallback
-    this.baseInstance_.attemptCollapse().catch(() => {
+    attemptCollapsePromise.catch(() => {
       this.baseInstance_.mutateElement(() => {
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
