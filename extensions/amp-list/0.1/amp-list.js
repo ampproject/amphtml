@@ -24,11 +24,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {
-  childElementByAttr,
-  childElementByTag,
-  removeChildren,
-} from '../../../src/dom';
+import {childElementByTag, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
@@ -432,7 +428,10 @@ export class AmpList extends AMP.BaseElement {
           'i-amphtml-layout-size-defined', 'i-amphtml-layout-responsive');
       this.container_.classList.remove(
           'i-amphtml-fill-content', 'i-amphtml-replaced-content');
-      const overflowElement = childElementByAttr(this.element, 'overflow');
+      // The overflow element is generally hidden with visibility hidden,
+      // but after changing to layout container, this causes an undesirable
+      // empty white space so we hide it with display none instead.
+      const overflowElement = this.getOverflowElement();
       if (overflowElement) {
         toggle(overflowElement, false);
       }
