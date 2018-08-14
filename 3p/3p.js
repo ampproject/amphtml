@@ -277,6 +277,7 @@ function validateAllowedFields(data, allowedFields) {
     adHolderText: true,
     loadingStrategy: true,
     htmlAccessAllowed: true,
+    adContainerId: true,
   };
 
   for (const field in data) {
