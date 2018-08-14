@@ -24,6 +24,11 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
+import {
+  childElementByAttr,
+  childElementByTag,
+  removeChildren,
+} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
@@ -31,7 +36,6 @@ import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
@@ -94,9 +98,6 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
-
-    /** @private */
-    this.resizeExperimentOn_ = isExperimentOn(this.win, 'amp-list-resize');
 
     /** @private */
     this.isSetToLayoutContainer_ = false;
@@ -380,6 +381,7 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
+    const resizeExperimentOn = isExperimentOn(this.win, 'amp-list-resize');
 
     this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
@@ -396,7 +398,7 @@ export class AmpList extends AMP.BaseElement {
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
 
-      if (!this.resizeExperimentOn_) {
+      if (!resizeExperimentOn) {
         // Change height if needed.
         this.measureElement(() => {
           const scrollHeight = this.container_./*OK*/scrollHeight;
@@ -408,7 +410,8 @@ export class AmpList extends AMP.BaseElement {
       }
     }, this.container_);
 
-    if (this.resizeExperimentOn_ && !this.isSetToLayoutContainer_) {
+    // This needs to be gated behind the experiment 'amp-list-resize'
+    if (resizeExperimentOn && !this.isSetToLayoutContainer_) {
       this.mutateElement(() => {
         this.changeToLayoutContainer_();
       });
@@ -422,15 +425,15 @@ export class AmpList extends AMP.BaseElement {
    */
   changeToLayoutContainer_() {
     this.element.setAttribute('layout', 'container');
-    const sizer = this.element.querySelector('i-amphtml-sizer');
+    const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
     if (sizer) {
       this.element.removeChild(sizer);
     }
-    this.element.classList.remove('i-amphtml-layout-size-defined');
-    this.element.classList.remove('i-amphtml-layout-responsive');
-    this.container_.classList.remove('i-amphtml-fill-content');
-    this.container_.classList.remove('i-amphtml-replaced-content');
-    const overflowElement = this.element.querySelector('[overflow]');
+    this.element.classList.remove(
+        'i-amphtml-layout-size-defined', 'i-amphtml-layout-responsive');
+    this.container_.classList.remove(
+        'i-amphtml-fill-content', 'i-amphtml-replaced-content');
+    const overflowElement = childElementByAttr(this.element, 'overflow');
     if (overflowElement) {
       toggle(overflowElement, false);
     }
