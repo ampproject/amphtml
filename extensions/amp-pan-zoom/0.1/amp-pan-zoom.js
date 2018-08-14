@@ -146,7 +146,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.zoomButton_ = null;
 
     /** @private */
-    this.disableDoubleTap = false;
+    this.disableDoubleTap_ = false;
   }
 
   /** @override */
@@ -415,7 +415,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       e.data.target.dispatchEvent(event);
     });
 
-    if (this.disableDoubleTap) {
+    if (this.disableDoubleTap_) {
       return;
     }
     this.gestures_.onGesture(DoubletapRecognizer, e => {
