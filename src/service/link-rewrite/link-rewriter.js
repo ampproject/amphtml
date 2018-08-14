@@ -18,7 +18,6 @@ export default class LinkRewriter {
     this.anchorReplacementMap_ = new Map();
     this.restoreDelay_ = 300; //ms
     this.events = new EventMessenger();
-    window.debugMap = this.anchorReplacementMap_;
   }
 
   /**

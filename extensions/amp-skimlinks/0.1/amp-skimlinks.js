@@ -101,7 +101,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
     };
 
     this.skimlinksLinkRewriter = this.linkRewriterService.registerLinkRewriter(
-        this.element,
         SKIMLINKS_REWRITER_ID,
         resolveFunction,
         options
@@ -125,9 +124,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @param {*} eventData
    */
   onClick_(eventData) {
-    const wasStolenFromSkim = eventData.replacedBy !== SKIMLINKS_REWRITER_ID;
-    const hasAffiliated = eventData.hasReplaced;
-    if (wasStolenFromSkim || !hasAffiliated) {
+    // The link was not monetizable or the link was replaced by an other linkRewriter.
+    if (eventData.replacedBy !== SKIMLINKS_REWRITER_ID) {
       this.trackingService.sendNaClickTracking(eventData.anchor);
     }
   }

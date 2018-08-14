@@ -44,7 +44,7 @@ const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
-const anchorClickActions = {
+export const anchorClickActions = {
   NAVIGATE_A2A: 'navigate-a2a',
   NAVIGATE_CUSTOM_PROTOCOL: 'navigate-custom-protocol',
   NAVIGATE_OUTBOUND: 'navigate-outbound',
