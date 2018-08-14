@@ -412,9 +412,7 @@ export class AmpList extends AMP.BaseElement {
 
     // This needs to be gated behind the experiment 'amp-list-resize'
     if (resizeExperimentOn && !this.isSetToLayoutContainer_) {
-      this.mutateElement(() => {
-        this.changeToLayoutContainer_();
-      });
+      this.changeToLayoutContainer_();
       this.isSetToLayoutContainer_ = true;
     }
   }
@@ -424,19 +422,22 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
-    this.element.setAttribute('layout', 'container');
-    const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
-    if (sizer) {
-      this.element.removeChild(sizer);
-    }
-    this.element.classList.remove(
-        'i-amphtml-layout-size-defined', 'i-amphtml-layout-responsive');
-    this.container_.classList.remove(
-        'i-amphtml-fill-content', 'i-amphtml-replaced-content');
-    const overflowElement = childElementByAttr(this.element, 'overflow');
-    if (overflowElement) {
-      toggle(overflowElement, false);
-    }
+    this.mutateElement(() => {
+      this.element.setAttribute('layout', 'container');
+      const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
+      if (sizer) {
+        this.element.removeChild(sizer);
+      }
+      this.element.classList.remove(
+          'i-amphtml-layout-size-defined', 'i-amphtml-layout-responsive');
+      this.container_.classList.remove(
+          'i-amphtml-fill-content', 'i-amphtml-replaced-content');
+      const overflowElement = childElementByAttr(this.element, 'overflow');
+      if (overflowElement) {
+        toggle(overflowElement, false);
+      }
+    });
+
   }
 
   /**
