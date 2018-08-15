@@ -441,10 +441,10 @@ export class Navigation {
    * @param {!Function} callback
    * @param {number} priority
    */
-  registerLinkRule(callback, priority) {
+  registerLocationMutator(callback, priority) {
     user().assert(!this.isLinkRulePriorityUsed_(priority),
         'Rule with same priority is already in use.');
-    this.registeredLinksRules_.push(new LinkRule(callback, priority));
+    this.registeredLinksRules_.push(new LocationMutator(callback, priority));
   }
 
   /**
@@ -532,7 +532,7 @@ function maybeExpandUrlParams(ampdoc, e) {
  * An href transformation applied to an anchor, executed according to its
  * priority.
  */
-class LinkRule {
+class LocationMutator {
   /**
    * @param {function(!Location):!Location} callback
    * @param {number} priority
