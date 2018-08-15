@@ -68,8 +68,6 @@ In the following example, tapping the button changes the `<p>` element's text fr
 <button on="tap:AMP.setState({foo: 'amp-bind'})">Say "Hello amp-bind"</button>
 ```
 
-In the example, the `<p>` element thus needs to have a default value, hence its definition being `<p [text]="'Hello ' + foo">Hello World</p>` rather than `<p [text]="'Hello ' + foo">World</p>`.
-
 {% call callout('Note', type='note') %}
 For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely `amp-bind` for initial render.
 {% endcall %}
