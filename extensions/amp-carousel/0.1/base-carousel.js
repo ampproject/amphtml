@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {setStyles} from '../../../src/style';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-
-const MAX_TABLET_WIDTH = 1000;
+import {isExperimentOn} from '../../../src/experiments';
 
 /**
  * @abstract
@@ -81,17 +79,15 @@ export class BaseCarousel extends AMP.BaseElement {
     button.classList.add(className);
     button.setAttribute('role', 'button');
     const icon = this.element.ownerDocument.createElement('div');
-    icon.classList.add('amp-carousel-button-icon');
-    const isIE = Services.platformFor(this.win).isIe();
-    if (isIE) {
-      button.classList.add('amp-carousel-button-background');
-    }
-    const {userAgent} = navigator;
-    if (!(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(userAgent))) { // detecting laptop & desktop
-      console.log('HELLO DESKTOP');
-      if (this.element.hasAttribute('scale')) {
-        setStyles(button, {transform: 'scale(' + this.element.getAttribute('scale') + ')'});
+    if (isExperimentOn(this.win, 'amp-carousel-new-arrows')) {
+      icon.classList.add('amp-carousel-button-icon');
+      const isIE = Services.platformFor(this.win).isIe();
+      if (isIE) {
+        button.classList.add('amp-carousel-button-background');
       }
+    } else {
+      icon.classList.add('amp-carousel-button-legacy');
+      button.classList.add('amp-carousel-button-background');
     }
 
     button.appendChild(icon);
