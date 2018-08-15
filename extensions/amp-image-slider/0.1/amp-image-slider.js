@@ -18,6 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
+import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
@@ -96,6 +97,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     /** @private {Gestures|null} */
     this.gestures_ = null;
 
+    /** @private {boolean} */
+    this.isEdge_ = Services.platformFor(this.win).isEdge();
+
     /** @public {boolean} */
     this.isEventRegistered = false; // for test purpose
   }
@@ -146,6 +150,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.buildImageWrappers_();
     this.buildBar_();
+    // Notice: hints are attached after amp-img finished loading
     this.buildHint_();
     this.checkARIA_();
 
@@ -176,6 +181,12 @@ export class AmpImageSlider extends AMP.BaseElement {
       if (initialPositionString) {
         const initialPosition = Number(initialPositionString);
         this.updatePositions_(initialPosition);
+      }
+      // Prevent Edge horizontal swipe for go back/forward
+      if (this.isEdge_) {
+        setStyles(this.element, {
+          'touch-action': 'pan-y', // allow browser only default y behavior
+        });
       }
     });
   }
@@ -262,8 +273,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     rightHintWrapper.appendChild(this.hintRightArrow_);
     this.hintLeftBody_.appendChild(leftHintWrapper);
     this.hintRightBody_.appendChild(rightHintWrapper);
-    this.container_.appendChild(this.hintLeftBody_);
-    this.container_.appendChild(this.hintRightBody_);
+    // Notice: hints are attached after amp-img finished loading
   }
 
   /**
@@ -276,7 +286,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     const rightAmpImage = dev().assertElement(this.rightAmpImage_);
     leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
       if (leftAmpImage.childElementCount > 0) {
-        const img = leftAmpImage.firstChild;
+        const img = leftAmpImage.querySelector('img');
         let newAltText;
         this.measureMutateElement(() => {
           const ariaSuffix =
@@ -294,7 +304,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     });
     rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
       if (rightAmpImage.childElementCount > 0) {
-        const img = rightAmpImage.firstChild;
+        const img = rightAmpImage.querySelector('img');
         let newAltText;
         this.measureMutateElement(() => {
           const ariaSuffix =
@@ -670,7 +680,20 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.registerEvents_();
 
-    return Promise.resolve();
+    return Promise.all([
+      dev().assertElement(this.leftAmpImage_)
+          .signals().whenSignal(CommonSignals.LOAD_END),
+      dev().assertElement(this.rightAmpImage_)
+          .signals().whenSignal(CommonSignals.LOAD_END),
+    ]).then(() => {
+      // Notice: hints are attached after amp-img finished loading
+      this.container_.appendChild(this.hintLeftBody_);
+      this.container_.appendChild(this.hintRightBody_);
+    }, () => {
+      // Do the same thing when signal rejects
+      this.container_.appendChild(this.hintLeftBody_);
+      this.container_.appendChild(this.hintRightBody_);
+    });
   }
 
   /** @override */
