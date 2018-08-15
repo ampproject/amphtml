@@ -26,6 +26,8 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-form"
       src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 </head>
 <body>
     <!-- Valid form -->
@@ -43,6 +45,29 @@
       </label>
       <input type="submit" value="Subscribe">
     </fieldset>
+    <div submit-success>
+      Submission successful!
+    </div>
+    <div submit-error>
+      Submission failed!
+    </div>
+    <div submitting>
+      Submitting form...
+    </div>
+  </form>
+  <!-- Valid form with templates for submit-success and submit-error -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="email" name="email">
+    <div submit-success>
+      <template type="amp-mustache">
+        Submission successful! {{a}}
+      </template>
+    </div>
+    <div submit-error>
+      <template type="amp-mustache">
+        Submission failed! {{a}}
+      </template>
+    </div>
   </form>
   <!-- Invalid: input can not be type="button|file|image". -->
   <form method="post" action-xhr="https://example.com/subscribe">
@@ -66,10 +91,31 @@
   <form method="get" action-xhr="https://example.com/subscribe">
     <input [type]="state.type" name="name">
   </form>
-  <!-- Invalid: invalid usage of submitting attribute -->
-  <form method="get" action-xhr="https://example.com/subscribe">
+  <!-- Invalid: invalid usage of submitting attribute with nested template -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="email" name="email">
     <div submitting>
-      Submitting form...
+      <template type="amp-mustache">
+        Submitting... {{a}}
+      </template>
+    </div>
+  </form>
+  <!-- Invalid: invalid usage of submitting attribute with template attribute -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="email" name="email">
+    <div submitting template="abc">
+    </div>
+  </form>
+    <!-- Invalid: invalid template within a template -->
+  <form method="post" action-xhr="https://example.com/subscribe">
+    <input type="email" name="email">
+    <div submit-error>
+      <template type="amp-mustache">
+        {{a}}
+        <template type="amp-mustache">
+          {{b}}
+        </template>
+      </template>
     </div>
   </form>
   <!-- Invalid: invalid usage of submitting attribute -->

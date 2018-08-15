@@ -27,6 +27,8 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-form"
 |        src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|    <script async custom-template="amp-mustache"
+|        src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 |  </head>
 |  <body>
 |      <!-- Valid form -->
@@ -44,56 +46,104 @@ FAIL
 |        </label>
 |        <input type="submit" value="Subscribe">
 |      </fieldset>
+|      <div submit-success>
+|        Submission successful!
+|      </div>
+|      <div submit-error>
+|        Submission failed!
+|      </div>
+|      <div submitting>
+|        Submitting form...
+|      </div>
+|    </form>
+|    <!-- Valid form with templates for submit-success and submit-error -->
+|    <form method="post" action-xhr="https://example.com/subscribe">
+|      <input type="email" name="email">
+|      <div submit-success>
+|        <template type="amp-mustache">
+|          Submission successful! {{a}}
+|        </template>
+|      </div>
+|      <div submit-error>
+|        <template type="amp-mustache">
+|          Submission failed! {{a}}
+|        </template>
+|      </div>
 |    </form>
 |    <!-- Invalid: input can not be type="button|file|image". -->
 |    <form method="post" action-xhr="https://example.com/subscribe">
 |      <input type="button" name="button">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:49:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:74:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:50:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:75:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: input can not be type="password" -->
 |    <form method="post" action-xhr="https://example.com/subscribe">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:54:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:79:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <input type="file" name="file">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:55:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:80:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: invalid attribute xhr-verify -->
 |    <form method="post" action-xhr="https://example.com/subscribe"
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:58:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=POST] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:83:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=POST] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      xhr-verify="https://example.com/subscribe">
 |    </form>
 |    <!-- Invalid: invalid attribute xhr-verify -->
 |    <form method="get" action-xhr="https://example.com/subscribe"
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:62:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:87:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      xhr-verify="https://example.com/subscribe">
 |    </form>
 |    <!-- Invalid: amp-bind usage for type in input -->
 |    <form method="get" action-xhr="https://example.com/subscribe">
 |      <input [type]="state.type" name="name">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:67:4 The attribute '[type]' may not appear in tag 'INPUT (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:92:4 The attribute '[type]' may not appear in tag 'INPUT (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
-|    <!-- Invalid: invalid usage of submitting attribute -->
-|    <form method="get" action-xhr="https://example.com/subscribe">
+|    <!-- Invalid: invalid usage of submitting attribute with nested template -->
+|    <form method="post" action-xhr="https://example.com/subscribe">
+|      <input type="email" name="email">
 |      <div submitting>
+|        <template type="amp-mustache">
+>>       ^~~~~~~~~
+amp4email_feature_tests/amp_form.html:98:6 The tag 'TEMPLATE (AMP4EMAIL)' may not appear as a descendant of tag 'form div [submitting]'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [GENERIC]
+|          Submitting... {{a}}
+|        </template>
+|      </div>
+|    </form>
+|    <!-- Invalid: invalid usage of submitting attribute with template attribute -->
+|    <form method="post" action-xhr="https://example.com/subscribe">
+|      <input type="email" name="email">
+|      <div submitting template="abc">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:71:4 The attribute 'submitting' may not appear in tag 'div'. [DISALLOWED_HTML]
-|        Submitting form...
+amp4email_feature_tests/amp_form.html:106:4 The attribute 'template' may not appear in tag 'FORM DIV [submitting]'. [DISALLOWED_HTML]
+|      </div>
+|    </form>
+|      <!-- Invalid: invalid template within a template -->
+|    <form method="post" action-xhr="https://example.com/subscribe">
+|      <input type="email" name="email">
+|      <div submit-error>
+|        <template type="amp-mustache">
+|          {{a}}
+|          <template type="amp-mustache">
+>>         ^~~~~~~~~
+amp4email_feature_tests/amp_form.html:115:8 The tag 'TEMPLATE (AMP4EMAIL)' may not appear as a descendant of tag 'template (amp4email)'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [GENERIC]
+|            {{b}}
+|          </template>
+|        </template>
 |      </div>
 |    </form>
 |    <!-- Invalid: invalid usage of submitting attribute -->
 |    <form method="get" action-xhr="https://example.com/subscribe">
 |      <div submitting template="mytemplate">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:77:4 The attribute 'submitting' may not appear in tag 'FORM DIV [submit-success][template]'. [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:123:4 The attribute 'template' may not appear in tag 'FORM DIV [submitting]'. [DISALLOWED_HTML]
 |        Submitting form...
 |      </div>
 |    </form>
