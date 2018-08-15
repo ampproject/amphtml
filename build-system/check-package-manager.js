@@ -16,6 +16,7 @@
 'use strict';
 
 const https = require('https');
+const readline = require('readline');
 const {getStdout} = require('./exec');
 
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
@@ -24,6 +25,8 @@ const gulpHelpUrl = 'https://medium.com/gulpjs/gulp-sips-command-line-interface-
 
 const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
+
+const updatesNeeded = [];
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {return '\x1b[31m' + text + '\x1b[0m';}
@@ -84,6 +87,7 @@ function checkNodeVersion() {
               cyan('"nvm install --lts"'), yellow('or see'),
               cyan('https://nodejs.org/en/download/package-manager'),
               yellow('for instructions.'));
+          updatesNeeded.push('node');
         } else {
           console.log(green('Detected'), cyan('node'), green('version'),
               cyan(nodeVersion + ' (latest LTS)') +
@@ -132,7 +136,7 @@ function checkYarnVersion() {
         cyan('"curl -o- -L https://yarnpkg.com/install.sh | bash"'),
         yellow('or see'), cyan('https://yarnpkg.com/docs/install'),
         yellow('for instructions.'));
-    console.log(yellow('Attempting to install packages...'));
+    updatesNeeded.push('yarn');
   } else {
     console.log(green('Detected'), cyan('yarn'), green('version'),
         cyan(yarnVersion + ' (stable)') +
@@ -163,6 +167,7 @@ function checkGlobalGulp() {
         cyan('"yarn global add gulp-cli"') + yellow('.'));
     console.log(yellow('⤷ See'), cyan(gulpHelpUrl),
         yellow('for more information.'));
+    updatesNeeded.push('gulp');
   } else if (!globalGulpCli) {
     console.log(yellow('WARNING: Could not find'),
         cyan('gulp-cli') + yellow('.'));
@@ -190,6 +195,23 @@ function main() {
   return checkNodeVersion().then(() => {
     checkGlobalGulp();
     checkYarnVersion();
+    if (!process.env.TRAVIS && updatesNeeded.length > 0) {
+      console.log(yellow('\nWARNING: Detected missing updates for'),
+          cyan(updatesNeeded.join(', ')));
+      console.log(yellow('⤷ Press any key to continue install...'));
+      console.log(yellow('⤷ Press'), cyan('Ctrl + C'),
+          yellow('to abort and fix...'));
+      readline.emitKeypressEvents(process.stdin);
+      process.stdin.setRawMode(true);
+      process.stdin.on('keypress', (unusedStr, key) => {
+        if (key.ctrl && key.name === 'c') {
+          process.exit(1);
+        } else {
+          console.log(yellow('\nAttempting to install packages...'));
+          process.exit(0);
+        }
+      });
+    }
   });
 }
 
