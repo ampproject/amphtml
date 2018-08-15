@@ -28,7 +28,7 @@ import {dict} from '../../../src/utils/object';
 import {numeric, px, setStyles as setStylesTransition} from '../../../src/transition';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {tryFocus} from '../../../src/dom';
 
 const TAG = 'amp-accordion';
@@ -316,9 +316,9 @@ class AmpAccordion extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       // We set position and opacity to avoid a FOUC while measuring height
-      setStyles(sectionChild, {
-        opacity: 0,
-        position: 'fixed',
+      setImportantStyles(sectionChild, {
+        'position': 'fixed',
+        'opacity': '0',
       });
       if (!section.hasAttribute('expanded')) {
         this.triggerEvent_('expand', section);
@@ -334,9 +334,9 @@ class AmpAccordion extends AMP.BaseElement {
           },
           () => {
             setStyles(sectionChild, {
+              'position': '',
               'opacity': '',
               'height': 0,
-              'position': '',
             });
           });
     }).then(() => {
