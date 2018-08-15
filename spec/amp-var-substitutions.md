@@ -93,7 +93,7 @@ Please take note of the following scenarios:
 * Asynchronously resolved variables are not available
 
 ### Restrictions
-`host` string of an URL does not accept variable.
+The `host` string of an URL does not accept variables.
 
 ## Variable substitution in links
 
