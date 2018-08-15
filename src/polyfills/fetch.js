@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {dev, user} from '../log';
+import {hasOwn, map} from '../utils/object';
 import {isArray, isObject} from '../types';
-import {map} from '../utils/object';
 import {parseJson} from '../json';
 import {utf8Encode} from '../utils/bytes';
 
@@ -136,6 +136,8 @@ class FetchResponse {
     /** @const {number} */
     this.status = this.xhr_.status;
 
+    this.statusText = this.xhr_.statusText;
+
     /** @const {boolean} */
     this.ok = this.status >= 200 && this.status < 300;
 
@@ -225,10 +227,10 @@ function normalizeMethod(method) {
  */
 class FetchResponseHeaders {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
+   * @param {!XMLHttpRequest|!XMLHttpRequestDef} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
+    /** @private @const {!XMLHttpRequest|!XMLHttpRequestDef} */
     this.xhr_ = xhr;
   }
 
@@ -266,7 +268,8 @@ export class Response extends FetchResponse {
        * @return {string}
        */
       getResponseHeader(name) {
-        return lowercasedHeaders[String(name).toLowerCase()] || null;
+        return hasOwn(lowercasedHeaders, name) ?
+          lowercasedHeaders[String(name).toLowerCase()] : null;
       },
     }, init);
 
@@ -304,7 +307,15 @@ export class Response extends FetchResponse {
  */
 export function install(win) {
   if (!win.fetch) {
-    win.fetch = /** @type {function(string, RequestInit):!Promise} */ (fetchPolyfill);
-    win.Response = Response;
+    Object.defineProperty(win, 'fetch', {
+      value: fetch,
+      writable: true,
+      enumerable: false,
+    });
+    Object.defineProperty(win, 'Response', {
+      value: Response,
+      writable: true,
+      enumerable: false,
+    });
   }
 }
