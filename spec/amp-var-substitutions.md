@@ -93,7 +93,7 @@ Please take note of the following scenarios:
 * Asynchronously resolved variables are not available
 
 ### Restrictions
-The `host` string of an URL does not accept variables.
+The `host` string of an URL does not accept variables. It fails on AMP cache.
 
 ## Variable substitution in links
 
