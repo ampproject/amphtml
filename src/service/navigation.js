@@ -124,6 +124,9 @@ export class Navigation {
      * @private {?Array<string>}
      */
     this.a2aFeatures_ = null;
+
+    /** @const @private {!Array<!LinkRule>} */
+    this.registeredLinksRules_ = [];
   }
 
   /**
@@ -253,8 +256,18 @@ export class Navigation {
       return;
     }
 
+    // Handle target's href transformations. Sort link rules by priority
+    // and execute based on that order.
+    this.registeredLinksRules_.sort((lr1, lr2) => {
+      return lr2.priority_ - lr1.priority_;
+    });
+    let locationTransformed = location;
+    this.registeredLinksRules_.forEach(lr => {
+      locationTransformed = lr.transform(locationTransformed);
+    });
+
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, target, location);
+    this.handleNavClick_(e, target, locationTransformed);
   }
 
   /**
@@ -410,6 +423,31 @@ export class Navigation {
   }
 
   /**
+   *
+   * @param {number} priority
+   * @return {boolean}
+   */
+  isLinkRulePriorityUsed_(priority) {
+    for (let i = 0; i < this.registeredLinksRules_.length; i++) {
+      const lr = this.registeredLinksRules_[i];
+      if (lr.priority_ === priority) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @param {!Function} callback
+   * @param {number} priority
+   */
+  registerLinkRule(callback, priority) {
+    user().assert(!this.isLinkRulePriorityUsed_(priority),
+        'Rule with same priority is already in use.');
+    this.registeredLinksRules_.push(new LinkRule(callback, priority));
+  }
+
+  /**
    * Scrolls the page to the given element.
    * @param {?Element} elem
    * @param {string} hash
@@ -487,5 +525,31 @@ function maybeExpandUrlParams(ampdoc, e) {
       target.setAttribute(ORIG_HREF_ATTRIBUTE, hrefToExpand);
     }
     target.setAttribute('href', newHref);
+  }
+}
+
+/**
+ * An href transformation applied to an anchor, executed according to its
+ * priority.
+ */
+class LinkRule {
+  /**
+   * @param {function(!Location):!Location} callback
+   * @param {number} priority
+   */
+  constructor(callback, priority) {
+    /** @const @private */
+    this.callback_ = callback;
+    /** @const @private */
+    this.priority_ = priority;
+  }
+
+  /**
+   * Calls the callback for transforming/mutating the location object.
+   * @param {!Location} location
+   * @return {!Location}
+   */
+  transform(location) {
+    return this.callback_(location);
   }
 }

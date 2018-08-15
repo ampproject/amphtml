@@ -92,6 +92,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
+
+    /** @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = null;
   }
 
   /** @override */
@@ -105,6 +108,12 @@ export class AmpList extends AMP.BaseElement {
 
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
         TAG, viewer, this.templates_);
+
+    this.navigation_ = Services.navigationForDoc(this.getAmpDoc());
+
+    this.navigation_.registerLinkRule(url => {
+      return url + '&ampList=appended';
+    }, 100);
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.

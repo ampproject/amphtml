@@ -144,6 +144,38 @@ describes.sandboxed('Navigation', {}, () => {
       });
     });
 
+    describe('link rules', () => {
+      const errorRe = /Rule with same priority is already in use./;
+      const priority = 100;
+      it('should throw error if priority is already in use', () => {
+        handler.registerLinkRule(url => {
+          return url + 'lr1';
+        }, priority);
+        allowConsoleError(() => {
+          expect(() => handler.registerLinkRule(url => {
+            return url + 'lr2';
+          }, priority)).to.throw(errorRe);
+        });
+      });
+
+      it('should throw error if priority is already in use', () => {
+        anchor.href = 'https://www.testing-1-2-3.org';
+        let transformedHref;
+        handler.registerLinkRule(location => {
+          location.href = location.href + '&second=2';
+          transformedHref = location.href;
+          return location;
+        }, 99);
+        handler.registerLinkRule(location => {
+          location.href = location.href + '&first=1';
+          transformedHref = location.href;
+          return location;
+        }, 100);
+        handler.handle_(event);
+        expect(transformedHref).to.equal(anchor.href + '&first=1&second=2');
+      });
+    });
+
     describe('link expansion', () => {
       it('should expand a link', () => {
         anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
