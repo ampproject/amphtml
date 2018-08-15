@@ -659,12 +659,12 @@ def PrintObject(descriptor, msg, registry, out):
   # set constructor instantiation.
   if fields:
     fields_string = '{' + ','.join(fields) + '}'
-    out.Line('var %s = /** @type {!%s} */ (Object.assign(new %s(%s), %s));' %
+    out.Line('let %s = /** @type {!%s} */ (oa(new %s(%s), %s));' %
              (this_message_reference, msg.DESCRIPTOR.full_name,
               msg.DESCRIPTOR.full_name, ','.join(constructor_arg_values),
               fields_string))
   else:
-    out.Line('var %s = new %s(%s);' %
+    out.Line('let %s = new %s(%s);' %
              (this_message_reference, msg.DESCRIPTOR.full_name,
               ','.join(constructor_arg_values)))
 
@@ -816,6 +816,9 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
     out.Line(' * @return {!%s}' % rules.DESCRIPTOR.full_name)
     out.Line(' */')
     out.Line('amp.validator.createRules = function() {')
+    # Shorthand object.assign to reduce the binary size of the validator rules
+    # generated.
+    out.Line('const oa = Object.assign;')
     out.PushIndent(2)
     PrintObject(descriptor, rules, registry, out)
 
