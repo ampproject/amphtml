@@ -687,7 +687,7 @@ function adoptStandardServicesForEmbed(childWin) {
   adoptServiceForEmbed(childWin, 'url');
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
-  adoptServiceForEmbed(childWin, 'navigation');
+  adoptServiceForEmbed(childWin, 'clickhandler');
 }
 
 
