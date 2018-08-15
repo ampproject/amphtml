@@ -85,25 +85,6 @@ export default class LinkRewriterService {
   }
 
   /**
-   * Find a registered link rewriter from its name.
-   * @param {*} maybeLinkRewriters
-   * @param {*} name
-   */
-  findLinkRewriterByName_(maybeLinkRewriters, name) {
-    if (!name) {
-      return null;
-    }
-
-    maybeLinkRewriters.forEach(linkRewriter => {
-      if (linkRewriter.name === name) {
-        return linkRewriter;
-      }
-    });
-
-    return null;
-  }
-
-  /**
    * If link rewriter priorities are set on the anchor re-ordered the list of linkRewriters.
    * @param {*} suitableLinkRewriters
    * @param {*} anchor
