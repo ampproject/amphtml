@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {crc32} from './crc32';
 
 /** @const {string} */
@@ -94,8 +93,8 @@ export class Linker {
     let result = '';
 
     keys.forEach(key => {
-      const encodedVal = base64UrlEncodeFromString(pairs[key]);
-      result += DELIMITER + key + DELIMITER + encodedVal;
+      result += DELIMITER + encodeURIComponent(key) + DELIMITER +
+          encodeURIComponent(pairs[key]);
     });
 
     return result;
