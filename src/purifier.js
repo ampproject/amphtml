@@ -73,7 +73,9 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'em',
   'i',
   'ins',
+  'li',
   'mark',
+  'ol',
   'p',
   'q',
   's',
@@ -91,6 +93,7 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'tfoot',
   'tr',
   'u',
+  'ul',
 ];
 
 /**
