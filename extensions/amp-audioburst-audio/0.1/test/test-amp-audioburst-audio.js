@@ -23,16 +23,18 @@ describes.realWin('amp-audioburst-audio', {
 }, env => {
 
   let win;
-  let element;
+  let audioburstAudio;
 
   beforeEach(() => {
     win = env.win;
-    element = win.document.createElement('amp-audioburst-audio');
-    win.document.body.appendChild(element);
+    audioburstAudio = win.document.createElement('amp-audioburst-audio');
+    audioburstAudio.setAttribute('layout', 'fixed-height');
+    audioburstAudio.setAttribute('height', '315');
+    audioburstAudio.setAttribute('src', 'https://sapi.audioburst.com/audio/repo/play/web/R6rDYxkvqVOK.mp3');
+    win.document.body.appendChild(audioburstAudio);
   });
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
+  it('should create element', () => {
+    expect(audioburstAudio.tagName).to.equal('AMP-AUDIOBURST-AUDIO');
   });
 });

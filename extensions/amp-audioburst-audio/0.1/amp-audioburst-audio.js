@@ -84,11 +84,11 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
+  /*buildCallback() {
     // this.container_.textContent = this.myText_;
     // this.element.appendChild(this.container_);
-    // this.applyFillContent(this.container_, /* replacedContent */ true);
-  }
+    // this.applyFillContent(this.container_, true);
+  }*/
 
   /** @override */
   layoutCallback() {
