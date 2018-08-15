@@ -10,10 +10,10 @@
 
 # Example of a good description:
 
-- Implements aspect X
-- Leaves out feature Y because of A
-- Improves performance by B
-- Improves accessibility by C
+- Implement aspect X
+- Leave out feature Y because of A
+- Improve performance by B
+- Improve accessibility by C
 
 # Emojis for categorizing pull requests:
 
