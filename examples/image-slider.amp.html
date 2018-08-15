@@ -108,6 +108,16 @@
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
     </amp-image-slider>
 
+    <p>Images toggle their own fallback</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="boom" layout="fill">
+        <amp-img fallback src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      </amp-img>
+      <amp-img src="boom" layout="fill">
+        <amp-img fallback src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      </amp-img>
+    </amp-image-slider>
+
     <p>Labels with NO positioning rules specified (default to both top left)</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
