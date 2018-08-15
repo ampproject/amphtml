@@ -104,6 +104,16 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
+   * @override
+   */
+  firstAttachedCallback() {
+    // Only allow prerender if video sources are cached on CDN. Set this value
+    // in `firstAttachedCallback` since `buildCallback` is too late and the
+    // element children may not be available in the constructor.
+    this.isPrerenderAllowed_ = this.hasAnyCachedSources_();
+  }
+
+  /**
    * AMP Cache may selectively cache certain video sources (based on various
    * heuristics such as video type, extensions, etc...).
    * When AMP Cache does so, it rewrites the `src` for `amp-video` and
@@ -173,8 +183,6 @@ class AmpVideo extends AMP.BaseElement {
       console/*OK*/.error(
           'No "poster" attribute has been provided for amp-video.');
     }
-
-    this.isPrerenderAllowed_ = this.hasAnyCachedSources_();
 
     // Enable inline play for iOS.
     this.video_.setAttribute('playsinline', '');
@@ -266,8 +274,6 @@ class AmpVideo extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT,
         dev().assertElement(this.video_),
         /* opt_removeMissingAttrs */ true);
@@ -277,6 +283,7 @@ class AmpVideo extends AMP.BaseElement {
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
     if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
@@ -395,21 +402,19 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {boolean}
    */
   hasAnyCachedSources_() {
     const {element} = this;
     const sources = toArray(childElementsByTag(element, 'source'));
     sources.push(element);
-
     for (let i = 0; i < sources.length; i++) {
       if (this.isCachedByCDN_(sources[i])) {
         return true;
       }
     }
-
     return false;
   }
-
 
   /**
    * @private
