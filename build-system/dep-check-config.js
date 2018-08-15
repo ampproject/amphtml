@@ -305,9 +305,6 @@ exports.rules = [
     mustNotDependOn: 'src/polyfills.js',
     whitelist: [
       'src/amp.js->src/polyfills.js',
-      'src/service.js->src/polyfills.js',
-      'src/service/timer-impl.js->src/polyfills.js',
-      'src/service/extensions-impl.js->src/polyfills.js',
     ],
   },
 
