@@ -45,7 +45,7 @@ describes.realWin('Linker', {
       pairs: {
         foo: '123',
       },
-      output: '1~mf9onh~foo~MTIz',
+      output: '1~1n4sgr~foo~123',
     },
     {
       description: 'appends one key value pair',
@@ -53,7 +53,7 @@ describes.realWin('Linker', {
       pairs: {
         key1: 'value1',
       },
-      output: '1~1pinp2k~key1~dmFsdWUx',
+      output: '1~v8ml5n~key1~value1',
     },
     {
       description: 'appends many key value pairs',
@@ -62,9 +62,9 @@ describes.realWin('Linker', {
         key1: 'value1',
         name: 'bob',
         color: 'green',
-        car: 'honda',
+        car: 'tesla',
       },
-      output: '1~fgkeaa~key1~dmFsdWUx~name~Ym9i~color~Z3JlZW4.~car~aG9uZGE.',
+      output: '1~1jsv73s~key1~value1~name~bob~color~green~car~tesla',
     },
     {
       description: 'fake macros',
@@ -73,7 +73,15 @@ describes.realWin('Linker', {
         cid: '12345',
         ref: 'https://www.example.com',
       },
-      output: '1~wqs6ww~cid~MTIzNDU.~ref~aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
+      output: '1~kj90f0~cid~12345~ref~https%3A%2F%2Fwww.example.com',
+    },
+    {
+      description: 'encodes url safe keys and values',
+      version: '1',
+      pairs: {
+        '<unsafe>': '//foo@bar',
+      },
+      output: '1~15mo0yg~%3Cunsafe%3E~%2F%2Ffoo%40bar',
     },
   ];
 
