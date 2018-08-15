@@ -174,6 +174,19 @@ describes.sandboxed('Navigation', {}, () => {
         handler.handle_(event);
         expect(transformedHref).to.equal(anchor.href + '&first=1&second=2');
       });
+
+      it('verify variable expansion happens before link rules', () => {
+        const expandVars = sandbox.spy(handler, 'expandVarsForAnchor_');
+        const obj = {
+          callback: location => {
+            return location;
+          },
+        };
+        const linkRuleSpy = sinon.spy(obj, 'callback');
+        handler.registerLinkRule(linkRuleSpy, 99);
+        handler.handle_(event);
+        sinon.assert.callOrder(expandVars, linkRuleSpy);
+      });
     });
 
     describe('link expansion', () => {
