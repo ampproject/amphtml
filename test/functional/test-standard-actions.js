@@ -320,7 +320,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
       beforeEach(() => {
         navigator = {navigateTo: sandbox.stub()};
-        sandbox.stub(Services, 'clickhHandlerForDoc').returns(navigator);
+        sandbox.stub(Services, 'clickHandlerForDoc').returns(navigator);
 
         // Fake ActionInvocation.
         invocation.method = 'navigateTo';
