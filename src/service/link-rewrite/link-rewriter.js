@@ -1,23 +1,33 @@
 import {user} from '../../log';
 
-import { createAnchorReplacementTuple, isAnchorReplacementTuple, AnchorRewriteDataResponse} from './link-rewrite-classes';
+import {AnchorRewriteDataResponse, createAnchorReplacementTuple, isAnchorReplacementTuple} from './link-rewrite-classes';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import EventMessenger from './event-messenger';
 
 export default class LinkRewriter {
   /**
    * Create a new linkRewriter instance you can then register to the LinkRewriteService.
+   * @param {*} iframeDoc
    * @param {*} name
    * @param {*} resolveUnknownLinks
    * @param {*} options
    */
-  constructor(name, resolveUnknownLinks, options) {
+  constructor(iframeDoc, name, resolveUnknownLinks, options) {
     this.name = name;
+    this.iframeDoc_ = iframeDoc;
     this.resolveUnknownLinks_ = resolveUnknownLinks;
-    this.linkSelector = options.linkSelector;
-    this.anchorReplacementMap_ = new Map();
+    this.linkSelector_ = options.linkSelector;
     this.restoreDelay_ = 300; //ms
     this.events = new EventMessenger();
+    this.reset();
+    this.scanLinksOnPage_();
+  }
+
+  /**
+   *
+   */
+  reset() {
+    this.anchorReplacementMap_ = new Map();
   }
 
   /**
@@ -74,7 +84,7 @@ export default class LinkRewriter {
    * Scan the page to find links and send events when scan is complete.
    */
   onDomUpdated() {
-    this.scanLinksOnPage_().then(() => {
+    return this.scanLinksOnPage_().then(() => {
       this.events.send(EVENTS.PAGE_SCANNED);
     });
   }
@@ -125,7 +135,7 @@ export default class LinkRewriter {
   getNewAnchors_(anchorList) {
     const unknownAnchors = [];
     anchorList.forEach(anchor => {
-      if (!this.anchorReplacementMap_.has(anchor)) {
+      if (!this.isWatchingLink(anchor)) {
         unknownAnchors.push(anchor);
       }
     });
@@ -165,6 +175,6 @@ export default class LinkRewriter {
    * (Based on linkSelector option)
    */
   getLinksInDOM_() {
-    return [].slice.call(document.querySelectorAll(this.linkSelector_ || 'a'));
+    return [].slice.call(this.iframeDoc_.querySelectorAll(this.linkSelector_ || 'a'));
   }
 }

@@ -8,16 +8,17 @@ export default class LinkRewriterService {
    *
    * @param {*} rootNode - ampDoc.getRootNode()
    */
-  constructor(rootNode) {
+  constructor(iframeDoc) {
     this.priorityList_ = [];
+    this.iframeDoc_ = iframeDoc;
     const metaTagSelector = `meta[name=${PRIORITY_META_TAG_NAME}]`;
-    const meta = rootNode.querySelector(metaTagSelector);
+    const meta = iframeDoc.querySelector(metaTagSelector);
 
     if (meta && meta.hasAttribute('content')) {
       this.priorityList_ = meta.getAttribute('content').trim().split(/\s+/);
     }
 
-    this.installGlobalEventListener_(rootNode);
+    this.installGlobalEventListener_(iframeDoc);
     this.linkRewriters_ = [];
   }
 
@@ -28,7 +29,7 @@ export default class LinkRewriterService {
    * @param {*} options
    */
   registerLinkRewriter(name, resolveUnknownLinks, options) {
-    const linkRewriter = new LinkRewriter(name, resolveUnknownLinks, options);
+    const linkRewriter = new LinkRewriter(this.iframeDoc_, name, resolveUnknownLinks, options);
     this.insertInListBasedOnPriority_(this.linkRewriters_, linkRewriter, this.priorityList_);
 
     return linkRewriter;
@@ -36,12 +37,12 @@ export default class LinkRewriterService {
 
   /**
    * Add DOM_UPDATE AND ANCHOR_CLICK listener.
-   * @param {*} rootNode
+   * @param {*} iframeDoc
    */
-  installGlobalEventListener_(rootNode) {
-    rootNode.addEventListener(AmpEvents.DOM_UPDATE,
+  installGlobalEventListener_(iframeDoc) {
+    iframeDoc.addEventListener(AmpEvents.DOM_UPDATE,
         this.onDomChanged_.bind(this));
-    rootNode.addEventListener(AmpEvents.ANCHOR_CLICK,
+    iframeDoc.addEventListener(AmpEvents.ANCHOR_CLICK,
         this.clickHandler_.bind(this));
   }
 
