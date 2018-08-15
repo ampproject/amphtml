@@ -41,7 +41,7 @@ limitations under the License.
 
 | Version | Description |
 | ------- | ----- |
-| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup doesn't affect functionality. |
+| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
 | 0.1 | Initial implementation. |
 
 ## Syntax
@@ -95,10 +95,10 @@ When using `amp-mustache` to template attribute values, quote escaping can be an
 
 ```html
 <template type="amp-mustache">
-  <!-- A double-quote (") in `foo` will cause a runtime error. -->
+  <!-- A double-quote (") in `foo` will cause malformed HTML. -->
   <amp-img alt="{{foo}}" src="example.jpg" width=100 height=100></amp-img>
 
-  <!-- A single-quote (') or double-quote (") in `bar` will cause a runtime error. -->
+  <!-- A single-quote (') or double-quote (") in `bar` will cause an AMP runtime parse error. -->
   <button on="tap:AMP.setState({foo: '{{bar}}'})">Click me</button>
 </template>
 ```
