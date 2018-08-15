@@ -41,7 +41,7 @@ limitations under the License.
 
 | Version | Description |
 | ------- | ----- |
-| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br>Internal improvements may cause minor breaking changes; we recommend testing your pages before adoption. |
+| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
 | 0.1 | Initial implementation. |
 
 ## Syntax
@@ -51,6 +51,7 @@ Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.
 - `{{variable}}`: A variable tag. It outputs the the HTML-escaped value of a variable.
 - `{{#section}}``{{/section}}`: A section tag. It can test the existence of a variable and iterate over it if it's an array.
 - `{{^section}}``{{/section}}`: An inverted tag. It can test the non-existence of a variable.
+- `{{{unescaped}}}`: Unescaped HTML. It's restricted in the markup it may output (see "Restrictions" below).
 
 ## Usage
 
@@ -81,11 +82,30 @@ that among other things, you can't use `amp-mustache` to:
 
 - Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
-- Output arbitrary HTML using `{{{unescaped}}}`. The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `colgroup`, `code`, `del`, `div`, `em`, `i`, `ins`, `mark`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`.
+
+The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `colgroup`, `code`, `del`, `div`, `em`, `i`, `ins`, `mark`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`.
 
 Notice also that because the body of the template has to be specified within the `template` element, it is
 impossible to specify `{{&var}}` expressions - they will always be escaped as `{{&amp;var}}`. The triple-mustache
 `{{{var}}}` has to be used for these cases.
+
+### Quote escaping
+
+When using `amp-mustache` to template attribute values, quote escaping can be an issue. For example:
+
+```html
+<template type="amp-mustache">
+  <!-- A double-quote (") in `foo` will cause malformed HTML. -->
+  <amp-img alt="{{foo}}" src="example.jpg" width=100 height=100></amp-img>
+
+  <!-- A single-quote (') or double-quote (") in `bar` will cause an AMP runtime parse error. -->
+  <button on="tap:AMP.setState({foo: '{{bar}}'})">Click me</button>
+</template>
+```
+
+Using HTML character codes is not possible since Mustache will escape `&` characters, e.g. `&quot;` -> `&amp;quot;`. A workaround is to change your backend to return alternate quote-like characters e.g. &prime; and &Prime;.
+
+There's an [open proposal](https://github.com/ampproject/amphtml/issues/8395) to perform this substitution in `amp-mustache` instead. Please comment on the issue if you'd like to support it.
 
 ## Validation
 
