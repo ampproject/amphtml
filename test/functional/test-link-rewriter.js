@@ -1,19 +1,21 @@
 import {AmpEvents} from '../../src/amp-events';
+import {PRIORITY_META_TAG_NAME} from '../../src/service/link-rewrite/constants';
 import {anchorClickActions} from '../../src/service/navigation';
 import {createCustomEvent} from '../../src/event-helper';
 import LinkRewriterService from '../../src/service/link-rewrite/link-rewrite-service';
 
 describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
-  let rootNode, linkRewriterService, win;
-  let sendEventHelper, registerLinkRewriterHelper;
+  let iframeDoc, linkRewriterService, win;
+  let sendEventHelper, registerLinkRewriterHelper, addPriorityMetaTagHelper;
+
+
   beforeEach(() => {
     win = env.win;
-    document = win.document;
-    rootNode = env.ampdoc.getRootNode();
-    env.sandbox.spy(rootNode, 'addEventListener');
-    env.sandbox.spy(rootNode, 'querySelector');
+    iframeDoc = env.ampdoc.getRootNode();
+    env.sandbox.spy(iframeDoc, 'addEventListener');
+    env.sandbox.spy(iframeDoc, 'querySelector');
 
-    linkRewriterService = new LinkRewriterService(rootNode);
+    linkRewriterService = new LinkRewriterService(iframeDoc);
 
     // Helper functions
     registerLinkRewriterHelper = vendorName => {
@@ -30,25 +32,45 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     sendEventHelper = (eventType, data) => {
       const event = createCustomEvent(win,
           eventType, data, {bubbles: true});
-      rootNode.dispatchEvent(event);
+      iframeDoc.dispatchEvent(event);
+    };
+
+    addPriorityMetaTagHelper = priorityRule => {
+      const meta = iframeDoc.createElement('meta');
+      meta.setAttribute('name', PRIORITY_META_TAG_NAME);
+      meta.setAttribute('content', priorityRule);
+      iframeDoc.head.appendChild(meta);
+      linkRewriterService = new LinkRewriterService(iframeDoc);
     };
   });
+
 
   afterEach(() => {
     env.sandbox.restore();
   });
 
+
   describe('When starting service', () => {
     it('Should listen for ANCHOR_CLICK', () => {
-      const spy = rootNode.addEventListener.withArgs(AmpEvents.ANCHOR_CLICK);
+      const spy = iframeDoc.addEventListener.withArgs(AmpEvents.ANCHOR_CLICK);
       expect(spy.calledOnce).to.be.true;
     });
 
     it('Should listen for DOM_UPDATE', () => {
-      const spy = rootNode.addEventListener.withArgs(AmpEvents.DOM_UPDATE);
+      const spy = iframeDoc.addEventListener.withArgs(AmpEvents.DOM_UPDATE);
       expect(spy.calledOnce).to.be.true;
     });
+
+    it('Should set default priorityList when no meta tag', () => {
+      expect(linkRewriterService.priorityList_).to.deep.equal([]);
+    });
+
+    it('Should read meta tag if available', () => {
+      addPriorityMetaTagHelper(' vendor1  vendor3 vendor2 ');
+      expect(linkRewriterService.priorityList_).to.deep.equal(['vendor1', 'vendor3', 'vendor2']);
+    });
   });
+
 
   describe('When registering new link rewriter', () => {
     it('Should simply add the link rewriter if no other link rewriter', () => {
@@ -58,7 +80,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     });
 
     it('Should set the highest priority in the first position', () => {
-      linkRewriterService.priorities = ['vendor2', 'vendor1'];
+      linkRewriterService.priorityList_ = ['vendor2', 'vendor1'];
 
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
@@ -68,7 +90,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     });
 
     it('Should set lower priority in the last position', () => {
-      linkRewriterService.priorities = ['vendor2', 'vendor1'];
+      linkRewriterService.priorityList_ = ['vendor2', 'vendor1'];
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
 
@@ -77,7 +99,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     });
 
     it('Should be insert linkRewriter in the middle', () => {
-      linkRewriterService.priorities = ['vendor2', 'vendor1', 'vendor3'];
+      linkRewriterService.priorityList_ = ['vendor2', 'vendor1', 'vendor3'];
 
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
       const linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
@@ -88,7 +110,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     });
 
     it('Should set link rewriters with no priorities at the end', () => {
-      linkRewriterService.priorities = ['vendor2', 'vendor1'];
+      linkRewriterService.priorityList_ = ['vendor2', 'vendor1'];
 
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
       const linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
@@ -103,6 +125,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     });
   });
 
+
   describe('On dom update', () => {
     it('Should notify all the links rewriter', () => {
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
@@ -116,6 +139,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       expect(linkRewriterVendor3.onDomUpdated.calledOnce).to.be.true;
     });
   });
+
 
   describe('On click', () => {
     beforeEach(() => {
@@ -133,7 +157,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       it('Should handle clicks of type "navigate-outbound"', () => {
         sendEventHelper(AmpEvents.ANCHOR_CLICK, {
           clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: document.createElement('a'),
+          anchor: iframeDoc.createElement('a'),
         });
         expect(linkRewriterService.getSuitableLinkRewritersForLink_.calledOnce).to.be.true;
       });
@@ -141,11 +165,12 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       it('Should support clicks of type "open-context-menu"', () => {
         sendEventHelper(AmpEvents.ANCHOR_CLICK, {
           clickActionType: anchorClickActions.OPEN_CONTEXT_MENU,
-          anchor: document.createElement('a'),
+          anchor: iframeDoc.createElement('a'),
         });
         expect(linkRewriterService.getSuitableLinkRewritersForLink_.calledOnce).to.be.true;
       });
     });
+
 
     describe('Send click event', () => {
       let linkRewriterVendor1, linkRewriterVendor2, linkRewriterVendor3;
@@ -170,7 +195,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       it('Should only send click event to suitable link rewriters', () => {
         sendEventHelper(AmpEvents.ANCHOR_CLICK, {
           clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: document.createElement('a'),
+          anchor: iframeDoc.createElement('a'),
         });
 
         expect(linkRewriterVendor1.events.send.calledOnce).to.be.true;
@@ -185,7 +210,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
 
         sendEventHelper(AmpEvents.ANCHOR_CLICK, {
           clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: document.createElement('a'),
+          anchor: iframeDoc.createElement('a'),
         });
 
         expect(getEventData(linkRewriterVendor1).replacedBy).to.equal('vendor1');
@@ -200,7 +225,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
 
         sendEventHelper(AmpEvents.ANCHOR_CLICK, {
           clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: document.createElement('a'),
+          anchor: iframeDoc.createElement('a'),
         });
 
         expect(getEventData(linkRewriterVendor1).replacedBy).to.be.null;
@@ -214,56 +239,97 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     describe('Calls rewriteAnchorUrl on the most suitable linkRewriter', () => {
       let linkRewriterVendor1, linkRewriterVendor2, linkRewriterVendor3;
 
-      beforeEach(() => {
-        linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
-        linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
-        linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
+      describe('Without page level priorities', () => {
+        beforeEach(() => {
+          linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
+          linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
+          linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
 
-        env.sandbox.stub(linkRewriterVendor1, 'isWatchingLink').returns(true);
-        env.sandbox.stub(linkRewriterVendor1.events, 'send');
-        env.sandbox.stub(linkRewriterVendor2, 'isWatchingLink').returns(false);
-        env.sandbox.stub(linkRewriterVendor2.events, 'send');
-        env.sandbox.stub(linkRewriterVendor3, 'isWatchingLink').returns(true);
-        env.sandbox.stub(linkRewriterVendor3.events, 'send');
-      });
-
-      it('Should ignore not suitable link rewriter', () => {
-        env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
-        env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(false);
-
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: document.createElement('a'),
+          env.sandbox.stub(linkRewriterVendor1, 'isWatchingLink').returns(true);
+          env.sandbox.stub(linkRewriterVendor1.events, 'send');
+          env.sandbox.stub(linkRewriterVendor2, 'isWatchingLink').returns(false);
+          env.sandbox.stub(linkRewriterVendor2.events, 'send');
+          env.sandbox.stub(linkRewriterVendor3, 'isWatchingLink').returns(true);
+          env.sandbox.stub(linkRewriterVendor3.events, 'send');
         });
 
-        expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
-        expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
-      });
+        it('Should ignore not suitable link rewriter', () => {
+          env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
+          env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(false);
 
+          sendEventHelper(AmpEvents.ANCHOR_CLICK, {
+            clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
+            anchor: iframeDoc.createElement('a'),
+          });
 
-      it.skip('Should respect page level priorities', () => {
-
-      });
-
-      it.skip('Should respect anchor level priorities', () => {
-
-      });
-
-      it('Should try the next one if no replacement', () => {
-        env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(false);
-        env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(false);
-        env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
-
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: document.createElement('a'),
+          expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
+          expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
         });
 
-        expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
-        expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
-        expect(linkRewriterVendor3.rewriteAnchorUrl.calledOnce).to.be.true;
+        it('Should try the next one if no replacement', () => {
+          env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(false);
+          env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(false);
+          env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
+
+          sendEventHelper(AmpEvents.ANCHOR_CLICK, {
+            clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
+            anchor: iframeDoc.createElement('a'),
+          });
+
+          expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
+          expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
+          expect(linkRewriterVendor3.rewriteAnchorUrl.calledOnce).to.be.true;
+        });
+      });
+
+
+      describe('With page level priorities', () => {
+        beforeEach(() => {
+          addPriorityMetaTagHelper('vendor3 vendor1');
+          linkRewriterService = new LinkRewriterService(iframeDoc);
+          linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
+          linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
+          linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
+
+          env.sandbox.stub(linkRewriterVendor1, 'isWatchingLink').returns(true);
+          env.sandbox.stub(linkRewriterVendor2, 'isWatchingLink').returns(true);
+          env.sandbox.stub(linkRewriterVendor3, 'isWatchingLink').returns(true);
+        });
+
+        it('Should respect page level priorities', () => {
+          env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
+          env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
+          env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
+
+          sendEventHelper(AmpEvents.ANCHOR_CLICK, {
+            clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
+            anchor: iframeDoc.createElement('a'),
+          });
+
+          expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.false;
+          expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
+          expect(linkRewriterVendor3.rewriteAnchorUrl.calledOnce).to.be.true;
+        });
+
+        it('Should respect anchor level priorities', () => {
+          env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(false);
+          env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
+          env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
+
+          const anchor = iframeDoc.createElement('a');
+          // Overwrite global priority
+          anchor.setAttribute('data-link-rewriters', 'vendor1 vendor3');
+
+          sendEventHelper(AmpEvents.ANCHOR_CLICK, {
+            clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
+            anchor,
+          });
+
+          expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
+          expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
+          expect(linkRewriterVendor3.rewriteAnchorUrl.calledOnce).to.be.true;
+        });
       });
     });
-
   });
 });
