@@ -182,11 +182,11 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/navigation.Navigation}
+   * @return {!./service/clickhandler.ClickHandler}
    */
-  static navigationForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/navigation.Navigation} */ (
-      getServiceForDoc(elementOrAmpDoc, 'navigation'));
+  static clickHandlerForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/clickhandler.ClickHandler} */ (
+      getServiceForDoc(elementOrAmpDoc, 'clickhandler'));
   }
 
   /**

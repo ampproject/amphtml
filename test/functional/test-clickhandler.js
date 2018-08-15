@@ -22,9 +22,9 @@ import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
 import {macroTask} from '../../testing/yield';
-import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
+import {maybeExpandUrlParamsForTesting} from '../../src/service/clickhandler';
 
-describes.sandboxed('Navigation', {}, () => {
+describes.sandboxed('ClickHandler', {}, () => {
   let event;
 
   beforeEach(() => {
@@ -61,7 +61,7 @@ describes.sandboxed('Navigation', {}, () => {
       win = env.win;
       doc = win.document;
 
-      handler = Services.navigationForDoc(doc);
+      handler = Services.clickHandlerForDoc(doc);
       handler.isIframed_ = true;
       decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
       handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
@@ -581,7 +581,7 @@ describes.sandboxed('Navigation', {}, () => {
         parentWin = env.parentWin;
         embed = env.embed;
 
-        handler = win.services.navigation.obj;
+        handler = win.services.clickhandler.obj;
         winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
           return {};
         });

@@ -19,7 +19,7 @@
  */
 
 import '../polyfills';
-import {Navigation} from '../service/navigation';
+import {ClickHandler} from '../service/clickhandler';
 import {Services} from '../services';
 import {
   adopt,
@@ -105,7 +105,7 @@ startupChunk(self.document, function initial() {
       stubElementsForDoc(ampdoc);
     });
     startupChunk(self.document, function final() {
-      Navigation.installAnchorClickInterceptor(ampdoc, self);
+      ClickHandler.installAnchorClickInterceptor(ampdoc, self);
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
     });
