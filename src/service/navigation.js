@@ -126,7 +126,7 @@ export class Navigation {
     this.a2aFeatures_ = null;
 
     /** @const @private {!Array<!LinkRule>} */
-    this.registeredLinksRules_ = [];
+    this.registeredLocationMutators_ = [];
   }
 
   /**
@@ -256,13 +256,13 @@ export class Navigation {
       return;
     }
 
-    // Handle target's href transformations. Sort link rules by priority
+    // Handle target's href transformations. Sort mutators by priority
     // and execute based on that order.
-    this.registeredLinksRules_.sort((lr1, lr2) => {
+    this.registeredLocationMutators_.sort((lr1, lr2) => {
       return lr2.priority_ - lr1.priority_;
     });
     let locationTransformed = location;
-    this.registeredLinksRules_.forEach(lr => {
+    this.registeredLocationMutators_.forEach(lr => {
       locationTransformed = lr.transform(locationTransformed);
     });
 
@@ -427,9 +427,9 @@ export class Navigation {
    * @param {number} priority
    * @return {boolean}
    */
-  isLinkRulePriorityUsed_(priority) {
-    for (let i = 0; i < this.registeredLinksRules_.length; i++) {
-      const lr = this.registeredLinksRules_[i];
+  isLocationRulePriorityUsed_(priority) {
+    for (let i = 0; i < this.registeredLocationMutators_.length; i++) {
+      const lr = this.registeredLocationMutators_[i];
       if (lr.priority_ === priority) {
         return true;
       }
@@ -442,9 +442,9 @@ export class Navigation {
    * @param {number} priority
    */
   registerLocationMutator(callback, priority) {
-    user().assert(!this.isLinkRulePriorityUsed_(priority),
+    user().assert(!this.isLocationRulePriorityUsed_(priority),
         'Rule with same priority is already in use.');
-    this.registeredLinksRules_.push(new LocationMutator(callback, priority));
+    this.registeredLocationMutators_.push(new LocationMutator(callback, priority));
   }
 
   /**
