@@ -71,17 +71,14 @@ export function twitter(global, data) {
       twttr.widgets.createMoment(data.momentid, tweet, data)
           ./*OK*/then(el => tweetCreated(twttr, el));
     } else if (data.timelineSourceType) {
-      twttr.widgets.createTimeline(
-          // Extract properties starting with 'timeline'.
-          Object.keys(data)
-              .filter(prop => startsWith(prop, 'timeline'))
-              .reduce((newData, prop) => {
-                newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
-                return newData;
-              }, {}),
-          tweet,
-          data
-      )
+      // Extract properties starting with 'timeline'.
+      const timelineData = Object.keys(data)
+          .filter(prop => startsWith(prop, 'timeline'))
+          .reduce((newData, prop) => {
+            newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
+            return newData;
+          }, {});
+      twttr.widgets.createTimeline(timelineData, tweet, data)
           ./*OK*/then(el => tweetCreated(twttr, el));
     }
   });

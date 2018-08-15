@@ -110,6 +110,11 @@ tags: {  # <amp-twitter>
     trigger: {
       also_requires_attr: "data-timeline-source-type"
     }
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+      allow_relative: false
+    }
   }
   # All
   attr_lists: "extended-amp-global"

@@ -98,7 +98,7 @@ Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/resp
 The ID of the Tweet or Moment, or the source type if a Timeline should be displayed.
 In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweet id.
 In a URL like https://twitter.com/i/moments/1009149991452135424, `1009149991452135424` is the moment id.
-Valid timeline source types include `profile`, `likes`, `list`, `collection`, `url`, or `widget`.
+Valid timeline source types include `profile`, `likes`, `list`, `collection`, `url`, and `widget`.
 
 ##### data-timeline-* (optional)
 
