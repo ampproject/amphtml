@@ -39,7 +39,7 @@ The following are **not** considered breaking changes:
 - Changes to elements and their children including their CSS if the element name starts with `i-`.
 - Changes to attribute and class names starting with `i-` (but this doesn't mean that CSS backward compatibility may be broken with this mechanism, which would be considered a breaking change).
 
-The following exceptions may be implemented without a new version<sup>1</sup>: 
+<sup>1</sup>The following exceptions may be implemented without a new version: 
 
 - Changes required to maintain the security of AMP pages.
 - Changes that affect fewer than 0.1% of crawler-accessible AMP pages.
