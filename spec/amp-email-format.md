@@ -266,7 +266,11 @@ Embedding AMP within an email is simple, add a new MIME part with a content type
   </noscript>
 </amp-img>
 
-It is important to note that the `text/x-amp-html` part must be nested under a `multipart/alternative` node, it will not be recognized by the email client otherwise. See the following example:
+Important things to note:
+- The `text/x-amp-html` part must be nested under a `multipart/alternative` node, it will not be recognized by the email client otherwise.
+- Some email clients will only render the last MIME part, so we recommend placing the `text/x-amp-html` MIME part *before* the `text/html` MIME part.
+
+See the following example:
 
 ```text
 From:  Person A <persona@gmail.com>
@@ -279,10 +283,6 @@ Content-Type: text/plain; charset="UTF-8"; format=flowed; delsp=yes
 
 Hello World in plain text!
 
---001a114634ac3555ae05525685ae
-Content-Type: text/html; charset="UTF-8"
-
-<span>Hello World in HTML!</span>
 --001a114634ac3555ae05525685ae
 Content-Type: text/x-amp-html; charset="UTF-8"
 
@@ -298,6 +298,10 @@ Hello World in AMP!
 </body>
 </html>
 --001a114634ac3555ae05525685ae--
+Content-Type: text/html; charset="UTF-8"
+
+<span>Hello World in HTML!</span>
+--001a114634ac3555ae05525685ae
 ```
 
 ## Replying/forwarding semantics
