@@ -49,10 +49,10 @@ export function batchFetchJsonFor(
   opt_urlReplacement = UrlReplacementPolicy.NONE)
 {
   assertHttpsUrl(element.getAttribute('src'), element);
-  return constructBatchFetchData(ampdoc, element, opt_urlReplacement)
+  return constructBatchFetchDef(ampdoc, element, opt_urlReplacement)
       .then(data => {
         return Services.batchedXhrFor(ampdoc.win)
-            .fetchJson(data['src'], data['fetchOpts']);
+            .fetchJson(data['xhrUrl'], data['fetchOpt']);
       }).then(res => res.json()).then(data => {
         if (data == null) {
           throw new Error('Response is undefined.');
@@ -68,10 +68,12 @@ export function batchFetchJsonFor(
  * @param {!Element} element
  * @param {!UrlReplacementPolicy} opt_urlReplacement If ALL, replaces all URL
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
- * @return {!Promise<!./service/xhr-impl.FetchData>}
+ * @return {!Promise<!./service/xhr-impl.FetchDef>}
  */
-export function constructBatchFetchData(
-  ampdoc, element, opt_urlReplacement) {
+export function constructBatchFetchDef(
+  ampdoc,
+  element,
+  opt_urlReplacement) {
   const url = element.getAttribute('src');
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(ampdoc);

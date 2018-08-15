@@ -435,10 +435,10 @@
           log('touch event!', name);
           return Promise.resolve();
         case 'viewerRenderTemplate':
-        const ampComponent = data.ampComponent.type
-        if (ampComponent === 'amp-list') {
+        const ampComponentType = data.ampComponent.type
+        if (ampComponentType === 'amp-list') {
           return this.ssrRenderAmpListTemplate_(data);
-        } else if (ampComponent == 'amp-form') {
+        } else if (ampComponentType == 'amp-form') {
           return this.ssrRenderAmpFormTemplate_(data);
         } else {
           return Promise.reject({error: 'source amp component is not valid'})
@@ -459,13 +459,28 @@
       // Mocked response.
       new Response
       return Promise.resolve({
-        data : "<ul><li>Some list item</li><li>Some list item</li><li>Some list item</li></ul>"
+        "html": "<ul><li>Some list item</li><li>Some list item</li><li>Some list item</li></ul>",
+        "body" : "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          }
+        }
       });
     };
 
     Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
       // Mocked response.
-      return Promise.resolve({data: "<div>Server side rendered search result</div>"});
+      return Promise.resolve({
+        "html": "<div>Server side rendered search result</div>",
+        "body": "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+            "AMP-Access-Control-Allow-Source-Origin": "http://localhost:8000"
+          }
+        }
+      });
     };
 
     Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {

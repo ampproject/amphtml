@@ -23,22 +23,19 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
-  constructBatchFetchData,
+  constructBatchFetchDef,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  fromStructuredCloneable,
-  setupAMPCors,
-  setupInit,
-  setupJsonFetchInit,
-  verifyAmpCORSHeaders,
-} from '../../../src/utils/xhr-utils';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import {
+  setupAMPCors,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -266,18 +263,17 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_() {
-    let fetchData;
-    const {win} = this;
+    let fetchDef;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
-    return constructBatchFetchData(
+    return constructBatchFetchDef(
         this.getAmpDoc(),
         this.element,
-        this.getPolicy_()).then(batchFetchData => {
-      batchFetchData.fetchOpt =
-          setupAMPCors(win, batchFetchData.xhrUrl, batchFetchData.fetchOpt);
-      setupJsonFetchInit(batchFetchData.fetchOpt);
-      setupInit(batchFetchData.fetchOpt);
+        this.getPolicy_()).then(batchFetchDef => {
+      fetchDef = batchFetchDef;
+      batchFetchDef.fetchOpt = setupAMPCors(
+          this.win, batchFetchDef.xhrUrl, batchFetchDef.fetchOpt);
+      setupJsonFetchInit(batchFetchDef.fetchOpt);
       const ampListAttributes = dict({
         'ampListAttributes': {
           'items': this.element.getAttribute('items') || 'items',
@@ -286,16 +282,15 @@ export class AmpList extends AMP.BaseElement {
         },
       });
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-          this.element, batchFetchData, null, ampListAttributes);
+          this.element, batchFetchDef, null, ampListAttributes);
     }).then(response => {
-      // Construct the fetch response and validate.
-      const fetchResponse =
-          fromStructuredCloneable(response, fetchData.responseType);
-      verifyAmpCORSHeaders(win, fetchResponse, fetchData.fetchOpt);
-      return fetchResponse;
+      fetchDef.responseType = 'application/json';
+      this.ssrTemplateHelper_.verifySsrResponse(
+          this.win, response, fetchDef);
+      return response['html'];
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(json => this.scheduleRender_(json))
+    }).then(html => this.scheduleRender_(html))
         .then(() => this.onFetchSuccess_(),
             error => this.onFetchError_(error));
   }
@@ -438,7 +433,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * return {UrlReplacementPolicy}
+   * return {!UrlReplacementPolicy}
    */
   getPolicy_() {
     const src = this.element.getAttribute('src');

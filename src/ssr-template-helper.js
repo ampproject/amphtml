@@ -15,6 +15,10 @@
  */
 
 import {dict} from './utils/object';
+import {
+  fromStructuredCloneable,
+  verifyAmpCORSHeaders,
+} from './utils/xhr-utils';
 import {toStructuredCloneable} from './utils/xhr-utils';
 
 /**
@@ -61,15 +65,15 @@ export class SsrTemplateHelper {
   /**
    * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
-   * @param {!./service/xhr-impl.FetchData} fetchData The fetch/XHR related data.
+   * @param {!./service/xhr-impl.FetchDef} fetchDef The fetch/XHR related data.
    * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.
-   * @param {?JsonObject=} opt_attributes Additional JSON to send to viewer.
+   * @param {!Object=} opt_attributes Additional JSON to send to viewer.
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
   fetchAndRenderTemplate(
-    element, fetchData, opt_templates = null, opt_attributes = null) {
+    element, fetchDef, opt_templates = null, opt_attributes = {}) {
     let mustacheTemplate;
     if (!opt_templates) {
       const template = this.templates_.maybeFindTemplate(element);
@@ -83,7 +87,7 @@ export class SsrTemplateHelper {
     return this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate',
         this.buildPayload_(
-            fetchData,
+            fetchDef,
             mustacheTemplate,
             opt_templates,
             opt_attributes
@@ -91,27 +95,34 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * @param {!./service/xhr-impl.FetchData} fetchData
+   * @param {!./service/xhr-impl.FetchDef} fetchDef
    * @param {string|undefined} mustacheTemplate
    * @param {?SsrTemplateDef=} opt_templates
-   * @param {?JsonObject=} opt_attributes
+   * @param {!Object=} opt_attributes
    */
-  buildPayload_(fetchData, mustacheTemplate, opt_templates, opt_attributes) {
+  buildPayload_(
+    fetchDef, mustacheTemplate, opt_templates, opt_attributes = {}) {
     const ampComponent = dict({
       'type': this.sourceComponent_,
+      'successTemplate': {
+        'type': 'amp-mustache',
+        'payload': opt_templates
+          ? this.xmls_.serializeToString(opt_templates['successTemplate'])
+          : mustacheTemplate,
+      },
+      'errorTemplate': {
+        'type': 'amp-mustache',
+        'payload': opt_templates
+          ? this.xmls_.serializeToString(
+              opt_templates['errorTemplate']) : null,
+      },
     });
-    ampComponent['successTemplate'] = dict({'type': 'amp-mustache'});
-    ampComponent['errorTemplate'] = dict({'type': 'amp-mustache'});
-    ampComponent['successTemplate']['payload'] = opt_templates
-      ? this.xmls_.serializeToString(opt_templates['successTemplate'])
-      : mustacheTemplate;
-    ampComponent['errorTemplate']['payload'] = opt_templates
-      ? this.xmls_.serializeToString(opt_templates['errorTemplate']) : null;
     const data = dict({
       'originalRequest':
-          toStructuredCloneable(fetchData.xhrUrl, fetchData.fetchOpt),
+          toStructuredCloneable(fetchDef.xhrUrl, fetchDef.fetchOpt),
       'ampComponent': ampComponent,
     });
+<<<<<<< HEAD
     data['successTemplate'] = opt_templates
       ? this.xmls_.serializeToString(opt_templates['successTemplate'])
       : mustacheTemplate;
@@ -121,5 +132,29 @@ export class SsrTemplateHelper {
 
     return this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate', data);
+=======
+    const additionalAttr = opt_attributes && Object.keys(opt_attributes);
+    if (additionalAttr) {
+      Object.keys(opt_attributes).forEach(key => {
+        data[key] = opt_attributes[key];
+      });
+    }
+    return data;
+>>>>>>> fix tests
+  }
+
+  /**
+   * Constructs the fetch response and verifies AMP CORS headers.
+   * @param {!Window} win
+   * @param {!JsonObject|string|undefined} response
+   * @param {!./service/xhr-impl.FetchDef|string} fetchDef
+   */
+  verifySsrResponse(win, response, fetchDef) {
+    verifyAmpCORSHeaders(
+        win,
+        fromStructuredCloneable(
+            response,
+            fetchDef.responseType),
+        fetchDef.fetchOpt);
   }
 }

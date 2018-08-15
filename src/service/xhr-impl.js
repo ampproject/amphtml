@@ -52,7 +52,7 @@ export let FetchInitJsonDef;
  *  fetchOpt: !FetchInitJsonDef
  * }}
  */
-export let FetchData;
+export let FetchDef;
 
 /**
  * A service that polyfills Fetch API for use within AMP.
