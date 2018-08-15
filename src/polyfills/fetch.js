@@ -54,7 +54,7 @@ let XMLHttpRequestDef;
  * @param {!Object|RequestInit=} init
  * @return {!Promise<!FetchResponse>}
  */
-export function fetchPolyfill(input, init) {
+export function fetchPolyfill(input, init = {}) {
   return new Promise(function(resolve, reject) {
     const requestMethod = normalizeMethod(init.method || 'GET');
     const xhr = createXhrRequest(requestMethod, input);
@@ -136,6 +136,7 @@ class FetchResponse {
     /** @const {number} */
     this.status = this.xhr_.status;
 
+    /** @const {string} */
     this.statusText = this.xhr_.statusText;
 
     /** @const {boolean} */
@@ -268,12 +269,14 @@ export class Response extends FetchResponse {
        * @return {string}
        */
       getResponseHeader(name) {
-        return hasOwn(lowercasedHeaders, name) ?
-          lowercasedHeaders[String(name).toLowerCase()] : null;
+        const headerName = String(name).toLowerCase();
+        return hasOwn(lowercasedHeaders, headerName) ?
+          lowercasedHeaders[headerName] : null;
       },
     }, init);
 
-    init.status = init.status || 200;
+    data.status = (init.status === undefined) ? 200 :
+      parseInt(init.status, 10);
 
     if (isArray(init.headers)) {
       init.headers.forEach(entry => {
@@ -288,9 +291,7 @@ export class Response extends FetchResponse {
             String(init.headers[key]);
       }
     }
-    if (init.status) {
-      data.status = parseInt(init.status, 10);
-    }
+
     if (init.statusText) {
       data.statusText = String(init.statusText);
     }
@@ -310,12 +311,14 @@ export function install(win) {
     Object.defineProperty(win, 'fetch', {
       value: fetch,
       writable: true,
-      enumerable: false,
+      enumerable: true,
+      configurable: true,
     });
     Object.defineProperty(win, 'Response', {
       value: Response,
       writable: true,
       enumerable: false,
+      configurable: true,
     });
   }
 }

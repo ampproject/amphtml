@@ -4,12 +4,22 @@ import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
 
 describes.sandboxed('fetch', {}, () => {
 
-  describe('fetch mothod', () => {
+  describe('fetch method', () => {
     let xhrCreated;
 
     function setupMockXhr() {
       const mockXhr = sandbox.useFakeXMLHttpRequest();
       xhrCreated = new Promise(resolve => mockXhr.onCreate = resolve);
+    }
+
+    function mockOkResponse() {
+      xhrCreated.then(
+          xhr => xhr.respond(
+              200, {
+                'Content-Type': 'text/xml',
+                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+              },
+              '<html></html>'));
     }
 
     beforeEach(() => {
@@ -21,38 +31,53 @@ describes.sandboxed('fetch', {}, () => {
       sandbox.restore();
     });
 
-    it('should allow GET and POST methods', () => {
-      const get = fetchPolyfill.bind(this, '/get?k=v1');
-      const post = fetchPolyfill.bind(this, '/post', {
+    it('should allow GET method', () => {
+      mockOkResponse();
+      return fetchPolyfill('/get?k=v1').then(response => {
+        expect(response.ok).to.be.equal(true);
+      });
+    });
+
+    it('should allow POST method', () => {
+      mockOkResponse();
+      return fetchPolyfill('/post', {
         method: 'POST',
         body: {
           hello: 'world',
         },
+      }).then(response => {
+        expect(response.ok).to.be.equal(true);
       });
-      const put = fetchPolyfill.bind(this, '/put', {
+    });
+
+    it('should not allow PUT method', () => {
+      mockOkResponse();
+      return expect(fetchPolyfill('/post', {
         method: 'PUT',
         body: {
           hello: 'world',
         },
-      });
-      const patch = fetchPolyfill.bind(this, '/patch', {
+      })).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
+    });
+
+    it('should not allow PATCH method', () => {
+      mockOkResponse();
+      return expect(fetchPolyfill('/post', {
         method: 'PATCH',
         body: {
           hello: 'world',
         },
-      });
-      const deleteMethod = fetchPolyfill.bind(this, '/delete', {
+      })).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
+    });
+
+    it('should not allow DELETE method', () => {
+      mockOkResponse();
+      return expect(fetchPolyfill('/post', {
         method: 'DELETE',
         body: {
-          id: 3,
+          hello: 'world',
         },
-      });
-
-      expect(get).to.not.throw();
-      expect(post).to.not.throw();
-      allowConsoleError(() => { expect(put).to.throw(); });
-      allowConsoleError(() => { expect(patch).to.throw(); });
-      allowConsoleError(() => { expect(deleteMethod).to.throw(); });
+      })).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
     });
 
     it('should allow FormData as body', () => {
@@ -134,7 +159,7 @@ describes.sandboxed('fetch', {}, () => {
         + 'for undefined status', () => {
       let response = new Response(TEST_TEXT, {status: undefined});
       expect(response.status).to.be.equals(200);
-      response = new Response(TEST_TEXT, {status: null});
+      response = new Response(TEST_TEXT);
       expect(response.status).to.be.equals(200);
     });
 
