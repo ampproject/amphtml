@@ -75,6 +75,11 @@
    *     ".another-loading-complete-css-class"
    *   ],
    *
+   *   // [optional] A duration of time (in milliseconds) to wait after all
+   *   // other loading is complete, before taking a snapshot. Can be used to
+   *   // allow CSS transitions or other effects to complete.
+   *   "loading_complete_delay_ms": 1000,
+   *
    *   // [optional] Experiments that must be enabled via cookies.
    *   "experiments": [
    *     "amp-feature-one",
@@ -198,7 +203,8 @@
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         "amp-story-page#page-2[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
@@ -246,7 +252,8 @@
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         "amp-story-page#the-one-with-the-cta-layer[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
       "url": "examples/visual-tests/amp-story/embed-mode-1.html",
@@ -317,7 +324,8 @@
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-share-pill-label",
         "amp-story-page#page-2[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
@@ -370,7 +378,8 @@
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-share-pill-label",
         "amp-story-page#the-one-with-the-cta-layer[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
       "url": "examples/visual-tests/amp-story/embed-mode-1.html",
@@ -425,7 +434,8 @@
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         "amp-story-page#page-2[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
       "url": "examples/visual-tests/amp-story/share-menu.rtl.html",
@@ -471,7 +481,8 @@
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-share-pill-label",
         "amp-story-page#page-2[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
