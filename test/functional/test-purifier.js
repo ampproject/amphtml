@@ -435,6 +435,11 @@ function runSanitizerTests() {
           '<b>a<i>b</i></b>');
     });
 
+    it('should support list tags', () => {
+      const html = '<ol><li></li></ol><ul></ul>';
+      expect(purifyTagsForTripleMustache(html)).to.be.equal(html);
+    });
+
     describe('should sanitize `style` attribute', () => {
       it('should allow valid styles',() => {
         expect(purify('<div style="color:blue">Test</div>'))
