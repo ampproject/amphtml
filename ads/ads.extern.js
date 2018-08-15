@@ -60,6 +60,7 @@ data.tweetid
 data.formula
 var mathjax
 mathjax.Hub
+mathjax.Hub.Config
 mathjax.Hub.Queue
 window.MathJax
 
