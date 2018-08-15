@@ -144,15 +144,15 @@ describes.sandboxed('Navigation', {}, () => {
       });
     });
 
-    describe('link rules', () => {
+    describe('locations mutators', () => {
       const errorRe = /Rule with same priority is already in use./;
       const priority = 100;
       it('should throw error if priority is already in use', () => {
-        handler.registerLinkRule(url => {
+        handler.registerLocationMutator(url => {
           return url + 'lr1';
         }, priority);
         allowConsoleError(() => {
-          expect(() => handler.registerLinkRule(url => {
+          expect(() => handler.registerLocationMutator(url => {
             return url + 'lr2';
           }, priority)).to.throw(errorRe);
         });
@@ -161,12 +161,12 @@ describes.sandboxed('Navigation', {}, () => {
       it('should throw error if priority is already in use', () => {
         anchor.href = 'https://www.testing-1-2-3.org';
         let transformedHref;
-        handler.registerLinkRule(location => {
+        handler.registerLocationMutator(location => {
           location.href = location.href + '&second=2';
           transformedHref = location.href;
           return location;
         }, 99);
-        handler.registerLinkRule(location => {
+        handler.registerLocationMutator(location => {
           location.href = location.href + '&first=1';
           transformedHref = location.href;
           return location;
@@ -183,7 +183,7 @@ describes.sandboxed('Navigation', {}, () => {
           },
         };
         const linkRuleSpy = sinon.spy(obj, 'callback');
-        handler.registerLinkRule(linkRuleSpy, 99);
+        handler.registerLocationMutator(linkRuleSpy, 99);
         handler.handle_(event);
         sinon.assert.callOrder(expandVars, linkRuleSpy);
       });
