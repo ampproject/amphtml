@@ -28,6 +28,15 @@ async function copyAndReplaceUrls(src, dest) {
   await Promise.all(promises);
 }
 
+async function modifyThirdPartyUrl() {
+  const filePath = 'firebase/dist/amp.js';
+  const data = await fs.readFile('firebase/dist/amp.js', 'utf8');
+  const result = data.replace(
+      'self.AMP_CONFIG={',
+      'self.AMP_CONFIG={"thirdPartyUrl":location.origin,');
+  await fs.writeFile(filePath, result, 'utf8');
+}
+
 async function generateFirebaseFolder() {
   await fs.mkdirp('firebase');
   if (argv.file) {
@@ -43,9 +52,15 @@ async function generateFirebaseFolder() {
     ]);
   }
   log(colors.green('Copying local amp files from dist folder.'));
-  await fs.copy('dist', 'firebase/dist', {overwrite: true});
-  await fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js',
-      {overwrite: true});
+  await Promise.all([
+    fs.copy('dist', 'firebase/dist', {overwrite: true}),
+    fs.copy('dist.3p/current', 'firebase/dist.3p/current', {overwrite: true}),
+  ]);
+  await Promise.all([
+    modifyThirdPartyUrl(),
+    fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js',
+        {overwrite: true}),
+  ]);
 }
 
 async function replaceUrls(filePath) {
