@@ -60,7 +60,7 @@ Process:
 
 ### Version deprecations
 
-Old versions of the AMP JS library and extensions may eventually be declared invalid by the AMP Validator. Such changes must also follow AMP's deprecations policy and additional deprecation rules prior to invalidation. 
+Old versions of the AMP JS library and extensions may eventually be declared invalid by the AMP Validator. Such changes are breaking and must the deprecations policy above as well as additional rules prior to invalidation:
 
 - A version must not be deprecated until a new version is released and stable for at least 1 month.
 - A version must not be invalidated until it has been deprecated for at least 1 year.
