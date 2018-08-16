@@ -34,11 +34,13 @@ describes.realWin('amp-list component', {
   let viewerMock;
   let setBindService;
   let template;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    sandbox = env.sandbox;
 
     const templates = Services.templatesFor(win);
     templatesMock = sandbox.mock(templates);
@@ -168,10 +170,6 @@ describes.realWin('amp-list component', {
   describe('without amp-bind', () => {
     beforeEach(() => {
       setBindService(null);
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should fetch and render', () => {

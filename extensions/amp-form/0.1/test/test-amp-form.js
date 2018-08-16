@@ -165,12 +165,12 @@ describes.repeated('', {
       });
 
       it('should server side render templates if enabled', () => {
+        const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
+        const fromStructuredCloneable =
+            sandbox.spy(xhrUtils, 'fromStructuredCloneable');
+        const verifyAmpCORSHeaders =
+            sandbox.spy(xhrUtils, 'verifyAmpCORSHeaders');
         ampForm.then(ampForm => {
-          const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
-          const fromStructuredCloneable =
-              sandbox.spy(xhrUtils, 'fromStructuredCloneable');
-          const verifyAmpCORSHeaders =
-              sandbox.spy(xhrUtils, 'verifyAmpCORSHeaders');
           const form = ampForm.form_;
           const template = createElement('template');
           template.setAttribute('type', 'amp-mustache');
