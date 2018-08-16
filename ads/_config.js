@@ -779,6 +779,11 @@ export const adConfig = {
 
   'rubicon': {},
 
+  'runative': {
+    prefetch: 'https://cdn.run-syndicate.com/sdk/v1/n.js',
+    renderStartImplemented: true,
+  },
+
   'sekindo': {
     renderStartImplemented: true,
   },
