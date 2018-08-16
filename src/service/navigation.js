@@ -125,7 +125,7 @@ export class Navigation {
      */
     this.a2aFeatures_ = null;
 
-    /** @const @private {!Array<!LinkRule>} */
+    /** @const @private {!Array<!AnchorMutator>} */
     this.registeredAnchorMutators_ = [];
   }
 
