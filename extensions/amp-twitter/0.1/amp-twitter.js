@@ -31,7 +31,7 @@ import {setStyle} from '../../../src/style';
  *    plusing.
  */
 function isPulsingPlaceholder(win) {
-  return isExperimentOn(win, 'twitter-default-placeholder');
+  return isExperimentOn(win, 'twitter-default-placeholder-pulse');
 }
 
 /**
@@ -45,10 +45,11 @@ function isFadingPlaceholder(win) {
 
 /**
  * @param {!Window} win
- * @return {boolean} True if we should show the default placeholder.
+ * @return {boolean} True if we should show the default placeholder with
+ *    a burst ending animation.
  */
-function isStaticPlaceholder(win) {
-  return isExperimentOn(win, 'twitter-default-placeholder-static');
+function isBurstingPlaceholder(win) {
+  return isExperimentOn(win, 'twitter-default-placeholder-burst');
 }
 
 /**
@@ -56,8 +57,7 @@ function isStaticPlaceholder(win) {
  * @return {boolean} True if we should show the default placeholder.
  */
 function enableDefaultPlaceholder(win) {
-  return isPulsingPlaceholder(win) || isStaticPlaceholder(win) ||
-      isFadingPlaceholder(win);
+  return isExperimentOn(win, 'twitter-default-placeholder');
 }
 
 class AmpTwitter extends AMP.BaseElement {
@@ -134,6 +134,9 @@ class AmpTwitter extends AMP.BaseElement {
     }
     if (isFadingPlaceholder(this.win)) {
       this.element.classList.add('i-amphtml-twitter-fade');
+    }
+    if (isBurstingPlaceholder(this.win)) {
+      this.element.classList.add('i-amphtml-twitter-burst');
     }
     this.updateForLoadingState_();
     listenFor(iframe, MessageType.EMBED_SIZE, data => {
