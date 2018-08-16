@@ -261,6 +261,12 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!MediaPool} */
     this.mediaPool_ = MediaPool.for(this);
 
+    /** @private {boolean} */
+    this.areAccessAuthorizationsCompleted_ = false;
+
+    /** @private */
+    this.navigateToPageAfterAccess_ = null;
+
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
@@ -714,6 +720,7 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => this.markStoryAsLoaded_());
 
     this.handleConsentExtension_();
+    this.initializeStoryAccess_();
 
     return storyLayoutPromise;
   }
@@ -802,6 +809,47 @@ export class AmpStory extends AMP.BaseElement {
     }
     dev().error(TAG, `amp-consent only allows tags: ${allowedTags}`);
     toRemoveChildren.forEach(el => consentEl.removeChild(el));
+  }
+
+
+  /**
+   * @private
+   */
+  initializeStoryAccess_() {
+    Services.accessServiceForDocOrNull(this.getAmpDoc()).then(accessService => {
+      if (!accessService) {
+        return;
+      }
+
+      this.areAccessAuthorizationsCompleted_ =
+          accessService.areFirstAuthorizationsCompleted();
+      accessService.onApplyAuthorizations(
+          () => this.onAccessApplyAuthorizations_());
+    });
+  }
+
+
+  /**
+   * On amp-access document reauthorization, maybe hide the access UI, and maybe
+   * perform navigation.
+   * @private
+   */
+  onAccessApplyAuthorizations_() {
+    this.areAccessAuthorizationsCompleted_ = true;
+
+    const nextPage = this.navigateToPageAfterAccess_;
+
+    // Step out if the next page is still hidden by the access extension.
+    if (nextPage && nextPage.element.hasAttribute('amp-access-hide')) {
+      return;
+    }
+
+    if (nextPage) {
+      this.navigateToPageAfterAccess_ = null;
+      this.switchTo_(nextPage.element.id);
+    }
+
+    this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
   }
 
 
@@ -895,6 +943,23 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
+    // If the next page might be paywall protected, and the access
+    // authorizations did not resolve yet, wait before navigating.
+    // TODO(gmajoulet): add a loading state.
+    if (targetPage.element.hasAttribute('amp-access') &&
+        !this.areAccessAuthorizationsCompleted_) {
+      this.navigateToPageAfterAccess_ = targetPage;
+      return Promise.resolve();
+    }
+
+    // If the next page is paywall protected, display the access UI and wait for
+    // the document to be reauthorized.
+    if (targetPage.element.hasAttribute('amp-access-hide')) {
+      this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
+      this.navigateToPageAfterAccess_ = targetPage;
+      return Promise.resolve();
+    }
+
     this.storeService_.dispatch(Action.CHANGE_PAGE, {
       id: targetPageId,
       index: pageIndex,
@@ -973,6 +1038,23 @@ export class AmpStory extends AMP.BaseElement {
 
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && (this.activePage_.element.id === targetPageId)) {
+      return Promise.resolve();
+    }
+
+    // If the next page might be paywall protected, and the access
+    // authorizations did not resolve yet, wait before navigating.
+    // TODO(gmajoulet): implement a loading state.
+    if (targetPage.element.hasAttribute('amp-access') &&
+        !this.areAccessAuthorizationsCompleted_) {
+      this.navigateToPageAfterAccess_ = targetPage;
+      return Promise.resolve();
+    }
+
+    // If the next page is paywall protected, display the access UI and wait for
+    // the document to be reauthorized.
+    if (targetPage.element.hasAttribute('amp-access-hide')) {
+      this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
+      this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
     }
 
