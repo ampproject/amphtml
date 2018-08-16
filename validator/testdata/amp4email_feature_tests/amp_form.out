@@ -139,13 +139,5 @@ amp4email_feature_tests/amp_form.html:115:8 The tag 'TEMPLATE (AMP4EMAIL)' may n
 |        </template>
 |      </div>
 |    </form>
-|    <!-- Invalid: invalid usage of submitting attribute -->
-|    <form method="get" action-xhr="https://example.com/subscribe">
-|      <div submitting template="mytemplate">
->>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:123:4 The attribute 'template' may not appear in tag 'FORM DIV [submitting]'. [DISALLOWED_HTML]
-|        Submitting form...
-|      </div>
-|    </form>
 |  </body>
 |  </html>
