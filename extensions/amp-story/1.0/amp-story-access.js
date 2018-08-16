@@ -83,7 +83,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout.CONTAINER;
   }
 
   /** @override */
