@@ -891,8 +891,12 @@ export class Viewer {
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
     const {protocol} = url;
-    if (protocol != 'https:' && protocol != 'x-thread:') {
-      // Non-https origins are never trusted. Android x-thread is allowed.
+    // Android x-thread is allowed.
+    if (protocol == 'x-thread:') {
+      return true;
+    }
+    if (protocol != 'https:') {
+      // Non-https origins are never trusted.
       return false;
     }
     return TRUSTED_VIEWER_HOSTS.some(th => th.test(url.hostname));
