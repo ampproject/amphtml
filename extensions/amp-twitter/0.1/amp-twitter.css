@@ -55,7 +55,7 @@ amp-twitter {
   height: 100%;
 }
 
-.i-amphtml-twitter-pulse .i-amphtml-twitter-placeholder-svg  {
+.i-amphtml-twitter-pulse:not([i-amphtml-loading]) .i-amphtml-twitter-placeholder-svg  {
   transition-property: transform, opacity;
   transition-duration: 100ms;
   transition-timing-function: ease-in;
@@ -97,7 +97,7 @@ amp-twitter[i-amphtml-loading="done"] .i-amphtml-twitter-placeholder-svg {
   opacity: 0;
 }
 
-.i-amphtml-twitter-pulse[i-amphtml-loading="done"] .i-amphtml-twitter-placeholder-svg  {
+.i-amphtml-twitter-burst[i-amphtml-loading="done"] .i-amphtml-twitter-placeholder-svg  {
   transition-duration: 250ms;
   transition-timing-function: ease-out;
   transform: scale(12);
