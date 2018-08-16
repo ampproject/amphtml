@@ -14,99 +14,101 @@
  * limitations under the License.
  */
 
+import {WindowInterface} from '../../../src/window-interface';
 import {crc32} from './crc32';
 
 /** @const {string} */
 const DELIMITER = '~';
 
 /**
- * Creates a new query string parameter to be used for cross-domain ID syncing.
- * &<paramName>=<version>~<checksum>~<key1>~<value1>~<key2>~<value2>...
+ * Creates the linker param from the given config, and returns the url with
+ * the given param attached.
+ * @param {string} version
+ * @param {Object<string,string>} pairs
+ * @return {string}
  */
-export class Linker {
-  /**
-   * Creates the linker param from the given config, and returns the url with
-   * the given param attached.
-   * @param {string} version
-   * @param {Object<string,string>} pairs
-   * @return {string}
-   */
-  create(version, pairs) {
-    if (!pairs || !Object.keys(pairs).length) {
-      return '';
-    }
-
-    return this.generateParam_(version, pairs);
+export function createLinker(version, pairs) {
+  if (!pairs || !Object.keys(pairs).length) {
+    return '';
   }
 
-
-  /**
-   * Generate the completed querystring.
-   * <paramName>=<version>~<checksum>~<key1>~<value1>~<key2>~<value2>...
-   * @param {string} version
-   * @param {Object<string, string>} pairs
-   * @return {string}
-   */
-  generateParam_(version, pairs) {
-    const encodedPairs = this.encodePairs_(pairs);
-    const checksum = this.getCheckSum_(encodedPairs);
-    return version + DELIMITER + checksum + encodedPairs;
-  }
+  return generateParam(version, pairs);
+}
 
 
-  /**
-   * Create a unique checksum hashing the fingerprint and a few other values.
-   * base36(CRC32(fingerprint + timestampRoundedInMin + kv pairs))
-   * @param {Object<string, string>} encodedPairs
-   * @return {string}
-   */
-  getCheckSum_(encodedPairs) {
-    const fingerprint = this.getFingerprint_();
-    const timestamp = this.getMinSinceEpoch_();
-    const crc = crc32([fingerprint, timestamp, encodedPairs].join(DELIMITER));
-    // Encoded to base36 for less bytes.
-    return crc.toString(36);
-  }
+/**
+ * Generate the completed querystring.
+ * <paramName>=<version>~<checksum>~<key1>~<value1>~<key2>~<value2>...
+ * @param {string} version
+ * @param {Object<string, string>} pairs
+ * @return {string}
+ */
+function generateParam(version, pairs) {
+  const encodedPairs = encodePairs(pairs);
+  const checksum = getCheckSum(encodedPairs);
+  return [version, checksum, encodedPairs].join(DELIMITER);
+}
 
 
-  /**
-   * Generates a semi-unique value for page visitor.
-   * User Agent + ~ + timezone + ~ + language.
-   * @return {string}
-   */
-  getFingerprint_() {
-    const date = new Date();
-    const timezone = date.getTimezoneOffset();
-
-    const language = navigator.userLanguage || navigator.language;
-    return navigator.userAgent + DELIMITER + timezone + DELIMITER + language;
-  }
-
-
-  /**
-   * Encode all values & join them together. Do not encode keys.
-   * @param {Object<string, string>} pairs
-   * @return {string}
-   */
-  encodePairs_(pairs) {
-    const keys = Object.keys(pairs);
-    let result = '';
-
-    keys.forEach(key => {
-      result += DELIMITER + encodeURIComponent(key) + DELIMITER +
-          encodeURIComponent(pairs[key]);
-    });
-
-    return result;
-  }
+/**
+ * Create a unique checksum hashing the fingerprint and a few other values.
+ * base36(CRC32(fingerprint + timestampRoundedInMin + kv pairs))
+ * @param {Object<string, string>} encodedPairs
+ * @return {string}
+ */
+function getCheckSum(encodedPairs) {
+  const fingerprint = getFingerprint();
+  const timestamp = getMinSinceEpoch();
+  const crc = crc32([fingerprint, timestamp, encodedPairs].join(DELIMITER));
+  // Encoded to base36 for less bytes.
+  return crc.toString(36);
+}
 
 
-  /**
-   * Rounded time used to check if t2 - t1 is within our time tolerance.
-   * @return {number}
-   */
-  getMinSinceEpoch_() {
-    // Timestamp in minutes, floored.
-    return Math.floor(Date.now() / 60000);
-  }
+/**
+ * Generates a semi-unique value for page visitor.
+ * User Agent + ~ + timezone + ~ + language.
+ * @return {string}
+ */
+function getFingerprint() {
+  const date = new Date();
+  const timezone = date.getTimezoneOffset();
+
+  const language = WindowInterface.getUserLanguage(window);
+  return [WindowInterface.getUserAgent(window), timezone, language]
+      .join(DELIMITER);
+}
+
+
+/**
+ * Encode all values & join them together
+ * @param {Object<string, string>} pairs
+ * @return {string}
+ */
+function encodePairs(pairs) {
+  const keys = Object.keys(pairs);
+
+  return keys
+      .map(key => encode(key) + DELIMITER + encode(pairs[key]))
+      .join(DELIMITER);
+}
+
+
+/**
+ * Rounded time used to check if t2 - t1 is within our time tolerance.
+ * @return {number}
+ */
+function getMinSinceEpoch() {
+  // Timestamp in minutes, floored.
+  return Math.floor(Date.now() / 60000);
+}
+
+
+/**
+ * Function that encodesURIComponent but also tilde, since we are using it as
+ * our delimiter.
+ * @param {string} value
+ */
+function encode(value) {
+  return encodeURIComponent(String(value)).replace(/~/g, '%7E');
 }

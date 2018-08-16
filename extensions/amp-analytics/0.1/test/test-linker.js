@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
-import {Linker} from '../linker';
+import {createLinker} from '../linker';
+import {mockWindowInterface} from '../../../../testing/test-helper';
 
-describes.realWin('Linker', {
-  amp: true,
-}, env => {
-  let ampdoc;
-  let linker;
+describe('Linker', () => {
   let sandbox;
 
   beforeEach(() => {
-    ampdoc = env.ampdoc;
-    sandbox = env.sandbox;
-    linker = new Linker(ampdoc);
     // Linker uses a timestamp value to generate checksum.
+    sandbox = sinon.sandbox;
     sandbox.useFakeTimers();
+    const mockWin = mockWindowInterface(sandbox);
+    mockWin.getUserAgent.returns('Chrome 70');
+    mockWin.getUserLanguage.returns('en-US');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   const tests = [
     {
       description: 'returns empty string if no pairs given',
       version: '1',
-      pairs: {
-      },
+      pairs: {},
       output: '',
     },
     {
@@ -45,7 +46,7 @@ describes.realWin('Linker', {
       pairs: {
         foo: '123',
       },
-      output: '1~1n4sgr~foo~123',
+      output: '1~18f0n76~foo~123',
     },
     {
       description: 'appends one key value pair',
@@ -53,7 +54,7 @@ describes.realWin('Linker', {
       pairs: {
         key1: 'value1',
       },
-      output: '1~v8ml5n~key1~value1',
+      output: '1~1s4yxti~key1~value1',
     },
     {
       description: 'appends many key value pairs',
@@ -64,7 +65,7 @@ describes.realWin('Linker', {
         color: 'green',
         car: 'tesla',
       },
-      output: '1~1jsv73s~key1~value1~name~bob~color~green~car~tesla',
+      output: '1~1wb5u39~key1~value1~name~bob~color~green~car~tesla',
     },
     {
       description: 'fake macros',
@@ -73,7 +74,7 @@ describes.realWin('Linker', {
         cid: '12345',
         ref: 'https://www.example.com',
       },
-      output: '1~kj90f0~cid~12345~ref~https%3A%2F%2Fwww.example.com',
+      output: '1~4envk6~cid~12345~ref~https%3A%2F%2Fwww.example.com',
     },
     {
       description: 'encodes url safe keys and values',
@@ -81,13 +82,22 @@ describes.realWin('Linker', {
       pairs: {
         '<unsafe>': '//foo@bar',
       },
-      output: '1~15mo0yg~%3Cunsafe%3E~%2F%2Ffoo%40bar',
+      output: '1~19v1jue~%3Cunsafe%3E~%2F%2Ffoo%40bar',
+    },
+    {
+      description: 'encodes tilde in key value pairs',
+      version: '1',
+      pairs: {
+        '~key~': 'hi',
+        'key2': '~hi~',
+      },
+      output: '1~byq5jo~%7Ekey%7E~hi~key2~%7Ehi%7E',
     },
   ];
 
   tests.forEach(test => {
     it(test.description, () => {
-      const result = linker.create(test.version, test.pairs);
+      const result = createLinker(test.version, test.pairs);
       return expect(result).to.equal(test.output);
     });
   });
