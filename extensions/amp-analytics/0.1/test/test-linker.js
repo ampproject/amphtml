@@ -24,6 +24,8 @@ describe('Linker', () => {
     // Linker uses a timestamp value to generate checksum.
     sandbox = sinon.sandbox;
     sandbox.useFakeTimers();
+    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(400);
+
     const mockWin = mockWindowInterface(sandbox);
     mockWin.getUserAgent.returns('Chrome 70');
     mockWin.getUserLanguage.returns('en-US');
@@ -46,7 +48,7 @@ describe('Linker', () => {
       pairs: {
         foo: '123',
       },
-      output: '1~18f0n76~foo~123',
+      output: '1~1eum8hq~foo~123',
     },
     {
       description: 'appends one key value pair',
@@ -54,7 +56,7 @@ describe('Linker', () => {
       pairs: {
         key1: 'value1',
       },
-      output: '1~1s4yxti~key1~value1',
+      output: '1~q74iie~key1~value1',
     },
     {
       description: 'appends many key value pairs',
@@ -65,7 +67,7 @@ describe('Linker', () => {
         color: 'green',
         car: 'tesla',
       },
-      output: '1~1wb5u39~key1~value1~name~bob~color~green~car~tesla',
+      output: '1~1eit8v3~key1~value1~name~bob~color~green~car~tesla',
     },
     {
       description: 'fake macros',
@@ -74,7 +76,7 @@ describe('Linker', () => {
         cid: '12345',
         ref: 'https://www.example.com',
       },
-      output: '1~4envk6~cid~12345~ref~https%3A%2F%2Fwww.example.com',
+      output: '1~s21iu~cid~12345~ref~https%3A%2F%2Fwww.example.com',
     },
     {
       description: 'encodes url safe keys and values',
@@ -82,7 +84,7 @@ describe('Linker', () => {
       pairs: {
         '<unsafe>': '//foo@bar',
       },
-      output: '1~19v1jue~%3Cunsafe%3E~%2F%2Ffoo%40bar',
+      output: '1~1gbjnst~%3Cunsafe%3E~%2F%2Ffoo%40bar',
     },
     {
       description: 'encodes tilde in key value pairs',
@@ -91,7 +93,7 @@ describe('Linker', () => {
         '~key~': 'hi',
         'key2': '~hi~',
       },
-      output: '1~byq5jo~%7Ekey%7E~hi~key2~%7Ehi%7E',
+      output: '1~1wqggkq~%7Ekey%7E~hi~key2~%7Ehi%7E',
     },
   ];
 
