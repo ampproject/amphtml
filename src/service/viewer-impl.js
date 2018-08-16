@@ -890,7 +890,12 @@ export class Viewer {
   isTrustedViewerOrigin_(urlString) {
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
-    if (url.protocol != 'https:') {
+    const {protocol} = url;
+    // Mobile WebView x-thread is allowed.
+    if (protocol == 'x-thread:') {
+      return true;
+    }
+    if (protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
     }

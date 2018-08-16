@@ -79,6 +79,7 @@ export const UIType = {
  *    uistate: !UIType,
  *    consentid: ?string,
  *    currentpageid: string,
+ *    currentpageindex: number,
  * }}
  */
 export let State;
