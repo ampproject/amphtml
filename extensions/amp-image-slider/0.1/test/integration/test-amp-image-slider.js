@@ -97,24 +97,36 @@ config.run('amp-image-slider', function() {
 
     // Ensure sliders has been properly laid out
     function areSlidersReady() {
-      // poll() is still needed here
-      // since we never know from DOM mutation
-      // if event handlers are registered yet
-      return poll('check if sliders ready', () => {
-        const slider1 = doc.getElementById('s1');
-        const slider2 = doc.getElementById('s2');
-        if (!slider1 || !slider2) {
-          return false;
-        }
-        if (!slider1.signals || !slider2.signals ||
-            !slider1.signals() || !slider2.signals()) {
-          return false;
-        }
-        // .signals() are accessible
-        // LOAD_END is emitted after layoutCallback
-        return !!slider1.signals().get('load-end') &&
-            !!slider2.signals().get('load-end');
-      });
+      // Guaranteed that sliders are both here
+      const slider1 = doc.getElementById('s1');
+      const slider2 = doc.getElementById('s2');
+
+      // Check if signals have been installed
+      const areSignalsInstalled = () => !!slider1.signals && !!slider2.signals;
+      // LOAD_END promises of sliders
+      const haveSlidersLoadEnded = () => {
+        return Promise.all([
+          slider1.signals().whenSignal('load-end'),
+          slider2.signals().whenSignal('load-end'),
+        ]);
+      };
+      // Start observer first to capture signal
+      const observerDeferred = startObserver(
+          doc.body,
+          areSignalsInstalled,
+          'signals failed to be installed on sliders'
+      );
+      // Check if signals are installed
+      // (chances are that all DOM updates have already completed)
+      if (areSignalsInstalled()) {
+        // Stop observer
+        cleanupObserver();
+        // Get promises of slider load end
+        return haveSlidersLoadEnded();
+      }
+      // Wait for signals to be installed and then wait for LOAD_END
+      // During element's life cycle, there will be a lot DOM changes
+      return observerDeferred.promise.then(haveSlidersLoadEnded);
     }
 
     // Populate variables and create slider groups and position groups
@@ -229,7 +241,7 @@ config.run('amp-image-slider', function() {
 
     // Check if sliderInfo (sliderInfo) is at correct position to left
     // Uses rounded comparison to avoid float issues in some browsers
-    function isCorrectSliderPosition(sliderInfo, leftPos) {
+    function hasCorrectSliderPosition(sliderInfo, leftPos) {
       // Rounded compare
       function isEqualRounded(v1, v2) {
         return Math.round(v1) === Math.round(v2);
@@ -315,7 +327,7 @@ config.run('amp-image-slider', function() {
       const eventDispatchFunction =
         () => eventConfig.target.dispatchEvent(event);
       const observerCallback =
-        () => isCorrectSliderPosition(sliderInfo, targetPos);
+        () => hasCorrectSliderPosition(sliderInfo, targetPos);
 
       return invokeAndObserve(
           eventDispatchFunction, observeTarget, observerCallback,
@@ -328,7 +340,7 @@ config.run('amp-image-slider', function() {
      */
     function verifyPositionAfterTimeout(sliderInfo, targetPos) {
       return timeout(1600).then(() => {
-        expect(isCorrectSliderPosition(sliderInfo, targetPos)).to.be.true;
+        expect(hasCorrectSliderPosition(sliderInfo, targetPos)).to.be.true;
       });
     }
 
@@ -797,7 +809,7 @@ config.run('amp-image-slider', function() {
       const clickButtonFunction =
         () => b1.click();
       const observerCallback =
-        () => isCorrectSliderPosition(s1, s1.pos.percent40);
+        () => hasCorrectSliderPosition(s1, s1.pos.percent40);
       // Click the button and observe slider bar position update
       return invokeAndObserve(
           /*invokeFunc*/clickButtonFunction,
