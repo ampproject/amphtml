@@ -505,7 +505,7 @@ config.run('amp-image-slider', function() {
           });
     });
 
-    it('should show hint again on scroll back and into viewport', () => {
+    it.skip('should show hint again on scroll back and into viewport', () => {
       let slider;
       let container_;
       let hint;
