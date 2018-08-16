@@ -891,7 +891,7 @@ export class Viewer {
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
     const {protocol} = url;
-    // Android x-thread is allowed.
+    // Mobile WebView x-thread is allowed.
     if (protocol == 'x-thread:') {
       return true;
     }
