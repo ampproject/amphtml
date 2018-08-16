@@ -95,10 +95,10 @@ When using `amp-mustache` to template attribute values, quote escaping can be an
 
 ```html
 <template type="amp-mustache">
-  <!-- A double-quote (") in `foo` will cause malformed HTML. -->
+  <!-- A double-quote (") in foo will cause malformed HTML. -->
   <amp-img alt="{{foo}}" src="example.jpg" width=100 height=100></amp-img>
 
-  <!-- A single-quote (') or double-quote (") in `bar` will cause an AMP runtime parse error. -->
+  <!-- A single-quote (') or double-quote (") in bar will cause an AMP runtime parse error. -->
   <button on="tap:AMP.setState({foo: '{{bar}}'})">Click me</button>
 </template>
 ```
