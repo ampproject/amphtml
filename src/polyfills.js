@@ -28,14 +28,15 @@ import {installCustomElements as installRegisterElement} from
   'document-register-element/build/document-register-element.patched';
 import {isExperimentOn} from './experiments';
 
-if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
-  installCustomElements(self, class {});
-} else {
-  installRegisterElement(self, 'auto');
-}
 installDOMTokenListToggle(self);
 installMathSign(self);
 installObjectAssign(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
+// isExperimentOn() must be called after Object.assign polyfill is installed.
+if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
+  installCustomElements(self, class {});
+} else {
+  installRegisterElement(self, 'auto');
+}
