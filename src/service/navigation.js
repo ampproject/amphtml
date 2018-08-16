@@ -259,11 +259,11 @@ export class Navigation {
     // Handle anchor transformations. Sort mutators by priority
     // and execute based on that order.
     this.registeredAnchorMutators_.sort((lr1, lr2) => {
-      return lr2.priority_ - lr1.priority_;
+      return lr2.priority - lr1.priority;
     });
     const transformedTarget = target;
     this.registeredAnchorMutators_.forEach(lr => {
-      target = lr.transform(target);
+      lr.transform(target);
       location = this.parseUrl_(target.href);
     });
 
@@ -431,7 +431,7 @@ export class Navigation {
   isAnchorMutatorPriorityUsed_(priority) {
     for (let i = 0; i < this.registeredAnchorMutators_.length; i++) {
       const lr = this.registeredAnchorMutators_[i];
-      if (lr.priority_ === priority) {
+      if (lr.priority === priority) {
         return true;
       }
     }
@@ -539,18 +539,17 @@ class AnchorMutator {
    * @param {number} priority
    */
   constructor(callback, priority) {
-    /** @const @private */
-    this.callback_ = callback;
-    /** @const @private */
-    this.priority_ = priority;
+    /** @const */
+    this.callback = callback;
+    /** @const */
+    this.priority = priority;
   }
 
   /**
    * Calls the callback for transforming/mutating the target object.
    * @param {!Element} el
-   * @return {!Element}
    */
   transform(el) {
-    return this.callback_(el);
+    this.callback(el);
   }
 }

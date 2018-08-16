@@ -148,12 +148,12 @@ describes.sandboxed('Navigation', {}, () => {
       const errorRe = /Mutator with same priority is already in use./;
       const priority = 100;
       it('should throw error if priority is already in use', () => {
-        handler.registerAnchorMutator(url => {
-          return url + 'lr1';
+        handler.registerAnchorMutator(element => {
+          element.href += '?am=1';
         }, priority);
         allowConsoleError(() => {
-          expect(() => handler.registerAnchorMutator(url => {
-            return url + 'lr2';
+          expect(() => handler.registerAnchorMutator(element => {
+            element.href += '?am=2';
           }, priority)).to.throw(errorRe);
         });
       });
@@ -164,12 +164,10 @@ describes.sandboxed('Navigation', {}, () => {
         handler.registerAnchorMutator(element => {
           element.href += '&second=2';
           transformedHref = element.href;
-          return element;
         }, 99);
         handler.registerAnchorMutator(element => {
           element.href += '?first=1';
           transformedHref = element.href;
-          return element;
         }, 100);
         handler.handle_(event);
         expect(transformedHref).to.equal(
@@ -180,8 +178,7 @@ describes.sandboxed('Navigation', {}, () => {
         const expandVars = sandbox.spy(handler, 'expandVarsForAnchor_');
         const parseUrl = sandbox.spy(handler, 'parseUrl_');
         const obj = {
-          callback: element => {
-            return element;
+          callback: () => {
           },
         };
         const linkRuleSpy = sinon.spy(obj, 'callback');
