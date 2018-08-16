@@ -131,6 +131,7 @@ export function installStylesLegacy(
  * @return {!Element}
  */
 function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
+  cssText = cssText.trim();
   let styleMap = cssRoot[STYLE_MAP_PROP];
   if (!styleMap) {
     styleMap = cssRoot[STYLE_MAP_PROP] = map();
@@ -146,6 +147,9 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   if (key) {
     const existing = getExistingStyleElement(cssRoot, styleMap, key);
     if (existing) {
+      if (existing.textContent.trim() !== cssText) {
+        existing.textContent = cssText;
+      }
       return existing;
     }
   }
