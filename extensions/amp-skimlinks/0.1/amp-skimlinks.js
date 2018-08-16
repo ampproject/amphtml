@@ -37,7 +37,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
     this.onBeaconCallbackONCE_ = once(this.onBeaconCallback_.bind(this));
     this.userSessionDataDeferred_ = new Deferred();
-    this.linkRewriterService = new LinkRewriterService(this.ampDoc_);
+    this.linkRewriterService = new LinkRewriterService(this.ampDoc_.getRootNode());
     return whenDocumentReady(this.ampDoc_).then(() => {
       window.t2 = new Date().getTime();
       this.startSkimcore_();

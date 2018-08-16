@@ -1,3 +1,4 @@
+import {hasOwn} from '../../utils/object';
 import {user} from '../../log';
 
 /**
@@ -35,20 +36,32 @@ export function isAnchorReplacementTuple(tuple) {
   return true;
 }
 
-
-export class AnchorRewriteDataResponse {
-  /**
-   *
-   * @param {*} anchorRewriteStatusList
-   * @param {*} asyncPromise
-   */
-  constructor(anchorRewriteStatusList, asyncPromise) {
-    if (asyncPromise) {
-      user().assert(asyncPromise instanceof Promise,
-          'AnchorRewriteStatusResponse(), if provider, second argument needs to be a promise');
-    }
-
-    this.syncData = anchorRewriteStatusList;
-    this.asyncData = asyncPromise;
+/**
+ * Contains an optional synchronous and an optional asynchronous response.
+ * @param {*} syncResponse
+ * @param {*} asyncResponse
+ */
+export function createTwoStepsResponse(syncResponse, asyncResponse) {
+  if (asyncResponse) {
+    user().assert(asyncResponse instanceof Promise,
+        'createTwoStepsResponse(syncResponse, asyncResponse), if provided, second argument needs to be a promise');
   }
+  return {
+    syncResponse,
+    asyncResponse,
+  };
+}
+
+
+/**
+ *
+ * @param {*} twoStepsResponse
+ */
+export function isTwoStepsResponse(twoStepsResponse) {
+  const isValid = twoStepsResponse &&
+    hasOwn(twoStepsResponse, 'syncResponse') &&
+    hasOwn(twoStepsResponse, 'asyncResponse');
+  console.log('isValid', isValid, twoStepsResponse);
+
+  return Boolean(isValid);
 }

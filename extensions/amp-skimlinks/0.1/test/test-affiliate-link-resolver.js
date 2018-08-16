@@ -1,5 +1,5 @@
 
-import {AnchorRewriteDataResponse, createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-classes';
+import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-classes';
 import {Services} from '../../../../src/services';
 import {XCUST_ATTRIBUTE_NAME} from '../constants';
 import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
@@ -149,7 +149,7 @@ describes.realWin('domain-resolver', {
         let requestIsPending = true;
 
         // First request
-        response.asyncData.then(() => {
+        response.asyncResponse.then(() => {
           requestIsPending = false;
         });
 
@@ -251,21 +251,21 @@ describes.realWin('domain-resolver', {
 
       it('Should call the callback if provided', () => {
         const response = resolver.resolveUnknownAnchors(anchorList);
-        return response.asyncData.then(() => {
+        return response.asyncResponse.then(() => {
           expect(apiCallback.calledOnce).to.be.true;
         });
       });
 
       it('Should provide the beacon data', () => {
         const response = resolver.resolveUnknownAnchors(anchorList);
-        return response.asyncData.then(() => {
+        return response.asyncResponse.then(() => {
           expect(apiCallback.withArgs(beaconData).calledOnce).to.be.true;
         });
       });
 
       it('Should not call the callback if api request is not made', () => {
         const response = resolver.resolveUnknownAnchors([]);
-        expect(response.asyncData).to.be.null;
+        expect(response.asyncResponse).to.be.null;
         expect(apiCallback.calledOnce).to.be.false;
       });
     });
@@ -285,23 +285,23 @@ describes.realWin('domain-resolver', {
         );
       });
 
-      it('Should return an AnchorRewriteDataResponse instance', () => {
-        const response = resolver.resolveUnknownAnchors([]);
-        expect(response).to.be.an.instanceof(AnchorRewriteDataResponse);
+      it('Should return an object with sync and async response', () => {
+        const twoStepsResponse = resolver.resolveUnknownAnchors([]);
+        expect(twoStepsResponse).to.have.all.keys('syncResponse', 'asyncResponse');
       });
 
       it('Should affiliate unknown links by default until the API gives an answer', () => {
-        const response = resolver.resolveUnknownAnchors(anchorList);
+        const twoStepsResponse = resolver.resolveUnknownAnchors(anchorList);
         // Replace all the unknown in the synchronous reponse,
         // asynchronous response will then overwrite it later.
         const expectedSyncData = anchorList.map(a => {
           return createAnchorReplacementTuple(a, resolver.getWaypointUrl_(a));
         });
 
-        expect(response.syncData).to.deep.equal(expectedSyncData);
+        expect(twoStepsResponse.syncResponse).to.deep.equal(expectedSyncData);
       });
 
-      it('Should set "asyncData" field in the returned object when only unknown domains', () => {
+      it('Should set "asyncResponse" field in the returned object when only unknown domains', () => {
         const response = resolver.resolveUnknownAnchors(anchorList);
         const expectedAsyncData = [
           createAnchorReplacementTuple(anchorList[0], resolver.getWaypointUrl_(anchorList[0])),
@@ -309,13 +309,13 @@ describes.realWin('domain-resolver', {
           createAnchorReplacementTuple(anchorList[2], resolver.getWaypointUrl_(anchorList[2])),
         ];
 
-        expect(response.asyncData).to.be.an.instanceof(Promise);
-        return response.asyncData.then(anchorReplacementTuple => {
+        expect(response.asyncResponse).to.be.an.instanceof(Promise);
+        return response.asyncResponse.then(anchorReplacementTuple => {
           expect(anchorReplacementTuple).to.deep.equal(expectedAsyncData);
         });
       });
 
-      it('Should only set the "syncData" field in the returned object when no new domains', () => {
+      it('Should only set the "asyncResponse" field in the returned object when no new domains', () => {
         resolver.domains_ = alreadyResolvedDomains;
         const response = resolver.resolveUnknownAnchors(anchorList);
         const expectedSyncData = [
@@ -323,8 +323,8 @@ describes.realWin('domain-resolver', {
           createAnchorReplacementTuple(anchorList[1], null),
           createAnchorReplacementTuple(anchorList[2], resolver.getWaypointUrl_(anchorList[2])),
         ];
-        expect(response.syncData).to.deep.equal(expectedSyncData);
-        expect(response.asyncData).to.be.null;
+        expect(response.syncResponse).to.deep.equal(expectedSyncData);
+        expect(response.asyncResponse).to.be.null;
       });
 
       it('Should not replace excluded domains', () => {
@@ -335,16 +335,16 @@ describes.realWin('domain-resolver', {
           createAnchorReplacementTuple(excludedAnchor, null),
         ];
 
-        expect(response.syncData).to.deep.equal(expectedSyncData);
-        expect(response.asyncData).to.be.null;
+        expect(response.syncResponse).to.deep.equal(expectedSyncData);
+        expect(response.asyncResponse).to.be.null;
       });
 
-      it('Should only return the "pending" anchors in the asyncData', () => {
+      it('Should only return the "pending" anchors in the asyncResponse', () => {
         const initialAnchor = helpers.createAnchor('https://initial-merchant.com');
         resolver.domains_ = {
           'initial-merchant.com': LINK_STATUS__AFFILIATE,
         };
-        // Initial anchor should not be in the asyncData list
+        // Initial anchor should not be in the asyncResponse list
         const expectedAsyncData = [
           createAnchorReplacementTuple(anchorList[0], resolver.getWaypointUrl_(anchorList[0])),
           createAnchorReplacementTuple(anchorList[1], null),
@@ -355,12 +355,12 @@ describes.realWin('domain-resolver', {
             [initialAnchor].concat(anchorList)
         );
 
-        expect(response.syncData.length).to.equal(4);
-        expect(response.syncData).to.deep.include(
+        expect(response.syncResponse.length).to.equal(4);
+        expect(response.syncResponse).to.deep.include(
             createAnchorReplacementTuple(initialAnchor, resolver.getWaypointUrl_(initialAnchor)),
         );
-        expect(response.asyncData).to.be.an.instanceof(Promise);
-        return response.asyncData.then(anchorReplacementTuple => {
+        expect(response.asyncResponse).to.be.an.instanceof(Promise);
+        return response.asyncResponse.then(anchorReplacementTuple => {
           expect(anchorReplacementTuple).to.deep.equal(expectedAsyncData);
         });
       });

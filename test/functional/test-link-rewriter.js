@@ -1,8 +1,8 @@
 import {AmpEvents} from '../../src/amp-events';
-import {AnchorRewriteDataResponse} from '../../src/service/link-rewrite/link-rewrite-classes';
 import {PRIORITY_META_TAG_NAME, EVENTS as linkRewriterEvents} from '../../src/service/link-rewrite/constants';
 import {anchorClickActions} from '../../src/service/navigation';
 import {createCustomEvent} from '../../src/event-helper';
+import {createTwoStepsResponse} from '../../src/service/link-rewrite/link-rewrite-classes';
 import LinkRewriter from '../../src/service/link-rewrite/link-rewriter';
 import LinkRewriterService from '../../src/service/link-rewrite/link-rewrite-service';
 
@@ -346,8 +346,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     iframeDoc = env.ampdoc.getRootNode();
 
     createResolveResponseHelper = (syncData, asyncData) => {
-      const response = new AnchorRewriteDataResponse(syncData, asyncData);
-      return env.sandbox.stub().returns(response);
+      const twoStepsResponse = createTwoStepsResponse(syncData, asyncData);
+      return env.sandbox.stub().returns(twoStepsResponse);
     };
 
     createLinkRewriterHelper = (resolveFunction, options) => {
@@ -362,7 +362,9 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
   });
 
 
-  describe.only('Scan links on page', () => {
+  describe('Scan links on page', () => {
+    const replacementUrl = 'https://redirect.com';
+
     it('Should scan the page when creating linkRewriter', () => {
       env.sandbox.stub(LinkRewriter.prototype, 'scanLinksOnPage_');
       const linkRewriter = new LinkRewriter(iframeDoc, 'test', () => {}, {});
@@ -375,7 +377,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       const resolveFunction = () => { };
       allowConsoleError(() => expect(() => {
         createLinkRewriterHelper(resolveFunction).scanLinksOnPage_();
-      }).to.throw('"resolveUnknownAnchors" returned value should be an instance of AnchorRewriteDataResponse'));
+      }).to.throw('Invalid response from provided resolveUnknownLinks, use the return value of createTwoStepsResponse(syncResponse, asyncResponse)'));
     });
 
     it('Should call resolveUnknownLinks if links on page', () => {
@@ -393,22 +395,15 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       expect(resolveFunction.calledOnce).to.be.false;
     });
 
-    it('Update the anchor Map with unknown links asap', () => {
+    it('Always update the anchor Map with unknown links', () => {
       const anchor = iframeDoc.createElement('a');
       iframeDoc.body.appendChild(anchor);
 
+      // Make sure resolveFunction doesn't return sync nor async data.
       const resolveFunction = createResolveResponseHelper();
-
       const linkRewriter = createLinkRewriterHelper(resolveFunction);
-
-      // Hack to check the Map status in the middle of scanLinksOnPage_ function.
-      resolveFunction.callsFake(() => {
-        // Should already exist in the map before the resolveFunction returns.
-        expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.true;
-        return new AnchorRewriteDataResponse();
-      });
-
       linkRewriter.scanLinksOnPage_();
+      expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.true;
     });
 
     it('Should raise an error if synchronous response data is malformed', () => {
@@ -422,8 +417,26 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       }).to.throw('Expected anchorReplacementTuple, use "createAnchorReplacementTuple()"'));
     });
 
-    it.skip('Update the anchor Map with synchronous response', () => {
+    it('Update the anchor Map with synchronous response', () => {
+      const anchor1 = iframeDoc.createElement('a');
+      const anchor2 = iframeDoc.createElement('a');
+      const anchor3 = iframeDoc.createElement('a');
 
+      iframeDoc.body.appendChild(anchor1);
+      iframeDoc.body.appendChild(anchor2);
+      iframeDoc.body.appendChild(anchor3);
+      const replacementUrl = 'https://redirect.com';
+      const syncData = [[anchor1, replacementUrl], [anchor2, null]];
+      const resolveFunction = createResolveResponseHelper(syncData);
+      const linkRewriter = createLinkRewriterHelper(resolveFunction);
+      linkRewriter.scanLinksOnPage_();
+
+      expect(linkRewriter.anchorReplacementMap_.get(anchor1)).to.equal(replacementUrl);
+      expect(linkRewriter.anchorReplacementMap_.has(anchor2)).to.be.true;
+      expect(linkRewriter.anchorReplacementMap_.get(anchor2)).to.be.null;
+      // Should exist even in the map even if not returned
+      expect(linkRewriter.anchorReplacementMap_.has(anchor3)).to.be.true;
+      expect(linkRewriter.anchorReplacementMap_.get(anchor3)).to.be.undefined;
     });
 
     it.skip('Should raise an error if async response data is malformed', () => {
@@ -442,8 +455,21 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       // return promise;
     });
 
-    it.skip('Update the anchor Map with asynchronous response', () => {
+    it('Update the anchor Map with asynchronous response', () => {
+      const anchor = iframeDoc.createElement('a');
+      iframeDoc.body.appendChild(anchor);
 
+      const asyncData = Promise.resolve([[anchor, replacementUrl]]);
+      const resolveFunction = createResolveResponseHelper([], asyncData);
+      const linkRewriter = createLinkRewriterHelper(resolveFunction);
+
+      const promise = linkRewriter.scanLinksOnPage_();
+      expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.true;
+      expect(linkRewriter.anchorReplacementMap_.get(anchor)).to.be.undefined;
+
+      return promise.then(() => {
+        expect(linkRewriter.anchorReplacementMap_.get(anchor)).to.equal(replacementUrl);
+      });
     });
 
     describe('Find all links on page', () => {

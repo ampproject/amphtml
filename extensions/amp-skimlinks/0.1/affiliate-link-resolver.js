@@ -2,7 +2,7 @@
 import {addParamsToUrl,parseUrlDeprecated} from '../../../src/url';
 
 import {AFFILIATION_API,AMP_CREATIVE,XCUST_ATTRIBUTE_NAME} from './constants';
-import {AnchorRewriteDataResponse, createAnchorReplacementTuple} from '../../../src/service/link-rewrite/link-rewrite-classes';
+import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
 import {once} from '../../../src/utils/function';
 
 export const LINK_STATUS__AFFILIATE = 'affiliate';
@@ -46,7 +46,8 @@ export default class AffiliateLinkResolver {
       willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(pendingAnchors, domainsToAsk);
     }
 
-    return new AnchorRewriteDataResponse(alreadyResolved, willBeResolvedPromise);
+    // Returns an object with a sync reponse and an async response.
+    return new createTwoStepsResponse(alreadyResolved, willBeResolvedPromise);
   }
 
   /**

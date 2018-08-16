@@ -1,8 +1,9 @@
 import {user} from '../../log';
 
-import {AnchorRewriteDataResponse, createAnchorReplacementTuple, isAnchorReplacementTuple} from './link-rewrite-classes';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
+import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsResponse} from './link-rewrite-classes';
 import EventMessenger from './event-messenger';
+
 
 export default class LinkRewriter {
   /**
@@ -107,20 +108,16 @@ export default class LinkRewriter {
       this.updateAnchorMap_(unknownAnchors.map(anchor => {
         return createAnchorReplacementTuple(anchor);
       }));
-      const response = this.resolveUnknownLinks_(unknownAnchors);
-      user().assert(
-          response instanceof AnchorRewriteDataResponse,
-          // TODO: add link to readme
-          '"resolveUnknownAnchors" returned value should be an instance of AnchorRewriteDataResponse',
-      );
-      // Anchors for which the status can be resolved synchronously
-      if (response.syncData) {
-        this.updateAnchorMap_(response.syncData);
-      }
+      const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
+      user().assert(isTwoStepsResponse(twoStepsResponse),
+          'Invalid response from provided resolveUnknownLinks, use the return value of createTwoStepsResponse(syncResponse, asyncResponse)');
 
+      if (twoStepsResponse.syncResponse) {
+        this.updateAnchorMap_(twoStepsResponse.syncResponse);
+      }
       // Anchors for which the status needs to be resolved asynchronously
-      if (response.asyncData) {
-        return response.asyncData.then(this.updateAnchorMap_.bind(this));
+      if (twoStepsResponse.asyncResponse) {
+        return twoStepsResponse.asyncResponse.then(this.updateAnchorMap_.bind(this));
       }
     }
 

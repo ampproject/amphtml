@@ -11,14 +11,12 @@ describes.realWin('amp-skimlinks', {
     extensions: ['amp-skimlinks'],
   },
 }, env => {
-  let win, document, ampdoc, ampSkimlinks, helpers;
+  let iframeDoc, ampSkimlinks, helpers;
 
 
   beforeEach(() => {
     helpers = helpersFactory(env);
-    win = env.win;
-    document = win.document;
-    ampdoc = env.ampdoc;
+    iframeDoc = env.ampdoc.getRootNode();
     ampSkimlinks = helpers.createAmpSkimlinks({
       'publisher-code': 'pubIdXdomainId',
     });
@@ -87,7 +85,7 @@ describes.realWin('amp-skimlinks', {
         ampSkimlinks.skimOptions_ = {
           linkSelector: '.article a',
         };
-        ampSkimlinks.linkRewriterService = new LinkRewriterService(ampdoc);
+        ampSkimlinks.linkRewriterService = new LinkRewriterService(iframeDoc);
         env.sandbox.spy(
             ampSkimlinks.linkRewriterService,
             'registerLinkRewriter'
@@ -107,10 +105,9 @@ describes.realWin('amp-skimlinks', {
         expect(ampSkimlinks.linkRewriterService.registerLinkRewriter.calledOnce).to.be.true;
         const args = ampSkimlinks.linkRewriterService.registerLinkRewriter.args[0];
 
-        expect(args[0]).to.equal(ampSkimlinks.element);
-        expect(args[1]).to.equal(SKIMLINKS_REWRITER_ID);
-        expect(args[2]).to.be.a('function');
-        expect(args[3].linkSelector).to.equal(ampSkimlinks.skimOptions_.linkSelector);
+        expect(args[0]).to.equal(SKIMLINKS_REWRITER_ID);
+        expect(args[1]).to.be.a('function');
+        expect(args[2].linkSelector).to.equal(ampSkimlinks.skimOptions_.linkSelector);
       });
 
       it('Should setup click callback', () => {
@@ -186,8 +183,15 @@ describes.realWin('amp-skimlinks', {
 
     it('Should send NA click tracking if skimlinks has not replaced the link', () => {
       ampSkimlinks.onClick_({
-        replacedBy: SKIMLINKS_REWRITER_ID,
-        hasReplaced: false,
+        replacedBy: 'vendorX',
+      });
+
+      expect(stub.calledOnce).to.be.true;
+    });
+
+    it('Should send NA click tracking if no one has replaced the link', () => {
+      ampSkimlinks.onClick_({
+        replacedBy: null,
       });
 
       expect(stub.calledOnce).to.be.true;
@@ -196,7 +200,6 @@ describes.realWin('amp-skimlinks', {
     it('Should not send NA click tracking if skimlinks has replaced the link', () => {
       ampSkimlinks.onClick_({
         replacedBy: SKIMLINKS_REWRITER_ID,
-        hasReplaced: true,
       });
 
       expect(stub.calledOnce).to.be.false;
