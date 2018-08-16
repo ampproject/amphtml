@@ -230,7 +230,7 @@
     display: flex !important;
     flex-direction: column !important;
     margin: 0 !important;
-    max-height: 80vh !important;
+    max-height: 60vh !important;
     min-height: 40vh !important;
     width: calc(100vw - 80px) !important;
     max-width: 800px !important;
