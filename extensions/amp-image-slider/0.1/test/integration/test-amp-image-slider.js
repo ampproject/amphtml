@@ -15,7 +15,6 @@
  */
 
 import {Deferred} from '../../../../../src/utils/promise';
-import {poll} from '../../../../../testing/iframe';
 
 const config = describe.configure().ifNewChrome();
 config.run('amp-image-slider', function() {
@@ -90,259 +89,7 @@ config.run('amp-image-slider', function() {
       cleanupObserver();
     });
 
-    // Wait for certain ms
-    function timeout(ms) {
-      return new Promise(resolve => win.setTimeout(resolve, ms));
-    }
-
-    // Ensure sliders has been properly laid out
-    function areSlidersReady() {
-      // Guaranteed that sliders are both here
-      const slider1 = doc.getElementById('s1');
-      const slider2 = doc.getElementById('s2');
-
-      // Check if signals have been installed
-      const areSignalsInstalled = () => !!slider1.signals && !!slider2.signals;
-      // LOAD_END promises of sliders
-      const haveSlidersLoadEnded = () => {
-        return Promise.all([
-          slider1.signals().whenSignal('load-end'),
-          slider2.signals().whenSignal('load-end'),
-        ]);
-      };
-      // Start observer first to capture signal
-      const observerDeferred = startObserver(
-          doc.body,
-          areSignalsInstalled,
-          'signals failed to be installed on sliders'
-      );
-      // Check if signals are installed
-      // (chances are that all DOM updates have already completed)
-      if (areSignalsInstalled()) {
-        // Stop observer
-        cleanupObserver();
-        // Get promises of slider load end
-        return haveSlidersLoadEnded();
-      }
-      // Wait for signals to be installed and then wait for LOAD_END
-      // During element's life cycle, there will be a lot DOM changes
-      return observerDeferred.promise.then(haveSlidersLoadEnded);
-    }
-
-    // Populate variables and create slider groups and position groups
-    function setup() {
-      const slider1 = doc.getElementById('s1');
-      const slider2 = doc.getElementById('s2');
-
-      // Creates a sliderInfo of slider
-      // sliderInfo is a collection of information of the slider
-      // including some children elements and rect information
-      function createSliderInfo(slider) {
-        const ampImgs = slider.getElementsByTagName('amp-img');
-        const labelWrappers =
-          slider.querySelectorAll('.i-amphtml-image-slider-label-wrapper');
-        const rect = slider.getBoundingClientRect();
-        const hints = slider.querySelectorAll('.i-amphtml-image-slider-hint');
-        return {
-          slider,
-          bar: slider.querySelector('.i-amphtml-image-slider-bar'),
-          container: slider.querySelector('.i-amphtml-image-slider-container'),
-          leftMask: slider.querySelector('.i-amphtml-image-slider-left-mask'),
-          rightMask: slider.querySelector('.i-amphtml-image-slider-right-mask'),
-          leftAmpImg: ampImgs[0],
-          rightAmpImg: ampImgs[1],
-          leftLabel: labelWrappers[0].firstChild,
-          rightLabel: labelWrappers[1].firstChild,
-          leftHint: hints[0],
-          rightHint: hints[1],
-          leftHintArrow: slider.querySelector('.amp-image-slider-hint-left'),
-          rightHintArrow: slider.querySelector('.amp-image-slider-hint-right'),
-          rect,
-          pos: createPositionGroup(slider), // collection of useful slider bar pos
-        };
-      }
-
-      // Creates a position group
-      // A position group is a group of x position info of the current slider
-      // in forms of percentX, where 'X' is the percent of slider bar from left
-      function createPositionGroup(slider) {
-        const rect = slider.getBoundingClientRect();
-        return {
-          percent0: rect.left,
-          percent40: rect.left + 0.4 * rect.width,
-          percent50: rect.left + 0.5 * rect.width,
-          percent60: rect.left + 0.6 * rect.width,
-          percent100: rect.right,
-          percent110: rect.right + 0.1 * rect.width,
-        };
-      }
-
-      s1 = createSliderInfo(slider1);
-      s2 = createSliderInfo(slider2);
-    }
-
-    // Preparing necessary information before tests
-    function prep() {
-      return areSlidersReady()
-          .then(setup);
-    }
-
-    /**
-     * Create a pointer event
-     * Set the event's clientX/Y, pageX/Y, and touches
-     */
-    function createPointerEvent(type, x, y) {
-      const event = new CustomEvent(type);
-      event.clientX = x;
-      event.clientY = y;
-      event.pageX = x;
-      event.pageY = y;
-      event.touches = [{
-        clientX: x,
-        clientY: y,
-        pageX: x,
-        pageY: y,
-      }];
-      return event;
-    }
-
-    // A collection of convenient event calls
-
-    function createMouseDownEvent(x) {
-      return createPointerEvent('mousedown', x, 0);
-    }
-
-    function createMouseMoveEvent(x) {
-      return createPointerEvent('mousemove', x, 0);
-    }
-
-    function createMouseUpEvent(x) {
-      return createPointerEvent('mouseup', x, 0);
-    }
-
-    function createTouchStartEvent(x) {
-      return createPointerEvent('touchstart', x, 0);
-    }
-
-    function createTouchMoveEvent(x) {
-      return createPointerEvent('touchmove', x, 0);
-    }
-
-    function createTouchEndEvent(x) {
-      return createPointerEvent('touchend', x, 0);
-    }
-
-    /**
-     * Create a keydown event, with given key
-     */
-    function createKeyDownEvent(key) {
-      return new KeyboardEvent('keydown', {key});
-    }
-
-    // Check if sliderInfo (sliderInfo) is at correct position to left
-    // Uses rounded comparison to avoid float issues in some browsers
-    function hasCorrectSliderPosition(sliderInfo, leftPos) {
-      // Rounded compare
-      function isEqualRounded(v1, v2) {
-        return Math.round(v1) === Math.round(v2);
-      }
-      // Check if it is aligned based on left border position
-      function isLeftAligned(element, expectedLeftPosition) {
-        return isEqualRounded(
-            element.getBoundingClientRect().left, expectedLeftPosition);
-      }
-      return isLeftAligned(sliderInfo.bar, leftPos) &&
-        isLeftAligned(sliderInfo.rightMask, leftPos) &&
-        isLeftAligned(sliderInfo.leftAmpImg, sliderInfo.rect.left) &&
-        isLeftAligned(sliderInfo.rightAmpImg, sliderInfo.rect.left) &&
-        isLeftAligned(sliderInfo.leftLabel, sliderInfo.rect.left) &&
-        isLeftAligned(sliderInfo.rightLabel, sliderInfo.rect.left);
-    }
-
-    // Race an observer and a timeout
-    // Resolves if cb(mutationList) returns true before timeout
-    // Rejects if timeout
-    function startObserver(
-      target, cb, opt_errorMessage) {
-      cleanupObserver();
-
-      const deferred = new Deferred();
-      observer = new win.MutationObserver(mutationList => {
-        if (cb(mutationList)) {
-          win.clearTimeout(timeoutHandle);
-          cleanupObserver();
-          deferred.resolve();
-        }
-      });
-      const timeoutHandle = win.setTimeout(() => {
-        // Cancel observer when times out
-        cleanupObserver();
-        deferred.reject(new Error(opt_errorMessage || 'Observer times out'));
-      }, 1600);
-
-      observer.observe(target, {attributes: true, subtree: true});
-      return deferred;
-    }
-
-    // Invoke a function and observe
-    // Guarantees that function is invoked after observer is ready
-    // Resolves if cb(mutationList) returns true
-    // Rejects if timeout
-    function invokeAndObserve(
-      invokeFunc, target, cb, opt_errorMessage) {
-      const observerDeferred =
-          startObserver(target, cb,
-              opt_errorMessage);
-      // Run func only after observer setup
-      invokeFunc();
-      return observerDeferred.promise;
-    }
-
-    // Cleanup the observer
-    function cleanupObserver() {
-      if (observer) {
-        observer.disconnect();
-        observer = null;
-      }
-    }
-
-    /**
-     * Dispatch a event
-     * and see if the expected targetPos is reached
-     */
-    function verifyPositionUpdateAfterEventDispatch(
-      eventConfig, observeTarget, sliderInfo, targetPos) {
-      let event;
-      // If pos is provided in eventConfig
-      // use pos as argument
-      if (eventConfig.pos !== undefined) {
-        event = new eventConfig.cstr(eventConfig.pos);
-      } else if (eventConfig.key !== undefined) {
-        // Same for eventConfig.key
-        // serves for keydown events
-        event = new eventConfig.cstr(eventConfig.key);
-      } else {
-        throw new Error('Not enough params for event construction is provided');
-      }
-      const eventDispatchFunction =
-        () => eventConfig.target.dispatchEvent(event);
-      const observerCallback =
-        () => hasCorrectSliderPosition(sliderInfo, targetPos);
-
-      return invokeAndObserve(
-          eventDispatchFunction, observeTarget, observerCallback,
-          `Slider failed to move to ${targetPos} before observer times out.`);
-    }
-
-    /**
-     * Wait for a certain period of time
-     * and then check if the target position is reached.
-     */
-    function verifyPositionAfterTimeout(sliderInfo, targetPos) {
-      return timeout(1600).then(() => {
-        expect(hasCorrectSliderPosition(sliderInfo, targetPos)).to.be.true;
-      });
-    }
+    /* #region TESTS */
 
     it('should build and layout', () => {
       expect(s1.slider).to.not.be.null;
@@ -511,8 +258,7 @@ config.run('amp-image-slider', function() {
         });
       });
 
-      it('should be able to trigger mousedown again ' +
-        'after mouse button up', () => {
+      it('slider bar should move with mousedown after mouseup', () => {
         // Mouse down first to enable mousemove follow
         s1.slider.dispatchEvent(createMouseDownEvent(s1.pos.percent50));
         // Test to guarantee we are in mousemove mode
@@ -691,8 +437,8 @@ config.run('amp-image-slider', function() {
         });
       });
 
-      it('should be able to trigger touchstart again ' +
-        'after finishing a previous touch', () => {
+      it('slider bar should follow touchstart ' +
+        'after finishing previous touch', () => {
         // Touch start first to enable touchmove follow
         s1.slider.dispatchEvent(createTouchStartEvent(s1.pos.percent50));
         // Test to guarantee we are in touchmove mode
@@ -726,22 +472,36 @@ config.run('amp-image-slider', function() {
     });
 
     describe('using a keyboard', () => {
-      it('should respond to all valid key press on focus', () => {
-        // Focus first!
-        s1.slider.focus();
-        // Testing ArrowLeft (move left 10%)
-        return verifyPositionUpdateAfterEventDispatch(
-            /*eventConfig*/
-            {
-              target: s1.slider,
-              cstr: createKeyDownEvent,
-              key: 'ArrowLeft',
-            },
-            /*observeTarget*/s1.slider,
-            /*sliderInfo*/s1,
-            /*targetPos*/s1.pos.percent40
-        ).then(() => {
-          // Testing ArrowRight (move right 10%)
+      it('pressing ArrowLeft should move slider bar by 10% to the left ' +
+        'only when slider is focused', () => {
+        // Notice that we are not focusing on the slider here
+        s1.slider.dispatchEvent(createKeyDownEvent('ArrowLeft'));
+        // Slider bar stays at original place (center by default)
+        return verifyPositionAfterTimeout(s1, s1.pos.percent50).then(() => {
+          // We focus here!
+          s1.slider.focus();
+          return verifyPositionUpdateAfterEventDispatch(
+              /*eventConfig*/
+              {
+                target: s1.slider,
+                cstr: createKeyDownEvent,
+                key: 'ArrowLeft',
+              },
+              /*observeTarget*/s1.slider,
+              /*sliderInfo*/s1,
+              /*targetPos*/s1.pos.percent40
+          );
+        });
+      });
+
+      it('pressing ArrowRight should move slider bar by 10% to the right ' +
+        'only when slider is focused', () => {
+        // Notice that we are not focusing on the slider here
+        s1.slider.dispatchEvent(createKeyDownEvent('ArrowRight'));
+        // Slider bar stays at original place (center by default)
+        return verifyPositionAfterTimeout(s1, s1.pos.percent50).then(() => {
+          // We focus here!
+          s1.slider.focus();
           return verifyPositionUpdateAfterEventDispatch(
               /*eventConfig*/
               {
@@ -751,10 +511,19 @@ config.run('amp-image-slider', function() {
               },
               /*observeTarget*/s1.slider,
               /*sliderInfo*/s1,
-              /*targetPos*/s1.pos.percent50
+              /*targetPos*/s1.pos.percent60
           );
-        }).then(() => {
-          // Testing PageUp (move to leftmost)
+        });
+      });
+
+      it('pressing PageUp should move slider bar to leftmost ' +
+        'only when slider is focused', () => {
+        // Notice that we are not focusing on the slider here
+        s1.slider.dispatchEvent(createKeyDownEvent('PageUp'));
+        // Slider bar stays at original place (center by default)
+        return verifyPositionAfterTimeout(s1, s1.pos.percent50).then(() => {
+          // We focus here!
+          s1.slider.focus();
           return verifyPositionUpdateAfterEventDispatch(
               /*eventConfig*/
               {
@@ -766,8 +535,36 @@ config.run('amp-image-slider', function() {
               /*sliderInfo*/s1,
               /*targetPos*/s1.pos.percent0
           );
+        });
+      });
+
+      it('pressing Home should move slider bar to center ' +
+        'only when slider is focused', () => {
+        // To test center, we have to focus and move slider bar
+        // to somewhere not the center initially
+        s1.slider.focus();
+        // We have to guarantee that the slider is not at center first
+        // after dispatching event. (runtime scheduling non-determinism)
+        return verifyPositionUpdateAfterEventDispatch(
+            /*eventConfig*/
+            {
+              target: s1.slider,
+              cstr: createKeyDownEvent,
+              key: 'PageUp',
+            },
+            /*observeTarget*/s1.slider,
+            /*sliderInfo*/s1,
+            /*targetPos*/s1.pos.percent0
+        ).then(() => {
+          // Unfocus the slider
+          s1.slider.blur();
+          // Notice it is not focused
+          s1.slider.dispatchEvent(createKeyDownEvent('Home'));
+          // Slider bar stays at original place (leftmost this case)
+          return verifyPositionAfterTimeout(s1, s1.pos.percent0);
         }).then(() => {
-          // Testing PageUp (move to center)
+          // We focus again here!
+          s1.slider.focus();
           return verifyPositionUpdateAfterEventDispatch(
               /*eventConfig*/
               {
@@ -779,8 +576,17 @@ config.run('amp-image-slider', function() {
               /*sliderInfo*/s1,
               /*targetPos*/s1.pos.percent50
           );
-        }).then(() => {
-          // Testing PageUp (move to rightmost)
+        });
+      });
+
+      it('pressing PageDown should move slider bar to rightmost ' +
+        'only when slider is focused', () => {
+        // Notice that we are not focusing on the slider here
+        s1.slider.dispatchEvent(createKeyDownEvent('PageDown'));
+        // Slider bar stays at original place (center by default)
+        return verifyPositionAfterTimeout(s1, s1.pos.percent50).then(() => {
+          // We focus here!
+          s1.slider.focus();
           return verifyPositionUpdateAfterEventDispatch(
               /*eventConfig*/
               {
@@ -793,13 +599,6 @@ config.run('amp-image-slider', function() {
               /*targetPos*/s1.pos.percent100
           );
         });
-      });
-
-      it('should not respond to any key press if not focused', () => {
-        // Notice that we are not focusing on the slider here
-        s1.slider.dispatchEvent(createKeyDownEvent('ArrowLeft'));
-        // Slider bar stays at original place (center by default)
-        return verifyPositionAfterTimeout(s1, s1.pos.percent50);
       });
     });
 
@@ -914,5 +713,263 @@ config.run('amp-image-slider', function() {
         });
       });
     });
+
+    /* #endregion */
+
+    /* #region HELPER FUNCTIONS */
+
+    // Wait for certain ms
+    function timeout(ms) {
+      return new Promise(resolve => win.setTimeout(resolve, ms));
+    }
+
+    // Preparing necessary information before tests
+    function prep() {
+      return areSlidersReady()
+          .then(setup);
+    }
+
+    // Ensure sliders has been properly laid out
+    function areSlidersReady() {
+      // Guaranteed that sliders are both here
+      const slider1 = doc.getElementById('s1');
+      const slider2 = doc.getElementById('s2');
+
+      // Check if signals have been installed
+      const areSignalsInstalled = () => !!slider1.signals && !!slider2.signals;
+      // LOAD_END promises of sliders
+      const haveSlidersLoadEnded = () => {
+        return Promise.all([
+          slider1.signals().whenSignal('load-end'),
+          slider2.signals().whenSignal('load-end'),
+        ]);
+      };
+      // Start observer first to capture signal
+      const observerDeferred = startObserver(
+          /*target*/doc.body,
+          /*cb*/areSignalsInstalled,
+          /*opt_errorMessage*/'signals failed to be installed on sliders'
+      );
+      // Check if signals are installed
+      // (chances are that all DOM updates have already completed)
+      if (areSignalsInstalled()) {
+        // Stop observer
+        cleanupObserver();
+        // Get promises of slider load end
+        return haveSlidersLoadEnded();
+      }
+      // Wait for signals to be installed and then wait for LOAD_END
+      // During element's life cycle, there will be a lot DOM changes
+      return observerDeferred.promise.then(haveSlidersLoadEnded);
+    }
+
+    // Populate variables and create slider groups and position groups
+    function setup() {
+      const slider1 = doc.getElementById('s1');
+      const slider2 = doc.getElementById('s2');
+
+      // Creates a sliderInfo of slider
+      // sliderInfo is a collection of information of the slider
+      // including some children elements and rect information
+      function createSliderInfo(slider) {
+        const ampImgs = slider.getElementsByTagName('amp-img');
+        const labelWrappers =
+          slider.querySelectorAll('.i-amphtml-image-slider-label-wrapper');
+        const rect = slider.getBoundingClientRect();
+        const hints = slider.querySelectorAll('.i-amphtml-image-slider-hint');
+        return {
+          slider,
+          bar: slider.querySelector('.i-amphtml-image-slider-bar'),
+          container: slider.querySelector('.i-amphtml-image-slider-container'),
+          leftMask: slider.querySelector('.i-amphtml-image-slider-left-mask'),
+          rightMask: slider.querySelector('.i-amphtml-image-slider-right-mask'),
+          leftAmpImg: ampImgs[0],
+          rightAmpImg: ampImgs[1],
+          leftLabel: labelWrappers[0].firstChild,
+          rightLabel: labelWrappers[1].firstChild,
+          leftHint: hints[0],
+          rightHint: hints[1],
+          leftHintArrow: slider.querySelector('.amp-image-slider-hint-left'),
+          rightHintArrow: slider.querySelector('.amp-image-slider-hint-right'),
+          rect,
+          pos: createPositionGroup(slider), // collection of useful slider bar pos
+        };
+      }
+
+      // Creates a position group
+      // A position group is a group of x position info of the current slider
+      // in forms of percentX, where 'X' is the percent of slider bar from left
+      function createPositionGroup(slider) {
+        const rect = slider.getBoundingClientRect();
+        return {
+          percent0: rect.left,
+          percent40: rect.left + 0.4 * rect.width,
+          percent50: rect.left + 0.5 * rect.width,
+          percent60: rect.left + 0.6 * rect.width,
+          percent100: rect.right,
+          percent110: rect.right + 0.1 * rect.width,
+        };
+      }
+
+      s1 = createSliderInfo(slider1);
+      s2 = createSliderInfo(slider2);
+    }
+
+    /**
+     * Create a pointer event
+     * Set the event's clientX/Y, pageX/Y, and touches
+     */
+    function createPointerEvent(type, x, y) {
+      const event = new CustomEvent(type);
+      event.clientX = x;
+      event.clientY = y;
+      event.pageX = x;
+      event.pageY = y;
+      event.touches = [{
+        clientX: x,
+        clientY: y,
+        pageX: x,
+        pageY: y,
+      }];
+      return event;
+    }
+
+    // A collection of convenient event calls
+
+    function createMouseDownEvent(x) {
+      return createPointerEvent('mousedown', x, 0);
+    }
+
+    function createMouseMoveEvent(x) {
+      return createPointerEvent('mousemove', x, 0);
+    }
+
+    function createMouseUpEvent(x) {
+      return createPointerEvent('mouseup', x, 0);
+    }
+
+    function createTouchStartEvent(x) {
+      return createPointerEvent('touchstart', x, 0);
+    }
+
+    function createTouchMoveEvent(x) {
+      return createPointerEvent('touchmove', x, 0);
+    }
+
+    function createTouchEndEvent(x) {
+      return createPointerEvent('touchend', x, 0);
+    }
+
+    // Create a keydown event, with given key
+    function createKeyDownEvent(key) {
+      return new KeyboardEvent('keydown', {key});
+    }
+
+    // Check if sliderInfo (sliderInfo) is at correct position to left
+    // Uses rounded comparison to avoid float issues in some browsers
+    function hasCorrectSliderPosition(sliderInfo, leftPos) {
+      // Rounded compare
+      function isEqualRounded(v1, v2) {
+        return Math.round(v1) === Math.round(v2);
+      }
+      // Check if it is aligned based on left border position
+      function isLeftAligned(element, expectedLeftPosition) {
+        return isEqualRounded(
+            element.getBoundingClientRect().left, expectedLeftPosition);
+      }
+      return isLeftAligned(sliderInfo.bar, leftPos) &&
+        isLeftAligned(sliderInfo.rightMask, leftPos) &&
+        isLeftAligned(sliderInfo.leftAmpImg, sliderInfo.rect.left) &&
+        isLeftAligned(sliderInfo.rightAmpImg, sliderInfo.rect.left) &&
+        isLeftAligned(sliderInfo.leftLabel, sliderInfo.rect.left) &&
+        isLeftAligned(sliderInfo.rightLabel, sliderInfo.rect.left);
+    }
+
+    // Race an observer and a timeout
+    // Resolves if cb(mutationList) returns true before timeout
+    // Rejects if timeout
+    function startObserver(
+      target, cb, opt_errorMessage) {
+      cleanupObserver();
+
+      const deferred = new Deferred();
+      observer = new win.MutationObserver(mutationList => {
+        if (cb(mutationList)) {
+          win.clearTimeout(timeoutHandle);
+          cleanupObserver();
+          deferred.resolve();
+        }
+      });
+      const timeoutHandle = win.setTimeout(() => {
+        // Cancel observer when times out
+        cleanupObserver();
+        deferred.reject(new Error(opt_errorMessage || 'Observer times out'));
+      }, 1600);
+
+      observer.observe(target, {attributes: true, subtree: true});
+      return deferred;
+    }
+
+    // Invoke a function and observe
+    // Guarantees that function is invoked after observer is ready
+    // Resolves if cb(mutationList) returns true
+    // Rejects if timeout
+    function invokeAndObserve(
+      invokeFunc, target, cb, opt_errorMessage) {
+      const observerDeferred =
+          startObserver(target, cb,
+              opt_errorMessage);
+      // Run func only after observer setup
+      invokeFunc();
+      return observerDeferred.promise;
+    }
+
+    // Cleanup the observer
+    function cleanupObserver() {
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+    }
+
+    /**
+     * Dispatch a event
+     * and see if the expected targetPos is reached
+     */
+    function verifyPositionUpdateAfterEventDispatch(
+      eventConfig, observeTarget, sliderInfo, targetPos) {
+      let event;
+      // If pos is provided in eventConfig
+      // use pos as argument
+      if (eventConfig.pos !== undefined) {
+        event = new eventConfig.cstr(eventConfig.pos);
+      } else if (eventConfig.key !== undefined) {
+        // Same for eventConfig.key
+        // serves for keydown events
+        event = new eventConfig.cstr(eventConfig.key);
+      } else {
+        throw new Error('Not enough params for event construction is provided');
+      }
+      const eventDispatchFunction =
+        () => eventConfig.target.dispatchEvent(event);
+      const observerCallback =
+        () => hasCorrectSliderPosition(sliderInfo, targetPos);
+
+      return invokeAndObserve(
+          eventDispatchFunction, observeTarget, observerCallback,
+          `Slider failed to move to ${targetPos} before observer times out.`);
+    }
+
+    /**
+     * Wait for a certain period of time
+     * and then check if the target position is reached.
+     */
+    function verifyPositionAfterTimeout(sliderInfo, targetPos) {
+      return timeout(1600).then(() => {
+        expect(hasCorrectSliderPosition(sliderInfo, targetPos)).to.be.true;
+      });
+    }
+
+    /* #endregion */
   });
 });
