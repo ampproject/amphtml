@@ -850,7 +850,7 @@ config.run('amp-image-slider', function() {
         }).then(() => {
           // scroll page to top
           const scrollToTopFunction =
-            () => win.scrollTo({top: 0});
+            () => win.scrollTo({top: s1.slider.offsetTop});
           // Notice that this checks if hint is displayed
           const isHintDisplayedCallback = () => !isHintHiddenCallback();
           // Hint should reappear again
@@ -893,7 +893,7 @@ config.run('amp-image-slider', function() {
           return timeout(500);
         }).then(() => {
           // scroll page to top
-          win.scrollTo({top: 0});
+          win.scrollTo({top: s2.slider.offsetTop});
           // Expect hint to still be hidden
           const expectHintHiddenCallback =
             () => expect(isHintHiddenCallback()).to.be.true;
