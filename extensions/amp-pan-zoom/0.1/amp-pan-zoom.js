@@ -133,6 +133,12 @@ export class AmpPanZoom extends AMP.BaseElement {
     /** @private */
     this.maxY_ = 0;
 
+    /** @private */
+    this.xOffsetFromCenter_;
+
+    /** @private */
+    this.yOffsetFromCenter_;
+
     /** @private {?../../../src/gesture.Gestures} */
     this.gestures_ = null;
 
@@ -303,11 +309,19 @@ export class AmpPanZoom extends AMP.BaseElement {
       height = this.sourceHeight_;
     }
 
+    const contentBox =
+      layoutRectFromDomRect(this.content_./*OK*/getBoundingClientRect());
+
     this.contentBox_ = layoutRectLtwh(
-        Math.round((this.elementBox_.width - width) / 2),
-        Math.round((this.elementBox_.height - height) / 2),
+        contentBox.left - this.elementBox_.left,
+        contentBox.top - this.elementBox_.top,
         Math.round(width),
         Math.round(height));
+
+    this.yOffsetFromCenter_ = this.contentBox_.top
+      - (this.elementBox_.height - this.contentBox_.height) / 2;
+    this.xOffsetFromCenter_ = this.contentBox_.left
+    - (this.elementBox_.width - this.contentBox_.width) / 2;
 
     // Adjust max scale to at least fit the screen.
     const elementBoxRatio = this.elementBox_.width /
@@ -523,15 +537,19 @@ export class AmpPanZoom extends AMP.BaseElement {
     const dh = this.elementBox_.height - (this.contentBox_.height * scale);
     const dw = this.elementBox_.width - (this.contentBox_.width * scale);
 
-    const minY = dh >= 0 ? 0 : dh / 2;
-    const maxY = dh >= 0 ? 0 : -minY;
+    const minY = dh >= 0 ? 0 : dh / 2 ;
+    const maxY = dh >= 0 ? 0 : -minY ;
     const minX = dw >= 0 ? 0 : dw / 2;
     const maxX = dw >= 0 ? 0 : -minX;
 
-    this.minX_ = minX;
-    this.minY_ = minY;
-    this.maxX_ = maxX;
-    this.maxY_ = maxY;
+    const xOffset = scale == 1 ? 0 : this.xOffsetFromCenter_;
+    const yOffset = scale == 1 ? 0 : this.yOffsetFromCenter_;
+
+    this.minX_ = minX - xOffset;
+    this.minY_ = minY - yOffset;
+    this.maxX_ = maxX - xOffset;
+    this.maxY_ = maxY - yOffset;
+
   }
 
   /**
