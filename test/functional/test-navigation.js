@@ -144,48 +144,54 @@ describes.sandboxed('Navigation', {}, () => {
       });
     });
 
-    describe('locations mutators', () => {
-      const errorRe = /Rule with same priority is already in use./;
+    describe('anchor mutators', () => {
+      const errorRe = /Mutator with same priority is already in use./;
       const priority = 100;
       it('should throw error if priority is already in use', () => {
-        handler.registerLocationMutator(url => {
+        handler.registerAnchorMutator(url => {
           return url + 'lr1';
         }, priority);
         allowConsoleError(() => {
-          expect(() => handler.registerLocationMutator(url => {
+          expect(() => handler.registerAnchorMutator(url => {
             return url + 'lr2';
           }, priority)).to.throw(errorRe);
         });
       });
 
-      it('should throw error if priority is already in use', () => {
+      it('should execute in order', () => {
         anchor.href = 'https://www.testing-1-2-3.org';
         let transformedHref;
-        handler.registerLocationMutator(location => {
-          location.href = location.href + '&second=2';
-          transformedHref = location.href;
-          return location;
+        handler.registerAnchorMutator(element => {
+          element.href += '&second=2';
+          transformedHref = element.href;
+          return element;
         }, 99);
-        handler.registerLocationMutator(location => {
-          location.href = location.href + '&first=1';
-          transformedHref = location.href;
-          return location;
+        handler.registerAnchorMutator(element => {
+          element.href += '?first=1';
+          transformedHref = element.href;
+          return element;
         }, 100);
         handler.handle_(event);
-        expect(transformedHref).to.equal(anchor.href + '&first=1&second=2');
+        expect(transformedHref).to.equal(
+            'https://www.testing-1-2-3.org/?first=1&second=2');
       });
 
-      it('verify variable expansion happens before link rules', () => {
+      it('verify order of operations', () => {
         const expandVars = sandbox.spy(handler, 'expandVarsForAnchor_');
+        const parseUrl = sandbox.spy(handler, 'parseUrl_');
         const obj = {
-          callback: location => {
-            return location;
+          callback: element => {
+            return element;
           },
         };
         const linkRuleSpy = sinon.spy(obj, 'callback');
-        handler.registerLocationMutator(linkRuleSpy, 99);
+        handler.registerAnchorMutator(linkRuleSpy, 99);
         handler.handle_(event);
-        sinon.assert.callOrder(expandVars, linkRuleSpy);
+        // Verify that the expansion of variables occurs first
+        // followed by the anchor transformation and then the parsing
+        // of the possibly mutated anchor href into the location object
+        // for navigation.handleNavClick.
+        sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
       });
     });
 

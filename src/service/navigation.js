@@ -126,7 +126,7 @@ export class Navigation {
     this.a2aFeatures_ = null;
 
     /** @const @private {!Array<!LinkRule>} */
-    this.registeredLocationMutators_ = [];
+    this.registeredAnchorMutators_ = [];
   }
 
   /**
@@ -244,7 +244,7 @@ export class Navigation {
   handleClick_(target, e) {
     this.expandVarsForAnchor_(target);
 
-    const location = this.parseUrl_(target.href);
+    let location = this.parseUrl_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
@@ -256,18 +256,19 @@ export class Navigation {
       return;
     }
 
-    // Handle target's href transformations. Sort mutators by priority
+    // Handle anchor transformations. Sort mutators by priority
     // and execute based on that order.
-    this.registeredLocationMutators_.sort((lr1, lr2) => {
+    this.registeredAnchorMutators_.sort((lr1, lr2) => {
       return lr2.priority_ - lr1.priority_;
     });
-    let locationTransformed = location;
-    this.registeredLocationMutators_.forEach(lr => {
-      locationTransformed = lr.transform(locationTransformed);
+    const transformedTarget = target;
+    this.registeredAnchorMutators_.forEach(lr => {
+      target = lr.transform(target);
+      location = this.parseUrl_(target.href);
     });
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, target, locationTransformed);
+    this.handleNavClick_(e, transformedTarget, location);
   }
 
   /**
@@ -427,9 +428,9 @@ export class Navigation {
    * @param {number} priority
    * @return {boolean}
    */
-  isLocationRulePriorityUsed_(priority) {
-    for (let i = 0; i < this.registeredLocationMutators_.length; i++) {
-      const lr = this.registeredLocationMutators_[i];
+  isAnchorMutatorPriorityUsed_(priority) {
+    for (let i = 0; i < this.registeredAnchorMutators_.length; i++) {
+      const lr = this.registeredAnchorMutators_[i];
       if (lr.priority_ === priority) {
         return true;
       }
@@ -441,10 +442,10 @@ export class Navigation {
    * @param {!Function} callback
    * @param {number} priority
    */
-  registerLocationMutator(callback, priority) {
-    user().assert(!this.isLocationRulePriorityUsed_(priority),
-        'Rule with same priority is already in use.');
-    this.registeredLocationMutators_.push(new LocationMutator(callback, priority));
+  registerAnchorMutator(callback, priority) {
+    user().assert(!this.isAnchorMutatorPriorityUsed_(priority),
+        'Mutator with same priority is already in use.');
+    this.registeredAnchorMutators_.push(new AnchorMutator(callback, priority));
   }
 
   /**
@@ -529,12 +530,12 @@ function maybeExpandUrlParams(ampdoc, e) {
 }
 
 /**
- * An href transformation applied to an anchor, executed according to its
+ * A transformation applied to an anchor element, executed according to its
  * priority.
  */
-class LocationMutator {
+class AnchorMutator {
   /**
-   * @param {function(!Location):!Location} callback
+   * @param {function(!Element):!Element} callback
    * @param {number} priority
    */
   constructor(callback, priority) {
@@ -545,11 +546,11 @@ class LocationMutator {
   }
 
   /**
-   * Calls the callback for transforming/mutating the location object.
-   * @param {!Location} location
-   * @return {!Location}
+   * Calls the callback for transforming/mutating the target object.
+   * @param {!Element} el
+   * @return {!Element}
    */
-  transform(location) {
-    return this.callback_(location);
+  transform(el) {
+    return this.callback_(el);
   }
 }
