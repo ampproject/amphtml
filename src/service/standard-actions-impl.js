@@ -173,9 +173,8 @@ export class StandardActions {
       invocation.args['position'] : 'top';
 
     // Animate the scroll
-    this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
-
-    return null;
+    // Should return a promise instead of null
+    return this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
   }
 
   /**
