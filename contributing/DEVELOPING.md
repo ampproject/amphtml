@@ -84,4 +84,9 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 
 We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
 
+## Builds and releases
+
+- The [AMP buildcop](buildcop.md) helps ensure that AMP's builds remain green (i.e. everything builds and all of the tests pass).  If you run into issues with builds that seem unrelated to your changes see if the issue is present on [Travis](https://travis-ci.org/ampproject/amphtml/builds) and let the buildcop know.
+- Understanding the [AMP release process](release-schedule.md) is useful for understanding when a change in AMP will make it into production and what to do if things go wrong during the rollout of a change.
+
 ## [Code of conduct](../CODE_OF_CONDUCT.md)
