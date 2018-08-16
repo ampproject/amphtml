@@ -77,6 +77,22 @@
       top: 50%;
       transform: translate(50%, -50%);
     }
+
+    .triangle-hint .amp-image-slider-hint-left {
+      width: 10px;
+      height: 20px;
+      background-size: 10px 20px;
+      margin-right: 10px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20'%3e%3cpolygon points='10,0 0,10 10,20' style='fill:white;stroke:black;stroke-width:1' /%3e%3c/svg%3e");
+    }
+
+    .triangle-hint .amp-image-slider-hint-right {
+      width: 10px;
+      height: 20px;
+      background-size: 10px 20px;
+      margin-left: 10px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20'%3e%3cpolygon points='0,0 10,10 0,20' style='fill:white;stroke:black;stroke-width:1' /%3e%3c/svg%3e");
+    }
   </style>
   <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
@@ -108,7 +124,7 @@
       <div second class="label right-label-center-xy">AFTER</div>
     </amp-image-slider>
 
-    <p>Has Alt</p>
+    <p>Has <code>alt</code> on <code>amp-img</code>s. ARIA order: [label content], [alt text if present], left/right image</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill" alt="Mountain"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill" alt="Ocean"></amp-img>
@@ -118,14 +134,32 @@
 
     <h1>Customizable Hints</h1>
 
-    <p>No Reemerging hint</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
-        disable-hint-reappear>
+    <p>Disable default viewport behavior (hint would NOT reappear after the slider interacted, out of viewport, and then back into viewport)</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" disable-hint-reappear>
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill" alt="Mountain"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill" alt="Ocean"></amp-img>
+    </amp-image-slider>
+
+    <p>Fully customized hint (replace with triangles)</p>
+    <amp-image-slider class="triangle-hint" tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
     </amp-image-slider>
+
+    <h1><code>Actions</code></h1>
+
+    <p><code>seekTo</code> test (currently, <code>seekTo</code> is not considered as user interaction)</p>
+    <amp-image-slider id="seekable" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+    <div class="flex">
+      <button on="tap:seekable.seekTo(percent=0)">Click me to Seek to Left</button>
+      <button on="tap:seekable.seekTo(percent=0.5)">Click me to Seek to Center</button>
+      <button on="tap:seekable.seekTo(percent=1)">Click me to Seek to Right</button>
+    </div>
   </main>
 </body>
 </html>
