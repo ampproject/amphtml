@@ -160,24 +160,14 @@ export function parseUrlWithA(a, url, opt_cache) {
     info.origin = info.protocol + '//' + info.host;
   }
 
-  // Freeze proprties during testing to avoid accidental mutation.
-  // The href is also allowed to be mutated to test navigation.registerLinkRule.
-  if (getMode().test && Object.defineProperty) {
-    Object.defineProperty(
-        info, 'origin', {configurable: false, writable: false});
-    Object.defineProperty(
-        info, 'protocol', {configurable: false, writable: false});
-    Object.defineProperty(
-        info, 'port', {configurable: false, writable: false});
-    Object.defineProperty(
-        info, 'pathname', {configurable: false, writable: false});
-  }
+  // Freeze during testing to avoid accidental mutation.
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
 
   if (opt_cache) {
-    opt_cache.put(url, info);
+    opt_cache.put(url, frozen);
   }
 
-  return info;
+  return frozen;
 }
 
 /**
