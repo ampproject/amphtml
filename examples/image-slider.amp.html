@@ -78,6 +78,54 @@
       transform: translate(50%, -50%);
     }
 
+    .reversed-hint .amp-image-slider-hint-left {
+      background-size: 64px 32px;
+      width: 64px;
+      height: 32px;
+      margin-right: 30px;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cg%3E%3Cpath d='M12 5H0V3h12V0l4 4-4 4z' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+      filter: drop-shadow(3px 3px 4px black);
+    }
+
+    .reversed-hint .amp-image-slider-hint-right {
+      background-size: 64px 32px;
+      width: 64px;
+      height: 32px;
+      margin-left: 30px;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 8'%3E%3Cg%3E%3Cpath d='M4 5h12V3H4V0L0 4l4 4z' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+      filter: drop-shadow(3px 3px 4px black);
+    }
+
+    .triangle-hint .amp-image-slider-hint-left {
+      width: 10px;
+      height: 20px;
+      background-size: 10px 20px;
+      margin-right: 10px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20'%3e%3cpolygon points='10,0 0,10 10,20' style='fill:white;stroke:black;stroke-width:1' /%3e%3c/svg%3e");
+    }
+
+    .triangle-hint .amp-image-slider-hint-right {
+      width: 10px;
+      height: 20px;
+      background-size: 10px 20px;
+      margin-left: 10px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='20' viewBox='0 0 10 20'%3e%3cpolygon points='0,0 10,10 0,20' style='fill:white;stroke:black;stroke-width:1' /%3e%3c/svg%3e");
+    }
+
+    .centered-hint .amp-image-slider-hint-left {
+      display: none;
+    }
+
+    .centered-hint .amp-image-slider-hint-right {
+      width: 10px;
+      height: 60px;
+      margin-left: 0;
+      margin-right: 0;
+      transform: translateX(-50%);
+      filter: none;
+      background-color: white;
+    }
+
     .lightbox {
       position: absolute;
       width: 100%;
@@ -136,6 +184,39 @@
 
     <h1>Customizable Hints</h1>
 
+    <p>Hide hints through display trick</p>
+    <amp-image-slider class="hint-hidden" tabindex="0" layout="responsive" width="1024" height="600"
+        disable-hint-reappear>
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Fully customized hint (current reversing the hint logos, changing sizes and margins)</p>
+    <amp-image-slider class="reversed-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Fully customized hint (replace with triangles)</p>
+    <amp-image-slider class="triangle-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <p>Fully customized hint (centering a box)</p>
+    <amp-image-slider class="centered-hint" tabindex="0" layout="responsive" width="1024" height="600">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <div first class="label">BEFORE</div>
+      <div second class="label">AFTER</div>
+    </amp-image-slider>
+
     <p>No Reemerging hint</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600"
         disable-hint-reappear>
@@ -173,29 +254,7 @@
         alt="and another sample image"></amp-img>
     </amp-carousel>
 
-    <h1>P0 TESTS</h1>
-
-    <p>NO labels; NO whatever modifications</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-    </amp-image-slider>
-
-    <p>Labels with NO positioning rules specified (default to both top left)</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label">BEFORE</div>
-      <div second class="label">AFTER</div>
-    </amp-image-slider>
-
-    <p>Labels with positioning rules specified</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
-      <div first class="label left-label-center-xy">BEFORE</div>
-      <div second class="label right-label-center-xy">AFTER</div>
-    </amp-image-slider>
+    <h1>Accessibility</h1>
 
     <p>Has ARIA labels</p>
     <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" aria-label="check out the following images">

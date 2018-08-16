@@ -94,9 +94,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.shouldHintReappear_ =
       !this.element.hasAttribute('disable-hint-reappear');
 
-    /** @private {boolean} */
-    this.gestureDisabled_ = false; // for now, will be set later
-
     /** @private {Gestures|null} */
     this.gestures_ = null;
 
@@ -171,7 +168,8 @@ export class AmpImageSlider extends AMP.BaseElement {
       }
     }, ActionTrust.LOW);
 
-    const initialPercentString = this.element.getAttribute('initial-percent');
+    const initialPositionString =
+        this.element.getAttribute('initial-slider-position');
     // TODO(kqian): move this before building child components on issue
     // This is the only step when content tree is attached to document
     return this.mutateElement(() => {
@@ -180,9 +178,9 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.leftMask_.appendChild(this.leftAmpImage_);
       this.rightMask_.appendChild(this.rightAmpImage_);
       // Set initial positioning
-      if (initialPercentString) {
-        const initialPercent = Number(initialPercentString);
-        this.updatePositions_(initialPercent);
+      if (initialPositionString) {
+        const initialPosition = Number(initialPositionString);
+        this.updatePositions_(initialPosition);
       }
       // Prevent Edge horizontal swipe for go back/forward
       if (this.isEdge_) {
@@ -191,40 +189,6 @@ export class AmpImageSlider extends AMP.BaseElement {
         });
       }
     });
-  }
-
-  /** @override */
-  mutatedAttributesCallback(mutations) {
-    const newGestureDisabled = mutations['disable-gesture'];
-    if (newGestureDisabled) {
-      this.disableGesture_(); // this.gestureDisabled_ is set in this call
-    } else {
-      this.enableGesture_(); // this.gestureDisabled_ is set in this call
-    }
-  }
-
-  /**
-   * Enable user interaction
-   * @private
-   */
-  enableGesture_() {
-    if (!this.gestureDisabled_) {
-      return;
-    }
-    this.registerEvents_();
-    this.gestureDisabled_ = false;
-  }
-
-  /**
-   * Disable user interaction
-   * @private
-   */
-  disableGesture_() {
-    if (this.gestureDisabled_) {
-      return;
-    }
-    this.unregisterEvents_();
-    this.gestureDisabled_ = true;
   }
 
   /**
@@ -715,11 +679,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
 
     this.registerEvents_();
-
-    // disable-gesture is checked here instead, after all construction is done
-    if (this.element.hasAttribute('disable-gesture')) {
-      this.disableGesture_();
-    }
 
     return Promise.all([
       dev().assertElement(this.leftAmpImage_)
