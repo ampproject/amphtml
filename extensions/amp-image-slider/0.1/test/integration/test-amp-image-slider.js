@@ -29,6 +29,12 @@ config.run('amp-image-slider', function() {
       <div second class="label">AFTER</div>
     </amp-image-slider>
     <button id="button" on="tap:slider.seekTo(percent=0.1)">seekTo 10%</button>
+    <amp-image-slider tabindex="0" id="s2"
+        layout="responsive" width="1000" height="500" disable-hint-reappear>
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
     <p class="para">HUGE PADDING</p>
   `;
 
@@ -42,7 +48,7 @@ config.run('amp-image-slider', function() {
   .label {
     color: white;
     border: 4px solid white;
-    padding: 1em;
+    padding: 16px;
     font-family: Arial, Helvetica, sans-serif;
     box-shadow: 2px 2px 27px 5px rgba(0,0,0,0.75);
   }
@@ -65,8 +71,13 @@ config.run('amp-image-slider', function() {
     let slider;
     let sliderImpl;
     let rect;
-    let bar_, container_, rightMask_, leftAmpImage_, rightAmpImage_;
-    let leftLabel_, rightLabel_;
+    let bar_;
+    let container_;
+    let rightMask_;
+    let leftAmpImage_;
+    let rightAmpImage_;
+    let leftLabel_;
+    let rightLabel_;
 
     beforeEach(() => {
       win = env.win;
@@ -75,7 +86,7 @@ config.run('amp-image-slider', function() {
 
     function waitForImageSlider() {
       return poll('wait for amp-image-slider to complete', () => {
-        slider = doc.getElementsByTagName('amp-image-slider')[0];
+        slider = doc.querySelector('#slider');
 
         if (!slider) {
           return false;
@@ -121,6 +132,10 @@ config.run('amp-image-slider', function() {
     function prep() {
       return waitForImageSlider()
           .then(prepareSlider);
+    }
+
+    function timeout(win, ms) {
+      return new Promise(resolve => win.setTimeout(resolve, ms));
     }
 
     // A bunch of expects to check if the slider has slided to
@@ -171,32 +186,53 @@ config.run('amp-image-slider', function() {
     }
 
     it('should construct', () => {
-      let slider, container_, rightMask_, bar_;
+      let slider;
+      let container_;
+      let rightMask_;
+      let bar_;
       return prep()
           .then(() => {
             const sliders = doc.getElementsByTagName('amp-image-slider');
             expect(sliders.length).to.be.greaterThan(0);
-            slider = sliders[0];
+            slider = doc.querySelector('#slider');
             container_ = slider
                 .querySelector('.i-amphtml-image-slider-container');
-            expect(!!container_).to.be.true;
+            expect(container_).to.not.be.null;
             rightMask_ = slider.querySelector('.i-amphtml-image-slider-bar');
-            expect(!!rightMask_).to.be.true;
+            expect(rightMask_).to.not.be.null;
             bar_ = slider.querySelector('.i-amphtml-image-slider-bar');
-            expect(!!bar_).to.be.true;
+            expect(bar_).to.not.be.null;
             const ampImgs = slider.getElementsByTagName('amp-img');
             expect(ampImgs.length).to.equal(2);
-            expect(!!ampImgs[0]).to.be.true;
-            expect(!!ampImgs[1]).to.be.true;
+            expect(ampImgs[0]).to.not.be.null;
+            expect(ampImgs[1]).to.not.be.null;
+          });
+    });
+
+    it('should apply custom styling on labels and hints', () => {
+      let slider;
+      let leftHintArrow;
+      let leftLabel;
+      return prep()
+          .then(() => {
+            slider = doc.querySelector('#slider');
+            leftHintArrow = slider.querySelector('.amp-image-slider-hint-left');
+            leftLabel = slider.querySelector('.label');
+            expect(env.win.getComputedStyle(leftHintArrow)['width'])
+                .to.equal('64px');
+            expect(env.win.getComputedStyle(leftLabel)['padding'])
+                .to.equal('16px');
           });
     });
 
     it('should animate moving bar to position on mousedown', () => {
-      let leftQuarterPos, centerPos, container_;
+      let leftQuarterPos;
+      let centerPos;
+      let container_;
       let slider;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             sliderImpl = slider.implementation_;
             container_ =
               slider.querySelector(
@@ -226,11 +262,12 @@ config.run('amp-image-slider', function() {
     });
 
     it('should animate moving bar to position on touch', () => {
-      let leftQuarterPos, centerPos;
+      let leftQuarterPos;
+      let centerPos;
       let slider;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             sliderImpl = slider.implementation_;
             leftQuarterPos = rect.left + 0.25 * rect.width;
             const touchStartEvent =
@@ -257,11 +294,16 @@ config.run('amp-image-slider', function() {
 
     it('should follow mouse drag', () => {
       let slider;
-      let mouseDownEvent, mouseMoveEvent, mouseUpEvent;
-      let centerPos, leftQuarterPos, rightQuarterPos, rightBeyondPos;
+      let mouseDownEvent;
+      let mouseMoveEvent;
+      let mouseUpEvent;
+      let centerPos;
+      let leftQuarterPos;
+      let rightQuarterPos;
+      let rightBeyondPos;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             sliderImpl = slider.implementation_;
             container_ =
               slider.querySelector(
@@ -337,11 +379,16 @@ config.run('amp-image-slider', function() {
 
     it('should follow touch drag', () => {
       let slider;
-      let touchStartEvent, touchMoveEvent, touchEndEvent;
-      let centerPos, leftQuarterPos, rightQuarterPos, rightBeyondPos;
+      let touchStartEvent;
+      let touchMoveEvent;
+      let touchEndEvent;
+      let centerPos;
+      let leftQuarterPos;
+      let rightQuarterPos;
+      let rightBeyondPos;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             centerPos = rect.left + 0.5 * rect.width;
             leftQuarterPos = rect.left + 0.25 * rect.width;
             rightQuarterPos = rect.left + 0.75 * rect.width;
@@ -413,10 +460,11 @@ config.run('amp-image-slider', function() {
     it('should follow keyboard buttons', () => {
       let slider;
       let keyDownEvent;
-      let centerPos, pos40Percent;
+      let centerPos;
+      let pos40Percent;
       return prep()
           .then(() => {
-            slider = doc.querySelector('amp-image-slider');
+            slider = doc.querySelector('#slider');
             slider.focus();
             centerPos = rect.left + 0.5 * rect.width;
             pos40Percent = rect.left + 0.4 * rect.width;
@@ -444,6 +492,98 @@ config.run('amp-image-slider', function() {
             keyDownEvent = createKeyDownEvent('PageDown');
             slider.dispatchEvent(keyDownEvent);
             return pollByBarLeftPos(rect.right);
+          });
+    });
+
+    it('should seekTo correct position', () => {
+      return prep()
+          .then(() => {
+            const button = doc.querySelector('#button');
+            const pos10Percent = rect.left + 0.1 * rect.width;
+            button.click();
+            return pollByBarLeftPos(pos10Percent);
+          });
+    });
+
+    it('should show hint again on scroll back and into viewport', () => {
+      let slider;
+      let container_;
+      let hint;
+      let mouseDownEvent;
+      return prep()
+          .then(() => {
+            slider = doc.querySelector('#slider');
+            container_ = slider
+                .querySelector('.i-amphtml-image-slider-container');
+            hint = slider.querySelectorAll('.i-amphtml-image-slider-hint')[0];
+            mouseDownEvent = createFakeEvent(
+                'mousedown',
+                0,
+                0
+            );
+            container_.dispatchEvent(mouseDownEvent);
+            return poll('should receive hidden class', () => {
+              return hint.classList
+                  .contains('i-amphtml-image-slider-hint-hidden');
+            });
+          })
+          .then(() => {
+            env.win.scrollTo({
+              top: 3000,
+            });
+            // Have to use timeout here,
+            // no indication of proper viewportCallback trigger
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            env.win.scrollTo({
+              top: 0,
+            });
+            return poll('should remove hidden class', () => {
+              return !hint.classList
+                  .contains('i-amphtml-image-slider-hint-hidden');
+            });
+          });
+    });
+
+    it('should show hint again with disable-hint-reappear', () => {
+      let slider;
+      let container_;
+      let hint;
+      let mouseDownEvent;
+      return prep()
+          .then(() => {
+            slider = doc.querySelector('#s2');
+            container_ = slider
+                .querySelector('.i-amphtml-image-slider-container');
+            hint = slider.querySelectorAll('.i-amphtml-image-slider-hint')[0];
+            mouseDownEvent = createFakeEvent(
+                'mousedown',
+                0,
+                0
+            );
+            container_.dispatchEvent(mouseDownEvent);
+            return poll('should receive hidden class', () => {
+              return hint.classList
+                  .contains('i-amphtml-image-slider-hint-hidden');
+            });
+          })
+          .then(() => {
+            env.win.scrollTo({
+              top: 3000,
+            });
+            // Have to use timeout here,
+            // no indication of proper viewportCallback trigger
+            return timeout(env.win, 500);
+          })
+          .then(() => {
+            env.win.scrollTo({
+              top: 0,
+            });
+            return poll('should remove hidden class', () => {
+              return hint.classList
+                  .contains('i-amphtml-image-slider-hint-hidden');
+            });
           });
     });
   });
