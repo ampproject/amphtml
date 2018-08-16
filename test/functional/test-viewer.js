@@ -1291,7 +1291,7 @@ describe('Viewer', () => {
       });
     }
 
-    describe('should trust domain variations', () => {
+    describe('should trust trusted viewer origins', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
@@ -1308,6 +1308,7 @@ describe('Viewer', () => {
       test('https://abc.www.google.com', true);
       test('https://google.cat', true);
       test('https://www.google.cat', true);
+      test('x-thread://', true);
     });
 
     describe('should not trust host as referrer with http', () => {
