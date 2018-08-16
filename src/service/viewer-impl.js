@@ -891,7 +891,7 @@ export class Viewer {
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
     const {protocol} = url;
-    if (protocol != 'https:' || protocol != 'x-thread:') {
+    if (protocol != 'https:' && protocol != 'x-thread:') {
       // Non-https origins are never trusted. Android x-thread is allowed.
       return false;
     }

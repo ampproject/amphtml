@@ -1308,7 +1308,7 @@ describe('Viewer', () => {
       test('https://abc.www.google.com', true);
       test('https://google.cat', true);
       test('https://www.google.cat', true);
-      test('x-thread://', true);
+      test('x-thread://www.google.com', true);
     });
 
     describe('should not trust host as referrer with http', () => {
