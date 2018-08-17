@@ -891,7 +891,7 @@ export class Viewer {
   isTrustedViewerOrigin_(urlString) {
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
-    if (protocol != 'https:') {
+    if (url.protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
     }
