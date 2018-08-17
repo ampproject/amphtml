@@ -30,7 +30,7 @@
       src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 </head>
 <body>
-    <!-- Valid form -->
+    <!-- Valid POST form. -->
     <form method="post" action-xhr="https://example.com/subscribe"
     custom-validation-reporting="as-you-go">
     <fieldset>
@@ -55,6 +55,13 @@
       Submitting form...
     </div>
   </form>
+  <!-- Valid GET form. -->
+  <form method="GET" action-xhr="https://someserver.com/endpoint">
+    <div>
+      <input name="googlesearch">
+    </div>
+    <input type="submit" value="OK">
+  </form>
   <!-- Valid form with templates for submit-success and submit-error -->
   <form method="post" action-xhr="https://example.com/subscribe">
     <input type="email" name="email">
@@ -68,6 +75,20 @@
         Submission failed! {{a}}
       </template>
     </div>
+  </form>
+  <!-- Invalid: only https protocol is supported. -->
+  <form method="GET" action-xhr="http://someserver.com/endpoint">
+    <input name="googlesearch">
+    <input type="submit" value="OK">
+  </form>
+  <!-- Invalid: the action and target attributes are disallowed. -->
+  <form method="GET"
+    action="/components/amp-form/submit-form"
+    target="_top">
+    <div>
+      <input name="googlesearch">
+    </div>
+    <input type="submit" value="OK">
   </form>
   <!-- Invalid: input can not be type="button|file|image". -->
   <form method="post" action-xhr="https://example.com/subscribe">
@@ -106,7 +127,7 @@
     <div submitting template="abc">
     </div>
   </form>
-    <!-- Invalid: invalid template within a template -->
+  <!-- Invalid: invalid template within a template -->
   <form method="post" action-xhr="https://example.com/subscribe">
     <input type="email" name="email">
     <div submit-error>
@@ -118,5 +139,60 @@
       </template>
     </div>
   </form>
+  <!-- Invalid: mustache variables are disallowed in action-xhr. -->
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="{{foo}}">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="{{foo}}{{bar}}">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="foo{{bar">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="foo}}bar">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="{{">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
+  <template type="amp-mustache">
+    <form method="GET"
+      action-xhr="}}">
+      <div>
+        <input name="googlesearch">
+      </div>
+      <input type="submit" value="OK">
+    </form>
+  </template>
 </body>
 </html>
