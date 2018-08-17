@@ -613,7 +613,7 @@ config.run('amp-image-slider', function() {
         );
       });
 
-      // TODO: (#17575)
+      // TODO: (#17581)
       // This test flakes. May require events/signals to help solve the issue.
       it.skip('should show hint again on slider scrolling back and ' +
         'into viewport, after hint hidden and slider scrolled out of viewport',
