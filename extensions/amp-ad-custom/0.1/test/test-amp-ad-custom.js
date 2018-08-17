@@ -17,10 +17,10 @@
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   getAmpAdTemplateHelper,
-} from '../template-validator';
-import {AmpAdTemplate} from '../amp-ad-template';
+} from '../../../amp-a4a/0.1/template-validator';
+import {AmpAdTemplate} from '../../../amp-a4a/0.1/amp-ad-template';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
-import {data} from './testdata/valid_css_at_rules_amp.reserialized';
+import {data} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
 import {tryParseJson} from '../../../../src/json';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
@@ -193,4 +193,5 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     });
   });
 });
+
 
