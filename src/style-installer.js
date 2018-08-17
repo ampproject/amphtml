@@ -146,6 +146,9 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   if (key) {
     const existing = getExistingStyleElement(cssRoot, styleMap, key);
     if (existing) {
+      if (existing.textContent !== cssText) {
+        existing.textContent = cssText;
+      }
       return existing;
     }
   }
