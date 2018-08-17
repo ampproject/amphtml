@@ -164,11 +164,11 @@ describes.sandboxed('Navigation', {}, () => {
         handler.registerAnchorMutator(element => {
           element.href += '&second=2';
           transformedHref = element.href;
-        }, 99);
+        }, 2);
         handler.registerAnchorMutator(element => {
           element.href += '?first=1';
           transformedHref = element.href;
-        }, 100);
+        }, 1);
         handler.registerAnchorMutator(element => {
           element.href += '&third=3';
           transformedHref = element.href;

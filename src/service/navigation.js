@@ -125,8 +125,8 @@ export class Navigation {
      */
     this.a2aFeatures_ = null;
 
-    /** @const @private {!Array<!AnchorMutator>} */
-    this.registeredAnchorMutators_ = [];
+    /** @private @const {!Array<function(!Element)>} */
+    this.anchorMutators_ = [];
   }
 
   /**
@@ -258,8 +258,8 @@ export class Navigation {
 
     // Handle anchor transformations.
     const transformedTarget = target;
-    this.registeredAnchorMutators_.forEach(lr => {
-      lr.transform(target);
+    this.anchorMutators_.forEach(callback => {
+      callback(target);
       location = this.parseUrl_(target.href);
     });
 
@@ -424,38 +424,9 @@ export class Navigation {
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {
-    const am = new AnchorMutator(callback, priority);
-    if (this.registeredAnchorMutators_.length) {
-      this.registeredAnchorMutators_.splice(
-          this.findIndexToInsert(this.registeredAnchorMutators_, am), 0, am);
-    } else {
-      this.registeredAnchorMutators_.push(am);
-    }
-  }
-
-  /**
-   * Returns the index at which to insert the anchor mutator.
-   * @param {!Array<!AnchorMutator>} anchorMutators
-   * @param {!AnchorMutator} am
-   * @return {number}
-   */
-  findIndexToInsert(anchorMutators, am) {
-    const toInsertPriority = am.priority;
-    for (let i = 0, len = anchorMutators.length; i < len; i++) {
-      const compareTo = anchorMutators[i];
-      user().assert(compareTo.priority !== toInsertPriority,
-          'Mutator with same priority is already in use.');
-      if (toInsertPriority > compareTo.priority) {
-        return 0;
-      }
-      if (i == (len - 1)) {
-        return anchorMutators.length + 1;
-      }
-      if (toInsertPriority < compareTo.priority
-          && (i == (anchorMutators.length - 1))) {
-        return i;
-      }
-    }
+    user().assert(!this.anchorMutators_[priority],
+        'Mutator with same priority is already in use.');
+    this.anchorMutators_[priority] = callback;
   }
 
   /**
@@ -539,27 +510,3 @@ function maybeExpandUrlParams(ampdoc, e) {
   }
 }
 
-/**
- * A transformation applied to an anchor element, executed according to its
- * priority.
- */
-class AnchorMutator {
-  /**
-   * @param {function(!Element):!Element} callback
-   * @param {number} priority
-   */
-  constructor(callback, priority) {
-    /** @const */
-    this.callback = callback;
-    /** @const */
-    this.priority = priority;
-  }
-
-  /**
-   * Calls the callback for transforming/mutating the target object.
-   * @param {!Element} el
-   */
-  transform(el) {
-    this.callback(el);
-  }
-}
