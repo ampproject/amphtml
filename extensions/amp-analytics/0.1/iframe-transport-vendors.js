@@ -26,5 +26,5 @@
  */
 export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ ({
   'bg': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
-  'moat': 'https://js.moatads.com/ampanalytics093284/iframe.html',
+  'moat': 'https://z.moatads.com/ampanalytics093284/iframe.html',
 });
