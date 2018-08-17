@@ -40,6 +40,7 @@
   "amp-carousel-scroll-snap": 1,
   "amp-carousel-new-arrows": 1,
   "user-error-reporting": 1,
+  "no-initial-intersection": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "inabox-rov": 1
