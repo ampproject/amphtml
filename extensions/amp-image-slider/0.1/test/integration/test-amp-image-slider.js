@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../../../src/utils/promise';
-
 const config = describe.configure().ifNewChrome();
 config.run('amp-image-slider', function() {
   this.timeout(20000);
@@ -746,7 +744,7 @@ config.run('amp-image-slider', function() {
         ]);
       };
       // Start observer first to capture signal
-      const observerDeferred = startObserver(
+      const observerPromise = startObserver(
           /*target*/doc.body,
           /*cb*/areSignalsInstalled,
           /*opt_errorMessage*/'signals failed to be installed on sliders'
@@ -761,7 +759,7 @@ config.run('amp-image-slider', function() {
       }
       // Wait for signals to be installed and then wait for LOAD_END
       // During element's life cycle, there will be a lot DOM changes
-      return observerDeferred.promise.then(haveSlidersLoadEnded);
+      return observerPromise.then(haveSlidersLoadEnded);
     }
 
     // Populate variables and create slider groups and position groups
@@ -901,23 +899,20 @@ config.run('amp-image-slider', function() {
     // Rejects if timeout
     function startObserver(
       target, cb, opt_errorMessage) {
-      cleanupObserver();
-
-      const deferred = new Deferred();
-      observer = new win.MutationObserver(mutationList => {
-        if (cb(mutationList)) {
+      return new Promise((resolve, reject) => {
+        observer = new win.MutationObserver(mutationList => {
+          if (cb(mutationList)) {
+            cleanupObserver();
+            resolve();
+          }
+        });
+        observerTimeout = win.setTimeout(() => {
+          // Cancel observer when times out
           cleanupObserver();
-          deferred.resolve();
-        }
+          reject(new Error(opt_errorMessage || 'Observer times out'));
+        }, 1600);
+        observer.observe(target, {attributes: true, subtree: true});
       });
-      observerTimeout = win.setTimeout(() => {
-        // Cancel observer when times out
-        cleanupObserver();
-        deferred.reject(new Error(opt_errorMessage || 'Observer times out'));
-      }, 1600);
-
-      observer.observe(target, {attributes: true, subtree: true});
-      return deferred;
     }
 
     // Invoke a function and observe
@@ -926,12 +921,12 @@ config.run('amp-image-slider', function() {
     // Rejects if timeout
     function invokeAndObserve(
       invokeFunc, target, cb, opt_errorMessage) {
-      const observerDeferred =
+      const observerPromise =
           startObserver(target, cb,
               opt_errorMessage);
       // Run func only after observer setup
       invokeFunc();
-      return observerDeferred.promise;
+      return observerPromise;
     }
 
     // Cleanup the observer
