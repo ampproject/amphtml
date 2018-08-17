@@ -1291,7 +1291,7 @@ describe('Viewer', () => {
       });
     }
 
-    describe('should trust trusted viewer origins', () => {
+    describe('should trust domain variations', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
