@@ -34,6 +34,10 @@ tags: {  # <amp-pan-zoom>
     value: ""
   }
   attrs: {
+    name: "disable-double-tap"
+    value: ""
+  }
+  attrs: {
     name: "initial-scale"
     value_regex: "[0-9]+(\\.[0-9]+)?"
   }
