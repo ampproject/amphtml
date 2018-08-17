@@ -189,7 +189,7 @@ describe('DoubletapRecognizer', () => {
 
   it('should ask pending for first touchend', () => {
     gesturesMock.expects('signalPending_').withExactArgs(
-        recognizer, 300).once();
+        recognizer, 200).once();
     gesturesMock.expects('signalReady_').never();
     recognizer.onTouchEnd({});
     expect(recognizer.tapCount_).to.equal(1);
