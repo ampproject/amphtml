@@ -185,7 +185,7 @@ describes.sandboxed('Navigation', {}, () => {
           callback: () => {
           },
         };
-        const linkRuleSpy = sinon.spy(obj, 'callback');
+        const linkRuleSpy = sandbox.spy(obj, 'callback');
         handler.registerAnchorMutator(linkRuleSpy, 99);
         handler.handle_(event);
         // Verify that the expansion of variables occurs first
