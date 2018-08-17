@@ -41,7 +41,7 @@ config.run('amp-image-slider', function() {
     </amp-image-slider>
     <button id="b2" on="tap:s2.seekTo(percent=0.4)">seekTo 10%</button>
 
-    <p class="para">HUGE PADDING</p>
+    <p id="pad">HUGE PADDING</p>
   `;
 
   const css = `
@@ -75,6 +75,7 @@ config.run('amp-image-slider', function() {
     let win;
     let doc;
     let observer;
+    let observerTimeout;
     let s1; // sliderInfo of slider 1
     let s2; // sliderInfo of slider 2
 
@@ -653,7 +654,7 @@ config.run('amp-image-slider', function() {
             /*opt_errorMessage*/'Hint failed to be hidden'
         ).then(() => {
           // scroll slider outside of viewport
-          win.scrollTo({top: 3000});
+          win.scrollTo(0, doc.body.scrollHeight);
           // Wait to ensure runtime notices the update.
           // Have to use timeout(...) here,
           // no indication of proper viewportCallback trigger
@@ -661,7 +662,7 @@ config.run('amp-image-slider', function() {
         }).then(() => {
           // scroll page to top
           const scrollToTopFunction =
-            () => win.scrollTo({top: s1.slider.offsetTop});
+            () => win.scrollTo(0, s1.slider.offsetTop);
           // Notice that this checks if hint is displayed
           const isHintDisplayedCallback = () => !isHintHiddenCallback();
           // Hint should reappear again
@@ -697,14 +698,14 @@ config.run('amp-image-slider', function() {
             /*opt_errorMessage*/'Hint failed to be hidden'
         ).then(() => {
           // scroll slider outside of viewport
-          win.scrollTo({top: 3000});
+          win.scrollTo(0, doc.body.scrollHeight);
           // Wait to ensure runtime notices the update.
           // Have to use timeout(...) here,
           // no indication of proper viewportCallback trigger
           return timeout(500);
         }).then(() => {
           // scroll page to top
-          win.scrollTo({top: s2.slider.offsetTop});
+          win.scrollTo(0, s2.slider.offsetTop);
           // Expect hint to still be hidden
           const expectHintHiddenCallback =
             () => expect(isHintHiddenCallback()).to.be.true;
@@ -813,6 +814,16 @@ config.run('amp-image-slider', function() {
 
       s1 = createSliderInfo(slider1);
       s2 = createSliderInfo(slider2);
+
+      // The viewport test has been flaky for quite a while
+      // A possibility is that the viewport might be high enough to keep
+      // slider always in viewport
+      const viewportHeight =
+          Math.max(doc.documentElement.clientHeight, win.innerHeight || 0);
+      const sliderHeights = slider1.offsetHeight + slider2.offsetHeight;
+      // 10 times viewport height + 2 slider height, ensure slider is out
+      doc.querySelector('#pad').style.height =
+          `${sliderHeights + 10 * viewportHeight}px`;
     }
 
     /**
@@ -895,12 +906,11 @@ config.run('amp-image-slider', function() {
       const deferred = new Deferred();
       observer = new win.MutationObserver(mutationList => {
         if (cb(mutationList)) {
-          win.clearTimeout(timeoutHandle);
           cleanupObserver();
           deferred.resolve();
         }
       });
-      const timeoutHandle = win.setTimeout(() => {
+      observerTimeout = win.setTimeout(() => {
         // Cancel observer when times out
         cleanupObserver();
         deferred.reject(new Error(opt_errorMessage || 'Observer times out'));
@@ -927,6 +937,8 @@ config.run('amp-image-slider', function() {
     // Cleanup the observer
     function cleanupObserver() {
       if (observer) {
+        win.clearTimeout(observerTimeout);
+        observerTimeout = 0;
         observer.disconnect();
         observer = null;
       }
