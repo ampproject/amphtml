@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {copyChildren, removeChildren} from '../../../src/dom';
+import {closest, copyChildren, removeChildren} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
@@ -59,6 +63,9 @@ export class AmpStoryAccess extends AMP.BaseElement {
     this.actions_ = Services.actionServiceForDoc(this.element);
 
     /** @private {?Element} */
+    this.contentEl_ = null;
+
+    /** @private {?Element} */
     this.scrollableEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -68,10 +75,10 @@ export class AmpStoryAccess extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const drawerEl = renderAsElement(this.win.document, TEMPLATE);
-    const contentEl = dev().assertElement(
+    this.contentEl_ = dev().assertElement(
         drawerEl.querySelector('.i-amphtml-story-access-content'));
 
-    copyChildren(this.element, contentEl);
+    copyChildren(this.element, this.contentEl_);
     removeChildren(this.element);
 
     this.element.appendChild(drawerEl);
@@ -103,6 +110,8 @@ export class AmpStoryAccess extends AMP.BaseElement {
         this.element.querySelector('.i-amphtml-story-access-overflow');
     this.scrollableEl_.addEventListener(
         'scroll', throttle(this.win, () => this.onScroll_(), 100));
+
+    this.element.addEventListener('click', event => this.onClick_(event));
   }
 
   /**
@@ -134,6 +143,20 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     this.element.getResources()
         .measureMutateElement(this.element, measurer, mutator);
+  }
+
+  /**
+   * Handles click events and maybe closes the paywall.
+   * @param {!Event} event
+   * @private
+   */
+  onClick_(event) {
+    const el = dev().assertElement(event.target);
+
+    // Closes the menu if click happened outside of the main container.
+    if (!closest(el, el => el === this.contentEl_, this.element)) {
+      this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
+    }
   }
 
   /**
