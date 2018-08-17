@@ -21,7 +21,13 @@ import {
 } from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {closest, closestByTag, copyChildren, removeChildren} from '../../../src/dom';
+import {assertHttpsUrl} from '../../../src/url';
+import {
+  closest,
+  closestByTag,
+  copyChildren,
+  removeChildren,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
@@ -36,7 +42,8 @@ const TAG = 'amp-story-access';
 
 /**
  * Story access template.
- * @const {!./simple-template.ElementDef}
+ * @param {?string} logoSrc
+ * @return {!./simple-template.ElementDef}
  */
 const getTemplate = logoSrc => ({
   tag: 'div',
@@ -93,13 +100,14 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const storyEl = closestByTag(this.element, 'AMP-STORY');
+    const storyEl =
+        dev().assertElement(closestByTag(this.element, 'AMP-STORY'));
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    if (!logoSrc) {
+    logoSrc ?
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src') :
       user().warn(
           TAG, 'Expected "publisher-logo-src" attribute on <amp-story>');
-    }
 
     const drawerEl = renderAsElement(this.win.document, getTemplate(logoSrc));
     this.contentEl_ = dev().assertElement(

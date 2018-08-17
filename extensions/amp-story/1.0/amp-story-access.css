@@ -82,8 +82,6 @@ amp-story-access.i-amphtml-story-access-visible::before {
   border-radius: initial !important;
 }
 
-/** Access header. */
-
 .i-amphtml-story-access-header {
   position: relative !important;
   height: 80px !important;
@@ -121,8 +119,6 @@ amp-story-access.i-amphtml-story-access-visible::before {
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12) !important;
   z-index: -1 !important;
 }
-
-/** Access content. */
 
 .i-amphtml-story-access-content {
   padding: 60px 16px 16px !important;
