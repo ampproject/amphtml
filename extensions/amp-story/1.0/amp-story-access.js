@@ -86,11 +86,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
     return layout == Layout.CONTAINER;
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return false;
-  }
-
   /**
    * @private
    */
