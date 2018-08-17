@@ -17,15 +17,12 @@ export default class AffiliateLinkResolver {
    * @param {*} xhr
    * @param {*} skimOptions
    * @param {*} getTrackingInfo
-   * @param {*} beaconApiCallback
    */
-  constructor(xhr, skimOptions, getTrackingInfo, beaconApiCallback) {
+  constructor(xhr, skimOptions, getTrackingInfo) {
     this.xhr_ = xhr;
     this.skimOptions_ = skimOptions;
     this.domains_ = {};
-    this.beaconApiCallback_ = beaconApiCallback;
     this.getTrackingInfo_ = getTrackingInfo;
-    this.onBeaconCallbackONCE = once(this.onBeaconCallback_);
   }
 
   /**
@@ -181,9 +178,6 @@ export default class AffiliateLinkResolver {
    */
   resolvedUnknownAnchorsAsync_(anchorList, domainsToAsk) {
     return this.fetchDomainResolverApi(domainsToAsk).then(data => {
-      // DomainResolverApi (beaconApi) returns extra meta-data that we want to handle
-      // oustide of the resolveUnknownDomains process.
-      this.beaconApiCallback_(data);
 
       this.updateDomainsStatusMapPostFetch_(domainsToAsk, data.merchant_domains || []);
 

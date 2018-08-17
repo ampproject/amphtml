@@ -15,7 +15,6 @@ describes.fakeWin('domain-resolver', {
   },
 }, env => {
   let getTrackingInfo;
-  let apiCallback;
   let win;
   let xhr;
   let helpers;
@@ -28,7 +27,6 @@ describes.fakeWin('domain-resolver', {
 
   beforeEach(() => {
     getTrackingInfo = helpers.createGetTrackingInfoStub();
-    apiCallback = env.sandbox.stub();
   });
 
   afterEach(() => {
@@ -60,7 +58,6 @@ describes.fakeWin('domain-resolver', {
             {},
             {excludedDomains: ['excluded-merchant.com']},
             getTrackingInfo,
-            apiCallback,
         );
 
         anchorList = [
@@ -174,7 +171,6 @@ describes.fakeWin('domain-resolver', {
             xhr,
             {pubcode},
             getTrackingInfo,
-            apiCallback,
         );
       });
 
@@ -236,42 +232,6 @@ describes.fakeWin('domain-resolver', {
     });
 
 
-    describe('Calls the beacon callback', () => {
-      let stubXhr;
-      let beaconData;
-      let resolver;
-
-      beforeEach(() => {
-        beaconData = {
-          'merchant_domains': ['merchant1.com', 'merchant2.com'],
-        };
-        stubXhr = helpers.createStubXhr(beaconData);
-        resolver = new AffiliateLinkResolver(stubXhr, {}, getTrackingInfo, apiCallback);
-      });
-
-      it('Should call the callback if provided', () => {
-        const response = resolver.resolveUnknownAnchors(anchorList);
-        return response.asyncResponse.then(() => {
-          expect(apiCallback.calledOnce).to.be.true;
-        });
-      });
-
-      it('Should provide the beacon data', () => {
-        const response = resolver.resolveUnknownAnchors(anchorList);
-        return response.asyncResponse.then(() => {
-          expect(apiCallback.withArgs(beaconData).calledOnce).to.be.true;
-        });
-      });
-
-      it('Should not call the callback if api request is not made', () => {
-        const response = resolver.resolveUnknownAnchors([]);
-        expect(response.asyncResponse).to.be.null;
-        expect(apiCallback.called).to.be.false;
-      });
-    });
-
-
-
     describe('Returns the correct data', () => {
       beforeEach(() => {
         const stubXhr = helpers.createStubXhr({
@@ -281,7 +241,6 @@ describes.fakeWin('domain-resolver', {
             stubXhr,
             {excludedDomains: ['excluded-merchant.com']},
             getTrackingInfo,
-            apiCallback,
         );
       });
 
@@ -370,7 +329,7 @@ describes.fakeWin('domain-resolver', {
 
 
     describe('getLinkDomain_', () => {
-      const resolver = new AffiliateLinkResolver({}, {}, getTrackingInfo, apiCallback);
+      const resolver = new AffiliateLinkResolver({}, {}, getTrackingInfo);
 
       it('Removes  http protocol', () => {
         const anchor = helpers.createAnchor('http://test.com');
@@ -412,7 +371,6 @@ describes.fakeWin('domain-resolver', {
             {},
             {},
             helpers.createGetTrackingInfoStub({customTrackingId}),
-            apiCallback
         );
         return resolver.getWaypointUrl_(anchor);
       }

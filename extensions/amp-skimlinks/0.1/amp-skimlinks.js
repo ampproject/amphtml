@@ -30,12 +30,10 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   buildCallback() {
     window.t1 = new Date().getTime();
-
     this.hasCalledBeacon = false;
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
-    this.onBeaconCallbackONCE_ = once(this.onBeaconCallback_.bind(this));
     this.userSessionDataDeferred_ = new Deferred();
     this.linkRewriterService = new LinkRewriterService(this.ampDoc_.getRootNode());
     return whenDocumentReady(this.ampDoc_).then(() => {
@@ -52,65 +50,70 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.domainResolverService = new AffiliateLinkResolver(
         this.xhr_,
         this.skimOptions_,
-        getBoundFunction(this.trackingService, 'getTrackingInfo'),
-        this.onBeaconCallbackONCE_
+        getBoundFunction(this.trackingService, 'getTrackingInfo')
     );
 
-    this.skimlinksLinkRewriter = this.initSkimlinksLinkRewriter(this.trackingService,this.domainResolverService);
-
-    // Fire impression tracking after we have received beaconRequest
-    // TODO: Should this be fired onexit?
-    this.userSessionDataDeferred_.promise.then(userSessionData => {
-      window.t3 = new Date().getTime();
-      this.trackingService.sendImpressionTracking(
-          userSessionData,
-          this.skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
-          startTime,
-      );
-    });
+    this.skimlinksLinkRewriter = this.initSkimlinksLinkRewriter();
   }
 
   /**
-   * Resolve promise
-   * @param {*} beaconData
+   *
    */
-  onBeaconCallback_(beaconData) {
-    this.hasCalledBeacon = true;
-    this.userSessionDataDeferred_.resolve({
-      guid: beaconData.guid,
-    });
+  getResolveUnkownLinksFunction_() {
+    const initBeaconCallbackHookONCE = once(this.initBeaconCallbackHook_.bind(this));
+    return anchorList => {
+      const twoStepsResponse = this.domainResolverService.resolveUnknownAnchors(anchorList);
+      // Only called after the first page scan.
+      initBeaconCallbackHookONCE(twoStepsResponse);
+
+      return twoStepsResponse;
+    };
   }
 
   /**
-   * Fallback
+   *  Fires impression tracking after beacon request
+   * @param {*} userSessionData
    */
-  callBeaconIfNotAlreadyDone_() {
-    if (!this.hasCalledBeacon) {
-      this.domainResolverService.fetchDomainResolverApi([])
-          .then(this.onBeaconCallbackONCE_);
+  sendImpressionTracking_(userSessionData) {
+    window.t3 = new Date().getTime();
+    this.trackingService.sendImpressionTracking(
+        userSessionData,
+        this.skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
+        startTime,
+    );
+  };
+
+  /**
+   * @param {*} twoStepsResponse
+   */
+  initBeaconCallbackHook_(twoStepsResponse) {
+    let waitForBeaconResponse = twoStepsResponse.asyncResponse;
+    // If we haven't called beacon on the first page scan (because not links were found)
+    // Call it manually to get extra info like guid.
+    if (!waitForBeaconResponse) {
+      waitForBeaconResponse = this.domainResolverService.fetchDomainResolverApi([]);
     }
+
+    // TODO: Make sure this is called after .then updating AnchorLinkMap.
+    return waitForBeaconResponse.then(({guid}) => {
+      this.sendImpressionTracking_({guid});
+    });
   }
 
   /**
    * Initialise skimlinks link rewriter
    */
   initSkimlinksLinkRewriter() {
-    const resolveFunction = getBoundFunction(this.domainResolverService, 'resolveUnknownAnchors');
     const options = {
       linkSelector: this.skimOptions_.linkSelector,
     };
 
     this.skimlinksLinkRewriter = this.linkRewriterService.registerLinkRewriter(
         SKIMLINKS_REWRITER_ID,
-        resolveFunction,
+        this.getResolveUnkownLinksFunction_(),
         options
     );
 
-    // HACK TO MAKE SURE WE ALWAYS CALL BEACON API in case there are no links to resolve in the page.
-    this.skimlinksLinkRewriter.events.on(
-        linkRewriterEvents.PAGE_SCANNED,
-        this.callBeaconIfNotAlreadyDone_.bind(this)
-    );
     this.skimlinksLinkRewriter.events.on(
         linkRewriterEvents.CLICK,
         this.onClick_.bind(this)
