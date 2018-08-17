@@ -16,6 +16,6 @@
 
 describe('dummy candidate', () => {
   it('should be fine', () => {
-    expect(XMLHttpRequest.prototype).toBe.not.be.null;
+    expect(XMLHttpRequest.prototype).to.be.not.be.null;
   });
 });
