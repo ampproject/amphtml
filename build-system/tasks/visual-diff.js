@@ -455,6 +455,19 @@ async function snapshotWebpages(percy, page, webpages, config) {
     await verifyCssElements(page, url, webpage.forbidden_css,
         webpage.loading_incomplete_css, webpage.loading_complete_css);
 
+    if (webpage.loading_complete_delay_ms) {
+      if (typeof webpage.loading_complete_delay_ms !== 'number' &&
+          webpage.loading_complete_delay_ms > 0) {
+        log('verbose', 'Waiting',
+            colors.cyan(webpage.loading_complete_delay_ms + 'ms'),
+            'for loading to complete');
+        await sleep(webpage.loading_complete_delay_ms || 0);
+      } else {
+        log('warning', 'Skipping unknown delay',
+            webpage.loading_complete_delay_ms);
+      }
+    }
+
     if (webpage.enable_percy_javascript) {
       snapshotOptions.enableJavaScript = true;
       // Remove all scripts that have an external source, leaving only those
