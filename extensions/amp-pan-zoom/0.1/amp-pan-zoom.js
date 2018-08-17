@@ -134,10 +134,10 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.maxY_ = 0;
 
     /** @private */
-    this.xOffsetFromCenter_;
+    this.xOffsetFromCenter_ = 0;
 
     /** @private */
-    this.yOffsetFromCenter_;
+    this.yOffsetFromCenter_ = 0;
 
     /** @private {?../../../src/gesture.Gestures} */
     this.gestures_ = null;
