@@ -197,7 +197,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
   buildCallback() {
     this.assertAndParseConfig_();
 
-    const storyEl = closestByTag(this.element, 'AMP-STORY');
+    const storyEl =
+        dev().assertElement(closestByTag(this.element, 'AMP-STORY'));
     const consentEl = closestByTag(this.element, 'AMP-CONSENT');
     const consentId = consentEl.id;
 
