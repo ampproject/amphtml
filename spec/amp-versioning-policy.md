@@ -20,8 +20,8 @@ The AMP JS library is distributed via its major version only. The major version 
 
 Each AMP extension is versioned independently. Publishers of AMP documents can choose the major and minor version of an extension; they cannot choose the patch version. 
 
-- Minor versions may be changed for breaking behavior changes *without* breaking API changes.
-- Major versions *must* be changed for any breaking API changes.
+- Extension minor versions may be changed for breaking behavior changes *without* breaking API changes.
+- Extension major versions *must* be changed for any breaking API changes.
 
 ## Breaking changes
 
@@ -60,7 +60,7 @@ Process:
 
 ### Version deprecations
 
-Old versions of the AMP JS library and extensions may eventually be declared invalid by the AMP Validator. Such changes are breaking and must the deprecations policy above as well as additional rules prior to invalidation:
+Old versions of the AMP JS library and extensions may eventually be declared invalid by the AMP Validator. Such changes are breaking and must follow the deprecations process above. Additional rules also constrain the timelines of version deprecations:
 
 - A version must not be deprecated until a new version is released and stable for at least 1 month.
 - A version must not be invalidated until it has been deprecated for at least 1 year.
