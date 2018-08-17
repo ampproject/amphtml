@@ -615,7 +615,10 @@ config.run('amp-image-slider', function() {
 
       // TODO: (#17581)
       // This test flakes. May require events/signals to help solve the issue.
-      it.skip('should show hint again on slider scrolling back and ' +
+      it('should show hint again on slider scrolling back and ' +
+      // TODO:
+      // This test flakes. May require signals to help solve the issue.
+      it('should show hint again on slider scrolling back and ' +
         'into viewport, after hint hidden and slider scrolled out of viewport',
       () => {
         const dispatchMouseDownEventFunction =
@@ -635,11 +638,8 @@ config.run('amp-image-slider', function() {
           const promise = outOfViewportPromise(s1.slider);
           // scroll slider outside of viewport
           win.scrollTo(0, doc.body.scrollHeight);
-          // Wait to ensure runtime notices the update.
-          // Have to use timeout(...) here,
-          // no indication of proper viewportCallback trigger
+          // Wait for outOfViewportPromise
           return promise;
-          // return timeout(500);
         }).then(() => {
           // scroll page to top
           const scrollToTopFunction =
@@ -678,12 +678,11 @@ config.run('amp-image-slider', function() {
             /*cb*/isHintHiddenCallback,
             /*opt_errorMessage*/'Hint failed to be hidden'
         ).then(() => {
+          const promise = outOfViewportPromise(s2.slider);
           // scroll slider outside of viewport
           win.scrollTo(0, doc.body.scrollHeight);
-          // Wait to ensure runtime notices the update.
-          // Have to use timeout(...) here,
-          // no indication of proper viewportCallback trigger
-          return timeout(500);
+          // Wait for outOfViewportPromise
+          return promise;
         }).then(() => {
           // scroll page to top
           win.scrollTo(0, s2.slider.offsetTop);
@@ -960,15 +959,15 @@ config.run('amp-image-slider', function() {
       });
     }
 
-    function inViewportPromise(element) {
-      return new Promise(resolve => {
-        element.addEventListener('amp-image-slider-viewportCallback', e => {
-          if (e.detail.inViewport) {
-            resolve();
-          }
-        });
-      });
-    }
+    // function inViewportPromise(element) {
+    //   return new Promise(resolve => {
+    //     element.addEventListener('amp-image-slider-viewportCallback', e => {
+    //       if (e.detail.inViewport) {
+    //         resolve();
+    //       }
+    //     });
+    //   });
+    // }
 
     function outOfViewportPromise(element) {
       return new Promise(resolve => {
