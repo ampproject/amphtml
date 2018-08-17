@@ -17,7 +17,7 @@
 const config = describe.configure().ifNewChrome();
 config.run('amp-image-slider', function() {
   this.timeout(20000);
-  const defaultTimeout = 1600;
+  const DEFAULT_TIMEOUT = 1600;
 
   // We have 2 sliders, #s1 and #s2
   // #s2 has attribute `disable-hint-reappear` set
@@ -689,7 +689,7 @@ config.run('amp-image-slider', function() {
           const expectHintHiddenCallback =
             () => expect(isHintHiddenCallback()).to.be.true;
           // Wait for a while, and validate that the hint is still hidden
-          return timeout(defaultTimeout).then(expectHintHiddenCallback);
+          return timeout(DEFAULT_TIMEOUT).then(expectHintHiddenCallback);
         });
       });
     });
@@ -891,7 +891,7 @@ config.run('amp-image-slider', function() {
           // Cancel observer when times out
           cleanupObserver();
           reject(new Error(opt_errorMessage || 'Observer times out'));
-        }, defaultTimeout);
+        }, DEFAULT_TIMEOUT);
         observer.observe(target, {attributes: true, subtree: true});
       });
     }
@@ -953,7 +953,7 @@ config.run('amp-image-slider', function() {
      * and then check if the target position is reached.
      */
     function verifyPositionAfterTimeout(sliderInfo, targetPos) {
-      return timeout(defaultTimeout).then(() => {
+      return timeout(DEFAULT_TIMEOUT).then(() => {
         expect(hasCorrectSliderPosition(sliderInfo, targetPos)).to.be.true;
       });
     }
