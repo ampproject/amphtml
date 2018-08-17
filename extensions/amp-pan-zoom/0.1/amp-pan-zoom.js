@@ -144,6 +144,9 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.zoomButton_ = null;
+
+    /** @private */
+    this.disableDoubleTap_ = false;
   }
 
   /** @override */
@@ -164,7 +167,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.initialX_ = this.getNumberAttributeOr_('initial-x', 0);
     this.initialY_ = this.getNumberAttributeOr_('initial-y', 0);
     this.resetOnResize_ = this.element.hasAttribute('reset-on-resize');
-
+    this.disableDoubleTap_ = this.element.hasAttribute('disable-double-tap');
     this.registerAction('transform', invocation => {
       const {args} = invocation;
       if (!args) {
@@ -390,17 +393,6 @@ export class AmpPanZoom extends AMP.BaseElement {
       }
     });
 
-    // Zoomable.
-    this.gestures_.onGesture(DoubletapRecognizer, e => {
-      const {clientX, clientY} = e.data;
-      const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-      const deltaX = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
-      const deltaY = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
-
-      this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true)
-          .then(() => this.onZoomRelease_());
-    });
-
     this.gestures_.onGesture(PinchRecognizer, e => {
       const {
         centerClientX,
@@ -422,6 +414,18 @@ export class AmpPanZoom extends AMP.BaseElement {
       const event = createCustomEvent(this.win, 'click', null, {bubbles: true});
       e.data.target.dispatchEvent(event);
     });
+
+    if (!this.disableDoubleTap_) {
+      this.gestures_.onGesture(DoubletapRecognizer, e => {
+        const {clientX, clientY} = e.data;
+        const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
+        const dx = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
+        const dy = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
+        this.onZoom_(newScale, dx, dy, /*animate*/ true)
+            .then(() => this.onZoomRelease_());
+      });
+    }
+
   }
 
   /**
