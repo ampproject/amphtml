@@ -20,8 +20,6 @@ import {
 } from './amp-ad-type-defs';
 import {AmpAdNetworkBase} from './amp-ad-network-base';
 import {NameFrameRenderer} from './name-frame-renderer';
-import {NetworkRegistry} from './template-config';
-import {Services} from '../../../src/services';
 import {TemplateRenderer} from './template-renderer';
 import {TemplateValidator} from './template-validator';
 import {addParamToUrl} from '../../../src/url';
@@ -46,16 +44,8 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
     this.registerRenderer(nameFrameRenderer, ValidatorResult.NON_AMP);
 
     /** @const {string} */
-    this.networkType_ = element.getAttribute('type');
-    dev().assert(this.networkType_,
-        'Template amp-ad elements must specify a type');
-
-    const networkConfig = NetworkRegistry[this.networkType_];
-    dev().assert(networkConfig, `Invalid network type ${this.networkType_}`);
-
-    /** @const {string} */
-    this.requestUrl_ = networkConfig.requestUrl;
-    dev().assert(this.requestUrl_,
+    this.baseRequestUrl_ = this.element.getAttribute('src');
+    dev().assert(this.baseRequestUrl_,
         'Invalid network configuration: no request URL specified');
 
     this.getContext().win = this.win;
@@ -73,15 +63,10 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
   /** @override */
   getRequestUrl() {
-    let url = Services.urlReplacementsForDoc(this.element)
-        .expandUrlSync(this.requestUrl_, {
-          width: this.getContext().size.width,
-          height: this.getContext().size.height,
-        });
-
+    let url = this.baseRequestUrl_;
     // We collect all fields in the dataset of the form
-    // 'data-request-var-<field_name>=<val>`, and append &<field_name>=<val> to
-    // the add request URL.
+    // 'data-request-param-<field_name>=<val>`, and append &<field_name>=<val>
+    // to the add request URL.
     Object.keys(this.element.dataset).forEach(dataField => {
       if (startsWith(dataField, DATA_REQUEST_PARAM_PREFIX)) {
         const requestParamName = dataField.slice(

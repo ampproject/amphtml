@@ -53,7 +53,7 @@ export class TemplateValidator extends Validator {
 
     const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
     const parsedResponseBody =
-        /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+    /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
         tryParseJson(body));
 
     // If we're missing the relevant header, or headers altogether, we cannot
