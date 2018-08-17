@@ -169,9 +169,13 @@ describes.sandboxed('Navigation', {}, () => {
           element.href += '?first=1';
           transformedHref = element.href;
         }, 100);
+        handler.registerAnchorMutator(element => {
+          element.href += '&third=3';
+          transformedHref = element.href;
+        }, 3);
         handler.handle_(event);
         expect(transformedHref).to.equal(
-            'https://www.testing-1-2-3.org/?first=1&second=2');
+            'https://www.testing-1-2-3.org/?first=1&second=2&third=3');
       });
 
       it('verify order of operations', () => {

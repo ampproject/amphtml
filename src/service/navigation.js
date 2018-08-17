@@ -256,11 +256,7 @@ export class Navigation {
       return;
     }
 
-    // Handle anchor transformations. Sort mutators by priority
-    // and execute based on that order.
-    this.registeredAnchorMutators_.sort((lr1, lr2) => {
-      return lr2.priority - lr1.priority;
-    });
+    // Handle anchor transformations.
     const transformedTarget = target;
     this.registeredAnchorMutators_.forEach(lr => {
       lr.transform(target);
@@ -424,28 +420,42 @@ export class Navigation {
   }
 
   /**
-   *
-   * @param {number} priority
-   * @return {boolean}
-   */
-  isAnchorMutatorPriorityUsed_(priority) {
-    for (let i = 0; i < this.registeredAnchorMutators_.length; i++) {
-      const lr = this.registeredAnchorMutators_[i];
-      if (lr.priority === priority) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
    * @param {!Function} callback
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {
-    user().assert(!this.isAnchorMutatorPriorityUsed_(priority),
-        'Mutator with same priority is already in use.');
-    this.registeredAnchorMutators_.push(new AnchorMutator(callback, priority));
+    const am = new AnchorMutator(callback, priority);
+    if (this.registeredAnchorMutators_.length) {
+      this.registeredAnchorMutators_.splice(
+          this.findIndexToInsert(this.registeredAnchorMutators_, am), 0, am);
+    } else {
+      this.registeredAnchorMutators_.push(am);
+    }
+  }
+
+  /**
+   * Returns the index at which to insert the anchor mutator.
+   * @param {!Array<!AnchorMutator>} anchorMutators
+   * @param {!AnchorMutator} am
+   * @return {number}
+   */
+  findIndexToInsert(anchorMutators, am) {
+    const toInsertPriority = am.priority;
+    for (let i = 0, len = anchorMutators.length; i < len; i++) {
+      const compareTo = anchorMutators[i];
+      user().assert(compareTo.priority !== toInsertPriority,
+          'Mutator with same priority is already in use.');
+      if (toInsertPriority > compareTo.priority) {
+        return 0;
+      }
+      if (i == (len - 1)) {
+        return anchorMutators.length + 1;
+      }
+      if (toInsertPriority < compareTo.priority
+          && (i == (anchorMutators.length - 1))) {
+        return i;
+      }
+    }
   }
 
   /**
