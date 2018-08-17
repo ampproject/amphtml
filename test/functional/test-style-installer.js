@@ -225,29 +225,6 @@ describe('Styles', () => {
         });
       });
 
-      it('should not override ws-only difference extension styles', () => {
-        const serverEl = doc.createElement('style');
-        serverEl.setAttribute('amp-runtime', '');
-        serverEl.textContent = '  CSS  ';
-        head.appendChild(serverEl);
-        const promise = installStylesAsPromise('CSS', true);
-        return promise.then(styleEl => {
-          expect(head.__AMP_CSS_SM['amp-runtime']).to.equal(serverEl);
-          expect(styleEl).to.equal(serverEl);
-          expect(styleEl.textContent).to.equal('  CSS  ');
-          expect(head.querySelectorAll('style[amp-runtime]'))
-              .to.have.length(1);
-
-          return installStylesAsPromise('   CSS   ', true);
-        }).then(styleEl => {
-          expect(head.__AMP_CSS_SM['amp-runtime']).to.equal(serverEl);
-          expect(styleEl).to.equal(serverEl);
-          expect(styleEl.textContent).to.equal('  CSS  ');
-          expect(head.querySelectorAll('style[amp-runtime]'))
-              .to.have.length(1);
-        });
-      });
-
       it('should re-create runtime style if absent', () => {
         return installStylesAsPromise('other{}', true).then(styleEl => {
           expect(head.__AMP_CSS_SM['amp-runtime']).to.equal(styleEl);
@@ -266,29 +243,6 @@ describe('Styles', () => {
           expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
           expect(styleEl).to.equal(serverEl);
           expect(styleEl.textContent).to.equal('other{}');
-          expect(head.querySelectorAll('style[amp-extension=amp-ext1]'))
-              .to.have.length(1);
-        });
-      });
-
-      it('should not override ws-only difference extension styles', () => {
-        const serverEl = doc.createElement('style');
-        serverEl.setAttribute('amp-extension', 'amp-ext1');
-        serverEl.textContent = '  CSS  ';
-        head.appendChild(serverEl);
-        const promise = installStylesAsPromise('CSS', false, 'amp-ext1');
-        return promise.then(styleEl => {
-          expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
-          expect(styleEl).to.equal(serverEl);
-          expect(styleEl.textContent).to.equal('  CSS  ');
-          expect(head.querySelectorAll('style[amp-extension=amp-ext1]'))
-              .to.have.length(1);
-
-          return installStylesAsPromise('   CSS   ', false, 'amp-ext1');
-        }).then(styleEl => {
-          expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
-          expect(styleEl).to.equal(serverEl);
-          expect(styleEl.textContent).to.equal('  CSS  ');
           expect(head.querySelectorAll('style[amp-extension=amp-ext1]'))
               .to.have.length(1);
         });
