@@ -76,7 +76,8 @@ tags: {  # <amp-date-countdown>
   }
   attrs: {
     name: "when-ended"
-    value_regex_casei: "stop|continue"
+    value_casei: "continue"
+    value_casei: "stop"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
