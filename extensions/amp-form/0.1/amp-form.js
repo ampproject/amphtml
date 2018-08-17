@@ -232,7 +232,7 @@ export class AmpForm {
    * @param {!Object<string, string>=} opt_extraFields
    * @return {!../../../src/service/xhr-impl.FetchDef}
    */
-  buildFetchDef(url, method, opt_extraFields) {
+  requestForFormFetch(url, method, opt_extraFields) {
     let xhrUrl, body;
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
@@ -494,7 +494,9 @@ export class AmpForm {
     const varSubPromise = this.doVarSubs_(varSubsFields);
     let p;
     if (this.ssrTemplateHelper_.isSupported()) {
-      p = this.handleSsrTemplate(varSubPromise, trust);
+      p = varSubPromise.then(() => {
+        this.handleSsrTemplate_(trust);
+      });
     } else {
       p = varSubPromise
           .then(() => {
@@ -521,32 +523,31 @@ export class AmpForm {
 
   /**
    * Handles the server side proxying and then rendering of the template.
-   * @param {!Promise} varSubPromise Variable substitution promise.
    * @param {ActionTrust} trust
    * @return {!Promise}
+   * @private
    */
-  handleSsrTemplate(varSubPromise, trust) {
+  handleSsrTemplate_(trust) {
     let fetchDef;
-    return varSubPromise.then(() => {
-      // Render template for the form submitting state.
-      const values = this.getFormAsObject_();
-      return this.renderTemplate_(values);
-    }).then(() => {
-      this.actions_.trigger(
-          this.form_, FormEvents.SUBMIT, /* event */ null, trust);
-    }).then(() => {
-      fetchDef = this.buildFetchDef(
-          dev().assertString(this.xhrAction_), this.method_);
-      setupInit(fetchDef.fetchOpt);
-      setupAMPCors(this.win_, fetchDef.xhrUrl, fetchDef.fetchOpt);
-      return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-          this.form_,
-          fetchDef,
-          this.getResponseTemplates_());
-    }).then(
-        resp => this.handleSsrTemplateSuccess_(resp, fetchDef),
-        error => this.handleSsrTemplateFailure_(
-            /** @type {!JsonObject} */ (error)));
+    // Render template for the form submitting state.
+    const values = this.getFormAsObject_();
+    return this.renderTemplate_(values)
+        .then(() => {
+          this.actions_.trigger(
+              this.form_, FormEvents.SUBMIT, /* event */ null, trust);
+        }).then(() => {
+          fetchDef = this.requestForFormFetch(
+              dev().assertString(this.xhrAction_), this.method_);
+          setupInit(fetchDef.fetchOpt);
+          setupAMPCors(this.win_, fetchDef.xhrUrl, fetchDef.fetchOpt);
+          return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+              this.form_,
+              fetchDef,
+              this.templatesForSsr_());
+        }).then(
+            resp => this.handleSsrTemplateSuccess_(resp, fetchDef),
+            error => this.handleSsrTemplateFailure_(
+                /** @type {!JsonObject} */ (error)));
   }
 
   /**
@@ -554,8 +555,9 @@ export class AmpForm {
    * Note that we do not render the submitting state template and only
    * deal with submit-success or submit-error.
    * @return {!../../../src/ssr-template-helper.SsrTemplateDef}
+   * @private
    */
-  getResponseTemplates_() {
+  templatesForSsr_() {
     const successContainer =
         this.form_.querySelector('div[submit-success]');
     const errorContainer = this.form_.querySelector('div[submit-error]');
@@ -645,8 +647,7 @@ export class AmpForm {
    */
   doXhr_(url, method, opt_extraFields) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    const fetchDef = this.buildFetchDef(
-        url, method, opt_extraFields);
+    const fetchDef = this.requestForFormFetch(url, method, opt_extraFields);
     return this.xhr_.fetch(fetchDef.xhrUrl, fetchDef.fetchOpt);
   }
 

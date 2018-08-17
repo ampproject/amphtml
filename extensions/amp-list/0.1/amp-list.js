@@ -23,7 +23,7 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
-  constructBatchFetchDef,
+  requestForBatchFetch,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
@@ -266,7 +266,7 @@ export class AmpList extends AMP.BaseElement {
     let fetchDef;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
-    return constructBatchFetchDef(
+    return requestForBatchFetch(
         this.getAmpDoc(),
         this.element,
         this.getPolicy_()).then(batchFetchDef => {
@@ -284,7 +284,7 @@ export class AmpList extends AMP.BaseElement {
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, batchFetchDef, null, ampListAttributes);
     }).then(response => {
-      fetchDef.responseType = 'application/json';
+      fetchDef.fetchOpt.responseType = 'application/json';
       this.ssrTemplateHelper_.verifySsrResponse(
           this.win, response, fetchDef);
       return response['html'];

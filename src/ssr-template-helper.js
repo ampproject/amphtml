@@ -99,6 +99,8 @@ export class SsrTemplateHelper {
    * @param {string|undefined} mustacheTemplate
    * @param {?SsrTemplateDef=} opt_templates
    * @param {!Object=} opt_attributes
+   * @return {!JsonObject}
+   * @private
    */
   buildPayload_(
     fetchDef, mustacheTemplate, opt_templates, opt_attributes = {}) {
@@ -154,7 +156,7 @@ export class SsrTemplateHelper {
         win,
         fromStructuredCloneable(
             response,
-            fetchDef.responseType),
+            fetchDef.fetchOpt.responseType),
         fetchDef.fetchOpt);
   }
 }

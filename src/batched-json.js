@@ -70,7 +70,7 @@ export function batchFetchJsonFor(
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
  * @return {!Promise<!./service/xhr-impl.FetchDef>}
  */
-export function constructBatchFetchDef(
+export function requestForBatchFetch(
   ampdoc,
   element,
   opt_urlReplacement) {
