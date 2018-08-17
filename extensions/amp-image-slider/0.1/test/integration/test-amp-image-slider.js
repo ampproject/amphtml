@@ -486,7 +486,7 @@ config.run('amp-image-slider', function() {
       });
 
       it('pressing ArrowRight should move slider bar by 10% to the right ' +
-        'only when slider is focused', () => {
+        'when slider is focused', () => {
         // Focus first!
         s1.slider.focus();
         return verifyPositionUpdateAfterEventDispatch(
@@ -503,7 +503,7 @@ config.run('amp-image-slider', function() {
       });
 
       it('pressing PageUp should move slider bar to leftmost ' +
-        'only when slider is focused', () => {
+        'when slider is focused', () => {
         // Focus first!
         s1.slider.focus();
         return verifyPositionUpdateAfterEventDispatch(
@@ -520,7 +520,7 @@ config.run('amp-image-slider', function() {
       });
 
       it('pressing Home should move slider bar to center ' +
-        'only when slider is focused', () => {
+        'when slider is focused', () => {
         // To test center, we have to focus and move slider bar
         // to somewhere not the center initially
         s1.slider.focus();
@@ -553,7 +553,7 @@ config.run('amp-image-slider', function() {
       });
 
       it('pressing PageDown should move slider bar to rightmost ' +
-        'only when slider is focused', () => {
+        'when slider is focused', () => {
         // Focus first!
         s1.slider.focus();
         return verifyPositionUpdateAfterEventDispatch(
