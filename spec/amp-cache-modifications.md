@@ -421,19 +421,6 @@ Remove unused custom-element extensions with the following exceptions:
 
 </details>
 
-#### Remove `<script type=application/ld+json>...</script>`
-
-Remove JSON-based linked data from the document.
-
-<details>
-<summary>example</summary>
-
-| before | after |
-| --- | --- |
-| `<head>`<br>`...`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`<script type=application/ld+json>`<br>`{`<br>`"@context": "http://schema.org",`<br>`"@type": "Person",`<br>`"name": "Lorem Ipsum",`<br>`}`<br>`</script>`<br>`...`<br>`</head>` | `<head>`<br>`...`<br>`<script async src=https://cdn.ampproject.org/v0.js></script>`<br>`...`<br>`</head>` |
-
-</details>
-
 #### Remove insignificant whitespace in `<head>`
 
 Remove whitespace in `<head>` except for tags that should preserve whitespace.
