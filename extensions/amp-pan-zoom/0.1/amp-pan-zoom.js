@@ -415,18 +415,16 @@ export class AmpPanZoom extends AMP.BaseElement {
       e.data.target.dispatchEvent(event);
     });
 
-    if (this.disableDoubleTap_) {
-      return;
+    if (!this.disableDoubleTap_) {
+      this.gestures_.onGesture(DoubletapRecognizer, e => {
+        const {clientX, clientY} = e.data;
+        const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
+        const dx = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
+        const dy = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
+        this.onZoom_(newScale, dx, dy, /*animate*/ true)
+            .then(() => this.onZoomRelease_());
+      });
     }
-    this.gestures_.onGesture(DoubletapRecognizer, e => {
-      const {clientX, clientY} = e.data;
-      const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-      const deltaX = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
-      const deltaY = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
-
-      this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true)
-          .then(() => this.onZoomRelease_());
-    });
 
   }
 
