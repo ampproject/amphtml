@@ -167,7 +167,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.initialX_ = this.getNumberAttributeOr_('initial-x', 0);
     this.initialY_ = this.getNumberAttributeOr_('initial-y', 0);
     this.resetOnResize_ = this.element.hasAttribute('reset-on-resize');
-    this.disableDoubleTap = this.element.hasAttribute('disable-double-tap');
+    this.disableDoubleTap_ = this.element.hasAttribute('disable-double-tap');
     this.registerAction('transform', invocation => {
       const {args} = invocation;
       if (!args) {
