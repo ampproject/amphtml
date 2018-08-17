@@ -558,7 +558,7 @@ export class Viewport {
     return this.getElementScrollTop_(parent).then(curScrollTop => {
       let newScrollTop;
       if (this.useLayers_) {
-        newScrollTop = elementRect.top + offset + curScrollTop;
+        newScrollTop = Math.max(0, elementRect.top + offset + curScrollTop);
       } else {
         const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
         newScrollTop = Math.max(0, calculatedScrollTop);
