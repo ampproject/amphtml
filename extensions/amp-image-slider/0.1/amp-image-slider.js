@@ -494,8 +494,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       return;
     }
     this.unlistenMouseDown_ =
-        listen(dev().assertElement(this.container_),
-            'mousedown', this.onMouseDown_.bind(this));
+        listen(this.element, 'mousedown', this.onMouseDown_.bind(this));
     this.unlistenKeyDown_ =
         listen(this.element, 'keydown', this.onKeyDown_.bind(this));
     this.registerTouchGestures_();
