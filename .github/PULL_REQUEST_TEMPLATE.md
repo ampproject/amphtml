@@ -1,7 +1,7 @@
 # Instructions:
 
 - Pick a meaningful title for your pull request. (Use sentence case.)
-  - Prefix the title with an emoji to identify what is being done. (Copy-paste from the list below.)
+  - Prefix the title with an emoji to identify what is being done. (Copy-paste the emoji itself (not the :code:) from the list below.)
   - Do not overuse punctuation in the title (like `(chore):`).
   - If it is helpful, use a simple prefix (like `ProjectX: Implement some feature`).
 - Enter a succinct description that says why the PR is necessary, and what it does.
