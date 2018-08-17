@@ -49,7 +49,7 @@ export function batchFetchJsonFor(
   opt_urlReplacement = UrlReplacementPolicy.NONE)
 {
   assertHttpsUrl(element.getAttribute('src'), element);
-  return constructBatchFetchDef(ampdoc, element, opt_urlReplacement)
+  return requestForBatchFetch(ampdoc, element, opt_urlReplacement)
       .then(data => {
         return Services.batchedXhrFor(ampdoc.win)
             .fetchJson(data['xhrUrl'], data['fetchOpt']);
