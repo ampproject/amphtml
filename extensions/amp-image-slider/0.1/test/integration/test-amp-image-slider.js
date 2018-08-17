@@ -616,9 +616,6 @@ config.run('amp-image-slider', function() {
       // TODO: (#17581)
       // This test flakes. May require events/signals to help solve the issue.
       it('should show hint again on slider scrolling back and ' +
-      // TODO:
-      // This test flakes. May require signals to help solve the issue.
-      it('should show hint again on slider scrolling back and ' +
         'into viewport, after hint hidden and slider scrolled out of viewport',
       () => {
         const dispatchMouseDownEventFunction =
