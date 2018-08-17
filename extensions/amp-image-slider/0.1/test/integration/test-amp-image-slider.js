@@ -472,69 +472,54 @@ config.run('amp-image-slider', function() {
 
     describe('using a keyboard', () => {
       it('pressing ArrowLeft should move slider bar by 10% to the left ' +
-        'only when slider is focused', () => {
-        // Notice that we are not focusing on the slider here
-        s1.slider.dispatchEvent(createKeyDownEvent('ArrowLeft'));
-        // Slider bar stays at original place (center by default)
-        return verifyPositionAfterTimeout(s1, s1.pos.percent50).then(() => {
-          // We focus here!
-          s1.slider.focus();
-          return verifyPositionUpdateAfterEventDispatch(
-              /*eventConfig*/
-              {
-                target: s1.slider,
-                cstr: createKeyDownEvent,
-                key: 'ArrowLeft',
-              },
-              /*observeTarget*/s1.slider,
-              /*sliderInfo*/s1,
-              /*targetPos*/s1.pos.percent40
-          );
-        });
+        'when slider is focused', () => {
+        // Focus first!
+        s1.slider.focus();
+        return verifyPositionUpdateAfterEventDispatch(
+            /*eventConfig*/
+            {
+              target: s1.slider,
+              cstr: createKeyDownEvent,
+              key: 'ArrowLeft',
+            },
+            /*observeTarget*/s1.slider,
+            /*sliderInfo*/s1,
+            /*targetPos*/s1.pos.percent40
+        );
       });
 
       it('pressing ArrowRight should move slider bar by 10% to the right ' +
         'only when slider is focused', () => {
-        // Notice that we are not focusing on the slider here
-        s1.slider.dispatchEvent(createKeyDownEvent('ArrowRight'));
-        // Slider bar stays at original place (center by default)
-        return verifyPositionAfterTimeout(s1, s1.pos.percent50).then(() => {
-          // We focus here!
-          s1.slider.focus();
-          return verifyPositionUpdateAfterEventDispatch(
-              /*eventConfig*/
-              {
-                target: s1.slider,
-                cstr: createKeyDownEvent,
-                key: 'ArrowRight',
-              },
-              /*observeTarget*/s1.slider,
-              /*sliderInfo*/s1,
-              /*targetPos*/s1.pos.percent60
-          );
-        });
+        // Focus first!
+        s1.slider.focus();
+        return verifyPositionUpdateAfterEventDispatch(
+            /*eventConfig*/
+            {
+              target: s1.slider,
+              cstr: createKeyDownEvent,
+              key: 'ArrowRight',
+            },
+            /*observeTarget*/s1.slider,
+            /*sliderInfo*/s1,
+            /*targetPos*/s1.pos.percent60
+        );
       });
 
       it('pressing PageUp should move slider bar to leftmost ' +
         'only when slider is focused', () => {
-        // Notice that we are not focusing on the slider here
-        s1.slider.dispatchEvent(createKeyDownEvent('PageUp'));
-        // Slider bar stays at original place (center by default)
-        return verifyPositionAfterTimeout(s1, s1.pos.percent50).then(() => {
-          // We focus here!
-          s1.slider.focus();
-          return verifyPositionUpdateAfterEventDispatch(
-              /*eventConfig*/
-              {
-                target: s1.slider,
-                cstr: createKeyDownEvent,
-                key: 'PageUp',
-              },
-              /*observeTarget*/s1.slider,
-              /*sliderInfo*/s1,
-              /*targetPos*/s1.pos.percent0
-          );
-        });
+        // Focus first!
+        s1.slider.focus();
+        return verifyPositionUpdateAfterEventDispatch(
+            /*eventConfig*/
+            {
+              target: s1.slider,
+              cstr: createKeyDownEvent,
+              key: 'PageUp',
+            },
+            /*observeTarget*/s1.slider,
+            /*sliderInfo*/s1,
+            /*targetPos*/s1.pos.percent0
+        );
       });
 
       it('pressing Home should move slider bar to center ' +
@@ -555,15 +540,7 @@ config.run('amp-image-slider', function() {
             /*sliderInfo*/s1,
             /*targetPos*/s1.pos.percent0
         ).then(() => {
-          // Unfocus the slider
-          s1.slider.blur();
-          // Notice it is not focused
-          s1.slider.dispatchEvent(createKeyDownEvent('Home'));
-          // Slider bar stays at original place (leftmost this case)
-          return verifyPositionAfterTimeout(s1, s1.pos.percent0);
-        }).then(() => {
-          // We focus again here!
-          s1.slider.focus();
+          // Still focused!
           return verifyPositionUpdateAfterEventDispatch(
               /*eventConfig*/
               {
@@ -580,24 +557,27 @@ config.run('amp-image-slider', function() {
 
       it('pressing PageDown should move slider bar to rightmost ' +
         'only when slider is focused', () => {
+        // Focus first!
+        s1.slider.focus();
+        return verifyPositionUpdateAfterEventDispatch(
+            /*eventConfig*/
+            {
+              target: s1.slider,
+              cstr: createKeyDownEvent,
+              key: 'PageDown',
+            },
+            /*observeTarget*/s1.slider,
+            /*sliderInfo*/s1,
+            /*targetPos*/s1.pos.percent100
+        );
+      });
+
+      it('pressing buttons should not move slider bar ' +
+        'if slider is not focused', () => {
         // Notice that we are not focusing on the slider here
-        s1.slider.dispatchEvent(createKeyDownEvent('PageDown'));
+        s1.slider.dispatchEvent(createKeyDownEvent('PageUp'));
         // Slider bar stays at original place (center by default)
-        return verifyPositionAfterTimeout(s1, s1.pos.percent50).then(() => {
-          // We focus here!
-          s1.slider.focus();
-          return verifyPositionUpdateAfterEventDispatch(
-              /*eventConfig*/
-              {
-                target: s1.slider,
-                cstr: createKeyDownEvent,
-                key: 'PageDown',
-              },
-              /*observeTarget*/s1.slider,
-              /*sliderInfo*/s1,
-              /*targetPos*/s1.pos.percent100
-          );
-        });
+        return verifyPositionAfterTimeout(s1, s1.pos.percent50);
       });
     });
 
