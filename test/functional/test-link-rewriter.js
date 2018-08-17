@@ -1,5 +1,5 @@
 import {AmpEvents} from '../../src/amp-events';
-import {PRIORITY_META_TAG_NAME, EVENTS as linkRewriterEvents} from '../../src/service/link-rewrite/constants';
+import {ORIGINAL_URL_ATTRIBUTE, PRIORITY_META_TAG_NAME, EVENTS as linkRewriterEvents} from '../../src/service/link-rewrite/constants';
 import {anchorClickActions} from '../../src/service/navigation';
 import {createCustomEvent} from '../../src/event-helper';
 import {createTwoStepsResponse} from '../../src/service/link-rewrite/link-rewrite-classes';
@@ -527,15 +527,31 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         const linkRewriter = createLinkRewriterHelper();
         linkRewriter.scanLinksOnPage_();
         expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.true;
-        linkRewriter.resolveUnknownLinks_.reset();
+        // Reset since resolveUnknownLinks_ has already been called during first scanLinksOnPage_();
+        linkRewriter.resolveUnknownLinks_.resetHistory();
 
         return linkRewriter.onDomUpdated().then(() => {
           expect(linkRewriter.resolveUnknownLinks_.called).to.be.false;
-        })
+        });
       });
 
       it('Should call resolveUnknownLinks_ if new links', () => {
+        const anchor1 = iframeDoc.createElement('a');
+        iframeDoc.body.appendChild(anchor1);
+        const linkRewriter = createLinkRewriterHelper();
+        linkRewriter.scanLinksOnPage_();
+        expect(linkRewriter.anchorReplacementMap_.has(anchor1)).to.be.true;
+        // Reset since resolveUnknownLinks_ has already been called during first scanLinksOnPage_();
+        linkRewriter.resolveUnknownLinks_.resetHistory();
 
+        //Introduce new link on the page
+        const anchor2 = iframeDoc.createElement('a');
+        iframeDoc.body.appendChild(anchor2);
+
+        return linkRewriter.onDomUpdated().then(() => {
+          expect(linkRewriter.resolveUnknownLinks_.calledOnce).to.be.true;
+          expect(linkRewriter.resolveUnknownLinks_.withArgs([anchor2]).calledOnce).to.be.true;
+        });
       });
 
       it('Should send PAGE_SCANNED event when onDomUpdated() is called', () => {
@@ -548,16 +564,77 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       });
     });
 
-    describe('Url rewriting', () => {
+    describe.only('rewriteAnchorUrl', () => {
+      const initialUrl = 'https://initialurl.com/';
+      let anchor1, linkRewriter;
 
+      beforeEach(() => {
+        anchor1 = iframeDoc.createElement('a');
+        anchor1.setAttribute('href', initialUrl);
+        linkRewriter = createLinkRewriterHelper();
+      });
+
+      it('Should return false if anchor does not exist', () => {
+        expect(linkRewriter.rewriteAnchorUrl(anchor1)).to.be.false;
+        expect(anchor1.href).to.equal(initialUrl);
+      });
+
+      it('Should return false if anchor exist but without replacement url', () => {
+        linkRewriter.anchorReplacementMap_.set(anchor1, null);
+        expect(linkRewriter.rewriteAnchorUrl(anchor1)).to.be.false;
+        expect(anchor1.href).to.equal(initialUrl);
+      });
+
+      it('Should return false if href is the same as replacement url', () => {
+        linkRewriter.anchorReplacementMap_.set(anchor1, initialUrl);
+        expect(linkRewriter.rewriteAnchorUrl(anchor1)).to.be.false;
+        expect(anchor1.href).to.equal(initialUrl);
+      });
+
+      it('Should replace and return true if the url has been replaced', () => {
+        const replacementUrl = 'https://replacementurl.com/';
+        linkRewriter.anchorReplacementMap_.set(anchor1, replacementUrl);
+        expect(linkRewriter.rewriteAnchorUrl(anchor1)).to.be.true;
+        expect(anchor1.href).to.equal(replacementUrl);
+      });
+
+      it('Should set the original url attribute', () => {
+        const replacementUrl = 'https://replacementurl.com/';
+        linkRewriter.anchorReplacementMap_.set(anchor1, replacementUrl);
+        linkRewriter.rewriteAnchorUrl(anchor1);
+
+        expect(anchor1.getAttribute(ORIGINAL_URL_ATTRIBUTE)).to.equal(initialUrl);
+      });
+
+      it('Should restore the original link after the delay', done => {
+        const replacementUrl = 'https://replacementurl.com/';
+        linkRewriter.anchorReplacementMap_.set(anchor1, replacementUrl);
+        linkRewriter.rewriteAnchorUrl(anchor1);
+
+        expect(anchor1.href).to.equal(replacementUrl);
+        setTimeout(() => {
+          expect(anchor1.href).to.equal(initialUrl);
+          done();
+        }, linkRewriter.restoreDelay_ + 1);
+      });
     });
 
     describe('isWatchingLink', () => {
+      it('Should return true if the link is in the Map', () => {
 
+      });
+      it('Should return false if the link is not in the Map', () => {
+
+      });
     });
 
     describe('getReplacementUrl', () => {
+      it('Should return null if link does not exist in the anchorReplacementMap_', () => {
 
+      });
+      it('Should return the value in stored in the anchorReplacementMap_', () => {
+
+      });
     });
 
   });

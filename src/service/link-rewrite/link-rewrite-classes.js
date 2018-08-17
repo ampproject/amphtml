@@ -61,7 +61,6 @@ export function isTwoStepsResponse(twoStepsResponse) {
   const isValid = twoStepsResponse &&
     hasOwn(twoStepsResponse, 'syncResponse') &&
     hasOwn(twoStepsResponse, 'asyncResponse');
-  console.log('isValid', isValid, twoStepsResponse);
 
   return Boolean(isValid);
 }
