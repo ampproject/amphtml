@@ -266,7 +266,7 @@ describes.realWin('domain-resolver', {
       it('Should not call the callback if api request is not made', () => {
         const response = resolver.resolveUnknownAnchors([]);
         expect(response.asyncResponse).to.be.null;
-        expect(apiCallback.calledOnce).to.be.false;
+        expect(apiCallback.called).to.be.false;
       });
     });
 

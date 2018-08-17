@@ -144,7 +144,7 @@ describes.realWin('amp-skimlinks', {
     });
 
     it('Should call sendImpressionTracking', done => {
-      expect(ampSkimlinks.trackingService.sendImpressionTracking.calledOnce).to.be.false;
+      expect(ampSkimlinks.trackingService.sendImpressionTracking.called).to.be.false;
       ampSkimlinks.onBeaconCallbackONCE_({});
       // Wait for next tick
       setTimeout(() => {
@@ -202,7 +202,7 @@ describes.realWin('amp-skimlinks', {
         replacedBy: SKIMLINKS_REWRITER_ID,
       });
 
-      expect(stub.calledOnce).to.be.false;
+      expect(stub.called).to.be.false;
     });
   });
 
@@ -219,7 +219,7 @@ describes.realWin('amp-skimlinks', {
     it('Does not call beacon API if a request was already made', () => {
       ampSkimlinks.hasCalledBeacon = true;
       ampSkimlinks.callBeaconIfNotAlreadyDone_();
-      expect(stub.calledOnce).to.be.false;
+      expect(stub.called).to.be.false;
     });
 
     it('Calls beacon API if no requests were previously made', () => {

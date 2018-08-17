@@ -121,8 +121,8 @@ describes.realWin('test-tracking', {
 
       trackingService.sendImpressionTracking({}, new Map(), startTime);
       const stub = trackingService.analytics_.trigger;
-      expect(stub.withArgs('page-impressions').calledOnce).to.be.false;
-      expect(stub.withArgs('link-impressions').calledOnce).to.be.false;
+      expect(stub.withArgs('page-impressions').called).to.be.false;
+      expect(stub.withArgs('link-impressions').called).to.be.false;
     });
 
 
@@ -253,7 +253,7 @@ describes.realWin('test-tracking', {
       trackingService.sendNaClickTracking(anchor);
 
       const stub = trackingService.analytics_.trigger;
-      expect(stub.withArgs('non-affiliate-click').calledOnce).to.be.false;
+      expect(stub.withArgs('non-affiliate-click').called).to.be.false;
     });
 
     it('Should send the global xcust with the na tracking', () => {

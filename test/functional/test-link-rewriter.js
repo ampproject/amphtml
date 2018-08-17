@@ -153,7 +153,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         sendEventHelper(AmpEvents.ANCHOR_CLICK, {
           clickActionType: anchorClickActions.NAVIGATE_CUSTOM_PROTOCOL,
         });
-        expect(linkRewriterService.getSuitableLinkRewritersForLink_.calledOnce).to.be.false;
+        expect(linkRewriterService.getSuitableLinkRewritersForLink_.called).to.be.false;
       });
 
       it('Should handle clicks of type "navigate-outbound"', () => {
@@ -201,7 +201,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         });
 
         expect(linkRewriterVendor1.events.send.calledOnce).to.be.true;
-        expect(linkRewriterVendor2.events.send.calledOnce).to.be.false;
+        expect(linkRewriterVendor2.events.send.called).to.be.false;
         expect(linkRewriterVendor3.events.send.calledOnce).to.be.true;
       });
 
@@ -265,7 +265,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           });
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
-          expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
+          expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
         });
 
         it('Should try the next one if no replacement', () => {
@@ -279,7 +279,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           });
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
-          expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
+          expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
           expect(linkRewriterVendor3.rewriteAnchorUrl.calledOnce).to.be.true;
         });
       });
@@ -308,8 +308,8 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
             anchor: iframeDoc.createElement('a'),
           });
 
-          expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.false;
-          expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
+          expect(linkRewriterVendor1.rewriteAnchorUrl.called).to.be.false;
+          expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
           expect(linkRewriterVendor3.rewriteAnchorUrl.calledOnce).to.be.true;
         });
 
@@ -328,7 +328,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           });
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
-          expect(linkRewriterVendor2.rewriteAnchorUrl.calledOnce).to.be.false;
+          expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
           expect(linkRewriterVendor3.rewriteAnchorUrl.calledOnce).to.be.true;
         });
       });
@@ -392,7 +392,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     it('Should not call resolveUnknownLinks if no links on page', () => {
       const resolveFunction = createResolveResponseHelper();
       createLinkRewriterHelper().scanLinksOnPage_();
-      expect(resolveFunction.calledOnce).to.be.false;
+      expect(resolveFunction.called).to.be.false;
     });
 
     it('Always update the anchor Map with unknown links', () => {
@@ -439,20 +439,16 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       expect(linkRewriter.anchorReplacementMap_.get(anchor3)).to.be.undefined;
     });
 
+    // Don't know how to catch the async error and expect it at the same time.
     it.skip('Should raise an error if async response data is malformed', () => {
+      expectAsyncConsoleError('Expected anchorReplacementTuple, use "createAnchorReplacementTuple()', 1);
       const anchor = iframeDoc.createElement('a');
       iframeDoc.body.appendChild(anchor);
 
       const resolveFunction = createResolveResponseHelper(null, Promise.resolve([{}]));
       const linkRewriter = createLinkRewriterHelper(resolveFunction);
-      allowConsoleError(() => expect(() => {
-        linkRewriter.scanLinksOnPage_();
-      }).to.throw('Expected anchorReplacementTuple, use "createAnchorReplacementTuple()"'));
-      // const promise = linkRewriter.scanLinksOnPage_();
-      // // expect(promise).should.be.rejectedWith(
-      // //     'Expected anchorReplacementTuple, use "createAnchorReplacementTuple()"');
 
-      // return promise;
+      return linkRewriter.scanLinksOnPage_();
     });
 
     it('Update the anchor Map with asynchronous response', () => {
@@ -517,11 +513,25 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       });
 
       it('Should remove detached anchor from internal Map', () => {
-
+        // Anchor is not attached to the dom
+        const anchor = iframeDoc.createElement('a');
+        const linkRewriter = createLinkRewriterHelper();
+        linkRewriter.anchorReplacementMap_.set(anchor, 'https://replacementurl.com');
+        linkRewriter.scanLinksOnPage_();
+        expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.false;
       });
 
       it('Should not call resolveUnknownLinks_ if no new links', () => {
+        const anchor = iframeDoc.createElement('a');
+        iframeDoc.body.appendChild(anchor);
+        const linkRewriter = createLinkRewriterHelper();
+        linkRewriter.scanLinksOnPage_();
+        expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.true;
+        linkRewriter.resolveUnknownLinks_.reset();
 
+        return linkRewriter.onDomUpdated().then(() => {
+          expect(linkRewriter.resolveUnknownLinks_.called).to.be.false;
+        })
       });
 
       it('Should call resolveUnknownLinks_ if new links', () => {
