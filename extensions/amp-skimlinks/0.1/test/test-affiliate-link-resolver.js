@@ -9,7 +9,7 @@ import AffiliateLinkResolver, {DOMAIN_RESOLVER_URL, LINK_STATUS__AFFILIATE, LINK
 import helpersFactory from './helpers';
 
 
-describes.realWin('domain-resolver', {
+describes.fakeWin('domain-resolver', {
   amp: {
     extensions: ['amp-skimlinks'],
   },

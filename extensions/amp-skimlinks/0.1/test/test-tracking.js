@@ -11,7 +11,7 @@ import {
 } from '../constants';
 
 
-describes.realWin('test-tracking', {
+describes.fakeWin('test-tracking', {
   amp: {
     extensions: ['amp-skimlinks'],
   },

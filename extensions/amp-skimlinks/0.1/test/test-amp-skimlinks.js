@@ -6,7 +6,7 @@ import helpersFactory from './helpers';
 import * as SkimOptionsModule from '../skim-options';
 
 
-describes.realWin('amp-skimlinks', {
+describes.fakeWin('amp-skimlinks', {
   amp: {
     extensions: ['amp-skimlinks'],
   },
@@ -72,7 +72,7 @@ describes.realWin('amp-skimlinks', {
         expect(SkimOptionsModule.getAmpSkimlinksOptions.calledOnce).to.be.true;
         expect(ampSkimlinks.skimOptions_).to.deep.equal({
           pubcode: options['publisher-code'],
-          excludedDomains: options['excluded-domains'].split(','),
+          excludedDomains: options['excluded-domains'].split(',').concat(['localhost']),
           tracking: options['tracking'],
           customTrackingId: options['custom-tracking-id'],
           linkSelector: options['link-selector'],
