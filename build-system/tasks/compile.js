@@ -135,6 +135,7 @@ function compile(entryModuleFilenames, outputDir,
       define,
       externs: baseExterns,
       hideWarningsFor,
+      outputDir,
     }).then(() => {
       return new Promise((resolve, reject) => {
         const stream = gulp.src(outputDir + '/**/*.js');
