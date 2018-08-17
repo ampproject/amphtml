@@ -4,8 +4,6 @@ The first **[AMP Contributor Summit](https://amphtml.wordpress.com/2018/06/28/an
 
 If you are a contributor to AMP or you want to become one please **[apply to attend](https://events.withgoogle.com/amp-contributor-summit/)**!
 
-If you'd like to give a talk at the summit please **[submit a talk proposal](https://goo.gl/forms/DCpv5ZWfH5drqqVh1)** by July 31, 2018.  Please note, that this is a technical summit. Don’t worry that your talk might not be polished enough.  We’re excited to hear from everyone!
-
 ⚡⚡⚡
 
 # AMP HTML ⚡
