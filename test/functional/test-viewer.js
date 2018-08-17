@@ -1291,7 +1291,7 @@ describe('Viewer', () => {
       });
     }
 
-    describe('should trust domain variations', () => {
+    describe('should trust trusted viewer origins', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
@@ -1308,6 +1308,7 @@ describe('Viewer', () => {
       test('https://abc.www.google.com', true);
       test('https://google.cat', true);
       test('https://www.google.cat', true);
+      test('x-thread://', true);
     });
 
     describe('should not trust host as referrer with http', () => {
@@ -1498,6 +1499,135 @@ describe('Viewer', () => {
       windowApi.location.href = 'https://acme.org/doc1#hash';
       const viewer = new Viewer(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+    });
+
+    it('should always return current location for top-level window', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.href = 'https://acme.org/doc1#hash';
+      const viewer = new Viewer(ampdoc);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should NOT allow override if not iframed', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      const viewer = new Viewer(ampdoc);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should NOT allow override if not trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.ancestorOrigins = ['https://untrusted.com'];
+      const viewer = new Viewer(ampdoc);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.calledWith('Viewer',
+            sinon.match(arg => {
+              return !!arg.match(/Untrusted viewer url override/);
+            }))).to.be.true;
+      });
+    });
+
+    it('should NOT allow override if ancestor is empty', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.ancestorOrigins = [];
+      const viewer = new Viewer(ampdoc);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.calledWith('Viewer',
+            sinon.match(arg => {
+              return !!arg.match(/Untrusted viewer url override/);
+            }))).to.be.true;
+      });
+    });
+
+    it('should allow partial override if async not trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      const viewer = new Viewer(ampdoc);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.calledWith('Viewer',
+            sinon.match(arg => {
+              return !!arg.match(/Untrusted viewer url override/);
+            }))).to.be.true;
+      });
+    });
+
+    it('should allow full override if async trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      const viewer = new Viewer(ampdoc);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      viewer.setMessageDeliverer(() => {}, 'https://google.com');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/viewer');
+        expect(viewer.getResolvedViewerUrl())
+            .to.equal('https://acme.org/viewer');
+        expect(errorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should allow override if iframed and trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(ampdoc);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/viewer');
+        expect(viewer.getResolvedViewerUrl())
+            .to.equal('https://acme.org/viewer');
+        expect(errorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should ignore override to empty if iframed and trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#origin=g.com&viewerUrl=';
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(ampdoc);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub).to.have.not.been.called;
+      });
     });
   });
 

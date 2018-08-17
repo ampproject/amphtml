@@ -802,6 +802,17 @@ export class Viewer {
   }
 
   /**
+   * Returns the promise that will yield the viewer URL value. It's by default
+   * the current page's URL. The trusted viewers are allowed to override this
+   * value.
+   * @return {!Promise<string>}
+   * @visibleForTesting
+   */
+  getViewerUrl() {
+    return this.viewerUrl_;
+  }
+
+  /**
    * Possibly return the messaging origin if set. This would be the origin
    * of the parent viewer.
    * @return {?string}
@@ -880,7 +891,12 @@ export class Viewer {
   isTrustedViewerOrigin_(urlString) {
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
-    if (url.protocol != 'https:') {
+    const {protocol} = url;
+    // Mobile WebView x-thread is allowed.
+    if (protocol == 'x-thread:') {
+      return true;
+    }
+    if (protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
     }
