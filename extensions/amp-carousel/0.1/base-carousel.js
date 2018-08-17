@@ -48,6 +48,15 @@ export class BaseCarousel extends AMP.BaseElement {
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
+
+    this.element.addEventListener(
+        'touchend', this.toggleControls_.bind(this));
+  }
+
+  /** Toggles the controls on tap/hover */
+  toggleControls_() {
+    this.setControlsState();
+    this.hintControls();
   }
 
   /** @override */
@@ -173,10 +182,6 @@ export class BaseCarousel extends AMP.BaseElement {
       Services.timerFor(this.win).delay(() => {
         this.mutateElement(() => {
           this.element.classList.remove(className);
-          this.prevButton_.classList.toggle(
-              'i-amphtml-screen-reader', !this.showControls_);
-          this.nextButton_.classList.toggle(
-              'i-amphtml-screen-reader', !this.showControls_);
         });
       }, 4000);
     });

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import * as analytics from '../../../../../src/analytics';
 import {poll} from '../../../../../testing/iframe';
 
-describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
+// TODO(cathyxz, #16822): This suite is flaky.
+describe.configure().skip('amp-lightbox-gallery', function() {
   this.timeout(10000);
   const extensions = ['amp-lightbox-gallery'];
   const body = `
@@ -30,16 +32,21 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
     This is a figcaption.
   </figcaption>
 </figure>
-  `;
+`;
+
   describes.integration('amp-lightbox-gallery with one image', {
     body,
     extensions,
   }, env => {
 
     let win;
+    let triggerAnalyticsEventSpy;
+
     beforeEach(() => {
       win = env.win;
       win.AMP_MODE.localDev = true;
+      triggerAnalyticsEventSpy =
+        env.sandbox.spy(analytics, 'triggerAnalyticsEvent');
     });
 
     it('should open and close correctly', () => {
@@ -111,6 +118,82 @@ describe.configure().ifNewChrome().run('amp-lightbox-gallery', function() {
         expect(descriptionText.classList.contains('i-amphtml-lbg-desc-text'))
             .to.be.true;
         expect(descriptionText.textContent).to.equal('This is a figcaption.');
+      });
+    });
+
+    it('should trigger analytics events for description displayed', () => {
+      openLightbox(win.document).then(() => {
+        expect(triggerAnalyticsEventSpy).to.be.called;
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            win.document.getElementById('amp-lightbox-gallery'),
+            'controlsToggled');
+      });
+    });
+
+    it('should trigger analytics events for thumbnails displayed', () => {
+      openLightbox(win.document).then(() => {
+        const thumbnail =
+          document.getElementsByClassName('i-amphtml-lbg-button-gallery');
+        thumbnail[0].click();
+        const thumbnailQuery =
+          win.document.getElementsByClassName('i-amphtml-lbg-gallery');
+        expect(triggerAnalyticsEventSpy).to.be.called;
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            win.document.getElementById('amp-lightbox-gallery'),
+            'descriptionToggled');
+        expect(thumbnailQuery.length).to.equal(1);
+      });
+    });
+  });
+
+  const multipleImagesBody = `
+  <figure>
+  <amp-img id="img0"
+      src="/examples/img/sample.jpg"
+      width=641 height=481 layout="responsive"
+      lightbox
+      role="button" tabindex="0"></amp-img>
+  <figcaption>
+    This is a figcaption.
+  </figcaption>
+  </figure>
+  <figure>
+  <amp-img id="img1"
+    src="/examples/img/sample.jpg"
+    width=641 height=481 layout="responsive"
+    lightbox
+    role="button" tabindex="0"></amp-img>
+  <figcaption>
+  This is a figcaption.
+  </figcaption>
+  </figure>
+  `;
+
+  describes.integration('amp-lightbox-gallery with multiple images', {
+    multipleImagesBody,
+    extensions,
+  }, env => {
+
+    let win;
+    let triggerAnalyticsEventSpy;
+
+    beforeEach(() => {
+      win = env.win;
+      win.AMP_MODE.localDev = true;
+      triggerAnalyticsEventSpy =
+        env.sandbox.spy(analytics, 'triggerAnalyticsEvent');
+    });
+
+    it('should trigger analytics events for description toggled', () => {
+      const lightbox = win.document.getElementById('amp-lightbox-gallery');
+      openLightbox(win.document).then(() => {
+        const nextButton = lightbox
+            .querySelector('i-amphtml-lbg-button-next');
+        nextButton.click();
+        expect(triggerAnalyticsEventSpy).to.be.called;
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            win.document.getElementById('amp-lightbox-gallery'),
+            'descriptionToggled');
       });
     });
   });

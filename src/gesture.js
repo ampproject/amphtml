@@ -419,7 +419,7 @@ export class Gestures {
       const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
         if (this.ready_[i] ||
-                this.pending_[i] && this.pending_[i] >= now) {
+                (this.pending_[i] && this.pending_[i] >= now)) {
           cancelEvent = true;
           break;
         }

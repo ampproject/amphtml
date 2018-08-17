@@ -110,14 +110,14 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
   });
 
   it('should show close button', () => {
-    doc.body.parentNode.classList.add('i-amphtml-subs-grant-yes');
+    doc.body.classList.add('i-amphtml-subs-grant-yes');
     return dialog.open(content, true).then(() => {
       expect(getComputedStyle(dialog.closeButton_).display).to.equal('block');
     });
   });
 
   it('should not show close button if content is not granted', () => {
-    doc.body.parentNode.classList.remove('i-amphtml-subs-grant-yes');
+    doc.body.classList.remove('i-amphtml-subs-grant-yes');
     return dialog.open(content, true).then(() => {
       expect(getComputedStyle(dialog.closeButton_).display).to.equal('none');
     });

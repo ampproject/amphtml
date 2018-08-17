@@ -35,7 +35,10 @@ import {
   VideoServiceInterface,
   VideoServiceSignals,
 } from './video-service-interface';
-import {VideoServiceSync} from './video-service-sync-impl';
+import {
+  VideoServiceSync,
+  setVideoComponentClassname,
+} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {
@@ -45,10 +48,10 @@ import {
   listenOncePromise,
 } from '../event-helper';
 import {dev, user} from '../log';
+import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 import {isFiniteNumber} from '../types';
-import {map} from '../utils/object';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
@@ -163,7 +166,7 @@ export class VideoManager {
         duration > 0) {
       const perc = currentTime / duration;
       const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
-          {time: currentTime, percent: perc});
+          dict({'time': currentTime, 'percent': perc}));
       this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
     }
   }
@@ -185,6 +188,8 @@ export class VideoManager {
 
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
+
+    setVideoComponentClassname(element);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
@@ -450,7 +455,7 @@ class VideoEntry {
       const firstPlay = 'firstPlay';
       const trust = ActionTrust.LOW;
       const event = createCustomEvent(this.ampdoc_.win, firstPlay,
-          /* detail */ {});
+          /* detail */ dict({}));
       const actions = Services.actionServiceForDoc(this.ampdoc_);
       actions.trigger(this.video.element, firstPlay, event, trust);
     });
@@ -510,7 +515,7 @@ class VideoEntry {
       return false;
     }
     return user().assert(this.video.isInteractive(),
-        'Only interactive videos are allowed to enter fullscreen on rotate.',
+        'Only interactive videos are allowed to enter fullscreen on rotate. ' +
         'Set the `controls` attribute on %s to enable.',
         element);
   }

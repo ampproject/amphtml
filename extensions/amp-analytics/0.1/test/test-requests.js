@@ -16,8 +16,7 @@
 
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
-import {REPLACEMENT_EXP_NAME} from '../../../../src/service/url-replacements-impl';
-import {RequestHandler, expandConfigRequest} from '../requests';
+import {RequestHandler} from '../requests';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -164,7 +163,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         clock.tick(2);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
@@ -173,7 +172,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
@@ -201,7 +200,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {'important': true}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1);
         yield macroTask();
@@ -239,7 +238,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         clock.tick(500);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         clock.tick(500);
         expect(handler.batchIntervalTimeoutId_).to.be.null;
         handler.send({}, {}, expansionOptions, {});
@@ -256,7 +255,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         clock.tick(1000);
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
@@ -370,6 +369,7 @@ describes.realWin('Requests', {amp: 1}, env => {
             analyticsMock, r, preconnect, spy, false);
         // Overwrite batchPlugin function
         handler.batchingPlugin_ = () => {throw new Error('test');};
+        expectAsyncConsoleError(/test/);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
         clock.tick(1000);
@@ -423,32 +423,6 @@ describes.realWin('Requests', {amp: 1}, env => {
     });
   });
 
-  //TODO: Move the expansion related tests here.
-
-  it('expandConfigRequest function', () => {
-    let config = {
-      'requests': {
-        'foo': 'test',
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'foobar': {},
-      },
-    };
-    config = expandConfigRequest(config);
-    expect(config).to.jsonEqual({
-      'requests': {
-        'foo': {
-          'baseUrl': 'test',
-        },
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'foobar': {},
-      },
-    });
-  });
-
   it('should replace dynamic bindings', function* () {
     const spy = sandbox.spy();
     const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE'};
@@ -481,7 +455,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
 
   it('should replace bindings with v2 flag', function* () {
-    toggleExperiment(env.win, REPLACEMENT_EXP_NAME, true);
+    toggleExperiment(env.win, 'url-replacement-v2', true);
     const spy = sandbox.spy();
     const r = {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
@@ -492,8 +466,9 @@ describes.realWin('Requests', {amp: 1}, env => {
       'param1': 'PARAM_1',
       'param2': 'PARAM_2',
       'param3': 'PARAM_3',
-      'foo': 'TOUPPERCASE(BASE64(foo))',
-    });
+      'foo': '$TOUPPERCASE($BASE64(foo))',
+    }, /* opt_iterations */ 2, /* opt_noencode */ true);
+
     const bindings = {
       'PARAM_1': 'val1',
       'PARAM_2': () => 'val2',
@@ -512,6 +487,6 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledOnce;
     expect(spy.args[0][0]).to.equal(
         'r1&key1=val1&key2=val2&key3=val3&val_base&foo=ZM9V');
-    toggleExperiment(env.win, REPLACEMENT_EXP_NAME);
+    toggleExperiment(env.win, 'url-replacement-v2');
   });
 });

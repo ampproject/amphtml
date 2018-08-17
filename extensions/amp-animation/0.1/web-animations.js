@@ -934,7 +934,7 @@ export class MeasureScanner extends Scanner {
   validateTime_(value, newValue, field, opt_allowNegative) {
     // Ensure that positive or zero values are only allowed.
     user().assert(
-        value != null && (value >= 0 || value < 0 && opt_allowNegative),
+        value != null && (value >= 0 || (value < 0 && opt_allowNegative)),
         '"%s" is invalid: %s', field, newValue);
     // Make sure that the values are in milliseconds: show a warning if
     // time is fractional.

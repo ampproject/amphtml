@@ -242,7 +242,7 @@ export class Resources {
         this.schedulePass();
       });
 
-      /** @private @const {function(number, !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
+      /** @private @const {function((number|undefined), !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
       this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
     }
 
@@ -1783,7 +1783,7 @@ export class Resources {
    * Calculates the layout's distance from viewport score, using an iterative
    * (and cacheable) calculation based on tree depth and distance.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @param {!Object<string, *>} cache

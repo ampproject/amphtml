@@ -31,10 +31,10 @@ import {dict} from '../src/utils/object';
  */
 export function masterSelection(win, type) {
   type = type.toLowerCase();
+  const configType = adConfig[type] &&
+      adConfig[type]['masterFrameAccessibleType'];
   // The master has a special name.
-  const masterName = 'frame_' +
-      (adConfig[type] && adConfig[type]['masterFrameAccessibleType'] || type) +
-      '_master';
+  const masterName = 'frame_' + (configType || type) + '_master';
   let master;
   try {
     // Try to get the master from the parent. If it does not
@@ -72,7 +72,9 @@ export class IntegrationAmpContext extends AbstractAmpContext {
         || this.embedType_ === 'github'
         || this.embedType_ === 'mathml'
         || this.embedType_ === 'reddit'
-        || this.embedType_ === 'yotpo');
+        || this.embedType_ === 'yotpo'
+        || this.embedType_ === 'embedly'
+    );
   }
 
   /** @return {!Window} */

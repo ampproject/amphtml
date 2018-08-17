@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Action} from './amp-story-store-service';
+import {Action, StateProperty, getStoreService} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
@@ -177,11 +177,14 @@ export class AmpStoryConsent extends AMP.BaseElement {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.element);
 
+    /** @private {?Object} */
+    this.consentConfig_ = null;
+
     /** @private {?Element} */
     this.scrollableEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {?Object} */
     this.storyConsentConfig_ = null;
@@ -197,7 +200,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
     const storyEl = closestByTag(this.element, 'AMP-STORY');
     const consentEl = closestByTag(this.element, 'AMP-CONSENT');
     const consentId = consentEl.id;
-    this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+
+    this.storeConsentId_(consentId);
 
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
@@ -245,6 +249,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentEl_.querySelector('.i-amphtml-story-consent-overflow');
     this.scrollableEl_.addEventListener(
         'scroll', throttle(this.win, () => this.onScroll_(), 100));
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -276,8 +284,22 @@ export class AmpStoryConsent extends AMP.BaseElement {
           .classList.toggle('i-amphtml-story-consent-fullbleed', isFullBleed);
     };
 
-    this.element.getResources()
-        .measureMutateElement(this.storyConsentEl_, measurer, mutator);
+    this.measureMutateElement(measurer, mutator, this.storyConsentEl_);
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    const mutator = () => {
+      rtlState ?
+        this.storyConsentEl_.setAttribute('dir', 'rtl') :
+        this.storyConsentEl_.removeAttribute('dir');
+    };
+
+    this.mutateElement(mutator, this.storyConsentEl_);
   }
 
   /**
@@ -286,6 +308,18 @@ export class AmpStoryConsent extends AMP.BaseElement {
    * @private
    */
   assertAndParseConfig_() {
+    // Validation of the amp-consent config is handled by the amp-consent
+    // javascript.
+    const parentEl = dev().assertElement(this.element.parentElement);
+    const consentScript = childElementByTag(parentEl, 'script');
+    this.consentConfig_ = consentScript && parseJson(consentScript.textContent);
+
+    // amp-consent already triggered console errors, step out to avoid polluting
+    // the console.
+    if (!this.consentConfig_) {
+      return;
+    }
+
     const storyConsentScript = childElementByTag(this.element, 'script');
 
     user().assert(
@@ -322,6 +356,35 @@ export class AmpStoryConsent extends AMP.BaseElement {
           this.storyConsentConfig_.externalLink.href,
           `${TAG}: config requires "externalLink.href" to be an absolute URL`);
       assertAbsoluteHttpOrHttpsUrl(this.storyConsentConfig_.externalLink.href);
+    }
+  }
+
+  /**
+   * @param {string} consentId
+   * @private
+   */
+  storeConsentId_(consentId) {
+    const policyId = Object.keys(this.consentConfig_['consents'])[0];
+    const policy = this.consentConfig_['consents'][policyId];
+
+    // checkConsentHref response overrides the amp-geo config, if provided.
+    if (policy.checkConsentHref) {
+      this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+      return;
+    }
+
+    // If using amp-access with amp-geo, only set the consent id if the user is
+    // in the expected geo group.
+    if (policy['promptIfUnknownForGeoGroup']) {
+      Services.geoForDocOrNull(this.element).then(geo => {
+        const geoGroup = policy['promptIfUnknownForGeoGroup'];
+        const matchedGeoGroups =
+          /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
+        if (geo && !matchedGeoGroups.includes(geoGroup)) {
+          return;
+        }
+        this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+      });
     }
   }
 

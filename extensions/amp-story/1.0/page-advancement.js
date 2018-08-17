@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent} from '../../../src/dom';
@@ -269,7 +269,7 @@ class ManualAdvancement extends AdvancementConfig {
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
       this.storeService_ =
-        Services.storyStoreService(element.ownerDocument.defaultView);
+        getStoreService(element.ownerDocument.defaultView);
     }
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
@@ -430,6 +430,8 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
     this.timeoutId_ = this.timer_.delay(() => this.onAdvance(), this.delayMs_);
 
+    this.onProgressUpdate();
+
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
       return !this.isRunning();
@@ -510,6 +512,12 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private {?Element} */
     this.mediaElement_ = null;
 
+    /** @private {?UnlistenDef} */
+    this.unlistenEndedFn_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenTimeupdateFn_ = null;
+
     /** @private {?../../../src/video-interface.VideoInterface} */
     this.video_ = null;
   }
@@ -579,8 +587,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
   startHtmlMediaElement_() {
     const mediaElement = dev().assertElement(this.mediaElement_,
         'Media element was unspecified.');
-    listenOnce(mediaElement, 'ended', () => this.onAdvance());
-    listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
+    this.unlistenEndedFn_ =
+        listenOnce(mediaElement, 'ended', () => this.onAdvance());
+    this.unlistenTimeupdateFn_ =
+        listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
   }
 
   /** @private */
@@ -589,8 +599,11 @@ class MediaBasedAdvancement extends AdvancementConfig {
       this.video_ = video;
     });
 
-    listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
-        {capture: true});
+    this.unlistenEndedFn_ =
+        listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
+            {capture: true});
+
+    this.onProgressUpdate();
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
@@ -600,10 +613,15 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   stop() {
-    // We don't need to explicitly stop the polling or media events listed
-    // above, since they are already bound to either the playback of the media
-    // on the page, or the isRunning state of this AdvancementConfig.
     super.stop();
+
+    if (this.unlistenEndedFn_) {
+      this.unlistenEndedFn_();
+    }
+
+    if (this.unlistenTimeupdateFn_) {
+      this.unlistenTimeupdateFn_();
+    }
   }
 
   /** @override */

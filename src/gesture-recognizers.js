@@ -364,7 +364,7 @@ class SwipeRecognizer extends GestureRecognizer {
     const deltaTime = this.lastTime_ - this.prevTime_;
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
-    if (!last && deltaTime > 4 || last && deltaTime > 16) {
+    if ((!last && deltaTime > 4) || (last && deltaTime > 16)) {
       this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_, deltaTime,
           this.velocityX_);
       this.velocityY_ = calcVelocity(this.lastY_ - this.prevY_, deltaTime,
@@ -382,6 +382,10 @@ class SwipeRecognizer extends GestureRecognizer {
       time: this.lastTime_,
       deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
       deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
+      startX: this.startX_,
+      startY: this.startY_,
+      lastX: this.lastX_,
+      lastY: this.lastY_,
       velocityX: this.horiz_ ? this.velocityX_ : 0,
       velocityY: this.vert_ ? this.velocityY_ : 0,
     }, event);
@@ -801,7 +805,7 @@ export class PinchRecognizer extends GestureRecognizer {
     const deltaY = this.deltaY_();
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
-    if (!last && deltaTime > 4 || last && deltaTime > 16) {
+    if ((!last && deltaTime > 4) || (last && deltaTime > 16)) {
       this.velocityX_ = calcVelocity(deltaX - this.prevDeltaX_, deltaTime,
           this.velocityX_);
       this.velocityY_ = calcVelocity(deltaY - this.prevDeltaY_, deltaTime,

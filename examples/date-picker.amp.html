@@ -47,7 +47,7 @@
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -69,9 +69,8 @@
     day-size="42"
     start-input-selector="#start"
     end-input-selector="#end"
+    minimum-nights="0"
     mode="overlay"
-    open-after-clear
-    open-after-select
   >
     <div>
       <input type="tel" placeholder="Start date" id="start">
@@ -230,7 +229,29 @@
   ></amp-date-picker>
 </amp-lightbox>
 
+<h2>Initial dates</h2>
+<h3>Today default</h3>
+<amp-date-picker date="P0D" layout="fixed-height" height="300"></amp-date-picker>
+
+<h3>Next week default</h3>
+<amp-date-picker type="range" start-date="P4W" end-date="P5W" layout="fixed-height" height="300" number-of-months=3></amp-date-picker>
+
 <h2>Actions</h2>
+<h3>setDate</h3>
+<button on="tap: sdsp.setDate(date='P0D')">Today</button>
+<button on="tap: sdsp.setDate(date='P1D')">Tomorrow</button>
+<button on="tap: sdsp.setDate(date='2018-08-09')">2018-08-09</button>
+<amp-date-picker id="sdsp" layout="fixed-height" height="360"></amp-date-picker>
+
+<h3>setDates</h3>
+<button on="tap: sdrp.setDates(startDate='P0D',endDate='P0D')">Today</button>
+<button on="tap: sdrp.setDates(startDate='P0D',endDate='P1D')">Tonight</button>
+<button on="tap: sdrp.setDates(startDate='P0D',endDate='P1W')">This week</button>
+<button on="tap: sdrp.setDates(startDate='2018-08-09')">Start 2018-08-09</button>
+<button on="tap: sdrp.setDates(endDate='2018-08-10')">End 2018-08-10</button>
+<button on="tap: sdrp.setDates(startDate='2018-08-10',endDate='2018-08-12')">Range 2018-08-10 to 2018-08-12</button>
+<amp-date-picker id="sdrp" type="range" layout="fixed-height" height="360"></amp-date-picker>
+
 <h3>Today</h3>
 <button on="tap: tsp.today">Today</button>
 <button on="tap: tsp.today(offset=1)">Tomorrow</button>

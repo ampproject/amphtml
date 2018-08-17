@@ -38,6 +38,11 @@ import {tryResolve} from '../utils/promise';
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
 
+/** @enum {string} */
+export const Capability = {
+  VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
+};
+
 /**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
  * string is returned.
@@ -461,7 +466,9 @@ export class Viewer {
 
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
-    this.maybeUpdateFragmentForCct();
+    this.whenFirstVisible().then(() => {
+      this.maybeUpdateFragmentForCct();
+    });
   }
 
   /**
@@ -506,6 +513,14 @@ export class Viewer {
     }
     // TODO(@cramforce): Consider caching the split.
     return capabilities.split(',').indexOf(name) != -1;
+  }
+
+  /**
+   * Whether the viewer can render templates.
+   * @return {boolean}
+   */
+  canRenderTemplates() {
+    return this.hasCapability(Capability.VIEWER_RENDER_TEMPLATE);
   }
 
   /**
@@ -873,15 +888,14 @@ export class Viewer {
    * @private
    */
   isTrustedViewerOrigin_(urlString) {
-    // TEMPORARY HACK due to a misbehaving native app. See b/32626673
-    // In native apps all security bets are off anyway, and in browser
-    // origins never take the form that is matched here.
-    if (this.isWebviewEmbedded_ && /^www\.[.a-z]+$/.test(urlString)) {
-      return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
-    }
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
-    if (url.protocol != 'https:') {
+    const {protocol} = url;
+    // Mobile WebView x-thread is allowed.
+    if (protocol == 'x-thread:') {
+      return true;
+    }
+    if (protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
     }
@@ -1161,7 +1175,6 @@ export class Viewer {
     }
   }
 }
-
 
 /**
  * Parses the viewer parameters as a string.

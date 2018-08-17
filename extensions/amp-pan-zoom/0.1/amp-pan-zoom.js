@@ -37,6 +37,7 @@ import {
 } from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
 
+import {dict} from '../../../src/utils/object';
 import {px, scale, setStyles, translate} from '../../../src/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -140,6 +141,9 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     /** @private */
     this.resetOnResize_ = false;
+
+    /** @private {?Element} */
+    this.zoomButton_ = null;
   }
 
   /** @override */
@@ -152,6 +156,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         this.elementIsSupported_(children[0]),
         children[0].tagName + ` is not supported by ${TAG}`
     );
+    this.element.classList.add('i-amphtml-pan-zoom');
     this.content_ = children[0];
     this.content_.classList.add('i-amphtml-pan-zoom-child');
     this.maxScale_ = this.getNumberAttributeOr_('max-scale', DEFAULT_MAX_SCALE);
@@ -166,12 +171,24 @@ export class AmpPanZoom extends AMP.BaseElement {
         return;
       }
       const scale = args['scale'] || 1;
-      this.updatePanZoomBounds_(scale);
-      const x = this.boundX_(args['x'] || 0, /*allowExtent*/ false);
-      const y = this.boundY_(args['y'] || 0, /*allowExtent*/ false);
-      return this.set_(scale, x, y, /*animate*/ true)
-          .then(() => this.onZoomRelease_());
+      const x = args['x'] || 0;
+      const y = args['y'] || 0;
+      return this.transform(x, y, scale);
     });
+  }
+
+  /**
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {number} scale
+   */
+  transform(x, y, scale) {
+    this.updatePanZoomBounds_(scale);
+    const boundX = this.boundX_(x, /*allowExtent*/ false);
+    const boundY = this.boundY_(y, /*allowExtent*/ false);
+    return this.set_(scale, boundX, boundY, /*animate*/ true)
+        .then(() => this.onZoomRelease_());
   }
 
   /** @override */
@@ -183,12 +200,14 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.element.hasAttribute('controls')) {
+      this.createZoomButton_();
+    }
     return this.resetContentDimensions_().then(this.setupGestures_());
   }
 
   /** @override */
   pauseCallback() {
-    this.resetContentDimensions_();
     this.cleanupGestures_();
   }
 
@@ -222,6 +241,25 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   elementIsSupported_(element) {
     return ELIGIBLE_TAGS[element.tagName];
+  }
+
+  /**
+   * Creates zoom buttoms
+   */
+  createZoomButton_() {
+    this.zoomButton_ = this.element.ownerDocument.createElement('div');
+    this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
+    this.zoomButton_.classList.add('amp-pan-zoom-button');
+    this.zoomButton_.addEventListener('click', () => {
+      if (this.zoomButton_.classList.contains('amp-pan-zoom-in-icon')) {
+        this.transform(0, 0, this.maxScale_);
+        this.toggleZoomButtonOut_();
+      } else {
+        this.transform(0, 0, this.minScale_);
+        this.toggleZoomButtonIn_();
+      }
+    });
+    this.element.appendChild(this.zoomButton_);
   }
 
   /**
@@ -293,19 +331,15 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   resetContentDimensions_() {
     const content = dev().assertElement(this.content_);
-    return this.measureElement(() => this.measure_()).then(() => {
-      return this.mutateElement(() => {
-        // Set the actual dimensions of the content
-        setStyles(content, {
-          top: px(this.contentBox_.top),
-          left: px(this.contentBox_.left),
-          width: px(this.contentBox_.width),
-          height: px(this.contentBox_.height),
-        });
-        // Update translation and scaling
-        this.updatePanZoom_();
-      }, content);
-    });
+    return this.measureMutateElement(() => this.measure_(), () => {
+      // Set the actual dimensions of the content
+      setStyles(content, {
+        width: px(this.contentBox_.width),
+        height: px(this.contentBox_.height),
+      });
+      // Update translation and scaling
+      this.updatePanZoom_();
+    }, content);
   }
 
   /** @private */
@@ -360,7 +394,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.gestures_.onGesture(DoubletapRecognizer, e => {
       const {clientX, clientY} = e.data;
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-      const deltaX = (this.elementBox_.height / 2) + this.getOffsetX_(clientX);
+      const deltaX = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
       const deltaY = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
 
       this.onZoom_(newScale, deltaX, deltaY, /*animate*/ true)
@@ -377,9 +411,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         last,
       } = e.data;
 
-      const centerX = this.getOffsetX_(centerClientX);
-      const centerY = this.getOffsetY_(centerClientY);
-      this.onPinchZoom_(centerX, centerY, deltaX, deltaY, dir);
+      this.onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir);
       if (last) {
         this.onZoomRelease_();
       }
@@ -521,11 +553,11 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   triggerTransformEnd_(scale, x, y) {
     const transformEndEvent =
-    createCustomEvent(this.win, `${TAG}.transformEnd`, {
-      scale,
-      x,
-      y,
-    });
+    createCustomEvent(this.win, `${TAG}.transformEnd`, dict({
+      'scale': scale,
+      'x': x,
+      'y': y,
+    }));
     this.action_.trigger(this.element, 'transformEnd', transformEndEvent,
         ActionTrust.HIGH);
   }
@@ -632,6 +664,26 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
+   * @private
+   */
+  toggleZoomButtonIn_() {
+    if (this.zoomButton_) {
+      this.zoomButton_.classList.add('amp-pan-zoom-in-icon');
+      this.zoomButton_.classList.remove('amp-pan-zoom-out-icon');
+    }
+  }
+
+  /**
+   * @private
+   */
+  toggleZoomButtonOut_() {
+    if (this.zoomButton_) {
+      this.zoomButton_.classList.remove('amp-pan-zoom-in-icon');
+      this.zoomButton_.classList.add('amp-pan-zoom-out-icon');
+    }
+  }
+
+  /**
    * Performs actions after the gesture that was performing zooming has been
    * released.
    * @return {!Promise}
@@ -642,8 +694,10 @@ export class AmpPanZoom extends AMP.BaseElement {
       // After the scale is updated, also register or unregister panning
       if (this.scale_ <= 1) {
         this.unregisterPanningGesture_();
+        this.toggleZoomButtonIn_();
       } else {
         this.registerPanningGesture_();
+        this.toggleZoomButtonOut_();
       }
     });
   }
