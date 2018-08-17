@@ -632,12 +632,14 @@ config.run('amp-image-slider', function() {
             /*cb*/isHintHiddenCallback,
             /*opt_errorMessage*/'Hint failed to be hidden'
         ).then(() => {
+          const promise = outOfViewportPromise(s1.slider);
           // scroll slider outside of viewport
           win.scrollTo(0, doc.body.scrollHeight);
           // Wait to ensure runtime notices the update.
           // Have to use timeout(...) here,
           // no indication of proper viewportCallback trigger
-          return timeout(500);
+          return promise;
+          // return timeout(500);
         }).then(() => {
           // scroll page to top
           const scrollToTopFunction =
@@ -955,6 +957,26 @@ config.run('amp-image-slider', function() {
     function verifyPositionAfterTimeout(sliderInfo, targetPos) {
       return timeout(DEFAULT_TIMEOUT).then(() => {
         expect(hasCorrectSliderPosition(sliderInfo, targetPos)).to.be.true;
+      });
+    }
+
+    function inViewportPromise(element) {
+      return new Promise(resolve => {
+        element.addEventListener('amp-image-slider-viewportCallback', e => {
+          if (e.detail.inViewport) {
+            resolve();
+          }
+        });
+      });
+    }
+
+    function outOfViewportPromise(element) {
+      return new Promise(resolve => {
+        element.addEventListener('amp-image-slider-viewportCallback', e => {
+          if (!e.detail.inViewport) {
+            resolve();
+          }
+        });
       });
     }
 

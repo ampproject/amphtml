@@ -22,6 +22,7 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
@@ -715,6 +716,13 @@ export class AmpImageSlider extends AMP.BaseElement {
   viewportCallback(inViewport) {
     // Show hint if back into viewport and user does not explicitly
     // disable this
+    if (getMode().localDev) {
+      this.element.dispatchEvent(new CustomEvent(
+          'amp-image-slider-viewportCallback', {
+            detail: {'inViewport': inViewport},
+          }
+      ));
+    }
     if (inViewport && this.shouldHintReappear_) {
       this.animateShowHint_();
     }
