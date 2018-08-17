@@ -367,7 +367,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   padding: 0 !important;
   position: fixed !important;
   right: 0 !important;
-  text-align: left !important;
+  text-align: start !important;
   z-index: 100002 !important;
 }
 
