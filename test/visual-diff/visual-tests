@@ -75,6 +75,11 @@
    *     ".another-loading-complete-css-class"
    *   ],
    *
+   *   // [optional] A duration of time (in milliseconds) to wait after all
+   *   // other loading is complete, before taking a snapshot. Can be used to
+   *   // allow CSS transitions or other effects to complete.
+   *   "loading_complete_delay_ms": 1000,
+   *
    *   // [optional] Experiments that must be enabled via cookies.
    *   "experiments": [
    *     "amp-feature-one",
@@ -192,20 +197,16 @@
       "enable_percy_javascript": true
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.
-      // e.g., https://percy.io/ampproject/amphtml/builds/894594
       "url": "examples/visual-tests/amp-story/basic.html",
       "name": "amp-story: basic",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         "amp-story-page#page-2[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
       "name": "amp-story: Grid layer (fill)",
       "viewport": {"width": 320, "height": 480},
@@ -215,8 +216,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html",
       "name": "amp-story: Grid layer (vertical)",
       "viewport": {"width": 320, "height": 480},
@@ -226,8 +225,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html",
       "name": "amp-story: Grid layer (horizontal)",
       "viewport": {"width": 320, "height": 480},
@@ -237,8 +234,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html",
       "name": "amp-story: Grid layer (thirds)",
       "viewport": {"width": 320, "height": 480},
@@ -251,19 +246,16 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
       "name": "amp-story: CTA layer",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         "amp-story-page#the-one-with-the-cta-layer[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/embed-mode-1.html",
       "name": "amp-story: embed mode 1",
       "viewport": {"width": 320, "height": 480},
@@ -272,8 +264,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/embed-mode-2.html",
       "name": "amp-story: embed mode 2",
       "viewport": {"width": 320, "height": 480},
@@ -282,8 +272,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/share-menu.html",
       "name": "amp-story: share menu",
       "viewport": {"width": 320, "height": 480},
@@ -293,8 +281,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/info-dialog.html",
       "name": "amp-story: info dialog",
       "viewport": {"width": 320, "height": 480},
@@ -304,8 +290,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-bookend.html",
       "name": "amp-story: bookend",
       "viewport": {"width": 320, "height": 480},
@@ -315,8 +299,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent",
       "viewport": {"width": 320, "height": 480},
@@ -326,8 +308,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
       "name": "amp-story: unsupported browser",
       "viewport": {"width": 320, "height": 480},
@@ -337,52 +317,47 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/basic.html",
       "name": "amp-story: basic (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         "amp-story-page#page-2[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
       "name": "amp-story: Grid layer (fill) (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-grid-template-fill"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-vertical.html",
       "name": "amp-story: Grid layer (vertical) (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-grid-template-vertical"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-horizontal.html",
       "name": "amp-story: Grid layer (horizontal) (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-grid-template-horizontal"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-thirds.html",
       "name": "amp-story: Grid layer (thirds) (desktop)",
       "viewport": {"width": 1440, "height": 900},
@@ -391,23 +366,22 @@
       ],
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-grid-template-thirds"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
       "name": "amp-story: CTA layer (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         "amp-story-page#the-one-with-the-cta-layer[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/embed-mode-1.html",
       "name": "amp-story: embed mode 1 (desktop)",
       "viewport": {"width": 1440, "height": 900},
@@ -416,40 +390,35 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/embed-mode-2.html",
       "name": "amp-story: embed mode 2 (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
-        ".i-amphtml-story-loaded"
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-bookend.html",
       "name": "amp-story: bookend (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-bookend"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-consent"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
       "name": "amp-story: unsupported browser (desktop)",
       "viewport": {"width": 1440, "height": 900},
@@ -459,19 +428,16 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/basic.rtl.html",
       "name": "amp-story: basic (rtl)",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
         "amp-story-page#page-2[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/share-menu.rtl.html",
       "name": "amp-story: share menu (rtl)",
       "viewport": {"width": 320, "height": 480},
@@ -481,8 +447,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/info-dialog.rtl.html",
       "name": "amp-story: info dialog (rtl)",
       "viewport": {"width": 320, "height": 480},
@@ -492,8 +456,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
       "name": "amp-story: bookend (rtl)",
       "viewport": {"width": 320, "height": 480},
@@ -503,8 +465,6 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (rtl)",
       "viewport": {"width": 320, "height": 480},
@@ -514,41 +474,37 @@
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/basic.rtl.html",
       "name": "amp-story: basic (desktop) (rtl)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         "amp-story-page#page-2[active]"
-      ]
+      ],
+      "loading_complete_delay_ms": 500, /* for page navigation */
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-bookend.rtl.html",
       "name": "amp-story: bookend (desktop) (rtl)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-bookend"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (desktop) (rtl)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_css": [
         ".i-amphtml-story-loaded",
+        ".i-amphtml-story-share-pill-label",
         ".i-amphtml-story-consent"
       ]
     },
     {
-      "flaky": true,
-      // amp-story tests are very flaky.  see above.
       // The url here should not matter; this UI should be triggered for all
       // story documents, based on the viewport dimensions.
       "url": "examples/visual-tests/amp-story/basic.html",
