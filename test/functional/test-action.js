@@ -1069,17 +1069,20 @@ describes.fakeWin('Core events', {amp: true}, env => {
   let document;
   let action;
   let triggerPromise;
+  let isTriggered;
 
   beforeEach(() => {
     window = env.win;
     document = window.document;
     sandbox = env.sandbox;
-    sandbox.stub(window.document, 'addEventListener');
+    sandbox.spy(window.document, 'addEventListener');
     const {ampdoc} = env;
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
+    isTriggered = false;
     triggerPromise = new Promise((resolve, reject) => {
       sandbox.stub(action, 'trigger').callsFake(() => {
+        isTriggered = true;
         try {
           originalTrigger.apply(action, action.trigger.getCall(0).args);
           resolve();
@@ -1296,6 +1299,94 @@ describes.fakeWin('Core events', {amp: true}, env => {
             return value == 'foo bar baz';
           }));
     });
+  });
+
+  it('should trigger longpress event at exactly 500ms ' +
+    'if mouse button is not released', () => {
+    sandbox.stub(action, 'invoke_');
+    const clock = sandbox.useFakeTimers.call(window);
+    // mousedown listener
+    const handler = window.document.addEventListener.getCall(8).args[1];
+    const element = document.createElement('div');
+    element.id = 'test';
+    element.setAttribute('on', 'longpress:test.hide');
+    const event = {target: element};
+    document.body.appendChild(element);
+    handler(event);
+    clock.tick(500); // tick exactly 500ms
+    expect(isTriggered).to.be.true; // sinon guarantees promise resolved
+    return triggerPromise.then(() => {
+      expect(action.trigger).to.have.been.calledWith(
+          element,
+          'longpress',
+          sinon.match(event => {
+            return event.target == element;
+          }));
+      clock.restore();
+    });
+  });
+
+  it('should not trigger longpress event if mouseup before 500ms', () => {
+    sandbox.stub(action, 'invoke_');
+    const clock = sandbox.useFakeTimers.call(window);
+    // mousedown listener
+    const handler = window.document.addEventListener.getCall(8).args[1];
+    const element = document.createElement('div');
+    element.id = 'test';
+    element.setAttribute('on', 'longpress:test.hide');
+    const event = {target: element};
+    document.body.appendChild(element);
+    handler(event);
+    clock.tick(499);
+    window.document.dispatchEvent(createCustomEvent(window, 'mouseup', {}));
+    clock.tick(2);
+    // Still not called
+    expect(isTriggered).to.be.false;
+    clock.restore();
+  });
+
+  it('should trigger longpress event at exactly 500ms ' +
+    'if touch is not released', () => {
+    sandbox.stub(action, 'invoke_');
+    const clock = sandbox.useFakeTimers.call(window);
+    // touchstart listener
+    const handler = window.document.addEventListener.getCall(9).args[1];
+    const element = document.createElement('div');
+    element.id = 'test';
+    element.setAttribute('on', 'longpress:test.hide');
+    const event = {target: element, preventDefault: () => {}};
+    document.body.appendChild(element);
+    handler(event);
+    clock.tick(500); // tick exactly 500ms
+    expect(isTriggered).to.be.true; // sinon guarantees promise resolved
+    return triggerPromise.then(() => {
+      expect(action.trigger).to.have.been.calledWith(
+          element,
+          'longpress',
+          sinon.match(event => {
+            return event.target == element;
+          }));
+      clock.restore();
+    });
+  });
+
+  it('should not trigger longpress event if touchend before 500ms', () => {
+    sandbox.stub(action, 'invoke_');
+    const clock = sandbox.useFakeTimers.call(window);
+    // touchstart listener
+    const handler = window.document.addEventListener.getCall(9).args[1];
+    const element = document.createElement('div');
+    element.id = 'test';
+    element.setAttribute('on', 'longpress:test.hide');
+    const event = {target: element, preventDefault: () => {}};
+    document.body.appendChild(element);
+    handler(event);
+    clock.tick(499);
+    window.document.dispatchEvent(createCustomEvent(window, 'touchend', {}));
+    clock.tick(2);
+    // Still not called
+    expect(isTriggered).to.be.false;
+    clock.restore();
   });
 
   describe('DeferredEvent', () => {

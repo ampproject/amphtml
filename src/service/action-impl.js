@@ -350,7 +350,7 @@ export class ActionService {
         const timer = Services.timerFor(this.ampdoc.win);
         timerId = timer.delay(() => {
           this.trigger(element, name, event, ActionTrust.HIGH);
-        }, 1000);
+        }, 500);
       });
       this.root_.addEventListener('touchstart', event => {
         event.preventDefault(); // don't emit mouse events
@@ -365,7 +365,7 @@ export class ActionService {
         const timer = Services.timerFor(this.ampdoc.win);
         timerId = timer.delay(() => {
           this.trigger(element, name, event, ActionTrust.HIGH);
-        }, 1000);
+        }, 500);
       });
     }
   }
