@@ -1322,7 +1322,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
           sinon.match(event => {
             return event.target == element;
           }));
-      clock.restore();
     });
   });
 
@@ -1342,7 +1341,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
     clock.tick(2);
     // Still not called
     expect(isTriggered).to.be.false;
-    clock.restore();
   });
 
   it('should trigger longpress event at exactly 500ms ' +
@@ -1366,7 +1364,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
           sinon.match(event => {
             return event.target == element;
           }));
-      clock.restore();
     });
   });
 
@@ -1386,7 +1383,6 @@ describes.fakeWin('Core events', {amp: true}, env => {
     clock.tick(2);
     // Still not called
     expect(isTriggered).to.be.false;
-    clock.restore();
   });
 
   describe('DeferredEvent', () => {

@@ -338,35 +338,25 @@ export class ActionService {
     } else if (name == 'longpress') {
       // TODO: should we consider mousedown/touchstart and then
       // mousemove/touchmove out of rect case? (seems impacts performance)
-      this.root_.addEventListener('mousedown', event => {
-        const element = dev().assertElement(event.target);
-        let timerId = 0;
-        const unlistenMouseUp = listen(this.root_, 'mouseup', () => {
-          if (timerId) {
-            timer.cancel(timerId);
-          }
-          unlistenMouseUp();
+      const listenLongPressEvents = (startPressEvent, endPressEvent) => {
+        this.root_.addEventListener(startPressEvent, event => {
+          const element = dev().assertElement(event.target);
+          let timerId = 0;
+          const unlistenEndPressEvent =
+            listen(this.root_, endPressEvent, () => {
+              if (timerId) {
+                timer.cancel(timerId);
+              }
+              unlistenEndPressEvent();
+            });
+          const timer = Services.timerFor(this.ampdoc.win);
+          timerId = timer.delay(() => {
+            this.trigger(element, name, event, ActionTrust.HIGH);
+          }, 500);
         });
-        const timer = Services.timerFor(this.ampdoc.win);
-        timerId = timer.delay(() => {
-          this.trigger(element, name, event, ActionTrust.HIGH);
-        }, 500);
-      });
-      this.root_.addEventListener('touchstart', event => {
-        event.preventDefault(); // don't emit mouse events
-        const element = dev().assertElement(event.target);
-        let timerId = 0;
-        const unlistenTouchend = listen(this.root_, 'touchend', () => {
-          if (timerId) {
-            timer.cancel(timerId);
-          }
-          unlistenTouchend();
-        });
-        const timer = Services.timerFor(this.ampdoc.win);
-        timerId = timer.delay(() => {
-          this.trigger(element, name, event, ActionTrust.HIGH);
-        }, 500);
-      });
+      };
+      listenLongPressEvents('mousedown', 'mouseup');
+      listenLongPressEvents('touchstart', 'touchend');
     }
   }
 
