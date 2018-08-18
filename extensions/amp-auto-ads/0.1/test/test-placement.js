@@ -1544,7 +1544,7 @@ describes.realWin('placement', {
         placements: [
           {
             anchor: {
-              selector: 'DIV.class2',
+              selector: 'body DIV.class2',
               sub: {
                 selector: 'DIV.class1 DIV.class3',
                 all: true,
