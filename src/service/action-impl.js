@@ -21,7 +21,7 @@ import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
-import {getDetail} from '../event-helper';
+import {getDetail, listen} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {
@@ -254,6 +254,7 @@ export class ActionService {
     this.addEvent('input-throttled');
     this.addEvent('valid');
     this.addEvent('invalid');
+    this.addEvent('longpress');
   }
 
   /** @override */
@@ -333,6 +334,38 @@ export class ActionService {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
         this.trigger(element, name, event, ActionTrust.HIGH);
+      });
+    } else if (name == 'longpress') {
+      // TODO: should we consider mousedown/touchstart and then
+      // mousemove/touchmove out of rect case? (seems impacts performance)
+      this.root_.addEventListener('mousedown', event => {
+        const element = dev().assertElement(event.target);
+        let timerId = 0;
+        const unlistenMouseUp = listen(this.root_, 'mouseup', () => {
+          if (timerId) {
+            timer.cancel(timerId);
+          }
+          unlistenMouseUp();
+        });
+        const timer = Services.timerFor(this.ampdoc.win);
+        timerId = timer.delay(() => {
+          this.trigger(element, name, event, ActionTrust.HIGH);
+        }, 1000);
+      });
+      this.root_.addEventListener('touchstart', event => {
+        event.preventDefault(); // don't emit mouse events
+        const element = dev().assertElement(event.target);
+        let timerId = 0;
+        const unlistenTouchend = listen(this.root_, 'touchend', () => {
+          if (timerId) {
+            timer.cancel(timerId);
+          }
+          unlistenTouchend();
+        });
+        const timer = Services.timerFor(this.ampdoc.win);
+        timerId = timer.delay(() => {
+          this.trigger(element, name, event, ActionTrust.HIGH);
+        }, 1000);
       });
     }
   }
