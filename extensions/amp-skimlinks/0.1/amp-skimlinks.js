@@ -15,10 +15,7 @@ import {getBoundFunction, nextTick} from './utils';
 
 /*** TODO:
  * - Fix issue with waypoint reporting links with macro variables.
- * - Add amp-specific analytics variable (is_amp, canonical_url, original_page...)
  * - Investigate why AMP page is so slow to start (check window.t2 - window.t1)
- * - Check if win.location is correct in the context of amp served by google.co.uk
- * - Rename and make more consistent
  */
 
 const startTime = new Date().getTime();
@@ -48,7 +45,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   startSkimcore_() {
     this.trackingService = this.initTracking();
-    this.domainResolverService = new AffiliateLinkResolver(
+    this.affiliateLinkResolver = new AffiliateLinkResolver(
         this.xhr_,
         this.skimOptions_,
         getBoundFunction(this.trackingService, 'getTrackingInfo')
@@ -63,7 +60,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   getResolveUnkownLinksFunction_() {
     const initBeaconCallbackHookONCE = once(this.initBeaconCallbackHook_.bind(this));
     return anchorList => {
-      const twoStepsResponse = this.domainResolverService.resolveUnknownAnchors(anchorList);
+      const twoStepsResponse = this.affiliateLinkResolver.resolveUnknownAnchors(anchorList);
       // Only called after the first page scan.
       initBeaconCallbackHookONCE(twoStepsResponse);
 
@@ -92,7 +89,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // If we haven't called beacon on the first page scan (because not links were found)
     // Call it manually to get extra info like guid.
     if (!twoStepsResponse.asyncResponse) {
-      return this.domainResolverService.fetchDomainResolverApi([])
+      return this.affiliateLinkResolver.fetchDomainResolverApi([])
           .then(trackFunction);
     }
 

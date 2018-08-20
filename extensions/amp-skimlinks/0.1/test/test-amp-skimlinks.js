@@ -178,22 +178,22 @@ describes.fakeWin('amp-skimlinks', {
       env.sandbox.stub(ampSkimlinks, 'initBeaconCallbackHook_');
       resolveFunction = ampSkimlinks.getResolveUnkownLinksFunction_();
 
-      ampSkimlinks.domainResolverService = {
+      ampSkimlinks.affiliateLinkResolver = {
         resolveUnknownAnchors: env.sandbox.stub(),
       };
     });
 
-    it('Should always call domainResolverService.resolveUnknownAnchors', () => {
+    it('Should always call affiliateLinkResolver.resolveUnknownAnchors', () => {
       const anchorsList = ['a', 'b'];
       resolveFunction.call(ampSkimlinks, anchorsList);
       resolveFunction.call(ampSkimlinks, anchorsList);
-      const stub = ampSkimlinks.domainResolverService.resolveUnknownAnchors;
+      const stub = ampSkimlinks.affiliateLinkResolver.resolveUnknownAnchors;
       expect(stub.withArgs(anchorsList).callCount).to.equal(2);
     });
 
-    it('Should return results of domainResolverService.resolveUnknownAnchors', () => {
+    it('Should return results of affiliateLinkResolver.resolveUnknownAnchors', () => {
       const res = ['a', 'b'];
-      ampSkimlinks.domainResolverService.resolveUnknownAnchors.returns(res);
+      ampSkimlinks.affiliateLinkResolver.resolveUnknownAnchors.returns(res);
       expect(resolveFunction.call(ampSkimlinks)).to.equal(res);
     });
 
@@ -208,7 +208,7 @@ describes.fakeWin('amp-skimlinks', {
   describe('initBeaconCallbackHook_', () => {
     const promise = Promise.resolve({});
     beforeEach(() => {
-      ampSkimlinks.domainResolverService = {
+      ampSkimlinks.affiliateLinkResolver = {
         fetchDomainResolverApi: env.sandbox.stub().returns(Promise.resolve({})),
       };
       env.sandbox.stub(ampSkimlinks, 'sendImpressionTracking_');
@@ -216,13 +216,13 @@ describes.fakeWin('amp-skimlinks', {
 
     it('Should call fetchDomainResolverApi if no asyncResponse', () => {
       ampSkimlinks.initBeaconCallbackHook_({asyncResponse: undefined});
-      const stub = ampSkimlinks.domainResolverService.fetchDomainResolverApi;
+      const stub = ampSkimlinks.affiliateLinkResolver.fetchDomainResolverApi;
       expect(stub.calledOnce).to.be.true;
     });
 
     it('Should not call fetchDomainResolverApi if asyncResponse', () => {
       ampSkimlinks.initBeaconCallbackHook_({asyncResponse: promise});
-      const stub = ampSkimlinks.domainResolverService.fetchDomainResolverApi;
+      const stub = ampSkimlinks.affiliateLinkResolver.fetchDomainResolverApi;
       expect(stub.called).to.be.false;
     });
 
