@@ -39,6 +39,6 @@
   "amp-date-picker": 1,
   "amp-carousel-scroll-snap": 1,
   "user-error-reporting": 1,
-  "doubleclickSraExp": 0.01,
+  "doubleclickSraExp": 0,
   "doubleclickSraReportExcludedBlock": 0.1
 }
