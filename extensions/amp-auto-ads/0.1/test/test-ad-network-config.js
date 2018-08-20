@@ -18,6 +18,10 @@ import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
+import {
+  ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
+  AdSenseAmpAutoAdsResponsiveBranches,
+} from '../../../../ads/google/adsense-amp-auto-ads-responsive';
 import {Services} from '../../../../src/services';
 import {
   forceExperimentBranch,
@@ -87,16 +91,30 @@ describes.realWin('ad-network-config', {
           'url=https%3A%2F%2Ffoo.bar%2Fbaz');
     });
 
-    it('should not be responsive-enabled if experiment is off', () => {
-      toggleExperiment(env.win, 'amp-auto-ads-adsense-responsive', false);
+    it('should report responsive-enabled when responsive experiment not on',
+        () => {
+          toggleExperiment(
+              env.win, ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME, false);
+          const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+          expect(adNetwork.isResponsiveEnabled(env.win)).to.equal(true);
+        });
+
+    it('should report responsive-enabled when responsive experiment on and ' +
+       'experiment branch picked', () => {
+      forceExperimentBranch(env.win,
+          ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
+          AdSenseAmpAutoAdsResponsiveBranches.EXPERIMENT);
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.isResponsiveEnabled(env.win)).to.be.false;
+      expect(adNetwork.isResponsiveEnabled(env.win)).to.equal(true);
     });
 
-    it('should be responsive-enabled if experiment is on', () => {
-      toggleExperiment(env.win, 'amp-auto-ads-adsense-responsive', true);
+    it('should report responsive-disabled when responsive experiment on ' +
+       'and control branch picked', () => {
+      forceExperimentBranch(env.win,
+          ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
+          AdSenseAmpAutoAdsResponsiveBranches.CONTROL);
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.isResponsiveEnabled(env.win)).to.be.true;
+      expect(adNetwork.isResponsiveEnabled(env.win)).to.equal(false);
     });
 
     // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.
