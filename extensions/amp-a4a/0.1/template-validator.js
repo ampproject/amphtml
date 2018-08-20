@@ -68,9 +68,7 @@ export class TemplateValidator extends Validator {
       return Promise.resolve(
           /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
             creativeData: {
-              crossDomainData: {
-                creative: body,
-              },
+              creative: body,
             },
             adResponseType: AdResponseType.TEMPLATE,
             type: ValidatorResult.NON_AMP,

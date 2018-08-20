@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {FriendlyFrameRenderer} from './friendly-frame-renderer';
 import {Renderer} from './amp-ad-type-defs';
+import {dev} from '../../../src/log';
 import {getAmpAdTemplateHelper} from './template-validator';
+import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
  * Render AMP creative into FriendlyFrame via templatization.
@@ -28,18 +29,22 @@ export class TemplateRenderer extends Renderer {
    */
   constructor() {
     super();
-
-    /**
-     * @type {!FriendlyFrameRenderer}
-     * @protected
-     */
-    this.friendlyFrameRenderer_ = new FriendlyFrameRenderer();
   }
 
   /** @override */
   render(context, element, creativeData) {
-    return this.friendlyFrameRenderer_.render(context, element, creativeData)
-        .then(() => {
+
+    creativeData = /** @type {CreativeData} */ (creativeData);
+
+    const {size, adUrl} = context;
+    const {creativeMetadata} = creativeData;
+
+    dev().assert(size, 'missing creative size');
+    dev().assert(adUrl, 'missing ad request url');
+
+    return renderCreativeIntoFriendlyFrame(
+        adUrl, size, element, creativeMetadata)
+        .then(iframe => {
           const templateData =
           /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
               creativeData.templateData);
@@ -48,7 +53,6 @@ export class TemplateRenderer extends Renderer {
             return Promise.resolve();
           }
           const templateHelper = getAmpAdTemplateHelper(context.win);
-          const {iframe} = this.friendlyFrameRenderer_;
           return templateHelper
               .render(data, iframe.contentWindow.document.body)
               .then(renderedElement => {

@@ -16,29 +16,19 @@
 
 import {Renderer} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /**
- * @typedef {{
- *   crossDomainData: ./amp-ad-type-defs.CrossDomainDataDef,
- * }}
- */
-export let CreativeData;
-
-/**
  * Render a non-AMP creative into a NameFrame.
  */
 export class NameFrameRenderer extends Renderer {
   /** @override */
-  render(context, element, creativeData) {
-    creativeData = /** @type {!CreativeData} */ (creativeData);
-
-    const {crossDomainData} = creativeData;
-    dev().assert(crossDomainData, 'CrossDomain data undefined!');
+  render(context, element, crossDomainData) {
+    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (
+      crossDomainData);
 
     if (!crossDomainData.creative && !crossDomainData.rawCreativeBytes) {
       // No creative, nothing to do.

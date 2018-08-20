@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
 import {Renderer} from './amp-ad-type-defs';
-import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
-import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
-import {setStyle} from '../../../src/style';
+import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
  * @typedef {{
@@ -44,12 +36,6 @@ export class FriendlyFrameRenderer extends Renderer {
    */
   constructor() {
     super();
-
-    /**
-     * @type {?Element}
-     * @public
-     */
-    this.iframe = null;
   }
 
   /** @override */
@@ -63,51 +49,7 @@ export class FriendlyFrameRenderer extends Renderer {
     dev().assert(size, 'missing creative size');
     dev().assert(adUrl, 'missing ad request url');
 
-    // Create and setup friendly iframe.
-    this.iframe = /** @type {!HTMLIFrameElement} */(
-      createElementWithAttributes(
-          /** @type {!Document} */(element.ownerDocument),
-          'iframe',
-          dict({
-            // NOTE: It is possible for either width or height to be 'auto',
-            // a non-numeric value.
-            'height': size.height,
-            'width': size.width,
-            'frameborder': '0',
-            'allowfullscreen': '',
-            'allowtransparency': '',
-            'scrolling': 'no',
-          })));
-    // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
-
-    const fontsArray = [];
-    if (creativeMetadata.customStylesheets) {
-      creativeMetadata.customStylesheets.forEach(s => {
-        const href = s['href'];
-        if (href) {
-          fontsArray.push(href);
-        }
-      });
-    }
-
-    return installFriendlyIframeEmbed(
-        this.iframe, element, {
-          host: element,
-          url: /** @type {string} */ (adUrl),
-          html: creativeMetadata.minifiedCreative,
-          extensionIds: creativeMetadata.customElementExtensions || [],
-          fonts: fontsArray,
-        }, embedWin => {
-          installUrlReplacementsForEmbed(element.getAmpDoc(), embedWin,
-              new A4AVariableSource(element.getAmpDoc(), embedWin));
-        })
-        .then(friendlyIframeEmbed => {
-          setFriendlyIframeEmbedVisible(
-              friendlyIframeEmbed, element.isInViewport());
-          // Ensure visibility hidden has been removed (set by boilerplate).
-          const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
-              friendlyIframeEmbed.win.document;
-          setStyle(frameDoc.body, 'visibility', 'visible');
-        });
+    return renderCreativeIntoFriendlyFrame(
+        adUrl, size, element, creativeMetadata);
   }
 }
