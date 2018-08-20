@@ -41,8 +41,7 @@ export default class Tracking {
    * @param {*} element
    */
   setupAnalytics_(element) {
-    // 'layoutCallback' from custom-element base class needs be executed in order to have analytics working.
-    // Analytics are not setup until CommonSignals.LOAD_START is triggered.
+    // Note: Analytics are not ready until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(element);
     analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
     // analyticsBuilder.track('page-impressions', `${TRACKING_API_URL}/track.php?canonnical=CANONICAL_URL&ampdoc=AMPDOC_URL&source=SOURCE_URL&document_referrer=\${documentReferrer}`);

@@ -81,7 +81,7 @@ describes.fakeWin('amp-skimlinks', {
     });
 
     describe('initSkimlinksLinkRewriter', () => {
-      let resolveFunction;
+      let resolveFunction, linkRewriter;
 
       beforeEach(() => {
         ampSkimlinks.skimOptions_ = {
@@ -99,7 +99,7 @@ describes.fakeWin('amp-skimlinks', {
         env.sandbox.stub(ampSkimlinks, 'getResolveUnkownLinksFunction_').returns(resolveFunction);
 
         env.sandbox.stub(ampSkimlinks, 'onClick_');
-        ampSkimlinks.initSkimlinksLinkRewriter();
+        linkRewriter = ampSkimlinks.initSkimlinksLinkRewriter();
       });
 
       it('Should register Skimlinks link rewriter', () => {
@@ -114,7 +114,7 @@ describes.fakeWin('amp-skimlinks', {
       it('Should setup click callback', () => {
         const data = {};
         // Send fake click.
-        ampSkimlinks.skimlinksLinkRewriter.events.send(linkRewriterEvents.CLICK, data);
+        linkRewriter.events.send(linkRewriterEvents.CLICK, data);
 
         expect(ampSkimlinks.onClick_.withArgs(data).calledOnce).to.be.true;
       });

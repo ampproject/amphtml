@@ -1,3 +1,4 @@
+import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {once} from '../../../src/utils/function';
 import {whenDocumentReady} from '../../../src/document-ready';
@@ -34,6 +35,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.ampDoc_ = this.getAmpDoc();
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
     this.linkRewriterService = new LinkRewriterService(this.ampDoc_.getRootNode());
+
     return whenDocumentReady(this.ampDoc_).then(() => {
       window.t2 = new Date().getTime();
       this.startSkimcore_();
@@ -44,7 +46,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Where everything start
    */
   startSkimcore_() {
-    this.trackingService = new Tracking(this.element, this.skimOptions_);
+    this.trackingService = this.initTracking();
     this.domainResolverService = new AffiliateLinkResolver(
         this.xhr_,
         this.skimOptions_,
@@ -85,7 +87,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @param {*} twoStepsResponse
    */
   initBeaconCallbackHook_(twoStepsResponse) {
-    const trackFunction = getBoundFunction(this, 'sendImpressionTracking_');
+    const trackFunction = this.sendImpressionTracking_.bind(this);
     // If we haven't called beacon on the first page scan (because not links were found)
     // Call it manually to get extra info like guid.
     if (!twoStepsResponse.asyncResponse) {
@@ -115,18 +117,31 @@ export class AmpSkimlinks extends AMP.BaseElement {
       linkSelector: this.skimOptions_.linkSelector,
     };
 
-    this.skimlinksLinkRewriter = this.linkRewriterService.registerLinkRewriter(
+    const skimlinksLinkRewriter = this.linkRewriterService.registerLinkRewriter(
         SKIMLINKS_REWRITER_ID,
         this.getResolveUnkownLinksFunction_(),
         options
     );
 
-    this.skimlinksLinkRewriter.events.on(
+    skimlinksLinkRewriter.events.on(
         linkRewriterEvents.CLICK,
         this.onClick_.bind(this)
     );
 
-    return this.skimlinksLinkRewriter;
+    return skimlinksLinkRewriter;
+  }
+
+  /**
+   * Initialise tracking module
+   */
+  initTracking() {
+    // 'amp-analytics' api is waiting for CommonSignals.LOAD_START to be
+    // triggered before sending requests.
+    // Normally CommonSignals.LOAD_START is sent from layoutCallback but since
+    // we are using layout = 'nodisplay', 'layoutCallback' is never called.
+    // We need to call it manually to have CustomEventReporterBuilder working.
+    this.signals().signal(CommonSignals.LOAD_START);
+    return new Tracking(this.element, this.skimOptions_);
   }
 
   /**
