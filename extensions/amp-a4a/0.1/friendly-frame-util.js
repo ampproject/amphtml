@@ -15,9 +15,7 @@
  */
 
 import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
-import {Renderer} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   installFriendlyIframeEmbed,
@@ -39,9 +37,9 @@ import {setStyle} from '../../../src/style';
  * @return {!Element} The iframe into which the creative was rendered.
  */
 export function renderCreativeIntoFriendlyFrame(
-    adUrl, size, element, creativeMetadata) {
+  adUrl, size, element, creativeMetadata) {
   // Create and setup friendly iframe.
-  iframe = /** @type {!HTMLIFrameElement} */(
+  const iframe = /** @type {!HTMLIFrameElement} */(
     createElementWithAttributes(
         /** @type {!Document} */(element.ownerDocument),
         'iframe',
