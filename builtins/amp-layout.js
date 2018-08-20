@@ -38,6 +38,12 @@ class AmpLayout extends BaseElement {
     });
     this.element.appendChild(container);
   }
+
+  /** @override */
+  prerenderAllowed() {
+    // Allow amp-layout to be built in prerender mode.
+    return true;
+  }
 }
 
 /**
