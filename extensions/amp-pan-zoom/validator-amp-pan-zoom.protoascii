@@ -30,10 +30,6 @@ tags: {  # <amp-pan-zoom>
   tag_name: "AMP-PAN-ZOOM"
   requires_extension: "amp-pan-zoom"
   attrs: {
-    name: "controls"
-    value: ""
-  }
-  attrs: {
     name: "disable-double-tap"
     value: ""
   }
