@@ -15,13 +15,14 @@
  */
 
 import {ANALYTICS_CONFIG} from '../vendors';
-import {AmpAnalytics, Priority} from '../amp-analytics';
+import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {
   ClickEventTracker,
   VisibilityTracker,
 } from '../events';
 import {LayoutPriority} from '../../../../src/layout';
+import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';

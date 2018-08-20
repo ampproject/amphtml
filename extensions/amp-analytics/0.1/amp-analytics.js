@@ -28,7 +28,7 @@ import {
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
 import {LayoutPriority} from '../../../src/layout';
-import {Priority} from '../../../src/navigation';
+import {Priority} from '../../../src/service/navigation';
 import {
   RequestHandler,
 } from './requests';
