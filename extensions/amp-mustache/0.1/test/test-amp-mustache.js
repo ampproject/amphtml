@@ -17,7 +17,7 @@
 import * as mustache from '../../../../third_party/mustache/mustache';
 import * as sanitizer from '../../../../src/sanitizer';
 import * as service from '../../../../src/service';
-import {AmpMustache} from '../amp-mustache'
+import {AmpMustache} from '../amp-mustache';
 
 describe('amp-mustache 0.1', () => {
   let sandbox;

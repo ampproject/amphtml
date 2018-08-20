@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {Capability} from './viewer-impl';
 import {Deferred} from '../utils/promise';
 import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
-import { Capability } from './viewer-impl';
 
 /**
  * @fileoverview
