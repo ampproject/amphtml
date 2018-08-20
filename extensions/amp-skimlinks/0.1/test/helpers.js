@@ -44,6 +44,7 @@ const helpersFactory = env => {
       env.sandbox.stub(CustomEventReporterBuilder.prototype, 'track');
       env.sandbox.stub(CustomEventReporterBuilder.prototype, 'build').returns({
         trigger: env.sandbox.stub(),
+        config_: {},
       });
     },
 

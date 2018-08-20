@@ -16,11 +16,9 @@ describes.fakeWin('test-tracking', {
     extensions: ['amp-skimlinks'],
   },
 }, env => {
-  let win;
   let helpers;
   const startTime = new Date().getTime();
   beforeEach(() => {
-    win = env.win;
     helpers = helpersFactory(env);
   });
 
@@ -70,11 +68,12 @@ describes.fakeWin('test-tracking', {
         expect(impressionId1).to.not.equal(impressionId2);
       });
 
-      it('Set the sendBeacon flag to true', () => {
-
+      it('Should set the amp-analytics beacon flag to true', () => {
+        const tracking = helpers.createTrackingWithStubAnalytics();
+        expect(tracking.analytics_.config_.transport.beacon).to.be.true;
       });
 
-      it('Setup the page-impressions analytics correctly', () => {
+      it('Should setup the page-impressions analytics correctly', () => {
         helpers.createTrackingWithStubAnalytics();
         const trackStub = CustomEventReporterBuilder.prototype.track;
         expect(trackStub.withArgs(
@@ -83,7 +82,7 @@ describes.fakeWin('test-tracking', {
         ).calledOnce).to.be.true;
       });
 
-      it('Setup the link-impressions analytics correctly', () => {
+      it('Should setup the link-impressions analytics correctly', () => {
         helpers.createTrackingWithStubAnalytics();
         const trackStub = CustomEventReporterBuilder.prototype.track;
         expect(trackStub.withArgs(
@@ -92,7 +91,7 @@ describes.fakeWin('test-tracking', {
         ).calledOnce).to.be.true;
       });
 
-      it('Setup the non-affiliate-click analytics correctly', () => {
+      it('Should setup the non-affiliate-click analytics correctly', () => {
         helpers.createTrackingWithStubAnalytics();
         const trackStub = CustomEventReporterBuilder.prototype.track;
         expect(trackStub.withArgs(
@@ -105,7 +104,7 @@ describes.fakeWin('test-tracking', {
 
     it('Should call both page impressions and link impressions analytics', () => {
       trackingService = helpers.createTrackingWithStubAnalytics();
-      trackingService.extractAnchorTrackingInfo_ = env.sandbox.stub()
+      env.sandbox.stub(trackingService, 'extractAnchorTrackingInfo_')
           .returns({numberAffiliateLinks: 0, urls: []});
 
       trackingService.sendImpressionTracking({}, new Map(), startTime);
@@ -116,7 +115,7 @@ describes.fakeWin('test-tracking', {
 
     it('Should not call page impressions nor link impressions analytics if skimOptions "tracking" is false', () => {
       trackingService = helpers.createTrackingWithStubAnalytics({tracking: false});
-      trackingService.extractAnchorTrackingInfo_ = env.sandbox.stub()
+      env.sandbox.stub(trackingService, 'extractAnchorTrackingInfo_')
           .returns({numberAffiliateLinks: 0, urls: []});
 
       trackingService.sendImpressionTracking({}, new Map(), startTime);

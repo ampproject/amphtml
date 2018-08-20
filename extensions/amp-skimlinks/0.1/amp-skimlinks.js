@@ -14,11 +14,10 @@ import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction, nextTick} from './utils';
 
 /*** TODO:
- * - Fix issue with analytics reporting links with macro variables.
+ * - Fix issue with waypoint reporting links with macro variables.
  * - Add amp-specific analytics variable (is_amp, canonical_url, original_page...)
  * - Investigate why AMP page is so slow to start (check window.t2 - window.t1)
  * - Check if win.location is correct in the context of amp served by google.co.uk
- * - Use no layout container
  */
 
 const startTime = new Date().getTime();

@@ -48,7 +48,14 @@ export default class Tracking {
     analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
     analyticsBuilder.track('non-affiliate-click', NA_CLICK_TRACKING_URL);
 
-    return analyticsBuilder.build();
+    const analytics = analyticsBuilder.build();
+    // Overwrite config manually since CustomEventReporterBuilder doesn't
+    // support optional config.
+    // TODO: add optional config param to .build() so we don't need to mutate
+    // a private property from outside.
+    analytics.config_.transport = {beacon: true};
+
+    return analytics;
   }
 
   /**
