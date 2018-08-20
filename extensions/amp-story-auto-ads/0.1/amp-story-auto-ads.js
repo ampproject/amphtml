@@ -29,7 +29,7 @@ import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
-const MIN_INTERVAL = 3;
+const MIN_INTERVAL = 4;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
