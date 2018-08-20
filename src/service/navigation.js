@@ -257,14 +257,13 @@ export class Navigation {
     }
 
     // Handle anchor transformations.
-    const transformedTarget = target;
     this.anchorMutators_.forEach(callback => {
       callback(target);
       location = this.parseUrl_(target.href);
     });
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, transformedTarget, location);
+    this.handleNavClick_(e, target, location);
   }
 
   /**
