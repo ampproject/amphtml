@@ -1,3 +1,4 @@
+import {parseUrlDeprecated} from '../../../src/url';
 import {user} from '../../../src/log';
 
 const errors = {
@@ -6,42 +7,61 @@ const errors = {
   INVALID_TRACKING_STATUS: '"tracking" possible values are "true" or "false".',
 };
 
+/**
+ *
+ * @param {*} condition
+ * @param {*} message
+ */
 function assertSkimOption(condition, message) {
   user().assert(condition, `<amp-skimlinks> Invalid option => ${message}`);
 }
 
-export function getAmpSkimlinksOptions(element, location) {
+/**
+ *
+ * @param {*} element
+ * @param {*} docInfo
+ */
+export function getAmpSkimlinksOptions(element, docInfo) {
   return {
     pubcode: getPubCode_(element),
-    excludedDomains: getExcludedDomains_(element, location),
+    excludedDomains: getExcludedDomains_(element, getInternalDomains_(docInfo)),
     tracking: getTrackingStatus_(element),
     customTrackingId: getCustomTrackingId_(element),
     linkSelector: getLinkSelector_(element),
   };
 }
 
-function getExcludedDomains_(element, location) {
-  let excludedDomains = [];
+/**
+ *
+ * @param {*} element
+ * @param {*} internalDomains
+ */
+function getExcludedDomains_(element, internalDomains) {
+  let excludedDomains = [].concat(internalDomains);
 
   const excludedDomainsAttr = element.getAttribute('excluded-domains');
   if (excludedDomainsAttr) {
     excludedDomains = excludedDomainsAttr.split(',');
   }
-  if (location.hostname) {
-    // Push current domain to ignore internal links.
-    excludedDomains.push(location.hostname);
-  }
 
   return excludedDomains;
 }
 
+/**
+ *
+ * @param {*} element
+ */
 function getPubCode_(element) {
   const pubCode = element.getAttribute('publisher-code');
   assertSkimOption(pubCode, errors.INVALID_PUBCODE);
 
-  return pubCode
+  return pubCode;
 }
 
+/**
+ *
+ * @param {*} element
+ */
 function getTrackingStatus_(element) {
   const tracking = element.getAttribute('tracking');
   if (tracking) {
@@ -53,6 +73,10 @@ function getTrackingStatus_(element) {
   return true;
 }
 
+/**
+ *
+ * @param {*} element
+ */
 function getCustomTrackingId_(element) {
   const customTrackingId = element.getAttribute('custom-tracking-id');
   if (customTrackingId) {
@@ -64,8 +88,29 @@ function getCustomTrackingId_(element) {
   return customTrackingId;
 }
 
+/**
+ *
+ * @param {*} element
+ */
 function getLinkSelector_(element) {
   const linkSelector = element.getAttribute('link-selector');
 
   return linkSelector || null;
+}
+
+/**
+ *
+ * @param {*} docInfo
+ */
+function getInternalDomains_(docInfo) {
+  const internalDomains = [];
+  if (docInfo.canonicalUrl) {
+    internalDomains.push(parseUrlDeprecated(docInfo.canonicalUrl).hostname);
+  }
+
+  if (docInfo.sourceUrl) {
+    internalDomains.push(parseUrlDeprecated(docInfo.sourceUrl).hostname);
+  }
+
+  return internalDomains;
 }

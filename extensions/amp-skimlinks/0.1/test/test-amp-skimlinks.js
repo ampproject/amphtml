@@ -72,7 +72,7 @@ describes.fakeWin('amp-skimlinks', {
         expect(SkimOptionsModule.getAmpSkimlinksOptions.calledOnce).to.be.true;
         expect(ampSkimlinks.skimOptions_).to.deep.equal({
           pubcode: options['publisher-code'],
-          excludedDomains: options['excluded-domains'].split(',').concat(['localhost']),
+          excludedDomains: options['excluded-domains'].split(','),
           tracking: options['tracking'],
           customTrackingId: options['custom-tracking-id'],
           linkSelector: options['link-selector'],

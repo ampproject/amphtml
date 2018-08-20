@@ -3,7 +3,6 @@ import {addParamsToUrl,parseUrlDeprecated} from '../../../src/url';
 
 import {AFFILIATION_API,AMP_CREATIVE,XCUST_ATTRIBUTE_NAME} from './constants';
 import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
-import {once} from '../../../src/utils/function';
 
 export const LINK_STATUS__AFFILIATE = 'affiliate';
 export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';

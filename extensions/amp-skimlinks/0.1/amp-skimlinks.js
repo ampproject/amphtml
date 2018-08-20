@@ -18,6 +18,7 @@ import {getBoundFunction, nextTick} from './utils';
  * - Add amp-specific analytics variable (is_amp, canonical_url, original_page...)
  * - Investigate why AMP page is so slow to start (check window.t2 - window.t1)
  * - Check if win.location is correct in the context of amp served by google.co.uk
+ * - Rename and make more consistent
  */
 
 const startTime = new Date().getTime();
@@ -32,7 +33,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.hasCalledBeacon = false;
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
-    this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
+    this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
+    this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
     this.linkRewriterService = new LinkRewriterService(this.ampDoc_.getRootNode());
 
     return whenDocumentReady(this.ampDoc_).then(() => {
