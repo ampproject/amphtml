@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_IFRAME_TRANSPORT_CONFIG} from './iframe-transport-vendors';
+import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
+import {hasOwn} from '../../../src/utils/object';
 
 /**
  * @const {!JsonObject}
@@ -1570,6 +1571,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '&ap=${ap}' +
         '&co=${co}' +
         '&cp=${cp}' +
+        '&ps=${ps}' +
         '&host=${canonicalHost}' +
         '&path=${canonicalPath}',
     },
@@ -2094,7 +2096,215 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'oracleInfinityAnalytics': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'requests': {
+      'host': 'https://dc.oracleinfinity.io/${guid}/dcs.gif?',
+      'baseUrl': 'dcssip=${dcssip}&dcsuri=${dcsuri}',
+      'baseRef': '&dcsref=${documentReferrer}',
+      'baseEs': '&WT.es=${sourceHost}${sourcePath}',
+      'baseTi': '&WT.ti=${ti}&dcsdat=${timestamp}',
+      'basePrefix': '${baseUrl}${baseTi}${baseRef}${baseEs}',
+      'screenBs': '&WT.bs=${availableScreenWidth}x${availableScreenHeight}',
+      'screenSr': '&WT.sr=${screenWidth}x${screenHeight}',
+      'screenDc': '&WT.cd=${screenColorDepth}',
+      'screenMeasures': '${screenBs}${screenSr}${screenDc}',
+      'browserUl': '&WT.ul=${browserLanguage}',
+      'browserLe': '&WT.le=${documentCharset}',
+      'browserMeasures': '${browserUl}${browserLe}&WT.js=Yes',
+      'sessCof': '&WT.co_f=${clientId(WT_AMP)}',
+      'sessVer': '&ora.tv_amp=1.0.0&ora.amp_ver=${ampVersion}',
+      'sessionization': '${sessCof}${sessVer}&dcscfg=3',
+      'baseP1': '${host}${basePrefix}',
+      'baseP2': '${screenMeasures}${browserMeasures}${sessionization}',
+      'baseDl': '&WT.dl=${dl}',
+      'pageview': '${baseP1}${baseP2}${baseDl}',
+      'event': '${baseP1}${baseP2}${baseDl}',
+      'dlPdf': 'a[href$=".pdf"]',
+      'dlXls': ',a[href$=".xls"]',
+      'dlPpt': ',a[href$=".ppt"]',
+      'dlZip': ',a[href$=".zip"]',
+      'dlTxt': ',a[href$=".txt"]',
+      'dlRtf': ',a[href$=".rtf"]',
+      'dlXml': ',a[href$=".xml"]',
+      'downLoad': '${dlPdf}${dlXls}${dlPpt}${dlZip}${dlTxt}${dlRtf}${dlXml}',
+    },
+    'vars': {
+      'dcssip': '${sourceHost}',
+      'dcsuri': '${sourcePath}',
+      'dl': '0',
+      'ti': '${title}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'trackAnchorClicks': {
+        'on': 'click',
+        'selector': 'a',
+        'request': 'event',
+        'vars': {
+          'dl': '99',
+          'ti': 'Link Click',
+        },
+      },
+    },
+    'trackDownloadClicks': {
+      'on': 'click',
+      'selector': '${downLoad}',
+      'request': 'event',
+      'vars': {
+        'dl': '20',
+        'ti': 'Download Click',
+      },
+    },
+  },
+
+  'moat': {
+    'vars': {
+      'element': ':root',
+    },
+    'requests': {
+      'load': JSON.stringify(/** @type {!JsonObject} */ ({
+        'type': 'load',
+        'pcode': '${pcode}',
+        'l0t': '${l0t}',
+        'acctType': '${acctType}',
+        'adType': '${adType}',
+        'qs': '${qs}',
+        'element': {
+          'src': '${htmlAttr(img,src,width)}',
+          'viewer': '${viewer}',
+        },
+        'document': {
+          'AMPDocumentHostname': '${ampdocHostname}',
+          'AMPDocumentURL': '${ampdocUrl}',
+          'canonicalHost': '${canonicalHost}',
+          'canonicalHostname': '${canonicalHostname}',
+          'canonicalPath': '${canonicalPath}',
+          'canonicalURL': '${canonicalUrl}',
+          'documentCharset': '${documentCharset}',
+          'documentReferrer': '${documentReferrer}',
+          'externalReferrer': '${externalReferrer}',
+          'sourceURL': '${sourceUrl}',
+          'sourceHost': '${sourceHost}',
+          'sourceHostname': '${sourceHostname}',
+          'sourcePath': '${sourcePath}',
+          'title': '${title}',
+          'viewer': '${viewer}',
+        },
+        'device': {
+          'availableScreenHeight': '${availableScreenHeight}',
+          'availableScreenWidth': '${availableScreenWidth}',
+          'browserLanguage': '${browserLanguage}',
+          'screenColorDepth': '${screenColorDepth}',
+          'screenHeight': '${screenHeight}',
+          'screenWidth': '${screenWidth}',
+          'scrollHeight': '${scrollHeight}',
+          'scrollWidth': '${scrollWidth}',
+          'scrollLeft': '${scrollLeft}',
+          'scrollTop': '${scrollTop}',
+          'timezone': '${timezone}',
+          'userAgent': '${userAgent}',
+          'viewportHeight': '${viewportHeight}',
+          'viewportWidth': '${viewportWidth}',
+        },
+        'requestCount': '${requestCount}',
+        'timeStamp': '${timestamp}',
+      })),
+      'unload': JSON.stringify(/** @type {!JsonObject} */ ({
+        'type': 'unload',
+        'pcode': '${pcode}',
+        'l0t': '${l0t}',
+        'requestCount': '${requestCount}',
+        'timeStamp': '${timestamp}',
+      })),
+      'click': JSON.stringify(/** @type {!JsonObject} */ ({
+        'type': 'click',
+        'pcode': '${pcode}',
+        'l0t': '${l0t}',
+        'requestCount': '${requestCount}',
+        'timeStamp': '${timestamp}',
+      })),
+      'viewability': JSON.stringify(/** @type {!JsonObject} */ ({
+        'type': 'viewability',
+        'pcode': '${pcode}',
+        'l0t': '${l0t}',
+        'backgroundState': '${backgroundState}',
+        'intersectionRect': '${intersectionRect}',
+        'intersectionRatio': '${intersectionRatio}',
+        'maxVisiblePercentage': '${maxVisiblePercentage}',
+        'minVisiblePercentage': '${minVisiblePercentage}',
+        'x': '${elementX}',
+        'y': '${elementY}',
+        'height': '${elementHeight}',
+        'width': '${elementWidth}',
+        'viewportHeight': '${viewportHeight}',
+        'viewportWidth': '${viewportWidth}',
+        'opacity': '${opacity}',
+        'timeStamp': '${timestamp}',
+        'requestCount': '${requestCount}',
+      })),
+      'iframe': JSON.stringify(/** @type {!JsonObject} */ ({
+        'type': 'iframe',
+        'pcode': '${pcode}',
+        'height': '${elementHeight}',
+        'width': '${elementWidth}',
+        'x': '${elementX}',
+        'y': '${elementY}',
+        'requestCount': '${requestCount}',
+      })),
+    },
+    'triggers': {
+      'load': {
+        'on': 'ini-load',
+        'request': 'load',
+      },
+      'unload': {
+        'on': 'ad-refresh',
+        'selector': '${element}',
+        'request': 'unload',
+      },
+      'click': {
+        'on': 'click',
+        'selector': '${element}',
+        'request': 'click',
+      },
+      'viewability': {
+        'on': 'visible',
+        'selector': '${element}',
+        'request': 'viewability',
+        'visibilitySpec': {
+          'repeat': true,
+          'visiblePercentageThresholds': [
+            [0,0],[0,5],[5,10],[10,15],[15,20],[20,25],
+            [25,30],[30,35],[35,40],[40,45],[45,50],
+            [50,55],[55,60],[60,65],[65,70],[70,75],
+            [75,80],[80,85],[85,90],[90,95],[95,100],[100,100],
+          ],
+        },
+      },
+      'iframe': {
+        'on': 'visible',
+        'selector': ':root',
+        'request': 'iframe',
+        'visibilitySpec': {
+          'repeat': true,
+          'visiblePercentageThresholds': [[0,0]],
+        },
+      },
+    },
+  },
+
+  'bg': {
+  },
 });
+
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
@@ -2105,5 +2315,20 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-// Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
-Object.assign(ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG);
+mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
+
+/**
+ * Merges iframe transport config.
+ *
+ * @param {!JsonObject} config
+ * @param {!JsonObject} iframeTransportConfig
+ */
+function mergeIframeTransportConfig(config, iframeTransportConfig) {
+  for (const vendor in iframeTransportConfig) {
+    if (hasOwn(iframeTransportConfig, vendor)) {
+      const url = iframeTransportConfig[vendor];
+      config[vendor]['transport'] =
+          Object.assign({}, config[vendor]['transport'], {'iframe': url});
+    }
+  }
+}
