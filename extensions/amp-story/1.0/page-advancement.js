@@ -332,7 +332,7 @@ class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    */
   isProtectedTarget_(event) {
-    return closest(dev().assertElement(event.target), el => {
+    return !!closest(dev().assertElement(event.target), el => {
       const elementRole = el.getAttribute('role');
 
       if (elementRole) {
