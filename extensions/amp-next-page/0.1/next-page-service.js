@@ -147,7 +147,7 @@ export class NextPageService {
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
     const documentRef =
-        createDocumentRef(win.document.location.url, win.document.title);
+        createDocumentRef(win.document.location.href, win.document.title);
     this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
 
