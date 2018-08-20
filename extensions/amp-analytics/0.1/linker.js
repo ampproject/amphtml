@@ -24,7 +24,7 @@ const DELIMITER = '~';
  * Creates the linker param from the given config, and returns the url with
  * the given param attached.
  * @param {string} version
- * @param {Object<string,string>} pairs
+ * @param {!Object} pairs
  * @return {string}
  */
 export function createLinker(version, pairs) {

@@ -434,7 +434,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           }
         });
         this.resolvedLinkers_[name] =
-            createLinker(/* version */ 1, expandedIds);
+            createLinker(/* version */ '1', expandedIds);
       });
     });
 
