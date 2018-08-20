@@ -159,7 +159,6 @@ describes.fakeWin('amp-skimlinks', {
     it('Should send NA click tracking if an other linkRewriter has replaced the link', () => {
       ampSkimlinks.onClick_({
         replacedBy: 'vendorX',
-        hasReplaced: true,
       });
 
       expect(stub.calledOnce).to.be.true;
@@ -169,7 +168,6 @@ describes.fakeWin('amp-skimlinks', {
     it('Should send NA click tracking if other vendor has not replaced the link', () => {
       ampSkimlinks.onClick_({
         replacedBy: 'vendorX',
-        hasReplaced: false,
       });
 
       expect(stub.calledOnce).to.be.true;

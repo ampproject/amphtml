@@ -220,6 +220,18 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         expect(getEventData(linkRewriterVendor3).replacedBy).to.equal('vendor1');
       });
 
+      it('Should contain the target anchor', () => {
+        env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
+
+        const anchor = iframeDoc.createElement('a')
+        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
+          clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
+          anchor,
+        });
+
+        expect(getEventData(linkRewriterVendor1).anchor).to.equal(anchor);
+      });
+
       it('Should set replacedBy to null when no replacement', () => {
         env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(false);
         env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);

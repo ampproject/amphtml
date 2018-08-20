@@ -80,7 +80,7 @@ export default class LinkRewriterService {
       }
       const replacedBy = chosenLinkRewriter ? chosenLinkRewriter.name : null;
       suitableLinkRewriters.forEach(linkRewriter => {
-        linkRewriter.events.send(EVENTS.CLICK, {replacedBy});
+        linkRewriter.events.send(EVENTS.CLICK, {replacedBy, anchor});
       });
     }
   }
