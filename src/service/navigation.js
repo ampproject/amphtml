@@ -423,8 +423,13 @@ export class Navigation {
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {
+    user().assert(priority <= 10 && priority > 0,
+        'Priority must a number from 1-10.');
     user().assert(!this.anchorMutators_[priority],
         'Mutator with same priority is already in use.');
+    // Note that we define a set priority, as making this boundless
+    // will create a sparse array, which is not performant if iterating
+    // through when executing.
     this.anchorMutators_[priority] = callback;
   }
 
