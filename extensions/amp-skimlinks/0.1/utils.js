@@ -1,10 +1,16 @@
+import {Deferred} from '../../../src/utils/promise';
+import {user} from '../../../src/log';
+
+
 /**
- * Get function from an object attached with the object as a context
+ * Get function from an object attached with the object as its context
  * @param {*} context
  * @param {*} functionName
  */
 export function getBoundFunction(context, functionName) {
-  // TODO: throw error if function doesn't exist?
+  const validFunction = context[functionName] && context[functionName].bind;
+  user().assert(validFunction,
+      `Function '${functionName}' not found in given context.`);
   return context[functionName].bind(context);
 }
 
@@ -20,4 +26,16 @@ export function generatePageImpressionId() {
   }
 
   return str;
+}
+
+/**
+ * Promise version of setTimeout(cb, 0);
+ */
+export function nextTick() {
+  const deferred = new Deferred();
+  setTimeout(() => {
+    deferred.resolve();
+  });
+
+  return deferred.promise;
 }

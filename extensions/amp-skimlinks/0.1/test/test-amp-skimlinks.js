@@ -121,33 +121,6 @@ describes.fakeWin('amp-skimlinks', {
     });
   });
 
-  //TODO: replace with initBeaconCallbackHook_ tests
-  describe.skip('On beacon callback', () => {
-    beforeEach(() => {
-      helpers.stubCustomEventReporterBuilder();
-      env.sandbox.stub(DocumentReady, 'whenDocumentReady').returns(Promise.resolve());
-      return ampSkimlinks.buildCallback().then(() => {
-        env.sandbox.stub(ampSkimlinks.trackingService, 'sendImpressionTracking');
-      });
-    });
-
-    it('Should set hasCalledBeacon to true', () => {
-      expect(ampSkimlinks.hasCalledBeacon).to.be.false;
-      ampSkimlinks.onBeaconCallbackONCE_({});
-      expect(ampSkimlinks.hasCalledBeacon).to.be.true;
-    });
-
-    it('Should call sendImpressionTracking', done => {
-      expect(ampSkimlinks.trackingService.sendImpressionTracking.called).to.be.false;
-      ampSkimlinks.onBeaconCallbackONCE_({});
-      // Wait for next tick
-      setTimeout(() => {
-        expect(ampSkimlinks.trackingService.sendImpressionTracking.calledOnce).to.be.true;
-        done();
-      }, 0);
-    });
-  });
-
   describe('On click callback', () => {
     let stub;
 
@@ -219,7 +192,7 @@ describes.fakeWin('amp-skimlinks', {
     });
 
     it('Should return results of domainResolverService.resolveUnknownAnchors', () => {
-      const res = ['a', 'b']
+      const res = ['a', 'b'];
       ampSkimlinks.domainResolverService.resolveUnknownAnchors.returns(res);
       expect(resolveFunction.call(ampSkimlinks)).to.equal(res);
     });
@@ -238,16 +211,17 @@ describes.fakeWin('amp-skimlinks', {
       ampSkimlinks.domainResolverService = {
         fetchDomainResolverApi: env.sandbox.stub().returns(Promise.resolve({})),
       };
-      env.sandbox.stub(ampSkimlinks, 'sendImpressionTracking_')
+      env.sandbox.stub(ampSkimlinks, 'sendImpressionTracking_');
     });
+
     it('Should call fetchDomainResolverApi if no asyncResponse', () => {
-      ampSkimlinks.initBeaconCallbackHook_({asyncResponse: undefined });
+      ampSkimlinks.initBeaconCallbackHook_({asyncResponse: undefined});
       const stub = ampSkimlinks.domainResolverService.fetchDomainResolverApi;
       expect(stub.calledOnce).to.be.true;
     });
 
     it('Should not call fetchDomainResolverApi if asyncResponse', () => {
-      ampSkimlinks.initBeaconCallbackHook_({ asyncResponse: promise});
+      ampSkimlinks.initBeaconCallbackHook_({asyncResponse: promise});
       const stub = ampSkimlinks.domainResolverService.fetchDomainResolverApi;
       expect(stub.called).to.be.false;
     });
@@ -263,28 +237,18 @@ describes.fakeWin('amp-skimlinks', {
         expect(ampSkimlinks.sendImpressionTracking_.calledOnce).to.be.true;
       });
     });
-  });
 
-  // TODO FIX THIS TESTS
-  describe.skip('on page scanned callback', () => {
-    let stub;
-    beforeEach(() => {
-      stub = env.sandbox.stub().returns(Promise.resolve({}));
-      ampSkimlinks.domainResolverService = {
-        fetchDomainResolverApi: stub,
+    it('Should chain to the asyncResponse promise asynchronously', done => {
+      const fakePromise = {
+        then: env.sandbox.stub(),
       };
+      ampSkimlinks.initBeaconCallbackHook_({asyncResponse: fakePromise});
+      expect(fakePromise.then.called).to.be.false;
+      setTimeout(() => {
+        expect(fakePromise.then.calledOnce).to.be.true;
+        done();
+      }, 1);
     });
 
-    it('Does not call beacon API if a request was already made', () => {
-      ampSkimlinks.hasCalledBeacon = true;
-      ampSkimlinks.callBeaconIfNotAlreadyDone_();
-      expect(stub.called).to.be.false;
-    });
-
-    it('Calls beacon API if no requests were previously made', () => {
-      ampSkimlinks.hasCalledBeacon = false;
-      ampSkimlinks.callBeaconIfNotAlreadyDone_();
-      expect(stub.calledOnce).to.be.true;
-    });
   });
 });

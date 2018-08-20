@@ -1,4 +1,3 @@
-import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {once} from '../../../src/utils/function';
 import {whenDocumentReady} from '../../../src/document-ready';
@@ -11,7 +10,7 @@ import AffiliateLinkResolver from './affiliate-link-resolver';
 import LinkRewriterService from '../../../src/service/link-rewrite/link-rewrite-service';
 
 import {getAmpSkimlinksOptions} from './skim-options';
-import {getBoundFunction} from './utils';
+import {getBoundFunction, nextTick} from './utils';
 
 /*** TODO:
  * - Fix issue with analytics reporting links with macro variables.
@@ -34,7 +33,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.ampDoc_.win.location);
-    this.userSessionDataDeferred_ = new Deferred();
     this.linkRewriterService = new LinkRewriterService(this.ampDoc_.getRootNode());
     return whenDocumentReady(this.ampDoc_).then(() => {
       window.t2 = new Date().getTime();
@@ -74,30 +72,39 @@ export class AmpSkimlinks extends AMP.BaseElement {
    *  Fires impression tracking after beacon request
    * @param {*} userSessionData
    */
-  sendImpressionTracking_(userSessionData) {
+  sendImpressionTracking_({guid}) {
     window.t3 = new Date().getTime();
     this.trackingService.sendImpressionTracking(
-        userSessionData,
+        {guid},
         this.skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
         startTime,
     );
-  };
+  }
 
   /**
    * @param {*} twoStepsResponse
    */
   initBeaconCallbackHook_(twoStepsResponse) {
-    let waitForBeaconResponse = twoStepsResponse.asyncResponse;
+    const trackFunction = getBoundFunction(this, 'sendImpressionTracking_');
     // If we haven't called beacon on the first page scan (because not links were found)
     // Call it manually to get extra info like guid.
-    if (!waitForBeaconResponse) {
-      waitForBeaconResponse = this.domainResolverService.fetchDomainResolverApi([]);
+    if (!twoStepsResponse.asyncResponse) {
+      return this.domainResolverService.fetchDomainResolverApi([])
+          .then(trackFunction);
     }
 
-    // TODO: Make sure this is called after .then updating AnchorLinkMap.
-    return waitForBeaconResponse.then(({guid}) => {
-      this.sendImpressionTracking_({guid});
+    // 'updateAnchorMap_' from linkRewriter (link-rewriter.js) needs to be
+    // updated before calling sendImpressionTracking_.
+    // Since we have two ".then" branches attached to asyncResponse && the
+    // ".then" in this function is declared before the .then inside
+    // scanLinksOnPage_ (link-rewriter.js) => we need to delay the
+    // twoStepsResponse.asyncResponse.then of this branch to the next tick
+    // to ensure that twoStepsResponse.asyncResponse.then(updateAnchorMap_)
+    // is executed frist.
+    return nextTick().then(() => {
+      return twoStepsResponse.asyncResponse.then(trackFunction);
     });
+
   }
 
   /**
