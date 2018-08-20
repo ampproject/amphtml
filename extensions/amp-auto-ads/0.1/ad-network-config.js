@@ -18,10 +18,13 @@ import {
   AdSenseAmpAutoAdsHoldoutBranches,
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {
+  AdSenseAmpAutoAdsResponsiveBranches,
+  getAdSenseAmpAutoAdsResponsiveExperimentBranch,
+} from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {parseUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
@@ -114,7 +117,8 @@ class AdSenseNetworkConfig {
    * @param {!Window} win
    */
   isResponsiveEnabled(win) {
-    return (isExperimentOn(win, 'amp-auto-ads-adsense-responsive'));
+    const branch = getAdSenseAmpAutoAdsResponsiveExperimentBranch(win);
+    return branch != AdSenseAmpAutoAdsResponsiveBranches.CONTROL;
   }
 
   /** @override */
