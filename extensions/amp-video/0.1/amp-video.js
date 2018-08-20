@@ -82,7 +82,7 @@ class AmpVideo extends AMP.BaseElement {
     this.muted_ = false;
 
     /** @private {boolean} */
-    this.isPrerenderAllowed_ = false;
+    this.prerenderAllowed_ = false;
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
@@ -110,7 +110,7 @@ class AmpVideo extends AMP.BaseElement {
     // Only allow prerender if video sources are cached on CDN. Set this value
     // in `firstAttachedCallback` since `buildCallback` is too late and the
     // element children may not be available in the constructor.
-    this.isPrerenderAllowed_ = this.hasAnyCachedSources_();
+    this.prerenderAllowed_ = this.hasAnyCachedSources_();
   }
 
   /**
@@ -149,7 +149,7 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   prerenderAllowed() {
-    return this.isPrerenderAllowed_;
+    return this.prerenderAllowed_;
   }
 
   /**

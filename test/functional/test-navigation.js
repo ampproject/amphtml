@@ -144,6 +144,58 @@ describes.sandboxed('Navigation', {}, () => {
       });
     });
 
+    describe('anchor mutators', () => {
+      const errorRe = /Mutator with same priority is already in use./;
+      const priority = 100;
+      it('should throw error if priority is already in use', () => {
+        handler.registerAnchorMutator(element => {
+          element.href += '?am=1';
+        }, priority);
+        allowConsoleError(() => {
+          expect(() => handler.registerAnchorMutator(element => {
+            element.href += '?am=2';
+          }, priority)).to.throw(errorRe);
+        });
+      });
+
+      it('should execute in order', () => {
+        anchor.href = 'https://www.testing-1-2-3.org';
+        let transformedHref;
+        handler.registerAnchorMutator(element => {
+          element.href += '&second=2';
+          transformedHref = element.href;
+        }, 2);
+        handler.registerAnchorMutator(element => {
+          element.href += '?first=1';
+          transformedHref = element.href;
+        }, 1);
+        handler.registerAnchorMutator(element => {
+          element.href += '&third=3';
+          transformedHref = element.href;
+        }, 3);
+        handler.handle_(event);
+        expect(transformedHref).to.equal(
+            'https://www.testing-1-2-3.org/?first=1&second=2&third=3');
+      });
+
+      it('verify order of operations', () => {
+        const expandVars = sandbox.spy(handler, 'expandVarsForAnchor_');
+        const parseUrl = sandbox.spy(handler, 'parseUrl_');
+        const obj = {
+          callback: () => {
+          },
+        };
+        const linkRuleSpy = sandbox.spy(obj, 'callback');
+        handler.registerAnchorMutator(linkRuleSpy, 99);
+        handler.handle_(event);
+        // Verify that the expansion of variables occurs first
+        // followed by the anchor transformation and then the parsing
+        // of the possibly mutated anchor href into the location object
+        // for navigation.handleNavClick.
+        sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
+      });
+    });
+
     describe('link expansion', () => {
       it('should expand a link', () => {
         anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';

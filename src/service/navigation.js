@@ -125,6 +125,9 @@ export class Navigation {
      * @private {?Array<string>}
      */
     this.a2aFeatures_ = null;
+
+    /** @private @const {!Array<function(!Element)>} */
+    this.anchorMutators_ = [];
   }
 
   /**
@@ -263,7 +266,7 @@ export class Navigation {
   handleClick_(target, e) {
     this.expandVarsForAnchor_(target);
 
-    const location = this.parseUrl_(target.href);
+    let location = this.parseUrl_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
@@ -275,8 +278,15 @@ export class Navigation {
       return;
     }
 
+    // Handle anchor transformations.
+    const transformedTarget = target;
+    this.anchorMutators_.forEach(callback => {
+      callback(target);
+      location = this.parseUrl_(target.href);
+    });
+
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, target, location);
+    this.handleNavClick_(e, transformedTarget, location);
   }
 
   /**
@@ -432,6 +442,16 @@ export class Navigation {
   }
 
   /**
+   * @param {!Function} callback
+   * @param {number} priority
+   */
+  registerAnchorMutator(callback, priority) {
+    user().assert(!this.anchorMutators_[priority],
+        'Mutator with same priority is already in use.');
+    this.anchorMutators_[priority] = callback;
+  }
+
+  /**
    * Scrolls the page to the given element.
    * @param {?Element} elem
    * @param {string} hash
@@ -511,3 +531,4 @@ function maybeExpandUrlParams(ampdoc, e) {
     target.setAttribute('href', newHref);
   }
 }
+

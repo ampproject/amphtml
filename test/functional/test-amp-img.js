@@ -342,7 +342,7 @@ describe('amp-img', () => {
     el.setAttribute('height', 100);
     el.setAttribute('noprerender', '');
     const impl = new AmpImg(el);
-    impl.buildCallback();
+    impl.firstAttachedCallback();
     expect(impl.prerenderAllowed()).to.equal(false);
   });
 
