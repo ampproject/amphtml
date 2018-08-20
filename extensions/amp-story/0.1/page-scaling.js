@@ -81,8 +81,8 @@ function targetDimensionsFor(sizer) {
 function scaleTransform(factor, width, height, matrix) {
   // TODO(alanorozco, #12934): Translate values are not correctly calculated if
   // `scale`, `skew` or `rotate` have been user-defined.
-  const translateX = width * factor / 2 - width / 2;
-  const translateY = height * factor / 2 - height / 2;
+  const translateX = ((width * factor) / 2) - (width / 2);
+  const translateY = ((height * factor) / 2) - (height / 2);
   return [
     matrix[0] * factor,
     matrix[1],
@@ -173,9 +173,9 @@ let pageScalingService = null;
 /**
  * Service for scaling pages dynamically so their layers will be sized within a
  * certain pixel range independent of visual dimensions.
+ * TODO(alanorozco): Make this part of the runtime layout system to prevent
+ *   FOUC-like jump and allow for SSR.
  */
-// TODO(alanorozco): Make this part of the runtime layout system to prevent
-// FOUC-like jump and allow for SSR.
 export class PageScalingService {
   /**
    * @param {!Window} win

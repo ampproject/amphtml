@@ -158,7 +158,7 @@ export function getTextColorForRGB({r, g, b}) {
   const linearG = getLinearRGBValue(g);
   const linearB = getLinearRGBValue(b);
 
-  const L = 0.2126 * linearR + 0.7152 * linearG + 0.0722 * linearB;
+  const L = (0.2126 * linearR) + (0.7152 * linearG) + (0.0722 * linearB);
 
   // Determines which one of the white and black text have a better contrast
   // ratio against the used background color.

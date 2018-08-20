@@ -16,6 +16,7 @@
 
 import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
+import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
 import {user} from '../log';
 
@@ -77,6 +78,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * This method should not be inlined to prevent TryCatch deoptimization.
  * NoInline keyword at the end of function name also prevents Closure compiler
  * from inlining the function.
+ * @param {Element} element
+ * @param {function(new:../base-element.BaseElement, !Element)} toClass
  * @private
  */
 function tryUpgradeElementNoInline(element, toClass) {
@@ -95,12 +98,11 @@ function tryUpgradeElementNoInline(element, toClass) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function stubElementsForDoc(ampdoc) {
-  const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
-  for (let i = 0; i < list.length; i++) {
-    const name = list[i].getAttribute('custom-element');
+  const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
+  extensions.forEach(name => {
     ampdoc.declareExtension(name);
     stubElementIfNotKnown(ampdoc.win, name);
-  }
+  });
 }
 
 
@@ -191,5 +193,5 @@ export function resetScheduledElementForTesting(win, elementName) {
  */
 export function getElementClassForTesting(win, elementName) {
   const knownElements = win.ampExtendedElements;
-  return knownElements && knownElements[elementName] || null;
+  return (knownElements && knownElements[elementName]) || null;
 }

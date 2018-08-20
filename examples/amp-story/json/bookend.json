@@ -1,6 +1,6 @@
 {
-  "bookend-version": "v1.0",
-  "share-providers": [
+  "bookendVersion": "v1.0",
+  "shareProviders": [
     "email",
     {"provider": "facebook", "app-id": "254325784911610"},
     "whatsapp"

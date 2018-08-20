@@ -99,8 +99,9 @@ export class LandscapeComponent {
             ref="category"></h2>
           <h2 class="i-amphtml-story-bookend-article-heading"
             ref="title"></h2>
-          <amp-img class="i-amphtml-story-bookend-landscape-image"
-            layout="fixed" width="0" height="0" ref="image"></amp-img>
+          <div class="i-amphtml-story-bookend-landscape-image">
+            <img ref="image"></img>
+          </div>
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;

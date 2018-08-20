@@ -247,7 +247,6 @@ export class ShareWidget {
   }
 
   /** @private */
-  // TODO(alanorozco): i18n for toast.
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
@@ -315,6 +314,10 @@ export class ShareWidget {
     });
   }
 
+  /**
+   * @param {!Array<!JsonObject|string>} providers
+   * @return {!Object<string, !JsonObject>} providers
+   */
   parseProvidersToClassicApi(providers) {
     const providersMap = {};
 
@@ -335,8 +338,8 @@ export class ShareWidget {
   /**
    * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @private
+   * TODO(alanorozco): Set story metadata in share config.
    */
-  // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
     if (Array.isArray(providers)) {
       providers = this.parseProvidersToClassicApi(providers);
@@ -465,23 +468,24 @@ export class ScrollableShareWidget extends ShareWidget {
 
         // Total width that the buttons will occupy with minimum padding.
         const totalItemWidth =
-            (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
+            (iconWidth * items.length) + ((2 * MIN_BUTTON_PADDING) *
                 (items.length - 1));
 
         // If buttons don't fit within the available area, calculate padding so
         // that there will be an element cut-off.
-        if (totalItemWidth > (containerWidth - leftMargin * 2)) {
-          const availableWidth = containerWidth - leftMargin - iconWidth / 2;
+        if (totalItemWidth > (containerWidth - (leftMargin * 2))) {
+          const availableWidth = containerWidth - leftMargin - (iconWidth / 2);
           const amountVisible =
-              Math.floor(availableWidth / (iconWidth + MIN_BUTTON_PADDING * 2));
+              Math.floor(
+                  availableWidth / (iconWidth + (MIN_BUTTON_PADDING * 2)));
 
-          state.padding = 0.5 * (availableWidth / amountVisible - iconWidth);
+          state.padding = 0.5 * ((availableWidth / amountVisible) - iconWidth);
         } else {
           // Otherwise, calculate padding in from MIN_PADDING to DEFAULT_PADDING
           // so that all elements fit and take as much area as possible.
           const totalPadding =
-              ((containerWidth - leftMargin * 2) - iconWidth * items.length) /
-              (items.length - 1);
+              ((containerWidth - (leftMargin * 2)) -
+              (iconWidth * items.length)) / (items.length - 1);
 
           state.padding = Math.min(DEFAULT_BUTTON_PADDING, 0.5 * totalPadding);
         }

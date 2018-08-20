@@ -101,15 +101,16 @@ export class ArticleComponent {
     }
 
     if (articleData.image) {
-      const ampImg =
+      const imgEl =
           html`
-          <amp-img class="i-amphtml-story-bookend-article-image"
-                  width="100"
-                  height="100">
-          </amp-img>`;
+          <div class="i-amphtml-story-bookend-article-image">
+            <img ref="image">
+            </img>
+          </div>`;
 
-      addAttributesToElement(ampImg, dict({'src': articleData.image}));
-      el.insertBefore(ampImg, el.firstChild);
+      const {image} = htmlRefs(imgEl);
+      addAttributesToElement(image, dict({'src': articleData.image}));
+      el.insertBefore(imgEl, el.firstChild);
     }
 
     const articleElements = htmlRefs(el);

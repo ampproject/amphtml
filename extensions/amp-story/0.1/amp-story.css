@@ -116,8 +116,17 @@ amp-story[standalone]:fullscreen {
   max-width: none !important;
 }
 
+amp-story .amp-video-eq {
+  height: 14px !important;;
+  width: 14px !important;
+}
+
 amp-story .amp-video-eq .amp-video-eq-col {
-  margin-right: 1px !important;
+  margin-right: 2px !important;
+}
+
+amp-story .amp-video-eq .amp-video-eq-col:last-child {
+  margin-right: 0 !important;
 }
 
 amp-story .amp-video-eq:not(.amp-video-eq-play) {

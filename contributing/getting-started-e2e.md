@@ -151,6 +151,7 @@ Now run `git remote -v` again and notice that you have set up your upstream alia
 Each branch of your local Git repository can track a branch of a remote repository.  Right now, your local `master` branch is tracking `origin/master`, which corresponds to the `master` branch of your GitHub fork.  You don't actually want this, though; the upstream `master` branch is constantly being updated, and your fork's `master` branch will rapidly become outdated.  Instead, it's best to make your local `master` branch track the upstream `master` branch.  You can do this like so:
 
 ```
+git fetch upstream master
 git branch -u upstream/master master
 ```
 

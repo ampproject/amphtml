@@ -144,6 +144,7 @@ describes.realWin('Expander', {
       ASYNC: Promise.resolve('hello'),
       ASYNCFN: arg => Promise.resolve(arg),
       BROKEN: () => undefined,
+      ANCESTOR_ORIGIN: () => Promise.resolve('https://www.google.com@foo'),
     };
 
     const sharedTestCases = [
@@ -261,6 +262,13 @@ describes.realWin('Expander', {
         it('should handle tokens with parenthesis next to each other', () => {
           const url = 'http://www.google.com/?test=RANDOMCLIENT_ID(__ga)UPPERCASE(foo)';
           const expected = 'http://www.google.com/?test=123456amp-GA12345FOO';
+          return expect(expander.expand(url, mockBindings))
+              .to.eventually.equal(expected);
+        });
+
+        it('should not encode NOENCODE_WHITELIST', () => {
+          const url = 'ANCESTOR_ORIGIN';
+          const expected = 'https://www.google.com@foo';
           return expect(expander.expand(url, mockBindings))
               .to.eventually.equal(expected);
         });

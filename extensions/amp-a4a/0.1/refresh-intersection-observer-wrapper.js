@@ -75,6 +75,10 @@ export class RefreshIntersectionObserverWrapper {
 
     this.updateObserver_ = true;
     this.intersectionObserver_.observe(element);
+    // Elements that appear and remain within the viewport for the duration of
+    // their existence may never have viewportCallback invoked. To ensure that
+    // refresh is triggered, we need to make this initial call.
+    this.intersectionObserver_.tick(this.viewport_.getRect());
   }
 
   /**
