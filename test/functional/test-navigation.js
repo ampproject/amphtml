@@ -469,7 +469,7 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should delegate navigation if viewer supports A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(true);
 
         handler.handle_(event);
 
@@ -485,7 +485,7 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should behave normally if viewer does not support A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(false);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(false);
 
         handler.handle_(event);
 
@@ -526,7 +526,7 @@ describes.sandboxed('Navigation', {}, () => {
         ampdoc.getRootNode().head.appendChild(meta);
 
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(true);
         expect(win.location.href).to.equal('https://www.pub.com/');
 
         // Delegate to viewer if opt_requestedBy matches the <meta> tag content

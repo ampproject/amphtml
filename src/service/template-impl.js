@@ -19,6 +19,7 @@ import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
+import { Capability } from './viewer-impl';
 
 /**
  * @fileoverview
@@ -114,8 +115,8 @@ export class BaseTemplate {
    * @return {boolean}
    */
   viewerCanRenderTemplates() {
-    return getServiceForDoc(
-        this.element, 'viewer').canRenderTemplates();
+    return getServiceForDoc(this.element, 'viewer')
+        .hasCapability(Capability.VIEWER_RENDER_TEMPLATE);
   }
 }
 

@@ -126,7 +126,8 @@ describes.realWin('amp-list component', {
   function expectViewerProxiedFetchAndRender(
     fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
-    viewerMock.expects('canRenderTemplates').returns(true).twice();
+    viewerMock.expects('hasCapability')
+        .withExactArgs(Capability.VIEWER_RENDER_TEMPLATE).returns(true).twice();
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
         Capability.VIEWER_RENDER_TEMPLATE,
         {
@@ -177,7 +178,8 @@ describes.realWin('amp-list component', {
       });
 
       it('should error if viewer does not define response data', () => {
-        viewerMock.expects('canRenderTemplates').returns(true);
+        viewerMock.expects('hasCapability')
+            .withExactArgs(Capability.VIEWER_RENDER_TEMPLATE).returns(true);
         viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
             Capability.VIEWER_RENDER_TEMPLATE,
             {

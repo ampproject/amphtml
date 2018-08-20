@@ -54,7 +54,7 @@ export class SsrTemplateHelper {
    * @return {boolean}
    */
   isSupported() {
-    return this.viewer_.canRenderTemplates();
+    return this.viewer_.hasCapability(Capability.VIEWER_RENDER_TEMPLATE);
   }
 
   /**

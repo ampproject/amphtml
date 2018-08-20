@@ -86,6 +86,9 @@ export class NextPageService {
     /** @private {boolean} */
     this.documentQueued_ = false;
 
+    /** @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = null;
+
     /** @private {?../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
@@ -314,7 +317,7 @@ export class NextPageService {
         this.triggerAnalyticsEvent_(
             'amp-next-page-click', next.ampUrl, currentAmpUrl);
         const a2a =
-            this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+            this.navigation_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
         if (a2a) {
           // A2A is enabled, don't navigate the browser.
           e.preventDefault();
