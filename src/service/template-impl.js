@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Capability} from './viewer-impl';
 import {Deferred} from '../utils/promise';
 import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
@@ -116,7 +115,7 @@ export class BaseTemplate {
    */
   viewerCanRenderTemplates() {
     return getServiceForDoc(this.element, 'viewer')
-        .hasCapability(Capability.VIEWER_RENDER_TEMPLATE);
+        .hasCapability('viewerRenderTemplate');
   }
 }
 

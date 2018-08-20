@@ -16,7 +16,6 @@
 
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
-import {Capability} from '../../../../src/service/viewer-impl';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
 
@@ -127,9 +126,9 @@ describes.realWin('amp-list component', {
     fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
     viewerMock.expects('hasCapability')
-        .withExactArgs(Capability.VIEWER_RENDER_TEMPLATE).returns(true).twice();
+        .withExactArgs('viewerRenderTemplate').returns(true).twice();
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        Capability.VIEWER_RENDER_TEMPLATE,
+        'viewerCanRenderTemplate',
         {
           data: {inputData: { }, src: 'https://data.com/list.json'},
           mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml">' +
@@ -179,9 +178,9 @@ describes.realWin('amp-list component', {
 
       it('should error if viewer does not define response data', () => {
         viewerMock.expects('hasCapability')
-            .withExactArgs(Capability.VIEWER_RENDER_TEMPLATE).returns(true);
+            .withExactArgs('viewerRenderTemplate').returns(true);
         viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-            Capability.VIEWER_RENDER_TEMPLATE,
+            'viewerRenderTemplate',
             {
               data: {
                 inputData: { },
