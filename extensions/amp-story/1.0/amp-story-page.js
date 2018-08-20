@@ -126,9 +126,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!function(*)} */
     this.mediaPoolRejectFn_ = deferred.reject;
 
-    /** @private @const {boolean} Only prerender the first story page. */
-    this.prerenderAllowed_ = matches(this.element,
-        'amp-story-page:first-of-type');
+    /** @private {boolean}  */
+    this.prerenderAllowed_ = false;
 
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
@@ -158,6 +157,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.animationManager_ = AnimationManager.create(
           this.element, this.getAmpDoc(), this.getAmpDoc().getUrl());
     }
+  }
+
+
+  /** @override */
+  firstAttachedCallback() {
+    // Only prerender the first story page.
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type');
   }
 
 
