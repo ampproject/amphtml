@@ -29,11 +29,13 @@ const watch = require('gulp-watch');
 const {gitDiffNameOnlyMaster} = require('../git');
 
 const isWatching = (argv.watch || argv.w) || false;
-const filesInARefactorPr = 15;
 const options = {
   fix: false,
 };
 let collapseLintResults = !!process.env.TRAVIS;
+
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const rootDir = path.dirname(path.dirname(__dirname));
 
 /**
  * Initializes the linter stream based on globs
@@ -65,12 +67,12 @@ function logOnSameLine(message) {
 
 /**
  * Runs the linter on the given stream using the given options.
- * @param {string} path
+ * @param {string} filePath
  * @param {!ReadableStream} stream
  * @param {!Object} options
  * @return {boolean}
  */
-function runLinter(path, stream, options) {
+function runLinter(filePath, stream, options) {
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
   }
@@ -79,14 +81,22 @@ function runLinter(path, stream, options) {
     log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
     console./* OK*/log('travis_fold:start:lint_results\n');
   }
+  const fixedFiles = {};
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
         logOnSameLine(msg.trim() + '\n');
       }))
-      .pipe(eslintIfFixed(path))
+      .pipe(eslintIfFixed(filePath))
       .pipe(eslint.result(function(result) {
         if (!process.env.TRAVIS) {
           logOnSameLine(colors.green('Linted: ') + result.filePath);
+        }
+        if (options.fix && result.fixed) {
+          const relativePath = path.relative(rootDir, result.filePath);
+          const status = result.errorCount == 0 ?
+            colors.green('Fixed: ') : colors.yellow('Partially fixed: ');
+          logOnSameLine(status + colors.cyan(relativePath));
+          fixedFiles[relativePath] = status;
         }
       }))
       .pipe(eslint.results(function(results) {
@@ -115,6 +125,12 @@ function runLinter(path, stream, options) {
                 'Since this is a destructive operation (that edits your files',
                 'in-place), make sure you commit before running the command.');
           }
+        }
+        if (options.fix && Object.keys(fixedFiles).length > 0) {
+          log(colors.green('INFO: ') + 'Summary of fixes:');
+          Object.keys(fixedFiles).forEach(file => {
+            log(fixedFiles[file] + colors.cyan(file));
+          });
         }
       }))
       .pipe(eslint.failAfterError());
@@ -148,21 +164,6 @@ function eslintRulesChanged() {
 }
 
 /**
- * Checks if there are validator changes, in which case we don't do strict
- * linting.
- *
- * @return {boolean}
- */
-function validatorChanged() {
-  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
-    return false;
-  }
-  return gitDiffNameOnlyMaster().filter(function(file) {
-    return path.dirname(file).startsWith('validator');
-  }).length > 0;
-}
-
-/**
  * Sets the list of files to be linted.
  *
  * @param {!Array<string>} files
@@ -176,15 +177,6 @@ function setFilesToLint(files) {
       log(colors.cyan(file));
     });
   }
-}
-
-/**
- * Enables linting in strict mode.
- */
-function enableStrictLinting() {
-  // TODO(#14761, #15255): Remove these overrides and make the rules errors by
-  // default in .eslintrc after all code is fixed.
-  options['configFile'] = '.eslintrc-strict';
   collapseLintResults = false;
 }
 
@@ -198,9 +190,6 @@ function lint() {
   }
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
-    if (!eslintRulesChanged()) {
-      enableStrictLinting();
-    }
   } else if (!eslintRulesChanged() &&
       (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
        process.env.LOCAL_PR_CHECK ||
@@ -211,10 +200,6 @@ function lint() {
       return Promise.resolve();
     }
     setFilesToLint(jsFiles);
-    // For large refactors or validator changes, don't enable strict linting.
-    if (jsFiles.length <= filesInARefactorPr && !validatorChanged()) {
-      enableStrictLinting();
-    }
   }
   const basePath = '.';
   const stream = initializeStream(config.lintGlobs, {base: basePath});
@@ -225,7 +210,7 @@ function lint() {
 gulp.task(
     'lint',
     'Validates against Google Closure Linter',
-    ['update-packages'],
+    maybeUpdatePackages,
     lint,
     {
       options: {

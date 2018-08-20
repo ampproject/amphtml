@@ -22,6 +22,7 @@
  */
 
 import {getCookie, setCookie} from './cookies';
+import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
 
 /** @const {string} */
@@ -88,7 +89,7 @@ export function isExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
   opt_transientExperiment) {
-  const currentlyOn = isExperimentOn(win, experimentId);
+  const currentlyOn = isExperimentOn(win, /*OK*/experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
     const toggles = experimentToggles(win);
@@ -297,10 +298,10 @@ export function randomlySelectUnsetExperiments(win, experiments) {
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
     // has already been populated by some other property.
-    if (!experiments.hasOwnProperty(experimentName)) {
+    if (!hasOwn(experiments, experimentName)) {
       continue;
     }
-    if (win.experimentBranches.hasOwnProperty(experimentName)) {
+    if (hasOwn(win.experimentBranches, experimentName)) {
       selectedExperiments[experimentName] =
           win.experimentBranches[experimentName];
       continue;
@@ -316,7 +317,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     // experiment branch (e.g., via a test setup), then randomize the branch
     // choice.
     if (!win.experimentBranches[experimentName] &&
-        isExperimentOn(win, experimentName)) {
+      isExperimentOn(win, /*OK*/experimentName)) {
       const {branches} = experiments[experimentName];
       win.experimentBranches[experimentName] = selectRandomItem(branches);
       selectedExperiments[experimentName] =

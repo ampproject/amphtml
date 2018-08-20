@@ -72,6 +72,10 @@ export function getIntersectionChangeEntry(
       element, hostViewport, intersection, ratio);
 }
 
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
 export function nativeIntersectionObserverSupported(win) {
   return 'IntersectionObserver' in win &&
       'IntersectionObserverEntry' in win &&
@@ -187,11 +191,11 @@ export class IntersectionObserverApi {
  */
 export class IntersectionObserverPolyfill {
   /**
-   * @param {function(?Array<!IntersectionObserverEntry>)} callback.
+   * @param {function(!Array<!IntersectionObserverEntry>)} callback
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {
-    /** @private @const {function(?Array<!IntersectionObserverEntry>)} */
+    /** @private @const {function(!Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
     // The input threshold can be a number or an array of numbers.
@@ -293,7 +297,7 @@ export class IntersectionObserverPolyfill {
    * Caller needs to make sure to pass in the correct container.
    * Note: the opt_iframe param is the iframe position relative to the host doc,
    * The iframe must be a non-scrollable iframe.
-   * @param {!./layout-rect.LayoutRectDef} hostViewport.
+   * @param {!./layout-rect.LayoutRectDef} hostViewport
    * @param {./layout-rect.LayoutRectDef=} opt_iframe
    */
   tick(hostViewport, opt_iframe) {
@@ -332,7 +336,7 @@ export class IntersectionObserverPolyfill {
    *
    * @param {!ElementIntersectionStateDef} state
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
-   * @param {./layout-rect.LayoutRectDef=} opt_iframe. iframe container rect
+   * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */

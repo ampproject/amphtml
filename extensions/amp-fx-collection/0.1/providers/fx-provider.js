@@ -94,6 +94,9 @@ export class FxElement {
     this.resources_ = resources;
 
     /** @type {?number} */
+    this.viewportHeight = null;
+
+    /** @type {?number} */
     this.adjustedViewportHeight = null;
 
     /** @private @const {!Element} */
@@ -118,12 +121,14 @@ export class FxElement {
 
     /** @private {number} */
     this.marginStart_ = element.hasAttribute('data-margin-start') ?
-      resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
+      /** @type {number} */
+      (resolvePercentageToNumber(element.getAttribute('data-margin-start'))) :
       defaultMarginValues(this.fxType_)['start'];
 
     /** @private {number} */
     this.marginEnd_ = element.hasAttribute('data-margin-end') ?
-      resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
+      /** @type {number} */
+      (resolvePercentageToNumber(element.getAttribute('data-margin-end'))) :
       defaultMarginValues(this.fxType_)['end'];
 
     /** @private {string} */
@@ -152,6 +157,11 @@ export class FxElement {
       // start observing position of the element.
       this.observePositionChanges_();
     });
+
+    this.getViewportHeight_().then(viewportHeight => {
+      this.viewportHeight = viewportHeight;
+    });
+
   }
 
   /**
@@ -166,6 +176,20 @@ export class FxElement {
       this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
         this.adjustedViewportHeight = adjustedViewportHeight;
       });
+      this.getViewportHeight_().then(viewportHeight => {
+        this.viewportHeight = viewportHeight;
+      });
+    });
+  }
+
+  /**
+   * Returns the current viewport height.
+   * @return {!Promise<number>}
+   * @private
+   */
+  getViewportHeight_() {
+    return this.resources_.measureElement(() => {
+      return this.viewport_.getHeight();
     });
   }
 

@@ -17,46 +17,48 @@
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {
-  ConsentPolicyManager,
-  MULTI_CONSENT_EXPERIMENT,
-} from './consent-policy-manager';
+import {ConsentPolicyManager} from './consent-policy-manager';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  getSourceUrl,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {
   childElementsByTag,
   isJsonScriptTag,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseJson} from '../../../src/json';
+import {isEnumValue} from '../../../src/types';
 import {setImportantStyles, toggle} from '../../../src/style';
+import {tryParseJson} from '../../../src/json';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
 
-export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
-
 /**
- * @enum {number}
+ * @enum {string}
  * @visibleForTesting
  */
 export const ACTION_TYPE = {
-  ACCEPT: 0,
-  REJECT: 1,
-  DISMISS: 2,
+  ACCEPT: 'accept',
+  REJECT: 'reject',
+  DISMISS: 'dismiss',
 };
 
 
 export class AmpConsent extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -90,7 +92,7 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?Element} */
     this.postPromptUI_ = null;
 
-    /** @private {!Object<string, function()>} */
+    /** @private {!Object<string, ?function()>} */
     this.dialogResolver_ = map();
 
     /** @private {!Object<string, boolean>} */
@@ -101,8 +103,12 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
+
+    /** @private {boolean} */
+    this.isPostPromptUIRequired_ = false;
   }
 
+  /** @override */
   getConsentPolicy() {
     // amp-consent should not be blocked by itself
     return null;
@@ -120,12 +126,9 @@ export class AmpConsent extends AMP.BaseElement {
     this.scheduleDisplay_(consentId);
   }
 
+  /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
-      return;
-    }
-
-    this.isMultiSupported_ = isExperimentOn(this.win, MULTI_CONSENT_EXPERIMENT);
+    this.isMultiSupported_ = ConsentPolicyManager.isMultiSupported(this.win);
 
     user().assert(this.element.getAttribute('id'),
         'amp-consent should have an id');
@@ -142,7 +145,8 @@ export class AmpConsent extends AMP.BaseElement {
     const consentPolicyManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANAGER)
             .then(manager => {
-              this.consentPolicyManager_ = manager;
+              this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (
+                manager);
               this.generateDefaultPolicy_();
               const policyKeys = Object.keys(this.policyConfig_);
               for (let i = 0; i < policyKeys.length; i++) {
@@ -154,13 +158,15 @@ export class AmpConsent extends AMP.BaseElement {
     const consentStateManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), CONSENT_STATE_MANAGER)
             .then(manager => {
-              this.consentStateManager_ = manager;
+              this.consentStateManager_ = /** @type {!ConsentStateManager} */ (
+                manager);
             });
 
     const notificationUiManagerPromise =
         getServicePromiseForDoc(this.getAmpDoc(), NOTIFICATION_UI_MANAGER)
             .then(manager => {
-              this.notificationUiManager_ = manager;
+              this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (
+                manager);
             });
 
     Promise.all([
@@ -180,6 +186,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
+
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
       let consentId = args && args['consent'];
@@ -187,6 +194,40 @@ export class AmpConsent extends AMP.BaseElement {
         consentId = Object.keys(this.consentConfig_)[0];
       }
       this.handlePostPrompt_(consentId || '');
+    });
+
+    this.enableExternalInteractions_();
+  }
+
+  /**
+   * Listen to external consent flow iframe's response
+   */
+  enableExternalInteractions_() {
+    this.win.addEventListener('message', event => {
+      if (!this.currentDisplayInstance_) {
+        return;
+      }
+
+      const data = getData(event);
+
+      if (!data || data['type'] != 'consent-response') {
+        return;
+      }
+
+      if (!data['action']) {
+        user().error(TAG, 'consent-response message missing required info');
+        return;
+      }
+
+      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+
+      for (let i = 0; i < iframes.length; i++) {
+        if (iframes[i].contentWindow === event.source) {
+          const action = data['action'];
+          this.handleAction_(action);
+          return;
+        }
+      }
     });
   }
 
@@ -268,22 +309,28 @@ export class AmpConsent extends AMP.BaseElement {
       // !important.
       setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
     });
-    if (this.dialogResolver_[this.currentDisplayInstance_]) {
-      this.dialogResolver_[this.currentDisplayInstance_]();
-      this.dialogResolver_[this.currentDisplayInstance_] = null;
+    const displayInstance = /** @type {string} */ (
+      this.currentDisplayInstance_);
+    if (this.dialogResolver_[displayInstance]) {
+      this.dialogResolver_[displayInstance]();
+      this.dialogResolver_[displayInstance] = null;
     }
-    this.consentUIPendingMap_[this.currentDisplayInstance_] = false;
+    this.consentUIPendingMap_[displayInstance] = false;
     this.currentDisplayInstance_ = null;
   }
 
   /**
    * Handler User action
-   * @param {ACTION_TYPE} action
+   * @param {string} action
    */
   handleAction_(action) {
+    if (!isEnumValue(ACTION_TYPE, action)) {
+      // Unrecognized action
+      return;
+    }
+
     if (!this.currentDisplayInstance_) {
-      dev().error(TAG, 'No consent ui is displaying, ' +
-          `consent id ${this.currentDisplayInstance_}`);
+      // No consent instance to act to
       return;
     }
 
@@ -315,7 +362,8 @@ export class AmpConsent extends AMP.BaseElement {
     const initPromptPromises = [];
     for (let i = 0; i < instanceKeys.length; i++) {
       const instanceId = instanceKeys[i];
-      this.consentStateManager_.registerConsentInstance(instanceId);
+      this.consentStateManager_.registerConsentInstance(
+          instanceId, this.consentConfig_[instanceId]);
 
       const isConsentRequiredPromise = this.getConsentRequiredPromise_(
           instanceId, this.consentConfig_[instanceId]);
@@ -467,10 +515,13 @@ export class AmpConsent extends AMP.BaseElement {
     const href =
         this.consentConfig_[instanceId]['checkConsentHref'];
     assertHttpsUrl(href, this.element);
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const ampdoc = this.getAmpDoc();
+    const sourceBase = getSourceUrl(ampdoc.getUrl());
+    const resolvedHref = resolveRelativeUrl(href, sourceBase);
+    const viewer = Services.viewerForDoc(ampdoc);
     return viewer.whenFirstVisible().then(() => {
       return Services.xhrFor(this.win)
-          .fetchJson(href, init)
+          .fetchJson(resolvedHref, init)
           .then(res => res.json());
     });
   }
@@ -499,7 +550,9 @@ export class AmpConsent extends AMP.BaseElement {
     user().assert(isJsonScriptTag(script),
         `${TAG} consent instance config should be put in a <script>` +
         'tag with type= "application/json"');
-    const config = parseJson(script.textContent);
+    const config = tryParseJson(script.textContent, () => {
+      user().assert(false, `${TAG}: Error parsing config`);
+    });
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     user().assert(Object.keys(consents).length != 0,
@@ -572,18 +625,24 @@ export class AmpConsent extends AMP.BaseElement {
         this.user().error(TAG, 'child element of <amp-consent> with ' +
           `promptUI id ${promptUI} not found`);
       }
-      this.consentUI_[instanceId] = element;
+      this.consentUI_[instanceId] = dev().assertElement(element);
     }
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceState(instanceId)
         .then(state => {
+          if (state == CONSENT_ITEM_STATE.ACCEPTED ||
+              state == CONSENT_ITEM_STATE.REJECTED) {
+            // Need to display post prompt ui if user previous made a decision
+            this.isPostPromptUIRequired_ = true;
+          }
           if (state == CONSENT_ITEM_STATE.UNKNOWN) {
             if (!this.consentRequired_[instanceId]) {
               this.consentStateManager_.updateConsentInstanceState(
                   instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
               return;
             }
+            this.isPostPromptUIRequired_ = true;
             // TODO(@zhouyx):
             // 1. Race condition on consent state change between schedule to
             //    display and display. Add one more check before display
@@ -597,6 +656,10 @@ export class AmpConsent extends AMP.BaseElement {
    * Handles the display of postPromptUI
    */
   handlePostPromptUI_() {
+    if (!this.isPostPromptUIRequired_) {
+      return;
+    }
+
     const {classList} = this.element;
     this.notificationUiManager_.onQueueEmpty(() => {
       if (!this.postPromptUI_) {

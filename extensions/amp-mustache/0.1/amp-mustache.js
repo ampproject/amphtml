@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
+import {user} from '../../../src/log';
 
-// Configure sanitizer for output of "triple-mustache";a set of allowed tags
-// to be unescaped.
-setUnescapedSanitizier(sanitizeTagsForTripleMustache);
-
+const TAG = 'amp-mustache';
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -33,9 +33,28 @@ setUnescapedSanitizier(sanitizeTagsForTripleMustache);
  * @extends {BaseTemplate$$module$src$service$template_impl}
  */
 export class AmpMustache extends AMP.BaseTemplate {
+  /**
+   * @param {!Element} element
+   * @param {!Window} win
+   */
+  constructor(element, win) {
+    super(element, win);
+
+    // Unescaped templating (triple mustache) has a special, strict sanitizer.
+    setUnescapedSanitizier(sanitizeTagsForTripleMustache);
+
+    user().warn(TAG, 'The extension "amp-mustache-0.1.js" is deprecated. ' +
+        'Please use a more recent version of this extension.');
+  }
 
   /** @override */
   compileCallback() {
+    // If viewer is renderTemplate capable, skip the handling of the mustache
+    // templates as its rendering is managed by the viewer. This template will
+    // only be responsible for sanitizing and inserting it into the DOM.
+    if (this.viewerCanRenderTemplates()) {
+      return;
+    }
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
     let index = 0;
@@ -59,17 +78,38 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   render(data) {
-    let mustacheData = data;
-    if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+    let html = data;
+    if (!this.viewerCanRenderTemplates()) {
+      let mustacheData = data;
+      if (typeof data === 'object') {
+        mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      }
+      html = mustacheRender(this.template_, mustacheData);
     }
-    const html = mustacheRender(this.template_, mustacheData);
-    const sanitized = sanitizeHtml(html);
+    return this.serializeHtml_(html);
+  }
+
+  /**
+   * Sanitizes the html and inserts it in the DOM.
+   * @param {string} html
+   * @return {!Element}
+   * @private
+   */
+  serializeHtml_(html) {
     const root = this.win.document.createElement('div');
+    const sanitized = sanitizeHtml(html);
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }
 }
 
-
-AMP.registerTemplate('amp-mustache', AmpMustache);
+// First, unregister template with same type to avoid "Duplicate template type"
+// error due to multiple versions of amp-mustache in the same unit test run.
+// This is due to transpilation of test code to ES5 which uses require() and,
+// unlike import, causes side effects (AMP.registerTemplate) to be run.
+// For unit tests, it doesn't actually matter which version of amp-mustache is
+// registered. Integration tests should only have one script version included.
+if (getMode().test) {
+  Services.templatesFor(window).unregisterTemplate(TAG);
+}
+AMP.registerTemplate(TAG, AmpMustache);

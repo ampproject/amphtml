@@ -21,7 +21,9 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
@@ -122,8 +124,11 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = startsWith(
-        Services.platformFor(this.win).getIosVersionString(), '10.3');
+    this.shouldDisableCssSnap_ = !isExperimentOn(
+        this.win, 'amp-carousel-scroll-snap') ||
+        startsWith(
+            Services.platformFor(this.win).getIosVersionString(),
+            '10.3');
   }
 
   /** @override */
@@ -208,7 +213,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   isLoopingEligible() {
-    return this.noOfSlides_ > 2;
+    return this.noOfSlides_ > 1;
   }
 
   /** @override */
@@ -261,13 +266,19 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   onLayoutMeasure() {
+    if (this.hasNativeSnapPoints_) {
+      // The state being calculated after this short circuit is only needed if
+      // CSS Scroll Snap is not enabled.
+      return;
+    }
+
     this.slideWidth_ = this.getLayoutWidth();
     if (this.slideIndex_ !== null) {
       // Reset scrollLeft on orientationChange.
       this.slidesContainer_./*OK*/scrollLeft =
           this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
+      this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
     }
-    this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
   /** @override */
@@ -467,6 +478,47 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * A format string for the button label. Should be a string, containing two
+   * placeholders of "%s", where the index and total count will go.
+   * @return {string}
+   * @private
+   */
+  getButtonSuffixFormat_() {
+    return this.element.getAttribute('data-button-count-format') ||
+        '(%s of %s)';
+  }
+
+  /**
+   * @param {number} buttonIndex The index that the button will take the user
+   *    to.
+   * @return {string} The formatted suffix for the button title.
+   */
+  getButtonTitleSuffix_(buttonIndex) {
+    const index = String(buttonIndex + 1);
+    const count = String(this.noOfSlides_);
+    return ' ' + this.getButtonSuffixFormat_().replace('%s', index)
+        .replace('%s', count);
+  }
+
+  /**
+   * @override
+   */
+  getPrevButtonTitle() {
+    const prevIndex = this.getPrevIndex_(this.slideIndex_);
+    const index = prevIndex == null ? 0 : prevIndex;
+    return super.getPrevButtonTitle() + this.getButtonTitleSuffix_(index);
+  }
+
+  /**
+   * @override
+   */
+  getNextButtonTitle() {
+    const nextIndex = this.getNextIndex_(this.slideIndex_);
+    const index = nextIndex == null ? this.noOfSlides_ - 1 : nextIndex;
+    return super.getNextButtonTitle() + this.getButtonTitleSuffix_(index);
+  }
+
+  /**
    * Updates to the right state of the new index on scroll.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
@@ -518,6 +570,28 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * @param {?number} currentIndex
+   * @return {?number} The previous index that would be navigated to, or null
+   *    if at the start and not looping.
+   * @private
+   */
+  getPrevIndex_(currentIndex) {
+    return (currentIndex - 1 >= 0) ? currentIndex - 1 :
+      (this.shouldLoop) ? this.noOfSlides_ - 1 : null;
+  }
+
+  /**
+   * @param {?number} currentIndex
+   * @return {?number} The next index that would be navigated to, or null if at
+   *    the end and not looping.
+   * @private
+   */
+  getNextIndex_(currentIndex) {
+    return (currentIndex + 1 < this.noOfSlides_) ? currentIndex + 1 :
+      (this.shouldLoop) ? 0 : null;
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *     it available for display.
    * Note: Element must be laid out.
@@ -533,17 +607,15 @@ export class AmpSlideScroll extends BaseSlides {
         this.slideIndex_ == newIndex) {
       return false;
     }
-    const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
-      (this.shouldLoop) ? noOfSlides_ - 1 : null;
-    const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
-      (this.shouldLoop) ? 0 : null;
+    const prevIndex = this.getPrevIndex_(newIndex);
+    const nextIndex = this.getNextIndex_(newIndex);
 
     const showIndexArr = [];
     if (prevIndex != null) {
       showIndexArr.push(prevIndex);
     }
     showIndexArr.push(newIndex);
-    if (nextIndex != null) {
+    if (nextIndex != null && nextIndex !== prevIndex) {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {
@@ -559,7 +631,6 @@ export class AmpSlideScroll extends BaseSlides {
       dev().error(TAG, error);
       return false;
     }
-
     this.updateInViewport(newSlideInView, true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
@@ -581,6 +652,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+    this.updateButtonTitles();
     return true;
   }
 
@@ -595,7 +667,8 @@ export class AmpSlideScroll extends BaseSlides {
     if (slideChanged) {
       const name = 'slideChange';
       const event =
-          createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+          createCustomEvent(this.win, `slidescroll.${name}`,
+              dict({'index': newIndex}));
       this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
@@ -660,7 +733,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
-    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
+    const curve = bezierCurve(0.8, 0, 0.6, 1); // ease-in
     const duration = 80;
     const slidesContainer = dev().assertElement(this.slidesContainer_);
     return Animation.animate(slidesContainer, pos => {

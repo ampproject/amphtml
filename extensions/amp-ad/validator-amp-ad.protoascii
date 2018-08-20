@@ -36,8 +36,8 @@ tags: {  # amp-ad
   spec_name: "amp-ad extension .js script"
   extension_spec: {
     name: "amp-ad"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -57,7 +57,7 @@ tags: {  # <amp-ad>
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -104,7 +104,7 @@ tags: {  # <amp-ad data-multi-size>
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -148,7 +148,7 @@ tags: {  # <amp-ad data-enable-refresh>
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -180,7 +180,7 @@ tags: {  # <amp-embed>
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -225,7 +225,7 @@ tags: {  # <amp-embed data-multi-size>
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"

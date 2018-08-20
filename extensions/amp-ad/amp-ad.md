@@ -93,6 +93,9 @@ If provided, requires confirming the [amp-user-notification](https://www.ampproj
 
 Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. You must specify a float value in the range of [0, 3]. By default, the value is 3. Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is specified but the value is left blank, the system assigns a float value, which optimizes for viewability without drastically impacting the impressions.  Note, specifying `prefer-viewability-over-views` as the value also automatically optimizes viewability.
 
+##### data-ad-container-id (optional)
+Informs the ad of the container component id in the case of attempting to collapse. The container component must be an `<amp-layout>` component that's parent of the ad. When the `data-ad-container-id` is specified, and such a `<amp-layout>` container component is found, AMP runtime will try to collapse the container component instead of the ad component during no fill. This feature can be useful when an ad indicator is in presence.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
@@ -110,9 +113,9 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot.
+If no ad is availabel for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
 
-If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled, and AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
+In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
 
 Example with fallback:
 
@@ -284,6 +287,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Medyanet](../../ads/medyanet.md)
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
+- [MixiMedia](../../ads/miximedia.md)
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
 - [myTarget](../../ads/mytarget.md)
@@ -328,6 +332,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
+- [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
 - [UAS](../../ads/uas.md)
@@ -353,6 +358,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 ## Supported embed types
 
 - [24smi](../../ads/24smi.md)
+- [AJA](../../ads/aja.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)

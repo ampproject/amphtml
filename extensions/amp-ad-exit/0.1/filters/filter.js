@@ -34,11 +34,10 @@ export class Filter {
   }
 
   /**
-   * @param {!../../../../src/service/action-impl.ActionEventDef} event
+   * @param {!../../../../src/service/action-impl.ActionEventDef} unusedEvent
    * @return {boolean} Whether the exit is allowed.
    */
-  /* eslint-disable no-unused-vars */
-  filter(event) {}
+  filter(unusedEvent) {}
 
   /**
    * This function is expected to be called in the onLayoutMeasure function of

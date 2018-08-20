@@ -32,6 +32,7 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
+import {install as installCustomElements} from '../polyfills/custom-elements';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
@@ -39,11 +40,13 @@ import {install as installDocContains} from '../polyfills/document-contains';
 import {installImg} from '../../builtins/amp-img';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
+import {installCustomElements as installRegisterElement} from
+  'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
+import {startsWith} from '../string';
 import {toWin} from '../types';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -99,8 +102,20 @@ let ExtensionDef;
  */
 let ExtensionHolderDef;
 
+/**
+ * @param {string} extensionId
+ * @return {boolean}
+ */
 export function isTemplateExtension(extensionId) {
   return CUSTOM_TEMPLATES.indexOf(extensionId) >= 0;
+}
+
+/**
+ * @param {string} extensionId
+ * @return {boolean}
+ */
+function isIntermediateExtension(extensionId) {
+  return startsWith(extensionId, '_');
 }
 
 /**
@@ -142,7 +157,7 @@ export class Extensions {
    * services and document factories. This method is called by the extension's
    * script itself when it's loaded using the regular `AMP.push()` callback.
    * @param {string} extensionId
-   * @param {function(!Object)} factory
+   * @param {function(!Object, !Object)} factory
    * @param {!Object} arg
    * @restricted
    */
@@ -150,7 +165,7 @@ export class Extensions {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
-      factory(arg);
+      factory(arg, arg['_']);
       if (getMode().localDev || getMode().test) {
         if (Object.freeze) {
           const m = holder.extension;
@@ -407,7 +422,7 @@ export class Extensions {
     setParentWindow(childWin, parentWin);
 
     // Install necessary polyfills.
-    installPolyfillsInChildWindow(childWin);
+    installPolyfillsInChildWindow(parentWin, childWin);
 
     // Install runtime styles.
     installStylesLegacy(childWin.document, cssText, /* callback */ null,
@@ -590,9 +605,15 @@ export class Extensions {
   createExtensionScript_(extensionId, opt_extensionVersion) {
     const scriptElement = this.win.document.createElement('script');
     scriptElement.async = true;
-    scriptElement.setAttribute(
-        isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
-        extensionId);
+    if (isIntermediateExtension(extensionId)) {
+      opt_extensionVersion = '';
+    } else {
+      scriptElement.setAttribute(
+          isTemplateExtension(extensionId)
+            ? 'custom-template'
+            : 'custom-element',
+          extensionId);
+    }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
     let loc = this.win.location;
@@ -641,12 +662,17 @@ export function stubLegacyElements(win) {
 
 /**
  * Install polyfills in the child window (friendly iframe).
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-function installPolyfillsInChildWindow(childWin) {
+function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, 'auto');
+  if (isExperimentOn(parentWin, 'custom-elements-v1')) {
+    installCustomElements(childWin, class {});
+  } else {
+    installRegisterElement(childWin, 'auto');
+  }
 }
 
 

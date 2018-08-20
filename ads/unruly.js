@@ -17,6 +17,11 @@ limitations under the License.
 
 import {loadScript, validateData} from '../3p/3p';
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ * @param {!Function} [scriptLoader=loadScript]
+ */
 export function unruly(global, data, scriptLoader = loadScript) {
   validateData(data, ['siteId']);
 
@@ -25,5 +30,5 @@ export function unruly(global, data, scriptLoader = loadScript) {
     siteId: data.siteId,
   };
 
-  scriptLoader(global, 'https://video.unrulymedia.com/amp-demo/native-loader.js');
+  scriptLoader(global, 'https://video.unrulymedia.com/native/native-loader.js');
 }

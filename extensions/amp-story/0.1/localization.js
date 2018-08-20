@@ -97,6 +97,9 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @return {!Array<string>} A list of language codes.
  */
 export function getLanguageCodesFromString(languageCode) {
+  if (!languageCode) {
+    return ['en', DEFAULT_LANGUAGE_CODE];
+  }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce((fallbackLanguageCodeList, chunk, index) => {
     const fallbackLanguageCode = matches.slice(0, index + 1)
@@ -161,7 +164,7 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
 
   Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
     const localizedStringId =
-        /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
     pseudoLocaleStringBundle[localizedStringId].string =
         localizationFn(localizedStringBundle[localizedStringId].string);
   });

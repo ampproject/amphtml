@@ -92,6 +92,9 @@ Please take note of the following scenarios:
 * `CLIENT_ID` is available once it has been computed. This can be accomplished through use by another feature such as `amp-analytics` or `amp-pixel`. Note that `CLIENT_ID` may also be blocked on an `amp-user-notification` that is pending acceptance.
 * Asynchronously resolved variables are not available
 
+### Restrictions
+The `host` string of an URL does not accept variables. It fails on AMP cache.
+
 ## Variable substitution in links
 
 Variable substitution is available in links, i.e. `<a href="..."></a>`.
@@ -1110,7 +1113,7 @@ Provides the time (in seconds) the user has been engaged with the page since the
 
 #### Total Time
 
-Provides the total time from the time page has become visible to the time a ping was sent out.
+Provides the total time from the time page has become visible to the time a ping was sent out. Only applicable to visible trigger events.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalTime}`

@@ -162,9 +162,10 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const ampDoc = this.getAmpDoc();
     const consentPolicyId = super.getConsentPolicy();
     const consentPromise = consentPolicyId
-      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      ? getConsentPolicyState(ampDoc, consentPolicyId)
       : Promise.resolve(null);
     return consentPromise.then(initialConsentState => {
       const {element, win} = this;
@@ -185,7 +186,7 @@ class AmpImaVideo extends AMP.BaseElement {
       element.appendChild(iframe);
 
       installVideoManagerForDoc(element);
-      Services.videoManagerForDoc(this.win.document).register(this);
+      Services.videoManagerForDoc(ampDoc).register(this);
 
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
@@ -312,12 +313,12 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   showControls() {
-    // Not supported.
+    this.sendCommand_('showControls');
   }
 
   /** @override */
   hideControls() {
-    // Not supported.
+    this.sendCommand_('hideControls');
   }
 
   /** @override */

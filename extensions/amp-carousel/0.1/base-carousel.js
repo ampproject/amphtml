@@ -15,6 +15,7 @@
  */
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {isExperimentOn} from '../../../src/experiments';
 
 /**
  * @abstract
@@ -48,6 +49,15 @@ export class BaseCarousel extends AMP.BaseElement {
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
+
+    this.element.addEventListener(
+        'touchend', this.toggleControls_.bind(this));
+  }
+
+  /** Toggles the controls on tap/hover */
+  toggleControls_() {
+    this.setControlsState();
+    this.hintControls();
   }
 
   /** @override */
@@ -60,61 +70,70 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /**
    * Handles element specific viewport based events.
-   * @param {boolean} unusedInViewport.
+   * @param {boolean} unusedInViewport
    * @protected
    */
   onViewportCallback(unusedInViewport) {}
 
-
-  buildButtons() {
-    this.prevButton_ = this.element.ownerDocument.createElement('div');
-    this.prevButton_.classList.add('amp-carousel-button');
-    this.prevButton_.classList.add('amp-carousel-button-prev');
-    this.prevButton_.setAttribute('role', 'button');
-    if (this.element.hasAttribute('data-previous-button-aria-label')) {
-      this.prevButton_.setAttribute('aria-label',
-          this.element.getAttribute('data-previous-button-aria-label'));
+  /**
+   * Builds a carousel button for next/prev.
+   * @param {string} className
+   * @param {function()} onInteraction
+   * @param {string} ariaName
+   */
+  buildButton(className, onInteraction, ariaName) {
+    const button = this.element.ownerDocument.createElement('div');
+    button.tabIndex = 0;
+    button.classList.add('amp-carousel-button');
+    button.classList.add(className);
+    button.setAttribute('role', 'button');
+    const icon = this.element.ownerDocument.createElement('div');
+    if (isExperimentOn(this.win, 'amp-carousel-new-arrows')) {
+      icon.classList.add('amp-carousel-button-icon');
+      const isIE = Services.platformFor(this.win).isIe();
+      if (isIE) {
+        button.classList.add('amp-carousel-button-background');
+      }
     } else {
-      this.prevButton_.setAttribute('aria-label',
-          'Previous item in carousel');
+      icon.classList.add('amp-carousel-button-legacy');
+      button.classList.add('amp-carousel-button-background');
     }
-    this.prevButton_.setAttribute('tabindex', 0);
-    this.prevButton_.onkeydown = event => {
+
+    button.appendChild(icon);
+
+    button.onkeydown = event => {
       if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
-          this.interactionPrev();
+          onInteraction();
         }
       }
     };
-    this.prevButton_.onclick = () => {
+    button.onclick = onInteraction;
+    if (this.element.hasAttribute(`data-${ariaName}-button-aria-label`)) {
+      button.setAttribute('aria-label',
+          this.element.getAttribute(`data-${ariaName}-button-aria-label`));
+    } else {
+      const upperCaseName = ariaName[0].toUpperCase() + ariaName.slice(1);
+      button.setAttribute('aria-label',
+          `${upperCaseName} item in carousel`);
+    }
+
+    return button;
+  }
+
+  /**
+   * Builds the next and previous buttons.
+   */
+  buildButtons() {
+    this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
       this.interactionPrev();
-    };
+    }, 'previous');
     this.element.appendChild(this.prevButton_);
 
-    this.nextButton_ = this.element.ownerDocument.createElement('div');
-    this.nextButton_.classList.add('amp-carousel-button');
-    this.nextButton_.classList.add('amp-carousel-button-next');
-    this.nextButton_.setAttribute('role', 'button');
-    if (this.element.hasAttribute('data-next-button-aria-label')) {
-      this.nextButton_.setAttribute('aria-label',
-          this.element.getAttribute('data-next-button-aria-label'));
-    } else {
-      this.nextButton_.setAttribute('aria-label',
-          'Next item in carousel');
-    }
-    this.nextButton_.setAttribute('tabindex', 0);
-    this.nextButton_.onkeydown = event => {
-      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
-        if (!event.defaultPrevented) {
-          event.preventDefault();
-          this.interactionNext();
-        }
-      }
-    };
-    this.nextButton_.onclick = () => {
+    this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
-    };
+    }, 'next');
     this.element.appendChild(this.nextButton_);
   }
 
@@ -187,13 +206,39 @@ export class BaseCarousel extends AMP.BaseElement {
       Services.timerFor(this.win).delay(() => {
         this.mutateElement(() => {
           this.element.classList.remove(className);
-          this.prevButton_.classList.toggle(
-              'i-amphtml-screen-reader', !this.showControls_);
-          this.nextButton_.classList.toggle(
-              'i-amphtml-screen-reader', !this.showControls_);
         });
       }, 4000);
     });
+  }
+
+  /**
+   * Updates the titles for the next/previous buttons. This should be called
+   * by subclasses if they want to update the button labels. The
+   * `getNextButtonTitle` and `getPrevButtonTitle` should be overwritten to
+   * provide the title values.
+   * @protected
+   */
+  updateButtonTitles() {
+    this.nextButton_.title = this.getNextButtonTitle();
+    this.prevButton_.title = this.getPrevButtonTitle();
+  }
+
+  /**
+   * @return {string} The title to use for the next button.
+   * @protected
+   */
+  getNextButtonTitle() {
+    return this.element.getAttribute('data-next-button-aria-label')
+        || 'Next item in carousel';
+  }
+
+  /**
+   * @return {string} The title to use for the pevious button.
+   * @protected
+   */
+  getPrevButtonTitle() {
+    return this.element.getAttribute('data-prev-button-aria-label')
+        || 'Previous item in carousel';
   }
 
   /** @override */

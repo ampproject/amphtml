@@ -21,6 +21,11 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
+    string: 'More to read',
+    description: 'Label to be placed as a title on top of related articles ' +
+        'at the end of a story.',
+  },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
     string: 'Privacy settings',
     description: 'Title for a section that allows the user to configure ' +
@@ -55,15 +60,6 @@ export default {
     string: 'More about AMP results',
     description: 'Label for a link to documentation on how AMP links are ' +
         'handled.',
-  },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: 'Enable',
-    description: 'Label for a button that enables the amp-story experiment.',
-  },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'Experiment enabled.  Please reload.',
-    description: 'Text that is shown once the amp-story experiment has ' +
-        'been successfully enabled.',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Tap Next',

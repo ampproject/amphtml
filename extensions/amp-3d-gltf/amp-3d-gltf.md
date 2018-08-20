@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-3d-gltf/">amp-3d-gltf example</a>.</td>
+  </tr>
 </table>
 
 ## Usage
@@ -70,6 +74,10 @@ Default value is `false`.
 ##### antialiasing [optional]
 
 A Boolean attribute that specifies whether to turn on antialiasing. Default value is `false`.
+
+##### clearColor [optional]
+
+A string that must contain valid CSS color, that will be used to fill free space on canvas. 
 
 ##### maxPixelRatio [optional]
 

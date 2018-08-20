@@ -19,7 +19,6 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as sinon from 'sinon';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -33,11 +32,13 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  RENDER_IDLE_DELAY_REQUEST_EXP,
   getNetworkId,
+  getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
+  resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
 import {
@@ -45,10 +46,7 @@ import {
 } from '../../../../ads/google/a4a/utils';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 /**
@@ -165,6 +163,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
 
+    afterEach(() => {
+      resetTokensToInstancesMap();
+    });
+
     it('should ignore creative-size header for fluid response', () => {
       impl.isFluid_ = true;
       impl.element.setAttribute('height', 'fluid');
@@ -212,28 +214,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // ads/google/test/test-utils.js
     });
 
-    it('should load delayed impression amp-pixels', () => {
-      const fireDelayedImpressionsSpy =
-          sandbox.spy(impl, 'fireDelayedImpressions');
-      expect(impl.extractSize({
-        get(name) {
-          switch (name) {
-            case 'X-AmpImps':
-              return 'https://a.com?a=b,https://b.com?c=d';
-            default:
-              return undefined;
-          }
-        },
-        has(name) {
-          return !!this.get(name);
-        },
-      })).to.deep.equal(size);
-      expect(fireDelayedImpressionsSpy.withArgs(
-          'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
-    });
-    it('shouldnt load delayed impression amp-pixels with fluid', () => {
-      const fireDelayedImpressionsSpy =
-          sandbox.spy(impl, 'fireDelayedImpressions');
+    it('should load delayed impression amp-pixels with fluid', () => {
       impl.isFluidRequest_ = true;
       expect(impl.extractSize({
         get(name) {
@@ -248,13 +229,11 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       })).to.deep.equal(size);
-      expect(fireDelayedImpressionsSpy.withArgs(
-          'https://a.com?a=b,https://b.com?c=d')).to.not.be.called;
+      expect(impl.fluidImpressionUrl_).to
+          .equal('https://a.com?a=b,https://b.com?c=d');
     });
-    it('should load delayed impression amp-pixels with fluid + multi-size',
+    it('should not load delayed impression amp-pixels with fluid + multi-size',
         () => {
-          const fireDelayedImpressionsSpy =
-              sandbox.spy(impl, 'fireDelayedImpressions');
           sandbox.stub(impl, 'handleResize_');
           impl.isFluid_ = true;
           expect(impl.extractSize({
@@ -272,8 +251,30 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
               return !!this.get(name);
             },
           })).to.deep.equal(size);
-          expect(fireDelayedImpressionsSpy.withArgs(
-              'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
+          expect(impl.fluidImpressionUrl_).to.not.be.ok;
+        });
+    it('should consume pageview state tokens when header is present',
+        () => {
+          const removePageviewStateTokenSpy =
+              sandbox.spy(impl, 'removePageviewStateToken');
+          const setPageviewStateTokenSpy =
+              sandbox.spy(impl, 'setPageviewStateToken');
+          expect(impl.extractSize({
+            get(name) {
+              switch (name) {
+                case 'amp-ff-pageview-tokens':
+                  return 'DUMMY_TOKEN';
+                default:
+                  return undefined;
+              }
+            },
+            has(name) {
+              return !!this.get(name);
+            },
+          })).to.deep.equal(size);
+          expect(removePageviewStateTokenSpy).to.be.calledOnce;
+          expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be
+              .calledOnce;
         });
   });
 
@@ -468,10 +469,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       toggleExperiment(env.win, 'dc-use-attr-for-format', false);
       doc.body.removeChild(element);
       env.win['ampAdGoogleIfiCounter'] = 0;
+      resetTokensToInstancesMap();
     });
 
     it('returns the right URL', () => {
       const impl = new AmpAdNetworkDoubleclickImpl(element);
+      const impl2 = new AmpAdNetworkDoubleclickImpl(element);
+      impl.setPageviewStateToken('abc');
+      impl2.setPageviewStateToken('def');
       impl.experimentIds = ['12345678'];
       return impl.getAdUrl().then(url => {
         [
@@ -511,6 +516,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
+          /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
     });
@@ -711,8 +717,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             regexp => expect(url).to.match(regexp));
       });
     });
-    it('should return empty string if unknown consentState', () => expect(
-        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(''));
+
+    it('should return empty string if unknown consentState', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
+        expect(url).equal('');
+        return expect(impl.getAdUrlDeferred.promise).to.eventually.equal('');
+      }));
 
     it('should include npa=1 if unknown consent & explicit npa', () => {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
@@ -774,7 +784,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.element.appendChild(placeholder);
       impl.element.appendChild(fallback);
       impl.size_ = {width: 123, height: 456};
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => sandbox.restore());
@@ -789,56 +799,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.onCreativeRender({customElementExtensions: []});
       expect(impl.unlayoutCallback()).to.be.false;
       expect(impl.iframe).is.ok;
-    });
-
-    it('should remove FIE if in all exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should remove non-FIE if in all exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not remove FIE if in remain exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.iframe).is.ok;
-    });
-
-    it('should remove rendered non-FIE if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not destroy ad promise for unrendered if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = 'abcdef';
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should destroy ad promise if ad response not yet received and in ' +
-        'remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = null;
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.isAmpCreative_).to.be.null;
     });
 
     it('should call #resetSlot, remove child iframe, but keep other children',
@@ -865,7 +825,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         });
 
     it('should call #unobserve on refreshManager', () => {
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
       impl.refreshManager_ = {
         unobserve: sandbox.spy(),
       };
@@ -904,12 +863,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should return false by default', () => {
       expect(impl.delayAdRequestEnabled()).to.be.false;
-    });
-
-    it('should return 12 if in experiment', () => {
-      forceExperimentBranch(
-          impl.win, RENDER_IDLE_DELAY_REQUEST_EXP, '21062232');
-      expect(impl.delayAdRequestEnabled()).to.equal(12);
     });
   });
 
@@ -976,7 +929,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           height: 50,
         };
       });
-      sandbox.stub(impl, 'protectedEmitLifecycleEvent_').callsFake(() => {});
       sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
         impl.element.setAttribute('height', height);
         impl.element.setAttribute('width', width);
@@ -1084,6 +1036,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(impl.adUrl_).to.be.ok;
         expect(impl.adUrl_.length).to.be.ok;
       });
+    });
+
+    it('should force layout to `fixed` if `responsive`', () => {
+      impl.element.setAttribute('layout', 'responsive');
+      impl.element.setAttribute('data-multi-size', '320x50');
+      impl.populateAdUrlState();
+      expect(impl.element.getAttribute('layout')).to.equal('fixed');
+    });
+
+    it('should not change layout if not `responsive`', () => {
+      impl.element.setAttribute('layout', 'not-responsive');
+      impl.element.setAttribute('data-multi-size', '320x50');
+      impl.populateAdUrlState();
+      expect(impl.element.getAttribute('layout')).to.equal('not-responsive');
     });
   });
 
@@ -1296,6 +1262,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       });
 
       describe('#fireDelayedImpressions', () => {
+        let isSecureStub;
         beforeEach(() => {
           element = createElementWithAttributes(doc, 'amp-ad', {
             'width': '200',
@@ -1303,6 +1270,9 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
             'type': 'doubleclick',
           });
           impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.getAmpDoc = () => {};
+          isSecureStub = sandbox.stub();
+          sandbox.stub(Services, 'urlForDoc').returns({isSecure: isSecureStub});
         });
 
         it('should handle null impressions', () => {
@@ -1312,35 +1282,32 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         });
 
         it('should not include non-https', () => {
-          impl.fireDelayedImpressions('http://f.com?a=b,https://b.net?c=d');
+          const urls = ['http://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.withArgs(urls[0]).returns(false);
+          isSecureStub.withArgs(urls[1]).returns(true);
+          impl.fireDelayedImpressions(urls.join());
           expect(env.win.document.querySelectorAll('amp-pixel').length)
               .to.equal(1);
           expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
+              `amp-pixel[src="${urls[1]}"][referrerpolicy=""]`))
               .to.be.ok;
         });
 
         it('should append amp-pixel w/o scrubReferer', () => {
-          impl.fireDelayedImpressions('https://f.com?a=b,https://b.net?c=d');
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://f.com?a=b"][referrerpolicy=""]'))
-              .to.be.ok;
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
-              .to.be.ok;
+          const urls = ['https://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.returns(true);
+          impl.fireDelayedImpressions(urls.join());
+          urls.forEach(url => expect(env.win.document.querySelector(
+              `amp-pixel[src="${url}"][referrerpolicy=""]`)).to.be.ok);
         });
 
-        it('should append amp-pixel wwith scrubReferer', () => {
-          impl.fireDelayedImpressions(
-              'https://f.com?a=b,https://b.net?c=d', true);
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://f.com?a=b"]' +
-              '[referrerpolicy="no-referrer"]'))
-              .to.be.ok;
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"]' +
-              '[referrerpolicy="no-referrer"]'))
-              .to.be.ok;
+        it('should append amp-pixel with scrubReferer', () => {
+          const urls = ['https://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.returns(true);
+          impl.fireDelayedImpressions(urls.join(), true);
+          urls.forEach(url => expect(env.win.document.querySelector(
+              `amp-pixel[src="${url}"][referrerpolicy="no-referrer"]`))
+              .to.be.ok);
         });
       });
 
@@ -1450,20 +1417,96 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       });
 
       describe('#setPageLevelExperiments', () => {
-
+        let randomlySelectUnsetExperimentsStub;
+        beforeEach(() => {
+          randomlySelectUnsetExperimentsStub =
+            sandbox.stub(impl, 'randomlySelectUnsetExperiments_');
+          sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
+          sandbox.stub(impl, 'getAmpDoc').returns({});
+          sandbox.stub(Services, 'viewerForDoc').returns(
+              {whenFirstVisible: () => new Deferred().promise});
+        });
         afterEach(() => {
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
         });
 
         it('should set invalid origin fix experiment if on canonical', () => {
-          impl.setPageLevelExperiments('');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
           expect(impl.experimentIds.includes('21060933')).to.be.true;
         });
 
         it('should not set invalid origin fix if exp on', () => {
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
-          impl.setPageLevelExperiments('');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
           expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
+
+        it('should select SRA experiments', () => {
+          randomlySelectUnsetExperimentsStub.returns(
+              {doubleclickSraExp: '117152667'});
+          impl.buildCallback();
+          expect(impl.experimentIds.includes('117152667')).to.be.true;
+          expect(impl.useSra).to.be.true;
+        });
+
+        describe('should properly limit SRA traffic', () => {
+          let experimentInfoMap;
+          beforeEach(() => {
+            randomlySelectUnsetExperimentsStub.returns({});
+            impl.setPageLevelExperiments();
+            // args format is call array followed by parameter array so expect
+            // first call, first param.
+            experimentInfoMap = randomlySelectUnsetExperimentsStub
+                .args[0][0]['doubleclickSraExp'];
+            expect(experimentInfoMap).to.be.ok;
+            expect(impl.useSra).to.be.false;
+          });
+
+          it('should allow by default', () =>
+            expect(experimentInfoMap.isTrafficEligible()).to.be.true);
+
+          it('should not allow if refresh meta', () => {
+            doc.head.appendChild(createElementWithAttributes(
+                doc, 'meta', {name: 'amp-ad-enable-refresh'}));
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
+
+          it('should not allow if sra meta', () => {
+            doc.head.appendChild(createElementWithAttributes(
+                doc, 'meta', {name: 'amp-ad-doubleclick-sra'}));
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
+
+          it('should not allow if block level refresh', () => {
+            impl.element.setAttribute('data-enable-refresh', '');
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
+        });
+      });
+
+      describe('#getPageviewStateTokensForAdRequest', () => {
+
+        beforeEach(() => {
+          resetTokensToInstancesMap();
+        });
+
+        it('should return the tokens associated with instances that are not ' +
+         'passed to it as an argument', () => {
+          const element1 = doc.createElement('amp-ad');
+          element1.setAttribute('type', 'doubleclick');
+          element1.setAttribute('data-ad-client', 'doubleclick');
+          const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+          impl1.setPageviewStateToken('DUMMY_TOKEN_1');
+          const element2 = doc.createElement('amp-ad');
+          element2.setAttribute('type', 'doubleclick');
+          element2.setAttribute('data-ad-client', 'doubleclick');
+          const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
+          impl2.setPageviewStateToken('DUMMY_TOKEN_2');
+          const instances = [impl1];
+          expect(getPageviewStateTokensForAdRequest(instances)).to.deep.equal(
+              ['DUMMY_TOKEN_2']);
         });
       });
     });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent} from '../../../src/dom';
@@ -23,6 +24,9 @@ import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
+
+/** @private @const {number} */
+const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -248,9 +252,8 @@ class MultipleAdvancementConfig extends AdvancementConfig {
 
 
 /**
- * Always provides a progress of 1.0.  Advances when the user taps the rightmost
- * 75% of the screen; triggers the previous listener when the user taps the
- * leftmost 25% of the screen.
+ * Always provides a progress of 1.0.  Advances when the user taps the
+ * corresponding section, depending on language settings.
  */
 class ManualAdvancement extends AdvancementConfig {
   /**
@@ -262,6 +265,30 @@ class ManualAdvancement extends AdvancementConfig {
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
     this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
+
+    if (element.ownerDocument.defaultView) {
+      /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+      this.storeService_ =
+        getStoreService(element.ownerDocument.defaultView);
+    }
+
+    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+    this.sections_ = {
+      // Width and navigation direction of each section depend on whether the
+      // document is RTL or LTR.
+      left: {
+        widthRatio: rtlState ?
+          NEXT_SCREEN_AREA_RATIO : PREVIOUS_SCREEN_AREA_RATIO,
+        direction: rtlState ?
+          TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
+      },
+      right: {
+        widthRatio: rtlState ?
+          PREVIOUS_SCREEN_AREA_RATIO : NEXT_SCREEN_AREA_RATIO,
+        direction: rtlState ?
+          TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
+      },
+    };
   }
 
   /** @override */
@@ -329,26 +356,39 @@ class ManualAdvancement extends AdvancementConfig {
 
     event.stopPropagation();
 
-    // TODO(newmuis): This will need to be flipped for RTL.
-    const elRect = this.element_./*OK*/getBoundingClientRect();
+    const pageRect = this.element_./*OK*/getBoundingClientRect();
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
     // cases.
-    const offsetLeft = ('x' in elRect) ? elRect.x : elRect.left;
-    const offsetWidth = elRect.width;
+    const offsetLeft = ('x' in pageRect) ? pageRect.x : pageRect.left;
 
-    const nextScreenAreaMin = offsetLeft +
-        ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
-    const nextScreenAreaMax = offsetLeft + offsetWidth;
+    const page = {
+      // Offset starting left of the page.
+      offset: offsetLeft,
+      width: pageRect.width,
+      clickEventX: event.pageX,
+    };
 
-    if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
-      this.onTapNavigation(TapNavigationDirection.NEXT);
-    } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.onTapNavigation(TapNavigationDirection.PREVIOUS);
+    this.onTapNavigation(this.getTapDirection_(page));
+  }
+
+  /**
+   * Decides what direction to navigate depending on which
+   * section of the page was there a click. The navigation direction of each
+   * individual section has been previously defined depending on the language
+   * settings.
+   * @param {!Object} page
+   */
+  getTapDirection_(page) {
+    const {left, right} = this.sections_;
+
+    if (page.clickEventX <= page.offset + (left.widthRatio * page.width)) {
+      return left.direction;
     }
+
+    return right.direction;
   }
 }
-
 
 /**
  * Provides progress and advancement based on a fixed duration of time,
@@ -389,6 +429,8 @@ class TimeBasedAdvancement extends AdvancementConfig {
     this.startTimeMs_ = this.getCurrentTimestampMs_();
 
     this.timeoutId_ = this.timer_.delay(() => this.onAdvance(), this.delayMs_);
+
+    this.onProgressUpdate();
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
@@ -470,6 +512,12 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private {?Element} */
     this.mediaElement_ = null;
 
+    /** @private {?UnlistenDef} */
+    this.unlistenEndedFn_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenTimeupdateFn_ = null;
+
     /** @private {?../../../src/video-interface.VideoInterface} */
     this.video_ = null;
   }
@@ -539,8 +587,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
   startHtmlMediaElement_() {
     const mediaElement = dev().assertElement(this.mediaElement_,
         'Media element was unspecified.');
-    listenOnce(mediaElement, 'ended', () => this.onAdvance());
-    listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
+    this.unlistenEndedFn_ =
+        listenOnce(mediaElement, 'ended', () => this.onAdvance());
+    this.unlistenTimeupdateFn_ =
+        listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
   }
 
   /** @private */
@@ -549,8 +599,11 @@ class MediaBasedAdvancement extends AdvancementConfig {
       this.video_ = video;
     });
 
-    listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
-        {capture: true});
+    this.unlistenEndedFn_ =
+        listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
+            {capture: true});
+
+    this.onProgressUpdate();
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
@@ -560,10 +613,15 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   stop() {
-    // We don't need to explicitly stop the polling or media events listed
-    // above, since they are already bound to either the playback of the media
-    // on the page, or the isRunning state of this AdvancementConfig.
     super.stop();
+
+    if (this.unlistenEndedFn_) {
+      this.unlistenEndedFn_();
+    }
+
+    if (this.unlistenTimeupdateFn_) {
+      this.unlistenTimeupdateFn_();
+    }
   }
 
   /** @override */

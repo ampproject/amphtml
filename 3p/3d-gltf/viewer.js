@@ -25,6 +25,11 @@ const CAMERA_NEAR_FACTOR = .1;
 
 
 export default class GltfViewer {
+  /**
+   * Creates an instance of GltfViewer.
+   * @param {!JsonObject} options
+   * @param {*} handlers
+   */
   constructor(options, handlers) {
     /** @private */
     this.options_ = options;
@@ -116,13 +121,13 @@ export default class GltfViewer {
    *
    * @private */
   setupLight_() {
-    const amb = new THREE.AmbientLight();
+    const amb = new THREE.AmbientLight(0xEDECD5, .5);
 
-    const dir1 = new THREE.DirectionalLight();
-    dir1.position.set(1, 2, 3);
+    const dir1 = new THREE.DirectionalLight(0xFFFFFF, .5);
+    dir1.position.set(0, 5, 3);
 
-    const dir2 = new THREE.DirectionalLight();
-    dir2.position.set(1, -2, -2);
+    const dir2 = new THREE.DirectionalLight(0xAECDD6, .4);
+    dir2.position.set(-1, -2, 4);
 
     const light = new THREE.Group();
     light.add(amb, dir1, dir2);
@@ -140,10 +145,16 @@ export default class GltfViewer {
     setStyle(el, 'left', 0);
     document.body.appendChild(this.renderer_.domElement);
 
+    this.renderer_.gammaOutput = true;
+    this.renderer_.gammaFactor = 2.2;
     this.renderer_.setPixelRatio(
         Math.min(
-            this.options_['maxPixelRatio'],
+            this.options_['rendererSettings']['maxPixelRatio'],
             devicePixelRatio));
+    this.renderer_.setClearColor(
+        this.options_['rendererSettings']['clearColor'],
+        this.options_['rendererSettings']['clearAlpha']
+    );
   }
 
   /**

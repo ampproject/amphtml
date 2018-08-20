@@ -43,7 +43,7 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
+This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 {% endcall %}
 
 [TOC]
@@ -295,8 +295,8 @@ Next, you must create a JSON file where you can customize the bookend. The overa
 
 ```text
 {
-  "bookend-version": "v1.0",
-  "share-providers": [
+  "bookendVersion": "v1.0",
+  "shareProviders": [
     ...
   ],
   "components": [
@@ -446,9 +446,39 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
   </noscript>
 </amp-img>
 
+**AMP-to-AMP linking**
+
+For documents displayed in an AMP viewer, links typically navigate `_top` or open in a new window. Links to AMP pages, however, may continue to be displayed in the viewer. To enable this behavior, add `"amphtml": true` to a component that supports links. For example:
+
+```json
+...
+{
+  "type": "small",
+  "title": "This is India an the best places you should go",
+  "url": "http://example.com/my-amp-document.html",
+  "image": "http://placehold.it/256x128",
+  "amphtml": true
+},
+{
+  "type": "cta-link",
+  "links": [
+    {
+      "text": "Sign Up",
+      "url": "example.com/signup",
+      "amphtml": true
+    },
+    {
+      "text": "Subscribe",
+      "url": "example.com/subscribe"
+    }
+  ]
+},
+...
+```
+
 #### Social sharing
 
-The configuration for social sharing is defined in the `share-providers` field of the response object, and it's optional.
+The configuration for social sharing is defined in the `shareProviders` field of the response object, and it's optional.
 
 This field should contain a string, where each string respresents a share provider's name (e.g. `twitter`).
 
@@ -466,8 +496,8 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ```text
 {
   // You must specify version v1.0.
-  "bookend-version": "v1.0",
-  "share-providers": [
+  "bookendVersion": "v1.0",
+  "shareProviders": [
     "email",
     "tumblr",
     {

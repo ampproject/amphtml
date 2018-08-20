@@ -186,7 +186,11 @@ export class Resource {
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
-    /** @private {?Object<number, !Deferred>} */
+    /**
+     * Really, this is a <number, !Deferred> map,
+     * but CC's type system can't handle it.
+     * @private {?Object<string, !Deferred>}
+     */
     this.withViewportDeferreds_ = null;
 
     /** @private {?Promise<undefined>} */
@@ -324,7 +328,7 @@ export class Resource {
       this.isBuilding_ = false;
       if (this.hasBeenMeasured()) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
-        this.element.updateLayoutBox(this.getLayoutBox());
+        this.element.updateLayoutBox(this.getLayoutBox(), true);
       } else {
         this.state_ = ResourceState.NOT_LAID_OUT;
       }
@@ -673,18 +677,19 @@ export class Resource {
     }
     // See if pre-existing promise.
     const viewportNum = dev().assertNumber(viewport);
+    const key = String(viewportNum);
     if (this.withViewportDeferreds_ &&
-        this.withViewportDeferreds_[viewportNum]) {
-      return this.withViewportDeferreds_[viewportNum].promise;
+        this.withViewportDeferreds_[key]) {
+      return this.withViewportDeferreds_[key].promise;
     }
     // See if already within viewport multiplier.
-    if (this.isWithinViewportRatio(viewport)) {
+    if (this.isWithinViewportRatio(viewportNum)) {
       return Promise.resolve();
     }
     // return promise that will trigger when within viewport multiple.
     this.withViewportDeferreds_ = this.withViewportDeferreds_ || {};
-    this.withViewportDeferreds_[viewportNum] = new Deferred();
-    return this.withViewportDeferreds_[viewportNum].promise;
+    this.withViewportDeferreds_[key] = new Deferred();
+    return this.withViewportDeferreds_[key].promise;
   }
 
   /** @private resolves promises populated via whenWithinViewport. */
@@ -693,12 +698,10 @@ export class Resource {
       return;
     }
     const viewportRatio = this.getDistanceViewportRatio();
-    const keys = Object.keys(this.withViewportDeferreds_);
-    for (let i = 0; i < keys.length; i++) {
-      const viewportInt = dev().assertNumber(parseInt(keys[i], 10));
-      if (this.isWithinViewportRatio(viewportInt, viewportRatio)) {
-        this.withViewportDeferreds_[viewportInt].resolve();
-        delete this.withViewportDeferreds_[viewportInt];
+    for (const key in this.withViewportDeferreds_) {
+      if (this.isWithinViewportRatio(parseFloat(key), viewportRatio)) {
+        this.withViewportDeferreds_[key].resolve();
+        delete this.withViewportDeferreds_[key];
       }
     }
   }
@@ -777,12 +780,13 @@ export class Resource {
    * calculation based on tree depth and number of layer scrolls it would take
    * to view the element.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @return {number}
    */
   layersDistanceRatio_(currentScore, layout, depth) {
+    currentScore = currentScore || 0;
     const depthPenalty = 1 + (depth / 10);
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalViewportsFromParent() +

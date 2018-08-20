@@ -64,6 +64,12 @@ export function getElementCreator(document) {
   };
 }
 
+/**
+ * Appends children to element
+ *
+ * @param {!Element} element
+ * @param {!Array<!Element>} children
+ */
 function appendChildren(element, children) {
   children = (!children) ? [] : Array.isArray(children) ? children : [children];
   children.forEach(child => element.appendChild(child));
@@ -148,11 +154,24 @@ export function composeEmbedUrl(options) {
   return embedUrl;
 }
 
+/**
+ * Satizes URL
+ *
+ * @param {*} localtion
+ * @return {string}
+ */
 function sanitizeUrl(localtion) {
   return removeFragment(localtion.href)
       .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
 }
 
+/**
+ * Conposes src url
+ *
+ * @param {string} src
+ * @param {string} itemId
+ * @return {string}
+ */
 export function composeItemSrcUrl(src, itemId) {
   const DEFAULT_BASE_URL = '//www.playbuzz.com/';
 

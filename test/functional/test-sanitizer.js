@@ -15,13 +15,9 @@
  */
 
 import {
-  resolveUrlAttr,
-  rewriteAttributeValue,
-  rewriteAttributesForElement,
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../src/sanitizer';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('Caja-based', () => {
   runSanitizerTests();
@@ -59,89 +55,14 @@ describe('Caja-based', () => {
   describe('for <amp-bind>', () => {
     it('should output [text] and [class] attributes', () => {
       expect(sanitizeHtml('<p [text]="foo" [class]="bar"></p>')).to.be
-          .equal('<p [text]="foo" [class]="bar"></p>');
+          .equal('<p [text]="foo" i-amphtml-binding [class]="bar"></p>');
     });
 
     it('should NOT rewrite values of binding attributes', () => {
       // Should not change "foo.bar". Adding `target` attribute is not necessary
       // (but harmless) since <amp-bind> will use rewriteAttributesForElement().
-      expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
-          .to.equal('<a [href]="foo.bar" target="_top">link</a>');
-    });
-  });
-});
-
-describe('DOMPurify-based', () => {
-  beforeEach(() => {
-    toggleExperiment(self, 'svg-in-mustache', true, true);
-  });
-
-  afterEach(() => {
-    toggleExperiment(self, 'svg-in-mustache', false, true);
-  });
-
-  runSanitizerTests();
-
-  describe('for <amp-bind>', () => {
-    it('should rewrite [text] and [class] attributes', () => {
-      expect(sanitizeHtml('<p [text]="foo"></p>')).to.be
-          .equal('<p data-amp-bind-text="foo"></p>');
-      expect(sanitizeHtml('<p [class]="bar"></p>')).to.be
-          .equal('<p data-amp-bind-class="bar"></p>');
-    });
-
-    it('should NOT rewrite values of binding attributes', () => {
-      // Should not change "foo.bar".
-      expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
-          .to.equal('<a data-amp-bind-href="foo.bar">link</a>');
-    });
-  });
-
-  // Select SVG XSS tests from https://html5sec.org/#svg.
-  describe('SVG', () => {
-    it('should prevent XSS via <G> tag and onload attribute', () => {
-      const svg = '<svg xmlns="http://www.w3.org/2000/svg">'
-          + '<g onload="javascript:alert(1)"></g></svg>';
-      expect(sanitizeHtml(svg)).to.equal(
-          '<svg xmlns="http://www.w3.org/2000/svg"><g></g></svg>');
-    });
-
-    it('should prevent XSS via <SCRIPT> tag', () => {
-      const svg = '<svg xmlns="http://www.w3.org/2000/svg">'
-          + '<script>alert(1)</script></svg>';
-      expect(sanitizeHtml(svg)).to.equal(
-          '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
-    });
-
-    it('should prevent automatic execution of onload attribute without other '
-        + 'SVG elements', () => {
-      const svg = '<svg onload="javascript:alert(1)" '
-          + 'xmlns="http://www.w3.org/2000/svg"></svg>';
-      expect(sanitizeHtml(svg)).to.equal(
-          '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
-    });
-
-    it('should prevent simple passive XSS via XLink', () => {
-      const svg = '<svg xmlns="http://www.w3.org/2000/svg">'
-          + '<a xmlns:xlink="http://www.w3.org/1999/xlink" '
-          + 'xlink:href="javascript:alert(1)">'
-          + '<rect width="1000" height="1000" fill="white"/></a></svg>';
-      expect(sanitizeHtml(svg)).to.equal(
-          '<svg xmlns="http://www.w3.org/2000/svg">'
-          + '<a xmlns:xlink="http://www.w3.org/1999/xlink">' +
-          '<rect fill="white" height="1000" width="1000"></rect></a></svg>');
-    });
-
-    it('should prevent XSS via "from" attribute in SVG and inline-SVG', () => {
-      const svg = '<svg>'
-          + '<a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="?">'
-          + '<circle r="400"></circle>'
-          + '<animate attributeName="xlink:href" begin="0" '
-          + 'from="javascript:alert(1)" to="&" />'
-          + '</a></svg>';
-      expect(sanitizeHtml(svg)).to.equal(
-          '<svg><a xlink:href="?" xmlns:xlink="http://www.w3.org/1999/xlink">'
-          + '<circle r="400"></circle></a></svg>');
+      expect(sanitizeHtml('<a [href]="foo.bar">link</a>')).to.equal(
+          '<a [href]="foo.bar" i-amphtml-binding target="_top">link</a>');
     });
   });
 });
@@ -190,7 +111,6 @@ function runSanitizerTests() {
     it('should NOT output security-sensitive markup', () => {
       expect(sanitizeHtml('a<script>b</script>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<script>b<img>d</script>c')).to.be.equal('ac');
-      expect(sanitizeHtml('a<style>b</style>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<frame></frame>c')).to.be.equal('ac');
@@ -318,10 +238,6 @@ function runSanitizerTests() {
       allowConsoleError(() => {
         expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal(
             'a<a>b</a>');
-        expect(sanitizeHtml('a<a style="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(sanitizeHtml('a<a STYLE="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
         expect(sanitizeHtml('a<a href="javascript:alert">b</a>')).to.be.equal(
             'a<a target="_top">b</a>');
         expect(sanitizeHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
@@ -385,6 +301,26 @@ function runSanitizerTests() {
       expect(sanitizeHtml('<form action-xhr="https://foo.com/bar"></form>'))
           .to.equal('<form action-xhr="https://foo.com/bar"></form>');
     });
+
+    it('should allow <amp-form>-related attributes', () => {
+      expect(sanitizeHtml('<div submitting></div>'))
+          .to.equal('<div submitting=""></div>');
+      expect(sanitizeHtml('<div submit-success></div>'))
+          .to.equal('<div submit-success=""></div>');
+      expect(sanitizeHtml('<div submit-error></div>'))
+          .to.equal('<div submit-error=""></div>');
+      expect(sanitizeHtml('<div verify-error></div>'))
+          .to.equal('<div verify-error=""></div>');
+      expect(sanitizeHtml('<span visible-when-invalid="valueMissing"></span>'))
+          .to.equal('<span visible-when-invalid="valueMissing"></span>');
+      expect(sanitizeHtml('<span validation-for="form1"></span>'))
+          .to.equal('<span validation-for="form1"></span>');
+    });
+
+    it('should allow <amp-lightbox> attributes', () => {
+      expect(sanitizeHtml('<amp-lightbox scrollable></amp-lightbox>'))
+          .to.equal('<amp-lightbox scrollable=""></amp-lightbox>');
+    });
   });
 
   describe('sanitizeTagsForTripleMustache', () => {
@@ -418,30 +354,12 @@ function runSanitizerTests() {
           .to.be.equal('ac');
     });
 
-    it('should output style attributes if inline styles enabled', () => {
-      toggleExperiment(self, 'inline-styles', true,
-          /* opt_transientExperiment */ true);
-      expect(sanitizeTagsForTripleMustache(
-          '<b style="color: red">abc</b>'))
-          .to.be.equal('<b style="color: red">abc</b>');
-    });
-
     it('should compensate for broken markup', () => {
       expect(sanitizeTagsForTripleMustache('<b>a<i>b')).to.be.equal(
           '<b>a<i>b</i></b>');
     });
 
     describe('should sanitize `style` attribute', () => {
-      beforeEach(() => {
-        toggleExperiment(self, 'inline-styles', true,
-            /* opt_transientExperiment */ true);
-      });
-
-      afterEach(() => {
-        toggleExperiment(self, 'inline-styles', false,
-            /* opt_transientExperiment */ true);
-      });
-
       it('should allow valid styles',() => {
         expect(sanitizeHtml('<div style="color:blue">Test</div>'))
             .to.equal('<div style="color:blue">Test</div>');
@@ -470,148 +388,3 @@ function runSanitizerTests() {
     });
   });
 }
-
-describe('rewriteAttributesForElement', () => {
-  let location = 'https://pub.com/';
-  it('should not modify `target` on publisher origin', () => {
-    const element = document.createElement('a');
-    element.setAttribute('href', '#hash');
-
-    rewriteAttributesForElement(element, 'href', 'https://not.hash/',
-        location);
-
-    expect(element.getAttribute('href')).to.equal('https://not.hash/');
-    expect(element.hasAttribute('target')).to.equal(false);
-  });
-
-  describe('on CDN origin', () => {
-    beforeEach(() => {
-      location = 'https://cdn.ampproject.org';
-    });
-
-    it('should set `target` when rewrite <a> from hash to non-hash', () => {
-      const element = document.createElement('a');
-      element.setAttribute('href', '#hash');
-
-      rewriteAttributesForElement(
-          element, 'href', 'https://not.hash/', location);
-
-      expect(element.getAttribute('href')).to.equal('https://not.hash/');
-      expect(element.getAttribute('target')).to.equal('_top');
-    });
-
-    it('should remove `target` when rewrite <a> from non-hash to hash', () => {
-      const element = document.createElement('a');
-      element.setAttribute('href', 'https://not.hash/');
-
-      rewriteAttributesForElement(element, 'href', '#hash', location);
-
-      expect(element.getAttribute('href')).to.equal('#hash');
-      expect(element.hasAttribute('target')).to.equal(false);
-    });
-  });
-});
-
-describe('rewriteAttributeValue', () => {
-  it('should be case-insensitive to tag and attribute name', () => {
-    expect(rewriteAttributeValue('a', 'href', '/doc2'))
-        .to.equal(rewriteAttributeValue('A', 'HREF', '/doc2'));
-    expect(rewriteAttributeValue('amp-img', 'src', '/jpeg1'))
-        .to.equal(rewriteAttributeValue('AMP-IMG', 'SRC', '/jpeg1'));
-    expect(rewriteAttributeValue('amp-img', 'srcset', '/jpeg2 2x, /jpeg1 1x'))
-        .to.equal(rewriteAttributeValue(
-            'AMP-IMG', 'SRCSET', '/jpeg2 2x, /jpeg1 1x'));
-  });
-});
-
-describe('resolveUrlAttr', () => {
-  it('should throw if __amp_source_origin is set', () => {
-    allowConsoleError(() => {
-      expect(() => resolveUrlAttr('a', 'href',
-          '/doc2?__amp_source_origin=https://google.com',
-          'http://acme.org/doc1')).to.throw(/Source origin is not allowed/);
-    });
-  });
-
-  it('should be called by sanitizer', () => {
-    expect(sanitizeHtml('<a href="/path"></a>')).to.match(/http/);
-    expect(sanitizeHtml('<amp-img src="/path"></amp-img>')).to.match(/http/);
-    expect(sanitizeHtml('<amp-img srcset="/path"></amp-img>'))
-        .to.match(/http/);
-  });
-
-  it('should resolve non-hash href', () => {
-    expect(resolveUrlAttr('a', 'href',
-        '/doc2',
-        'http://acme.org/doc1'))
-        .to.equal('http://acme.org/doc2');
-    expect(resolveUrlAttr('a', 'href',
-        '/doc2',
-        'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('http://acme.org/doc2');
-    expect(resolveUrlAttr('a', 'href',
-        'http://non-acme.org/doc2',
-        'http://acme.org/doc1'))
-        .to.equal('http://non-acme.org/doc2');
-  });
-
-  it('should ignore hash URLs', () => {
-    expect(resolveUrlAttr('a', 'href',
-        '#hash1',
-        'http://acme.org/doc1'))
-        .to.equal('#hash1');
-  });
-
-  it('should resolve src', () => {
-    expect(resolveUrlAttr('amp-video', 'src',
-        '/video1',
-        'http://acme.org/doc1'))
-        .to.equal('http://acme.org/video1');
-    expect(resolveUrlAttr('amp-video', 'src',
-        '/video1',
-        'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('http://acme.org/video1');
-    expect(resolveUrlAttr('amp-video', 'src',
-        'http://non-acme.org/video1',
-        'http://acme.org/doc1'))
-        .to.equal('http://non-acme.org/video1');
-  });
-
-  it('should rewrite image http(s) src', () => {
-    expect(resolveUrlAttr('amp-img', 'src',
-        '/image1?a=b#h1',
-        'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1');
-    expect(resolveUrlAttr('amp-img', 'src',
-        'https://acme.org/image1?a=b#h1',
-        'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/s/acme.org/image1?a=b#h1');
-  });
-
-  it('should rewrite image http(s) srcset', () => {
-    expect(resolveUrlAttr('amp-img', 'srcset',
-        '/image2?a=b#h1 2x, /image1?a=b#h1 1x',
-        'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
-            'https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x');
-    expect(resolveUrlAttr('amp-img', 'srcset',
-        'https://acme.org/image2?a=b#h1 2x, /image1?a=b#h1 1x',
-        'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
-            'https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x');
-  });
-
-  it('should NOT rewrite image http(s) src when not on proxy', () => {
-    expect(resolveUrlAttr('amp-img', 'src',
-        '/image1',
-        'http://acme.org/doc1'))
-        .to.equal('http://acme.org/image1');
-  });
-
-  it('should NOT rewrite image data src', () => {
-    expect(resolveUrlAttr('amp-img', 'src',
-        'data:12345',
-        'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('data:12345');
-  });
-});

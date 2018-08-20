@@ -59,12 +59,15 @@ import {urls} from '../src/config';
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
 import {bodymovinanimation} from './bodymovinanimation';
+import {embedly} from './embedly';
 import {facebook} from './facebook';
 import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
+import {viqeoplayer} from './viqeoplayer';
+import {yotpo} from './yotpo';
 
 import {_ping_} from '../ads/_ping_';
 
@@ -103,6 +106,7 @@ import {adverline} from '../ads/adverline';
 import {adverticum} from '../ads/adverticum';
 import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
+import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
@@ -166,6 +170,7 @@ import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
+import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mytarget} from '../ads/mytarget';
@@ -217,6 +222,7 @@ import {uas} from '../ads/uas';
 import {unruly} from '../ads/unruly';
 import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
+import {videointelligence} from '../ads/videointelligence';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
@@ -244,6 +250,7 @@ import {zucks} from '../ads/zucks';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
+  aja: true,
   _ping_: true,
   '24smi': true,
   bringhub: true,
@@ -252,6 +259,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   kuadio: true,
   'mantis-recommend': true,
+  miximedia: true,
   mywidget: true,
   outbrain: true,
   plista: true,
@@ -306,6 +314,7 @@ register('adverline', adverline);
 register('adverticum', adverticum);
 register('advertserve', advertserve);
 register('affiliateb', affiliateb);
+register('aja', aja);
 register('amoad', amoad);
 register('appnexus', appnexus);
 register('appvador', appvador);
@@ -332,6 +341,7 @@ register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('eadv', eadv);
 register('eas', eas);
+register('embedly', embedly);
 register('engageya', engageya);
 register('epeex', epeex);
 register('eplanning', eplanning);
@@ -376,6 +386,7 @@ register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
 register('microad', microad);
+register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mytarget', mytarget);
@@ -429,7 +440,9 @@ register('uas', uas);
 register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
+register('videointelligence', videointelligence);
 register('videonow', videonow);
+register('viqeoplayer', viqeoplayer);
 register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
@@ -446,6 +459,7 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('yieldone', yieldone);
 register('yieldpro', yieldpro);
+register('yotpo', yotpo);
 register('zedo', zedo);
 register('zergnet', zergnet);
 register('zucks', zucks);

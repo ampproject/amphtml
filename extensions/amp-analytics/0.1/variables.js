@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {REPLACEMENT_EXP_NAME} from '../../../src/service/url-replacements-impl';
 import {Services} from '../../../src/services';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
@@ -132,18 +132,18 @@ export class VariableService {
     /** @private {!Object<string, *>} */
     this.macros_ = {};
 
-    this.register_('DEFAULT', defaultMacro);
-    this.register_('SUBSTR', substrMacro);
-    this.register_('TRIM', value => value.trim());
-    this.register_('JSON', value => JSON.stringify(value));
-    this.register_('TOLOWERCASE', value => value.toLowerCase());
-    this.register_('TOUPPERCASE', value => value.toUpperCase());
-    this.register_('NOT', value => String(!value));
-    this.register_('BASE64', value => btoa(value));
-    this.register_('HASH', this.hashMacro_.bind(this));
-    this.register_('IF',
+    this.register_('$DEFAULT', defaultMacro);
+    this.register_('$SUBSTR', substrMacro);
+    this.register_('$TRIM', value => value.trim());
+    this.register_('$JSON', value => JSON.stringify(value));
+    this.register_('$TOLOWERCASE', value => value.toLowerCase());
+    this.register_('$TOUPPERCASE', value => value.toUpperCase());
+    this.register_('$NOT', value => String(!value));
+    this.register_('$BASE64', value => base64UrlEncodeFromString(value));
+    this.register_('$HASH', this.hashMacro_.bind(this));
+    this.register_('$IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
-    this.register_('REPLACE', replaceMacro);
+    this.register_('$REPLACE', replaceMacro);
   }
 
   /**
@@ -151,7 +151,7 @@ export class VariableService {
    */
   getMacros() {
     const isV2ExpansionOn = this.win_ && isExperimentOn(this.win_,
-        REPLACEMENT_EXP_NAME);
+        'url-replacement-v2');
     return isV2ExpansionOn ? this.macros_ : {};
   }
 

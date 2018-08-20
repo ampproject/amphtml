@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   IframeTransportClient, IframeTransportContext,
 } from '../../../../3p/iframe-transport-client';
@@ -34,7 +33,7 @@ describe('iframe-transport-client', () => {
   let sentinel;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sentinel = createUniqueId();
     window.name = JSON.stringify({sentinel, type: 'some-vendor'});
     iframeTransportClient = new IframeTransportClient(window);
@@ -47,7 +46,7 @@ describe('iframe-transport-client', () => {
   /**
    * Sends a message from the current window to itself
    * @param {string} type Type of the message.
-   * @param {!JsonObject} object Message payload.
+   * @param {!JsonObject} data Message payload.
    */
   function send(type, data) {
     const object = {};

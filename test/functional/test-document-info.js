@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -25,7 +24,7 @@ describe('document-info', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -232,4 +231,60 @@ describe('document-info', () => {
     });
   });
 
+  it('should provide the replaceParams for an AMP landing page', () => {
+    const base = 'https://cdn.ampproject.org/a/www.origin.com/foo/';
+    const win = {
+      document: {
+        nodeType: /* document */ 9,
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
+      },
+      Math: {random() { return 0.123456789; }},
+      location: {
+        href: base + '?f=0&amp_r=test%3Dhello%20world',
+      },
+    };
+    win.document.defaultView = win;
+    installDocService(win, /* isSingleDoc */ true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
+        .to.deep.equal({'test': 'hello world'});
+  });
+
+  it('should not have replaceParams for non-AMP landing page', () => {
+    const base = 'https://cdn.ampproject.org/v/www.origin.com/foo/';
+    const win = {
+      document: {
+        nodeType: /* document */ 9,
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
+      },
+      Math: {random() { return 0.123456789; }},
+      location: {
+        href: base + '?f=0&amp_r=test%3Dhello%20world',
+      },
+    };
+    win.document.defaultView = win;
+    installDocService(win, /* isSingleDoc */ true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
+        .to.deep.equal({});
+  });
+
+  it('should not provide the replaceParams if invalid', () => {
+    const base = 'https://cdn.ampproject.org/a/www.origin.com/foo/';
+    const win = {
+      document: {
+        nodeType: /* document */ 9,
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
+      },
+      Math: {random() { return 0.123456789; }},
+      location: {
+        href: base + '?f=0&amp_r=%3Dinvalid',
+      },
+    };
+    win.document.defaultView = win;
+    installDocService(win, /* isSingleDoc */ true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
+        .to.deep.equal({});
+  });
 });

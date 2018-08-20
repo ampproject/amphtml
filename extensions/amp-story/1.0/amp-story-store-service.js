@@ -16,11 +16,44 @@
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
+import {registerServiceBuilder} from '../../../src/service';
 
 
 /** @type {string} */
 const TAG = 'amp-story';
+
+
+/**
+ * Util function to retrieve the store service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param  {!Window} win
+ * @return {!AmpStoryStoreService}
+ */
+export const getStoreService = win => {
+  let service = Services.storyStoreService(win);
+
+  if (!service) {
+    service = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => service);
+  }
+
+  return service;
+};
+
+
+/**
+ * Different UI experiences to display the story.
+ * @const @enum {number}
+ */
+export const UIType = {
+  MOBILE: 0,
+  DESKTOP: 1,
+  SCROLL: 2,
+};
 
 
 /**
@@ -31,6 +64,7 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    accessstate: boolean,
  *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
@@ -39,10 +73,13 @@ const TAG = 'amp-story';
  *    landscapestate: boolean,
  *    mutedstate: boolean,
  *    pausedstate: boolean,
+ *    rtlstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
+ *    uistate: !UIType,
  *    consentid: ?string,
  *    currentpageid: string,
+ *    currentpageindex: number,
  * }}
  */
 export let State;
@@ -59,6 +96,7 @@ export const StateProperty = {
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
 
   // App States.
+  ACCESS_STATE: 'accessstate', // amp-access paywall.
   AD_STATE: 'adstate',
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
@@ -67,8 +105,10 @@ export const StateProperty = {
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
   PAUSED_STATE: 'pausedstate',
+  RTL_STATE: 'rtlstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
+  UI_STATE: 'uistate',
 
   // App data.
   CONSENT_ID: 'consentid',
@@ -81,16 +121,18 @@ export const StateProperty = {
 export const Action = {
   CHANGE_PAGE: 'setcurrentpageid',
   SET_CONSENT_ID: 'setconsentid',
+  TOGGLE_ACCESS: 'toggleaccess',
   TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
-  TOGGLE_DESKTOP: 'toggledesktop',
   TOGGLE_INFO_DIALOG: 'toggleinfodialog',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
   TOGGLE_PAUSED: 'togglepaused',
+  TOGGLE_RTL: 'togglertl',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
+  TOGGLE_UI: 'toggleui',
 };
 
 
@@ -103,6 +145,13 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    // Triggers the amp-acess paywall.
+    case Action.TOGGLE_ACCESS:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.ACCESS_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
       return /** @type {!State} */ (Object.assign(
@@ -114,10 +163,6 @@ const actions = (state, action, data) => {
       }
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
-    // Triggers the desktop UI.
-    case Action.TOGGLE_DESKTOP:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
       return /** @type {!State} */ (Object.assign(
@@ -139,6 +184,9 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_PAUSED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.PAUSED_STATE]: !!data}));
+    case Action.TOGGLE_RTL:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.RTL_STATE]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
@@ -147,6 +195,13 @@ const actions = (state, action, data) => {
           {}, state, {
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.SHARE_MENU_STATE]: !!data,
+          }));
+    case Action.TOGGLE_UI:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            // Keep DESKTOP_STATE for compatiblity with v0.1.
+            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP,
+            [StateProperty.UI_STATE]: data,
           }));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
@@ -189,7 +244,7 @@ export class AmpStoryStoreService {
    * @return {*}
    */
   get(key) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Unknown state ${key}.`);
       return;
     }
@@ -204,7 +259,7 @@ export class AmpStoryStoreService {
    *                                     triggered with current value.
    */
   subscribe(key, listener, callToInitialize = false) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
     }
@@ -250,6 +305,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
@@ -258,8 +314,10 @@ export class AmpStoryStoreService {
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAUSED_STATE]: false,
+      [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
+      [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,

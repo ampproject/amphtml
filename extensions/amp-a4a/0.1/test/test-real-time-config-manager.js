@@ -635,6 +635,30 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
+    it('should handle empty urls array', () => {
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.rtcConfig_.urls = [];
+      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+    });
+
+    it('should handle empty vendors object', () => {
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.rtcConfig_.vendors = {};
+      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+    });
+
+    it('should handle missing urls array', () => {
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.rtcConfig_.urls = undefined;
+      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+    });
+
+    it('should handle missing vendors object', () => {
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.rtcConfig_.vendors = undefined;
+      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+    });
+
     it('should clear just invalid custom URLs', () => {
       rtc.rtcConfig_.vendors = {
         'vendorA': {'sendRegardlessOfConsentState': true,
@@ -717,6 +741,23 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'url': 'https://www.rtc.com/example1'},
         'https://www.other-rtc.com/example2'];
       rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should always clear RTC for a new consent state', () => {
+      rtc.consentState_ = 'FAKE_NEW_CONSENT_STATE';
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expectedRtcConfig.urls = [];
+      expectedRtcConfig.vendors = {};
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should not clear RTC for a null consent state', () => {
+      rtc.consentState_ = null;
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });

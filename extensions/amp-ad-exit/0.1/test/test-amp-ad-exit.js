@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-import {
-  ANALYTICS_IFRAME_TRANSPORT_CONFIG,
-} from '../../../amp-analytics/0.1/iframe-transport-vendors';
 import {AmpAdExit} from '../amp-ad-exit';
 import {FilterType} from '../filters/filter';
+import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {installTimerService} from '../../../../src/service/timer-impl';
+import {setParentWindow} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
@@ -160,27 +160,16 @@ describes.realWin('amp-ad-exit', {
     adDiv.style.width = '200px';
     adDiv.style.height = '200px';
     win.document.body.appendChild(adDiv);
-    // TODO(jonkeller): Long-term, test with amp-ad-exit enclosed inside amp-ad,
-    // so we don't have to do this hack.
-    sandbox.stub(AmpAdExit.prototype, 'getAmpAdResourceId_').callsFake(
-        () => String(Math.round(Math.random() * 10000)));
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create({useFakeTimers: true});
+    sandbox = sinon.createSandbox({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
     addAdDiv();
-    // TODO(jonkeller): Remove after rebase
-    win.top.document.body.getResourceId = () => '6789';
-    // TEST_3P_VENDOR must be in ANALYTICS_IFRAME_TRANSPORT_CONFIG
+    // TEST_3P_VENDOR must be in IFRAME_TRANSPORTS
     // *before* makeElementWithConfig
-    ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR] =
-      ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR] || {
-        transport: {
-          iframe: '/nowhere.html',
-        },
-      };
+    IFRAME_TRANSPORTS[TEST_3P_VENDOR] = '/nowhere.html';
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -192,7 +181,7 @@ describes.realWin('amp-ad-exit', {
     env.win.document.body.removeChild(env.win.document.getElementById('ad'));
     element = undefined;
     // Without the following, will break amp-analytics' test-vendor.js
-    delete ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR];
+    delete IFRAME_TRANSPORTS[TEST_3P_VENDOR];
   });
 
   it('should reject non-JSON children', () => {
@@ -673,5 +662,24 @@ describes.realWin('amp-ad-exit', {
 
     expect(makeElementWithConfig(unkVendor))
         .to.eventually.be.rejectedWith(/Unknown vendor/);
+  });
+
+  it('getAmpAdResourceId_ should reference AMP top window', () => {
+    const frame = win.document.createElement('iframe');
+    win.document.body.appendChild(frame);
+    const doc = frame.contentDocument;
+    const ampAd = doc.createElement('amp-ad');
+    ampAd.getResourceId = () => 12345;
+    doc.body.appendChild(ampAd);
+    const adFrame = doc.createElement('iframe');
+    ampAd.appendChild(adFrame);
+    const ampAdExitElement =
+        adFrame.contentDocument.createElement('amp-ad-exit');
+    adFrame.contentDocument.body.appendChild(ampAdExitElement);
+    installTimerService(frame.contentWindow);
+    installPlatformService(frame.contentWindow);
+    setParentWindow(adFrame.contentWindow, frame.contentWindow);
+    expect(new AmpAdExit(ampAdExitElement).getAmpAdResourceId_())
+        .to.equal('12345');
   });
 });
