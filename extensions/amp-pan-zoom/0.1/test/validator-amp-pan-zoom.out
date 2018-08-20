@@ -44,7 +44,7 @@ FAIL
 |      <svg></svg>
 |    </amp-pan-zoom>
 |
-|    <amp-pan-zoom layout="fill" controls disable-double-tap>
+|    <amp-pan-zoom layout="fill" disable-double-tap>
 |      <div></div>
 |    </amp-pan-zoom>
 |
