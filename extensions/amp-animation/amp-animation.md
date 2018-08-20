@@ -71,8 +71,7 @@ defined as an `animations` array:
 
 ### Placement in DOM
 
-Initially, `<amp-animation>` is only allowed to be placed as a direct child of `<body>` element. This restriction
-will be removed in the near future.
+`<amp-animation>` is only allowed to be placed as a direct child of `<body>` element if `trigger="visibility"`. If `trigger` is not specified and animation's playback is controlled programmatically via its actions, it can be placed anywhere in the DOM.
 
 ### Animation component
 
