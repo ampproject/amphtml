@@ -203,9 +203,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.element.hasAttribute('controls')) {
-      this.createZoomButton_();
-    }
+    this.createZoomButton_();
     return this.resetContentDimensions_().then(this.setupGestures_());
   }
 
