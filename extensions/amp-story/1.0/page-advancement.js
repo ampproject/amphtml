@@ -332,12 +332,14 @@ class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    */
   isProtectedTarget_(event) {
-    const elementRole = event.target.getAttribute('role');
+    return !!closest(dev().assertElement(event.target), el => {
+      const elementRole = el.getAttribute('role');
 
-    if (elementRole) {
-      return !!TAPPABLE_ARIA_ROLES[elementRole.toLowerCase()];
-    }
-    return false;
+      if (elementRole) {
+        return !!TAPPABLE_ARIA_ROLES[elementRole.toLowerCase()];
+      }
+      return false;
+    }, /* opt_stopAt */ this.element_);
   }
 
 
