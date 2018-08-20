@@ -400,7 +400,7 @@ export class BaseElement {
    * prerender when document itself is not yet visible (pre-render mode).
    *
    * The return value of this function is used to determine whether or not the
-   * element will be built and laid out during prerender mode. Therefore, any
+   * element will be built _and_ laid out during prerender mode. Therefore, any
    * changes to the return value _after_ buildCallback() will have no affect.
    * @return {boolean}
    */
