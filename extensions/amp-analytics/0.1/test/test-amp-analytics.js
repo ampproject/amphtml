@@ -15,7 +15,7 @@
  */
 
 import {ANALYTICS_CONFIG} from '../vendors';
-import {AmpAnalytics} from '../amp-analytics';
+import {AmpAnalytics, Priority} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {
   ClickEventTracker,
@@ -290,6 +290,219 @@ describes.realWin('amp-analytics', {
         }
       });
     }
+  });
+
+  describe('Linkers', () => {
+    let analytics;
+
+    beforeEach(() => {
+      sandbox.stub(Services, 'documentInfoForDoc')
+          .returns({
+            sourceUrl: 'www.example.com ',
+            canonicalUrl: 'www.example.com',
+          });
+
+      const el = doc.createElement('amp-analytics');
+      el.setAttribute('type', 'foo');
+      doc.body.appendChild(el);
+      analytics = new AmpAnalytics(el);
+      analytics.getAmpDoc = () => ampdoc;
+    });
+
+    it('registers the callback if given linkers config', () => {
+      expectAsyncConsoleError(noTriggersError);
+      expectAsyncConsoleError(noRequestStringsError);
+
+      const config = {
+        linkers: {
+          testLinker: {
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+              gclid: '123',
+            },
+          },
+        },
+      };
+
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .resolves(config);
+
+      const navigation = Services.navigationForDoc(analytics.element);
+      const registerStub = sandbox.stub(navigation,
+          'registerAnchorMutator');
+      analytics.buildCallback();
+      return analytics.layoutCallback().then(() => {
+        expect(registerStub.calledOnce).to.be.true;
+        return expect(registerStub).calledWith(
+            sinon.match.func,
+            Priority.LINKER,
+        );
+      });
+    });
+
+    it('does not register the callback if no linkers config', () => {
+      expectAsyncConsoleError(noTriggersError);
+      expectAsyncConsoleError(noRequestStringsError);
+
+      const config = {};
+
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .resolves(config);
+
+      const navigation = Services.navigationForDoc(analytics.element);
+      const registerStub = sandbox.stub(navigation,
+          'registerAnchorMutator');
+      analytics.buildCallback();
+      return analytics.layoutCallback().then(() => {
+        return expect(registerStub.notCalled).to.be.true;
+      });
+    });
+
+    it('starts resolving macros and adds them to map for later use', () => {
+      expectAsyncConsoleError(noTriggersError);
+      expectAsyncConsoleError(noRequestStringsError);
+
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+              gclid: '234',
+            },
+          },
+          testLinker2: {
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      };
+
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .resolves(config);
+
+      const navigation = Services.navigationForDoc(analytics.element);
+      sandbox.stub(navigation, 'registerAnchorMutator');
+
+      analytics.buildCallback();
+      return analytics.layoutCallback().then(() => {
+        return Promise.all(analytics.allLinkerPromises_);
+      }).then(() => {
+        const res1 = (analytics.resolvedLinkers_['testLinker1']).split('~');
+        const res2 = (analytics.resolvedLinkers_['testLinker2']).split('~');
+
+        expect(res1[2]).to.equal('_key');
+        expect(res1[3]).to.match(/^amp-([a-zA-Z0-9_-]+)/);
+        expect(res1[4]).to.equal('gclid');
+        expect(res1[5]).to.equal('234');
+
+        expect(res2[2]).to.equal('foo');
+        return expect(res2[3]).to.equal('bar');
+      });
+    });
+
+    it('should add linker', () => {
+      expectAsyncConsoleError(noTriggersError);
+      expectAsyncConsoleError(noRequestStringsError);
+
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+              gclid: '234',
+            },
+          },
+        },
+      };
+
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .resolves(config);
+
+      const navigation = Services.navigationForDoc(analytics.element);
+      sandbox.stub(navigation, 'registerAnchorMutator');
+
+      analytics.buildCallback();
+      return analytics.layoutCallback().then(() => {
+        return Promise.all(analytics.allLinkerPromises_);
+      }).then(() => {
+        const a = document.createElement('a');
+        a.href = 'https://www.example.com';
+        a.hostname = 'www.example.com';
+
+        analytics.linkerCallback_(a);
+        return expect(a.href).to.not.equal('https://www.example.com');
+      });
+    });
+
+    it('should not add linker if not proxy && proxyOnly == true', () => {
+      expectAsyncConsoleError(noTriggersError);
+      expectAsyncConsoleError(noRequestStringsError);
+
+      const config = {
+        linkers: {
+          testLinker1: {
+            proxyOnly: true,
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+              gclid: '234',
+            },
+          },
+        },
+      };
+
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .resolves(config);
+
+      const navigation = Services.navigationForDoc(analytics.element);
+      sandbox.stub(navigation, 'registerAnchorMutator');
+
+      analytics.buildCallback();
+      return analytics.layoutCallback().then(() => {
+        return Promise.all(analytics.allLinkerPromises_);
+      }).then(() => {
+        const a = document.createElement('a');
+        a.href = 'https://www.example.com';
+        a.hostname = 'www.example.com';
+
+        analytics.linkerCallback_(a);
+        return expect(a.href).to.equal('https://www.example.com/');
+      });
+    });
+
+    it('should not add linker destination domains do not match', () => {
+      expectAsyncConsoleError(noTriggersError);
+      expectAsyncConsoleError(noRequestStringsError);
+
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+            },
+            destinationDomains: ['www.foo.com'],
+          },
+        },
+      };
+
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .resolves(config);
+
+      const navigation = Services.navigationForDoc(analytics.element);
+      sandbox.stub(navigation, 'registerAnchorMutator');
+
+      analytics.buildCallback();
+      return analytics.layoutCallback().then(() => {
+        return Promise.all(analytics.allLinkerPromises_);
+      }).then(() => {
+        const a = document.createElement('a');
+        a.href = 'https://www.example.com';
+        a.hostname = 'www.example.com';
+
+        analytics.linkerCallback_(a);
+        return expect(a.href).to.equal('https://www.example.com/');
+      });
+    });
   });
 
   describe('iframe transport', () => {
