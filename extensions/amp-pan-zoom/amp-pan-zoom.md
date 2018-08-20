@@ -122,6 +122,14 @@ The following public CSS classes are exposed to allow customization for the zoom
 Use `.amp-pan-zoom-button` to customize the dimensions, positioning, background-color, border-radius of all buttons.
 Use `.amp-pan-zoom-in-icon` to customize the icon for the zoom in button.
 Use `.amp-pan-zoom-out-icon` to customize the icon for the zoom out button.
+You can also hide these buttons entirely and create your own using the `transform` action. To hide them, just apply
+
+```
+.amp-pan-zoom-button {
+  display: none;
+}
+```
+
 
 ## Validation
 See [amp-pan-zoom rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pan-zoom/validator-amp-pan-zoom.protoascii) in the AMP validator specification.
