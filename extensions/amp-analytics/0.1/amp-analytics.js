@@ -28,13 +28,11 @@ import {
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
 import {LayoutPriority} from '../../../src/layout';
-import {Priority} from '../../../src/service/navigation';
+import {LinkerManager} from './linker-manager';
 import {
   RequestHandler,
 } from './requests';
 import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
-import {createLinker} from './linker';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
@@ -95,12 +93,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = Services.cryptoFor(this.win);
-
-    /** @private {!Array<Promise>} @visibleForTesting */
-    this.allLinkerPromises_ = [];
-
-    /** @private {JsonObject} */
-    this.resolvedLinkers_ = dict();
 
     /** @private {?Promise} */
     this.iniPromise_ = null;
@@ -226,7 +218,9 @@ export class AmpAnalytics extends AMP.BaseElement {
               this.config_ = config;
             })
             .then(this.registerTriggers_.bind(this))
-            .then(this.initLinker_.bind(this));
+            .then(() => {
+              new LinkerManager(this, this.config_).init();
+            });
     return this.iniPromise_;
   }
 
@@ -385,118 +379,6 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       const eventType = config['on'];
       rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
-    }
-  }
-
-  /**
-   * Start resolving any macros that may exist in the linker configuration
-   * and register the callback with the navigation service. Since macro
-   * resolution is aynchronous the callback may be looking for these values
-   * before they are ready.
-   * @private
-   */
-  initLinker_() {
-    if (!this.config_['linkers']) {
-      return;
-    }
-
-    const TAG = this.getName_();
-
-    const linkerNames = Object.keys(this.config_['linkers']);
-    dev().assert(linkerNames.length,
-        `${TAG}: use of "linkers" requires at least one name given.`);
-
-    // Each linker config has it's own set of macros to resolve.
-    this.allLinkerPromises_ = linkerNames.map(name => {
-      const ids = this.config_['linkers'][name]['ids'];
-
-      dev().assert(ids,
-          `${TAG}: "ids" is a required field for use of "linkers".`);
-
-      // Keys for linker data.
-      const keys = Object.keys(ids);
-      // Expand the value of each key value pair (if necessary).
-      const valuePromises = keys.map(key => {
-        const expansionOptions = new ExpansionOptions(this.config_['vars'],
-            /* opt_iterations */ undefined,
-            /* opt_noencode */ true);
-        return this.expandTemplateWithUrlParams_(ids[key],
-            expansionOptions);
-      });
-
-      return Promise.all(valuePromises).then(values => {
-        // Rejoin each key with its expanded value.
-        const expandedIds = {};
-        values.forEach((value, i) => {
-          // Omit pair if value resolves to empty.
-          if (value) {
-            expandedIds[keys[i]] = value;
-          }
-        });
-        this.resolvedLinkers_[name] =
-            createLinker(/* version */ '1', expandedIds);
-      });
-    });
-
-    const navigation = Services.navigationForDoc(this.element);
-    navigation.registerAnchorMutator(
-        this.linkerCallback_.bind(this), Priority.LINKER);
-  }
-
-  /**
-   * Called on click on any anchor element. Adds linker param if a match for
-   * given linker configuration.
-   * @param {!Element} element
-   * @private
-   */
-  linkerCallback_(element) {
-    if (!element.href) {
-      return;
-    }
-
-    const linkerConfigs = this.config_['linkers'];
-    for (const linkerName in linkerConfigs) {
-      // The linker param is created asynchronously. This callback should be
-      // synchronous, so we skip if value is not there yet.
-      if (this.resolvedLinkers_[linkerName]) {
-        this.maybeAppendLinker_(element, linkerName, linkerConfigs[linkerName]);
-      }
-    }
-  }
-
-  /**
-   * Appends the linker param if the given url falls within rules defined in
-   * linker configuration.
-   * @param {!Element} el
-   * @param {string} name
-   * @param {!Object} config
-   * @private
-   */
-  maybeAppendLinker_(el, name, config) {
-    const {href, hostname} = el;
-    // Not on proxy but proxyOnly option is set.
-    const isProxyOrigin = Services.urlForDoc(this.element).isProxyOrigin(href);
-    if (config['proxyOnly'] && !isProxyOrigin) {
-      return;
-    }
-
-    // If no domains given, default to canonical and source.
-    let domains = config['destinationDomains'];
-    if (!domains) {
-      const {sourceUrl, canonicalUrl} = Services
-          .documentInfoForDoc(this.element);
-
-      domains = [sourceUrl, canonicalUrl];
-    }
-
-    // See if any domains match.
-    for (let i = 0; i < domains.length; i++) {
-      if (domains[i] === hostname) {
-        const newUrl = addParamToUrl(href, name, this.resolvedLinkers_[name]);
-        el.href = newUrl;
-        // If we find a match we can quit.
-        return;
-      }
     }
   }
 
@@ -781,9 +663,8 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} spec Expression that needs to be expanded.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<string>} expanded spec.
-   * @private
    */
-  expandTemplateWithUrlParams_(spec, expansionOptions) {
+  expandTemplateWithUrlParams(spec, expansionOptions) {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
             this.element).expandUrlAsync(key));
