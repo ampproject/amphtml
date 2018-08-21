@@ -164,6 +164,13 @@ event.value</pre>
     <td>Elements that fire <code>input</code> event.</td>
     <td>Same as <code>change</code> event data.</td>
   </tr>
+  <!-- longpress -->
+  <tr>
+    <td><code>longpress</code></td>
+    <td>Fired when pressing an element for more than 0.5s.</td>
+    <td>all elements</td>
+    <td></td>
+  </tr>
 </table>
 
 ### amp-carousel[type="slides"]

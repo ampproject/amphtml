@@ -21,7 +21,7 @@ import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
-import {getDetail} from '../event-helper';
+import {getDetail, listen} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {
@@ -254,6 +254,7 @@ export class ActionService {
     this.addEvent('input-throttled');
     this.addEvent('valid');
     this.addEvent('invalid');
+    this.addEvent('longpress');
   }
 
   /** @override */
@@ -334,6 +335,28 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
+    } else if (name == 'longpress') {
+      // TODO: should we consider mousedown/touchstart and then
+      // mousemove/touchmove out of rect case? (seems impacts performance)
+      const listenLongPressEvents = (startPressEvent, endPressEvent) => {
+        this.root_.addEventListener(startPressEvent, event => {
+          const element = dev().assertElement(event.target);
+          let timerId = 0;
+          const unlistenEndPressEvent =
+            listen(this.root_, endPressEvent, () => {
+              if (timerId) {
+                timer.cancel(timerId);
+              }
+              unlistenEndPressEvent();
+            });
+          const timer = Services.timerFor(this.ampdoc.win);
+          timerId = timer.delay(() => {
+            this.trigger(element, name, event, ActionTrust.HIGH);
+          }, 500);
+        });
+      };
+      listenLongPressEvents('mousedown', 'mouseup');
+      listenLongPressEvents('touchstart', 'touchend');
     }
   }
 
