@@ -66,8 +66,8 @@ export class LinkerManager {
       const vendorConfig = this.config_['linkers'][name];
 
       if (vendorConfig['enabled'] !== true) {
-        user().warn(`${TAG}: linker config for ${name} is not enabled and` +
-            'will be ignored.')
+        user().warn(TAG, `linker config for ${name} is not enabled and` +
+            'will be ignored.');
         return;
       }
 

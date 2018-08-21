@@ -29,7 +29,7 @@ describe('Linkers', () => {
     // Linker uses a timestamp value to generate checksum.
     sandbox = sinon.sandbox;
 
-    expandStub = sinon.stub();
+    expandStub = sandbox.stub();
     analytics = {
       expandTemplateWithUrlParams: expandStub,
       element: {},
