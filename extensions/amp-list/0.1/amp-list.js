@@ -401,7 +401,8 @@ export class AmpList extends AMP.BaseElement {
             if (layout == Layout.NODISPLAY || layout == Layout.FILL) {
               return;
             } else if (layout == Layout.FLEX_ITEM) {
-              // TODO (cathyxz): flex item does not play nice with layout container
+              // TODO (cathyxz): flex item does not play nice
+              // with layout container
               this.attemptChangeHeight(scrollHeight).catch(() => {});
             } else if (layout !== Layout.CONTAINER) {
               this.changeToLayoutContainer_();
