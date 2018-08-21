@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Capability} from './service/viewer-impl';
 import {dict, map} from './utils/object';
 import {iterateCursor} from './dom';
 
@@ -54,7 +53,7 @@ export class SsrTemplateHelper {
    * @return {boolean}
    */
   isSupported() {
-    return this.viewer_.canRenderTemplates();
+    return this.viewer_.hasCapability('viewerRenderTemplate');
   }
 
   /**
@@ -82,7 +81,7 @@ export class SsrTemplateHelper {
       'sourceAmpComponent': this.sourceComponent_,
     });
     return this.viewer_.sendMessageAwaitResponse(
-        Capability.VIEWER_RENDER_TEMPLATE, data);
+        'viewerRenderTemplate', data);
   }
 
   /**

@@ -86,8 +86,8 @@ export class NextPageService {
     /** @private {boolean} */
     this.documentQueued_ = false;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
+    /** @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = null;
 
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
@@ -136,7 +136,6 @@ export class NextPageService {
       this.hideSelector_ = this.config_.hideSelectors.join(',');
     }
 
-    this.viewer_ = Services.viewerForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
@@ -314,7 +313,7 @@ export class NextPageService {
         this.triggerAnalyticsEvent_(
             'amp-next-page-click', next.ampUrl, currentAmpUrl);
         const a2a =
-            this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+            this.navigation_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
         if (a2a) {
           // A2A is enabled, don't navigate the browser.
           e.preventDefault();

@@ -30,9 +30,7 @@ describe('amp-mustache 0.1', () => {
     templateElement = document.createElement('template');
     const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
     getServiceForDocStub.returns({
-      canRenderTemplates: () => viewerCanRenderTemplates,
-    });
-
+      hasCapability: unused => viewerCanRenderTemplates});
     template = new AmpMustache(templateElement);
   });
 
