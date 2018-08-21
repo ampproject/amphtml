@@ -21,9 +21,7 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function pulsepoint(global, data) {
-  validateData(data, [], [
-    'pid', 'tagid',
-  ]);
+  validateData(data, ['pid', 'tagid'], []);
   tag(global, data);
 }
 
