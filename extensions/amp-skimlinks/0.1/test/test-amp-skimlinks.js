@@ -179,7 +179,7 @@ describes.fakeWin('amp-skimlinks', {
     });
   });
 
-  describe.only('On page scan callback', () => {
+  describe('On page scan callback', () => {
     const guid = 'my-guid';
     const beaconResponse = Promise.resolve({guid});
     beforeEach(() => {
@@ -262,7 +262,6 @@ describes.fakeWin('amp-skimlinks', {
           ).to.be.true;
         });
       });
-
 
     });
   });
