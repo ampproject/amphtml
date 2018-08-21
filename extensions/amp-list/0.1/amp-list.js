@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {Deferred} from '../../../src/utils/promise';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -31,8 +32,7 @@ import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -95,8 +95,6 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
 
-    /** @private */
-    this.isSetToLayoutContainer_ = false;
   }
 
   /** @override */
@@ -392,23 +390,22 @@ export class AmpList extends AMP.BaseElement {
       const event = createCustomEvent(this.win,
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
-
-      if (resizeExperimentOn) {
-        // This needs to be gated behind the experiment 'amp-list-resize'
-        if (!this.isSetToLayoutContainer_) {
-          this.changeToLayoutContainer_();
-          this.isSetToLayoutContainer_ = true;
-        }
-      } else {
-        // Change height if needed.
-        this.measureElement(() => {
-          const scrollHeight = this.container_./*OK*/scrollHeight;
-          const height = this.element./*OK*/offsetHeight;
-          if (scrollHeight > height) {
+      // Change height if needed.
+      this.measureElement(() => {
+        const scrollHeight = this.container_./*OK*/scrollHeight;
+        const height = this.element./*OK*/offsetHeight;
+        if (scrollHeight > height) {
+          if (resizeExperimentOn) {
+            // This needs to be gated behind the experiment 'amp-list-resize'
+            const layout = this.element.getAttribute('layout');
+            if (layout !== Layout.CONTAINER) {
+              this.changeToLayoutContainer_();
+            }
+          } else {
             this.attemptChangeHeight(scrollHeight).catch(() => {});
           }
-        });
-      }
+        }
+      });
     });
   }
 
@@ -417,15 +414,45 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
-    this.element.setAttribute('layout', 'container');
-    const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
-    if (sizer) {
-      this.element.removeChild(sizer);
+    const layout = this.element.getAttribute('layout');
+    if (layout == Layout.NODISPLAY || layout == Layout.FILL) {
+      return;
     }
-    this.element.classList.remove(
-        'i-amphtml-layout-size-defined', 'i-amphtml-layout-responsive');
+    if (layout == Layout.RESPONSIVE) {
+      const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
+      if (sizer) {
+        this.element.removeChild(sizer);
+      }
+      this.element.classList.remove('i-amphtml-layout-responsive');
+    } else if (layout == Layout.FIXED) {
+      this.element.classList.remove('i-amphtml-layout-fixed');
+      setStyles(this.element, {
+        height: '',
+      });
+    } else if (layout == Layout.FIXED_HEIGHT) {
+      this.element.classList.remove('i-amphtml-layout-fixed-height');
+      setStyles(this.element, {
+        height: '',
+        width: '',
+      });
+    } else if (layout == Layout.INTRINSIC) {
+      const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
+      if (sizer) {
+        this.element.removeChild(sizer);
+      }
+      this.element.classList.remove('i-amphtml-layout-intrinsic');
+    } else if (layout == Layout.FLEX_ITEM) {
+      setStyles(this.element, {
+        height: '',
+        width: '',
+      });
+    }
+
+    this.element.classList.remove('i-amphtml-layout-size-defined');
     this.container_.classList.remove(
-        'i-amphtml-fill-content', 'i-amphtml-replaced-content');
+        'i-amphtml-fill-content',
+        'i-amphtml-replaced-content'
+    );
     // The overflow element is generally hidden with visibility hidden,
     // but after changing to layout container, this causes an undesirable
     // empty white space so we hide it with display none instead.
@@ -433,6 +460,8 @@ export class AmpList extends AMP.BaseElement {
     if (overflowElement) {
       toggle(overflowElement, false);
     }
+
+    this.element.setAttribute('layout', 'container');
   }
 
   /**
