@@ -114,8 +114,8 @@ export class BaseTemplate {
    * @return {boolean}
    */
   viewerCanRenderTemplates() {
-    return getServiceForDoc(
-        this.element, 'viewer').canRenderTemplates();
+    return getServiceForDoc(this.element, 'viewer')
+        .hasCapability('viewerRenderTemplate');
   }
 }
 
