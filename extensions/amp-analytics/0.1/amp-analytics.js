@@ -664,6 +664,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} spec Expression that needs to be expanded.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<string>} expanded spec.
+   * @private
    */
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_.expandTemplate(spec, expansionOptions)

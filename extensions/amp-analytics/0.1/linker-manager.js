@@ -19,8 +19,8 @@ import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {createLinker} from './linker';
-import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics-linker';
 
