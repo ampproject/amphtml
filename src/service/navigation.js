@@ -423,7 +423,7 @@ export class Navigation {
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {
-    user().assert(priority <= 10 && priority > 0,
+    dev().assert(priority <= 10 && priority > 0,
         'Priority must a number from 1-10.');
     user().assert(!this.anchorMutators_[priority],
         'Mutator with same priority is already in use.');

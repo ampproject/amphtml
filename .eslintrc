@@ -60,7 +60,6 @@
     }
   },
   "rules": {
-    "amphtml-internal/anchor-mutator-priority": 2,
     "amphtml-internal/closure-type-primitives": 2,
     "amphtml-internal/dict-string-keys": 2,
     "amphtml-internal/enforce-private-props": 2,
