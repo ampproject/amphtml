@@ -47,6 +47,7 @@ import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {startsWith} from '../string';
 import {toWin} from '../types';
+import {CustomElementExtensionDef} from '../friendly-iframe-embed';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -596,7 +597,7 @@ export class Extensions {
   }
 
   /**
-   * Create the missing amp extension HTML script element.
+   * Create the missing afrmp extension HTML script element.
    * @param {string} extensionId
    * @param {string=} opt_extensionVersion
    * @return {!Element} Script object
@@ -624,6 +625,25 @@ export class Extensions {
         opt_extensionVersion, getMode().localDev);
     scriptElement.src = scriptSrc;
     return scriptElement;
+  }
+
+  /**
+   *
+   * @param {!Array<!../friendly-iframe-embed.CustomElementExtensionDef|string>} customElementExtensions
+   * @param {string} extensionId
+   * @return {?CustomElementExtensionDef}
+   */
+  hasExtensionId(customElementExtensions, extensionId) {
+    customElementExtensions.forEach(extensionDefOrId => {
+      if (typeof extensionDefOrId == 'object'
+          && extensionId === extensionDefOrId.extensionId) {
+        return {extensionId, version: extensionDefOrId.version};
+      } else if (extensionDefOrId === extensionId) {
+        // Default to 0.1 version if not specified.
+        return {extensionId, version: '0.1'};
+      }
+    });
+    return null;
   }
 }
 

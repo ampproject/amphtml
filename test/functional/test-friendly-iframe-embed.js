@@ -137,10 +137,9 @@ describe('friendly-iframe-embed', () => {
   });
 
   it('should install extensions', () => {
-
     // Extensions preloading have been requested.
     extensionsMock.expects('preloadExtension')
-        .withExactArgs('amp-test')
+        .withExactArgs('amp-test', '0.1')
         .returns(Promise.resolve())
         .once();
 
@@ -156,7 +155,34 @@ describe('friendly-iframe-embed', () => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
+      extensionDefs: ['amp-test'],
+    });
+    return embedPromise.then(embed => {
+      expect(installExtWin).to.equal(embed.win);
+    });
+  });
+
+  it('should install extensions with versions', () => {
+    // Extensions preloading have been requested.
+    extensionsMock.expects('preloadExtension')
+        .withExactArgs('amp-mustache', '0.2')
+        .returns(Promise.resolve())
+        .once();
+
+    // Extensions are installed.
+    let installExtWin;
+    extensionsMock.expects('installExtensionsInChildWindow')
+        .withExactArgs(sinon.match(arg => {
+          installExtWin = arg;
+          return true;
+        }), [{extensionId: 'amp-mustache', version: '0.2'}],
+            /* preinstallCallback */ undefined)
+        .once();
+
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+      extensionDefs: [{extensionId: 'amp-mustache', version: '0.2'}],
     });
     return embedPromise.then(embed => {
       expect(installExtWin).to.equal(embed.win);
@@ -185,7 +211,7 @@ describe('friendly-iframe-embed', () => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
+      extensionDefs: ['amp-test'],
     });
     return embedPromise.then(embed => {
       resourcesMock.expects('removeForChildWindow')
@@ -219,7 +245,7 @@ describe('friendly-iframe-embed', () => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '',
-      extensionIds: [],
+      extensionDefs: [],
     });
     return embedPromise.then(embed => {
       expect(embed.isVisible()).to.be.false;

@@ -95,7 +95,7 @@ export class FriendlyFrameRenderer extends Renderer {
           host: element,
           url: /** @type {string} */ (adUrl),
           html: creativeMetadata.minifiedCreative,
-          extensionIds: creativeMetadata.customElementExtensions || [],
+          extensionDefs: creativeMetadata.customElementExtensions || [],
           fonts: fontsArray,
         }, embedWin => {
           installUrlReplacementsForEmbed(context.ampDoc, embedWin,

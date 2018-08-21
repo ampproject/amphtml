@@ -22,7 +22,6 @@ import {
 import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {Services} from '../../../src/services';
 import {getAmpAdMetadata} from './amp-ad-utils';
-import {pushIfNotExist} from '../../../src/utils/array';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
 
@@ -80,15 +79,30 @@ export class TemplateValidator extends Validator {
         .then(template => {
           const creativeMetadata = getAmpAdMetadata(template);
           if (parsedResponseBody.analytics) {
-            pushIfNotExist(
-                creativeMetadata['customElementExtensions'], 'amp-analytics');
+            const extensions = creativeMetadata['customElementExtensions'];
+            const ampAnalyticsExt =
+                this.extensions.hasExtensionId(extensions, 'amp-analytics');
+            if (!ampAnalyticsExt) {
+              extensions.push(ampAnalyticsExt);
+            }
           }
-          pushIfNotExist(
-              creativeMetadata['customElementExtensions'], 'amp-mustache');
-
+          const ampMustacheExt =
+              this.extensions.hasExtensionId(extensions, 'amp-mustache');
+          if (!ampMustacheExt) {
+            extensions.push(ampMustacheExt);
+          }
           const extensions = Services.extensionsFor(context.win);
           creativeMetadata.customElementExtensions.forEach(
-              extensionId => extensions./*OK*/preloadExtension(extensionId));
+              extensionDefOrId => {
+                let extensionId;
+                let version = '0.1';
+                if (typeof extensionDefOrId == 'object') {
+                  extensionId = extensionDefOrId.extensionId;
+                  version = extensionDefOrId.version;
+                }
+                extensions./*OK*/preloadExtension(extensionId, version);
+              });
+
           // TODO(levitzky) Add preload logic for fonts / images.
           return Promise.resolve(
               /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({

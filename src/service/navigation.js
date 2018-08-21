@@ -33,6 +33,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {toWin} from '../types';
+import PriorityQueue from '../utils/priority-queue';
 
 const TAG = 'navigation';
 /** @private @const {string} */
@@ -126,8 +127,12 @@ export class Navigation {
      */
     this.a2aFeatures_ = null;
 
-    /** @private @const {!Array<function(!Element)>} */
-    this.anchorMutators_ = [];
+    /**
+     * @type {!PriorityQueue<function(!Element)>}
+     * @private
+     * @const
+     */
+    this.anchorMutators_ = new PriorityQueue();
   }
 
   /**
@@ -279,10 +284,18 @@ export class Navigation {
     }
 
     // Handle anchor transformations.
+<<<<<<< HEAD
     this.anchorMutators_.forEach(callback => {
       callback(target);
+=======
+    let am = this.anchorMutators_.peek();
+    while (am) {
+      this.anchorMutators_.dequeue();
+      am(target);
+>>>>>>> use priority queue
       location = this.parseUrl_(target.href);
-    });
+      am = this.anchorMutators_.peek();
+    }
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
@@ -447,14 +460,7 @@ export class Navigation {
   registerAnchorMutator(callback, priority) {
     dev().assert(priority <= 10 && priority > 0,
         'Priority must a number from 1-10.');
-    user().assert(!this.anchorMutators_[priority],
-        'Mutator with same priority is already in use.');
-    // Note that we define a set priority, as making this boundless
-    // will create a large sparse array, which is not performant if iterating
-    // through when executing. If the number of registered anchor mutators
-    // exceeds 10 then we will need to either increase or modify the
-    // implementation. Please talk to @alabiaga @choumx @jridgewell.
-    this.anchorMutators_[priority] = callback;
+    this.anchorMutators_.enqueue(callback, priority);
   }
 
   /**
