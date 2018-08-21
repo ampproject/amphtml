@@ -21,6 +21,21 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
+    string: 'Sound off',
+    description: 'Text that informs users that the sound is off after they ' +
+          'click the mute button',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
+    string: 'Sound on',
+    description: 'Text that informs users that the sound is on after they ' +
+          'click the unmute button on a page with sound',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
+    string: 'This page has no sound',
+    description: 'Text that informs users that the sound is on after they ' +
+          'click the unmute button on a page without sound',
+  },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'More to read',
     description: 'Label to be placed as a title on top of related articles ' +

@@ -25,12 +25,15 @@ import {parseJson} from '../../../src/json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 31
+ * Next ID: 34
  *
  * @const @enum {string}
  */
 export const LocalizedStringId = {
   // amp-story
+  AMP_STORY_AUDIO_MUTE_BUTTON_TEXT: '31',
+  AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT: '32',
+  AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT: '33',
   AMP_STORY_BOOKEND_MORE_TO_READ_LABEL: '30',
   AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE: '29',
   AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL: '28',
