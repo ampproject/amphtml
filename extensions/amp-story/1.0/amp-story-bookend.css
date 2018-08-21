@@ -17,7 +17,7 @@
 @import './amp-story-share.css';
 
 .i-amphtml-story-bookend {
-  text-align: left !important;
+  text-align: start !important;
   color: #fff !important;
   bottom: 0 !important;
   display: flex !important;
@@ -28,10 +28,6 @@
   top: 0 !important;
   z-index: 100001 !important;
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
-
-[dir=rtl].i-amphtml-story-bookend {
-  text-align: right !important;
 }
 
 .i-amphtml-story-bookend.i-amphtml-hidden {
