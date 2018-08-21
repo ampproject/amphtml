@@ -751,6 +751,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
   * Checks if the page has any audio.
+  * @return {boolean}
   * @private
   */
   checkPageHasAudio_() {
@@ -768,8 +769,8 @@ export class AmpStoryPage extends AMP.BaseElement {
   */
   hasVideoWithAudio_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return Array.prototype.some.call(ampVideoEls, video =>
-      !video.hasAttribute('noaudio'));
+    return Array.prototype.some.call(
+        ampVideoEls, video => !video.hasAttribute('noaudio'));
   }
 
   /**

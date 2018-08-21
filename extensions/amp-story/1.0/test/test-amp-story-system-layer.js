@@ -95,20 +95,24 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
     storeService.dispatch(Action.TOGGLE_MUTED, true);
-    expect(systemLayer.getShadowRoot()).to.have.attribute('muted', 'muted');
+    expect(systemLayer.getShadowRoot()).to.have.attribute('muted');
   });
 
   it('should show that this page has no sound when unmuted', () => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, false);
     storeService.dispatch(Action.TOGGLE_MUTED, false);
-    expect(systemLayer.getShadowRoot()).to.have.attribute('muted', 'noaudio');
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('muted');
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute(
+        'i-amphtml-story-audio-state');
   });
 
   it('should show that the sound is on when unmuted', () => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
     storeService.dispatch(Action.TOGGLE_MUTED, false);
-    expect(systemLayer.getShadowRoot()).to.have.attribute('muted', 'audioon');
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('muted');
+    expect(systemLayer.getShadowRoot()).to.have.attribute(
+        'i-amphtml-story-audio-state');
   });
 });

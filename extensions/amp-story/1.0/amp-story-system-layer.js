@@ -41,16 +41,28 @@ const AD_SHOWING_ATTRIBUTE = 'ad-showing';
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
 /** @private @const {string} */
+const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
+
+/** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
 /** @private @const {string} */
+const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
+
+/** @private @const {string} */
+const HAS_AUDIO_ATTRIBUTE = 'i-amphtml-story-audio-state';
+
+/** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
 /** @private @const {string} */
 const INFO_CLASS = 'i-amphtml-story-info-control';
+
+/** @private @const {number} */
+const hideTimeout = 1500;
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -217,6 +229,7 @@ export class SystemLayer {
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
+
   }
 
   /**
@@ -259,12 +272,12 @@ export class SystemLayer {
     if (Services.viewerForDoc(this.win_.document.documentElement)
         .isEmbedded()) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
-      this.getShadowRoot().setAttribute('info', '');
+      this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
-      this.getShadowRoot().removeAttribute('info');
+      this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
 
-    this.getShadowRoot().setAttribute('messagedisplay', 'noshow');
+    this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     return this.getRoot();
   }
 
@@ -332,6 +345,10 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
       this.onRtlStateUpdate_(rtlState);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.PAGE_HAS_AUDIO_STATE, audio => {
+      this.onPageAudioStateUpdate_(audio);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -396,28 +413,36 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to the presence of audio on a page to determine which audio messages
+   * to display.
+   * @param {boolean} pageAudio
+   * @private
+   */
+  onPageAudioStateUpdate_(pageAudio) {
+    this.vsync_.mutate(() => {
+      pageAudio ?
+        this.getShadowRoot().setAttribute(HAS_AUDIO_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(HAS_AUDIO_ATTRIBUTE);
+    });
+  }
+  /**
    * Reacts to muted state updates.
    * @param {boolean} isMuted
    * @private
    */
   onMutedStateUpdate_(isMuted) {
     this.vsync_.mutate(() => {
-      if (isMuted) {
-        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'muted');
-      } else if (this.storeService_.get(StateProperty.PAGE_HAS_AUDIO_STATE)) {
-        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'audioon');
-      } else {
-        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, 'noaudio');
-      }
+      isMuted ?
+        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
     });
   }
 
   /**
    * Hides element after elapsed time.
-   * @param {number} hideTimeout
    * @private
    */
-  hideAfterTimeout_(hideTimeout) {
+  hideAfterTimeout_() {
     this.timer_.delay(() => this.hideInteral_(), hideTimeout);
   }
 
@@ -430,7 +455,7 @@ export class SystemLayer {
       return;
     }
     this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute('messagedisplay', 'noshow');
+      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     });
   }
 
@@ -481,10 +506,9 @@ export class SystemLayer {
    */
   onAudioIconClick_(mute) {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
-    const hideTimeout = 1500;
     this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute('messagedisplay', 'show');
-      this.hideAfterTimeout_(hideTimeout);
+      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
+      this.hideAfterTimeout_();
     });
   }
 
