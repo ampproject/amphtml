@@ -31,7 +31,6 @@ import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 
 /** @const {string} */
@@ -375,7 +374,7 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
-    const resizeExperimentOn = isExperimentOn(this.win, 'amp-list-resize');
+    const autoResize = this.element.hasAttribute('auto-resize');
 
     this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
@@ -395,7 +394,7 @@ export class AmpList extends AMP.BaseElement {
         const scrollHeight = this.container_./*OK*/scrollHeight;
         const height = this.element./*OK*/offsetHeight;
         if (scrollHeight > height) {
-          if (resizeExperimentOn) {
+          if (autoResize) {
             // This needs to be gated behind the experiment 'amp-list-resize'
             const layout = this.element.getAttribute('layout');
             if (layout == Layout.NODISPLAY || layout == Layout.FILL) {

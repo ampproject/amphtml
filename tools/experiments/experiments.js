@@ -338,11 +338,6 @@ const EXPERIMENTS = [
     name: 'Enables scroll snap on carousel across all browsers/OSes',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
-  {
-    id: 'amp-list-resize',
-    name: 'Enables container-based resizing on amp list',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
-  },
 ];
 
 if (getMode().localDev) {
