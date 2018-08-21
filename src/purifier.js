@@ -24,6 +24,7 @@ import {
 } from './url';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
+import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -226,8 +227,7 @@ const PURIFY_CONFIG = {
 };
 
 /**
- * Monotonically increasing counter used for keying nodes for set-dom, which
- * allows certain elements to opt-out of DOM diffing and be replaced outright.
+ * Monotonically increasing counter used for keying nodes.
  * @private {number}
  */
 let KEY_COUNTER = 0;
@@ -255,6 +255,15 @@ export function purifyHtml(dirty) {
   let allowedAttributes;
   const allowedAttributesChanges = [];
 
+  // Disables DOM diffing via set-dom for a given node and instead allows it to
+  // be replaced outright.
+  const disableDiffingFor = node => {
+    if (isExperimentOn(self, 'amp-list-diffing')) {
+      // set-dom uses node attribute keys for opting out of diffing.
+      node.setAttribute('i-amphtml-key', KEY_COUNTER++);
+    }
+  };
+
   /**
    * @param {!Node} node
    * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
@@ -267,9 +276,8 @@ export function purifyHtml(dirty) {
     // calculation is not possible).
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
-      // Allows AMP elements to opt out of DOM diffing since
-      // they don't support arbitrary child mutation. @see KEY_COUNTER.
-      node.setAttribute('i-amphtml-key', KEY_COUNTER++);
+      // AMP elements don't support arbitrary mutation, so don't DOM diff them.
+      disableDiffingFor(node);
     }
     // Set `target` attribute for <a> tags if necessary.
     if (tagName === 'a') {
@@ -361,9 +369,8 @@ export function purifyHtml(dirty) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
-      // Allows elements with bindings to opt out of DOM diffing to avoid
-      // disrupting binding cleanup from Bind.scanAndApply(). @see KEY_COUNTER.
-      node.setAttribute('i-amphtml-key', KEY_COUNTER++);
+      // Avoid disrupting Bind.scanAndApply() with DOM diffing.
+      disableDiffingFor(node);
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {

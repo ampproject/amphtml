@@ -25,6 +25,7 @@ import {
 } from './purifier';
 import {dict, map} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {isExperimentOn} from './experiments';
 import {startsWith} from './string';
 import {user} from './log';
 
@@ -78,6 +79,11 @@ export function sanitizeHtml(html) {
 }
 
 /**
+ * @private {number}
+ */
+let KEY_COUNTER = 0;
+
+/**
  * @param {string} html
  * @return {string}
  */
@@ -117,7 +123,12 @@ function sanitizeWithCaja(html) {
       }
       if (cajaBlacklistedTags[tagName]) {
         ignore++;
-      } else if (!startsWith(tagName, 'amp-')) {
+      } else if (startsWith(tagName, 'amp-')) {
+        // Disable DOM diffing for amp-* which don't support children mutation.
+        if (isExperimentOn(self, 'amp-list-diffing')) {
+          attribs.push('i-amphtml-key', KEY_COUNTER++);
+        }
+      } else {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
@@ -206,6 +217,11 @@ function sanitizeWithCaja(html) {
         // This is an optimization that obviates the need for DOM scan later.
         if (isBinding[i] && !emittedBindingMarker) {
           emit(' i-amphtml-binding');
+          // Disable DOM diffing for elements with bindings to avoid disrupting
+          // Bind.scanAndApply().
+          if (isExperimentOn(self, 'amp-list-diffing')) {
+            emit(` i-amphtml-key=${KEY_COUNTER++}`);
+          }
           emittedBindingMarker = true;
         }
       }
