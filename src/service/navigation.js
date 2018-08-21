@@ -428,8 +428,10 @@ export class Navigation {
     user().assert(!this.anchorMutators_[priority],
         'Mutator with same priority is already in use.');
     // Note that we define a set priority, as making this boundless
-    // will create a sparse array, which is not performant if iterating
-    // through when executing.
+    // will create a large sparse array, which is not performant if iterating
+    // through when executing. If the number of registered anchor mutators
+    // exceeds 10 then we will need to either increase or modify the
+    // implementation. Please talk to @alabiaga @choumx @jridgewell.
     this.anchorMutators_[priority] = callback;
   }
 
