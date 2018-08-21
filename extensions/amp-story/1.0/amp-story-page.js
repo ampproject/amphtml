@@ -765,6 +765,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
   * Checks if the page has any videos with audio.
+  * @return {boolean}
   * @private
   */
   hasVideoWithAudio_() {
