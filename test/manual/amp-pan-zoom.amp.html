@@ -74,11 +74,13 @@
 
     amp-pan-zoom {
       border: #000 2px solid;
-    }
-
-    #hide-controls .amp-pan-zoom-button {
       display: none;
     }
+
+    #pan-zoom {
+      display: initial;
+    }
+
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -179,7 +181,6 @@
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
     <amp-layout layout="responsive" height="1" width="1">
       <amp-pan-zoom
-        controls
         disable-double-tap
         layout="fill"
         on="transformEnd:AMP.setState({scale: event.scale})">
