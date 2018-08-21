@@ -604,7 +604,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
       const expansionOptions = this.expansionOptions_({}, trigger);
-      return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
+      return this.expandTemplateWithUrlParams(sampleOn, expansionOptions)
           .then(key => this.cryptoService_.uniform(key))
           .then(digest => digest * 100 < threshold);
     }
@@ -650,7 +650,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve(true);
     }
 
-    return this.expandTemplateWithUrlParams_(spec, expansionOptions)
+    return this.expandTemplateWithUrlParams(spec, expansionOptions)
         .then(val => {
           return val !== '' && val !== '0' && val !== 'false' &&
               val !== 'null' && val !== 'NaN' && val !== 'undefined';
