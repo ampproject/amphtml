@@ -205,13 +205,9 @@ export class LinkerManager {
     }
 
     // See if any domains match.
-    for (let i = 0; i < domains.length; i++) {
-      if (domains[i] === hostname) {
-        const newUrl = addParamToUrl(href, name, this.resolvedLinkers_[name]);
-        el.href = newUrl;
-        // If we find a match we can quit.
-        return;
-      }
+    if (domains.includes(hostname)) {
+      const newUrl = addParamToUrl(href, name, this.resolvedLinkers_[name]);
+      el.href = newUrl;
     }
   }
 }
