@@ -226,6 +226,13 @@ const PURIFY_CONFIG = {
 };
 
 /**
+ * Monotonically increasing counter used for keying nodes for set-dom, which
+ * allows certain elements to opt-out of DOM diffing and be replaced outright.
+ * @private {number}
+ */
+let KEY_COUNTER = 0;
+
+/**
  * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
  * @return {!Node}
@@ -260,6 +267,9 @@ export function purifyHtml(dirty) {
     // calculation is not possible).
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
+      // Allows AMP elements to opt out of DOM diffing since
+      // they don't support arbitrary child mutation. @see KEY_COUNTER.
+      node.setAttribute('i-amphtml-key', KEY_COUNTER++);
     }
     // Set `target` attribute for <a> tags if necessary.
     if (tagName === 'a') {
@@ -351,6 +361,9 @@ export function purifyHtml(dirty) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
+      // Allows elements with bindings to opt out of DOM diffing to avoid
+      // disrupting binding cleanup from Bind.scanAndApply(). @see KEY_COUNTER.
+      node.setAttribute('i-amphtml-key', KEY_COUNTER++);
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as setDOM from '../../../node_modules/set-dom/dist/set-dom';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {Deferred} from '../../../src/utils/promise';
@@ -33,6 +32,7 @@ import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import setDOM from 'set-dom';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -114,10 +114,6 @@ export class AmpList extends AMP.BaseElement {
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
 
-    if (!this.container_.hasAttribute('role')) {
-      this.container_.setAttribute('role', 'list');
-    }
-
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
     }
@@ -177,9 +173,11 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Creates and returns <div> that contains the template-rendered children.
    * @return {!Element}
+   * @private
    */
   createContainer_() {
     const container = this.win.document.createElement('div');
+    container.setAttribute('role', 'list');
     this.applyFillContent(container, true);
     return container;
   }
@@ -188,6 +186,7 @@ export class AmpList extends AMP.BaseElement {
    * Adds template-rendered `elements` as children to `container`.
    * @param {!Array<!Node>} elements
    * @param {!Element} container
+   * @private
    */
   addElementsToContainer_(elements, container) {
     elements.forEach(element => {
@@ -398,12 +397,16 @@ export class AmpList extends AMP.BaseElement {
     dev().info(TAG, 'render:', elements);
     this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
-                       
+
       const diffing = isExperimentOn(this.win, 'amp-list-diffing');
       if (this.container_.hasChildNodes && diffing) {
         const newContainer = this.createContainer_();
         this.addElementsToContainer_(elements, newContainer);
-        setDOM.default(this.container_, newContainer);
+
+        // Use `i-amphtml-key` as a node key for identifying when to skip
+        // DOM diffing and replace. Needed for AMP elements, for example.
+        setDOM.KEY = 'i-amphtml-key';
+        setDOM(this.container_, newContainer);
       } else {
         removeChildren(dev().assertElement(this.container_));
         this.addElementsToContainer_(elements, this.container_);
