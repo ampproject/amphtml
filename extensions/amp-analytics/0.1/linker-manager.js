@@ -62,7 +62,9 @@ export class LinkerManager {
 
     // Each linker config has it's own set of macros to resolve.
     this.allLinkerPromises_ = linkerNames.map(name => {
+
       const vendorConfig = this.config_['linkers'][name];
+
       if (vendorConfig['enabled'] !== true) {
         user().warn(`${TAG}: linker config for ${name} is not enabled and` +
             'will be ignored.')
