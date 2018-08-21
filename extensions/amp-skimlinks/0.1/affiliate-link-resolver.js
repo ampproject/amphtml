@@ -1,7 +1,7 @@
 
 import {addParamsToUrl,parseUrlDeprecated} from '../../../src/url';
 
-import {AFFILIATION_API,AMP_CREATIVE,XCUST_ATTRIBUTE_NAME} from './constants';
+import {AFFILIATION_API, PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
 
 export const LINK_STATUS__AFFILIATE = 'affiliate';
@@ -74,11 +74,11 @@ export default class AffiliateLinkResolver {
       url: anchor.href,
       sref: referrer,
       pref: externalReferrer,
-      xcreo: AMP_CREATIVE,
       xguid: guid,
       xuuid: pageImpressionId,
       xtz: timezone,
       xs: '1', // Always use source_app=1 (skimlinks)
+      platform: PLATFORM_NAME,
     };
     if (xcust) {
       queryParams.xcust = xcust;

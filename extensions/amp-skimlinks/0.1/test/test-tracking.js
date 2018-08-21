@@ -1,7 +1,7 @@
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
-
+import {PLATFORM_NAME} from '../constants'
 
 import {
   LINKS_IMPRESSIONS_TRACKING_URL,
@@ -137,6 +137,7 @@ describes.fakeWin('test-tracking', {
           slc: 0,
           jsl: 200,
           t: 1,
+          platform: PLATFORM_NAME,
         };
         trackingService = setupTrackingService(null, {
           pageImpressionId: expectedData.uuid,
@@ -186,6 +187,7 @@ describes.fakeWin('test-tracking', {
           dl: {},
           hae: 0,
           typ: 'l',
+          platform: PLATFORM_NAME,
         };
         trackingService = setupTrackingService(null, {
           pageImpressionId: expectedData.uuid,
@@ -230,6 +232,7 @@ describes.fakeWin('test-tracking', {
         uuid: 'page-impressions-id',
         site: 'false',
         product: '1',
+        platform: PLATFORM_NAME,
       };
 
       const trackingService = setupTrackingService(null, {

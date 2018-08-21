@@ -1,7 +1,7 @@
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
 import {generatePageImpressionId} from './utils';
 
-import {XCUST_ATTRIBUTE_NAME} from './constants';
+import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 
 
 
@@ -91,6 +91,7 @@ export default class Tracking {
       guid,
       uuid: pageImpressionId,
       tz: timezone,
+      platform: PLATFORM_NAME,
     };
 
     const {
@@ -130,6 +131,7 @@ export default class Tracking {
       xtz: timezone,
       uuid: pageImpressionId,
       product: '1',
+      platform: PLATFORM_NAME,
     };
 
     this.analytics_.trigger('non-affiliate-click', {

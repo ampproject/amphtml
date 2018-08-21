@@ -396,10 +396,6 @@ describes.fakeWin('domain-resolver', {
         expect(queryParams.pref).to.equal('external_referrer');
       });
 
-      it('Sends the xcreo (creative)', () => {
-        expect(queryParams.xcreo).to.equal('FIXME_AMP_CREATIVE');
-      });
-
       it('Sends the xguid (GUID)', () => {
         expect(queryParams.xguid).to.equal('user_guid');
       });

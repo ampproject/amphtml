@@ -58,7 +58,7 @@ export default class LinkRewriterService {
   }
 
   /**
-   * Call the most appropriate link rewriter when the user clicks on an anchor element.
+   * Call the most relevant link rewriter when the user clicks on an anchor element.
    * @param {*} customEvent
    */
   clickHandler_(customEvent) {
