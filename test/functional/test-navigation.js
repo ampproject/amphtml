@@ -145,8 +145,9 @@ describes.sandboxed('Navigation', {}, () => {
     });
 
     describe('anchor mutators', () => {
-      const priority = 10;
+
       it('should allow same priority', () => {
+        const priority = 10;
         handler.registerAnchorMutator(element => {
           element.href += '?am=1';
         }, priority);

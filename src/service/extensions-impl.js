@@ -47,7 +47,7 @@ import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {startsWith} from '../string';
 import {toWin} from '../types';
-import { CustomElementExtensionDef } from '../friendly-iframe-embed';
+import {CustomElementExtensionDef} from '../friendly-iframe-embed';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
