@@ -67,8 +67,10 @@ export class LinkerManager {
     }
 
     const linkerNames = Object.keys(this.config_['linkers']);
-    dev().assert(linkerNames.length,
-        `${TAG}: use of "linkers" requires at least one name given.`);
+    if (!linkerNames.length) {
+      return user().error(TAG,
+          'use of "linkers" requires at least one name given.');
+    }
 
     // Each linker config has it's own set of macros to resolve.
     this.allLinkerPromises_ = linkerNames.map(name => {
@@ -77,14 +79,15 @@ export class LinkerManager {
       const isOptIn = this.isLegacyOptIn_();
 
       if (!isOptIn && vendorConfig['enabled'] !== true) {
-        user().warn(TAG, `linker config for ${name} is not enabled and` +
+        return user().info(TAG, `linker config for ${name} is not enabled and` +
             'will be ignored.');
-        return;
       }
 
       const ids = vendorConfig['ids'];
-      dev().assert(ids,
-          `${TAG}: "ids" is a required field for use of "linkers".`);
+      if (!ids) {
+        return user().error(ids,
+            '"ids" is a required field for use of "linkers".');
+      }
 
       // Keys for linker data.
       const keys = Object.keys(ids);
