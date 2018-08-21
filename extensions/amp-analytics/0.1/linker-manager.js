@@ -24,6 +24,12 @@ import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-analytics-linker';
 
+/**
+ * The name of the Google CID API as it appears in the meta tag to opt-in.
+ * @const @private {string}
+ */
+const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
+
 export class LinkerManager {
 
   /**
@@ -64,8 +70,9 @@ export class LinkerManager {
     this.allLinkerPromises_ = linkerNames.map(name => {
 
       const vendorConfig = this.config_['linkers'][name];
+      const isOptIn = this.isLegacyOptIn_();
 
-      if (vendorConfig['enabled'] !== true) {
+      if (!isOptIn && vendorConfig['enabled'] !== true) {
         user().warn(TAG, `linker config for ${name} is not enabled and` +
             'will be ignored.');
         return;
@@ -105,6 +112,21 @@ export class LinkerManager {
         this.linkerCallback_.bind(this), Priority.LINKER);
   }
 
+
+  /**
+   * If the document has existing cid meta tag they do not need to explicity
+   * opt-in to use linker.
+   * @return {boolean}
+   * @private
+   */
+  isLegacyOptIn_() {
+    const optInMeta = this.analytics_.getAmpDoc().win.document.head
+        ./*OK*/querySelector(`meta[name=${GOOGLE_CID_API_META_NAME}]`);
+    const isGaType = this.analytics_.element
+        .getAttribute('type') === 'googleanalytics';
+
+    return optInMeta && isGaType;
+  }
 
   /**
    * Called on click on any anchor element. Adds linker param if a match for

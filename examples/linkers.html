@@ -8,6 +8,8 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
+  <meta name="amp-google-client-id-api" content="googleanalytics">
 </head>
 <body>
   <amp-analytics>
@@ -43,10 +45,34 @@
     }
     </script>
   </amp-analytics>
+  <amp-analytics type="googleanalytics">
+    <script type="application/json">
+    {
+      "requests": {
+        "endpoint": "/analytics/foo?b=goog"
+      },
+      "triggers": {
+        "pageview": {
+          "on": "visible",
+          "request": "endpoint"
+        }
+      },
+      "linkers" : {
+        "ga": {
+          "ids": {
+            "_ga": "CLIENT_ID(_ga)"
+          },
+          "destinationDomains": ["www.ampproject.com"]
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
   <h1 id="top">AMP Analytics</h1>
     <div><a href="https://www.example.com">example.com #1</a></div>
     <div><a href="https://www.example.com">example.com #2</a></div>
     <div><a href="https://www.google.com">google.com</a></div>
+    <div><a href="https://www.ampproject.com">ampproject.com</a></div>
   <p>
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet
     neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in
