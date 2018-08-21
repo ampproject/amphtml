@@ -357,7 +357,7 @@ export class RequestHandler {
  * @private
  */
 function getExtraUrlParams(
-    variableService, configParams, triggerParams, expansionOption) {
+  variableService, configParams, triggerParams, expansionOption) {
   const requestPromises = [];
   const params = map();
   // Don't encode param values here,
@@ -434,7 +434,7 @@ function constructExtraUrlParamStrs(baseUrl, extraUrlParamStrsPromise) {
  * @return {Promise<string>}
  */
 export function expandPostMessage(baseInstance, msg,
-    configParams, triggerParams, expansionOption, dynamicBindings) {
+  configParams, triggerParams, expansionOption, dynamicBindings) {
   const variableService = variableServiceFor(baseInstance.win);
   const urlReplacementService =
       Services.urlReplacementsForDoc(baseInstance.element);

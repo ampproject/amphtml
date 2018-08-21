@@ -523,12 +523,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     const hasPostMessage = this.isInabox_ && trigger['parentPostMessage'];
 
     if (requestName != undefined && !request) {
-        const TAG = this.getName_();
-        this.user().error(TAG, 'Ignoring event. Request string ' +
-            'not found: ', trigger['request']);
-        if (!hasPostMessage) {
-          return;
-        }
+      const TAG = this.getName_();
+      this.user().error(TAG, 'Ignoring event. Request string ' +
+          'not found: ', trigger['request']);
+      if (!hasPostMessage) {
+        return;
+      }
     }
     this.checkTriggerEnabled_(trigger, event).then(enabled => {
       if (!enabled) {
@@ -582,6 +582,12 @@ export class AmpAnalytics extends AMP.BaseElement {
         dynamicBindings);
   }
 
+  /**
+   * Expand and post message to parent window if applicable.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @private
+   */
   expandAndPostMessage_(trigger, event) {
     const msg = trigger['parentPostMessage'];
     if (!msg || !this.isInabox_) {
@@ -589,21 +595,19 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
-    const dynamicBindings =
-        this.getDynamicVariableBindings_(trigger, expansionOptions);
     expandPostMessage(
         this,
         msg,
         this.config_['extraUrlParams'],
         trigger['extraUrlParams'],
-        this.expansionOptions_(event, trigger),
+        expansionOptions,
         this.getDynamicVariableBindings_(trigger, expansionOptions))
         .then(message => {
-      if (isIframed(this.win)) {
-        // Only post message with explict `parentPostMessage` to inabox host
-        this.win.parent./*OK*/postMessage(message, '*');
-      }
-    });
+          if (isIframed(this.win)) {
+            // Only post message with explict `parentPostMessage` to inabox host
+            this.win.parent./*OK*/postMessage(message, '*');
+          }
+        });
   }
 
 

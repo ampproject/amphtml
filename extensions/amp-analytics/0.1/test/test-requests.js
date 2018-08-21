@@ -516,8 +516,8 @@ describes.realWin('Requests', {amp: 1}, env => {
           undefined,
           expansionOptions,
           {}).then(msg => {
-            expect(msg).to.equal('test foo 123 ... TESTE1');
-          });
+        expect(msg).to.equal('test foo 123 ... TESTE1');
+      });
     });
 
     it('should replace not append ${extraUrlParams}', () => {
