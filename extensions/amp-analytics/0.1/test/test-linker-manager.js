@@ -141,7 +141,7 @@ describe('Linkers', () => {
     const a = {
       href: 'https://www.example.com',
       hostname: 'www.example.com',
-    }
+    };
 
     const manager = new LinkerManager(analytics, config);
     manager.init();
@@ -169,7 +169,7 @@ describe('Linkers', () => {
     const a = {
       href: 'https://www.example.com',
       hostname: 'www.example.com',
-    }
+    };
 
     const manager = new LinkerManager(analytics, config);
     manager.init();
@@ -195,7 +195,7 @@ describe('Linkers', () => {
     const a = {
       href: 'https://www.example.com',
       hostname: 'www.example.com',
-    }
+    };
 
     const manager = new LinkerManager(analytics, config);
     manager.init();
