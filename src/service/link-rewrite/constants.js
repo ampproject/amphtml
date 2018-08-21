@@ -10,3 +10,4 @@ export const ALLOWED_CLICK_ACTION_TYPES = [
 
 export const ORIGINAL_URL_ATTRIBUTE = 'data-link-rewriter-original-url';
 export const PRIORITY_META_TAG_NAME = 'amp-link-rewrite-priorities';
+export const LINK_REWRITE_SERVICE_NAME = 'link-rewrite-service';

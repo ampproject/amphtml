@@ -102,6 +102,9 @@ export class Navigation {
     /** @private @const {!./history-impl.History} */
     this.history_ = Services.historyForDoc(this.ampdoc);
 
+    /** @private @const {!./link-rewrite/link-rewrite-service.LinkRewriteService} */
+    this.linkRewriteService_ = Services.linkRewriteServiceForDoc(this.ampdoc);
+
     const platform = Services.platformFor(this.ampdoc.win);
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();

@@ -13,12 +13,11 @@ describes.fakeWin('amp-skimlinks', {
     extensions: ['amp-skimlinks'],
   },
 }, env => {
-  let iframeDoc, ampSkimlinks, helpers;
+  let ampSkimlinks, helpers;
 
 
   beforeEach(() => {
     helpers = helpersFactory(env);
-    iframeDoc = env.ampdoc.getRootNode();
     ampSkimlinks = helpers.createAmpSkimlinks({
       'publisher-code': 'pubIdXdomainId',
     });
@@ -89,7 +88,7 @@ describes.fakeWin('amp-skimlinks', {
         ampSkimlinks.skimOptions_ = {
           linkSelector: '.article a',
         };
-        ampSkimlinks.linkRewriterService = new LinkRewriterService(iframeDoc);
+        ampSkimlinks.linkRewriterService = new LinkRewriterService(env.ampdoc);
         env.sandbox.spy(
             ampSkimlinks.linkRewriterService,
             'registerLinkRewriter'

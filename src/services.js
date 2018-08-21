@@ -30,6 +30,8 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
+import {LINK_REWRITE_SERVICE_NAME} from './service/link-rewrite';
+
 /** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
 export let SubscriptionService;
 
@@ -251,6 +253,14 @@ export class Services {
       getServiceForDoc(elementOrAmpDoc, 'layers'));
   }
 
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/link-rewrite/link-rewrite-service.LinkRewriteService}
+   */
+  static linkRewriteServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/link-rewrite/link-rewrite-service.LinkRewriteService} */ (
+      getServiceForDoc(elementOrAmpDoc, LINK_REWRITE_SERVICE_NAME));
+  }
   /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}

@@ -8,7 +8,6 @@ import Tracking from './tracking';
 import {SKIMLINKS_REWRITER_ID} from './constants';
 import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewrite/constants';
 import AffiliateLinkResolver from './affiliate-link-resolver';
-import LinkRewriterService from '../../../src/service/link-rewrite/link-rewrite-service';
 
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
@@ -31,7 +30,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.ampDoc_ = this.getAmpDoc();
     this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
-    this.linkRewriterService = new LinkRewriterService(this.ampDoc_.getRootNode());
+    this.linkRewriterService = Services.linkRewriteServiceForDoc(this.ampDoc_);
 
     return whenDocumentReady(this.ampDoc_).then(() => {
       this.startSkimcore_();

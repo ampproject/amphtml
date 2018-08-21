@@ -1,24 +1,23 @@
-import {ALLOWED_CLICK_ACTION_TYPES, EVENTS, PRIORITY_META_TAG_NAME} from './constants';
+import {ALLOWED_CLICK_ACTION_TYPES, EVENTS, LINK_REWRITE_SERVICE_NAME, PRIORITY_META_TAG_NAME} from './constants';
 import {AmpEvents} from '../../amp-events';
 
 import LinkRewriter from './link-rewriter';
 
 export default class LinkRewriterService {
   /**
-   *
-   * @param {*} rootNode - ampDoc.getRootNode()
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(iframeDoc) {
+  constructor(ampdoc) {
     this.priorityList_ = [];
-    this.iframeDoc_ = iframeDoc;
+    this.iframeDoc_ = ampdoc.getRootNode();
     const metaTagSelector = `meta[name=${PRIORITY_META_TAG_NAME}]`;
-    const meta = iframeDoc.querySelector(metaTagSelector);
+    const meta = this.iframeDoc_.querySelector(metaTagSelector);
 
     if (meta && meta.hasAttribute('content')) {
       this.priorityList_ = meta.getAttribute('content').trim().split(/\s+/);
     }
 
-    this.installGlobalEventListener_(iframeDoc);
+    this.installGlobalEventListener_(this.iframeDoc_);
     this.linkRewriters_ = [];
   }
 
