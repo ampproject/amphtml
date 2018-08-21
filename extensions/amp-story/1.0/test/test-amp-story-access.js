@@ -24,6 +24,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
   let defaultConfig;
   let storeService;
   let storyAccess;
+  let storyEl;
 
   const setConfig = config => {
     accessConfigurationEl.textContent = JSON.stringify(config);
@@ -40,11 +41,14 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     defaultConfig = {login: 'https://example.com'};
     setConfig(defaultConfig);
 
+    storyEl = win.document.createElement('amp-story');
     const storyAccessEl = win.document.createElement('amp-story-access');
     storyAccessEl.getResources = () => win.services.resources.obj;
 
+    storyEl.appendChild(storyAccessEl);
+
     win.document.body.appendChild(accessConfigurationEl);
-    win.document.body.appendChild(storyAccessEl);
+    win.document.body.appendChild(storyEl);
 
     storyAccess = new AmpStoryAccess(storyAccessEl);
   });
@@ -147,5 +151,16 @@ describes.realWin('amp-story-access', {amp: true}, env => {
         .to.have.been.calledWith('SCRIPT.login-namespace1-type2');
     expect(addToWhitelistStub)
         .to.have.been.calledWith('SCRIPT.login-namespace2');
+  });
+
+  it('should require publisher-logo-src to be a URL', () => {
+    storyEl.setAttribute('publisher-logo-src', 'foo:bar');
+
+    allowConsoleError(() => {
+      expect(() => {
+        storyAccess.buildCallback();
+      }).to.throw('amp-story publisher-logo-src must start with ' +
+          '"https://" or "//"');
+    });
   });
 });

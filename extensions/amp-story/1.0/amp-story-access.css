@@ -82,10 +82,46 @@ amp-story-access.i-amphtml-story-access-visible::before {
   border-radius: initial !important;
 }
 
-/** access content. */
+.i-amphtml-story-access-header {
+  position: relative !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  background: var(--primary-color, #F0F0F0) !important;
+  z-index: 2 !important;
+
+  /* Making sure the background color fills the container in full bleed mode. */
+  margin: 0 -8px !important;
+}
+
+.i-amphtml-story-access-logo {
+  position: absolute !important;
+  bottom: -32px !important;
+  margin-left: -32px !important;
+  left: 50% !important;
+  height: 64px !important;
+  width: 64px !important;
+  background: #F0F0F0 !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  border-radius: 5px !important;
+}
+
+.i-amphtml-story-access-logo::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -6px !important;
+  bottom: -6px !important;
+  left: -6px !important;
+  right: -6px !important;
+  background: #FFFFFF !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12) !important;
+  z-index: -1 !important;
+}
 
 .i-amphtml-story-access-content {
-  padding: 16px !important;
+  padding: 60px 16px 16px !important;
   font-size: 14px !important;
   z-index: 0 !important;
 }
