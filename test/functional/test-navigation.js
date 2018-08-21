@@ -198,7 +198,11 @@ describes.sandboxed('Navigation', {}, () => {
         // of the possibly mutated anchor href into the location object
         // for navigation.handleNavClick.
         sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
-        expect(parseUrl).to.be.calledOnce;
+        expect(expandVars).to.be.calledOnce;
+        // Verify that parseUrl is called once when the variables are
+        // expanded, then after the anchor mutators and then once more
+        // in handleNavClick
+        expect(parseUrl).to.be.calledThrice;
       });
     });
 
