@@ -398,7 +398,12 @@ export class AmpList extends AMP.BaseElement {
           if (resizeExperimentOn) {
             // This needs to be gated behind the experiment 'amp-list-resize'
             const layout = this.element.getAttribute('layout');
-            if (layout !== Layout.CONTAINER) {
+            if (layout == Layout.NODISPLAY || layout == Layout.FILL) {
+              return;
+            } else if (layout == Layout.FLEX_ITEM) {
+              // TODO (cathyxz): flex item does not play nice with layout container
+              this.attemptChangeHeight(scrollHeight).catch(() => {});
+            } else if (layout !== Layout.CONTAINER) {
               this.changeToLayoutContainer_();
             }
           } else {
@@ -415,9 +420,6 @@ export class AmpList extends AMP.BaseElement {
    */
   changeToLayoutContainer_() {
     const layout = this.element.getAttribute('layout');
-    if (layout == Layout.NODISPLAY || layout == Layout.FILL) {
-      return;
-    }
     if (layout == Layout.RESPONSIVE) {
       const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
       if (sizer) {
@@ -441,11 +443,6 @@ export class AmpList extends AMP.BaseElement {
         this.element.removeChild(sizer);
       }
       this.element.classList.remove('i-amphtml-layout-intrinsic');
-    } else if (layout == Layout.FLEX_ITEM) {
-      setStyles(this.element, {
-        height: '',
-        width: '',
-      });
     }
 
     this.element.classList.remove('i-amphtml-layout-size-defined');
