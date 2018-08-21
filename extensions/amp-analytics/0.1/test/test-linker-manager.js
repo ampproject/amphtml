@@ -66,6 +66,7 @@ describe('Linkers', () => {
     const config = {
       linkers: {
         testLinker: {
+          enabled: true,
           ids: {
             gclid: '123',
           },
@@ -96,12 +97,14 @@ describe('Linkers', () => {
     const config = {
       linkers: {
         testLinker1: {
+          enabled: true,
           ids: {
             _key: 'CLIENT_ID(_ga)',
             gclid: '234',
           },
         },
         testLinker2: {
+          enabled: true,
           ids: {
             foo: 'bar',
           },
@@ -130,6 +133,7 @@ describe('Linkers', () => {
     const config = {
       linkers: {
         testLinker1: {
+          enabled: true,
           ids: {
             _key: 'CLIENT_ID(_ga)',
             gclid: '234',
@@ -157,6 +161,7 @@ describe('Linkers', () => {
     const config = {
       linkers: {
         testLinker1: {
+          enabled: true,
           proxyOnly: true,
           ids: {
             _key: 'CLIENT_ID(_ga)',
@@ -184,10 +189,37 @@ describe('Linkers', () => {
     const config = {
       linkers: {
         testLinker1: {
+          enabled: true,
           ids: {
             _key: 'CLIENT_ID(_ga)',
           },
           destinationDomains: ['www.foo.com'],
+        },
+      },
+    };
+
+    const a = {
+      href: 'https://www.example.com',
+      hostname: 'www.example.com',
+    };
+
+    const manager = new LinkerManager(analytics, config);
+    manager.init();
+
+    return Promise.all(manager.allLinkerPromises_).then(() => {
+      manager.linkerCallback_(a);
+      return expect(a.href).to.equal('https://www.example.com');
+    });
+  });
+
+  it('should not add linker if not explicitly enabled', () => {
+    const config = {
+      linkers: {
+        testLinker1: {
+          ids: {
+            _key: 'CLIENT_ID(_ga)',
+            gclid: '234',
+          },
         },
       },
     };

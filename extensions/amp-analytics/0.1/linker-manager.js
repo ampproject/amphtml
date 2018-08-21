@@ -19,7 +19,7 @@ import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {createLinker} from './linker';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-analytics-linker';
@@ -34,7 +34,7 @@ export class LinkerManager {
     /** @private */
     this.analytics_ = analytics;
 
-    /** @private {!Object} */
+    /** @private {JsonObject} */
     this.config_ = config;
 
     /** @private {!Array<Promise>} @visibleForTesting */
@@ -42,7 +42,6 @@ export class LinkerManager {
 
     /** @private {JsonObject} */
     this.resolvedLinkers_ = dict();
-
   }
 
 
@@ -63,8 +62,14 @@ export class LinkerManager {
 
     // Each linker config has it's own set of macros to resolve.
     this.allLinkerPromises_ = linkerNames.map(name => {
-      const ids = this.config_['linkers'][name]['ids'];
+      const vendorConfig = this.config_['linkers'][name];
+      if (vendorConfig['enabled'] !== true) {
+        user().warn(`${TAG}: linker config for ${name} is not enabled and` +
+            'will be ignored.')
+        return;
+      }
 
+      const ids = vendorConfig['ids'];
       dev().assert(ids,
           `${TAG}: "ids" is a required field for use of "linkers".`);
 
