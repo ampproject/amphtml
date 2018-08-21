@@ -521,7 +521,7 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should delegate navigation if viewer supports A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(true);
 
         handler.handle_(event);
 
@@ -537,7 +537,7 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should behave normally if viewer does not support A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(false);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(false);
 
         handler.handle_(event);
 
@@ -577,30 +577,31 @@ describes.sandboxed('Navigation', {}, () => {
         meta.setAttribute('content', 'feature-foo, action-bar');
         ampdoc.getRootNode().head.appendChild(meta);
 
-        const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+        const send = sandbox.stub(handler.viewer_, 'sendMessage');
+        const hasCapability = sandbox.stub(handler.viewer_, 'hasCapability');
+        hasCapability.returns(true);
         expect(win.location.href).to.equal('https://www.pub.com/');
 
         // Delegate to viewer if opt_requestedBy matches the <meta> tag content
         // and the viewer supports A2A.
         handler.navigateTo(win, 'https://amp.pub.com/amp_page', 'feature-foo');
-        expect(stub).to.be.calledOnce;
-        expect(stub).to.be.calledWithExactly(
-            'https://amp.pub.com/amp_page', 'feature-foo');
+        expect(hasCapability).to.be.calledWithExactly('a2a');
+        expect(send).to.be.calledOnce;
+        expect(send).to.be.calledWithExactly('a2aNavigate',
+            {requestedBy: 'feature-foo', url: 'https://amp.pub.com/amp_page'});
         expect(win.location.href).to.equal('https://www.pub.com/');
 
         // If opt_requestedBy doesn't match, navigate top normally.
         handler.navigateTo(win, 'https://amp.pub.com/amp_page', 'no-match');
-        expect(stub).to.be.calledOnce;
+        expect(send).to.be.calledOnce;
         expect(win.location.href).to.equal('https://amp.pub.com/amp_page');
 
         // If opt_requestedBy matches but viewer doesn't support A2A, navigate
         // top normally.
-        stub.returns(false);
+        send.reset();
+        hasCapability.returns(false);
         handler.navigateTo(win, 'https://amp.pub.com/different', 'action-bar');
-        expect(stub).to.be.calledTwice;
-        expect(stub).to.be.calledWithExactly(
-            'https://amp.pub.com/different', 'action-bar');
+        expect(send).to.not.be.called;
         expect(win.location.href).to.equal('https://amp.pub.com/different');
       });
     });
