@@ -338,6 +338,7 @@ twttr.events.bind;
 twttr.widgets;
 twttr.widgets.createTweet;
 twttr.widgets.createMoment;
+twttr.widgets.createTimeline;
 
 var FB;
 FB.init;
