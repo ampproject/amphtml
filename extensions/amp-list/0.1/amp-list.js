@@ -422,10 +422,6 @@ export class AmpList extends AMP.BaseElement {
   changeToLayoutContainer_() {
     const layout = this.element.getAttribute('layout');
     if (layout == Layout.RESPONSIVE) {
-      const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
-      if (sizer) {
-        this.element.removeChild(sizer);
-      }
       this.element.classList.remove('i-amphtml-layout-responsive');
     } else if (layout == Layout.FIXED) {
       this.element.classList.remove('i-amphtml-layout-fixed');
@@ -439,13 +435,12 @@ export class AmpList extends AMP.BaseElement {
         width: '',
       });
     } else if (layout == Layout.INTRINSIC) {
-      const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
-      if (sizer) {
-        this.element.removeChild(sizer);
-      }
       this.element.classList.remove('i-amphtml-layout-intrinsic');
     }
-
+    const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
+    if (sizer) {
+      this.element.removeChild(sizer);
+    }
     this.element.classList.remove('i-amphtml-layout-size-defined');
     this.container_.classList.remove(
         'i-amphtml-fill-content',
