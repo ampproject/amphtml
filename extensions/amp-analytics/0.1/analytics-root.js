@@ -28,6 +28,7 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
+import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
 const TAG = 'amp-analytics';
@@ -196,7 +197,7 @@ export class AnalyticsRoot {
     // Special case selectors. The selection method is irrelavant.
     // And no need to wait for document ready.
     if (selector == ':root') {
-      return Promise.resolve(this.getRootElement());
+      return tryResolve(() => this.getRootElement());
     }
     if (selector == ':host') {
       return new Promise(resolve => {
@@ -277,7 +278,7 @@ export class AnalyticsRoot {
       const rootElement = this.getRootElement();
       const isSelectAny = (selector == '*');
       const isSelectRoot = (selector == ':root');
-      let target = event.target;
+      let {target} = event;
       while (target) {
 
         // Target must be contained by this root.
@@ -298,7 +299,7 @@ export class AnalyticsRoot {
 
         // Check if the target matches the selector.
         if (isSelectAny ||
-            isSelectRoot && target == rootElement ||
+            (isSelectRoot && target == rootElement) ||
             matchesNoInline(target, selector)) {
           listener(target, event);
           // Don't fire the event multiple times even if the more than one

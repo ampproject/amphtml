@@ -324,7 +324,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     });
 
     it('should match root', () => {
-      const documentElement = win.document.documentElement;
+      const {documentElement} = win.document;
       expect(matches(body, documentElement, '*')).to.equal(documentElement);
       expect(matches(body, documentElement, ':root'))
           .to.equal(documentElement);
@@ -583,7 +583,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     });
 
     it('should match root', () => {
-      const documentElement = win.document.documentElement;
+      const {documentElement} = win.document;
       expect(matches(body, documentElement, '*')).to.equal(documentElement);
       expect(matches(body, documentElement, ':root'))
           .to.equal(documentElement);

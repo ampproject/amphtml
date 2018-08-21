@@ -19,6 +19,7 @@ import {
   Entitlements,
   SubscribeResponse,
 } from '../../../../third_party/subscriptions-project/swg';
+import {Entitlement, GrantReason} from '../../../amp-subscriptions/0.1/entitlement';
 import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   PageConfig,
@@ -80,6 +81,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should listen on callbacks', () => {
     expect(callbacks.loginRequest).to.be.calledOnce;
+  });
+
+  it('should scope the runtime to one ampdoc', () => {
+    expect(platform.runtime_.doc_.ampdoc_).to.equal(ampdoc);
   });
 
   it('should proxy fetch via AMP fetcher', () => {
@@ -158,20 +163,23 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should ignore activate when granted', () => {
-    platform.activate({granted: true, subscribed: true});
+    platform.activate(new Entitlement({service: 'subscribe.google.com',
+      granted: true, grantReason: GrantReason.SUBSCRIBER}));
     expect(methods.showOffers).to.not.be.called;
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
   it('should show offers on activate when not granted', () => {
-    platform.activate({granted: false});
+    platform.activate(new Entitlement({service: 'subscribe.google.com',
+      granted: false}));
     expect(methods.showOffers).to.be.calledOnce
         .calledWithExactly({list: 'amp'});
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
   it('should show abbrv offer on activate when granted non-subscriber', () => {
-    platform.activate({granted: true, subscribed: false});
+    platform.activate(new Entitlement({service: 'subscribe.google.com',
+      granted: true, subscribed: true}));
     expect(methods.showAbbrvOffer).to.be.calledOnce
         .calledWithExactly({list: 'amp'});
     expect(methods.showOffers).to.not.be.called;
@@ -305,6 +313,66 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       return viewerOrigin;
     }).then(() => {
       expect(platform.isGoogleViewer_).to.be.true;
+    });
+  });
+
+  it('should attach button given to decorateUI', () => {
+    const elem = env.win.document.createElement('div');
+    const decorateStub = sandbox.stub(platform.runtime_.buttonApi_,
+        'attach');
+    elem.textContent = 'some html';
+    platform.decorateUI(elem, 'subscribe');
+    expect(elem.textContent).to.be.equal('');
+    expect(decorateStub).to.be.calledWith(elem);
+  });
+
+  it('should show offers if subscribe action is delegated', () => {
+    const executeStub = platform.runtime_.showOffers;
+    platform.executeAction('subscribe');
+    expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
+  });
+
+  describe('getEntitlements', () => {
+    it('should convert granted entitlements to internal shape', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      return platform.getEntitlements().then(entitlement => {
+        expect(entitlement.source).to.be.equal('google');
+        expect(entitlement.granted).to.be.equal(true);
+        expect(entitlement.grantReason).to.be.equal(GrantReason.SUBSCRIBER);
+        expect(entitlement.data).to.deep.equal(entitlementResponse);
+      });
+    });
+
+    it('should convert non granted entitlements to null', () => {
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              entitlements: {
+                source: 'google',
+                products: ['example.org:premium'],
+                subscriptionToken: '',
+              },
+            });
+          },
+        });
+      });
+      return platform.getEntitlements().then(entitlement => {
+        expect(entitlement).to.be.equal(null);
+      });
     });
   });
 });

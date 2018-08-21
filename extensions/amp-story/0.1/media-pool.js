@@ -100,6 +100,10 @@ let nextInstanceId = 0;
 let elId = 0;
 
 
+/**
+ * Media pool class, providing an optimized and cross browser interface to
+ * handle HTMLMediaElements.
+ */
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
@@ -116,9 +120,6 @@ export class MediaPool {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(win);
 
     /**
      * The function used to retrieve the distance between an element and the
@@ -220,24 +221,22 @@ export class MediaPool {
       this.allocated[type] = [];
       this.unallocated[type] = [];
 
-      this.vsync_.mutate(() => {
-        // Reverse-looping is generally faster and Closure would usually make
-        // this optimization automatically. However, it skips it due to a
-        // comparison with the itervar below, so we have to roll it by hand.
-        for (let i = count; i > 0; i--) {
-          const mediaEl = /** @type {!HTMLMediaElement} */
-              // Use seed element at end of set to prevent wasting it.
-              (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
-          const sources = this.getDefaultSource_(type);
-          mediaEl.setAttribute('pool-element', elId++);
-          this.enqueueMediaElementTask_(mediaEl,
-              new UpdateSourcesTask(sources, this.vsync_));
-          // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
-          // is returned.  If so, we should adjust the pool size/distribution
-          // between media types.
-          this.unallocated[type].push(mediaEl);
-        }
-      });
+      // Reverse-looping is generally faster and Closure would usually make
+      // this optimization automatically. However, it skips it due to a
+      // comparison with the itervar below, so we have to roll it by hand.
+      for (let i = count; i > 0; i--) {
+        const mediaEl = /** @type {!HTMLMediaElement} */
+            // Use seed element at end of set to prevent wasting it.
+            (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
+        const sources = this.getDefaultSource_(type);
+        mediaEl.setAttribute('pool-element', elId++);
+        this.enqueueMediaElementTask_(mediaEl,
+            new UpdateSourcesTask(sources));
+        // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
+        // is returned.  If so, we should adjust the pool size/distribution
+        // between media types.
+        this.unallocated[type].push(mediaEl);
+      }
     });
   }
 
@@ -462,12 +461,12 @@ export class MediaPool {
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
 
     return this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapIntoDomTask(domMediaEl, this.vsync_))
+        new SwapIntoDomTask(domMediaEl))
         .then(() => {
           this.maybeResetAmpMedia_(ampMediaForPoolEl);
           this.maybeResetAmpMedia_(ampMediaForDomEl);
           this.enqueueMediaElementTask_(poolMediaEl,
-              new UpdateSourcesTask(sources, this.vsync_));
+              new UpdateSourcesTask(sources));
           this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
         }, () => {
           this.forceDeallocateMediaElement_(poolMediaEl);
@@ -489,7 +488,11 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then(impl => impl.resetOnDomChange());
+    componentEl.getImpl().then(impl => {
+      if (impl.resetOnDomChange) {
+        impl.resetOnDomChange();
+      }
+    });
   }
 
 
@@ -504,7 +507,7 @@ export class MediaPool {
     const defaultSources = this.getDefaultSource_(mediaType);
 
     return this.enqueueMediaElementTask_(poolMediaEl,
-        new UpdateSourcesTask(defaultSources, this.vsync_));
+        new UpdateSourcesTask(defaultSources));
   }
 
 
@@ -524,7 +527,7 @@ export class MediaPool {
         'No media element to put back into DOM after eviction.'));
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapOutOfDomTask(oldDomMediaEl, this.vsync_))
+        new SwapOutOfDomTask(oldDomMediaEl))
         .then(() => {
           poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
         });

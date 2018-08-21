@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */
@@ -143,11 +144,16 @@ export class AccessClientAdapter {
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: {
+        headers: dict({
           'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        }),
         body: '',
       });
     });
+  }
+
+  /** @override */
+  postAction() {
+    // Nothing to do.
   }
 }

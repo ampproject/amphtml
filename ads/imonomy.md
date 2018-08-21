@@ -21,11 +21,11 @@ Imonomy supports Header Tag style bidding using Doubleclick as the ad server.
 ## Example
 
 ```html
-<amp-ad width=728 height=90
+<amp-ad width="728" height="90"
   type="imonomy"
   data-pid="5656544455"
   data-sub-id="636gd"
-  data-slot="/36653869/amp_imo_multi_size"
+  data-slot="/36653869/amp_imo_multi_size">
 </amp-ad>
 ```
 
@@ -37,7 +37,7 @@ If you use `remote.html` in your AMP pages, you must add `imonomy` into the arra
 
 Ad size is based on the `width` and `height` attributes of the `amp-ad` tag by default. Both width and height override attributes (`data-override-width` and `data-override-height`) and multi-size ads (via `data-multi-size`) are supported.
 
-__Required:__
+### Required parameters
 
 - `data-pid`
 - `data-sub-id`

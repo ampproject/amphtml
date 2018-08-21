@@ -15,9 +15,10 @@
  */
 
 import {BaseElement} from '../../src/base-element';
+import {LayoutPriority} from '../../src/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 import {toggleExperiment} from '../../src/experiments';
@@ -31,10 +32,8 @@ describes.realWin('BaseElement', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    doc.registerElement('amp-test-element', {
-      prototype: createAmpElementProtoForTesting(win,
-          'amp-test-element', BaseElement),
-    });
+    win.customElements.define('amp-test-element',
+        createAmpElementForTesting(win, 'amp-test-element', BaseElement));
     customElement = doc.createElement('amp-test-element');
     element = new BaseElement(customElement);
   });
@@ -44,7 +43,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     customElement.getResources = () => resources;
     const updateLayoutPriorityStub = sandbox.stub(
         resources, 'updateLayoutPriority');
-    element.updateLayoutPriority(1);
+    element.updateLayoutPriority(LayoutPriority.METADATA);
     expect(updateLayoutPriorityStub).to.be.calledOnce;
   });
 
@@ -86,9 +85,9 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should fail execution of unregistered action', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       element.executeAction({method: 'method1'}, false);
-    }).to.throw(/Method not found/);
+    }).to.throw(/Method not found/); });
   });
 
   it('`this` context of handler should not be the holder', () => {
@@ -204,9 +203,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
 
       return Promise.all([
         event1Promise,
-        event2Promise
-            .then(() => { assert.fail('Blur should not have been forwarded'); })
-            .catch(() => { /* timed-out, all good */ }),
+        expect(event2Promise).to.eventually.be.rejectedWith(/timeout/),
       ]);
     });
 

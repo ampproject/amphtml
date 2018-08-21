@@ -35,7 +35,11 @@ const TAG = 'inabox-viewport';
 /** @const {number} */
 const MIN_EVENT_INTERVAL = 100;
 
-/** @visibleForTesting */
+/**
+ * @param {!Window} win
+ * @param {!Element} bodyElement
+ * @visibleForTesting
+ */
 export function prepareBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).runPromise({
     measure: state => {
@@ -61,7 +65,11 @@ export function prepareBodyForOverlay(win, bodyElement) {
 }
 
 
-/** @visibleForTesting */
+/**
+ * @param {!Window} win
+ * @param {!Element} bodyElement
+ * @visibleForTesting
+ */
 export function resetBodyForOverlay(win, bodyElement) {
   return Services.vsyncFor(win).mutatePromise(() => {
     // We're not resetting background here as it's supposed to remain
@@ -131,9 +139,6 @@ export class ViewportBindingInabox {
 
     /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
     this.requestPositionPromise_ = null;
-
-    /** @private {!../service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private {function()} */
     this.fireScrollThrottle_ = throttle(this.win, () => {
@@ -391,7 +396,7 @@ export function installInaboxViewportService(ampdoc) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isChanged(newRect, oldRect) {
   return isMoved(newRect, oldRect) || isResized(newRect, oldRect);
@@ -400,7 +405,7 @@ function isChanged(newRect, oldRect) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isMoved(newRect, oldRect) {
   return newRect.left != oldRect.left || newRect.top != oldRect.top;
@@ -409,7 +414,7 @@ function isMoved(newRect, oldRect) {
 /**
  * @param {!../layout-rect.LayoutRectDef} newRect
  * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
+ * @return {boolean}
  */
 function isResized(newRect, oldRect) {
   return newRect.width != oldRect.width || newRect.height != oldRect.height;

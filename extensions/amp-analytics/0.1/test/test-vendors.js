@@ -15,11 +15,19 @@
  */
 
 import {ANALYTICS_CONFIG} from '../vendors';
+import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
+import {hasOwn} from '../../../../src/utils/object';
 
-describe('analyaitcs vendors', () => {
-  it('googleanalytics & googleanalytics-alpha should be identical', () => {
-    const gaConfig = ANALYTICS_CONFIG['googleanalytics'];
-    expect(gaConfig).to
-        .deep.equal(ANALYTICS_CONFIG['googleanalytics-alpha']);
+describe('iframe transport', () => {
+
+  it('Should not contain iframe transport if not whitelisted', () => {
+    for (const vendor in ANALYTICS_CONFIG) {
+      const vendorEntry = ANALYTICS_CONFIG[vendor];
+      if (hasOwn(vendorEntry, 'transport') &&
+          hasOwn(vendorEntry.transport, 'iframe')) {
+        expect(vendorEntry['transport']['iframe'])
+            .to.equal(IFRAME_TRANSPORTS[vendor]);
+      }
+    }
   });
 });

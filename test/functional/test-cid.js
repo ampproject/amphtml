@@ -15,7 +15,6 @@
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
@@ -39,7 +38,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {macroTask} from '../../testing/yield';
-import {parseUrl} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url';
 import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
@@ -66,7 +65,7 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
@@ -87,6 +86,7 @@ describe('cid', () => {
       },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+        search: 'f=0',
       },
       crypto: {
         getRandomValues: array => {
@@ -147,9 +147,10 @@ describe('cid', () => {
         });
 
     cid = cidServiceForDocForTesting(ampdoc);
-    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').callsFake(() => null);
+    sandbox.stub(cid, 'isScopeOptedIn_').callsFake(() => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
+    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -178,6 +179,8 @@ describe('cid', () => {
   });
 
   describe('with crypto stub', () => {
+    const doesNotProvideError = '[CID] Viewer does not provide cap=cid';
+    const invalidFormatError = '[CID] invalid cid format';
     beforeEach(() => {
       crypto.sha384Base64 = val => {
         if (val instanceof Uint8Array) {
@@ -295,6 +298,7 @@ describe('cid', () => {
     });
 
     it('should read from viewer storage if embedded', () => {
+      expectAsyncConsoleError(doesNotProvideError);
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
       viewerStorage = JSON.stringify({
@@ -319,6 +323,8 @@ describe('cid', () => {
 
     it('should read from viewer storage if embedded and convert cid to ' +
         'new format', () => {
+      expectAsyncConsoleError(doesNotProvideError);
+      expectAsyncConsoleError(invalidFormatError);
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
       // baseCid returned by legacy API
@@ -349,6 +355,7 @@ describe('cid', () => {
     });
 
     it('should store to viewer storage if embedded', () => {
+      expectAsyncConsoleError(doesNotProvideError, 2);
       fakeWin.parent = {};
       const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
       return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
@@ -384,7 +391,7 @@ describe('cid', () => {
       return compare('e2', expected).then(() => {
         clock.tick(364 * DAY);
         return compare('e2', expected).then(() => {
-          clock.tick(365 * DAY + 1);
+          clock.tick((365 * DAY) + 1);
           removeMemoryCacheOfCid();
           return compare(
               'e2',
@@ -398,6 +405,7 @@ describe('cid', () => {
     });
 
     it('should expire on read after 365 days when embedded', () => {
+      expectAsyncConsoleError(doesNotProvideError, 3);
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
       viewerStorage = JSON.stringify({
@@ -410,7 +418,7 @@ describe('cid', () => {
       return compare('e2', expectedIdFromViewer).then(() => {
         clock.tick(364 * DAY);
         return compare('e2', expectedIdFromViewer).then(() => {
-          clock.tick(365 * DAY + 1);
+          clock.tick((365 * DAY) + 1);
           removeMemoryCacheOfCid();
           return compare('e2', expectedNewId);
         });
@@ -439,6 +447,7 @@ describe('cid', () => {
     });
 
     it('should set last access time once a day when embedded', () => {
+      expectAsyncConsoleError(doesNotProvideError, 5);
       fakeWin.parent = {};
       const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       function getStoredTime() {
@@ -489,9 +498,9 @@ describe('cid', () => {
     });
 
     it('should fail on invalid scope', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         cid.get({scope: '$$$'}, Promise.resolve());
-      }).to.throw(/\$\$\$/);
+      }).to.throw(/\$\$\$/); });
     });
 
     it('should not store until persistence promise resolves', () => {
@@ -525,6 +534,7 @@ describe('cid', () => {
     });
 
     it('should not wait persistence consent for viewer storage', () => {
+      expectAsyncConsoleError(doesNotProvideError, 2);
       fakeWin.parent = {};
       const persistencePromise = new Promise(() => {/* never resolves */});
       return cid.get({scope: 'e2'}, hasConsent, persistencePromise).then(() => {
@@ -705,9 +715,9 @@ describe('cid', () => {
 
 describe('getProxySourceOrigin', () => {
   it('should fail on non-proxy origin', () => {
-    expect(() => {
-      getProxySourceOrigin(parseUrl('https://abc.org/v/foo.com/'));
-    }).to.throw(/Expected proxy origin/);
+    allowConsoleError(() => { expect(() => {
+      getProxySourceOrigin(parseUrlDeprecated('https://abc.org/v/foo.com/'));
+    }).to.throw(/Expected proxy origin/); });
   });
 });
 
@@ -726,6 +736,7 @@ describes.realWin('cid', {amp: true}, env => {
     clock = lolex.install({
       target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     cid = cidServiceForDocForTesting(ampdoc);
+    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -733,6 +744,8 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('should store CID in cookie when not in Viewer', function *() {
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
     setCookie(win, 'foo', '', 0);
     const fooCid = yield cid.get({
       scope: 'foo',
@@ -747,6 +760,8 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('get method should return CID when in Viewer ', () => {
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(true));
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(Promise.resolve('cid-from-viewer'));
@@ -760,11 +775,15 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('get method should time out when in Viewer', function *() {
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(true));
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(new Promise(() => {}));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer')
         .returns(Promise.resolve(true));
+    const storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(false));
     sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
@@ -777,17 +796,16 @@ describes.realWin('cid', {amp: true}, env => {
     clock.tick(9999);
     yield macroTask();
     expect(resolved).to.be.false;
-    clock.tick(1);
-    yield macroTask();
-    expect(resolved).to.be.true;
     expect(scopedCid).to.be.undefined;
+    yield macroTask();
   });
 
   describe('pub origin, CID API opt in', () => {
 
     beforeEach(() => {
       sandbox.stub(url, 'isProxyOrigin').returns(false);
-      sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').returns('api-key');
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
       setCookie(win, '_ga', '', 0);
     });
 
@@ -796,6 +814,7 @@ describes.realWin('cid', {amp: true}, env => {
     });
 
     it('should use cid api on pub origin if opted in', () => {
+      cid.apiKeyMap_ = {'AMP_ECID_GOOGLE': 'cid-api-key'};
       const getScopedCidStub = sandbox.stub(cid.cidApi_, 'getScopedCid');
       getScopedCidStub.returns(Promise.resolve('cid-from-api'));
       return cid.get({
@@ -804,7 +823,7 @@ describes.realWin('cid', {amp: true}, env => {
         createCookieIfNotPresent: true,
       }, hasConsent).then(scopedCid => {
         expect(getScopedCidStub)
-            .to.be.calledWith('api-key', 'AMP_ECID_GOOGLE');
+            .to.be.calledWith('cid-api-key', 'AMP_ECID_GOOGLE');
         expect(scopedCid).to.equal('cid-from-api');
         expect(getCookie(win, '_ga')).to.equal('cid-from-api');
       });
@@ -832,6 +851,48 @@ describes.realWin('cid', {amp: true}, env => {
       }, hasConsent).then(scopedCid => {
         expect(scopedCid).to.be.null;
         expect(getCookie(win, '_ga')).to.be.null;
+      });
+    });
+  });
+
+  describe('isScopeOptedIn', () => {
+    it('should read predefined clients and custom API keys correctly', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" ' +
+          'content="googleanalytics, ' +
+          'foo = foo-api-key,' +
+          'bar=bar-api-key ,' +
+          'hello=hello-api-key">';
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE'))
+          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
+      expect(cid.isScopeOptedIn_('foo')).to.equal('foo-api-key');
+      expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
+      expect(cid.isScopeOptedIn_('hello')).to.equal('hello-api-key');
+      expect(cid.isScopeOptedIn_('non-existing')).to.be.undefined;
+    });
+
+    it('should work if meta only contains predefined clients', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE'))
+          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
+    });
+
+    it('should work if meta only contains custom scopes', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" ' +
+          'content="' +
+          'foo=foo-api-key,' +
+          'bar=bar-api-key">';
+      expect(cid.isScopeOptedIn_('foo')).to.equal('foo-api-key');
+      expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
+    });
+
+    it('should not work if vendor not whitelisted', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="abodeanalytics">';
+      allowConsoleError(() => {
+        expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
       });
     });
   });

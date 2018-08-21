@@ -91,6 +91,9 @@ function setClassOnHover(hoverEl, targetEl, className) {
 }
 
 
+/**
+ * Desktop navigation buttons.
+ */
 class PaginationButton {
   /**
    * @param {!Document} doc
@@ -146,7 +149,7 @@ export class PaginationButtons {
   /** @param {!Window} win */
   constructor(win) {
     const doc = win.document;
-    const storeService = Services.storyStoreService(win);
+    const storeService = Services.storyStoreServiceV01(win);
 
     /** @private @const {!PaginationButton} */
     this.forwardButton_ =

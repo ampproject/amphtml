@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {Vsync} from '../../src/service/vsync-impl';
@@ -32,7 +31,7 @@ describe('vsync', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     win = {
       document: {
@@ -99,9 +98,9 @@ describe('vsync', () => {
     });
 
     it('should fail canAnimate without node', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         vsync.canAnimate();
-      }).to.throw(/Assertion failed/);
+      }).to.throw(/Assertion failed/); });
     });
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.

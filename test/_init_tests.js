@@ -18,6 +18,7 @@
 import '../src/polyfills';
 import 'babel-polyfill';
 import * as describes from '../testing/describes';
+import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {
@@ -39,6 +40,17 @@ import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
+
+// Used to print warnings for unexpected console errors.
+let consoleErrorSandbox;
+let testName;
+let expectedAsyncErrors;
+let rethrowAsyncSandbox;
+const originalConsoleError = console/*OK*/.error;
+
+// Used to clean up global state between tests.
+let initialGlobalState;
+let initialWindowState;
 
 // All exposed describes.
 global.describes = describes;
@@ -145,6 +157,18 @@ class TestConfig {
     return this.skip(this.runOnIos);
   }
 
+  skipIfPropertiesObfuscated() {
+    return this.skip(function() {
+      return window.__karma__.config.amp.propertiesObfuscated;
+    });
+  }
+
+  skipSinglePass() {
+    return this.skip(function() {
+      return window.__karma__.config.amp.singlePass;
+    });
+  }
+
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
@@ -244,27 +268,145 @@ it.configure = function() {
   return new TestConfig(it);
 };
 
-// Used to check if an unrestored sandbox exists
-const sandboxes = [];
-const create = sinon.sandbox.create;
-sinon.sandbox.create = function(config) {
-  const sandbox = create.call(sinon.sandbox, config);
-  sandboxes.push(sandbox);
+/**
+ * Prints a warning when a console error is detected during a test.
+ * @param {*} messages One or more error messages
+ */
+function printWarning(...messages) {
+  const message = messages.join(' ');
 
-  const restore = sandbox.restore;
-  sandbox.restore = function() {
-    const i = sandboxes.indexOf(sandbox);
-    if (i > -1) {
-      sandboxes.splice(i, 1);
+  // Match equal strings.
+  if (expectedAsyncErrors.includes(message)) {
+    expectedAsyncErrors.splice(expectedAsyncErrors.indexOf(message), 1);
+    return;
+  }
+
+  // Match regex.
+  for (let i = 0; i < expectedAsyncErrors.length; i++) {
+    const expectedError = expectedAsyncErrors[i];
+    if (typeof expectedError != 'string') {
+      if (expectedError.test(message)) {
+        expectedAsyncErrors.splice(i, 1);
+        return;
+      }
     }
-    return restore.call(sandbox);
+  }
+
+  const errorMessage = message.split('\n', 1)[0]; // First line.
+  const helpMessage = '    The test "' + testName + '"' +
+      ' resulted in a call to console.error. (See above line.)\n' +
+      '    ⤷ If the error is not expected, fix the code that generated ' +
+          'the error.\n' +
+      '    ⤷ If the error is expected (and synchronous), use the following ' +
+          'pattern to wrap the test code that generated the error:\n' +
+      '        \'allowConsoleError(() => { <code that generated the ' +
+          'error> });\'\n' +
+      '    ⤷ If the error is expected (and asynchronous), use the ' +
+          'following pattern at the top of the test:\n' +
+      '        \'expectAsyncConsoleError(<string or regex>[, <number of' +
+      ' times the error message repeats>]);';
+  originalConsoleError(errorMessage + '\'\n' + helpMessage);
+}
+
+/**
+ * Used during normal test execution, to detect unexpected console errors.
+ */
+function warnForConsoleError() {
+  expectedAsyncErrors = [];
+  consoleErrorSandbox = sinon.createSandbox();
+  const consoleErrorStub =
+      consoleErrorSandbox.stub(console, 'error').callsFake(printWarning);
+
+  this.expectAsyncConsoleError = function(message, repeat = 1) {
+    expectedAsyncErrors.push.apply(
+        expectedAsyncErrors, Array(repeat).fill(message));
   };
-  return sandbox;
-};
+  this.allowConsoleError = function(func) {
+    consoleErrorStub.reset();
+    consoleErrorStub.callsFake(() => {});
+    const result = func();
+    try {
+      expect(consoleErrorStub).to.have.been.called;
+    } catch (e) {
+      const helpMessage =
+          'The test "' + testName + '" contains an "allowConsoleError" block ' +
+          'that didn\'t result in a call to console.error.';
+      originalConsoleError(helpMessage);
+    } finally {
+      consoleErrorStub.callsFake(printWarning);
+    }
+    return result;
+  };
+}
+
+/**
+ * Used to restore error level logging after each test.
+ */
+function restoreConsoleError() {
+  consoleErrorSandbox.restore();
+  if (expectedAsyncErrors.length > 0) {
+    const helpMessage =
+        'The test "' + testName + '" called "expectAsyncConsoleError", ' +
+        'but there were no call(s) to console.error with these message(s): ' +
+        '"' + expectedAsyncErrors.join('", "') + '"';
+    throw new Error(helpMessage);
+  }
+  expectedAsyncErrors = [];
+}
+
+/**
+ * Used to silence info, log, and warn level logging during each test, unless
+ * verbose mode is enabled.
+ */
+function maybeStubConsoleInfoLogWarn() {
+  const {verboseLogging} = window.__karma__.config;
+  if (!verboseLogging) {
+    sinon.sandbox.stub(console, 'info').callsFake(() => {});
+    sinon.sandbox.stub(console, 'log').callsFake(() => {});
+    sinon.sandbox.stub(console, 'warn').callsFake(() => {});
+  }
+}
+
+/**
+ * Used to precent asynchronous throwing of errors during each test.
+ */
+function preventAsyncErrorThrows() {
+  this.stubAsyncErrorThrows = function() {
+    rethrowAsyncSandbox = sinon.createSandbox();
+    rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
+      const error = log.createErrorVargs.apply(null, args);
+      self.reportError(error);
+      throw error;
+    });
+  };
+  this.restoreAsyncErrorThrows = function() {
+    rethrowAsyncSandbox.restore();
+  };
+  setReportError(reportError);
+  stubAsyncErrorThrows();
+}
+
+before(function() {
+  // This is a more robust version of `this.skip()`. See #17245.
+  this.skipTest = function() {
+    if (this._runnable.title != '"before all" hook') {
+      throw new Error('skipTest() can only be called from within before()');
+    }
+    this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.
+    this.skip();
+  };
+});
 
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
+  testName = this.currentTest.fullTitle();
+  sinon.sandbox = sinon.createSandbox();
+  maybeStubConsoleInfoLogWarn();
+  preventAsyncErrorThrows();
+  warnForConsoleError();
+  initialGlobalState = Object.keys(global);
+  initialWindowState = Object.keys(window);
 });
 
 function beforeTest() {
@@ -282,9 +424,15 @@ function beforeTest() {
   Services.resourcesForDoc(ampdoc).ampInitComplete();
 }
 
-// Global cleanup of tags added during tests. Cool to add more
-// to selector.
+/**
+ * Global cleanup of tags added during tests. Cool to add more to selector.
+ */
 afterEach(function() {
+  const globalState = Object.keys(global);
+  const windowState = Object.keys(window);
+  sinon.sandbox.restore();
+  restoreConsoleError();
+  restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
@@ -306,18 +454,20 @@ afterEach(function() {
   window.context = undefined;
   window.AMP_MODE = undefined;
 
-  const forgotGlobal = !!global.sandbox;
-  if (forgotGlobal) {
-    // The error will be thrown later to give possibly other sandboxes a
-    // chance to restore themselves.
-    delete global.sandbox;
+  if (windowState.length != initialWindowState.length) {
+    for (let i = initialWindowState.length; i < windowState.length; ++i) {
+      if (window[windowState[i]]) {
+        delete window[windowState[i]];
+      }
+    }
   }
-  if (sandboxes.length > 0) {
-    sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
-    throw new Error('You forgot to restore your sandbox!');
-  }
-  if (forgotGlobal) {
-    throw new Error('You forgot to clear global sandbox!');
+
+  if (initialGlobalState.length != globalState.length) {
+    for (let i = initialGlobalState.length; i < globalState.length; ++i) {
+      if (global[globalState[i]]) {
+        delete global[globalState[i]];
+      }
+    }
   }
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
@@ -327,7 +477,6 @@ afterEach(function() {
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
-  setReportError(reportError);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

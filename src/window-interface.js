@@ -21,11 +21,39 @@
  */
 export class WindowInterface {
 
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {string}
+   */
   static getDocumentReferrer(win) {
     return win.document.referrer;
   }
 
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {string}
+   */
   static getHostname(win) {
     return win.location.hostname;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {string}
+   */
+  static getUserAgent(win) {
+    return win.navigator.userAgent;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {string}
+   */
+  static getUserLanguage(win) {
+    return win.navigator.userLanguage || win.navigator.language;
   }
 }

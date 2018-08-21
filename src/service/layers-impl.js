@@ -227,7 +227,8 @@ export class LayoutLayers {
    */
   getScrolledPosition(element, opt_ancestor) {
     const layout = this.add(element);
-    return layout.getScrolledPosition(opt_ancestor);
+    const pos = layout.getScrolledPosition(opt_ancestor);
+    return positionLt(Math.round(pos.left), Math.round(pos.top));
   }
 
   /**
@@ -242,7 +243,8 @@ export class LayoutLayers {
    */
   getOffsetPosition(element, opt_ancestor) {
     const layout = this.add(element);
-    return layout.getOffsetPosition(opt_ancestor);
+    const pos = layout.getOffsetPosition(opt_ancestor);
+    return positionLt(Math.round(pos.left), Math.round(pos.top));
   }
 
   /**
@@ -253,7 +255,8 @@ export class LayoutLayers {
    */
   getSize(element) {
     const layout = this.add(element);
-    return layout.getSize();
+    const size = layout.getSize();
+    return sizeWh(Math.round(size.width), Math.round(size.height));
   }
 
   /**
@@ -290,7 +293,7 @@ export class LayoutLayers {
   /**
    * Dirties the element's parent layer, so remeasures will happen.
    *
-   * @parent {!Element} node
+   * @param {!Element} node
    */
   dirty(node) {
     // Find a parent layer, or fall back to the root scrolling layer in cases
@@ -447,9 +450,9 @@ export class LayoutElement {
     /**
      * Whether the layout is a descendant of the most recently scrolled layer.
      *
-     * Note: This attribute is `undefined`, unless the ancestry tree is currently
-     * being iterated with #iterateAncestry. This is the only time it can be
-     * determined without a ton of DOM checks.
+     * Note: This attribute is `undefined`, unless the ancestry tree is
+     * currently being iterated with #iterateAncestry. This is the only time it
+     * can be determined without a ton of DOM checks.
      *
      * @private {boolean|undefined}
      */
@@ -608,7 +611,7 @@ export class LayoutElement {
   /**
    * Adds the child to the list of children of this layer.
    *
-   * @param {!LayoutElement} child;
+   * @param {!LayoutElement} child
    */
   add(child) {
     dev().assert(this.isLayer());
@@ -620,7 +623,7 @@ export class LayoutElement {
   /**
    * Removes the child from the list of children of this layer.
    *
-   * @param {!LayoutElement} child;
+   * @param {!LayoutElement} child
    */
   remove(child) {
     dev().assert(this.isLayer());
@@ -813,6 +816,24 @@ export class LayoutElement {
   }
 
   /**
+   * Gets the ratio of the element's horizontal distance over the parent's
+   * "viewport". Ie, "how many full scrolls horizontally does it take to
+   * intersect this element"
+   *
+   * @return {number}
+   */
+  getHorizontalViewportsFromParent() {
+    const distance = this.getHorizontalDistanceFromParent();
+    if (distance === 0) {
+      return 0;
+    }
+
+    const parent = this.getParentLayer();
+    const parentWidth = parent.getSize().width;
+    return distance / parentWidth;
+  }
+
+  /**
    * Gets the minimal vertical distance of this element from its parent's
    * "viewport".
    *
@@ -841,7 +862,25 @@ export class LayoutElement {
     return 0;
   }
 
-  /*
+  /**
+   * Gets the ratio of the element's vertical distance over the parent's
+   * "viewport". Ie, "how many full scrolls vertical does it take to
+   * intersect this element"
+   *
+   * @return {number}
+   */
+  getVerticalViewportsFromParent() {
+    const distance = this.getVerticalDistanceFromParent();
+    if (distance === 0) {
+      return 0;
+    }
+
+    const parent = this.getParentLayer();
+    const parentHeight = parent.getSize().height;
+    return distance / parentHeight;
+  }
+
+  /**
    * Gets the current scrollTop of this layer.
    *
    * @return {number}
@@ -851,7 +890,7 @@ export class LayoutElement {
     return this.scrollTop_;
   }
 
-  /*
+  /**
    * Gets the current scrollLeft of this layer.
    *
    * @return {number}
@@ -1003,7 +1042,7 @@ export class LayoutElement {
     }
 
     let accumulator = undefined;
-    const length = ANCESTRY_CACHE.length;
+    const {length} = ANCESTRY_CACHE;
     for (let i = 0; i < length; i++) {
       const layer = ANCESTRY_CACHE.pop();
       accumulator = iterator(accumulator, layer, i, state);
@@ -1013,7 +1052,8 @@ export class LayoutElement {
   }
 
   /**
-   * Remeasures the element, and all children, since this element was marked dirty.
+   * Remeasures the element, and all children, since this element was marked
+   * dirty.
    *
    * @param {!PositionDef=} opt_relativeTo A performance optimization used when
    *     recursively measuring the child nodes of the layer.

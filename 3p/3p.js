@@ -23,8 +23,8 @@
 
 
 import {dev, user} from '../src/log';
+import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
-import {map} from '../src/utils/object';
 import {rethrowAsync} from '../src/log';
 
 
@@ -185,7 +185,7 @@ export function validateSrcContains(string, src) {
  *     done. The first argument is the result.
  */
 export function computeInMasterFrame(global, taskId, work, cb) {
-  const master = global.context.master;
+  const {master} = global.context;
   let tasks = master.__ampMasterTasks;
   if (!tasks) {
     tasks = master.__ampMasterTasks = {};
@@ -272,13 +272,16 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
+    blockOnConsent: true,
     ampSlotIndex: true,
     adHolderText: true,
     loadingStrategy: true,
+    htmlAccessAllowed: true,
+    adContainerId: true,
   };
 
   for (const field in data) {
-    if (!data.hasOwnProperty(field) || field in defaultAvailableFields) {
+    if (!hasOwn(data, field) || field in defaultAvailableFields) {
       continue;
     }
     if (allowedFields.indexOf(field) < 0) {
@@ -299,7 +302,7 @@ let experimentToggles = {};
  * @return {boolean}
  */
 export function isExperimentOn(experimentId) {
-  return !!experimentToggles[experimentId];
+  return experimentToggles && !!experimentToggles[experimentId];
 }
 
 /**

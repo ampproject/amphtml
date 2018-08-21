@@ -18,6 +18,22 @@
   /* Fixed to make position independent of page other elements. */
   position: fixed;
   bottom: 0;
+  left: 0;
   overflow: hidden !important;
-  visibility: hidden;
+  background: rgba(255, 255, 255, .7);
+  z-index: 1000;
+  width: 100%;
  }
+
+ amp-consent > * {
+   display: none !important;
+   max-height: 100vh !important;
+ }
+
+ amp-consent.amp-active {
+  visibility: visible;
+}
+
+amp-consent.amp-hidden {
+  visibility: hidden;
+}

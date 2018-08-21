@@ -15,13 +15,11 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   ExpansionOptions,
   installVariableService,
   variableServiceFor,
 } from '../variables';
-import {REPLACEMENT_EXP_NAME} from '../../../../src/service/url-replacements-impl';
 import {Services} from '../../../../src/services';
 import {adopt} from '../../../../src/runtime';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -32,7 +30,7 @@ describe('amp-analytics.VariableService', function() {
   let variables, sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     installVariableService(window);
     variables = variableServiceFor(window);
   });
@@ -69,27 +67,37 @@ describe('amp-analytics.VariableService', function() {
     });
 
     it('expands nested vars', () => {
-      return variables.expandTemplate('${1}', new ExpansionOptions(vars))
-          .then(actual =>
-            expect(actual).to.equal('123%24%7B4%7D')
-          );
+      return allowConsoleError(() => {
+        return variables.expandTemplate('${1}', new ExpansionOptions(vars))
+            .then(actual =>
+              expect(actual).to.equal('123%24%7B4%7D')
+            );
+      });
     });
 
     it('expands nested vars (no encode)', () => {
-      return variables.expandTemplate('${1}',
-          new ExpansionOptions(vars, undefined, true))
-          .then(actual =>
-            expect(actual).to.equal('123${4}')
-          );
+      return allowConsoleError(() => {
+        return variables.expandTemplate('${1}',
+            new ExpansionOptions(vars, undefined, true))
+            .then(actual =>
+              expect(actual).to.equal('123${4}')
+            );
+      });
     });
 
     it('expands nested vars without double encoding', () => {
-      return expect(variables.expandTemplate('${a}',
-          new ExpansionOptions(vars))).to.eventually.equal(
-          'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
+      return allowConsoleError(() => {
+        return expect(variables.expandTemplate('${a}',
+            new ExpansionOptions(vars))).to.eventually.equal(
+            'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
+      });
     });
 
     it('limits the recursion to n', () => {
+      expectAsyncConsoleError(
+          '[Analytics.Variables] Maximum depth reached while expanding ' +
+          'variables. Please ensure that the variables are not recursive.', 2);
+
       return variables.expandTemplate('${1}', new ExpansionOptions(vars, 3))
           .then(actual =>
             expect(actual).to.equal('1234%24%7B1%7D'))
@@ -133,14 +141,14 @@ describe('amp-analytics.VariableService', function() {
     beforeEach(() => {
       ampdoc = env.ampdoc;
       win = env.win;
-      toggleExperiment(env.win, REPLACEMENT_EXP_NAME, true);
+      toggleExperiment(env.win, 'url-replacement-v2', true);
       installVariableService(win);
       variables = variableServiceFor(win);
       urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
     });
 
     afterEach(() => {
-      toggleExperiment(env.win, REPLACEMENT_EXP_NAME);
+      toggleExperiment(env.win, 'url-replacement-v2');
     });
 
     function check(input, output) {
@@ -149,77 +157,78 @@ describe('amp-analytics.VariableService', function() {
       return expect(expanded).to.eventually.equal(output);
     }
 
-    it('default works', () => check('DEFAULT(one,two)', 'one'));
+    it('default works', () => check('$DEFAULT(one,two)', 'one'));
 
-    it('default works without first arg', () => check('DEFAULT(,two)', 'two'));
+    it('default works without first arg', () => check('$DEFAULT(,two)', 'two'));
 
     it('default works without first arg length',
-        () => check('DEFAULT(TRIM(), two)', 'two'));
+        () => check('$DEFAULT($TRIM(), two)', 'two'));
 
-    it('hash works', () => check('HASH(test)',
+    it('hash works', () => check('$HASH(test)',
         'doQSMg97CqWBL85CjcRwazyuUOAqZMqhangiSb_o78S37xzLEmJV0ZYEff7fF6Cp'));
 
-    it('substr works', () => check('SUBSTR(Hello world!, 1, 4)', 'ello'));
+    it('substr works', () => check('$SUBSTR(Hello world!, 1, 4)', 'ello'));
 
-    it('trim works', () => check('TRIM(hello      )', 'hello'));
+    it('trim works', () => check('$TRIM(hello      )', 'hello'));
 
     it('json works', () =>
-      check('JSON(Hello world!)', '%22Hello%20world!%22'));
+      check('$JSON(Hello world!)', '%22Hello%20world!%22'));
 
     it('toLowerCase works', () =>
-      check('TOLOWERCASE(HeLLO WOrld!)', 'hello%20world!'));
+      check('$TOLOWERCASE(HeLLO WOrld!)', 'hello%20world!'));
 
     it('toUpperCase works', () => {
-      return check('TOUPPERCASE(HeLLO WOrld!)', 'HELLO%20WORLD!');
+      return check('$TOUPPERCASE(HeLLO WOrld!)', 'HELLO%20WORLD!');
     });
 
-    it('not works (truth-y value)', () => check('NOT(hello)', 'false'));
+    it('not works (truth-y value)', () => check('$NOT(hello)', 'false'));
 
-    it('not works (false-y value)', () => check('NOT()', 'true'));
+    it('not works (false-y value)', () => check('$NOT()', 'true'));
 
     it('base64 works', () => {
-      return check('BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
+      return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
-    it('if works', () => check('IF(hey, truthy, falsey)', 'truthy'));
+    it('if works', () => check('$IF(hey, truthy, falsey)', 'truthy'));
 
     it('chaining works', () => {
-      return check('SUBSTR(Hello world!, 6)', 'world!').then(() =>
-        check('TOUPPERCASE(SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
-        check('BASE64(TOUPPERCASE(SUBSTR(Hello world!, 6)))', 'V09STEQh'))
+      return check('$SUBSTR(Hello world!, 6)', 'world!').then(() =>
+        check('$TOUPPERCASE($SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
+        check('$BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6)))', 'V09STEQh'))
           .then(() =>
-            check('HASH(BASE64(TOUPPERCASE(SUBSTR(Hello world!, 6))))',
+            check('$HASH($BASE64($TOUPPERCASE($SUBSTR(Hello world!, 6))))',
                 'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_Q' +
                 'S7Uc5ZmODduHWdplzrZ7Jsnqx')
           );
     });
 
     it('replaces common use case', () => {
-      return check('REPLACE(this-is-a-test, `-`)', 'thisisatest');
+      return check('$REPLACE(this-is-a-test, `-`)', 'thisisatest');
     });
 
     it('replaces three args', () => {
-      return check('REPLACE(this-is-a-test, `-`, *)', 'this*is*a*test');
+      return check('$REPLACE(this-is-a-test, `-`, *)', 'this*is*a*test');
     });
 
     it('replaces backticks optional', () => {
-      return check('REPLACE(this-is-a-test, -, **)', 'this**is**a**test');
+      return check('$REPLACE(this-is-a-test, -, **)', 'this**is**a**test');
     });
 
     it('replaces not trimming spaces in backticks', () => {
-      return check('REPLACE(this-is-a-test, ` -`)', 'this-is-a-test');
+      return check('$REPLACE(this-is-a-test, ` -`)', 'this-is-a-test');
     });
 
     it('replaces respecting space as arg', () => {
-      return check('REPLACE(this-is-a-test, `-`, ` `)', 'this%20is%20a%20test');
+      return check('$REPLACE(this-is-a-test, `-`, ` `)',
+          'this%20is%20a%20test');
     });
 
     it('replaces respecting backticks', () => {
-      return check('REPLACE(`this-,is-,a-,test`, `-,`)', 'thisisatest');
+      return check('$REPLACE(`this-,is-,a-,test`, `-,`)', 'thisisatest');
     });
 
     it('replace with no third arg', () => {
-      return check('REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
+      return check('$REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
     });
   });
 

@@ -25,9 +25,8 @@ import {appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';
-import {hasOwn, map} from '../../../src/utils/object';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {isObject} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 import {parseQueryString} from '../../../src/url';
 
 const TAG = 'AMP-ANALYTICS';
@@ -36,16 +35,16 @@ const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} ampAnalyticsElement
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {function(string, !JsonObject)} handler
    * @param {boolean} isSandbox
    */
-  constructor(ampdoc, request, preconnect, handler, isSandbox) {
+  constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
 
     /** @const {!Window} */
-    this.win = ampdoc.win;
+    this.win = ampAnalyticsElement.getAmpDoc().win;
 
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
@@ -75,7 +74,8 @@ export class RequestHandler {
     this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacementService_ = Services.urlReplacementsForDoc(ampdoc);
+    this.urlReplacementService_ =
+      Services.urlReplacementsForDoc(ampAnalyticsElement);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
@@ -157,7 +157,8 @@ export class RequestHandler {
     const extraUrlParamsPromise = this.expandExtraUrlParams_(
         configParams, triggerParams, expansionOption)
         .then(expandExtraUrlParams => {
-          // Construct the extraUrlParamsString: Remove null param and encode component
+          // Construct the extraUrlParamsString: Remove null param and encode
+          // component
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
           return this.urlReplacementService_.expandUrlAsync(
@@ -222,10 +223,12 @@ export class RequestHandler {
    * @private
    */
   fire_() {
-    const extraUrlParamsPromise = this.extraUrlParamsPromise_;
-    const baseUrlTemplatePromise = this.baseUrlTemplatePromise_;
-    const baseUrlPromise = this.baseUrlPromise_;
-    const batchSegmentsPromise = this.batchSegmentPromises_;
+    const {
+      extraUrlParamsPromise_: extraUrlParamsPromise,
+      baseUrlTemplatePromise_: baseUrlTemplatePromise,
+      baseUrlPromise_: baseUrlPromise,
+      batchSegmentPromises_: batchSegmentsPromise,
+    } = this;
     const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
@@ -380,6 +383,9 @@ export class RequestHandler {
     this.refreshBatchInterval_();
   }
 
+  /**
+   * Initializes report window.
+   */
   initReportWindow_() {
     if (this.reportWindow_) {
       this.reportWindowTimeoutId_ = this.win.setTimeout(() => {
@@ -410,33 +416,4 @@ export class RequestHandler {
       this.refreshBatchInterval_();
     }, interval);
   }
-}
-
-/**
- * Expand config's request to object
- * @param {!JsonObject} config
- */
-export function expandConfigRequest(config) {
-  if (!config['requests']) {
-    return config;
-  }
-  for (const k in config['requests']) {
-    if (hasOwn(config['requests'], k)) {
-      config['requests'][k] = expandRequestStr(config['requests'][k]);
-    }
-  }
-  return config;
-}
-
-/**
- * Expand single request to an object
- * @param {!JsonObject} request
- */
-function expandRequestStr(request) {
-  if (isObject(request)) {
-    return request;
-  }
-  return {
-    'baseUrl': request,
-  };
 }

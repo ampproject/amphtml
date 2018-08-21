@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {Services} from '../../src/services';
@@ -49,7 +48,7 @@ describe('Activity getTotalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     // start at something other than 0
@@ -70,6 +69,7 @@ describe('Activity getTotalEngagedTime', () => {
         style: {
           // required to instantiate Viewport service
           paddingTop: 0,
+          setProperty: () => {},
         },
         classList: {
           add: () => {},
@@ -251,7 +251,7 @@ describe('Activity getIncrementalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     // start at something other than 0
@@ -272,6 +272,7 @@ describe('Activity getIncrementalEngagedTime', () => {
         style: {
           // required to instantiate Viewport service
           paddingTop: 0,
+          setProperty: () => {},
         },
         classList: {
           add: () => {},
@@ -374,6 +375,37 @@ describe('Activity getIncrementalEngagedTime', () => {
       const second = activity.getIncrementalEngagedTime('tests');
       expect(second).to.equal(5);
       return expect(second).not.to.equal(activity.getTotalEngagedTime());
+    });
+  });
+
+  it('should not reset incremental engaged time if reset is false', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      // don't reset
+      mousedownObservable.fire();
+      clock.tick(10000);
+      // more engaged time, don't reset
+      const second = activity.getIncrementalEngagedTime('tests', false);
+      expect(second).to.equal(5);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      // more engaged time, don't reset
+      const third = activity.getIncrementalEngagedTime('tests', false);
+      expect(third).to.equal(10);
+      // more engaged time, reset
+      const fourth = activity.getIncrementalEngagedTime('tests', true);
+      expect(fourth).to.equal(10);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      // more engaged time, don't reset
+      const fifth = activity.getIncrementalEngagedTime('tests', false);
+      expect(fifth).to.equal(5);
+      // reset with default value
+      const sixth = activity.getIncrementalEngagedTime('tests');
+      expect(sixth).to.equal(5);
+      // should be reset
+      const seventh = activity.getIncrementalEngagedTime('tests', false);
+      return expect(seventh).to.equal(0);
     });
   });
 

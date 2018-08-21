@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../localization';
 import {PaginationButtons} from '../pagination-buttons';
-import {Services} from '../../../../src/services';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -36,6 +38,11 @@ describes.realWin('amp-story', {
   let element;
   let story;
 
+  /**
+   * @param {!Element} container
+   * @param {boolean=} opt_active
+   * @return {!Element}
+   */
   function appendEmptyPage(container, opt_active) {
     const page = document.createElement('amp-story-page');
     page.id = '-empty-page';
@@ -46,6 +53,12 @@ describes.realWin('amp-story', {
     return page;
   }
 
+  /**
+   * @param {!Element} container
+   * @param {number} count
+   * @param {Array<string>=} opt_ids
+   * @return {!Array<!Element>}
+   */
   function createPages(container, count, opt_ids) {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
@@ -56,6 +69,10 @@ describes.realWin('amp-story', {
     });
   }
 
+  /**
+   * @param {string} eventType
+   * @return {!Event}
+   */
   function createEvent(eventType) {
     const eventObj = document.createEventObject ?
       document.createEventObject() : document.createEvent('Events');
@@ -70,11 +87,15 @@ describes.realWin('amp-story', {
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization-v01', () => localizationService);
+
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
+    // sandbox.stub(element.implementation_,
+    // 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {
@@ -130,66 +151,55 @@ describes.realWin('amp-story', {
 
   it('should preload the bookend if navigating to the last page', () => {
     createPages(story.element, 1, ['cover']);
-    const bookendUrl = 'foo.com';
-    story.element.setAttribute('bookend-config-src', bookendUrl);
 
-    const fakeBookendElement = win.document.createElement('div');
-    sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
+    const loadBookendStub =
+        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
 
     return story.layoutCallback()
         .then(() => {
-          expect(fetchJsonStub).to.have.been.calledOnce;
-          expect(fetchJsonStub.getCall(0).args[0]).to.equal(bookendUrl);
-        });
-  });
-
-  // The empty bookend is built even if no bookend-config-src attribute was set.
-  it('should prerender the bookend if navigating to the last page', () => {
-    createPages(story.element, 1, ['cover']);
-    const fakeBookendElement = win.document.createElement('div');
-    const buildBookendStub =
-        sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const appendChildSpy = sandbox.spy(story.element, 'appendChild');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(buildBookendStub).to.have.been.calledWith(story.getAmpDoc());
-          expect(appendChildSpy).to.have.been.calledWith(fakeBookendElement);
-        });
-  });
-
-  it('should not preload the bookend if no attribute was set', () => {
-    createPages(story.element, 1, ['cover']);
-
-    const fakeBookendElement = win.document.createElement('div');
-    sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(fetchJsonStub).to.not.have.been.called;
+          expect(buildBookendStub).to.have.been.calledOnce;
+          expect(loadBookendStub).to.have.been.calledOnce;
         });
   });
 
   it('should not preload the bookend if not on the last page', () => {
     createPages(story.element, 2, ['cover']);
-    story.element.setAttribute('bookend-config-src', 'foo.com');
 
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
+    const loadBookendStub =
+        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
 
     return story.layoutCallback()
         .then(() => {
-          expect(fetchJsonStub).to.not.have.been.called;
+          expect(buildBookendStub).to.not.have.been.called;
+          expect(loadBookendStub).to.not.have.been.called;
+        });
+  });
+
+  it('should prerender/load the share menu', () => {
+    createPages(story.element, 1, ['cover']);
+
+    sandbox.stub(story.bookend_, 'build');
+    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildShareMenuStub).to.have.been.calledOnce;
+        });
+  });
+
+  it('should not prerender/load the share menu on desktop', () => {
+    createPages(story.element, 1, ['cover']);
+
+    story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
+
+    sandbox.stub(story.bookend_, 'build');
+    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildShareMenuStub).to.not.have.been.called;
         });
   });
 
@@ -330,6 +340,58 @@ describes.realWin('amp-story', {
         expect(story.element.classList.contains('i-amphtml-story-landscape'))
             .to.be.false;
       });
+
+  it('should update page id in store', () => {
+    const firstPageId = 'page-one';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+    const dispatchStub =
+        sandbox.stub(story.storeService_, 'dispatch');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
+            id: firstPageId,
+            index: 0,
+          });
+        });
+  });
+
+  it('should update page id in browser history', () => {
+    // Have to stub this because tests run in iframe and you can't write
+    // history from another domain (about:srcdoc)
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const firstPageId = 'page-zero';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          return expect(replaceStub).to.have.been.calledWith(
+              {ampStoryPageId: firstPageId},
+              '',
+          );
+        });
+  });
+
+  it('should NOT update page id in browser history if ad', () => {
+    // Have to stub this because tests run in iframe and you can't write
+    // history from another domain (about:srcdoc)
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const firstPageId = 'i-amphtml-ad-page-1';
+    const pageCount = 2;
+    const pages = createPages(story.element, pageCount,
+        [firstPageId, 'page-1']);
+    const firstPage = pages[0];
+    firstPage.setAttribute('ad', '');
+
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          return expect(replaceStub).to.not.have.been.called;
+        });
+  });
 });
 
 

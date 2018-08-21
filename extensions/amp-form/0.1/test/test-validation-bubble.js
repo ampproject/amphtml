@@ -18,7 +18,7 @@ import {ValidationBubble} from '../validation-bubble';
 
 describes.realWin('validation-bubble', {amp: true}, env => {
   it('should append a dom element to the document', () => {
-    const ampdoc = env.ampdoc;
+    const {ampdoc} = env;
     const document = ampdoc.getRootNode();
 
     new ValidationBubble(ampdoc);
@@ -27,7 +27,7 @@ describes.realWin('validation-bubble', {amp: true}, env => {
   });
 
   it('should show and hide bubble', () => {
-    const ampdoc = env.ampdoc;
+    const {ampdoc} = env;
     const document = ampdoc.getRootNode();
 
     const targetEl = document.createElement('div');

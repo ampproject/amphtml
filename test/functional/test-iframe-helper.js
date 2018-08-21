@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as IframeHelper from '../../src/iframe-helper';
-import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
 import {generateSentinel} from '../../src/3p-frame.js';
 
@@ -33,7 +32,7 @@ describe('iframe-helper', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     return createIframePromise().then(c => {
       container = c;
       const i = c.doc.createElement('iframe');
@@ -49,22 +48,21 @@ describe('iframe-helper', function() {
   it('should assert src in iframe', () => {
     const iframe = container.doc.createElement('iframe');
     iframe.srcdoc = '<html>';
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       IframeHelper.listenFor(iframe, 'test', () => {});
-    }).to.throw('only iframes with src supported');
+    }).to.throw('only iframes with src supported'); });
   });
 
   it('should assert iframe is detached', () => {
     const iframe = container.doc.createElement('iframe');
     iframe.src = iframeSrc;
     insert(iframe);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       IframeHelper.listenFor(iframe, 'test', () => {});
-    }).to.throw('cannot register events on an attached iframe');
+    }).to.throw('cannot register events on an attached iframe'); });
   });
 
-  // TODO(dvoytenko, #12499): Make this work with latest mocha / karma.
-  it.skip('should listen to iframe messages from non-3P frame', () => {
+  it('should listen to iframe messages from non-3P frame', () => {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
@@ -85,8 +83,7 @@ describe('iframe-helper', function() {
     });
   });
 
-  // TODO(dvoytenko, #12499): Make this work with latest mocha / karma.
-  it.skip('should listen to iframe messages from 3P frame', () => {
+  it('should listen to iframe messages from 3P frame', () => {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
@@ -110,8 +107,7 @@ describe('iframe-helper', function() {
     });
   });
 
-  // TODO(dvoytenko, #12499): Make this work with latest mocha / karma.
-  it.skip('should listen to iframe messages from nested 3P frame', () => {
+  it('should listen to iframe messages from nested 3P frame', () => {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {

@@ -73,6 +73,13 @@ Linkedin is one of the pre-configured providers, so you do not need to provide t
 
 Selects a provider type. This is required for both pre-configured and non-configured providers.
 
+##### data-target
+
+Specifies the target in which to open the target. The default is `_blank` for all cases other than email/SMS on iOS, in which case the target is set to `_top`.
+
+Please note that we only suggest using this override for email.
+
+
 ##### data-share-endpoint
 
 This attribute is **required for non-configured providers**.
@@ -181,6 +188,16 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>
       <ul>
         <li><code>data-param-text</code>: optional, defaults to: "Current page title - current page URL"</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>LINE</td>
+    <td><code>line</code></td>
+    <td>
+      <ul>
+        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-text</code>: optional, defaults to: Current page title</li>
       </ul>
     </td>
   </tr>

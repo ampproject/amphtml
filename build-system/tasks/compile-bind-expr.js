@@ -32,7 +32,7 @@ gulp.task('compile-bind-expr', function() {
   const suppressCheckTypes = '/** @fileoverview ' +
       '@suppress {checkTypes, suspiciousCode, uselessCode} */';
   const imports = 'import {AstNode, AstNodeType} from \'./bind-expr-defines\';';
-  const jsExports = 'exports.parser = parser;';
+  const jsExports = 'export const bindParser = parser;';
 
   const out = [
     license,

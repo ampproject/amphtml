@@ -44,15 +44,13 @@ The requirements for an RTC endpoint to be used with DoubleClick are the same as
 
 The RTC Response to a GET must meet the following requirements:
 
-
-
 *   Status Code = 200
-*   Headers (in addition to automatically added headers):
-    *   CORS
-    *   AMP-Access-Control-Allow-Source-Origin
-    *   Access-control-allow-origin
-    *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
-*   Must respond within default 1 second timeout on the response imposed by real-time-config-manager.js. Publishers may optionally shorten this timeout.
+*   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
+*   Body of response is a JSON object of targeting information such as:
+    *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
+    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
+
+
 
 The body of the response must meet the following specification:
 
@@ -309,7 +307,7 @@ The results will be merged with the value set on the amp-ad element, and the res
 
 _Note: the ordering of items is not guaranteed._
 
-This resulting object will then be sent on the **scp **parameter of the ad request, as
+This resulting object will then be sent on the **scp** parameter of the ad request, as
 
 
 ```
@@ -321,3 +319,5 @@ https://securepubads.g.doubleclick.net/...scp=loc%3Dusa%26gender%3Df%26r%3Dh%26e
 ## Using RTC In DFP
 
 The results of the RTC Callouts will be added to the DoubleClick Ad Request, allowing you to use the key/value pairs in DFP as you would for any other non-AMP ad request. Please refer to generic key/value targeting documentation for DoubleClick.
+
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>

@@ -479,7 +479,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         vh.update_(1);
         clock.tick(20);
         vh.update_(1);
-        eventSpy.reset();
+        eventSpy.resetHistory();
         expect(eventSpy).to.not.be.called;
         clock.tick(1001);
         promiseResolver();
@@ -572,12 +572,14 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
     it('should NOT allow invalid values', () => {
       const vh = new VisibilityModel(NO_SPEC, NO_CALC);
-      expect(() => {
-        vh.updateCounters_(-1);
-      }).to.throw(/invalid visibility value/);
-      expect(() => {
-        vh.updateCounters_(1.00001);
-      }).to.throw(/invalid visibility value/);
+      allowConsoleError(() => {
+        expect(() => {
+          vh.updateCounters_(-1);
+        }).to.throw(/invalid visibility value/);
+        expect(() => {
+          vh.updateCounters_(1.00001);
+        }).to.throw(/invalid visibility value/);
+      });
     });
 
     it('should match custom visibility position', () => {
@@ -1046,7 +1048,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.update();
       expect(eventSpy).to.be.calledOnce;
 
-      eventSpy.reset();
+      eventSpy.resetHistory();
       visibility = 1;
       clock.tick(200);
       vh.update();

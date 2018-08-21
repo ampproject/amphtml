@@ -81,14 +81,13 @@ describes.fakeWin('Template', {}, env => {
     const templateElement = createTemplateElement();
     registerExtendedTemplate(win, templateElement.getAttribute('type'),
         TemplateImpl);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       registerExtendedTemplate(win, templateElement.getAttribute('type'),
           TemplateImpl);
-    }).to.throw(/Duplicate template type/);
+    }).to.throw(/Duplicate template type/); });
   });
 
   it('should block render until template registered', () => {
-    templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
@@ -106,7 +105,6 @@ describes.fakeWin('Template', {}, env => {
   });
 
   it('should unblock render when template registered', () => {
-    templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
@@ -121,7 +119,6 @@ describes.fakeWin('Template', {}, env => {
   });
 
   it('should unblock render for parallel templates', () => {
-    templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
@@ -168,9 +165,9 @@ describes.fakeWin('Template', {}, env => {
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
     doc.body.appendChild(parentElement);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Template element must be a "template" tag/);
+    }).to.throw(/Template element must be a "template" tag/); });
   });
 
   it('should discover template via children', () => {
@@ -189,14 +186,14 @@ describes.fakeWin('Template', {}, env => {
   it('should fail when template not found', () => {
     const parentElement = doc.createElement('div');
     doc.body.appendChild(parentElement);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Template not found/);
+    }).to.throw(/Template not found/); });
 
     parentElement.setAttribute('template', 'notemplate' + Math.random());
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Template not found/);
+    }).to.throw(/Template not found/); });
   });
 
   it('should detect if a template is present in a container', () => {

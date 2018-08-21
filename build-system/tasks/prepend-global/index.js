@@ -24,8 +24,7 @@ const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 
-const red = colors.red;
-const cyan = colors.cyan;
+const {red, cyan} = colors;
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
@@ -101,8 +100,8 @@ function writeTarget(filename, fileString, opt_dryrun) {
 }
 
 /**
- * @param {string|boolean}
- * @param {string}
+ * @param {string|boolean} value
+ * @param {string} defaultValue
  * @return {string}
  */
 function valueOrDefault(value, defaultValue) {

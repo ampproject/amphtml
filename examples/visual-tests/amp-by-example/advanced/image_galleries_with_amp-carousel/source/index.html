@@ -225,9 +225,10 @@
     are allowed when using `amp-bind`. We use the unary plus operator before `selectedSlide` to cast it into an integer.
   -->
   <div>
-    <p> Selected slide: <span [text]="+selectedSlide + 1">1</span>/3</p>
+    <p class="m1"> Selected slide: <span [text]="+selectedSlide + 1">1</span>/3</p>
 
     <amp-carousel controls type="slides" width="400" height="300"
+                                                     layout="responsive"
                                                      [slide]="selectedSlide" on="slideChange:AMP.setState({selectedSlide: event.index})">
       <amp-img src="/examples/visual-tests/amp-by-example/img/image1.jpg" width="400" height="300"></amp-img>
       <amp-img src="/examples/visual-tests/amp-by-example/img/image2.jpg" width="400" height="300"></amp-img>

@@ -1,13 +1,13 @@
 PASS
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,20 +31,20 @@ PASS
 |        max-width: 736px;
 |        margin: 8px;
 |      }
-|  
+|
 |      amp-lightbox {
 |        background-color: rgba(0, 0, 0, 0.9);
 |      }
-|  
+|
 |      .bordered {
 |        border: 1px solid black;
 |      }
-|  
+|
 |      .box1 {
 |        border: 1px solid black;
 |        margin: 8px 0;
 |      }
-|  
+|
 |      .logo {
 |        background: yellow;
 |        border: 5px solid black;
@@ -57,7 +57,7 @@ PASS
 |        width: 40px;
 |        height: 40px;
 |      }
-|  
+|
 |      .ear {
 |        background: lime;
 |        border: 5px solid black;
@@ -69,20 +69,20 @@ PASS
 |        width: 20px;
 |        height: 20px;
 |      }
-|  
+|
 |      @media screen and (min-width: 380px) {
 |        .logo {
 |          top: auto;
 |        }
 |      }
-|  
+|
 |      @media screen and (min-width: 420px) {
 |        .logo {
 |          position: static;
 |          top: auto;
 |        }
 |      }
-|  
+|
 |      .goto {
 |        display: block;
 |        margin: 16px;
@@ -96,39 +96,39 @@ PASS
 |      .comic-amp-font-loaded .comic-amp {
 |        font-family: 'Comic AMP', serif, sans-serif;
 |      }
-|  
+|
 |      .comic-amp-font-loading .comic-amp {
 |        color: #0ff;
 |      }
-|  
+|
 |      .comic-amp-font-missing .comic-amp {
 |        color: #f00;
 |      }
-|  
+|
 |      .lightbox-close-button {
 |        background: white;
 |      }
-|  
+|
 |      .lightbox-text {
 |        color: white;
 |      }
-|  
+|
 |      #amp-iframe:target {
 |        border: 1px solid green;
 |      }
-|  
+|
 |      #breaker {
 |        height: 100px;
 |        background: green;
 |      }
-|  
+|
 |      #breaking {
 |        height: 200px;
 |        width: 200vw;
 |        background: rgba(0, 0, 0, 0.5);
 |      }
-|  
-|  
+|
+|
 |    </style>
 |    <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
 |    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
@@ -150,9 +150,9 @@ PASS
 |  <body class="comic-amp-font-loading">
 |  <div class="logo"></div>
 |  <div class="ear"></div>
-|  
+|
 |  <article>
-|  
+|
 |  <h1 id="top">AMP #0</h1>
 |  <a href="#amp-iframe">Go to iframe</a>
 |    <p class="comic-amp">
@@ -168,13 +168,13 @@ PASS
 |        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
 |      </div>
 |    </p>
-|  
+|
 |    <p>
 |      <a class="goto" href="#top">Top</a>
 |      <a class="goto" href="#img0">Image0</a>
 |      <a class="goto" href="#footer">Footer</a>
 |    </p>
-|  
+|
 |    <p>
 |      <amp-carousel width=400 height=300 layout=responsive type=slides>
 |        <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>
@@ -212,7 +212,7 @@ PASS
 |            width="400" height="225" layout="responsive"></amp-img>
 |      </amp-anim>
 |    </p>
-|  
+|
 |    <h2>Video</h2>
 |    <amp-video
 |        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
@@ -220,21 +220,21 @@ PASS
 |        height="204"
 |        layout="responsive"
 |        controls></amp-video>
-|  
+|
 |    <h2>Youtube</h2>
 |    <amp-youtube
 |        data-videoid="mGENRKrdoGY"
 |        width="480" height="270"></amp-youtube>
-|  
+|
 |    <amp-youtube
 |        data-videoid="mGENRKrdoGY"
 |        layout="responsive"
 |        width="480" height="270"></amp-youtube>
-|  
-|  
+|
+|
 |    <h2>Audio</h2>
 |      <amp-audio src="/examples/av/audio.mp3"></amp-audio>
-|  
+|
 |    <h2>Lightbox</h2>
 |    <amp-lightbox id="lightbox" layout="nodisplay">
 |      <p>
@@ -249,11 +249,11 @@ PASS
 |        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
 |      </p>
 |    </amp-lightbox>
-|  
+|
 |    <button on="tap:lightbox">
 |        Open Lightbox
 |    </button>
-|  
+|
 |    <h2>Scrollable Lightbox</h2>
 |    <amp-lightbox scrollable id="lightbox-scrollable" layout="nodisplay">
 |      <button on="tap:lightbox-scrollable.close" class="lightbox-close-button">
@@ -291,11 +291,11 @@ PASS
 |        Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
 |      </p>
 |    </amp-lightbox>
-|  
+|
 |    <button on="tap:lightbox-scrollable">
 |      Open Scrollable Lightbox
 |    </button>
-|  
+|
 |    <h2>Images</h2>
 |    <p>
 |    Responsive (w/srcset, w/image-lightbox)
@@ -308,13 +308,13 @@ PASS
 |          width=527 height=193 layout="responsive"
 |          on="tap:imagelightbox1" role="button" tabindex="0"></amp-img>
 |    </p>
-|  
+|
 |    <p>
 |    Fixed
 |    <p>
 |      <amp-img id="img1" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=264 height=96></amp-img>
 |    </p>
-|  
+|
 |    <p>
 |    None
 |    <p class="bordered">
@@ -332,7 +332,7 @@ PASS
 |    <p>
 |      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
 |    </p>
-|  
+|
 |    <p>
 |      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
 |    </p>
@@ -412,7 +412,7 @@ PASS
 |      height="320"
 |      layout="responsive">
 |    </amp-instagram>
-|  
+|
 |    <h2 id="amp-iframe">IFrame</h2>
 |    <amp-iframe width=300 height=300
 |        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
@@ -428,7 +428,7 @@ PASS
 |        type="adsense"
 |        data-ad-client="ca-pub-9350112648257122">
 |    </amp-ad>
-|  
+|
 |    <h2>SVG</h2>
 |    <svg width="400" height="296" viewBox="1400 500 3000 2500">
 |      <path d="m 3766.9354,1578.1181 c 58.2769,-756.81944 -408.1876,-717.21057 -510.4769,-701.02201 -79.902,12.64545 -239.2559,90.53098 -313.8601,318.92831 -82.3686,252.1683 143.3895,461.6098 259.4436,801.3231 172.8182,640.8523 -882.0196,923.1062 -1227.7959,798.7381 -69.3048,-30.0286 -182.3973,-108.7232 -158.8806,-186.5382 8.5153,-72.4218 -105.5719,-107.3077 -82.4098,-11.1024 95.373,379.694 618.3608,323.5968 1066.1849,144.2115 250.0432,-100.16 489.5859,-347.2474 489.7608,-633.164 -50.7024,-386.8592 -391.2774,-599.5297 -282.7825,-917.5279 173.2946,-330.57664 355.7612,-318.24308 596.6594,-169.4657 82.8022,96.8444 115.4521,181.225 119.5309,313.0092 2.5525,82.4609 -36.2889,260.8703 44.6262,242.61 z" fill="#669900"/>
@@ -446,11 +446,11 @@ PASS
 |      <path d="m 4079.5806,868.74488 c -18.4503,-3.3062 -24.5591,-6.34261 -33.5316,-16.66736 -4.696,-5.40376 -13.8197,-14.12548 -20.2749,-19.38163 -15.4956,-12.61776 -67.3382,-71.44012 -79.5473,-90.25706 -5.3049,-8.17621 -11.2871,-16.48111 -13.2935,-18.45531 -3.2617,-3.20909 -2.0572,-6.35995 11.3672,-29.73174 8.2588,-14.37823 17.879,-28.42525 21.3781,-31.21559 5.1887,-4.13699 12.0245,-5.80701 37.0394,-9.04885 16.8723,-2.18653 54.8305,-8.80671 84.352,-14.71151 29.5216,-5.90476 65.0265,-12.78154 78.8997,-15.28165 l 25.2242,-4.54567 23.7713,9.77618 c 62.8275,25.83824 111.7721,65.33019 111.7721,90.18546 1e-4,5.06675 -4.6709,12.80857 -17.366,28.78381 -52.1377,65.60993 -108.3882,110.96089 -146.1569,117.83656 -19.9034,3.62333 -69.5666,5.23515 -83.6338,2.71436 z" fill="#ff6600"/>
 |      <path d="m 2377.3238,1269.2624 c -26.787,279.7212 111.0044,672.201 309.1165,843.6212 80.8729,69.9767 240.8138,-4.026 318.9086,-41.6454 45.2094,-35.9724 35.0313,-101.296 26.1997,-150.9873 -17.4339,-69.7557 -49.832,-121.797 -100.685,-116.1204 -45.4057,5.0682 -68.5356,8.8251 -64.9322,120.9642 1.3601,42.327 -40.4759,93.1741 -89.0657,90.4079 -52.9357,4.327 -75.8994,-38.881 -101.1012,-69.9814 -212.4085,-262.1247 -233.2146,-599.5762 -162.849,-813.093 10.758,-32.6441 5.6189,-86.0919 -34.34,-65.3213 -75.6217,39.3078 -93.8408,124.7689 -101.2517,202.1555 z" fill="#ff6600"/>
 |    </svg>
-|  
+|
 |    <div id="footer">The end. <a href="#top">Back to top.</a></div>
-|  
+|
 |    <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$RANDOM?"></amp-pixel>
-|  
+|
 |    <amp-font
 |      layout="nodisplay"
 |      font-family="Comic Amp"
@@ -460,7 +460,7 @@ PASS
 |      on-error-add-class="comic-amp-font-missing"
 |      on-load-add-class="comic-amp-font-loaded">
 |    </amp-font>
-|  
+|
 |    <div id="breaker">
 |      <div id="breaking"></div>
 |    </div>

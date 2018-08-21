@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
@@ -30,7 +31,7 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return 1;
+    return LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -65,7 +66,7 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     const viewer = Services.viewerForDoc(this.getAmpDoc());
-    if (!viewer.isVisible()) {
+    if (!viewer.hasBeenVisible()) {
       const TAG = this.getName_();
       dev().error(TAG, 'Viewer must be visible before mutation.');
       return;
@@ -92,7 +93,7 @@ export class AmpState extends AMP.BaseElement {
     }
     // Parse child script tag and/or fetch JSON from endpoint at `src`
     // attribute, with the latter taking priority.
-    const children = this.element.children;
+    const {children} = this.element;
     if (children.length > 0) {
       this.parseChildAndUpdateState_();
     }
@@ -107,7 +108,7 @@ export class AmpState extends AMP.BaseElement {
    */
   parseChildAndUpdateState_() {
     const TAG = this.getName_();
-    const children = this.element.children;
+    const {children} = this.element;
     if (children.length != 1) {
       this.user().error(
           TAG, 'Should contain exactly one <script> child.');
@@ -132,7 +133,6 @@ export class AmpState extends AMP.BaseElement {
    * @param {!Element} element
    * @param {boolean} isInit
    * @return {!Promise}
-   * @visibleForTesting
    */
   fetch_(ampdoc, element, isInit) {
     const src = element.getAttribute('src');
@@ -150,7 +150,7 @@ export class AmpState extends AMP.BaseElement {
 
   /**
    * @param {boolean} isInit
-   * @returm {!Promise}
+   * @return {!Promise}
    * @private
    */
   fetchAndUpdate_(isInit) {

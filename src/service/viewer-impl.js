@@ -14,24 +14,34 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev, duplicateErrorIfNecessary} from '../log';
-import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
+  isProxyOrigin,
   parseQueryString,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
+  serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
+import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {startsWith} from '../string';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
+
+/** @enum {string} */
+export const Capability = {
+  VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
+};
 
 /**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
@@ -40,6 +50,14 @@ const SENTINEL_ = '__AMP__';
  * @private {number}
  */
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
+
+/**
+ * Prefixes to remove when trimming a hostname for comparison.
+ * @const
+ * @private {!RegExp}
+ */
+const TRIM_ORIGIN_PATTERN_ =
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp|m)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -171,8 +189,12 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
-    /** @private {?function()} */
-    this.whenFirstVisibleResolve_ = null;
+    /**
+     * Subset of this.params_ that only contains parameters in the URL hash,
+     * e.g. "#foo=bar".
+     * @const @private {!Object<string, string>}
+     */
+    this.hashParams_ = {};
 
     /** @private {?Promise} */
     this.nextVisiblePromise_ = null;
@@ -195,15 +217,17 @@ export class Viewer {
     /** @private {?Function} */
     this.trustedViewerResolver_ = null;
 
+    const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
      * `this.onVisibilityChange_()`.
      * @private @const {!Promise}
      */
-    this.whenFirstVisiblePromise_ = new Promise(resolve => {
-      this.whenFirstVisibleResolve_ = resolve;
-    });
+    this.whenFirstVisiblePromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.whenFirstVisibleResolve_ = deferred.resolve;
 
     // Params can be passed either directly in multi-doc environment or via
     // iframe hash/name with hash taking precedence.
@@ -214,7 +238,8 @@ export class Viewer {
         parseParams_(this.win.name.substring(SENTINEL_.length), this.params_);
       }
       if (this.win.location.hash) {
-        parseParams_(this.win.location.hash, this.params_);
+        parseParams_(this.win.location.hash, this.hashParams_);
+        Object.assign(this.params_, this.hashParams_);
       }
     }
 
@@ -235,11 +260,10 @@ export class Viewer {
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     /**
-     * Whether the AMP document is embedded in a webview.
-     * @private @const {boolean}
+     * Whether the AMP document is embedded in a Chrome Custom Tab.
+     * @private {?boolean}
      */
-    this.isWebviewEmbedded_ = !this.isIframed_ &&
-        this.params_['webview'] == '1';
+    this.isCctEmbedded_ = null;
 
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe, or
@@ -247,7 +271,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isEmbedded_ = !!(
-      this.isIframed_ && !this.win.AMP_TEST_IFRAME
+      (this.isIframed_ && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
@@ -259,15 +283,26 @@ export class Viewer {
         && (this.params_['origin']
             || this.params_['visibilityState']
             // Parent asked for viewer JS. We must be embedded.
-            || (this.win.location.search.indexOf('amp_js_v') != -1))
-        || this.isWebviewEmbedded_
+            || (this.win.location.search.indexOf('amp_js_v') != -1)))
+        || this.isWebviewEmbedded()
+        || this.isCctEmbedded()
         || !ampdoc.isSingleDoc());
+
+    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
+    /**
+     * Whether the AMP document was served by a proxy.
+     * @private @const {boolean}
+     */
+    this.isProxyOrigin_ = isProxyOrigin(url);
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
 
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
+
+    const messagingDeferred = new Deferred();
+    this.messagingReadyResolver_ = messagingDeferred.resolve;
 
     /**
      * This promise will resolve when communications channel has been
@@ -279,9 +314,7 @@ export class Viewer {
     this.messagingReadyPromise_ = this.isEmbedded_ ?
       Services.timerFor(this.win).timeoutPromise(
           20000,
-          new Promise(resolve => {
-            this.messagingReadyResolver_ = resolve;
-          })).catch(reason => {
+          messagingDeferred.promise).catch(reason => {
         throw getChannelError(/** @type {!Error|string|undefined} */ (
           reason));
       }) : null;
@@ -308,7 +341,8 @@ export class Viewer {
       // Not embedded in IFrame - can't trust the viewer.
       trustedViewerResolved = false;
       trustedViewerPromise = Promise.resolve(false);
-    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded_) {
+    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded() &&
+        !this.isCctEmbedded()) {
       // Ancestors when available take precedence. This is the main API used
       // for this determination. Fallback is only done when this API is not
       // supported by the browser.
@@ -317,10 +351,9 @@ export class Viewer {
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
       // Wait for comms channel to confirm the origin.
-      trustedViewerResolved = undefined;
-      trustedViewerPromise = new Promise(resolve => {
-        this.trustedViewerResolver_ = resolve;
-      });
+      const deferred = new Deferred();
+      trustedViewerPromise = deferred.promise;
+      this.trustedViewerResolver_ = deferred.resolve;
     }
 
     /** @const @private {!Promise<boolean>} */
@@ -403,11 +436,12 @@ export class Viewer {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
-        // This is currently used my mode.js to infer development mode.
+        // This is currently used by mode.js to infer development mode.
         if (!this.win.location.originalHash) {
           this.win.location.originalHash = this.win.location.hash;
         }
         this.win.history.replaceState({}, '', newUrl);
+        delete this.hashParams_['click'];
         dev().fine(TAG_, 'replace fragment:' + this.win.location.href);
       }
     }
@@ -416,6 +450,12 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
+
+    // This fragment may get cleared by impression tracking. If so, it will be
+    // restored afterward.
+    this.whenFirstVisible().then(() => {
+      this.maybeUpdateFragmentForCct();
+    });
   }
 
   /**
@@ -463,27 +503,6 @@ export class Viewer {
   }
 
   /**
-   * Requests A2A navigation to the given destination. If the viewer does
-   * not support this operation, does nothing.
-   * The URL is assumed to be in AMP Cache format already.
-   * @param {string} url An AMP article URL.
-   * @param {string} requestedBy Informational string about the entity that
-   *     requested the navigation.
-   * @return {boolean} Returns true if navigation message was sent to viewer.
-   *     Otherwise, returns false.
-   */
-  navigateToAmpUrl(url, requestedBy) {
-    if (this.hasCapability('a2a')) {
-      this.sendMessage('a2aNavigate', dict({
-        'url': url,
-        'requestedBy': requestedBy,
-      }));
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * Whether the document is embedded in a viewer.
    * @return {boolean}
    */
@@ -496,7 +515,73 @@ export class Viewer {
    * @return {boolean}
    */
   isWebviewEmbedded() {
-    return this.isWebviewEmbedded_;
+    return !this.isIframed_ && this.params_['webview'] == '1';
+  }
+
+  /**
+   * Whether the document is embedded in a Chrome Custom Tab.
+   * @return {boolean}
+   */
+  isCctEmbedded() {
+    if (this.isCctEmbedded_ != null) {
+      return this.isCctEmbedded_;
+    }
+    this.isCctEmbedded_ = false;
+    if (!this.isIframed_) {
+      const queryParams = parseQueryString(this.win.location.search);
+      this.isCctEmbedded_ = queryParams['amp_gsa'] === '1' &&
+          startsWith(queryParams['amp_js_v'] || '', 'a');
+    }
+    return this.isCctEmbedded_;
+  }
+
+  /**
+   * Whether the document was served by a proxy.
+   * @return {boolean}
+   */
+  isProxyOrigin() {
+    return this.isProxyOrigin_;
+  }
+
+  /**
+   * Update the URL fragment with data needed to support custom tabs. This will
+   * not clear query string parameters, but will clear the fragment.
+   */
+  maybeUpdateFragmentForCct() {
+    if (!this.isCctEmbedded()) {
+      return;
+    }
+    // CCT only works with versions of Chrome that support the history API.
+    if (!this.win.history.replaceState) {
+      return;
+    }
+    const sourceOrigin = getSourceOrigin(this.win.location.href);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.ampdoc);
+    const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
+    if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
+      this.hashParams_['ampshare'] = canonicalUrl;
+      this.win.history.replaceState({}, '',
+          '#' + serializeQueryString(
+              /** @type {!JsonObject} */ (this.hashParams_)));
+    }
+  }
+
+  /**
+   * Compares URLs to determine if they match once common subdomains are
+   * removed. Everything else must match.
+   * @param {string} first Origin to compare.
+   * @param {string} second Origin to compare.
+   * @return {boolean} Whether the origins match without subdomains.
+   * @private
+   */
+  hasRoughlySameOrigin_(first, second) {
+    const trimOrigin = origin => {
+      if (origin.split('.').length > 2) {
+        return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
+      }
+      return origin;
+    };
+    return trimOrigin(first) == trimOrigin(second);
   }
 
   /**
@@ -630,9 +715,9 @@ export class Viewer {
       return this.nextVisiblePromise_;
     }
 
-    return this.nextVisiblePromise_ = new Promise(resolve => {
-      this.nextVisibleResolve_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.nextVisibleResolve_ = deferred.resolve;
+    return this.nextVisiblePromise_ = deferred.promise;
   }
 
   /**
@@ -708,7 +793,7 @@ export class Viewer {
    * @private
    */
   isTrustedReferrer_(referrer) {
-    const url = parseUrl(referrer);
+    const url = parseUrlDeprecated(referrer);
     if (url.protocol != 'https:') {
       return false;
     }
@@ -770,15 +855,14 @@ export class Viewer {
    * @private
    */
   isTrustedViewerOrigin_(urlString) {
-    // TEMPORARY HACK due to a misbehaving native app. See b/32626673
-    // In native apps all security bets are off anyway, and in browser
-    // origins never take the form that is matched here.
-    if (this.isWebviewEmbedded_ && /^www\.[.a-z]+$/.test(urlString)) {
-      return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
-    }
     /** @const {!Location} */
-    const url = parseUrl(urlString);
-    if (url.protocol != 'https:') {
+    const url = parseUrlDeprecated(urlString);
+    const {protocol} = url;
+    // Mobile WebView x-thread is allowed.
+    if (protocol == 'x-thread:') {
+      return true;
+    }
+    if (protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
     }
@@ -953,7 +1037,7 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-        Promise.resolve(this.messageDeliverer_(
+        tryResolve(() => this.messageDeliverer_(
             eventType,
             /** @type {?JsonObject|string|undefined} */ (data),
             awaitResponse)));
@@ -982,10 +1066,9 @@ export class Viewer {
       message.data = data;
       message.awaitResponse = message.awaitResponse || awaitResponse;
     } else {
-      let responseResolver;
-      const responsePromise = new Promise(r => {
-        responseResolver = r;
-      });
+      const deferred = new Deferred();
+      const {promise: responsePromise, resolve: responseResolver} = deferred;
+
       message = {
         eventType,
         data,
@@ -1045,8 +1128,8 @@ export class Viewer {
 
     try {
       // The origin and source origin must match.
-      const url = parseUrl(this.win.location.href);
-      const replaceUrl = parseUrl(
+      const url = parseUrlDeprecated(this.win.location.href);
+      const replaceUrl = parseUrlDeprecated(
           removeFragment(newUrl) + this.win.location.hash);
       if (url.origin == replaceUrl.origin &&
           getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
@@ -1059,7 +1142,6 @@ export class Viewer {
     }
   }
 }
-
 
 /**
  * Parses the viewer parameters as a string.
@@ -1095,6 +1177,7 @@ function getChannelError(opt_reason) {
 
 /**
  * Sets the viewer visibility state. This calls is restricted to runtime only.
+ * @param {!Viewer} viewer
  * @param {!VisibilityState} state
  * @restricted
  */

@@ -15,9 +15,9 @@
  */
 
 import * as analytics from '../../src/analytics';
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {
+  blockedByConsentError,
   cancellation,
   detectJsEngineFromStack,
   detectNonAmpJs,
@@ -90,6 +90,14 @@ describes.fakeWin('installErrorReporting', {}, env => {
     expect(rejectedPromiseError.reported).to.be.not.be.ok;
     expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
   });
+
+  it('should ignore blockByConsent', () => {
+    rejectedPromiseEvent.reason = rejectedPromiseError =
+        blockedByConsentError();
+    win.eventListeners.fire(rejectedPromiseEvent);
+    expect(rejectedPromiseError.reported).to.be.not.be.ok;
+    expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
+  });
 });
 
 describe('maybeReportErrorToViewer', () => {
@@ -103,7 +111,7 @@ describe('maybeReportErrorToViewer', () => {
       new Error('XYZ', false));
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     const optedInDoc = window.document.implementation.createHTMLDocument('');
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
@@ -172,7 +180,7 @@ describe('reportErrorToServer', () => {
 
   beforeEach(() => {
     onError = window.onerror;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     nextRandomNumber = 0;
     sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
   });
@@ -455,7 +463,8 @@ describe('reportErrorToServer', () => {
     expect(data.s).to.be.undefined;
   });
 
-  it('should report experiments', () => {
+  // TODO(#14350): unskip flaky test
+  it.skip('should report experiments', () => {
     resetExperimentTogglesForTesting(window);
     toggleExperiment(window, 'test-exp', true);
     // Toggle on then off, so it's stored

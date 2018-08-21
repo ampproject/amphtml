@@ -19,17 +19,17 @@ limitations under the License.
 ## Tag Example
 
 ```html
-  <amp-ad width=300 height=250
-      type="pulsepoint"
-      data-pid="512379"
-      data-tagid="472988"
-      data-size="300X250">
-  </amp-ad>
+<amp-ad width="300" height="250"
+    type="pulsepoint"
+    data-pid="512379"
+    data-tagid="472988"
+    data-size="300X250">
+</amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://www.pulsepoint.com).
+For semantics of configuration, please see [PulsePoint's documentation](https://www.pulsepoint.com).
 
 Supported parameters:
 

@@ -98,7 +98,8 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
         clickEvent = document.createEventObject();
         clickEvent.type = 'click';
       }
-      ampdoc.getRootNode().dispatchEvent(clickEvent);
+      const node = ampdoc.getRootNode();
+      node.body.dispatchEvent(clickEvent);
       return viewPromise;
     });
   });

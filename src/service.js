@@ -23,6 +23,7 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
+import {Deferred} from './utils/promise';
 import {dev} from './log';
 import {toWin} from './types';
 
@@ -100,6 +101,10 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
 /**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
+ *
+ * Unlike most service getters, passing `Node` is necessary for some FIE-scope
+ * services since sometimes we only have the FIE Document for context.
+ *
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id
  * @param {boolean=} opt_fallbackToTopWin
@@ -119,7 +124,7 @@ export function getExistingServiceForDocInEmbedScope(
   }
   // If an ampdoc is passed or fallback is allowed, continue resolving.
   if (!nodeOrDoc.nodeType || opt_fallbackToTopWin) {
-    return getServiceForDoc(nodeOrDoc, id);
+    return getServiceForDocDeprecated(nodeOrDoc, id);
   }
   return null;
 }
@@ -198,10 +203,10 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
 
 
 /**
- * Returns a service for the given id and window (a per-window singleton).
- * Users should typically wrap this as a special purpose function (e.g.
- * `Services.vsyncFor(win)`) for type safety and because the factory should not be
- * passed around.
+ * Returns a service for the given id and window (a per-window singleton). Users
+ * should typically wrap this as a special purpose function (e.g.
+ * `Services.vsyncFor(win)`) for type safety and because the factory should not
+ * be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @template T
@@ -214,12 +219,11 @@ export function getService(win, id) {
 
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * `Services.vsyncFor(win)`) for type safety and because the factory should not be
- * passed around.
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. `Services.vsyncFor(win)`) for type safety and because the
+ * factory should not be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @return {!Promise<!Object>}
@@ -248,7 +252,7 @@ export function getExistingServiceOrNull(win, id) {
 /**
  * Like getServicePromise but returns null if the service was never registered.
  * @param {!Window} win
- * @param {string} id of the service.
+ * @param {string} id
  * @return {?Promise<!Object>}
  */
 export function getServicePromiseOrNull(win, id) {
@@ -259,12 +263,32 @@ export function getServicePromiseOrNull(win, id) {
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * Expects service `id` to be registered.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id of the service.
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {string} id
  * @return {T}
  * @template T
  */
-export function getServiceForDoc(nodeOrDoc, id) {
+export function getServiceForDoc(elementOrAmpDoc, id) {
+  const ampdoc = getAmpdoc(elementOrAmpDoc);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  return getServiceInternal(holder, id);
+}
+
+
+/**
+ * tl;dr -- Use getServiceForDoc() instead of this.
+ *
+ * Privileged variant of getServiceForDoc() that accepts non-element params,
+ * e.g. window.document. This is currently necessary for doc-level services
+ * used in startup, e.g. Chunks. Eventually we want to remove this function
+ * and have callers find the appropriate AmpDoc and use getServiceForDoc().
+ *
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
+ * @return {T}
+ * @template T
+ */
+export function getServiceForDocDeprecated(nodeOrDoc, id) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   return getServiceInternal(holder, id);
@@ -275,26 +299,26 @@ export function getServiceForDoc(nodeOrDoc, id) {
  * Returns a promise for a service for the given id and ampdoc. Also expects
  * a service that has the actual implementation. The promise resolves when
  * the implementation loaded.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id of the service.
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {string} id
  * @return {!Promise<!Object>}
  */
-export function getServicePromiseForDoc(nodeOrDoc, id) {
+export function getServicePromiseForDoc(elementOrAmpDoc, id) {
   return getServicePromiseInternal(
-      getAmpdocServiceHolder(nodeOrDoc), id);
+      getAmpdocServiceHolder(elementOrAmpDoc), id);
 }
 
 
 /**
  * Like getServicePromiseForDoc but returns null if the service was never
  * registered for this ampdoc.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id of the service.
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {string} id
  * @return {?Promise<!Object>}
  */
-export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
+export function getServicePromiseOrNullForDoc(elementOrAmpDoc, id) {
   return getServicePromiseOrNullInternal(
-      getAmpdocServiceHolder(nodeOrDoc), id);
+      getAmpdocServiceHolder(elementOrAmpDoc), id);
 }
 
 /**
@@ -417,9 +441,7 @@ function getServiceInternal(holder, id) {
  * @param {!Object} holder Object holding the service instance.
  * @param {!Window|!./service/ampdoc-impl.AmpDoc} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {?function(new:Object, !Window)|
- *         ?function(new:Object, !./service/ampdoc-impl.AmpDoc)}
- *     ctor Constructor function to new the service. Called with context.
+ * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
  */
 function registerServiceInternal(holder, context, id, ctor) {
   const services = getServices(holder);
@@ -465,10 +487,9 @@ function getServicePromiseInternal(holder, id) {
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
-  let resolve;
-  const promise = new Promise(r => {
-    resolve = r;
-  });
+  const deferred = new Deferred();
+  const {promise, resolve} = deferred;
+
   const services = getServices(holder);
   services[id] = {
     obj: null,
@@ -510,7 +531,7 @@ function getServicePromiseOrNullInternal(holder, id) {
  * @return {!Object<string,!ServiceHolderDef>}
  */
 function getServices(holder) {
-  let services = holder.services;
+  let {services} = holder;
   if (!services) {
     services = holder.services = {};
   }
@@ -639,7 +660,7 @@ export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
   if (!isServiceRegistered(holder, serviceId)) {
     return false;
   }
-  const service = getServiceForDoc(frameElement, serviceId);
+  const service = getServiceForDocDeprecated(frameElement, serviceId);
   if (!isEmbeddable(service)) {
     return false;
   }

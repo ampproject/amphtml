@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
+import {WindowInterface} from '../src/window-interface';
 import {
   getService,
   getServiceForDoc,
@@ -23,7 +22,9 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../src/service';
-import {WindowInterface} from '../src/window-interface';
+import {getStyle} from '../src/style';
+import {poll} from './iframe';
+import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
@@ -80,6 +81,35 @@ export function mockWindowInterface(sandbox) {
 export function whenCalled(spy, opt_callCount = 1) {
   return poll(`Spy was called ${opt_callCount} times`,
       () => spy.callCount === opt_callCount);
+}
+
+const noneValues = {
+  'animation-name': ['none', 'initial'],
+  'animation-duration': ['0s', 'initial'],
+  'animation-timing-function': ['ease', 'initial'],
+  'animation-delay': ['0s', 'initial'],
+  'animation-iteration-count': ['1', 'initial'],
+  'animation-direction': ['normal', 'initial'],
+  'animation-fill-mode': ['none', 'initial'],
+  'animation-play-state': ['running', 'initial'],
+};
+
+/**
+ * Browsers are inconsistent when accessing the value for 'animation: none'.
+ * Some return 'none', some return the full shorthand, some give the full
+ * shorthand in a different order.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isAnimationNone(element) {
+  for (const property in noneValues) {
+    const value = getStyle(element, property);
+    const expectedValues = noneValues[property];
+    if (!expectedValues.some(expectedValue => value == expectedValue)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /**

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Transport, sendRequest, sendRequestUsingIframe} from '../transport';
 import {adopt} from '../../../../src/runtime';
 import {loadPromise} from '../../../../src/event-helper';
@@ -25,7 +24,7 @@ describe('amp-analytics.transport', () => {
 
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -72,6 +71,14 @@ describe('amp-analytics.transport', () => {
     assertCallCounts(0, 0, 1);
   });
 
+  it('falls back to image setting suppressWarnings to true', () => {
+    setupStubs(true, true);
+    sendRequest(window, 'https://example.com/test', {
+      beacon: false, xhrpost: false, image: {suppressWarnings: true},
+    });
+    assertCallCounts(0, 0, 1);
+  });
+
   it('falls back to xhrpost when enabled and beacon is not available', () => {
     setupStubs(false, true);
     sendRequest(window, 'https://example.com/test', {
@@ -103,15 +110,15 @@ describe('amp-analytics.transport', () => {
   });
 
   it('asserts that urls are https', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       sendRequest(window, 'http://example.com/test');
-    }).to.throw(/https/);
+    }).to.throw(/https/); });
   });
 
   it('should NOT allow __amp_source_origin', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
-    }).to.throw(/Source origin is not allowed in/);
+    }).to.throw(/Source origin is not allowed in/); });
   });
 
   describe('sendRequestUsingIframe', () => {
@@ -132,18 +139,17 @@ describe('amp-analytics.transport', () => {
     });
 
     it('iframe asserts that urls are https', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         sendRequestUsingIframe(window, 'http://example.com/test');
-      }).to.throw(/https/);
+      }).to.throw(/https/); });
     });
 
     it('forbids same origin', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         sendRequestUsingIframe(window, 'http://localhost:9876/');
       }).to.throw(
-          /Origin of iframe request must not be equal to the document origin./
-      );
+          /Origin of iframe request must not be equal to the document origin./);
+      });
     });
   });
 });
-

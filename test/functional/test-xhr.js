@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   FetchResponse,
   assertSuccess,
   fetchPolyfill,
-  xhrServiceForTesting,
-} from '../../src/service/xhr-impl';
+} from '../../src/utils/xhr-utils';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
 import {getCookie} from '../../src/cookies';
+import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
+import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {
   let sandbox;
   let ampdocServiceForStub;
+  let ampdocViewerStub;
   let xhrCreated;
+  let viewer;
 
   const location = {href: 'https://acme.com/path'};
   const nativeWin = {
@@ -71,9 +73,17 @@ describe.configure().skipSafari().run('XHR', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
-    ampdocServiceForStub.returns({isSingleDoc: () => false});
+    ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
+    ampdocViewerStub.returns({
+      whenFirstVisible: () => Promise.resolve(),
+    });
+    ampdocServiceForStub.returns({
+      isSingleDoc: () => false,
+      getAmpDoc: () => ampdocViewerStub,
+    });
+
     location.href = 'https://acme.com/path';
   });
 
@@ -83,14 +93,15 @@ describe.configure().skipSafari().run('XHR', function() {
 
   scenarios.forEach(test => {
     let xhr;
-
-    // Since if it's the Native fetch, it won't use the XHR object so
+    beforeEach(() => {
+      xhr = xhrServiceForTesting(test.win);
+    });
+    // Since it's the Native fetch, it won't use the XHR object so
     // mocking and testing the request becomes not doable.
     if (test.desc != 'Native') {
 
       describe('#XHR', () => {
         beforeEach(() => {
-          xhr = xhrServiceForTesting(test.win);
           setupMockXhr();
         });
 
@@ -123,9 +134,9 @@ describe.configure().skipSafari().run('XHR', function() {
 
           expect(get).to.not.throw();
           expect(post).to.not.throw();
-          expect(put).to.throw();
-          expect(patch).to.throw();
-          expect(deleteMethod).to.throw();
+          allowConsoleError(() => { expect(put).to.throw(); });
+          allowConsoleError(() => { expect(patch).to.throw(); });
+          allowConsoleError(() => { expect(deleteMethod).to.throw(); });
         });
 
         it('should allow FormData as body', () => {
@@ -177,21 +188,21 @@ describe.configure().skipSafari().run('XHR', function() {
 
         it('should defend against invalid source origin query ' +
            'parameter', () => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
-          }).to.throw(/Source origin is not allowed/);
+          }).to.throw(/Source origin is not allowed/); });
         });
 
         it('should defend against empty source origin query parameter', () => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             xhr.fetchJson('/get?k=v1&__amp_source_origin=#h1');
-          }).to.throw(/Source origin is not allowed/);
+          }).to.throw(/Source origin is not allowed/); });
         });
 
         it('should defend against re-encoded source origin parameter', () => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             xhr.fetchJson('/get?k=v1&_%5famp_source_origin=#h1');
-          }).to.throw(/Source origin is not allowed/);
+          }).to.throw(/Source origin is not allowed/); });
         });
 
         it('should not include __amp_source_origin if ampCors ' +
@@ -249,11 +260,37 @@ describe.configure().skipSafari().run('XHR', function() {
             expect(error.message).to.contain('Response must contain');
           });
         });
+
+        describe('viewer visibility', () => {
+          afterEach(() => {
+            test.win.fetch.restore();
+          });
+          it('should not call fetch if view is not visible ', () => {
+            const fetchCall = sandbox.spy(test.win, 'fetch');
+            ampdocViewerStub.returns({
+              whenFirstVisible: () => Promise.reject(),
+            });
+            xhr.fetchJson('/get', {ampCors: false});
+            expect(fetchCall.notCalled).to.be.true;
+          });
+          it('should call fetch if view is visible ', () => {
+            const fetchCall = sandbox.spy(test.win, 'fetch');
+            ampdocViewerStub.returns({
+              whenFirstVisible: () => Promise.resolve(),
+            });
+            const fetch = xhr.fetchJson('/get', {ampCors: false});
+            fetch.then(() => {
+              expect(fetchCall.calledOnce).to.be.true;
+            });
+          });
+        });
       });
     }
 
     describe('AMP-Same-Origin', () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+      beforeEach(() => {
+        xhr = xhrServiceForTesting(test.win);
+      });
 
       it('should not be set for cross origin requests', () => {
         const init = {};
@@ -289,7 +326,9 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     describe(test.desc, () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+      beforeEach(() => {
+        xhr = xhrServiceForTesting(test.win);
+      });
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
@@ -342,6 +381,7 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should do simple JSON fetch', () => {
+        sandbox.stub(user(), 'assert');
         return xhr.fetchJson('http://localhost:31862/get?k=v1')
             .then(res => res.json())
             .then(res => {
@@ -408,9 +448,9 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should NOT succeed CORS with invalid credentials', () => {
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           xhr.fetchJson('https://acme.org/', {credentials: null});
-        }).to.throw(/Only credentials=include|omit support: null/);
+        }).to.throw(/Only credentials=include|omit support: null/); });
       });
 
       it('should expose HTTP headers', () => {
@@ -426,103 +466,10 @@ describe.configure().skipSafari().run('XHR', function() {
         return xhr.fetchJson('http://localhost:31863/status/500').then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
-          const message = error.message;
+          const {message} = error;
           expect(message).to.contain('http://localhost:31863');
           expect(message).not.to.contain('status/500');
           expect(message).not.to.contain('CID');
-        });
-      });
-    });
-
-    describe('#fetchDocument', () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
-
-      it('should be able to fetch a document', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html').then(doc => {
-          expect(doc.nodeType).to.equal(9);
-        });
-        xhrCreated.then(xhr => {
-          expect(xhr.requestHeaders['Accept']).to.equal('text/html');
-          xhr.respond(
-              200, {
-                'Content-Type': 'text/xml',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>');
-          expect(xhr.responseType).to.equal('document');
-        });
-        return promise;
-      });
-
-      it('should mark 400 as not retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                400, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.be.undefined;
-          expect(e.retriable).to.not.equal(true);
-        });
-      });
-
-      it('should mark 415 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
-
-      it('should mark 500 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
-
-      it('should error on non truthy responseXML', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                200, {
-                  'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '{"hello": "world"}'));
-        return promise.catch(e => {
-          expect(e.message)
-              .to.contain('responseXML should exist');
         });
       });
     });
@@ -543,10 +490,10 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should be able to fetch a document', () => {
         const promise = xhr.fetchText('/text.html');
-        expect(fetchStub.calledWith('/text.html', {
+        expect(fetchStub).to.be.calledWith('/text.html', {
           method: 'GET',
           headers: {'Accept': 'text/plain'},
-        })).to.be.true;
+        });
         return promise.then(res => {
           return res.text();
         }).then(text => {
@@ -671,10 +618,10 @@ describe.configure().skipSafari().run('XHR', function() {
 
         expect(objectFn).to.not.throw();
         expect(arrayFn).to.not.throw();
-        expect(stringFn).to.throw();
-        expect(numberFn).to.throw();
-        expect(booleanFn).to.throw();
-        expect(nullFn).to.throw();
+        allowConsoleError(() => { expect(stringFn).to.throw(); });
+        allowConsoleError(() => { expect(numberFn).to.throw(); });
+        allowConsoleError(() => { expect(booleanFn).to.throw(); });
+        allowConsoleError(() => { expect(nullFn).to.throw(); });
       });
 
     });
@@ -765,9 +712,8 @@ describe.configure().skipSafari().run('XHR', function() {
     const origin = 'https://acme.com';
 
     let interceptionEnabledWin;
-    let viewer;
+    let optedInDoc;
     let sendMessageStub;
-
     function getDefaultResponseOptions() {
       return {
         headers: [
@@ -781,23 +727,22 @@ describe.configure().skipSafari().run('XHR', function() {
     }
 
     beforeEach(() => {
-      const optedInDoc = window.document.implementation.createHTMLDocument('');
+      optedInDoc = window.document.implementation.createHTMLDocument('');
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
       ampdocServiceForStub.returns({
         isSingleDoc: () => true,
         getAmpDoc: () => ({getRootNode: () => optedInDoc}),
       });
-
       viewer = {
         hasCapability: () => true,
         isTrustedViewer: () => Promise.resolve(true),
         sendMessageAwaitResponse: getDefaultResponsePromise,
+        whenFirstVisible: () => Promise.resolve(),
       };
       sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
       sendMessageStub.returns(getDefaultResponsePromise());
-      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-
+      ampdocViewerStub.returns(viewer);
       interceptionEnabledWin = {
         location: {
           href: `${origin}/path`,
@@ -808,7 +753,10 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     it('should not intercept if AMP doc is not single', () => {
-      ampdocServiceForStub.returns({isSingleDoc: () => false});
+      ampdocServiceForStub.returns({
+        isSingleDoc: () => false,
+        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+      });
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
       return xhr.fetch('https://cdn.ampproject.org')
@@ -848,13 +796,27 @@ describe.configure().skipSafari().run('XHR', function() {
           .then(() => expect(sendMessageStub).to.not.have.been.called);
     });
 
+    it('should not intercept a 1p cdn from subdomain', () => {
+      const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+      return xhr.fetch('https://subdomain-model.cdn.ampproject.org/ww.js')
+          .then(() => expect(sendMessageStub).to.not.have.been.called);
+    });
+
+    it('should not intercept a 1p cdn resource', () => {
+      const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+      return xhr.fetch('https://cdn.ampproject.org/ww.js')
+          .then(() => expect(sendMessageStub).to.not.have.been.called);
+    });
+
     it('should intercept if viewer untrusted but dev mode', () => {
       sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
       interceptionEnabledWin.AMP_DEV_MODE = true;
 
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return xhr.fetch('https://cdn.ampproject.org')
+      return xhr.fetch('https://www.some-url.org/some-resource/')
           .then(() => expect(sendMessageStub).to.have.been.called);
     });
 
@@ -864,14 +826,14 @@ describe.configure().skipSafari().run('XHR', function() {
 
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return xhr.fetch('https://cdn.ampproject.org')
+      return xhr.fetch('https://www.some-url.org/some-resource/')
           .then(() => expect(sendMessageStub).to.have.been.called);
     });
 
     it('should send viewer message named `xhr`', () => {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return xhr.fetch('https://cdn.ampproject.org')
+      return xhr.fetch('https://www.some-url.org/some-resource/')
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
                 'xhr', sinon.match.any));
@@ -880,12 +842,12 @@ describe.configure().skipSafari().run('XHR', function() {
     it('should post correct structurally-cloneable GET request', () => {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return xhr.fetch('https://cdn.ampproject.org')
+      return xhr.fetch('https://www.some-url.org/some-resource/')
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
                 sinon.match.any, {
                   originalRequest: {
-                    input: 'https://cdn.ampproject.org' +
+                    input: 'https://www.some-url.org/some-resource/' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
                     init: {
                       headers: {},
@@ -900,7 +862,7 @@ describe.configure().skipSafari().run('XHR', function() {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
       return xhr
-          .fetch('https://cdn.ampproject.org', {
+          .fetch('https://www.some-url.org/some-resource/', {
             method: 'POST',
             headers: {'Content-Type': 'application/json;charset=utf-8'},
             body: JSON.stringify({a: 42, b: [24, true]}),
@@ -909,7 +871,7 @@ describe.configure().skipSafari().run('XHR', function() {
             expect(sendMessageStub).to.have.been.calledWithMatch(
                 sinon.match.any, {
                   originalRequest: {
-                    input: 'https://cdn.ampproject.org' +
+                    input: 'https://www.some-url.org/some-resource/' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
                     init: {
                       headers: {
@@ -933,7 +895,7 @@ describe.configure().skipSafari().run('XHR', function() {
       formData.append('b', true);
 
       return xhr
-          .fetch('https://cdn.ampproject.org', {
+          .fetch('https://www.some-url.org/some-resource/', {
             method: 'POST',
             body: formData,
           })
@@ -941,7 +903,7 @@ describe.configure().skipSafari().run('XHR', function() {
             expect(sendMessageStub).to.have.been.calledWithMatch(
                 sinon.match.any, {
                   originalRequest: {
-                    input: 'https://cdn.ampproject.org' +
+                    input: 'https://www.some-url.org/some-resource/' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
                     init: {
                       headers: {
@@ -960,7 +922,7 @@ describe.configure().skipSafari().run('XHR', function() {
       sendMessageStub.returns(Promise.resolve());
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return expect(xhr.fetch('https://cdn.ampproject.org'))
+      return expect(xhr.fetch('https://www.some-url.org/some-resource/'))
           .to.eventually.be.rejectedWith(Error, 'Object expected: undefined');
     });
 
@@ -968,7 +930,7 @@ describe.configure().skipSafari().run('XHR', function() {
       sendMessageStub.returns(Promise.resolve(null));
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return expect(xhr.fetch('https://cdn.ampproject.org'))
+      return expect(xhr.fetch('https://www.some-url.org/some-resource/'))
           .to.eventually.be.rejectedWith(Error, 'Object expected: null');
     });
 
@@ -976,7 +938,7 @@ describe.configure().skipSafari().run('XHR', function() {
       sendMessageStub.returns(Promise.resolve('response text'));
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      return expect(xhr.fetch('https://cdn.ampproject.org')).to.eventually
+      return expect(xhr.fetch('https://www.some-url.org/some-resource/')).to.eventually
           .be.rejectedWith(Error, 'Object expected: response text');
     });
 
@@ -999,7 +961,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org').then(response => {
+        return xhr.fetch('https://www.some-url.org/some-resource/').then(response => {
           expect(response.headers.get('a')).to.equal('2');
           expect(response.headers.get('b')).to.equal('false');
           expect(response.headers.get('Amp-Access-Control-Allow-source-origin'))
@@ -1012,22 +974,6 @@ describe.configure().skipSafari().run('XHR', function() {
           return expect(response.json()).to.eventually.deep.equal({
             content: 32,
           });
-        });
-      });
-
-      it('should return correct document response', () => {
-        sendMessageStub.returns(
-            Promise.resolve({
-              body: '<html><body>Foo</body></html>',
-              init: {
-                headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-              },
-            }));
-        const xhr = xhrServiceForTesting(interceptionEnabledWin);
-
-        return xhr.fetchDocument('https://cdn.ampproject.org').then(doc => {
-          expect(doc).to.have.nested.property('body.textContent')
-              .that.equals('Foo');
         });
       });
     });
@@ -1051,7 +997,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org').then(response => {
+        return xhr.fetch('https://www.some-url.org/some-resource/').then(response => {
           expect(response.headers.get('a')).to.equal('2');
           expect(response.headers.get('b')).to.equal('false');
           expect(response.headers.get('Amp-Access-Control-Allow-Source-Origin'))
@@ -1064,25 +1010,11 @@ describe.configure().skipSafari().run('XHR', function() {
         });
       });
 
-      it('should return correct document response', () => {
-        sendMessageStub.returns(
-            Promise.resolve({
-              body: '<html><body>Foo</body></html>',
-              init: {
-                headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-              },
-            }));
-        const xhr = xhrServiceForTesting(interceptionEnabledWin);
-
-        return xhr.fetchDocument('https://cdn.ampproject.org')
-            .then(doc => expect(doc.body.textContent).to.equal('Foo'));
-      });
-
       it('should return default response when body/init missing', () => {
         sendMessageStub.returns(Promise.resolve({}));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               expect(response.headers.get('a')).to.be.null;
               expect(response.headers.has('a')).to.be.false;
@@ -1096,7 +1028,7 @@ describe.configure().skipSafari().run('XHR', function() {
         sendMessageStub.returns(Promise.resolve({body: '', init: {}}));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               expect(response.headers.get('a')).to.be.null;
               expect(response.headers.has('a')).to.be.false;
@@ -1108,7 +1040,7 @@ describe.configure().skipSafari().run('XHR', function() {
         sendMessageStub.returns(Promise.resolve({body: 32}));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               return expect(response.text()).to.eventually.equal('32');
             });
@@ -1118,7 +1050,7 @@ describe.configure().skipSafari().run('XHR', function() {
         sendMessageStub.returns(Promise.resolve({init: {status: '209.6'}}));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               return expect(response).to.have.property('status')
                   .that.equals(209);
@@ -1134,7 +1066,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               expect(response.headers.get(1)).to.equal('true');
               expect(response.headers.get('false')).to.equal('NaN');
@@ -1155,7 +1087,7 @@ describe.configure().skipSafari().run('XHR', function() {
             }));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-        return xhr.fetch('https://cdn.ampproject.org', {ampCors: false})
+        return xhr.fetch('https://www.some-url.org/some-resource/', {ampCors: false})
             .then(response => {
               expect(response.headers.get('content-type'))
                   .to.equal('text/plain');

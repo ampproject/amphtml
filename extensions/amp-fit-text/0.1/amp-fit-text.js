@@ -117,6 +117,7 @@ class AmpFitText extends AMP.BaseElement {
 /**
  * @param {Element} measurer
  * @param {number} expectedHeight
+ * @param {number} expectedWidth
  * @param {number} minFontSize
  * @param {number} maxFontSize
  * @return {number}

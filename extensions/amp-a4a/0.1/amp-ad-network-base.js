@@ -31,6 +31,10 @@ const TAG = 'amp-ad-network-base';
  */
 export class AmpAdNetworkBase extends AMP.BaseElement {
 
+  /**
+   * Creates an instance of AmpAdNetworkBase.
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
 
@@ -46,9 +50,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.recoveryModes_ = map();
 
-    /** @private {?./amp-ad-type-defs.LayoutInfoDef} */
-    this.initialSize_ = null;
-
     /** @const @private {!Object} */
     this.context_ = {};
 
@@ -62,16 +63,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
      * @type {number}
      */
     this.retryLimit_ = 0;
-  }
-
-  /** @override */
-  buildCallback() {
-    this.initialSize_ = {
-      // TODO(levitzky) handle non-numeric values.
-      width: this.element.getAttribute('width'),
-      height: this.element.getAttribute('height'),
-      layout: this.element.getAttribute('layout'),
-    };
   }
 
   /** @override */
@@ -95,8 +86,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-ad-type-defs.FailureType} failure
-   * @param {!./amp-ad-type-defs.RecoveryModeType} recovery
+   * @param {!FailureType} failure
+   * @param {!RecoveryModeType} recovery
    * @final
    */
   onFailure(failure, recovery) {
@@ -200,7 +191,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-ad-type-defs.FailureType} failureType
+   * @param {FailureType} failureType
    * @param {*=} error
    * @private
    */

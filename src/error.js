@@ -42,6 +42,11 @@ import {urls} from './config';
  */
 const CANCELLED = 'CANCELLED';
 
+/**
+ * @const {string}
+ */
+const BLOCK_BY_CONSENT = 'BLOCK_BY_CONSENT';
+
 
 /**
  * The threshold for errors throttled because nothing can be done about
@@ -235,13 +240,41 @@ export function isCancellation(errorOrMessage) {
 }
 
 /**
+ * Returns an error for component blocked by consent
+ * @return {!Error}
+ */
+export function blockedByConsentError() {
+  return new Error(BLOCK_BY_CONSENT);
+}
+
+/**
+ * @param {*} errorOrMessage
+ * @return {boolean}
+ */
+export function isBlockedByConsent(errorOrMessage) {
+  if (!errorOrMessage) {
+    return false;
+  }
+  if (typeof errorOrMessage == 'string') {
+    return startsWith(errorOrMessage, BLOCK_BY_CONSENT);
+  }
+  if (typeof errorOrMessage.message == 'string') {
+    return startsWith(errorOrMessage.message, BLOCK_BY_CONSENT);
+  }
+  return false;
+}
+
+
+/**
  * Install handling of global unhandled exceptions.
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (reportErrorToServer);
   win.addEventListener('unhandledrejection', event => {
-    if (event.reason && event.reason.message === CANCELLED) {
+    if (event.reason &&
+      (event.reason.message === CANCELLED ||
+      event.reason.message === BLOCK_BY_CONSENT)) {
       event.preventDefault();
       return;
     }
@@ -374,13 +407,18 @@ export function getErrorReportData(message, filename, line, col, error,
     return;
   }
 
+  const detachedWindow = !(self && self.window);
   const throttleBase = Math.random();
+
   // We throttle load errors and generic "Script error." errors
   // that have no information and thus cannot be acted upon.
   if (isLoadErrorMessage(message) ||
     // See https://github.com/ampproject/amphtml/issues/7353
     // for context.
-    message == 'Script error.') {
+    message == 'Script error.' ||
+    // Window has become detached, really anything can happen
+    // at this point.
+    detachedWindow) {
     expected = true;
 
     if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
@@ -408,6 +446,7 @@ export function getErrorReportData(message, filename, line, col, error,
   // Errors are tagged with "ex" ("expected") label to allow loggers to
   // classify these errors as benchmarks and not exceptions.
   data['ex'] = expected ? '1' : '0';
+  data['dw'] = detachedWindow ? '1' : '0';
 
   let runtime = '1p';
   if (self.context && self.context.location) {
@@ -506,6 +545,9 @@ export function detectNonAmpJs(win) {
   return false;
 }
 
+/**
+ * Resets accumulated error messages for testing
+ */
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
 }
@@ -528,7 +570,7 @@ export function detectJsEngineFromStack() {
   try {
     object.t();
   } catch (e) {
-    const stack = e.stack;
+    const {stack} = e;
 
     // Safari only mentions the method name.
     if (startsWith(stack, 't@')) {

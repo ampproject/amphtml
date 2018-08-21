@@ -31,18 +31,30 @@
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 
+/**
+ * Call to action button layer template.
+ *
+ * No pre-rendering to let more computing-intensive elements (like
+ * videos) get pre-rendered first. Since this layer will not contain
+ * computing-intensive resources such as videos, we can just risk rendering
+ * while the user is looking.
+ */
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
 
   /** @override */
-  prerenderAllowed() {
-    /**
-     * Skip pre-rendering to let more computing-intensive elements (like
-     * videos) get pre-rendered first. Since this layer will not contain
-     * computing-intensive resources such as videos, we can just risk rendering
-     * while the user is looking.
-     */
-    return false;
+  buildCallback() {
+    super.buildCallback();
+    this.setOrOverwriteTargetAttribute_();
+  }
+
+  /**
+   * Overwrite or set target attribute to _blank in call-to-action links.
+   * @private
+   */
+  setOrOverwriteTargetAttribute_() {
+    const ctaLinks = this.element.querySelectorAll('a');
+    for (let i = 0; i < ctaLinks.length; i++) {
+      ctaLinks[i].setAttribute('target', '_blank');
+    }
   }
 }
-
-AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);

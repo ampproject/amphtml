@@ -41,11 +41,11 @@
 import * as events from '../../../src/event-helper';
 import * as utils from './utils';
 import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertAbsoluteHttpOrHttpsUrl,
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
 import {dict} from '../../../src/utils/object';
@@ -53,8 +53,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
-/** @const */
-const EXPERIMENT = 'amp-playbuzz';
 
 class AmpPlaybuzz extends AMP.BaseElement {
 
@@ -65,7 +63,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
+    /** @visibleForTesting {?Promise} */
     this.iframePromise_ = null;
 
     /** @private {?number} */
@@ -105,8 +103,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
   buildCallback() {
     // EXPERIMENT
     // AMP.toggleExperiment(EXPERIMENT, true); //for dev
-    user().assert(isExperimentOn(this.win, EXPERIMENT),
-        `Enable ${EXPERIMENT} experiment`);
+    user().assert(isExperimentOn(this.win, 'amp-playbuzz'),
+        'Enable amp-playbuzz experiment');
 
     const e = this.element;
     const src = e.getAttribute('src');
@@ -138,6 +136,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
+    if (this.element.hasAttribute('aria-label')) {
+      placeholder.setAttribute('aria-label', 'Loading - '
+          + this.element.getAttribute('aria-label'));
+    } else {
+      placeholder.setAttribute('aria-label', 'Loading interactive element');
+    }
     placeholder.setAttribute('placeholder', '');
     placeholder.appendChild(this.createPlaybuzzLoader_());
     return placeholder;
@@ -151,7 +155,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the overflow element
-   * @returns {!Element} overflowElement
+   * @return {!Element} overflowElement
    *
    */
   getOverflowElement_() {
@@ -251,15 +255,15 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /**
    *
    * Returns the composed embed source url
-   * @returns {string} url
+   * @return {string} url
    *
    */
   generateEmbedSourceUrl_() {
-    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
-    const parsedPageUrl = parseUrl(canonicalUrl);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const parsedPageUrl = parseUrlDeprecated(canonicalUrl);
     const params = {
       itemUrl: this.iframeSrcUrl_,
-      relativeUrl: parseUrl(this.iframeSrcUrl_).pathname,
+      relativeUrl: parseUrlDeprecated(this.iframeSrcUrl_).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,
@@ -271,6 +275,11 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return embedUrl;
   }
 
+  /**
+   * Relays scroll data to iframe.
+   *
+   * @param {{height: number, left: number, relayoutAll: boolean, top: number, velocity: number, width: number }} changeEvent
+   */
   sendScrollDataToItem_(changeEvent) {
     if (!this.isInViewport()) {
       return;

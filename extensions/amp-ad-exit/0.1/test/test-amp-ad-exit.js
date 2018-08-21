@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
 import {AmpAdExit} from '../amp-ad-exit';
+import {FilterType} from '../filters/filter';
+import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {installTimerService} from '../../../../src/service/timer-impl';
+import {setParentWindow} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';
@@ -157,25 +160,16 @@ describes.realWin('amp-ad-exit', {
     adDiv.style.width = '200px';
     adDiv.style.height = '200px';
     win.document.body.appendChild(adDiv);
-    // TODO(jonkeller): Long-term, test with amp-ad-exit enclosed inside amp-ad,
-    // so we don't have to do this hack.
-    sandbox.stub(AmpAdExit.prototype, 'getAmpAdResourceId_').callsFake(
-        () => String(Math.round(Math.random() * 10000)));
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create({useFakeTimers: true});
+    sandbox = sinon.createSandbox({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
     addAdDiv();
-    // TODO(jonkeller): Remove after rebase
-    win.top.document.body.getResourceId = () => '6789';
-    // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
-    ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
-      transport: {
-        iframe: '/nowhere.html',
-      },
-    };
+    // TEST_3P_VENDOR must be in IFRAME_TRANSPORTS
+    // *before* makeElementWithConfig
+    IFRAME_TRANSPORTS[TEST_3P_VENDOR] = '/nowhere.html';
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -186,28 +180,28 @@ describes.realWin('amp-ad-exit', {
     env.win.document.body.removeChild(element);
     env.win.document.body.removeChild(env.win.document.getElementById('ad'));
     element = undefined;
+    // Without the following, will break amp-analytics' test-vendor.js
+    delete IFRAME_TRANSPORTS[TEST_3P_VENDOR];
   });
 
   it('should reject non-JSON children', () => {
     const el = win.document.createElement('amp-ad-exit');
     el.appendChild(win.document.createElement('p'));
     win.document.body.appendChild(el);
-    return el.build().then(() => {
-      throw new Error('must have failed');
-    }, error => {
-      expect(error.message).to.match(/application\/json/);
-    });
+    let promise;
+    allowConsoleError(() => promise = el.build());
+    return promise.should.be.rejectedWith(/application\/json/);
   });
 
   it('should do nothing for missing targets', () => {
     const open = sandbox.stub(win, 'open');
     try {
-      element.implementation_.executeAction({
+      allowConsoleError(() => element.implementation_.executeAction({
         method: 'exit',
         args: {target: 'not-a-real-target'},
         event: makeClickEvent(1001),
         satisfiesTrust: () => true,
-      });
+      }));
       expect(open).to.not.have.been.called;
     } catch (expected) {}
   });
@@ -241,6 +235,33 @@ describes.realWin('amp-ad-exit', {
     });
 
     expect(open).to.not.have.been.called;
+  });
+
+  it('should use options.startTimingEvent', () => {
+    return makeElementWithConfig({
+      targets: {
+        navStart: {
+          'finalUrl': 'http://localhost:8000/simple',
+          'filters': ['twoSecond'],
+        },
+      },
+      options: {'startTimingEvent': 'navigationStart'},
+      filters: {
+        'twoSecond': {
+          type: 'clickDelay',
+          delay: 2000,
+        },
+      },
+    }).then(el => {
+      expect(el.implementation_.defaultFilters_.length).to.equal(2);
+      let clickFilter = el.implementation_.defaultFilters_[0];
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
+      clickFilter = el.implementation_.userFilters_['twoSecond'];
+      expect(clickFilter).to.be.ok;
+      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
+    });
   });
 
   it('should attempt new-tab navigation', () => {
@@ -487,7 +508,8 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.not.have.been.called;
 
-    // The click is within the left border but left border protection is not set.
+    // The click is within the left border but left border protection is not
+    // set.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtection'},
@@ -544,7 +566,8 @@ describes.realWin('amp-ad-exit', {
 
     expect(open).to.not.have.been.called;
 
-    // The click is within the left border but left border protection is not set.
+    // The click is within the left border but left border protection is not
+    // set.
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'borderProtectionRelativeTo'},
@@ -640,5 +663,23 @@ describes.realWin('amp-ad-exit', {
     expect(makeElementWithConfig(unkVendor))
         .to.eventually.be.rejectedWith(/Unknown vendor/);
   });
-});
 
+  it('getAmpAdResourceId_ should reference AMP top window', () => {
+    const frame = win.document.createElement('iframe');
+    win.document.body.appendChild(frame);
+    const doc = frame.contentDocument;
+    const ampAd = doc.createElement('amp-ad');
+    ampAd.getResourceId = () => 12345;
+    doc.body.appendChild(ampAd);
+    const adFrame = doc.createElement('iframe');
+    ampAd.appendChild(adFrame);
+    const ampAdExitElement =
+        adFrame.contentDocument.createElement('amp-ad-exit');
+    adFrame.contentDocument.body.appendChild(ampAdExitElement);
+    installTimerService(frame.contentWindow);
+    installPlatformService(frame.contentWindow);
+    setParentWindow(adFrame.contentWindow, frame.contentWindow);
+    expect(new AmpAdExit(ampAdExitElement).getAmpAdResourceId_())
+        .to.equal('12345');
+  });
+});

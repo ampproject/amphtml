@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {
   AnalyticsEventType,
@@ -107,9 +106,9 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
 
     it('should reject trigger in a disallowed environment', () => {
       sandbox.stub(root, 'getType').callsFake(() => 'other');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         group.addTrigger({on: 'click', selector: '*'});
-      }).to.throw(/Trigger type "click" is not allowed in the other/);
+      }).to.throw(/Trigger type "click" is not allowed in the other/); });
     });
 
     it('should reject trigger that fails to initialize', () => {
@@ -299,7 +298,7 @@ describe('amp-analytics.instrumentation OLD', function() {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     const docState = Services.documentStateFor(window);
     sandbox.stub(docState, 'isHidden').callsFake(() => false);
     ampdoc = new AmpDocSingle(window);
@@ -384,40 +383,44 @@ describe('amp-analytics.instrumentation OLD', function() {
   it('fails gracefully on bad scroll config', () => {
     const fn1 = sandbox.stub();
 
-    ins.addListenerDepr_({'on': 'scroll'}, fn1);
-    expect(fn1).to.have.not.been.called;
+    allowConsoleError(() => {
+      ins.addListenerDepr_({'on': 'scroll'}, fn1);
+      expect(fn1).to.have.not.been.called;
 
-    ins.addListenerDepr_({'on': 'scroll', 'scrollSpec': {}}, fn1);
-    expect(fn1).to.have.not.been.called;
+      ins.addListenerDepr_({'on': 'scroll', 'scrollSpec': {}}, fn1);
+      expect(fn1).to.have.not.been.called;
 
-    ins.addListenerDepr_({
-      'on': 'scroll',
-      'scrollSpec': {
-        'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
-      }},
-    fn1);
-    expect(fn1).to.have.not.been.called;
+      ins.addListenerDepr_({
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
+        }},
+      fn1);
+      expect(fn1).to.have.not.been.called;
 
-    ins.addListenerDepr_({
-      'on': 'scroll',
-      'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []}},
-    fn1);
-    expect(fn1).to.have.not.been.called;
+      ins.addListenerDepr_({
+        'on': 'scroll',
+        'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []}},
+      fn1);
+      expect(fn1).to.have.not.been.called;
 
-    ins.addListenerDepr_({
-      'on': 'scroll',
-      'scrollSpec': {
-        'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
-      }},
-    fn1);
-    expect(fn1).to.have.not.been.called;
+      ins.addListenerDepr_({
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
+        }},
+      fn1);
+      expect(fn1).to.have.not.been.called;
+    });
   });
 
   it('normalizes boundaries correctly.', () => {
-    expect(ins.normalizeBoundaries_([])).to.be.empty;
-    expect(ins.normalizeBoundaries_(undefined)).to.be.empty;
-    expect(ins.normalizeBoundaries_(['foo'])).to.be.empty;
-    expect(ins.normalizeBoundaries_(['0', '1'])).to.be.empty;
+    allowConsoleError(() => {
+      expect(ins.normalizeBoundaries_([])).to.be.empty;
+      expect(ins.normalizeBoundaries_(undefined)).to.be.empty;
+      expect(ins.normalizeBoundaries_(['foo'])).to.be.empty;
+      expect(ins.normalizeBoundaries_(['0', '1'])).to.be.empty;
+    });
     expect(ins.normalizeBoundaries_([1])).to.deep.equal({0: false});
     expect(ins.normalizeBoundaries_([1, 4, 99, 1001])).to.deep.equal({
       0: false,

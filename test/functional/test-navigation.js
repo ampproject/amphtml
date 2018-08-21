@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import '../../src/service/navigation';
 import * as Impression from '../../src/impression';
 import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
+import {createElementWithAttributes} from '../../src/dom';
+import {
+  installUrlReplacementsServiceForDoc,
+} from '../../src/service/url-replacements-impl';
 import {macroTask} from '../../testing/yield';
-
+import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
 
 describes.sandboxed('Navigation', {}, () => {
   let event;
@@ -28,6 +31,7 @@ describes.sandboxed('Navigation', {}, () => {
     event = {
       target: null,
       defaultPrevented: false,
+      type: 'click',
     };
     event.preventDefault = function() {
       event.defaultPrevented = true;
@@ -140,6 +144,58 @@ describes.sandboxed('Navigation', {}, () => {
       });
     });
 
+    describe('anchor mutators', () => {
+      const errorRe = /Mutator with same priority is already in use./;
+      const priority = 100;
+      it('should throw error if priority is already in use', () => {
+        handler.registerAnchorMutator(element => {
+          element.href += '?am=1';
+        }, priority);
+        allowConsoleError(() => {
+          expect(() => handler.registerAnchorMutator(element => {
+            element.href += '?am=2';
+          }, priority)).to.throw(errorRe);
+        });
+      });
+
+      it('should execute in order', () => {
+        anchor.href = 'https://www.testing-1-2-3.org';
+        let transformedHref;
+        handler.registerAnchorMutator(element => {
+          element.href += '&second=2';
+          transformedHref = element.href;
+        }, 2);
+        handler.registerAnchorMutator(element => {
+          element.href += '?first=1';
+          transformedHref = element.href;
+        }, 1);
+        handler.registerAnchorMutator(element => {
+          element.href += '&third=3';
+          transformedHref = element.href;
+        }, 3);
+        handler.handle_(event);
+        expect(transformedHref).to.equal(
+            'https://www.testing-1-2-3.org/?first=1&second=2&third=3');
+      });
+
+      it('verify order of operations', () => {
+        const expandVars = sandbox.spy(handler, 'expandVarsForAnchor_');
+        const parseUrl = sandbox.spy(handler, 'parseUrl_');
+        const obj = {
+          callback: () => {
+          },
+        };
+        const linkRuleSpy = sandbox.spy(obj, 'callback');
+        handler.registerAnchorMutator(linkRuleSpy, 99);
+        handler.handle_(event);
+        // Verify that the expansion of variables occurs first
+        // followed by the anchor transformation and then the parsing
+        // of the possibly mutated anchor href into the location object
+        // for navigation.handleNavClick.
+        sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
+      });
+    });
+
     describe('link expansion', () => {
       it('should expand a link', () => {
         anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
@@ -155,6 +211,14 @@ describes.sandboxed('Navigation', {}, () => {
         expect(anchor.href).to.equal(
             'https://www.google.com/link?out=QUERY_PARAM(hello)');
         expect(handleNavSpy).to.be.calledOnce;
+      });
+
+      it('should expand link if event type is right click', () => {
+        anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
+        anchor.setAttribute('data-amp-replace', 'QUERY_PARAM');
+        event.type = 'contextmenu';
+        handler.handle_(event);
+        expect(anchor.href).to.equal('https://www.google.com/link?out=world');
       });
     });
 
@@ -457,7 +521,7 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should delegate navigation if viewer supports A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(true);
 
         handler.handle_(event);
 
@@ -473,7 +537,7 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should behave normally if viewer does not support A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(false);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(false);
 
         handler.handle_(event);
 
@@ -500,7 +564,9 @@ describes.sandboxed('Navigation', {}, () => {
         const newUrl = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
 
         expect(win.location.href).to.equal('https://www.pub.com/');
-        handler.navigateTo(win, newUrl);
+        allowConsoleError(() => {
+          handler.navigateTo(win, newUrl);
+        });
         // No navigation so window location should be unchanged.
         expect(win.location.href).to.equal('https://www.pub.com/');
       });
@@ -511,30 +577,31 @@ describes.sandboxed('Navigation', {}, () => {
         meta.setAttribute('content', 'feature-foo, action-bar');
         ampdoc.getRootNode().head.appendChild(meta);
 
-        const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+        const send = sandbox.stub(handler.viewer_, 'sendMessage');
+        const hasCapability = sandbox.stub(handler.viewer_, 'hasCapability');
+        hasCapability.returns(true);
         expect(win.location.href).to.equal('https://www.pub.com/');
 
         // Delegate to viewer if opt_requestedBy matches the <meta> tag content
         // and the viewer supports A2A.
         handler.navigateTo(win, 'https://amp.pub.com/amp_page', 'feature-foo');
-        expect(stub).to.be.calledOnce;
-        expect(stub).to.be.calledWithExactly(
-            'https://amp.pub.com/amp_page', 'feature-foo');
+        expect(hasCapability).to.be.calledWithExactly('a2a');
+        expect(send).to.be.calledOnce;
+        expect(send).to.be.calledWithExactly('a2aNavigate',
+            {requestedBy: 'feature-foo', url: 'https://amp.pub.com/amp_page'});
         expect(win.location.href).to.equal('https://www.pub.com/');
 
         // If opt_requestedBy doesn't match, navigate top normally.
         handler.navigateTo(win, 'https://amp.pub.com/amp_page', 'no-match');
-        expect(stub).to.be.calledOnce;
+        expect(send).to.be.calledOnce;
         expect(win.location.href).to.equal('https://amp.pub.com/amp_page');
 
         // If opt_requestedBy matches but viewer doesn't support A2A, navigate
         // top normally.
-        stub.returns(false);
+        send.reset();
+        hasCapability.returns(false);
         handler.navigateTo(win, 'https://amp.pub.com/different', 'action-bar');
-        expect(stub).to.be.calledTwice;
-        expect(stub).to.be.calledWithExactly(
-            'https://amp.pub.com/different', 'action-bar');
+        expect(send).to.not.be.called;
         expect(win.location.href).to.equal('https://amp.pub.com/different');
       });
     });
@@ -643,5 +710,42 @@ describes.sandboxed('Navigation', {}, () => {
         });
       });
     });
+  });
+});
+
+describes.realWin('anchor-click-interceptor', {amp: true}, env => {
+
+  let doc;
+  let ampdoc;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    doc = ampdoc.win.document;
+    installUrlReplacementsServiceForDoc(ampdoc);
+  });
+
+  it('should replace CLICK_X and CLICK_Y in href', () => {
+    const a = createElementWithAttributes(doc, 'a', {
+      href: 'http://example.com/?x=CLICK_X&y=CLICK_Y',
+    });
+    const div = createElementWithAttributes(doc, 'div', {});
+    a.appendChild(div);
+    doc.body.appendChild(a);
+
+    // first click
+    maybeExpandUrlParamsForTesting(ampdoc, {
+      target: div,
+      pageX: 12,
+      pageY: 34,
+    });
+    expect(a.href).to.equal('http://example.com/?x=12&y=34');
+
+    // second click
+    maybeExpandUrlParamsForTesting(ampdoc, {
+      target: div,
+      pageX: 23,
+      pageY: 45,
+    });
+    expect(a.href).to.equal('http://example.com/?x=23&y=45');
   });
 });

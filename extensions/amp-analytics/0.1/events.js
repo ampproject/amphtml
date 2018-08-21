@@ -24,6 +24,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {hasOwn} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -128,7 +129,7 @@ export function getTrackerKeyName(eventType) {
   if (!isReservedTriggerType(eventType)) {
     return 'custom';
   }
-  return TRACKER_TYPE.hasOwnProperty(eventType) ?
+  return hasOwn(TRACKER_TYPE, eventType) ?
     TRACKER_TYPE[eventType].name : eventType;
 }
 
@@ -139,7 +140,7 @@ export function getTrackerKeyName(eventType) {
 export function getTrackerTypesForParentType(parentType) {
   const filtered = {};
   Object.keys(TRACKER_TYPE).forEach(key => {
-    if (TRACKER_TYPE.hasOwnProperty(key) &&
+    if (hasOwn(TRACKER_TYPE, key) &&
         TRACKER_TYPE[key].allowedFor.indexOf(parentType) != -1) {
       filtered[key] = TRACKER_TYPE[key].klass;
     }
@@ -239,8 +240,9 @@ export class CustomEventTracker extends EventTracker {
 
     /**
      * Sandbox events get their own buffer, because handler to those events will
-     * be added after parent element's layout. (Time varies, can be later than 10s)
-     * sandbox events buffer will never expire but will cleared when handler is ready.
+     * be added after parent element's layout. (Time varies, can be later than
+     * 10s) sandbox events buffer will never expire but will cleared when
+     * handler is ready.
      * @private {!Object<string, !Array<!AnalyticsEvent>|undefined>|undefined}
      */
     this.sandboxBuffer_ = {};
@@ -360,10 +362,8 @@ export class ClickEventTracker extends EventTracker {
     /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
 
-    /** @private @const */
-    this.boundOnClick_ = e => {
-      this.clickObservable_.fire(e);
-    };
+    /** @private @const {function(!Event)} */
+    this.boundOnClick_ = this.clickObservable_.fire.bind(this.clickObservable_);
     this.root.getRoot().addEventListener('click', this.boundOnClick_);
   }
 
@@ -594,6 +594,9 @@ class TimerEventHandler {
     }
   }
 
+  /**
+   * Unlistens for start and stop.
+   */
   dispose() {
     this.unlistenForStop_();
     this.unlistenForStart_();
@@ -671,6 +674,7 @@ class TimerEventHandler {
 
   /**
    * @param {!Window} win
+   * @restricted
    */
   stopTimer_(win) {
     if (!this.isRunning()) {
@@ -883,10 +887,9 @@ export class VideoEventTracker extends EventTracker {
     /** @private {?Observable<!Event>} */
     this.sessionObservable_ = new Observable();
 
-    /** @private {?Function} */
-    this.boundOnSession_ = e => {
-      this.sessionObservable_.fire(e);
-    };
+    /** @private {?function(!Event)} */
+    this.boundOnSession_ =
+        this.sessionObservable_.fire.bind(this.sessionObservable_);
 
     Object.keys(VideoAnalyticsEvents).forEach(key => {
       this.root.getRoot().addEventListener(
@@ -920,7 +923,7 @@ export class VideoEventTracker extends EventTracker {
     let intervalCounter = 0;
 
     return this.sessionObservable_.add(event => {
-      const type = event.type;
+      const {type} = event;
       const isVisibleType = (type === VideoAnalyticsEvents.SESSION_VISIBLE);
       const normalizedType =
           isVisibleType ? VideoAnalyticsEvents.SESSION : type;
@@ -1030,7 +1033,6 @@ export class VisibilityTracker extends EventTracker {
 
   /**
    * @return {!Promise}
-   * @visibleForTesting
    */
   createReportReadyPromise_() {
     const viewer = this.root.getViewer();
