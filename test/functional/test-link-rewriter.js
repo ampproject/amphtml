@@ -53,11 +53,6 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
 
 
   describe('When starting service', () => {
-    it('Should listen for ANCHOR_CLICK', () => {
-      const spy = iframeDoc.addEventListener.withArgs(AmpEvents.ANCHOR_CLICK);
-      expect(spy.calledOnce).to.be.true;
-    });
-
     it('Should listen for DOM_UPDATE', () => {
       const spy = iframeDoc.addEventListener.withArgs(AmpEvents.DOM_UPDATE);
       expect(spy.calledOnce).to.be.true;
@@ -167,22 +162,6 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         });
         expect(linkRewriteService.getSuitableLinkRewritersForLink_.called).to.be.false;
       });
-
-      it('Should handle clicks of type "navigate-outbound"', () => {
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: iframeDoc.createElement('a'),
-        });
-        expect(linkRewriteService.getSuitableLinkRewritersForLink_.calledOnce).to.be.true;
-      });
-
-      it('Should support clicks of type "open-context-menu"', () => {
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.OPEN_CONTEXT_MENU,
-          anchor: iframeDoc.createElement('a'),
-        });
-        expect(linkRewriteService.getSuitableLinkRewritersForLink_.calledOnce).to.be.true;
-      });
     });
 
 
@@ -207,10 +186,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       });
 
       it('Should only send click event to suitable link rewriters', () => {
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: iframeDoc.createElement('a'),
-        });
+        linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
 
         expect(linkRewriterVendor1.events.send.calledOnce).to.be.true;
         expect(linkRewriterVendor2.events.send.called).to.be.false;
@@ -222,10 +198,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
         env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
 
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: iframeDoc.createElement('a'),
-        });
+        linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
 
         expect(getEventData(linkRewriterVendor1).replacedBy).to.equal('vendor1');
         expect(getEventData(linkRewriterVendor2).replacedBy).to.equal('vendor1');
@@ -234,12 +207,9 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
 
       it('Should contain the target anchor', () => {
         env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
-
         const anchor = iframeDoc.createElement('a');
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor,
-        });
+
+        linkRewriteService.maybeRewriteLink(anchor);
 
         expect(getEventData(linkRewriterVendor1).anchor).to.equal(anchor);
       });
@@ -249,10 +219,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
         env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(false);
 
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-          anchor: iframeDoc.createElement('a'),
-        });
+        linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
 
         expect(getEventData(linkRewriterVendor1).replacedBy).to.be.null;
         // vendor2 has isWatchingLink to false therefore can not replace.
@@ -283,10 +250,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
           env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(false);
 
-          sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-            clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-            anchor: iframeDoc.createElement('a'),
-          });
+          linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -297,10 +261,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(false);
           env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
 
-          sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-            clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-            anchor: iframeDoc.createElement('a'),
-          });
+          linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -327,10 +288,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
           env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
 
-          sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-            clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-            anchor: iframeDoc.createElement('a'),
-          });
+          linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.called).to.be.false;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -346,10 +304,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           // Overwrite global priority
           anchor.setAttribute('data-link-rewriters', 'vendor1 vendor3');
 
-          sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-            clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
-            anchor,
-          });
+          linkRewriteService.maybeRewriteLink(anchor);
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;

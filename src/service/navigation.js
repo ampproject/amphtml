@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../amp-events';
 import {Services} from '../services';
 import {
   closestByTag,
@@ -22,7 +21,6 @@ import {
   isIframed,
   openWindowDialog,
 } from '../dom';
-import {createCustomEvent} from '../event-helper';
 import {dev, user} from '../log';
 import {
   getExtraParamsUrl,
@@ -230,10 +228,9 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
-
-    let clickActionType = null;
+    this.linkRewriteService_.maybeRewriteLink(target);
     if (e.type == EVENT_TYPE_CLICK) {
-      clickActionType = this.handleClick_(target, e);
+      this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
       // Handles contextmenu click. Note that currently this only deals
       // with url variable substitution and expansion, as there is
@@ -243,23 +240,7 @@ export class Navigation {
       // TODO(alabiaga): investigate fix for handling A2A and custom link
       // protocols.
       this.expandVarsForAnchor_(target);
-      clickActionType = anchorClickActions.OPEN_CONTEXT_MENU;
     }
-
-    this.dispatchAnchorClickEvent_(e, target, clickActionType);
-  }
-
-  dispatchAnchorClickEvent_(e, anchor, clickActionType) {
-    if (!clickActionType) {
-      return;
-    }
-
-    const event = createCustomEvent(this.ampdoc.win,
-        AmpEvents.ANCHOR_CLICK,
-        {clickEvent: e, clickActionType, anchor},
-        {bubbles: true});
-
-    this.ampdoc.getRootNode().dispatchEvent(event);
   }
 
   /**

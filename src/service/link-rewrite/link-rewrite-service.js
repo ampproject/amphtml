@@ -1,5 +1,5 @@
-import {ALLOWED_CLICK_ACTION_TYPES, EVENTS, LINK_REWRITE_SERVICE_NAME, PRIORITY_META_TAG_NAME} from './constants';
 import {AmpEvents} from '../../amp-events';
+import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
 
 import LinkRewriter from './link-rewriter';
 
@@ -43,8 +43,6 @@ export default class LinkRewriterService {
   installGlobalEventListener_(iframeDoc) {
     iframeDoc.addEventListener(AmpEvents.DOM_UPDATE,
         this.onDomChanged_.bind(this));
-    iframeDoc.addEventListener(AmpEvents.ANCHOR_CLICK,
-        this.clickHandler_.bind(this));
   }
 
   /**
@@ -57,15 +55,9 @@ export default class LinkRewriterService {
   }
 
   /**
-   * Call the most relevant link rewriter when the user clicks on an anchor element.
-   * @param {*} customEvent
+   * @param {*} anchor -
    */
-  clickHandler_(customEvent) {
-    const {clickActionType, anchor} = customEvent.detail;
-
-    if (!ALLOWED_CLICK_ACTION_TYPES.includes(clickActionType)) {
-      return;
-    }
+  maybeRewriteLink(anchor) {
     const suitableLinkRewriters = this.getSuitableLinkRewritersForLink_(anchor);
     if (suitableLinkRewriters.length) {
       const orderedLinkRewriters = this.getLinkRewritersOrderByPriority_(suitableLinkRewriters, anchor);

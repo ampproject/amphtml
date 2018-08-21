@@ -19,7 +19,6 @@
  * @enum {string}
  */
 export const AmpEvents = {
-  ANCHOR_CLICK: 'amp:anchor-click',
   BUILT: 'amp:built',
   DOM_UPDATE: 'amp:dom-update',
   VISIBILITY_CHANGE: 'amp:visibilitychange', // https://github.com/ampproject/amphtml/blob/master/ads/README.md#page-visibility
