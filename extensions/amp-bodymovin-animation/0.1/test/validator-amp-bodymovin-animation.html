@@ -28,6 +28,7 @@
   <script async custom-element="amp-bodymovin-animation" src="https://cdn.ampproject.org/v0/amp-bodymovin-animation-0.1.js"></script>
 </head>
 <body>
+  Valid test cases
   <amp-bodymovin-animation layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json">
   </amp-bodymovin-animation>
 
@@ -51,4 +52,14 @@
 
   <amp-bodymovin-animation renderer="html" layout="responsive" width="200" height="200" src="https://nainar.github.io/loader.json" loop='true'>
   </amp-bodymovin-animation></body>
+
+  Invalid test cases
+  <amp-bodymovin-animation layout="fixed" src="https://nainar.github.io/loader.json">
+  </amp-bodymovin-animation>
+
+  <amp-bodymovin-animation layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop='nope'>
+  </amp-bodymovin-animation>
+
+  <amp-bodymovin-animation layout="responsive" width="200" height="200" src="https://nainar.github.io/loader.json" loop='true' autoplay>
+  </amp-bodymovin-animation>
 </html>

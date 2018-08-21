@@ -49,7 +49,8 @@ tags: {  # <amp-bodymovin-animation>
   }
   attrs: {
     name: "renderer"
-    value_regex: "svg|html"
+    value_casei: "svg"
+    value_casei: "html"
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bodymovin-animation"
   amp_layout: {
