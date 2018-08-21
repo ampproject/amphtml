@@ -279,14 +279,13 @@ export class Navigation {
     }
 
     // Handle anchor transformations.
-    const transformedTarget = target;
     this.anchorMutators_.forEach(callback => {
       callback(target);
       location = this.parseUrl_(target.href);
     });
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, transformedTarget, location);
+    this.handleNavClick_(e, target, location);
   }
 
   /**
@@ -446,8 +445,15 @@ export class Navigation {
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {
+    dev().assert(priority <= 10 && priority > 0,
+        'Priority must a number from 1-10.');
     user().assert(!this.anchorMutators_[priority],
         'Mutator with same priority is already in use.');
+    // Note that we define a set priority, as making this boundless
+    // will create a large sparse array, which is not performant if iterating
+    // through when executing. If the number of registered anchor mutators
+    // exceeds 10 then we will need to either increase or modify the
+    // implementation. Please talk to @alabiaga @choumx @jridgewell.
     this.anchorMutators_[priority] = callback;
   }
 

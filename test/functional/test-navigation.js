@@ -145,8 +145,9 @@ describes.sandboxed('Navigation', {}, () => {
     });
 
     describe('anchor mutators', () => {
-      const errorRe = /Mutator with same priority is already in use./;
-      const priority = 100;
+      const priortyUsedError = /Mutator with same priority is already in use./;
+      const priorityError = /Priority must a number from 1-10./;
+      const priority = 10;
       it('should throw error if priority is already in use', () => {
         handler.registerAnchorMutator(element => {
           element.href += '?am=1';
@@ -154,8 +155,27 @@ describes.sandboxed('Navigation', {}, () => {
         allowConsoleError(() => {
           expect(() => handler.registerAnchorMutator(element => {
             element.href += '?am=2';
-          }, priority)).to.throw(errorRe);
+          }, priority)).to.throw(priortyUsedError);
         });
+      });
+
+      it('should respect confines of the priority rules', () => {
+        allowConsoleError(() => {
+          expect(() => handler.registerAnchorMutator(element => {
+            element.href += '?priority=-1';
+          }, -1)).to.throw(priorityError);
+        });
+        allowConsoleError(() => {
+          expect(() => handler.registerAnchorMutator(element => {
+            element.href += '?priority=11';
+          }, 11)).to.throw(priorityError);
+        });
+        expect(() => handler.registerAnchorMutator(element => {
+          element.href += '?priority=1';
+        }, 1)).to.not.throw();
+        expect(() => handler.registerAnchorMutator(element => {
+          element.href += '?priority=10';
+        }, 10)).to.not.throw();
       });
 
       it('should execute in order', () => {
@@ -186,7 +206,7 @@ describes.sandboxed('Navigation', {}, () => {
           },
         };
         const linkRuleSpy = sandbox.spy(obj, 'callback');
-        handler.registerAnchorMutator(linkRuleSpy, 99);
+        handler.registerAnchorMutator(linkRuleSpy, 1);
         handler.handle_(event);
         // Verify that the expansion of variables occurs first
         // followed by the anchor transformation and then the parsing
