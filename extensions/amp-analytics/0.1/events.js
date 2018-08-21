@@ -27,6 +27,8 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {hasOwn} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
+import {Services} from '../../../src/services';
+
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -70,8 +72,8 @@ const TRACKER_TYPE = Object.freeze({
   'scroll': {
     name: 'scroll',
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) { return new ScrollCustomEventTracker(root); },
-  }
+    klass: function(root) { return new ScrollEventTracker(root); },
+  },
   'custom': {
     name: 'custom',
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
@@ -419,20 +421,19 @@ export class ScrollEventTracker extends EventTracker {
   constructor(root) {
     super(root);
 
-    /** @private {boolean} */
-    this.scrollHandlerRegistered_ = false;
-
-    /** @private {!Observable<
-      !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
+    /** @private {!Observable<!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
 
-    /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(root.ampdoc);
+    
+    /** @private {!./analytics-root.AnalyticsRoot} root */
+    this.root_ = root;
   }
 
   /** @override */
   dispose() {
-    
+    this.scrollObservable_.removeAll();
   }
 
   /** @override */
@@ -472,7 +473,6 @@ export class ScrollEventTracker extends EventTracker {
 
     // Ensure that the scroll events are being listened to.
     if (!this.scrollHandlerRegistered_) {
-      this.scrollHandlerRegistered_ = true;
       this.viewport_.onChanged(this.onScroll_.bind(this));
     }
 
@@ -500,7 +500,7 @@ export class ScrollEventTracker extends EventTracker {
         bounds[bound] = true;
         const vars = Object.create(null);
         vars[varName] = b;
-        listener(this.createEventDepr_(AnalyticsEventType.SCROLL, vars));
+        listener(new AnalyticsEvent(this.root_, AnalyticsEventType.SCROLL, vars));
       }
     };
 
@@ -554,18 +554,6 @@ export class ScrollEventTracker extends EventTracker {
       result[bound] = false;
     }
     return result;
-  }
-
-  /**
-   * @param {string} type
-   * @param {!Object<string, string>=} opt_vars
-   * @return {!AnalyticsEvent}
-   * @private
-   */
-  createEventDepr_(type, opt_vars) {
-    // TODO(dvoytenko): Remove when Tracker migration is complete.
-    return new AnalyticsEvent(
-      this.ampdocRoot_.getRootElement(), type, opt_vars);
   }
 }
 

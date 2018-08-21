@@ -25,8 +25,6 @@ import {
   getTrackerKeyName,
   getTrackerTypesForParentType,
 } from './events';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {
   getFriendlyIframeEmbedOptional,
@@ -146,21 +144,6 @@ export class InstrumentationService {
       holder[PROP] = root;
     }
     return root;
-  }
-
-  /**
-   * Checks to confirm that a given trigger type is allowed for the element.
-   * Specifically, it confirms that if the element is in the embed, only a
-   * subset of the trigger types are allowed.
-   * @param  {!AnalyticsEventType} triggerType
-   * @param  {!Element} element
-   * @return {boolean} True if the trigger is allowed. False otherwise.
-   */
-  isTriggerAllowed_(triggerType, element) {
-    if (element.ownerDocument.defaultView != this.ampdoc.win) {
-      return ALLOWED_IN_EMBED.includes(triggerType);
-    }
-    return true;
   }
 }
 
