@@ -20,7 +20,7 @@ import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
   closestByTag,
@@ -197,7 +197,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
   buildCallback() {
     this.assertAndParseConfig_();
 
-    const storyEl = closestByTag(this.element, 'AMP-STORY');
+    const storyEl =
+        dev().assertElement(closestByTag(this.element, 'AMP-STORY'));
     const consentEl = closestByTag(this.element, 'AMP-CONSENT');
     const consentId = consentEl.id;
 
@@ -205,10 +206,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    if (!logoSrc) {
+    logoSrc ?
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src') :
       user().warn(
           TAG, 'Expected "publisher-logo-src" attribute on <amp-story>');
-    }
 
     // Story consent config is set by the `assertAndParseConfig_` method.
     if (this.storyConsentConfig_) {
