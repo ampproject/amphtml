@@ -64,6 +64,11 @@ const TRACKER_TYPE = Object.freeze({
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function(root) { return new ClickEventTracker(root); },
   },
+  'scroll': {
+    name: 'scroll',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) { return new ScrollCustomEventTracker(root); },
+  }
   'custom': {
     name: 'custom',
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
@@ -400,6 +405,29 @@ export class ClickEventTracker extends EventTracker {
   }
 }
 
+/**
+ * Tracks scroll events.
+ */
+export class ScrollEventTracker extends EventTracker {
+  
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+   
+  }
+
+  /** @override */
+  dispose() {
+    
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    
+  }
+}
 
 /**
  * Tracks events based on signals.
