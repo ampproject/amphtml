@@ -198,6 +198,7 @@ describes.sandboxed('Navigation', {}, () => {
         // of the possibly mutated anchor href into the location object
         // for navigation.handleNavClick.
         sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
+        expect(parseUrl).to.be.calledOnce;
       });
     });
 

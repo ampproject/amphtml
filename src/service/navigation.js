@@ -286,8 +286,8 @@ export class Navigation {
     // Handle anchor transformations.
     this.anchorMutators_.forEach(anchorMutator => {
       anchorMutator(target);
-      location = this.parseUrl_(target.href);
     });
+    location = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
