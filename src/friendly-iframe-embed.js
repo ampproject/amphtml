@@ -48,19 +48,27 @@ const EXCLUDE_INI_LOAD =
  *   document. Can include whatever is normally allowed in an AMP document,
  *   except for AMP `<script>` declarations. Those should be passed as an
  *   array of `extensionIds`.
- * - extensionsIds: An optional array of AMP extension IDs used in this embed.
+ * - extensionsIds: An optional array of AMP extension IDs w/wo versions
+ *     used in this embed.
  * - fonts: An optional array of fonts used in this embed.
  *
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: string,
- *   extensionIds: (?Array<string>|undefined),
+ *   extensionDefs: (?Array<!CustomElementExtensionDef|string>|undefined),
  *   fonts: (?Array<string>|undefined),
  * }}
  */
 export let FriendlyIframeSpec;
 
+/**
+ * @typedef {{
+ *  extensionId: string,
+ *  version: string
+ * }}
+ */
+export let CustomElementExtensionDef;
 
 /**
  * @type {boolean|undefined}
@@ -136,9 +144,19 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
 
   // Pre-load extensions.
-  if (spec.extensionIds) {
-    spec.extensionIds.forEach(
-        extensionId => extensions.preloadExtension(extensionId));
+  if (spec.extensionDefs) {
+    let version = '0.1';
+    let extensionId;
+    spec.extensionDefs.forEach(extensionDef => {
+      if (typeof extensionDef == 'object') {
+        extensionId = extensionDef.extensionId;
+        version = extensionDef.version;
+      } else if (typeof extensionDef == 'string') {
+        extensionId = extensionDef;
+      }
+
+      extensions.preloadExtension(extensionId, version);
+    });
   }
 
   const html = mergeHtml(spec);
@@ -210,7 +228,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
     extensions.installExtensionsInChildWindow(
-        childWin, spec.extensionIds || [], opt_preinstallCallback);
+        childWin, spec.extensionDefs || [], opt_preinstallCallback);
     // Ready to be shown.
     embed.startRender_();
     return embed;

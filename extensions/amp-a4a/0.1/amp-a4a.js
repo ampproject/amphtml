@@ -18,6 +18,11 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '../../../src/consent-state';
+import {
+  ExtensionDef,
+  installFriendlyIframeEmbed,
+  setFriendlyIframeEmbedVisible,
+} from '../../../src/friendly-iframe-embed';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -45,10 +50,6 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
 import {
   installUrlReplacementsForEmbed,
 } from '../../../src/service/url-replacements-impl';
@@ -127,7 +128,8 @@ export let SizeInfoDef;
 
 /** @typedef {{
       minifiedCreative: string,
-      customElementExtensions: !Array<string>,
+      customElementExtensions: !Array<
+          !../../../src/friendly-iframe-embed.CustomElementExtensionDef|string>,
       customStylesheets: !Array<{href: string}>,
       images: (Array<string>|undefined),
       ctaType: (string|undefined),
@@ -803,8 +805,10 @@ export class AmpA4A extends AMP.BaseElement {
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
           const extensions = Services.extensionsFor(this.win);
-          creativeMetaDataDef.customElementExtensions.forEach(
-              extensionId => extensions.preloadExtension(extensionId));
+          creativeMetaDataDef.customElementExtensions.forEach(extensionDef => {
+            const {extensionId, version} = extensionDef;
+            extensions.preloadExtension(extensionId, version);
+          });
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
             this.preconnect.preload(font.href));
@@ -1397,7 +1401,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Need to guarantee that this is no longer null
           url: /** @type {string} */ (this.adUrl_),
           html: creativeMetaData.minifiedCreative,
-          extensionIds: creativeMetaData.customElementExtensions || [],
+          extensionDefs: creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
