@@ -1928,7 +1928,7 @@ export class AmpStory extends AMP.BaseElement {
         'amp-audio, amp-video:not([noaudio]), [background-audio]');
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 
-    this.storeService_.dispatch(Action.TOGGLE_HAS_AUDIO,
+    this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_AUDIO,
         containsMediaElementWithAudio || hasStoryAudio);
   }
 

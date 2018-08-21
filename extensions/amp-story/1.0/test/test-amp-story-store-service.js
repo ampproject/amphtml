@@ -142,8 +142,8 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
 
   it('should toggle the has audio state', () => {
     const listenerSpy = sandbox.spy();
-    storeService.subscribe(StateProperty.HAS_AUDIO_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_HAS_AUDIO, true);
+    storeService.subscribe(StateProperty.STORY_HAS_AUDIO_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_AUDIO, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
