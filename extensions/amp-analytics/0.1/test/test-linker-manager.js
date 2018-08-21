@@ -18,7 +18,7 @@ import {LinkerManager} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 
-describe('Linkers', () => {
+describe('Linker Manager', () => {
   let sandbox;
   let ampdoc;
   let registerSpy;
@@ -73,7 +73,7 @@ describe('Linkers', () => {
     expect(registerSpy.calledOnce).to.be.true;
     expect(registerSpy).calledWith(
         sinon.match.func,
-        Priority.LINKER,
+        Priority.ANALYTICS_LINKER,
     );
   });
 

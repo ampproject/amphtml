@@ -45,7 +45,7 @@ const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
 /** @enum {number} */
 export const Priority = {
-  LINKER: 2,
+  ANALYTICS_LINKER: 2,
 };
 
 /**

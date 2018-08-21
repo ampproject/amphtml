@@ -122,7 +122,7 @@ export class LinkerManager {
     if (this.allLinkerPromises_.length) {
       const navigation = Services.navigationForDoc(this.ampdoc_);
       navigation.registerAnchorMutator(
-          this.handleAnchorMutation_.bind(this), Priority.LINKER);
+          this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
   }
 
