@@ -78,6 +78,13 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @const {function(!Element)} */
     this.boundRendered_ = this.rendered_.bind(this);
 
+    /** @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(this.win);
+  }
+
+  /** @override */
+  buildCallback() {
+
     //Note: One of end-date, timestamp-ms, timestamp-seconds is required.
     /** @private {string} */
     this.endDate_ = this.element.getAttribute('end-date');
@@ -115,12 +122,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {!Object|null} */
     this.countDownTimer_ = null;
 
-    /** @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
-  }
-
-  /** @override */
-  buildCallback() {
     Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       const EPOCH = this.getEpoch_() + (this.offsetSeconds_ * 1000);
       this.tickCountDown_(new Date(EPOCH) - new Date());
