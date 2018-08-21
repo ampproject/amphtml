@@ -57,12 +57,28 @@ const DATA_ATTR = {
 
 /** @const */
 const CTA_TYPES = {
+  APPLY_NOW: 'Apply Now',
+  BOOK_NOW: 'Book',
+  BUY_TICKETS: 'Buy Tickets',
+  DOWNLOAD: 'Download',
   EXPLORE: 'Explore Now',
-  SHOP: 'Shop Now',
-  READ: 'Read Now',
+  GET_NOW: 'Get Now',
   INSTALL: 'Install Now',
   LISTEN: 'Listen Now',
+  MORE: 'More',
+  OPEN_APP: 'Open App',
+  ORDER_NOW: 'Order Now',
+  PLAY: 'Play',
+  READ: 'Read Now',
+  SHOP: 'Shop Now',
+  SHOW: 'Show',
+  SHOWTIMES: 'Showtimes',
+  SIGN_UP: 'Sign Up',
   SUBSCRIBE: 'Subscribe Now',
+  USE_APP: 'Use App',
+  VIEW: 'View',
+  WATCH: 'Watch',
+  WATCH_EPISODE: 'Watch Episode',
 };
 
 /** @const */
