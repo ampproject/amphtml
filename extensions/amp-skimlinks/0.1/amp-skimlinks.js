@@ -11,7 +11,7 @@ import AffiliateLinkResolver from './affiliate-link-resolver';
 import LinkRewriterService from '../../../src/service/link-rewrite/link-rewrite-service';
 
 import {getAmpSkimlinksOptions} from './skim-options';
-import {getBoundFunction, nextTick} from './utils';
+import {getBoundFunction} from './utils';
 
 /*** TODO:
  * - Fix issue with waypoint reporting links with macro variables.
@@ -54,19 +54,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.skimlinksLinkRewriter = this.initSkimlinksLinkRewriter();
   }
 
-  /**
-   *
-   */
-  getResolveUnkownLinksFunction_() {
-    const initBeaconCallbackHookONCE = once(this.initBeaconCallbackHook_.bind(this));
-    return anchorList => {
-      const twoStepsResponse = this.affiliateLinkResolver.resolveUnknownAnchors(anchorList);
-      // Only called after the first page scan.
-      initBeaconCallbackHookONCE(twoStepsResponse);
-
-      return twoStepsResponse;
-    };
-  }
 
   /**
    *  Fires impression tracking after beacon request
@@ -74,7 +61,10 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   sendImpressionTracking_({guid}) {
     window.t3 = new Date().getTime();
+    // Update tracking service with extra info.
+    this.trackingService.setTrackingInfo({guid});
     this.trackingService.sendImpressionTracking(
+        // TODO, change signature to remove this since it's set before through the setter
         {guid},
         this.skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
         startTime,
@@ -82,29 +72,17 @@ export class AmpSkimlinks extends AMP.BaseElement {
   }
 
   /**
-   * @param {*} twoStepsResponse
+   * Called only on the first page scan.
+   * Make a fallback call to beacon if no links where founds on the page.
+   * Send the impression tracking once we have the beacon API response.
    */
-  initBeaconCallbackHook_(twoStepsResponse) {
-    const trackFunction = this.sendImpressionTracking_.bind(this);
-    // If we haven't called beacon on the first page scan (because not links were found)
-    // Call it manually to get extra info like guid.
-    if (!twoStepsResponse.asyncResponse) {
-      return this.affiliateLinkResolver.fetchDomainResolverApi([])
-          .then(trackFunction);
+  onPageScanned_() {
+    let onBeaconApiResponse = this.affiliateLinkResolver.firstRequest;
+    if (!onBeaconApiResponse) {
+      onBeaconApiResponse = this.affiliateLinkResolver.fetchDomainResolverApi([]);
     }
 
-    // 'updateAnchorMap_' from linkRewriter (link-rewriter.js) needs to be
-    // updated before calling sendImpressionTracking_.
-    // Since we have two ".then" branches attached to asyncResponse && the
-    // ".then" in this function is declared before the .then inside
-    // scanLinksOnPage_ (link-rewriter.js) => we need to delay the
-    // twoStepsResponse.asyncResponse.then of this branch to the next tick
-    // to ensure that twoStepsResponse.asyncResponse.then(updateAnchorMap_)
-    // is executed frist.
-    return nextTick().then(() => {
-      return twoStepsResponse.asyncResponse.then(trackFunction);
-    });
-
+    return onBeaconApiResponse.then(this.sendImpressionTracking_.bind(this));
   }
 
   /**
@@ -117,8 +95,14 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
     const skimlinksLinkRewriter = this.linkRewriterService.registerLinkRewriter(
         SKIMLINKS_REWRITER_ID,
-        this.getResolveUnkownLinksFunction_(),
+        getBoundFunction(this.affiliateLinkResolver, 'resolveUnknownAnchors'),
         options
+    );
+
+    // We are only interested in the first page scan.
+    skimlinksLinkRewriter.events.on(
+        linkRewriterEvents.PAGE_SCANNED,
+        once(this.onPageScanned_.bind(this)),
     );
 
     skimlinksLinkRewriter.events.on(

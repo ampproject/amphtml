@@ -22,6 +22,9 @@ export default class AffiliateLinkResolver {
     this.skimOptions_ = skimOptions;
     this.domains_ = {};
     this.getTrackingInfo_ = getTrackingInfo;
+    // Promise of the first request to beacon so we can
+    // access beaconData outside of the linkRewriter/LinkResolver flow.
+    this.firstApiRequest = null;
   }
 
   /**
@@ -176,8 +179,12 @@ export default class AffiliateLinkResolver {
    * @param {*} domainsToAsk
    */
   resolvedUnknownAnchorsAsync_(anchorList, domainsToAsk) {
-    return this.fetchDomainResolverApi(domainsToAsk).then(data => {
+    const promise = this.fetchDomainResolverApi(domainsToAsk);
+    if (!this.firstRequest) {
+      this.firstRequest = promise;
+    }
 
+    return promise.then(data => {
       this.updateDomainsStatusMapPostFetch_(domainsToAsk, data.merchant_domains || []);
 
       return this.mapToAnchorReplacementTuple_(anchorList);

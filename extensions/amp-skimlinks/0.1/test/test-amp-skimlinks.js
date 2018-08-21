@@ -1,9 +1,11 @@
 import * as DocumentReady from '../../../../src/document-ready';
 import * as SkimOptionsModule from '../skim-options';
+import * as Utils from '../utils';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../../../../src/service/link-rewrite/constants';
 import LinkRewriterService from '../../../../src/service/link-rewrite/link-rewrite-service';
 import helpersFactory from './helpers';
+
 
 
 describes.fakeWin('amp-skimlinks', {
@@ -92,13 +94,12 @@ describes.fakeWin('amp-skimlinks', {
             ampSkimlinks.linkRewriterService,
             'registerLinkRewriter'
         );
-        ampSkimlinks.trackingService = {
-          sendNaClickTracking: env.sandbox.stub(),
-        };
+        ampSkimlinks.trackingService = {sendNaClickTracking: env.sandbox.stub()};
         resolveFunction = env.sandbox.stub();
-        env.sandbox.stub(ampSkimlinks, 'getResolveUnkownLinksFunction_').returns(resolveFunction);
+        env.sandbox.stub(Utils, 'getBoundFunction').returns(resolveFunction);
 
         env.sandbox.stub(ampSkimlinks, 'onClick_');
+        env.sandbox.stub(ampSkimlinks, 'onPageScanned_');
         linkRewriter = ampSkimlinks.initSkimlinksLinkRewriter();
       });
 
@@ -117,6 +118,13 @@ describes.fakeWin('amp-skimlinks', {
         linkRewriter.events.send(linkRewriterEvents.CLICK, data);
 
         expect(ampSkimlinks.onClick_.withArgs(data).calledOnce).to.be.true;
+      });
+
+      it('Should setup scan callback with function executed only once', () => {
+        const data = {};
+        linkRewriter.events.send(linkRewriterEvents.PAGE_SCANNED, data);
+        linkRewriter.events.send(linkRewriterEvents.PAGE_SCANNED, data);
+        expect(ampSkimlinks.onPageScanned_.calledOnce).to.be.true;
       });
     });
   });
@@ -171,84 +179,91 @@ describes.fakeWin('amp-skimlinks', {
     });
   });
 
-  describe('getResolveUnkownLinksFunction_ returned function', () => {
-    let resolveFunction;
-
+  describe.only('On page scan callback', () => {
+    const guid = 'my-guid';
+    const beaconResponse = Promise.resolve({guid});
     beforeEach(() => {
-      env.sandbox.stub(ampSkimlinks, 'initBeaconCallbackHook_');
-      resolveFunction = ampSkimlinks.getResolveUnkownLinksFunction_();
-
       ampSkimlinks.affiliateLinkResolver = {
-        resolveUnknownAnchors: env.sandbox.stub(),
+        fetchDomainResolverApi: env.sandbox.stub().returns(beaconResponse),
+      };
+      ampSkimlinks.trackingService = {
+        setTrackingInfo: env.sandbox.stub(),
+        sendImpressionTracking: env.sandbox.stub(),
+      };
+      ampSkimlinks.skimlinksLinkRewriter = {
+        getAnchorLinkReplacementMap: env.sandbox.stub(),
       };
     });
 
-    it('Should always call affiliateLinkResolver.resolveUnknownAnchors', () => {
-      const anchorsList = ['a', 'b'];
-      resolveFunction.call(ampSkimlinks, anchorsList);
-      resolveFunction.call(ampSkimlinks, anchorsList);
-      const stub = ampSkimlinks.affiliateLinkResolver.resolveUnknownAnchors;
-      expect(stub.withArgs(anchorsList).callCount).to.equal(2);
-    });
+    describe('When beacon call has not been made yet', () => {
+      beforeEach(() => {
+        ampSkimlinks.affiliateLinkResolver.firstRequest = null;
+      });
 
-    it('Should return results of affiliateLinkResolver.resolveUnknownAnchors', () => {
-      const res = ['a', 'b'];
-      ampSkimlinks.affiliateLinkResolver.resolveUnknownAnchors.returns(res);
-      expect(resolveFunction.call(ampSkimlinks)).to.equal(res);
-    });
+      it('Should make the fallback call', () => {
+        ampSkimlinks.sendImpressionTracking_ = env.sandbox.stub().returns(
+            Promise.resolve());
 
-    it('Should call initBeaconCallbackHook_ only once', () => {
-      resolveFunction.call(ampSkimlinks);
-      expect(ampSkimlinks.initBeaconCallbackHook_.calledOnce).to.be.true;
-      resolveFunction.call(ampSkimlinks);
-      expect(ampSkimlinks.initBeaconCallbackHook_.calledOnce).to.be.true;
-    });
-  });
+        return ampSkimlinks.onPageScanned_().then(() => {
+          const stub = ampSkimlinks.affiliateLinkResolver.fetchDomainResolverApi;
+          expect(stub.calledOnce).to.be.true;
+        });
+      });
 
-  describe('initBeaconCallbackHook_', () => {
-    const promise = Promise.resolve({});
-    beforeEach(() => {
-      ampSkimlinks.affiliateLinkResolver = {
-        fetchDomainResolverApi: env.sandbox.stub().returns(Promise.resolve({})),
-      };
-      env.sandbox.stub(ampSkimlinks, 'sendImpressionTracking_');
-    });
+      it('Should send the impression tracking', () => {
+        return ampSkimlinks.onPageScanned_().then(() => {
+          const stub = ampSkimlinks.trackingService.sendImpressionTracking;
+          expect(stub.calledOnce).to.be.true;
+        });
+      });
 
-    it('Should call fetchDomainResolverApi if no asyncResponse', () => {
-      ampSkimlinks.initBeaconCallbackHook_({asyncResponse: undefined});
-      const stub = ampSkimlinks.affiliateLinkResolver.fetchDomainResolverApi;
-      expect(stub.calledOnce).to.be.true;
-    });
-
-    it('Should not call fetchDomainResolverApi if asyncResponse', () => {
-      ampSkimlinks.initBeaconCallbackHook_({asyncResponse: promise});
-      const stub = ampSkimlinks.affiliateLinkResolver.fetchDomainResolverApi;
-      expect(stub.called).to.be.false;
-    });
-
-    it('Should call sendImpressionTracking_ when asyncResponse is resolved', () => {
-      return ampSkimlinks.initBeaconCallbackHook_({asyncResponse: promise}).then(() => {
-        expect(ampSkimlinks.sendImpressionTracking_.calledOnce).to.be.true;
+      it('Should update tracking info with the guid', () => {
+        return ampSkimlinks.onPageScanned_().then(() => {
+          const {
+            setTrackingInfo: setTrackingInfoStub,
+            sendImpressionTracking: sendImpressionTrackingStub,
+          } = ampSkimlinks.trackingService;
+          expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
+          expect(setTrackingInfoStub.calledBefore(sendImpressionTrackingStub)).to.be.true;
+        });
       });
     });
 
-    it('Should call sendImpressionTracking_ when fetchDomainResolverApi is resolved', () => {
-      return ampSkimlinks.initBeaconCallbackHook_({asyncResponse: null}).then(() => {
-        expect(ampSkimlinks.sendImpressionTracking_.calledOnce).to.be.true;
+    describe('When beacon call has already been made', () => {
+      beforeEach(() => {
+        ampSkimlinks.affiliateLinkResolver.firstRequest = Promise.resolve(beaconResponse);
       });
-    });
 
-    it('Should chain to the asyncResponse promise asynchronously', done => {
-      const fakePromise = {
-        then: env.sandbox.stub(),
-      };
-      ampSkimlinks.initBeaconCallbackHook_({asyncResponse: fakePromise});
-      expect(fakePromise.then.called).to.be.false;
-      setTimeout(() => {
-        expect(fakePromise.then.calledOnce).to.be.true;
-        done();
-      }, 1);
-    });
+      it('Should not make the fallback call', () => {
+        ampSkimlinks.sendImpressionTracking_ = env.sandbox.stub().returns(
+            Promise.resolve());
+        return ampSkimlinks.onPageScanned_().then(() => {
+          const stub = ampSkimlinks.affiliateLinkResolver.fetchDomainResolverApi;
+          expect(stub.called).to.be.false;
+        });
+      });
 
+      it('Should send the impression tracking', () => {
+        return ampSkimlinks.onPageScanned_().then(() => {
+          const stub = ampSkimlinks.trackingService.sendImpressionTracking;
+          expect(stub.calledOnce).to.be.true;
+        });
+      });
+
+      it('Should update tracking info with the guid', () => {
+        return ampSkimlinks.onPageScanned_().then(() => {
+          const {
+            setTrackingInfo: setTrackingInfoStub,
+            sendImpressionTracking: sendImpressionTrackingStub,
+          } = ampSkimlinks.trackingService;
+          expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
+          expect(
+              setTrackingInfoStub.calledBefore(sendImpressionTrackingStub)
+          ).to.be.true;
+        });
+      });
+
+
+    });
   });
 });

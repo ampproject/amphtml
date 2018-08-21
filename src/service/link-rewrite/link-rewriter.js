@@ -21,7 +21,8 @@ export default class LinkRewriter {
     this.restoreDelay_ = 300; //ms
     this.events = new EventMessenger();
     this.reset();
-    this.scanLinksOnPage_();
+    // Trigger first page scan
+    this.onDomUpdated();
   }
 
   /**
