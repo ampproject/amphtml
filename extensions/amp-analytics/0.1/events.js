@@ -28,6 +28,9 @@ import {hasOwn} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
+const SCROLL_PRECISION_PERCENT = 5;
+const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
+const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
@@ -415,7 +418,16 @@ export class ScrollEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-   
+
+    /** @private {boolean} */
+    this.scrollHandlerRegistered_ = false;
+
+    /** @private {!Observable<
+      !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
+    this.scrollObservable_ = new Observable();
+
+    /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(root.ampdoc);
   }
 
   /** @override */
@@ -425,7 +437,135 @@ export class ScrollEventTracker extends EventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    
+    if (!config['scrollSpec']) {
+      user().error(TAG, 'Missing scrollSpec on scroll trigger.');
+      return;
+    }
+    this.registerScrollTrigger_(config['scrollSpec'], listener);
+
+    // Trigger an event to fire events that might have already happened.
+    const size = this.viewport_.getSize();
+    this.onScroll_({
+      top: this.viewport_.getScrollTop(),
+      left: this.viewport_.getScrollLeft(),
+      width: size.width,
+      height: size.height,
+      relayoutAll: false,
+      velocity: 0, // Hack for typing.
+    });
+  }
+
+  /**
+   * Register for a listener to be called when the boundaries specified in
+   * config are reached.
+   * @param {!JsonObject} config the config that specifies the boundaries.
+   * @param {function(!AnalyticsEvent)} listener
+   * @private
+   */
+  registerScrollTrigger_(config, listener) {
+    if (!Array.isArray(config['verticalBoundaries']) &&
+      !Array.isArray(config['horizontalBoundaries'])) {
+      user().error(TAG, 'Boundaries are required for the scroll ' +
+        'trigger to work.');
+      return;
+    }
+
+    // Ensure that the scroll events are being listened to.
+    if (!this.scrollHandlerRegistered_) {
+      this.scrollHandlerRegistered_ = true;
+      this.viewport_.onChanged(this.onScroll_.bind(this));
+    }
+
+    /**
+     * @param {!Object<number, boolean>} bounds
+     * @param {number} scrollPos Number representing the current scroll
+     * @param {string} varName variable name to assign to the bound that
+     * triggers the event
+     * position.
+     */
+    const triggerScrollEvents = (bounds, scrollPos, varName) => {
+      if (!scrollPos) {
+        return;
+      }
+      // Goes through each of the boundaries and fires an event if it has not
+      // been fired so far and it should be.
+      for (const b in bounds) {
+        if (!hasOwn(bounds, b)) {
+          continue;
+        }
+        const bound = parseInt(b, 10);
+        if (bound > scrollPos || bounds[bound]) {
+          continue;
+        }
+        bounds[bound] = true;
+        const vars = Object.create(null);
+        vars[varName] = b;
+        listener(this.createEventDepr_(AnalyticsEventType.SCROLL, vars));
+      }
+    };
+
+    const boundsV = this.normalizeBoundaries_(config['verticalBoundaries']);
+    const boundsH = this.normalizeBoundaries_(config['horizontalBoundaries']);
+    this.scrollObservable_.add(e => {
+      // Calculates percentage scrolled by adding screen height/width to
+      // top/left and dividing by the total scroll height/width.
+      triggerScrollEvents(boundsV,
+        (e.top + e.height) * 100 / this.viewport_.getScrollHeight(),
+        VAR_V_SCROLL_BOUNDARY);
+      triggerScrollEvents(boundsH,
+        (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
+        VAR_H_SCROLL_BOUNDARY);
+    });
+  }
+
+  /**
+   * @param {!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef} e
+   * @private
+   */
+  onScroll_(e) {
+    this.scrollObservable_.fire(e);
+  }
+
+  /**
+   * Rounds the boundaries for scroll trigger to nearest
+   * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
+   * as keys and false as values.
+   *
+   * @param {!Array<number>} bounds array of bounds.
+   * @return {!Object<number,boolean>} Object with normalized bounds as keys
+   * and false as value.
+   * @private
+   */
+  normalizeBoundaries_(bounds) {
+    const result = {};
+    if (!bounds || !Array.isArray(bounds)) {
+      return result;
+    }
+
+    for (let b = 0; b < bounds.length; b++) {
+      let bound = bounds[b];
+      if (typeof bound !== 'number' || !isFinite(bound)) {
+        user().error(TAG, 'Scroll trigger boundaries must be finite.');
+        return result;
+      }
+
+      bound = Math.min(Math.round(bound / SCROLL_PRECISION_PERCENT) *
+        SCROLL_PRECISION_PERCENT, 100);
+      result[bound] = false;
+    }
+    return result;
+  }
+
+  /**
+   * @param {string} type
+   * @param {!Object<string, string>=} opt_vars
+   * @return {!AnalyticsEvent}
+   * @private
+   */
+  createEventDepr_(type, opt_vars) {
+    // TODO(dvoytenko): Remove when Tracker migration is complete.
+    return new AnalyticsEvent(
+      this.ampdocRoot_.getRootElement(), type, opt_vars);
   }
 }
 
