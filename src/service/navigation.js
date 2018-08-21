@@ -284,13 +284,10 @@ export class Navigation {
     }
 
     // Handle anchor transformations.
-    let am = this.anchorMutators_.peek();
-    while (am) {
-      this.anchorMutators_.dequeue();
-      am(target);
+    this.anchorMutators_.forEach(anchorMutator => {
+      anchorMutator(target);
       location = this.parseUrl_(target.href);
-      am = this.anchorMutators_.peek();
-    }
+    });
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
