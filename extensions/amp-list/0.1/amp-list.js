@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as setDOM from 'set-dom/src/index';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {Deferred} from '../../../src/utils/promise';
@@ -32,7 +33,6 @@ import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import setDOM from 'set-dom';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -399,14 +399,16 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       const diffing = isExperimentOn(this.win, 'amp-list-diffing');
-      if (this.container_.hasChildNodes && diffing) {
+      if (this.container_.hasChildNodes() && diffing) {
         const newContainer = this.createContainer_();
         this.addElementsToContainer_(elements, newContainer);
 
+        // Necessary to support both browserify and CC import semantics.
+        const diff = (setDOM.default || setDOM);
         // Use `i-amphtml-key` as a node key for identifying when to skip
         // DOM diffing and replace. Needed for AMP elements, for example.
-        setDOM.KEY = 'i-amphtml-key';
-        setDOM(this.container_, newContainer);
+        diff.KEY = 'i-amphtml-key';
+        diff(this.container_, newContainer);
       } else {
         removeChildren(dev().assertElement(this.container_));
         this.addElementsToContainer_(elements, this.container_);
