@@ -20,8 +20,7 @@ import {Services} from '../../../../src/services';
 
 describe('Linkers', () => {
   let sandbox;
-  let analytics;
-  let expandStub;
+  let ampdoc;
   let registerSpy;
   let isProxySpy;
 
@@ -29,15 +28,7 @@ describe('Linkers', () => {
     // Linker uses a timestamp value to generate checksum.
     sandbox = sinon.sandbox;
 
-    expandStub = sandbox.stub();
-    analytics = {
-      expandTemplateWithUrlParams: expandStub,
-      element: {},
-    };
-
-    expandStub.withArgs('CLIENT_ID(_ga)')
-        .returns('amp-12345');
-    expandStub.returnsArg(0);
+    ampdoc = {};
 
     sandbox.stub(Services, 'documentInfoForDoc')
         .returns({
@@ -74,7 +65,9 @@ describe('Linkers', () => {
       },
     };
 
-    const manager = new LinkerManager(analytics, config);
+    const manager = new LinkerManager(ampdoc, config);
+    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
+    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
     manager.init();
 
     expect(registerSpy.calledOnce).to.be.true;
@@ -87,13 +80,13 @@ describe('Linkers', () => {
   it('does not register the callback if no linkers config', () => {
     const config = {};
 
-    const manager = new LinkerManager(analytics, config);
+    const manager = new LinkerManager(ampdoc, config);
     manager.init();
 
     expect(registerSpy.notCalled).to.be.true;
   });
 
-  it('starts resolving macros and adds them to map for later use', () => {
+  it('starts resolving macros and adds them to the a tag', () => {
     const config = {
       linkers: {
         testLinker1: {
@@ -112,20 +105,32 @@ describe('Linkers', () => {
       },
     };
 
-    const manager = new LinkerManager(analytics, config);
+    const manager = new LinkerManager(ampdoc, config);
+    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
+    const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
+    expandStub.withArgs('CLIENT_ID(_ga)')
+        .returns('amp-12345');
+    expandStub.returnsArg(0);
     manager.init();
 
+    const a = {
+      href: 'https://www.example.com',
+      hostname: 'www.example.com',
+    };
+
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      const res1 = (manager.resolvedLinkers_['testLinker1']).split('~');
-      const res2 = (manager.resolvedLinkers_['testLinker2']).split('~');
+      manager.handleAnchorMutation_(a);
+      const parsedUrl = new URL(a.href);
+      const param1 = parsedUrl.searchParams.get('testLinker1').split('~');
+      const param2 = parsedUrl.searchParams.get('testLinker2').split('~');
 
-      expect(res1[2]).to.equal('_key');
-      expect(res1[3]).to.match(/^amp-([a-zA-Z0-9_-]+)/);
-      expect(res1[4]).to.equal('gclid');
-      expect(res1[5]).to.equal('234');
+      expect(param1[2]).to.equal('_key');
+      expect(param1[3]).to.match(/^amp-([a-zA-Z0-9_-]+)/);
+      expect(param1[4]).to.equal('gclid');
+      expect(param1[5]).to.equal('234');
 
-      expect(res2[2]).to.equal('foo');
-      return expect(res2[3]).to.equal('bar');
+      expect(param2[2]).to.equal('foo');
+      return expect(param2[3]).to.equal('bar');
     });
   });
 
@@ -147,11 +152,16 @@ describe('Linkers', () => {
       hostname: 'www.example.com',
     };
 
-    const manager = new LinkerManager(analytics, config);
+    const manager = new LinkerManager(ampdoc, config);
+    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
+    const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
+    expandStub.withArgs('CLIENT_ID(_ga)')
+        .returns('amp-12345');
+    expandStub.returnsArg(0);
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.linkerCallback_(a);
+      manager.handleAnchorMutation_(a);
       return expect(a.href).to.not.equal('https://www.example.com');
     });
   });
@@ -176,11 +186,14 @@ describe('Linkers', () => {
       hostname: 'www.example.com',
     };
 
-    const manager = new LinkerManager(analytics, config);
+    const manager = new LinkerManager(ampdoc, config);
+
+    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
+    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.linkerCallback_(a);
+      manager.handleAnchorMutation_(a);
       return expect(a.href).to.equal('https://www.example.com');
     });
   });
@@ -203,11 +216,13 @@ describe('Linkers', () => {
       hostname: 'www.example.com',
     };
 
-    const manager = new LinkerManager(analytics, config);
+    const manager = new LinkerManager(ampdoc, config);
+    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
+    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.linkerCallback_(a);
+      manager.handleAnchorMutation_(a);
       return expect(a.href).to.equal('https://www.example.com');
     });
   });
@@ -229,11 +244,13 @@ describe('Linkers', () => {
       hostname: 'www.example.com',
     };
 
-    const manager = new LinkerManager(analytics, config);
+    const manager = new LinkerManager(ampdoc, config);
+    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
+    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.linkerCallback_(a);
+      manager.handleAnchorMutation_(a);
       return expect(a.href).to.equal('https://www.example.com');
     });
   });

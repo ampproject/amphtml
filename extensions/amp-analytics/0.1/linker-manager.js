@@ -67,56 +67,63 @@ export class LinkerManager {
     }
 
     const linkerNames = Object.keys(this.config_['linkers']);
+
     if (!linkerNames.length) {
       return user().error(TAG,
           'use of "linkers" requires at least one name given.');
     }
 
     // Each linker config has it's own set of macros to resolve.
-    this.allLinkerPromises_ = linkerNames.map(name => {
+    this.allLinkerPromises_ = linkerNames
+        .filter(name => {
+          const vendorConfig = this.config_['linkers'][name];
+          const isOptIn = this.isLegacyOptIn_();
 
-      const vendorConfig = this.config_['linkers'][name];
-      const isOptIn = this.isLegacyOptIn_();
-
-      if (!isOptIn && vendorConfig['enabled'] !== true) {
-        return user().info(TAG, `linker config for ${name} is not enabled and` +
-            'will be ignored.');
-      }
-
-      const ids = vendorConfig['ids'];
-      if (!ids) {
-        return user().error(ids,
-            '"ids" is a required field for use of "linkers".');
-      }
-
-      // Keys for linker data.
-      const keys = Object.keys(ids);
-      // Expand the value of each key value pair (if necessary).
-      const valuePromises = keys.map(key => {
-        const expansionOptions = new ExpansionOptions(this.config_['vars'],
-            /* opt_iterations */ undefined,
-            /* opt_noencode */ true);
-        return this.expandTemplateWithUrlParams_(ids[key],
-            expansionOptions);
-      });
-
-      return Promise.all(valuePromises).then(values => {
-        // Rejoin each key with its expanded value.
-        const expandedIds = {};
-        values.forEach((value, i) => {
-          // Omit pair if value resolves to empty.
-          if (value) {
-            expandedIds[keys[i]] = value;
+          if (!isOptIn && vendorConfig['enabled'] !== true) {
+            user().info(TAG, `linker config for ${name} is not enabled and` +
+                'will be ignored.');
+            return false;
           }
-        });
-        this.resolvedLinkers_[name] =
-            createLinker(/* version */ '1', expandedIds);
-      });
-    });
 
-    const navigation = Services.navigationForDoc(this.ampdoc_);
-    navigation.registerAnchorMutator(
-        this.linkerCallback_.bind(this), Priority.LINKER);
+          if (!vendorConfig['ids']) {
+            user().error(TAG,
+                '"ids" is a required field for use of "linkers".');
+            return false;
+          }
+
+          return true;
+        }).map(name => {
+          const ids = this.config_['linkers'][name]['ids'];
+          // Keys for linker data.
+          const keys = Object.keys(ids);
+          // Expand the value of each key value pair (if necessary).
+          const valuePromises = keys.map(key => {
+            const expansionOptions = new ExpansionOptions(this.config_['vars'],
+                /* opt_iterations */ undefined,
+                /* opt_noencode */ true);
+            return this.expandTemplateWithUrlParams_(ids[key],
+                expansionOptions);
+          });
+
+          return Promise.all(valuePromises).then(values => {
+            // Rejoin each key with its expanded value.
+            const expandedIds = {};
+            values.forEach((value, i) => {
+              // Omit pair if value resolves to empty.
+              if (value) {
+                expandedIds[keys[i]] = value;
+              }
+            });
+            this.resolvedLinkers_[name] =
+                createLinker(/* version */ '1', expandedIds);
+          });
+        });
+
+    if (this.allLinkerPromises_.length) {
+      const navigation = Services.navigationForDoc(this.ampdoc_);
+      navigation.registerAnchorMutator(
+          this.handleAnchorMutation_.bind(this), Priority.LINKER);
+    }
   }
 
 
@@ -155,7 +162,7 @@ export class LinkerManager {
    * @param {!Element} element
    * @private
    */
-  linkerCallback_(element) {
+  handleAnchorMutation_(element) {
     if (!element.href) {
       return;
     }
