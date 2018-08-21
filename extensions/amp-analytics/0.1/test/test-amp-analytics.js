@@ -53,6 +53,7 @@ describes.realWin('amp-analytics', {
 }, function(env) {
   let win, doc;
   let sendRequestSpy;
+  let postMessageSpy;
   let configWithCredentials;
   let uidService;
   let crypto;
@@ -148,6 +149,7 @@ describes.realWin('amp-analytics', {
     analytics.createdCallback();
     analytics.buildCallback();
     sendRequestSpy = sandbox.stub(analytics, 'sendRequest_');
+    postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
     return analytics;
   }
 
@@ -256,6 +258,7 @@ describes.realWin('amp-analytics', {
             // to avoid pageView pings.
             yield macroTask();
             sendRequestSpy.resetHistory();
+            postMessageSpy.resetHistory();
 
 
             analytics.handleEvent_({
@@ -445,6 +448,18 @@ describes.realWin('amp-analytics', {
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy).to.have.not.been.called;
+    });
+  });
+
+  it('does send a hit when parentPostMessage is provided inabox', function() {
+    env.win.AMP_MODE.runtime = 'inabox';
+    const analytics = getAnalyticsTag({
+      'requests': {'foo': 'https://example.com/bar'},
+      'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
+    });
+    return waitForNoSendRequest(analytics).then(() => {
+      expect(sendRequestSpy).to.have.not.been.called;
+      expect(postMessageSpy).to.have.been.called;
     });
   });
 
