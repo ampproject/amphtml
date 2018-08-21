@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions} from './variables';
+import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
@@ -33,15 +33,19 @@ const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
 export class LinkerManager {
 
   /**
-   * @param {./amp-analytics.AmpAnalytics} analytics
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {JsonObject} config
+   * @param {?string} type
    */
-  constructor(analytics, config) {
+  constructor(ampdoc, config, type) {
     /** @private */
-    this.analytics_ = analytics;
+    this.ampdoc_ = ampdoc;
 
     /** @private {JsonObject} */
     this.config_ = config;
+
+    /** @private {?string} */
+    this.type_ = type;
 
     /** @private {!Array<Promise>} @visibleForTesting */
     this.allLinkerPromises_ = [];
@@ -89,7 +93,7 @@ export class LinkerManager {
         const expansionOptions = new ExpansionOptions(this.config_['vars'],
             /* opt_iterations */ undefined,
             /* opt_noencode */ true);
-        return this.analytics_.expandTemplateWithUrlParams(ids[key],
+        return this.expandTemplateWithUrlParams_(ids[key],
             expansionOptions);
       });
 
@@ -107,9 +111,24 @@ export class LinkerManager {
       });
     });
 
-    const navigation = Services.navigationForDoc(this.analytics_.element);
+    const navigation = Services.navigationForDoc(this.ampdoc_);
     navigation.registerAnchorMutator(
         this.linkerCallback_.bind(this), Priority.LINKER);
+  }
+
+
+  /**
+   * Expands spec using provided expansion options and applies url replacement
+   * if necessary.
+   * @param {string} template Expression that needs to be expanded.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Promise<string>} expanded template.
+   */
+  expandTemplateWithUrlParams_(template, expansionOptions) {
+    return variableServiceFor(this.ampdoc_.win)
+        .expandTemplate(template, expansionOptions)
+        .then(expanded => Services.urlReplacementsForDoc(
+            this.ampdoc_).expandUrlAsync(expanded));
   }
 
 
@@ -120,12 +139,11 @@ export class LinkerManager {
    * @private
    */
   isLegacyOptIn_() {
-    const optInMeta = this.analytics_.getAmpDoc().win.document.head
+    const optInMeta = this.ampdoc_.win.document.head
         ./*OK*/querySelector(`meta[name=${GOOGLE_CID_API_META_NAME}]`);
-    const isGaType = this.analytics_.element
-        .getAttribute('type') === 'googleanalytics';
+    const isGaType = this.type_ === 'googleanalytics';
 
-    return optInMeta && isGaType;
+    return !!(optInMeta && isGaType);
   }
 
   /**
@@ -161,7 +179,7 @@ export class LinkerManager {
   maybeAppendLinker_(el, name, config) {
     const {href, hostname} = el;
     // Not on proxy but proxyOnly option is set.
-    const isProxyOrigin = Services.urlForDoc(this.analytics_.element)
+    const isProxyOrigin = Services.urlForDoc(this.ampdoc_)
         .isProxyOrigin(href);
     if (config['proxyOnly'] && !isProxyOrigin) {
       return;
@@ -171,7 +189,7 @@ export class LinkerManager {
     let domains = config['destinationDomains'];
     if (!domains) {
       const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(
-          this.analytics_.element);
+          this.ampdoc_);
 
       domains = [sourceUrl, canonicalUrl];
     }
