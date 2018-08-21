@@ -15,18 +15,17 @@ import {getBoundFunction} from './utils';
 
 /*** TODO:
  * - Fix issue with waypoint reporting links with macro variables.
- * - Investigate why AMP page is so slow to start (check window.t2 - window.t1)
  */
 
 const startTime = new Date().getTime();
 
 
 export class AmpSkimlinks extends AMP.BaseElement {
+
   /**
    * @override
    */
   buildCallback() {
-    window.t1 = new Date().getTime();
     this.hasCalledBeacon = false;
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
@@ -35,7 +34,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.linkRewriterService = new LinkRewriterService(this.ampDoc_.getRootNode());
 
     return whenDocumentReady(this.ampDoc_).then(() => {
-      window.t2 = new Date().getTime();
       this.startSkimcore_();
     });
   }
@@ -60,7 +58,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @param {*} userSessionData
    */
   sendImpressionTracking_({guid}) {
-    window.t3 = new Date().getTime();
     // Update tracking service with extra info.
     this.trackingService.setTrackingInfo({guid});
     this.trackingService.sendImpressionTracking(
@@ -140,12 +137,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
   /** @override */
   isLayoutSupported() {
     return true;
-  }
-
-  /** @override */
-  layoutCallback() {
-    console.log('LAYOUT CALLBACK');
-    // actually load your resource or render more expensive resources.
   }
 }
 
