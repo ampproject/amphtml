@@ -125,6 +125,18 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       expect(linkRewriterService.linkRewriters_).to.deep.equal(
           [linkRewriterVendor2, linkRewriterVendor1, linkRewriterVendor3]);
     });
+
+
+    it('Should call .onDomUpdate() after registering linkRewriter', () => {
+      env.sandbox.stub(LinkRewriter.prototype, 'onDomUpdated')
+          .returns(Promise.resolve());
+      const linkRewriter = linkRewriterService.registerLinkRewriter(
+          'vendor',
+          env.sandbox.stub(),
+          {}
+      );
+      expect(linkRewriter.onDomUpdated.calledOnce).to.be.true;
+    });
   });
 
 
@@ -223,7 +235,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       it('Should contain the target anchor', () => {
         env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
 
-        const anchor = iframeDoc.createElement('a')
+        const anchor = iframeDoc.createElement('a');
         sendEventHelper(AmpEvents.ANCHOR_CLICK, {
           clickActionType: anchorClickActions.NAVIGATE_OUTBOUND,
           anchor,
@@ -366,7 +378,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       resolveFunction = resolveFunction || createResolveResponseHelper();
       options = options || {};
       // Prevent scanning the page in the constructor
-      env.sandbox.stub(LinkRewriter.prototype, 'scanLinksOnPage_');
+      env.sandbox.stub(LinkRewriter.prototype, 'scanLinksOnPage_')
+          .returns(Promise.resolve());
       const linkRewriter = new LinkRewriter(iframeDoc, 'test', resolveFunction, options);
       linkRewriter.scanLinksOnPage_.restore();
       return linkRewriter;
@@ -376,12 +389,6 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
 
   describe('Scan links on page', () => {
     const replacementUrl = 'https://redirect.com';
-
-    it('Should scan the page when creating linkRewriter', () => {
-      env.sandbox.stub(LinkRewriter.prototype, 'scanLinksOnPage_');
-      const linkRewriter = new LinkRewriter(iframeDoc, 'test', () => {}, {});
-      expect(linkRewriter.scanLinksOnPage_.calledOnce).to.be.true;
-    });
 
     it('Should raise an error resolveUnknownLinks returns wrong object', () => {
       const anchor1 = iframeDoc.createElement('a');
@@ -569,8 +576,9 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       it('Should send PAGE_SCANNED event when onDomUpdated() is called', () => {
         const linkRewriter = createLinkRewriterHelper();
         env.sandbox.stub(linkRewriter.events, 'send');
+        const stub = linkRewriter.events.send;
+
         return linkRewriter.onDomUpdated().then(() => {
-          const stub = linkRewriter.events.send;
           expect(stub.withArgs(linkRewriterEvents.PAGE_SCANNED).calledOnce).to.be.true;
         });
       });

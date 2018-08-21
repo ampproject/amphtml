@@ -31,6 +31,8 @@ export default class LinkRewriterService {
   registerLinkRewriter(name, resolveUnknownLinks, options) {
     const linkRewriter = new LinkRewriter(this.iframeDoc_, name, resolveUnknownLinks, options);
     this.insertInListBasedOnPriority_(this.linkRewriters_, linkRewriter, this.priorityList_);
+    // Trigger initial scan.
+    linkRewriter.onDomUpdated();
 
     return linkRewriter;
   }
