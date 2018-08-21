@@ -339,11 +339,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
-    id: 'amp-carousel-new-arrows',
-    name: 'Enables new AMP carousel navigation arrows',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17510',
-  },
-  {
     id: 'amp-list-resize',
     name: 'Enables container-based resizing on amp list',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
