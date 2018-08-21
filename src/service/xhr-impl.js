@@ -17,7 +17,6 @@
 import {Services} from '../services';
 import {
   assertSuccess,
-  fetchPolyfill,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
@@ -84,7 +83,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!../utils/xhr-utils.FetchInitDef} init
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>|!Promise<!Response>}
+   * @return {!Promise<!Response>|!Promise<!Response>}
    * @private
    */
   fetch_(input, init) {
@@ -99,14 +98,7 @@ export class Xhr {
           if (isFormDataWrapper(init.body)) {
             init.body = init.body.getFormData();
           }
-          // Fallback to xhr polyfill since `fetch` api does not support
-          // responseType = 'document'. We do this so we don't have to do any
-          // parsing and document construction on the UI thread which would be
-          // expensive.
-          if (init.responseType == 'document') {
-            return fetchPolyfill(input, init);
-          }
-          return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+          return this.win.fetch(input, init);
         });
   }
 
@@ -123,7 +115,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!../utils/xhr-utils.FetchInitDef=} init
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   fetchAmpCors_(input, init = {}) {
@@ -149,7 +141,7 @@ export class Xhr {
    * @param {string} input
    * @param {?FetchInitJsonDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
@@ -187,7 +179,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?../utils/xhr-utils.FetchInitDef=} opt_init
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetchText(input, opt_init) {
     return this.fetch(input, setupInit(opt_init, 'text/plain'));
@@ -196,7 +188,7 @@ export class Xhr {
   /**
    * @param {string} input URL
    * @param {?../utils/xhr-utils.FetchInitDef=} opt_init Fetch options object.
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);

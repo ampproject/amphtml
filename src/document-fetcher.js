@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {FetchResponse, assertSuccess, getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
 import {Services} from './services';
+import {assertSuccess, getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
 import {user} from './log';
 
 /**
@@ -81,7 +81,18 @@ function xhrRequest(input, init) {
       // whole document loading to complete. This is fine for the use cases
       // we have now, but may need to be reimplemented later.
       if (xhr.readyState == /* COMPLETE */ 4) {
-        const response = new FetchResponse(xhr);
+        const options = {
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: {
+            get(header) {
+              return xhr.getResponseHeader(header);
+            },
+          },
+        };
+        const body = 'response' in xhr
+          ? xhr.response : xhr.responseText;
+        const response = new Response(/** @type {string} */ (body || ''), /** @type {!ResponseInit} */ (options));
         const promise = assertSuccess(response)
             .then(response => ({response, xhr}));
         resolve(promise);

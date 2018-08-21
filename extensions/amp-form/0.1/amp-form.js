@@ -530,7 +530,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's action endpoint.
-   * @return {!Promise<!../../../src/utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doActionXhr_() {
@@ -539,7 +539,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's verify endpoint.
-   * @return {!Promise<!../../../src/utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doVerifyXhr_() {
@@ -552,7 +552,7 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!Promise<!../../../src/utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doXhr_(url, method, opt_extraFields) {
@@ -599,12 +599,12 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
-   * @param {!../../../src/utils/xhr-utils.FetchResponse} response
+   * @param {!Response} response
    * @return {!Promise}
    * @private visible for testing
    */
   handleXhrSubmitSuccess_(response) {
-    return this.handleSubmitSuccess_(response.json()).then(() => {
+    return this.handleSubmitSuccess_(/** @type {!Promise<!JsonObject>}*/(response.json())).then(() => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.maybeHandleRedirect_(response);
     });
@@ -722,7 +722,7 @@ export class AmpForm {
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
    * Not applicable if viewer can render templates.
-   * @param {!../../../src/utils/xhr-utils.FetchResponse} response
+   * @param {!Response} response
    * @private
    */
   maybeHandleRedirect_(response) {
