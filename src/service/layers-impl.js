@@ -144,7 +144,6 @@ export class LayoutLayers {
     }));
 
     // Declare scrollingElement as the one true scrolling layer.
-    // We o
     const root = this.declareLayer_(scrollingElement, true,
         scrollingElementScrollsLikeViewport);
 
