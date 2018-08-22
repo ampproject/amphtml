@@ -98,7 +98,7 @@ export class Xhr {
           if (isFormDataWrapper(init.body)) {
             init.body = init.body.getFormData();
           }
-          return this.win.fetch(input, init);
+          return (this.win.fetch).apply(null, arguments);
         });
   }
 
