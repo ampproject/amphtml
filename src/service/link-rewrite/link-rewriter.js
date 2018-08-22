@@ -1,7 +1,7 @@
 import {user} from '../../log';
 
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
-import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsResponse} from './link-rewrite-classes';
+import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsResponse} from './link-rewrite-helpers';
 import EventMessenger from './event-messenger';
 
 
