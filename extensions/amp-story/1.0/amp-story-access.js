@@ -14,23 +14,38 @@
  * limitations under the License.
  */
 
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {copyChildren, removeChildren} from '../../../src/dom';
+import {assertHttpsUrl} from '../../../src/url';
+import {
+  closest,
+  closestByTag,
+  copyChildren,
+  removeChildren,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
+import {user} from '../../../src/log';
 
+
+/** @const {string} */
+const TAG = 'amp-story-access';
 
 /**
  * Story access template.
- * @const {!./simple-template.ElementDef}
+ * @param {?string} logoSrc
+ * @return {!./simple-template.ElementDef}
  */
-const TEMPLATE = {
+const getTemplate = logoSrc => ({
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-access-overflow'}),
   children: [
@@ -40,12 +55,27 @@ const TEMPLATE = {
       children: [
         {
           tag: 'div',
+          attrs: dict({'class': 'i-amphtml-story-access-header'}),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-story-access-logo',
+                'style': logoSrc ?
+                  `background-image: url('${logoSrc}') !important;` : '',
+              }),
+              children: [],
+            },
+          ],
+        },
+        {
+          tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-access-content'}),
         },
       ],
     },
   ],
-};
+});
 
 /**
  * The <amp-story-access> custom element.
@@ -59,6 +89,9 @@ export class AmpStoryAccess extends AMP.BaseElement {
     this.actions_ = Services.actionServiceForDoc(this.element);
 
     /** @private {?Element} */
+    this.contentEl_ = null;
+
+    /** @private {?Element} */
     this.scrollableEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -67,11 +100,20 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const drawerEl = renderAsElement(this.win.document, TEMPLATE);
-    const contentEl = dev().assertElement(
+    const storyEl =
+        dev().assertElement(closestByTag(this.element, 'AMP-STORY'));
+    const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
+
+    logoSrc ?
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src') :
+      user().warn(
+          TAG, 'Expected "publisher-logo-src" attribute on <amp-story>');
+
+    const drawerEl = renderAsElement(this.win.document, getTemplate(logoSrc));
+    this.contentEl_ = dev().assertElement(
         drawerEl.querySelector('.i-amphtml-story-access-content'));
 
-    copyChildren(this.element, contentEl);
+    copyChildren(this.element, this.contentEl_);
     removeChildren(this.element);
 
     this.element.appendChild(drawerEl);
@@ -83,12 +125,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return false;
+    return layout == Layout.CONTAINER;
   }
 
   /**
@@ -103,6 +140,8 @@ export class AmpStoryAccess extends AMP.BaseElement {
         this.element.querySelector('.i-amphtml-story-access-overflow');
     this.scrollableEl_.addEventListener(
         'scroll', throttle(this.win, () => this.onScroll_(), 100));
+
+    this.element.addEventListener('click', event => this.onClick_(event));
   }
 
   /**
@@ -134,6 +173,20 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     this.element.getResources()
         .measureMutateElement(this.element, measurer, mutator);
+  }
+
+  /**
+   * Handles click events and maybe closes the paywall.
+   * @param {!Event} event
+   * @private
+   */
+  onClick_(event) {
+    const el = dev().assertElement(event.target);
+
+    // Closes the menu if click happened outside of the main container.
+    if (!closest(el, el => el === this.contentEl_, this.element)) {
+      this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
+    }
   }
 
   /**

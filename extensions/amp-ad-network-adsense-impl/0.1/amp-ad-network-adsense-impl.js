@@ -56,6 +56,9 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {
+  getAdSenseAmpAutoAdsResponsiveExperimentBranch,
+} from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
   getExperimentBranch,
@@ -332,8 +335,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     const experimentIds = [];
     const ampAutoAdsBranch = getAdSenseAmpAutoAdsExpBranch(this.win);
+    const ampAutoAdsResponsiveBranch =
+      getAdSenseAmpAutoAdsResponsiveExperimentBranch(this.win);
     if (ampAutoAdsBranch) {
       experimentIds.push(ampAutoAdsBranch);
+    }
+    if (ampAutoAdsResponsiveBranch) {
+      experimentIds.push(ampAutoAdsResponsiveBranch);
     }
     const identityPromise = Services.timerFor(this.win)
         .timeoutPromise(1000, this.identityTokenPromise_)

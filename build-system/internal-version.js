@@ -16,28 +16,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const crypto = require('crypto');
 
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
 exports.VERSION = argv.version ?
   String(argv.version) : String(Date.now());
-
-// A token that changes its value each time we release AMP. This is intended
-// to verify that two iframes of AMP have the same version of AMP. It is
-// also intended to make running iframes with custom software very unpleasant,
-// so that we are more likely to have everybody on the same version.
-exports.TOKEN = getToken();
-
-function getToken() {
-  const task = process.argv[2];
-  // For tests build parent and child frame can get out of sync because
-  // we do not version lock them. To fix this we use a fixed token.
-  if (!task || task == 'build' || task == 'test') {
-    return 'development--token';
-  }
-  // For every other build, most importantly `dist` we assume production.
-  return crypto.createHmac(
-      'sha256', crypto.randomBytes(16)).update(exports.VERSION)
-      .digest('hex');
-}

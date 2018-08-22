@@ -174,7 +174,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         clock.tick(2);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
@@ -183,7 +183,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
@@ -211,7 +211,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {'important': true}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1);
         yield macroTask();
@@ -249,7 +249,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         clock.tick(500);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         clock.tick(500);
         expect(handler.batchIntervalTimeoutId_).to.be.null;
         handler.send({}, {}, expansionOptions, {});
@@ -266,7 +266,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         clock.tick(1000);
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();

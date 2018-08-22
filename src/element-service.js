@@ -204,6 +204,32 @@ export function extensionScriptsInNode(head) {
 }
 
 /**
+ * Waits for body to be present then verifies that an extension script is
+ * present in head for installation.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} extensionId
+ * @return {!Promise<boolean>}
+ */
+export function isExtensionScriptInNode(ampdoc, extensionId) {
+  return ampdoc.whenBodyAvailable()
+      .then(() => {
+        return extensionScriptInNode(
+            ampdoc.getHeadNode(), extensionId);
+      });
+}
+
+/**
+ * Verifies that an extension script is present in head for
+ * installation.
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
+ * @param {string} extensionId
+ * @private
+ */
+function extensionScriptInNode(head, extensionId) {
+  return extensionScriptsInNode(head).includes(extensionId);
+}
+
+/**
  * Waits for an extension if its script is present
  * @param {!Window} win
  * @param {string} extension
@@ -222,7 +248,7 @@ function waitForExtensionIfPresent(win, extension, head) {
 
   // TODO(jpettitt) investigate registerExtension to short circuit
   // the dom call in extensionScriptsInNode()
-  if (!extensionScriptsInNode(head).includes(extension)) {
+  if (!extensionScriptInNode(head, extension)) {
     return Promise.resolve();
   }
 

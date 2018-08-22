@@ -23,6 +23,10 @@
  * </amp-story>
  * </code>
  */
+import {
+  Action,
+  getStoreService,
+} from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {
   AnimationManager,
@@ -126,12 +130,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!function(*)} */
     this.mediaPoolRejectFn_ = deferred.reject;
 
-    /** @private @const {boolean} Only prerender the first story page. */
-    this.prerenderAllowed_ = matches(this.element,
-        'amp-story-page:first-of-type');
+    /** @private {boolean}  */
+    this.prerenderAllowed_ = false;
 
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -158,6 +164,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.animationManager_ = AnimationManager.create(
           this.element, this.getAmpDoc(), this.getAmpDoc().getUrl());
     }
+  }
+
+
+  /** @override */
+  firstAttachedCallback() {
+    // Only prerender the first story page.
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type');
   }
 
 
@@ -281,6 +295,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       this.advancement_.start();
       this.maybeStartAnimations();
+      this.checkPageHasAudio_();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -306,7 +321,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   beforeVisible() {
     return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
   }
-
 
   /**
    * @return {!Promise}
@@ -603,6 +617,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {number} progress The progress from 0.0 to 1.0.
    */
   emitProgress_(progress) {
+    // Don't emit progress for ads, since the progress bar is hidden.
+    if (this.isAd()) {
+      return;
+    }
+
     const payload = dict({
       'pageId': this.element.id,
       'progress': progress,
@@ -742,6 +761,29 @@ export class AmpStoryPage extends AMP.BaseElement {
         eventInit);
   }
 
+  /**
+  * Checks if the page has any audio.
+  * @private
+  */
+  checkPageHasAudio_() {
+    const pageHasAudio =
+      this.element.hasAttribute('background-audio') ||
+      this.element.querySelector('amp-audio') ||
+      this.hasVideoWithAudio_();
+
+    this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
+  }
+
+  /**
+  * Checks if the page has any videos with audio.
+  * @return {boolean}
+  * @private
+  */
+  hasVideoWithAudio_() {
+    const ampVideoEls = this.element.querySelectorAll('amp-video');
+    return Array.prototype.some.call(
+        ampVideoEls, video => !video.hasAttribute('noaudio'));
+  }
 
   /**
    * @private

@@ -15,7 +15,6 @@
  */
 
 import * as rds from '../../src/render-delaying-services';
-import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
@@ -207,7 +206,7 @@ describe('Styles', () => {
           return installStylesAsPromise('other{}', true);
         }).then(styleEl => {
           expect(styleEl).to.equal(firstStyleEl);
-          expect(styleEl.textContent).to.equal('');
+          expect(styleEl.textContent).to.equal('other{}');
           expect(head.querySelectorAll('style[amp-runtime]'))
               .to.have.length(1);
         });
@@ -220,7 +219,7 @@ describe('Styles', () => {
         return installStylesAsPromise('other{}', true).then(styleEl => {
           expect(head.__AMP_CSS_SM['amp-runtime']).to.equal(serverEl);
           expect(styleEl).to.equal(serverEl);
-          expect(styleEl.textContent).to.equal('');
+          expect(styleEl.textContent).to.equal('other{}');
           expect(head.querySelectorAll('style[amp-runtime]'))
               .to.have.length(1);
         });
@@ -243,7 +242,7 @@ describe('Styles', () => {
         return promise.then(styleEl => {
           expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
           expect(styleEl).to.equal(serverEl);
-          expect(styleEl.textContent).to.equal('');
+          expect(styleEl.textContent).to.equal('other{}');
           expect(head.querySelectorAll('style[amp-extension=amp-ext1]'))
               .to.have.length(1);
         });

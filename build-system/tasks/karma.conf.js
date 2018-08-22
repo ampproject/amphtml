@@ -65,7 +65,8 @@ module.exports = {
     transform: [
       ['babelify', {compact: false, sourceMapsAbsolute: true}],
     ],
-    bundleDelay: 1200,
+    // Prevent "cannot find module" errors on Travis. See #14166.
+    bundleDelay: process.env.TRAVIS ? 5000 : 1200,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
@@ -227,9 +228,6 @@ module.exports = {
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
-    // TODO(rsimha, #14406): Remove this after all tests are fixed.
-    failOnConsoleError: !process.env.TRAVIS && !process.env.LOCAL_PR_CHECK,
-    // TODO(rsimha, #14432): Set to false after all tests are fixed.
     captureConsole: true,
     verboseLogging: false,
   },

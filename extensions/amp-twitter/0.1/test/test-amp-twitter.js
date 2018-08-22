@@ -83,6 +83,36 @@ describes.realWin('amp-twitter', {
     expect(tweet).not.to.be.undefined;
   });
 
+  it('adds tweet element correctly for a profile timeline', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    twitter(win, {
+      timelineSourceType: 'profile',
+      timelineScreenName: 'amphtml',
+      width: 111,
+      height: 222,
+    });
+    const tweet = doc.body.querySelector('#tweet');
+    expect(tweet).not.to.be.undefined;
+  });
+
+  it('adds tweet element correctly for a likes timeline', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    twitter(win, {
+      timelineSourceType: 'likes',
+      timelineScreenName: 'amphtml',
+      width: 111,
+      height: 222,
+    });
+    const tweet = doc.body.querySelector('#tweet');
+    expect(tweet).not.to.be.undefined;
+  });
+
   it('removes iframe after unlayoutCallback', () => {
     return getAmpTwitter(tweetId).then(ampTwitter => {
       const iframe = ampTwitter.querySelector('iframe');

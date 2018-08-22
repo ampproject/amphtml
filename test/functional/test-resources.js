@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -33,7 +32,7 @@ describe('Resources', () => {
   let resources;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
@@ -589,7 +588,7 @@ describes.fakeWin('Resources startup', {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     resources = Services.resourcesForDoc(win.document.body);
     resources.relayoutAll_ = false;
@@ -704,7 +703,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     vsyncSpy = sandbox.stub(resources.vsync_, 'run').callsFake(task => {
@@ -1091,7 +1090,7 @@ describe('Resources discoverWork', () => {
   let resource1, resource2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     resources = new Resources(new AmpDocSingle(window));
     viewportMock = sandbox.mock(resources.viewport_);
 
@@ -1766,7 +1765,7 @@ describe('Resources changeSize', () => {
   let resource1, resource2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
@@ -2181,7 +2180,7 @@ describe('Resources changeSize', () => {
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 0, 222, undefined, false);
       expect(vsyncSpy).to.be.calledOnce;
-      vsyncSpy.reset();
+      vsyncSpy.resetHistory();
       resources.mutateWork_();
 
       expect(resources.requestsChangeSize_).to.be.empty;
@@ -2530,7 +2529,7 @@ describe('Resources mutateElement and collapse', () => {
   let resource1RequestMeasureStub, resource2RequestMeasureStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
