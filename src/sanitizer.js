@@ -25,7 +25,6 @@ import {
 } from './purifier';
 import {dict, map} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
-import {isExperimentOn} from './experiments';
 import {startsWith} from './string';
 import {user} from './log';
 
@@ -65,6 +64,12 @@ const SELF_CLOSING_TAGS = dict({
 const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /**
+ * Monotonically increasing counter used for keying nodes.
+ * @private {number}
+ */
+let KEY_COUNTER = 0;
+
+/**
  * Sanitizes the provided HTML.
  *
  * This function expects the HTML to be already pre-sanitized and thus it does
@@ -72,22 +77,10 @@ const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
  * cases, such as <SCRIPT>, <STYLE>, <IFRAME>.
  *
  * @param {string} html
+ * @param {boolean=} diffing
  * @return {string}
  */
-export function sanitizeHtml(html) {
-  return sanitizeWithCaja(html);
-}
-
-/**
- * @private {number}
- */
-let KEY_COUNTER = 0;
-
-/**
- * @param {string} html
- * @return {string}
- */
-function sanitizeWithCaja(html) {
+export function sanitizeHtml(html, diffing) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
@@ -125,7 +118,7 @@ function sanitizeWithCaja(html) {
         ignore++;
       } else if (startsWith(tagName, 'amp-')) {
         // Disable DOM diffing for amp-* which don't support children mutation.
-        if (isExperimentOn(self, 'amp-list-diffing')) {
+        if (diffing) {
           attribs.push('i-amphtml-key', KEY_COUNTER++);
         }
       } else {
@@ -186,7 +179,7 @@ function sanitizeWithCaja(html) {
         }
         return;
       }
-      let emittedBindingMarker = false;
+      let emittedBindingMarkers = false;
       emit('<');
       emit(tagName);
       for (let i = 0; i < attribs.length; i += 2) {
@@ -215,14 +208,14 @@ function sanitizeWithCaja(html) {
         emit('"');
         // Set a custom attribute to mark this element as containing a binding.
         // This is an optimization that obviates the need for DOM scan later.
-        if (isBinding[i] && !emittedBindingMarker) {
+        if (isBinding[i] && !emittedBindingMarkers) {
           emit(' i-amphtml-binding');
           // Disable DOM diffing for elements with bindings to avoid disrupting
           // Bind.scanAndApply().
-          if (isExperimentOn(self, 'amp-list-diffing')) {
+          if (diffing) {
             emit(` i-amphtml-key=${KEY_COUNTER++}`);
           }
-          emittedBindingMarker = true;
+          emittedBindingMarkers = true;
         }
       }
       emit('>');

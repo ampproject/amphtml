@@ -24,7 +24,6 @@ import {
 } from './url';
 import {dict} from './utils/object';
 import {filterSplice} from './utils/array';
-import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -235,9 +234,10 @@ let KEY_COUNTER = 0;
 /**
  * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
+ * @param {boolean=} diffing
  * @return {!Node}
  */
-export function purifyHtml(dirty) {
+export function purifyHtml(dirty, diffing = false) {
   const config = Object.assign({}, PURIFY_CONFIG, {
     'ADD_ATTR': WHITELISTED_ATTRS,
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
@@ -258,7 +258,7 @@ export function purifyHtml(dirty) {
   // Disables DOM diffing via set-dom for a given node and instead allows it to
   // be replaced outright.
   const disableDiffingFor = node => {
-    if (isExperimentOn(self, 'amp-list-diffing')) {
+    if (diffing) {
       // set-dom uses node attribute keys for opting out of diffing.
       node.setAttribute('i-amphtml-key', KEY_COUNTER++);
     }
