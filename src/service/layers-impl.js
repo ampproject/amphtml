@@ -349,7 +349,7 @@ export class LayoutLayers {
     if (layer && layer.isLayer()) {
       layer.dirtyScrollMeasurements();
     } else {
-      layer = this.declareLayer_(element, false);
+      layer = this.declareLayer_(element, false, false);
     }
 
     this.activeLayer_ = layer;
