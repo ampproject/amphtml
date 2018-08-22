@@ -76,11 +76,11 @@ export function bodymovinanimation(global) {
     width: '100%',
     height: '100%',
   });
-  const renderer = dataReceived['renderer'];
 
   global.document.getElementById('c').appendChild(animatingContainer);
   const shouldLoop = dataLoop != 'false';
   const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
+  const renderer = dataReceived['renderer'];
   getBodymovinAnimationSdk(global, renderer, function(bodymovin) {
     animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
