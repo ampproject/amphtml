@@ -85,45 +85,45 @@ export class AmpDateCountdown extends AMP.BaseElement {
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
-     /** @const {function(!Element)} */
-     this.boundRendered_ = this.rendered_.bind(this);
+    /** @const {function(!Element)} */
+    this.boundRendered_ = this.rendered_.bind(this);
 
-     //Note: One of end-date, timestamp-ms, timestamp-seconds is required.
-     /** @private {string} */
-     this.endDate_ = this.element.getAttribute('end-date');
+    //Note: One of end-date, timestamp-ms, timestamp-seconds is required.
+    /** @private {string} */
+    this.endDate_ = this.element.getAttribute('end-date');
 
-     /** @private {number} */
-     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
+    /** @private {number} */
+    this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
 
-     /** @private {number} */
-     this.timestampSeconds_
+    /** @private {number} */
+    this.timestampSeconds_
        = Number(this.element.getAttribute('timestamp-seconds'));
 
-     /** @private {number} */
-     this.offsetSeconds_
+    /** @private {number} */
+    this.offsetSeconds_
        = Number(this.element.getAttribute('offset-seconds'))
        || DEFAULT_OFFSET_SECONDS;
 
-     /** @private {string} */
-     this.locale_
+    /** @private {string} */
+    this.locale_
        = (this.element.getAttribute('locale')
        || DEFAULT_LOCALE).toLowerCase();
 
-     /** @private {string} */
-     this.whenEnded_
+    /** @private {string} */
+    this.whenEnded_
        = (this.element.getAttribute('when-ended')
        || DEFAULT_WHEN_ENDED).toLowerCase();
 
-     /** @private {string} */
-     this.biggestUnit_
+    /** @private {string} */
+    this.biggestUnit_
        = (this.element.getAttribute('biggest-unit')
        || DEFAULT_BIGGEST_UNIT).toUpperCase();
 
-     /** @private {!Object|null} */
-     this.localeWordList_ = this.getLocaleWord_(this.locale_);
+    /** @private {!Object|null} */
+    this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
-     /** @private {!Object|null} */
-     this.countDownTimer_ = null;
+    /** @private {!Object|null} */
+    this.countDownTimer_ = null;
 
     Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       const EPOCH = this.getEpoch_() + (this.offsetSeconds_ * 1000);
