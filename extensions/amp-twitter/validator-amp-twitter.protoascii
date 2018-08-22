@@ -56,7 +56,7 @@ tags: {  # <amp-twitter>
   }
   attrs: {
     name: "data-momentid"
-    mandatory_oneof: "['data-tweetid', 'data-momentid', 'data-timeline-source-type']"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
     value_regex: "\\d+"
   }
   attrs: {
@@ -66,21 +66,7 @@ tags: {  # <amp-twitter>
     }
   }
   attrs: {
-    name: "data-tweetid"
-    mandatory_oneof: "['data-tweetid', 'data-momentid', 'data-timeline-source-type']"
-  }
-  attrs: {
-    name: "data-timeline-source-type"
-    mandatory_oneof: "['data-tweetid', 'data-momentid', 'data-timeline-source-type']"
-  }
-  attrs: {
-    name: "data-timeline-screen-name"
-    trigger: {
-      also_requires_attr: "data-timeline-source-type"
-    }
-  }
-  attrs: {
-    name: "data-timeline-user-id"
+    name: "data-timeline-id"
     trigger: {
       also_requires_attr: "data-timeline-source-type"
     }
@@ -99,13 +85,16 @@ tags: {  # <amp-twitter>
     }
   }
   attrs: {
-    name: "data-timeline-id"
+    name: "data-timeline-source-type"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
+  attrs: {
+    name: "data-timeline-screen-name"
     trigger: {
       also_requires_attr: "data-timeline-source-type"
     }
-    value_regex: "\\d+"
   }
-  attrs: {
+    attrs: {
     name: "data-timeline-url"
     trigger: {
       also_requires_attr: "data-timeline-source-type"
@@ -116,7 +105,17 @@ tags: {  # <amp-twitter>
       allow_relative: false
     }
   }
-  # All
+  attrs: {
+    name: "data-timeline-user-id"
+    trigger: {
+      also_requires_attr: "data-timeline-source-type"
+    }
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-tweetid"
+    mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
