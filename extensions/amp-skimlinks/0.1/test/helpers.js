@@ -25,21 +25,6 @@ const helpersFactory = env => {
       };
     },
 
-    createGetTrackingInfoStub(data) {
-      return () => {
-        return Object.assign({
-          pubcode,
-          // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
-          referrer: 'referrer',
-          externalReferrer: 'external_referrer',
-          timezone: 'timezone',
-          pageImpressionId: 'page_impression_id',
-          customTrackingId: null,
-          guid: 'user_guid',
-        }, data);
-      };
-    },
-
     stubCustomEventReporterBuilder() {
       env.sandbox.stub(CustomEventReporterBuilder.prototype, 'track');
       env.sandbox.stub(CustomEventReporterBuilder.prototype, 'build').returns({

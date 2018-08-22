@@ -11,6 +11,7 @@ import AffiliateLinkResolver from './affiliate-link-resolver';
 
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
+import Waypoint from './waypoint';
 
 /*** TODO:
  * - Fix issue with waypoint reporting links with macro variables.
@@ -42,10 +43,11 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   startSkimcore_() {
     this.trackingService = this.initTracking();
+    this.waypoint_ = new Waypoint(this.trackingService);
     this.affiliateLinkResolver = new AffiliateLinkResolver(
         this.xhr_,
         this.skimOptions_,
-        getBoundFunction(this.trackingService, 'getTrackingInfo')
+        this.waypoint_,
     );
 
     this.skimlinksLinkRewriter = this.initSkimlinksLinkRewriter();
@@ -126,7 +128,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @param {*} eventData
    */
   onClick_(eventData) {
-    // The link was not monetizable or the link was replaced by an other linkRewriter.
+    // The link was not monetizable or the link was replaced
+    // by an other linkRewriter.
     if (eventData.replacedBy !== SKIMLINKS_REWRITER_ID) {
       this.trackingService.sendNaClickTracking(eventData.anchor);
     }

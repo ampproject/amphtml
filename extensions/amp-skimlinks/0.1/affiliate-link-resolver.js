@@ -1,7 +1,7 @@
 
-import {addParamsToUrl,parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
-import {AFFILIATION_API, DOMAIN_RESOLVER_API_URL, PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
+import {DOMAIN_RESOLVER_API_URL} from './constants';
 import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-helpers';
 
 export const STATUS__AFFILIATE = 'affiliate';
@@ -14,13 +14,13 @@ export default class AffiliateLinkResolver {
    *
    * @param {*} xhr
    * @param {*} skimOptions
-   * @param {*} getTrackingInfo
+   * @param {*} waypoint
    */
-  constructor(xhr, skimOptions, getTrackingInfo) {
+  constructor(xhr, skimOptions, waypoint) {
     this.xhr_ = xhr;
     this.skimOptions_ = skimOptions;
+    this.waypoint_ = waypoint;
     this.domains_ = {};
-    this.getTrackingInfo_ = getTrackingInfo;
     // Promise of the first request to beacon so we can
     // access beaconData outside of the linkRewriter/LinkResolver flow.
     this.firstApiRequest = null;
@@ -49,43 +49,6 @@ export default class AffiliateLinkResolver {
     return new createTwoStepsResponse(alreadyResolved, willBeResolvedPromise);
   }
 
-  /**
-   * Get replacement url.
-   * @param {*} anchor
-   */
-  getWaypointUrl_(anchor) {
-    if (!anchor) {
-      return null;
-    }
-
-    const {
-      pubcode,
-      referrer,
-      externalReferrer,
-      timezone,
-      pageImpressionId,
-      customTrackingId,
-      guid,
-    } = this.getTrackingInfo_();
-
-    const xcust = anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId;
-    const queryParams = {
-      id: pubcode,
-      url: anchor.href,
-      sref: referrer,
-      pref: externalReferrer,
-      xguid: guid,
-      xuuid: pageImpressionId,
-      xtz: timezone,
-      xs: '1', // Always use source_app=1 (skimlinks)
-      platform: PLATFORM_NAME,
-    };
-    if (xcust) {
-      queryParams.xcust = xcust;
-    }
-
-    return addParamsToUrl(AFFILIATION_API, queryParams);
-  }
 
   /**
    * Build list of AnchorReplacementTuple
@@ -97,7 +60,7 @@ export default class AffiliateLinkResolver {
       // Always replace unknown, we will overwrite them after asking
       // the api if needed
       if (status === STATUS__AFFILIATE || status === STATUS__UNKNOWN) {
-        const replacementUrl = this.getWaypointUrl_(anchor);
+        const replacementUrl = this.waypoint_.getAffiliateUrl(anchor);
         return createAnchorReplacementTuple(anchor, replacementUrl);
       }
 
