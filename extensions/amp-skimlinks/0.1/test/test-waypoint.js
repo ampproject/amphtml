@@ -5,7 +5,7 @@ import helpersFactory from './helpers';
 import Waypoint from '../waypoint';
 
 
-describes.fakeWin('domain-resolver', {
+describes.fakeWin('Waypoint', {
   amp: {
     extensions: ['amp-skimlinks'],
   },
@@ -22,19 +22,22 @@ describes.fakeWin('domain-resolver', {
     return Object.assign({
       pubcode,
       // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
-      referrer: 'referrer',
-      externalReferrer: 'external_referrer',
-      timezone: 'timezone',
       pageImpressionId: 'page_impression_id',
       customTrackingId: null,
       guid: 'user_guid',
     }, data);
   }
 
+
+
   beforeEach(() => {
     trackingService = helpers.createTrackingWithStubAnalytics();
     env.sandbox.stub(trackingService, 'getTrackingInfo').returns(getFakeTrackingInfo());
-    waypoint = new Waypoint(trackingService);
+    env.sandbox.stub(env.ampdoc.win.document, 'referrer').value('referrer_url')
+    helpers.mockServiceGetter('documentInfoForDoc', {canonicalUrl: 'canonical_url'});
+    env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns('-120');
+    waypoint = new Waypoint(env.ampdoc, trackingService);
+
   });
 
   afterEach(() => {
@@ -68,11 +71,11 @@ describes.fakeWin('domain-resolver', {
     });
 
     it('Sends the sref', () => {
-      expect(queryParams.sref).to.equal('referrer');
+      expect(queryParams.sref).to.equal('canonical_url');
     });
 
     it('Sends the pref', () => {
-      expect(queryParams.pref).to.equal('external_referrer');
+      expect(queryParams.pref).to.equal('referrer_url');
     });
 
     it('Sends the xguid (GUID)', () => {
@@ -84,7 +87,7 @@ describes.fakeWin('domain-resolver', {
     });
 
     it('Sends the xtz (timezone)', () => {
-      expect(queryParams.xtz).to.equal('timezone');
+      expect(queryParams.xtz).to.equal('-120');
     });
 
     it('Sends xs (source app)', () => {

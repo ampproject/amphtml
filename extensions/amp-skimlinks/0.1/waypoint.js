@@ -1,14 +1,19 @@
-import {AFFILIATION_API, PLATFORM_NAME, XCUST_ATTRIBUTE_NAME } from './constants';
+import {AFFILIATION_API, PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 
 
 export default class Waypoint {
   /**
-   *
+   * @param {*} ampdoc
    * @param {*} tracking
    */
-  constructor(tracking) {
+  constructor(ampdoc, tracking) {
     this.tracking_ = tracking;
+
+    this.documentReferrer_ = ampdoc.win.document.referrer;
+    this.canonicalUrl_ = Services.documentInfoForDoc(ampdoc).canonicalUrl;
+    this.timezone_ = new Date().getTimezoneOffset();
   }
 
   /**
@@ -22,9 +27,6 @@ export default class Waypoint {
 
     const {
       pubcode,
-      referrer,
-      externalReferrer,
-      timezone,
       pageImpressionId,
       customTrackingId,
       guid,
@@ -34,11 +36,11 @@ export default class Waypoint {
     const queryParams = {
       id: pubcode,
       url: anchor.href,
-      sref: referrer,
-      pref: externalReferrer,
+      sref: this.canonicalUrl_,
+      pref: this.documentReferrer_,
       xguid: guid,
       xuuid: pageImpressionId,
-      xtz: timezone,
+      xtz: this.timezone_,
       xs: '1', // Always use source_app=1 (skimlinks)
       platform: PLATFORM_NAME,
     };

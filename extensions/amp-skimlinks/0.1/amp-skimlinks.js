@@ -43,7 +43,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   startSkimcore_() {
     this.trackingService = this.initTracking();
-    this.waypoint_ = new Waypoint(this.trackingService);
+    this.waypoint_ = new Waypoint(this.ampDoc_, this.trackingService);
     this.affiliateLinkResolver = new AffiliateLinkResolver(
         this.xhr_,
         this.skimOptions_,

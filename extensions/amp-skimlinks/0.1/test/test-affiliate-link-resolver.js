@@ -27,7 +27,7 @@ describes.fakeWin('domain-resolver', {
 
   beforeEach(() => {
     trackingService = helpers.createTrackingWithStubAnalytics();
-    waypoint = new Waypoint(trackingService);
+    waypoint = new Waypoint(env.ampdoc, trackingService);
   });
 
   afterEach(() => {

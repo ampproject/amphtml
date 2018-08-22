@@ -1,7 +1,9 @@
 import {AmpSkimlinks} from '../amp-skimlinks';
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
+import {Services} from '../../../../src/services';
 import {pubcode} from './constants';
 import Tracking from '../tracking';
+
 
 
 const helpersFactory = env => {
@@ -23,6 +25,11 @@ const helpersFactory = env => {
       return {
         fetchJson: env.sandbox.stub().returns(Promise.resolve(response)),
       };
+    },
+
+    mockServiceGetter(getterName, returnValue) {
+      env.sandbox.stub(Services, getterName);
+      Services[getterName].returns(returnValue);
     },
 
     stubCustomEventReporterBuilder() {
