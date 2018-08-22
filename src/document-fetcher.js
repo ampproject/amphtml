@@ -90,9 +90,7 @@ function xhrRequest(input, init) {
             },
           },
         };
-        const body = 'response' in xhr
-          ? xhr.response : xhr.responseText;
-        const response = new Response(/** @type {string} */ (body || ''), /** @type {!ResponseInit} */ (options));
+        const response = new Response('', /** @type {!ResponseInit} */ (options));
         const promise = assertSuccess(response)
             .then(response => ({response, xhr}));
         resolve(promise);
