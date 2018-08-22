@@ -47,7 +47,7 @@ export class LinkerManager {
     /** @private {?string} */
     this.type_ = type;
 
-    /** @private {!Array<Promise>} @visibleForTesting */
+    /** @private {!Array<Promise>} */
     this.allLinkerPromises_ = [];
 
     /** @private {JsonObject} */
@@ -195,13 +195,14 @@ export class LinkerManager {
       return;
     }
 
-    // If no domains given, default to canonical and source.
     let /** @type {Array} */ domains = config['destinationDomains'];
-    if (!Array.isArray(domains)) {
+    // If given domains, but not in the right format.
+    if (domains && !Array.isArray(domains)) {
       user().warn(TAG, `${name} destinationDomains must be an array.`);
       return;
     }
 
+    // If no domains given, default to canonical and source.
     if (!domains) {
       const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(
           this.ampdoc_);
