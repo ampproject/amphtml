@@ -1,14 +1,13 @@
 
 import {addParamsToUrl,parseUrlDeprecated} from '../../../src/url';
 
-import {AFFILIATION_API, PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
+import {AFFILIATION_API, DOMAIN_RESOLVER_API_URL, PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
 
 export const LINK_STATUS__AFFILIATE = 'affiliate';
 export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
 export const LINK_STATUS__IGNORE_LINK = 'ignore';
 export const LINK_STATUS__UNKNOWN = 'unknown';
-export const DOMAIN_RESOLVER_URL = 'https://r.skimresources.com/api';
 
 export default class AffiliateLinkResolver {
   /**
@@ -202,7 +201,7 @@ export default class AffiliateLinkResolver {
       domains,
     };
 
-    const beaconUrl = `${DOMAIN_RESOLVER_URL}?data=${JSON.stringify(data)}`;
+    const beaconUrl = `${DOMAIN_RESOLVER_API_URL}?data=${JSON.stringify(data)}`;
     const fetchOptions = {
       method: 'GET',
       // Disabled AMP CORS for dev

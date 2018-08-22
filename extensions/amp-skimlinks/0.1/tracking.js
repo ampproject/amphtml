@@ -44,7 +44,6 @@ export default class Tracking {
     // Note: Analytics are not ready until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(element);
     analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
-    // analyticsBuilder.track('page-impressions', `${TRACKING_API_URL}/track.php?canonnical=CANONICAL_URL&ampdoc=AMPDOC_URL&source=SOURCE_URL&document_referrer=\${documentReferrer}`);
     analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
     analyticsBuilder.track('non-affiliate-click', NA_CLICK_TRACKING_URL);
 

@@ -1,10 +1,10 @@
 
-import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-classes';
+import {DOMAIN_RESOLVER_API_URL, XCUST_ATTRIBUTE_NAME} from '../constants';
 import {Services} from '../../../../src/services';
-import {XCUST_ATTRIBUTE_NAME} from '../constants';
+import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-classes';
 import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
 import {pubcode} from './constants';
-import AffiliateLinkResolver, {DOMAIN_RESOLVER_URL, LINK_STATUS__AFFILIATE, LINK_STATUS__NON_AFFILIATE, LINK_STATUS__UNKNOWN} from '../affiliate-link-resolver';
+import AffiliateLinkResolver, {LINK_STATUS__AFFILIATE, LINK_STATUS__NON_AFFILIATE, LINK_STATUS__UNKNOWN} from '../affiliate-link-resolver';
 
 import helpersFactory from './helpers';
 
@@ -186,7 +186,7 @@ describes.fakeWin('domain-resolver', {
           domains,
         };
 
-        const url = `${DOMAIN_RESOLVER_URL}?data=${JSON.stringify(expectedData)}`;
+        const url = `${DOMAIN_RESOLVER_API_URL}?data=${JSON.stringify(expectedData)}`;
         const response = {
           json: () => (Promise.resolve({})),
         };
@@ -207,7 +207,7 @@ describes.fakeWin('domain-resolver', {
           domains,
         };
 
-        const url = `${DOMAIN_RESOLVER_URL}?data=${JSON.stringify(expectedData)}`;
+        const url = `${DOMAIN_RESOLVER_API_URL}?data=${JSON.stringify(expectedData)}`;
         const fetchOptions = {
           method: 'GET',
           // Disabled AMP CORS
