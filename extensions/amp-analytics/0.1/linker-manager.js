@@ -196,7 +196,12 @@ export class LinkerManager {
     }
 
     // If no domains given, default to canonical and source.
-    let domains = config['destinationDomains'];
+    let /** @type {Array} */ domains = config['destinationDomains'];
+    if (!Array.isArray(domains)) {
+      user().warn(TAG, `${name} destinationDomains must be an array.`);
+      return;
+    }
+
     if (!domains) {
       const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(
           this.ampdoc_);
