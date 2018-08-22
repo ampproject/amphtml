@@ -27,6 +27,7 @@ tags: {  # amp-mowplayer
 tags: {  # <amp-mowplayer>
   html_format: AMP
   tag_name: "AMP-MOWPLAYER"
+  attrs: { name: "autoplay" }
   attrs: {
     name: "data-mediaid"
     mandatory: true
