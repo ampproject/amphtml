@@ -16,7 +16,6 @@
 
 /**
  * @fileoverview Embeds an Audioburst audio player
- * @author Audioburst
  *
  * Example:
  * <code>
@@ -26,8 +25,7 @@
  *  height="315"
  *  src="https://sapi.audioburst.com/audio/repo/play/web/l1AXp9wBR57y.mp3"
  *  fullShow="http://storageaudiobursts.blob.core.windows.net/temp/11760_2018081122_t.mp3"
- *  fullShowPosition="640">
- * </amp-audioburst-audio>
+ *  fullShowPosition="640"></amp-audioburst-audio>
  */
 
 import {Layout} from '../../../src/layout';
@@ -50,8 +48,8 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
     this.fullShowSrc_ = undefined;
     /** @private {number} */
     this.fullShowPosition_ = 0;
-    /** @public {boolean} */
-    this.isPlaying = false;
+    /** @private {boolean} */
+    this.isPlaying_ = false;
     /** @public {boolean} */
     this.ended = false;
     /** @public {number} */
@@ -94,9 +92,9 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
   layoutCallback() {
     this.viewport_ = Services.viewportForDoc(this.getAmpDoc());
     this.burstSrc_ = this.element.getAttribute('src');
-    this.fullShowSrc_ = this.element.getAttribute('fullShow');
+    this.fullShowSrc_ = this.element.getAttribute('full-show');
     this.fullShowPosition_ =
-      Number(this.element.getAttribute('fullShowPosition'));
+      Number(this.element.getAttribute('full-show-position'));
     setStyles(this.container_, {
       'padding': '2em 1em',
       'text-align': 'center',
@@ -213,7 +211,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
 
   /** */
   play() {
-    if (this.audio_ && !this.isPlaying) {
+    if (this.audio_ && !this.isPlaying_) {
       this.audio_.play();
       this.setPlaying_(true);
     }
@@ -221,7 +219,7 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
 
   /** */
   pause() {
-    if (this.audio_ && this.isPlaying) {
+    if (this.audio_ && this.isPlaying_) {
       this.audio_.pause();
       this.setPlaying_(false);
     }
@@ -232,13 +230,13 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
   */
   setPlaying_(playing) {
     if (!!playing) {
-      this.isPlaying = true;
+      this.isPlaying_ = true;
       if (this.playBtn_ && this.pauseBtn_) {
         setStyle(this.playBtn_, 'display', 'none');
         setStyle(this.pauseBtn_, 'display', 'flex');
       }
     } else {
-      this.isPlaying = false;
+      this.isPlaying_ = false;
       setStyle(this.pauseBtn_, 'display', 'none');
       setStyle(this.playBtn_, 'display', 'flex');
     }
@@ -457,4 +455,8 @@ export class AmpAudioburstAudio extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-audioburst-audio', AmpAudioburstAudio);
+const TAG = 'amp-audioburst-audio';
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAudioburstAudio);
+});
