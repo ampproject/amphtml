@@ -1,10 +1,10 @@
 
 import {DOMAIN_RESOLVER_API_URL, XCUST_ATTRIBUTE_NAME} from '../constants';
 import {Services} from '../../../../src/services';
-import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-classes';
+import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-helpers';
 import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
 import {pubcode} from './constants';
-import AffiliateLinkResolver, {LINK_STATUS__AFFILIATE, LINK_STATUS__NON_AFFILIATE, LINK_STATUS__UNKNOWN} from '../affiliate-link-resolver';
+import AffiliateLinkResolver, {STATUS__AFFILIATE, STATUS__NON_AFFILIATE, STATUS__UNKNOWN} from '../affiliate-link-resolver';
 
 import helpersFactory from './helpers';
 
@@ -35,9 +35,9 @@ describes.fakeWin('domain-resolver', {
 
   describe('resolveUnknownAnchors', () => {
     const alreadyResolvedDomains = {
-      'merchant1.com': LINK_STATUS__AFFILIATE,
-      'non-merchant.com': LINK_STATUS__NON_AFFILIATE,
-      'merchant2.com': LINK_STATUS__AFFILIATE,
+      'merchant1.com': STATUS__AFFILIATE,
+      'non-merchant.com': STATUS__NON_AFFILIATE,
+      'merchant2.com': STATUS__AFFILIATE,
     };
     let resolver;
     let anchorList;
@@ -155,9 +155,9 @@ describes.fakeWin('domain-resolver', {
         resolver.resolveUnknownAnchors(anchorList);
         expect(requestIsPending).to.be.true;
         expect(resolver.domains_).to.deep.equal({
-          'merchant1.com': LINK_STATUS__UNKNOWN,
-          'non-merchant.com': LINK_STATUS__UNKNOWN,
-          'merchant2.com': LINK_STATUS__UNKNOWN,
+          'merchant1.com': STATUS__UNKNOWN,
+          'non-merchant.com': STATUS__UNKNOWN,
+          'merchant2.com': STATUS__UNKNOWN,
         });
       });
     });
@@ -301,7 +301,7 @@ describes.fakeWin('domain-resolver', {
       it('Should only return the "pending" anchors in the asyncResponse', () => {
         const initialAnchor = helpers.createAnchor('https://initial-merchant.com');
         resolver.domains_ = {
-          'initial-merchant.com': LINK_STATUS__AFFILIATE,
+          'initial-merchant.com': STATUS__AFFILIATE,
         };
         // Initial anchor should not be in the asyncResponse list
         const expectedAsyncData = [

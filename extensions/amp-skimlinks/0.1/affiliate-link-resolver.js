@@ -2,12 +2,12 @@
 import {addParamsToUrl,parseUrlDeprecated} from '../../../src/url';
 
 import {AFFILIATION_API, DOMAIN_RESOLVER_API_URL, PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
-import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-classes';
+import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-helpers';
 
-export const LINK_STATUS__AFFILIATE = 'affiliate';
-export const LINK_STATUS__NON_AFFILIATE = 'non-affiliate';
-export const LINK_STATUS__IGNORE_LINK = 'ignore';
-export const LINK_STATUS__UNKNOWN = 'unknown';
+export const STATUS__AFFILIATE = 'affiliate';
+export const STATUS__NON_AFFILIATE = 'non-affiliate';
+export const STATUS__IGNORE_LINK = 'ignore';
+export const STATUS__UNKNOWN = 'unknown';
 
 export default class AffiliateLinkResolver {
   /**
@@ -37,7 +37,7 @@ export default class AffiliateLinkResolver {
 
     const domainsToAsk = this.getNewDomains_(anchorList);
     if (domainsToAsk.length) {
-      // Set domains to LINK_STATUS__UNKNOWN to mark them as already requested.
+      // Set domains to STATUS__UNKNOWN to mark them as already requested.
       this.markDomainsAsUnknown(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
       const pendingAnchors = this.getPendingAnchors_(anchorList, domainsToAsk);
@@ -94,7 +94,7 @@ export default class AffiliateLinkResolver {
     const anchorListNormalised = anchorList.map(anchor => {
       const status = this.getDomainAffiliateStatus_(this.getLinkDomain(anchor));
       // Always replace unknown, we will overwrite them after asking beacon if needed
-      if (status === LINK_STATUS__AFFILIATE || status === LINK_STATUS__UNKNOWN) {
+      if (status === STATUS__AFFILIATE || status === STATUS__UNKNOWN) {
         const replacementUrl = this.getWaypointUrl_(anchor);
         return createAnchorReplacementTuple(anchor, replacementUrl);
       }
@@ -111,10 +111,10 @@ export default class AffiliateLinkResolver {
    */
   getDomainAffiliateStatus_(domain) {
     if (this.isExcludedDomain_(domain)) {
-      return LINK_STATUS__IGNORE_LINK;
+      return STATUS__IGNORE_LINK;
     }
 
-    return this.domains_[domain] || LINK_STATUS__UNKNOWN;
+    return this.domains_[domain] || STATUS__UNKNOWN;
   }
 
   /**
@@ -144,15 +144,15 @@ export default class AffiliateLinkResolver {
   markDomainsAsUnknown(domains) {
     domains.forEach(domain => {
       const domainStatus = this.domains_[domain];
-      if (domainStatus && domainStatus !== LINK_STATUS__UNKNOWN) {
+      if (domainStatus && domainStatus !== STATUS__UNKNOWN) {
         return;
       }
 
       if (this.isExcludedDomain_(domain)) {
-        this.domains_[domain] = LINK_STATUS__IGNORE_LINK;
+        this.domains_[domain] = STATUS__IGNORE_LINK;
       }
 
-      this.domains_[domain] = LINK_STATUS__UNKNOWN;
+      this.domains_[domain] = STATUS__UNKNOWN;
     });
   }
 
@@ -225,8 +225,8 @@ export default class AffiliateLinkResolver {
     allDomains.forEach(domain => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
       this.domains_[domain] = isAffiliateDomain ?
-        LINK_STATUS__AFFILIATE :
-        LINK_STATUS__NON_AFFILIATE;
+        STATUS__AFFILIATE :
+        STATUS__NON_AFFILIATE;
     });
   }
 
