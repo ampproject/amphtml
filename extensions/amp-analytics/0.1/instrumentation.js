@@ -20,7 +20,6 @@ import {
 } from './analytics-root';
 import {
   AnalyticsEvent,
-  AnalyticsEventType,
   CustomEventTracker,
   getTrackerKeyName,
   getTrackerTypesForParentType,
@@ -35,25 +34,8 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {hasOwn} from '../../../src/utils/object';
 
 const PROP = '__AMP_AN_ROOT';
-
-/** @const {string} */
-const TAG = 'Analytics.Instrumentation';
-
-/**
- * Events that can result in analytics data to be sent.
- * @const {Array<AnalyticsEventType>}
- */
-const ALLOWED_IN_EMBED = [
-  AnalyticsEventType.VISIBLE,
-  AnalyticsEventType.CLICK,
-  AnalyticsEventType.TIMER,
-  AnalyticsEventType.SCROLL,
-  AnalyticsEventType.HIDDEN,
-];
-
 
 /**
  * @implements {../../../src/service.Disposable}

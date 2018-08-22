@@ -24,7 +24,7 @@ import {
   ScrollEventTracker,
   SignalTracker,
   TimerEventTracker,
-  VisibilityTracker
+  VisibilityTracker,
 } from '../events';
 import {Signals} from '../../../../src/utils/signals';
 
@@ -167,14 +167,14 @@ describes.realWin('Events', {amp: 1}, env => {
       'scrollSpec': {
         'verticalBoundaries': [0, 100],
         'horizontalBoundaries': [0, 100],
-      }
+      },
     };
 
     beforeEach(() => {
       tracker = root.getTracker('scroll', ScrollEventTracker);
       fakeViewport = {
         'getSize': sandbox.stub().returns(
-          {top: 0, left: 0, height: 200, width: 200}),
+            {top: 0, left: 0, height: 200, width: 200}),
         'getScrollTop': sandbox.stub().returns(0),
         'getScrollLeft': sandbox.stub().returns(0),
         'getScrollHeight': sandbox.stub().returns(500),
@@ -187,8 +187,6 @@ describes.realWin('Events', {amp: 1}, env => {
     it('should initalize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
       expect(tracker.scrollObservable_.getHandlerCount()).to.equal(0);
-
-      const sandboxStub = sandbox.stub();
 
       tracker.add(undefined, 'scroll', defaultScrollConfig, sandbox.stub());
       expect(tracker.scrollObservable_.getHandlerCount()).to.equal(1);
@@ -203,11 +201,11 @@ describes.realWin('Events', {amp: 1}, env => {
       const fn2 = sandbox.stub();
       tracker.add(undefined, 'scroll', defaultScrollConfig, fn1);
       tracker.add(undefined, 'scroll', {
-        'on': 'scroll', 
+        'on': 'scroll',
         'scrollSpec': {
-          'verticalBoundaries': [92], 
-          'horizontalBoundaries': [92]
-        }
+          'verticalBoundaries': [92],
+          'horizontalBoundaries': [92],
+        },
       }, fn2);
 
       function matcher(expected) {
@@ -217,8 +215,14 @@ describes.realWin('Events', {amp: 1}, env => {
         };
       }
       expect(fn1).to.have.callCount(2);
-      expect(fn1.getCall(0).calledWithMatch(sinon.match(matcher(0)))).to.be.true;
-      expect(fn1.getCall(1).calledWithMatch(sinon.match(matcher(0)))).to.be.true;
+      expect(
+          fn1.getCall(0)
+              .calledWithMatch(sinon.match(matcher(0)))
+      ).to.be.true;
+      expect(
+          fn1.getCall(1)
+              .calledWithMatch(sinon.match(matcher(0)))
+      ).to.be.true;
       expect(fn2).to.have.not.been.called;
 
       // Scroll Down
@@ -228,12 +232,18 @@ describes.realWin('Events', {amp: 1}, env => {
 
       expect(fn1).to.have.callCount(4);
       expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be
-        .true;
+          .true;
       expect(fn1.getCall(3).calledWithMatch(sinon.match(matcher(100)))).to.be
-        .true;
+          .true;
       expect(fn2).to.have.callCount(2);
-      expect(fn2.getCall(0).calledWithMatch(sinon.match(matcher(90)))).to.be.true;
-      expect(fn2.getCall(1).calledWithMatch(sinon.match(matcher(90)))).to.be.true;
+      expect(
+          fn2.getCall(0)
+              .calledWithMatch(sinon.match(matcher(90)))
+      ).to.be.true;
+      expect(
+          fn2.getCall(1)
+              .calledWithMatch(sinon.match(matcher(90)))
+      ).to.be.true;
     });
 
     it('does not fire duplicates on scroll', () => {
@@ -255,20 +265,23 @@ describes.realWin('Events', {amp: 1}, env => {
         tracker.add(undefined, 'scroll', {'on': 'scroll'}, fn1);
         expect(fn1).to.have.not.been.called;
 
-        tracker.add(undefined, 'scroll', {'on': 'scroll', 'scrollSpec': {}}, fn1);
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {},
+        }, fn1);
         expect(fn1).to.have.not.been.called;
 
         tracker.add(undefined, 'scroll', {
           'on': 'scroll',
           'scrollSpec': {
             'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
-          }
+          },
         }, fn1);
         expect(fn1).to.have.not.been.called;
 
         tracker.add(undefined, 'scroll', {
           'on': 'scroll',
-          'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []}
+          'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []},
         }, fn1);
         expect(fn1).to.have.not.been.called;
 
@@ -276,7 +289,7 @@ describes.realWin('Events', {amp: 1}, env => {
           'on': 'scroll',
           'scrollSpec': {
             'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
-          }
+          },
         }, fn1);
         expect(fn1).to.have.not.been.called;
       });
@@ -301,16 +314,16 @@ describes.realWin('Events', {amp: 1}, env => {
       const fn1 = sandbox.stub();
       const fn2 = sandbox.stub();
       tracker.add(undefined, 'scroll', {
-        'on': 'scroll', 
+        'on': 'scroll',
         'scrollSpec': {
-          'verticalBoundaries': [1]
-        }
+          'verticalBoundaries': [1],
+        },
       }, fn1);
       tracker.add(undefined, 'scroll', {
-        'on': 'scroll', 
+        'on': 'scroll',
         'scrollSpec': {
-          'verticalBoundaries': [4]
-        }
+          'verticalBoundaries': [4],
+        },
       }, fn2);
       expect(fn2).to.be.calledOnce;
     });

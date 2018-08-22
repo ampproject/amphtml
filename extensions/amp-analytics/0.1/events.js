@@ -21,13 +21,13 @@ import {
   VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {hasOwn} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
-import {Services} from '../../../src/services';
 
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -414,7 +414,7 @@ export class ClickEventTracker extends EventTracker {
  * Tracks scroll events.
  */
 export class ScrollEventTracker extends EventTracker {
-  
+
   /**
    * @param {!./analytics-root.AnalyticsRoot} root
    */
@@ -426,7 +426,7 @@ export class ScrollEventTracker extends EventTracker {
 
     /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(root.ampdoc);
-    
+
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
   }
@@ -500,7 +500,13 @@ export class ScrollEventTracker extends EventTracker {
         bounds[bound] = true;
         const vars = Object.create(null);
         vars[varName] = b;
-        listener(new AnalyticsEvent(this.root_, AnalyticsEventType.SCROLL, vars));
+        listener(
+            new AnalyticsEvent(
+                this.root_,
+                AnalyticsEventType.SCROLL,
+                vars
+            )
+        );
       }
     };
 
@@ -510,11 +516,11 @@ export class ScrollEventTracker extends EventTracker {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       triggerScrollEvents(boundsV,
-        (e.top + e.height) * 100 / this.viewport_.getScrollHeight(),
-        VAR_V_SCROLL_BOUNDARY);
+          (e.top + e.height) * 100 / this.viewport_.getScrollHeight(),
+          VAR_V_SCROLL_BOUNDARY);
       triggerScrollEvents(boundsH,
-        (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
-        VAR_H_SCROLL_BOUNDARY);
+          (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
+          VAR_H_SCROLL_BOUNDARY);
     });
   }
 

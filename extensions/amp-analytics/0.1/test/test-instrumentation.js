@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {
-  AnalyticsEventType,
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
+  ScrollEventTracker,
   SignalTracker,
   TimerEventTracker,
   VisibilityTracker,
-  ScrollEventTracker
 } from '../events';
 
 import {
   InstrumentationService,
 } from '../instrumentation.js';
-import {Services} from '../../../../src/services';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {
-  installResourcesServiceForDoc,
-} from '../../../../src/service/resources-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;
@@ -94,7 +86,6 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
 
   describe('AnalyticsGroup', () => {
     let group;
-    let insStub;
 
     beforeEach(() => {
       group = service.createAnalyticsGroup(analyticsElement);
@@ -145,7 +136,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       group.addTrigger(config, handler);
       expect(stub).to.be.calledOnce;
       expect(stub).to.be.calledWith(
-        analyticsElement, 'scroll', config, handler);
+          analyticsElement, 'scroll', config, handler);
       expect(group.listeners_).to.have.length(1);
       expect(group.listeners_[0]).to.equal(unlisten);
     });
