@@ -264,8 +264,9 @@ export class AmpAnalytics extends AMP.BaseElement {
         const hasRequestOrPostMessage = trigger['request'] ||
             (trigger['parentPostMessage'] && this.isInabox_);
         if (!trigger['on'] || !hasRequestOrPostMessage) {
-          this.user().error(TAG, '"on" and "request" ' +
-              'attributes are required for data to be collected.');
+          const errorMsgSeg = this.isInabox_ ? '/"parentPostMessage"' : '';
+          this.user().error(TAG, '"on" and "request"' + errorMsgSeg +
+              ' attributes are required for data to be collected.');
           continue;
         }
         // Check for not supported trigger for sandboxed analytics
@@ -445,10 +446,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   generateRequests_() {
-    if (!this.config_ || !this.config_['requests']) {
-      const TAG = this.getName_();
-      this.user().error(TAG, 'No request strings defined. Analytics ' +
+    if (!this.config_['requests']) {
+      if (!this.isInabox_) {
+        const TAG = this.getName_();
+        this.user().error(TAG, 'No request strings defined. Analytics ' +
           'data will not be sent from this page.');
+      }
       return;
     }
 
@@ -524,7 +527,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (requestName != undefined && !request) {
       const TAG = this.getName_();
-      this.user().error(TAG, 'Ignoring event. Request string ' +
+      this.user().error(TAG, 'Ignoring request for event. Request string ' +
           'not found: ', trigger['request']);
       if (!hasPostMessage) {
         return;
