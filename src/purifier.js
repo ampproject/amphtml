@@ -309,8 +309,12 @@ export function purifyHtml(dirty) {
     allowedAttributes = data.allowedAttributes;
 
     const allowAttribute = () => {
-      allowedAttributes[attrName] = true;
-      allowedAttributesChanges.push(attrName);
+      // Only add new attributes to `allowedAttributesChanges` to avoid removing
+      // default-supported attributes later erroneously.
+      if (!allowedAttributes[attrName]) {
+        allowedAttributes[attrName] = true;
+        allowedAttributesChanges.push(attrName);
+      }
     };
 
     // Allow all attributes for AMP elements. This avoids the need to whitelist
