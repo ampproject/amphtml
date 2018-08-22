@@ -239,7 +239,7 @@ module.exports = {
   failOnEmptyTestSuite: false,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
-  browserDisconnectTolerance: 0,
+  browserDisconnectTolerance: process.env.TRAVIS ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
