@@ -68,11 +68,6 @@ export class LinkerManager {
 
     const linkerNames = Object.keys(this.config_['linkers']);
 
-    if (!linkerNames.length) {
-      return user().error(TAG,
-          'use of "linkers" requires at least one name given.');
-    }
-
     // Each linker config has it's own set of macros to resolve.
     this.allLinkerPromises_ = linkerNames
         .filter(name => {
