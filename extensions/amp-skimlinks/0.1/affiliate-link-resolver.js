@@ -41,7 +41,8 @@ export default class AffiliateLinkResolver {
       this.markDomainsAsUnknown(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
       const pendingAnchors = this.getPendingAnchors_(anchorList, domainsToAsk);
-      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(pendingAnchors, domainsToAsk);
+      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(pendingAnchors,
+          domainsToAsk);
     }
 
     // Returns an object with a sync reponse and an async response.
@@ -93,7 +94,8 @@ export default class AffiliateLinkResolver {
   mapToAnchorReplacementTuple_(anchorList) {
     const anchorListNormalised = anchorList.map(anchor => {
       const status = this.getDomainAffiliateStatus_(this.getLinkDomain(anchor));
-      // Always replace unknown, we will overwrite them after asking beacon if needed
+      // Always replace unknown, we will overwrite them after asking
+      // the api if needed
       if (status === STATUS__AFFILIATE || status === STATUS__UNKNOWN) {
         const replacementUrl = this.getWaypointUrl_(anchor);
         return createAnchorReplacementTuple(anchor, replacementUrl);
@@ -157,7 +159,8 @@ export default class AffiliateLinkResolver {
   }
 
   /**
-   * Get the list of anchors for which the domain of the href is in the `domainsToAsk` list.
+   * Get the list of anchors for which the domain of the href is
+   * in the `domainsToAsk` list.
    * @param {*} anchorList
    * @param {string[]} domainsToAsk
    */
@@ -184,7 +187,8 @@ export default class AffiliateLinkResolver {
     }
 
     return promise.then(data => {
-      this.updateDomainsStatusMapPostFetch_(domainsToAsk, data.merchant_domains || []);
+      const merchantDomains = data.merchant_domains || [];
+      this.updateDomainsStatusMapPostFetch_(domainsToAsk, merchantDomains);
 
       return this.mapToAnchorReplacementTuple_(anchorList);
     });

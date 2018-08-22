@@ -41,7 +41,7 @@ export default class Tracking {
    * @param {*} element
    */
   setupAnalytics_(element) {
-    // Note: Analytics are not ready until CommonSignals.LOAD_START is triggered.
+    // Analytics are not ready until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(element);
     analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
     analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
@@ -74,15 +74,20 @@ export default class Tracking {
 
   /**
    * Send Page impression and link impressions
-   * @param {*} userSessionData
    * @param {*} anchorStatusMap
    * @param {*} startTime
    */
-  sendImpressionTracking(userSessionData, anchorStatusMap, startTime) {
+  sendImpressionTracking(anchorStatusMap, startTime) {
     if (!this.tracking_) {
       return;
     }
-    const {pageImpressionId, timezone, pubcode, pageUrl, guid} = this.trackingInfo_;
+    const {
+      pageImpressionId,
+      timezone,
+      pubcode,
+      pageUrl,
+      guid,
+    } = this.trackingInfo_;
 
     const commonData = {
       pub: pubcode,
@@ -99,7 +104,11 @@ export default class Tracking {
     } = this.extractAnchorTrackingInfo_(anchorStatusMap);
 
 
-    this.sendPageImpressionTracking_(commonData, numberAffiliateLinks, startTime);
+    this.sendPageImpressionTracking_(
+        commonData,
+        numberAffiliateLinks,
+        startTime
+    );
     this.sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls);
   }
 
@@ -208,5 +217,3 @@ export default class Tracking {
     };
   }
 }
-
-

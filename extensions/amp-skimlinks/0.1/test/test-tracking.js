@@ -107,7 +107,7 @@ describes.fakeWin('test-tracking', {
       env.sandbox.stub(trackingService, 'extractAnchorTrackingInfo_')
           .returns({numberAffiliateLinks: 0, urls: []});
 
-      trackingService.sendImpressionTracking({}, new Map(), startTime);
+      trackingService.sendImpressionTracking(new Map(), startTime);
       const stub = trackingService.analytics_.trigger;
       expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
       expect(stub.withArgs('link-impressions').calledOnce).to.be.true;
@@ -118,7 +118,7 @@ describes.fakeWin('test-tracking', {
       env.sandbox.stub(trackingService, 'extractAnchorTrackingInfo_')
           .returns({numberAffiliateLinks: 0, urls: []});
 
-      trackingService.sendImpressionTracking({}, new Map(), startTime);
+      trackingService.sendImpressionTracking(new Map(), startTime);
       const stub = trackingService.analytics_.trigger;
       expect(stub.withArgs('page-impressions').called).to.be.false;
       expect(stub.withArgs('link-impressions').called).to.be.false;
@@ -143,7 +143,7 @@ describes.fakeWin('test-tracking', {
           pageImpressionId: expectedData.uuid,
           guid: expectedData.guid,
         });
-        trackingService.sendImpressionTracking({}, new Map(), startTime);
+        trackingService.sendImpressionTracking(new Map(), startTime);
         const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'page-impressions');
 
         expect(urlVars.data).to.be.a.string;
@@ -157,7 +157,7 @@ describes.fakeWin('test-tracking', {
 
       it('Should set slc param correctly', () => {
         const trackingService = helpers.createTrackingWithStubAnalytics({});
-        trackingService.sendImpressionTracking({}, createFakeAnchorReplacementMap(), startTime);
+        trackingService.sendImpressionTracking(createFakeAnchorReplacementMap(), startTime);
         const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'page-impressions');
 
         expect(urlVars.data).to.be.a.string;
@@ -168,7 +168,7 @@ describes.fakeWin('test-tracking', {
 
       it('Should send the xcust to the page impressions request', () => {
         trackingService = setupTrackingService({customTrackingId: 'xcust-id'});
-        trackingService.sendImpressionTracking({}, new Map(), startTime);
+        trackingService.sendImpressionTracking(new Map(), startTime);
 
         const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'page-impressions');
         const trackingData = JSON.parse(urlVars.data);
@@ -193,7 +193,7 @@ describes.fakeWin('test-tracking', {
           pageImpressionId: expectedData.uuid,
           guid: expectedData.guid,
         });
-        trackingService.sendImpressionTracking({}, new Map(), startTime);
+        trackingService.sendImpressionTracking(new Map(), startTime);
         const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'link-impressions');
 
         expect(urlVars.data).to.be.a.string;
@@ -204,7 +204,7 @@ describes.fakeWin('test-tracking', {
 
     it('Should set dl and hae', () => {
       const trackingService = helpers.createTrackingWithStubAnalytics({});
-      trackingService.sendImpressionTracking({}, createFakeAnchorReplacementMap(), startTime);
+      trackingService.sendImpressionTracking(createFakeAnchorReplacementMap(), startTime);
       const urlVars = helpers.getAnalyticsUrlVars(trackingService, 'link-impressions');
 
       expect(urlVars.data).to.be.a.string;

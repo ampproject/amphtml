@@ -60,8 +60,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // Update tracking service with extra info.
     this.trackingService.setTrackingInfo({guid});
     this.trackingService.sendImpressionTracking(
-        // TODO, change signature to remove this since it's set before through the setter
-        {guid},
         this.skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
         startTime,
     );
@@ -75,7 +73,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
   onPageScanned_() {
     let onBeaconApiResponse = this.affiliateLinkResolver.firstRequest;
     if (!onBeaconApiResponse) {
-      onBeaconApiResponse = this.affiliateLinkResolver.fetchDomainResolverApi([]);
+      onBeaconApiResponse = this.affiliateLinkResolver.fetchDomainResolverApi(
+          []);
     }
 
     return onBeaconApiResponse.then(this.sendImpressionTracking_.bind(this));
