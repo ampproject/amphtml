@@ -46,7 +46,7 @@ amp-consent {
   height: auto !important;
   margin: 0 !important;
   padding: 0 !important;
-  text-align: left !important;
+  text-align: start !important;
   width: auto !important;
 }
 
@@ -367,7 +367,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   padding: 0 !important;
   position: fixed !important;
   right: 0 !important;
-  text-align: left !important;
+  text-align: start !important;
   z-index: 100002 !important;
 }
 

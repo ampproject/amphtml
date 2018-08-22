@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Action, getStoreService} from './amp-story-store-service';
+import {Action, StateProperty, getStoreService} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
   closestByTag,
@@ -197,7 +197,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
   buildCallback() {
     this.assertAndParseConfig_();
 
-    const storyEl = closestByTag(this.element, 'AMP-STORY');
+    const storyEl =
+        dev().assertElement(closestByTag(this.element, 'AMP-STORY'));
     const consentEl = closestByTag(this.element, 'AMP-CONSENT');
     const consentId = consentEl.id;
 
@@ -205,10 +206,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    if (!logoSrc) {
+    logoSrc ?
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src') :
       user().warn(
           TAG, 'Expected "publisher-logo-src" attribute on <amp-story>');
-    }
 
     // Story consent config is set by the `assertAndParseConfig_` method.
     if (this.storyConsentConfig_) {
@@ -233,11 +234,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
     return layout == Layout.NODISPLAY;
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return false;
-  }
-
   /**
    * @private
    */
@@ -249,6 +245,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentEl_.querySelector('.i-amphtml-story-consent-overflow');
     this.scrollableEl_.addEventListener(
         'scroll', throttle(this.win, () => this.onScroll_(), 100));
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -280,8 +280,22 @@ export class AmpStoryConsent extends AMP.BaseElement {
           .classList.toggle('i-amphtml-story-consent-fullbleed', isFullBleed);
     };
 
-    this.element.getResources()
-        .measureMutateElement(this.storyConsentEl_, measurer, mutator);
+    this.measureMutateElement(measurer, mutator, this.storyConsentEl_);
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    const mutator = () => {
+      rtlState ?
+        this.storyConsentEl_.setAttribute('dir', 'rtl') :
+        this.storyConsentEl_.removeAttribute('dir');
+    };
+
+    this.mutateElement(mutator, this.storyConsentEl_);
   }
 
   /**

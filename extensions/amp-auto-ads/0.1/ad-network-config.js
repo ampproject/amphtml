@@ -18,6 +18,10 @@ import {
   AdSenseAmpAutoAdsHoldoutBranches,
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {
+  AdSenseAmpAutoAdsResponsiveBranches,
+  getAdSenseAmpAutoAdsResponsiveExperimentBranch,
+} from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
@@ -41,6 +45,13 @@ class AdNetworkConfigDef {
    * @return {boolean} true if amp-auto-ads should be enabled on this pageview.
    */
   isEnabled(unusedWin) {}
+
+  /**
+   * Indicates whether amp-auto-ads should be displayed at full-width.
+   * @param {!Window} unusedWin
+   * @return {boolean} true if amp-auto-ads full-width responsive is enabled.
+   */
+  isResponsiveEnabled(unusedWin) {}
 
   /**
    * @return {string}
@@ -102,6 +113,14 @@ class AdSenseNetworkConfig {
     return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
   }
 
+  /**
+   * @param {!Window} win
+   */
+  isResponsiveEnabled(win) {
+    const branch = getAdSenseAmpAutoAdsResponsiveExperimentBranch(win);
+    return branch != AdSenseAmpAutoAdsResponsiveBranches.CONTROL;
+  }
+
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
@@ -159,6 +178,13 @@ class DoubleclickNetworkConfig {
    */
   isEnabled(unused) {
     return true;
+  }
+
+  /**
+   * @param {!Window} unusedWin
+   */
+  isResponsiveEnabled(unusedWin) {
+    return false;
   }
 
   /** @override */

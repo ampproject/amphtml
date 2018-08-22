@@ -1291,7 +1291,7 @@ describe('Viewer', () => {
       });
     }
 
-    describe('should trust domain variations', () => {
+    describe('should trust trusted viewer origins', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
@@ -1308,6 +1308,7 @@ describe('Viewer', () => {
       test('https://abc.www.google.com', true);
       test('https://google.cat', true);
       test('https://www.google.cat', true);
+      test('x-thread://', true);
     });
 
     describe('should not trust host as referrer with http', () => {
@@ -1666,30 +1667,6 @@ describe('Viewer', () => {
       });
       clock.tick(1010);
       return result;
-    });
-  });
-
-  describe('navigateTo', () => {
-    const ampUrl = 'https://cdn.ampproject.org/test/123';
-    it('should message viewer if a2a capability is supported', () => {
-      windowApi.location.hash = '#cap=a2a';
-      const viewer = new Viewer(ampdoc);
-      const send = sandbox.stub(viewer, 'sendMessage');
-      const result = viewer.navigateToAmpUrl(ampUrl, 'abc123');
-      expect(send.lastCall.args[0]).to.equal('a2aNavigate');
-      expect(send.lastCall.args[1]).to.jsonEqual({
-        url: ampUrl,
-        requestedBy: 'abc123',
-      });
-      expect(result).to.be.true;
-    });
-
-    it('should return false if a2a capability is not supported', () => {
-      const viewer = new Viewer(ampdoc);
-      const send = sandbox.stub(viewer, 'sendMessage');
-      const result = viewer.navigateToAmpUrl(ampUrl, 'abc123');
-      expect(send).to.have.not.been.called;
-      expect(result).to.be.false;
     });
   });
 });

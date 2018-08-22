@@ -152,7 +152,7 @@ Additional countries may be included with the preset list as in the `myList` exa
   {
     "ISOCountryGroups": {
       "eea": [ "preset-eea" ],
-      "myList": [ "preset-eea", "ca", "au" , nz" ]
+      "myList": [ "preset-eea", "ca", "au", "nz" ]
     }
   }
   </script>

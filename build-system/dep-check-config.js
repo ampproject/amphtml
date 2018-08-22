@@ -128,6 +128,7 @@ exports.rules = [
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
+      '3p/viqeoplayer.js->src/event-helper.js',
     ],
   },
   {
@@ -150,6 +151,7 @@ exports.rules = [
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
       'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
+      'ads/google/adsense-amp-auto-ads-responsive.js->src/experiments.js',
       'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
@@ -209,6 +211,8 @@ exports.rules = [
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-viqeo-player/0.1/amp-viqeo-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brightcove/0.1/amp-brightcove.js->' +
           'src/service/video-manager-impl.js',

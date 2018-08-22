@@ -28,10 +28,9 @@
  */
 
 import {addParamToUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
+import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
 
 export const TAG = 'amp-google-document-embed';
 
@@ -75,8 +74,6 @@ export class AmpDriveViewer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, 'amp-google-document-embed'),
-        'Experiment amp-google-document-embed is disabled');
     user().assert(
         this.element.getAttribute('src'),
         'The src attribute is required for <amp-google-document-embed> %s',
@@ -97,6 +94,18 @@ export class AmpDriveViewer extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
+        value => mutations[value] !== undefined);
+    const iframe = dev().assertElement(this.iframe_);
+    this.propagateAttributes(attrs, iframe, /* opt_removeMissingAttrs */ true);
+    const src = mutations['src'];
+    if (src) {
+      iframe.src = this.getSrc_(src);
+    }
   }
 
   /**

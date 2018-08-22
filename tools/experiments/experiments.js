@@ -66,7 +66,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-access-iframe',
-    name: 'AMP Access iframe prototype',
+    name: 'AMP Access iframe prototype (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/13287',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
   },
@@ -93,6 +93,12 @@ const EXPERIMENTS = [
     name: 'AMP Auto Ads AdSense Holdout',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
+  },
+  {
+    id: 'amp-auto-ads-adsense-responsive',
+    name: 'AMP Auto Ads AdSense Responsive',
+    spec: '',
+    cleanupIssue: '',
   },
   {
     id: 'amp-google-vrview-image',
@@ -295,13 +301,6 @@ const EXPERIMENTS = [
     name: 'Enables the new Layers position/measurement system',
     spec: 'https://github.com/ampproject/amphtml/issues/3434',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
-  },
-  {
-    id: 'amp-google-document-embed',
-    name: 'Enables the experiment amp-google-document-embed component' +
-        ' which is a wrapper around the Google Drive document viewer embed.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
   },
   {
     id: 'amp-image-slider',

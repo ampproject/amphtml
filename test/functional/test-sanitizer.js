@@ -316,6 +316,11 @@ function runSanitizerTests() {
       expect(sanitizeHtml('<span validation-for="form1"></span>'))
           .to.equal('<span validation-for="form1"></span>');
     });
+
+    it('should allow <amp-lightbox> attributes', () => {
+      expect(sanitizeHtml('<amp-lightbox scrollable></amp-lightbox>'))
+          .to.equal('<amp-lightbox scrollable=""></amp-lightbox>');
+    });
   });
 
   describe('sanitizeTagsForTripleMustache', () => {

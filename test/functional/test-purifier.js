@@ -392,6 +392,11 @@ function runSanitizerTests() {
       expect(purify('<span validation-for="form1"></span>'))
           .to.equal('<span validation-for="form1"></span>');
     });
+
+    it('should allow <amp-lightbox> attributes', () => {
+      expect(purify('<amp-lightbox scrollable></amp-lightbox>'))
+          .to.equal('<amp-lightbox scrollable=""></amp-lightbox>');
+    });
   });
 
   describe('purifyTagsForTripleMustache', () => {
@@ -428,6 +433,11 @@ function runSanitizerTests() {
     it('should compensate for broken markup', () => {
       expect(purifyTagsForTripleMustache('<b>a<i>b')).to.be.equal(
           '<b>a<i>b</i></b>');
+    });
+
+    it('should support list tags', () => {
+      const html = '<ol><li></li></ol><ul></ul>';
+      expect(purifyTagsForTripleMustache(html)).to.be.equal(html);
     });
 
     describe('should sanitize `style` attribute', () => {
