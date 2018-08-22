@@ -104,24 +104,21 @@ export function sanitizeHtml(html, diffing) {
         }
         return;
       }
-      const isBinding = map();
+      const isAmpElement = startsWith(tagName, 'amp-');
       // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
       // brackets before custom validation and restoring them afterwards.
+      const bindingAttribs = [];
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
         if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
-          isBinding[i] = true;
           attribs[i] = attr.slice(1, -1);
+          bindingAttribs.push(i);
         }
       }
+
       if (cajaBlacklistedTags[tagName]) {
         ignore++;
-      } else if (startsWith(tagName, 'amp-')) {
-        // Disable DOM diffing for amp-* which don't support children mutation.
-        if (diffing) {
-          attribs.push('i-amphtml-key', String(KEY_COUNTER++));
-        }
-      } else {
+      } else if (!isAmpElement) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
@@ -133,13 +130,13 @@ export function sanitizeHtml(html, diffing) {
           // Restore some of the attributes that AMP is directly responsible
           // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
-            const attrib = attribs[i];
-            if (WHITELISTED_ATTRS.includes(attrib)) {
+            const attrName = attribs[i];
+            if (WHITELISTED_ATTRS.includes(attrName)) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+            } else if (attrName.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
-                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrib)) {
+                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrName)) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -168,8 +165,7 @@ export function sanitizeHtml(html, diffing) {
               attribs[index] = '_top';
             }
           } else if (hasHref) {
-            attribs.push('target');
-            attribs.push('_top');
+            attribs.push('target', '_top');
           }
         }
       }
@@ -179,7 +175,19 @@ export function sanitizeHtml(html, diffing) {
         }
         return;
       }
-      let emittedBindingMarkers = false;
+      // Filter out bindings with empty attribute values.
+      const hasBindings = bindingAttribs.some(i => !!attribs[i + 1]);
+      if (hasBindings) {
+        // Set a custom attribute to identify elements with bindings.
+        // This is an optimization that avoids the need for a DOM scan later.
+        attribs.push('i-amphtml-binding', '');
+      }
+      // Elements with bindings and AMP elements must opt-out of DOM diffing.
+      if (hasBindings || isAmpElement) {
+        if (diffing) {
+          attribs.push('i-amphtml-key', String(KEY_COUNTER++));
+        }
+      }
       emit('<');
       emit(tagName);
       for (let i = 0; i < attribs.length; i += 2) {
@@ -191,31 +199,17 @@ export function sanitizeHtml(html, diffing) {
           continue;
         }
         emit(' ');
-        if (isBinding[i]) {
-          emit('[' + attrName + ']');
-        } else {
-          emit(attrName);
-        }
+        emit(bindingAttribs.includes(i) ? `[${attrName}]` : attrName);
         emit('="');
         if (attrValue) {
           // Rewrite attribute values unless this attribute is a binding.
-          // Bindings contain expressions not scalars and shouldn't be modified.
-          const rewrite = (isBinding[i])
+          // Bindings contain expressions and shouldn't be rewritten.
+          const rewrite = (bindingAttribs.includes(i))
             ? attrValue
             : rewriteAttributeValue(tagName, attrName, attrValue);
           emit(htmlSanitizer.escapeAttrib(rewrite));
         }
         emit('"');
-        // Set a custom attribute to mark this element as containing a binding.
-        // This is an optimization that obviates the need for DOM scan later.
-        if (isBinding[i] && !emittedBindingMarkers) {
-          emit(' i-amphtml-binding');
-          // Disable DOM diffing for elements with bindings.
-          if (diffing && attribs.indexOf('i-amphtml-key') < 0) {
-            emit(` i-amphtml-key="${KEY_COUNTER++}"`);
-          }
-          emittedBindingMarkers = true;
-        }
       }
       emit('>');
     },
