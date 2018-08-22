@@ -321,6 +321,20 @@ function runSanitizerTests() {
       expect(sanitizeHtml('<amp-lightbox scrollable></amp-lightbox>'))
           .to.equal('<amp-lightbox scrollable=""></amp-lightbox>');
     });
+
+    it('should output "i-amphtml-key" attribute if diffing is enabled', () => {
+      // Elements with bindings should have i-amphtml-key="<number>".
+      expect(sanitizeHtml('<p [text]="foo"></p>', true)).to.match(
+          /<p \[text\]="foo" i-amphtml-binding i-amphtml-key="(\d+)"><\/p>/);
+      // AMP elements should have i-amphtml-key="<number>".
+      expect(sanitizeHtml('<amp-img></amp-img>', true)).to.match(
+          /<amp-img i-amphtml-key="(\d+)"><\/amp-img>/);
+      // AMP elements with bindings should have i-amphtml-key="<number>".
+      expect(sanitizeHtml('<amp-img [text]="foo"></amp-img>', true)).to.match(
+          /<amp-img \[text\]="foo" i-amphtml-binding i-amphtml-key="(\d+)"><\/amp-img>/);
+      // Other elements should NOT have i-amphtml-key-set.
+      expect(sanitizeHtml('<p></p>')).to.equal('<p></p>');
+    });
   });
 
   describe('sanitizeTagsForTripleMustache', () => {

@@ -255,8 +255,7 @@ export function purifyHtml(dirty, diffing = false) {
   let allowedAttributes;
   const allowedAttributesChanges = [];
 
-  // Disables DOM diffing via set-dom for a given node and instead allows it to
-  // be replaced outright.
+  // Disables DOM diffing for a given node and allows it to be replaced.
   const disableDiffingFor = node => {
     if (diffing) {
       // set-dom uses node attribute keys for opting out of diffing.

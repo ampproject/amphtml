@@ -119,7 +119,7 @@ export function sanitizeHtml(html, diffing) {
       } else if (startsWith(tagName, 'amp-')) {
         // Disable DOM diffing for amp-* which don't support children mutation.
         if (diffing) {
-          attribs.push('i-amphtml-key', KEY_COUNTER++);
+          attribs.push('i-amphtml-key', String(KEY_COUNTER++));
         }
       } else {
         // Ask Caja to validate the element as well.
@@ -210,10 +210,9 @@ export function sanitizeHtml(html, diffing) {
         // This is an optimization that obviates the need for DOM scan later.
         if (isBinding[i] && !emittedBindingMarkers) {
           emit(' i-amphtml-binding');
-          // Disable DOM diffing for elements with bindings to avoid disrupting
-          // Bind.scanAndApply().
-          if (diffing) {
-            emit(` i-amphtml-key=${KEY_COUNTER++}`);
+          // Disable DOM diffing for elements with bindings.
+          if (diffing && attribs.indexOf('i-amphtml-key') < 0) {
+            emit(` i-amphtml-key="${KEY_COUNTER++}"`);
           }
           emittedBindingMarkers = true;
         }
