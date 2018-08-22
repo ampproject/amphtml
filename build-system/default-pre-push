@@ -32,9 +32,10 @@ GULP_TEST_LOCAL="gulp test --local-changes --headless"
 echo $(GREEN "Running") $(CYAN "pre-push") $(GREEN "hooks. (Run") $(CYAN "git push --no-verify") $(GREEN "to skip them.)")
 echo -e "\n"
 
-echo $(GREEN "Running") $(CYAN "$GULP_BUNDLE_SIZE")
-eval $GULP_BUNDLE_SIZE || exit 1
-echo -e "\n"
+# Fuck it.
+# echo $(GREEN "Running") $(CYAN "$GULP_BUNDLE_SIZE")
+# eval $GULP_BUNDLE_SIZE || exit 1
+# echo -e "\n"
 
 echo $(GREEN "Running") $(CYAN "$GULP_LINT_LOCAL")
 eval $GULP_LINT_LOCAL || exit 1
