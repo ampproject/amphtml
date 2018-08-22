@@ -23,7 +23,7 @@ import {
   isValidAttr,
   rewriteAttributeValue,
 } from './purifier';
-import {dict, map} from './utils/object';
+import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {startsWith} from './string';
 import {user} from './log';
