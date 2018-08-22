@@ -337,6 +337,7 @@ const forbiddenTerms = {
     whitelist: [
       // viewer-impl.sendMessage
       'src/error.js',
+      'src/service/navigation.js',
       'src/service/viewer-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',

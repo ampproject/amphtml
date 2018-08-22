@@ -21,20 +21,31 @@ import {
 } from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {closest, copyChildren, removeChildren} from '../../../src/dom';
+import {assertHttpsUrl} from '../../../src/url';
+import {
+  closest,
+  closestByTag,
+  copyChildren,
+  removeChildren,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
+import {user} from '../../../src/log';
 
+
+/** @const {string} */
+const TAG = 'amp-story-access';
 
 /**
  * Story access template.
- * @const {!./simple-template.ElementDef}
+ * @param {?string} logoSrc
+ * @return {!./simple-template.ElementDef}
  */
-const TEMPLATE = {
+const getTemplate = logoSrc => ({
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-access-overflow'}),
   children: [
@@ -44,12 +55,27 @@ const TEMPLATE = {
       children: [
         {
           tag: 'div',
+          attrs: dict({'class': 'i-amphtml-story-access-header'}),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-story-access-logo',
+                'style': logoSrc ?
+                  `background-image: url('${logoSrc}') !important;` : '',
+              }),
+              children: [],
+            },
+          ],
+        },
+        {
+          tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-access-content'}),
         },
       ],
     },
   ],
-};
+});
 
 /**
  * The <amp-story-access> custom element.
@@ -74,7 +100,16 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const drawerEl = renderAsElement(this.win.document, TEMPLATE);
+    const storyEl =
+        dev().assertElement(closestByTag(this.element, 'AMP-STORY'));
+    const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
+
+    logoSrc ?
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src') :
+      user().warn(
+          TAG, 'Expected "publisher-logo-src" attribute on <amp-story>');
+
+    const drawerEl = renderAsElement(this.win.document, getTemplate(logoSrc));
     this.contentEl_ = dev().assertElement(
         drawerEl.querySelector('.i-amphtml-story-access-content'));
 

@@ -19,7 +19,6 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev, duplicateErrorIfNecessary} from '../log';
-import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -30,6 +29,7 @@ import {
   serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
+import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {startsWith} from '../string';
@@ -503,35 +503,6 @@ export class Viewer {
   }
 
   /**
-   * Whether the viewer can render templates.
-   * @return {boolean}
-   */
-  canRenderTemplates() {
-    return this.hasCapability(Capability.VIEWER_RENDER_TEMPLATE);
-  }
-
-  /**
-   * Requests A2A navigation to the given destination. If the viewer does
-   * not support this operation, does nothing.
-   * The URL is assumed to be in AMP Cache format already.
-   * @param {string} url An AMP article URL.
-   * @param {string} requestedBy Informational string about the entity that
-   *     requested the navigation.
-   * @return {boolean} Returns true if navigation message was sent to viewer.
-   *     Otherwise, returns false.
-   */
-  navigateToAmpUrl(url, requestedBy) {
-    if (this.hasCapability('a2a')) {
-      this.sendMessage('a2aNavigate', dict({
-        'url': url,
-        'requestedBy': requestedBy,
-      }));
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * Whether the document is embedded in a viewer.
    * @return {boolean}
    */
@@ -802,6 +773,7 @@ export class Viewer {
    * the current page's URL. The trusted viewers are allowed to override this
    * value.
    * @return {!Promise<string>}
+   * @visibleForTesting
    */
   getViewerUrl() {
     return this.viewerUrl_;
