@@ -119,7 +119,7 @@ describe('Linker Manager', () => {
     };
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation_(a);
+      manager.handleAnchorMutation(a);
       const parsedUrl = new URL(a.href);
       const param1 = parsedUrl.searchParams.get('testLinker1').split('~');
       const param2 = parsedUrl.searchParams.get('testLinker2').split('~');
@@ -161,7 +161,7 @@ describe('Linker Manager', () => {
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation_(a);
+      manager.handleAnchorMutation(a);
       return expect(a.href).to.not.equal('https://www.example.com');
     });
   });
@@ -193,7 +193,7 @@ describe('Linker Manager', () => {
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation_(a);
+      manager.handleAnchorMutation(a);
       return expect(a.href).to.equal('https://www.example.com');
     });
   });
@@ -222,7 +222,7 @@ describe('Linker Manager', () => {
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation_(a);
+      manager.handleAnchorMutation(a);
       return expect(a.href).to.equal('https://www.example.com');
     });
   });
@@ -250,7 +250,7 @@ describe('Linker Manager', () => {
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation_(a);
+      manager.handleAnchorMutation(a);
       return expect(a.href).to.equal('https://www.example.com');
     });
   });

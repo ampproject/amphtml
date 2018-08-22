@@ -117,7 +117,7 @@ export class LinkerManager {
     if (this.allLinkerPromises_.length) {
       const navigation = Services.navigationForDoc(this.ampdoc_);
       navigation.registerAnchorMutator(
-          this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
+          this.handleAnchorMutation.bind(this), Priority.ANALYTICS_LINKER);
     }
   }
 
@@ -155,9 +155,9 @@ export class LinkerManager {
    * Called on click on any anchor element. Adds linker param if a match for
    * given linker configuration.
    * @param {!Element} element
-   * @private
+   * @visibleForTesting
    */
-  handleAnchorMutation_(element) {
+  handleAnchorMutation(element) {
     if (!element.href) {
       return;
     }
