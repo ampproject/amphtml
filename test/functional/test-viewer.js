@@ -644,7 +644,6 @@ describe('Viewer', () => {
 
     it('should not expect messaging', () => {
       expect(viewer.messagingReadyPromise_).to.be.null;
-      expect(viewer.messagingMaybePromise_).to.be.null;
     });
 
     it('should fail sendMessageAwaitResponse', () => {
@@ -691,7 +690,7 @@ describe('Viewer', () => {
       }, 'https://www.example.com');
       viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
-      return viewer.messagingMaybePromise_.then(() => {
+      return viewer.messagingReadyPromise_.then(() => {
         expect(delivered.length).to.equal(1);
         const m = delivered[0];
         expect(m.eventType).to.equal('broadcast');
@@ -700,16 +699,10 @@ describe('Viewer', () => {
     });
 
     it('should post broadcast event but not fail w/o messaging', () => {
-      viewer.broadcast({type: 'type1'});
+      const result = viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
       clock.tick(20001);
-      return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
-          .then(res => {
-            expect(res).to.equal('ERROR');
-            return viewer.messagingMaybePromise_;
-          }).then(() => {
-            expect(viewer.messageQueue_.length).to.equal(0);
-          });
+      return expect(result).eventually.to.be.false;
     });
 
     it('sendMessageAwaitResponse should wait for messaging channel', () => {

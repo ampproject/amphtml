@@ -312,26 +312,13 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-      Services.timerFor(this.win).timeoutPromise(
-          20000,
-          messagingDeferred.promise).catch(reason => {
-        throw getChannelError(/** @type {!Error|string|undefined} */ (
-          reason));
-      }) : null;
-
-    /**
-     * A promise for non-essential messages. These messages should not fail
-     * if there's no messaging channel set up. But ideally viewer would try to
-     * deliver if at all possible. This promise is only available when the
-     * document is embedded.
-     * @private @const {?Promise}
-     */
-    this.messagingMaybePromise_ = this.isEmbedded_ ?
-      this.messagingReadyPromise_
+      Services.timerFor(this.win)
+          .timeoutPromise(20000, messagingDeferred.promise)
           .catch(reason => {
-            // Don't fail promise, but still report.
-            reportError(getChannelError(
-                /** @type {!Error|string|undefined} */ (reason)));
+            const error = getChannelError(
+                /** @type {!Error|string|undefined} */ (reason));
+            reportError(error);
+            throw error;
           }) : null;
 
     // Trusted viewer and referrer.
@@ -1088,14 +1075,16 @@ export class Viewer {
    * established, but it will not fail if the channel is timed out.
    *
    * @param {!JsonObject} message
+   * @return {!Promise<boolean>} a Promise of success or not
    */
   broadcast(message) {
-    if (!this.messagingMaybePromise_) {
+    if (!this.messagingReadyPromise_) {
       // Messaging is not expected.
-      return;
+      return Promise.resolve(false);
     }
 
-    this.sendMessage('broadcast', message);
+    return this.sendMessageInternal_('broadcast', message, false, false)
+        .then(() => true, () => false);
   }
 
   /**
@@ -1113,7 +1102,7 @@ export class Viewer {
    * @return {?Promise}
    */
   whenMessagingReady() {
-    return this.messagingMaybePromise_;
+    return this.messagingReadyPromise_;
   }
 
   /**
