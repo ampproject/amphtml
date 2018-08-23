@@ -503,18 +503,11 @@ export class AmpForm {
             this.submittingWithTrust_(trust);
             return this.doActionXhr_();
           })
-<<<<<<< HEAD
           .then(response => this.handleXhrSubmitSuccess_(
               /* {!../../../src/utils/xhr-utils.FetchResponse} */ response),
           error => {
             return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
           });
-=======
-          .then(response => this.handleXhrSubmitSuccess_(response),
-              error => {
-                return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-              });
->>>>>>> .
     }
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;

@@ -124,7 +124,6 @@ export class SsrTemplateHelper {
           toStructuredCloneable(fetchDef.xhrUrl, fetchDef.fetchOpt),
       'ampComponent': ampComponent,
     });
-<<<<<<< HEAD
     data['successTemplate'] = opt_templates
       ? this.xmls_.serializeToString(opt_templates['successTemplate'])
       : mustacheTemplate;
@@ -134,15 +133,6 @@ export class SsrTemplateHelper {
 
     return this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate', data);
-=======
-    const additionalAttr = opt_attributes && Object.keys(opt_attributes);
-    if (additionalAttr) {
-      Object.keys(opt_attributes).forEach(key => {
-        data[key] = opt_attributes[key];
-      });
-    }
-    return data;
->>>>>>> fix tests
   }
 
   /**
