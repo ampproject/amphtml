@@ -234,10 +234,12 @@ module.exports = {
 
   singleRun: true,
   browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
   browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
+
+  // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
+  browserDisconnectTolerance: process.env.TRAVIS ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
