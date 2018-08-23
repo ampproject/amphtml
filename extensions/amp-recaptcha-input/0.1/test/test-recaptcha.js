@@ -18,4 +18,4 @@ import {adopt} from '../../../../src/runtime';
 
 adopt(window);
 
-describe('amp-recaptcha-service', () => {})
+describe('amp-recaptcha-service', () => {});

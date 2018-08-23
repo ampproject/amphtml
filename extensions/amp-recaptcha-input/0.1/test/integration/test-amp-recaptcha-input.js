@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {})
+describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {});

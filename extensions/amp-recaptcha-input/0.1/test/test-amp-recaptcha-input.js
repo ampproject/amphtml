@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-describes.realWin('amp-recaptcha-input 0.1 version', {})
+describes.realWin('amp-recaptcha-input 0.1 version', {});
