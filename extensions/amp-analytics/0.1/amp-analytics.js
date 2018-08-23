@@ -202,7 +202,13 @@ export class AmpAnalytics extends AMP.BaseElement {
             // Rudimentary "idle" signal.
             .then(() => Services.timerFor(this.win).promise(1))
             .then(() => this.consentPromise_)
-            .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
+            .then(() => Services.ampdocServiceFor(this.win))
+            .then(ampDocService => {
+              return ampDocService.getAmpDoc(this.element, {
+                closestAmpDoc: true,
+              });
+            })
+            .then(instrumentationServicePromiseForDoc)
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
               return new AnalyticsConfig(this.element).loadConfig();
