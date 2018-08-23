@@ -211,9 +211,6 @@ export class Viewer {
     /** @private {?Function} */
     this.messagingReadyResolver_ = null;
 
-    /** @private {?Function} */
-    this.trustedViewerResolver_ = null;
-
     const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
