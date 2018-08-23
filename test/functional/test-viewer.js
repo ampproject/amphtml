@@ -699,7 +699,6 @@ describe('Viewer', () => {
     });
 
     it('should post broadcast event but not fail w/o messaging', () => {
-      expectAsyncConsoleError(/No messaging channel/);
       const result = viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
       clock.tick(20001);
