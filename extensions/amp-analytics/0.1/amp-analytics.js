@@ -220,7 +220,7 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(this.registerTriggers_.bind(this))
             .then(() => {
               const type = this.element.getAttribute('type');
-              new LinkerManager(this, this.config_, type).init();
+              new LinkerManager(this.getAmpDoc(), this.config_, type).init();
             });
     return this.iniPromise_;
   }
