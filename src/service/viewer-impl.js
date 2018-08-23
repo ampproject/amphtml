@@ -315,7 +315,7 @@ export class Viewer {
             throw error;
           }) : null;
 
-    /** @const @private {!Promise<boolean>|undefined|boolean} */
+    /** @private {!Promise<boolean>|undefined|boolean} */
     this.isTrustedViewer_ = undefined;
     if (!this.isEmbedded_) {
       // Not embedded in IFrame - can't trust the viewer.
@@ -329,7 +329,7 @@ export class Viewer {
           this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
     }
 
-    /** @const @private {?Promise<string>} */
+    /** @private {?Promise<string>} */
     this.viewerOrigin_ = null;
 
     /** @private {string} */
