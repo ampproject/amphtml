@@ -393,6 +393,14 @@ function runSanitizerTests() {
           .to.equal('<span validation-for="form1"></span>');
     });
 
+    it('should avoid disallowing default-supported attributes', () => {
+      // We whitelist all attributes of AMP elements, but make sure we don't
+      // remove default-supported attributes from the whitelist afterwards.
+      const html =
+          '<amp-img style="color: red"></amp-img><p style="color: blue"></p>';
+      expect(purify(html)).to.equal(html);
+    });
+
     it('should allow <amp-lightbox> attributes', () => {
       expect(purify('<amp-lightbox scrollable></amp-lightbox>'))
           .to.equal('<amp-lightbox scrollable=""></amp-lightbox>');
