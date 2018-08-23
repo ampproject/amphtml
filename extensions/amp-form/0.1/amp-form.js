@@ -473,7 +473,7 @@ export class AmpForm {
             return this.doActionXhr_();
           })
           .then(response => this.handleXhrSubmitSuccess_(
-              /* !../../../src/utils/xhr-utils.FetchResponse */ response),
+              /* {!../../../src/utils/xhr-utils.FetchResponse} */ response),
           error => {
             return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
           });
