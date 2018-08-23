@@ -218,6 +218,11 @@ export class ViewportBindingInabox {
   }
 
   /** @override */
+  getScrollingElementScrollsLikeViewport() {
+    return true;
+  }
+
+  /** @override */
   supportsPositionFixed() {
     return false;
   }

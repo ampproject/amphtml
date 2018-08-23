@@ -102,8 +102,9 @@ export class LayoutLayers {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} scrollingElement
+   * @param {boolean} scrollingElementScrollsLikeViewport
    */
-  constructor(ampdoc, scrollingElement) {
+  constructor(ampdoc, scrollingElement, scrollingElementScrollsLikeViewport) {
     const {win} = ampdoc;
 
     /** @const @private {!Element} */
@@ -143,7 +144,8 @@ export class LayoutLayers {
     }));
 
     // Declare scrollingElement as the one true scrolling layer.
-    const root = this.declareLayer_(scrollingElement, true);
+    const root = this.declareLayer_(scrollingElement, true,
+        scrollingElementScrollsLikeViewport);
 
     /**
      * Stores the most recently scrolled layer.
@@ -287,7 +289,7 @@ export class LayoutLayers {
    * @param {!Element} element
    */
   declareLayer(element) {
-    this.declareLayer_(element, false);
+    this.declareLayer_(element, false, false);
   }
 
   /**
@@ -308,11 +310,12 @@ export class LayoutLayers {
    *
    * @param {!Element} element
    * @param {boolean} isRootLayer
+   * @param {boolean} scrollsLikeViewport
    * @return {!LayoutElement}
    */
-  declareLayer_(element, isRootLayer) {
+  declareLayer_(element, isRootLayer, scrollsLikeViewport) {
     const layout = this.add(element);
-    layout.declareLayer(isRootLayer);
+    layout.declareLayer(isRootLayer, scrollsLikeViewport);
     return layout;
   }
 
@@ -345,7 +348,7 @@ export class LayoutLayers {
     if (layer && layer.isLayer()) {
       layer.dirtyScrollMeasurements();
     } else {
-      layer = this.declareLayer_(element, false);
+      layer = this.declareLayer_(element, false, false);
     }
 
     this.activeLayer_ = layer;
@@ -468,15 +471,22 @@ export class LayoutElement {
     this.isLayer_ = false;
 
     /**
-     * Whether the layer is a "root" scrolling layer. Root scrollers have
-     * special properties, mainly that they can never be un-declared (they will
-     * always exist) and that their offset positions are not defined by
-     * scrollTop (DOM APIs are inconsistent between a root scroller and an
-     * overflow scroller).
+     * Whether the layer is a "root" scrolling layer. Root scrollers can never
+     * be un-declared (they will always exist).
      *
      * @private {boolean}
      */
     this.isRootLayer_ = false;
+
+    /**
+     * Whether the layer scrolls like a viewport. Native scrolling elements
+     * have special scrolling inconsistencies. When you scroll one of these
+     * special scrollers, its relative top (returned by getBoundingClientRect)
+     * changes. This is different than regular overflow scrollers.
+     *
+     * @private {boolean}
+     */
+    this.scrollsLikeViewport_ = false;
 
     /**
      * Whether this layer needs to remeasure its scrollTop/Left position during
@@ -650,13 +660,19 @@ export class LayoutElement {
    * for child elements.
    *
    * @param {boolean} isRootLayer
+   * @param {boolean} scrollsLikeViewport
    */
-  declareLayer(isRootLayer) {
+  declareLayer(isRootLayer, scrollsLikeViewport) {
+    dev().assert(!scrollsLikeViewport || isRootLayer, 'Only root layers may' +
+      ' scroll like a viewport.');
+
     if (this.isLayer_) {
       return;
     }
     this.isLayer_ = true;
     this.isRootLayer_ = isRootLayer;
+    this.scrollsLikeViewport_ = scrollsLikeViewport;
+
 
     // Ensure the coordinate system is remeasured
     this.needsRemeasure_ = true;
@@ -1077,10 +1093,10 @@ export class LayoutElement {
     this.size_ = sizeWh(element./*OK*/clientWidth, element./*OK*/clientHeight);
 
     let {left, top} = element./*OK*/getBoundingClientRect();
-    // Root layers are really screwed up. Their positions will **double** count
-    // their scroll position (left === -scrollLeft, top === -scrollTop), which
-    // breaks with every other scroll box on the page.
-    if (this.isRootLayer_) {
+    // Viewport scroller layers are really screwed up. Their positions will
+    // **double** count their scroll position (left === -scrollLeft, top ===
+    // -scrollTop), which breaks with every other scroll box on the page.
+    if (this.scrollsLikeViewport_) {
       left += this.getScrollLeft();
       top += this.getScrollTop();
     }
@@ -1141,9 +1157,12 @@ function relativeScrolledPositionForChildren(layer) {
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} scrollingElement
+ * @param {boolean} scrollingElementScrollsLikeViewport
  */
-export function installLayersServiceForDoc(ampdoc, scrollingElement) {
+export function installLayersServiceForDoc(ampdoc, scrollingElement,
+  scrollingElementScrollsLikeViewport) {
   registerServiceBuilderForDoc(ampdoc, 'layers', function(ampdoc) {
-    return new LayoutLayers(ampdoc, scrollingElement);
+    return new LayoutLayers(ampdoc, scrollingElement,
+        scrollingElementScrollsLikeViewport);
   }, /* opt_instantiate */ true);
 }

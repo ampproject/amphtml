@@ -251,4 +251,9 @@ export class ViewportBindingNatural_ {
     }
     return doc.documentElement;
   }
+
+  /** @override */
+  getScrollingElementScrollsLikeViewport() {
+    return true;
+  }
 }
