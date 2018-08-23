@@ -31,6 +31,7 @@ import {LayoutPriority} from '../../../src/layout';
 import {LinkerManager} from './linker-manager';
 import {
   RequestHandler,
+  expandPostMessage,
 } from './requests';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user} from '../../../src/log';
@@ -41,6 +42,7 @@ import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
 import {isArray} from '../../../src/types';
 import {isEnumValue} from '../../../src/types';
+import {isIframed} from '../../../src/dom';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
@@ -102,6 +104,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
 
     /**
      * Maximum time (since epoch) to report resource timing metrics.
@@ -269,9 +272,12 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.user().error(TAG, 'Trigger should be an object: ', k);
           continue;
         }
-        if (!trigger['on'] || !trigger['request']) {
-          this.user().error(TAG, '"on" and "request" ' +
-              'attributes are required for data to be collected.');
+        const hasRequestOrPostMessage = trigger['request'] ||
+            (trigger['parentPostMessage'] && this.isInabox_);
+        if (!trigger['on'] || !hasRequestOrPostMessage) {
+          const errorMsgSeg = this.isInabox_ ? '/"parentPostMessage"' : '';
+          this.user().error(TAG, '"on" and "request"' + errorMsgSeg +
+              ' attributes are required for data to be collected.');
           continue;
         }
         // Check for not supported trigger for sandboxed analytics
@@ -451,10 +457,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   generateRequests_() {
-    if (!this.config_ || !this.config_['requests']) {
-      const TAG = this.getName_();
-      this.user().error(TAG, 'No request strings defined. Analytics ' +
+    if (!this.config_['requests']) {
+      if (!this.isInabox_) {
+        const TAG = this.getName_();
+        this.user().error(TAG, 'No request strings defined. Analytics ' +
           'data will not be sent from this page.');
+      }
       return;
     }
 
@@ -505,7 +513,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   handleEvent_(trigger, event) {
     const requests = isArray(trigger['request'])
       ? trigger['request'] : [trigger['request']];
-
     for (let r = 0; r < requests.length; r++) {
       const requestName = requests[r];
       this.handleRequestForEvent_(requestName, trigger, event);
@@ -527,19 +534,22 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     const request = this.requests_[requestName];
+    const hasPostMessage = this.isInabox_ && trigger['parentPostMessage'];
 
-    if (!request) {
+    if (requestName != undefined && !request) {
       const TAG = this.getName_();
-      this.user().error(TAG, 'Ignoring event. Request string ' +
+      this.user().error(TAG, 'Ignoring request for event. Request string ' +
           'not found: ', trigger['request']);
-      return;
+      if (!hasPostMessage) {
+        return;
+      }
     }
-
     this.checkTriggerEnabled_(trigger, event).then(enabled => {
       if (!enabled) {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);
+      this.expandAndPostMessage_(trigger, event);
     });
   }
 
@@ -574,6 +584,9 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   expandAndSendRequest_(request, trigger, event) {
+    if (!request) {
+      return;
+    }
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
     const dynamicBindings =
@@ -582,6 +595,35 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.config_['extraUrlParams'], trigger, expansionOptions,
         dynamicBindings);
   }
+
+  /**
+   * Expand and post message to parent window if applicable.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @private
+   */
+  expandAndPostMessage_(trigger, event) {
+    const msg = trigger['parentPostMessage'];
+    if (!msg || !this.isInabox_) {
+      // Only send message in inabox runtime with parentPostMessage specified.
+      return;
+    }
+    const expansionOptions = this.expansionOptions_(event, trigger);
+    expandPostMessage(
+        this,
+        msg,
+        this.config_['extraUrlParams'],
+        trigger['extraUrlParams'],
+        expansionOptions,
+        this.getDynamicVariableBindings_(trigger, expansionOptions))
+        .then(message => {
+          if (isIframed(this.win)) {
+            // Only post message with explict `parentPostMessage` to inabox host
+            this.win.parent./*OK*/postMessage(message, '*');
+          }
+        });
+  }
+
 
   /**
    * @param {!JsonObject} trigger The config to use to determine sampling.

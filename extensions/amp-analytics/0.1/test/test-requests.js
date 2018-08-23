@@ -16,7 +16,7 @@
 
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
-import {RequestHandler} from '../requests';
+import {RequestHandler, expandPostMessage} from '../requests';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -488,5 +488,57 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy.args[0][0]).to.equal(
         'r1&key1=val1&key2=val2&key3=val3&val_base&foo=ZM9V');
     toggleExperiment(env.win, 'url-replacement-v2');
+  });
+
+  describe('expandPostMessage', () => {
+    let expansionOptions;
+    let analyticsInstanceMock;
+    let params;
+    beforeEach(() => {
+      expansionOptions = new ExpansionOptions({
+        'teste1': 'TESTE1',
+      });
+      analyticsInstanceMock = {
+        win: env.win,
+        element: analyticsMock,
+      };
+      params = {
+        'e1': '${teste1}',
+        'e2': 'teste2',
+      };
+    });
+
+    it('should expand', () => {
+      return expandPostMessage(
+          analyticsInstanceMock,
+          'test foo 123 ... ${teste1}',
+          undefined,
+          undefined,
+          expansionOptions,
+          {}).then(msg => {
+        expect(msg).to.equal('test foo 123 ... TESTE1');
+      });
+    });
+
+    it('should replace not append ${extraUrlParams}', () => {
+      const replacePromise = expandPostMessage(
+          analyticsInstanceMock,
+          'test ${extraUrlParams} foo',
+          params, /* configParams */
+          undefined, /* triggerParams */
+          expansionOptions,
+          {} /* dynamicBindings */);
+      const appendPromise = expandPostMessage(
+          analyticsInstanceMock,
+          'test foo',
+          params, /* configParams */
+          undefined, /* triggerParams */
+          expansionOptions,
+          {} /* dynamicBindings */);
+      return replacePromise.then(replace => {
+        expect(replace).to.equal('test e1=TESTE1&e2=teste2 foo');
+        expect(appendPromise).to.eventually.equal('test foo');
+      });
+    });
   });
 });

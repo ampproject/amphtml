@@ -154,13 +154,13 @@ export class RequestHandler {
       });
     }
 
-    const extraUrlParamsPromise = this.expandExtraUrlParams_(
-        configParams, triggerParams, expansionOption)
+    const extraUrlParamsPromise = getExtraUrlParams(
+        this.variableService_, configParams, triggerParams, expansionOption)
         .then(expandExtraUrlParams => {
           // Construct the extraUrlParamsString: Remove null param and encode
           // component
-          const expandedExtraUrlParamsStr =
-              this.getExtraUrlParamsString_(expandExtraUrlParams);
+          const expandedExtraUrlParamsStr = getExtraUrlParamsString(
+              this.variableService_, expandExtraUrlParams);
           return this.urlReplacementService_.expandUrlAsync(
               expandedExtraUrlParamsStr, bindings, this.whiteList_);
         });
@@ -241,31 +241,12 @@ export class RequestHandler {
               this.constructBatchSegments_(baseUrl, batchSegmentsPromise);
         } else {
           requestUrlPromise =
-              this.constructExtraUrlParamStrs_(baseUrl, extraUrlParamsPromise);
+              constructExtraUrlParamStrs(baseUrl, extraUrlParamsPromise);
         }
         requestUrlPromise.then(requestUrl => {
           this.handler_(requestUrl, lastTrigger);
         });
       });
-    });
-  }
-
-  /**
-   * Construct the final requestUrl with baseUrl and extraUrlParams
-   * @param {string} baseUrl
-   * @param {!Array<!Promise<string>>} extraUrlParamStrsPromise
-   */
-  constructExtraUrlParamStrs_(baseUrl, extraUrlParamStrsPromise) {
-    return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
-      filterSplice(paramStrs, item => {return !!item;});
-      const extraUrlParamsStr = paramStrs.join('&');
-      let requestUrl;
-      if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
-        requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
-      } else {
-        requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
-      }
-      return requestUrl;
     });
   }
 
@@ -301,58 +282,6 @@ export class RequestHandler {
     this.extraUrlParamsPromise_ = [];
     this.batchSegmentPromises_ = [];
     this.lastTrigger_ = null;
-  }
-
-  /**
-   * Function that handler extraUrlParams from config and trigger.
-   * @param {?JsonObject} configParams
-   * @param {?JsonObject} triggerParams
-   * @param {!./variables.ExpansionOptions} expansionOption
-   * @return {!Promise<!JsonObject>}
-   * @private
-   */
-  expandExtraUrlParams_(configParams, triggerParams, expansionOption) {
-    const requestPromises = [];
-    const params = map();
-    // Don't encode param values here,
-    // as we'll do it later in the getExtraUrlParamsString_ call.
-    const option = new ExpansionOptions(
-        expansionOption.vars,
-        expansionOption.iterations,
-        true /* noEncode */);
-    // Add any given extraUrlParams as query string param
-    if (configParams || triggerParams) {
-      Object.assign(params, configParams, triggerParams);
-      for (const k in params) {
-        if (typeof params[k] == 'string') {
-          requestPromises.push(
-              this.variableService_.expandTemplate(params[k], option)
-                  .then(value => { params[k] = value; }));
-        }
-      }
-    }
-    return Promise.all(requestPromises).then(() => {
-      return params;
-    });
-  }
-
-  /**
-   * Handle the params map and form the final extraUrlParams string
-   * @param {!Object} params
-   * @return {string}
-   */
-  getExtraUrlParamsString_(params) {
-    const s = [];
-    for (const k in params) {
-      const v = params[k];
-      if (v == null) {
-        continue;
-      } else {
-        const sv = this.variableService_.encodeVars(k, v);
-        s.push(`${encodeURIComponent(k)}=${sv}`);
-      }
-    }
-    return s.join('&');
   }
 
   /**
@@ -416,4 +345,122 @@ export class RequestHandler {
       this.refreshBatchInterval_();
     }, interval);
   }
+}
+
+/**
+ * Expand the postMessage string
+ * @param {!AMP.BaseElement} baseInstance
+ * @param {string} msg
+ * @param {?JsonObject} configParams
+ * @param {?JsonObject} triggerParams
+ * @param {!./variables.ExpansionOptions} expansionOption
+ * @param {!Object<string, *>} dynamicBindings A mapping of variables to
+ *     stringable values. For example, values could be strings, functions that
+ *     return strings, promises, etc.
+ * @return {Promise<string>}
+ */
+export function expandPostMessage(baseInstance, msg,
+  configParams, triggerParams, expansionOption, dynamicBindings) {
+  const variableService = variableServiceFor(baseInstance.win);
+  const urlReplacementService =
+      Services.urlReplacementsForDoc(baseInstance.element);
+
+  const macros = variableService.getMacros();
+  const bindings = Object.assign({}, dynamicBindings, macros);
+  expansionOption.freezeVar('extraUrlParams');
+
+  const basePromise = variableService.expandTemplate(
+      msg, expansionOption).then(base => {
+    return urlReplacementService.expandUrlAsync(base, bindings);
+  });
+  if (msg.indexOf('${extraUrlParams}') < 0) {
+    // No need to append extraUrlParams
+    return basePromise;
+  }
+
+  //return base url with the appended extra url params;
+  const extraUrlParamsStrPromise = getExtraUrlParams(
+      variableService, configParams, triggerParams, expansionOption)
+      .then(params => {
+        const str = getExtraUrlParamsString(variableService, params);
+        return urlReplacementService.expandUrlAsync(str, bindings);
+      });
+
+  return basePromise.then(expandedMsg => {
+    return constructExtraUrlParamStrs(expandedMsg, [extraUrlParamsStrPromise]);
+  });
+}
+
+/**
+ * Function that handler extraUrlParams from config and trigger.
+ * @param {!./variables.VariableService} variableService
+ * @param {?JsonObject} configParams
+ * @param {?JsonObject} triggerParams
+ * @param {!./variables.ExpansionOptions} expansionOption
+ * @return {!Promise<!JsonObject>}
+ * @private
+ */
+function getExtraUrlParams(
+  variableService, configParams, triggerParams, expansionOption) {
+  const requestPromises = [];
+  const params = map();
+  // Don't encode param values here,
+  // as we'll do it later in the getExtraUrlParamsString call.
+  const option = new ExpansionOptions(
+      expansionOption.vars,
+      expansionOption.iterations,
+      true /* noEncode */);
+  // Add any given extraUrlParams as query string param
+  if (configParams || triggerParams) {
+    Object.assign(params, configParams, triggerParams);
+    for (const k in params) {
+      if (typeof params[k] == 'string') {
+        requestPromises.push(
+            variableService.expandTemplate(params[k], option)
+                .then(value => { params[k] = value; }));
+      }
+    }
+  }
+  return Promise.all(requestPromises).then(() => {
+    return params;
+  });
+}
+
+/**
+ * Handle the params map and form the final extraUrlParams string
+ * @param {!./variables.VariableService} variableService
+ * @param {!Object} params
+ * @return {string}
+ */
+function getExtraUrlParamsString(variableService, params) {
+  const s = [];
+  for (const k in params) {
+    const v = params[k];
+    if (v == null) {
+      continue;
+    } else {
+      const sv = variableService.encodeVars(k, v);
+      s.push(`${encodeURIComponent(k)}=${sv}`);
+    }
+  }
+  return s.join('&');
+}
+
+/**
+ * Construct the final requestUrl with baseUrl and extraUrlParams
+ * @param {string} baseUrl
+ * @param {!Array<!Promise<string>>} extraUrlParamStrsPromise
+ */
+function constructExtraUrlParamStrs(baseUrl, extraUrlParamStrsPromise) {
+  return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
+    filterSplice(paramStrs, item => {return !!item;});
+    const extraUrlParamsStr = paramStrs.join('&');
+    let requestUrl;
+    if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
+      requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
+    } else {
+      requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
+    }
+    return requestUrl;
+  });
 }
