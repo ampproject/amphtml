@@ -28,6 +28,7 @@ import {
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
 import {LayoutPriority} from '../../../src/layout';
+import {LinkerManager} from './linker-manager';
 import {
   RequestHandler,
 } from './requests';
@@ -202,7 +203,13 @@ export class AmpAnalytics extends AMP.BaseElement {
             // Rudimentary "idle" signal.
             .then(() => Services.timerFor(this.win).promise(1))
             .then(() => this.consentPromise_)
-            .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
+            .then(() => Services.ampdocServiceFor(this.win))
+            .then(ampDocService => {
+              return ampDocService.getAmpDoc(this.element, {
+                closestAmpDoc: true,
+              });
+            })
+            .then(instrumentationServicePromiseForDoc)
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
               return new AnalyticsConfig(this.element).loadConfig();
@@ -210,7 +217,11 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(config => {
               this.config_ = config;
             })
-            .then(this.registerTriggers_.bind(this));
+            .then(this.registerTriggers_.bind(this))
+            .then(() => {
+              const type = this.element.getAttribute('type');
+              new LinkerManager(this.getAmpDoc(), this.config_, type).init();
+            });
     return this.iniPromise_;
   }
 
