@@ -32,7 +32,8 @@ config.run('amp-image-slider', function() {
     </amp-image-slider>
     <button id="b1" on="tap:s1.seekTo(percent=0.4)">seekTo 10%</button>
     <amp-image-slider tabindex="0" id="s2"
-        layout="responsive" width="1000" height="500" disable-hint-reappear>
+        layout="responsive" width="1000" height="500" disable-hint-reappear
+        initial-slider-position="0.6" step-size="0.2">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
@@ -692,6 +693,31 @@ config.run('amp-image-slider', function() {
           return timeout(DEFAULT_TIMEOUT).then(expectHintHiddenCallback);
         });
       });
+    });
+
+    it('should place the slider bar to 60% from left when setting ' +
+      'initial-slider-position="0.6"' , () => {
+      // 0.6 means 60% from left
+      expect(hasCorrectSliderPosition(s2, s2.pos.percent60)).to.be.true;
+    });
+
+    it('should move the slider bar by 20% on arrow key press when setting ' +
+      'step-size="0.2"' , () => {
+      // To test center, we have to focus and move slider bar
+      // to somewhere not the center initially
+      s2.slider.focus();
+      // Moving slider bar from 60% lands on 40%
+      return verifyPositionUpdateAfterEventDispatch(
+          /*eventConfig*/
+          {
+            target: s2.slider,
+            cstr: createKeyDownEvent,
+            key: 'ArrowLeft',
+          },
+          /*observeTarget*/s2.slider,
+          /*sliderInfo*/s2,
+          /*targetPos*/s2.pos.percent40
+      );
     });
 
     /* #endregion */
