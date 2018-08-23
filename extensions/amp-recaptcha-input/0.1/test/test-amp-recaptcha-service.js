@@ -14,8 +14,4 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
-
-adopt(window);
-
 describe('amp-recaptcha-service', () => {});

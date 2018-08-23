@@ -16,14 +16,14 @@
 
 import '../amp-recaptcha-input';
 
-describes.realWin('amp-recaptcha-input 0.1 version', {
+describes.realWin('amp-recaptcha-input', {
   win: { /* window spec */
     location: '...',
     historyOff: false,
   },
   amp: { /* amp spec */
     runtimeOn: false,
-    extensions: ['amp-recaptcha-input:0.1'],
+    extensions: ['amp-recaptcha-input'],
   },
 }, () => {
 
