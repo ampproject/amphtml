@@ -13,10 +13,6 @@ import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
 import Waypoint from './waypoint';
 
-/*** TODO:
- * - Fix issue with waypoint reporting links with macro variables.
- */
-
 const startTime = new Date().getTime();
 
 
@@ -26,7 +22,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @override
    */
   buildCallback() {
-    this.hasCalledBeacon = false;
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
     this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
