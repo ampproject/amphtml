@@ -38,7 +38,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Promise<!../../../src/service/xhr-impl.FetchResponse>} */
+    /** @private {?Promise<!../../../src/utils/xhr-utils.FetchResponse>} */
     this.adResponsePromise_ = null;
 
     /** @private {Object<string, !./amp-ad-type-defs.Validator>} */
@@ -156,7 +156,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * Processes the ad response as soon as the XHR request returns.
-   * @param {?../../../src/service/xhr-impl.FetchResponse} response
+   * @param {?../../../src/utils/xhr-utils.FetchResponse} response
    * @return {!Promise}
    * @private
    */
