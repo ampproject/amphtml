@@ -1080,7 +1080,7 @@ export class Viewer {
   broadcast(message) {
     if (!this.messagingReadyPromise_) {
       // Messaging is not expected.
-      return;
+      return Promise.resolve(false);
     }
 
     return this.sendMessageInternal_('broadcast', message, false, false)
