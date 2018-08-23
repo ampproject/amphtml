@@ -61,6 +61,9 @@ export class AnalyticsRoot {
 
     /** @private {?./visibility-manager.VisibilityManager} */
     this.visibilityManager_ = null;
+    
+    /** @private {boolean} */
+    this.scrollEventTracker_ = false;
   }
 
   /** @override */

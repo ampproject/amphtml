@@ -427,6 +427,9 @@ export class ScrollEventTracker extends EventTracker {
     /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(root.ampdoc);
 
+    /** @private {boolean} */
+    this.scrollHandlerRegistered_ = false;
+
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
   }
@@ -473,6 +476,7 @@ export class ScrollEventTracker extends EventTracker {
 
     // Ensure that the scroll events are being listened to.
     if (!this.scrollHandlerRegistered_) {
+      this.scrollHandlerRegistered_ = true;
       this.viewport_.onChanged(this.onScroll_.bind(this));
     }
 
