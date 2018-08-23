@@ -43,6 +43,11 @@ const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
+/** @enum {number} */
+export const Priority = {
+  ANALYTICS_LINKER: 2,
+};
+
 /**
  * Install navigation service for ampdoc, which handles navigations from anchor
  * tag clicks and other runtime features like AMP.navigateTo().
@@ -537,4 +542,3 @@ function maybeExpandUrlParams(ampdoc, e) {
     target.setAttribute('href', newHref);
   }
 }
-

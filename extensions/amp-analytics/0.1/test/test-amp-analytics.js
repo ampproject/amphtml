@@ -22,6 +22,7 @@ import {
   VisibilityTracker,
 } from '../events';
 import {LayoutPriority} from '../../../../src/layout';
+import {LinkerManager} from '../linker-manager';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
@@ -290,6 +291,33 @@ describes.realWin('amp-analytics', {
         }
       });
     }
+  });
+
+  describe('Linkers', () => {
+    let analytics;
+
+    beforeEach(() => {
+      const el = doc.createElement('amp-analytics');
+      el.setAttribute('type', 'foo');
+      doc.body.appendChild(el);
+      analytics = new AmpAnalytics(el);
+      analytics.getAmpDoc = () => ampdoc;
+    });
+
+    it('Initializes a new Linker.', () => {
+      expectAsyncConsoleError(noTriggersError);
+      expectAsyncConsoleError(noRequestStringsError);
+
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .resolves({});
+
+      const linkerStub = sandbox.stub(LinkerManager.prototype, 'init');
+
+      analytics.buildCallback();
+      return analytics.layoutCallback().then(() => {
+        expect(linkerStub.calledOnce).to.be.true;
+      });
+    });
   });
 
   describe('iframe transport', () => {
