@@ -293,4 +293,9 @@ export class ViewportBindingIosEmbedWrapper_ {
   getScrollingElement() {
     return this.wrapper_;
   }
+
+  /** @override */
+  getScrollingElementScrollsLikeViewport() {
+    return false;
+  }
 }

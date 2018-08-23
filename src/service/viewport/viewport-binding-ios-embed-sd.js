@@ -447,4 +447,9 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   getScrollingElement() {
     return this.scroller_;
   }
+
+  /** @override */
+  getScrollingElementScrollsLikeViewport() {
+    return false;
+  }
 }
