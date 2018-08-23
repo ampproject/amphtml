@@ -23,7 +23,6 @@ import {waitForServices} from './render-delaying-services';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';
-const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
 
 
 /**
@@ -228,14 +227,14 @@ function maybeTransform(cssRoot, cssText) {
  * after the first call.
  * @private {boolean}
  */
-let shouldNotMakeVisible = false;
+let madeVisible = false;
 
 /**
  * @visibleForTesting
  * @param {boolean} value
  */
-export function setShouldNotMakeVisible(value) {
-  shouldNotMakeVisible = value;
+export function setmadeVisible(value) {
+  madeVisible = value;
 }
 
 /**
@@ -249,11 +248,11 @@ export function setShouldNotMakeVisible(value) {
 export function makeBodyVisible(doc, opt_waitForServices) {
   dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
-  if (shouldNotMakeVisible) {
+  if (madeVisible) {
     return;
   }
   const set = () => {
-    shouldNotMakeVisible = true;
+    madeVisible = true;
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
@@ -263,10 +262,10 @@ export function makeBodyVisible(doc, opt_waitForServices) {
   };
   try {
     waitForBody(doc, () => {
-      if (shouldNotMakeVisible) {
+      if (madeVisible) {
         return;
       }
-      shouldNotMakeVisible = true;
+      madeVisible = true;
       if (opt_waitForServices) {
         waitForServices(win).catch(reason => {
           rethrowAsync(reason);
@@ -317,7 +316,7 @@ function renderStartedNoInline(doc) {
  * @param {!Window} unusedWin
  */
 export function bodyAlwaysVisible(unusedWin) {
-  shouldNotMakeVisible = true;
+  madeVisible = true;
 }
 
 
