@@ -185,7 +185,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return lightboxManagerFor(this.getAmpDoc()).then(manager => {
+    return lightboxManagerForDoc(this.getAmpDoc()).then(manager => {
       this.manager_ = manager;
       this.history_ = Services.historyForDoc(this.getAmpDoc());
       this.action_ = Services.actionServiceForDoc(this.getAmpDoc());
@@ -1537,7 +1537,7 @@ export function installLightboxGallery(ampdoc) {
  * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Promise<?LightboxManager>}
  */
-function lightboxManagerFor(elementOrAmpDoc) {
+function lightboxManagerForDoc(elementOrAmpDoc) {
   return /** @type {!Promise<?LightboxManager>} */ (
     getElementServiceForDoc(
         elementOrAmpDoc, 'amp-lightbox-manager', 'amp-lightbox-gallery'));
