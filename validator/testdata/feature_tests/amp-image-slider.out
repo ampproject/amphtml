@@ -62,5 +62,34 @@ feature_tests/amp-image-slider.html:54:2 The attribute 'first' may not appear in
 |    <div second>Should not be exposed</div>
 >>   ^~~~~~~~~
 feature_tests/amp-image-slider.html:55:2 The attribute 'second' may not appear in tag 'div'. [DISALLOWED_HTML]
+|
+|    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" disable-hint-reappear>
+|      <amp-img src="/1.jpg" layout="fill"></amp-img>
+|      <amp-img src="/2.jpg" layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="0.3" step-size="0.4">
+|      <amp-img src="/1.jpg" layout="fill"></amp-img>
+|      <amp-img src="/2.jpg" layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="1.5" step-size="1.5">
+>>   ^~~~~~~~~
+feature_tests/amp-image-slider.html:67:2 The attribute 'initial-slider-position' in tag 'amp-image-slider' is set to the invalid value '1.5'. (see https://www.ampproject.org/docs/reference/components/amp-image-slider) [DISALLOWED_HTML]
+>>   ^~~~~~~~~
+feature_tests/amp-image-slider.html:67:2 The attribute 'step-size' in tag 'amp-image-slider' is set to the invalid value '1.5'. (see https://www.ampproject.org/docs/reference/components/amp-image-slider) [DISALLOWED_HTML]
+|      <amp-img src="/1.jpg" layout="fill"></amp-img>
+|      <amp-img src="/2.jpg" layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="0" step-size="0.0">
+|      <amp-img src="/1.jpg" layout="fill"></amp-img>
+|      <amp-img src="/2.jpg" layout="fill"></amp-img>
+|    </amp-image-slider>
+|
+|    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="1" step-size="1.0">
+|      <amp-img src="/1.jpg" layout="fill"></amp-img>
+|      <amp-img src="/2.jpg" layout="fill"></amp-img>
+|    </amp-image-slider>
 |  </body>
 |  </html>
