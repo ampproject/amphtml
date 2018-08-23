@@ -789,7 +789,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.iframe.contentWindow.document &&
             this.iframe.contentWindow.document.body,
         'Attempting to expand fluid creative without properly set up ' +
-            'friendly frame.');
+            'friendly frame. Slot id: ' +
+            this.element.getAttribute('data-amp-slot-index'));
         this.attemptChangeHeight(
             this.iframe.contentWindow.document.body./*OK*/scrollHeight)
             .then(() => this.fireFluidDelayedImpression());
