@@ -14,4 +14,22 @@
  * limitations under the License.
  */
 
-describes.realWin('amp-recaptcha-input 0.1 version', {});
+import '../amp-recaptcha-input';
+
+describes.realWin('amp-recaptcha-input 0.1 version', {
+  win: { /* window spec */
+    location: '...',
+    historyOff: false,
+  },
+  amp: { /* amp spec */
+    runtimeOn: false,
+    extensions: ['amp-recaptcha-input:0.1'],
+  },
+}, () => {
+
+  describe('amp-recaptcha-input', () => {
+    it('should pass', () => {
+      expect(true).to.be.ok;
+    });
+  });
+});
