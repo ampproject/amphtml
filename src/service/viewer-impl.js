@@ -212,9 +212,6 @@ export class Viewer {
     this.messagingReadyResolver_ = null;
 
     /** @private {?Function} */
-    this.viewerOriginResolver_ = null;
-
-    /** @private {?Function} */
     this.trustedViewerResolver_ = null;
 
     const deferred = new Deferred();
@@ -321,60 +318,36 @@ export class Viewer {
             throw error;
           }) : null;
 
-    // Trusted viewer and referrer.
-    let trustedViewerResolved;
-    let trustedViewerPromise;
+    /** @const @private {!Promise<boolean>|undefined|boolean} */
+    this.isTrustedViewer_ = undefined;
     if (!this.isEmbedded_) {
       // Not embedded in IFrame - can't trust the viewer.
-      trustedViewerResolved = false;
-      trustedViewerPromise = Promise.resolve(false);
+      this.isTrustedViewer_ = false;
     } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded() &&
         !this.isCctEmbedded()) {
       // Ancestors when available take precedence. This is the main API used
       // for this determination. Fallback is only done when this API is not
       // supported by the browser.
-      trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
+      this.isTrustedViewer_ = (this.win.location.ancestorOrigins.length > 0 &&
           this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
-      trustedViewerPromise = Promise.resolve(trustedViewerResolved);
-    } else {
-      // Wait for comms channel to confirm the origin.
-      const deferred = new Deferred();
-      trustedViewerPromise = deferred.promise;
-      this.trustedViewerResolver_ = deferred.resolve;
     }
 
-    /** @const @private {!Promise<boolean>} */
-    this.isTrustedViewer_ = trustedViewerPromise;
-
-    /** @const @private {!Promise<string>} */
-    this.viewerOrigin_ = new Promise(resolve => {
-      if (!this.isEmbedded()) {
-        // Viewer is only determined for iframed documents at this time.
-        resolve('');
-      } else if (this.win.location.ancestorOrigins &&
-          this.win.location.ancestorOrigins.length > 0) {
-        resolve(this.win.location.ancestorOrigins[0]);
-      } else {
-        // Race to resolve with a timer.
-        Services.timerFor(this.win).delay(
-            () => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
-        this.viewerOriginResolver_ = resolve;
-      }
-    });
+    /** @const @private {?Promise<string>} */
+    this.viewerOrigin_ = null;
 
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
         this.isEmbedded() && 'referrer' in this.params_ &&
-            trustedViewerResolved !== false ?
-          this.params_['referrer'] :
-          this.win.document.referrer;
+        (this.isTrustedViewer_ !== false
+          ? this.params_['referrer']
+          : this.win.document.referrer);
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
       if (this.isEmbedded() && 'referrer' in this.params_) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer_.then(isTrusted => {
+        this.isTrustedViewer().then(isTrusted => {
           if (isTrusted) {
             resolve(this.params_['referrer']);
           } else {
@@ -402,7 +375,7 @@ export class Viewer {
       if (this.isEmbedded() && viewerUrlOverride) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer_.then(isTrusted => {
+        this.isTrustedViewer().then(isTrusted => {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
@@ -814,7 +787,12 @@ export class Viewer {
    * @return {!Promise<boolean>}
    */
   isTrustedViewer() {
-    return this.isTrustedViewer_;
+    if (this.isTrustedViewer_ === undefined) {
+      this.isTrustedViewer_ = this.messagingReadyPromise_.then(origin => {
+        return origin ? this.isTrustedViewerOrigin_(origin) : false;
+      });
+    }
+    return Promise.resolve(this.isTrustedViewer_);
   }
 
   /**
@@ -834,7 +812,22 @@ export class Viewer {
    * @return {!Promise<string>}
    */
   getViewerOrigin() {
-    return this.viewerOrigin_;
+    if (!this.viewerOrigin_) {
+      let origin;
+      if (!this.isEmbedded()) {
+        // Viewer is only determined for iframed documents at this time.
+        origin = '';
+      } else if (this.win.location.ancestorOrigins &&
+          this.win.location.ancestorOrigins.length > 0) {
+        origin = this.win.location.ancestorOrigins[0];
+      }
+      this.viewerOrigin_ = origin !== undefined
+        ? Promise.resolve(origin)
+        : Services.timerFor(this.win)
+            .timeoutPromise(VIEWER_ORIGIN_TIMEOUT_, this.messagingReadyPromise_)
+            .catch(() => '');
+    }
+    return /** @type {!Promise<string>} */(this.viewerOrigin_);
   }
 
   /**
@@ -953,14 +946,7 @@ export class Viewer {
     this.messageDeliverer_ = deliverer;
     this.messagingOrigin_ = origin;
     if (this.messagingReadyResolver_) {
-      this.messagingReadyResolver_();
-    }
-    if (this.trustedViewerResolver_) {
-      this.trustedViewerResolver_(
-          origin ? this.isTrustedViewerOrigin_(origin) : false);
-    }
-    if (this.viewerOriginResolver_) {
-      this.viewerOriginResolver_(origin || '');
+      this.messagingReadyResolver_(origin);
     }
 
     if (this.messageQueue_.length > 0) {
