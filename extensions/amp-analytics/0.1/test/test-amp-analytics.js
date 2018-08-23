@@ -54,6 +54,7 @@ describes.realWin('amp-analytics', {
 }, function(env) {
   let win, doc;
   let sendRequestSpy;
+  let postMessageSpy;
   let configWithCredentials;
   let uidService;
   let crypto;
@@ -85,6 +86,9 @@ describes.realWin('amp-analytics', {
       'read property \'toUpperCase\' of null';
   const onAndRequestAttributesError = '[AmpAnalytics <unknown id>] "on" and ' +
       '"request" attributes are required for data to be collected.';
+  const onAndRequestAttributesInaboxError = '[AmpAnalytics <unknown id>] ' +
+      '"on" and "request"/"parentPostMessage" ' +
+      'attributes are required for data to be collected.';
   const invalidThresholdForSamplingError =
       '[AmpAnalytics <unknown id>] Invalid threshold for sampling.';
   const clickTrackerNotSupportedError = '[AmpAnalytics <unknown id>] click ' +
@@ -149,6 +153,7 @@ describes.realWin('amp-analytics', {
     analytics.createdCallback();
     analytics.buildCallback();
     sendRequestSpy = sandbox.stub(analytics, 'sendRequest_');
+    postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
     return analytics;
   }
 
@@ -257,6 +262,7 @@ describes.realWin('amp-analytics', {
             // to avoid pageView pings.
             yield macroTask();
             sendRequestSpy.resetHistory();
+            postMessageSpy.resetHistory();
 
 
             analytics.handleEvent_({
@@ -473,6 +479,62 @@ describes.realWin('amp-analytics', {
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy).to.have.not.been.called;
+    });
+  });
+
+  describe('parentPostMessage in inabox case', () => {
+    it('does send a hit when parentPostMessage is provided inabox', function() {
+      env.win.AMP_MODE.runtime = 'inabox';
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
+      });
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+        expect(postMessageSpy).to.have.been.called;
+      });
+    });
+
+    it('does not send with parentPostMessage not inabox', function() {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible',
+          'request': 'foo',
+          'parentPostMessage': 'foo'}],
+      });
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.been.called;
+        expect(postMessageSpy).to.have.not.been.called;
+      });
+    });
+
+    it('not send when request and parentPostMessage are not provided',
+        function() {
+          env.win.AMP_MODE.runtime = 'inabox';
+          expectAsyncConsoleError(onAndRequestAttributesInaboxError);
+          const analytics = getAnalyticsTag({
+            'requests': {'foo': 'https://example.com/bar'},
+            'triggers': [{'on': 'visible'}],
+          });
+          return waitForNoSendRequest(analytics).then(() => {
+            expect(sendRequestSpy).to.have.not.been.called;
+          });
+        });
+
+    it('send when request and parentPostMessage are provided', function() {
+      env.win.AMP_MODE.runtime = 'inabox';
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible',
+          'parentPostMessage': 'bar',
+          'request': 'foo'}],
+      });
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+        expect(sendRequestSpy.args[0][0])
+            .to.equal('https://example.com/bar');
+        expect(postMessageSpy).to.have.been.called;
+      });
     });
   });
 
