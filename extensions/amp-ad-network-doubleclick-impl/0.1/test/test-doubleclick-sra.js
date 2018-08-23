@@ -442,7 +442,9 @@ describes.realWin('Doubleclick SRA', config , env => {
           }).returns(Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
         bodyUsed: false,
-        headers,
+        headers: {
+          getResponseHeader:(header) => headers[header],
+        },
         text: () => {
           throw new Error('should not be SRA!');
         },
