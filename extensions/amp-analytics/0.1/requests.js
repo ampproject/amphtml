@@ -348,6 +348,50 @@ export class RequestHandler {
 }
 
 /**
+ * Expand the postMessage string
+ * @param {!AMP.BaseElement} baseInstance
+ * @param {string} msg
+ * @param {?JsonObject} configParams
+ * @param {?JsonObject} triggerParams
+ * @param {!./variables.ExpansionOptions} expansionOption
+ * @param {!Object<string, *>} dynamicBindings A mapping of variables to
+ *     stringable values. For example, values could be strings, functions that
+ *     return strings, promises, etc.
+ * @return {Promise<string>}
+ */
+export function expandPostMessage(baseInstance, msg,
+  configParams, triggerParams, expansionOption, dynamicBindings) {
+  const variableService = variableServiceFor(baseInstance.win);
+  const urlReplacementService =
+      Services.urlReplacementsForDoc(baseInstance.element);
+
+  const macros = variableService.getMacros();
+  const bindings = Object.assign({}, dynamicBindings, macros);
+  expansionOption.freezeVar('extraUrlParams');
+
+  const basePromise = variableService.expandTemplate(
+      msg, expansionOption).then(base => {
+    return urlReplacementService.expandUrlAsync(base, bindings);
+  });
+  if (msg.indexOf('${extraUrlParams}') < 0) {
+    // No need to append extraUrlParams
+    return basePromise;
+  }
+
+  //return base url with the appended extra url params;
+  const extraUrlParamsStrPromise = getExtraUrlParams(
+      variableService, configParams, triggerParams, expansionOption)
+      .then(params => {
+        const str = getExtraUrlParamsString(variableService, params);
+        return urlReplacementService.expandUrlAsync(str, bindings);
+      });
+
+  return basePromise.then(expandedMsg => {
+    return constructExtraUrlParamStrs(expandedMsg, [extraUrlParamsStrPromise]);
+  });
+}
+
+/**
  * Function that handler extraUrlParams from config and trigger.
  * @param {!./variables.VariableService} variableService
  * @param {?JsonObject} configParams
@@ -418,49 +462,5 @@ function constructExtraUrlParamStrs(baseUrl, extraUrlParamStrsPromise) {
       requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
     }
     return requestUrl;
-  });
-}
-
-/**
- * Expand the postMessage string
- * @param {!AMP.BaseElement} baseInstance
- * @param {string} msg
- * @param {?JsonObject} configParams
- * @param {?JsonObject} triggerParams
- * @param {!./variables.ExpansionOptions} expansionOption
- * @param {!Object<string, *>} dynamicBindings A mapping of variables to
- *     stringable values. For example, values could be strings, functions that
- *     return strings, promises, etc.
- * @return {Promise<string>}
- */
-export function expandPostMessage(baseInstance, msg,
-  configParams, triggerParams, expansionOption, dynamicBindings) {
-  const variableService = variableServiceFor(baseInstance.win);
-  const urlReplacementService =
-      Services.urlReplacementsForDoc(baseInstance.element);
-
-  const macros = variableService.getMacros();
-  const bindings = Object.assign({}, dynamicBindings, macros);
-  expansionOption.freezeVar('extraUrlParams');
-
-  const basePromise = variableService.expandTemplate(
-      msg, expansionOption).then(base => {
-    return urlReplacementService.expandUrlAsync(base, bindings);
-  });
-  if (msg.indexOf('${extraUrlParams}') < 0) {
-    // No need to append extraUrlParams
-    return basePromise;
-  }
-
-  //return base url with the appended extra url params;
-  const extraUrlParamsStrPromise = getExtraUrlParams(
-      variableService, configParams, triggerParams, expansionOption)
-      .then(params => {
-        const str = getExtraUrlParamsString(variableService, params);
-        return urlReplacementService.expandUrlAsync(str, bindings);
-      });
-
-  return basePromise.then(expandedMsg => {
-    return constructExtraUrlParamStrs(expandedMsg, [extraUrlParamsStrPromise]);
   });
 }
