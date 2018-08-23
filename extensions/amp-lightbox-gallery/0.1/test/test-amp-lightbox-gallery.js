@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {installLightboxGallery, installLightboxManager} from '../amp-lightbox-gallery';
+import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';
 
@@ -31,9 +31,9 @@ describes.realWin('amp-lightbox-gallery', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    installLightboxManager(win);
-    installLightboxGallery(win);
-    gallery = doc.getElementById(TAG);
+    return installLightboxGallery(env.ampdoc).then(() => {
+      gallery = doc.getElementById(TAG);
+    });
   });
 
   describe('basic functionality', function() {
