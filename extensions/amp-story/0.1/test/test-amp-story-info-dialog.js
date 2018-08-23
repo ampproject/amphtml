@@ -29,7 +29,6 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 
 describes.realWin('amp-story-share-menu', {amp: true}, env => {
-  let messagingReadyPromise;
   let moreInfoLinkUrl;
   let parentEl;
   let infoDialog;
@@ -56,7 +55,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     });
 
     sandbox.stub(Services, 'viewerForDoc').returns({
-      whenMessagingReady: () => messagingReadyPromise,
       sendMessageAwaitResponse: eventType => {
         if (eventType === 'moreInfoLinkUrl') {
           return Promise.resolve(moreInfoLinkUrl);
@@ -79,7 +77,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   });
 
   it('should hide more info link when there is no viewer messaging', () => {
-    messagingReadyPromise = null;
+    moreInfoLinkUrl = undefined;
 
     return infoDialog.build().then(() => {
       expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
@@ -88,7 +86,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   });
 
   it('should hide more info link when the viewer does not supply it', () => {
-    messagingReadyPromise = Promise.resolve();
     moreInfoLinkUrl = null;
 
     return infoDialog.build().then(() => {
@@ -98,7 +95,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   });
 
   it('should show more info link when the viewer supplies it', () => {
-    messagingReadyPromise = Promise.resolve();
     moreInfoLinkUrl = 'https://example.com/more-info.html';
 
     return infoDialog.build().then(() => {
