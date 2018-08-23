@@ -15,6 +15,31 @@
  */
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {setStyles} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
+
+const LEGACY_PREV_ARROW_STYLE = {
+  backgroundImage: 'url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>\')',
+  backgroundSize: '18px 18px',
+};
+
+const LEGACY_NEXT_ARROW_STYLE = {
+  backgroundImage: 'url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z"/></svg>\')',
+  backgroundSize: '18px 18px',
+};
+
+const NEW_PREV_ARROW_STYLE = {
+  backgroundColor: 'transparent',
+  backgroundImage: 'url(\'data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="arrow_left_03" fill="#ffffff"><path d="M11.7604076,9.75 L11.7604076,15.25 C11.7604076,15.8022847 11.3126924,16.25 10.7604076,16.25 C10.2081229,16.25 9.76040764,15.8022847 9.76040764,15.25 L9.76040764,8.75 C9.76040764,8.19771525 10.2081229,7.75 10.7604076,7.75 L17.2604076,7.75 C17.8126924,7.75 18.2604076,8.19771525 18.2604076,8.75 C18.2604076,9.30228475 17.8126924,9.75 17.2604076,9.75 L11.7604076,9.75 Z" id="Combined-Shape" transform="translate(14.010408, 12.000000) rotate(-45.000000) translate(-14.010408, -12.000000) "></path></g></g></svg>\')',
+  filter: 'drop-shadow(0px 1px 2px #4a4a4a)',
+};
+
+const NEW_NEXT_ARROW_STYLE = {
+
+  backgroundColor: 'transparent',
+  backgroundImage: 'url(\'data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs></defs><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="arrow_right_03" fill="#ffffff"><path d="M7.75,9.75 L7.75,15.25 C7.75,15.8022847 7.30228475,16.25 6.75,16.25 C6.19771525,16.25 5.75,15.8022847 5.75,15.25 L5.75,8.75 C5.75,8.19771525 6.19771525,7.75 6.75,7.75 L13.25,7.75 C13.8022847,7.75 14.25,8.19771525 14.25,8.75 C14.25,9.30228475 13.8022847,9.75 13.25,9.75 L7.75,9.75 Z" id="Combined-Shape" transform="translate(10.000000, 12.000000) rotate(-225.000000) translate(-10.000000, -12.000000) "></path></g></g></svg>\')',
+  filter: 'drop-shadow(0px 1px 2px #4a4a4a)',
+};
 
 /**
  * @abstract
@@ -69,13 +94,33 @@ export class BaseCarousel extends AMP.BaseElement {
    * Builds a carousel button for next/prev.
    * @param {string} className
    * @param {function()} onInteraction
+   * @param {string} ariaName
+   * @param {JSON} newStyles
+   * @param {JSON} legacyStyles
    */
-  buildButton(className, onInteraction) {
+  buildButton(className, onInteraction, ariaName, newStyles, legacyStyles) {
     const button = this.element.ownerDocument.createElement('div');
     button.tabIndex = 0;
     button.classList.add('amp-carousel-button');
     button.classList.add(className);
+    let overridenStyle = false;
+    for (let i = 0; i < this.win.document.styleSheets.length; i++) {
+      const sheet = this.win.document.styleSheets[i];
+      console.log(sheet);
+      if (sheet.ownerNode instanceof HTMLStyleElement) {
+        for (let j = 0; j < sheet.cssRules.length; j++) {
+          if (sheet.cssRules[j].selectorText === `.${className}`) {
+            console.log(sheet.cssRules[j].selectorText);
+            overridenStyle = true;
+          }
+        }
+      }
+    }
     button.setAttribute('role', 'button');
+    if (!overridenStyle) {
+      setStyles(button, isExperimentOn(this.win, 'amp-carousel-new-arrows') ? newStyles : legacyStyles);
+    }
+
     button.onkeydown = event => {
       if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
         if (!event.defaultPrevented) {
@@ -85,6 +130,14 @@ export class BaseCarousel extends AMP.BaseElement {
       }
     };
     button.onclick = onInteraction;
+    if (this.element.hasAttribute(`data-${ariaName}-button-aria-label`)) {
+      button.setAttribute('aria-label',
+          this.element.getAttribute(`data-${ariaName}-button-aria-label`));
+    } else {
+      const upperCaseName = ariaName[0].toUpperCase() + ariaName.slice(1);
+      button.setAttribute('aria-label',
+          `${upperCaseName} item in carousel`);
+    }
 
     return button;
   }
@@ -95,12 +148,12 @@ export class BaseCarousel extends AMP.BaseElement {
   buildButtons() {
     this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
       this.interactionPrev();
-    });
+    }, 'previous', NEW_PREV_ARROW_STYLE, LEGACY_PREV_ARROW_STYLE);
     this.element.appendChild(this.prevButton_);
 
     this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
-    });
+    }, 'next', NEW_NEXT_ARROW_STYLE, LEGACY_NEXT_ARROW_STYLE);
     this.element.appendChild(this.nextButton_);
   }
 
