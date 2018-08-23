@@ -81,13 +81,20 @@ export class AmpDocService {
   /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
    * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
-   * instance is always returned. Otherwise, this method locates the `AmpDoc`
-   * that contains the specified node and, if necessary, initializes it.
+   * instance is returned, unless specfically looking for a closer `AmpDoc`.
+   * Otherwise, this method locates the `AmpDoc` that contains the specified
+   * node and, if necessary, initializes it.
+   *
+   * TODO(#17614): We should always look for the closest AmpDoc (make
+   * closestAmpDoc always true).
    *
    * @param {!Node=} opt_node
+   * @param {{
+   *  closestAmpDoc: boolean
+   * }=} opt_options
    * @return {!AmpDoc}
    */
-  getAmpDoc(opt_node) {
+  getAmpDoc(opt_node = undefined, {closestAmpDoc = false} = {}) {
     // Ensure that node is attached if specified. This check uses a new and
     // fast `isConnected` API and thus only checked on platforms that have it.
     // See https://www.chromestatus.com/feature/5676110549352448.
@@ -99,7 +106,7 @@ export class AmpDocService {
     }
 
     // Single document: return it immediately.
-    if (this.singleDoc_) {
+    if (this.singleDoc_ && !closestAmpDoc) {
       return this.singleDoc_;
     }
 
@@ -117,8 +124,11 @@ export class AmpDocService {
     // Otherwise discover and possibly create the ampdoc.
     let n = opt_node;
     while (n) {
-      // A custom element may already have the reference to the ampdoc.
-      if (n.ampdoc_) {
+      // A custom element may already have the reference. If we are looking
+      // for the closest AmpDoc, the element might have a reference to the
+      // global AmpDoc, which we do not want. This occurs when using
+      // <amp-next-page>.
+      if (n.ampdoc_ && !closestAmpDoc) {
         return n.ampdoc_;
       }
 
@@ -144,6 +154,12 @@ export class AmpDocService {
         return ampdoc;
       }
       n = shadowRoot.host;
+    }
+
+    // If we were looking for the closest AmpDoc, then fall back to the single
+    // doc if there is no other AmpDoc that is closer.
+    if (this.singleDoc_) {
+      return this.singleDoc_;
     }
 
     throw dev().createError('No ampdoc found for', opt_node);
