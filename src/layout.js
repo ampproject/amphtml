@@ -461,8 +461,7 @@ export function applyStaticLayout(element) {
     intrinsicSizer.setAttribute('src',
         `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     element.insertBefore(sizer, element.firstChild);
-    // TODO(jpettitt): sizer is leaked and can't be cleaned up.
-    element.sizerElement = intrinsicSizer;
+    element.sizerElement = sizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
