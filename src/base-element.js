@@ -1075,5 +1075,3 @@ export class BaseElement {
     return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }
-
-

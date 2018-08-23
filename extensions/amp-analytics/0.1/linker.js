@@ -24,7 +24,7 @@ const DELIMITER = '~';
  * Creates the linker param from the given config, and returns the url with
  * the given param attached.
  * @param {string} version
- * @param {Object<string,string>} pairs
+ * @param {!Object} pairs
  * @return {string}
  */
 export function createLinker(version, pairs) {
@@ -40,7 +40,7 @@ export function createLinker(version, pairs) {
  * Generate the completed querystring.
  * <paramName>=<version>~<checksum>~<key1>~<value1>~<key2>~<value2>...
  * @param {string} version
- * @param {Object<string, string>} pairs
+ * @param {!Object} pairs
  * @return {string}
  */
 function generateParam(version, pairs) {
@@ -53,7 +53,7 @@ function generateParam(version, pairs) {
 /**
  * Create a unique checksum hashing the fingerprint and a few other values.
  * base36(CRC32(fingerprint + timestampRoundedInMin + kv pairs))
- * @param {Object<string, string>} encodedPairs
+ * @param {string} encodedPairs
  * @return {string}
  */
 function getCheckSum(encodedPairs) {
@@ -82,7 +82,7 @@ function getFingerprint() {
 
 /**
  * Encode all values & join them together
- * @param {Object<string, string>} pairs
+ * @param {!Object} pairs
  * @return {string}
  */
 function encodePairs(pairs) {

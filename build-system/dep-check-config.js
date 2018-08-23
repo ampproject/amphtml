@@ -276,6 +276,8 @@ exports.rules = [
           'src/service/navigation.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->' +
           'src/service/navigation.js',
+      'extensions/amp-analytics/0.1/linker-manager.js->' +
+          'src/service/navigation.js',
     ],
   },
   {
