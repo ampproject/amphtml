@@ -123,14 +123,15 @@ export class AmpImageSlider extends AMP.BaseElement {
         } else if (!this.rightAmpImage_) {
           this.rightAmpImage_ = child;
         }
-      }
-
-      if (child.tagName.toLowerCase() === 'div') {
+      } else if (child.tagName.toLowerCase() === 'div') {
         if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
         } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
         }
+      } else {
+        user().error('AMP-IMAGE-SLIDER',
+            `Invalid child element: ${child.tagName}`);
       }
     }
 
