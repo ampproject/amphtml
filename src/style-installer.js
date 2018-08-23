@@ -223,6 +223,16 @@ function maybeTransform(cssRoot, cssText) {
   return transformer ? transformer(cssText) : cssText;
 }
 
+/**
+ * Create variable so that code contained in makeBodyVisible can early exit
+ * after the first call.
+ * @private {boolean}
+ */
+let shouldNotMakeVisible = false;
+
+export function setShouldNotMakeVisible(value) {
+  shouldNotMakeVisible = value;
+}
 
 /**
  * Sets the document's body opacity to 1.
@@ -235,11 +245,11 @@ function maybeTransform(cssRoot, cssText) {
 export function makeBodyVisible(doc, opt_waitForServices) {
   dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
-  if (win[bodyVisibleSentinel]) {
+  if (shouldNotMakeVisible) {
     return;
   }
   const set = () => {
-    win[bodyVisibleSentinel] = true;
+    shouldNotMakeVisible = true;
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
@@ -249,10 +259,10 @@ export function makeBodyVisible(doc, opt_waitForServices) {
   };
   try {
     waitForBody(doc, () => {
-      if (win[bodyVisibleSentinel]) {
+      if (shouldNotMakeVisible) {
         return;
       }
-      win[bodyVisibleSentinel] = true;
+      shouldNotMakeVisible = true;
       if (opt_waitForServices) {
         waitForServices(win).catch(reason => {
           rethrowAsync(reason);
@@ -300,10 +310,10 @@ function renderStartedNoInline(doc) {
 
 /**
  * Indicates that the body is always visible. For instance, in case of PWA.
- * @param {!Window} win
+ * @param {!Window} unusedWin
  */
-export function bodyAlwaysVisible(win) {
-  win[bodyVisibleSentinel] = true;
+export function bodyAlwaysVisible(unusedWin) {
+  shouldNotMakeVisible = true;
 }
 
 
