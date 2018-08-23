@@ -73,13 +73,12 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Send the impression tracking once we have the beacon API response.
    */
   onPageScanned_() {
-    let onBeaconApiResponse = this.affiliateLinkResolver.firstRequest;
-    if (!onBeaconApiResponse) {
-      onBeaconApiResponse = this.affiliateLinkResolver.fetchDomainResolverApi(
-          []);
-    }
+    // .firstRequest may be null if the page doesn't have any non-excluded links.
+    const beaconApiPromise = this.affiliateLinkResolver.firstRequest ||
+        // If it's the case, fallback with manual call
+        this.affiliateLinkResolver.fetchDomainResolverApi([]);
 
-    return onBeaconApiResponse.then(this.sendImpressionTracking_.bind(this));
+    return beaconApiPromise.then(this.sendImpressionTracking_.bind(this));
   }
 
   /**
@@ -130,7 +129,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   onClick_(eventData) {
     // The link was not monetizable or the link was replaced
     // by an other linkRewriter.
-    if (eventData.replacedBy !== SKIMLINKS_REWRITER_ID) {
+    if (eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID) {
       this.trackingService.sendNaClickTracking(eventData.anchor);
     }
   }

@@ -37,9 +37,30 @@ export function isAnchorReplacementTuple(tuple) {
 }
 
 /**
- * Contains an optional synchronous and an optional asynchronous response.
+ * Create a reponse object for 'resolveUnknownAnchors()' function
+ * in the format expected by LinkRewriter.
+ *
+ * Some replacement urls may be determine synchrously but others may need an
+ * asynchrounous call. Being able to return a sync and async response offers
+ * flexibility to handle all these scenarios:
+ *
+ * - If you don't need any api calls to determine your replacement url.
+ *   Use: createTwoStepsResponse(syncResponse)
+ *
+ * - If you need a an api call to determine your replacement url
+ *   Use: createTwoStepsResponse(null, asyncResponse)
+ *
+ * - If you need an api call to determine your replacement url but
+ *   have implemented a synchronous cache system.
+ *   Use: createTwoStepsResponse(syncResponse, asyncResponse);
+ *
+ * - If you want to return a temporary replacement url until you get the
+ *   real replacement url from your api call.
+ *   Use:  createTwoStepsResponse(syncResponse, asyncResponse)
+ *
  * @param {*} syncResponse
  * @param {*} asyncResponse
+ * @return {Object} - "two steps response" {syncResponse, asyncResponse}
  */
 export function createTwoStepsResponse(syncResponse, asyncResponse) {
   if (asyncResponse) {
@@ -58,9 +79,9 @@ export function createTwoStepsResponse(syncResponse, asyncResponse) {
  * @param {*} twoStepsResponse
  */
 export function isTwoStepsResponse(twoStepsResponse) {
-  const isValid = twoStepsResponse &&
-    hasOwn(twoStepsResponse, 'syncResponse') &&
-    hasOwn(twoStepsResponse, 'asyncResponse');
+  const isValid = twoStepsResponse && (
+    hasOwn(twoStepsResponse, 'syncResponse') ||
+    hasOwn(twoStepsResponse, 'asyncResponse'));
 
   return Boolean(isValid);
 }

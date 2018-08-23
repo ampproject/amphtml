@@ -1,5 +1,6 @@
 import {AmpEvents} from '../../amp-events';
 import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
+import {Services} from '../../services';
 
 import LinkRewriter from './link-rewriter';
 
@@ -10,25 +11,30 @@ export default class LinkRewriterService {
   constructor(ampdoc) {
     this.priorityList_ = [];
     this.iframeDoc_ = ampdoc.getRootNode();
-    const metaTagSelector = `meta[name=${PRIORITY_META_TAG_NAME}]`;
-    const meta = this.iframeDoc_.querySelector(metaTagSelector);
-
-    if (meta && meta.hasAttribute('content')) {
-      this.priorityList_ = meta.getAttribute('content').trim().split(/\s+/);
-    }
+    this.priorityList_ = this.getPriorityList_(ampdoc);
 
     this.installGlobalEventListener_(this.iframeDoc_);
     this.linkRewriters_ = [];
   }
 
   /**
+   * @param {*} ampdoc
+   */
+  getPriorityList_(ampdoc) {
+    const docInfo = Services.documentInfoForDoc(ampdoc);
+    const value = docInfo.metaTags[PRIORITY_META_TAG_NAME];
+
+    return value ? value.trim().split(/\s+/) : [];
+  }
+
+  /**
    * Register a new link rewriter on the page.
-   * @param {*} name
+   * @param {*} linkRewriterId
    * @param {*} resolveUnknownLinks
    * @param {*} options
    */
-  registerLinkRewriter(name, resolveUnknownLinks, options) {
-    const linkRewriter = new LinkRewriter(this.iframeDoc_, name, resolveUnknownLinks, options);
+  registerLinkRewriter(linkRewriterId, resolveUnknownLinks, options) {
+    const linkRewriter = new LinkRewriter(this.iframeDoc_, linkRewriterId, resolveUnknownLinks, options);
     this.insertInListBasedOnPriority_(this.linkRewriters_, linkRewriter, this.priorityList_);
     // Trigger initial scan.
     linkRewriter.onDomUpdated();
@@ -60,39 +66,35 @@ export default class LinkRewriterService {
   maybeRewriteLink(anchor) {
     const suitableLinkRewriters = this.getSuitableLinkRewritersForLink_(anchor);
     if (suitableLinkRewriters.length) {
-      const orderedLinkRewriters = this.getLinkRewritersOrderByPriority_(suitableLinkRewriters, anchor);
       let chosenLinkRewriter = null;
 
       // Iterate by order of priority until one of the linkRewriter replaces the link.
-      for (let i = 0; i < orderedLinkRewriters.length; i++) {
-        const hasReplaced = orderedLinkRewriters[i].rewriteAnchorUrl(anchor);
+      for (let i = 0; i < suitableLinkRewriters.length; i++) {
+        const hasReplaced = suitableLinkRewriters[i].rewriteAnchorUrl(anchor);
         if (hasReplaced) {
-          chosenLinkRewriter = orderedLinkRewriters[i];
+          chosenLinkRewriter = suitableLinkRewriters[i];
           break;
         }
       }
-      const replacedBy = chosenLinkRewriter ? chosenLinkRewriter.name : null;
+      const linkRewriterId = chosenLinkRewriter ? chosenLinkRewriter.id : null;
+
+      // Emit click event for analytics purposes only,
+      // anchor should not me mutated by handlers.
       suitableLinkRewriters.forEach(linkRewriter => {
-        linkRewriter.events.send(EVENTS.CLICK, {replacedBy, anchor});
+        linkRewriter.events.send(EVENTS.CLICK, {linkRewriterId, anchor});
       });
     }
   }
 
   /**
-   * If link rewriter priorities are set on the anchor re-ordered the list of linkRewriters.
-   * @param {*} suitableLinkRewriters
    * @param {*} anchor
-   * @return {*} - suitableLinkRewriters ordered by priorities
    */
-  getLinkRewritersOrderByPriority_(suitableLinkRewriters, anchor) {
-    if (anchor.dataset.linkRewriters) {
-      const priorities = anchor.dataset.linkRewriters.trim().split(/\s+/);
-      return suitableLinkRewriters.reduce((orderedList, linkRewriter) => {
-        return this.insertInListBasedOnPriority_(orderedList, linkRewriter, priorities);
-      }, []);
+  parseLinkRewriterPriorityForAnchor_(anchor) {
+    if (!anchor || !anchor.dataset.linkRewriters) {
+      return [];
     }
 
-    return suitableLinkRewriters;
+    return anchor.dataset.linkRewriters.trim().split(/\s+/);
   }
 
   /**
@@ -102,7 +104,7 @@ export default class LinkRewriterService {
    * @param {*} priorityList
    */
   insertInListBasedOnPriority_(linkRewriterList, linkRewriter, priorityList) {
-    const priorityIndex = priorityList.indexOf(linkRewriter.name);
+    const priorityIndex = priorityList.indexOf(linkRewriter.id);
     if (priorityIndex > -1) {
       linkRewriterList.splice(priorityIndex, 0, linkRewriter);
     } else {
@@ -117,9 +119,10 @@ export default class LinkRewriterService {
    * @param {*} anchor
    */
   getSuitableLinkRewritersForLink_(anchor) {
+    const linkPriorityList = this.parseLinkRewriterPriorityForAnchor_(anchor);
     return this.linkRewriters_.reduce((acc, linkRewriter) => {
       if (linkRewriter.isWatchingLink(anchor)) {
-        acc.push(linkRewriter);
+        this.insertInListBasedOnPriority_(acc, linkRewriter, linkPriorityList);
       }
 
       return acc;

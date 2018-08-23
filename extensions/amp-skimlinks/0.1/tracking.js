@@ -69,7 +69,7 @@ export default class Tracking {
    * @param {*} newInfo
    */
   setTrackingInfo(newInfo) {
-    this.trackingInfo_ = Object.assign(this.trackingInfo_, newInfo);
+    Object.assign(this.trackingInfo_, newInfo);
   }
 
   /**
@@ -91,7 +91,7 @@ export default class Tracking {
 
     const commonData = {
       pub: pubcode,
-      pag: pageUrl, // TODO: is this the same as this.referer_?
+      pag: pageUrl,
       guid,
       uuid: pageImpressionId,
       tz: timezone,
@@ -177,7 +177,7 @@ export default class Tracking {
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
     const data = Object.assign({
-      dl: urls, // DO WE NEED TO REPLACE URL FIRST? ISN'T THIS DONE AUTOMATICALLY?
+      dl: urls,
       hae: numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
       typ: 'l',
     }, commonData);
@@ -196,15 +196,12 @@ export default class Tracking {
     const urls = {};
 
     anchorStatusMap.forEach((replacementUrl, anchor) => {
-      const urlState = urls[anchor.href];
-      if (urlState) {
-        urlState.count = urlState.count + 1;
-      } else {
-        urls[anchor.href] = {
-          count: 1,
-          ae: replacementUrl ? 1 : 0,
-        };
-      }
+      urls[anchor.href] = urls[anchor.href] || {
+        ae: replacementUrl ? 1 : 0,
+        count: 0,
+      };
+
+      urls[anchor.href].count += 1;
 
       if (urls[anchor.href].ae === 1) {
         numberAffiliateLinks = numberAffiliateLinks + 1;

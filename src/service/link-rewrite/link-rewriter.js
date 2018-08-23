@@ -9,12 +9,12 @@ export default class LinkRewriter {
   /**
    * Create a new linkRewriter instance you can then register to the LinkRewriteService.
    * @param {*} iframeDoc
-   * @param {*} name
+   * @param {*} id
    * @param {*} resolveUnknownLinks
    * @param {*} options
    */
-  constructor(iframeDoc, name, resolveUnknownLinks, options) {
-    this.name = name;
+  constructor(iframeDoc, id, resolveUnknownLinks, options) {
+    this.id = id;
     this.iframeDoc_ = iframeDoc;
     this.resolveUnknownLinks_ = resolveUnknownLinks;
     this.linkSelector_ = options.linkSelector;
@@ -97,27 +97,31 @@ export default class LinkRewriter {
     this.removeDetachedAnchorsFromMap_(anchorList);
 
     // Get the list of new links.
-    const unknownAnchors = this.getNewAnchors_(anchorList);
+    const unknownAnchors = this.getUnknownAnchors_(anchorList);
 
     //  Ask for the affiliate status of the new anchors.
-    if (unknownAnchors.length) {
-      // Mark all new anchors discovered to the default unknown.
-      // Note: Only anchors with a status will be considered in the click handlers.
-      // (Other anchors are assumed to be the ones exluded by linkSelector_)
-      this.updateAnchorMap_(unknownAnchors.map(anchor => {
-        return createAnchorReplacementTuple(anchor);
-      }));
-      const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
-      user().assert(isTwoStepsResponse(twoStepsResponse),
-          'Invalid response from provided resolveUnknownLinks, use the return value of createTwoStepsResponse(syncResponse, asyncResponse)');
+    if (!unknownAnchors.length) {
+      return Promise.resolve();
+    }
 
-      if (twoStepsResponse.syncResponse) {
-        this.updateAnchorMap_(twoStepsResponse.syncResponse);
-      }
-      // Anchors for which the status needs to be resolved asynchronously
-      if (twoStepsResponse.asyncResponse) {
-        return twoStepsResponse.asyncResponse.then(this.updateAnchorMap_.bind(this));
-      }
+    // Mark all new anchors discovered to the default unknown.
+    // Note: Only anchors with a status will be considered in the click handlers.
+    // (Other anchors are assumed to be the ones exluded by linkSelector_)
+    const unknownAnchorsTuples = unknownAnchors.map(anchor => {
+      return createAnchorReplacementTuple(anchor, undefined);
+    });
+
+    this.updateAnchorMap_(unknownAnchorsTuples);
+    const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
+    user().assert(isTwoStepsResponse(twoStepsResponse),
+        'Invalid response from provided resolveUnknownLinks, use the return value of createTwoStepsResponse(syncResponse, asyncResponse)');
+
+    if (twoStepsResponse.syncResponse) {
+      this.updateAnchorMap_(twoStepsResponse.syncResponse);
+    }
+    // Anchors for which the status needs to be resolved asynchronously
+    if (twoStepsResponse.asyncResponse) {
+      return twoStepsResponse.asyncResponse.then(this.updateAnchorMap_.bind(this));
     }
 
     return Promise.resolve();
@@ -128,7 +132,7 @@ export default class LinkRewriter {
    * that were not in the page at the time of the last page scan.
    * @param {*} anchorList
    */
-  getNewAnchors_(anchorList) {
+  getUnknownAnchors_(anchorList) {
     const unknownAnchors = [];
     anchorList.forEach(anchor => {
       if (!this.isWatchingLink(anchor)) {

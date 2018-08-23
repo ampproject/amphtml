@@ -4,9 +4,14 @@ import {parseUrlDeprecated} from '../../../src/url';
 import {DOMAIN_RESOLVER_API_URL} from './constants';
 import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-helpers';
 
+// Can be monetized
 export const STATUS__AFFILIATE = 'affiliate';
+// Can't be monetized but can be tracked
 export const STATUS__NON_AFFILIATE = 'non-affiliate';
+// Can't be monetized and can't be tracked
 export const STATUS__IGNORE_LINK = 'ignore';
+// We don't know yet if the link can me monitized. Will be considered as
+// 'can be monetized' until we have the answer from the API.
 export const STATUS__UNKNOWN = 'unknown';
 
 export default class AffiliateLinkResolver {
@@ -22,7 +27,7 @@ export default class AffiliateLinkResolver {
     this.waypoint_ = waypoint;
     this.domains_ = {};
     // Promise of the first request to beacon so we can
-    // access beaconData outside of the linkRewriter/LinkResolver flow.
+    // access API data outside of the linkRewriter/LinkResolver flow.
     this.firstApiRequest = null;
   }
 
@@ -32,7 +37,7 @@ export default class AffiliateLinkResolver {
    * @return {Promise}
    */
   resolveUnknownAnchors(anchorList) {
-    const alreadyResolved = this.mapToAnchorReplacementTuple_(anchorList);
+    const alreadyResolvedTupleList = this.mapToAnchorReplacementTuple_(anchorList);
     let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);
@@ -40,13 +45,13 @@ export default class AffiliateLinkResolver {
       // Set domains to STATUS__UNKNOWN to mark them as already requested.
       this.markDomainsAsUnknown(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
-      const pendingAnchors = this.getPendingAnchors_(anchorList, domainsToAsk);
-      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(pendingAnchors,
+      const unknownAnchors = this.getUnknownAnchors_(anchorList, domainsToAsk);
+      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(unknownAnchors,
           domainsToAsk);
     }
 
     // Returns an object with a sync reponse and an async response.
-    return new createTwoStepsResponse(alreadyResolved, willBeResolvedPromise);
+    return new createTwoStepsResponse(alreadyResolvedTupleList, willBeResolvedPromise);
   }
 
 
@@ -55,19 +60,17 @@ export default class AffiliateLinkResolver {
    * @param {*} anchorList
    */
   mapToAnchorReplacementTuple_(anchorList) {
-    const anchorListNormalised = anchorList.map(anchor => {
+    return anchorList.map(anchor => {
+      let replacementUrl = null;
       const status = this.getDomainAffiliateStatus_(this.getLinkDomain(anchor));
       // Always replace unknown, we will overwrite them after asking
       // the api if needed
       if (status === STATUS__AFFILIATE || status === STATUS__UNKNOWN) {
-        const replacementUrl = this.waypoint_.getAffiliateUrl(anchor);
-        return createAnchorReplacementTuple(anchor, replacementUrl);
+        replacementUrl = this.waypoint_.getAffiliateUrl(anchor);
       }
 
-      return createAnchorReplacementTuple(anchor, null);
+      return createAnchorReplacementTuple(anchor, replacementUrl);
     });
-
-    return anchorListNormalised;
   }
 
   /**
@@ -108,8 +111,7 @@ export default class AffiliateLinkResolver {
    */
   markDomainsAsUnknown(domains) {
     domains.forEach(domain => {
-      const domainStatus = this.domains_[domain];
-      if (domainStatus && domainStatus !== STATUS__UNKNOWN) {
+      if (this.domains_[domain]) {
         return;
       }
 
@@ -127,15 +129,12 @@ export default class AffiliateLinkResolver {
    * @param {*} anchorList
    * @param {string[]} domainsToAsk
    */
-  getPendingAnchors_(anchorList, domainsToAsk) {
-    return anchorList.reduce((acc, anchor) => {
+  getUnknownAnchors_(anchorList, domainsToAsk) {
+    return anchorList.filter(anchor => {
       const anchorDomain = this.getLinkDomain(anchor);
-      if (domainsToAsk.indexOf(anchorDomain) !== -1) {
-        acc.push(anchor);
-      }
 
-      return acc;
-    }, []);
+      return domainsToAsk.indexOf(anchorDomain) !== -1;
+    });
   }
 
   /**
@@ -151,7 +150,7 @@ export default class AffiliateLinkResolver {
 
     return promise.then(data => {
       const merchantDomains = data.merchant_domains || [];
-      this.updateDomainsStatusMapPostFetch_(domainsToAsk, merchantDomains);
+      this.updateDomainsStatusMap_(domainsToAsk, merchantDomains);
 
       return this.mapToAnchorReplacementTuple_(anchorList);
     });
@@ -171,10 +170,10 @@ export default class AffiliateLinkResolver {
     const beaconUrl = `${DOMAIN_RESOLVER_API_URL}?data=${JSON.stringify(data)}`;
     const fetchOptions = {
       method: 'GET',
-      // Disabled AMP CORS for dev
+      // Disabling AMP CORS since API does not support it.
       requireAmpResponseSourceOrigin: false,
       ampCors: false,
-      // Allow beacon API to set cookies
+      // Allowing beacon API to set cookies.
       credentials: 'include',
     };
 
@@ -188,7 +187,7 @@ export default class AffiliateLinkResolver {
    * @param {*} allDomains
    * @param {*} affiliateDomains
    */
-  updateDomainsStatusMapPostFetch_(allDomains, affiliateDomains) {
+  updateDomainsStatusMap_(allDomains, affiliateDomains) {
     allDomains.forEach(domain => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
       this.domains_[domain] = isAffiliateDomain ?
@@ -202,12 +201,9 @@ export default class AffiliateLinkResolver {
    * @param {*} anchor
    */
   getLinkDomain(anchor) {
-    let {hostname} = parseUrlDeprecated(anchor.href);
-    if (hostname.indexOf('www.') === 0) {
-      hostname = hostname.replace('www.', '');
-    }
+    const {hostname} = parseUrlDeprecated(anchor.href);
 
-    return hostname;
+    return hostname.replace(/^www\./, '');
   }
 
   /**
@@ -216,7 +212,7 @@ export default class AffiliateLinkResolver {
    */
   isExcludedDomain_(domain) {
     const {excludedDomains} = this.skimOptions_;
-    // Should update the isExcluded list as a side effect for caching
+    // TODO: Should update the isExcluded list as a side effect for caching
     if (!excludedDomains || !excludedDomains.length) {
       return false;
     }

@@ -61,7 +61,7 @@ describes.fakeWin('amp-skimlinks', {
       env.sandbox.spy(SkimOptionsModule, 'getAmpSkimlinksOptions');
       const options = {
         'publisher-code': '666X666',
-        'excluded-domains': 'amazon.com,amazon.fr',
+        'excluded-domains': 'amazon.com  amazon.fr ',
         'tracking': false,
         'custom-tracking-id': 'campaignX',
         'link-selector': '.content a',
@@ -73,7 +73,7 @@ describes.fakeWin('amp-skimlinks', {
         expect(SkimOptionsModule.getAmpSkimlinksOptions.calledOnce).to.be.true;
         expect(ampSkimlinks.skimOptions_).to.deep.equal({
           pubcode: options['publisher-code'],
-          excludedDomains: options['excluded-domains'].split(','),
+          excludedDomains: ['amazon.com', 'amazon.fr'],
           tracking: options['tracking'],
           customTrackingId: options['custom-tracking-id'],
           linkSelector: options['link-selector'],
@@ -138,7 +138,7 @@ describes.fakeWin('amp-skimlinks', {
 
     it('Should send NA click tracking if an other linkRewriter has replaced the link', () => {
       ampSkimlinks.onClick_({
-        replacedBy: 'vendorX',
+        linkRewriterId: 'vendorX',
       });
 
       expect(stub.calledOnce).to.be.true;
@@ -147,7 +147,7 @@ describes.fakeWin('amp-skimlinks', {
     // TODO, confirm the logic
     it('Should send NA click tracking if other vendor has not replaced the link', () => {
       ampSkimlinks.onClick_({
-        replacedBy: 'vendorX',
+        linkRewriterId: 'vendorX',
       });
 
       expect(stub.calledOnce).to.be.true;
@@ -155,7 +155,7 @@ describes.fakeWin('amp-skimlinks', {
 
     it('Should send NA click tracking if skimlinks has not replaced the link', () => {
       ampSkimlinks.onClick_({
-        replacedBy: 'vendorX',
+        linkRewriterId: 'vendorX',
       });
 
       expect(stub.calledOnce).to.be.true;
@@ -163,7 +163,7 @@ describes.fakeWin('amp-skimlinks', {
 
     it('Should send NA click tracking if no one has replaced the link', () => {
       ampSkimlinks.onClick_({
-        replacedBy: null,
+        linkRewriterId: null,
       });
 
       expect(stub.calledOnce).to.be.true;
@@ -171,7 +171,7 @@ describes.fakeWin('amp-skimlinks', {
 
     it('Should not send NA click tracking if skimlinks has replaced the link', () => {
       ampSkimlinks.onClick_({
-        replacedBy: SKIMLINKS_REWRITER_ID,
+        linkRewriterId: SKIMLINKS_REWRITER_ID,
       });
 
       expect(stub.called).to.be.false;

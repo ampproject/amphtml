@@ -41,7 +41,7 @@ function getExcludedDomains_(element, internalDomains) {
 
   const excludedDomainsAttr = element.getAttribute('excluded-domains');
   if (excludedDomainsAttr) {
-    excludedDomains = excludedDomainsAttr.split(',');
+    excludedDomains = excludedDomainsAttr.trim().split(/\s+/);
   }
 
   return excludedDomains;
