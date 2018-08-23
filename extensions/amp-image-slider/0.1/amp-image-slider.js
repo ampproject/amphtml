@@ -122,16 +122,20 @@ export class AmpImageSlider extends AMP.BaseElement {
           this.leftAmpImage_ = child;
         } else if (!this.rightAmpImage_) {
           this.rightAmpImage_ = child;
+        } else {
+          user().error('AMP-IMAGE-SLIDER',
+              'Should not contain more than 2 <amp-img>s.');
         }
       } else if (child.tagName.toLowerCase() === 'div') {
         if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
         } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
+        } else {
+          user().error('AMP-IMAGE-SLIDER',
+              'Should not contain <div>s without ' +
+              '"first" or "second" attributes.');
         }
-      } else {
-        user().error('AMP-IMAGE-SLIDER',
-            `Invalid child element: ${child.tagName}`);
       }
     }
 
