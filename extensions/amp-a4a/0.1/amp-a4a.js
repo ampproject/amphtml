@@ -249,8 +249,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?AMP.AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
 
-    /** @type {boolean} whether creative has been verified as AMP */
-    this.isVerifiedAmpCreative = false;
+    /** @private {boolean} whether creative has been verified as AMP */
+    this.isVerifiedAmpCreative_ = false;
 
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
@@ -423,7 +423,7 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   renderOutsideViewport() {
     // Ensure non-verified AMP creatives are throttled.
-    if (!this.isVerifiedAmpCreative && is3pThrottled(this.win) &&
+    if (!this.isVerifiedAmpCreative_ && is3pThrottled(this.win) &&
         !this.inNonAmpPreferenceExp()) {
       return false;
     }
@@ -775,7 +775,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Need to know if creative was verified as part of render outside
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
-          this.isVerifiedAmpCreative = !!creative;
+          this.isVerifiedAmpCreative_ = !!creative;
           return creative && utf8Decode(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
@@ -1097,7 +1097,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
-    this.isVerifiedAmpCreative = false;
+    this.isVerifiedAmpCreative_ = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
         this.getNonAmpCreativeRenderingMethod();
@@ -1767,6 +1767,14 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!JsonObject|undefined}
    */
   getAdditionalContextMetadata(opt_isSafeframe) {}
+
+  /**
+   * Returns whether the received creative is verified AMP.
+   * @return {boolean} True if the creative is verified AMP, false otherwise.
+   */
+  isVerifiedAmpCreative() {
+    return this.isVerifiedAmpCreative_;
+  }
 }
 
 /**

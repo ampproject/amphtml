@@ -251,7 +251,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
     impl.buildCallback();
     impl.isFluidRequest_ = true;
-    impl.isVerifiedAmpCreative = true;
+    impl.isVerifiedAmpCreative_ = true;
     impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
     impl.onCreativeRender({customElementExtensions: []});
     expect(resizeStub).to.be.calledOnce;

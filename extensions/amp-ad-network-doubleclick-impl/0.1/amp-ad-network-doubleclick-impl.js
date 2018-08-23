@@ -779,6 +779,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return super.renderNonAmpCreative();
   }
 
+  /** @override */
+  layoutCallback() {
+    return super.layoutCallback().then(superReturn => {
+      if (this.isFluidRequest_ && this.isVerifiedAmpCreative()) {
+        // This is an AMP fluid creative that will be rendered in a friendly
+        // frame.
+        dev().assert(this.iframe && this.iframe.contentWindow &&
+            this.iframe.contentWindow.document &&
+            this.iframe.contentWindow.document.body,
+        'Attempting to expand fluid creative without properly set up ' +
+            'friendly frame.');
+        this.attemptChangeHeight(
+            this.iframe.contentWindow.document.body./*OK*/scrollHeight)
+            .then(() => this.fireFluidDelayedImpression());
+      }
+      return Promise.resolve(superReturn);
+    });
+  }
+
   /** @override  */
   unlayoutCallback() {
     if (this.refreshManager_) {
@@ -865,17 +884,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // creative will be centered instead of left-aligned.
       this.element.removeAttribute('height');
       setStyles(this.element, {width: `${size.width}px`});
-    } else if (this.isFluidRequest_ && this.isVerifiedAmpCreative) {
-      // This is an AMP fluid creative that will be rendered in a friendly
-      // frame.
-      dev().assert(this.iframe && this.iframe.contentWindow &&
-          this.iframe.contentWindow.document &&
-          this.iframe.contentWindow.document.body,
-      'Attempting to expand fluid creative without properly set up ' +
-          'friendly frame.');
-      this.attemptChangeHeight(
-          this.iframe.contentWindow.document.body./*OK*/scrollHeight)
-          .then(() => this.fireFluidDelayedImpression());
     }
 
     this.refreshManager_ = this.refreshManager_ ||

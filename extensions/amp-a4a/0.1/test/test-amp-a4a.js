@@ -1101,7 +1101,7 @@ describe('amp-a4a', () => {
         return a4a.adPromise_.then(promiseResult => {
           expect(promiseResult).to.be.ok;
           expect(promiseResult.minifiedCreative).to.be.ok;
-          expect(a4a.isVerifiedAmpCreative).to.be.true;
+          expect(a4a.isVerifiedAmpCreative()).to.be.true;
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
           expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
           expect(maybeExecuteRealTimeConfigStub.calledWith(
@@ -1289,7 +1289,7 @@ describe('amp-a4a', () => {
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(fetchMock.called('ad')).to.be.true;
-          expect(a4a.isVerifiedAmpCreative).to.equal(isValidCreative);
+          expect(a4a.isVerifiedAmpCreative()).to.equal(isValidCreative);
           if (isValidCreative) {
             expect(promiseResult).to.be.ok;
             expect(promiseResult.minifiedCreative).to.be.ok;
@@ -1860,14 +1860,14 @@ describe('amp-a4a', () => {
     });
     it('should return true if throttled, but AMP creative', () => {
       incrementLoadingAds(fixture.win);
-      a4a.isVerifiedAmpCreative = true;
+      a4a.isVerifiedAmpCreative_ = true;
       expect(a4a.renderOutsideViewport()).to.equal(3);
     });
     it('should return 1.25 if prefer-viewability-over-views', () => {
       a4aElement.setAttribute(
           'data-loading-strategy', 'prefer-viewability-over-views');
       expect(a4a.renderOutsideViewport()).to.equal(1.25);
-      a4a.isVerifiedAmpCreative = true;
+      a4a.isVerifiedAmpCreative_ = true;
       expect(a4a.renderOutsideViewport()).to.equal(1.25);
     });
   });
