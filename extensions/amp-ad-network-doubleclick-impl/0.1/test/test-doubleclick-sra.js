@@ -443,7 +443,7 @@ describes.realWin('Doubleclick SRA', config , env => {
         arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
         bodyUsed: false,
         headers: {
-          getResponseHeader:(header) => headers[header],
+          getResponseHeader: header => headers[header],
         },
         text: () => {
           throw new Error('should not be SRA!');
