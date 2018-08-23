@@ -230,6 +230,10 @@ function maybeTransform(cssRoot, cssText) {
  */
 let shouldNotMakeVisible = false;
 
+/**
+ * @visibleForTesting
+ * @param {boolean} value
+ */
 export function setShouldNotMakeVisible(value) {
   shouldNotMakeVisible = value;
 }
