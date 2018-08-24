@@ -95,6 +95,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {upgradeBackgroundAudio} from './audio';
+import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsDefault from './_locales/default';
 import LocalizedStringsEn from './_locales/en';
