@@ -371,8 +371,10 @@ export class Viewer {
    * established or timeout in 20 seconds. The timeout is needed to avoid
    * this promise becoming a memory leak with accumulating undelivered
    * messages. The promise is only available when the document is embedded.
-   * @private
+   *
+   * @param {!Promise} messagingPromise
    * @return {?Promise}
+   * @private
    */
   initMessagingChannel_(messagingPromise) {
     const isEmbedded = !!(
