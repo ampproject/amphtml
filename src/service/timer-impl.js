@@ -17,12 +17,15 @@
 // Requires polyfills in immediate side effect.
 import '../polyfills';
 
-import {registerServiceBuilder} from '../service';
+import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
 import {reportError} from '../error';
 import {user} from '../log';
 
+const TAG = 'timer';
+
 /**
  * Helper with all things Timer.
+* @implements {../service.EmbeddableService}
  */
 export class Timer {
 
@@ -165,6 +168,11 @@ export class Timer {
     });
   }
 
+  /** @override */
+  adoptEmbedWindow(embedWin) {
+    installServiceInEmbedScope(embedWin, TAG,
+        new Timer(embedWin));
+  }
 }
 
 /**

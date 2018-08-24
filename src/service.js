@@ -650,6 +650,7 @@ export function adoptServiceForEmbed(embedWin, serviceId) {
  * @param {!Window} embedWin
  * @param {string} serviceId
  * @return {boolean}
+ * @visibleForTesting
  */
 export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
   const frameElement = /** @type {!Node} */ (dev().assert(
