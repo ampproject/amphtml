@@ -826,9 +826,6 @@ export class Bind {
    * @return {!Promise<!JsonObject>}
    */
   evaluateExpression_(expression, scope) {
-    if (expression.length == 0) {
-      return Promise.resolve(null);
-    }
     return this.initializePromise_.then(() => {
       // Allow expression to reference current state in addition to event state.
       Object.assign(scope, this.state_);
