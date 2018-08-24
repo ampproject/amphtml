@@ -43,7 +43,7 @@ PASS
 |      <!-- Invalid: AMP Runtime can't parse json with comments. -->
 |      <script type="application/json">
 >>     ^~~~~~~~~
-amp-geo/0.1/test/validator-amp-geo.html:43:4 JSON contents are invalid data that can not be parsed. [DISALLOWED_HTML]
+amp-geo/0.1/test/validator-amp-geo.html:43:4 The script tag contains invalid JSON that cannot be parsed. [DISALLOWED_HTML]
 |      {
 |        // Comment, should break parsing and result in a warning.
 |      }
