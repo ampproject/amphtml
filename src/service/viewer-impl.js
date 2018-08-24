@@ -1055,6 +1055,8 @@ export class Viewer {
   /**
    * Resolves when there is a messaging channel established with the viewer.
    * Will be null if no messaging is needed like in an non-embedded document.
+   * Deprecated: do not use. sendMessage and sendMessageAwaitResponse already
+   *             wait for messaging channel ready.
    * @return {?Promise}
    */
   whenMessagingReady() {
