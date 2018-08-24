@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as experiments from '../../../../src/experiments';
 import {LinkerManager} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
@@ -23,12 +24,22 @@ describe('Linker Manager', () => {
   let ampdoc;
   let registerSpy;
   let isProxySpy;
+  let findMetaTagStub;
 
   beforeEach(() => {
     // Linker uses a timestamp value to generate checksum.
     sandbox = sinon.sandbox;
 
-    ampdoc = {};
+    findMetaTagStub = sandbox.stub();
+    ampdoc = {
+      win: {
+        document: {
+          head: {
+            querySelector: findMetaTagStub,
+          },
+        },
+      },
+    };
 
     sandbox.stub(Services, 'documentInfoForDoc')
         .returns({
@@ -254,4 +265,74 @@ describe('Linker Manager', () => {
       return expect(a.href).to.equal('https://www.example.com');
     });
   });
+
+  it('should add linker if meta tag is present and experiment on', () => {
+    const config = {
+      linkers: {
+        testLinker1: {
+          ids: {
+            _key: 'CLIENT_ID(_ga)',
+            gclid: '234',
+          },
+        },
+      },
+    };
+
+    const a = {
+      href: 'https://www.example.com',
+      hostname: 'www.example.com',
+    };
+
+    const manager = new LinkerManager(ampdoc, config);
+    sandbox.stub(experiments, 'isExperimentOn').returns(true);
+    manager.type_ = 'googleanalytics';
+    findMetaTagStub.returns({});
+    const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
+    expandStub.withArgs('CLIENT_ID(_ga)')
+        .returns('amp-12345');
+    expandStub.returnsArg(0);
+
+    manager.init();
+
+    return Promise.all(manager.allLinkerPromises_).then(() => {
+      manager.handleAnchorMutation(a);
+      return expect(a.href).not.to.equal('https://www.example.com');
+    });
+  });
+
+  it('should not add linker if meta tag is present but experiment is not on',
+      () => {
+        const config = {
+          linkers: {
+            testLinker1: {
+              ids: {
+                _key: 'CLIENT_ID(_ga)',
+                gclid: '234',
+              },
+            },
+          },
+        };
+
+        const a = {
+          href: 'https://www.example.com',
+          hostname: 'www.example.com',
+        };
+
+        const manager = new LinkerManager(ampdoc, config);
+        sandbox.stub(experiments, 'isExperimentOn').returns(false);
+        manager.type_ = 'googleanalytics';
+        findMetaTagStub.returns({});
+        const expandStub = sandbox.stub(manager,
+            'expandTemplateWithUrlParams_');
+        expandStub.withArgs('CLIENT_ID(_ga)')
+            .returns('amp-12345');
+        expandStub.returnsArg(0);
+
+        manager.init();
+
+        return Promise.all(manager.allLinkerPromises_).then(() => {
+          manager.handleAnchorMutation(a);
+          return expect(a.href).to.equal('https://www.example.com');
+        });
+      });
 });
