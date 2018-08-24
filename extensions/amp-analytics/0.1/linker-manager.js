@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments'
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics-linker';

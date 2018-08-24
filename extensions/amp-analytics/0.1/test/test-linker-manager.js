@@ -36,9 +36,9 @@ describe('Linker Manager', () => {
         document: {
           head: {
             querySelector: findMetaTagStub,
-          }
-        }
-      }
+          },
+        },
+      },
     };
 
     sandbox.stub(Services, 'documentInfoForDoc')
@@ -322,7 +322,8 @@ describe('Linker Manager', () => {
         sandbox.stub(experiments, 'isExperimentOn').returns(false);
         manager.type_ = 'googleanalytics';
         findMetaTagStub.returns({});
-        const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
+        const expandStub = sandbox.stub(manager,
+            'expandTemplateWithUrlParams_');
         expandStub.withArgs('CLIENT_ID(_ga)')
             .returns('amp-12345');
         expandStub.returnsArg(0);
