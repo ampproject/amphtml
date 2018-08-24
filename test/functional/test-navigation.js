@@ -145,37 +145,16 @@ describes.sandboxed('Navigation', {}, () => {
     });
 
     describe('anchor mutators', () => {
-      const priortyUsedError = /Mutator with same priority is already in use./;
-      const priorityError = /Priority must a number from 1-10./;
-      const priority = 10;
       it('should throw error if priority is already in use', () => {
+        const priority = 10;
         handler.registerAnchorMutator(element => {
           element.href += '?am=1';
         }, priority);
         allowConsoleError(() => {
           expect(() => handler.registerAnchorMutator(element => {
             element.href += '?am=2';
-          }, priority)).to.throw(priortyUsedError);
+          }, priority)).to.not.throw();
         });
-      });
-
-      it('should respect confines of the priority rules', () => {
-        allowConsoleError(() => {
-          expect(() => handler.registerAnchorMutator(element => {
-            element.href += '?priority=-1';
-          }, -1)).to.throw(priorityError);
-        });
-        allowConsoleError(() => {
-          expect(() => handler.registerAnchorMutator(element => {
-            element.href += '?priority=11';
-          }, 11)).to.throw(priorityError);
-        });
-        expect(() => handler.registerAnchorMutator(element => {
-          element.href += '?priority=1';
-        }, 1)).to.not.throw();
-        expect(() => handler.registerAnchorMutator(element => {
-          element.href += '?priority=10';
-        }, 10)).to.not.throw();
       });
 
       it('should execute in order', () => {
@@ -186,16 +165,22 @@ describes.sandboxed('Navigation', {}, () => {
           transformedHref = element.href;
         }, 2);
         handler.registerAnchorMutator(element => {
-          element.href += '?first=1';
+          element.href += '&first=1';
           transformedHref = element.href;
         }, 1);
         handler.registerAnchorMutator(element => {
-          element.href += '&third=3';
+          element.href += '?third=3';
+          transformedHref = element.href;
+        }, 3);
+        // If using a same priority, the order of registration is respected.
+        handler.registerAnchorMutator(element => {
+          element.href += '&third=3-1';
           transformedHref = element.href;
         }, 3);
         handler.handle_(event);
         expect(transformedHref).to.equal(
-            'https://www.testing-1-2-3.org/?first=1&second=2&third=3');
+            'https://www.testing-1-2-3.org/?third=3&third=3-1&second=2'
+            + '&first=1');
       });
 
       it('verify order of operations', () => {
@@ -213,6 +198,11 @@ describes.sandboxed('Navigation', {}, () => {
         // of the possibly mutated anchor href into the location object
         // for navigation.handleNavClick.
         sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
+        expect(expandVars).to.be.calledOnce;
+        // Verify that parseUrl is called once when the variables are
+        // expanded, then after the anchor mutators and then once more
+        // in handleNavClick
+        expect(parseUrl).to.be.calledThrice;
       });
     });
 
