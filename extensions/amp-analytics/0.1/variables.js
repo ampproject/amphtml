@@ -135,7 +135,6 @@ export class VariableService {
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
     this.register_('$TRIM', value => value.trim());
-    this.register_('$JSON', value => JSON.stringify(value));
     this.register_('$TOLOWERCASE', value => value.toLowerCase());
     this.register_('$TOUPPERCASE', value => value.toUpperCase());
     this.register_('$NOT', value => String(!value));
