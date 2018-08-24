@@ -17,28 +17,19 @@
 
 import {
   ExpansionOptions,
+  VariableService,
   installVariableService,
   variableServiceFor,
 } from '../variables';
 import {Services} from '../../../../src/services';
-import {adopt} from '../../../../src/runtime';
 import {toggleExperiment} from '../../../../src/experiments';
 
-adopt(window);
-
 describe('amp-analytics.VariableService', function() {
-  let variables, sandbox;
+  let variables;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    installVariableService(window);
-    variables = variableServiceFor(window);
+    variables = new VariableService({});
   });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
 
   it('correctly encodes scalars and arrays', () => {
     expect(variables.encodeVars('v', 'abc %&')).to.equal('abc%20%25%26');
@@ -108,17 +99,23 @@ describe('amp-analytics.VariableService', function() {
                 ));
     });
 
+    it('do not expand macros', () => {
+      const actual =
+          variables.expandTemplate('MACRO(a,b)', new ExpansionOptions(vars));
+      return expect(actual).to.eventually.equal('MACRO(a,b)');
+    });
+
     it('works with complex params (1)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM(foo,bar)'});
-      return variables.expandTemplate('${fooParam}', vars)
+      return variables.expandTemplate('${fooParam}&123', vars)
           .then(actual =>
-            expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
+            expect(actual).to.equal('QUERY_PARAM(foo,bar)&123'));
     });
 
     it('works with complex params (2)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM'});
-      return variables.expandTemplate('${fooParam(foo,bar)}', vars)
-          .then(actual => expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
+      return variables.expandTemplate('${fooParam(foo,bar)}&123', vars)
+          .then(actual => expect(actual).to.equal('QUERY_PARAM(foo,bar)&123'));
     });
 
     it('respect freeze variables', () => {
@@ -130,6 +127,19 @@ describe('amp-analytics.VariableService', function() {
           .then(actual => expect(actual).to.equal(
               'QUERY_PARAM(foo,bar)${freeze}'));
 
+    });
+
+    it('expands array vars', () => {
+      const actual = variables.expandTemplate('${array}', new ExpansionOptions({
+        'array': [1, 'xy&x', 'MACRO(abc,def)'],
+      }));
+      return expect(actual).to.eventually.equal('1,xy%26x,MACRO(abc,def)');
+    });
+
+    it('handles empty var name', () => {
+      const actual =
+          variables.expandTemplate('${}', new ExpansionOptions(vars));
+      return expect(actual).to.eventually.equal('');
     });
   });
 

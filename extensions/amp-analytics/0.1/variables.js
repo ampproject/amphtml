@@ -180,7 +180,7 @@ export class VariableService {
     const replacementPromises = [];
     let replacement = template.replace(/\${([^}]*)}/g, (match, key) => {
       if (!key) {
-        return Promise.resolve('');
+        return '';
       }
 
       const {name, argList} = this.getNameArgs_(key);
