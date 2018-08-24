@@ -5,8 +5,7 @@
     "ampdoc-shell",
     "disable-amp-story-desktop",
     "inabox-rov",
-    "url-replacement-v2",
-    "linker-meta-opt-in"
+    "url-replacement-v2"
   ],
   "allow-url-opt-in": ["pump-early-frame"],
 

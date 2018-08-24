@@ -7,8 +7,7 @@
     "disable-faster-amp-list",
     "inabox-rov",
     "inline-styles",
-    "url-replacement-v2",
-    "linker-meta-opt-in"
+    "url-replacement-v2"
   ],
   "allow-url-opt-in": ["pump-early-frame"],
 
