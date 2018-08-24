@@ -329,17 +329,11 @@ export class AmpPanZoom extends AMP.BaseElement {
       height = this.sourceHeight_;
     }
 
-    const contentBox =
-      layoutRectFromDomRect(this.content_./*OK*/getBoundingClientRect());
-
     this.contentBox_ = layoutRectLtwh(
-        contentBox.left - this.elementBox_.left,
-        contentBox.top - this.elementBox_.top,
+        0,
+        0,
         Math.round(width),
         Math.round(height));
-
-    this.yOffsetFromCenter_ = this.getYOffsetFromCenter_();
-    this.xOffsetFromCenter_ = this.getXOffsetFromCenter_();
 
     // Adjust max scale to at least fit the screen.
     const elementBoxRatio = this.elementBox_.width /
@@ -354,7 +348,6 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.startScale_ = this.scale_ = this.initialScale_;
     this.startX_ = this.posX_ = this.initialX_;
     this.startY_ = this.posY_ = this.initialY_;
-    this.updatePanZoomBounds_(this.scale_);
   }
 
   /**
@@ -364,15 +357,25 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   resetContentDimensions_() {
     const content = dev().assertElement(this.content_);
-    return this.measureMutateElement(() => this.measure_(), () => {
-      // Set the actual dimensions of the content
-      setStyles(content, {
-        width: px(this.contentBox_.width),
-        height: px(this.contentBox_.height),
-      });
-      // Update translation and scaling
-      this.updatePanZoom_();
-    }, content);
+    return this.measureMutateElement(
+        () => this.measure_(),
+        () => {
+          // Set the actual dimensions of the content
+          setStyles(content, {
+            width: px(this.contentBox_.width),
+            height: px(this.contentBox_.height),
+          });
+        }, content).then(() => {
+      const contentBox =
+      layoutRectFromDomRect(this.content_./*OK*/getBoundingClientRect());
+      // Set content positions to offset from element box
+      this.contentBox_.top = contentBox.top - this.elementBox_.top;
+      this.contentBox_.left = contentBox.left - this.elementBox_.left;
+      this.yOffsetFromCenter_ = this.getYOffsetFromCenter_();
+      this.xOffsetFromCenter_ = this.getXOffsetFromCenter_();
+      this.updatePanZoomBounds_(this.scale_);
+      return this.updatePanZoom_();
+    });
   }
 
   /** @private */
@@ -563,20 +566,20 @@ export class AmpPanZoom extends AMP.BaseElement {
     const xOffset = scale == 1 ? 0 : this.xOffsetFromCenter_;
     const yOffset = scale == 1 ? 0 : this.yOffsetFromCenter_;
 
-    this.minX_ = minX - xOffset;
-    this.minY_ = minY - yOffset;
-    this.maxX_ = maxX - xOffset;
-    this.maxY_ = maxY - yOffset;
-
+    this.minX_ = Math.min(minX, minX - xOffset);
+    this.minY_ = Math.min(minY, minY - yOffset);
+    this.maxX_ = Math.max(maxX, maxX - xOffset);
+    this.maxY_ = Math.max(maxY, maxY - yOffset);
   }
 
   /**
    * Updates pan/zoom of the content based on the current values.
+   * @return {Promise}
    * @private
    */
   updatePanZoom_() {
     const {scale_: s, posX_: x, posY_: y, content_: content} = this;
-    this.mutateElement(() => {
+    return this.mutateElement(() => {
       setStyles(dev().assertElement(content), {
         transform: translate(x, y) + ' ' + scale(s),
       });
@@ -672,11 +675,13 @@ export class AmpPanZoom extends AMP.BaseElement {
     }
     const dist = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
     const newScale = this.startScale_ * (1 + (dir * dist / 100));
-    const deltaCenterX = (this.elementBox_.width / 2) - centerClientX;
-    const deltaCenterY = (this.elementBox_.height / 2) - centerClientY;
-    deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
-    deltaY = Math.min(deltaCenterY, deltaCenterY * (dist / 100));
-    this.onZoom_(newScale, deltaX, deltaY, /*animate*/ false);
+    const centerX = this.elementBox_.width / 2 - this.xOffsetFromCenter_;
+    const centerY = this.elementBox_.height / 2 - this.yOffsetFromCenter_;
+    const deltaCenterX = centerX - centerClientX;
+    const deltaCenterY = centerY - centerClientY;
+    const dx = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
+    const dy = Math.min(deltaCenterY, deltaCenterY * (dist / 100));
+    this.onZoom_(newScale, dx, dy, /*animate*/ false);
   }
 
   /**
@@ -693,9 +698,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (newScale == this.scale_) {
       return Promise.resolve();
     }
-
     this.updatePanZoomBounds_(newScale);
-
     const newPosX = this.boundX_(this.startX_ + (deltaX * newScale), false);
     const newPosY = this.boundY_(this.startY_ + (deltaY * newScale), false);
     return this.set_(newScale, newPosX, newPosY, animate);
@@ -781,8 +784,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       this.scale_ = newScale;
       this.posX_ = newPosX;
       this.posY_ = newPosY;
-      this.updatePanZoom_();
-      return Promise.resolve();
+      return this.updatePanZoom_();
     }
   }
 
