@@ -60,7 +60,19 @@ Users can mouse down or touch to move the slider to the position of the pointer,
 
 If you specify `tabindex` on the `amp-image-slider` element, users can navigate the slider with their keyboards. Pressing the  down, left, or right arrow moves the slider bar one step towards the corresponding direction. Pressing the Home key brings the slider to the center. Pressing the PageUp or PageDown keys moves to the left or right end of the slider body.
 
+## Attributes
+
+### `disable-hint-reappear`
+
 The hints that shows at the center of the vertical bar will disappear once user starts interacting with the slider (such as clicking the mouse button, touch the slider, and pressing keys to move the slider). The hints would reappear if it then leaves the viewport and goes back in again. To stop such reappearing behavior, add the `disable-hint-reappear` attribute to the image slider.
+
+### `initial-slider-position`
+
+The vertical slider bar sits at the center of the slider body by default. To move the initial slider position to a different place, set `initial-slider-position` to a value between 0 and 1, corresponding to 0% to 100% from the left slider edge.
+
+### `step-size`
+
+When focusing on the slider, left and right keyboard buttons move the slider bar by 10% each press. To use a different step size, set `step-size` to a value between 0 and 1, corresponding to moving 0% to moving 100% each key press.
 
 ## Actions
 
