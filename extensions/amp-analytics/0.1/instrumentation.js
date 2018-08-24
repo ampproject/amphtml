@@ -22,12 +22,10 @@ import {
   AnalyticsEvent,
   AnalyticsEventType,
   CustomEventTracker,
-  getTrackerKeyName,
-  getTrackerTypesForParentType,
 } from './events';
+import {AnalyticsGroup} from './analytics-group';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
@@ -38,6 +36,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {hasOwn} from '../../../src/utils/object';
+import {user} from '../../../src/log';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -325,81 +324,6 @@ export class InstrumentationService {
       return ALLOWED_IN_EMBED.includes(triggerType);
     }
     return true;
-  }
-}
-
-
-/**
- * Represents the group of analytics triggers for a single config. All triggers
- * are declared and released at the same time.
- *
- * @implements {../../../src/service.Disposable}
- */
-export class AnalyticsGroup {
-  /**
-   * @param {!./analytics-root.AnalyticsRoot} root
-   * @param {!Element} analyticsElement
-   * @param {!InstrumentationService} service
-   */
-  constructor(root, analyticsElement, service) {
-    // TODO(dvoytenko): remove `service` as soon as migration is complete.
-
-    /** @const */
-    this.root_ = root;
-    /** @const */
-    this.analyticsElement_ = analyticsElement;
-    /** @const */
-    this.service_ = service;
-
-    /** @private @const {!Array<!UnlistenDef>} */
-    this.listeners_ = [];
-  }
-
-  /** @override */
-  dispose() {
-    this.listeners_.forEach(listener => {
-      listener();
-    });
-  }
-
-  /**
-   * Adds a trigger with the specified config and listener. The config must
-   * contain `on` property specifying the type of the event.
-   *
-   * Triggers registered on a group are automatically released when the
-   * group is disposed.
-   *
-   * @param {!JsonObject} config
-   * @param {function(!AnalyticsEvent)} handler
-   */
-  addTrigger(config, handler) {
-    const eventType = dev().assertString(config['on']);
-    const trackerKey = getTrackerKeyName(eventType);
-    const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
-
-    if (this.isDeprecatedListenerEvent(trackerKey)) {
-      // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
-      // triggers have been migrated..
-      this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
-      return;
-    }
-
-    const tracker = this.root_.getTrackerForWhitelist(
-        trackerKey, trackerWhitelist);
-    user().assert(!!tracker,
-        'Trigger type "%s" is not allowed in the %s', eventType,
-        this.root_.getType());
-    const unlisten = tracker.add(this.analyticsElement_, eventType, config,
-        handler);
-    this.listeners_.push(unlisten);
-  }
-
-  /**
-   * @param {string} triggerType
-   * @return {boolean}
-   */
-  isDeprecatedListenerEvent(triggerType) {
-    return triggerType == 'scroll';
   }
 }
 
