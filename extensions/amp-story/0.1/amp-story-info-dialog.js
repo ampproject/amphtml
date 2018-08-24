@@ -175,6 +175,9 @@ export class InfoDialog {
    * @private
    */
   requestMoreInfoLink_() {
+    if (!this.viewer_.isEmbedded()) {
+      return Promise.resolve();
+    }
     return this.viewer_./*OK*/sendMessageAwaitResponse(
         'moreInfoLinkUrl', /* data */ undefined)
         .then(moreInfoUrl => {

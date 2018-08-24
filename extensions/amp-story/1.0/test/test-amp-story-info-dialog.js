@@ -30,6 +30,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-share-menu', {amp: true}, env => {
   let moreInfoLinkUrl;
+  let embedded;
   let parentEl;
   let infoDialog;
   let storeService;
@@ -40,6 +41,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
+    embedded = true;
     registerServiceBuilder(win, 'story-store', () => storeService);
 
     // Making sure resource tasks run synchronously.
@@ -55,6 +57,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     });
 
     sandbox.stub(Services, 'viewerForDoc').returns({
+      isEmbedded: () => embedded,
       sendMessageAwaitResponse: eventType => {
         if (eventType === 'moreInfoLinkUrl') {
           return Promise.resolve(moreInfoLinkUrl);
@@ -77,7 +80,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   });
 
   it('should hide more info link when there is no viewer messaging', () => {
-    moreInfoLinkUrl = undefined;
+    embedded = false;
 
     return infoDialog.build().then(() => {
       expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
