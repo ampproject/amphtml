@@ -57,6 +57,7 @@ describe('amp-analytics.VariableService', function() {
     const vars = {
       '1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}', '5': 0,
       'a': '${b}', 'b': '${c}', 'c': 'https://www.google.com/a?b=1&c=2',
+      'obj': {a: 1, b: 'xyz'}, 'array': [1, 'xyx', 2],
     };
 
     it('expands zeros', () => {
@@ -73,6 +74,13 @@ describe('amp-analytics.VariableService', function() {
               expect(actual).to.equal('123%24%7B4%7D')
             );
       });
+    });
+
+    it('expands object/array vars', () => {
+      const actual = variables.expandTemplate(
+          '${obj}~${array}', new ExpansionOptions(vars));
+      return expect(actual).to.eventually.equal(
+          '%7B%22a%22%3A1%2C%22b%22%3A%22xyz%22%7D~%5B1%2C%22xyx%22%2C2%5D');
     });
 
     it('expands nested vars (no encode)', () => {

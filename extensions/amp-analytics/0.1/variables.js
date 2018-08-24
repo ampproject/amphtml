@@ -22,6 +22,7 @@ import {isArray, isFiniteNumber} from '../../../src/types';
 // TODO(calebcordry) remove this once experiment is launched
 // also remove from dep-check-config whitelist;
 import {isExperimentOn} from '../../../src/experiments';
+import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'Analytics.Variables';
@@ -199,7 +200,7 @@ export class VariableService {
                 true /* noEncode */));
       } else {
         // Values can also be arrays and objects. Don't expand them.
-        p = Promise.resolve(raw);
+        p = tryResolve(JSON.stringify.bind(null, raw));
       }
 
       p = p.then(finalRawValue => {
@@ -208,11 +209,10 @@ export class VariableService {
           ? finalRawValue
           : this.encodeVars(name, finalRawValue);
         return val ? val + argList : val;
-      })
-          .then(encodedValue => {
-          // Replace it in the string
-            replacement = replacement.replace(match, encodedValue);
-          });
+      }).then(encodedValue => {
+        // Replace it in the string
+        replacement = replacement.replace(match, encodedValue);
+      });
 
       // Queue current replacement promise after the last replacement.
       replacementPromises.push(p);
