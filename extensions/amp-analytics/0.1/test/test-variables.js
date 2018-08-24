@@ -171,9 +171,6 @@ describe('amp-analytics.VariableService', function() {
 
     it('trim works', () => check('$TRIM(hello      )', 'hello'));
 
-    it('json works', () =>
-      check('$JSON(Hello world!)', '%22Hello%20world!%22'));
-
     it('toLowerCase works', () =>
       check('$TOLOWERCASE(HeLLO WOrld!)', 'hello%20world!'));
 
