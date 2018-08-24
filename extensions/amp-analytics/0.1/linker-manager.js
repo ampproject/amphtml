@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics-linker';
@@ -144,6 +145,10 @@ export class LinkerManager {
    * @private
    */
   isLegacyOptIn_() {
+    if (!isExperimentOn(this.ampdoc_.win, 'linker-meta-opt-in')) {
+      return false;
+    }
+
     const optInMeta = this.ampdoc_.win.document.head
         ./*OK*/querySelector(`meta[name=${GOOGLE_CID_API_META_NAME}]`);
     const isGaType = this.type_ === 'googleanalytics';
