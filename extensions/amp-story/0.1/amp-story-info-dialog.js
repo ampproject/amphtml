@@ -175,23 +175,15 @@ export class InfoDialog {
    * @private
    */
   requestMoreInfoLink_() {
-    const messagingPromise = this.viewer_.whenMessagingReady();
-
-    if (!messagingPromise) {
-      // There is no viewer to supply the more info URL.
+    if (!this.viewer_.isEmbedded()) {
       return Promise.resolve();
     }
-
-    return messagingPromise
-        .then(() => {
-          return this.viewer_./*OK*/sendMessageAwaitResponse('moreInfoLinkUrl',
-              /* data */ undefined);
-        })
+    return this.viewer_./*OK*/sendMessageAwaitResponse(
+        'moreInfoLinkUrl', /* data */ undefined)
         .then(moreInfoUrl => {
           if (!moreInfoUrl) {
             return null;
           }
-
           return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
         });
   }
