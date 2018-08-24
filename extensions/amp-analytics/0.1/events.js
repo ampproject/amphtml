@@ -423,29 +423,31 @@ export class ScrollEventTracker extends EventTracker {
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
 
-    /** @private {function(!Event)} */
-    this.scrollHandler_ = undefined;
+    /** @private {function(!Object)|null} */
+    this.scrollHandler_ = null;
   }
 
   /** @override */
   dispose() {
-    this.root_.getScrollManager()
-        .removeScrollHandler(this.scrollHandler_);
-    this.scrollHandler_ = undefined;
+    if (this.scrollHandler_ !== null) {
+      this.root_.getScrollManager()
+          .removeScrollHandler(this.scrollHandler_);
+      this.scrollHandler_ = null;
+    }
   }
 
   /** @override */
   add(context, eventType, config, listener) {
     if (!config['scrollSpec']) {
       user().error(TAG, 'Missing scrollSpec on scroll trigger.');
-      return;
+      return NO_UNLISTEN;
     }
 
     if (!Array.isArray(config['scrollSpec']['verticalBoundaries']) &&
       !Array.isArray(config['scrollSpec']['horizontalBoundaries'])) {
       user().error(TAG, 'Boundaries are required for the scroll ' +
         'trigger to work.');
-      return;
+      return NO_UNLISTEN;
     }
 
     /**
@@ -459,6 +461,7 @@ export class ScrollEventTracker extends EventTracker {
       if (!scrollPos) {
         return;
       }
+
       // Goes through each of the boundaries and fires an event if it has not
       // been fired so far and it should be.
       for (const b in bounds) {
@@ -474,7 +477,7 @@ export class ScrollEventTracker extends EventTracker {
         vars[varName] = b;
         listener(
             new AnalyticsEvent(
-                this.root_,
+                this.root_.getRootElement(),
                 AnalyticsEventType.SCROLL,
                 vars
             )
@@ -493,14 +496,14 @@ export class ScrollEventTracker extends EventTracker {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       triggerScrollEvents(boundsV,
-          (e.scrollTop + e.screenHeight) * 100 / e.scrollHeight,
+          (e.top + e.screenHeight) * 100 / e.height,
           VAR_V_SCROLL_BOUNDARY);
       triggerScrollEvents(boundsH,
-          (e.scrollLeft + e.screenWidth) * 100 / e.scrollWidth,
+          (e.left + e.screenWidth) * 100 / e.width,
           VAR_H_SCROLL_BOUNDARY);
     };
 
-    this.root_.getScrollManager()
+    return this.root_.getScrollManager()
         .addScrollHandler(this.scrollHandler_);
   }
 

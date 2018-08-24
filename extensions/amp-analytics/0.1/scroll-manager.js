@@ -18,11 +18,24 @@ import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 
 /**
+ * @typedef {{
+ *   relayoutAll: boolean,
+ *   top: number,
+ *   left: number,
+ *   width: number,
+ *   height: number,
+ *   screenHeight: number,
+ *   screenWidth: number,
+ *   velocity: number
+ * }}
+ */
+export let ScrollEventDef;
+
+/**
  * A manager for handling multiple Scroll Event Trackers.
  * The instance of this class corresponds 1:1 to `AnalyticsRoot`. It represents
  * a collection of all scroll triggers declared within the `AnalyticsRoot`.
  * @implements {../../../src/service.Disposable}
- * @abstract
  */
 export class ScrollManager {
   /**
@@ -33,7 +46,7 @@ export class ScrollManager {
     /** @const @protected {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc*/
     this.ampdoc = ampdoc;
 
-    /** @private {!Observable<!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
+    /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */
     this.scrollObservable_ = new Observable();
 
     /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
@@ -49,30 +62,34 @@ export class ScrollManager {
   }
 
   /**
-   * @param {function(!Event)} handler
+   * @param {function(!Object)} handler
    */
   removeScrollHandler(handler) {
     this.scrollObservable_.remove(handler);
   }
 
   /**
-   * @param {function(!Event)} handler
+   * @param {function(!Object)} handler
+   * @return {!UnlistenDef}
    */
   addScrollHandler(handler) {
-    this.scrollObservable_.add(handler);
 
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
-    handler({
-      scrollTop: this.viewport_.getScrollTop(),
-      scrollLeft: this.viewport_.getScrollLeft(),
-      scrollWidth: this.viewport_.getScrollWidth(),
-      scrollHeight: this.viewport_.getScrollHeight(),
+    /** {./scroll-manager.ScrollEventDef} */
+    const scrollEvent = {
+      top: this.viewport_.getScrollTop(),
+      left: this.viewport_.getScrollLeft(),
+      width: this.viewport_.getScrollWidth(),
+      height: this.viewport_.getScrollHeight(),
       screenWidth: size.width,
       screenHeight: size.height,
       relayoutAll: false,
       velocity: 0, // Hack for typing.
-    });
+    };
+    handler(scrollEvent);
+
+    return this.scrollObservable_.add(handler);
   }
 
   /**
@@ -80,8 +97,19 @@ export class ScrollManager {
    * @private
    */
   onScroll_(e) {
+    /** {./scroll-manager.ScrollEventDef} */
+    const scrollEvent = {
+      top: e.top,
+      left: e.left,
+      width: this.viewport_.getScrollWidth(),
+      height: this.viewport_.getScrollHeight(),
+      screenWidth: e.width,
+      screenHeight: e.height,
+      relayoutAll: e.relayoutAll,
+      velocity: e.velocity, // Hack for typing.
+    };
     // Fire all of our children scroll observables
-    this.scrollObservable_.fire(e);
+    this.scrollObservable_.fire(scrollEvent);
   }
 }
 

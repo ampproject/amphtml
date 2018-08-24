@@ -162,7 +162,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     let tracker;
     let fakeViewport;
-    let getFakeViewportEvent;
+    let getFakeViewportChangedEvent;
     const defaultScrollConfig = {
       'on': 'scroll',
       'scrollSpec': {
@@ -184,15 +184,13 @@ describes.realWin('Events', {amp: 1}, env => {
       };
       tracker.root_.getScrollManager().viewport_ = fakeViewport;
 
-      getFakeViewportEvent = () => {
+      getFakeViewportChangedEvent = () => {
         const size = fakeViewport.getSize();
         return {
-          scrollTop: fakeViewport.getScrollTop(),
-          scrollLeft: fakeViewport.getScrollLeft(),
-          scrollWidth: fakeViewport.getScrollWidth(),
-          scrollHeight: fakeViewport.getScrollHeight(),
-          screenWidth: size.width,
-          screenHeight: size.height,
+          top: fakeViewport.getScrollTop(),
+          left: fakeViewport.getScrollLeft(),
+          width: size.width,
+          height: size.height,
           relayoutAll: false,
           velocity: 0, // Hack for typing.
         };
@@ -244,7 +242,7 @@ describes.realWin('Events', {amp: 1}, env => {
       // Scroll Down
       fakeViewport.getScrollTop.returns(500);
       fakeViewport.getScrollLeft.returns(500);
-      tracker.root_.getScrollManager().onScroll_(getFakeViewportEvent());
+      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
 
       expect(fn1).to.have.callCount(4);
       expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be
@@ -269,7 +267,7 @@ describes.realWin('Events', {amp: 1}, env => {
       // Scroll Down
       fakeViewport.getScrollTop.returns(10);
       fakeViewport.getScrollLeft.returns(10);
-      tracker.root_.getScrollManager().onScroll_(getFakeViewportEvent());
+      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
 
       expect(fn1).to.have.callCount(2);
     });

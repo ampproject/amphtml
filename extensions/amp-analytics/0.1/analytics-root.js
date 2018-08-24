@@ -64,7 +64,7 @@ export class AnalyticsRoot {
     this.visibilityManager_ = null;
 
     /** @private {?./scroll-manager.ScrollManager} */
-    this.scrollManager_ = false;
+    this.scrollManager_ = null;
   }
 
   /** @override */
