@@ -181,18 +181,19 @@ describes.realWin('Events', {amp: 1}, env => {
         'getScrollWidth': sandbox.stub().returns(500),
         'onChanged': sandbox.stub(),
       };
-      tracker.viewport_ = fakeViewport;
+      root.getScrollManager().viewport_ = fakeViewport;
     });
 
     it('should initalize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
-      expect(tracker.scrollObservable_.getHandlerCount()).to.equal(0);
+      expect(tracker.scrollHandler_).to.be.not.ok;
 
       tracker.add(undefined, 'scroll', defaultScrollConfig, sandbox.stub());
-      expect(tracker.scrollObservable_.getHandlerCount()).to.equal(1);
+      expect(tracker.scrollHandler_).to.be.ok;
+
 
       tracker.dispose();
-      expect(tracker.scrollObservable_.getHandlerCount()).to.equal(0);
+      expect(tracker.scrollHandler_).to.be.not.ok;
     });
 
 
@@ -228,7 +229,7 @@ describes.realWin('Events', {amp: 1}, env => {
       // Scroll Down
       fakeViewport.getScrollTop.returns(500);
       fakeViewport.getScrollLeft.returns(500);
-      tracker.onScroll_({top: 500, left: 500, height: 250, width: 250});
+      .onScroll_({top: 500, left: 500, height: 250, width: 250});
 
       expect(fn1).to.have.callCount(4);
       expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be

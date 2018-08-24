@@ -21,7 +21,6 @@ import {
   VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
-import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -421,22 +420,18 @@ export class ScrollEventTracker extends EventTracker {
   constructor(root) {
     super(root);
 
-    /** @private {!Observable<!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
-    this.scrollObservable_ = new Observable();
-
-    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = Services.viewportForDoc(root.ampdoc);
-
-    /** @private {boolean} */
-    this.scrollHandlerRegistered_ = false;
-
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
+
+    /** @private {function(!Event)} */
+    this.scrollHandler_ = undefined;
   }
 
   /** @override */
   dispose() {
-    this.scrollObservable_.removeAll();
+    this.root_.getScrollManager()
+      .removeScrollHandler(this.scrollHandler_);
+    this.scrollHandler_ = undefined;
   }
 
   /** @override */
@@ -445,39 +440,12 @@ export class ScrollEventTracker extends EventTracker {
       user().error(TAG, 'Missing scrollSpec on scroll trigger.');
       return;
     }
-    this.registerScrollTrigger_(config['scrollSpec'], listener);
 
-    // Trigger an event to fire events that might have already happened.
-    const size = this.viewport_.getSize();
-    this.onScroll_({
-      top: this.viewport_.getScrollTop(),
-      left: this.viewport_.getScrollLeft(),
-      width: size.width,
-      height: size.height,
-      relayoutAll: false,
-      velocity: 0, // Hack for typing.
-    });
-  }
-
-  /**
-   * Register for a listener to be called when the boundaries specified in
-   * config are reached.
-   * @param {!JsonObject} config the config that specifies the boundaries.
-   * @param {function(!AnalyticsEvent)} listener
-   * @private
-   */
-  registerScrollTrigger_(config, listener) {
-    if (!Array.isArray(config['verticalBoundaries']) &&
-      !Array.isArray(config['horizontalBoundaries'])) {
+    if (!Array.isArray(config['scrollSpec']['verticalBoundaries']) &&
+      !Array.isArray(config['scrollSpec']['horizontalBoundaries'])) {
       user().error(TAG, 'Boundaries are required for the scroll ' +
         'trigger to work.');
       return;
-    }
-
-    // Ensure that the scroll events are being listened to.
-    if (!this.scrollHandlerRegistered_) {
-      this.scrollHandlerRegistered_ = true;
-      this.viewport_.onChanged(this.onScroll_.bind(this));
     }
 
     /**
@@ -514,9 +482,14 @@ export class ScrollEventTracker extends EventTracker {
       }
     };
 
-    const boundsV = this.normalizeBoundaries_(config['verticalBoundaries']);
-    const boundsH = this.normalizeBoundaries_(config['horizontalBoundaries']);
-    this.scrollObservable_.add(e => {
+    const boundsV = this.normalizeBoundaries_(
+        config['scrollSpec']['verticalBoundaries']
+    );
+    const boundsH = this.normalizeBoundaries_(
+        config['scrollSpec']['horizontalBoundaries']
+    );
+
+    this.scrollHandler_ = e => {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       triggerScrollEvents(boundsV,
@@ -525,15 +498,10 @@ export class ScrollEventTracker extends EventTracker {
       triggerScrollEvents(boundsH,
           (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
           VAR_H_SCROLL_BOUNDARY);
-    });
-  }
+    };
 
-  /**
-   * @param {!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef} e
-   * @private
-   */
-  onScroll_(e) {
-    this.scrollObservable_.fire(e);
+    this.root_.getScrollManager()
+        .addScrollHandler(this.scrollHandler_);
   }
 
   /**

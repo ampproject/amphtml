@@ -1,0 +1,104 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {AmpdocAnalyticsRoot} from '../analytics-root';
+import {ScrollManager} from '../scroll-manager';
+
+
+describes.realWin('ScrollManager', {amp: 1}, env => {
+  let win;
+  let ampdoc;
+  let resources, viewport;
+  let root;
+  let body, target, child, other;
+
+  let scrollManager;
+  let fakeViewport;
+  const defaultScrollConfig = {
+    'on': 'scroll',
+    'scrollSpec': {
+      'verticalBoundaries': [0, 100],
+      'horizontalBoundaries': [0, 100],
+    },
+  };
+
+  beforeEach(() => {
+    win = env.win;
+    ampdoc = env.ampdoc;
+    resources = win.services.resources.obj;
+    viewport = win.services.viewport.obj;
+    root = new AmpdocAnalyticsRoot(ampdoc);
+    body = win.document.body;
+
+    target = win.document.createElement('target');
+    target.id = 'target';
+    target.className = 'target';
+    body.appendChild(target);
+
+    child = win.document.createElement('child');
+    child.id = 'child';
+    child.className = 'child';
+    target.appendChild(child);
+
+    other = win.document.createElement('div');
+    other.id = 'other';
+    other.className = 'other';
+    body.appendChild(other);
+
+    scrollManager = root.getScrollManager();
+    fakeViewport = {
+      'getSize': sandbox.stub().returns(
+        {top: 0, left: 0, height: 200, width: 200}),
+      'getScrollTop': sandbox.stub().returns(0),
+      'getScrollLeft': sandbox.stub().returns(0),
+      'getScrollHeight': sandbox.stub().returns(500),
+      'getScrollWidth': sandbox.stub().returns(500),
+      'onChanged': sandbox.stub(),
+    };
+    scrollManager.viewport_ = fakeViewport;
+
+  });
+
+  it('should initalize, add listeners and dispose', () => {
+    expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
+
+    scrollManager.addScrollHandler(sandbox.stub());
+    expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
+
+    scrollManager.dispose();
+    expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
+  });
+
+  it('fires on scroll', () => {
+    const fn1 = sandbox.stub();
+    const fn2 = sandbox.stub();
+    scrollManager.addScrollHandler(fn1);
+    scrollManager.addScrollHandler(fn2);
+
+    expect(fn1).to.have.callCount(1);
+    expect(fn2).to.have.callCount(1);
+
+    // Scroll Down
+    fakeViewport.getScrollTop.returns(500);
+    fakeViewport.getScrollLeft.returns(500);
+    scrollManager.onScroll_({top: 500, left: 500, height: 250, width: 250});
+
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.have.callCount(2);
+  });
+
+  
+});
