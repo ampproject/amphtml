@@ -233,7 +233,7 @@ let madeVisible = false;
  * @visibleForTesting
  * @param {boolean} value
  */
-export function setmadeVisible(value) {
+export function setmadeVisibleForTesting(value) {
   madeVisible = value;
 }
 
