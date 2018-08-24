@@ -284,10 +284,10 @@ export class Viewer {
 
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
-        this.isEmbedded() && 'referrer' in this.params_ &&
-        (this.isTrustedAncestorOrigins_() !== false
+        (this.isEmbedded() && 'referrer' in this.params_ &&
+            this.isTrustedAncestorOrigins_() !== false)
           ? this.params_['referrer']
-          : this.win.document.referrer);
+          : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
@@ -379,18 +379,18 @@ export class Viewer {
   initMessagingChannel_(messagingPromise) {
     const isEmbedded = !!(
       (this.isIframed_ && !this.win.AMP_TEST_IFRAME
-      // Checking param "origin", as we expect all viewers to provide it.
-      // See https://github.com/ampproject/amphtml/issues/4183
-      // There appears to be a bug under investigation where the
-      // origin is sometimes failed to be detected. Since failure mode
-      // if we fail to initialize communication is very bad, we also check
-      // for visibilityState.
-      // After https://github.com/ampproject/amphtml/issues/6070
-      // is fixed we should probably only keep the amp_js_v check here.
-      && (this.params_['origin']
-      || this.params_['visibilityState']
-      // Parent asked for viewer JS. We must be embedded.
-      || (this.win.location.search.indexOf('amp_js_v') != -1)))
+        // Checking param "origin", as we expect all viewers to provide it.
+        // See https://github.com/ampproject/amphtml/issues/4183
+        // There appears to be a bug under investigation where the
+        // origin is sometimes failed to be detected. Since failure mode
+        // if we fail to initialize communication is very bad, we also check
+        // for visibilityState.
+        // After https://github.com/ampproject/amphtml/issues/6070
+        // is fixed we should probably only keep the amp_js_v check here.
+        && (this.params_['origin']
+          || this.params_['visibilityState']
+          // Parent asked for viewer JS. We must be embedded.
+          || (this.win.location.search.indexOf('amp_js_v') != -1)))
       || this.isWebviewEmbedded()
       || this.isCctEmbedded()
       || !this.ampdoc.isSingleDoc());
