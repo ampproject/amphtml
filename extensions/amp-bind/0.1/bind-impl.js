@@ -826,6 +826,9 @@ export class Bind {
    * @return {!Promise<!JsonObject>}
    */
   evaluateExpression_(expression, scope) {
+    if (expression.length == 0) {
+      return Promise.resolve(null);
+    }
     return this.initializePromise_.then(() => {
       // Allow expression to reference current state in addition to event state.
       Object.assign(scope, this.state_);
@@ -1361,10 +1364,10 @@ export class Bind {
    */
   debugPrintState_(opt_elementOrExpr) {
     if (opt_elementOrExpr) {
-      if (typeof opt_elementOrExpr === 'string') {
+      if (typeof opt_elementOrExpr == 'string') {
         const value = getValueForExpr(this.state_, opt_elementOrExpr);
         user().info(TAG, value);
-      } else if (opt_elementOrExpr.nodeType === Node.ELEMENT_NODE) {
+      } else if (opt_elementOrExpr.nodeType == Node.ELEMENT_NODE) {
         const element = user().assertElement(opt_elementOrExpr);
         this.debugPrintElement_(element);
       } else {
@@ -1384,7 +1387,7 @@ export class Bind {
    */
   debugPrintElement_(element) {
     const index = findIndex(this.boundElements_, boundElement => {
-      return boundElement.element === element;
+      return boundElement.element == element;
     });
     if (index < 0) {
       user().info(TAG, 'Element has no bindings:', element);
@@ -1398,8 +1401,8 @@ export class Bind {
       promises.push(this.evaluateExpression_(expressionString, this.state_));
     });
     // Print the map of attribute to expression value for `element`.
-    const output = map();
     Promise.all(promises).then(results => {
+      const output = map();
       boundProperties.forEach((boundProperty, i) => {
         const {property} = boundProperty;
         output[property] = results[i];
