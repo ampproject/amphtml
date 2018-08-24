@@ -135,7 +135,6 @@ export class Performance {
 
     // Can be null which would mean this AMP page is not embedded
     // and has no messaging channel.
-    //noinspection JSDeprecatedSymbols
     const channelPromise = this.viewer_.whenMessagingReady();
 
     this.viewer_.whenFirstVisible().then(() => {
