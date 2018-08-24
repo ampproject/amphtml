@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 
 /**
  * A manager for handling multiple Scroll Event Trackers.
@@ -26,12 +26,11 @@ import {Observable} from '../../../src/observable';
  */
 export class ScrollManager {
   /**
-   * @param {?VisibilityManager} parent
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
 
-    /** @const @protected */
+    /** @const @protected {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc*/
     this.ampdoc = ampdoc;
 
     /** @private {!Observable<!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
@@ -42,30 +41,35 @@ export class ScrollManager {
     this.viewport_.onChanged(this.onScroll_.bind(this));
   }
 
+  /**
+   * Function to dispose of all handlers on the scroll observable
+   */
   dispose() {
     this.scrollObservable_.removeAll();
   }
-  
+
   /**
-   * @param {function(!Event)} 
+   * @param {function(!Event)} handler
    */
   removeScrollHandler(handler) {
     this.scrollObservable_.remove(handler);
   }
-  
+
   /**
-   * @param {function(!Event)} 
+   * @param {function(!Event)} handler
    */
   addScrollHandler(handler) {
-    this.scrollObservable_.add(handler); 
+    this.scrollObservable_.add(handler);
 
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
     handler({
-      top: this.viewport_.getScrollTop(),
-      left: this.viewport_.getScrollLeft(),
-      width: size.width,
-      height: size.height,
+      scrollTop: this.viewport_.getScrollTop(),
+      scrollLeft: this.viewport_.getScrollLeft(),
+      scrollWidth: this.viewport_.getScrollWidth(),
+      scrollHeight: this.viewport_.getScrollHeight(),
+      screenWidth: size.width,
+      screenHeight: size.height,
       relayoutAll: false,
       velocity: 0, // Hack for typing.
     });

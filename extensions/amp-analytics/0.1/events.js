@@ -430,7 +430,7 @@ export class ScrollEventTracker extends EventTracker {
   /** @override */
   dispose() {
     this.root_.getScrollManager()
-      .removeScrollHandler(this.scrollHandler_);
+        .removeScrollHandler(this.scrollHandler_);
     this.scrollHandler_ = undefined;
   }
 
@@ -493,10 +493,10 @@ export class ScrollEventTracker extends EventTracker {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       triggerScrollEvents(boundsV,
-          (e.top + e.height) * 100 / this.viewport_.getScrollHeight(),
+          (e.scrollTop + e.screenHeight) * 100 / e.scrollHeight,
           VAR_V_SCROLL_BOUNDARY);
       triggerScrollEvents(boundsH,
-          (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
+          (e.scrollLeft + e.screenWidth) * 100 / e.scrollWidth,
           VAR_H_SCROLL_BOUNDARY);
     };
 

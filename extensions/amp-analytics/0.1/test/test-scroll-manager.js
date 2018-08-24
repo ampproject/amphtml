@@ -21,25 +21,15 @@ import {ScrollManager} from '../scroll-manager';
 describes.realWin('ScrollManager', {amp: 1}, env => {
   let win;
   let ampdoc;
-  let resources, viewport;
   let root;
   let body, target, child, other;
 
   let scrollManager;
   let fakeViewport;
-  const defaultScrollConfig = {
-    'on': 'scroll',
-    'scrollSpec': {
-      'verticalBoundaries': [0, 100],
-      'horizontalBoundaries': [0, 100],
-    },
-  };
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    resources = win.services.resources.obj;
-    viewport = win.services.viewport.obj;
     root = new AmpdocAnalyticsRoot(ampdoc);
     body = win.document.body;
 
@@ -58,10 +48,11 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     other.className = 'other';
     body.appendChild(other);
 
-    scrollManager = root.getScrollManager();
+    scrollManager = new ScrollManager(ampdoc);
+    root.scrollManager_ = scrollManager;
     fakeViewport = {
       'getSize': sandbox.stub().returns(
-        {top: 0, left: 0, height: 200, width: 200}),
+          {top: 0, left: 0, height: 200, width: 200}),
       'getScrollTop': sandbox.stub().returns(0),
       'getScrollLeft': sandbox.stub().returns(0),
       'getScrollHeight': sandbox.stub().returns(500),
@@ -100,5 +91,24 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     expect(fn2).to.have.callCount(2);
   });
 
-  
+  it('can remove specifc handlers', () => {
+    const fn1 = sandbox.stub();
+    const fn2 = sandbox.stub();
+    scrollManager.addScrollHandler(fn1);
+    scrollManager.addScrollHandler(fn2);
+
+    expect(fn1).to.have.callCount(1);
+    expect(fn2).to.have.callCount(1);
+
+    scrollManager.removeScrollHandler(fn2);
+
+    // Scroll Down
+    fakeViewport.getScrollTop.returns(500);
+    fakeViewport.getScrollLeft.returns(500);
+    scrollManager.onScroll_({top: 500, left: 500, height: 250, width: 250});
+
+
+    expect(fn1).to.have.callCount(2);
+    expect(fn2).to.have.callCount(1);
+  });
 });
