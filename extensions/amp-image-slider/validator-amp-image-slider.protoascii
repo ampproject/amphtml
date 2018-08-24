@@ -34,6 +34,16 @@ tags: {  # <amp-image-slider>
   attrs: {
     name: "disable-hint-reappear"
   }
+  attrs: {
+    name: "initial-slider-position"
+    # number between 0 and 1 (inclusive)
+    value_regex: "0(\\.[0-9]+)?|1(\\.0+)?"
+  }
+  attrs: {
+    name: "step-size"
+    # number between 0 and 1 (inclusive)
+    value_regex: "0(\\.[0-9]+)?|1(\\.0+)?"
+  }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: INTRINSIC

@@ -257,11 +257,25 @@
     <h1>Accessibility</h1>
 
     <p>Has ARIA labels</p>
-    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" aria-label="check out the following images">
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill" alt="Mountain"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill" alt="Ocean"></amp-img>
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
+    </amp-image-slider>
+
+    <h1>Customization</h1>
+
+    <p>Set <code>initial-slider-position</code> to 0.3</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" initial-slider-position="0.3">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+    </amp-image-slider>
+
+    <p>Set <code>step-size</code> to 0.2</p>
+    <amp-image-slider tabindex="0" layout="responsive" width="1024" height="600" step-size="0.2">
+      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
+      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
     </amp-image-slider>
 
     <h1>Test lightbox overlay</h1>
