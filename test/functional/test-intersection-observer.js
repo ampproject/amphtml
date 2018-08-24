@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {BaseElement} from '../../src/base-element';
 import {
   IntersectionObserver,
   getIntersectionChangeEntry,
 } from '../../src/intersection-observer';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
 
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.useFakeTimers();
   });
 
@@ -324,9 +323,9 @@ describe('IntersectionObserver', () => {
     }
   }
 
-  const ElementClass = document.registerElement('amp-int', {
-    prototype: createAmpElementProtoForTesting(window, 'amp-int', TestElement),
-  });
+  const ElementClass = createAmpElementForTesting(window, 'amp-int',
+      TestElement);
+  customElements.define('amp-int', ElementClass);
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe-intersection.html';
@@ -351,7 +350,7 @@ describe('IntersectionObserver', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     testElementCreatedCallback = sandbox.spy();
     testElementPreconnectCallback = sandbox.spy();

@@ -58,7 +58,7 @@ describes.realWin('layout-delay-meter', {
     expect(tickSpy).to.be.calledWith('adld', 300);
 
     // should only tick once.
-    tickSpy.reset();
+    tickSpy.resetHistory();
     clock.tick(200);
     meter.startLayout();
     expect(tickSpy).to.not.be.called;
@@ -72,7 +72,7 @@ describes.realWin('layout-delay-meter', {
     expect(tickSpy).to.be.calledWith('adld', 0);
 
     // should only tick once.
-    tickSpy.reset();
+    tickSpy.resetHistory();
     clock.tick(200);
     meter.enterViewport();
     expect(tickSpy).to.not.be.called;

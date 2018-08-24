@@ -21,6 +21,12 @@
     }} */
 export let LayoutInfoDef;
 
+/** @typedef {{
+      templateUrl: string,
+      data: (JsonObject|undefined),
+    }} */
+export let AmpTemplateCreativeDef;
+
 /** @enum {string} */
 export const FailureType = {
   REQUEST_ERROR: 'REQUEST_ERROR',
@@ -70,7 +76,7 @@ export class Validator {
   /**
    * @param {!Object} unusedContext
    * @param {!ArrayBuffer} unusedUnvalidatedBytes
-   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedHeaders
+   * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} unusedHeaders
    * @return {!Promise<!ValidatorOutput>}
    * @abstract
    */

@@ -149,14 +149,13 @@ export function isReportingEnabled(ampElement) {
   // a no-op (sends no pings).
   const type = ampElement.element.getAttribute('type');
   const {win} = ampElement;
-  const experimentName = 'a4aProfilingRate';
   // In local dev mode, neither the canary nor prod config files is available,
   // so manually set the profiling rate, for testing/dev.
   if (getMode(ampElement.win).localDev && !getMode(ampElement.win).test) {
-    toggleExperiment(win, experimentName, true, true);
+    toggleExperiment(win, 'a4aProfilingRate', true, true);
   }
   return (type == 'doubleclick' || type == 'adsense') &&
-      isExperimentOn(win, experimentName);
+      isExperimentOn(win, 'a4aProfilingRate');
 }
 
 /**
@@ -593,7 +592,7 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
  * Extracts configuration used to build amp-analytics element for active view.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} responseHeaders
+ * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
  * @return {?JsonObject} config or null if invalid/missing.
@@ -875,7 +874,7 @@ export function isCdnProxy(win) {
 
 /**
  * Populates the fields of the given Nameframe experiment config object.
- * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
+ * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} headers
  * @param {!NameframeExperimentConfig} nameframeConfig
  */
 export function setNameframeExperimentConfigs(headers, nameframeConfig) {

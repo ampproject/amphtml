@@ -146,6 +146,9 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   if (key) {
     const existing = getExistingStyleElement(cssRoot, styleMap, key);
     if (existing) {
+      if (existing.textContent !== cssText) {
+        existing.textContent = cssText;
+      }
       return existing;
     }
   }
@@ -240,7 +243,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
-      animation: 'none',
+      'animation': 'none',
     });
     renderStartedNoInline(doc);
   };

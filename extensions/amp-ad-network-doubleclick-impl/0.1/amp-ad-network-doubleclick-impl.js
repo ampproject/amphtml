@@ -67,9 +67,6 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {
-  extractUrlExperimentId,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
@@ -84,11 +81,12 @@ import {isExperimentOn} from '../../../src/experiments';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isSecureUrlDeprecated, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
+import {parseQueryString} from '../../../src/url';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -103,12 +101,21 @@ const DOUBLECLICK_BASE_URL =
 /** @const {string} */
 const RTC_SUCCESS = '2';
 
+/** @const {string} */
+const DOUBLECLICK_SRA_EXP = 'doubleclickSraExp';
+
 /** @const @enum{string} */
-const DOUBLECLICK_EXPERIMENT_FEATURE = {
+const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
 };
+
+/**
+ * Map of pageview tokens to the instances they belong to.
+ * @private {!Object<string, !AmpAdNetworkDoubleclickImpl>}
+ */
+let tokensToInstances = {};
 
 /** @private {?Promise} */
 let sraRequests = null;
@@ -124,7 +131,6 @@ let TroubleshootDataDef;
 
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
-
 
 /**
  * @typedef
@@ -178,7 +184,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?../../../src/service/xhr-impl.FetchResponse>} */
+    /** @protected {!Deferred<?../../../src/utils/xhr-utils.FetchResponse>} */
     this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
@@ -286,38 +292,41 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * @param {?string} urlExperimentId
+   * Executes page level experiment diversion and pushes any experiment IDs
+   * onto this.experimentIds.
    * @visibleForTesting
    */
-  setPageLevelExperiments(urlExperimentId) {
+  setPageLevelExperiments() {
     if (!isCdnProxy(this.win) && !isExperimentOn(
         this.win, 'expDfpInvOrigDeprecated')) {
       this.experimentIds.push('21060933');
     }
-    const experimentId = {
-      // SRA
-      '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
-      '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
-      '9': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER,
-    }[urlExperimentId];
-    switch (experimentId) {
-      case undefined:
-        break;
-      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL:
-      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA:
-      case DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER:
-        // For SRA experiments, do not include pages that are using refresh.
-        if (this.win.document./*OK*/querySelector(
-            'meta[name=amp-ad-enable-refresh], ' +
-            'amp-ad[type=doubleclick][data-enable-refresh]')) {
-          break;
-        }
-      default:
-        dev().info(
-            TAG,
-            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-        this.experimentIds.push(experimentId);
-    }
+    const experimentInfoMap =
+    /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+        // Only select into SRA experiments if SRA not already explicitly
+        // enabled and refresh is not being used by any slot.
+        [DOUBLECLICK_SRA_EXP]: {
+          isTrafficEligible: () => !this.win.document./*OK*/querySelector(
+              'meta[name=amp-ad-enable-refresh], ' +
+              'amp-ad[type=doubleclick][data-enable-refresh], ' +
+              'meta[name=amp-ad-doubleclick-sra]'),
+          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+              key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
+        },
+      });
+    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
+    Object.keys(setExps).forEach(expName =>
+      setExps[expName] && this.experimentIds.push(setExps[expName]));
+  }
+
+  /**
+   * For easier unit testing.
+   * @param {!Object<string, !../../../src/experiments.ExperimentInfo>} experimentInfoMap
+   * @return {!Object<string, string>}
+   */
+  randomlySelectUnsetExperiments_(experimentInfoMap) {
+    return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
   }
 
   /** @private */
@@ -344,15 +353,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
-    this.setPageLevelExperiments(
-        extractUrlExperimentId(this.win, this.element));
+    this.setPageLevelExperiments();
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search)) ||
         !!this.win.document.querySelector(
             'meta[name=amp-ad-doubleclick-sra]') ||
         !!this.experimentIds.filter(exp =>
-          exp == DOUBLECLICK_EXPERIMENT_FEATURE.SRA ||
-          exp == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER).length;
+          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA ||
+          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER).length;
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc()));
@@ -369,10 +377,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {!Array<!AmpAdNetworkDoubleclickImpl>=} instances
    * @return {!Object<string,string|boolean|number>}
    * @visibleForTesting
    */
-  getPageParameters(consentState) {
+  getPageParameters(consentState, instances) {
+    instances = instances || [this];
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
@@ -380,6 +390,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
+      'psts': getPageviewStateTokensForAdRequest(instances),
     };
   }
 
@@ -448,7 +459,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (this.element.getAttribute('layout') == 'responsive') {
         // TODO(levitzky) Define the behavior and remove this warning.
         user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
-            'currently not well defined. Proceed with caution.');
+            'currently not well defined. Forcefully overriding layout to ' +
+            '`fixed`.');
+        this.element.setAttribute('layout', 'fixed');
       }
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation') || 'true';
@@ -693,11 +706,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       size = this.getSlotSize();
     }
     // If this is a multi-size creative, fire delayed impression now. If it's
-    // fluid, wait until after resize.
+    // fluid, wait until after resize happens.
     if (this.isFluidRequest_ && !this.returnedSize_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
-    } else {
-      this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
+    }
+
+    // If the response included a pageview state token, check for an existing
+    // token and remove it. Then save the new one to the module level object.
+    if (responseHeaders.get('amp-ff-pageview-tokens')) {
+      this.removePageviewStateToken();
+      this.setPageviewStateToken(
+          responseHeaders.get('amp-ff-pageview-tokens'));
     }
 
     return size;
@@ -738,10 +757,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
     // will not be started until resumeCallback).
     sraRequests = null;
-    this.sraDeferred = new Deferred();
+    this.sraDeferred = null;
     this.qqid_ = null;
     this.consentState = null;
     this.getAdUrlDeferred = new Deferred();
+    this.removePageviewStateToken();
   }
 
   /** @override */
@@ -909,12 +929,31 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.useSra) {
       return super.sendXhrRequest(adUrl);
     }
+    this.sraDeferred = new Deferred();
+    const checkStillCurrent = this.verifyStillCurrent();
+    // InitiateSraRequests resolves when all blocks have had their SRA
+    // responses returned such that sraDeferred being non-null indicates this
+    // element was somehow not included so report.
+    this.initiateSraRequests().then(() => {
+      checkStillCurrent();
+      if (!this.sraDeferred) {
+        dev().warn(TAG, `SRA failed to include element ${this.ifi_}`);
+        if (isExperimentOn(this.win, 'doubleclickSraReportExcludedBlock')) {
+          this.getAmpDoc().getBody().appendChild(createElementWithAttributes(
+              this.win.document, 'amp-pixel', dict({'src':
+              'https://pagead2.googlesyndication.com/pagead/gen_204?' +
+                  `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`})));
+        }
+      }
+    });
     // Wait for SRA request which will call response promise when this block's
-    // response has been returned.
-    this.initiateSraRequests();
-    // Null response indicates single slot should execute using non-SRA method.
-    return this.sraDeferred.promise.then(
-        response => response || super.sendXhrRequest(adUrl));
+    // response has been returned. Null response indicates single slot should
+    // execute using non-SRA method.
+    return this.sraDeferred.promise.then(response => {
+      checkStillCurrent();
+      this.sraDeferred = null;
+      return response || super.sendXhrRequest(adUrl);
+    });
   }
 
   /**
@@ -928,7 +967,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     impressions.split(',').forEach(url => {
       try {
-        if (!isSecureUrlDeprecated(url)) {
+        if (!Services.urlForDoc(this.getAmpDoc()).isSecure(url)) {
           dev().warn(TAG, `insecure impression url: ${url}`);
           return;
         }
@@ -963,23 +1002,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * - group by networkID allowing for separate SRA requests
    * - for each grouping, construct SRA request
    * - handle chunks for streaming response for each block
+   * @return {!Promise}
    * @visibleForTesting
    */
   initiateSraRequests() {
-    if (sraRequests) {
-      return;
-    }
     // Use cancellation of the first slot's promiseId as indication of
     // unlayoutCallback execution.  Assume that if called for one slot, it will
     // be called for all and we should cancel SRA execution.
     const checkStillCurrent = this.verifyStillCurrent();
-    sraRequests = this.groupSlotsForSra()
+    const noFallbackExp = this.experimentIds.includes(
+        DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER);
+    sraRequests = sraRequests || this.groupSlotsForSra()
         .then(groupIdToBlocksAry => {
           checkStillCurrent();
+          const sraRequestPromises = [];
           Object.keys(groupIdToBlocksAry).forEach(networkId => {
             const blocks = dev().assert(groupIdToBlocksAry[networkId]);
             // TODO: filter blocks with SRA disabled?
-            Promise.all(blocks).then(instances => {
+            sraRequestPromises.push(Promise.all(blocks).then(instances => {
               dev().assert(instances.length);
               checkStillCurrent();
               // Exclude any instances that do not have an adPromise_ as this
@@ -1000,10 +1040,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // Only contained invalid elements.
                 return;
               }
-              // Determine if more than one block for this element, if not do
-              // not set sra request promise which results in sending as non-SRA
-              // request (benefit is it allows direct cache method).
-              if (typeInstances.length == 1) {
+              // If not within no recovery SRA experiment, determine if more
+              // than one block for this element, if not do not set sra request
+              // promise which results in sending as non-SRA request (benefit
+              // is it allows direct cache method).
+              if (!noFallbackExp && typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
@@ -1034,20 +1075,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   })
                   .then(response => {
                     checkStillCurrent();
-                    return lineDelimitedStreamer(
-                        this.win, response, slotCallback);
+                    lineDelimitedStreamer(this.win, response, slotCallback);
+                    return Promise.all(typeInstances.map(
+                        instance => instance.sraDeferred.promise));
                   })
                   .catch(error => {
                     if (isCancellation(error)) {
                       // Cancellation should be propagated to slot promises
                       // causing their adPromise chains within A4A to handle
                       // appropriately.
-                      typeInstances.forEach(instance =>
+                      typeInstances.forEach(instance => instance.sraDeferred &&
                         instance.sraDeferred.reject(error));
-                    } else if (!!this.win.document.querySelector(
-                        'meta[name=amp-ad-doubleclick-sra]') ||
-                        this.experimentIds.includes(
-                            DOUBLECLICK_EXPERIMENT_FEATURE.SRA_NO_RECOVER)) {
+                    } else if (noFallbackExp ||
+                      !!this.win.document.querySelector(
+                          'meta[name=amp-ad-doubleclick-sra]')) {
                       // If publisher has explicitly enabled SRA mode (not
                       // experiment), then assume error is network failure,
                       // collapse slot, reset url to empty string to ensure
@@ -1073,9 +1114,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         instance.sraDeferred.resolve(null));
                     }
                   });
-            });
+            }));
           });
+          return Promise.all(sraRequestPromises);
         });
+    return sraRequests;
   }
 
   /**
@@ -1098,7 +1141,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       ? XORIGIN_MODE.SAFEFRAME
       : super.getNonAmpCreativeRenderingMethod(headerValue);
   }
-
 
   /**
    * Note that location is parsed once on first access and cached.
@@ -1168,6 +1210,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
   }
 
+  /**
+   * Sets the pageview state token associated with the slot. Token does not
+   * expire.
+   * @param {string} token
+   */
+  setPageviewStateToken(token) {
+    tokensToInstances[token] = this;
+  }
+
+  /**
+   * Checks for the presence of a pageview token in the module level object
+   * and removes it if present.
+   */
+  removePageviewStateToken() {
+    for (const token in tokensToInstances) {
+      if (tokensToInstances[token] == this) {
+        delete tokensToInstances[token];
+        break;
+      }
+    }
+  }
+
   /** @override */
   getA4aAnalyticsVars(analyticsTrigger) {
     return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
@@ -1223,7 +1287,33 @@ function constructSRARequest_(a4a, instances) {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
-                instances[0].getPageParameters(instances[0].consentState)),
-            startTime);
+                instances[0].getPageParameters(instances[0].consentState,
+                    instances)), startTime);
       });
+}
+
+/**
+ * Returns the pageview tokens that should be included in the ad request. Tokens
+ * should come only from instances that are not being requested in this request.
+ * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instancesInAdRequest
+ * @return {!Array<string>} Array of pageview tokens to include in the ad
+ * request.
+ */
+export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
+  const pageviewStateTokensInAdRequest = [];
+  for (const token in tokensToInstances) {
+    if (!instancesInAdRequest.includes(
+        tokensToInstances[token])) {
+      pageviewStateTokensInAdRequest.push(token);
+    }
+  }
+  return pageviewStateTokensInAdRequest;
+}
+
+/**
+ * Resets the tokensToInstances mapping for testing purposes.
+ * @visibleForTesting
+ */
+export function resetTokensToInstancesMap() {
+  tokensToInstances = {};
 }

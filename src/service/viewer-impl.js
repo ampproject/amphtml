@@ -19,7 +19,6 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev, duplicateErrorIfNecessary} from '../log';
-import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -30,6 +29,7 @@ import {
   serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
+import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {startsWith} from '../string';
@@ -37,6 +37,11 @@ import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
+
+/** @enum {string} */
+export const Capability = {
+  VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
+};
 
 /**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
@@ -254,24 +259,11 @@ export class Viewer {
         this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
-    let isCctEmbedded = false;
-    if (!this.isIframed_) {
-      const queryParams = parseQueryString(this.win.location.search);
-      isCctEmbedded = queryParams['amp_gsa'] === '1' &&
-          startsWith(queryParams['amp_js_v'] || '', 'a');
-    }
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
-     * @private @const {boolean}
+     * @private {?boolean}
      */
-    this.isCctEmbedded_ = isCctEmbedded;
-
-    /**
-     * Whether the AMP document is embedded in a webview.
-     * @private @const {boolean}
-     */
-    this.isWebviewEmbedded_ = !this.isIframed_ &&
-        this.params_['webview'] == '1';
+    this.isCctEmbedded_ = null;
 
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe, or
@@ -292,8 +284,8 @@ export class Viewer {
             || this.params_['visibilityState']
             // Parent asked for viewer JS. We must be embedded.
             || (this.win.location.search.indexOf('amp_js_v') != -1)))
-        || this.isWebviewEmbedded_
-        || this.isCctEmbedded_
+        || this.isWebviewEmbedded()
+        || this.isCctEmbedded()
         || !ampdoc.isSingleDoc());
 
     const url = parseUrlDeprecated(this.ampdoc.win.location.href);
@@ -320,26 +312,13 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-      Services.timerFor(this.win).timeoutPromise(
-          20000,
-          messagingDeferred.promise).catch(reason => {
-        throw getChannelError(/** @type {!Error|string|undefined} */ (
-          reason));
-      }) : null;
-
-    /**
-     * A promise for non-essential messages. These messages should not fail
-     * if there's no messaging channel set up. But ideally viewer would try to
-     * deliver if at all possible. This promise is only available when the
-     * document is embedded.
-     * @private @const {?Promise}
-     */
-    this.messagingMaybePromise_ = this.isEmbedded_ ?
-      this.messagingReadyPromise_
+      Services.timerFor(this.win)
+          .timeoutPromise(20000, messagingDeferred.promise)
           .catch(reason => {
-            // Don't fail promise, but still report.
-            reportError(getChannelError(
-                /** @type {!Error|string|undefined} */ (reason)));
+            const error = getChannelError(
+                /** @type {!Error|string|undefined} */ (reason));
+            reportError(error);
+            throw error;
           }) : null;
 
     // Trusted viewer and referrer.
@@ -349,8 +328,8 @@ export class Viewer {
       // Not embedded in IFrame - can't trust the viewer.
       trustedViewerResolved = false;
       trustedViewerPromise = Promise.resolve(false);
-    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded_ &&
-        !this.isCctEmbedded_) {
+    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded() &&
+        !this.isCctEmbedded()) {
       // Ancestors when available take precedence. This is the main API used
       // for this determination. Fallback is only done when this API is not
       // supported by the browser.
@@ -461,7 +440,9 @@ export class Viewer {
 
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
-    this.maybeUpdateFragmentForCct();
+    this.whenFirstVisible().then(() => {
+      this.maybeUpdateFragmentForCct();
+    });
   }
 
   /**
@@ -509,27 +490,6 @@ export class Viewer {
   }
 
   /**
-   * Requests A2A navigation to the given destination. If the viewer does
-   * not support this operation, does nothing.
-   * The URL is assumed to be in AMP Cache format already.
-   * @param {string} url An AMP article URL.
-   * @param {string} requestedBy Informational string about the entity that
-   *     requested the navigation.
-   * @return {boolean} Returns true if navigation message was sent to viewer.
-   *     Otherwise, returns false.
-   */
-  navigateToAmpUrl(url, requestedBy) {
-    if (this.hasCapability('a2a')) {
-      this.sendMessage('a2aNavigate', dict({
-        'url': url,
-        'requestedBy': requestedBy,
-      }));
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * Whether the document is embedded in a viewer.
    * @return {boolean}
    */
@@ -542,7 +502,7 @@ export class Viewer {
    * @return {boolean}
    */
   isWebviewEmbedded() {
-    return this.isWebviewEmbedded_;
+    return !this.isIframed_ && this.params_['webview'] == '1';
   }
 
   /**
@@ -550,6 +510,15 @@ export class Viewer {
    * @return {boolean}
    */
   isCctEmbedded() {
+    if (this.isCctEmbedded_ != null) {
+      return this.isCctEmbedded_;
+    }
+    this.isCctEmbedded_ = false;
+    if (!this.isIframed_) {
+      const queryParams = parseQueryString(this.win.location.search);
+      this.isCctEmbedded_ = queryParams['amp_gsa'] === '1' &&
+          startsWith(queryParams['amp_js_v'] || '', 'a');
+    }
     return this.isCctEmbedded_;
   }
 
@@ -566,7 +535,7 @@ export class Viewer {
    * not clear query string parameters, but will clear the fragment.
    */
   maybeUpdateFragmentForCct() {
-    if (!this.isCctEmbedded_) {
+    if (!this.isCctEmbedded()) {
       return;
     }
     // CCT only works with versions of Chrome that support the history API.
@@ -791,6 +760,7 @@ export class Viewer {
    * the current page's URL. The trusted viewers are allowed to override this
    * value.
    * @return {!Promise<string>}
+   * @visibleForTesting
    */
   getViewerUrl() {
     return this.viewerUrl_;
@@ -873,15 +843,14 @@ export class Viewer {
    * @private
    */
   isTrustedViewerOrigin_(urlString) {
-    // TEMPORARY HACK due to a misbehaving native app. See b/32626673
-    // In native apps all security bets are off anyway, and in browser
-    // origins never take the form that is matched here.
-    if (this.isWebviewEmbedded_ && /^www\.[.a-z]+$/.test(urlString)) {
-      return TRUSTED_VIEWER_HOSTS.some(th => th.test(urlString));
-    }
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
-    if (url.protocol != 'https:') {
+    const {protocol} = url;
+    // Mobile WebView x-thread is allowed.
+    if (protocol == 'x-thread:') {
+      return true;
+    }
+    if (protocol != 'https:') {
       // Non-https origins are never trusted.
       return false;
     }
@@ -1106,14 +1075,16 @@ export class Viewer {
    * established, but it will not fail if the channel is timed out.
    *
    * @param {!JsonObject} message
+   * @return {!Promise<boolean>} a Promise of success or not
    */
   broadcast(message) {
-    if (!this.messagingMaybePromise_) {
+    if (!this.messagingReadyPromise_) {
       // Messaging is not expected.
-      return;
+      return Promise.resolve(false);
     }
 
-    this.sendMessage('broadcast', message);
+    return this.sendMessageInternal_('broadcast', message, false, false)
+        .then(() => true, () => false);
   }
 
   /**
@@ -1131,7 +1102,7 @@ export class Viewer {
    * @return {?Promise}
    */
   whenMessagingReady() {
-    return this.messagingMaybePromise_;
+    return this.messagingReadyPromise_;
   }
 
   /**
@@ -1161,7 +1132,6 @@ export class Viewer {
     }
   }
 }
-
 
 /**
  * Parses the viewer parameters as a string.

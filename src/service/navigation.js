@@ -22,6 +22,7 @@ import {
   openWindowDialog,
 } from '../dom';
 import {dev, user} from '../log';
+import {dict} from '../utils/object';
 import {
   getExtraParamsUrl,
   shouldAppendExtraParams,
@@ -41,6 +42,11 @@ const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
+
+/** @enum {number} */
+export const Priority = {
+  ANALYTICS_LINKER: 2,
+};
 
 /**
  * Install navigation service for ampdoc, which handles navigations from anchor
@@ -124,6 +130,9 @@ export class Navigation {
      * @private {?Array<string>}
      */
     this.a2aFeatures_ = null;
+
+    /** @private @const {!Array<function(!Element)>} */
+    this.anchorMutators_ = [];
   }
 
   /**
@@ -178,7 +187,7 @@ export class Navigation {
         this.a2aFeatures_ = this.queryA2AFeatures_();
       }
       if (this.a2aFeatures_.includes(opt_requestedBy)) {
-        if (this.viewer_.navigateToAmpUrl(url, opt_requestedBy)) {
+        if (this.navigateToAmpUrl(url, opt_requestedBy)) {
           return;
         }
       }
@@ -186,6 +195,27 @@ export class Navigation {
 
     // Otherwise, perform normal behavior of navigating the top frame.
     win.top.location.href = url;
+  }
+
+  /**
+   * Requests A2A navigation to the given destination. If the viewer does
+   * not support this operation, does nothing.
+   * The URL is assumed to be in AMP Cache format already.
+   * @param {string} url An AMP article URL.
+   * @param {string} requestedBy Informational string about the entity that
+   *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
+   */
+  navigateToAmpUrl(url, requestedBy) {
+    if (this.viewer_.hasCapability('a2a')) {
+      this.viewer_.sendMessage('a2aNavigate', dict({
+        'url': url,
+        'requestedBy': requestedBy,
+      }));
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -241,7 +271,7 @@ export class Navigation {
   handleClick_(target, e) {
     this.expandVarsForAnchor_(target);
 
-    const location = this.parseUrl_(target.href);
+    let location = this.parseUrl_(target.href);
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
@@ -252,6 +282,12 @@ export class Navigation {
     if (this.handleCustomProtocolClick_(e, target, location)) {
       return;
     }
+
+    // Handle anchor transformations.
+    this.anchorMutators_.forEach(callback => {
+      callback(target);
+      location = this.parseUrl_(target.href);
+    });
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
@@ -335,7 +371,7 @@ export class Navigation {
       return false;
     }
     // The viewer may not support the capability for navigating AMP links.
-    if (this.viewer_.navigateToAmpUrl(location.href, '<a rel=amphtml>')) {
+    if (this.navigateToAmpUrl(location.href, '<a rel=amphtml>')) {
       e.preventDefault();
       return true;
     }
@@ -407,6 +443,23 @@ export class Navigation {
       // If the hash did not update just scroll to the element.
       this.scrollToElement_(elem, hash);
     }
+  }
+
+  /**
+   * @param {!Function} callback
+   * @param {number} priority
+   */
+  registerAnchorMutator(callback, priority) {
+    dev().assert(priority <= 10 && priority > 0,
+        'Priority must a number from 1-10.');
+    user().assert(!this.anchorMutators_[priority],
+        'Mutator with same priority is already in use.');
+    // Note that we define a set priority, as making this boundless
+    // will create a large sparse array, which is not performant if iterating
+    // through when executing. If the number of registered anchor mutators
+    // exceeds 10 then we will need to either increase or modify the
+    // implementation. Please talk to @alabiaga @choumx @jridgewell.
+    this.anchorMutators_[priority] = callback;
   }
 
   /**

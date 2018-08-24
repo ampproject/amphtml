@@ -24,7 +24,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isObject} from '../../../src/types';
 
-export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
@@ -66,6 +65,16 @@ export class ConsentPolicyManager {
     /** @private {?function()} */
     this.allConsentInitatedResolver_ = deferred.resolve;
 
+  }
+
+  /**
+   * Is Multi-consent experiment enabled?
+   *
+   * @param {!Window} win
+   * @return {boolean}
+   */
+  static isMultiSupported(win) {
+    return isExperimentOn(win, 'multi-consent');
   }
 
   /**
@@ -150,7 +159,7 @@ export class ConsentPolicyManager {
    * @return {!Promise<CONSENT_POLICY_STATE>}
    */
   whenPolicyResolved(policyId) {
-    if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
+    if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
         user().error(TAG, `can not find defined policy ${policyId}, ` +
@@ -171,7 +180,7 @@ export class ConsentPolicyManager {
    * @return {!Promise<boolean>}
    */
   whenPolicyUnblock(policyId) {
-    if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
+    if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
         user().error(TAG, `can not find defined policy ${policyId}, ` +

@@ -71,27 +71,28 @@ describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
       });
     });
 
-    it('should not change scroll position after close', () => {
-      const openerButton = win.document.getElementById('sidebarOpener');
-      const sidebar = win.document.getElementById('sidebar1');
-      const viewport = sidebar.implementation_.getViewport();
-      const openedPromise = waitForSidebarOpen(win.document);
-      openerButton.click();
-      expect(viewport.getScrollTop()).to.equal(0);
-      return openedPromise.then(() => {
-        viewport.setScrollTop(1000);
-        expect(viewport.getScrollTop()).to.equal(1000);
-        const closerButton = win.document.getElementById('sidebarCloser');
-        const closedPromise = waitForSidebarClose(win.document);
-        closerButton.click();
-        return closedPromise;
-      }).then(() => {
-        // Firefox resets scroll to top on pop history
-        // Safari resets scroll to top somewhere unrelated to focus
-        // expect(viewport.getScrollTop()).to.equal(1000);
-        expect(win.document.activeElement).to.not.equal(openerButton);
-      });
-    });
+    it.configure().skipIfPropertiesObfuscated().run(
+        'should not change scroll position after close', () => {
+          const openerButton = win.document.getElementById('sidebarOpener');
+          const sidebar = win.document.getElementById('sidebar1');
+          const viewport = sidebar.implementation_.getViewport();
+          const openedPromise = waitForSidebarOpen(win.document);
+          openerButton.click();
+          expect(viewport.getScrollTop()).to.equal(0);
+          return openedPromise.then(() => {
+            viewport.setScrollTop(1000);
+            expect(viewport.getScrollTop()).to.equal(1000);
+            const closerButton = win.document.getElementById('sidebarCloser');
+            const closedPromise = waitForSidebarClose(win.document);
+            closerButton.click();
+            return closedPromise;
+          }).then(() => {
+            // Firefox resets scroll to top on pop history
+            // Safari resets scroll to top somewhere unrelated to focus
+            // expect(viewport.getScrollTop()).to.equal(1000);
+            expect(win.document.activeElement).to.not.equal(openerButton);
+          });
+        });
   });
 });
 

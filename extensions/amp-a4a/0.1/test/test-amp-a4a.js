@@ -24,7 +24,6 @@ import '../../../amp-ad/0.1/amp-ad';
 // methods in tests.
 import * as analytics from '../../../../src/analytics';
 import * as analyticsExtension from '../../../../src/extension-analytics';
-import * as sinon from 'sinon';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 import {
   AmpA4A,
@@ -78,7 +77,7 @@ describe('amp-a4a', () => {
   let getResourceStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     fetchMock = null;
     getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
         'getSigningServiceNames');
@@ -2256,7 +2255,7 @@ describe('amp-a4a', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {
@@ -2290,6 +2289,7 @@ describe('amp-a4a', () => {
         tearDownSlotMock.returns(undefined);
         const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
         destroyFrameMock.returns(undefined);
+        sandbox.stub(analytics, 'triggerAnalyticsEvent');
 
         expect(a4a.isRefreshing).to.be.false;
         return a4a.refresh(() => {}).then(() => {
@@ -2301,13 +2301,53 @@ describe('amp-a4a', () => {
         });
       });
     });
+
+
+    it('should fire an analytics event when refreshing', () => {
+      return createIframePromise().then(f => {
+        const fixture = f;
+        setupForAdTesting(fixture);
+        const a4aElement = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.adPromise_ = Promise.resolve();
+        a4a.getAmpDoc = () => a4a.win.document;
+        a4a.getResource = () => {
+          return {
+            layoutCanceled: () => {},
+          };
+        };
+        a4a.mutateElement = func => func();
+        a4a.togglePlaceholder = sandbox.spy();
+
+        // We don't really care about the behavior of the following methods, so
+        // long as they're called the appropriate number of times. We stub them
+        // out here because they would otherwise throw errors unrelated to the
+        // behavior actually being tested.
+        const initiateAdRequestMock =
+            sandbox.stub(AmpA4A.prototype, 'initiateAdRequest');
+        initiateAdRequestMock.returns(undefined);
+        const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
+        tearDownSlotMock.returns(undefined);
+        const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
+        destroyFrameMock.returns(undefined);
+
+        const triggerAnalyticsEventStub = sandbox.stub(analytics,
+            'triggerAnalyticsEvent');
+
+        expect(a4a.isRefreshing).to.be.false;
+        return a4a.refresh(() => {}).then(() => {
+          expect(triggerAnalyticsEventStub)
+              .calledWith(a4a.element, 'ad-refresh');
+        });
+      });
+    });
   });
 
   describe('buildCallback', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {

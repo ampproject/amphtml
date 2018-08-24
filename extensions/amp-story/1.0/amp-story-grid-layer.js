@@ -81,7 +81,14 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   constructor(element) {
     super(element);
 
-    /** @private @const {boolean} Only prerender if child of the first page. */
+    /** @private {boolean} */
+    this.prerenderAllowed_ = false;
+  }
+
+
+  /** @override */
+  firstAttachedCallback() {
+    // Only prerender if child of the first page.
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type amp-story-grid-layer');
   }

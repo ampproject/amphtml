@@ -75,13 +75,13 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      dev().assert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!top || top - (fxElement.adjustedViewportHeight *
+      if (!top || top - (fxElement.viewportHeight *
         fxElement.getFlyInDistance() / 100) >
           (1 - fxElement.getMarginStart()) *
-            fxElement.adjustedViewportHeight) {
+            fxElement.viewportHeight) {
         return;
       }
 
@@ -129,11 +129,11 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      dev().assert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight) {
+        fxElement.viewportHeight) {
         return;
       }
 
@@ -182,11 +182,11 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      dev().assert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight) {
+        fxElement.viewportHeight) {
         return;
       }
 
@@ -235,13 +235,13 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      dev().assert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!top || top + (fxElement.adjustedViewportHeight *
+      if (!top || top + (fxElement.viewportHeight *
         fxElement.getFlyInDistance() / 100) >
           (1 - fxElement.getMarginStart()) *
-            fxElement.adjustedViewportHeight) {
+            fxElement.viewportHeight) {
         return;
       }
 
@@ -289,11 +289,11 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight);
+      dev().assert(fxElement.viewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight) {
+        fxElement.viewportHeight) {
         return;
       }
 
@@ -357,9 +357,9 @@ export const Presets = {
       const marginDelta = fxElement.getMarginEnd() - fxElement.getMarginStart();
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
-      const offset = 1 * (fxElement.adjustedViewportHeight - top -
-        (fxElement.getMarginStart() * fxElement.adjustedViewportHeight)) /
-        (marginDelta * fxElement.adjustedViewportHeight);
+      const offset = 1 * (fxElement.viewportHeight - top -
+        (fxElement.getMarginStart() * fxElement.viewportHeight)) /
+        (marginDelta * fxElement.viewportHeight);
       fxElement.setOffset(offset);
 
       if (fxElement.isMutateScheduled()) {

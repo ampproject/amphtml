@@ -1,14 +1,5 @@
 # Building an AMP Extension
 
-## A word on contributing
-
-We suggest opening an "Intent to Implement" GitHub issue for your
-extension as early as you can, so we can advise on next steps or provide
-early feedback on the implementation or naming. See [CONTRIBUTING.md
-for more details](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
-
-## Getting started
-
 AMP can be extended to allow more functionality and components through
 building open source extensions (aka custom elements). For example, AMP
 provides `amp-carousel`, `amp-sidebar` and `amp-access` as
@@ -16,10 +7,36 @@ extensions. If you'd like to add an extension to support your company
 video player, rich embed or just a general UI component like a star
 rating viewer, you'd do this by building an extension.
 
+- [A word on contributing](#a-word-on-contributing)
+- [Naming](#naming)
+- [Directory structure](#directory-structure)
+- [Extend AMP.BaseElement](#extend-ampbaseelement)
+- [Element styling](#element-styling)
+- [Register element with AMP](#register-element-with-amp)
+- [Actions and events](#actions-and-events)
+- [Sub-elements ownership](#sub-elements-ownership)
+- [Allowing proper validations](#allowing-proper-validations)
+- [Performance considerations](#performance-considerations)
+- [Layouts supported in your element](#layouts-supported-in-your-element)
+- [Experiments](#experiments)
+- [Documenting your element](#documenting-your-element)
+- [Example of using your extension](#example-of-using-your-extension)
+- [Updating build configs](#updating-build-configs)
+- [Versioning](#versioning)
+- [Unit tests](#unit-tests)
+- [Type checking](#type-checking)
+- [Example PRs](#example-prs)
+
+## A word on contributing
+
+We suggest that you open an "Intent to Implement" GitHub issue for your
+extension as early as you can, so that we can advise you on next steps or provide early feedback on the implementation or naming. For details, see [CONTRIBUTING.md
+for more details](../CONTRIBUTING.md#phase-concept-design).
+
 ## Naming
 
 All AMP extensions (and built-in elements) have their tag names prefixed
-with `amp-`. Make sure to choose a proper clear name for your
+with `amp-`. Make sure to choose an accurate and clear name for your
 extension. For example, video players are also suffixed with `-player`
 (e.g. amp-brid-player).
 
@@ -28,20 +45,20 @@ extension. For example, video players are also suffixed with `-player`
 You create your extension's files inside the `extensions/` directory.
 The directory structure is below:
 
--   extensions/amp-my-element/
-    -   0.1/
-        -   test/
-            -   **test-amp-my-element.js** (Unit test suite for your element)
-            -   More test JS files (Optional)
-        -   **amp-my-element.js** (Contains your element's implementation)
-        -   **amp-my-element.css** (Optional)
-        -   More JS files (Optional)
-        -   validator-amp-my-element.protoascii (Validator rules)
-    -   **amp-my-element.md** (Main usage documentation for your element)
-    -   More documentation in .md files (Optional)
-
-In most cases you'll only create the bolded files. If your element does
-not need custom CSS you don't need to create the CSS file.
+```text
+/extensions/amp-my-element/
+├── 0.1/
+|   ├── test/
+|   |   ├── test-amp-my-element.js       # Element's unit test suite (req'd)
+|   |   └── More test JS files (optional)
+|   ├── amp-my-element.js                # Element's implementation (req'd)
+|   ├── amp-my-element.css               # Custom CSS (optional)
+|   └── More JS files (optional)
+├── validator-amp-my-element.protoascii  # Validator rules (req'd)
+├── amp-my-element.md                    # Element's main documentation (req'd)
+└── More documentation in .md files (optional)
+```
+In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
 
 ## Extend AMP.BaseElement
 
@@ -270,16 +287,6 @@ tell AMP which class to use for this tag name and which CSS to load.
 ```javascript
 AMP.registerElement('amp-carousel', CarouselSelector, CSS);
 ```
-
-## Element usage documentation and tests
-
-Make sure to write pretty comprehensive unit tests for your element.
-Also don't forget to write an .md file documenting how to use this
-element along with its attributes requirements and examples.
-
-An extra step that you can do is to write a small AMP doc inside
-examples/ directory to provide easy examples for users to preview and
-for developers to manually test and visually inspect your element.
 
 ## Actions and events
 
@@ -697,13 +704,26 @@ Users wanting to experiment with your element can then go to the
 [experiments page](https://cdn.ampproject.org/experiments.html) and
 enable your experiment.
 
-If test on localhost, use the command `AMP.toggleExperiment(id,
-true/false)` to enable.
+If you are testing on your localhost, use the command `AMP.toggleExperiment(id,
+true/false)` to enable the experiment.
+
+## Documenting your element
+
+Create a .md file that serves as the main documentation for your element. This document should include:
+
+- Summary table
+- Overview
+- How to use it including code snippets and images
+- Examples
+- Attributes to specify (optional and required)
+- Validation
+
+For samples of element documentation, see: [amp-list](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [amp-carousel](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md)
 
 ## Example of using your extension
 
-This is optional but it greatly helps users to understand and demo how
-your element works and provides an easy start-point for them to
+This greatly helps users to understand and demonstrate how
+your element works, and provides an easy start-point for them to
 experiment with it. This is basically where you actually build an AMP
 HTML document and use your element in it by creating a file in the
 `examples/` directory, usually with the `my-element.amp.html` file

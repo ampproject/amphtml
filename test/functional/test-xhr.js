@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   FetchResponse,
   assertSuccess,
   fetchPolyfill,
-  xhrServiceForTesting,
-} from '../../src/service/xhr-impl';
+} from '../../src/utils/xhr-utils';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
 import {getCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
+import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {
@@ -74,7 +73,7 @@ describe.configure().skipSafari().run('XHR', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({
@@ -475,99 +474,6 @@ describe.configure().skipSafari().run('XHR', function() {
       });
     });
 
-    describe('#fetchDocument', () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
-
-      it('should be able to fetch a document', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html').then(doc => {
-          expect(doc.nodeType).to.equal(9);
-        });
-        xhrCreated.then(xhr => {
-          expect(xhr.requestHeaders['Accept']).to.equal('text/html');
-          xhr.respond(
-              200, {
-                'Content-Type': 'text/xml',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>');
-          expect(xhr.responseType).to.equal('document');
-        });
-        return promise;
-      });
-
-      it('should mark 400 as not retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                400, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.be.undefined;
-          expect(e.retriable).to.not.equal(true);
-        });
-      });
-
-      it('should mark 415 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
-
-      it('should mark 500 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
-
-      it('should error on non truthy responseXML', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                200, {
-                  'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '{"hello": "world"}'));
-        return promise.catch(e => {
-          expect(e.message)
-              .to.contain('responseXML should exist');
-        });
-      });
-    });
-
     describe('#fetchText', () => {
       const TEST_TEXT = 'test text';
       let fetchStub;
@@ -584,10 +490,10 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should be able to fetch a document', () => {
         const promise = xhr.fetchText('/text.html');
-        expect(fetchStub.calledWith('/text.html', {
+        expect(fetchStub).to.be.calledWith('/text.html', {
           method: 'GET',
           headers: {'Accept': 'text/plain'},
-        })).to.be.true;
+        });
         return promise.then(res => {
           return res.text();
         }).then(text => {
@@ -1070,22 +976,6 @@ describe.configure().skipSafari().run('XHR', function() {
           });
         });
       });
-
-      it('should return correct document response', () => {
-        sendMessageStub.returns(
-            Promise.resolve({
-              body: '<html><body>Foo</body></html>',
-              init: {
-                headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-              },
-            }));
-        const xhr = xhrServiceForTesting(interceptionEnabledWin);
-
-        return xhr.fetchDocument('https://www.some-url.org/some-resource/').then(doc => {
-          expect(doc).to.have.nested.property('body.textContent')
-              .that.equals('Foo');
-        });
-      });
     });
 
     describe('when native Response type is unavailable', () => {
@@ -1118,20 +1008,6 @@ describe.configure().skipSafari().run('XHR', function() {
             content: 32,
           });
         });
-      });
-
-      it('should return correct document response', () => {
-        sendMessageStub.returns(
-            Promise.resolve({
-              body: '<html><body>Foo</body></html>',
-              init: {
-                headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-              },
-            }));
-        const xhr = xhrServiceForTesting(interceptionEnabledWin);
-
-        return xhr.fetchDocument('https://www.some-url.org/some-resource/')
-            .then(doc => expect(doc.body.textContent).to.equal('Foo'));
       });
 
       it('should return default response when body/init missing', () => {

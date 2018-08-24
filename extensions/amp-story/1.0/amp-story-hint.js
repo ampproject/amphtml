@@ -17,7 +17,11 @@
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/utils/object';
 import {renderAsElement} from './simple-template';
@@ -144,7 +148,7 @@ export class AmpStoryHint {
     this.hintTimeout_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -163,6 +167,10 @@ export class AmpStoryHint {
     const root = this.document_.createElement('div');
     this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
+    }, true /** callToInitialize */);
 
     this.vsync_.mutate(() => {
       this.parentEl_.appendChild(root);
@@ -183,7 +191,7 @@ export class AmpStoryHint {
    * @private
    */
   showHint_(hintClass) {
-    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE) {
       return;
     }
 
@@ -251,6 +259,19 @@ export class AmpStoryHint {
 
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.add('i-amphtml-hidden');
+    });
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState ?
+        this.hintContainer_.setAttribute('dir', 'rtl') :
+        this.hintContainer_.removeAttribute('dir');
     });
   }
 }

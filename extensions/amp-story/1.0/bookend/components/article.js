@@ -15,9 +15,9 @@
  */
 
 import {BookendComponentInterface} from './bookend-component-interface';
-import {Services} from '../../../../../src/services';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceOriginForBookendComponent} from './bookend-component-interface';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
@@ -27,7 +27,8 @@ import {userAssertValidProtocol} from '../../utils';
  *   type: string,
  *   title: string,
  *   url: string,
- *   image: (string|undefined)
+ *   image: (string|undefined),
+ *   domainName: string,
  * }}
  */
 export let ArticleComponentDef;
@@ -61,7 +62,7 @@ export class ArticleComponent {
   /** @override */
   build(articleJson, element) {
     const url = articleJson['url'];
-    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+    const domainName = getSourceOriginForBookendComponent(element, url);
 
     const article = {
       url,
@@ -90,9 +91,14 @@ export class ArticleComponent {
         <a class="i-amphtml-story-bookend-article
           i-amphtml-story-bookend-component"
           target="_top">
-          <h2 class="i-amphtml-story-bookend-article-heading" ref="heading">
-          </h2>
-          <div class="i-amphtml-story-bookend-component-meta" ref="meta"></div>
+          <div class="i-amphtml-story-bookend-article-text-content">
+            <h2
+              class="i-amphtml-story-bookend-article-heading" ref="heading">
+            </h2>
+            <div
+              class="i-amphtml-story-bookend-component-meta" ref="meta">
+            </div>
+          </div>
         </a>`;
     addAttributesToElement(el, dict({'href': articleData.url}));
 
@@ -110,7 +116,7 @@ export class ArticleComponent {
 
       const {image} = htmlRefs(imgEl);
       addAttributesToElement(image, dict({'src': articleData.image}));
-      el.insertBefore(imgEl, el.firstChild);
+      el.appendChild(imgEl);
     }
 
     const articleElements = htmlRefs(el);

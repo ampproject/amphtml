@@ -38,16 +38,8 @@
       transform: rotate(-180deg)
     }
 
-    .rotate-1 {
-      transform: rotate(-180deg)
-    }
-
     .rotate-2 {
       transform: rotate(-270deg)
-    }
-
-    .rotate-3 {
-      transform: rotate(-180deg)
     }
 
     .spacer {
@@ -78,7 +70,7 @@
           "selector": "#clock-scene-1 .rotate-1",
           "keyframes": [
             { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(0deg)" }
+            { "transform": "rotate(180deg)" }
           ]
         }
       ]
@@ -113,8 +105,8 @@
         {
           "selector": "#clock-scene-1 .rotate-3",
           "keyframes": [
-            { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(0deg)" }
+            { "transform": "rotate(90deg)" },
+            { "transform": "rotate(-270deg)" }
           ]
         }
       ]
@@ -124,7 +116,7 @@
   <main>
     <div class="spacer"></div>
 
-    <h3>Move phone along y axis</h3>
+    <h3>Rotate phone along y axis</h3>
     <div id="clock-scene-1" class="clock-scene">
       <amp-orientation-observer
         beta-range="0 180"
@@ -138,7 +130,7 @@
 
     <div class="spacer"></div>
 
-    <h3>Move phone along x axis</h3>
+    <h3>Rotate phone along x axis</h3>
     <div id="clock-scene-1" class="clock-scene">
       <amp-orientation-observer
         on="gamma:clockAnim2.seekTo(percent=event.percent)"
@@ -154,7 +146,7 @@
     <h3>Rotate phone horizontally</h3>
     <div id="clock-scene-1" class="clock-scene">
       <amp-orientation-observer
-        alpha-range="0 180"
+        alpha-range="0 360"
         on="alpha:clockAnim3.seekTo(percent=event.percent)"
         layout="nodisplay">
       </amp-orientation-observer>

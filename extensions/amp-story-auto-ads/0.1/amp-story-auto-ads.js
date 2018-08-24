@@ -29,7 +29,7 @@ import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
-const MIN_INTERVAL = 3;
+const MIN_INTERVAL = 4;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
@@ -57,10 +57,28 @@ const DATA_ATTR = {
 
 /** @const */
 const CTA_TYPES = {
+  APPLY_NOW: 'Apply Now',
+  BOOK_NOW: 'Book',
+  BUY_TICKETS: 'Buy Tickets',
+  DOWNLOAD: 'Download',
   EXPLORE: 'Explore Now',
-  SHOP: 'Shop Now',
-  READ: 'Read Now',
+  GET_NOW: 'Get Now',
   INSTALL: 'Install Now',
+  LISTEN: 'Listen Now',
+  MORE: 'More',
+  OPEN_APP: 'Open App',
+  ORDER_NOW: 'Order Now',
+  PLAY: 'Play',
+  READ: 'Read Now',
+  SHOP: 'Shop Now',
+  SHOW: 'Show',
+  SHOWTIMES: 'Showtimes',
+  SIGN_UP: 'Sign Up',
+  SUBSCRIBE: 'Subscribe Now',
+  USE_APP: 'Use App',
+  VIEW: 'View',
+  WATCH: 'Watch',
+  WATCH_EPISODE: 'Watch Episode',
 };
 
 /** @const */
@@ -328,6 +346,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
+      // Ensures the video-manager does not follow the autoplay attribute on
+      // amp-video tags, which would play the ad in the background before it is
+      // displayed.
+      ampStoryAdPage.getImpl().then(impl => impl.delegateVideoAutoplay());
+
       // remove loading attribute once loaded so that desktop CSS will position
       // offscren with all other pages
       const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
