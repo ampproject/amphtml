@@ -55,11 +55,13 @@ describe('amp-analytics.VariableService', function() {
       'c': 'https://www.google.com/a?b=1&c=2',
     };
 
-    it('expands nested vars', () => {
-      const actual = variables.expand(
-          '${a}', new ExpansionOptions(vars));
-      expect(actual).to.equal(
-          'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
+    function check(template, expected, vars) {
+      const actual = variables.expand(template, new ExpansionOptions(vars));
+      expect(actual).to.equal(expected);
+    }
+
+    it('expands nested vars (encode once)', () => {
+      check('${a}', 'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2', vars);
     });
 
     it('expands nested vars (no encode)', () => {
@@ -69,27 +71,36 @@ describe('amp-analytics.VariableService', function() {
     });
 
     it('expands zeros', () => {
-      const actual = variables.expand(
-          '${zero}', new ExpansionOptions({'zero': 0}));
-      expect(actual).to.equal('0');
+      check('${zero}', '0', {'zero': 0});
     });
 
-    it('do not expand macros', () => {
-      const actual = variables.expand(
-          'MACRO(a,b)', new ExpansionOptions({}));
-      expect(actual).to.equal('MACRO(a,b)');
+    it('drops unknown vars', () => {
+      check('a=${known}&b=${unknown}', 'a=KNOWN&b=', {'known': 'KNOWN'});
     });
 
-    it('works with complex params (1)', () => {
-      const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM(foo,bar)'});
-      const actual = variables.expand('${fooParam}&123', vars);
-      expect(actual).to.equal('QUERY_PARAM(foo,bar)&123');
+    it('does not expand macros', () => {
+      check('MACRO(a,b)', 'MACRO(a,b)', {});
     });
 
-    it('works with complex params (2)', () => {
-      const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM'});
-      const actual = variables.expand('${fooParam(foo,bar)}&123', vars);
-      expect(actual).to.equal('QUERY_PARAM(foo,bar)&123');
+    it('supports macro args', () => {
+      check('${foo}', 'AAA(BBB(1))', {
+        'foo': 'AAA(BBB(1))',
+      });
+
+      // TODO: fix this, should be 'AAA(BBB(1,2))'
+      check('${foo}', 'AAA(BBB(1%2C2))', {
+        'foo': 'AAA(BBB(1,2))',
+      });
+
+      check('${foo}&${bar(3,4)}', 'FOO(1,2)&BAR(3,4)', {
+        'foo': 'FOO(1,2)', 'bar': 'BAR',
+      });
+
+      // TODO: fix this, should be 'AAA(1,2)%26BBB(3,4)%26CCC(5,6)%26DDD(7,8)'
+      check('${all}', 'AAA(1%2C2)%26BBB(3%2C4)%26CCC(5%2C6)%26DDD(7,8)', {
+        'a': 'AAA', 'b': 'BBB', 'c': 'CCC(5,6)', 'd': 'DDD(7,8)',
+        'all': '${a(1,2)}&${b(3,4)}&${c}&${d}',
+      });
     });
 
     it('respect freeze variables', () => {
@@ -102,22 +113,20 @@ describe('amp-analytics.VariableService', function() {
     });
 
     it('expands array vars', () => {
-      const actual = variables.expand('${array}', new ExpansionOptions({
-        'foo': 'bar',
-        'array': [
-          'xy&x', // special chars should be encoded
-          'MACRO(abc,def)', // do not encode macro
-          'MACRO(abc,def)&123', // this is not a macro
-          '${foo}', // vars in array is not expanded
-        ],
-      }));
-      expect(actual).to.equal(
-          'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,%24%7Bfoo%7D');
+      check('${array}',
+          'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,%24%7Bfoo%7D', {
+            'foo': 'bar',
+            'array': [
+              'xy&x', // special chars should be encoded
+              'MACRO(abc,def)', // do not encode macro
+              'MACRO(abc,def)&123', // this is not a macro
+              '${foo}', // vars in array is not expanded
+            ],
+          });
     });
 
     it('handles empty var name', () => {
-      const actual = variables.expand('${}', new ExpansionOptions(vars));
-      expect(actual).to.equal('');
+      check('${}', '', {});
     });
 
     describe('should handle recursive vars', () => {
@@ -127,9 +136,7 @@ describe('amp-analytics.VariableService', function() {
 
       it('defaults to 2 recursion', () => {
         allowConsoleError(() => {
-          const actual = variables.expand(
-              '${1}', new ExpansionOptions(recursiveVars));
-          expect(actual).to.equal('123%24%7B4%7D');
+          check('${1}', '123%24%7B4%7D', recursiveVars);
         });
       });
 
