@@ -13,3 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function recaptcha(global, data) {
+  console.log('recaptcha is called!');
+}
