@@ -47,7 +47,7 @@ describe('amp-analytics.VariableService', function() {
     });
   });
 
-  describe('expandTemplate', () => {
+  describe('expand', () => {
 
     const vars = {
       'a': '${b}',
@@ -56,55 +56,53 @@ describe('amp-analytics.VariableService', function() {
     };
 
     it('expands nested vars', () => {
-      const actual = variables.expandTemplate(
+      const actual = variables.expand(
           '${a}', new ExpansionOptions(vars));
-      return expect(actual).to.eventually.equal(
+      expect(actual).to.equal(
           'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
     });
 
     it('expands nested vars (no encode)', () => {
-      const actual = variables.expandTemplate(
+      const actual = variables.expand(
           '${a}', new ExpansionOptions(vars, undefined, true));
-      return expect(actual).to.eventually.equal('https://www.google.com/a?b=1&c=2');
+      expect(actual).to.equal('https://www.google.com/a?b=1&c=2');
     });
 
     it('expands zeros', () => {
-      const actual = variables.expandTemplate(
+      const actual = variables.expand(
           '${zero}', new ExpansionOptions({'zero': 0}));
-      return expect(actual).to.eventually.equal('0');
+      expect(actual).to.equal('0');
     });
 
     it('do not expand macros', () => {
-      const actual =
-          variables.expandTemplate('MACRO(a,b)', new ExpansionOptions({}));
-      return expect(actual).to.eventually.equal('MACRO(a,b)');
+      const actual = variables.expand(
+          'MACRO(a,b)', new ExpansionOptions({}));
+      expect(actual).to.equal('MACRO(a,b)');
     });
 
     it('works with complex params (1)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM(foo,bar)'});
-      return variables.expandTemplate('${fooParam}&123', vars)
-          .then(actual =>
-            expect(actual).to.equal('QUERY_PARAM(foo,bar)&123'));
+      const actual = variables.expand('${fooParam}&123', vars);
+      expect(actual).to.equal('QUERY_PARAM(foo,bar)&123');
     });
 
     it('works with complex params (2)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM'});
-      return variables.expandTemplate('${fooParam(foo,bar)}&123', vars)
-          .then(actual => expect(actual).to.equal('QUERY_PARAM(foo,bar)&123'));
+      const actual = variables.expand('${fooParam(foo,bar)}&123', vars);
+      expect(actual).to.equal('QUERY_PARAM(foo,bar)&123');
     });
 
     it('respect freeze variables', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM',
         'freeze': 'error'});
       vars.freezeVar('freeze');
-      return variables.expandTemplate(
-          '${fooParam(foo,bar)}${nonfreeze}${freeze}', vars)
-          .then(actual => expect(actual).to.equal(
-              'QUERY_PARAM(foo,bar)${freeze}'));
+      const actual = variables.expand(
+          '${fooParam(foo,bar)}${nonfreeze}${freeze}', vars);
+      expect(actual).to.equal('QUERY_PARAM(foo,bar)${freeze}');
     });
 
     it('expands array vars', () => {
-      const actual = variables.expandTemplate('${array}', new ExpansionOptions({
+      const actual = variables.expand('${array}', new ExpansionOptions({
         'foo': 'bar',
         'array': [
           'xy&x', // special chars should be encoded
@@ -113,14 +111,13 @@ describe('amp-analytics.VariableService', function() {
           '${foo}', // vars in array is not expanded
         ],
       }));
-      return expect(actual).to.eventually.equal(
+      expect(actual).to.equal(
           'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,%24%7Bfoo%7D');
     });
 
     it('handles empty var name', () => {
-      const actual =
-          variables.expandTemplate('${}', new ExpansionOptions(vars));
-      return expect(actual).to.eventually.equal('');
+      const actual = variables.expand('${}', new ExpansionOptions(vars));
+      expect(actual).to.equal('');
     });
 
     describe('should handle recursive vars', () => {
@@ -129,17 +126,19 @@ describe('amp-analytics.VariableService', function() {
       };
 
       it('defaults to 2 recursion', () => {
-        expectAsyncConsoleError(/Maximum depth reached/);
-        const actual = variables.expandTemplate(
-            '${1}', new ExpansionOptions(recursiveVars));
-        return expect(actual).to.eventually.equal('123%24%7B4%7D');
+        allowConsoleError(() => {
+          const actual = variables.expand(
+              '${1}', new ExpansionOptions(recursiveVars));
+          expect(actual).to.equal('123%24%7B4%7D');
+        });
       });
 
       it('limits the recursion to 5', () => {
-        expectAsyncConsoleError(/Maximum depth reached/);
-        const actual = variables.expandTemplate(
-            '${1}', new ExpansionOptions(recursiveVars, 5));
-        return expect(actual).to.eventually.equal('123412%24%7B3%7D');
+        allowConsoleError(() => {
+          const actual = variables.expand(
+              '${1}', new ExpansionOptions(recursiveVars, 5));
+          expect(actual).to.equal('123412%24%7B3%7D');
+        });
       });
     });
   });

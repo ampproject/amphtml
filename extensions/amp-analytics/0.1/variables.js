@@ -22,6 +22,7 @@ import {isArray, isFiniteNumber} from '../../../src/types';
 // TODO(calebcordry) remove this once experiment is launched
 // also remove from dep-check-config whitelist;
 import {isExperimentOn} from '../../../src/experiments';
+import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'Analytics.Variables';
@@ -168,10 +169,19 @@ export class VariableService {
    * @param {string} template The template to expand
    * @param {!ExpansionOptions} options configuration to use for expansion
    * @return {!Promise<string>} The expanded string
+   * Deprecated: use expand()
    */
   expandTemplate(template, options) {
-    const replacementPromises = [];
-    let replacement = template.replace(/\${([^}]*)}/g, (match, key) => {
+    return tryResolve(this.expand.bind(null, template, options));
+  }
+
+  /**
+   * @param {string} template The template to expand
+   * @param {!ExpansionOptions} options configuration to use for expansion
+   * @return {string} The expanded string
+   */
+  expand(template, options) {
+    return template.replace(/\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(TAG, 'Maximum depth reached while expanding variables. ' +
             'Please ensure that the variables are not recursive.');
@@ -182,54 +192,29 @@ export class VariableService {
         return '';
       }
 
+      // Split the key to name and args
+      // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
       const {name, argList} = getNameArgs(key);
       if (options.freezeVars[name]) {
         // Do nothing with frozen params
         return match;
       }
 
-      const value = options.vars[name] != null ? options.vars[name] : '';
-      const p = this.expandVar_(value, argList, options).then(encodedValue => {
-        // Replace it in the string
-        replacement = replacement.replace(match, encodedValue);
-      });
+      let value = options.vars[name] != null ? options.vars[name] : '';
 
-      // Queue current replacement promise after the last replacement.
-      replacementPromises.push(p);
+      if (typeof value == 'string') {
+        value = this.expand(value,
+            new ExpansionOptions(options.vars, options.iterations - 1,
+                true /* noEncode */));
+      }
 
-      // Since the replacement will happen later, return the original template.
-      return match;
-    });
-
-    // Once all the promises are complete, return the expanded value.
-    return Promise.all(replacementPromises).then(() => replacement);
-  }
-
-  /**
-   * @param {*} value
-   * @param {string} argList
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {Promise}
-   * @private
-   */
-  expandVar_(value, argList, options) {
-    let p;
-    if (typeof value == 'string') {
-      // Expand string values further.
-      p = this.expandTemplate(value,
-          new ExpansionOptions(options.vars, options.iterations - 1,
-              true /* noEncode */));
-    } else {
-      // Values can also be arrays and objects. Don't expand them.
-      p = Promise.resolve(value);
-    }
-
-    return p.then(finalRawValue => {
-      // Then encode the value
-      const val = options.noEncode
-        ? finalRawValue
-        : this.encodeVars(name, finalRawValue);
-      return val ? val + argList : val;
+      if (!options.noEncode) {
+        value = this.encodeVars(name, value);
+      }
+      if (value) {
+        value += argList;
+      }
+      return value;
     });
   }
 
