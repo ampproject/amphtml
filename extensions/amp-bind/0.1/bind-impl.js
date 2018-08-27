@@ -447,7 +447,7 @@ export class Bind {
         return this.evaluate_().then(results => this.verify_(results));
       }
     }).then(() => {
-      this.viewer_.sendMessage('bindReady');
+      this.viewer_.sendMessage('bindReady', undefined);
       this.dispatchEventForTesting_(BindEvents.INITIALIZE);
     });
   }
