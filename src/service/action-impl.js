@@ -445,32 +445,22 @@ export class ActionService {
     return !!this.findAction_(target, actionEventType, opt_stopAt);
   }
 
-  /**
-   * Overwrites the current action whitelist (if any). Takes an array of records
-   * with fields `tagOrTarget` and `method`, e.g.:
-   *
-   *     [{tagOrTarget: 'AMP', method: 'navigateTo'},
-   *      {tagOrTarget: 'AMP-FORM', method: 'submit'}]
-   *
-   * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
-   */
-  setWhitelist(whitelist) {
-    this.whitelist_ = whitelist;
+  /** Empties the current action whitelist (if any). */
+  clearWhitelist() {
+    this.whitelist_ = [];
   }
 
   /**
-   * Adds an action to the whitelist. Takes a record with fields `tagOrTarget`
-   * and `method`, e.g.:
-   *
-   *     {tagOrTarget: 'AMP-FORM', method: 'submit'}
-   *
-   * @param {{tagOrTarget: string, method: string}} action
+   * Adds an action to the whitelist.
+   * @param {string} tagOrTarget The tag or target to whitelist, e.g.
+   *     'AMP-LIST', '*'.
+   * @param {string} method The method to whitelist, e.g. 'show', 'hide'.
    */
-  addToWhitelist(action) {
+  addToWhitelist(tagOrTarget, method) {
     if (!this.whitelist_) {
       this.whitelist_ = [];
     }
-    this.whitelist_.push(action);
+    this.whitelist_.push({tagOrTarget, method});
   }
 
   /**

@@ -91,8 +91,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     storyAccess.buildCallback();
 
     expect(addToWhitelistStub).to.have.been.calledOnce;
-    expect(addToWhitelistStub).to.have.been.calledWith(
-        {tagOrTarget: 'SCRIPT', method: 'login'});
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT', 'login');
   });
 
   it('should whitelist the typed <amp-access> actions', () => {
@@ -109,9 +108,9 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     expect(addToWhitelistStub).to.have.been.calledTwice;
     expect(addToWhitelistStub).to.have.been.calledWith(
-        {tagOrTarget: 'SCRIPT', method: 'login-typefoo'});
+        'SCRIPT', 'login-typefoo');
     expect(addToWhitelistStub).to.have.been.calledWith(
-        {tagOrTarget: 'SCRIPT', method: 'login-typebar'});
+        'SCRIPT', 'login-typebar');
   });
 
   it('should whitelist the namespaced and default <amp-access> actions', () => {
@@ -125,10 +124,8 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     expect(addToWhitelistStub).to.have.been.calledTwice;
     // Both namespaced and default actions are allowed.
-    expect(addToWhitelistStub).to.have.been.calledWith(
-        {tagOrTarget: 'SCRIPT', method: 'login'});
-    expect(addToWhitelistStub).to.have.been.calledWith(
-        {tagOrTarget: 'SCRIPT', method: 'login-foo'});
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT', 'login');
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT', 'login-foo');
   });
 
   it('should whitelist namespaced and typed <amp-access> actions', () => {
@@ -151,11 +148,11 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     expect(addToWhitelistStub).to.have.callCount(3);
     expect(addToWhitelistStub).to.have.been.calledWith(
-        {tagOrTarget: 'SCRIPT', method: 'login-namespace1-type1'});
+        'SCRIPT', 'login-namespace1-type1');
     expect(addToWhitelistStub).to.have.been.calledWith(
-        {tagOrTarget: 'SCRIPT', method: 'login-namespace1-type2'});
+        'SCRIPT', 'login-namespace1-type2');
     expect(addToWhitelistStub).to.have.been.calledWith(
-        {tagOrTarget: 'SCRIPT', method: 'login-namespace2'});
+        'SCRIPT', 'login-namespace2');
   });
 
   it('should require publisher-logo-src to be a URL', () => {

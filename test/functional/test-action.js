@@ -1389,7 +1389,7 @@ describes.realWin('Action whitelisting', {
     it('should allow adding actions to the whitelist', () => {
       const i = new ActionInvocation(target, 'print', /* args */ null,
           'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
-      action.addToWhitelist({tagOrTarget: 'AMP', method: 'print'});
+      action.addToWhitelist('AMP', 'print');
       action.invoke_(i);
       expect(spy).to.be.calledWithExactly(i);
     });
