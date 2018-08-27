@@ -266,7 +266,7 @@ describe('document-info', () => {
     installDocService(win, /* isSingleDoc */ true);
     installDocumentInfoServiceForDoc(win.document);
     expect(Services.documentInfoForDoc(win.document).replaceParams)
-        .to.deep.equal({});
+        .to.be.null;
   });
 
   it('should not provide the replaceParams if invalid', () => {
