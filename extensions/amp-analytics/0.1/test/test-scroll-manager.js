@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,9 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
       'getScrollLeft': sandbox.stub().returns(0),
       'getScrollHeight': sandbox.stub().returns(500),
       'getScrollWidth': sandbox.stub().returns(500),
-      'onChanged': sandbox.stub(),
+      'onChanged': () => {
+        return sandbox.stub();
+      },
     };
     scrollManager.viewport_ = fakeViewport;
 
@@ -71,6 +73,22 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
 
     scrollManager.dispose();
     expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
+  });
+
+  it('should add a viewport onChanged listener with scroll handlers, '
+    + 'and dispose when there are none', () => {
+      expect(scrollManager.viewportOnChangedUnlistenDef_).to.not.be.ok;
+      
+      const fn1 = sandbox.stub()
+      scrollManager.addScrollHandler(fn1);
+
+      expect(scrollManager.viewportOnChangedUnlistenDef_).to.be.ok;
+      const unlistenStub = scrollManager.viewportOnChangedUnlistenDef_;
+
+      scrollManager.removeScrollHandler(fn1);
+
+      expect(scrollManager.viewportOnChangedUnlistenDef_).to.not.be.ok;
+      expect(unlistenStub).to.have.callCount(1);
   });
 
   it('fires on scroll', () => {

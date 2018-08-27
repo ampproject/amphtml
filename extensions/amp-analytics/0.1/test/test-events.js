@@ -170,6 +170,7 @@ describes.realWin('Events', {amp: 1}, env => {
         'horizontalBoundaries': [0, 100],
       },
     };
+    let scrollManager;
 
     beforeEach(() => {
       tracker = root.getTracker('scroll', ScrollEventTracker);
@@ -182,7 +183,8 @@ describes.realWin('Events', {amp: 1}, env => {
         'getScrollWidth': sandbox.stub().returns(500),
         'onChanged': sandbox.stub(),
       };
-      tracker.root_.getScrollManager().viewport_ = fakeViewport;
+      scrollManager = tracker.root_.getScrollManager();
+      scrollManager.viewport_ = fakeViewport;
 
       getFakeViewportChangedEvent = () => {
         const size = fakeViewport.getSize();
@@ -199,14 +201,15 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should initalize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
-      expect(tracker.scrollHandler_).to.be.not.ok;
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
 
       tracker.add(undefined, 'scroll', defaultScrollConfig, sandbox.stub());
-      expect(tracker.scrollHandler_).to.be.ok;
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
+
 
 
       tracker.dispose();
-      expect(tracker.scrollHandler_).to.be.not.ok;
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
     });
 
 

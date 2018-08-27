@@ -422,9 +422,9 @@ export class ScrollEventTracker extends EventTracker {
 
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
-
+    
     /** @private {function(!Object)|null} */
-    this.scrollHandler_ = null;
+    this.scrollHandler_ = null
   }
 
   /** @override */
@@ -450,62 +450,45 @@ export class ScrollEventTracker extends EventTracker {
       return NO_UNLISTEN;
     }
 
-    /**
-     * @param {!Object<number, boolean>} bounds
-     * @param {number} scrollPos Number representing the current scroll
-     * @param {string} varName variable name to assign to the bound that
-     * triggers the event
-     * position.
-     */
-    const triggerScrollEvents = (bounds, scrollPos, varName) => {
-      if (!scrollPos) {
-        return;
-      }
-
-      // Goes through each of the boundaries and fires an event if it has not
-      // been fired so far and it should be.
-      for (const b in bounds) {
-        if (!hasOwn(bounds, b)) {
-          continue;
-        }
-        const bound = parseInt(b, 10);
-        if (bound > scrollPos || bounds[bound]) {
-          continue;
-        }
-        bounds[bound] = true;
-        const vars = Object.create(null);
-        vars[varName] = b;
-        listener(
-            new AnalyticsEvent(
-                this.root_.getRootElement(),
-                AnalyticsEventType.SCROLL,
-                vars
-            )
-        );
-      }
-    };
-
-    const boundsV = this.normalizeBoundaries_(
-        config['scrollSpec']['verticalBoundaries']
-    );
-    const boundsH = this.normalizeBoundaries_(
-        config['scrollSpec']['horizontalBoundaries']
-    );
-
-    this.scrollHandler_ = e => {
-      // Calculates percentage scrolled by adding screen height/width to
-      // top/left and dividing by the total scroll height/width.
-      triggerScrollEvents(boundsV,
-          (e.top + e.screenHeight) * 100 / e.height,
-          VAR_V_SCROLL_BOUNDARY);
-      triggerScrollEvents(boundsH,
-          (e.left + e.screenWidth) * 100 / e.width,
-          VAR_H_SCROLL_BOUNDARY);
-    };
+    this.scrollHandler_ = this.getScrollHandler_(config, listener);
 
     return this.root_.getScrollManager()
         .addScrollHandler(this.scrollHandler_);
   }
+
+  /**
+   * Function to return a Scroll Handler Function instance
+   * @param {!JsonObject} config
+   * @param {function(!AnalyticsEvent)} listener
+   * @return {function(!Object)} 
+   * @private
+   */
+  getScrollHandler_(config, listener) {
+
+    const boundsV = this.normalizeBoundaries_(
+      config['scrollSpec']['verticalBoundaries']
+    );
+    const boundsH = this.normalizeBoundaries_(
+      config['scrollSpec']['horizontalBoundaries']
+    );
+
+
+    return (e) => {
+      // Calculates percentage scrolled by adding screen height/width to
+      // top/left and dividing by the total scroll height/width.
+      this.triggerScrollEvents_(boundsV,
+        (e.top + e.screenHeight) * 100 / e.height,
+        VAR_V_SCROLL_BOUNDARY, 
+        listener
+      );
+      this.triggerScrollEvents_(boundsH,
+        (e.left + e.screenWidth) * 100 / e.width,
+        VAR_H_SCROLL_BOUNDARY, 
+        listener
+      );
+    }
+  }
+
 
   /**
    * Rounds the boundaries for scroll trigger to nearest
@@ -535,6 +518,41 @@ export class ScrollEventTracker extends EventTracker {
       result[bound] = false;
     }
     return result;
+  }
+  
+  /**
+   * @param {!Object<number, boolean>} bounds
+   * @param {number} scrollPos Number representing the current scroll
+   * @param {string} varName variable name to assign to the bound that
+   * @param {function(!AnalyticsEvent)} listener
+   * triggers the event position.
+   */
+  triggerScrollEvents_(bounds, scrollPos, varName, listener) {
+    if (!scrollPos) {
+      return;
+    }
+
+    // Goes through each of the boundaries and fires an event if it has not
+    // been fired so far and it should be.
+    for (const b in bounds) {
+      if (!hasOwn(bounds, b)) {
+        continue;
+      }
+      const bound = parseInt(b, 10);
+      if (bound > scrollPos || bounds[bound]) {
+        continue;
+      }
+      bounds[bound] = true;
+      const vars = Object.create(null);
+      vars[varName] = b;
+      listener(
+        new AnalyticsEvent(
+          this.root_.getRootElement(),
+          AnalyticsEventType.SCROLL,
+          vars
+        )
+      );
+    }
   }
 }
 

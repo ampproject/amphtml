@@ -51,7 +51,9 @@ export class ScrollManager {
 
     /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
-    this.viewport_.onChanged(this.onScroll_.bind(this));
+    
+    /** @const @private {!UnlistenDef|null} */
+    this.viewportOnChangedUnlistenDef_ = null;
   }
 
   /**
@@ -59,13 +61,18 @@ export class ScrollManager {
    */
   dispose() {
     this.scrollObservable_.removeAll();
+    this.removeViewportOnChangedListener_();
   }
-
+  
   /**
    * @param {function(!Object)} handler
    */
   removeScrollHandler(handler) {
     this.scrollObservable_.remove(handler);
+    
+    if (this.scrollObservable_.getHandlerCount() <= 0) {
+      this.removeViewportOnChangedListener_();
+    }
   }
 
   /**
@@ -89,6 +96,10 @@ export class ScrollManager {
     };
     handler(scrollEvent);
 
+    if (this.scrollObservable_.getHandlerCount() === 0) {
+      this.addViewportOnChangedListener_();
+    }
+
     return this.scrollObservable_.add(handler);
   }
 
@@ -111,5 +122,25 @@ export class ScrollManager {
     // Fire all of our children scroll observables
     this.scrollObservable_.fire(scrollEvent);
   }
+
+  /**
+   * Function to remove the viewport onChanged listener
+   * @private
+   */
+  removeViewportOnChangedListener_() {
+    if (this.viewportOnChangedUnlistenDef_) {
+      this.viewportOnChangedUnlistenDef_();
+      this.viewportOnChangedUnlistenDef_ = null;
+    }
+  }
+
+  /**
+   * Function to add the viewport onChanged listener
+   * @private
+   */
+  addViewportOnChangedListener_() {
+    this.viewportOnChangedUnlistenDef_ = this.viewport_.onChanged(this.onScroll_.bind(this));
+  }
+
 }
 
