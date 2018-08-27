@@ -289,7 +289,8 @@ describe.configure().ifNewChrome().run('Bind', function() {
       expect(viewer.sendMessage).to.not.be.called;
       return onBindReady(env, bind).then(() => {
         expect(viewer.sendMessage).to.be.calledOnce;
-        expect(viewer.sendMessage).to.be.calledWithExactly('bindReady');
+        expect(viewer.sendMessage)
+            .to.be.calledWithExactly('bindReady', undefined);
       });
     });
 
