@@ -432,15 +432,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should add extra params to SOURCE_URL', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated(
-          'https://cdn.ampproject.org/a/o.com/foo/?amp_r=hello%3Dworld');
+          'https://cdn.ampproject.org/a/o.com/foo/?a&amp_r=hello%3Dworld');
       sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
         return Promise.resolve();
       });
       return Services.urlReplacementsForDoc(win.ampdoc)
           .expandUrlAsync('?url=SOURCE_URL')
           .then(res => {
-            expect(res).to.contain(
-                encodeURIComponent('http://o.com/foo/?hello=world'));
+            expect(res).to.equal(
+                '?url=' + encodeURIComponent('http://o.com/foo/?hello=world&a='));
           });
     });
 
@@ -454,8 +454,38 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return Services.urlReplacementsForDoc(win.ampdoc)
           .expandUrlAsync('?url=SOURCE_URL')
           .then(res => {
-            expect(res).to.contain(
-                encodeURIComponent('http://o.com/foo/?hello=world&safe=1&a=1'));
+            expect(res).to.equal(
+                '?url=' + encodeURIComponent('http://o.com/foo/?hello=world&safe=1&a=1'));
+          });
+    });
+
+    it('should not change SOURCE_URL if amp_r does not exist', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/a/o.com/foo/?a');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return Promise.resolve();
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL')
+          .then(res => {
+            expect(res).to.equal(
+                '?url=' + encodeURIComponent('http://o.com/foo/?a'));
+          });
+    });
+
+    it('should not change SOURCE_URL if extra params are not available', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/v/o.com/foo/?a&amp_r=hello%3Dworld');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return Promise.resolve();
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL')
+          .then(res => {
+            expect(res).to.equal(
+                '?url=' + encodeURIComponent('http://o.com/foo/?a'));
           });
     });
   });
