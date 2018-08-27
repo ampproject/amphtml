@@ -434,64 +434,6 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
 }
 
-/** Experiment disabled  */
-.i-amphtml-story-experiment-error {
-  align-items: center !important;
-  align-content: center!important;
-  background-color: #222 !important;
-  bottom: 0 !important;
-  color: #f0f0f0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 20px !important;
-  justify-content: center !important;
-  left: 0 !important;
-  padding: 32px !important;
-  position: absolute !important;
-  right: 0 !important;
-  top: 0 !important;
-  z-index: 999999 !important;
-  text-align: center !important;
-}
-
-.i-amphtml-story-experiment-icon {
-  background-repeat: no-repeat !important;
-  background-size: cover !important;
-  height: 64px !important;
-  margin: 0 auto 16px !important;
-  width: 64px !important;
-}
-
-.i-amphtml-story-experiment-icon-error {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
-}
-
-.i-amphtml-story-experiment-icon-done {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>') !important;
-}
-
-.i-amphtml-story-experiment-error button {
-  background-color: transparent !important;
-  border: 1px solid #f0f0f0 !important;
-  border-radius: 8px !important;
-  color: #f0f0f0 !important;
-  cursor: pointer !important;
-  font-size: 20px !important;
-  font-family: 'Roboto', sans-serif !important;
-  margin: 16px 0 0 !important;
-  outline: none !important;
-  padding: 8px 32px !important;
-  text-transform: uppercase !important;
-  width: 50% !important;
-}
-
-.i-amphtml-story-experiment-error button:active,
-.i-amphtml-story-experiment-error button:focus {
-  background-color: #f0f0f0 !important;
-  color: #222 !important;
-}
-
 .i-amphtml-story-toast {
   position: absolute !important;
   bottom: 0 !important;
