@@ -346,20 +346,13 @@ export class FixedLayer {
             }
           }
 
-          // Transferability requires element to be fixed and top or bottom to
-          // be styled with `0`. Also, do not transfer transparent
-          // elements - that's a lot of work for no benefit.  Additionally,
-          // transparent elements used for "service" needs and thus
-          // best kept in the original tree. The visibility, however, is not
-          // considered because `visibility` CSS is inherited. Also, the
-          // `height` is constrained to at most 300px. This is to avoid
-          // transfering of more substantial sections for now. Likely to be
-          // relaxed in the future.
+          // Transferability requires element to be opaque (not 100%
+          // transparent) - that's a lot of work for no benefit. Additionally,
+          // transparent elements used for "service" needs and thus best kept
+          // in the original tree. The visibility, however, is not considered
+          // because `visibility` CSS is inherited.
           const isTransferrable = isFixed && (
-            fe.forceTransfer || (
-              opacity > 0 &&
-                  offsetHeight < 300 &&
-                  (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
+            fe.forceTransfer || (opacity > 0 && !!(top || bottom)));
           if (isTransferrable) {
             hasTransferables = true;
           }
@@ -401,15 +394,6 @@ export class FixedLayer {
       // Fail silently.
       dev().error(TAG, 'Failed to mutate fixed elements:', error);
     });
-  }
-
-  /**
-   * We currently only allow elements with `top: 0` or `bottom: 0`.
-   * @param {string} s
-   * @return {boolean}
-   */
-  isAllowedCoord_(s) {
-    return (!!s && parseInt(s, 10) == 0);
   }
 
   /**
