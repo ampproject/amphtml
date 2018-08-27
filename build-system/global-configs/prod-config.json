@@ -5,9 +5,15 @@
     "ampdoc-shell",
     "disable-amp-story-desktop",
     "inabox-rov",
-    "url-replacement-v2"
+    "url-replacement-v2",
+    "linker-meta-opt-in"
   ],
-  "allow-url-opt-in": ["pump-early-frame"],
+  "allow-url-opt-in": [
+    "pump-early-frame",
+    "twitter-default-placeholder",
+    "twitter-default-placeholder-pulse",
+    "twitter-default-placeholder-fade"
+  ],
 
   "canary": 0,
   "expAdsenseA4A": 0.01,
