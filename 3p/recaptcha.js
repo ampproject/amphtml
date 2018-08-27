@@ -15,7 +15,10 @@
  */
 
 import {user} from '../src/log';
+import {listenParent, nonSensitiveDataPostMessage} from './messaging';
 import {writeScript} from './3p';
+
+const postMessageListeners = [];
 
 /**
  * Get the recaptcha script.
@@ -34,6 +37,33 @@ function getRecaptchaApiJs(global, scriptSource, cb) {
   });
 }
 
+/**
+ * Function to handle executing actions using the grecaptcha Object,
+ * and sending the token back to the parent amp-recaptcha component
+ *
+ * @param {!Window} global
+ * @param {!Object} grecaptcha
+ * @param {!String} siteKey
+ * @return {function(!JsonObject)}
+ */
+function getActionTypeHandler(global, grecaptcha, siteKey) {
+  return (data) => {
+    // TODO(torch2424) May have to get sitKey from data
+    console.log('Action type handler', 'data', data);
+
+    grecaptcha.execute(siteKey, {
+      action: data.action
+    }).then(function(token) {
+      nonSensitivePostMessage('token', {
+        token: token
+      });
+    }).catch(function(error) {
+      // TODO(torch2424)
+    });
+  };
+}
+
+
 
 /**
  * @param {!Window} global
@@ -41,12 +71,17 @@ function getRecaptchaApiJs(global, scriptSource, cb) {
  */
 export function recaptcha(global, data) {
   console.log('recaptcha is called!');
-  
+
   let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
-  recaptchaApiUrl += '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE' // TODO: Get sitekey from data
+  // TODO: Get sitekey from data
+  const siteKey = '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE';
+  recaptchaApiUrl += siteKey;
 
   getRecaptchaApiJs(global, recaptchaApiUrl, function() {
     console.log('got recaptcha!');
     console.log('recaptcha object', grecaptcha);
+    
+    const actionTypeListener = listenParent(global, 'action', getActionTypeHandler(global, grecaptcha, siteKey));
+    postMessageListeners.push(actionTypeListener);
   });
 }
