@@ -20,6 +20,13 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {toWin} from '../../../src/types';
 
+/** @const @private {string} */
+const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
+
+/** @const @private {string} */
+const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
+
+
 /** @type {boolean|undefined} */
 let reportValiditySupported;
 
@@ -221,24 +228,21 @@ export class AbstractCustomValidator extends FormValidator {
   }
 
   /**
-   * Returns the first validation element for a given input.
    * @param {!Element} input
-   * @param {string=} opt_invalidType Only return this validation type.
-   * @param {boolean=} opt_visible Only return a visible element.
+   * @param {string=} invalidType
    * @return {?Element}
    */
-  getValidationFor(input, opt_invalidType, opt_visible) {
+  getValidationFor(input, invalidType) {
     if (!input.id) {
       return null;
     }
-    let selector = `[validation-for=${input.id}]`;
-    if (opt_invalidType) {
-      selector = `[visible-when-invalid=${opt_invalidType}]` + selector;
+    const property = VALIDATION_CACHE_PREFIX + invalidType;
+    if (!(property in input)) {
+      const selector = `[visible-when-invalid=${invalidType}]`
+          + `[validation-for=${input.id}]`;
+      input[property] = this.root.querySelector(selector);
     }
-    if (opt_visible) {
-      selector = '.visible' + selector;
-    }
-    return this.root.querySelector(selector);
+    return input[property];
   }
 
   /**
@@ -253,6 +257,8 @@ export class AbstractCustomValidator extends FormValidator {
     if (!validation.textContent.trim()) {
       validation.textContent = input.validationMessage;
     }
+    input[VISIBLE_VALIDATION_CACHE] = validation;
+
     this.resources.mutateElement(input,
         () => input.setAttribute('aria-invalid', 'true'));
     this.resources.mutateElement(validation,
@@ -267,6 +273,8 @@ export class AbstractCustomValidator extends FormValidator {
     if (!visibleValidation) {
       return;
     }
+    delete input[VISIBLE_VALIDATION_CACHE];
+
     this.resources.mutateElement(input,
         () => input.removeAttribute('aria-invalid'));
     this.resources.mutateElement(visibleValidation,
@@ -278,7 +286,7 @@ export class AbstractCustomValidator extends FormValidator {
    * @return {?Element}
    */
   getVisibleValidationFor(input) {
-    return this.getValidationFor(input, undefined, /* opt_visible */ true);
+    return input[VISIBLE_VALIDATION_CACHE];
   }
 
   /**
