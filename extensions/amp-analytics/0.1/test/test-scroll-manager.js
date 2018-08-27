@@ -77,18 +77,18 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
 
   it('should add a viewport onChanged listener with scroll handlers, '
     + 'and dispose when there are none', () => {
-      expect(scrollManager.viewportOnChangedUnlistenDef_).to.not.be.ok;
-      
-      const fn1 = sandbox.stub()
-      scrollManager.addScrollHandler(fn1);
+    expect(scrollManager.viewportOnChangedUnlistenDef_).to.not.be.ok;
 
-      expect(scrollManager.viewportOnChangedUnlistenDef_).to.be.ok;
-      const unlistenStub = scrollManager.viewportOnChangedUnlistenDef_;
+    const fn1 = sandbox.stub();
+    scrollManager.addScrollHandler(fn1);
 
-      scrollManager.removeScrollHandler(fn1);
+    expect(scrollManager.viewportOnChangedUnlistenDef_).to.be.ok;
+    const unlistenStub = scrollManager.viewportOnChangedUnlistenDef_;
 
-      expect(scrollManager.viewportOnChangedUnlistenDef_).to.not.be.ok;
-      expect(unlistenStub).to.have.callCount(1);
+    scrollManager.removeScrollHandler(fn1);
+
+    expect(scrollManager.viewportOnChangedUnlistenDef_).to.not.be.ok;
+    expect(unlistenStub).to.have.callCount(1);
   });
 
   it('fires on scroll', () => {

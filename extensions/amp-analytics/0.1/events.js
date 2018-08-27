@@ -422,9 +422,9 @@ export class ScrollEventTracker extends EventTracker {
 
     /** @private {!./analytics-root.AnalyticsRoot} root */
     this.root_ = root;
-    
+
     /** @private {function(!Object)|null} */
-    this.scrollHandler_ = null
+    this.scrollHandler_ = null;
   }
 
   /** @override */
@@ -460,35 +460,34 @@ export class ScrollEventTracker extends EventTracker {
    * Function to return a Scroll Handler Function instance
    * @param {!JsonObject} config
    * @param {function(!AnalyticsEvent)} listener
-   * @return {function(!Object)} 
+   * @return {function(!Object)}
    * @private
    */
   getScrollHandler_(config, listener) {
 
     const boundsV = this.normalizeBoundaries_(
-      config['scrollSpec']['verticalBoundaries']
+        config['scrollSpec']['verticalBoundaries']
     );
     const boundsH = this.normalizeBoundaries_(
-      config['scrollSpec']['horizontalBoundaries']
+        config['scrollSpec']['horizontalBoundaries']
     );
 
 
-    return (e) => {
+    return e => {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       this.triggerScrollEvents_(boundsV,
-        (e.top + e.screenHeight) * 100 / e.height,
-        VAR_V_SCROLL_BOUNDARY, 
-        listener
+          (e.top + e.screenHeight) * 100 / e.height,
+          VAR_V_SCROLL_BOUNDARY,
+          listener
       );
       this.triggerScrollEvents_(boundsH,
-        (e.left + e.screenWidth) * 100 / e.width,
-        VAR_H_SCROLL_BOUNDARY, 
-        listener
+          (e.left + e.screenWidth) * 100 / e.width,
+          VAR_H_SCROLL_BOUNDARY,
+          listener
       );
-    }
+    };
   }
-
 
   /**
    * Rounds the boundaries for scroll trigger to nearest
@@ -519,7 +518,7 @@ export class ScrollEventTracker extends EventTracker {
     }
     return result;
   }
-  
+
   /**
    * @param {!Object<number, boolean>} bounds
    * @param {number} scrollPos Number representing the current scroll
@@ -546,11 +545,11 @@ export class ScrollEventTracker extends EventTracker {
       const vars = Object.create(null);
       vars[varName] = b;
       listener(
-        new AnalyticsEvent(
-          this.root_.getRootElement(),
-          AnalyticsEventType.SCROLL,
-          vars
-        )
+          new AnalyticsEvent(
+              this.root_.getRootElement(),
+              AnalyticsEventType.SCROLL,
+              vars
+          )
       );
     }
   }

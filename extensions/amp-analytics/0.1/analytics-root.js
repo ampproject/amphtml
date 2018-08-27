@@ -355,18 +355,9 @@ export class AnalyticsRoot {
    */
   getScrollManager() {
     if (!this.scrollManager_) {
-      this.scrollManager_ = this.createScrollManager();
+      this.scrollManager_ = new ScrollManager(this.ampdoc);
     }
 
-    return this.scrollManager_;
-  }
-
-  /**
-   * @return {!./scroll-manager.ScrollManager}
-   * @protected
-   */
-  createScrollManager() {
-    this.scrollManager_ = new ScrollManager(this.ampdoc);
     return this.scrollManager_;
   }
 }

@@ -51,8 +51,8 @@ export class ScrollManager {
 
     /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
-    
-    /** @const @private {!UnlistenDef|null} */
+
+    /** @private {!UnlistenDef|null} */
     this.viewportOnChangedUnlistenDef_ = null;
   }
 
@@ -63,13 +63,13 @@ export class ScrollManager {
     this.scrollObservable_.removeAll();
     this.removeViewportOnChangedListener_();
   }
-  
+
   /**
    * @param {function(!Object)} handler
    */
   removeScrollHandler(handler) {
     this.scrollObservable_.remove(handler);
-    
+
     if (this.scrollObservable_.getHandlerCount() <= 0) {
       this.removeViewportOnChangedListener_();
     }
@@ -139,7 +139,8 @@ export class ScrollManager {
    * @private
    */
   addViewportOnChangedListener_() {
-    this.viewportOnChangedUnlistenDef_ = this.viewport_.onChanged(this.onScroll_.bind(this));
+    this.viewportOnChangedUnlistenDef_ =
+      this.viewport_.onChanged(this.onScroll_.bind(this));
   }
 
 }
