@@ -101,6 +101,11 @@ export class FormValidator {
    */
   onInput(unusedEvent) {}
 
+  /** @return {!Nodelist} */
+  inputs() {
+    return this.form.querySelectorAll('input,select,textarea');
+  }
+
   /**
    * Fires a valid/invalid event from the form if its validity state
    * has changed since the last invocation of this function.
@@ -146,7 +151,7 @@ export class PolyfillDefaultValidator extends FormValidator {
 
   /** @override */
   report() {
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         inputs[i]./*REVIEW*/focus();
@@ -193,12 +198,6 @@ export class AbstractCustomValidator extends FormValidator {
    */
   constructor(form) {
     super(form);
-
-    /** @private @const {!Object<string, ?Element>} */
-    this.inputValidationsDict_ = {};
-
-    /** @private @const {!Object<string, ?Element>} */
-    this.inputVisibleValidationDict_ = {};
   }
 
   /**
@@ -215,27 +214,30 @@ export class AbstractCustomValidator extends FormValidator {
    * Hides all validation messages.
    */
   hideAllValidations() {
-    for (const id in this.inputVisibleValidationDict_) {
-      const input = this.root.getElementById(id);
+    const inputs = this.inputs();
+    inputs.forEach(input => {
       this.hideValidationFor(dev().assertElement(input));
-    }
+    });
   }
 
   /**
    * @param {!Element} input
-   * @param {string} invalidType
+   * @param {string=} opt_invalidType
+   * @param {boolean=} opt_visible
    * @return {?Element}
    */
-  getValidationFor(input, invalidType) {
+  getValidationFor(input, opt_invalidType, opt_visible) {
     if (!input.id) {
       return null;
     }
-    const selector = `[visible-when-invalid=${invalidType}]` +
-        `[validation-for=${input.id}]`;
-    if (this.inputValidationsDict_[selector] === undefined) {
-      this.inputValidationsDict_[selector] = this.root.querySelector(selector);
+    let selector = `[validation-for=${input.id}]`;
+    if (opt_invalidType) {
+      selector = `[visible-when-invalid=${opt_invalidType}]` + selector;
     }
-    return this.inputValidationsDict_[selector];
+    if (opt_visible) {
+      selector = '.visible' + selector;
+    }
+    return this.root.querySelector(selector);
   }
 
   /**
@@ -247,12 +249,9 @@ export class AbstractCustomValidator extends FormValidator {
     if (!validation) {
       return;
     }
-
     if (!validation.textContent.trim()) {
       validation.textContent = input.validationMessage;
     }
-    this.inputVisibleValidationDict_[input.id] = validation;
-
     this.resources.mutateElement(input,
         () => input.setAttribute('aria-invalid', 'true'));
     this.resources.mutateElement(validation,
@@ -267,8 +266,6 @@ export class AbstractCustomValidator extends FormValidator {
     if (!visibleValidation) {
       return;
     }
-    delete this.inputVisibleValidationDict_[input.id];
-
     this.resources.mutateElement(input,
         () => input.removeAttribute('aria-invalid'));
     this.resources.mutateElement(visibleValidation,
@@ -280,10 +277,7 @@ export class AbstractCustomValidator extends FormValidator {
    * @return {?Element}
    */
   getVisibleValidationFor(input) {
-    if (!input.id) {
-      return null;
-    }
-    return this.inputVisibleValidationDict_[input.id];
+    return this.getValidationFor(input, undefined, /* opt_visible */ true);
   }
 
   /**
@@ -327,7 +321,7 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
   /** @override */
   report() {
     this.hideAllValidations();
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         this.reportInput(inputs[i]);
@@ -353,7 +347,7 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
   report() {
     this.hideAllValidations();
     let firstInvalidInput = null;
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         firstInvalidInput = firstInvalidInput || inputs[i];
