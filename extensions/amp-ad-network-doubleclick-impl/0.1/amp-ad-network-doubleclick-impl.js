@@ -795,7 +795,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.iframe.contentWindow.document.body./*OK*/scrollHeight)
             .then(() => this.fireFluidDelayedImpression());
       }
-      return Promise.resolve(superReturn);
+      return superReturn;
     });
   }
 
