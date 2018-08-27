@@ -204,7 +204,8 @@
         ".i-amphtml-story-loaded",
         "amp-story-page#page-2[active]"
       ],
-      "loading_complete_delay_ms": 500, /* for page navigation */
+      // for page navigation
+      "loading_complete_delay_ms": 500
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-grid-layer-template-fill.html",
@@ -253,7 +254,8 @@
         ".i-amphtml-story-loaded",
         "amp-story-page#the-one-with-the-cta-layer[active]"
       ],
-      "loading_complete_delay_ms": 500, /* for page navigation */
+      // for page navigation
+      "loading_complete_delay_ms": 500
     },
     {
       "url": "examples/visual-tests/amp-story/embed-mode-1.html",
@@ -327,7 +329,8 @@
         ".i-amphtml-story-share-pill-label",
         "amp-story-page#page-2[active]"
       ],
-      "loading_complete_delay_ms": 500, /* for page navigation */
+      // for page navigation
+      "loading_complete_delay_ms": 500
     },
     {
       "flaky": true,
@@ -391,7 +394,8 @@
         ".i-amphtml-story-share-pill-label",
         "amp-story-page#the-one-with-the-cta-layer[active]"
       ],
-      "loading_complete_delay_ms": 500, /* for page navigation */
+      // for page navigation
+      "loading_complete_delay_ms": 500
     },
     {
       "flaky": true,
@@ -455,7 +459,8 @@
         ".i-amphtml-story-loaded",
         "amp-story-page#page-2[active]"
       ],
-      "loading_complete_delay_ms": 500, /* for page navigation */
+      // for page navigation
+      "loading_complete_delay_ms": 500
     },
     {
       "url": "examples/visual-tests/amp-story/share-menu.rtl.html",
@@ -504,7 +509,8 @@
         ".i-amphtml-story-share-pill-label",
         "amp-story-page#page-2[active]"
       ],
-      "loading_complete_delay_ms": 500, /* for page navigation */
+      // for page navigation
+      "loading_complete_delay_ms": 500
     },
     {
       "flaky": true,
