@@ -236,11 +236,11 @@ export class ActionService {
      *
      *     [{tagOrTarget: 'AMP', method: 'navigateTo'},
      *      {tagOrTarget: 'AMP-FORM', method: 'submit'},
-     *      {tagOrTarget: '*', method: 'show'}].
+     *      {tagOrTarget: '*', method: 'show'}]
      *
      * If not null, any actions that are not in the whitelist will be ignored
      * and throw a user error at invocation time. Note that `tagOrTarget` is
-     * always the canonical upercased form (same as
+     * always the canonical uppercased form (same as
      * `Element.prototype.tagName`). If `tagOrTarget` is the wildcard '*', then
      * the whitelisted method is allowed on any tag or target.
      * @private {?Array<{tagOrTarget: string, method: string}>}

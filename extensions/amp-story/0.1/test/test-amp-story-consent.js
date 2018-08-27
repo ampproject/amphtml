@@ -231,9 +231,12 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     storyConsent.buildCallback();
 
     expect(addToWhitelistStub).to.have.callCount(3);
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.prompt');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.reject');
+    expect(addToWhitelistStub).to.have.been.calledWith(
+        {tagOrTarget: 'AMP-CONSENT', method: 'accept'});
+    expect(addToWhitelistStub).to.have.been.calledWith(
+        {tagOrTarget: 'AMP-CONSENT', method: 'prompt'});
+    expect(addToWhitelistStub).to.have.been.calledWith(
+        {tagOrTarget: 'AMP-CONSENT', method: 'reject'});
   });
 
   it('should broadcast the amp actions', () => {

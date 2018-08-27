@@ -1411,7 +1411,7 @@ describes.realWin('Action whitelisting', {
         '"AMP.print" is not whitelisted [].');
   });
 
-  it('should ignore unparsable whitelist entries', () => {
+  it('should ignore unparseable whitelist entries', () => {
     const meta = createElementWithAttributes(env.win.document, 'meta', {
       name: 'amp-action-whitelist',
       content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',

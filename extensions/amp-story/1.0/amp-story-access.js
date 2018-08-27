@@ -243,6 +243,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
    */
   whitelistAction_(namespace = undefined, type = undefined) {
     const action = ['login', namespace, type].filter(s => !!s).join('-');
-    this.actions_.addToWhitelist(`SCRIPT.${action}`);
+    this.actions_.addToWhitelist({tagOrTarget: 'SCRIPT', method: action});
   }
 }
