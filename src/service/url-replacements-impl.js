@@ -581,6 +581,9 @@ export class GlobalVariableSource extends VariableSource {
   addReplaceParamsIfMissing_(orig) {
     const {replaceParams} =
     /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
+    if (!replaceParams) {
+      return orig;
+    }
     const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
     const params = parseQueryString(url.search);
     return addParamsToUrl(removeSearch(orig),
@@ -649,7 +652,7 @@ export class GlobalVariableSource extends VariableSource {
     if (typeof params[key] !== 'undefined') {
       return params[key];
     }
-    if (typeof replaceParams[key] !== 'undefined') {
+    if (replaceParams && typeof replaceParams[key] !== 'undefined') {
       return /** @type {string} */(replaceParams[key]);
     }
     return defaultValue;
