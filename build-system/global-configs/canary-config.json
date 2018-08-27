@@ -7,7 +7,12 @@
     "inabox-rov",
     "url-replacement-v2"
   ],
-  "allow-url-opt-in": ["pump-early-frame"],
+  "allow-url-opt-in": [
+    "pump-early-frame",
+    "twitter-default-placeholder",
+    "twitter-default-placeholder-pulse",
+    "twitter-default-placeholder-fade"
+  ],
 
   "canary": 1,
   "expAdsenseA4A": 0.01,
