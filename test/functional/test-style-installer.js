@@ -44,6 +44,7 @@ describe('Styles', () => {
       resources = Services.resourcesForDoc(ampdoc);
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
+      styles.setmadeVisibleForTesting(false);
     });
 
     it('should work with waitForService=false', () => {

@@ -23,7 +23,6 @@ import {waitForServices} from './render-delaying-services';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';
-const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
 
 
 /**
@@ -223,6 +222,20 @@ function maybeTransform(cssRoot, cssText) {
   return transformer ? transformer(cssText) : cssText;
 }
 
+/**
+ * Create variable so that code contained in makeBodyVisible can early exit
+ * after the first call.
+ * @private {boolean}
+ */
+let madeVisible = false;
+
+/**
+ * @visibleForTesting
+ * @param {boolean} value
+ */
+export function setmadeVisibleForTesting(value) {
+  madeVisible = value;
+}
 
 /**
  * Sets the document's body opacity to 1.
@@ -235,11 +248,11 @@ function maybeTransform(cssRoot, cssText) {
 export function makeBodyVisible(doc, opt_waitForServices) {
   dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
-  if (win[bodyVisibleSentinel]) {
+  if (madeVisible) {
     return;
   }
   const set = () => {
-    win[bodyVisibleSentinel] = true;
+    madeVisible = true;
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
@@ -249,10 +262,10 @@ export function makeBodyVisible(doc, opt_waitForServices) {
   };
   try {
     waitForBody(doc, () => {
-      if (win[bodyVisibleSentinel]) {
+      if (madeVisible) {
         return;
       }
-      win[bodyVisibleSentinel] = true;
+      madeVisible = true;
       if (opt_waitForServices) {
         waitForServices(win).catch(reason => {
           rethrowAsync(reason);
@@ -300,10 +313,10 @@ function renderStartedNoInline(doc) {
 
 /**
  * Indicates that the body is always visible. For instance, in case of PWA.
- * @param {!Window} win
+ * @param {!Window} unusedWin
  */
-export function bodyAlwaysVisible(win) {
-  win[bodyVisibleSentinel] = true;
+export function bodyAlwaysVisible(unusedWin) {
+  madeVisible = true;
 }
 
 
