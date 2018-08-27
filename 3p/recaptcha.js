@@ -18,6 +18,7 @@ import {user} from '../src/log';
 import {listenParent, nonSensitiveDataPostMessage} from './messaging';
 import {writeScript} from './3p';
 
+/** @const {Array<function>} */
 const postMessageListeners = [];
 
 /**
@@ -48,40 +49,41 @@ function getRecaptchaApiJs(global, scriptSource, cb) {
  */
 function getActionTypeHandler(global, grecaptcha, siteKey) {
   return (data) => {
-    // TODO(torch2424) May have to get sitKey from data
-    console.log('Action type handler', 'data', data);
-
     grecaptcha.execute(siteKey, {
       action: data.action
     }).then(function(token) {
       nonSensitivePostMessage('token', {
         token: token
       });
-    }).catch(function(error) {
-      // TODO(torch2424)
+    }).catch(function(err) {
+      user().error('reCAPTCHA', err);
+      nonSensitiveDataPostMessage('error', dict({
+        'error': (err || '').toString(),
+      }));
     });
   };
 }
-
-
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function recaptcha(global, data) {
-  console.log('recaptcha is called!');
+  user().assert(
+    data.sitekey,
+    'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+    data.element
+  );
 
   let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
-  // TODO: Get sitekey from data
-  const siteKey = '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE';
+  const siteKey = data.sitekey;
   recaptchaApiUrl += siteKey;
 
   getRecaptchaApiJs(global, recaptchaApiUrl, function() {
-    console.log('got recaptcha!');
-    console.log('recaptcha object', grecaptcha);
-    
-    const actionTypeListener = listenParent(global, 'action', getActionTypeHandler(global, grecaptcha, siteKey));
-    postMessageListeners.push(actionTypeListener);
+    grecaptcha.ready(function() {
+      const actionTypeListener = listenParent(global, 'action', getActionTypeHandler(global, grecaptcha, siteKey));
+      postMessageListeners.push(actionTypeListener);
+      nonSensitiveDataPostMessage('ready');
+    });
   });
 }
