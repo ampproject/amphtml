@@ -229,15 +229,10 @@ function maybeTransform(cssRoot, cssText) {
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.
  * @param {!Document} doc The document who's body we should make visible.
- * @param {boolean=} opt_waitForServices Whether the body visibility should
- *     be blocked on key services being loaded.
  */
-export function makeBodyVisible(doc, opt_waitForServices) {
+export function makeBodyVisible(doc) {
   dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
-  if (win[bodyVisibleSentinel]) {
-    return;
-  }
   const set = () => {
     win[bodyVisibleSentinel] = true;
     setStyles(dev().assertElement(doc.body), {
@@ -249,29 +244,21 @@ export function makeBodyVisible(doc, opt_waitForServices) {
   };
   try {
     waitForBody(doc, () => {
-      if (win[bodyVisibleSentinel]) {
-        return;
-      }
-      win[bodyVisibleSentinel] = true;
-      if (opt_waitForServices) {
-        waitForServices(win).catch(reason => {
-          rethrowAsync(reason);
-          return [];
-        }).then(services => {
-          set();
-          if (services.length > 0) {
-            Services.resourcesForDoc(doc)./*OK*/schedulePass(
-                1, /* relayoutAll */ true);
-          }
-          try {
-            const perf = Services.performanceFor(win);
-            perf.tick('mbv');
-            perf.flush();
-          } catch (e) {}
-        });
-      } else {
+      waitForServices(win).catch(reason => {
+        rethrowAsync(reason);
+        return [];
+      }).then(services => {
         set();
-      }
+        if (services.length > 0) {
+          Services.resourcesForDoc(doc)./*OK*/schedulePass(
+              1, /* relayoutAll */ true);
+        }
+        try {
+          const perf = Services.performanceFor(win);
+          perf.tick('mbv');
+          perf.flush();
+        } catch (e) {}
+      });
     });
   } catch (e) {
     // If there was an error during the logic above (such as service not
@@ -281,6 +268,25 @@ export function makeBodyVisible(doc, opt_waitForServices) {
     // often called as a last resort.
     rethrowAsync(e);
   }
+}
+
+/**
+ * Set the document's body opacity to 1. Called in error cases.
+ * @param {!Document} doc The document who's body we should make visible.
+ */
+export function makeBodyVisibleRecovery(doc) {
+  dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
+  const win = /** @type {!Window} */ (doc.defaultView);
+  if (win[bodyVisibleSentinel]) {
+    return;
+  }
+
+  win[bodyVisibleSentinel] = true;
+  setStyles(dev().assertElement(doc.body), {
+    opacity: 1,
+    visibility: 'visible',
+    'animation': 'none',
+  });
 }
 
 
