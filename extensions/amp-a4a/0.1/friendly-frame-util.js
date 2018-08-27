@@ -34,7 +34,7 @@ import {setStyle} from '../../../src/style';
  * @param {!./amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata Metadata
  *   for the creative. Contains information like required extensions, fonts, and
  *   of course the creative itself.
- * @return {!Element} The iframe into which the creative was rendered.
+ * @return {!Promise<!Element>} The iframe into which the creative was rendered.
  */
 export function renderCreativeIntoFriendlyFrame(
   adUrl, size, element, creativeMetadata) {

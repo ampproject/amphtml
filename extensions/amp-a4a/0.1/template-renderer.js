@@ -20,6 +20,17 @@ import {getAmpAdTemplateHelper} from './template-validator';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
+ * @typedef {{
+ *   size: ./amp-ad-type-defs.LayoutInfoDef,
+ *   adUrl: string,
+ *   creativeMetadata: ./amp-ad-type-defs.CreativeMetaDataDef,
+ *   templateData: ./amp-ad-type-defs.AmpTemplateCreativeDef,
+ * }}
+ */
+export let CreativeData;
+
+
+/**
  * Render AMP creative into FriendlyFrame via templatization.
  */
 export class TemplateRenderer extends Renderer {
