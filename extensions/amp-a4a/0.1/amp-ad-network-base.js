@@ -156,7 +156,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * Processes the ad response as soon as the XHR request returns.
-   * @param {?../../../src/utils/xhr-util.FetchResponse} response
+   * @param {?../../../src/utils/xhr-utils.FetchResponse} response
    * @return {!Promise}
    * @private
    */
