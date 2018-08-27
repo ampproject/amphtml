@@ -162,7 +162,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       const attributeName = attribute.name.toLowerCase();
       const propertyName = SUPPORTED_CSS_GRID_ATTRIBUTES[attributeName];
       if (propertyName) {
-        setStyle(element, propertyName, attribute.value);
+        setStyle(element, /*OK*/propertyName, attribute.value);
         element.removeAttribute(attributeName);
       }
     }

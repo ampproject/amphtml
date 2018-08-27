@@ -263,8 +263,8 @@ export class PageScalingService {
         scalableElements(page).forEach((el, i) => {
           // `border-box` required since layer now has a width/height set.
           setImportantStyles(el, {'box-sizing': 'border-box'});
-          setImportantStyles(el,
-              this.scalingStyles(targetDimensions, scalableElsDimensions[i]));
+          setImportantStyles(el, /*OK*/this.scalingStyles(
+              targetDimensions, scalableElsDimensions[i]));
         });
         markScalingApplied(page);
       },

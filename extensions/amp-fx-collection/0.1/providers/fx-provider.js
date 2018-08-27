@@ -66,7 +66,7 @@ export class FxProvider {
     new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.ampdoc_, this.fxType_);
-    setStyles(element, installStyles(element, this.fxType_));
+    setStyles(element, /*OK*/installStyles(element, this.fxType_));
   }
 }
 

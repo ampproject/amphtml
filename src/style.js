@@ -98,9 +98,10 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
  * @param {!Object<string, *>} styles
  */
 export function setImportantStyles(element, styles) {
+  const {style} = element;
   for (const k in styles) {
-    element.style.setProperty(
-        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+    style.setProperty(
+        getVendorJsPropertyName(style, k), styles[k].toString(), 'important');
   }
 }
 
@@ -148,7 +149,7 @@ export function getStyle(element, property, opt_bypassCache) {
  */
 export function setStyles(element, styles) {
   for (const k in styles) {
-    setStyle(element, k, styles[k]);
+    setStyle(element, /*OK*/k, styles[k]);
   }
 }
 
@@ -160,9 +161,14 @@ export function setStyles(element, styles) {
  */
 export function toggle(element, opt_display) {
   if (opt_display === undefined) {
-    opt_display = getStyle(element, 'display') == 'none';
+    opt_display = element.hasAttribute('hidden') ||
+        getStyle(element, 'display') === 'none';
   }
-  setStyle(element, 'display', opt_display ? '' : 'none');
+  if (opt_display) {
+    element.removeAttribute('hidden');
+  } else {
+    element.setAttribute('hidden', '');
+  }
 }
 
 
@@ -270,9 +276,7 @@ export function computedStyle(win, el) {
  * @param {!Array<string>} properties
  */
 export function resetStyles(element, properties) {
-  const styleObj = {};
-  properties.forEach(prop => {
-    styleObj[prop] = null;
-  });
-  setStyles(element, styleObj);
+  for (let i = 0; i < properties.length; i++) {
+    setStyle(element, /*OK*/properties[i], null);
+  }
 }

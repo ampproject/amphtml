@@ -197,7 +197,7 @@ class AnimationRunner {
 
     return this.firstFrameProps_.then(firstFrameProps =>
       this.vsync_.mutatePromise(() => {
-        setStyles(this.target_, firstFrameProps);
+        setStyles(this.target_, /*OK*/omit(firstFrameProps, ['display']));
       }));
   }
 

@@ -252,7 +252,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       },
       mutate: () => {
         this.bodySyncScheduled_ = false;
-        setImportantStyles(this.wrapper_, inheritStyles);
+        setImportantStyles(this.wrapper_, /*OK*/inheritStyles);
       },
     });
   }

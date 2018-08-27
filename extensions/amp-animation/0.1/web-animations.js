@@ -126,7 +126,7 @@ export class WebAnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        setStyles(request.target, request.vars);
+        setStyles(request.target, /*OK*/request.vars);
       }
       const player = request.target.animate(request.keyframes, request.timing);
       player.pause();
