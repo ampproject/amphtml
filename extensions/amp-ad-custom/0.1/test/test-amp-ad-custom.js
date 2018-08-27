@@ -18,7 +18,7 @@ import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   getAmpAdTemplateHelper,
 } from '../../../amp-a4a/0.1/template-validator';
-import {AmpAdTemplate} from '../../../amp-a4a/0.1/amp-ad-template';
+import {AmpAdTemplate} from '../amp-ad-custom';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {data} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
 import {tryParseJson} from '../../../../src/json';
