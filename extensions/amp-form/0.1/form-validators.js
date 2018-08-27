@@ -101,7 +101,7 @@ export class FormValidator {
    */
   onInput(unusedEvent) {}
 
-  /** @return {!Nodelist} */
+  /** @return {!NodeList} */
   inputs() {
     return this.form.querySelectorAll('input,select,textarea');
   }
@@ -215,15 +215,16 @@ export class AbstractCustomValidator extends FormValidator {
    */
   hideAllValidations() {
     const inputs = this.inputs();
-    inputs.forEach(input => {
-      this.hideValidationFor(dev().assertElement(input));
-    });
+    for (let i = 0; i < inputs.length; i++) {
+      this.hideValidationFor(dev().assertElement(inputs[i]));
+    }
   }
 
   /**
+   * Returns the first validation element for a given input.
    * @param {!Element} input
-   * @param {string=} opt_invalidType
-   * @param {boolean=} opt_visible
+   * @param {string=} opt_invalidType Only return this validation type.
+   * @param {boolean=} opt_visible Only return a visible element.
    * @return {?Element}
    */
   getValidationFor(input, opt_invalidType, opt_visible) {
