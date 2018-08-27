@@ -68,7 +68,7 @@ amp-carousel[controls] .amp-carousel-button,
 
 .i-amphtml-carousel-button-prev-new {
   background-color: transparent;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"><path  d="M14,7.4 L9.4,12 L14,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M14,7.4 L9.4,12 L14,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
   filter: drop-shadow(0px 1px 2px #4a4a4a);
 }
 
@@ -79,7 +79,7 @@ amp-carousel[controls] .amp-carousel-button,
 
 .i-amphtml-carousel-button-next-new {
   background-color: transparent;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"><path  d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
   filter: drop-shadow(0px 1px 2px #4a4a4a);
 };
 
