@@ -527,7 +527,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[2].className).to.not.contain('visible');
     });
 
-    it('should report on interaction for active inputs on submit', () => {
+    it('should report on interaction for non-active inputs on submit', () => {
       validator.report();
 
       expect(doc.activeElement).to.equal(form.elements[0]);
