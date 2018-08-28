@@ -135,19 +135,25 @@ describes.realWin('amp-pan-zoom', {
       expect(impl.startY_).to.equal(0);
       expect(impl.sourceWidth_).to.equal(100);
       expect(impl.sourceHeight_).to.equal(100);
-      expect(impl.yOffsetFromCenter_).to.equal(0);
-      expect(impl.xOffsetFromCenter_).to.equal(0);
     });
   });
 
   it('should update pan and zoom bounds correctly', () => {
-    return getPanZoom().then(() => el.layoutCallback()).then(() => {
+    return getPanZoom().then(() => {
+      el.getBoundingClientRect = () => {
+        return {
+          'top': 0,
+          'left': 0,
+          'height': 400,
+          'width': 300,
+        };
+      };
+      return el.layoutCallback();
+    }).then(() => {
       expect(impl.elementBox_.height).to.equal(400);
       expect(impl.elementBox_.width).to.equal(300);
       expect(impl.contentBox_.height).to.equal(300);
       expect(impl.contentBox_.width).to.equal(300);
-      expect(impl.yOffsetFromCenter_).to.equal(0);
-      expect(impl.xOffsetFromCenter_).to.equal(0);
 
       expect(impl.minX_).to.equal(0);
       expect(impl.maxX_).to.equal(0);
@@ -172,48 +178,6 @@ describes.realWin('amp-pan-zoom', {
     });
   });
 
-  it('should measure initial y offset correctly', () => {
-    return getPanZoom({
-      'style': 'display: initial',
-    }).then(() => {
-      el.getBoundingClientRect = () => {
-        return {
-          'top': 0,
-          'left': 0,
-          'height': 400,
-          'width': 300,
-        };
-      };
-      return el.layoutCallback();
-    }).then(() => {
-      expect(impl.xOffsetFromCenter_).to.equal(0);
-      // 0 - (400 - 300) / 2
-      expect(impl.yOffsetFromCenter_).to.equal(-50);
-    });
-  });
-
-  it('should measure initial x offset correctly', () => {
-    return getPanZoom({
-      'style': 'display: initial',
-      'height': '300',
-      'width': '400',
-    }).then(() => {
-      el.getBoundingClientRect = () => {
-        return {
-          'top': 0,
-          'left': 0,
-          'height': 300,
-          'width': 400,
-        };
-      };
-      return el.layoutCallback();
-    }).then(() => {
-      // 0 - (400 - 300) / 2
-      expect(impl.xOffsetFromCenter_).to.equal(-50);
-      expect(impl.yOffsetFromCenter_).to.equal(0);
-    });
-  });
-
   it('should correctly update pan zoom bounds with y offset', () => {
     return getPanZoom({
       'style': 'display: initial',
@@ -228,10 +192,6 @@ describes.realWin('amp-pan-zoom', {
       };
       return el.layoutCallback();
     }).then(() => {
-      expect(impl.xOffsetFromCenter_).to.equal(0);
-      // 0 - (400 - 300) / 2
-      expect(impl.yOffsetFromCenter_).to.equal(-50);
-
       expect(impl.minY_).to.equal(0);
       expect(impl.maxY_).to.equal(0);
 
