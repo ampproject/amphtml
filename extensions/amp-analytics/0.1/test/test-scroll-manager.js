@@ -23,7 +23,6 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
   let ampdoc;
   let root;
   let body, target, child, other;
-
   let scrollManager;
   let fakeViewport;
 
