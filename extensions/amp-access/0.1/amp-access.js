@@ -220,9 +220,9 @@ export class AccessService {
     // Only re-authorize sections if authorization already fired, otherwise
     // just wait and existing callback will cover new sections.
     if (this.firstAuthorizationsCompleted_) {
+      const target = dev().assertElement(event.target);
       // Guard against anything else in flight.
       return this.lastAuthorizationPromises_.then(() => {
-        const target = dev().assertElement(event.target);
         const responses = this.combinedResponses();
         this.applyAuthorizationToRoot_(target, responses);
       });
