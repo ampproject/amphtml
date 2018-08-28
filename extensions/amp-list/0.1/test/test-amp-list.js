@@ -88,7 +88,8 @@ describes.realWin('amp-list component', {
    * @return {!Promise}
    */
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
-    viewerMock.expects('canRenderTemplates').returns(false).twice();
+    viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+        .returns(false).twice();
     listMock.expects('fetch_')
         .withExactArgs(opts.expr || DEFAULT_LIST_OPTS.expr)
         .returns(Promise.resolve(fetched))
@@ -132,7 +133,7 @@ describes.realWin('amp-list component', {
     viewerMock.expects('hasCapability')
         .withExactArgs('viewerRenderTemplate').returns(true).twice();
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'viewerCanRenderTemplate',
+        'viewerRenderTemplate',
         {
           'ampComponent': {
             'errorTemplate': {'payload': null, 'type': 'amp-mustache'},
@@ -454,7 +455,8 @@ describes.realWin('amp-list component', {
 
     it('should show placeholder on fetch failure (w/o fallback)', () => {
       // Stub fetch_() to fail.
-      viewerMock.expects('canRenderTemplates').returns(false).twice();
+      viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+          .returns(false).twice();
       listMock.expects('fetch_').returns(Promise.reject()).once();
       listMock.expects('toggleLoading').withExactArgs(false).once();
       listMock.expects('togglePlaceholder').never();
@@ -508,7 +510,8 @@ describes.realWin('amp-list component', {
         },
       };
       setBindService(bind);
-      viewerMock.expects('canRenderTemplates').returns(false).twice();
+      viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+          .returns(false).twice();
     });
 
     it('should _not_ refetch if [src] attr changes (before layout)', () => {

@@ -65,7 +65,7 @@ export class SsrTemplateHelper {
   /**
    * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
-   * @param {!./service/xhr-impl.FetchDef} fetchDef The fetch/XHR related data.
+   * @param {!./service/xhr-impl.FetchRequestDef} request The fetch/XHR related data.
    * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.
@@ -73,7 +73,7 @@ export class SsrTemplateHelper {
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
   fetchAndRenderTemplate(
-    element, fetchDef, opt_templates = null, opt_attributes = {}) {
+    element, request, opt_templates = null, opt_attributes = {}) {
     let mustacheTemplate;
     if (!opt_templates) {
       const template = this.templates_.maybeFindTemplate(element);
@@ -87,7 +87,7 @@ export class SsrTemplateHelper {
     return this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate',
         this.buildPayload_(
-            fetchDef,
+            request,
             mustacheTemplate,
             opt_templates,
             opt_attributes
@@ -95,7 +95,7 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * @param {!./service/xhr-impl.FetchDef} fetchDef
+   * @param {!./service/xhr-impl.FetchRequestDef} request
    * @param {string|undefined} mustacheTemplate
    * @param {?SsrTemplateDef=} opt_templates
    * @param {!Object=} opt_attributes
@@ -103,7 +103,7 @@ export class SsrTemplateHelper {
    * @private
    */
   buildPayload_(
-    fetchDef, mustacheTemplate, opt_templates, opt_attributes = {}) {
+    request, mustacheTemplate, opt_templates, opt_attributes = {}) {
     const ampComponent = dict({
       'type': this.sourceComponent_,
       'successTemplate': {
@@ -121,18 +121,18 @@ export class SsrTemplateHelper {
     });
     const data = dict({
       'originalRequest':
-          toStructuredCloneable(fetchDef.xhrUrl, fetchDef.fetchOpt),
+          toStructuredCloneable(request.xhrUrl, request.fetchOpt),
       'ampComponent': ampComponent,
     });
-    data['successTemplate'] = opt_templates
-      ? this.xmls_.serializeToString(opt_templates['successTemplate'])
-      : mustacheTemplate;
-    data['errorTemplate'] = opt_templates
-      ? this.xmls_.serializeToString(opt_templates['errorTemplate'])
-      : null;
 
-    return this.viewer_.sendMessageAwaitResponse(
-        'viewerRenderTemplate', data);
+    const additionalAttr = opt_attributes && Object.keys(opt_attributes);
+    if (additionalAttr) {
+      Object.keys(opt_attributes).forEach(key => {
+        data[key] = opt_attributes[key];
+      });
+    }
+
+    return data;
   }
 
   /**

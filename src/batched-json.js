@@ -68,7 +68,7 @@ export function batchFetchJsonFor(
  * @param {!Element} element
  * @param {!UrlReplacementPolicy} opt_urlReplacement If ALL, replaces all URL
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
- * @return {!Promise<!./service/xhr-impl.FetchDef>}
+ * @return {!Promise<!./service/xhr-impl.FetchRequestDef>}
  */
 export function requestForBatchFetch(
   ampdoc,
