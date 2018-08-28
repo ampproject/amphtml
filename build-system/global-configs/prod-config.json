@@ -42,6 +42,7 @@
   "amp-consent": 1,
   "amp-img-native-srcset": 1,
   "amp-story-v1": 1,
+  "amp-carousel-scroll-snap": 0.01,
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01,
   "font-display-swap": 1,
