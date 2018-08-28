@@ -19,7 +19,7 @@ import {dict} from '../src/utils/object';
 import {user} from '../src/log';
 import {writeScript} from './3p';
 
-/** @const {!String} */
+/** @const {string} */
 const TAG = 'RECAPTCHA';
 
 /** {!IframeMessaginClient|null} **/
@@ -59,12 +59,12 @@ function actionTypeHandler(grecaptcha, siteKey, data) {
   grecaptcha.execute(siteKey, {
     action: data.action,
   })./*OK*/then(function(token) {
-    iframeMessagingClient.sendMessage('token', {
+    iframeMessagingClient./*OK*/sendMessage('token', {
       token,
     });
   }).catch(function(err) {
     user().error(TAG, err);
-    iframeMessagingClient.sendMessage('error', dict({
+    iframeMessagingClient./*OK*/sendMessage('error', dict({
       'error': (err || '').toString(),
     }));
   });
@@ -76,9 +76,10 @@ function actionTypeHandler(grecaptcha, siteKey, data) {
  */
 export function recaptcha(global, data) {
   user().assert(
-    data.sitekey,
-    TAG + ' The data-sitekey attribute is required for <amp-recaptcha-input> %s',
-    data.element
+      data.sitekey,
+      TAG +
+      ' The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+      data.element
   );
 
   let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
@@ -93,7 +94,7 @@ export function recaptcha(global, data) {
           'action',
           actionTypeHandler.bind(this, grecaptcha, siteKey)
       );
-      iframeMessagingClient.sendMessage('ready');
+      iframeMessagingClient./*OK*/sendMessage('ready');
     });
   });
 }

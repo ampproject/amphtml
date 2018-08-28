@@ -330,6 +330,7 @@ data.headerBackgroundColor;
 data.bodyBackgroundColor;
 data.data.fontColor;
 data.width;
+data.sitekey;
 
 // 3p code
 var twttr;
