@@ -22,7 +22,7 @@
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
-  z-index: 100003 !important;
+  z-index: 100005 !important; /** Above amp-story-access. */
 }
 
 /** Black opacity overlay. */
@@ -52,12 +52,8 @@
   border-radius: 8px 8px 0 0 !important;
   color: rgba(0, 0, 0, 0.87) !important;
   font-family: 'Roboto', sans-serif !important;
-  text-align: left !important;
+  text-align: start !important;
   overflow: hidden !important;
-}
-
-[dir=rtl] .i-amphtml-story-consent-container {
-  text-align: right !important;
 }
 
 .i-amphtml-story-consent-fullbleed .i-amphtml-story-consent-container {

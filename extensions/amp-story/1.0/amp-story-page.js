@@ -23,6 +23,10 @@
  * </amp-story>
  * </code>
  */
+import {
+  Action,
+  getStoreService,
+} from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {
   AnimationManager,
@@ -33,7 +37,6 @@ import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
-import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
 import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
@@ -131,6 +134,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -288,6 +294,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       this.advancement_.start();
       this.maybeStartAnimations();
+      this.checkPageHasAudio_();
       this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -311,9 +318,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
-    return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
+    return this.maybeApplyFirstAnimationFrame();
   }
-
 
   /**
    * @return {!Promise}
@@ -561,14 +567,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.animationManager_.applyFirstFrame();
   }
 
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  scale_() {
-    const storyEl = dev().assertElement(this.element.parentNode);
-    return PageScalingService.for(storyEl).scale(this.element);
-  }
 
   /**
    * @return {number} The distance from the current page to the active page.
@@ -592,7 +590,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
       this.preloadAllMedia_();
-      this.scale_();
     }
   }
 
@@ -754,6 +751,29 @@ export class AmpStoryPage extends AMP.BaseElement {
         eventInit);
   }
 
+  /**
+  * Checks if the page has any audio.
+  * @private
+  */
+  checkPageHasAudio_() {
+    const pageHasAudio =
+      this.element.hasAttribute('background-audio') ||
+      this.element.querySelector('amp-audio') ||
+      this.hasVideoWithAudio_();
+
+    this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
+  }
+
+  /**
+  * Checks if the page has any videos with audio.
+  * @return {boolean}
+  * @private
+  */
+  hasVideoWithAudio_() {
+    const ampVideoEls = this.element.querySelectorAll('amp-video');
+    return Array.prototype.some.call(
+        ampVideoEls, video => !video.hasAttribute('noaudio'));
+  }
 
   /**
    * @private

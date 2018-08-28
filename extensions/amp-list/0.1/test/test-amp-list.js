@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
@@ -33,11 +34,13 @@ describes.realWin('amp-list component', {
   let viewerMock;
   let setBindService;
   let template;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    sandbox = env.sandbox;
 
     const templates = Services.templatesFor(win);
     templatesMock = sandbox.mock(templates);
@@ -85,6 +88,8 @@ describes.realWin('amp-list component', {
    * @return {!Promise}
    */
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
+    viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+        .returns(false).twice();
     listMock.expects('fetch_')
         .withExactArgs(opts.expr || DEFAULT_LIST_OPTS.expr)
         .returns(Promise.resolve(fetched))
@@ -128,12 +133,26 @@ describes.realWin('amp-list component', {
     viewerMock.expects('hasCapability')
         .withExactArgs('viewerRenderTemplate').returns(true).twice();
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        'viewerCanRenderTemplate',
+        'viewerRenderTemplate',
         {
-          data: {inputData: { }, src: 'https://data.com/list.json'},
-          mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml">' +
-              '{{template}}</template>',
-          'sourceAmpComponent': 'amp-list',
+          'ampComponent': {
+            'errorTemplate': {'payload': null, 'type': 'amp-mustache'},
+            'successTemplate': {
+              'payload': '<template xmlns="http://www.w3.org/1999/xhtml">{{template}}</template>',
+              'type': 'amp-mustache',
+            },
+            'type': 'amp-list',
+          },
+          'ampListAttributes': {
+            'items': 'items', 'maxItems': null, 'singleItem': null},
+          'originalRequest': {
+            'init': {
+              'headers': {'Accept': 'application/json'},
+              'method': 'GET',
+              'requireAmpResponseSourceOrigin': false,
+            },
+            'input': 'https://data.com/list.json',
+          },
         }).returns(fetch).once();
     if (opts.resetOnRefresh) {
       listMock.expects('togglePlaceholder').withExactArgs(true).once();
@@ -143,7 +162,7 @@ describes.realWin('amp-list component', {
     listMock.expects('togglePlaceholder').withExactArgs(false).once();
     const render = Promise.resolve(rendered);
     templatesMock.expects('findAndRenderTemplate')
-        .withExactArgs(element, fetched.data)
+        .withExactArgs(element, fetched.html)
         .returns(render).once(1);
 
     return Promise.all([fetch, render]);
@@ -165,14 +184,20 @@ describes.realWin('amp-list component', {
       });
     });
 
-    // TODO(alabiaga): Fix failing tests.
-    describe.skip('Viewer render template', () => {
+    describe('Viewer render template', () => {
       it('should proxy rendering to viewer', () => {
-        const resp = {data: '<div>Rendered template</div>'};
+        const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
+        const fromStructuredCloneable =
+            sandbox.spy(xhrUtils, 'fromStructuredCloneable');
+        const verifyAmpCORSHeaders =
+            sandbox.spy(xhrUtils, 'verifyAmpCORSHeaders');
+        const resp = {'html': '<div>Rendered template</div>'};
         const itemElement = doc.createElement('div');
         const rendered = expectViewerProxiedFetchAndRender(resp, itemElement);
         return list.layoutCallback().then(() => rendered).then(() => {
           expect(list.container_.contains(itemElement)).to.be.true;
+          sinon.assert.callOrder(
+              setupAMPCors, fromStructuredCloneable, verifyAmpCORSHeaders);
         });
       });
 
@@ -182,18 +207,28 @@ describes.realWin('amp-list component', {
         viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
             'viewerRenderTemplate',
             {
-              data: {
-                inputData: { },
-                src: 'https://data.com/list.json',
+              'ampComponent': {
+                'errorTemplate': {'payload': null, 'type': 'amp-mustache'},
+                'src': 'https://data.com/list.json',
               },
-              mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml">' +
-                  '{{template}}</template>',
-              'sourceAmpComponent': 'amp-list',
+              'successTemplate': {
+                'payload': '<template xmlns="http://www.w3.org/1999/xhtml">{{template}}</template>',
+                'type': 'amp-mustache',
+              },
+              'type': 'amp-list',
+              'originalRequest': {
+                'init': {
+                  'headers': {'Accept': 'application/json'},
+                  'method': 'GET',
+                  'requireAmpResponseSourceOrigin': false,
+                },
+                'input': 'https://data.com/list.json',
+              },
             }).returns(Promise.resolve({})).once();
         templatesMock.expects('findAndRenderTemplate').never();
         listMock.expects('toggleLoading').withExactArgs(false).once();
         return expect(list.layoutCallback()).to.eventually.be
-            .rejectedWith(/Response missing the \'data\' field/);
+            .rejectedWith(/Error proxying amp-list templates/);
       });
     });
 
@@ -420,6 +455,8 @@ describes.realWin('amp-list component', {
 
     it('should show placeholder on fetch failure (w/o fallback)', () => {
       // Stub fetch_() to fail.
+      viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+          .returns(false).twice();
       listMock.expects('fetch_').returns(Promise.reject()).once();
       listMock.expects('toggleLoading').withExactArgs(false).once();
       listMock.expects('togglePlaceholder').never();
@@ -473,6 +510,8 @@ describes.realWin('amp-list component', {
         },
       };
       setBindService(bind);
+      viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+          .returns(false).twice();
     });
 
     it('should _not_ refetch if [src] attr changes (before layout)', () => {

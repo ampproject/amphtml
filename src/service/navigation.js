@@ -33,6 +33,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {toWin} from '../types';
+import PriorityQueue from '../utils/priority-queue';
 
 const TAG = 'navigation';
 /** @private @const {string} */
@@ -42,6 +43,11 @@ const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
+
+/** @enum {number} */
+export const Priority = {
+  ANALYTICS_LINKER: 2,
+};
 
 /**
  * Install navigation service for ampdoc, which handles navigations from anchor
@@ -126,8 +132,12 @@ export class Navigation {
      */
     this.a2aFeatures_ = null;
 
-    /** @private @const {!Array<function(!Element)>} */
-    this.anchorMutators_ = [];
+    /**
+     * @type {!PriorityQueue<function(!Element)>}
+     * @private
+     * @const
+     */
+    this.anchorMutators_ = new PriorityQueue();
   }
 
   /**
@@ -279,14 +289,13 @@ export class Navigation {
     }
 
     // Handle anchor transformations.
-    const transformedTarget = target;
-    this.anchorMutators_.forEach(callback => {
-      callback(target);
-      location = this.parseUrl_(target.href);
+    this.anchorMutators_.forEach(anchorMutator => {
+      anchorMutator(target);
     });
+    location = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, transformedTarget, location);
+    this.handleNavClick_(e, target, location);
   }
 
   /**
@@ -446,9 +455,7 @@ export class Navigation {
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {
-    user().assert(!this.anchorMutators_[priority],
-        'Mutator with same priority is already in use.');
-    this.anchorMutators_[priority] = callback;
+    this.anchorMutators_.enqueue(callback, priority);
   }
 
   /**
@@ -531,4 +538,3 @@ function maybeExpandUrlParams(ampdoc, e) {
     target.setAttribute('href', newHref);
   }
 }
-

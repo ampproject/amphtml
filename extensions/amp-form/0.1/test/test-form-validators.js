@@ -44,49 +44,57 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
   }
 
-  function getForm(doc = env.win.document, isCustomValidations = false) {
+  function getForm(doc, isCustomValidations = false) {
     const form = doc.createElement('form');
     form.setAttribute('method', 'POST');
-
-    const nameInput = doc.createElement('input');
-    stubValidationMessage(nameInput);
-    nameInput.id = 'name1';
-    nameInput.setAttribute('name', 'name');
-    nameInput.setAttribute('required', '');
-    form.appendChild(nameInput);
-
-    const emailInput = doc.createElement('input');
-    stubValidationMessage(emailInput);
-    emailInput.id = 'email1';
-    emailInput.setAttribute('name', 'email');
-    emailInput.setAttribute('type', 'email');
-    emailInput.setAttribute('required', '');
-    form.appendChild(emailInput);
-
-    const submitBtn = doc.createElement('input');
-    submitBtn.setAttribute('type', 'submit');
-    form.appendChild(submitBtn);
     doc.body.appendChild(form);
 
+    const {name, email, submit} = getInputs(doc);
+    [name, email, submit].forEach(c => form.appendChild(c));
+
     if (isCustomValidations) {
-      const requiredNameMsg = doc.createElement('div');
-      requiredNameMsg.setAttribute('visible-when-invalid', 'valueMissing');
-      requiredNameMsg.setAttribute('validation-for', 'name1');
-      doc.body.appendChild(requiredNameMsg);
-
-      const requiredEmailMsg = doc.createElement('div');
-      requiredEmailMsg.setAttribute('visible-when-invalid', 'valueMissing');
-      requiredEmailMsg.setAttribute('validation-for', 'email1');
-      doc.body.appendChild(requiredEmailMsg);
-
-      const emailInvalidMsg = doc.createElement('div');
-      emailInvalidMsg.setAttribute('visible-when-invalid', 'typeMismatch');
-      emailInvalidMsg.setAttribute('validation-for', 'email1');
-      emailInvalidMsg.textContent = emailTypeValidationMsg;
-      doc.body.appendChild(emailInvalidMsg);
+      const {noName, noEmail, invalidEmail} = getCustomValidations(doc);
+      [noName, noEmail, invalidEmail].forEach(c => doc.body.appendChild(c));
     }
 
     return form;
+  }
+
+  function getInputs(doc) {
+    const name = doc.createElement('input');
+    stubValidationMessage(name);
+    name.id = 'name1';
+    name.setAttribute('name', 'name');
+    name.setAttribute('required', '');
+
+    const email = doc.createElement('input');
+    stubValidationMessage(email);
+    email.id = 'email1';
+    email.setAttribute('name', 'email');
+    email.setAttribute('type', 'email');
+    email.setAttribute('required', '');
+
+    const submit = doc.createElement('input');
+    submit.setAttribute('type', 'submit');
+
+    return {name, email, submit};
+  }
+
+  function getCustomValidations(doc) {
+    const noName = doc.createElement('div');
+    noName.setAttribute('visible-when-invalid', 'valueMissing');
+    noName.setAttribute('validation-for', 'name1');
+
+    const noEmail = doc.createElement('div');
+    noEmail.setAttribute('visible-when-invalid', 'valueMissing');
+    noEmail.setAttribute('validation-for', 'email1');
+
+    const invalidEmail = doc.createElement('div');
+    invalidEmail.setAttribute('visible-when-invalid', 'typeMismatch');
+    invalidEmail.setAttribute('validation-for', 'email1');
+    invalidEmail.textContent = emailTypeValidationMsg;
+
+    return {noName, noEmail, invalidEmail};
   }
 
   beforeEach(() => {
@@ -276,6 +284,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[0].className).to.not.contain('visible');
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
+
       validator.onInput({target: form.elements[0]});
       expect(doc.activeElement).to.not.equal(form.elements[0]);
       expect(validations[0].className).to.not.contain('visible');
@@ -283,7 +292,7 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[2].className).to.not.contain('visible');
     });
 
-    it('should not report on interaction for non-active inputs', () => {
+    it('should report on interaction for active inputs', () => {
       form.elements[0].validationMessage = 'Name is required';
       validator.report();
       expect(doc.activeElement).to.equal(form.elements[0]);
@@ -538,6 +547,34 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(doc.activeElement).to.equal(form.elements[0]);
       expect(validations[0].className).to.contain('visible');
       expect(validations[1].className).to.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+    });
+
+    it('should work after input and validation elements are replaced', () => {
+      form.elements[0].validationMessage = 'Name is required';
+      form.elements[1].validationMessage = 'Email is required';
+
+      validator.onBlur({target: form.elements[0]});
+      expect(validations[0].className).to.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
+      expect(validations[2].className).to.not.contain('visible');
+
+      // Simulate a dynamic content event e.g. amp-list re-render.
+      const {name, email, submit} = getInputs(doc);
+      while (form.firstChild) {
+        form.removeChild(form.firstChild);
+      }
+      [name, email, submit].forEach(c => form.appendChild(c));
+
+      validations.forEach(v => v.parentNode.removeChild(v));
+      const {noName, noEmail, invalidEmail} = getCustomValidations(doc);
+      [noName, noEmail, invalidEmail].forEach(c => doc.body.appendChild(c));
+      validations = doc.querySelectorAll('[visible-when-invalid]');
+
+      // Test that validation still works.
+      validator.onBlur({target: form.elements[0]});
+      expect(validations[0].className).to.contain('visible');
+      expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
     });
 
