@@ -326,8 +326,8 @@ export function setupAMPCors(win, input, init) {
 }
 
 /**
- * @param {?../service/xhr-impl.FetchInitJsonDef=} init
- * @return {!../service/xhr-impl.FetchInitJsonDef}
+ * @param {?FetchInitJsonDef=} init
+ * @return {!FetchInitJsonDef}
  */
 export function setupJsonFetchInit(init) {
   const fetchInit = setupInit(init, 'application/json');

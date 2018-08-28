@@ -65,7 +65,7 @@ export class SsrTemplateHelper {
   /**
    * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
-   * @param {!./service/xhr-impl.FetchRequestDef} request The fetch/XHR related data.
+   * @param {!FetchRequestDef} request The fetch/XHR related data.
    * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.
@@ -95,7 +95,7 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * @param {!./service/xhr-impl.FetchRequestDef} request
+   * @param {!FetchRequestDef} request
    * @param {string|undefined} mustacheTemplate
    * @param {?SsrTemplateDef=} opt_templates
    * @param {!Object=} opt_attributes
@@ -139,7 +139,7 @@ export class SsrTemplateHelper {
    * Constructs the fetch response and verifies AMP CORS headers.
    * @param {!Window} win
    * @param {!JsonObject|string|undefined} response
-   * @param {!./service/xhr-impl.FetchRequestDef|string} request
+   * @param {!FetchRequestDef|string} request
    */
   verifySsrResponse(win, response, request) {
     verifyAmpCORSHeaders(

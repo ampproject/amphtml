@@ -250,8 +250,8 @@ export class AmpForm {
       }
     }
     return {
-      'xhrUrl': xhrUrl,
-      'fetchOpt': dict({
+      xhrUrl,
+      fetchOpt: dict({
         'body': body,
         'method': method,
         'credentials': 'include',

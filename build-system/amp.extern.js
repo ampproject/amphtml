@@ -17,7 +17,9 @@
 /** @externs */
 
 /**
- * Special case for fetchJson
+ * Special case for fetchJson.
+ * Externed for use in the amp-form component when reconstructing
+ * the request for SSR and then passed to runtime.
  * @typedef {{
  *   body: (!JsonObject|!FormData|undefined),
  *   credentials: (string|undefined),
@@ -30,6 +32,8 @@
 var FetchInitJsonDef;
 
 /**
+ * Externed as this is constructed in the amp-form component and
+ * then passed to runtime.
  * @typedef {{
  *  xhrUrl: string,
  *  fetchOpt: !FetchInitJsonDef
