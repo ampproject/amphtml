@@ -14,4 +14,46 @@
  * limitations under the License.
  */
 
-describe('amp-recaptcha-service', () => {});
+import '../amp-recaptcha-input'
+import '../../../amp-gist/0.1/amp-gist';
+import {AmpRecaptcha} from '../amp-recaptcha-service';
+
+describes.realWin('amp-recaptcha-service', {
+  amp: { /* amp spec */
+    extensions: ['amp-recaptcha-input', 'amp-gist'],
+  }
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    
+    // Dispose of any old artifacts of tests
+    AmpRecaptcha.dispose_();
+  });
+
+  function getElement() {
+    const element = doc.createElement('amp-gist');
+    element.setAttribute('height', '237');
+    doc.body.appendChild(element);
+    return element.build().then(() => element.layoutCallback()).then(() => element);
+  }
+
+  it('should pass', () => {
+    expect(true).to.be.ok;
+  });
+
+  it('should create an iframe on initialize', done => {
+    getElement().then(element => {
+      AmpRecaptcha.initialize_(element, win).then(() => {
+        console.error('hello', AmpRecaptcha.iframe_);
+        expect(true).to.be.ok;
+        done();
+      });
+    });
+  });
+
+
+});
+
