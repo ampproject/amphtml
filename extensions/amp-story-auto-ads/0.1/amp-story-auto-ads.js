@@ -546,6 +546,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.uniquePageIds_[pageId] = true;
     }
 
+    if (this.adPagesCreated_ === 0) {
+      // This is protection against us running our placement algorithm in a
+      // story where no ads have been created. Most likely because INI_LOAD on
+      // the story was fired very late, or not at all.
+      return;
+    }
+
     if (this.uniquePagesCount_ > MIN_INTERVAL) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
