@@ -22,17 +22,16 @@ import {
   setupAMPCors,
   setupInit,
   setupInput,
+  setupJsonFetchInit,
   verifyAmpCORSHeaders,
 } from '../utils/xhr-utils';
-import {dev, user} from '../log';
 import {
   getCorsUrl,
   parseUrlDeprecated,
-  serializeQueryString,
 } from '../url';
 import {getService, registerServiceBuilder} from '../service';
-import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {user} from '../log';
 
 /**
  * Special case for fetchJson
@@ -47,8 +46,13 @@ import {isFormDataWrapper} from '../form-data-wrapper';
  */
 export let FetchInitJsonDef;
 
-/** @private @const {!Array<function(*):boolean>} */
-const allowedJsonBodyTypes_ = [isArray, isObject];
+/**
+ * @typedef {{
+ *  xhrUrl: string,
+ *  fetchOpt: !FetchInitJsonDef
+ * }}
+ */
+export let FetchRequestDef;
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -152,29 +156,7 @@ export class Xhr {
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetchJson(input, opt_init, opt_allowFailure) {
-    const init = setupInit(opt_init, 'application/json');
-    if (init.method == 'POST' && !isFormDataWrapper(init.body)) {
-      // Assume JSON strict mode where only objects or arrays are allowed
-      // as body.
-      dev().assert(
-          allowedJsonBodyTypes_.some(test => test(init.body)),
-          'body must be of type object or array. %s',
-          init.body
-      );
-
-      // Content should be 'text/plain' to avoid CORS preflight.
-      init.headers['Content-Type'] = init.headers['Content-Type'] ||
-          'text/plain;charset=utf-8';
-      const headerContentType = init.headers['Content-Type'];
-      // Cast is valid, because we checked that it is not form data above.
-      if (headerContentType === 'application/x-www-form-urlencoded') {
-        init.body =
-          serializeQueryString(/** @type {!JsonObject} */ (init.body));
-      } else {
-        init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
-      }
-    }
-    return this.fetch(input, init);
+    return this.fetch(input, setupJsonFetchInit(opt_init));
   }
 
   /**
@@ -232,7 +214,6 @@ export class Xhr {
     return getCorsUrl(win, url);
   }
 }
-
 
 /**
  * @param {!Window} window

@@ -23,6 +23,7 @@ import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
 import {parseJson} from '../json';
+import {serializeQueryString} from '../url';
 import {utf8Encode} from './bytes';
 
 /** @private @const {!Array<string>} */
@@ -30,6 +31,9 @@ const allowedMethods_ = ['GET', 'POST'];
 
 /** @private @const {string} */
 const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
+
+/** @private @const {!Array<function(*):boolean>} */
+const allowedJsonBodyTypes_ = [isArray, isObject];
 
 /**
  * The "init" argument of the Fetch API. Currently, only "credentials: include"
@@ -322,6 +326,36 @@ export function setupAMPCors(win, input, init) {
 }
 
 /**
+ * @param {?FetchInitJsonDef=} init
+ * @return {!FetchInitJsonDef}
+ */
+export function setupJsonFetchInit(init) {
+  const fetchInit = setupInit(init, 'application/json');
+  if (fetchInit.method == 'POST' && !isFormDataWrapper(fetchInit.body)) {
+    // Assume JSON strict mode where only objects or arrays are allowed
+    // as body.
+    dev().assert(
+        allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
+        'body must be of type object or array. %s',
+        fetchInit.body
+    );
+
+    // Content should be 'text/plain' to avoid CORS preflight.
+    fetchInit.headers['Content-Type'] = fetchInit.headers['Content-Type'] ||
+        'text/plain;charset=utf-8';
+    const headerContentType = fetchInit.headers['Content-Type'];
+    // Cast is valid, because we checked that it is not form data above.
+    if (headerContentType === 'application/x-www-form-urlencoded') {
+      fetchInit.body =
+        serializeQueryString(/** @type {!JsonObject} */ (fetchInit.body));
+    } else {
+      fetchInit.body = JSON.stringify(/** @type {!JsonObject} */ (fetchInit.body));
+    }
+  }
+  return fetchInit;
+}
+
+/**
  * Normalized method name by uppercasing.
  * @param {string|undefined} method
  * @return {string}
@@ -344,9 +378,9 @@ function normalizeMethod_(method) {
 /**
  * Verifies if response has the correct headers
  * @param {!Window} win
- * @param {!FetchResponse} response
+ * @param {!FetchResponse|!Response} response
  * @param {!FetchInitDef=} init
- * @return {!FetchResponse}
+ * @return {!FetchResponse|!Response}
  */
 export function verifyAmpCORSHeaders(win, response, init) {
   const allowSourceOriginHeader = response.headers.get(
