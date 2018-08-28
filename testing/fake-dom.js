@@ -64,6 +64,8 @@ export class FakeWindow {
     this.DOMTokenList = window.DOMTokenList;
     /** @const */
     this.Math = window.Math;
+    /** @const */
+    this.Promise = window.Promise;
 
     /** @const */
     this.crypto = window.crypto || window.msCrypto;
