@@ -175,7 +175,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
         expect(validatorOutput.creativeData).to.be.ok;
         const {creativeData} = validatorOutput;
         expect(creativeData).to.be.ok;
-        expect(creativeData.crossDomainData.creative).to.deep.equal(
+        expect(creativeData.creative).to.deep.equal(
             '{"templateUrl":"https://adnetwork.com/amp-template.html"}');
       });
     });
