@@ -679,8 +679,9 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
+ * @visibleForTesting
  */
-function adoptStandardServicesForEmbed(childWin) {
+export function adoptStandardServicesForEmbed(childWin) {
   // The order of service adoptations is important.
   // TODO(dvoytenko): Refactor service registration if this set becomes
   // to pass the "embeddable" flag if this set becomes too unwieldy.
@@ -688,6 +689,7 @@ function adoptStandardServicesForEmbed(childWin) {
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
   adoptServiceForEmbed(childWin, 'navigation');
+  adoptServiceForEmbed(childWin, 'timer');
 }
 
 

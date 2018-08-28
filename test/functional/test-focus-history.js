@@ -50,6 +50,7 @@ describe('FocusHistory', () => {
       },
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
+      Promise: window.Promise,
     };
     installTimerService(testWindow);
     focusHistory = new FocusHistory(testWindow, 10000);

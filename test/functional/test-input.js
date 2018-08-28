@@ -49,6 +49,7 @@ describe('Input', () => {
       navigator: {},
       ontouchstart: '',
       setTimeout: window.setTimeout,
+      Promise: window.Promise,
     };
     installTimerService(windowApi);
 

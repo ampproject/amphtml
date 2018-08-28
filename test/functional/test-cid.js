@@ -105,6 +105,7 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
       Math: window.Math,
+      Promise: window.Promise,
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
