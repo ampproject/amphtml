@@ -15,6 +15,7 @@
  */
 
 import {IframeMessagingClient} from './iframe-messaging-client';
+import {dict} from '../src/utils/object';
 import {user} from '../src/log';
 import {writeScript} from './3p';
 
@@ -34,7 +35,7 @@ let iframeMessagingClient = null;
  */
 function getRecaptchaApiJs(global, scriptSource, cb) {
   writeScript(global, scriptSource, function() {
-    cb(global.gist);
+    cb(global.grecaptcha);
   });
 }
 
@@ -43,23 +44,23 @@ function getRecaptchaApiJs(global, scriptSource, cb) {
  * and sending the token back to the parent amp-recaptcha component
  *
  * @param {!Window} global
- * @param {!Object} grecaptcha
- * @param {!String} siteKey
- * @return {function(!JsonObject)}
+ * @param {*} grecaptcha
+ * @param {string} siteKey
+ * @return {function(?JsonObject)}
  */
 function getActionTypeHandler(global, grecaptcha, siteKey) {
-  return (data) => {
-    
+  return data => {
+
     if (!iframeMessagingClient) {
       user().error('IframeMessagingClient does not exist.');
       return;
     }
 
     grecaptcha.execute(siteKey, {
-      action: data.action
+      action: data.action,
     }).then(function(token) {
       iframeMessagingClient.sendMessage('token', {
-        token: token
+        token,
       });
     }).catch(function(err) {
       user().error('reCAPTCHA', err);
@@ -75,22 +76,26 @@ function getActionTypeHandler(global, grecaptcha, siteKey) {
  * @param {!Object} data
  */
 export function recaptcha(global, data) {
-
+  /*
   user().assert(
     data.sitekey,
     'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
     data.element
   );
+  */
 
   let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
-  const siteKey = data.sitekey;
+  const siteKey = data.sitekey || '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE';
   recaptchaApiUrl += siteKey;
 
-  getRecaptchaApiJs(global, recaptchaApiUrl, function() {
+  getRecaptchaApiJs(global, recaptchaApiUrl, function(grecaptcha) {
     grecaptcha.ready(function() {
       iframeMessagingClient = new IframeMessagingClient(global);
-      iframeMessagingClient.setSentinel(global.context.sentinel)
-      iframeMessagingClient.registerCallback('action', getActionTypeHandler(global, grecaptcha, siteKey));
+      iframeMessagingClient.setSentinel(global.context.sentinel);
+      iframeMessagingClient.registerCallback(
+          'action',
+          getActionTypeHandler(global, grecaptcha, siteKey)
+      );
       iframeMessagingClient.sendMessage('ready');
     });
   });

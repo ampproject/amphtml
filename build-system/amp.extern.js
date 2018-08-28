@@ -355,6 +355,9 @@ animationHandler.stop;
 animationHandler.goToAndStop;
 animationHandler.totalFrames;
 
+var grecaptcha;
+grecaptcha.execute;
+
 // Validator
 var amp;
 amp.validator;

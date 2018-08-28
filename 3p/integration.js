@@ -414,7 +414,7 @@ register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
 register('realclick', realclick);
-register('recaptcha', recaptcha)
+register('recaptcha', recaptcha);
 register('reddit', reddit);
 register('relap', relap);
 register('revcontent', revcontent);
