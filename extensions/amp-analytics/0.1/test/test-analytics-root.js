@@ -143,7 +143,6 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   it('should create scroll manager', () => {
     const scrollManager = root.getScrollManager();
     expect(scrollManager).to.be.instanceOf(ScrollManager);
-    expect(scrollManager.ampdoc).to.equal(ampdoc);
     // Ensure the instance is reused.
     expect(root.getScrollManager()).to.equal(scrollManager);
   });

@@ -424,15 +424,15 @@ export class ScrollEventTracker extends EventTracker {
     this.root_ = root;
 
     /** @private {function(!Object)|null} */
-    this.scrollHandler_ = null;
+    this.boundScrollHandler_ = null;
   }
 
   /** @override */
   dispose() {
-    if (this.scrollHandler_ !== null) {
+    if (this.boundScrollHandler_ !== null) {
       this.root_.getScrollManager()
-          .removeScrollHandler(this.scrollHandler_);
-      this.scrollHandler_ = null;
+          .removeScrollHandler(this.boundScrollHandler_);
+      this.boundScrollHandler_ = null;
     }
   }
 
@@ -450,21 +450,6 @@ export class ScrollEventTracker extends EventTracker {
       return NO_UNLISTEN;
     }
 
-    this.scrollHandler_ = this.getScrollHandler_(config, listener);
-
-    return this.root_.getScrollManager()
-        .addScrollHandler(this.scrollHandler_);
-  }
-
-  /**
-   * Function to return a Scroll Handler Function instance
-   * @param {!JsonObject} config
-   * @param {function(!AnalyticsEvent)} listener
-   * @return {function(!Object)}
-   * @private
-   */
-  getScrollHandler_(config, listener) {
-
     const boundsV = this.normalizeBoundaries_(
         config['scrollSpec']['verticalBoundaries']
     );
@@ -472,21 +457,34 @@ export class ScrollEventTracker extends EventTracker {
         config['scrollSpec']['horizontalBoundaries']
     );
 
+    this.boundScrollHandler_ =
+      this.scrollHandler_.bind(this, boundsV, boundsH, listener);
 
-    return e => {
-      // Calculates percentage scrolled by adding screen height/width to
-      // top/left and dividing by the total scroll height/width.
-      this.triggerScrollEvents_(boundsV,
+    return this.root_.getScrollManager()
+        .addScrollHandler(this.boundScrollHandler_);
+  }
+
+  /**
+   * Function to handle scroll events from the Scroll manager
+   * @param {!Object<number,boolean>} boundsV
+   * @param {!Object<number,boolean>} boundsH
+   * @param {function(!AnalyticsEvent)} listener
+   * @param {!Object} e
+   * @private
+   */
+  scrollHandler_(boundsV, boundsH, listener, e) {
+    // Calculates percentage scrolled by adding screen height/width to
+    // top/left and dividing by the total scroll height/width.
+    this.triggerScrollEvents_(boundsV,
         (e.top + e.height) * 100 / e./*OK*/scrollHeight,
-          VAR_V_SCROLL_BOUNDARY,
-          listener
-      );
-      this.triggerScrollEvents_(boundsH,
+        VAR_V_SCROLL_BOUNDARY,
+        listener
+    );
+    this.triggerScrollEvents_(boundsH,
         (e.left + e.width) * 100 / e./*OK*/scrollWidth,
-          VAR_H_SCROLL_BOUNDARY,
-          listener
-      );
-    };
+        VAR_H_SCROLL_BOUNDARY,
+        listener
+    );
   }
 
   /**

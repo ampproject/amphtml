@@ -82,12 +82,10 @@ export class ScrollManager {
     const scrollEvent = {
       top: this.viewport_.getScrollTop(),
       left: this.viewport_.getScrollLeft(),
-      width: this.viewport_.getScrollWidth(),
-      height: this.viewport_.getScrollHeight(),
-      screenWidth: size.width,
-      screenHeight: size.height,
-      relayoutAll: false,
-      velocity: 0, // Hack for typing.
+      width: size.width,
+      height: size.height,
+      scrollWidth: this.viewport_.getScrollWidth(),
+      scrollHeight: this.viewport_.getScrollHeight(),
     };
     handler(scrollEvent);
 
