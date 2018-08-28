@@ -206,8 +206,6 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.add(undefined, 'scroll', defaultScrollConfig, sandbox.stub());
       expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
 
-
-
       tracker.dispose();
       expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
     });
