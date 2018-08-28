@@ -45,6 +45,7 @@
   "font-display-swap": 1,
   "amp-date-picker": 1,
   "amp-carousel-scroll-snap": 1,
+  "amp-carousel-new-arrows": 0.01,
   "user-error-reporting": 1,
   "no-initial-intersection": 1,
   "doubleclickSraExp": 0,
