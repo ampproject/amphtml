@@ -7,19 +7,26 @@ import {dict} from '../../../src/utils/object';
 export class Waypoint {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {*} tracking
+   * @param {!./tracking.Tracking} tracking
    */
   constructor(ampdoc, tracking) {
+    /** @private {?./tracking.Tracking} */
     this.tracking_ = tracking;
 
+    /** @private {string} */
     this.documentReferrer_ = ampdoc.win.document.referrer;
+
+    /** @private {string} */
     this.canonicalUrl_ = Services.documentInfoForDoc(ampdoc).canonicalUrl;
-    this.timezone_ = new Date().getTimezoneOffset();
+
+    /** @private {string} */
+    this.timezone_ = `${new Date().getTimezoneOffset()}`;
   }
 
   /**
    *
-   * @param {Element} anchor
+   * @param {HTMLElement} anchor
+   * @return {?string}
    */
   getAffiliateUrl(anchor) {
     if (!anchor) {
