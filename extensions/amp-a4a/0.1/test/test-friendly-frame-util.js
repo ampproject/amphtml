@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FriendlyFrameRenderer} from '../friendly-frame-renderer';
+import {renderCreativeIntoFriendlyFrame} from '../friendly-frame-util';
 
 const realWinConfig = {
   amp: {},
@@ -22,30 +22,14 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
+describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
 
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;
-  let context;
-  let creativeData;
-  let renderer;
   let renderPromise;
 
   beforeEach(() => {
-    context = {
-      size: {width: '320', height: '50'},
-      adUrl: 'http://www.google.com',
-    };
-    creativeData = {
-      creativeMetadata: {
-        minifiedCreative,
-        customElementExtensions: [],
-        extensions: [],
-      },
-    };
-
-    renderer = new FriendlyFrameRenderer();
     containerElement = document.createElement('div');
     containerElement.signals = () => ({
       whenSignal: () => Promise.resolve(),
@@ -58,7 +42,16 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
     containerElement.getAmpDoc = () => env.ampdoc;
     document.body.appendChild(containerElement);
 
-    renderPromise = renderer.render(context, containerElement, creativeData);
+    const adUrl = 'http://www.google.com';
+    const size = {width: '320', height: '50'};
+    const creativeMetadata = {
+      minifiedCreative,
+      customElementExtensions: [],
+      extensions: [],
+    };
+
+    renderPromise = renderCreativeIntoFriendlyFrame(
+        adUrl, size, containerElement, creativeMetadata);
   });
 
   afterEach(() => {
@@ -66,8 +59,7 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
   });
 
   it('should append iframe child', () => {
-    return renderPromise.then(() => {
-      const iframe = containerElement.querySelector('iframe');
+    return renderPromise.then(iframe => {
       expect(iframe).to.be.ok;
       expect(iframe.contentWindow.document.body.innerHTML)
           .to.equal(minifiedCreative);
@@ -79,16 +71,14 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
         + '<meta http-equiv=Content-Security-Policy content="script-src '
         + '\'none\';object-src \'none\';child-src \'none\'">'
         + '<p>Hello, World!</p>';
-    return renderPromise.then(() => {
-      const iframe = containerElement.querySelector('iframe');
+    return renderPromise.then(iframe => {
       expect(iframe).to.be.ok;
       expect(iframe.getAttribute('srcdoc')).to.equal(srcdoc);
     });
   });
 
   it('should set correct attributes on the iframe', () => {
-    return renderPromise.then(() => {
-      const iframe = containerElement.querySelector('iframe');
+    return renderPromise.then(iframe => {
       expect(iframe).to.be.ok;
       expect(iframe.getAttribute('width')).to.equal('320');
       expect(iframe.getAttribute('height')).to.equal('50');
@@ -100,11 +90,11 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
   });
 
   it('should style body of iframe document to be visible', () => {
-    return renderPromise.then(() => {
-      const iframe = containerElement.querySelector('iframe');
+    return renderPromise.then(iframe => {
       expect(iframe).to.be.ok;
       expect(iframe.contentWindow.document.body.style.visibility)
           .to.equal('visible');
     });
   });
 });
+
