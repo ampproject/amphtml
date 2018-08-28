@@ -273,6 +273,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       chunkInstanceForTesting(ampdoc);
 
       viewer = Services.viewerForDoc(ampdoc);
+      sandbox.stub(viewer, 'sendMessage');
       bind = new Bind(ampdoc);
       // Connected <div> element created by describes.js.
       container = win.document.getElementById('parent');
@@ -282,6 +283,15 @@ describe.configure().ifNewChrome().run('Bind', function() {
 
     afterEach(() => {
       clock.uninstall();
+    });
+
+    it('should send "bindReady" to viewer on init', () => {
+      expect(viewer.sendMessage).to.not.be.called;
+      return onBindReady(env, bind).then(() => {
+        expect(viewer.sendMessage).to.be.calledOnce;
+        expect(viewer.sendMessage)
+            .to.be.calledWithExactly('bindReady', undefined);
+      });
     });
 
     it('should scan for bindings when ampdoc is ready', () => {
