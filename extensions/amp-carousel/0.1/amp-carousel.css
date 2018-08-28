@@ -55,15 +55,33 @@ amp-carousel[controls] .amp-carousel-button,
 
 .amp-carousel-button-prev {
   left: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
-  background-size: 18px 18px;
 }
 
 .amp-carousel-button-next {
   right: 16px;
+}
+
+.i-amphtml-carousel-button-prev-legacy {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
+  background-size: 18px 18px;
+}
+
+.i-amphtml-carousel-button-prev-new {
+  background-color: transparent;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M14,7.4 L9.4,12 L14,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+  filter: drop-shadow(0px 1px 2px #4a4a4a);
+}
+
+.i-amphtml-carousel-button-next-legacy {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z"/></svg>');
   background-size: 18px 18px;
 }
+
+.i-amphtml-carousel-button-next-new {
+  background-color: transparent;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+  filter: drop-shadow(0px 1px 2px #4a4a4a);
+};
 
 .i-amphtml-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
   animation: i-amphtml-carousel-hint 1s ease-in 3s 1 normal both;
