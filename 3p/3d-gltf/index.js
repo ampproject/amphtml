@@ -52,6 +52,7 @@ const loadThree = (global, cb) => {
 
 /**
  * @param {!Window} global
+ * @suppress {deprecated}
  */
 export function gltfViewer(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
