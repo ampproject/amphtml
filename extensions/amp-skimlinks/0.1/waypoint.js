@@ -5,7 +5,8 @@ import {dict} from '../../../src/utils/object';
 
 
 /**
- * The waypoint class is responsible for building the affiliated url.
+ * The waypoint class is responsible for building the url to
+ * Skimlinks affiliate API.
  */
 export class Waypoint {
   /**
@@ -27,7 +28,7 @@ export class Waypoint {
   }
 
   /**
-   * Creates the go.redirectingat.com version of the anchor's url.
+   * Creates the go.skimresources.com version of the anchor's url.
    * @public
    * @param {HTMLElement} anchor
    * @return {?string}
