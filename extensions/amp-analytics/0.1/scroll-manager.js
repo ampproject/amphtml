@@ -19,14 +19,12 @@ import {Services} from '../../../src/services';
 
 /**
  * @typedef {{
- *   relayoutAll: boolean,
  *   top: number,
  *   left: number,
  *   width: number,
  *   height: number,
- *   screenHeight: number,
- *   screenWidth: number,
- *   velocity: number
+ *   scrollHeight: number,
+ *   scrollWidth: number,
  * }}
  */
 export let ScrollEventDef;
@@ -43,17 +41,14 @@ export class ScrollManager {
    */
   constructor(ampdoc) {
 
-    /** @const @protected {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc*/
-    this.ampdoc = ampdoc;
+    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampdoc);
+
+    /** @private {!UnlistenDef|null} */
+    this.viewportOnChangedUnlistener_ = null;
 
     /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */
     this.scrollObservable_ = new Observable();
-
-    /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = Services.viewportForDoc(this.ampdoc);
-
-    /** @private {!UnlistenDef|null} */
-    this.viewportOnChangedUnlistenDef_ = null;
   }
 
   /**
@@ -112,12 +107,11 @@ export class ScrollManager {
     const scrollEvent = {
       top: e.top,
       left: e.left,
-      width: this.viewport_.getScrollWidth(),
-      height: this.viewport_.getScrollHeight(),
-      screenWidth: e.width,
-      screenHeight: e.height,
-      relayoutAll: e.relayoutAll,
-      velocity: e.velocity, // Hack for typing.
+      width: e.width,
+      height: e.height,
+      scrollWidth: this.viewport_.getScrollWidth(),
+      scrollHeight: this.viewport_.getScrollHeight(),
+
     };
     // Fire all of our children scroll observables
     this.scrollObservable_.fire(scrollEvent);
@@ -128,9 +122,9 @@ export class ScrollManager {
    * @private
    */
   removeViewportOnChangedListener_() {
-    if (this.viewportOnChangedUnlistenDef_) {
-      this.viewportOnChangedUnlistenDef_();
-      this.viewportOnChangedUnlistenDef_ = null;
+    if (this.viewportOnChangedUnlistener_) {
+      this.viewportOnChangedUnlistener_();
+      this.viewportOnChangedUnlistener_ = null;
     }
   }
 
@@ -139,7 +133,7 @@ export class ScrollManager {
    * @private
    */
   addViewportOnChangedListener_() {
-    this.viewportOnChangedUnlistenDef_ =
+    this.viewportOnChangedUnlistener_ =
       this.viewport_.onChanged(this.onScroll_.bind(this));
   }
 
