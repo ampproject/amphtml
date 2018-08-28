@@ -145,16 +145,15 @@ describes.sandboxed('Navigation', {}, () => {
     });
 
     describe('anchor mutators', () => {
-      const errorRe = /Mutator with same priority is already in use./;
-      const priority = 100;
       it('should throw error if priority is already in use', () => {
+        const priority = 10;
         handler.registerAnchorMutator(element => {
           element.href += '?am=1';
         }, priority);
         allowConsoleError(() => {
           expect(() => handler.registerAnchorMutator(element => {
             element.href += '?am=2';
-          }, priority)).to.throw(errorRe);
+          }, priority)).to.not.throw();
         });
       });
 
@@ -166,16 +165,22 @@ describes.sandboxed('Navigation', {}, () => {
           transformedHref = element.href;
         }, 2);
         handler.registerAnchorMutator(element => {
-          element.href += '?first=1';
+          element.href += '&first=1';
           transformedHref = element.href;
         }, 1);
         handler.registerAnchorMutator(element => {
-          element.href += '&third=3';
+          element.href += '?third=3';
+          transformedHref = element.href;
+        }, 3);
+        // If using a same priority, the order of registration is respected.
+        handler.registerAnchorMutator(element => {
+          element.href += '&third=3-1';
           transformedHref = element.href;
         }, 3);
         handler.handle_(event);
         expect(transformedHref).to.equal(
-            'https://www.testing-1-2-3.org/?first=1&second=2&third=3');
+            'https://www.testing-1-2-3.org/?third=3&third=3-1&second=2'
+            + '&first=1');
       });
 
       it('verify order of operations', () => {
@@ -186,13 +191,18 @@ describes.sandboxed('Navigation', {}, () => {
           },
         };
         const linkRuleSpy = sandbox.spy(obj, 'callback');
-        handler.registerAnchorMutator(linkRuleSpy, 99);
+        handler.registerAnchorMutator(linkRuleSpy, 1);
         handler.handle_(event);
         // Verify that the expansion of variables occurs first
         // followed by the anchor transformation and then the parsing
         // of the possibly mutated anchor href into the location object
         // for navigation.handleNavClick.
         sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
+        expect(expandVars).to.be.calledOnce;
+        // Verify that parseUrl is called once when the variables are
+        // expanded, then after the anchor mutators and then once more
+        // in handleNavClick
+        expect(parseUrl).to.be.calledThrice;
       });
     });
 
