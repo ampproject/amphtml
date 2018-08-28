@@ -558,10 +558,10 @@ export class AmpPanZoom extends AMP.BaseElement {
     const {width: cWidth, left, height: cHeight, top} = this.contentBox_;
     const {width: eWidth, height: eHeight} = this.elementBox_;
 
-    this.maxX_ = (cWidth * scale - cWidth) / 2 - left;
-    this.maxY_ = cHeight * (scale - 1) / 2 - top;
-    this.minX_ = eWidth - (left + cWidth * (scale + 1) / 2);
-    this.minY_ = eHeight - (top + cHeight * (scale + 1) / 2);
+    this.maxX_ = Math.max(0, (cWidth * scale - cWidth) / 2 - left);
+    this.maxY_ = Math.max(0, (cHeight * scale - cHeight) / 2 - top);
+    this.minX_ = Math.min(0, eWidth - (left + cWidth * (scale + 1) / 2));
+    this.minY_ = Math.min(0, eHeight - (top + cHeight * (scale + 1) / 2));
   }
 
   /**
@@ -691,8 +691,8 @@ export class AmpPanZoom extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.updatePanZoomBounds_(newScale);
-    const newPosX = this.boundX_(this.startX_ + (deltaX * newScale), true);
-    const newPosY = this.boundY_(this.startY_ + (deltaY * newScale), true);
+    const newPosX = this.boundX_(this.startX_ + (deltaX * newScale), false);
+    const newPosY = this.boundY_(this.startY_ + (deltaY * newScale), false);
     return this.set_(newScale, newPosX, newPosY, animate);
   }
 
@@ -790,8 +790,8 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (newScale != this.scale_) {
       this.updatePanZoomBounds_(newScale);
     }
-    const newPosX = this.boundX_(this.posX_ / this.scale_ * newScale, true);
-    const newPosY = this.boundY_(this.posY_ / this.scale_ * newScale, true);
+    const newPosX = this.boundX_(this.posX_ / this.scale_ * newScale, false);
+    const newPosY = this.boundY_(this.posY_ / this.scale_ * newScale, false);
     return this.set_(newScale, newPosX, newPosY, true).then(() => {
       this.startScale_ = this.scale_;
       this.startX_ = this.posX_;

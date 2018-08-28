@@ -178,7 +178,7 @@ describes.realWin('amp-pan-zoom', {
     });
   });
 
-  it('should correctly update pan zoom bounds with y offset', () => {
+  it('should correctly update bounds with top-aligned content', () => {
     return getPanZoom({
       'style': 'display: initial',
     }).then(() => {
@@ -192,20 +192,76 @@ describes.realWin('amp-pan-zoom', {
       };
       return el.layoutCallback();
     }).then(() => {
+
       expect(impl.minY_).to.equal(0);
       expect(impl.maxY_).to.equal(0);
 
       impl.updatePanZoomBounds_(2);
-      // min((400 - 600) / 2 - (-50), (400 - 600) / 2)
-      expect(impl.minY_).to.equal(-100);
-      // max(600 - 400) / 2 + (-50), (600 - 400) / 2)
+      expect(impl.minY_).to.equal(-50);
       expect(impl.maxY_).to.equal(150);
 
       impl.updatePanZoomBounds_(3);
-      // min((400 - 900) / 2 - (-50), (400 - 900) / 2 )
-      expect(impl.minY_).to.equal(-250);
-      // max((900 - 400) / 2 - (-50), (900 - 400) / 2 )
+      expect(impl.minY_).to.equal(-200);
       expect(impl.maxY_).to.equal(300);
+    });
+  });
+
+  it('should correctly update bounds with left-aligned content', () => {
+    return getPanZoom({
+      'height': '300',
+      'width': '400',
+      'style': 'justify-content: start',
+    }).then(() => {
+      el.getBoundingClientRect = () => {
+        return {
+          'top': 0,
+          'left': 0,
+          'height': 300,
+          'width': 400,
+        };
+      };
+      return el.layoutCallback();
+    }).then(() => {
+
+      expect(impl.minY_).to.equal(0);
+      expect(impl.maxY_).to.equal(0);
+
+      impl.updatePanZoomBounds_(2);
+      expect(impl.minX_).to.equal(-50);
+      expect(impl.maxX_).to.equal(150);
+
+      impl.updatePanZoomBounds_(3);
+      expect(impl.minX_).to.equal(-200);
+      expect(impl.maxX_).to.equal(300);
+    });
+  });
+
+  it('should correctly update bounds with bottom-aligned content', () => {
+    return getPanZoom({
+      'style': 'justify-content: start; flex-direction: column-reverse',
+    }).then(() => {
+      el.getBoundingClientRect = () => {
+        return {
+          'top': 0,
+          'left': 0,
+          'height': 400,
+          'width': 300,
+        };
+      };
+      return el.layoutCallback();
+    }).then(() => {
+
+      expect(impl.minY_).to.equal(0);
+      expect(impl.maxY_).to.equal(0);
+
+      impl.updatePanZoomBounds_(2);
+
+      expect(impl.minY_).to.equal(-150);
+      expect(impl.maxY_).to.equal(50);
+
+      impl.updatePanZoomBounds_(3);
+      expect(impl.minY_).to.equal(-300);
+      expect(impl.maxY_).to.equal(200);
     });
   });
 
