@@ -13,3 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+class AmpRecaptchaService {
+  constructor() {
+  
+  }
+
+  register() {
+  
+  }
+
+  unregister() {
+  
+  }
+
+  execute() {
+  
+  }
+
+  initialize_() {
+  
+  }
+}
+
+// Export a singleton.
+const AmpRecaptcha = new AmpRecaptchaService();
+export AmpRecaptcha;
