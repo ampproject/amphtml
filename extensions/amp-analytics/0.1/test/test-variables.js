@@ -56,7 +56,8 @@ describe('amp-analytics.VariableService', function() {
     };
 
     function check(template, expected, vars) {
-      const actual = variables.expand(template, new ExpansionOptions(vars));
+      const actual = variables.expandTemplateSync(
+          template, new ExpansionOptions(vars));
       expect(actual).to.equal(expected);
     }
 
@@ -65,9 +66,20 @@ describe('amp-analytics.VariableService', function() {
     });
 
     it('expands nested vars (no encode)', () => {
-      const actual = variables.expand(
+      const actual = variables.expandTemplateSync(
           '${a}', new ExpansionOptions(vars, undefined, true));
       expect(actual).to.equal('https://www.google.com/a?b=1&c=2');
+    });
+
+    it('expands complicated string', () => {
+      check('${foo}', 'HELLO%2FWORLD%2BWORLD%2BHELLO%2BHELLO', {
+        'foo': '${a}+${b}+${c}+${hello}',
+        'a': '${hello}/${world}',
+        'b': '${world}',
+        'c': '${hello}',
+        'hello': 'HELLO',
+        'world': 'WORLD',
+      });
     });
 
     it('expands zeros', () => {
@@ -107,7 +119,7 @@ describe('amp-analytics.VariableService', function() {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM',
         'freeze': 'error'});
       vars.freezeVar('freeze');
-      const actual = variables.expand(
+      const actual = variables.expandTemplateSync(
           '${fooParam(foo,bar)}${nonfreeze}${freeze}', vars);
       expect(actual).to.equal('QUERY_PARAM(foo,bar)${freeze}');
     });
@@ -134,18 +146,16 @@ describe('amp-analytics.VariableService', function() {
         '1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}',
       };
 
-      it('defaults to 2 recursion', () => {
-        allowConsoleError(() => {
-          check('${1}', '123%24%7B4%7D', recursiveVars);
-        });
+      it('default to 2 recursions', () => {
+        expectAsyncConsoleError(/Maximum depth reached while expanding variables/);
+        check('${1}', '123%24%7B4%7D', recursiveVars);
       });
 
-      it('limits the recursion to 5', () => {
-        allowConsoleError(() => {
-          const actual = variables.expand(
-              '${1}', new ExpansionOptions(recursiveVars, 5));
-          expect(actual).to.equal('123412%24%7B3%7D');
-        });
+      it('customize recursions to 5', () => {
+        expectAsyncConsoleError(/Maximum depth reached while expanding variables/);
+        const actual = variables.expandTemplateSync(
+            '${1}', new ExpansionOptions(recursiveVars, 5));
+        expect(actual).to.equal('123412%24%7B3%7D');
       });
     });
   });

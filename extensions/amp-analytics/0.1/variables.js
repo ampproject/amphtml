@@ -169,18 +169,18 @@ export class VariableService {
    * @param {string} template The template to expand
    * @param {!ExpansionOptions} options configuration to use for expansion
    * @return {!Promise<string>} The expanded string
-   * Deprecated: use expand()
    */
   expandTemplate(template, options) {
-    return tryResolve(this.expand.bind(null, template, options));
+    return tryResolve(this.expandTemplateSync.bind(null, template, options));
   }
 
   /**
    * @param {string} template The template to expand
    * @param {!ExpansionOptions} options configuration to use for expansion
    * @return {string} The expanded string
+   * @visibleForTesting
    */
-  expand(template, options) {
+  expandTemplateSync(template, options) {
     return template.replace(/\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(TAG, 'Maximum depth reached while expanding variables. ' +
@@ -203,7 +203,7 @@ export class VariableService {
       let value = options.vars[name] != null ? options.vars[name] : '';
 
       if (typeof value == 'string') {
-        value = this.expand(value,
+        value = this.expandTemplateSync(value,
             new ExpansionOptions(options.vars, options.iterations - 1,
                 true /* noEncode */));
       }
@@ -220,7 +220,7 @@ export class VariableService {
 
   /**
    * @param {string} unusedName Name of the variable. Only used in tests.
-   * @param {string|!Array<string>} raw The values to URI encode.
+   * @param {string|?Array<string>} raw The values to URI encode.
    * @return {string} The encoded value.
    */
   encodeVars(unusedName, raw) {
