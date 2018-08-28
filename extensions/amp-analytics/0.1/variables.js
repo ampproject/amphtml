@@ -171,7 +171,7 @@ export class VariableService {
    * @return {!Promise<string>} The expanded string
    */
   expandTemplate(template, options) {
-    return tryResolve(this.expandTemplateSync.bind(null, template, options));
+    return tryResolve(this.expandTemplateSync.bind(this, template, options));
   }
 
   /**
