@@ -92,6 +92,17 @@ describes.realWin('inabox-host:messaging', {}, env => {
         }),
       })).to.be.false;
     });
+
+    it('should tolerate message with null source', () => {
+      host.processMessage({
+        source: null,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'send-positions',
+        }),
+      });
+    });
   });
 
   describe('send-positions', () => {

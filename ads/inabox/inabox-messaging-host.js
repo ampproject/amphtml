@@ -253,8 +253,10 @@ export class InaboxMessagingHost {
     if (this.iframeMap_[sentinel]) {
       return this.iframeMap_[sentinel].measurableFrame;
     }
-    const measurableFrame =
-      /** @type {HTMLIFrameElement} */(this.getMeasureableFrame(source));
+    const measurableFrame = this.getMeasureableFrame(source);
+    if (!measurableFrame) {
+      return null;
+    }
     const measurableWin = measurableFrame.contentWindow;
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
@@ -284,6 +286,9 @@ export class InaboxMessagingHost {
    * @visibleForTesting
    */
   getMeasureableFrame(win) {
+    if (!win) {
+      return null;
+    }
     // First, we try to find the top-most x-domain window in win's parent
     // hierarchy. If win is not nested within x-domain framing, then
     // this loop breaks immediately.
