@@ -23,14 +23,19 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
+  requestForBatchFetch,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import {
+  setupAMPCors,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -258,16 +263,36 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_() {
-    return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-        this.element).then(resp => {
-      const data = getData(resp);
-      user().assert(
-          resp && (typeof data !== 'undefined'),
-          'Response missing the "data" field.');
-      return this.scheduleRender_(data);
+    let request;
+    // Construct the fetch init data that would be called by the viewer
+    // passed in as the 'originalRequest'.
+    return requestForBatchFetch(
+        this.getAmpDoc(),
+        this.element,
+        this.getPolicy_()).then(batchFetchDef => {
+      request = batchFetchDef;
+      batchFetchDef.fetchOpt = setupAMPCors(
+          this.win, batchFetchDef.xhrUrl, batchFetchDef.fetchOpt);
+      setupJsonFetchInit(batchFetchDef.fetchOpt);
+      const ampListAttributes = dict({
+        'ampListAttributes': {
+          'items': this.element.getAttribute('items') || 'items',
+          'singleItem': this.element.getAttribute('single-item'),
+          'maxItems': this.element.getAttribute('max-items'),
+        },
+      });
+      return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+          this.element, batchFetchDef, null, ampListAttributes);
+    }).then(response => {
+      request.fetchOpt.responseType = 'application/json';
+      this.ssrTemplateHelper_.verifySsrResponse(
+          this.win, response, request);
+      return response['html'];
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).catch(error => this.showFallback_(error));
+    }).then(html => this.scheduleRender_(html))
+        .then(() => this.onFetchSuccess_(),
+            error => this.onFetchError_(error));
   }
 
   /**
@@ -403,17 +428,51 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    const ampdoc = this.getAmpDoc();
+    return batchFetchJsonFor(
+        this.getAmpDoc(), this.element, itemsExpr, this.getPolicy_());
+  }
+
+  /**
+   * return {!UrlReplacementPolicy}
+   */
+  getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     let policy = UrlReplacementPolicy.OPT_IN;
     if (src == this.initialSrc_ ||
-      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+       (getSourceOrigin(src)
+           == getSourceOrigin(this.getAmpDoc().win.location))) {
       policy = UrlReplacementPolicy.ALL;
     }
-    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
+    return policy;
   }
+
+  /** @private */
+  onFetchSuccess_() {
+    if (this.getFallback()) {
+      // Hide in case fallback was displayed for a previous fetch.
+      this.toggleFallback_(false);
+    }
+    this.togglePlaceholder(false);
+    this.toggleLoading(false);
+  }
+
+  /**
+   * @param {*=} error
+   * @private
+   * @throws {!Error} throws error if fallback element is not present.
+   */
+  onFetchError_(error) {
+    this.toggleLoading(false);
+    if (this.getFallback()) {
+      this.toggleFallback(true);
+      this.togglePlaceholder(false);
+    } else {
+      throw error;
+    }
+  }
+
 
   /**
    * Must be called in mutate context.

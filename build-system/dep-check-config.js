@@ -278,6 +278,10 @@ exports.rules = [
           'src/service/navigation.js',
       'extensions/amp-analytics/0.1/linker-manager.js->' +
           'src/service/navigation.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+          'src/service/xhr-impl.js',
+      'extensions/amp-form/0.1/amp-form.js->' +
+          'src/service/xhr-impl.js',
     ],
   },
   {

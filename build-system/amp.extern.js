@@ -17,6 +17,31 @@
 /** @externs */
 
 /**
+ * Special case for fetchJson.
+ * Externed for use in the amp-form component when reconstructing
+ * the request for SSR and then passed to runtime.
+ * @typedef {{
+ *   body: (!JsonObject|!FormData|undefined),
+ *   credentials: (string|undefined),
+ *   headers: (!JsonObject|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+var FetchInitJsonDef;
+
+/**
+ * Externed as this is constructed in the amp-form component and
+ * then passed to runtime.
+ * @typedef {{
+ *  xhrUrl: string,
+ *  fetchOpt: !FetchInitJsonDef
+ * }}
+ */
+var FetchRequestDef;
+
+/**
  * A type for Objects that can be JSON serialized or that come from
  * JSON serialization. Requires the objects fields to be accessed with
  * bracket notation object['name'] to make sure the fields do not get
