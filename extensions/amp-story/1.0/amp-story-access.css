@@ -25,6 +25,16 @@ amp-story-access {
   z-index: 100003 !important; /** Above the bookend and desktop navigation UI. */
   transform: translate3d(0, 100vh, 0) !important;
   transition-delay: 0.15s !important;
+  pointer-events: none !important;
+}
+
+/** Allows [amp-access="CONDITION"] rules. */
+amp-story-access[amp-access-hide] {
+  display: none !important;
+}
+
+amp-story-access[type=blocking] {
+  z-index: 100004 !important; /** Above the [type=notification]. */
 }
 
 amp-story-access.i-amphtml-story-access-visible {
@@ -32,8 +42,8 @@ amp-story-access.i-amphtml-story-access-visible {
   transition-delay: 0s !important;
 }
 
-/** Black opacity overlay. */
-amp-story-access::before {
+/** Black opacity overlay. Only on blocking story-access. */
+amp-story-access[type=blocking]::before {
   content: "" !important;
   position: absolute !important;
   top: 0 !important;
@@ -42,10 +52,11 @@ amp-story-access::before {
   width: 100% !important;
   background: #000000 !important;
   opacity: 0 !important;
+  pointer-events: auto !important;
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-amp-story-access.i-amphtml-story-access-visible::before {
+amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
   opacity: 0.4 !important;
   transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
@@ -65,8 +76,9 @@ amp-story-access.i-amphtml-story-access-visible::before {
   border-radius: 8px 8px 0 0 !important;
   color: rgba(0, 0, 0, 0.87) !important;
   font-family: 'Roboto', sans-serif !important;
-  text-align: start !important;
   overflow: hidden !important;
+  pointer-events: auto !important;
+  text-align: start !important;
   transform: translate3d(0, 100%, 0) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
@@ -82,6 +94,10 @@ amp-story-access.i-amphtml-story-access-visible::before {
   border-radius: initial !important;
 }
 
+[type="notification"] .i-amphtml-story-access-container {
+  box-shadow: 0 -1px 2px 1px rgba(0, 0, 0, 0.12) !important;
+}
+
 .i-amphtml-story-access-header {
   position: relative !important;
   height: 80px !important;
@@ -90,7 +106,7 @@ amp-story-access.i-amphtml-story-access-visible::before {
   z-index: 2 !important;
 
   /* Making sure the background color fills the container in full bleed mode. */
-  margin: 0 -8px !important;
+  margin: 0 -8px 48px !important;
 }
 
 .i-amphtml-story-access-logo {
@@ -120,8 +136,21 @@ amp-story-access.i-amphtml-story-access-visible::before {
   z-index: -1 !important;
 }
 
+.i-amphtml-story-access-close-button {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  height: 36px !important;
+  width: 36px !important;
+  color: #757575 !important;
+  cursor: pointer !important;
+  font-size: 24px !important;
+  line-height: 36px !important;
+  text-align: center !important;
+}
+
 .i-amphtml-story-access-content {
-  padding: 60px 16px 16px !important;
+  padding: 16px !important;
   font-size: 14px !important;
   z-index: 0 !important;
 }
@@ -138,6 +167,8 @@ amp-story-access.i-amphtml-story-access-visible::before {
 
   .i-amphtml-story-access-overflow {
     margin-top: 0 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.2) !important;
   }
 
   .i-amphtml-story-access-container {
@@ -148,9 +179,14 @@ amp-story-access.i-amphtml-story-access-visible::before {
     min-height: 20vh !important;
     width: calc(100vw - 80px) !important;
     max-width: 800px !important;
+    border-radius: 0px !important;
     opacity: 0 !important;
     transform: translate3d(0, 0, 0) !important;
     transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  }
+
+  [type=notification] .i-amphtml-story-access-container {
+    min-height: 0 !important;
   }
 
   .i-amphtml-story-access-visible .i-amphtml-story-access-container {
