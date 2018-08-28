@@ -19,6 +19,9 @@ import {dict} from '../src/utils/object';
 import {user} from '../src/log';
 import {writeScript} from './3p';
 
+/** @const {!String} */
+const TAG = 'RECAPTCHA';
+
 /** {!IframeMessaginClient|null} **/
 let iframeMessagingClient = null;
 
@@ -43,32 +46,28 @@ function getRecaptchaApiJs(global, scriptSource, cb) {
  * Function to handle executing actions using the grecaptcha Object,
  * and sending the token back to the parent amp-recaptcha component
  *
- * @param {!Window} global
  * @param {*} grecaptcha
  * @param {string} siteKey
- * @return {function(?JsonObject)}
+ * @param {Object} data
  */
-function getActionTypeHandler(global, grecaptcha, siteKey) {
-  return data => {
+function actionTypeHandler(grecaptcha, siteKey, data) {
+  if (!iframeMessagingClient) {
+    user().error(TAG, 'IframeMessagingClient does not exist.');
+    return;
+  }
 
-    if (!iframeMessagingClient) {
-      user().error('IframeMessagingClient does not exist.');
-      return;
-    }
-
-    grecaptcha.execute(siteKey, {
-      action: data.action,
-    }).then(function(token) {
-      iframeMessagingClient.sendMessage('token', {
-        token,
-      });
-    }).catch(function(err) {
-      user().error('reCAPTCHA', err);
-      iframeMessagingClient.sendMessage('error', dict({
-        'error': (err || '').toString(),
-      }));
+  grecaptcha.execute(siteKey, {
+    action: data.action,
+  })./*OK*/then(function(token) {
+    iframeMessagingClient.sendMessage('token', {
+      token,
     });
-  };
+  }).catch(function(err) {
+    user().error(TAG, err);
+    iframeMessagingClient.sendMessage('error', dict({
+      'error': (err || '').toString(),
+    }));
+  });
 }
 
 /**
@@ -76,13 +75,11 @@ function getActionTypeHandler(global, grecaptcha, siteKey) {
  * @param {!Object} data
  */
 export function recaptcha(global, data) {
-  /*
   user().assert(
     data.sitekey,
-    'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+    TAG + ' The data-sitekey attribute is required for <amp-recaptcha-input> %s',
     data.element
   );
-  */
 
   let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
   const siteKey = data.sitekey || '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE';
@@ -94,7 +91,7 @@ export function recaptcha(global, data) {
       iframeMessagingClient.setSentinel(global.context.sentinel);
       iframeMessagingClient.registerCallback(
           'action',
-          getActionTypeHandler(global, grecaptcha, siteKey)
+          actionTypeHandler.bind(this, grecaptcha, siteKey)
       );
       iframeMessagingClient.sendMessage('ready');
     });
