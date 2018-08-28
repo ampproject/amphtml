@@ -412,6 +412,14 @@ function runSanitizerTests() {
       expect(purifyTagsForTripleMustache('abc')).to.be.equal('abc');
     });
 
+    it('should output HTML entities', () => {
+      const entity = '&lt;tag&gt;';
+      expect(purifyTagsForTripleMustache(entity)).to.be.equal(entity);
+      // DOMPurify short-circuits when there are no '<' characters.
+      expect(purifyTagsForTripleMustache(`<p>${entity}</p>`))
+          .to.be.equal(`<p>${entity}</p>`);
+    });
+
     it('should output valid markup', () => {
       expect(purifyTagsForTripleMustache('<b>abc</b>'))
           .to.be.equal('<b>abc</b>');
