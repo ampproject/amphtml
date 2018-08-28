@@ -1,10 +1,10 @@
 
+import {AffiliateLinkResolver, STATUS__AFFILIATE, STATUS__NON_AFFILIATE, STATUS__UNKNOWN} from '../affiliate-link-resolver';
 import {DOMAIN_RESOLVER_API_URL} from '../constants';
 import {Services} from '../../../../src/services';
+import {Waypoint} from '../waypoint';
 import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-helpers';
 import {pubcode} from './constants';
-import AffiliateLinkResolver, {STATUS__AFFILIATE, STATUS__NON_AFFILIATE, STATUS__UNKNOWN} from '../affiliate-link-resolver';
-import Waypoint from '../waypoint';
 import helpersFactory from './helpers';
 
 

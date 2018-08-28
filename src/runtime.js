@@ -48,7 +48,7 @@ import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installDocumentStateService} from './service/document-state';
-import {installGlobalLinkRewriterServiceForDoc} from './service/link-rewrite';
+import {installGlobalLinkRewriteServiceForDoc} from './service/link-rewrite/link-rewrite-service';
 import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHistoryServiceForDoc} from './service/history-impl';
@@ -120,7 +120,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
-  installGlobalLinkRewriterServiceForDoc(ampdoc);
+  installGlobalLinkRewriteServiceForDoc(ampdoc);
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }

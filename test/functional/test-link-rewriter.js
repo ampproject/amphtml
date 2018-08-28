@@ -1,11 +1,11 @@
 import {AmpEvents} from '../../src/amp-events';
+import {LinkRewriteService} from '../../src/service/link-rewrite/link-rewrite-service';
+import {LinkRewriter} from '../../src/service/link-rewrite/link-rewriter';
 import {ORIGINAL_URL_ATTRIBUTE, PRIORITY_META_TAG_NAME, EVENTS as linkRewriterEvents} from '../../src/service/link-rewrite/constants';
-import { Services } from '../../src/services';
+import {Services} from '../../src/services';
 import {anchorClickActions} from '../../src/service/navigation';
 import {createCustomEvent} from '../../src/event-helper';
 import {createTwoStepsResponse} from '../../src/service/link-rewrite/link-rewrite-helpers';
-import LinkRewriteService from '../../src/service/link-rewrite/link-rewrite-service';
-import LinkRewriter from '../../src/service/link-rewrite/link-rewriter';
 
 
 describes.fakeWin('Link Rewriter Service', {amp: true}, env => {

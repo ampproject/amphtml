@@ -1,12 +1,15 @@
 import {AmpEvents} from '../../amp-events';
-import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
+import {EVENTS, LINK_REWRITE_SERVICE_NAME, PRIORITY_META_TAG_NAME} from './constants';
+import {LinkRewriter} from './link-rewriter';
 import {Services} from '../../services';
+import {registerServiceBuilderForDoc} from '../../service';
 
-import LinkRewriter from './link-rewriter';
-
-export default class LinkRewriterService {
+/**
+ * @package
+ */
+export class LinkRewriteService {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     this.priorityList_ = [];
@@ -14,24 +17,17 @@ export default class LinkRewriterService {
     this.priorityList_ = this.getPriorityList_(ampdoc);
 
     this.installGlobalEventListener_(this.iframeDoc_);
+    /** @private {Array<./link-rewriter.LinkRewriter>} */
     this.linkRewriters_ = [];
   }
 
-  /**
-   * @param {*} ampdoc
-   */
-  getPriorityList_(ampdoc) {
-    const docInfo = Services.documentInfoForDoc(ampdoc);
-    const value = docInfo.metaTags[PRIORITY_META_TAG_NAME];
-
-    return value ? value.trim().split(/\s+/) : [];
-  }
 
   /**
+   * @public
    * Register a new link rewriter on the page.
-   * @param {*} linkRewriterId
-   * @param {*} resolveUnknownLinks
-   * @param {*} options
+   * @param {string} linkRewriterId
+   * @param {Function} resolveUnknownLinks
+   * @param {?Object} options
    */
   registerLinkRewriter(linkRewriterId, resolveUnknownLinks, options) {
     const linkRewriter = new LinkRewriter(this.iframeDoc_, linkRewriterId, resolveUnknownLinks, options);
@@ -42,26 +38,10 @@ export default class LinkRewriterService {
     return linkRewriter;
   }
 
-  /**
-   * Add DOM_UPDATE AND ANCHOR_CLICK listener.
-   * @param {*} iframeDoc
-   */
-  installGlobalEventListener_(iframeDoc) {
-    iframeDoc.addEventListener(AmpEvents.DOM_UPDATE,
-        this.onDomChanged_.bind(this));
-  }
 
   /**
-   * Notify all the rewriter when new elements have been added to the page.
-   */
-  onDomChanged_() {
-    this.linkRewriters_.forEach(linkRewriter => {
-      linkRewriter.onDomUpdated();
-    });
-  }
-
-  /**
-   * @param {*} anchor -
+   * @public
+   * @param {HTMLElement} anchor
    */
   maybeRewriteLink(anchor) {
     const suitableLinkRewriters = this.getSuitableLinkRewritersForLink_(anchor);
@@ -80,28 +60,68 @@ export default class LinkRewriterService {
 
       // Emit click event for analytics purposes only,
       // anchor should not me mutated by handlers.
+      const eventData = {
+        linkRewriterId,
+        anchor,
+      };
+
       suitableLinkRewriters.forEach(linkRewriter => {
-        linkRewriter.events.send(EVENTS.CLICK, {linkRewriterId, anchor});
+        linkRewriter.events.send(EVENTS.CLICK, eventData);
       });
     }
   }
 
   /**
-   * @param {*} anchor
+   * @private
+   * @param {!../ampdoc-impl.AmpDoc} ampdoc
    */
-  parseLinkRewriterPriorityForAnchor_(anchor) {
-    if (!anchor || !anchor.dataset.linkRewriters) {
-      return [];
-    }
+  getPriorityList_(ampdoc) {
+    const docInfo = Services.documentInfoForDoc(ampdoc);
+    const value = docInfo.metaTags[PRIORITY_META_TAG_NAME];
 
-    return anchor.dataset.linkRewriters.trim().split(/\s+/);
+    return value ? value.trim().split(/\s+/) : [];
   }
 
   /**
-   *
-   * @param {*} linkRewriterList
-   * @param {*} linkRewriter
-   * @param {*} priorityList
+   * @private
+   * Add DOM_UPDATE AND ANCHOR_CLICK listener.
+   * @param {*} iframeDoc
+   */
+  installGlobalEventListener_(iframeDoc) {
+    iframeDoc.addEventListener(AmpEvents.DOM_UPDATE,
+        this.onDomChanged_.bind(this));
+  }
+
+  /**
+   * @private
+   * Notify all the rewriter when new elements have been added to the page.
+   */
+  onDomChanged_() {
+    this.linkRewriters_.forEach(linkRewriter => {
+      linkRewriter.onDomUpdated();
+    });
+  }
+
+
+  /**
+   * @private
+   * @param {HTMLElement} anchor
+   * @return {Array<string>}
+   */
+  parseLinkRewriterPriorityForAnchor_(anchor) {
+    const dataValue = anchor.getAttribute('data-link-rewriters')
+    if (!anchor || !dataValue) {
+      return [];
+    }
+
+    return dataValue.trim().split(/\s+/);
+  }
+
+  /**
+   * @private
+   * @param {Array<./link-rewriter.LinkRewriter>} linkRewriterList
+   * @param {!./link-rewriter.LinkRewriter} linkRewriter
+   * @param {Array<string>} priorityList
    */
   insertInListBasedOnPriority_(linkRewriterList, linkRewriter, priorityList) {
     const priorityIndex = priorityList.indexOf(linkRewriter.id);
@@ -115,8 +135,10 @@ export default class LinkRewriterService {
   }
 
   /**
+   * @private
    * Get the list of all the link rewriter watching a specific anchor.
-   * @param {*} anchor
+   * @param {HTMLElement} anchor
+   * @return {Array<./link-rewriter.LinkRewriter>}
    */
   getSuitableLinkRewritersForLink_(anchor) {
     const linkPriorityList = this.parseLinkRewriterPriorityForAnchor_(anchor);
@@ -128,4 +150,18 @@ export default class LinkRewriterService {
       return acc;
     }, []);
   }
+}
+
+
+/**
+ * Register the link rewrite service.
+ * @param {!../ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installGlobalLinkRewriteServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(
+      ampdoc,
+      LINK_REWRITE_SERVICE_NAME,
+      LinkRewriteService,
+      true
+  );
 }

@@ -1,11 +1,12 @@
 import {AFFILIATION_API, PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
 
 
-export default class Waypoint {
+export class Waypoint {
   /**
-   * @param {*} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {*} tracking
    */
   constructor(ampdoc, tracking) {
@@ -18,7 +19,7 @@ export default class Waypoint {
 
   /**
    *
-   * @param {*} anchor
+   * @param {Element} anchor
    */
   getAffiliateUrl(anchor) {
     if (!anchor) {
@@ -33,21 +34,22 @@ export default class Waypoint {
     } = this.tracking_.getTrackingInfo();
 
     const xcust = anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId;
-    const queryParams = {
-      id: pubcode,
-      url: anchor.href,
-      sref: this.canonicalUrl_,
-      pref: this.documentReferrer_,
-      xguid: guid,
-      xuuid: pageImpressionId,
-      xtz: this.timezone_,
-      xs: '1', // Always use source_app=1 (skimlinks)
-      platform: PLATFORM_NAME,
-    };
+
+    const queryParams = dict({
+      'id': pubcode,
+      'url': anchor.href,
+      'sref': this.canonicalUrl_,
+      'pref': this.documentReferrer_,
+      'xguid': guid,
+      'xuuid': pageImpressionId,
+      'xtz': this.timezone_,
+      'xs': '1', // Always use source_app=1 (skimlinks)
+      'platform': PLATFORM_NAME,
+    });
     if (xcust) {
-      queryParams.xcust = xcust;
+      queryParams['xcust'] = xcust;
     }
 
-    return addParamsToUrl(AFFILIATION_API, queryParams);
+    return addParamsToUrl(AFFILIATION_API, /** @type {!JsonObject} */ (queryParams));
   }
 }

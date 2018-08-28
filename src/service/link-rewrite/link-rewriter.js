@@ -4,36 +4,43 @@ import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsResponse} from './link-rewrite-helpers';
 import EventMessenger from './event-messenger';
 
-
-export default class LinkRewriter {
+export class LinkRewriter {
   /**
    * Create a new linkRewriter instance you can then register to the LinkRewriteService.
    * @param {*} iframeDoc
-   * @param {*} id
-   * @param {*} resolveUnknownLinks
-   * @param {*} options
+   * @param {string} id
+   * @param {Function} resolveUnknownLinks
+   * @param {Object=} options
    */
   constructor(iframeDoc, id, resolveUnknownLinks, options) {
     this.id = id;
     this.iframeDoc_ = iframeDoc;
+
+    /** @private {Function} */
     this.resolveUnknownLinks_ = resolveUnknownLinks;
+
     this.linkSelector_ = options.linkSelector;
     this.restoreDelay_ = 300; //ms
+
+    /** @public */
     this.events = new EventMessenger();
-    this.reset();
+
+    /** @private */
+    this.anchorReplacementMap_ = new Map();
   }
 
   /**
-   *
+   * @public
    */
   reset() {
     this.anchorReplacementMap_ = new Map();
   }
 
   /**
+   * @public
    * Get the replacement url for a specific anchor.
-   * @param {HTMLElement} anchor
-   * @return {string}
+   * @param {?HTMLElement} anchor
+   * @return {?string}
    */
   getReplacementUrl(anchor) {
     if (!this.isWatchingLink(anchor)) {
@@ -44,6 +51,7 @@ export default class LinkRewriter {
   }
 
   /**
+   * @public
    * Get the anchor to replacement url Map
    * @return {Map}
    */
@@ -52,16 +60,19 @@ export default class LinkRewriter {
   }
 
   /**
+   * @public
    * Returns True if the link is not excluded by the linkSelector option.
-   * @param {*} anchor
+   * @param {?HTMLElement} anchor
+   * @return {boolean}
    */
   isWatchingLink(anchor) {
     return this.anchorReplacementMap_.has(anchor);
   }
 
   /**
+   * @public
    * Swap temporarly the href of an anchor by the associated replacement url.
-   * @param {*} anchor
+   * @param {?HTMLElement} anchor
    */
   rewriteAnchorUrl(anchor) {
     const newUrl = this.getReplacementUrl(anchor);
@@ -81,7 +92,10 @@ export default class LinkRewriter {
   }
 
   /**
+   * @public
    * Scan the page to find links and send events when scan is complete.
+   * @return {Promise} - Resolved when page has been scanned and
+   *   all links have been resolved
    */
   onDomUpdated() {
     return this.scanLinksOnPage_().then(() => {
@@ -90,6 +104,7 @@ export default class LinkRewriter {
   }
 
   /**
+   * @private
    * Find all the anchors in the page (based on linkSelector option) and
    */
   scanLinksOnPage_() {
@@ -128,6 +143,7 @@ export default class LinkRewriter {
   }
 
   /**
+   * @private
    * Filter the list of anchors to returns only the ones
    * that were not in the page at the time of the last page scan.
    * @param {*} anchorList
@@ -144,9 +160,10 @@ export default class LinkRewriter {
   }
 
   /**
-  * Update the state of the internal Anchor to replacement url Map.
-  * @param {*} anchorReplacementTupleList
-  */
+   * @private
+   * Update the state of the internal Anchor to replacement url Map.
+   * @param {*} anchorReplacementTupleList
+   */
   updateAnchorMap_(anchorReplacementTupleList) {
     anchorReplacementTupleList.forEach(replacementTuple => {
       user().assert(isAnchorReplacementTuple(replacementTuple),
@@ -157,6 +174,7 @@ export default class LinkRewriter {
   }
 
   /**
+   * @private
    * Remove from the internal anchor Map the links that are no longer in the page.
    * @param {*} anchorList - The list of links in the page.
    */
@@ -171,10 +189,12 @@ export default class LinkRewriter {
   }
 
   /**
+   * @private
    * Get the list of anchors element in the page.
    * (Based on linkSelector option)
    */
   getLinksInDOM_() {
-    return [].slice.call(this.iframeDoc_.querySelectorAll(this.linkSelector_ || 'a'));
+    const q = this.iframeDoc_.querySelectorAll(this.linkSelector_ || 'a');
+    return [].slice.call(q);
   }
 }

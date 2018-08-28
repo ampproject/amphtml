@@ -3,6 +3,7 @@ import {parseUrlDeprecated} from '../../../src/url';
 
 import {DOMAIN_RESOLVER_API_URL} from './constants';
 import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-helpers';
+import {dict} from '../../../src/utils/object';
 
 // Can be monetized
 export const STATUS__AFFILIATE = 'affiliate';
@@ -14,7 +15,7 @@ export const STATUS__IGNORE_LINK = 'ignore';
 // 'can be monetized' until we have the answer from the API.
 export const STATUS__UNKNOWN = 'unknown';
 
-export default class AffiliateLinkResolver {
+export class AffiliateLinkResolver {
   /**
    *
    * @param {*} xhr
@@ -28,13 +29,15 @@ export default class AffiliateLinkResolver {
     this.domains_ = {};
     // Promise of the first request to beacon so we can
     // access API data outside of the linkRewriter/LinkResolver flow.
-    this.firstApiRequest = null;
+
+    /** @public */
+    this.firstRequest = null;
   }
 
   /**
    *
    * @param {*} anchorList
-   * @return {Promise}
+   * @return {*}
    */
   resolveUnknownAnchors(anchorList) {
     const alreadyResolvedTupleList = this.mapToAnchorReplacementTuple_(anchorList);
@@ -51,7 +54,7 @@ export default class AffiliateLinkResolver {
     }
 
     // Returns an object with a sync reponse and an async response.
-    return new createTwoStepsResponse(alreadyResolvedTupleList, willBeResolvedPromise);
+    return createTwoStepsResponse(alreadyResolvedTupleList, willBeResolvedPromise);
   }
 
 
@@ -107,7 +110,7 @@ export default class AffiliateLinkResolver {
 
   /**
    * Save domains as unknown status in the internal state.
-   * @param {string[]} domains
+   * @param {Array<string>} domains
    */
   markDomainsAsUnknown(domains) {
     domains.forEach(domain => {
@@ -127,7 +130,7 @@ export default class AffiliateLinkResolver {
    * Get the list of anchors for which the domain of the href is
    * in the `domainsToAsk` list.
    * @param {*} anchorList
-   * @param {string[]} domainsToAsk
+   * @param {Array<string>} domainsToAsk
    */
   getUnknownAnchors_(anchorList, domainsToAsk) {
     return anchorList.filter(anchor => {
@@ -161,11 +164,11 @@ export default class AffiliateLinkResolver {
    * @param {*} domains
    */
   fetchDomainResolverApi(domains) {
-    const data = {
-      pubcode: this.skimOptions_.pubcode,
-      page: '',
-      domains,
-    };
+    const data = dict({
+      'pubcode': this.skimOptions_.pubcode,
+      'page': '',
+      'domains': domains,
+    });
 
     const beaconUrl = `${DOMAIN_RESOLVER_API_URL}?data=${JSON.stringify(data)}`;
     const fetchOptions = {

@@ -1,8 +1,8 @@
+import {Waypoint} from '../waypoint';
 import {XCUST_ATTRIBUTE_NAME} from '../constants';
 import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
-import Waypoint from '../waypoint';
 
 
 describes.fakeWin('Waypoint', {
@@ -33,7 +33,7 @@ describes.fakeWin('Waypoint', {
   beforeEach(() => {
     trackingService = helpers.createTrackingWithStubAnalytics();
     env.sandbox.stub(trackingService, 'getTrackingInfo').returns(getFakeTrackingInfo());
-    env.sandbox.stub(env.ampdoc.win.document, 'referrer').value('referrer_url')
+    env.sandbox.stub(env.ampdoc.win.document, 'referrer').value('referrer_url');
     helpers.mockServiceGetter('documentInfoForDoc', {canonicalUrl: 'canonical_url'});
     env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns('-120');
     waypoint = new Waypoint(env.ampdoc, trackingService);

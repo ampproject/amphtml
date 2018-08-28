@@ -30,7 +30,7 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
-import {LINK_REWRITE_SERVICE_NAME} from './service/link-rewrite';
+import {LINK_REWRITE_SERVICE_NAME} from './service/link-rewrite/constants';
 
 /** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
 export let SubscriptionService;

@@ -3,62 +3,90 @@ import {Services} from '../../../src/services';
 import {once} from '../../../src/utils/function';
 import {whenDocumentReady} from '../../../src/document-ready';
 
-import Tracking from './tracking';
+import {Tracking} from './tracking';
 
+import {AffiliateLinkResolver} from './affiliate-link-resolver';
 import {SKIMLINKS_REWRITER_ID} from './constants';
 import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewrite/constants';
-import AffiliateLinkResolver from './affiliate-link-resolver';
 
+import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
-import Waypoint from './waypoint';
 
 const startTime = new Date().getTime();
 
 
 export class AmpSkimlinks extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-  /**
-   * @override
-   */
-  buildCallback() {
+    /** @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.win);
-    this.ampDoc_ = this.getAmpDoc();
-    this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
-    this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
-    this.linkRewriterService = Services.linkRewriteServiceForDoc(this.ampDoc_);
 
-    return whenDocumentReady(this.ampDoc_).then(() => {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = this.getAmpDoc();
+
+    /** @private {!../../../src/service/document-info-impl.DocumentInfoDef} */
+    this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
+
+    /** @private {!../../../src/service/link-rewrite/link-rewrite-service.LinkRewriteService} */
+    this.linkRewriterService_ = Services.linkRewriteServiceForDoc(this.ampDoc_);
+
+    /** @private {?Object} */
+    this.skimOptions_ = null;
+
+    /** @private {?./tracking.Tracking} */
+    this.trackingService_ = null;
+
+    /** @private {?./affiliate-link-resolver.AffiliateLinkResolver} */
+    this.affiliateLinkResolver_ = null;
+
+    /** @private {?./waypoint.Waypoint} */
+    this.waypoint_ = null;
+
+    /** @private {?../../../src/service/link-rewrite/link-rewriter.LinkRewriter} */
+    this.skimlinksLinkRewriter_ = null;
+
+  }
+
+  /** @override */
+  buildCallback() {
+    this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
+    return whenDocumentReady(
+        /** @type {!Document} */ (this.ampDoc_.getRootNode())
+    ).then(() => {
       this.startSkimcore_();
     });
   }
 
   /**
-   * Where everything start
+   * @private
    */
   startSkimcore_() {
-    this.trackingService = this.initTracking();
-    this.waypoint_ = new Waypoint(this.ampDoc_, this.trackingService);
-    this.affiliateLinkResolver = new AffiliateLinkResolver(
+    this.trackingService_ = this.initTracking_();
+    this.waypoint_ = new Waypoint(this.ampDoc_, this.trackingService_);
+    this.affiliateLinkResolver_ = new AffiliateLinkResolver(
         this.xhr_,
         this.skimOptions_,
-        this.waypoint_,
+        this.waypoint_
     );
 
-    this.skimlinksLinkRewriter = this.initSkimlinksLinkRewriter();
+    this.skimlinksLinkRewriter_ = this.initSkimlinksLinkRewriter_();
   }
 
 
   /**
-   *  Fires impression tracking after beacon request
-   * @param {*} userSessionData
+   *  Fires impression tracking after beacon API request.
+   * @param {!Object} beaconData - Json response from Beacon API.
+   * @private
    */
   sendImpressionTracking_({guid}) {
     // Update tracking service with extra info.
-    this.trackingService.setTrackingInfo({guid});
-    this.trackingService.sendImpressionTracking(
-        this.skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
-        startTime,
+    this.trackingService_.setTrackingInfo({guid});
+    this.trackingService_.sendImpressionTracking(
+        this.skimlinksLinkRewriter_.getAnchorLinkReplacementMap(),
+        startTime
     );
   }
 
@@ -66,34 +94,36 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Called only on the first page scan.
    * Make a fallback call to beacon if no links where founds on the page.
    * Send the impression tracking once we have the beacon API response.
+   * @return {Promise}
    */
   onPageScanned_() {
     // .firstRequest may be null if the page doesn't have any non-excluded links.
-    const beaconApiPromise = this.affiliateLinkResolver.firstRequest ||
+    const beaconApiPromise = this.affiliateLinkResolver_.firstRequest ||
         // If it's the case, fallback with manual call
-        this.affiliateLinkResolver.fetchDomainResolverApi([]);
+        this.affiliateLinkResolver_.fetchDomainResolverApi([]);
 
     return beaconApiPromise.then(this.sendImpressionTracking_.bind(this));
   }
 
   /**
    * Initialise skimlinks link rewriter
+   * @return {!../../../src/service/link-rewrite/link-rewriter.LinkRewriter}
    */
-  initSkimlinksLinkRewriter() {
+  initSkimlinksLinkRewriter_() {
     const options = {
       linkSelector: this.skimOptions_.linkSelector,
     };
 
-    const skimlinksLinkRewriter = this.linkRewriterService.registerLinkRewriter(
+    const skimlinksLinkRewriter = this.linkRewriterService_.registerLinkRewriter(
         SKIMLINKS_REWRITER_ID,
-        getBoundFunction(this.affiliateLinkResolver, 'resolveUnknownAnchors'),
+        getBoundFunction(this.affiliateLinkResolver_, 'resolveUnknownAnchors'),
         options
     );
 
     // We are only interested in the first page scan.
     skimlinksLinkRewriter.events.on(
         linkRewriterEvents.PAGE_SCANNED,
-        once(this.onPageScanned_.bind(this)),
+        once(this.onPageScanned_.bind(this))
     );
 
     skimlinksLinkRewriter.events.on(
@@ -106,8 +136,10 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   /**
    * Initialise tracking module
+   * @return {!./tracking.Tracking}
+   * @private
    */
-  initTracking() {
+  initTracking_() {
     // 'amp-analytics' api is waiting for CommonSignals.LOAD_START to be
     // triggered before sending requests.
     // Normally CommonSignals.LOAD_START is sent from layoutCallback but since
@@ -118,14 +150,16 @@ export class AmpSkimlinks extends AMP.BaseElement {
   }
 
   /**
-   *
-   * @param {*} eventData
+   * A click (left or right) on an anchor has happened,
+   * fire NA clicks if needed.
+   * @param {!{linkRewriterId: ?string, anchor: !Element}} eventData - click event information
+   * @private
    */
   onClick_(eventData) {
     // The link was not monetizable or the link was replaced
     // by an other linkRewriter.
     if (eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID) {
-      this.trackingService.sendNaClickTracking(eventData.anchor);
+      this.trackingService_.sendNaClickTracking(eventData.anchor);
     }
   }
 

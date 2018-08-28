@@ -1,4 +1,5 @@
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
+import {dict} from '../../../src/utils/object';
 import {generatePageImpressionId} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
@@ -12,12 +13,12 @@ import {
 } from './constants';
 
 
-export default class Tracking {
+export class Tracking {
   /**
    * Use tracking instance to track page impressions,
    * link impressions and non-affiliated clicks.
-   * @param {*} element
-   * @param {*} skimOptions
+   * @param {AmpElement} element
+   * @param {Object} skimOptions
    */
   constructor(element, skimOptions) {
     this.tracking_ = skimOptions.tracking;
@@ -38,7 +39,7 @@ export default class Tracking {
 
   /**
    *
-   * @param {*} element
+   * @param {AmpElement} element
    */
   setupAnalytics_(element) {
     // Analytics are not ready until CommonSignals.LOAD_START is triggered.
@@ -66,7 +67,7 @@ export default class Tracking {
 
   /**
    * Update tracking info
-   * @param {*} newInfo
+   * @param {Object} newInfo
    */
   setTrackingInfo(newInfo) {
     Object.assign(this.trackingInfo_, newInfo);
@@ -75,7 +76,7 @@ export default class Tracking {
   /**
    * Send Page impression and link impressions
    * @param {*} anchorStatusMap
-   * @param {*} startTime
+   * @param {number} startTime
    */
   sendImpressionTracking(anchorStatusMap, startTime) {
     if (!this.tracking_) {
@@ -129,7 +130,7 @@ export default class Tracking {
       customTrackingId,
     } = this.trackingInfo_;
 
-    const data = {
+    const data = /** @type {!JsonObject} */ ({
       pubcode,
       referrer: pageUrl,
       pref: referrer,
@@ -140,7 +141,7 @@ export default class Tracking {
       uuid: pageImpressionId,
       product: '1',
       platform: PLATFORM_NAME,
-    };
+    });
 
     this.analytics_.trigger('non-affiliate-click', {
       data: JSON.stringify(data), rnd: 'RANDOM',
@@ -149,20 +150,21 @@ export default class Tracking {
 
   /**
    * Page impression tracking request
-   * @param {*} commonData
-   * @param {*} numberAffiliateLinks
-   * @param {*} startTime
+   * @param {Object} commonData
+   * @param {number} numberAffiliateLinks
+   * @param {number} startTime
    */
   sendPageImpressionTracking_(commonData, numberAffiliateLinks, startTime) {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
-    const data = Object.assign({
+    const data = /** @type {!JsonObject} */ (Object.assign({
       slc: numberAffiliateLinks,
-      jsl: new Date().getTime() - startTime, // How long did it take to send the tracking
+      // How long did it take to send the tracking
+      jsl: new Date().getTime() - startTime,
       pref: referrer,
       uc: customTrackingId,
       t: 1,
-    }, commonData);
+    }, commonData));
 
     this.analytics_.trigger('page-impressions', {
       data: JSON.stringify(data),
@@ -171,16 +173,16 @@ export default class Tracking {
 
   /**
    * Link impressions tracking request
-   * @param {*} commonData
-   * @param {*} numberAffiliateLinks
-   * @param {*} urls
+   * @param {Object} commonData
+   * @param {number} numberAffiliateLinks
+   * @param {Object} urls
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
-    const data = Object.assign({
+    const data = /** @type {!JsonObject} */ (Object.assign({
       dl: urls,
       hae: numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
       typ: 'l',
-    }, commonData);
+    }, commonData));
 
     this.analytics_.trigger('link-impressions', {
       data: JSON.stringify(data),
@@ -190,6 +192,7 @@ export default class Tracking {
   /**
    *
    * @param {*} anchorStatusMap
+   * @return {{numberAffiliateLinks: number, urls: Object}}
    */
   extractAnchorTrackingInfo_(anchorStatusMap) {
     let numberAffiliateLinks = 0;

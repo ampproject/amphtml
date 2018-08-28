@@ -47,7 +47,7 @@ export const anchorClickActions = {
   NAVIGATE_CUSTOM_PROTOCOL: 'navigate-custom-protocol',
   NAVIGATE_OUTBOUND: 'navigate-outbound',
   OPEN_CONTEXT_MENU: 'open-context-menu',
-}
+};
 /**
  * Install navigation service for ampdoc, which handles navigations from anchor
  * tag clicks and other runtime features like AMP.navigateTo().
@@ -228,7 +228,10 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
-    this.linkRewriteService_.maybeRewriteLink(target);
+    this.linkRewriteService_.maybeRewriteLink(
+        /** @type {!HTMLElement} */ (target)
+    );
+
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
