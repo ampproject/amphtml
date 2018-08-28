@@ -302,13 +302,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   whitelistActions_() {
-    // Allows a button that could hide the amp-story-access element, like
-    // regular AMP allows.
-    // eg: <button on="tap:notification.hide">Dismiss</button>
-    if (this.getType_() === Type.NOTIFICATION) {
-      this.actions_.addToWhitelist('AMP-STORY-ACCESS.hide');
-    }
-
     const accessEl =
         dev().assertElement(
             this.win.document.getElementById('amp-access'),

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-amp-story-access.i-amphtml-element {
+amp-story-access {
   position: absolute !important;
-  display: flex; /** No !important to allow the runtime to hide/show it. */
+  display: flex !important;
   flex-direction: column !important;
   top: 0 !important;
   left: 0 !important;
@@ -26,6 +26,11 @@ amp-story-access.i-amphtml-element {
   transform: translate3d(0, 100vh, 0) !important;
   transition-delay: 0.15s !important;
   pointer-events: none !important;
+}
+
+/** Allows [amp-access="CONDITION"] rules. */
+amp-story-access[amp-access-hide] {
+  display: none !important;
 }
 
 amp-story-access[type=blocking] {
