@@ -435,27 +435,21 @@ export class Bind {
    */
   initialize_(root) {
     dev().info(TAG, 'init');
-    let promise = Promise.all([
+    return Promise.all([
       this.addMacros_(),
-      this.addBindingsForNodes_([root])]
-    ).then(results => {
+      this.addBindingsForNodes_([root]),
+    ]).then(results => {
       dev().info(TAG, '⤷', 'Δ:', results);
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
+      // In dev mode, check default values against initial expression results.
+      if (getMode().development) {
+        return this.evaluate_().then(results => this.verify_(results));
+      }
+    }).then(() => {
+      this.viewer_.sendMessage('bindReady', undefined);
+      this.dispatchEventForTesting_(BindEvents.INITIALIZE);
     });
-    if (getMode().development) {
-      // Check default values against initial expression results.
-      promise = promise.then(() =>
-        this.evaluate_().then(results => this.verify_(results))
-      );
-    }
-    if (getMode().test) {
-      // Signal init completion for integration tests.
-      promise.then(() => {
-        this.dispatchEventForTesting_(BindEvents.INITIALIZE);
-      });
-    }
-    return promise;
   }
 
   /**
