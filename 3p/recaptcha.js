@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {IframeMessagingClient} from './iframe-messaging-client';
 import {user} from '../src/log';
-import {listenParent, nonSensitiveDataPostMessage} from './messaging';
 import {writeScript} from './3p';
 
-/** @const {Array<function>} */
-const postMessageListeners = [];
+/** {!IframeMessaginClient|null} **/
+let iframeMessagingClient = null;
 
 /**
  * Get the recaptcha script.
@@ -49,15 +49,21 @@ function getRecaptchaApiJs(global, scriptSource, cb) {
  */
 function getActionTypeHandler(global, grecaptcha, siteKey) {
   return (data) => {
+    
+    if (!iframeMessagingClient) {
+      user().error('IframeMessagingClient does not exist.');
+      return;
+    }
+
     grecaptcha.execute(siteKey, {
       action: data.action
     }).then(function(token) {
-      nonSensitivePostMessage('token', {
+      iframeMessagingClient.sendMessage('token', {
         token: token
       });
     }).catch(function(err) {
       user().error('reCAPTCHA', err);
-      nonSensitiveDataPostMessage('error', dict({
+      iframeMessagingClient.sendMessage('error', dict({
         'error': (err || '').toString(),
       }));
     });
@@ -69,6 +75,7 @@ function getActionTypeHandler(global, grecaptcha, siteKey) {
  * @param {!Object} data
  */
 export function recaptcha(global, data) {
+
   user().assert(
     data.sitekey,
     'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
@@ -81,9 +88,10 @@ export function recaptcha(global, data) {
 
   getRecaptchaApiJs(global, recaptchaApiUrl, function() {
     grecaptcha.ready(function() {
-      const actionTypeListener = listenParent(global, 'action', getActionTypeHandler(global, grecaptcha, siteKey));
-      postMessageListeners.push(actionTypeListener);
-      nonSensitiveDataPostMessage('ready');
+      iframeMessagingClient = new IframeMessagingClient(global);
+      iframeMessagingClient.setSentinel(global.context.sentinel)
+      iframeMessagingClient.registerCallback('action', getActionTypeHandler(global, grecaptcha, siteKey));
+      iframeMessagingClient.sendMessage('ready');
     });
   });
 }
