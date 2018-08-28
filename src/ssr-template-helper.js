@@ -139,14 +139,14 @@ export class SsrTemplateHelper {
    * Constructs the fetch response and verifies AMP CORS headers.
    * @param {!Window} win
    * @param {!JsonObject|string|undefined} response
-   * @param {!./service/xhr-impl.FetchDef|string} fetchDef
+   * @param {!./service/xhr-impl.FetchRequestDef|string} request
    */
-  verifySsrResponse(win, response, fetchDef) {
+  verifySsrResponse(win, response, request) {
     verifyAmpCORSHeaders(
         win,
         fromStructuredCloneable(
             response,
-            fetchDef.fetchOpt.responseType),
-        fetchDef.fetchOpt);
+            request.fetchOpt.responseType),
+        request.fetchOpt);
   }
 }
