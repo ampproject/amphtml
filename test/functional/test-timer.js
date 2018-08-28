@@ -28,6 +28,7 @@ describes.fakeWin('Timer', {}, env => {
     WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
     WindowApi.prototype.document = {};
+    WindowApi.prototype.Promise = window.Promise;
     const windowApi = new WindowApi();
     windowMock = sandbox.mock(windowApi);
 

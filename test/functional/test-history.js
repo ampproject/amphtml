@@ -383,6 +383,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
       addEventListener: () => {},
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
+      Promise: window.Promise,
     };
     installTimerService(windowStub);
     new HistoryBindingNatural_(windowStub);

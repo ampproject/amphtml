@@ -636,6 +636,7 @@ export function isEmbeddable(service) {
  * in embed scope.
  * @param {!Window} embedWin
  * @param {string} serviceId
+ * @visibleForTesting
  */
 export function adoptServiceForEmbed(embedWin, serviceId) {
   const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);

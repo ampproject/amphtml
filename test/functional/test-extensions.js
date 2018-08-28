@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as service from '../../src/service';
 import {
   AmpDocShadow,
   AmpDocShell,
@@ -23,6 +24,7 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {
   Extensions,
+  adoptStandardServicesForEmbed,
   installExtensionsService,
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
@@ -44,9 +46,11 @@ describes.sandboxed('Extensions', {}, () => {
     let win;
     let extensions;
     let timeoutCallback;
+    let sandbox;
 
     beforeEach(() => {
       win = env.win;
+      sandbox = env.sandbox;
       win.setTimeout = cb => {
         timeoutCallback = cb;
       };
@@ -1038,6 +1042,23 @@ describes.sandboxed('Extensions', {}, () => {
         // Extension elements are stubbed immediately, but registered only
         // after extension is loaded.
         expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      });
+    });
+
+    describe('adoptStandardServicesForEmbed', () => {
+      it('verify order of adopted services for embed', () => {
+        const adoptServiceForEmbed =
+            sandbox.stub(service, 'adoptServiceForEmbed');
+        sandbox.stub(service, 'adoptServiceForEmbedIfEmbeddable')
+            .withArgs({}, sinon.match.any).returns(true);
+        adoptStandardServicesForEmbed({});
+        expect(adoptServiceForEmbed.callCount).to.equal(5);
+        const expectedCallsInOrder = [
+          'url', 'action', 'standard-actions', 'navigation', 'timer'];
+        expectedCallsInOrder.forEach((call, index) => {
+          expect(adoptServiceForEmbed.getCall([index]).args[1])
+              .to.equal(expectedCallsInOrder[index]);
+        });
       });
     });
   });

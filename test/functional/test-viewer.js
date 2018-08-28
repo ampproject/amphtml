@@ -63,6 +63,7 @@ describe('Viewer', () => {
     windowApi.Math = window.Math;
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
+    windowApi.Promise = window.Promise;
     windowApi.location = {
       hash: '#origin=g.com',
       href: '/test/viewer',

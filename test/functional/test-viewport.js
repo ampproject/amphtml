@@ -1257,6 +1257,7 @@ describe('Viewport META', () => {
         setTimeout: window.setTimeout,
         clearTimeout: window.clearTimeout,
         location: {},
+        Promise: window.Promise,
       };
       installTimerService(windowApi);
       installVsyncService(windowApi);
