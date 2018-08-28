@@ -36,7 +36,7 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
- * Checks the style if a prefixed version of a property exists and returns
+  Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
  * @param {!Object} style
@@ -161,14 +161,9 @@ export function setStyles(element, styles) {
  */
 export function toggle(element, opt_display) {
   if (opt_display === undefined) {
-    opt_display = element.hasAttribute('hidden') ||
-        getStyle(element, 'display') === 'none';
+    opt_display = getStyle(element, 'display') == 'none';
   }
-  if (opt_display) {
-    element.removeAttribute('hidden');
-  } else {
-    element.setAttribute('hidden', '');
-  }
+  setStyle(element, 'display', opt_display ? '' : 'none');
 }
 
 
