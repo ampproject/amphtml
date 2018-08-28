@@ -60,14 +60,12 @@ config.run('amp-image-slider', function() {
   }
   `;
 
-  const experiments = ['amp-image-slider'];
   const extensions = ['amp-image-slider'];
 
   describes.integration('amp-image-slider', {
     body: sliderBody,
     css,
     extensions,
-    experiments,
   }, env => {
     let win;
     let doc;

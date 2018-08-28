@@ -106,11 +106,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO(kqian): remove after launch
-    // From https://github.com/ampproject/amphtml/pull/16688
-    user().assert(isExperimentOn(this.win, 'amp-image-slider'),
-        'Experiment <amp-image-slider> disabled');
-
     const children = this.getRealChildren();
 
     for (let i = 0; i < children.length; i++) {
@@ -668,11 +663,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // TODO(kqian): remove after launch
-    // From https://github.com/ampproject/amphtml/pull/16688
-    user().assert(isExperimentOn(this.win, 'amp-image-slider'),
-        'Experiment <amp-image-slider> disabled');
-
     // Extensions such as amp-carousel still uses .setAsOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents
