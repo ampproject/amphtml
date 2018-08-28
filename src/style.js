@@ -149,7 +149,7 @@ export function getStyle(element, property, opt_bypassCache) {
  */
 export function setStyles(element, styles) {
   for (const k in styles) {
-    setStyle(element, /*OK*/k, styles[k]);
+    setStyle(element, k, styles[k]);
   }
 }
 
@@ -165,7 +165,6 @@ export function toggle(element, opt_display) {
   }
   setStyle(element, 'display', opt_display ? '' : 'none');
 }
-
 
 /**
  * Returns a pixel value.
@@ -272,6 +271,6 @@ export function computedStyle(win, el) {
  */
 export function resetStyles(element, properties) {
   for (let i = 0; i < properties.length; i++) {
-    setStyle(element, /*OK*/properties[i], null);
+    setStyle(element, properties[i], null);
   }
 }

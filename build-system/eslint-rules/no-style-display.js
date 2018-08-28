@@ -29,8 +29,12 @@ module.exports = function(context) {
 
   return {
     [setStyleCall]: function(node) {
-      const arg = node.arguments[1];
+      const filePath = context.getFilename();
+      if (filePath.endsWith('src/style.js')) {
+        return;
+      }
 
+      const arg = node.arguments[1];
       if (!arg || isOk(arg)) {
         return;
       }
