@@ -44,6 +44,7 @@ describe('Styles', () => {
       resources = Services.resourcesForDoc(ampdoc);
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
+      styles.setBodyMadeVisibleForTesting(false);
     });
 
     it('should make visible in recovery call', () => {

@@ -625,7 +625,7 @@ const forbiddenTerms = {
     ],
   },
   '[^\\.]makeBodyVisible\\(': {
-    message: 'This is a protected function. If you are calling this to show' +
+    message: 'This is a protected function. If you are calling this to show ' +
         'body after an error please use `makeBodyVisibleRecovery`',
     whitelist: [
       'src/amp.js',
