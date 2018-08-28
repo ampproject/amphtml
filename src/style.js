@@ -15,6 +15,7 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
+import {dev} from './log';
 import {map} from './utils/object.js';
 import {startsWith} from './string';
 
@@ -152,6 +153,24 @@ export function setStyles(element, styles) {
     setStyle(element, k, styles[k]);
   }
 }
+
+
+/**
+ * Asserts that the styles does not contain the `display` style.
+ * This is the only possible way to pass a dynamic styles object to setStyles
+ * and setImportantStyles.
+ *
+ * @param {!Object<string, *>} styles
+ * @return {!Object<string, *>}
+ */
+export function assertDoesNotContainDisplay(styles) {
+  if ('display' in styles) {
+    dev().error('STYLE', '`display` style detected in styles. You must use ' +
+      'toggle instead.');
+  }
+  return styles;
+}
+
 
 
 /**

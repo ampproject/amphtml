@@ -22,11 +22,6 @@ module.exports = function(context) {
   const setStylesCall = 'CallExpression[callee.name=setStyles], CallExpression[callee.name=setImportantStyles]';
   const resetStylesCall = 'CallExpression[callee.name=resetStyles]';
 
-  function isOk(node) {
-    const comments = node.leadingComments || [];
-    return comments.some(comment => comment.value === 'OK');
-  }
-
   return {
     [setStyleCall]: function(node) {
       const filePath = context.getFilename();
@@ -35,7 +30,7 @@ module.exports = function(context) {
       }
 
       const arg = node.arguments[1];
-      if (!arg || isOk(arg)) {
+      if (!arg) {
         return;
       }
 
@@ -51,14 +46,21 @@ module.exports = function(context) {
       const callName = node.callee.name;
       const arg = node.arguments[1];
 
-      if (!arg || isOk(arg)) {
+      if (!arg) {
         return;
       }
 
       if (arg.type !== 'ObjectExpression') {
+        if (arg.type === 'CallExpression') {
+          const {callee} = arg;
+          if (callee.type === 'Identifier' && callee.name === 'assertDoesNotContainDisplay') {
+            return;
+          }
+        }
+
         return context.report({
           node: arg || node,
-          message: `styles argument (the second argument) to ${callName} must be an object`,
+          message: `styles argument (the second argument) to ${callName} must be an object literal`,
         });
       }
 
@@ -79,14 +81,14 @@ module.exports = function(context) {
     [resetStylesCall]: function(node) {
       const arg = node.arguments[1];
 
-      if (!arg || isOk(arg)) {
+      if (!arg) {
         return;
       }
 
       if (arg.type !== 'ArrayExpression') {
         return context.report({
           node: arg || node,
-          message: `styles argument (the second argument) to resetStyles must be an array`,
+          message: `styles argument (the second argument) to resetStyles must be an array literal`,
         });
       }
 
