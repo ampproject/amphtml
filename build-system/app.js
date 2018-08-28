@@ -932,7 +932,8 @@ app.get('/adzerk/*', (req, res) => {
       pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
   fs.readFileAsync(filePath).then(file => {
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+    res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
+    res.setHeader('AMP-Ad-Response-Type', 'template');
     res.end(file);
   }).error(() => {
     res.status(404);

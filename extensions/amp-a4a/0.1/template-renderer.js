@@ -14,35 +14,69 @@
  * limitations under the License.
  */
 
-import {FriendlyFrameRenderer} from './friendly-frame-renderer';
+import {Renderer} from './amp-ad-type-defs';
+import {dev} from '../../../src/log';
 import {getAmpAdTemplateHelper} from './template-validator';
+import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
+
+/**
+ * @typedef {{
+ *   size: ./amp-ad-type-defs.LayoutInfoDef,
+ *   adUrl: string,
+ *   creativeMetadata: ./amp-ad-type-defs.CreativeMetaDataDef,
+ *   templateData: ./amp-ad-type-defs.AmpTemplateCreativeDef,
+ * }}
+ */
+export let CreativeData;
+
 
 /**
  * Render AMP creative into FriendlyFrame via templatization.
  */
-export class TemplateRenderer extends FriendlyFrameRenderer {
+export class TemplateRenderer extends Renderer {
+
+  /**
+   * Constructs a TemplateRenderer instance.
+   */
+  constructor() {
+    super();
+  }
+
   /** @override */
-  render(context, element, validatorData) {
-    const {creativeData} = validatorData;
-    return super.render(context, element, creativeData).then(() => {
-      const templateHelper = getAmpAdTemplateHelper(context.win);
-      return templateHelper
-          .render(
-              creativeData.templateData.data,
-              this.iframe.contentWindow.document.body)
-          .then(renderedElement => {
-            const {analytics} = creativeData.templateData;
-            if (analytics) {
-              templateHelper.insertAnalytics(renderedElement, analytics);
-            }
-            // This element must exist, or #render() would have thrown.
-            const templateElement = this.iframe.contentWindow.document
-                .getElementsByTagName('template')[0];
-            this.iframe.contentWindow.document.body
-                .removeChild(templateElement);
-            this.iframe.contentWindow.document.body
-                .appendChild(renderedElement);
-	  });
-    });
+  render(context, element, creativeData) {
+
+    creativeData = /** @type {CreativeData} */ (creativeData);
+
+    const {size, adUrl} = context;
+    const {creativeMetadata} = creativeData;
+
+    dev().assert(size, 'missing creative size');
+    dev().assert(adUrl, 'missing ad request url');
+
+    return renderCreativeIntoFriendlyFrame(
+        adUrl, size, element, creativeMetadata)
+        .then(iframe => {
+          const templateData =
+          /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+              creativeData.templateData);
+          const {data} = templateData;
+          if (!data) {
+            return Promise.resolve();
+          }
+          const templateHelper = getAmpAdTemplateHelper(context.win);
+          return templateHelper
+              .render(data, iframe.contentWindow.document.body)
+              .then(renderedElement => {
+                const {analytics} = templateData;
+                if (analytics) {
+                  templateHelper.insertAnalytics(renderedElement, analytics);
+                }
+                // This element must exist, or #render() would have thrown.
+                const templateElement = iframe.contentWindow.document
+                    .querySelector('template');
+                templateElement.parentNode
+                    .replaceChild(renderedElement, templateElement);
+              });
+        });
   }
 }

@@ -42,10 +42,8 @@ describes.realWin('NameFrameRenderer', realWinConfig, env => {
     };
 
     creativeData = {
-      crossDomainData: {
-        rawCreativeBytes: utf8Encode(minifiedCreative),
-        additionalContextMetadata: {},
-      },
+      rawCreativeBytes: utf8Encode(minifiedCreative),
+      additionalContextMetadata: {},
     };
 
     containerElement = document.createElement('div');
