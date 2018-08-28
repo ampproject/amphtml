@@ -152,7 +152,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   /**
    * A click (left or right) on an anchor has happened,
    * fire NA clicks if needed.
-   * @param {!{linkRewriterId: ?string, anchor: !Element}} eventData - click event information
+   * @param {!{linkRewriterId: ?string, anchor: !HTMLElement}} eventData - click event information
    * @private
    */
   onClick_(eventData) {

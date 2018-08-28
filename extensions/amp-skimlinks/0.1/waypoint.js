@@ -4,6 +4,9 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 
 
+/**
+ * The waypoint class is responsible for building the affiliated url.
+ */
 export class Waypoint {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -24,7 +27,8 @@ export class Waypoint {
   }
 
   /**
-   *
+   * Creates the go.redirectingat.com version of the anchor's url.
+   * @public
    * @param {HTMLElement} anchor
    * @return {?string}
    */

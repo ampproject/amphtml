@@ -13,6 +13,16 @@ import {
 } from './constants';
 
 
+/**
+ * The Tracking class exposes some public methods to
+ * send the 3 potential Skimlinks tracking requests to Skimlinks tracking API:
+ *  - Page impression tracking
+ *  - Link impression tracking
+ *  - Non-affiliate click tracking.
+ *
+ * It uses the amp-analytics internal API (https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-components-analytics.md)
+ * in order to send the tracking requests.
+ */
 export class Tracking {
   /**
    * Use tracking instance to track page impressions,
@@ -21,8 +31,10 @@ export class Tracking {
    * @param {Object} skimOptions
    */
   constructor(element, skimOptions) {
+    /** @private {boolean} */
     this.tracking_ = skimOptions.tracking;
 
+    /** @private {!Object} */
     this.trackingInfo_ = {
       pubcode: skimOptions.pubcode,
       // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
@@ -38,43 +50,27 @@ export class Tracking {
   }
 
   /**
-   *
-   * @param {AmpElement} element
-   */
-  setupAnalytics_(element) {
-    // Analytics are not ready until CommonSignals.LOAD_START is triggered.
-    const analyticsBuilder = new CustomEventReporterBuilder(element);
-    analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
-    analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
-    analyticsBuilder.track('non-affiliate-click', NA_CLICK_TRACKING_URL);
-
-    const analytics = analyticsBuilder.build();
-    // Overwrite config manually since CustomEventReporterBuilder doesn't
-    // support optional config.
-    // TODO: add optional config param to .build() so we don't need to mutate
-    // a private property from outside.
-    analytics.config_.transport = {beacon: true};
-
-    return analytics;
-  }
-
-  /**
-   *
+   * Getter to access the tracking data from outside the class.
+   * @public
+   * @return {Object}
    */
   getTrackingInfo() {
     return this.trackingInfo_;
   }
 
   /**
-   * Update tracking info
-   * @param {Object} newInfo
+   * Setter to update the tracking data from outside the class.
+   * This is mainly used for setting the guid that we receive from beaconAPI.
+   * @public
+   * @param {!Object} newInfo
    */
   setTrackingInfo(newInfo) {
     Object.assign(this.trackingInfo_, newInfo);
   }
 
   /**
-   * Send Page impression and link impressions
+   * Sends "Page impression" and "Link impression" tracking requests (POST).
+   * @public
    * @param {*} anchorStatusMap
    * @param {number} startTime
    */
@@ -90,6 +86,7 @@ export class Tracking {
       guid,
     } = this.trackingInfo_;
 
+    // This data is common to both page & link impression requests.
     const commonData = {
       pub: pubcode,
       pag: pageUrl,
@@ -104,7 +101,6 @@ export class Tracking {
       urls,
     } = this.extractAnchorTrackingInfo_(anchorStatusMap);
 
-
     this.sendPageImpressionTracking_(
         commonData,
         numberAffiliateLinks,
@@ -114,8 +110,10 @@ export class Tracking {
   }
 
   /**
-   * Send tracking to register non-affiliated click.
-   * @param {*} anchor
+   * Sends tracking request to Skimlinks tracking API in order to
+   * register non-affiliated click.
+   * @public
+   * @param {HTMLElement} anchor
    */
   sendNaClickTracking(anchor) {
     if (!this.tracking_) {
@@ -143,13 +141,17 @@ export class Tracking {
       platform: PLATFORM_NAME,
     });
 
+    // Triggers POST request. Second param is the object used to interpolate
+    // placeholder variables defined in NA_CLICK_TRACKING_URL.
     this.analytics_.trigger('non-affiliate-click', {
       data: JSON.stringify(data), rnd: 'RANDOM',
     });
   }
 
   /**
-   * Page impression tracking request
+   * Sends tracking request to Skimlinks tracking API in order to
+   * register page impression request.
+   * @private
    * @param {Object} commonData
    * @param {number} numberAffiliateLinks
    * @param {number} startTime
@@ -166,13 +168,17 @@ export class Tracking {
       t: 1,
     }, commonData));
 
+    // Triggers POST request. Second param is the object used to interpolate
+    // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL.
     this.analytics_.trigger('page-impressions', {
       data: JSON.stringify(data),
     });
   }
 
   /**
-   * Link impressions tracking request
+   * Sends tracking request to Skimlinks tracking API in order to
+   * register link impression request.
+   * @private
    * @param {Object} commonData
    * @param {number} numberAffiliateLinks
    * @param {Object} urls
@@ -184,14 +190,51 @@ export class Tracking {
       typ: 'l',
     }, commonData));
 
+    // Triggers POST request. Second param is the object used to interpolate
+    // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
     this.analytics_.trigger('link-impressions', {
       data: JSON.stringify(data),
     });
   }
 
+
   /**
+   * Initialise the amp-analytics internal API.
+   * @private
+   * @param {AmpElement} element
+   */
+  setupAnalytics_(element) {
+    // Analytics are not ready until CommonSignals.LOAD_START is triggered.
+    const analyticsBuilder = new CustomEventReporterBuilder(element);
+    analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
+    analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
+    analyticsBuilder.track('non-affiliate-click', NA_CLICK_TRACKING_URL);
+
+    const analytics = analyticsBuilder.build();
+    /*
+      Use {beacon: true} to send the request through sendBeacon()
+      https://www.ampproject.org/docs/analytics/deep_dive_analytics#how-data-gets-sent:-transport-attribute
+
+      Overwrite config manually since CustomEventReporterBuilder doesn't
+      support optional config.
+      TODO: add optional config param to .build() so we don't need to mutate
+      a private property from outside.
+    */
+    analytics.config_.transport = {beacon: true};
+
+    return analytics;
+  }
+
+  /**
+   * Extract the information about links on the page
+   * in order to send it to the tracking API:
+   * - Number of affiliate links on the pages
+   * - A map of each url seen on the page associated with some information:
+   *   i.e: {url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1}}
    *
-   * @param {*} anchorStatusMap
+   * @private
+   * @param {*} anchorStatusMap - Map of all the anchors on the page
+   *    associated with their potential replacement url.
    * @return {{numberAffiliateLinks: number, urls: Object}}
    */
   extractAnchorTrackingInfo_(anchorStatusMap) {
@@ -213,7 +256,7 @@ export class Tracking {
 
     return {
       numberAffiliateLinks,
-      urls, // Object like { url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1 } }
+      urls,
     };
   }
 }
