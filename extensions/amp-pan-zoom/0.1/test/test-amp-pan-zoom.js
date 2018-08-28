@@ -15,6 +15,7 @@
  */
 
 import '../amp-pan-zoom';
+import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin('amp-pan-zoom', {
   amp: {
@@ -26,14 +27,7 @@ describes.realWin('amp-pan-zoom', {
   let svg;
 
   const measureMutateElementStub = (measure, mutate) => {
-    let result = Promise.resolve();
-    if (measure) {
-      result = result.then(measure);
-    }
-    if (mutate) {
-      result = result.then(mutate);
-    }
-    return result;
+    return Promise.resolve().then(measure).then(mutate);
   };
 
   /**
@@ -43,27 +37,20 @@ describes.realWin('amp-pan-zoom', {
    * @param {Object} opt_attributes
    */
   function getPanZoom(opt_attributes) {
-    el = doc.createElement('amp-pan-zoom');
-    // Default attributes that can be overidden
-    el.setAttribute('layout', 'fixed');
-    el.setAttribute('width', '300');
-    el.setAttribute('height', '400');
+    el = htmlFor(doc)`
+      <amp-pan-zoom layout="fixed" width ="300" height="400">
+      </amp-pan-zoom>
+    `;
 
     for (const key in opt_attributes) {
       el.setAttribute(key, opt_attributes[key]);
     }
 
-    svg = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '100');
-    svg.setAttribute('height', '100');
-    const svgNS = svg.namespaceURI;
-    const rect = doc.createElementNS(svgNS,'rect');
-    rect.setAttribute('x', '0');
-    rect.setAttribute('y', '0');
-    rect.setAttribute('width','100');
-    rect.setAttribute('height','100');
-    rect.setAttribute('fill','#95B3D7');
-    svg.appendChild(rect);
+    svg = htmlFor(doc)`
+      <svg width="100" height="100">
+        <rect width="100" height="100" fill="#95B3D7"></rect>
+      </svg>
+    `;
 
     el.appendChild(svg);
     doc.body.appendChild(el);
@@ -72,10 +59,7 @@ describes.realWin('amp-pan-zoom', {
       sandbox.stub(impl, 'measureMutateElement')
           .callsFake(measureMutateElementStub);
       sandbox.stub(impl, 'mutateElement')
-          .callsFake(mutate => {
-            mutate();
-            return Promise.resolve();
-          });
+          .callsFake(mutate => measureMutateElementStub(undefined, mutate));
     });
   }
 
@@ -100,17 +84,17 @@ describes.realWin('amp-pan-zoom', {
       expect(impl.initialX_).to.equal(1);
       expect(impl.initialY_).to.equal(5);
       expect(impl.maxScale_).to.equal(4);
-      expect(impl.resetOnResize_).to.equal(true);
-      expect(impl.disableDoubleTap_).to.equal(true);
+      expect(impl.resetOnResize_).to.be.true;
+      expect(impl.disableDoubleTap_).to.be.true;
     });
   });
 
   it('should size contents correctly', () => {
     return getPanZoom().then(() => el.layoutCallback()).then(() => {
-      expect(svg.style.width).to.equal('300px');
-      expect(svg.style.height).to.equal('300px');
-      expect(svg.classList.contains('i-amphtml-pan-zoom-child')).to.equal(true);
-      expect(el.classList.contains('i-amphtml-pan-zoom')).to.equal(true);
+      expect(svg.clientWidth).to.equal(300);
+      expect(svg.clientHeight).to.equal(300);
+      expect(svg.getAttribute('class')).to.match(/i-amphtml-pan-zoom-child/);
+      expect(el.className).to.match(/i-amphtml-pan-zoom/);
     });
   });
 
