@@ -529,7 +529,7 @@ async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
       if (!(await waitForElementVisibility(page, css, {hidden: true}))) {
         log('fatal', colors.cyan(url), '| An element with the CSS selector',
             colors.cyan(css),
-            `is still visible after ${CSS_SELECTOR_RETRY_MS} ms`);
+            `is still visible after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
       }
     }
   }
@@ -550,7 +550,7 @@ async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
       if (!(await waitForElementVisibility(page, css, {visible: true}))) {
         log('fatal', colors.cyan(url), '| An element with the CSS selector',
             colors.cyan(css),
-            `is still invisible after ${CSS_SELECTOR_RETRY_MS} ms`);
+            `is still invisible after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
       }
     }
   }
