@@ -305,7 +305,7 @@ gulp firebase
 firebase deploy
 ```
 
-`gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`). It assumes that you have already run `gulp build` or `gulp dist` prior to running `gulp firebase`.  When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
+`gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`). It assumes that you have already run `gulp build` or `gulp dist` prior to running `gulp firebase` (use `gulp build` with `gulp firebase` and `gulp dist` with `gulp firebase --min`.  When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
 
 ```
 {
