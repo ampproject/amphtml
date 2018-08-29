@@ -591,6 +591,50 @@ describes.realWin('placement', {
           });
     });
 
+    it('should not resize to full-width responsive if width exceeds limit',
+        () => {
+          const anchor = doc.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const resource = Services.resourcesForDoc(anchor);
+          sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(resource.viewport_, 'getWidth').callsFake(() => 2000);
+
+          const placements = getPlacementsFromConfigObj(ampdoc, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+
+          const attributes = {
+            'type': '_ping_',
+          };
+
+          const sizing = {};
+
+          const adTracker = new AdTracker([], {
+            initialMinSpacing: 0,
+            subsequentMinSpacing: [],
+            maxAdCount: 10,
+          });
+          return placements[0].placeAd(attributes, sizing, adTracker, true)
+              .then(placementState => {
+                expect(resource.attemptChangeSize).to.have.been.calledWith(
+                    anchor.firstChild, 250, undefined);
+                expect(placementState).to.equal(PlacementState.PLACED);
+              });
+        });
+
     it('should resize to full-width responsive correctly in ltr',
         () => {
           const anchor = doc.createElement('div');

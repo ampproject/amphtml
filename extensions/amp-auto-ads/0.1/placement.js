@@ -50,6 +50,11 @@ let PlacementSizingDef;
 const TARGET_AD_HEIGHT_PX = 250;
 
 /**
+ * @const
+ */
+const MAXIMUM_RESPONSIVE_WIDTH = 1200;
+
+/**
  * @enum {number}
  */
 export const PlacementState = {
@@ -236,9 +241,9 @@ export class Placement {
    * @private
    */
   getPlacementSizing_(sizing, isResponsiveEnabled) {
-    if (isResponsiveEnabled) {
-      const viewport = this.resources_.getViewport();
-      const viewportWidth = viewport.getWidth();
+    const viewport = this.resources_.getViewport();
+    const viewportWidth = viewport.getWidth();
+    if (isResponsiveEnabled && viewportWidth <= MAXIMUM_RESPONSIVE_WIDTH) {
       const viewportHeight = viewport.getHeight();
       const responsiveHeight =
         getResponsiveHeightForContext_(viewportWidth, viewportHeight);
