@@ -165,33 +165,10 @@ amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
     justify-content: center !important;
   }
 
-  .i-amphtml-story-access-overflow {
-    margin-top: 0 !important;
-    border-radius: 6px !important;
-    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.2) !important;
-  }
-
   .i-amphtml-story-access-container {
-    display: flex !important;
-    flex-direction: column !important;
     margin: 0 !important;
-    max-height: 60vh !important;
-    min-height: 20vh !important;
     width: calc(100vw - 80px) !important;
     max-width: 800px !important;
-    border-radius: 0px !important;
-    opacity: 0 !important;
-    transform: translate3d(0, 0, 0) !important;
-    transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
-  }
-
-  [type=notification] .i-amphtml-story-access-container {
-    min-height: 0 !important;
-  }
-
-  .i-amphtml-story-access-visible .i-amphtml-story-access-container {
-    opacity: 1 !important;
-    transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   }
 
   .i-amphtml-story-access-content {
@@ -201,8 +178,31 @@ amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
     overflow-y: auto !important;
   }
 
+  .i-amphtml-story-access-overflow::-webkit-scrollbar,
   .i-amphtml-story-access-content::-webkit-scrollbar {
     width: 0px !important;
     background: transparent !important;
+  }
+
+  [type="blocking"] .i-amphtml-story-access-overflow {
+    margin-top: 0 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  [type="blocking"] .i-amphtml-story-access-container {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 60vh !important;
+    min-height: 20vh !important;
+    border-radius: 0px !important;
+    opacity: 0 !important;
+    transform: translate3d(0, 0, 0) !important;
+    transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  }
+
+  [type="blocking"].i-amphtml-story-access-visible .i-amphtml-story-access-container {
+    opacity: 1 !important;
+    transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   }
 }
