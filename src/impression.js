@@ -36,6 +36,23 @@ const DEFAULT_APPEND_URL_PARAM = [
 ];
 
 /**
+ * These domains are trusted with more sensitive viewer operations such as
+ * sending impression requests. If you believe your domain should be here,
+ * file the issue on GitHub to discuss. The process will be similar
+ * (but somewhat more stringent) to the one described in the [3p/README.md](
+ * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ *
+ * @export {!Array<!RegExp>}
+ */
+const TRUSTED_REFERRER_HOSTS = [
+  /**
+   * Twitter's link wrapper domains:
+   * - t.co
+   */
+  /^t.co$/,
+];
+
+/**
  * A function to get the trackImpressionPromise;
  * @return {!Promise}
  */
@@ -60,7 +77,6 @@ export function maybeTrackImpression(win) {
   const deferred = new Deferred();
   const {promise, resolve: resolveImpression} = deferred;
 
-
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
       promise, 'TrackImpressionPromise timeout').catch(error => {
     dev().warn('IMPRESSION', error);
@@ -68,7 +84,8 @@ export function maybeTrackImpression(win) {
 
   const viewer = Services.viewerForDoc(win.document);
   const isTrustedViewerPromise = viewer.isTrustedViewer();
-  const isTrustedReferrerPromise = viewer.isTrustedReferrer();
+  const isTrustedReferrerPromise = viewer.getReferrerUrl().then(
+      referrer => isTrustedReferrer(referrer));
   Promise.all([
     isTrustedViewerPromise,
     isTrustedReferrerPromise,
@@ -139,6 +156,17 @@ function handleReplaceUrl(win) {
       });
 }
 
+/**
+ * @param {string} referrer
+ * @visibleForTesting
+ */
+export function isTrustedReferrer(referrer) {
+  const url = parseUrlDeprecated(referrer);
+  if (url.protocol != 'https:') {
+    return false;
+  }
+  return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
+}
 
 /**
  * Perform the impression request if it has been provided via
