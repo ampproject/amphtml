@@ -57,7 +57,7 @@ amp-story-access[type=blocking]::before {
 }
 
 amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
-  opacity: 0.4 !important;
+  opacity: 0.55 !important;
   transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
