@@ -311,6 +311,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Purch](../../ads/purch.md)
 - [Rambler&Co](../../ads/capirs.md)
 - [Realclick](../../ads/realclick.md)
+- [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
