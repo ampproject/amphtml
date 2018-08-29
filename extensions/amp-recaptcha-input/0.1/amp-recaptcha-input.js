@@ -21,14 +21,13 @@
  */
 
 import {AmpRecaptcha} from './amp-recaptcha-service';
+import {LayoutPriority} from '../../../src/layout';
 
 export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    console.log('ayyeee');
   }
 
   /** @override */
@@ -38,15 +37,15 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('layout callback!');
-    return AmpRecaptcha.register(this);
+    console.log('layout callback!', this);
+    return AmpRecaptcha.register(this.win, this.element);
   }
 
   /**
    * @override
    */
   unlayoutCallback() {
-    AmpRecaptcha.unregister(this);
+    AmpRecaptcha.unregister(this.element);
     return true;
   }
 }

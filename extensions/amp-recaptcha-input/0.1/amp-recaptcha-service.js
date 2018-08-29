@@ -45,14 +45,13 @@ class AmpRecaptchaService {
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
-   * @param {!AmpElement} element
    * @param {!Window} win
+   * @param {!AmpElement} element
    */
-  register(element, win) {
-    console.log(element);
-    this.registeredElement.push(element);
+  register(win, element) {
+    this.registeredElements.push(element);
     if (!this.iframe_) {
-      return this.initialize_(element, win);
+      return this.initialize_(win, element);
     }
     return Promise.resolve(); 
   }
@@ -85,12 +84,12 @@ class AmpRecaptchaService {
   
   /**
    * Function to create and load our recaptcha boostrap iframe.
-   * @param {!AmpElement} element
    * @param {!Window} win
+   * @param {!AmpElement} element
    * @return {Promise}
    * @private
    */
-  initialize_(element, win) {
+  initialize_(win, element) {
 
     /* the third parameter 'recaptcha' ties it to the 3p/recaptcha.js */
     this.iframe_ = getIframe(win, element, 'recaptcha');

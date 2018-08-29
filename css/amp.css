@@ -642,6 +642,18 @@ amp-analytics, amp-story-auto-ads {
 }
 
 /**
+ *  amp-recaptcha-input should never be visible. 
+ * But positioned next to it's containing element
+ */
+amp-recaptcha-input {
+  position: absolute !important; 
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
+/**
  * Iframe allows setting frameborder, so we need to set box-sizing to border-box
  * or otherwise the iframe will oevrflow its parent when there is a border.
  */
