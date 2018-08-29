@@ -329,27 +329,27 @@ describes.fakeWin('domain-resolver', {
 
 
 
-    describe('getLinkDomain_', () => {
+    describe('getAnchorDomain_', () => {
       const resolver = new AffiliateLinkResolver({}, {}, waypoint);
 
       it('Removes  http protocol', () => {
         const anchor = helpers.createAnchor('http://test.com');
-        expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
+        expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
       });
 
       it('removes // protocol', () => {
         const anchor = helpers.createAnchor('//test.com/');
-        expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
+        expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
       });
 
       it('Removes www.', () => {
         const anchor = helpers.createAnchor('http://www.test.com');
-        expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
+        expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
       });
 
       it('Removes the path and query params', () => {
         const anchor = helpers.createAnchor('http://www.test.com/hello-word?test=1');
-        expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
+        expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
       });
     });
 
