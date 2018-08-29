@@ -121,8 +121,14 @@ describes.realWin('amp-consent', {
       });
 
       it('assert valid config', () => {
+        const scriptTypeError = 'amp-consent: config should ' +
+            'be put in a <script> tag with type = "application/json"';
+        const consentExistError = 'amp-consent: consents config is required';
+        const multiScriptError =
+            'amp-consent: should have (only) one <script> child';
         // Check script type equals to application/json
         const consentElement = doc.createElement('amp-consent');
+        consentElement.setAttribute('id', 'test');
         consentElement.setAttribute('layout', 'nodisplay');
         const scriptElement = doc.createElement('script');
         scriptElement.textContent = JSON.stringify(defaultConfig);
@@ -131,16 +137,15 @@ describes.realWin('amp-consent', {
 
         doc.body.appendChild(consentElement);
         const ampConsent = new AmpConsent(consentElement);
-        //ampConsent.assertAndParseConfig_();
         allowConsoleError(() => {
-          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+          expect(() => ampConsent.buildCallback()).to.throw(scriptTypeError);
         });
 
         // Check consent config exists
         scriptElement.setAttribute('type', 'application/json');
         scriptElement.textContent = JSON.stringify({});
         allowConsoleError(() => {
-          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+          expect(() => ampConsent.buildCallback()).to.throw(consentExistError);
         });
 
         // Check there is only one script object
@@ -148,7 +153,7 @@ describes.realWin('amp-consent', {
         const script2 = doc.createElement('script');
         consentElement.appendChild(script2);
         allowConsoleError(() => {
-          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+          expect(() => ampConsent.buildCallback()).to.throw(multiScriptError);
         });
       });
 

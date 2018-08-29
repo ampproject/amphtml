@@ -19,8 +19,8 @@
  * {@link http://json.org/}.
  */
 
+import {childElementsByTag, isJsonScriptTag} from './dom';
 import {isObject} from './types';
-
 
 // NOTE Type are changed to {*} because of
 // https://github.com/google/closure-compiler/issues/1999
@@ -132,6 +132,27 @@ export function tryParseJson(json, opt_onFailed) {
     }
     return undefined;
   }
+}
+
+/**
+ * Helper method to get the json config from an element <script> tag
+ * Throws error if there is no or more than one <script> tag,
+ * or <script> tag has type value not equal to application/json
+ * or cannot parse the json object
+ * @param {!Element} element
+ * @return {?JsonObject}
+ */
+export function getSingleChildJsonConfig(element) {
+  const scripts = childElementsByTag(element, 'script');
+  if (scripts.length != 1) {
+    throw new Error('should have (only) one <script> child');
+  }
+  const script = scripts[0];
+  if (!isJsonScriptTag(script)) {
+    throw new Error('config should be put in a <script> tag with type = ' +
+        '"application/json"');
+  }
+  return parseJson(script.textContent);
 }
 
 /**

@@ -16,6 +16,7 @@
 
 import {
   deepEquals,
+  getSingleChildJsonConfig,
   getValueForExpr,
   recreateNonProtoObject,
   tryParseJson,
@@ -162,6 +163,52 @@ describe('json', () => {
         expect(err).to.exist;
       });
       expect(onFailedCalled).to.be.true;
+    });
+  });
+
+  describe('getSingleChildJsonConfig', () => {
+    let element;
+    let script;
+    let text;
+    beforeEach(() => {
+      element = document.createElement('div');
+      script = document.createElement('script');
+      script.setAttribute('type', 'application/json');
+      text = '{"a":{"b": "c"}}';
+      script.textContent = text;
+    });
+
+    it('return json config', () => {
+      element.appendChild(script);
+      expect(getSingleChildJsonConfig(element)).to.deep.equal({
+        'a': {
+          'b': 'c',
+        },
+      });
+    });
+
+    it('throw if not one script', () => {
+      expect(() => getSingleChildJsonConfig(element)).to.throw(
+          'should have (only) one <script> child');
+      element.appendChild(script);
+      const script2 = document.createElement('script');
+      element.appendChild(script2);
+      expect(() => getSingleChildJsonConfig(element)).to.throw(
+          'should have (only) one <script> child');
+    });
+
+    it('throw if type is not application/json', () => {
+      script.setAttribute('type', '');
+      element.appendChild(script);
+      expect(() => getSingleChildJsonConfig(element)).to.throw('config ' +
+        'should be put in a <script> tag with type = "application/json"');
+    });
+
+    it('throw if cannot parse json', () => {
+      const invalidText = '{"a":{"b": "c",}}';
+      script.textContent = invalidText;
+      element.appendChild(script);
+      expect(() => getSingleChildJsonConfig(element)).to.throw();
     });
   });
 
