@@ -36,25 +36,6 @@ const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 const allowedJsonBodyTypes_ = [isArray, isObject];
 
 /**
- * The "init" argument of the Fetch API. Currently, only "credentials: include"
- * is implemented.  Note ampCors with explicit false indicates that
- * __amp_source_origin should not be appended to the URL to allow for
- * potential caching or response across pages.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- *
- * @typedef {{
- *   body: (!Object|!Array|undefined|string),
- *   credentials: (string|undefined),
- *   headers: (!JsonObject|undefined),
- *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
- * }}
- */
-export let FetchInitDef;
-
-/**
  * Serializes a fetch request so that it can be passed to `postMessage()`,
  * i.e., can be cloned using the
  * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
@@ -101,7 +82,7 @@ export function toStructuredCloneable(input, init) {
   const newInit = Object.assign({}, init);
   if (isFormDataWrapper(init.body)) {
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
-    newInit.body = fromIterator(init.body.entries());
+    newInit.body = fromIterator(/** @type {!FormDataWrapper} **/ (init.body).entries());
   }
   return {input, init: newInit};
 }
@@ -326,8 +307,8 @@ export function setupAMPCors(win, input, init) {
 }
 
 /**
- * @param {?FetchInitJsonDef=} init
- * @return {!FetchInitJsonDef}
+ * @param {?FetchInitDef=} init
+ * @return {!FetchInitDef}
  */
 export function setupJsonFetchInit(init) {
   const fetchInit = setupInit(init, 'application/json');
