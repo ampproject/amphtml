@@ -640,7 +640,7 @@ export class MeasureScanner extends Scanner {
       // whitelisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
-      const object = /** {!Object<string, *>} */ (specKeyframes);
+      const object = /** @type {!Object<string, *>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = {};
       for (const prop in object) {
@@ -669,7 +669,7 @@ export class MeasureScanner extends Scanner {
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
       // https://github.com/web-animations/web-animations-js/issues/14
-      const array = /** {!Array<!Object<string, *>>} */ (specKeyframes);
+      const array = /** @type {!Array<!Object<string, *>>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
