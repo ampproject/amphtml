@@ -92,8 +92,9 @@ export class LinkRewriterManager {
    * tracking requests, handlers of this events should not
    * mutate the anchor!
    * @param {HTMLElement} anchor
+   * @param {string} clickType - 'click' or 'contextmenu'
    */
-  maybeRewriteLink(anchor) {
+  maybeRewriteLink(anchor, clickType) {
     const suitableLinkRewriters = this.getSuitableLinkRewritersForLink_(anchor);
     if (suitableLinkRewriters.length) {
       let chosenLinkRewriter = null;
@@ -114,6 +115,7 @@ export class LinkRewriterManager {
       const eventData = {
         linkRewriterId,
         anchor,
+        clickType,
       };
 
       suitableLinkRewriters.forEach(linkRewriter => {

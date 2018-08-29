@@ -504,17 +504,17 @@ describes.sandboxed('Navigation', {}, () => {
     });
 
     describe('Link rewriting', () => {
-      it('Should ask to rewrite the link on click', () => {
+      it('Should give the chance to rewrite the link on click', () => {
         handler.handle_(event);
         expect(linkRewriterSpy).to.be.calledOnce;
-        expect(linkRewriterSpy).to.be.calledWith(anchor);
+        expect(linkRewriterSpy).to.be.calledWith(anchor, 'click');
       });
 
-      it('Should ask to rewrite the link on right click', () => {
+      it('Should give the chance to rewrite the link on right click', () => {
         event.type = 'contextmenu';
         handler.handle_(event);
         expect(linkRewriterSpy).to.be.calledOnce;
-        expect(linkRewriterSpy).to.be.calledWith(anchor);
+        expect(linkRewriterSpy).to.be.calledWith(anchor, 'contextmenu');
       });
     });
 

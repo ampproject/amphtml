@@ -34,10 +34,10 @@ import {
 import {toWin} from '../types';
 
 const TAG = 'navigation';
-/** @private @const {string} */
-const EVENT_TYPE_CLICK = 'click';
-/** @private @const {string} */
-const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
+/** @public @const {string} */
+export const EVENT_TYPE_CLICK = 'click';
+/** @public @const {string} */
+export const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -229,7 +229,8 @@ export class Navigation {
       return;
     }
     this.linkRewriterService_.maybeRewriteLink(
-        /** @type {!HTMLElement} */ (target)
+        /** @type {!HTMLElement} */ (target),
+        e.type
     );
 
     if (e.type == EVENT_TYPE_CLICK) {

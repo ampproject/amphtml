@@ -157,17 +157,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       env.sandbox.spy(linkRewriterManager, 'getSuitableLinkRewritersForLink_');
     });
 
-    describe('Allowed click action types', () => {
-      it('Should return if action type not allowed', () => {
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_CUSTOM_PROTOCOL,
-        });
-        expect(linkRewriterManager.getSuitableLinkRewritersForLink_.called).to.be.false;
-      });
-    });
-
-
-    describe('Send click event', () => {
+    describe('Send clicks event', () => {
       let linkRewriterVendor1, linkRewriterVendor2, linkRewriterVendor3;
 
       function getEventData() {
@@ -227,6 +217,13 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
         // vendor2 has isWatchingLink to false therefore can not replace.
         expect(getEventData(linkRewriterVendor2).linkRewriterId).to.be.null;
         expect(getEventData(linkRewriterVendor3).linkRewriterId).to.be.null;
+      });
+
+      it('Should set the clickType', () => {
+        linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'), 'contextmenu');
+        expect(getEventData(linkRewriterVendor1).clickType).to.equal('contextmenu');
+        expect(getEventData(linkRewriterVendor2).clickType).to.equal('contextmenu');
+        expect(getEventData(linkRewriterVendor3).clickType).to.equal('contextmenu');
       });
     });
 

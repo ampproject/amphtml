@@ -9,10 +9,10 @@ import {AffiliateLinkResolver} from './affiliate-link-resolver';
 import {SKIMLINKS_REWRITER_ID} from './constants';
 import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewriter/constants';
 
+import {EVENT_TYPE_CONTEXT_MENU} from '../../../src/service/navigation';
 import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
-
 const startTime = new Date().getTime();
 
 
@@ -159,7 +159,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
   onClick_(eventData) {
     // The link was not monetizable or the link was replaced
     // by an other LinkRewriter.
-    if (eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID) {
+    const doClickTracking = eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID &&
+      eventData.clickType !== EVENT_TYPE_CONTEXT_MENU; // Right click should not track.
+    if (doClickTracking) {
       this.trackingService_.sendNaClickTracking(eventData.anchor);
     }
   }
