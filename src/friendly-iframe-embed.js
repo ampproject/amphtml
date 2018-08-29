@@ -519,28 +519,7 @@ export class FriendlyIframeEmbed {
     user().assert(ampAdParent.tagName.toLowerCase() == 'amp-ad',
         'Only <amp-ad> is allowed to enter lightbox mode.');
 
-    const bodyStyle = {
-      'background': 'transparent',
-      'position': 'absolute',
-      'bottom': 'auto',
-      'right': 'auto',
-
-      // Set for replacing with vsync values.
-      'top': '',
-      'left': '',
-      'width': '',
-      'height': '',
-    };
-
-    const iframeStyle = {
-      'position': 'fixed',
-      'left': 0,
-      'right': 0,
-      'bottom': 0,
-      'width': '100vw',
-      'top': 0,
-      'height': '100vh',
-    };
+    let bodyStyle;
 
     return this.measureMutate_({
       measure: () => {
@@ -553,19 +532,38 @@ export class FriendlyIframeEmbed {
         const {top, left, width, height} = moveLayoutRect(rect, /* dx */ 0, dy);
 
         // Offset body by header height to prevent visual jump.
-        Object.assign(bodyStyle, {
-          'top': px(top),
-          'left': px(left),
-          'width': px(width),
-          'height': px(height),
-        });
+        bodyStyle = {
+          top: px(top),
+          left: px(left),
+          width: px(width),
+          height: px(height),
+        };
       },
       mutate: () => {
         // !important to prevent abuse e.g. box @ ltwh = 0, 0, 0, 0
-        setImportantStyles(this.iframe, iframeStyle);
+        setImportantStyles(this.iframe, {
+          'position': 'fixed',
+          'left': 0,
+          'right': 0,
+          'bottom': 0,
+          'width': '100vw',
+          'top': 0,
+          'height': '100vh',
+        });
 
         // We need to override runtime-level !important rules
-        setImportantStyles(this.getBodyElement(), bodyStyle);
+        setImportantStyles(this.getBodyElement(), {
+          'background': 'transparent',
+          'position': 'absolute',
+          'bottom': 'auto',
+          'right': 'auto',
+
+          // Read during vsync measure phase.
+          'top': bodyStyle.top,
+          'left': bodyStyle.left,
+          'width': bodyStyle.width,
+          'height': bodyStyle.height,
+        });
       },
     });
   }

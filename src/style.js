@@ -15,6 +15,7 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
+import {dev} from './log';
 import {map} from './utils/object.js';
 import {startsWith} from './string';
 
@@ -36,7 +37,7 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
- * Checks the style if a prefixed version of a property exists and returns
+  Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
  * @param {!Object} style
@@ -98,9 +99,10 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
  * @param {!Object<string, *>} styles
  */
 export function setImportantStyles(element, styles) {
+  const {style} = element;
   for (const k in styles) {
-    element.style.setProperty(
-        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+    style.setProperty(
+        getVendorJsPropertyName(style, k), styles[k].toString(), 'important');
   }
 }
 
@@ -154,6 +156,27 @@ export function setStyles(element, styles) {
 
 
 /**
+ * Asserts that the styles does not contain the `display` style.
+ * This is the only possible way to pass a dynamic styles object to setStyles
+ * and setImportantStyles.
+ *
+ * If you wish to set `display`, use the `toggle` helper instead. This is so
+ * changes to display can trigger necessary updates. See #17475.
+ *
+ * @param {!Object<string, *>} styles
+ * @return {!Object<string, *>}
+ */
+export function assertDoesNotContainDisplay(styles) {
+  if ('display' in styles) {
+    dev().error('STYLE', '`display` style detected in styles. You must use ' +
+      'toggle instead.');
+  }
+  return styles;
+}
+
+
+
+/**
  * Shows or hides the specified element.
  * @param {!Element} element
  * @param {boolean=} opt_display
@@ -164,7 +187,6 @@ export function toggle(element, opt_display) {
   }
   setStyle(element, 'display', opt_display ? '' : 'none');
 }
-
 
 /**
  * Returns a pixel value.
@@ -270,9 +292,7 @@ export function computedStyle(win, el) {
  * @param {!Array<string>} properties
  */
 export function resetStyles(element, properties) {
-  const styleObj = {};
-  properties.forEach(prop => {
-    styleObj[prop] = null;
-  });
-  setStyles(element, styleObj);
+  for (let i = 0; i < properties.length; i++) {
+    setStyle(element, properties[i], null);
+  }
 }

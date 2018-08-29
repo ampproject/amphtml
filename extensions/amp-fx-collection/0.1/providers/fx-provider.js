@@ -19,6 +19,7 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
+import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
 import {convertEasingKeyword, defaultDurationValues,
   defaultEasingValues, defaultFlyInDistanceValues,
   defaultMarginValues, installStyles, resolvePercentageToNumber}
@@ -27,7 +28,6 @@ import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
-import {setStyles} from '../../../../src/style';
 
 /**
  * Class that implements the various preset animation providers.
@@ -66,7 +66,8 @@ export class FxProvider {
     new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.ampdoc_, this.fxType_);
-    setStyles(element, installStyles(element, this.fxType_));
+    setStyles(element, assertDoesNotContainDisplay(installStyles(
+        element, this.fxType_)));
   }
 }
 

@@ -1137,12 +1137,14 @@ function onMessage(global, event) {
       break;
     case 'resize':
       if (msg.args && msg.args.width && msg.args.height) {
-        const dimsStyles = {
+        setStyles(wrapperDiv, {
           'width': px(msg.args.width),
           'height': px(msg.args.height),
-        };
-        setStyles(wrapperDiv, dimsStyles);
-        setStyles(bigPlayDiv, dimsStyles);
+        });
+        setStyles(bigPlayDiv, {
+          'width': px(msg.args.width),
+          'height': px(msg.args.height),
+        });
         if (adsActive) {
           adsManager.resize(
               msg.args.width, msg.args.height,
