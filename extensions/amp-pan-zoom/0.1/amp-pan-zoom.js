@@ -532,10 +532,8 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     this.minX_ = Math.min(0, eWidth - (left + cWidth * (scale + 1) / 2));
     this.maxX_ = Math.max(0, (cWidth * scale - cWidth) / 2 - left);
-
     this.minY_ = Math.min(0, eHeight - (top + cHeight * (scale + 1) / 2));
     this.maxY_ = Math.max(0, (cHeight * scale - cHeight) / 2 - top);
-
   }
 
   /**
@@ -639,13 +637,12 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (dir == 0) {
       return;
     }
+    const {width, height} = this.elementBox_;
     const dist = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
-    const newScale = this.startScale_ * (1 + (dir * dist / 100));
-    const centerX = this.elementBox_.width / 2;
-    const centerY = this.elementBox_.height / 2;
-    const deltaCenterX = Math.abs(centerX - centerClientX);
-    const deltaCenterY = Math.abs(centerY - centerClientY);
     const pinchFactor = dist / 100;
+    const newScale = this.startScale_ * (1 + (dir * pinchFactor));
+    const deltaCenterX = width / 2 + this.getOffsetX_(centerClientX);
+    const deltaCenterY = height / 2 + this.getOffsetY_(centerClientY);
     const dx = pinchFactor > 1 ? deltaCenterX : deltaCenterX * pinchFactor;
     const dy = pinchFactor > 1 ? deltaCenterY : deltaCenterY * pinchFactor;
     this.onZoom_(newScale, dx, dy, /*animate*/ false);
