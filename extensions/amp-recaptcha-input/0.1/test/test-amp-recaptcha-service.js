@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-recaptcha-input'
-import '../../../amp-gist/0.1/amp-gist';
+import '../amp-recaptcha-input';
 import {AmpRecaptcha} from '../amp-recaptcha-service';
 
 describes.realWin('amp-recaptcha-service', {
