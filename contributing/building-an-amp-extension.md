@@ -27,6 +27,12 @@ rating viewer, you'd do this by building an extension.
 - [Type checking](#type-checking)
 - [Example PRs](#example-prs)
 
+# Checklist for creating an experiment
+
+-[] Create your directory structure.
+-[] Create an experiment. 
+-[] Check previous PRs of past experiments to model your extension after, if applicable. 
+
 ## A word on contributing
 
 We suggest that you open an "Intent to Implement" GitHub issue for your
@@ -57,6 +63,8 @@ The directory structure is below:
 ├── validator-amp-my-element.protoascii  # Validator rules (req'd)
 ├── amp-my-element.md                    # Element's main documentation (req'd)
 └── More documentation in .md files (optional)
+└── OWNERS.yaml # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md) (req'd)
+
 ```
 In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
 
@@ -630,7 +638,7 @@ required if the validator hasn't been updated yet to allow your newly
 created extension, otherwise people using it in production will
 invalidate all their AMP documents.
 
-You can add your extension as an experiment in the
+Add your extension as an experiment in the
 `amphtml/tools/experiments` file by adding a record for your extension
 in EXPERIMENTS variable.
 
@@ -808,3 +816,5 @@ $ gulp check-types
   - [amp-sidebar](https://github.com/ampproject/amphtml/commit/99634b18310129f4260e4172cb2750ae7b8ffbf0)
   - [amp-image-lightbox](https://github.com/ampproject/amphtml/commit/e6006f9ca516ae5d7d79267976d3df39cc1f9636)
   - [amp-accordion](https://github.com/ampproject/amphtml/commit/1aae4eee37ec80c6ea9b822fb43ecce73feb7df6)
+- Implementing a video player.
+  - [amp-jwplayer](https://github.com/ampproject/amphtml/commit/4acdd9f1d70a8a374cb886d3a4778476d13e7daf#diff-f650f38f7840dc8148bacd88733be338)
