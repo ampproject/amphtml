@@ -75,6 +75,7 @@
     "amphtml-internal/no-import": 2,
     "amphtml-internal/no-mixed-operators": 2,
     "amphtml-internal/no-spread": 2,
+    "amphtml-internal/no-style-display": 2,
     "amphtml-internal/no-style-property-setting": 2,
     "amphtml-internal/no-swallow-return-from-allow-console-error": 2,
     "amphtml-internal/prefer-deferred-promise": 1,

@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {
+  assertDoesNotContainDisplay,
+  px,
+  setImportantStyles,
+  setStyle,
+} from '../../../src/style';
 import {childElementsByTag, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setImportantStyles, setStyle} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {toArray, toWin} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
@@ -263,8 +268,8 @@ export class PageScalingService {
         scalableElements(page).forEach((el, i) => {
           // `border-box` required since layer now has a width/height set.
           setImportantStyles(el, {'box-sizing': 'border-box'});
-          setImportantStyles(el,
-              this.scalingStyles(targetDimensions, scalableElsDimensions[i]));
+          setImportantStyles(el, assertDoesNotContainDisplay(this.scalingStyles(
+              targetDimensions, scalableElsDimensions[i])));
         });
         markScalingApplied(page);
       },
