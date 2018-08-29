@@ -444,6 +444,7 @@ describes.realWin('Doubleclick SRA', config , env => {
         bodyUsed: false,
         headers: {
           get: header => headers[header],
+          has: header => header in headers,
         },
         text: () => {
           throw new Error('should not be SRA!');
