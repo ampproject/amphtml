@@ -41,7 +41,7 @@ export default class Tracking {
    * @param {*} element
    */
   setupAnalytics_(element) {
-    // Note: Analytics are not ready until CommonSignals.LOAD_START is triggered.
+    // Analytics are not ready until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(element);
     analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
     analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
@@ -69,24 +69,29 @@ export default class Tracking {
    * @param {*} newInfo
    */
   setTrackingInfo(newInfo) {
-    this.trackingInfo_ = Object.assign(this.trackingInfo_, newInfo);
+    Object.assign(this.trackingInfo_, newInfo);
   }
 
   /**
    * Send Page impression and link impressions
-   * @param {*} userSessionData
    * @param {*} anchorStatusMap
    * @param {*} startTime
    */
-  sendImpressionTracking(userSessionData, anchorStatusMap, startTime) {
+  sendImpressionTracking(anchorStatusMap, startTime) {
     if (!this.tracking_) {
       return;
     }
-    const {pageImpressionId, timezone, pubcode, pageUrl, guid} = this.trackingInfo_;
+    const {
+      pageImpressionId,
+      timezone,
+      pubcode,
+      pageUrl,
+      guid,
+    } = this.trackingInfo_;
 
     const commonData = {
       pub: pubcode,
-      pag: pageUrl, // TODO: is this the same as this.referer_?
+      pag: pageUrl,
       guid,
       uuid: pageImpressionId,
       tz: timezone,
@@ -99,7 +104,11 @@ export default class Tracking {
     } = this.extractAnchorTrackingInfo_(anchorStatusMap);
 
 
-    this.sendPageImpressionTracking_(commonData, numberAffiliateLinks, startTime);
+    this.sendPageImpressionTracking_(
+        commonData,
+        numberAffiliateLinks,
+        startTime
+    );
     this.sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls);
   }
 
@@ -168,7 +177,7 @@ export default class Tracking {
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
     const data = Object.assign({
-      dl: urls, // DO WE NEED TO REPLACE URL FIRST? ISN'T THIS DONE AUTOMATICALLY?
+      dl: urls,
       hae: numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
       typ: 'l',
     }, commonData);
@@ -187,15 +196,12 @@ export default class Tracking {
     const urls = {};
 
     anchorStatusMap.forEach((replacementUrl, anchor) => {
-      const urlState = urls[anchor.href];
-      if (urlState) {
-        urlState.count = urlState.count + 1;
-      } else {
-        urls[anchor.href] = {
-          count: 1,
-          ae: replacementUrl ? 1 : 0,
-        };
-      }
+      urls[anchor.href] = urls[anchor.href] || {
+        ae: replacementUrl ? 1 : 0,
+        count: 0,
+      };
+
+      urls[anchor.href].count += 1;
 
       if (urls[anchor.href].ae === 1) {
         numberAffiliateLinks = numberAffiliateLinks + 1;
@@ -208,5 +214,3 @@ export default class Tracking {
     };
   }
 }
-
-

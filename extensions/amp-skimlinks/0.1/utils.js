@@ -27,15 +27,3 @@ export function generatePageImpressionId() {
 
   return str;
 }
-
-/**
- * Promise version of setTimeout(cb, 0);
- */
-export function nextTick() {
-  const deferred = new Deferred();
-  setTimeout(() => {
-    deferred.resolve();
-  });
-
-  return deferred.promise;
-}

@@ -1,10 +1,12 @@
 import {AmpEvents} from '../../src/amp-events';
 import {ORIGINAL_URL_ATTRIBUTE, PRIORITY_META_TAG_NAME, EVENTS as linkRewriterEvents} from '../../src/service/link-rewrite/constants';
+import { Services } from '../../src/services';
 import {anchorClickActions} from '../../src/service/navigation';
 import {createCustomEvent} from '../../src/event-helper';
 import {createTwoStepsResponse} from '../../src/service/link-rewrite/link-rewrite-helpers';
 import LinkRewriteService from '../../src/service/link-rewrite/link-rewrite-service';
 import LinkRewriter from '../../src/service/link-rewrite/link-rewriter';
+
 
 describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
   let iframeDoc, linkRewriteService, win;
@@ -38,10 +40,10 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     };
 
     addPriorityMetaTagHelper = priorityRule => {
-      const meta = iframeDoc.createElement('meta');
-      meta.setAttribute('name', PRIORITY_META_TAG_NAME);
-      meta.setAttribute('content', priorityRule);
-      iframeDoc.head.appendChild(meta);
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+        metaTags: {[PRIORITY_META_TAG_NAME]: priorityRule},
+      });
+
       linkRewriteService = new LinkRewriteService(env.ampdoc);
     };
   });
@@ -200,9 +202,9 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
 
         linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
 
-        expect(getEventData(linkRewriterVendor1).replacedBy).to.equal('vendor1');
-        expect(getEventData(linkRewriterVendor2).replacedBy).to.equal('vendor1');
-        expect(getEventData(linkRewriterVendor3).replacedBy).to.equal('vendor1');
+        expect(getEventData(linkRewriterVendor1).linkRewriterId).to.equal('vendor1');
+        expect(getEventData(linkRewriterVendor2).linkRewriterId).to.equal('vendor1');
+        expect(getEventData(linkRewriterVendor3).linkRewriterId).to.equal('vendor1');
       });
 
       it('Should contain the target anchor', () => {
@@ -214,17 +216,17 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         expect(getEventData(linkRewriterVendor1).anchor).to.equal(anchor);
       });
 
-      it('Should set replacedBy to null when no replacement', () => {
+      it('Should set linkRewriterId to null when no replacement', () => {
         env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(false);
         env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
         env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(false);
 
         linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
 
-        expect(getEventData(linkRewriterVendor1).replacedBy).to.be.null;
+        expect(getEventData(linkRewriterVendor1).linkRewriterId).to.be.null;
         // vendor2 has isWatchingLink to false therefore can not replace.
-        expect(getEventData(linkRewriterVendor2).replacedBy).to.be.null;
-        expect(getEventData(linkRewriterVendor3).replacedBy).to.be.null;
+        expect(getEventData(linkRewriterVendor2).linkRewriterId).to.be.null;
+        expect(getEventData(linkRewriterVendor3).linkRewriterId).to.be.null;
       });
     });
 

@@ -1,11 +1,10 @@
 
-import {DOMAIN_RESOLVER_API_URL, XCUST_ATTRIBUTE_NAME} from '../constants';
+import {DOMAIN_RESOLVER_API_URL} from '../constants';
 import {Services} from '../../../../src/services';
 import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-helpers';
-import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
 import {pubcode} from './constants';
 import AffiliateLinkResolver, {STATUS__AFFILIATE, STATUS__NON_AFFILIATE, STATUS__UNKNOWN} from '../affiliate-link-resolver';
-
+import Waypoint from '../waypoint';
 import helpersFactory from './helpers';
 
 
@@ -14,10 +13,11 @@ describes.fakeWin('domain-resolver', {
     extensions: ['amp-skimlinks'],
   },
 }, env => {
-  let getTrackingInfo;
   let win;
   let xhr;
   let helpers;
+  let trackingService;
+  let waypoint;
 
   beforeEach(() => {
     win = env.win;
@@ -26,7 +26,8 @@ describes.fakeWin('domain-resolver', {
   });
 
   beforeEach(() => {
-    getTrackingInfo = helpers.createGetTrackingInfoStub();
+    trackingService = helpers.createTrackingWithStubAnalytics();
+    waypoint = new Waypoint(env.ampdoc, trackingService);
   });
 
   afterEach(() => {
@@ -57,7 +58,7 @@ describes.fakeWin('domain-resolver', {
         resolver = new AffiliateLinkResolver(
             {},
             {excludedDomains: ['excluded-merchant.com']},
-            getTrackingInfo,
+            waypoint,
         );
 
         anchorList = [
@@ -170,7 +171,7 @@ describes.fakeWin('domain-resolver', {
         resolver = new AffiliateLinkResolver(
             xhr,
             {pubcode},
-            getTrackingInfo,
+            waypoint,
         );
       });
 
@@ -240,7 +241,7 @@ describes.fakeWin('domain-resolver', {
         resolver = new AffiliateLinkResolver(
             stubXhr,
             {excludedDomains: ['excluded-merchant.com']},
-            getTrackingInfo,
+            waypoint,
         );
       });
 
@@ -254,7 +255,7 @@ describes.fakeWin('domain-resolver', {
         // Replace all the unknown in the synchronous reponse,
         // asynchronous response will then overwrite it later.
         const expectedSyncData = anchorList.map(a => {
-          return createAnchorReplacementTuple(a, resolver.getWaypointUrl_(a));
+          return createAnchorReplacementTuple(a, waypoint.getAffiliateUrl(a));
         });
 
         expect(twoStepsResponse.syncResponse).to.deep.equal(expectedSyncData);
@@ -263,9 +264,9 @@ describes.fakeWin('domain-resolver', {
       it('Should set "asyncResponse" field in the returned object when only unknown domains', () => {
         const response = resolver.resolveUnknownAnchors(anchorList);
         const expectedAsyncData = [
-          createAnchorReplacementTuple(anchorList[0], resolver.getWaypointUrl_(anchorList[0])),
+          createAnchorReplacementTuple(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
           createAnchorReplacementTuple(anchorList[1], null),
-          createAnchorReplacementTuple(anchorList[2], resolver.getWaypointUrl_(anchorList[2])),
+          createAnchorReplacementTuple(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
         ];
 
         expect(response.asyncResponse).to.be.an.instanceof(Promise);
@@ -278,9 +279,9 @@ describes.fakeWin('domain-resolver', {
         resolver.domains_ = alreadyResolvedDomains;
         const response = resolver.resolveUnknownAnchors(anchorList);
         const expectedSyncData = [
-          createAnchorReplacementTuple(anchorList[0], resolver.getWaypointUrl_(anchorList[0])),
+          createAnchorReplacementTuple(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
           createAnchorReplacementTuple(anchorList[1], null),
-          createAnchorReplacementTuple(anchorList[2], resolver.getWaypointUrl_(anchorList[2])),
+          createAnchorReplacementTuple(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
         ];
         expect(response.syncResponse).to.deep.equal(expectedSyncData);
         expect(response.asyncResponse).to.be.null;
@@ -305,9 +306,9 @@ describes.fakeWin('domain-resolver', {
         };
         // Initial anchor should not be in the asyncResponse list
         const expectedAsyncData = [
-          createAnchorReplacementTuple(anchorList[0], resolver.getWaypointUrl_(anchorList[0])),
+          createAnchorReplacementTuple(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
           createAnchorReplacementTuple(anchorList[1], null),
-          createAnchorReplacementTuple(anchorList[2], resolver.getWaypointUrl_(anchorList[2])),
+          createAnchorReplacementTuple(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
         ];
 
         const response = resolver.resolveUnknownAnchors(
@@ -316,7 +317,7 @@ describes.fakeWin('domain-resolver', {
 
         expect(response.syncResponse.length).to.equal(4);
         expect(response.syncResponse).to.deep.include(
-            createAnchorReplacementTuple(initialAnchor, resolver.getWaypointUrl_(initialAnchor)),
+            createAnchorReplacementTuple(initialAnchor, waypoint.getAffiliateUrl(initialAnchor)),
         );
         expect(response.asyncResponse).to.be.an.instanceof(Promise);
         return response.asyncResponse.then(anchorReplacementTuple => {
@@ -329,7 +330,7 @@ describes.fakeWin('domain-resolver', {
 
 
     describe('getLinkDomain_', () => {
-      const resolver = new AffiliateLinkResolver({}, {}, getTrackingInfo);
+      const resolver = new AffiliateLinkResolver({}, {}, waypoint);
 
       it('Removes  http protocol', () => {
         const anchor = helpers.createAnchor('http://test.com');
@@ -352,93 +353,5 @@ describes.fakeWin('domain-resolver', {
       });
     });
 
-
-
-    describe('getWaypointUrl_', () => {
-      let replacementUrl;
-      let queryParams;
-      let anchor;
-      const destinationUrl = 'https://test.com/path/to?isAdmin=true';
-
-      function getQueryParams(url) {
-        return parseQueryString(
-            parseUrlDeprecated(url).search
-        );
-      }
-
-      function generateWaypointUrl(anchor, customTrackingId) {
-        const resolver = new AffiliateLinkResolver(
-            {},
-            {},
-            helpers.createGetTrackingInfoStub({customTrackingId}),
-        );
-        return resolver.getWaypointUrl_(anchor);
-      }
-
-      beforeEach(() => {
-        anchor = helpers.createAnchor(destinationUrl);
-        replacementUrl = generateWaypointUrl(anchor);
-        queryParams = getQueryParams(replacementUrl);
-      });
-
-      it('Sends the pubcode', () => {
-        expect(queryParams.id).to.equal(pubcode);
-      });
-      it('Sends the destination url', () => {
-        expect(queryParams.url).to.equal(destinationUrl);
-      });
-
-      it('Sends the sref', () => {
-        expect(queryParams.sref).to.equal('referrer');
-      });
-
-      it('Sends the pref', () => {
-        expect(queryParams.pref).to.equal('external_referrer');
-      });
-
-      it('Sends the xguid (GUID)', () => {
-        expect(queryParams.xguid).to.equal('user_guid');
-      });
-
-      it('Sends the xuuid (impression id)', () => {
-        expect(queryParams.xuuid).to.equal('page_impression_id');
-      });
-
-      it('Sends the xtz (timezone)', () => {
-        expect(queryParams.xtz).to.equal('timezone');
-      });
-
-      it('Sends xs (source app)', () => {
-        expect(queryParams.xs).to.equal('1');
-      });
-
-      describe('custom-tracking-id', () => {
-        it('Does not send the xcust (custom tracking id) if not provided as skimOption', () => {
-          expect(queryParams.xcust).to.be.undefined;
-        });
-
-        it('Sends the xcust (custom tracking id) if provided on the link', () => {
-          anchor.setAttribute(XCUST_ATTRIBUTE_NAME, 'linkTrackingId');
-          replacementUrl = generateWaypointUrl(anchor);
-          queryParams = getQueryParams(replacementUrl);
-          expect(queryParams.xcust).to.be.equal('linkTrackingId');
-        });
-
-        it('Sends the xcust (custom tracking id) if provided as skimOption', () => {
-          replacementUrl = generateWaypointUrl(anchor, 'globalTrackingId');
-          queryParams = getQueryParams(replacementUrl);
-          expect(queryParams.xcust).to.be.equal('globalTrackingId');
-        });
-
-
-        it('Sends the xcust (custom tracking id) if provided on the link and as skimOption', () => {
-          anchor.setAttribute(XCUST_ATTRIBUTE_NAME, 'linkTrackingId');
-          replacementUrl = generateWaypointUrl(anchor, 'globalTrackingId');
-          queryParams = getQueryParams(replacementUrl);
-          expect(queryParams.xcust).to.be.equal('linkTrackingId');
-        });
-
-      });
-    });
   });
 });

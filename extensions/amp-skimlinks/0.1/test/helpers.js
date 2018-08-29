@@ -1,7 +1,9 @@
 import {AmpSkimlinks} from '../amp-skimlinks';
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
+import {Services} from '../../../../src/services';
 import {pubcode} from './constants';
 import Tracking from '../tracking';
+
 
 
 const helpersFactory = env => {
@@ -25,19 +27,9 @@ const helpersFactory = env => {
       };
     },
 
-    createGetTrackingInfoStub(data) {
-      return () => {
-        return Object.assign({
-          pubcode,
-          // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
-          referrer: 'referrer',
-          externalReferrer: 'external_referrer',
-          timezone: 'timezone',
-          pageImpressionId: 'page_impression_id',
-          customTrackingId: null,
-          guid: 'user_guid',
-        }, data);
-      };
+    mockServiceGetter(getterName, returnValue) {
+      env.sandbox.stub(Services, getterName);
+      Services[getterName].returns(returnValue);
     },
 
     stubCustomEventReporterBuilder() {

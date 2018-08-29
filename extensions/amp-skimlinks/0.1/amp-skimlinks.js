@@ -11,10 +11,7 @@ import AffiliateLinkResolver from './affiliate-link-resolver';
 
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
-
-/*** TODO:
- * - Fix issue with waypoint reporting links with macro variables.
- */
+import Waypoint from './waypoint';
 
 const startTime = new Date().getTime();
 
@@ -25,7 +22,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @override
    */
   buildCallback() {
-    this.hasCalledBeacon = false;
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
     this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
@@ -42,10 +38,11 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   startSkimcore_() {
     this.trackingService = this.initTracking();
+    this.waypoint_ = new Waypoint(this.ampDoc_, this.trackingService);
     this.affiliateLinkResolver = new AffiliateLinkResolver(
         this.xhr_,
         this.skimOptions_,
-        getBoundFunction(this.trackingService, 'getTrackingInfo')
+        this.waypoint_,
     );
 
     this.skimlinksLinkRewriter = this.initSkimlinksLinkRewriter();
@@ -60,8 +57,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // Update tracking service with extra info.
     this.trackingService.setTrackingInfo({guid});
     this.trackingService.sendImpressionTracking(
-        // TODO, change signature to remove this since it's set before through the setter
-        {guid},
         this.skimlinksLinkRewriter.getAnchorLinkReplacementMap(),
         startTime,
     );
@@ -73,12 +68,12 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Send the impression tracking once we have the beacon API response.
    */
   onPageScanned_() {
-    let onBeaconApiResponse = this.affiliateLinkResolver.firstRequest;
-    if (!onBeaconApiResponse) {
-      onBeaconApiResponse = this.affiliateLinkResolver.fetchDomainResolverApi([]);
-    }
+    // .firstRequest may be null if the page doesn't have any non-excluded links.
+    const beaconApiPromise = this.affiliateLinkResolver.firstRequest ||
+        // If it's the case, fallback with manual call
+        this.affiliateLinkResolver.fetchDomainResolverApi([]);
 
-    return onBeaconApiResponse.then(this.sendImpressionTracking_.bind(this));
+    return beaconApiPromise.then(this.sendImpressionTracking_.bind(this));
   }
 
   /**
@@ -127,8 +122,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @param {*} eventData
    */
   onClick_(eventData) {
-    // The link was not monetizable or the link was replaced by an other linkRewriter.
-    if (eventData.replacedBy !== SKIMLINKS_REWRITER_ID) {
+    // The link was not monetizable or the link was replaced
+    // by an other linkRewriter.
+    if (eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID) {
       this.trackingService.sendNaClickTracking(eventData.anchor);
     }
   }
