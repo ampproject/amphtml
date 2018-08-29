@@ -341,7 +341,7 @@ export class AmpPanZoom extends AMP.BaseElement {
           });
         }, content).then(() => {
       const contentBox =
-      layoutRectFromDomRect(this.content_./*OK*/getBoundingClientRect());
+        layoutRectFromDomRect(this.content_./*OK*/getBoundingClientRect());
       // Set content positions to offset from element box
       this.contentBox_.top = contentBox.top - this.elementBox_.top;
       this.contentBox_.left = contentBox.left - this.elementBox_.left;
