@@ -63,7 +63,7 @@ The directory structure is below:
 ├── validator-amp-my-element.protoascii  # Validator rules (req'd)
 ├── amp-my-element.md                    # Element's main documentation (req'd)
 └── More documentation in .md files (optional)
-└── OWNERS.yaml # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md>here) (req'd)
+└── OWNERS.yaml # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md) (req'd)
 
 ```
 In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
