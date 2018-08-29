@@ -693,8 +693,9 @@ export class AmpStory extends AMP.BaseElement {
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => {
-          this.pages_.forEach(page => {
+          this.pages_.forEach((page, index) => {
             page.setState(PageState.NOT_ACTIVE);
+            this.upgradeCtaAnchorTagsForTracking_(page, index);
           });
         })
         .then(() => this.switchTo_(initialPageId))
@@ -1850,6 +1851,27 @@ export class AmpStory extends AMP.BaseElement {
         removeAttributeInMutate(page, Attributes.VISITED));
     }));
   }
+
+
+  /**
+   * @param {!AmpStoryPage} page The page whose CTA anchor tags should be
+   *     upgraded.
+   * @param {number} pageIndex The index of the page.
+   * @private
+   */
+  upgradeCtaAnchorTagsForTracking_(page, pageIndex) {
+    this.mutateElement(() => {
+      const pageId = page.element.id;
+      const ctaAnchorEls =
+          scopedQuerySelectorAll(page.element, 'amp-story-cta-layer a');
+
+      Array.prototype.forEach.call(ctaAnchorEls, ctaAnchorEl => {
+        ctaAnchorEl.setAttribute('data-vars-story-page-id', pageId);
+        ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
+      });
+    });
+  }
+
 
   /** @return {!NavigationState} */
   getNavigationState() {
