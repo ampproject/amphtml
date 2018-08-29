@@ -34,22 +34,9 @@ import {isFormDataWrapper} from '../form-data-wrapper';
 import {user} from '../log';
 
 /**
- * Special case for fetchJson
- * @typedef {{
- *   body: (!JsonObject|!FormData|undefined),
- *   credentials: (string|undefined),
- *   headers: (!JsonObject|undefined),
- *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
- * }}
- */
-export let FetchInitJsonDef;
-
-/**
  * @typedef {{
  *  xhrUrl: string,
- *  fetchOpt: !FetchInitJsonDef
+ *  fetchOpt: !FetchInitDef
  * }}
  */
 export let FetchRequestDef;
@@ -87,7 +74,7 @@ export class Xhr {
    * be either the native fetch or our polyfill.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef} init
+   * @param {!FetchInitDef} init
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>|!Promise<!Response>}
    * @private
    */
@@ -101,7 +88,7 @@ export class Xhr {
           // will expect a native `FormData` object in the `body` property, so
           // the native `FormData` object needs to be unwrapped.
           if (isFormDataWrapper(init.body)) {
-            init.body = init.body.getFormData();
+            init.body = /** @type {!FormDataWrapper} */ (init.body).getFormData();
           }
           // Fallback to xhr polyfill since `fetch` api does not support
           // responseType = 'document'. We do this so we don't have to do any
@@ -126,7 +113,7 @@ export class Xhr {
    *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef=} init
+   * @param {!FetchInitDef=} init
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    * @private
    */
@@ -151,7 +138,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitJsonDef=} opt_init
+   * @param {?FetchInitDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
@@ -168,7 +155,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init
+   * @param {?FetchInitDef=} opt_init
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetchText(input, opt_init) {
@@ -177,7 +164,7 @@ export class Xhr {
 
   /**
    * @param {string} input URL
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init Fetch options object.
+   * @param {?FetchInitDef=} opt_init Fetch options object.
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    */
   fetch(input, opt_init) {
@@ -194,7 +181,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} opt_init
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
