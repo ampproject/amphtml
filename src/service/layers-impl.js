@@ -340,7 +340,7 @@ export class LayoutLayers {
    * @param {!Node} root
    */
   listenForScroll_(root) {
-    this.unlisteners_.push(listen(scrollingElement, 'scroll', event => {
+    this.unlisteners_.push(listen(root, 'scroll', event => {
       this.scrolled_(event);
     }, {capture: true, passive: true}));
   }
