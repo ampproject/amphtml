@@ -65,6 +65,7 @@ amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
   margin-top: auto !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
+  pointer-events: auto !important;
   /* Enable iOS momentum scrolling. */
   -webkit-overflow-scrolling: touch !important;
 }
@@ -77,7 +78,6 @@ amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
   color: rgba(0, 0, 0, 0.87) !important;
   font-family: 'Roboto', sans-serif !important;
   overflow: hidden !important;
-  pointer-events: auto !important;
   text-align: start !important;
   transform: translate3d(0, 100%, 0) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
