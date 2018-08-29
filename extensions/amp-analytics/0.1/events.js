@@ -28,6 +28,10 @@ import {hasOwn} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
+
+const SCROLL_PRECISION_PERCENT = 5;
+const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
+const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
@@ -63,6 +67,11 @@ const TRACKER_TYPE = Object.freeze({
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function(root) { return new ClickEventTracker(root); },
+  },
+  'scroll': {
+    name: 'scroll',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) { return new ScrollEventTracker(root); },
   },
   'custom': {
     name: 'custom',
@@ -400,6 +409,149 @@ export class ClickEventTracker extends EventTracker {
   }
 }
 
+/**
+ * Tracks scroll events.
+ */
+export class ScrollEventTracker extends EventTracker {
+
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private {!./analytics-root.AnalyticsRoot} root */
+    this.root_ = root;
+
+    /** @private {function(!Object)|null} */
+    this.boundScrollHandler_ = null;
+  }
+
+  /** @override */
+  dispose() {
+    if (this.boundScrollHandler_ !== null) {
+      this.root_.getScrollManager()
+          .removeScrollHandler(this.boundScrollHandler_);
+      this.boundScrollHandler_ = null;
+    }
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    if (!config['scrollSpec']) {
+      user().error(TAG, 'Missing scrollSpec on scroll trigger.');
+      return NO_UNLISTEN;
+    }
+
+    if (!Array.isArray(config['scrollSpec']['verticalBoundaries']) &&
+      !Array.isArray(config['scrollSpec']['horizontalBoundaries'])) {
+      user().error(TAG, 'Boundaries are required for the scroll ' +
+        'trigger to work.');
+      return NO_UNLISTEN;
+    }
+
+    const boundsV = this.normalizeBoundaries_(
+        config['scrollSpec']['verticalBoundaries']
+    );
+    const boundsH = this.normalizeBoundaries_(
+        config['scrollSpec']['horizontalBoundaries']
+    );
+
+    this.boundScrollHandler_ =
+      this.scrollHandler_.bind(this, boundsV, boundsH, listener);
+
+    return this.root_.getScrollManager()
+        .addScrollHandler(this.boundScrollHandler_);
+  }
+
+  /**
+   * Function to handle scroll events from the Scroll manager
+   * @param {!Object<number,boolean>} boundsV
+   * @param {!Object<number,boolean>} boundsH
+   * @param {function(!AnalyticsEvent)} listener
+   * @param {!Object} e
+   * @private
+   */
+  scrollHandler_(boundsV, boundsH, listener, e) {
+    // Calculates percentage scrolled by adding screen height/width to
+    // top/left and dividing by the total scroll height/width.
+    this.triggerScrollEvents_(boundsV,
+        (e.top + e.height) * 100 / e./*OK*/scrollHeight,
+        VAR_V_SCROLL_BOUNDARY,
+        listener
+    );
+    this.triggerScrollEvents_(boundsH,
+        (e.left + e.width) * 100 / e./*OK*/scrollWidth,
+        VAR_H_SCROLL_BOUNDARY,
+        listener
+    );
+  }
+
+  /**
+   * Rounds the boundaries for scroll trigger to nearest
+   * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
+   * as keys and false as values.
+   *
+   * @param {!Array<number>} bounds array of bounds.
+   * @return {!Object<number,boolean>} Object with normalized bounds as keys
+   * and false as value.
+   * @private
+   */
+  normalizeBoundaries_(bounds) {
+    const result = {};
+    if (!bounds || !Array.isArray(bounds)) {
+      return result;
+    }
+
+    for (let b = 0; b < bounds.length; b++) {
+      let bound = bounds[b];
+      if (typeof bound !== 'number' || !isFinite(bound)) {
+        user().error(TAG, 'Scroll trigger boundaries must be finite.');
+        return result;
+      }
+
+      bound = Math.min(Math.round(bound / SCROLL_PRECISION_PERCENT) *
+        SCROLL_PRECISION_PERCENT, 100);
+      result[bound] = false;
+    }
+    return result;
+  }
+
+  /**
+   * @param {!Object<number, boolean>} bounds
+   * @param {number} scrollPos Number representing the current scroll
+   * @param {string} varName variable name to assign to the bound that
+   * @param {function(!AnalyticsEvent)} listener
+   * triggers the event position.
+   */
+  triggerScrollEvents_(bounds, scrollPos, varName, listener) {
+    if (!scrollPos) {
+      return;
+    }
+
+    // Goes through each of the boundaries and fires an event if it has not
+    // been fired so far and it should be.
+    for (const b in bounds) {
+      if (!hasOwn(bounds, b)) {
+        continue;
+      }
+      const bound = parseInt(b, 10);
+      if (bound > scrollPos || bounds[bound]) {
+        continue;
+      }
+      bounds[bound] = true;
+      const vars = Object.create(null);
+      vars[varName] = b;
+      listener(
+          new AnalyticsEvent(
+              this.root_.getRootElement(),
+              AnalyticsEventType.SCROLL,
+              vars
+          )
+      );
+    }
+  }
+}
 
 /**
  * Tracks events based on signals.
