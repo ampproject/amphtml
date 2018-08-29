@@ -129,17 +129,13 @@ export class LayoutLayers {
     // the document (the scrolling element) or an element scrolls.
     // This forwards to our scroll-dirty system, and eventually to the scroll
     // listener.
-    this.unlisteners_.push(listen(win.document, 'scroll', event => {
-      this.scrolled_(event);
-    }, {capture: true, passive: true}));
+    this.listenForScroll_(win.document);
 
     // Scroll events do not bubble out of shadow trees.
     // Strangely, iOS 11 reports that document contains things in a shadow tree.
     // Any node element, however, doesn't.
     if (!win.document.documentElement.contains(scrollingElement)) {
-      this.unlisteners_.push(listen(scrollingElement, 'scroll', event => {
-        this.scrolled_(event);
-      }, {capture: true, passive: true}));
+      this.listenForScroll_(scrollingElement);
     }
 
     // Destroys the layer tree on document resize, since entirely new CSS may
@@ -336,6 +332,17 @@ export class LayoutLayers {
       layout.undeclareLayer();
       layout.forgetParentLayer();
     }
+  }
+
+  /**
+   * Listens for scroll events on root.
+   *
+   * @param {!Node} root
+   */
+  listenForScroll_(root) {
+    this.unlisteners_.push(listen(scrollingElement, 'scroll', event => {
+      this.scrolled_(event);
+    }, {capture: true, passive: true}));
   }
 
   /**
