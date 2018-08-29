@@ -44,13 +44,13 @@ export function isAnchorReplacementTuple(tuple) {
  * asynchronous call. Being able to return a sync and async response offers
  * flexibility to handle all these scenarios:
  *
- * - If you don't need any api calls to determined your replacement url.
+ * - If you don't need any api calls to determine your replacement url.
  *   Use: createTwoStepsResponse(syncResponse)
  *
- * - If you need a an api call to determined your replacement url
+ * - If you need a an api call to determine your replacement url
  *   Use: createTwoStepsResponse(null, asyncResponse)
  *
- * - If you need an api call to determined your replacement url but
+ * - If you need an api call to determine your replacement url but
  *   have implemented a synchronous cache system.
  *   Use: createTwoStepsResponse(syncResponse, asyncResponse);
  *
