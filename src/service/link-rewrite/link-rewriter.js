@@ -1,29 +1,49 @@
 import {user} from '../../log';
 
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
+import {EventMessenger} from './event-messenger';
 import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsResponse} from './link-rewrite-helpers';
-import EventMessenger from './event-messenger';
 
+/**
+ * LinkRewriter works conjointly with LinkRewriterService to allow rewriting
+ * links at runtime. E.g: Replacing a link by its affiliate version only if
+ * the link can be monetised. A page can have multiple LinkRewriter running
+ * at the same time.
+ *
+ * LinkRewriter class is in charge of:
+ * - Scanning the page to find links based on an optional css selector.
+ * - Asking the "resolveUnknownLinks" function which links can be replaced.
+ * - Keeping track of the replacement link of each link on the page.
+ * - Swapping the anchor url to its replacement url when instructed
+ *  by the LinkRewriterService.
+ */
 export class LinkRewriter {
-  /**
-   * Create a new linkRewriter instance you can then register to the LinkRewriteService.
-   * @param {*} iframeDoc
+  /**.
+   * @param {Document} iframeDoc
    * @param {string} id
    * @param {Function} resolveUnknownLinks
    * @param {Object=} options
    */
   constructor(iframeDoc, id, resolveUnknownLinks, options) {
+    /** @public {!./event-messenger.EventMessenger} */
+    this.events = new EventMessenger();
+
+    /** @public {string} */
     this.id = id;
+
+    /** @private {Document} */
     this.iframeDoc_ = iframeDoc;
+
 
     /** @private {Function} */
     this.resolveUnknownLinks_ = resolveUnknownLinks;
 
+    /** @private {string} */
     this.linkSelector_ = options.linkSelector;
+
+    /** @private {number} */
     this.restoreDelay_ = 300; //ms
 
-    /** @public */
-    this.events = new EventMessenger();
 
     /** @private */
     this.anchorReplacementMap_ = new Map();
@@ -31,14 +51,7 @@ export class LinkRewriter {
 
   /**
    * @public
-   */
-  reset() {
-    this.anchorReplacementMap_ = new Map();
-  }
-
-  /**
-   * @public
-   * Get the replacement url for a specific anchor.
+   * Get the replacement url associated with the anchor.
    * @param {?HTMLElement} anchor
    * @return {?string}
    */
@@ -61,7 +74,12 @@ export class LinkRewriter {
 
   /**
    * @public
-   * Returns True if the link is not excluded by the linkSelector option.
+   * Returns True if the LinkRewriter instance is supposed to handle
+   * this particular anchor.
+   * By default LinkRewriter handles all the links on the page but
+   * inclusion/exclusion rules can be created by using the "linkSelector"
+   * option. When using this option all the links not matching the css selector
+   * will be ignored and isWatchingLink(anchor) will return false.
    * @param {?HTMLElement} anchor
    * @return {boolean}
    */
@@ -71,8 +89,15 @@ export class LinkRewriter {
 
   /**
    * @public
-   * Swap temporarly the href of an anchor by the associated replacement url.
+   * This function is called when the user clicks on a link.
+   * It swaps temporarly the href of an anchor by its associated
+   * replacement url but only for the time needed by the browser
+   * to handle the click on the anchor and navigate to to the new url.
+   * After 300ms, if the page is still open (target="_blank" scenario),
+   * the link is restored to its initial value.
    * @param {?HTMLElement} anchor
+   * @return {boolean} - 'true' if the linkRewriter has changed the url
+   *  'false' otherwise.
    */
   rewriteAnchorUrl(anchor) {
     const newUrl = this.getReplacementUrl(anchor);
@@ -93,9 +118,10 @@ export class LinkRewriter {
 
   /**
    * @public
-   * Scan the page to find links and send events when scan is complete.
-   * @return {Promise} - Resolved when page has been scanned and
-   *   all links have been resolved
+   * Scan the page to find links and send "page_scanned" event when scan
+   * is completed and we know the replacement url of all the links
+   * currently in the DOM.
+   * @return {Promise}
    */
   onDomUpdated() {
     return this.scanLinksOnPage_().then(() => {
@@ -105,7 +131,12 @@ export class LinkRewriter {
 
   /**
    * @private
-   * Find all the anchors in the page (based on linkSelector option) and
+   * Scan the page to find all the links on the page.
+   * If new anchors are discovered, ask to the "resolveUnknownLinks"
+   * function what is the replacement url for each anchor. The response which can
+   * be synchronous, asynchronous or both at the same time will be stored
+   * internally and used if a click on one of this anchor happens later.
+   * @return {Promise}
    */
   scanLinksOnPage_() {
     const anchorList = this.getLinksInDOM_();
@@ -176,7 +207,7 @@ export class LinkRewriter {
   /**
    * @private
    * Remove from the internal anchor Map the links that are no longer in the page.
-   * @param {*} anchorList - The list of links in the page.
+   * @param {Array<HTMLElement>} anchorList - The list of links in the page.
    */
   removeDetachedAnchorsFromMap_(anchorList) {
     this.anchorReplacementMap_.forEach((value, anchor) => {
@@ -192,6 +223,7 @@ export class LinkRewriter {
    * @private
    * Get the list of anchors element in the page.
    * (Based on linkSelector option)
+   * @return {Array<HTMLElement>}
    */
   getLinksInDOM_() {
     const q = this.iframeDoc_.querySelectorAll(this.linkSelector_ || 'a');

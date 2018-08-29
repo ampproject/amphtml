@@ -5,33 +5,68 @@ import {Services} from '../../services';
 import {registerServiceBuilderForDoc} from '../../service';
 
 /**
- * @package
+ * LinkRewriterService works conjointly with LinkRewriter to allow rewriting
+ * links at runtime. E.g: Replacing a link by its affiliate version only if
+ * the link can be monetised. A page can have multiple LinkRewriter running
+ * at the same time.
+ *
+ * LinkRewriterService class is in charge of:
+ * - Keeping track of all the registered linkRewriters
+ * - Notifying all the linkRewriters when the DOM has changed.
+ * - Managing which LinkRewriter has the priority to replace a link
+ *   (based on configurable priority list).
+ * - Notifying the most relevant LinkRewriter that a click happened
+ *   so the linkRewriter handles the potential replacement.
+ * - Sending a click event to listeners to be able to track the click
+ *   even if the url has not been replaced.
  */
 export class LinkRewriteService {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    this.priorityList_ = [];
-    this.iframeDoc_ = ampdoc.getRootNode();
+
+    /** @private {!Document} */
+    this.iframeDoc_ = /** @type {!Document} */ (ampdoc.getRootNode());
+
+    /**
+     * @private {Array<string>}
+     * List of link rewriter Id in priority order as defined
+     * in the PRIORITY_META_TAG_NAME meta tag.
+     * First element has the highest priority.
+     */
     this.priorityList_ = this.getPriorityList_(ampdoc);
 
-    this.installGlobalEventListener_(this.iframeDoc_);
-    /** @private {Array<./link-rewriter.LinkRewriter>} */
+
+    /**
+     * @private {Array<./link-rewriter.LinkRewriter>}
+     * The list of all the LinkRewriter instances registed
+     * in the page.
+     */
     this.linkRewriters_ = [];
+
+    this.installGlobalEventListener_(this.iframeDoc_);
   }
 
 
   /**
    * @public
-   * Register a new link rewriter on the page.
+   * Create and configure a new LinkRewriter on the page.
    * @param {string} linkRewriterId
-   * @param {Function} resolveUnknownLinks
-   * @param {?Object} options
+   * @param {function(Array<HTMLElement>): Array<Array>} resolveUnknownLinks
+   * A function returning for each anchors the associated replacement url if any.
+   * @param {?Object} options - e.g: { linkSelector: "a:not(.ads)""}
+   * @return {!./link-rewriter.LinkRewriter}
    */
   registerLinkRewriter(linkRewriterId, resolveUnknownLinks, options) {
-    const linkRewriter = new LinkRewriter(this.iframeDoc_, linkRewriterId, resolveUnknownLinks, options);
-    this.insertInListBasedOnPriority_(this.linkRewriters_, linkRewriter, this.priorityList_);
+    const linkRewriter = new LinkRewriter(
+        this.iframeDoc_,
+        linkRewriterId,
+        resolveUnknownLinks,
+        options
+    );
+    this.insertInListBasedOnPriority_(this.linkRewriters_, linkRewriter,
+        this.priorityList_);
     // Trigger initial scan.
     linkRewriter.onDomUpdated();
 
@@ -41,6 +76,19 @@ export class LinkRewriteService {
 
   /**
    * @public
+   * Notify the LinkRewriteService that a click has happened on an anchor.
+   * This is the chance for one of the registered LinkRewriter to rewrite the
+   * url before the browser handles the click and navigates to the link url.
+   *
+   * The LinkRewriter allowed to replace the url will be chosen based on the
+   * defined priority order (in link attribute or global meta tag).
+   * If a LinkRewriter decides to not replace the url,  we will ask the next
+   * one if it wants to replace the link until one replacement is made.
+   *
+   * A "CLICK" event will also be dispatched to notify listeners that a click
+   * on an anchor has happened. This should mostly be used to send click
+   * tracking requests, handlers of this events should not
+   * mutate the anchor!
    * @param {HTMLElement} anchor
    */
   maybeRewriteLink(anchor) {
@@ -73,7 +121,11 @@ export class LinkRewriteService {
 
   /**
    * @private
+   * Extract the priority list from the optional html meta tag.
+   * The meta tag should contain a whitespace separated list of
+   * LinkRewrited.id.
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
+   * @return {Array<string>}
    */
   getPriorityList_(ampdoc) {
     const docInfo = Services.documentInfoForDoc(ampdoc);
@@ -84,7 +136,7 @@ export class LinkRewriteService {
 
   /**
    * @private
-   * Add DOM_UPDATE AND ANCHOR_CLICK listener.
+   * Listen for DOM_UPDATE event.
    * @param {*} iframeDoc
    */
   installGlobalEventListener_(iframeDoc) {
@@ -94,7 +146,9 @@ export class LinkRewriteService {
 
   /**
    * @private
-   * Notify all the rewriter when new elements have been added to the page.
+   * Notify all the registered LinkRewriter when new elements have been added
+   * to the page so they can re-scan the page to find potential new links to
+   * replace.
    */
   onDomChanged_() {
     this.linkRewriters_.forEach(linkRewriter => {
@@ -105,11 +159,14 @@ export class LinkRewriteService {
 
   /**
    * @private
+   * Extract the optional priority list for this specific anchor
+   * from its attribute. The 'data-link-rewriters' attribute should
+   * contain a whitespace separated list of LinkRewrited.id.
    * @param {HTMLElement} anchor
    * @return {Array<string>}
    */
   parseLinkRewriterPriorityForAnchor_(anchor) {
-    const dataValue = anchor.getAttribute('data-link-rewriters')
+    const dataValue = anchor.getAttribute('data-link-rewriters');
     if (!anchor || !dataValue) {
       return [];
     }
@@ -119,12 +176,16 @@ export class LinkRewriteService {
 
   /**
    * @private
+   * Mutate linkRewriterList to insert a new LinkRewriter in the list
+   * while keeping the list in order of priority as defined by the
+   * idPriorityList.
    * @param {Array<./link-rewriter.LinkRewriter>} linkRewriterList
    * @param {!./link-rewriter.LinkRewriter} linkRewriter
-   * @param {Array<string>} priorityList
+   * @param {Array<string>} idPriorityList
+   * @return {Array<./link-rewriter.LinkRewriter>} - Mutated linkRewriterList param.
    */
-  insertInListBasedOnPriority_(linkRewriterList, linkRewriter, priorityList) {
-    const priorityIndex = priorityList.indexOf(linkRewriter.id);
+  insertInListBasedOnPriority_(linkRewriterList, linkRewriter, idPriorityList) {
+    const priorityIndex = idPriorityList.indexOf(linkRewriter.id);
     if (priorityIndex > -1) {
       linkRewriterList.splice(priorityIndex, 0, linkRewriter);
     } else {
@@ -136,7 +197,8 @@ export class LinkRewriteService {
 
   /**
    * @private
-   * Get the list of all the link rewriter watching a specific anchor.
+   * Get the list of all the link rewriter "watching" a specific anchor.
+   * See LinkRewriter.isWatchingLink for more details.
    * @param {HTMLElement} anchor
    * @return {Array<./link-rewriter.LinkRewriter>}
    */
@@ -154,7 +216,7 @@ export class LinkRewriteService {
 
 
 /**
- * Register the link rewrite service.
+ * Register the global LinkRewriteService.
  * @param {!../ampdoc-impl.AmpDoc} ampdoc
  */
 export function installGlobalLinkRewriteServiceForDoc(ampdoc) {

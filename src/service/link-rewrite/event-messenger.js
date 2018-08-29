@@ -1,6 +1,6 @@
 
 
-export default class EventMessenger {
+export class EventMessenger {
   /**
    * Constructor
    */
