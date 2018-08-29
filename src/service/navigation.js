@@ -42,12 +42,7 @@ export const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
-export const anchorClickActions = {
-  NAVIGATE_A2A: 'navigate-a2a',
-  NAVIGATE_CUSTOM_PROTOCOL: 'navigate-custom-protocol',
-  NAVIGATE_OUTBOUND: 'navigate-outbound',
-  OPEN_CONTEXT_MENU: 'open-context-menu',
-};
+
 /**
  * Install navigation service for ampdoc, which handles navigations from anchor
  * tag clicks and other runtime features like AMP.navigateTo().
@@ -259,18 +254,16 @@ export class Navigation {
 
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
-      return anchorClickActions.NAVIGATE_A2A;
+      return;
     }
 
     // Handle navigating to custom protocol if applicable.
     if (this.handleCustomProtocolClick_(e, target, location)) {
-      return anchorClickActions.NAVIGATE_CUSTOM_PROTOCOL;
+      return;
     }
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
-
-    return anchorClickActions.NAVIGATE_OUTBOUND;
   }
 
   /**
