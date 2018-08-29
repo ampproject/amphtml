@@ -98,7 +98,7 @@ tags: {  # <amp-list>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
-  attrs {
+  attrs: {
     name: "auto-resize"
     value: ""
   }
