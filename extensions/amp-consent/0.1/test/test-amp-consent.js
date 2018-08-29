@@ -461,6 +461,8 @@ describes.realWin('amp-consent', {
       };
       event.source = iframe.contentWindow;
       win.dispatchEvent(event);
+      expect(actionSpy).to.be.calledOnce;
+
       expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT);
     });
 
