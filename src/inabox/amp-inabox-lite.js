@@ -34,7 +34,11 @@ import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
-import {installStylesForDoc, makeBodyVisible} from '../style-installer';
+import {
+  installStylesForDoc,
+  makeBodyVisible,
+  makeBodyVisibleRecovery,
+} from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {registerIniLoadListener} from './utils';
 import {stubElementsForDoc} from '../service/custom-element-registry';
@@ -60,7 +64,7 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self); // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
@@ -68,7 +72,7 @@ try {
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(self.document); // TODO: to be simplified
+  makeBodyVisibleRecovery(self.document); // TODO: to be simplified
   throw e;
 }
 
@@ -97,7 +101,7 @@ installStylesForDoc(ampdoc, fullCss, () => {
   stubElementsForDoc(ampdoc);
 
   Navigation.installAnchorClickInterceptor(ampdoc, self);
-  makeBodyVisible(self.document, /* waitForServices */ true); // TODO: to be simplified
+  makeBodyVisible(self.document); // TODO: to be simplified
 
   Services.resourcesForDoc(ampdoc).ampInitComplete();
 }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');

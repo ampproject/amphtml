@@ -44,27 +44,28 @@ describe('Styles', () => {
       resources = Services.resourcesForDoc(ampdoc);
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
+      styles.setBodyMadeVisibleForTesting(false);
     });
 
-    it('should work with waitForService=false', () => {
+    it('should make visible in recovery call', () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
       expect(ampdoc.signals().get('render-start')).to.be.null;
 
-      styles.makeBodyVisible(doc);
+      styles.makeBodyVisibleRecovery(doc);
+
       expect(doc.body).to.exist;
       expect(getStyle(doc.body, 'opacity')).to.equal('1');
       expect(getStyle(doc.body, 'visibility')).to.equal('visible');
       expect(isAnimationNone(doc.body)).to.be.true;
-      expect(ampdoc.signals().get('render-start')).to.be.ok;
     });
 
     it('should ignore resources failures for render-start', () => {
       sandbox.stub(resources, 'renderStarted').callsFake(() => {
         throw new Error('intentional');
       });
-      styles.makeBodyVisible(doc);
+      styles.makeBodyVisibleRecovery(doc);
       expect(ampdoc.signals().get('render-start')).to.be.null;
     });
 
@@ -76,8 +77,7 @@ describe('Styles', () => {
 
       waitForServicesStub.withArgs(win)
           .returns(Promise.resolve(['service1', 'service2']));
-      styles.makeBodyVisible(doc, true);
-      styles.makeBodyVisible(doc, true); // 2nd call should make no difference
+      styles.makeBodyVisible(doc);
       return new Promise(resolve => {
         setTimeout(resolve, 0);
       }).then(() => {
@@ -92,7 +92,7 @@ describe('Styles', () => {
 
     it('should skip schedulePass if no render delaying services', () => {
       waitForServicesStub.withArgs(win).returns(Promise.resolve([]));
-      styles.makeBodyVisible(doc, true);
+      styles.makeBodyVisible(doc);
       return new Promise(resolve => {
         setTimeout(resolve, 0);
       }).then(() => {

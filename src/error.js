@@ -32,7 +32,7 @@ import {
   isLoadErrorMessage,
 } from './event-helper';
 import {isProxyOrigin} from './url';
-import {makeBodyVisible} from './style-installer';
+import {makeBodyVisibleRecovery} from './style-installer';
 import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
@@ -294,7 +294,7 @@ export function installErrorReporting(win) {
 function reportErrorToServer(message, filename, line, col, error) {
   // Make an attempt to unhide the body.
   if (this && this.document) {
-    makeBodyVisible(this.document);
+    makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
