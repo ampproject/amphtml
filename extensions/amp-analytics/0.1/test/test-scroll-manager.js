@@ -104,8 +104,36 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     fakeViewport.getScrollLeft.returns(500);
     scrollManager.onScroll_({top: 500, left: 500, height: 250, width: 250});
 
+    const expectedScrollEvent = {
+      top: 500,
+      left: 500,
+      height: 250,
+      width: 250,
+      scrollWidth: 500,
+      scrollHeight: 500,
+    };
+
+    function matcher(expected) {
+      return actual => {
+        // Returns true if all of the object keys have the same value
+        return !Object.keys(actual).some(key => {
+          return actual[key] !== expected[key];
+        });
+      };
+    }
+
     expect(fn1).to.have.callCount(2);
+    expect(
+        fn1.getCall(1)
+            .calledWithMatch(sinon.match(matcher(expectedScrollEvent)))
+    ).to.be.true;
+
     expect(fn2).to.have.callCount(2);
+    expect(
+        fn2.getCall(1)
+            .calledWithMatch(sinon.match(matcher(expectedScrollEvent)))
+    ).to.be.true;
+
   });
 
   it('can remove specifc handlers', () => {
