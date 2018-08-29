@@ -190,6 +190,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    */
   scrollHandler_() {
     const currentScrollLeft = this.container_./*OK*/scrollLeft;
+    this.pos_ = currentScrollLeft;
 
     if (this.scrollTimerId_ === null) {
       this.waitForScroll_(currentScrollLeft);
