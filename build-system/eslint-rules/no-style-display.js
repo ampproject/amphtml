@@ -60,7 +60,7 @@ module.exports = function(context) {
 
         return context.report({
           node: arg || node,
-          message: `styles argument (the second argument) to ${callName} must be an object literal`,
+          message: `styles argument (the second argument) to ${callName} must be an object literal. You may also pass in an explicit call to assertDoesNotContainDisplay`,
         });
       }
 
