@@ -31,9 +31,13 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  getVendorJsPropertyName,
+} from '../../../src/style';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, user} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
@@ -126,7 +130,8 @@ export class WebAnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        setStyles(request.target, request.vars);
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
       }
       const player = request.target.animate(request.keyframes, request.timing);
       player.pause();

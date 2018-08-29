@@ -95,6 +95,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {upgradeBackgroundAudio} from './audio';
+import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsDefault from './_locales/default';
 import LocalizedStringsEn from './_locales/en';
@@ -283,8 +284,7 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
         .registerLocalizedStringBundle('default', LocalizedStringsDefault)
-        // TODO(newmuis, #11647): Enable Arabic strings once RTL is supported.
-        // .registerLocalizedStringBundle('ar', LocalizedStringsAr)
+        .registerLocalizedStringBundle('ar', LocalizedStringsAr)
         .registerLocalizedStringBundle('de', LocalizedStringsDe)
         .registerLocalizedStringBundle('en', LocalizedStringsEn)
         .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)

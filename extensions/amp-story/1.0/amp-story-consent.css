@@ -22,7 +22,7 @@
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
-  z-index: 100003 !important;
+  z-index: 100005 !important; /** Above amp-story-access. */
 }
 
 /** Black opacity overlay. */
