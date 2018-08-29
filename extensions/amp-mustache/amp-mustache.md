@@ -115,7 +115,7 @@ Can also be represented as:
 
 ### Tables
 
-Since AMP template strings must be specified in `<template>` elements, this can cause unexpected behavior in due to browser parsing. For example, `<table>` elements can cause [foster parenting](https://www.w3.org/TR/html5/syntax.html#unexpected-markup-in-tables) of text by the browser. In the following example:
+Since AMP template strings must be specified in `<template>` elements, this can cause unexpected behavior due to browser parsing. For example, `<table>` elements can cause [foster parenting](https://www.w3.org/TR/html5/syntax.html#unexpected-markup-in-tables) of text. In the following example:
 
 ```html
 <template type="amp-mustache">
