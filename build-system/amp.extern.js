@@ -27,7 +27,7 @@
  * Externed for use in the amp-form component when reconstructing
  * the request for SSR and then passed to runtime.
  * @typedef {{
- *   body: (!JsonObject|!FormData|!Object|undefined|string),
+ *   body: (!JsonObject|!FormData|!FormDataWrapper|undefined|string),
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
@@ -36,6 +36,12 @@
  * }}
  */
 var FetchInitDef;
+
+/** @constructor **/
+var FormDataWrapper = function() {};
+
+FormDataWrapper.prototype.entries = function() {};
+FormDataWrapper.prototype.getFormData = function() {};
 
 /**
  * Externed as this is constructed in the amp-form component and

@@ -88,7 +88,7 @@ export class Xhr {
           // will expect a native `FormData` object in the `body` property, so
           // the native `FormData` object needs to be unwrapped.
           if (isFormDataWrapper(init.body)) {
-            init.body = init.body.getFormData();
+            init.body = /** @type {!FormDataWrapper} */ (init.body).getFormData();
           }
           // Fallback to xhr polyfill since `fetch` api does not support
           // responseType = 'document'. We do this so we don't have to do any

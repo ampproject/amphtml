@@ -82,7 +82,7 @@ export function toStructuredCloneable(input, init) {
   const newInit = Object.assign({}, init);
   if (isFormDataWrapper(init.body)) {
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
-    newInit.body = fromIterator(init.body.entries());
+    newInit.body = fromIterator(/** @type {!FormDataWrapper} **/ (init.body).entries());
   }
   return {input, init: newInit};
 }
