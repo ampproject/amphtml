@@ -27,8 +27,7 @@ const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
-const {applyConfig, removeConfig} = require('./prepend-global/index.js');
-const {execScriptAsync} = require('../exec');
+const {execOrDie, execScriptAsync} = require('../exec');
 const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
 const {gitBranchName, gitCommitterEmail} = require('../git');
 
@@ -343,11 +342,13 @@ async function runVisualTests(page, visualTestsConfig) {
 /**
  * Cleans up any existing AMP config from the runtime and 3p frame.
  */
-async function cleanupAmpConfig() {
+function cleanupAmpConfig() {
   log('verbose', 'Cleaning up existing AMP config');
-  for (const targetFile of AMP_RUNTIME_TARGET_FILES) {
-    await removeConfig(targetFile);
-  }
+  AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
+    execOrDie(
+        `gulp prepend-global --local_dev --target ${targetFile} --remove`,
+        {'stdio': 'ignore'});
+  });
 }
 
 /**
@@ -355,17 +356,14 @@ async function cleanupAmpConfig() {
  *
  * @param {string} config Config to apply. One of 'canary' or 'prod'.
  */
-async function applyAmpConfig(config) {
+function applyAmpConfig(config) {
   log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
-  const baseConfigFile =
-      'build-system/global-configs/' + config + '-config.json';
-
-  for (const targetFile of AMP_RUNTIME_TARGET_FILES) {
-    await removeConfig(targetFile);
-    await applyConfig(config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true,
-        /* opt_branch */ null, /* opt_fortesting */ true);
-  }
+  AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
+    execOrDie(
+        `gulp prepend-global --local_dev --fortesting --target ${targetFile} ` +
+        `--${config}`,
+        {'stdio': 'ignore'});
+  });
 }
 
 /**
