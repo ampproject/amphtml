@@ -547,7 +547,7 @@ export class LayoutElement {
    * If the element is itself a layer, it still looks in the element's ancestry
    * for a parent layer.
    *
-   * TODO(jridgewell, #12554): Needs to traverse FIE/Shadow boundary.
+   * TODO(jridgewell, #12554): Needs to traverse FIE boundary.
    *
    * @param {!Element} node
    * @param {boolean=} opt_force Whether to force a re-lookup
@@ -610,7 +610,7 @@ export class LayoutElement {
           // node is the op, we can't return the node as its own parent layer.
           // In that case, it doesn't have a parent layer.
           // TODO(jridgewell, #12554): Fixed position's parent is the FIE
-          // element, what about Shadows?
+          // element.
           return op === node ? null : LayoutElement.for(op);
         }
         op = op./*OK*/offsetParent;
@@ -639,8 +639,8 @@ export class LayoutElement {
    * A check that the LayoutElement is contained by this layer, and the element
    * is not the layer's element.
    *
-   * TODO(jridgewell, #12554): This needs to account for FIE/Shadow's root,
-   * since it will be a child layout of the host element.
+   * TODO(jridgewell, #12554): This needs to account for FIE root, since it
+   * will be a child layout of the host element.
    *
    * @param {!LayoutElement} layout
    * @return {boolean}
