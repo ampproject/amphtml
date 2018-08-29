@@ -86,8 +86,6 @@ amp-list/0.1/test/validator-amp-list.html:43:2 The attribute '[state]' in tag 'a
 |    </amp-list>
 |    <!-- Valid amp-list with auto-resize attribute -->
 |    <amp-list width=10 height=10
->>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:85:2 The attribute 'auto-resize' may not appear in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      auto-resize>
 |    <div></div>

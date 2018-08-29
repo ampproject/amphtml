@@ -30,7 +30,7 @@ const multer = require('multer');
 const path = require('path');
 const request = require('request');
 const pc = process;
-const countries = require('./countries.json');
+const countries = require('../examples/countries.json');
 
 app.use(bodyParser.json());
 app.use('/amp4test', require('./amp4test'));

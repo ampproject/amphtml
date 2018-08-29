@@ -42,6 +42,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   html_format: EXPERIMENTAL
   tag_name: "AMP-LIST"
   requires_extension: "amp-list"
+    attrs: {
+    name: "auto-resize"
+    value: ""
+  }
   attrs: {
     name: "binding"
     value: "always"
@@ -98,10 +102,6 @@ tags: {  # <amp-list>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
-  attrs: {
-    name: "auto-resize"
-    value: ""
-  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }

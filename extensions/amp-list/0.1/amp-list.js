@@ -395,16 +395,13 @@ export class AmpList extends AMP.BaseElement {
         const height = this.element./*OK*/offsetHeight;
         if (scrollHeight > height) {
           if (autoResize) {
-            // This needs to be gated behind the experiment 'amp-list-resize'
             const layout = this.element.getAttribute('layout');
-            if (layout == Layout.NODISPLAY || layout == Layout.FILL) {
-              return;
-            } else if (layout == Layout.FLEX_ITEM) {
+            if (layout == Layout.FLEX_ITEM) {
               // TODO (cathyxz): flex item does not play nice
               // with layout container
               this.attemptChangeHeight(scrollHeight).catch(() => {});
             } else if (layout !== Layout.CONTAINER) {
-              this.changeToLayoutContainer_();
+              this.changeToLayoutContainer_(layout);
             }
           } else {
             this.attemptChangeHeight(scrollHeight).catch(() => {});
@@ -416,29 +413,35 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Converts the amp-list to de facto layout container.
+   * @param {string} previousLayout
    * @private
    */
-  changeToLayoutContainer_() {
-    const layout = this.element.getAttribute('layout');
-    if (layout == Layout.RESPONSIVE) {
-      this.element.classList.remove('i-amphtml-layout-responsive');
-    } else if (layout == Layout.FIXED) {
-      this.element.classList.remove('i-amphtml-layout-fixed');
-      setStyles(this.element, {
-        height: '',
-      });
-    } else if (layout == Layout.FIXED_HEIGHT) {
-      this.element.classList.remove('i-amphtml-layout-fixed-height');
-      setStyles(this.element, {
-        height: '',
-        width: '',
-      });
-    } else if (layout == Layout.INTRINSIC) {
-      this.element.classList.remove('i-amphtml-layout-intrinsic');
+  changeToLayoutContainer_(previousLayout) {
+    switch (previousLayout) {
+      case Layout.RESPONSIVE:
+        this.element.classList.remove('i-amphtml-layout-responsive');
+        break;
+      case Layout.FIXED:
+        this.element.classList.remove('i-amphtml-layout-fixed');
+        setStyles(this.element, {
+          height: '',
+        });
+        break;
+      case Layout.FIXED_HEIGHT:
+        this.element.classList.remove('i-amphtml-layout-fixed-height');
+        setStyles(this.element, {
+          height: '',
+          width: '',
+        });
+        break;
+      case Layout.INTRINSIC:
+        this.element.classList.remove('i-amphtml-layout-intrinsic');
+        break;
     }
     const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
     if (sizer) {
       this.element.removeChild(sizer);
+      this.element.sizerElement = undefined;
     }
     this.element.classList.remove('i-amphtml-layout-size-defined');
     this.container_.classList.remove(
