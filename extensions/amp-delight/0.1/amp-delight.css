@@ -1,0 +1,7 @@
+amp-delight [placeholder] {
+    transition: opacity 0.5s ease-out;
+}
+
+amp-delight [placeholder].faded {
+    opacity: 0;
+}
