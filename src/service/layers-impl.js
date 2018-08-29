@@ -130,12 +130,17 @@ export class LayoutLayers {
     // This forwards to our scroll-dirty system, and eventually to the scroll
     // listener.
     this.unlisteners_.push(listen(win.document, 'scroll', event => {
-      const {target} = event;
-      const scrolled = target.nodeType == Node.ELEMENT_NODE
-        ? dev().assertElement(target)
-        : scrollingElement;
-      this.scrolled_(scrolled);
+      this.scrolled_(event);
     }, {capture: true, passive: true}));
+
+    // Scroll events do not bubble out of shadow trees.
+    // Strangely, iOS 11 reports that document contains things in a shadow tree.
+    // Any node element, however, doesn't.
+    if (!win.document.documentElement.contains(scrollingElement)) {
+      this.unlisteners_.push(listen(scrollingElement, 'scroll', event => {
+        this.scrolled_(event);
+      }, {capture: true, passive: true}));
+    }
 
     // Destroys the layer tree on document resize, since entirely new CSS may
     // apply to the document now.
@@ -342,18 +347,21 @@ export class LayoutLayers {
    * Eventually, it will send an array of elements that actually changed
    * position (instead of having to check all elements in the listener).
    *
-   * @param {!Element} element
+   * @param {!Event} event
    */
-  scrolled_(element) {
-    let layer = LayoutElement.forOptional(element);
+  scrolled_(event) {
+    const {target} = event;
+    const scrolled = target.nodeType == Node.ELEMENT_NODE
+      ? dev().assertElement(target)
+      : this.scrollingElement_;
+    let layer = LayoutElement.forOptional(scrolled);
     if (layer && layer.isLayer()) {
       layer.dirtyScrollMeasurements();
     } else {
-      layer = this.declareLayer_(element, false, false);
+      layer = this.declareLayer_(scrolled, false, false);
     }
 
     this.activeLayer_ = layer;
-
     if (this.onScroll_) {
       this.onScroll_(/* layer.getElements() */);
     }
