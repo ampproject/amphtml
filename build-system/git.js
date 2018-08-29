@@ -86,7 +86,7 @@ exports.gitCommitterEmail = function() {
 
 /**
  * Returns the timestamp of the latest commit on the local branch.
- * @return {int}
+ * @return {number}
  */
 exports.gitCommitFormattedTime = function() {
   return getStdout(
