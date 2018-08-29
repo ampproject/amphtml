@@ -97,7 +97,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
           [linkRewriterVendor2, linkRewriterVendor1]);
     });
 
-    it('Should be insert linkRewriter in the middle', () => {
+    it('Should be able to insert linkRewriter in the middle', () => {
       linkRewriterManager.priorityList_ = ['vendor2', 'vendor1', 'vendor3'];
 
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
@@ -118,11 +118,25 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
           [linkRewriterVendor2, linkRewriterVendor3]);
 
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
+      const linkRewriterVendor4 = registerLinkRewriterHelper('vendor4');
 
       expect(linkRewriterManager.linkRewriters_).to.deep.equal(
-          [linkRewriterVendor2, linkRewriterVendor1, linkRewriterVendor3]);
+          [linkRewriterVendor2, linkRewriterVendor1,
+            linkRewriterVendor3, linkRewriterVendor4]);
     });
 
+    it('Should ingore if priority contains unregistered rewriters', () => {
+      linkRewriteService.priorityList_ = [
+        'vendor2', 'vendor4', 'vendor1','vendor3',
+      ];
+
+      const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
+      const linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
+      const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
+
+      expect(linkRewriteService.linkRewriters_).to.deep.equal(
+          [linkRewriterVendor2, linkRewriterVendor1, linkRewriterVendor3]);
+    });
 
     it('Should call .onDomUpdate() after registering linkRewriter', () => {
       env.sandbox.stub(LinkRewriter.prototype, 'onDomUpdated')
