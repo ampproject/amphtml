@@ -13,3 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @fileoverview Async Input Element that uses the
+ * amp-recaptcha-service to dispatch actions, and return
+ * recaptcha tokens
+ */
+
+import {AmpRecaptcha} from './amp-recaptcha-service';
+
+export class AmpRecaptchaInput extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    console.log('ayyeee');
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return true;
+  }
+
+  /** @override */
+  layoutCallback() {
+    console.log('layout callback!');
+    return AmpRecaptcha.register(this);
+  }
+
+  /**
+   * @override
+   */
+  unlayoutCallback() {
+    AmpRecaptcha.unregister(this);
+    return true;
+  }
+}
+
+AMP.extension('amp-recaptcha-input', '0.1', AMP => {
+  AMP.registerElement('amp-recaptcha-input', AmpRecaptchaInput);
+});

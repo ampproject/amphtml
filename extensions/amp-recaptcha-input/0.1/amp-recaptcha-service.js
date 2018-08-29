@@ -49,10 +49,12 @@ class AmpRecaptchaService {
    * @param {!Window} win
    */
   register(element, win) {
+    console.log(element);
     this.registeredElement.push(element);
     if (!this.iframe_) {
-      this.initialize_(element, win);
+      return this.initialize_(element, win);
     }
+    return Promise.resolve(); 
   }
 
   /**
