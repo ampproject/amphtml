@@ -992,7 +992,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
-    return Promise.resolve(true);
+    return this.attemptToRenderCreative();
   }
 
   /**

@@ -17,6 +17,43 @@
 /** @externs */
 
 /**
+ * The "init" argument of the Fetch API. Currently, only "credentials: include"
+ * is implemented.  Note ampCors with explicit false indicates that
+ * __amp_source_origin should not be appended to the URL to allow for
+ * potential caching or response across pages.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
+ * Externed for use in the amp-form component when reconstructing
+ * the request for SSR and then passed to runtime.
+ * @typedef {{
+ *   body: (!JsonObject|!FormData|!FormDataWrapper|undefined|string),
+ *   credentials: (string|undefined),
+ *   headers: (!JsonObject|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+var FetchInitDef;
+
+/** @constructor **/
+var FormDataWrapper = function() {};
+
+FormDataWrapper.prototype.entries = function() {};
+FormDataWrapper.prototype.getFormData = function() {};
+
+/**
+ * Externed as this is constructed in the amp-form component and
+ * then passed to runtime.
+ * @typedef {{
+ *  xhrUrl: string,
+ *  fetchOpt: !FetchInitDef
+ * }}
+ */
+var FetchRequestDef;
+
+/**
  * A type for Objects that can be JSON serialized or that come from
  * JSON serialization. Requires the objects fields to be accessed with
  * bracket notation object['name'] to make sure the fields do not get

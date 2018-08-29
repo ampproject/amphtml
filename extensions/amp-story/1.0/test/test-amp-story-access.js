@@ -15,7 +15,7 @@
  */
 
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpStoryAccess} from '../amp-story-access';
+import {AmpStoryAccess, Type} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-access', {amp: true}, env => {
@@ -72,10 +72,26 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     expect(buttonInDrawerEl).to.exist;
   });
 
-  it('should display the <amp-story-access> tag on state update', done => {
+  it('should display the access blocking paywall on state update', done => {
     storyAccess.buildCallback();
 
     storeService.dispatch(Action.TOGGLE_ACCESS, true);
+
+    win.requestAnimationFrame(() => {
+      expect(storyAccess.element)
+          .to.have.class('i-amphtml-story-access-visible');
+      done();
+    });
+  });
+
+  it('should show the access notification on state update', done => {
+    storyAccess.element.setAttribute('type', Type.NOTIFICATION);
+    storyAccess.buildCallback();
+
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'foo',
+      index: 0,
+    });
 
     win.requestAnimationFrame(() => {
       expect(storyAccess.element)

@@ -640,7 +640,7 @@
 
   // Export the sanitizing function for unescaped values.
   mustache.sanitizeUnescaped = null;
-  mustache.setUnescapedSanitizier = function setUnescapedSanitizier (sanitizeUnescaped) {
+  mustache.setUnescapedSanitizer = function setUnescapedSanitizer(sanitizeUnescaped) {
     mustache.sanitizeUnescaped = sanitizeUnescaped;
   };
 

@@ -21,33 +21,24 @@ import {
   setupAMPCors,
   setupInit,
   setupInput,
+  setupJsonFetchInit,
   verifyAmpCORSHeaders,
 } from '../utils/xhr-utils';
-import {dev, user} from '../log';
 import {
   getCorsUrl,
   parseUrlDeprecated,
-  serializeQueryString,
 } from '../url';
 import {getService, registerServiceBuilder} from '../service';
-import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {user} from '../log';
 
 /**
- * Special case for fetchJson
  * @typedef {{
- *   body: (!JsonObject|!FormData|undefined),
- *   credentials: (string|undefined),
- *   headers: (!JsonObject|undefined),
- *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
+ *  xhrUrl: string,
+ *  fetchOpt: !FetchInitDef
  * }}
  */
-export let FetchInitJsonDef;
-
-/** @private @const {!Array<function(*):boolean>} */
-const allowedJsonBodyTypes_ = [isArray, isObject];
+export let FetchRequestDef;
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -82,7 +73,7 @@ export class Xhr {
    * be either the native fetch or our polyfill.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef} init
+   * @param {!FetchInitDef} init
    * @return {!Promise<!Response>|!Promise<!Response>}
    * @private
    */
@@ -96,7 +87,7 @@ export class Xhr {
           // will expect a native `FormData` object in the `body` property, so
           // the native `FormData` object needs to be unwrapped.
           if (isFormDataWrapper(init.body)) {
-            init.body = init.body.getFormData();
+            init.body = /** @type {!FormDataWrapper} */ (init.body).getFormData();
           }
           return (this.win.fetch).apply(null, arguments);
         });
@@ -114,7 +105,7 @@ export class Xhr {
    *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef=} init
+   * @param {!FetchInitDef=} init
    * @return {!Promise<!Response>}
    * @private
    */
@@ -139,34 +130,12 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitJsonDef=} opt_init
+   * @param {?FetchInitDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
    * @return {!Promise<!Response>}
    */
   fetchJson(input, opt_init, opt_allowFailure) {
-    const init = setupInit(opt_init, 'application/json');
-    if (init.method == 'POST' && !isFormDataWrapper(init.body)) {
-      // Assume JSON strict mode where only objects or arrays are allowed
-      // as body.
-      dev().assert(
-          allowedJsonBodyTypes_.some(test => test(init.body)),
-          'body must be of type object or array. %s',
-          init.body
-      );
-
-      // Content should be 'text/plain' to avoid CORS preflight.
-      init.headers['Content-Type'] = init.headers['Content-Type'] ||
-          'text/plain;charset=utf-8';
-      const headerContentType = init.headers['Content-Type'];
-      // Cast is valid, because we checked that it is not form data above.
-      if (headerContentType === 'application/x-www-form-urlencoded') {
-        init.body =
-          serializeQueryString(/** @type {!JsonObject} */ (init.body));
-      } else {
-        init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
-      }
-    }
-    return this.fetch(input, init);
+    return this.fetch(input, setupJsonFetchInit(opt_init));
   }
 
   /**
@@ -178,7 +147,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init
+   * @param {?FetchInitDef=} opt_init
    * @return {!Promise<!Response>}
    */
   fetchText(input, opt_init) {
@@ -187,7 +156,7 @@ export class Xhr {
 
   /**
    * @param {string} input URL
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init Fetch options object.
+   * @param {?FetchInitDef=} opt_init Fetch options object.
    * @return {!Promise<!Response>}
    */
   fetch(input, opt_init) {
@@ -204,7 +173,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} opt_init
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
@@ -224,7 +193,6 @@ export class Xhr {
     return getCorsUrl(win, url);
   }
 }
-
 
 /**
  * @param {!Window} window

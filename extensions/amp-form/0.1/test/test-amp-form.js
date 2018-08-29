@@ -16,6 +16,7 @@
 
 import '../../../amp-mustache/0.1/amp-mustache';
 import '../../../amp-selector/0.1/amp-selector';
+import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
   AmpForm,
@@ -75,6 +76,7 @@ describes.repeated('', {
       cidServiceForDocForTesting(env.ampdoc);
       env.ampdoc.getBody().appendChild(form);
       const ampForm = new AmpForm(form, 'amp-form-test-id');
+      sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(false);
       return Promise.resolve(ampForm);
     }
 
@@ -163,6 +165,11 @@ describes.repeated('', {
       });
 
       it('should server side render templates if enabled', () => {
+        const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
+        const fromStructuredCloneable =
+            sandbox.spy(xhrUtils, 'fromStructuredCloneable');
+        const verifyAmpCORSHeaders =
+            sandbox.spy(xhrUtils, 'verifyAmpCORSHeaders');
         ampForm.then(ampForm => {
           const form = ampForm.form_;
           const template = createElement('template');
@@ -204,6 +211,10 @@ describes.repeated('', {
                 expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate)
                     .to.have.been.calledWith(
                         form, sinon.match.func, sinon.match.func);
+                sinon.assert.callOrder(
+                    setupAMPCors,
+                    fromStructuredCloneable,
+                    verifyAmpCORSHeaders);
               });
         });
       });
@@ -1239,7 +1250,7 @@ describes.repeated('', {
 
     describe('User Validity', () => {
       it('should manage valid/invalid on input/fieldset/form on submit', () => {
-        expectAsyncConsoleError(/Form submission failed.*/);
+        expectAsyncConsoleError(/Form submission failed/);
         setReportValiditySupportedForTesting(false);
         return getAmpForm(getForm(/*button1*/ true)).then(ampForm => {
           const form = ampForm.form_;
@@ -1478,7 +1489,7 @@ describes.repeated('', {
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
-      expectAsyncConsoleError(/Form submission failed.*/);
+      expectAsyncConsoleError(/Form submission failed/);
       this.timeout(3000);
       return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
@@ -1710,6 +1721,7 @@ describes.repeated('', {
 
         navigateTo = sandbox.spy();
         sandbox.stub(Services, 'navigationForDoc').returns({navigateTo});
+        sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(false);
       });
 
       describe('AMP-Redirect-To', () => {

@@ -22,7 +22,7 @@ import {user} from './log';
  *
  * @param {!Window} win
  * @param {string} input
- * @param {?./utils/xhr-utils.FetchInitDef=} opt_init
+ * @param {?FetchInitDef=} opt_init
  * @return {!Promise<!Document>}
  * @ignore
  */
@@ -52,7 +52,7 @@ export function fetchDocument(win, input, opt_init) {
  *
  *
  * @param {string} input
- * @param {!./utils/xhr-utils.FetchInitDef} init
+ * @param {!FetchInitDef} init
  * @private
  */
 function xhrRequest(input, init) {

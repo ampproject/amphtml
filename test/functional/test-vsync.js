@@ -50,6 +50,7 @@ describe('vsync', () => {
       requestAnimationFrame: window.requestAnimationFrame.bind(window),
     };
     win.document.defaultView = win;
+    win.Promise = window.Promise;
 
     installTimerService(win);
 
