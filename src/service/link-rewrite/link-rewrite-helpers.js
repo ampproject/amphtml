@@ -37,20 +37,20 @@ export function isAnchorReplacementTuple(tuple) {
 }
 
 /**
- * Create a reponse object for 'resolveUnknownAnchors()' function
+ * Create a response object for 'resolveUnknownAnchors()' function
  * in the format expected by LinkRewriter.
  *
- * Some replacement urls may be determine synchrously but others may need an
- * asynchrounous call. Being able to return a sync and async response offers
+ * Some replacement urls may be determined synchronously but others may need an
+ * asynchronous call. Being able to return a sync and async response offers
  * flexibility to handle all these scenarios:
  *
- * - If you don't need any api calls to determine your replacement url.
+ * - If you don't need any api calls to determined your replacement url.
  *   Use: createTwoStepsResponse(syncResponse)
  *
- * - If you need a an api call to determine your replacement url
+ * - If you need a an api call to determined your replacement url
  *   Use: createTwoStepsResponse(null, asyncResponse)
  *
- * - If you need an api call to determine your replacement url but
+ * - If you need an api call to determined your replacement url but
  *   have implemented a synchronous cache system.
  *   Use: createTwoStepsResponse(syncResponse, asyncResponse);
  *
