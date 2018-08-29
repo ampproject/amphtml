@@ -26,7 +26,7 @@ min_validator_revision_required: 348
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 726
+spec_file_revision: 730
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -5781,7 +5781,7 @@ error_formats {
 }
 error_formats {
   code: INVALID_JSON_CDATA
-  format: "JSON contents are invalid data that can not be parsed."
+  format: "The script tag contains invalid JSON that cannot be parsed."
 }
 error_formats {
   code: DISALLOWED_PROPERTY_IN_ATTR_VALUE
