@@ -79,7 +79,6 @@ class AmpRecaptchaService {
    * @return {Promise}
    */
   execute(sitekey, action) {
-    
   }
   
   /**
@@ -149,8 +148,6 @@ class AmpRecaptchaService {
    * @param {!Object} message
    */
   handleTokenMessage_(message) {
-    // TODO: test this
-    console.log(message);
   }
 
   /**
@@ -158,8 +155,6 @@ class AmpRecaptchaService {
    * @param {!Object} message
    */
   handleErrorMessage_(message) {
-    // TODO: test this
-    console.log(message);
   }
 }
 

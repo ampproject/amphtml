@@ -21,13 +21,19 @@
  */
 
 import {AmpRecaptcha} from './amp-recaptcha-service';
-import {LayoutPriority} from '../../../src/layout';
+import {isExperimentOn} from '../../../src/experiments';
+
+/** @const */
+const TAG = 'amp-recaptcha-input';
 
 export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {boolean} */
+    this.isExperimentEnabled_ = isExperimentOn(this.win, TAG);
   }
 
   /** @override */
@@ -37,16 +43,21 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('layout callback!', this);
-    return AmpRecaptcha.register(this.win, this.element);
+    if (this.isExperimentEnabled_) {
+      return AmpRecaptcha.register(this.win, this.element);
+    }
+    return Promise.resolve();
   }
 
   /**
    * @override
    */
   unlayoutCallback() {
-    AmpRecaptcha.unregister(this.element);
-    return true;
+    if (this.isExperimentEnabled_) {
+      AmpRecaptcha.unregister(this.element);
+      return true;
+    }
+    return false;
   }
 }
 
