@@ -97,29 +97,53 @@ describes.realWin('Expander', {
       ABC: () => 'three',
       ABCD: () => 'four',
     };
-    beforeEach(() => {
-      env.win.document.head.appendChild(
-          createElementWithAttributes(env.win.document, 'meta', {
-            name: 'amp-allowed-url-macros',
-            content: 'ABC,ABCD,CANONICAL',
-          }));
 
-      variableSource = new GlobalVariableSource(env.ampdoc);
-      expander = new Expander(variableSource);
+    describe('Non-empty whitelist', () => {
+      beforeEach(() => {
+        env.win.document.head.appendChild(
+            createElementWithAttributes(env.win.document, 'meta', {
+              name: 'amp-allowed-url-macros',
+              content: 'ABC,ABCD,CANONICAL',
+            }));
+
+        variableSource = new GlobalVariableSource(env.ampdoc);
+        expander = new Expander(variableSource);
+      });
+
+      it('should not replace unwhitelisted RANDOM', () => {
+        const url = 'http://www.google.com/?test=RANDOM';
+        const expected = 'http://www.google.com/?test=RANDOM';
+        return expect(expander.expand(url, mockBindings))
+            .to.eventually.equal(expected);
+      });
+
+      it('should replace whitelisted ABCD', () => {
+        const url = 'http://www.google.com/?test=ABCD';
+        const expected = 'http://www.google.com/?test=four';
+        return expect(expander.expand(url, mockBindings))
+            .to.eventually.equal(expected);
+      });
     });
 
-    it('should not replace unwhitelisted RANDOM', () => {
-      const url = 'http://www.google.com/?test=RANDOM';
-      const expected = 'http://www.google.com/?test=RANDOM';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal(expected);
-    });
+    describe('Empty whitelist', () => {
+      beforeEach(() => {
+        env.win.document.head.appendChild(
+            createElementWithAttributes(env.win.document, 'meta', {
+              name: 'amp-allowed-url-macros',
+              content: '',
+            }));
 
-    it('should replace whitelisted ABCD', () => {
-      const url = 'http://www.google.com/?test=ABCD';
-      const expected = 'http://www.google.com/?test=four';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal(expected);
+        variableSource = new GlobalVariableSource(env.ampdoc);
+        expander = new Expander(variableSource);
+      });
+
+      it('should not replace anything', () => {
+        const url = 'http://www.google.com/?test=ABCD';
+        const expected = 'http://www.google.com/?test=ABCD';
+        return expect(expander.expand(url, mockBindings))
+            .to.eventually.equal(expected);
+      });
+
     });
   });
 
