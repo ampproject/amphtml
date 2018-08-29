@@ -42,7 +42,7 @@ export class BatchedXhr extends Xhr {
    * Fetch and batch the requests if possible.
    *
    * @param {string} input URL
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init Fetch options object.
+   * @param {?FetchInitDef=} opt_init Fetch options object.
    * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
    * @override
    */
