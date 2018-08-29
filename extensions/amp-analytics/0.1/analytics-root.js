@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ScrollManager} from './scroll-manager';
 import {Services} from '../../../src/services';
 import {
   VisibilityManagerForDoc,
@@ -61,6 +62,9 @@ export class AnalyticsRoot {
 
     /** @private {?./visibility-manager.VisibilityManager} */
     this.visibilityManager_ = null;
+
+    /** @private {?./scroll-manager.ScrollManager} */
+    this.scrollManager_ = null;
   }
 
   /** @override */
@@ -71,6 +75,9 @@ export class AnalyticsRoot {
     }
     if (this.visibilityManager_) {
       this.visibilityManager_.dispose();
+    }
+    if (this.scrollManager_) {
+      this.scrollManager_.dispose();
     }
   }
 
@@ -162,7 +169,7 @@ export class AnalyticsRoot {
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
+   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {
@@ -339,6 +346,20 @@ export class AnalyticsRoot {
    * @abstract
    */
   createVisibilityManager() {}
+
+  /**
+   *  Returns the Scroll Managet corresponding to this analytics root.
+   * The Scroll Manager is created lazily as needed, and will handle
+   * calling all handlers for a scroll event.
+   * @return {!./scroll-manager.ScrollManager}
+   */
+  getScrollManager() {
+    if (!this.scrollManager_) {
+      this.scrollManager_ = new ScrollManager(this.ampdoc);
+    }
+
+    return this.scrollManager_;
+  }
 }
 
 

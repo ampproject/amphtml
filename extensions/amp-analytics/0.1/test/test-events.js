@@ -21,6 +21,7 @@ import {
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
+  ScrollEventTracker,
   SignalTracker,
   TimerEventTracker,
   VisibilityTracker,
@@ -154,6 +155,192 @@ describes.realWin('Events', {amp: 1}, env => {
       target.click();
       const event = handler.args[0][0];
       expect(event.vars).to.deep.equal({'foo': 'bar'});
+    });
+  });
+
+  describe('ScrollEventTracker', () => {
+
+    let tracker;
+    let fakeViewport;
+    let getFakeViewportChangedEvent;
+    const defaultScrollConfig = {
+      'on': 'scroll',
+      'scrollSpec': {
+        'verticalBoundaries': [0, 100],
+        'horizontalBoundaries': [0, 100],
+      },
+    };
+    let scrollManager;
+
+    beforeEach(() => {
+      tracker = root.getTracker('scroll', ScrollEventTracker);
+      fakeViewport = {
+        'getSize': sandbox.stub().returns(
+            {top: 0, left: 0, height: 200, width: 200}),
+        'getScrollTop': sandbox.stub().returns(0),
+        'getScrollLeft': sandbox.stub().returns(0),
+        'getScrollHeight': sandbox.stub().returns(500),
+        'getScrollWidth': sandbox.stub().returns(500),
+        'onChanged': sandbox.stub(),
+      };
+      scrollManager = tracker.root_.getScrollManager();
+      scrollManager.viewport_ = fakeViewport;
+
+      getFakeViewportChangedEvent = () => {
+        const size = fakeViewport.getSize();
+        return {
+          top: fakeViewport.getScrollTop(),
+          left: fakeViewport.getScrollLeft(),
+          width: size.width,
+          height: size.height,
+          relayoutAll: false,
+          velocity: 0, // Hack for typing.
+        };
+      };
+    });
+
+    it('should initalize, add listeners and dispose', () => {
+      expect(tracker.root).to.equal(root);
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
+
+      tracker.add(undefined, 'scroll', defaultScrollConfig, sandbox.stub());
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
+
+      tracker.dispose();
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
+    });
+
+
+    it('fires on scroll', () => {
+      const fn1 = sandbox.stub();
+      const fn2 = sandbox.stub();
+      tracker.add(undefined, 'scroll', defaultScrollConfig, fn1);
+      tracker.add(undefined, 'scroll', {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [92],
+          'horizontalBoundaries': [92],
+        },
+      }, fn2);
+
+      function matcher(expected) {
+        return actual => {
+          return actual.vars.horizontalScrollBoundary === String(expected) ||
+            actual.vars.verticalScrollBoundary === String(expected);
+        };
+      }
+      expect(fn1).to.have.callCount(2);
+      expect(
+          fn1.getCall(0)
+              .calledWithMatch(sinon.match(matcher(0)))
+      ).to.be.true;
+      expect(
+          fn1.getCall(1)
+              .calledWithMatch(sinon.match(matcher(0)))
+      ).to.be.true;
+      expect(fn2).to.have.not.been.called;
+
+      // Scroll Down
+      fakeViewport.getScrollTop.returns(500);
+      fakeViewport.getScrollLeft.returns(500);
+      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+
+      expect(fn1).to.have.callCount(4);
+      expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be
+          .true;
+      expect(fn1.getCall(3).calledWithMatch(sinon.match(matcher(100)))).to.be
+          .true;
+      expect(fn2).to.have.callCount(2);
+      expect(
+          fn2.getCall(0)
+              .calledWithMatch(sinon.match(matcher(90)))
+      ).to.be.true;
+      expect(
+          fn2.getCall(1)
+              .calledWithMatch(sinon.match(matcher(90)))
+      ).to.be.true;
+    });
+
+    it('does not fire duplicates on scroll', () => {
+      const fn1 = sandbox.stub();
+      tracker.add(undefined, 'scroll', defaultScrollConfig, fn1);
+
+      // Scroll Down
+      fakeViewport.getScrollTop.returns(10);
+      fakeViewport.getScrollLeft.returns(10);
+      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+
+      expect(fn1).to.have.callCount(2);
+    });
+
+    it('fails gracefully on bad scroll config', () => {
+      const fn1 = sandbox.stub();
+
+      allowConsoleError(() => {
+        tracker.add(undefined, 'scroll', {'on': 'scroll'}, fn1);
+        expect(fn1).to.have.not.been.called;
+
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {},
+        }, fn1);
+        expect(fn1).to.have.not.been.called;
+
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {
+            'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
+          },
+        }, fn1);
+        expect(fn1).to.have.not.been.called;
+
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []},
+        }, fn1);
+        expect(fn1).to.have.not.been.called;
+
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {
+            'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
+          },
+        }, fn1);
+        expect(fn1).to.have.not.been.called;
+      });
+    });
+
+    it('normalizes boundaries correctly.', () => {
+      allowConsoleError(() => {
+        expect(tracker.normalizeBoundaries_([])).to.be.empty;
+        expect(tracker.normalizeBoundaries_(undefined)).to.be.empty;
+        expect(tracker.normalizeBoundaries_(['foo'])).to.be.empty;
+        expect(tracker.normalizeBoundaries_(['0', '1'])).to.be.empty;
+      });
+      expect(tracker.normalizeBoundaries_([1])).to.deep.equal({0: false});
+      expect(tracker.normalizeBoundaries_([1, 4, 99, 1001])).to.deep.equal({
+        0: false,
+        5: false,
+        100: false,
+      });
+    });
+
+    it('fires events on normalized boundaries.', () => {
+      const fn1 = sandbox.stub();
+      const fn2 = sandbox.stub();
+      tracker.add(undefined, 'scroll', {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [1],
+        },
+      }, fn1);
+      tracker.add(undefined, 'scroll', {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [4],
+        },
+      }, fn2);
+      expect(fn2).to.be.calledOnce;
     });
   });
 
