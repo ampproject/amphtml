@@ -22,7 +22,6 @@ import {isArray, isFiniteNumber} from '../../../src/types';
 // TODO(calebcordry) remove this once experiment is launched
 // also remove from dep-check-config whitelist;
 import {isExperimentOn} from '../../../src/experiments';
-import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'Analytics.Variables';
@@ -171,56 +170,79 @@ export class VariableService {
    * @return {!Promise<string>} The expanded string
    */
   expandTemplate(template, options) {
-    return tryResolve(this.expandTemplateSync.bind(this, template, options));
-  }
+    if (options.iterations < 0) {
+      user().error(TAG, 'Maximum depth reached while expanding variables. ' +
+          'Please ensure that the variables are not recursive.');
+      return Promise.resolve(template);
+    }
 
-  /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {string} The expanded string
-   * @visibleForTesting
-   */
-  expandTemplateSync(template, options) {
-    return template.replace(/\${([^}]*)}/g, (match, key) => {
-      if (options.iterations < 0) {
-        user().error(TAG, 'Maximum depth reached while expanding variables. ' +
-            'Please ensure that the variables are not recursive.');
-        return match;
-      }
-
+    const replacementPromises = [];
+    let replacement = template.replace(/\${([^}]*)}/g, (match, key) => {
       if (!key) {
-        return '';
+        return Promise.resolve('');
       }
 
-      // Split the key to name and args
-      // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
-      const {name, argList} = getNameArgs(key);
+      const {name, argList} = this.getNameArgs_(key);
       if (options.freezeVars[name]) {
         // Do nothing with frozen params
         return match;
       }
 
-      let value = options.vars[name] != null ? options.vars[name] : '';
+      const raw = options.vars[name] != null ? options.vars[name] : '';
 
-      if (typeof value == 'string') {
-        value = this.expandTemplateSync(value,
+      let p;
+      if (typeof raw == 'string') {
+        // Expand string values further.
+        p = this.expandTemplate(raw,
             new ExpansionOptions(options.vars, options.iterations - 1,
                 true /* noEncode */));
+      } else {
+        // Values can also be arrays and objects. Don't expand them.
+        p = Promise.resolve(raw);
       }
 
-      if (!options.noEncode) {
-        value = this.encodeVars(name, value);
-      }
-      if (value) {
-        value += argList;
-      }
-      return value;
+      p = p.then(finalRawValue => {
+        // Then encode the value
+        const val = options.noEncode
+          ? finalRawValue
+          : this.encodeVars(name, finalRawValue);
+        return val ? val + argList : val;
+      })
+          .then(encodedValue => {
+          // Replace it in the string
+            replacement = replacement.replace(match, encodedValue);
+          });
+
+      // Queue current replacement promise after the last replacement.
+      replacementPromises.push(p);
+
+      // Since the replacement will happen later, return the original template.
+      return match;
     });
+
+    // Once all the promises are complete, return the expanded value.
+    return Promise.all(replacementPromises).then(() => replacement);
+  }
+
+  /**
+   * Returns an array containing two values: name and args parsed from the key.
+   *
+   * @param {string} key The key to be parsed.
+   * @return {!FunctionNameArgsDef}
+   * @private
+   */
+  getNameArgs_(key) {
+    if (!key) {
+      return {name: '', argList: ''};
+    }
+    const match = key.match(VARIABLE_ARGS_REGEXP);
+    user().assert(match, 'Variable with invalid format found: ' + key);
+    return {name: match[1] || match[0], argList: match[2] || ''};
   }
 
   /**
    * @param {string} unusedName Name of the variable. Only used in tests.
-   * @param {string|?Array<string>} raw The values to URI encode.
+   * @param {string|!Array<string>} raw The values to URI encode.
    * @return {string} The encoded value.
    */
   encodeVars(unusedName, raw) {
@@ -232,7 +254,7 @@ export class VariableService {
       return raw.map(this.encodeVars.bind(this, unusedName)).join(',');
     }
     // Separate out names and arguments from the value and encode the value.
-    const {name, argList} = getNameArgs(String(raw));
+    const {name, argList} = this.getNameArgs_(String(raw));
     return encodeURIComponent(name) + argList;
   }
 
@@ -247,24 +269,6 @@ export class VariableService {
 
 
 /**
- * Returns an array containing two values: name and args parsed from the key.
- *
- * case 1) 'SOME_MACRO(abc,def)' => name='SOME_MACRO', argList='(abc,def)'
- * case 2) 'randomString' => name='randomString', argList=''
- * @param {string} key The key to be parsed.
- * @return {!FunctionNameArgsDef}
- */
-function getNameArgs(key) {
-  if (!key) {
-    return {name: '', argList: ''};
-  }
-  const match = key.match(VARIABLE_ARGS_REGEXP);
-  user().assert(match, 'Variable with invalid format found: ' + key);
-
-  return {name: match[1] || match[0], argList: match[2] || ''};
-}
-
-/**
  * @param {!Window} win
  */
 export function installVariableService(win) {
@@ -277,13 +281,4 @@ export function installVariableService(win) {
  */
 export function variableServiceFor(win) {
   return getService(win, 'amp-analytics-variables');
-}
-
-/**
- * @param {string} key
- * @return {{name, argList}|!FunctionNameArgsDef}
- * @visibleForTesting
- */
-export function getNameArgsForTesting(key) {
-  return getNameArgs(key);
 }
