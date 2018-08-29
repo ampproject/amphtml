@@ -20,7 +20,7 @@ import {AmpRecaptcha} from '../amp-recaptcha-service';
 
 describes.realWin('amp-recaptcha-service', {
   amp: { /* amp spec */
-    extensions: ['amp-recaptcha-input', 'amp-gist'],
+    extensions: ['amp-recaptcha-input'],
   }
 }, env => {
   let win, doc;
@@ -34,26 +34,19 @@ describes.realWin('amp-recaptcha-service', {
   });
 
   function getElement() {
-    const element = doc.createElement('amp-gist');
-    element.setAttribute('height', '237');
+    const element = doc.createElement('amp-recaptcha-input');
     doc.body.appendChild(element);
     return element.build().then(() => element.layoutCallback()).then(() => element);
   }
 
-  it('should pass', () => {
-    expect(true).to.be.ok;
-  });
-
   it('should create an iframe on initialize', done => {
     getElement().then(element => {
-      AmpRecaptcha.initialize_(element, win).then(() => {
-        console.error('hello', AmpRecaptcha.iframe_);
-        expect(true).to.be.ok;
+      expect(element).to.be.ok;
+      AmpRecaptcha.initialize_(win, element).then(() => {
+        expect(AmpRecaptcha.iframe_).to.be.ok;
         done();
       });
     });
   });
-
-
 });
 
