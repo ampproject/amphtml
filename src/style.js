@@ -160,6 +160,9 @@ export function setStyles(element, styles) {
  * This is the only possible way to pass a dynamic styles object to setStyles
  * and setImportantStyles.
  *
+ * If you wish to set `display`, use the `toggle` helper instead. This is so
+ * changes to display can trigger necessary updates. See #17475.
+ *
  * @param {!Object<string, *>} styles
  * @return {!Object<string, *>}
  */
