@@ -73,7 +73,7 @@ if (isExperimentOn(self, 'ampdoc-shell')) {
     // Pre-stub already known elements.
     stubElementsForDoc(ampdocShell);
 
-    makeBodyVisible(self.document, /* waitForServices */ true);
+    makeBodyVisible(self.document);
     Services.resourcesForDoc(ampdocShell).ampInitComplete();
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 } else {
