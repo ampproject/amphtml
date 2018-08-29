@@ -27,7 +27,7 @@
  * Externed for use in the amp-form component when reconstructing
  * the request for SSR and then passed to runtime.
  * @typedef {{
- *   body: (!JsonObject|!FormData|!Object|!Array|undefined|string),
+ *   body: (!JsonObject|!FormData|!Object|undefined|string),
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
