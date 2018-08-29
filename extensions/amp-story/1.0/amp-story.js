@@ -1860,13 +1860,15 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   upgradeCtaAnchorTagsForTracking_(page, pageIndex) {
-    const pageId = page.element.id;
-    const ctaAnchorEls =
-        scopedQuerySelectorAll(page.element, 'amp-story-cta-layer a');
+    this.mutateElement(() => {
+      const pageId = page.element.id;
+      const ctaAnchorEls =
+          scopedQuerySelectorAll(page.element, 'amp-story-cta-layer a');
 
-    Array.prototype.forEach.call(ctaAnchorEls, ctaAnchorEl => {
-      ctaAnchorEl.setAttribute('data-vars-story-page-id', pageId);
-      ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
+      Array.prototype.forEach.call(ctaAnchorEls, ctaAnchorEl => {
+        ctaAnchorEl.setAttribute('data-vars-story-page-id', pageId);
+        ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
+      });
     });
   }
 
