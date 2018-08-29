@@ -17,11 +17,17 @@
 /** @externs */
 
 /**
- * Special case for fetchJson.
+ * The "init" argument of the Fetch API. Currently, only "credentials: include"
+ * is implemented.  Note ampCors with explicit false indicates that
+ * __amp_source_origin should not be appended to the URL to allow for
+ * potential caching or response across pages.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
  * Externed for use in the amp-form component when reconstructing
  * the request for SSR and then passed to runtime.
  * @typedef {{
- *   body: (!JsonObject|!FormData|undefined),
+ *   body: (!JsonObject|!FormData|!Object|!Array|undefined|string),
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
@@ -29,14 +35,14 @@
  *   ampCors: (boolean|undefined)
  * }}
  */
-var FetchInitJsonDef;
+var FetchInitDef;
 
 /**
  * Externed as this is constructed in the amp-form component and
  * then passed to runtime.
  * @typedef {{
  *  xhrUrl: string,
- *  fetchOpt: !FetchInitJsonDef
+ *  fetchOpt: !FetchInitDef
  * }}
  */
 var FetchRequestDef;
