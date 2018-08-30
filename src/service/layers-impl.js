@@ -17,11 +17,11 @@
 import {Services} from '../services';
 import {computedStyle} from '../style';
 import {dev} from '../log';
-import {escapeCssSelectorIdent, rootNodeFor} from '../dom';
 import {filterSplice} from '../utils/array';
 import {getMode} from '../mode';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {rootNodeFor} from '../dom';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
 
