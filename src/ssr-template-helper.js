@@ -63,9 +63,9 @@ export class SsrTemplateHelper {
   isSupported() {
     const {ampdoc} = this.viewer_;
     if (ampdoc.isSingleDoc()) {
-      const htmlElement = ampdoc.getRootNode().documentElement
+      const htmlElement = ampdoc.getRootNode().documentElement;
       if (htmlElement.hasAttribute('allow-viewer-render-template')) {
-        return this.viewer_.hasCapability('viewerRenderTemplate')
+        return this.viewer_.hasCapability('viewerRenderTemplate');
       }
     }
   }
