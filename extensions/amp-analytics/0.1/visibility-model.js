@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
 
@@ -62,18 +61,6 @@ export class VisibilityModel {
 
     /** @private {?Observable} */
     this.onTriggerObservable_ = new Observable();
-
-    const deferred = new Deferred();
-
-    /** @private */
-    this.eventPromise_ = deferred.promise;
-
-    /** @private {?function()} */
-    this.eventResolver_ = deferred.resolve;
-
-    this.eventPromise_.then(() => {
-      this.onTriggerObservable_.fire();
-    });
 
     /** @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
@@ -148,15 +135,6 @@ export class VisibilityModel {
    * @private
    */
   reset_() {
-    dev().assert(!this.eventResolver_,
-        'Attempt to refresh visible event before previous one resolve');
-    const deferred = new Deferred();
-    this.eventPromise_ = deferred.promise;
-    this.eventResolver_ = deferred.resolve;
-
-    this.eventPromise_.then(() => {
-      this.onTriggerObservable_.fire();
-    });
     this.scheduleRepeatId_ = null;
     this.everMatchedVisibility_ = false;
     this.matchesVisibility_ = false;
@@ -196,7 +174,6 @@ export class VisibilityModel {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
-    this.eventResolver_ = null;
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.removeAll();
       this.onTriggerObservable_ = null;
@@ -220,10 +197,6 @@ export class VisibilityModel {
   onTriggerEvent(handler) {
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.add(handler);
-    }
-    if (this.eventPromise_ && !this.eventResolver_) {
-      // If eventPromise has already resolved, need to call handler manually.
-      handler();
     }
   }
 
@@ -300,9 +273,6 @@ export class VisibilityModel {
       }
       return;
     }
-    if (!this.eventResolver_) {
-      return;
-    }
     const conditionsMet = this.updateCounters_(visibility);
     if (conditionsMet) {
       if (this.scheduledUpdateTimeoutId_) {
@@ -310,9 +280,7 @@ export class VisibilityModel {
         this.scheduledUpdateTimeoutId_ = null;
       }
       if (this.reportReady_) {
-        // TODO(jonkeller): Can we eliminate eventResolver_?
-        this.eventResolver_();
-        this.eventResolver_ = null;
+        this.onTriggerObservable_.fire();
         if (this.repeat_) {
           this.waitToReset_ = true;
           this.continuousTime_ = 0;
