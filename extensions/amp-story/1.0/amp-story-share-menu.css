@@ -57,6 +57,7 @@
   right: 0 !important;
   height: auto !important;
   background: rgba(0, 0, 0, 0.9) !important;
+  border-radius: 8px 8px 0 0 !important;
   transform: translate3d(0, 100%, 0) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }

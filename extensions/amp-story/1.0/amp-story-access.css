@@ -72,7 +72,7 @@ amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
 
 .i-amphtml-story-access-container {
   position: relative !important;
-  margin: 88px 8px 0 !important;
+  margin: 88px 0 0 !important;
   padding: 0px !important;
   background: #FFFFFF !important;
   border-radius: 8px 8px 0 0 !important;
@@ -89,12 +89,6 @@ amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
   transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-access-fullbleed .i-amphtml-story-access-container {
-  margin: 88px 0px 0 !important;
-  padding: 0 8px !important;
-  border-radius: initial !important;
-}
-
 [type=notification] .i-amphtml-story-access-container {
   box-shadow: 0 -1px 2px 1px rgba(0, 0, 0, 0.12) !important;
   max-height: calc(var(--i-amphtml-story-vh, 1vh) * 20) !important; /** 20vh */
@@ -102,13 +96,11 @@ amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
 
 .i-amphtml-story-access-header {
   position: relative !important;
+  margin: 0 0 48px !important;
   height: 80px !important;
   min-height: 80px !important;
   background: var(--primary-color, #F0F0F0) !important;
   z-index: 2 !important;
-
-  /* Making sure the background color fills the container in full bleed mode. */
-  margin: 0 -8px 48px !important;
 }
 
 .i-amphtml-story-access-logo {
