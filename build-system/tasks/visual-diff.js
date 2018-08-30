@@ -256,7 +256,7 @@ function verifyBuildStatus(status, buildId) {
  * Waits until the browsers are up and reachable, and ties their lifecycle to
  * this process's lifecycle.
  *
- * @param {int} numPages how many pages to open.
+ * @param {number} numPages how many pages to open.
  * @return {!Array<!puppeteer.Page>} a Puppeteer controlled page.
  */
 async function launchBrowsers(numPages) {
