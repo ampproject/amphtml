@@ -192,6 +192,8 @@ AmpConfigType.prototype.v;
 AmpConfigType.prototype.canary;
 /* @public {string} */
 AmpConfigType.prototype.runtime;
+/* @public {boolean} */
+AmpConfigType.prototype.test;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;
