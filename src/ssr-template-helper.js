@@ -55,11 +55,20 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * Whether the viewer can render templates.
+   * Whether the viewer can render templates. A doc-level opt in as
+   * trusted viewers must set this capability explicitly, as a security
+   * measure for potential abuse of feature.
    * @return {boolean}
    */
   isSupported() {
-    return this.viewer_.hasCapability('viewerRenderTemplate');
+    const {ampdoc} = this.viewer_;
+    if (ampdoc.isSingleDoc()) {
+      const htmlElement = ampdoc.getRootNode().documentElement;
+      if (htmlElement.hasAttribute('allow-viewer-render-template')) {
+        return this.viewer_.hasCapability('viewerRenderTemplate');
+      }
+    }
+    return false;
   }
 
   /**
