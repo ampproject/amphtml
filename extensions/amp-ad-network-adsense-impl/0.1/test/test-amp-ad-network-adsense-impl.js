@@ -360,6 +360,17 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
       expect(clickHandlerCalled).to.equal(1);
     });
+
+    it('should set iframe id and data-google-query-id attribute', () => {
+      impl.buildCallback();
+      impl.ifi_ = 3;
+      impl.qqid_ = 'abc';
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender(null);
+      expect(impl.element.getAttribute('data-google-query-id')).to.equal('abc');
+      expect(impl.iframe.id).to.equal('google_ads_iframe_3');
+    });
   });
 
   describe('centering', () => {
