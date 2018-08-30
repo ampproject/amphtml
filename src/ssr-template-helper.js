@@ -61,15 +61,13 @@ export class SsrTemplateHelper {
    * @return {boolean}
    */
   isSupported() {
-    let isOptIn = false;
     const {ampdoc} = this.viewer_;
-    /** @type {boolean|!Element} */
-    const htmlElement =
-        ampdoc.isSingleDoc() && ampdoc.getRootNode().documentElement;
-    if (htmlElement) {
-      isOptIn = htmlElement.hasAttribute('allow-viewer-render-template');
+    if (ampdoc.isSingleDoc()) {
+      const htmlElement = ampdoc.getRootNode().documentElement
+      if (htmlElement.hasAttribute('allow-viewer-render-template')) {
+        return this.viewer_.hasCapability('viewerRenderTemplate')
+      }
     }
-    return isOptIn && this.viewer_.hasCapability('viewerRenderTemplate');
   }
 
   /**
