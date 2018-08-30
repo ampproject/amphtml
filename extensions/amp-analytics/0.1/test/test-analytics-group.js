@@ -24,6 +24,7 @@ import {
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
+  ScrollEventTracker,
   SignalTracker,
   TimerEventTracker,
   VisibilityTracker,
@@ -74,6 +75,21 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(
         analyticsElement, 'click', config, handler);
+    expect(group.listeners_).to.have.length(1);
+    expect(group.listeners_[0]).to.equal(unlisten);
+  });
+
+  it('should add "scroll" trigger', () => {
+    const tracker = root.getTracker('scroll', ScrollEventTracker);
+    const unlisten = function() {};
+    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const config = {on: 'scroll', selector: '*'};
+    const handler = function() {};
+    expect(group.listeners_).to.be.empty;
+    group.addTrigger(config, handler);
+    expect(stub).to.be.calledOnce;
+    expect(stub).to.be.calledWith(
+        analyticsElement, 'scroll', config, handler);
     expect(group.listeners_).to.have.length(1);
     expect(group.listeners_[0]).to.equal(unlisten);
   });

@@ -77,14 +77,14 @@ describes.realWin('amp-instagram', {
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?cr=1&v=7');
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?cr=1&v=9');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
   function testIframeCaptioned(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=7');
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=9');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }

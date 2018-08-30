@@ -63,6 +63,7 @@ describe('Viewer', () => {
     windowApi.Math = window.Math;
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
+    windowApi.Promise = window.Promise;
     windowApi.location = {
       hash: '#origin=g.com',
       href: '/test/viewer',
@@ -1321,42 +1322,6 @@ describe('Viewer', () => {
   });
 
   describe('referrer', () => {
-    /**
-     * Tests trust determination by referrer.
-     * @param {string} referrer URL under test.
-     * @param {boolean} toBeTrusted The expected outcome.
-     */
-    function test(referrer, toBeTrusted) {
-      it('testing ' + referrer, () => {
-        const viewer = new Viewer(ampdoc);
-        expect(viewer.isTrustedReferrer_(referrer)).to.equal(toBeTrusted);
-      });
-    }
-
-    describe('should not trust host as referrer with http', () => {
-      test('http://t.co/asdf', false);
-    });
-
-    describe('should trust whitelisted hosts', () => {
-      test('https://t.co/asdf', true);
-    });
-
-    describe('should not trust non-whitelisted hosts', () => {
-      test('https://www.t.co/asdf', false);
-      test('https://t.com/asdf', false);
-      test('https://t.cn/asdf', false);
-    });
-
-    describe('isTrustedReferrer', () => {
-      it('should return true for whitelisted hosts', () => {
-        windowApi.document.referrer = 'https://t.co/docref';
-        const viewer = new Viewer(ampdoc);
-        return viewer.isTrustedReferrer().then(isTrusted => {
-          expect(isTrusted).to.equal(true);
-        });
-      });
-    });
-
     it('should return document referrer if not overriden', () => {
       windowApi.parent = {};
       windowApi.location.hash = '#';

@@ -17,7 +17,12 @@
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
-import {computedStyle, px, setImportantStyles} from '../../style';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  px,
+  setImportantStyles,
+} from '../../style';
 import {dev} from '../../log';
 import {htmlFor} from '../../static-template';
 import {isExperimentOn} from '../../experiments';
@@ -252,7 +257,8 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       },
       mutate: () => {
         this.bodySyncScheduled_ = false;
-        setImportantStyles(this.wrapper_, inheritStyles);
+        setImportantStyles(this.wrapper_, assertDoesNotContainDisplay(
+            inheritStyles));
       },
     });
   }

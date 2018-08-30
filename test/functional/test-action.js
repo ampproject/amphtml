@@ -1336,7 +1336,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
   });
 });
 
-describes.realWin('whitelist', {
+describes.realWin('Action whitelisting', {
   amp: {
     ampdoc: 'single',
   },
@@ -1346,37 +1346,83 @@ describes.realWin('whitelist', {
   let spy;
 
   beforeEach(() => {
-    const meta = createElementWithAttributes(env.win.document, 'meta', {
-      name: 'amp-action-whitelist',
-      content: 'AMP.pushState, AMP.setState',
-    });
-    env.win.document.head.appendChild(meta);
-
-    action = new ActionService(env.ampdoc, env.win.document);
     spy = env.sandbox.spy();
     target = createExecElement('foo', spy);
   });
 
-  it('should allow whitelisted actions', () => {
-    const i = new ActionInvocation(target, 'setState', /* args */ null,
-        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
-    action.invoke_(i);
-    expect(spy).to.be.calledWithExactly(i);
+  describe('with non-empty whitelist', () => {
+    beforeEach(() => {
+      const meta = createElementWithAttributes(env.win.document, 'meta', {
+        name: 'amp-action-whitelist',
+        content: 'AMP.pushState, AMP.setState, *.show',
+      });
+      env.win.document.head.appendChild(meta);
+
+      action = new ActionService(env.ampdoc, env.win.document);
+    });
+
+    it('should allow whitelisted actions', () => {
+      const i = new ActionInvocation(target, 'setState', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should allow whitelisted actions with wildcard target', () => {
+      const i = new ActionInvocation(target, 'show', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'DIV');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should not allow non-whitelisted actions', () => {
+      const i = new ActionInvocation(target, 'print', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      sandbox.stub(action, 'error_');
+      expect(action.invoke_(i)).to.be.null;
+      expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
+          '[{"tagOrTarget":"AMP","method":"pushState"},' +
+          '{"tagOrTarget":"AMP","method":"setState"},' +
+          '{"tagOrTarget":"*","method":"show"}].');
+    });
+
+    it('should allow adding actions to the whitelist', () => {
+      const i = new ActionInvocation(target, 'print', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      action.addToWhitelist('AMP', 'print');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
   });
 
-  it('should not allow non-whitelisted actions', () => {
+  it('should not allow any action with empty string whitelist', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: '',
+    });
+    env.win.document.head.appendChild(meta);
+    action = new ActionService(env.ampdoc, env.win.document);
+
     const i = new ActionInvocation(target, 'print', /* args */ null,
         'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
     sandbox.stub(action, 'error_');
     expect(action.invoke_(i)).to.be.null;
-    expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
-        '(AMP.pushState,AMP.setState).');
+    expect(action.error_).to.be.calledWith(
+        '"AMP.print" is not whitelisted [].');
   });
 
-  it('should allow adding actions to the whitelist', () => {
-    const i = new ActionInvocation(target, 'print', /* args */ null,
+  it('should ignore unparseable whitelist entries', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',
+    });
+    env.win.document.head.appendChild(meta);
+    allowConsoleError(() => {
+      action = new ActionService(env.ampdoc, env.win.document);
+    });
+
+    const i = new ActionInvocation(target, 'setState', /* args */ null,
         'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
-    action.addToWhitelist('AMP.print');
     action.invoke_(i);
     expect(spy).to.be.calledWithExactly(i);
   });

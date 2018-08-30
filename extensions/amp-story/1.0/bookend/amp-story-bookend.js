@@ -37,16 +37,7 @@ import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
-import {throttle} from '../../../../src/utils/rate-limit';
 
-/**
- * Scroll amount required for full-bleed in px.
- * @private @const {number}
- */
-const FULLBLEED_THRESHOLD = 88;
-
-/** @private @const {string} */
-const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
 
 /** @private @const {string} */
 const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
@@ -268,11 +259,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
     this.replayButton_
         .addEventListener('click', event => this.onReplayButtonClick_(event));
 
-    this.getOverflowContainer_().addEventListener('scroll',
-        // minInterval is high since this is a step function that does not
-        // require smoothness
-        throttle(this.win, () => this.onScroll_(), 100));
-
     this.win.addEventListener('keyup', event => {
       if (!this.isActive_()) {
         return;
@@ -479,24 +465,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   elementOutsideUsableArea_(el) {
     return !closest(el, el => el == this.getInnerContainer_());
-  }
-
-  /**
-   * Changes between card view and full-bleed based on scroll position.
-   * @private
-   */
-  onScroll_() {
-    if (!this.isActive_()) {
-      return;
-    }
-    let shouldBeFullBleed = false;
-    this.measureMutateElement(() => {
-      shouldBeFullBleed =
-          this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
-    }, () => {
-      this.getShadowRoot().classList.toggle(
-          FULLBLEED_CLASSNAME, shouldBeFullBleed);
-    });
   }
 
   /**

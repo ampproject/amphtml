@@ -88,23 +88,6 @@ const TRUSTED_VIEWER_HOSTS = [
 ];
 
 /**
- * These domains are trusted with more sensitive viewer operations such as
- * sending impression requests. If you believe your domain should be here,
- * file the issue on GitHub to discuss. The process will be similar
- * (but somewhat more stringent) to the one described in the [3p/README.md](
- * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
- *
- * @export {!Array<!RegExp>}
- */
-const TRUSTED_REFERRER_HOSTS = [
-  /**
-   * Twitter's link wrapper domains:
-   * - t.co
-   */
-  /^t.co$/,
-];
-
-/**
  * @typedef {function(*):(!Promise<*>|undefined)}
  */
 export let RequestResponder;
@@ -208,15 +191,6 @@ export class Viewer {
     /** @private {?time} */
     this.lastVisibleTime_ = null;
 
-    /** @private {?Function} */
-    this.messagingReadyResolver_ = null;
-
-    /** @private {?Function} */
-    this.viewerOriginResolver_ = null;
-
-    /** @private {?Function} */
-    this.trustedViewerResolver_ = null;
-
     const deferred = new Deferred();
     /**
      * This promise might be resolved right away if the current
@@ -266,34 +240,11 @@ export class Viewer {
     this.isCctEmbedded_ = null;
 
     /**
-     * Whether the AMP document is embedded in a viewer, such as an iframe, or
-     * a web view, or a shadow doc in PWA.
-     * @private @const {boolean}
-     */
-    this.isEmbedded_ = !!(
-      (this.isIframed_ && !this.win.AMP_TEST_IFRAME
-        // Checking param "origin", as we expect all viewers to provide it.
-        // See https://github.com/ampproject/amphtml/issues/4183
-        // There appears to be a bug under investigation where the
-        // origin is sometimes failed to be detected. Since failure mode
-        // if we fail to initialize communication is very bad, we also check
-        // for visibilityState.
-        // After https://github.com/ampproject/amphtml/issues/6070
-        // is fixed we should probably only keep the amp_js_v check here.
-        && (this.params_['origin']
-            || this.params_['visibilityState']
-            // Parent asked for viewer JS. We must be embedded.
-            || (this.win.location.search.indexOf('amp_js_v') != -1)))
-        || this.isWebviewEmbedded()
-        || this.isCctEmbedded()
-        || !ampdoc.isSingleDoc());
-
-    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
-    /**
      * Whether the AMP document was served by a proxy.
      * @private @const {boolean}
      */
-    this.isProxyOrigin_ = isProxyOrigin(url);
+    this.isProxyOrigin_ =
+        isProxyOrigin(parseUrlDeprecated(this.ampdoc.win.location.href));
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -302,79 +253,31 @@ export class Viewer {
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
     const messagingDeferred = new Deferred();
+    /** @const @private {!Function} */
     this.messagingReadyResolver_ = messagingDeferred.resolve;
+    /** @const @private {?Promise} */
+    this.messagingReadyPromise_ =
+        this.initMessagingChannel_(messagingDeferred.promise);
 
-    /**
-     * This promise will resolve when communications channel has been
-     * established or timeout in 20 seconds. The timeout is needed to avoid
-     * this promise becoming a memory leak with accumulating undelivered
-     * messages. The promise is only available when the document is embedded.
-     * @private @const {?Promise}
-     */
-    this.messagingReadyPromise_ = this.isEmbedded_ ?
-      Services.timerFor(this.win)
-          .timeoutPromise(20000, messagingDeferred.promise)
-          .catch(reason => {
-            const error = getChannelError(
-                /** @type {!Error|string|undefined} */ (reason));
-            reportError(error);
-            throw error;
-          }) : null;
+    /** @private {?Promise<boolean>} */
+    this.isTrustedViewer_ = null;
 
-    // Trusted viewer and referrer.
-    let trustedViewerResolved;
-    let trustedViewerPromise;
-    if (!this.isEmbedded_) {
-      // Not embedded in IFrame - can't trust the viewer.
-      trustedViewerResolved = false;
-      trustedViewerPromise = Promise.resolve(false);
-    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded() &&
-        !this.isCctEmbedded()) {
-      // Ancestors when available take precedence. This is the main API used
-      // for this determination. Fallback is only done when this API is not
-      // supported by the browser.
-      trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
-          this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
-      trustedViewerPromise = Promise.resolve(trustedViewerResolved);
-    } else {
-      // Wait for comms channel to confirm the origin.
-      const deferred = new Deferred();
-      trustedViewerPromise = deferred.promise;
-      this.trustedViewerResolver_ = deferred.resolve;
-    }
-
-    /** @const @private {!Promise<boolean>} */
-    this.isTrustedViewer_ = trustedViewerPromise;
-
-    /** @const @private {!Promise<string>} */
-    this.viewerOrigin_ = new Promise(resolve => {
-      if (!this.isEmbedded()) {
-        // Viewer is only determined for iframed documents at this time.
-        resolve('');
-      } else if (this.win.location.ancestorOrigins &&
-          this.win.location.ancestorOrigins.length > 0) {
-        resolve(this.win.location.ancestorOrigins[0]);
-      } else {
-        // Race to resolve with a timer.
-        Services.timerFor(this.win).delay(
-            () => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
-        this.viewerOriginResolver_ = resolve;
-      }
-    });
+    /** @private {?Promise<string>} */
+    this.viewerOrigin_ = null;
 
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
-        this.isEmbedded() && 'referrer' in this.params_ &&
-            trustedViewerResolved !== false ?
-          this.params_['referrer'] :
-          this.win.document.referrer;
+        (this.isEmbedded() && 'referrer' in this.params_ &&
+            this.isTrustedAncestorOrigins_() !== false)
+          ? this.params_['referrer']
+          : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
       if (this.isEmbedded() && 'referrer' in this.params_) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer_.then(isTrusted => {
+        this.isTrustedViewer().then(isTrusted => {
           if (isTrusted) {
             resolve(this.params_['referrer']);
           } else {
@@ -402,7 +305,7 @@ export class Viewer {
       if (this.isEmbedded() && viewerUrlOverride) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer_.then(isTrusted => {
+        this.isTrustedViewer().then(isTrusted => {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
@@ -443,6 +346,49 @@ export class Viewer {
     this.whenFirstVisible().then(() => {
       this.maybeUpdateFragmentForCct();
     });
+  }
+
+  /**
+   * Initialize messaging channel with Viewer host.
+   * This promise will resolve when communications channel has been
+   * established or timeout in 20 seconds. The timeout is needed to avoid
+   * this promise becoming a memory leak with accumulating undelivered
+   * messages. The promise is only available when the document is embedded.
+   *
+   * @param {!Promise} messagingPromise
+   * @return {?Promise}
+   * @private
+   */
+  initMessagingChannel_(messagingPromise) {
+    const isEmbedded = !!(
+      (this.isIframed_ && !this.win.AMP_TEST_IFRAME
+        // Checking param "origin", as we expect all viewers to provide it.
+        // See https://github.com/ampproject/amphtml/issues/4183
+        // There appears to be a bug under investigation where the
+        // origin is sometimes failed to be detected. Since failure mode
+        // if we fail to initialize communication is very bad, we also check
+        // for visibilityState.
+        // After https://github.com/ampproject/amphtml/issues/6070
+        // is fixed we should probably only keep the amp_js_v check here.
+        && (this.params_['origin']
+          || this.params_['visibilityState']
+          // Parent asked for viewer JS. We must be embedded.
+          || (this.win.location.search.indexOf('amp_js_v') != -1)))
+      || this.isWebviewEmbedded()
+      || this.isCctEmbedded()
+      || !this.ampdoc.isSingleDoc());
+
+    if (!isEmbedded) {
+      return null;
+    }
+    return Services.timerFor(this.win)
+        .timeoutPromise(20000, messagingPromise)
+        .catch(reason => {
+          const error = getChannelError(
+              /** @type {!Error|string|undefined} */ (reason));
+          reportError(error);
+          throw error;
+        });
   }
 
   /**
@@ -494,7 +440,7 @@ export class Viewer {
    * @return {boolean}
    */
   isEmbedded() {
-    return this.isEmbedded_;
+    return !!this.messagingReadyPromise_;
   }
 
   /**
@@ -776,19 +722,6 @@ export class Viewer {
   }
 
   /**
-   * @param {string} referrer
-   * @return {boolean}
-   * @private
-   */
-  isTrustedReferrer_(referrer) {
-    const url = parseUrlDeprecated(referrer);
-    if (url.protocol != 'https:') {
-      return false;
-    }
-    return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
-  }
-
-  /**
    * Returns an unconfirmed "referrer" URL that can be optionally customized by
    * the viewer. Consider using `getReferrerUrl()` instead, which returns the
    * promise that will yield the confirmed "referrer" URL.
@@ -814,17 +747,34 @@ export class Viewer {
    * @return {!Promise<boolean>}
    */
   isTrustedViewer() {
-    return this.isTrustedViewer_;
+    if (!this.isTrustedViewer_) {
+      const isTrustedAncestorOrigins = this.isTrustedAncestorOrigins_();
+      this.isTrustedViewer_ = isTrustedAncestorOrigins !== undefined
+        ? Promise.resolve(isTrustedAncestorOrigins)
+        : this.messagingReadyPromise_.then(origin => {
+          return origin ? this.isTrustedViewerOrigin_(origin) : false;
+        });
+    }
+    return /** @type {!Promise<boolean>} */(this.isTrustedViewer_);
   }
 
   /**
-   * Whether the referrer has been whitelisted for CORS impression
-   * @return {!Promise<boolean>}
+   * Whether the viewer is has been whitelisted for more sensitive operations
+   * by looking at the ancestorOrigins.
+   * @return {boolean|undefined}
    */
-  isTrustedReferrer() {
-    return this.referrerUrl_.then(referrer => {
-      return this.isTrustedReferrer_(referrer);
-    });
+  isTrustedAncestorOrigins_() {
+    if (!this.isEmbedded()) {
+      // Not embedded in IFrame - can't trust the viewer.
+      return false;
+    } else if (this.win.location.ancestorOrigins && !this.isWebviewEmbedded() &&
+        !this.isCctEmbedded()) {
+      // Ancestors when available take precedence. This is the main API used
+      // for this determination. Fallback is only done when this API is not
+      // supported by the browser.
+      return this.win.location.ancestorOrigins.length > 0 &&
+          this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]);
+    }
   }
 
   /**
@@ -834,7 +784,22 @@ export class Viewer {
    * @return {!Promise<string>}
    */
   getViewerOrigin() {
-    return this.viewerOrigin_;
+    if (!this.viewerOrigin_) {
+      let origin;
+      if (!this.isEmbedded()) {
+        // Viewer is only determined for iframed documents at this time.
+        origin = '';
+      } else if (this.win.location.ancestorOrigins &&
+          this.win.location.ancestorOrigins.length > 0) {
+        origin = this.win.location.ancestorOrigins[0];
+      }
+      this.viewerOrigin_ = origin !== undefined
+        ? Promise.resolve(origin)
+        : Services.timerFor(this.win)
+            .timeoutPromise(VIEWER_ORIGIN_TIMEOUT_, this.messagingReadyPromise_)
+            .catch(() => '');
+    }
+    return /** @type {!Promise<string>} */(this.viewerOrigin_);
   }
 
   /**
@@ -952,16 +917,7 @@ export class Viewer {
     dev().fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
     this.messagingOrigin_ = origin;
-    if (this.messagingReadyResolver_) {
-      this.messagingReadyResolver_();
-    }
-    if (this.trustedViewerResolver_) {
-      this.trustedViewerResolver_(
-          origin ? this.isTrustedViewerOrigin_(origin) : false);
-    }
-    if (this.viewerOriginResolver_) {
-      this.viewerOriginResolver_(origin || '');
-    }
+    this.messagingReadyResolver_(origin);
 
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
@@ -1099,6 +1055,8 @@ export class Viewer {
   /**
    * Resolves when there is a messaging channel established with the viewer.
    * Will be null if no messaging is needed like in an non-embedded document.
+   * Deprecated: do not use. sendMessage and sendMessageAwaitResponse already
+   *             wait for messaging channel ready.
    * @return {?Promise}
    */
   whenMessagingReady() {

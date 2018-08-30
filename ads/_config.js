@@ -777,6 +777,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'rfp': {
+    prefetch: 'https://js.rfp.fout.jp/rfp-amp.js',
+    preconnect: 'https://ad.rfp.fout.jp',
+    renderStartImplemented: true,
+  },
+
   'rubicon': {},
 
   'sekindo': {

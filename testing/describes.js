@@ -515,6 +515,10 @@ class FakeWinFixture {
     if (this.spec.mockFetch !== false) {
       attachFetchMock(env);
     }
+
+    if (!this.spec.Promise) {
+      env.win.Promise = window.Promise;
+    }
   }
 
   /** @override */
