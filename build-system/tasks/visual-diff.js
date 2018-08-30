@@ -425,7 +425,7 @@ async function snapshotWebpages(percy, page, webpages) {
 
     // Navigate to an empty page first to support different webpages that only
     // modify the #anchor name.
-    await page.goto('about:blank');
+    await page.goto('about:blank').then(() => {}, () => {});
 
     // Puppeteer is flaky when it comes to catching navigation requests, so
     // ignore timeouts. If this was a real non-loading page, this will be caught
