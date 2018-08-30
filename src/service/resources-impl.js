@@ -1970,7 +1970,7 @@ export class Resources {
       request.force = force || request.force;
       request.callback = opt_callback;
     } else {
-      this.requestsChangeSize_.push(/** @type {!ChangeSizeRequestDef} */{
+      this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
         resource,
         newHeight,
         newWidth,
