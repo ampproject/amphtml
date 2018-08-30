@@ -171,7 +171,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       env.sandbox.spy(linkRewriterManager, 'getSuitableLinkRewritersForLink_');
     });
 
-    describe('Send clicks event', () => {
+    describe('Send click event', () => {
       let linkRewriterVendor1, linkRewriterVendor2, linkRewriterVendor3;
 
       function getEventData() {
