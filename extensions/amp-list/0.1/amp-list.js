@@ -437,11 +437,10 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Converts the amp-list to de facto layout container.
+   * Undoes previous size-defined layout
    * @param {string} previousLayout
-   * @private
    */
-  changeToLayoutContainer_(previousLayout) {
+  undoPreviousLayout_(previousLayout) {
     switch (previousLayout) {
       case Layout.RESPONSIVE:
         this.element.classList.remove('i-amphtml-layout-responsive');
@@ -468,6 +467,15 @@ export class AmpList extends AMP.BaseElement {
       this.element.removeChild(sizer);
     }
     this.element.classList.remove('i-amphtml-layout-size-defined');
+  }
+
+  /**
+   * Converts the amp-list to de facto layout container.
+   * @param {string} previousLayout
+   * @private
+   */
+  changeToLayoutContainer_(previousLayout) {
+    this.undoPreviousLayout_(previousLayout);
     this.container_.classList.remove(
         'i-amphtml-fill-content',
         'i-amphtml-replaced-content'
