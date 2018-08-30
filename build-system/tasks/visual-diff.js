@@ -47,7 +47,7 @@ const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
     CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
 const AMP_RUNTIME_TARGET_FILES = [
-  'dist/amp.js', 'dist.3p/current/integration.js'];
+  'dist/amp.js', 'dist/amp-esm.js', 'dist.3p/current/integration.js'];
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
 const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
@@ -360,7 +360,8 @@ function applyAmpConfig(config) {
   log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
   AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
     execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} --${config}`,
+        `gulp prepend-global --local_dev --fortesting --target ${targetFile} ` +
+        `--${config}`,
         {'stdio': 'ignore'});
   });
 }
@@ -379,7 +380,6 @@ async function generateSnapshots(percy, page, webpages) {
     await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
     await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
-  cleanupAmpConfig();
 
   const numUnfilteredTests = webpages.length;
   webpages = webpages.filter(webpage => !webpage.flaky);
@@ -409,6 +409,7 @@ async function generateSnapshots(percy, page, webpages) {
     log('travis', colors.cyan(config), ': ');
     await snapshotWebpages(percy, page, webpages, config);
   }
+  await cleanupAmpConfig();
 }
 
 /**
@@ -528,7 +529,7 @@ async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
       if (!(await waitForElementVisibility(page, css, {hidden: true}))) {
         log('fatal', colors.cyan(url), '| An element with the CSS selector',
             colors.cyan(css),
-            `is still visible after ${CSS_SELECTOR_RETRY_MS} ms`);
+            `is still visible after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
       }
     }
   }
@@ -549,7 +550,7 @@ async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
       if (!(await waitForElementVisibility(page, css, {visible: true}))) {
         log('fatal', colors.cyan(url), '| An element with the CSS selector',
             colors.cyan(css),
-            `is still invisible after ${CSS_SELECTOR_RETRY_MS} ms`);
+            `is still invisible after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
       }
     }
   }

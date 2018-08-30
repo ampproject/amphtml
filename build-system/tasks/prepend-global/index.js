@@ -118,10 +118,12 @@ function valueOrDefault(value, defaultValue) {
  * @param {boolean=} opt_localDev Whether to enable local development
  * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
+ * @param {boolean=} opt_fortesting Whether to force getMode().test to be true
  * @return {!Promise}
  */
 function applyConfig(
-  config, target, filename, opt_localDev, opt_localBranch, opt_branch) {
+  config, target, filename, opt_localDev, opt_localBranch, opt_branch,
+  opt_fortesting) {
   return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
       .then(() => {
         return Promise.all([
@@ -139,6 +141,9 @@ function applyConfig(
         }
         if (opt_localDev) {
           configJson = enableLocalDev(config, target, configJson);
+        }
+        if (opt_fortesting) {
+          configJson = Object.assign({test: true}, configJson);
         }
         const targetString = files[1].toString();
         const configString = JSON.stringify(configJson);
@@ -244,7 +249,7 @@ function main() {
   return removeConfig(target).then(() => {
     return applyConfig(
         config, target, filename,
-        argv.local_dev, argv.local_branch, argv.branch);
+        argv.local_dev, argv.local_branch, argv.branch, argv.fortesting);
   });
 }
 
@@ -260,6 +265,7 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
         'Uses master by default.',
     'local_branch': '  Don\'t switch branches and use the config from the ' +
         'local branch.',
+    'fortesting': '  Force the config to return true for getMode().test',
     'remove': '  Removes previously prepended json config from the target ' +
         'file (if present).',
   },
