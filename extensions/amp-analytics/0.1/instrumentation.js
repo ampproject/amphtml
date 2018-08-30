@@ -21,10 +21,8 @@ import {
 import {
   AnalyticsEvent,
   CustomEventTracker,
-  getTrackerKeyName,
-  getTrackerTypesForParentType,
 } from './events';
-import {dev, user} from '../../../src/log';
+import {AnalyticsGroup} from './analytics-group';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
@@ -126,62 +124,6 @@ export class InstrumentationService {
       holder[PROP] = root;
     }
     return root;
-  }
-}
-
-
-/**
- * Represents the group of analytics triggers for a single config. All triggers
- * are declared and released at the same time.
- *
- * @implements {../../../src/service.Disposable}
- */
-export class AnalyticsGroup {
-  /**
-   * @param {!./analytics-root.AnalyticsRoot} root
-   * @param {!Element} analyticsElement
-   */
-  constructor(root, analyticsElement) {
-
-    /** @const */
-    this.root_ = root;
-    /** @const */
-    this.analyticsElement_ = analyticsElement;
-
-    /** @private @const {!Array<!UnlistenDef>} */
-    this.listeners_ = [];
-  }
-
-  /** @override */
-  dispose() {
-    this.listeners_.forEach(listener => {
-      listener();
-    });
-  }
-
-  /**
-   * Adds a trigger with the specified config and listener. The config must
-   * contain `on` property specifying the type of the event.
-   *
-   * Triggers registered on a group are automatically released when the
-   * group is disposed.
-   *
-   * @param {!JsonObject} config
-   * @param {function(!AnalyticsEvent)} handler
-   */
-  addTrigger(config, handler) {
-    const eventType = dev().assertString(config['on']);
-    const trackerKey = getTrackerKeyName(eventType);
-    const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
-
-    const tracker = this.root_.getTrackerForWhitelist(
-        trackerKey, trackerWhitelist);
-    user().assert(!!tracker,
-        'Trigger type "%s" is not allowed in the %s', eventType,
-        this.root_.getType());
-    const unlisten = tracker.add(this.analyticsElement_, eventType, config,
-        handler);
-    this.listeners_.push(unlisten);
   }
 }
 

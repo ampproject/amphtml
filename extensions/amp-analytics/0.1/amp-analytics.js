@@ -87,7 +87,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
 
-    /** @private {?./instrumentation.AnalyticsGroup} */
+    /** @private {?./analytics-group.AnalyticsGroup} */
     this.analyticsGroup_ = null;
 
     /** @private {!./variables.VariableService} */
