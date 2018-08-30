@@ -20,7 +20,10 @@
  * recaptcha tokens
  */
 
-import {AmpRecaptcha} from './amp-recaptcha-service';
+import {
+  installRecaptchaService,
+  recaptchaServiceFor,
+} from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const */
@@ -32,19 +35,22 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {!./amp-recaptcha-service.AmpRecaptchaService} */
+    this.recaptchaService_ = recaptchaServiceFor(this.win);
+
     /** @private {boolean} */
-    this.isExperimentEnabled_ = isExperimentOn(this.win, TAG);
+    this.isExperimentEnabled_ = isExperimentOn(this.win, 'amp-recaptcha-input');
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported() {
     return true;
   }
 
   /** @override */
   layoutCallback() {
     if (this.isExperimentEnabled_) {
-      return AmpRecaptcha.register(this.win, this.element);
+      return this.recaptchaService_.register(this);
     }
     return Promise.resolve();
   }
@@ -54,13 +60,14 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
    */
   unlayoutCallback() {
     if (this.isExperimentEnabled_) {
-      AmpRecaptcha.unregister(this.element);
+      this.recaptchaService_.unregister(this);
       return true;
     }
     return false;
   }
 }
 
-AMP.extension('amp-recaptcha-input', '0.1', AMP => {
-  AMP.registerElement('amp-recaptcha-input', AmpRecaptchaInput);
+AMP.extension(TAG, '0.1', AMP => {
+  installRecaptchaService(AMP.win);
+  AMP.registerElement(TAG, AmpRecaptchaInput);
 });

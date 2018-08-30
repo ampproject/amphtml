@@ -15,25 +15,32 @@
  */
 
 /**
- * @fileoverview Service for recaptcha components 
+ * @fileoverview Service for recaptcha components
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
 import {Deferred} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getIframe} from '../../../src/3p-frame';
-import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
+import {getService, registerServiceBuilder} from '../../../src/service';
+import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
 
-class AmpRecaptchaService {
-  constructor() {
-    
-    /** @private {?HTMLIFrameElement} */
+export class AmpRecaptchaService {
+
+  /**
+   * @param {!Window} window
+   */
+  constructor(window) {
+
+    /** @private {!Window} */
+    this.win_ = window;
+
+    /** @private {?Element} */
     this.iframe_ = null;
 
     /** @const @private {!Array} */
-    this.registeredElements = [];
+    this.registeredElements_ = [];
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -41,73 +48,60 @@ class AmpRecaptchaService {
     /** @private {!Deferred} */
     this.willBeReady_ = new Deferred();
   }
-  
+
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
-   * @param {!Window} win
-   * @param {!AmpElement} element
+   * @param {!AMP.BaseElement} elementImpl
    */
-  register(win, element) {
-    this.registeredElements.push(element);
+  register(elementImpl) {
+    this.registeredElements_.push(elementImpl);
     if (!this.iframe_) {
-      return this.initialize_(win, element);
+      return this.initialize_(elementImpl);
     }
-    return Promise.resolve(); 
+    return Promise.resolve();
   }
 
   /**
    * Function to unregister as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
-   * @param {!AmpElement} element
+   * @param {!AMP.BaseElement} elementImpl
    */
-  unregister(element) {
-    this.registeredElements.splice(
-      this.registeredElements.indexOf(element),
-      1
+  unregister(elementImpl) {
+    this.registeredElements_.splice(
+        this.registeredElements_.indexOf(elementImpl),
+        1
     );
 
-    if (this.registeredElements.length <= 0) {
+    if (this.registeredElements_.length <= 0) {
       this.dispose_();
     }
   }
-  
-  /**
-   * Function to execute actions on the recaptcha bootstrap iframe
-   * @param {!String} sitekey
-   * @param {!String} action
-   * @return {Promise}
-   */
-  execute(sitekey, action) {
-  }
-  
+
   /**
    * Function to create and load our recaptcha boostrap iframe.
-   * @param {!Window} win
-   * @param {!AmpElement} element
+  * @param {!AMP.BaseElement} elementImpl
    * @return {Promise}
    * @private
    */
-  initialize_(win, element) {
+  initialize_(elementImpl) {
 
     /* the third parameter 'recaptcha' ties it to the 3p/recaptcha.js */
-    this.iframe_ = getIframe(win, element, 'recaptcha');
+    this.iframe_ = getIframe(this.win_, elementImpl.element, 'recaptcha');
 
     const listenIframe = (evName, cb) => listenFor(
-      dev().assertElement(this.iframe_),
-      evName,
-      cb,
-      true);
+        dev().assertElement(this.iframe_),
+        evName,
+        cb,
+        true);
 
     const disposers = [
       listenIframe('ready', this.willBeReady_.resolve),
-      listenIframe('token', this.handleTokenMessage_),
-      listenIframe('error', this.handleErrorMessage_),
     ];
     this.unlistenMessage_ = () => disposers.forEach(d => d());
 
-    element.appendChild(this.iframe_);
-    return loadPromise(this.iframe_);
+    elementImpl.element.appendChild(this.iframe_);
+    return elementImpl.loadPromise(this.iframe_);
   }
 
   /**
@@ -126,37 +120,20 @@ class AmpRecaptchaService {
       this.unlistenMessage_();
     }
   }
-
-  /**
-   * Wraps postMessage for testing
-   *
-   * @param {string} type
-   * @param {!JsonObject} message
-   * @private
-   */
-  postMessage_(type, message) {
-    postMessage(
-      dev().assertElement(this.iframe_),
-      type,
-      message,
-      '*',
-      true);
-  }
-
-  /**
-   * Function to handle token messages from the recaptcha bootstrap iframe.
-   * @param {!Object} message
-   */
-  handleTokenMessage_(message) {
-  }
-
-  /**
-   * Function to handle token messages from the recaptcha bootstrap iframe.
-   * @param {!Object} message
-   */
-  handleErrorMessage_(message) {
-  }
 }
 
-// Export a singleton.
-export const AmpRecaptcha = new AmpRecaptchaService();
+/**
+ * @param {!Window} win
+ */
+export function installRecaptchaService(win) {
+  registerServiceBuilder(win, 'amp-recaptcha', AmpRecaptchaService);
+}
+
+/**
+ * @param {!Window} win
+ * @return {!AmpRecaptchaService}
+ */
+export function recaptchaServiceFor(win) {
+  return getService(win, 'amp-recaptcha');
+}
+

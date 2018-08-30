@@ -20,14 +20,14 @@ import {AmpRecaptcha} from '../amp-recaptcha-service';
 describes.realWin('amp-recaptcha-service', {
   amp: { /* amp spec */
     extensions: ['amp-recaptcha-input'],
-  }
+  },
 }, env => {
   let win, doc;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    
+
     // Dispose of any old artifacts of tests
     AmpRecaptcha.dispose_();
   });
@@ -35,13 +35,15 @@ describes.realWin('amp-recaptcha-service', {
   function getElement() {
     const element = doc.createElement('amp-recaptcha-input');
     doc.body.appendChild(element);
-    return element.build().then(() => element.layoutCallback()).then(() => element);
+    return element.build()
+        .then(() => element.layoutCallback())
+        .then(() => element);
   }
 
   it('should create an iframe on initialize', done => {
     getElement().then(element => {
       expect(element).to.be.ok;
-      AmpRecaptcha.initialize_(win, element).then(() => {
+      AmpRecaptcha.initialize_(element).then(() => {
         expect(AmpRecaptcha.iframe_).to.be.ok;
         done();
       });
