@@ -126,7 +126,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
     });
 
     it('Should ingore if priority contains unregistered rewriters', () => {
-      linkRewriteService.priorityList_ = [
+      linkRewriterManager.priorityList_ = [
         'vendor2', 'vendor4', 'vendor1','vendor3',
       ];
 
@@ -134,7 +134,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       const linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
 
-      expect(linkRewriteService.linkRewriters_).to.deep.equal(
+      expect(linkRewriterManager.linkRewriters_).to.deep.equal(
           [linkRewriterVendor2, linkRewriterVendor1, linkRewriterVendor3]);
     });
 
@@ -234,7 +234,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       });
 
       it('Should set the clickType', () => {
-        linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'), 'contextmenu');
+        linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'), 'contextmenu');
         expect(getEventData(linkRewriterVendor1).clickType).to.equal('contextmenu');
         expect(getEventData(linkRewriterVendor2).clickType).to.equal('contextmenu');
         expect(getEventData(linkRewriterVendor3).clickType).to.equal('contextmenu');
