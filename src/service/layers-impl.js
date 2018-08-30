@@ -21,6 +21,7 @@ import {filterSplice} from '../utils/array';
 import {getMode} from '../mode';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {rootNodeFor} from '../dom';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
 
@@ -115,6 +116,7 @@ export class LayoutLayers {
      * TODO(jridgewell, #12556): send an array of elements who have changed
      * position due to the scroll.
      * @type {function()|null}
+     * @private
      */
     this.onScroll_ = null;
 
@@ -128,13 +130,14 @@ export class LayoutLayers {
     // the document (the scrolling element) or an element scrolls.
     // This forwards to our scroll-dirty system, and eventually to the scroll
     // listener.
-    this.unlisteners_.push(listen(win.document, 'scroll', event => {
-      const {target} = event;
-      const scrolled = target.nodeType == Node.ELEMENT_NODE
-        ? dev().assertElement(target)
-        : scrollingElement;
-      this.scrolled_(scrolled);
-    }, {capture: true, passive: true}));
+    this.listenForScroll_(win.document);
+
+    // Scroll events do not bubble out of shadow trees.
+    // Strangely, iOS 11 reports that document contains things in a shadow tree.
+    // Any Element, however, doesn't.
+    if (!win.document.documentElement.contains(scrollingElement)) {
+      this.listenForScroll_(scrollingElement);
+    }
 
     // Destroys the layer tree on document resize, since entirely new CSS may
     // apply to the document now.
@@ -312,6 +315,7 @@ export class LayoutLayers {
    * @param {boolean} isRootLayer
    * @param {boolean} scrollsLikeViewport
    * @return {!LayoutElement}
+   * @private
    */
   declareLayer_(element, isRootLayer, scrollsLikeViewport) {
     const layout = this.add(element);
@@ -322,6 +326,7 @@ export class LayoutLayers {
   /**
    * Destroys the layer tree, since new CSS may apply to the document after a
    * resize.
+   * @private
    */
   onResize_() {
     const layouts = this.layouts_;
@@ -333,6 +338,18 @@ export class LayoutLayers {
   }
 
   /**
+   * Listens for scroll events on root.
+   *
+   * @param {!Node} root
+   * @private
+   */
+  listenForScroll_(root) {
+    this.unlisteners_.push(listen(root, 'scroll', event => {
+      this.scrolled_(event);
+    }, {capture: true, passive: true}));
+  }
+
+  /**
    * Dirties the scrolled layer, so any later calls to getScrolledPosition will
    * recalc the scrolled position.  If the scrolled element is not yet a layer,
    * it turns it into a layer lazily.
@@ -341,18 +358,28 @@ export class LayoutLayers {
    * Eventually, it will send an array of elements that actually changed
    * position (instead of having to check all elements in the listener).
    *
-   * @param {!Element} element
+   * @param {!Event} event
+   * @private
    */
-  scrolled_(element) {
-    let layer = LayoutElement.forOptional(element);
+  scrolled_(event) {
+    const {target} = event;
+    // If the target of the scroll event is an element, that means that element
+    // is an overflow scroller.
+    // However, if the target is the document itself, that means the native
+    // root scroller (`document.scrollingElement`) did the scrolling. But, we
+    // can't assign a layer to a Document (only Elements), so just pretend it
+    // was the scrolling element that scrolled.
+    const scrolled = target.nodeType == Node.ELEMENT_NODE
+      ? dev().assertElement(target)
+      : this.scrollingElement_;
+    let layer = LayoutElement.forOptional(scrolled);
     if (layer && layer.isLayer()) {
       layer.dirtyScrollMeasurements();
     } else {
-      layer = this.declareLayer_(element, false, false);
+      layer = this.declareLayer_(scrolled, false, false);
     }
 
     this.activeLayer_ = layer;
-
     if (this.onScroll_) {
       this.onScroll_(/* layer.getElements() */);
     }
@@ -546,7 +573,7 @@ export class LayoutElement {
    * If the element is itself a layer, it still looks in the element's ancestry
    * for a parent layer.
    *
-   * TODO(jridgewell, #12554): Needs to traverse FIE/Shadow boundary.
+   * TODO(jridgewell, #12554): Needs to traverse FIE boundary.
    *
    * @param {!Element} node
    * @param {boolean=} opt_force Whether to force a re-lookup
@@ -562,8 +589,9 @@ export class LayoutElement {
 
     const win = /** @type {!Window } */ (dev().assert(
         node.ownerDocument.defaultView));
+    let el = node;
     let op = node;
-    for (let el = node; el; el = el.parentNode) {
+    while (el) {
       // Ensure the node (if it a layer itself) is not return as the parent
       // layer.
       const layout = el === node ? null : LayoutElement.forOptional(el);
@@ -583,11 +611,18 @@ export class LayoutElement {
           // node is the op, we can't return the node as its own parent layer.
           // In that case, it doesn't have a parent layer.
           // TODO(jridgewell, #12554): Fixed position's parent is the FIE
-          // element, what about Shadows?
+          // element.
           return op === node ? null : LayoutElement.for(op);
         }
         op = op./*OK*/offsetParent;
       }
+
+      // Traversal happens first to the `assignedSlot` (since the slot is in
+      // between the current `el` and its `parentNode`), then to either the
+      // `parentNode` (for normal tree traversal) or the `host` (for traversing
+      // from shadow trees to light trees).
+      // Note `parentNode` and `host` are mutually exclusive.
+      el = el.assignedSlot || el.parentNode || el.host;
     }
 
     // Use isConnected if available, but always pass if it's not.
@@ -608,14 +643,26 @@ export class LayoutElement {
    * A check that the LayoutElement is contained by this layer, and the element
    * is not the layer's element.
    *
-   * TODO(jridgewell, #12554): This needs to account for FIE/Shadow's root,
-   * since it will be a child layout of the host element.
+   * TODO(jridgewell, #12554): This needs to account for FIE root, since it
+   * will be a child layout of the host element.
    *
    * @param {!LayoutElement} layout
    * @return {boolean}
    */
   contains(layout) {
-    return layout !== this && this.element_.contains(layout.element_);
+    if (layout === this) {
+      return false;
+    }
+    const element = this.element_;
+    const other = layout.element_;
+    if (element.contains(other)) {
+      return true;
+    }
+
+    // Layers inside a shadow tree may contain children from the light tree.
+    const rootNode = rootNodeFor(element);
+    const host = rootNode && rootNode.host;
+    return !!host && host.contains(other);
   }
 
   /**
@@ -717,6 +764,7 @@ export class LayoutElement {
    * the this layer.
    *
    * @param {!LayoutElement} layer
+   * @private
    */
   transfer_(layer) {
     // An optimization if we know that the new layer definitely contains
@@ -1073,6 +1121,7 @@ export class LayoutElement {
    *
    * @param {!PositionDef=} opt_relativeTo A performance optimization used when
    *     recursively measuring the child nodes of the layer.
+   * @private
    */
   remeasure_(opt_relativeTo) {
     this.updateScrollPosition_();
@@ -1127,6 +1176,7 @@ export class LayoutElement {
 
   /**
    * Updates the cached scroll positions of the layer, if the layer is dirty.
+   * @private
    */
   updateScrollPosition_() {
     if (this.isLayer_ && this.needsScrollRemeasure_) {
