@@ -31,7 +31,7 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';
 export const DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME =
   'AMP-template-amp-creative';
 
-/** {?AmpAdTemplateHelper} */
+/** @type {?AmpAdTemplateHelper} */
 let ampAdTemplateHelper;
 
 /**

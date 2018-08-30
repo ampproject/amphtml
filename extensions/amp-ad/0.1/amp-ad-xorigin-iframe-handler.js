@@ -70,7 +70,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?AMP.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
-    /** {?Element} iframe instance */
+    /** @type {?Element} iframe instance */
     this.iframe = null;
 
     /** @private {?IntersectionObserver} */
