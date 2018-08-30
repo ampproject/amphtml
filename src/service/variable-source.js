@@ -263,7 +263,7 @@ export class VariableSource {
       keys = keys.filter(key => opt_whiteList[key]);
     }
     if (keys.length === 0) {
-      const regexThatMatchesNothing = /_^/g;
+      const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
       return regexThatMatchesNothing;
     }
     // The keys must be sorted to ensure that the longest keys are considered
