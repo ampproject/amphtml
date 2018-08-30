@@ -116,6 +116,7 @@ export class LayoutLayers {
      * TODO(jridgewell, #12556): send an array of elements who have changed
      * position due to the scroll.
      * @type {function()|null}
+     * @private
      */
     this.onScroll_ = null;
 
@@ -314,6 +315,7 @@ export class LayoutLayers {
    * @param {boolean} isRootLayer
    * @param {boolean} scrollsLikeViewport
    * @return {!LayoutElement}
+   * @private
    */
   declareLayer_(element, isRootLayer, scrollsLikeViewport) {
     const layout = this.add(element);
@@ -324,6 +326,7 @@ export class LayoutLayers {
   /**
    * Destroys the layer tree, since new CSS may apply to the document after a
    * resize.
+   * @private
    */
   onResize_() {
     const layouts = this.layouts_;
@@ -338,6 +341,7 @@ export class LayoutLayers {
    * Listens for scroll events on root.
    *
    * @param {!Node} root
+   * @private
    */
   listenForScroll_(root) {
     this.unlisteners_.push(listen(root, 'scroll', event => {
@@ -355,6 +359,7 @@ export class LayoutLayers {
    * position (instead of having to check all elements in the listener).
    *
    * @param {!Event} event
+   * @private
    */
   scrolled_(event) {
     const {target} = event;
@@ -759,6 +764,7 @@ export class LayoutElement {
    * the this layer.
    *
    * @param {!LayoutElement} layer
+   * @private
    */
   transfer_(layer) {
     // An optimization if we know that the new layer definitely contains
@@ -1115,6 +1121,7 @@ export class LayoutElement {
    *
    * @param {!PositionDef=} opt_relativeTo A performance optimization used when
    *     recursively measuring the child nodes of the layer.
+   * @private
    */
   remeasure_(opt_relativeTo) {
     this.updateScrollPosition_();
@@ -1169,6 +1176,7 @@ export class LayoutElement {
 
   /**
    * Updates the cached scroll positions of the layer, if the layer is dirty.
+   * @private
    */
   updateScrollPosition_() {
     if (this.isLayer_ && this.needsScrollRemeasure_) {
