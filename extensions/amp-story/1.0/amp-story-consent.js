@@ -34,7 +34,6 @@ import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
-import {throttle} from '../../../src/utils/rate-limit';
 
 
 /** @const {string} */
@@ -180,9 +179,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
     /** @private {?Object} */
     this.consentConfig_ = null;
 
-    /** @private {?Element} */
-    this.scrollableEl_ = null;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
@@ -241,11 +237,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
     this.storyConsentEl_.addEventListener(
         'click', event => this.onClick_(event), true /** useCapture */);
 
-    this.scrollableEl_ =
-        this.storyConsentEl_.querySelector('.i-amphtml-story-consent-overflow');
-    this.scrollableEl_.addEventListener(
-        'scroll', throttle(this.win, () => this.onScroll_(), 100));
-
     this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
       this.onRtlStateUpdate_(rtlState);
     }, true /** callToInitialize */);
@@ -264,23 +255,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
       const targetEl = dev().assertElement(event.target);
       this.actions_.trigger(targetEl, 'tap', event, ActionTrust.HIGH);
     }
-  }
-
-  /**
-   * Toggles the fullbleed UI on scroll.
-   * @private
-   */
-  onScroll_() {
-    let isFullBleed;
-
-    const measurer =
-        () => isFullBleed = this.scrollableEl_./*OK*/scrollTop > 88;
-    const mutator = () => {
-      this.storyConsentEl_
-          .classList.toggle('i-amphtml-story-consent-fullbleed', isFullBleed);
-    };
-
-    this.measureMutateElement(measurer, mutator, this.storyConsentEl_);
   }
 
   /**
