@@ -85,13 +85,65 @@ that among other things, you can't use `amp-mustache` to:
 
 The output of "triple-mustache" is sanitized to only allow the following tags: `a`, `b`, `br`, `caption`, `colgroup`, `code`, `del`, `div`, `em`, `i`, `ins`, `li`, `mark`, `ol`, `p`, `q`, `s`, `small`, `span`, `strong`, `sub`, `sup`, `table`, `tbody`, `time`, `td`, `th`, `thead`, `tfoot`, `tr`, `u`, `ul`.
 
-Notice also that because the body of the template has to be specified within the `template` element, it is
-impossible to specify `{{&var}}` expressions - they will always be escaped as `{{&amp;var}}`. The triple-mustache
-`{{{var}}}` has to be used for these cases.
+## Pitfalls
+
+### Nested templates
+
+Per AMP Validation, `<template>` elements must not be children of other `<template>` elements. This can happen when nesting two components that use templates, e.g. `amp-list` and `amp-form`.
+
+To workaround this, `<template>` elements can also be referenced by `id` via the `template` attribute on the component. For example:
+
+```html
+<amp-list id="myList" src="https://foo.com/list.json">
+  <template type="amp-mustache">
+    <div>{{title}}</div>
+  </template>
+</amp-list>
+```
+
+Can also be represented as:
+
+```html
+<!-- Externalize templates to avoid nesting. -->
+<template type="amp-mustache" id="myTemplate">
+  <div>{{title}}</div>
+</template>
+
+<amp-list id="myList" src="https://foo.com/list.json" template="myTemplate">
+</amp-list>
+```
+
+### Tables
+
+Since AMP template strings must be specified in `<template>` elements, this can cause unexpected behavior due to browser parsing. For example, `<table>` elements can cause [foster parenting](https://www.w3.org/TR/html5/syntax.html#unexpected-markup-in-tables) of text. In the following example:
+
+```html
+<template type="amp-mustache">
+  <table>
+    <tr>
+      {{#foo}}<td></td>{{/foo}}
+    </tr>
+  </table>
+</template>
+```
+
+The browser will foster parent the text nodes `{{#foo}}` and `{{/foo}}`:
+
+```html
+{{#foo}}
+{{/foo}}
+<table>
+  <tr>
+    <td></td>
+  </tr>
+</table>
+```
+
+Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`) or using non-table elements like `<div>` instead.
 
 ### Quote escaping
 
-When using `amp-mustache` to template attribute values, quote escaping can be an issue. For example:
+When using `amp-mustache` to calculate attribute values, quote escaping can be an issue. For example:
 
 ```html
 <template type="amp-mustache">
@@ -103,9 +155,17 @@ When using `amp-mustache` to template attribute values, quote escaping can be an
 </template>
 ```
 
-Using HTML character codes is not possible since Mustache will escape `&` characters, e.g. `&quot;` -> `&amp;quot;`. A workaround is to change your backend to return alternate quote-like characters e.g. &prime; and &Prime;.
+Using HTML character codes in the `{{foo}}` or `{{bar}}` variables won't work since Mustache will HTML escape `&` characters (e.g. `&quot;` -> `&amp;quot;`). One workaround is to use facsimile characters e.g. &prime; (`&prime;`) and &Prime; (`&Prime;`).
 
 There's an [open proposal](https://github.com/ampproject/amphtml/issues/8395) to perform this substitution in `amp-mustache` instead. Please comment on the issue if you'd like to support it.
+
+### HTML entities
+
+HTML entities are not preserved in `<template>` elements.
+
+This can be an issue if you want to server-side render a `<template>` containing user-generated text, since user-generated text containing `{{`, `}}`, `{{{`, `}}}` will be treated as a Mustache section. E.g. replacing `{{` with HTML entities `&lcub;&lcub;` won't work because they aren't preserved when the browser parses the `<template>`.
+
+Workarounds include replacing strings like `{{` with different characters or stripping them outright from user-generated content.
 
 ## Validation
 

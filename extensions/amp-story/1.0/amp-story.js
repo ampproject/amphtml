@@ -95,6 +95,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {upgradeBackgroundAudio} from './audio';
+import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsDefault from './_locales/default';
 import LocalizedStringsEn from './_locales/en';
@@ -283,8 +284,7 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
         .registerLocalizedStringBundle('default', LocalizedStringsDefault)
-        // TODO(newmuis, #11647): Enable Arabic strings once RTL is supported.
-        // .registerLocalizedStringBundle('ar', LocalizedStringsAr)
+        .registerLocalizedStringBundle('ar', LocalizedStringsAr)
         .registerLocalizedStringBundle('de', LocalizedStringsDe)
         .registerLocalizedStringBundle('en', LocalizedStringsEn)
         .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
@@ -350,7 +350,7 @@ export class AmpStory extends AMP.BaseElement {
     // Disallow all actions in a (standalone) story.
     // Components then add their own actions.
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
-    actions.setWhitelist([]);
+    actions.clearWhitelist();
   }
 
 
@@ -693,8 +693,9 @@ export class AmpStory extends AMP.BaseElement {
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => {
-          this.pages_.forEach(page => {
+          this.pages_.forEach((page, index) => {
             page.setState(PageState.NOT_ACTIVE);
+            this.upgradeCtaAnchorTagsForTracking_(page, index);
           });
         })
         .then(() => this.switchTo_(initialPageId))
@@ -1850,6 +1851,27 @@ export class AmpStory extends AMP.BaseElement {
         removeAttributeInMutate(page, Attributes.VISITED));
     }));
   }
+
+
+  /**
+   * @param {!AmpStoryPage} page The page whose CTA anchor tags should be
+   *     upgraded.
+   * @param {number} pageIndex The index of the page.
+   * @private
+   */
+  upgradeCtaAnchorTagsForTracking_(page, pageIndex) {
+    this.mutateElement(() => {
+      const pageId = page.element.id;
+      const ctaAnchorEls =
+          scopedQuerySelectorAll(page.element, 'amp-story-cta-layer a');
+
+      Array.prototype.forEach.call(ctaAnchorEls, ctaAnchorEl => {
+        ctaAnchorEl.setAttribute('data-vars-story-page-id', pageId);
+        ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
+      });
+    });
+  }
+
 
   /** @return {!NavigationState} */
   getNavigationState() {
