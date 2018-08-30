@@ -57,7 +57,7 @@ export class AnalyticsGroup {
    * group is disposed.
    *
    * @param {!JsonObject} config
-   * @param {function(!AnalyticsEvent)} handler
+   * @param {function(!./events.AnalyticsEvent)} handler
    */
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
