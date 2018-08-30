@@ -54,7 +54,7 @@ export class Entitlement {
     this.raw = raw;
     /** @const {string} */
     this.source = source;
-    /** {string} */
+    /** @type {string} */
     this.service = service;
     /** @const {boolean} */
     this.granted = granted;
