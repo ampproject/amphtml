@@ -413,7 +413,7 @@ describes.realWin('amp-story', {
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
@@ -453,7 +453,7 @@ describes.realWin('amp-story', {
 
     it('should play the story after the consent is resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
@@ -501,7 +501,7 @@ describes.realWin('amp-story', {
 
     it('should play the story if the consent was already resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
