@@ -133,7 +133,7 @@ export class LayoutLayers {
 
     // Scroll events do not bubble out of shadow trees.
     // Strangely, iOS 11 reports that document contains things in a shadow tree.
-    // Any node element, however, doesn't.
+    // Any Element, however, doesn't.
     if (!win.document.documentElement.contains(scrollingElement)) {
       this.listenForScroll_(scrollingElement);
     }
@@ -358,6 +358,12 @@ export class LayoutLayers {
    */
   scrolled_(event) {
     const {target} = event;
+    // If the target of the scroll event is an element, that means that element
+    // is an overflow scroller.
+    // However, if the target is the document itself, that means the native
+    // root scroller (`document.scrollingElement`) did the scrolling. But, we
+    // can't assign a layer to a Document (only Elements), so just pretend it
+    // was the scrolling element that scrolled.
     const scrolled = target.nodeType == Node.ELEMENT_NODE
       ? dev().assertElement(target)
       : this.scrollingElement_;
