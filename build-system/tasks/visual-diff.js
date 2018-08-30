@@ -433,9 +433,9 @@ async function snapshotWebpages(percy, page, webpages) {
     // more network requests. This method is flaky since Puppeteer doesn't
     // always understand Chrome's network activity, so ignore timeouts again.
     navigationPromises[pageId] = Promise.all([
-      page.goto(`${BASE_URL}/${url}`),
-      page.waitForNavigation({waitUntil: 'networkidle2'}),
-    ]).then(() => pageId).catch(() => pageId);
+      page.goto(`${BASE_URL}/${url}`).catch(() => {}),
+      page.waitForNavigation({waitUntil: 'networkidle0'}).catch(() => {}),
+    ]).then(() => pageId);
   }
 
   while (Object.keys(navigationPromises).length > 0) {
