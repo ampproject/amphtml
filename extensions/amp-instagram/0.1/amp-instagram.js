@@ -157,7 +157,7 @@ class AmpInstagram extends AMP.BaseElement {
         this.element.getAttribute('alt'));
     iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/embed/' +
-        this.captioned_ + '?cr=1&v=7';
+        this.captioned_ + '?cr=1&v=9';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     setStyles(iframe, {
