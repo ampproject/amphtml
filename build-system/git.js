@@ -83,3 +83,22 @@ exports.gitBranchName = function() {
 exports.gitCommitterEmail = function() {
   return getStdout('git log -1 --pretty=format:"%ae"').trim();
 };
+
+/**
+ * Returns the timestamp of the latest commit on the local branch.
+ * @return {number}
+ */
+exports.gitCommitFormattedTime = function() {
+  return getStdout(
+      'TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S')
+      .trim();
+};
+
+/**
+ * Returns machine parsable list of uncommitted changed files, or an empty
+ * string if no files were changed.
+ * @return {string}
+ */
+exports.gitStatusPorcelain = function() {
+  return getStdout('git status --porcelain').trim();
+};
