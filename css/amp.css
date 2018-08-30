@@ -174,7 +174,7 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-/* layout=nodisplay are automatically until JS initializes. */
+/* layout=nodisplay are automatically hidden until JS initializes. */
 [layout=nodisplay]:not(.i-amphtml-element) {
   display: none !important;
 }
