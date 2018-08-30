@@ -151,6 +151,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * indicates no creative render.
      */
     this.isAmpCreative_ = null;
+
+    /** @private {number} slot index specific to google inventory */
+    this.ifi_ = 0;
   }
 
   /**
@@ -291,7 +294,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const sharedStateParams = sharedState.addNewSlot(
         format, this.uniqueSlotId_, adClientId, slotname);
     const viewportSize = this.getViewport().getSize();
-    this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    if (!this.ifi_) {
+      this.win['ampAdGoogleIfiCounter'] =
+          this.win['ampAdGoogleIfiCounter'] || 1;
+      this.ifi_ = this.win['ampAdGoogleIfiCounter']++;
+    }
     const enclosingContainers = getEnclosingContainerTypes(this.element);
     const pfx = enclosingContainers.includes(
         ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
@@ -320,7 +327,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'prev_fmts': sharedStateParams.prevFmts || null,
       'prev_slotnames': sharedStateParams.prevSlotnames || null,
       'brdim': additionalDimensions(this.win, viewportSize),
-      'ifi': this.win['ampAdGoogleIfiCounter']++,
+      'ifi': this.ifi_,
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
       'pfx': pfx ? '1' : '0',
@@ -446,6 +453,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
     });
+    if (this.qqid_) {
+      this.element.setAttribute('data-google-query-id', this.qqid_);
+    }
+    dev().assertElement(this.iframe).id = `google_ads_iframe_${this.ifi_}`;
   }
 
   /** @override */
