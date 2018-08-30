@@ -279,26 +279,22 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
-   * Measures the content viewer and content sizes and positioning.
-   * This must be called AFTER the source element has already been
-   * laid out.
-   * @private
+   * Calculate the width and height of the content dimensions such
+   * that they fit within amp-pan-zoom.
+   * @param {number} aspectRatio
    */
-  measure_() {
-    this.sourceWidth_ = this.content_./*OK*/scrollWidth;
-    this.sourceHeight_ = this.content_./*OK*/scrollHeight;
+  calculateContentDimensions_(aspectRatio) {
+    // Calculate content height if we set width to amp-pan-zoom's width
+    const heightToFit = this.elementBox_.width / aspectRatio;
+    // Calculate content width if we set height to be amp-pan-zoom's height
+    const widthToFit = this.elementBox_.height * aspectRatio;
 
-    this.elementBox_ = layoutRectFromDomRect(this.element
-        ./*OK*/getBoundingClientRect());
-
-    const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
-    const heightToFit = this.elementBox_.width / sourceAspectRatio;
-    const widthToFit = this.elementBox_.height * sourceAspectRatio;
+    // The content should fit within amp-pan-zoom, so take the smaller value
     let height = Math.min(heightToFit, this.elementBox_.height);
     let width = Math.min(widthToFit, this.elementBox_.width);
 
     if (Math.abs(width - this.sourceWidth_) <= 16
-    && Math.abs(height - this.sourceHeight_ <= 16)) {
+        && Math.abs(height - this.sourceHeight_) <= 16) {
       width = this.sourceWidth_;
       height = this.sourceHeight_;
     }
@@ -308,15 +304,42 @@ export class AmpPanZoom extends AMP.BaseElement {
         0,
         Math.round(width),
         Math.round(height));
+  }
 
-    // Adjust max scale to at least fit the screen.
-    const elementBoxRatio = this.elementBox_.width /
-     this.elementBox_.height;
+  /**
+   * Adjust max scale to at least fit the screen. This handles
+   * the case of ridiculously long or wide content. We guarantee
+   * that when zoomed to max, the smaller dimension fits the entire
+   * amp-pan-zoom space.
+   * @param {number} sourceAspectRatio
+   */
+  calculateMaxScale_(sourceAspectRatio) {
+    const {width, height} = this.elementBox_;
+    const elementBoxRatio = width / height;
     const maxScale = Math.max(
         elementBoxRatio / sourceAspectRatio,
         sourceAspectRatio / elementBoxRatio
     );
     this.maxScale_ = Math.max(this.maxScale_, maxScale);
+  }
+
+  /**
+   * Measures the content viewer and content sizes and positioning.
+   * This must be called AFTER the source element has already been
+   * laid out.
+   * @private
+   */
+  measure_() {
+    this.sourceWidth_ = this.content_./*OK*/scrollWidth;
+    this.sourceHeight_ = this.content_./*OK*/scrollHeight;
+
+    const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+
+    this.elementBox_ = layoutRectFromDomRect(this.element
+        ./*OK*/getBoundingClientRect());
+
+    this.calculateContentDimensions_(sourceAspectRatio);
+    this.calculateMaxScale_(sourceAspectRatio);
 
     // Reset zoom and pan.
     this.startScale_ = this.scale_ = this.initialScale_;
