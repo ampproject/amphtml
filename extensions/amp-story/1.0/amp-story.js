@@ -575,7 +575,8 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
-      if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
+      if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
+          this.storeService_.get(StateProperty.ACCESS_STATE)) {
         return;
       }
       if (!this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
