@@ -71,10 +71,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      */
     this.iframe_ = null;
 
-    /** {?Object} */
+    /** @type {?Object} */
     this.config = null;
 
-    /** {?AmpAdUIHandler} */
+    /** @type {?AmpAdUIHandler} */
     this.uiHandler = null;
 
     /** @private {?AmpAdXOriginIframeHandler} */

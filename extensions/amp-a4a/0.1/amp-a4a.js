@@ -243,7 +243,7 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.friendlyIframeEmbed_ = null;
 
-    /** {?AMP.AmpAdUIHandler} */
+    /** @type {?AMP.AmpAdUIHandler} */
     this.uiHandler = null;
 
     /** @private {?AMP.AmpAdXOriginIframeHandler} */

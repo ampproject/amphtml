@@ -53,7 +53,7 @@ export class AmpAdCustom extends AMP.BaseElement {
      *  responses will be keyed by slot */
     this.slot_ = null;
 
-    /** {?AmpAdUIHandler} */
+    /** @type {?AmpAdUIHandler} */
     this.uiHandler = null;
   }
 
