@@ -466,7 +466,6 @@ export class AmpList extends AMP.BaseElement {
     const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
     if (sizer) {
       this.element.removeChild(sizer);
-      this.element.sizerElement = undefined;
     }
     this.element.classList.remove('i-amphtml-layout-size-defined');
     this.container_.classList.remove(
