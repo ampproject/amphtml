@@ -121,24 +121,24 @@
 }
 
 [info] .i-amphtml-message-container {
-  /* 48px for info button, add width to padding for 
-  * additional story buttons */
-  padding-right: 48px !important; 
+  /* 48px for info button, add width to padding for additional story buttons. */
+  padding-right: 48px !important;
 }
 
 [info][dir=rtl] .i-amphtml-message-container {
-  /* 48px for info button, add width to padding for 
-  * additional story buttons */
-  padding-right: auto !important; 
-  padding-left: 48px !important; 
+  /* 48px for info button, add width to padding for additional story buttons. */
+  padding-right: auto !important;
+  padding-left: 48px !important;
 }
 
 .i-amphtml-message-container {
   width: max-content !important;
   transition-property: opacity, transform !important;
   position: absolute !important;
-  top: 14px !important;
+  top: 12px !important;
   right: 48px !important;
+  color: #fff !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.24) !important;
 }
 
 [dir=rtl] .i-amphtml-message-container {
@@ -192,7 +192,7 @@
 [i-amphtml-story-audio-state].audio-playing:not([muted]) .i-amphtml-story-unmute-sound-text,
 :not([i-amphtml-story-audio-state]).audio-playing:not([muted]) .i-amphtml-story-unmute-no-sound-text {
   display: block !important;
-} 
+}
 
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-system-layer-buttons,
@@ -265,7 +265,6 @@
 [desktop] .i-amphtml-story-share-control {
   display: none !important;
 }
-
 
 /* Share pill */
 
