@@ -414,23 +414,23 @@ export class AmpPanZoom extends AMP.BaseElement {
       }
     });
 
-    // Override all taps to enable tap events on content
-    this.gestures_.onGesture(TapRecognizer, e => {
-      const event = createCustomEvent(this.win, 'click', null, {bubbles: true});
-      e.data.target.dispatchEvent(event);
-    });
-
     if (!this.disableDoubleTap_) {
       this.gestures_.onGesture(DoubletapRecognizer, e => {
         const {clientX, clientY} = e.data;
-        const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
-        const dx = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
-        const dy = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
-        this.onZoom_(newScale, dx, dy, /*animate*/ true)
+        this.onDoubletapZoom_(clientX, clientY)
             .then(() => this.onZoomRelease_());
       });
+      // Override all taps to enable tap events on content
+      this.gestures_.onGesture(TapRecognizer, e => {
+        const event = createCustomEvent(
+            this.win,
+            'click',
+            null,
+            {bubbles: true}
+        );
+        e.data.target.dispatchEvent(event);
+      });
     }
-
   }
 
   /**
@@ -522,18 +522,46 @@ export class AmpPanZoom extends AMP.BaseElement {
   /**
    * Updates X/Y bounds based on the provided scale value. The min/max bounds
    * are calculated to allow full pan of the content regardless of the scale
-   * value.
+   * value. In the diagram below, assume content is y_offset from top of
+   * amp-pan-zoom, and scaled by s. We should bound panning so that the edges
+   * of the content do not exceed the amp-pan-zoom bounds.
+   * Let s = scale, hc = content height, hp = pan zoom height, y_o = y offset
+   *     maxY -       |------------------------------------|   -
+   *          -       |           |------------| y_o       |   |         -
+   *                  |           |------------| -         |   |         |
+   *                  |           |            | | hc      |   | s * hc  |
+   *                  |           |------------| -         |   |         |
+   *                  |           |            |           |   |         |
+   *          -       |-----------|------------|-----------|   -         |  hp
+   *          |                   |            |                         |
+   *    minY  |                   |            |                         |
+   *          |                   |            |                         |
+   *          -                   |------------|                         -
+   *
+   * maxY = 1/2 s * hc - 1/2 hc - y_o
+   * minY = hp + minY - s * hc
+   * Note that maxY and minY are max and minimum values for the CSS transform
+   * translate y variable applied to the content. A positive value moves the
+   * content down--we do not want the scaled content to move down more than
+   * maxY. A negative value moves the content up--we do not want the content
+   * to move up more than minY.
+   *
    * @param {number} scale
    * @private
    */
   updatePanZoomBounds_(scale) {
-    const {width: cWidth, left, height: cHeight, top} = this.contentBox_;
+    const {
+      width: cWidth,
+      left: xOffset,
+      height: cHeight,
+      top: yOffset,
+    } = this.contentBox_;
     const {width: eWidth, height: eHeight} = this.elementBox_;
 
-    this.minX_ = Math.min(0, eWidth - (left + cWidth * (scale + 1) / 2));
-    this.maxX_ = Math.max(0, (cWidth * scale - cWidth) / 2 - left);
-    this.minY_ = Math.min(0, eHeight - (top + cHeight * (scale + 1) / 2));
-    this.maxY_ = Math.max(0, (cHeight * scale - cHeight) / 2 - top);
+    this.minX_ = Math.min(0, eWidth - (xOffset + cWidth * (scale + 1) / 2));
+    this.maxX_ = Math.max(0, (cWidth * scale - cWidth) / 2 - xOffset);
+    this.minY_ = Math.min(0, eHeight - (yOffset + cHeight * (scale + 1) / 2));
+    this.maxY_ = Math.max(0, (cHeight * scale - cHeight) / 2 - yOffset);
   }
 
   /**
@@ -611,6 +639,17 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
+   * @param {number} clientX
+   * @param {number} clientY
+   */
+  onDoubletapZoom_(clientX, clientY) {
+    const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
+    const dx = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
+    const dy = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
+    return this.onZoom_(newScale, dx, dy, /*animate*/ true);
+  }
+
+  /**
    * Performs a one-step pinch zoom action.
    * @param {number} centerClientX
    * @param {number} centerClientY
@@ -620,20 +659,6 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir) {
-    this.zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir);
-  }
-
-  /**
-   * Given center position, zoom delta, and zoom position, computes
-   * and updates a zoom action on the content.
-   * @param {number} centerClientX
-   * @param {number} centerClientY
-   * @param {number} deltaX
-   * @param {number} deltaY
-   * @param {number} dir
-   * @private
-   */
-  zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir) {
     if (dir == 0) {
       return;
     }
