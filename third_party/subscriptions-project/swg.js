@@ -6643,6 +6643,7 @@ class LinkSaveFlow {
         });
       }
     });
+    /** {!Promise<boolean>} */
     return this.dialogManager_.openView(this.activityIframeView_,
         /* hidden */ true).then(() => {
           return this.activityIframeView_.port().then(port => {
