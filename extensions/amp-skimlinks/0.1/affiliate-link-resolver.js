@@ -2,7 +2,7 @@
 import {parseUrlDeprecated} from '../../../src/url';
 
 import {DOMAIN_RESOLVER_API_URL} from './constants';
-import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewrite/link-rewrite-helpers';
+import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewriter/link-rewriter-helpers';
 import {dict} from '../../../src/utils/object';
 
 

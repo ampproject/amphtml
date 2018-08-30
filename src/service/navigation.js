@@ -100,8 +100,8 @@ export class Navigation {
     /** @private @const {!./history-impl.History} */
     this.history_ = Services.historyForDoc(this.ampdoc);
 
-    /** @private @const {!./link-rewrite/link-rewrite-service.LinkRewriteService} */
-    this.linkRewriteService_ = Services.linkRewriteServiceForDoc(this.ampdoc);
+    /** @private @const {!./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
+    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(this.ampdoc);
 
     const platform = Services.platformFor(this.ampdoc.win);
     /** @private @const {boolean} */
@@ -228,7 +228,7 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
-    this.linkRewriteService_.maybeRewriteLink(
+    this.linkRewriterService_.maybeRewriteLink(
         /** @type {!HTMLElement} */ (target)
     );
 

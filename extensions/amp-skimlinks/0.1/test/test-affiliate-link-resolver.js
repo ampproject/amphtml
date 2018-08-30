@@ -3,7 +3,7 @@ import {AffiliateLinkResolver, STATUS__AFFILIATE, STATUS__NON_AFFILIATE, STATUS_
 import {DOMAIN_RESOLVER_API_URL} from '../constants';
 import {Services} from '../../../../src/services';
 import {Waypoint} from '../waypoint';
-import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-helpers';
+import {createAnchorReplacementTuple} from '../../../../src/service/link-rewriter/link-rewriter-helpers';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
 

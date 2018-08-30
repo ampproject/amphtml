@@ -1,15 +1,15 @@
 import {AmpEvents} from '../../src/amp-events';
-import {LinkRewriteService} from '../../src/service/link-rewrite/link-rewrite-service';
-import {LinkRewriter} from '../../src/service/link-rewrite/link-rewriter';
-import {ORIGINAL_URL_ATTRIBUTE, PRIORITY_META_TAG_NAME, EVENTS as linkRewriterEvents} from '../../src/service/link-rewrite/constants';
+import {LinkRewriter} from '../../src/service/link-rewriter/link-rewriter';
+import {LinkRewriterManager} from '../../src/service/link-rewriter/link-rewriter-manager';
+import {ORIGINAL_URL_ATTRIBUTE, PRIORITY_META_TAG_NAME, EVENTS as linkRewriterEvents} from '../../src/service/link-rewriter/constants';
 import {Services} from '../../src/services';
 import {anchorClickActions} from '../../src/service/navigation';
 import {createCustomEvent} from '../../src/event-helper';
-import {createTwoStepsResponse} from '../../src/service/link-rewrite/link-rewrite-helpers';
+import {createTwoStepsResponse} from '../../src/service/link-rewriter/link-rewriter-helpers';
 
 
-describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
-  let iframeDoc, linkRewriteService, win;
+describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
+  let iframeDoc, linkRewriterManager, win;
   let sendEventHelper, registerLinkRewriterHelper, addPriorityMetaTagHelper;
 
 
@@ -19,11 +19,11 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     env.sandbox.spy(iframeDoc, 'addEventListener');
     env.sandbox.spy(iframeDoc, 'querySelector');
 
-    linkRewriteService = new LinkRewriteService(env.ampdoc);
+    linkRewriterManager = new LinkRewriterManager(env.ampdoc);
 
     // Helper functions
     registerLinkRewriterHelper = vendorName => {
-      const linkRewriter = linkRewriteService.registerLinkRewriter(
+      const linkRewriter = linkRewriterManager.registerLinkRewriter(
           vendorName,
           env.sandbox.stub(),
           {}
@@ -44,7 +44,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         metaTags: {[PRIORITY_META_TAG_NAME]: priorityRule},
       });
 
-      linkRewriteService = new LinkRewriteService(env.ampdoc);
+      linkRewriterManager = new LinkRewriterManager(env.ampdoc);
     };
   });
 
@@ -61,65 +61,65 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     });
 
     it('Should set default priorityList when no meta tag', () => {
-      expect(linkRewriteService.priorityList_).to.deep.equal([]);
+      expect(linkRewriterManager.priorityList_).to.deep.equal([]);
     });
 
     it('Should read meta tag if available', () => {
       addPriorityMetaTagHelper(' vendor1  vendor3 vendor2 ');
-      expect(linkRewriteService.priorityList_).to.deep.equal(['vendor1', 'vendor3', 'vendor2']);
+      expect(linkRewriterManager.priorityList_).to.deep.equal(['vendor1', 'vendor3', 'vendor2']);
     });
   });
 
 
   describe('When registering new link rewriter', () => {
     it('Should simply add the link rewriter if no other link rewriter', () => {
-      expect(linkRewriteService.linkRewriters_.length).to.equal(0);
+      expect(linkRewriterManager.linkRewriters_.length).to.equal(0);
       const linkRewriter = registerLinkRewriterHelper('amp-skimlinks');
-      expect(linkRewriteService.linkRewriters_).to.deep.equal([linkRewriter]);
+      expect(linkRewriterManager.linkRewriters_).to.deep.equal([linkRewriter]);
     });
 
     it('Should set the highest priority in the first position', () => {
-      linkRewriteService.priorityList_ = ['vendor2', 'vendor1'];
+      linkRewriterManager.priorityList_ = ['vendor2', 'vendor1'];
 
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
 
-      expect(linkRewriteService.linkRewriters_).to.deep.equal(
+      expect(linkRewriterManager.linkRewriters_).to.deep.equal(
           [linkRewriterVendor2, linkRewriterVendor1]);
     });
 
     it('Should set lower priority in the last position', () => {
-      linkRewriteService.priorityList_ = ['vendor2', 'vendor1'];
+      linkRewriterManager.priorityList_ = ['vendor2', 'vendor1'];
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
 
-      expect(linkRewriteService.linkRewriters_).to.deep.equal(
+      expect(linkRewriterManager.linkRewriters_).to.deep.equal(
           [linkRewriterVendor2, linkRewriterVendor1]);
     });
 
     it('Should be insert linkRewriter in the middle', () => {
-      linkRewriteService.priorityList_ = ['vendor2', 'vendor1', 'vendor3'];
+      linkRewriterManager.priorityList_ = ['vendor2', 'vendor1', 'vendor3'];
 
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
       const linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
 
-      expect(linkRewriteService.linkRewriters_).to.deep.equal(
+      expect(linkRewriterManager.linkRewriters_).to.deep.equal(
           [linkRewriterVendor2, linkRewriterVendor1, linkRewriterVendor3]);
     });
 
     it('Should set link rewriters with no priorities at the end', () => {
-      linkRewriteService.priorityList_ = ['vendor2', 'vendor1'];
+      linkRewriterManager.priorityList_ = ['vendor2', 'vendor1'];
 
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
       const linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
 
-      expect(linkRewriteService.linkRewriters_).to.deep.equal(
+      expect(linkRewriterManager.linkRewriters_).to.deep.equal(
           [linkRewriterVendor2, linkRewriterVendor3]);
 
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
 
-      expect(linkRewriteService.linkRewriters_).to.deep.equal(
+      expect(linkRewriterManager.linkRewriters_).to.deep.equal(
           [linkRewriterVendor2, linkRewriterVendor1, linkRewriterVendor3]);
     });
 
@@ -127,7 +127,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
     it('Should call .onDomUpdate() after registering linkRewriter', () => {
       env.sandbox.stub(LinkRewriter.prototype, 'onDomUpdated')
           .returns(Promise.resolve());
-      const linkRewriter = linkRewriteService.registerLinkRewriter(
+      const linkRewriter = linkRewriterManager.registerLinkRewriter(
           'vendor',
           env.sandbox.stub(),
           {}
@@ -154,7 +154,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
 
   describe('On click', () => {
     beforeEach(() => {
-      env.sandbox.spy(linkRewriteService, 'getSuitableLinkRewritersForLink_');
+      env.sandbox.spy(linkRewriterManager, 'getSuitableLinkRewritersForLink_');
     });
 
     describe('Allowed click action types', () => {
@@ -162,7 +162,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         sendEventHelper(AmpEvents.ANCHOR_CLICK, {
           clickActionType: anchorClickActions.NAVIGATE_CUSTOM_PROTOCOL,
         });
-        expect(linkRewriteService.getSuitableLinkRewritersForLink_.called).to.be.false;
+        expect(linkRewriterManager.getSuitableLinkRewritersForLink_.called).to.be.false;
       });
     });
 
@@ -188,7 +188,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       });
 
       it('Should only send click event to suitable link rewriters', () => {
-        linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
 
         expect(linkRewriterVendor1.events.send.calledOnce).to.be.true;
         expect(linkRewriterVendor2.events.send.called).to.be.false;
@@ -200,7 +200,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
         env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
 
-        linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
 
         expect(getEventData(linkRewriterVendor1).linkRewriterId).to.equal('vendor1');
         expect(getEventData(linkRewriterVendor2).linkRewriterId).to.equal('vendor1');
@@ -211,7 +211,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
         const anchor = iframeDoc.createElement('a');
 
-        linkRewriteService.maybeRewriteLink(anchor);
+        linkRewriterManager.maybeRewriteLink(anchor);
 
         expect(getEventData(linkRewriterVendor1).anchor).to.equal(anchor);
       });
@@ -221,7 +221,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
         env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
         env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(false);
 
-        linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
 
         expect(getEventData(linkRewriterVendor1).linkRewriterId).to.be.null;
         // vendor2 has isWatchingLink to false therefore can not replace.
@@ -252,7 +252,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
           env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(false);
 
-          linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -263,7 +263,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(false);
           env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
 
-          linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -275,7 +275,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
       describe('With page level priorities', () => {
         beforeEach(() => {
           addPriorityMetaTagHelper('vendor3 vendor1');
-          linkRewriteService = new LinkRewriteService(env.ampdoc);
+          linkRewriterManager = new LinkRewriterManager(env.ampdoc);
           linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
           linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
           linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
@@ -290,7 +290,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
           env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
 
-          linkRewriteService.maybeRewriteLink(iframeDoc.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.called).to.be.false;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -306,7 +306,7 @@ describes.fakeWin('Link Rewriter Service', {amp: true}, env => {
           // Overwrite global priority
           anchor.setAttribute('data-link-rewriters', 'vendor1 vendor3');
 
-          linkRewriteService.maybeRewriteLink(anchor);
+          linkRewriterManager.maybeRewriteLink(anchor);
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;

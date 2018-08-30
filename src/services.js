@@ -30,7 +30,7 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
-import {LINK_REWRITE_SERVICE_NAME} from './service/link-rewrite/constants';
+import {LINK_REWRITER_SERVICE_NAME} from './service/link-rewriter/constants';
 
 /** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
 export let SubscriptionService;
@@ -255,11 +255,11 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/link-rewrite/link-rewrite-service.LinkRewriteService}
+   * @return {!./service/link-rewriter/link-rewriter-manager.LinkRewriterManager}
    */
-  static linkRewriteServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/link-rewrite/link-rewrite-service.LinkRewriteService} */ (
-      getServiceForDoc(elementOrAmpDoc, LINK_REWRITE_SERVICE_NAME));
+  static linkRewriterServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/link-rewriter/link-rewriter-manager.LinkRewriterManager} */ (
+      getServiceForDoc(elementOrAmpDoc, LINK_REWRITER_SERVICE_NAME));
   }
   /**
    * @param {!Window} window

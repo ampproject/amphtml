@@ -1,9 +1,9 @@
 import * as DocumentReady from '../../../../src/document-ready';
 import * as SkimOptionsModule from '../skim-options';
 import * as Utils from '../utils';
-import {LinkRewriteService} from '../../../../src/service/link-rewrite/link-rewrite-service';
+import {LinkRewriterManager} from '../../../../src/service/link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
-import {EVENTS as linkRewriterEvents} from '../../../../src/service/link-rewrite/constants';
+import {EVENTS as linkRewriterEvents} from '../../../../src/service/link-rewriter/constants';
 import helpersFactory from './helpers';
 
 
@@ -88,7 +88,7 @@ describes.fakeWin('amp-skimlinks', {
         ampSkimlinks.skimOptions_ = {
           linkSelector: '.article a',
         };
-        ampSkimlinks.linkRewriterService_ = new LinkRewriteService(env.ampdoc);
+        ampSkimlinks.linkRewriterService_ = new LinkRewriterManager(env.ampdoc);
         env.sandbox.spy(
             ampSkimlinks.linkRewriterService_,
             'registerLinkRewriter'

@@ -1,16 +1,16 @@
 import {AmpEvents} from '../../amp-events';
-import {EVENTS, LINK_REWRITE_SERVICE_NAME, PRIORITY_META_TAG_NAME} from './constants';
+import {EVENTS, LINK_REWRITER_SERVICE_NAME, PRIORITY_META_TAG_NAME} from './constants';
 import {LinkRewriter} from './link-rewriter';
 import {Services} from '../../services';
 import {registerServiceBuilderForDoc} from '../../service';
 
 /**
- * LinkRewriterService works conjointly with LinkRewriter to allow rewriting
+ * LinkRewriterManager works conjointly with LinkRewriter to allow rewriting
  * links at runtime. E.g: Replacing a link by its affiliate version only if
  * the link can be monetised. A page can have multiple LinkRewriter running
  * at the same time.
  *
- * LinkRewriterService class is in charge of:
+ * LinkRewriterManager class is in charge of:
  * - Keeping track of all the registered linkRewriters
  * - Notifying all the linkRewriters when the DOM has changed.
  * - Managing which LinkRewriter has the priority to replace a link
@@ -20,7 +20,7 @@ import {registerServiceBuilderForDoc} from '../../service';
  * - Sending a click event to listeners to be able to track the click
  *   even if the url has not been replaced.
  */
-export class LinkRewriteService {
+export class LinkRewriterManager {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    */
@@ -221,11 +221,11 @@ export class LinkRewriteService {
  * Register the global LinkRewriteService.
  * @param {!../ampdoc-impl.AmpDoc} ampdoc
  */
-export function installGlobalLinkRewriteServiceForDoc(ampdoc) {
+export function installGlobalLinkRewriterServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
-      LINK_REWRITE_SERVICE_NAME,
-      LinkRewriteService,
+      LINK_REWRITER_SERVICE_NAME,
+      LinkRewriterManager,
       true
   );
 }

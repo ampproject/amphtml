@@ -2,10 +2,10 @@ import {user} from '../../log';
 
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {EventMessenger} from './event-messenger';
-import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsResponse} from './link-rewrite-helpers';
+import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsResponse} from './link-rewriter-helpers';
 
 /**
- * LinkRewriter works conjointly with LinkRewriterService to allow rewriting
+ * LinkRewriter works conjointly with LinkRewriterManager to allow rewriting
  * links at runtime. E.g: Replacing a link by its affiliate version only if
  * the link can be monetised. A page can have multiple LinkRewriter running
  * at the same time.
@@ -15,7 +15,7 @@ import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsRespon
  * - Asking the "resolveUnknownLinks" function which links can be replaced.
  * - Keeping track of the replacement link of each link on the page.
  * - Swapping the anchor url to its replacement url when instructed
- *  by the LinkRewriterService.
+ *  by the LinkRewriterManager.
  */
 export class LinkRewriter {
   /**.

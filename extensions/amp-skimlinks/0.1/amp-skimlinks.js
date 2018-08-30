@@ -7,7 +7,7 @@ import {Tracking} from './tracking';
 
 import {AffiliateLinkResolver} from './affiliate-link-resolver';
 import {SKIMLINKS_REWRITER_ID} from './constants';
-import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewrite/constants';
+import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewriter/constants';
 
 import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
@@ -30,8 +30,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {!../../../src/service/document-info-impl.DocumentInfoDef} */
     this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
 
-    /** @private {!../../../src/service/link-rewrite/link-rewrite-service.LinkRewriteService} */
-    this.linkRewriterService_ = Services.linkRewriteServiceForDoc(this.ampDoc_);
+    /** @private {!../../../src/service/link-rewriter/link-rewriter-manager.LinkRewriterManager} */
+    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(this.ampDoc_);
 
     /** @private {?Object} */
     this.skimOptions_ = null;
@@ -45,7 +45,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?./waypoint.Waypoint} */
     this.waypoint_ = null;
 
-    /** @private {?../../../src/service/link-rewrite/link-rewriter.LinkRewriter} */
+    /** @private {?../../../src/service/link-rewriter/link-rewriter.LinkRewriter} */
     this.skimlinksLinkRewriter_ = null;
 
   }
@@ -108,7 +108,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   /**
    * Initialise Skimlinks LinkRewriter
-   * @return {!../../../src/service/link-rewrite/link-rewriter.LinkRewriter}
+   * @return {!../../../src/service/link-rewriter/link-rewriter.LinkRewriter}
    */
   initSkimlinksLinkRewriter_() {
     const options = {
