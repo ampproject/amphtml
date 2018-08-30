@@ -586,32 +586,7 @@ export class LayoutElement {
         node.ownerDocument.defaultView));
     let el = node;
     let op = node;
-    let last = node.shadowRoot;
     while (el) {
-      const {shadowRoot} = el;
-      // There are two ways to get to this el.
-      // 1. We traversed up the normal DOM tree, in which case last will be
-      //   a child node.
-      // 2. We traversed up from the shadow root itself, in which case last
-      //   will be the shadow root.
-      // We don't want to go into the shadow root infinitely, so make sure last
-      // isn't the shadow root.
-      if (shadowRoot && last !== shadowRoot) {
-        const name = last.nodeType === Node.ELEMENT_NODE
-          ? last.getAttribute('slot')
-          : null;
-        const selector = name
-          ? `slot[name="${escapeCssSelectorIdent(name)}"]`
-          : 'slot:not([name]),slot[name=""]';
-        const slot = shadowRoot.querySelector(selector);
-
-        if (slot) {
-          last = el;
-          el = slot;
-          continue;
-        }
-      }
-
       // Ensure the node (if it a layer itself) is not return as the parent
       // layer.
       const layout = el === node ? null : LayoutElement.forOptional(el);
@@ -637,9 +612,12 @@ export class LayoutElement {
         op = op./*OK*/offsetParent;
       }
 
-      last = el;
-      // Shadow roots have a host, not a parentNode.
-      el = el.parentNode || el.host;
+      // Traversal happens first to the `assignedSlot` (since the slot is in
+      // between the current `el` and its `parentNode`), then to either the
+      // `parentNode` (for normal tree traversal) or the `host` (for traversing
+      // from shadow trees to light trees).
+      // Note `parentNode` and `host` are mutually exclusive.
+      el = el.assignedSlot || el.parentNode || el.host;
     }
 
     // Use isConnected if available, but always pass if it's not.
