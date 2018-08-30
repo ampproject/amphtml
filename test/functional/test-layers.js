@@ -22,32 +22,50 @@ import {Services} from '../../src/services';
 import {installDocService} from '../../src/service/ampdoc-impl';
 
 describes.repeated('messaging', {
-  'Real document scroller': true,
-  'Overflow scroller': false,
-}, (name, useDocumentScroller) => {
+  'Real document scroller': 'native',
+  'Overflow scroller': 'overflow',
+  'Shadow DOM scroller': 'shadow',
+}, (name, impl) => {
   describes.realWin(`Layers (${name})`, {amp: false}, env => {
     let win;
     let root;
+    let scrollingElement;
 
-    function createElement() {
-      const div = win.document.createElement('div');
-      Object.defineProperty(div, 'isConnected', {
-        value: true,
-      });
-      return div;
+    function createElement(tag = 'div') {
+      return win.document.createElement(tag);
     }
+
+    before(function() {
+      if (impl === 'shadow' && !Element.prototype.attachShadow) {
+        this.skipTest();
+      }
+    });
 
     beforeEach(() => {
       win = env.win;
-      if (useDocumentScroller) {
-        root = win.document.scrollingElement;
-      } else {
-        root = createElement();
-        win.document.body.appendChild(root);
+      switch (impl) {
+        case 'native':
+          root = scrollingElement = win.document.scrollingElement;
+          break;
+
+        case 'overflow':
+          root = scrollingElement = createElement();
+          win.document.body.appendChild(root);
+          break;
+
+        case 'shadow': {
+          root = win.document.body;
+          scrollingElement = createElement('div');
+          const sd = root.attachShadow({mode: 'open'});
+          const slot = createElement('slot');
+          scrollingElement.appendChild(slot);
+          sd.appendChild(scrollingElement);
+        }
       }
+
       installDocService(win, true);
       const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-      installLayersServiceForDoc(ampdoc, root, useDocumentScroller);
+      installLayersServiceForDoc(ampdoc, scrollingElement, impl === 'native');
     });
 
     function scroll(element, top, left) {
@@ -60,8 +78,8 @@ describes.repeated('messaging', {
     describe('LayoutElement', () => {
 
       describe('.getParentLayer', () => {
-        it('returns null for root layer', () => {
-          expect(LayoutElement.getParentLayer(root)).to.be.null;
+        it('returns null for scrolling layer', () => {
+          expect(LayoutElement.getParentLayer(scrollingElement)).to.be.null;
         });
 
         it('returns parent layer', () => {
@@ -69,7 +87,7 @@ describes.repeated('messaging', {
           root.appendChild(div);
 
           expect(LayoutElement.getParentLayer(div)).to.equal(
-              LayoutElement.for(root));
+              LayoutElement.for(scrollingElement));
         });
 
         it('returns null if element is fixed', () => {
@@ -104,10 +122,10 @@ describes.repeated('messaging', {
           parent.appendChild(div);
           root.appendChild(parent);
 
-          root.style.width = '100vw';
-          root.style.height = '100vh';
-          root.style.position = 'absolute';
-          root.style.overflow = 'scroll';
+          scrollingElement.style.width = '100vw';
+          scrollingElement.style.height = '100vh';
+          scrollingElement.style.position = 'absolute';
+          scrollingElement.style.overflow = 'scroll';
           parent.style.width = '110vw';
           parent.style.height = '110vh';
           parent.style.position = 'absolute';
@@ -122,7 +140,7 @@ describes.repeated('messaging', {
           layers.add(div);
           layout = LayoutElement.for(div);
           parentLayout = LayoutElement.for(parent);
-          rootLayout = LayoutElement.for(root);
+          rootLayout = LayoutElement.for(scrollingElement);
         });
 
         it('calculates layout offsets without scrolls', () => {
@@ -203,7 +221,7 @@ describes.repeated('messaging', {
             top: 0,
           });
 
-          scroll(root, 10, 0);
+          scroll(scrollingElement, 10, 0);
           expect(rootLayout.getScrollTop()).to.equal(10);
           expect(rootLayout.getScrolledPosition()).to.deep.equal({
             left: 0,
@@ -229,7 +247,7 @@ describes.repeated('messaging', {
             top: -10,
           });
 
-          scroll(root, 10, 5);
+          scroll(scrollingElement, 10, 5);
           expect(rootLayout.getScrollTop()).to.equal(10);
           expect(layout.getScrolledPosition()).to.deep.equal({
             left: -10,
@@ -255,10 +273,10 @@ describes.repeated('messaging', {
           parent.appendChild(div);
           root.appendChild(parent);
 
-          root.style.width = '100vw';
-          root.style.height = '100vh';
-          root.style.position = 'absolute';
-          root.style.overflow = 'scroll';
+          scrollingElement.style.width = '100vw';
+          scrollingElement.style.height = '100vh';
+          scrollingElement.style.position = 'absolute';
+          scrollingElement.style.overflow = 'scroll';
           parent.style.width = '110vw';
           parent.style.height = '110vh';
           parent.style.position = 'absolute';
@@ -273,7 +291,7 @@ describes.repeated('messaging', {
           layers.add(div);
           layout = LayoutElement.for(div);
           parentLayout = LayoutElement.for(parent);
-          rootLayout = LayoutElement.for(root);
+          rootLayout = LayoutElement.for(scrollingElement);
         });
 
         it('calculates layout offsets without scrolls', () => {
@@ -354,7 +372,7 @@ describes.repeated('messaging', {
             top: 0,
           });
 
-          scroll(root, 10, 0);
+          scroll(scrollingElement, 10, 0);
           expect(rootLayout.getScrollTop()).to.equal(10);
           expect(rootLayout.getOffsetPosition()).to.deep.equal({
             left: 0,
@@ -380,7 +398,7 @@ describes.repeated('messaging', {
             top: 0,
           });
 
-          scroll(root, 10, 5);
+          scroll(scrollingElement, 10, 5);
           expect(rootLayout.getScrollTop()).to.equal(10);
           expect(layout.getOffsetPosition()).to.deep.equal({
             left: 0,
