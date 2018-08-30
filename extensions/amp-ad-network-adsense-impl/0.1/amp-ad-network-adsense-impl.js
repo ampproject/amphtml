@@ -296,7 +296,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const viewportSize = this.getViewport().getSize();
     if (!this.ifi_) {
       this.win['ampAdGoogleIfiCounter'] =
-          this.win['ampAdGoogleIfiCounter'] || 0;
+          this.win['ampAdGoogleIfiCounter'] || 1;
       this.ifi_ = this.win['ampAdGoogleIfiCounter']++;
     }
     const enclosingContainers = getEnclosingContainerTypes(this.element);
