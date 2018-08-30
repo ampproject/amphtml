@@ -262,6 +262,10 @@ export class VariableSource {
     if (opt_whiteList) {
       keys = keys.filter(key => opt_whiteList[key]);
     }
+    if (keys.length === 0) {
+      const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
+      return regexThatMatchesNothing;
+    }
     // The keys must be sorted to ensure that the longest keys are considered
     // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
     keys.sort((s1, s2) => s2.length - s1.length);

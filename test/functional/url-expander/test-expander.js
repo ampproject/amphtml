@@ -89,26 +89,25 @@ describes.realWin('Expander', {
   });
 
   describe('Whitelist of variables', () => {
-    let variableSource;
-    let expander;
-
     const mockBindings = {
       RANDOM: () => 0.1234,
       ABC: () => 'three',
       ABCD: () => 'four',
     };
-    beforeEach(() => {
+
+    function createExpanderWithWhitelist(whitelist) {
       env.win.document.head.appendChild(
           createElementWithAttributes(env.win.document, 'meta', {
             name: 'amp-allowed-url-macros',
-            content: 'ABC,ABCD,CANONICAL',
+            content: whitelist,
           }));
 
       variableSource = new GlobalVariableSource(env.ampdoc);
-      expander = new Expander(variableSource);
-    });
+      return new Expander(variableSource);
+    }
 
     it('should not replace unwhitelisted RANDOM', () => {
+      const expander = createExpanderWithWhitelist('ABC,ABCD,CANONICAL');
       const url = 'http://www.google.com/?test=RANDOM';
       const expected = 'http://www.google.com/?test=RANDOM';
       return expect(expander.expand(url, mockBindings))
@@ -116,11 +115,21 @@ describes.realWin('Expander', {
     });
 
     it('should replace whitelisted ABCD', () => {
+      const expander = createExpanderWithWhitelist('ABC,ABCD,CANONICAL');
       const url = 'http://www.google.com/?test=ABCD';
       const expected = 'http://www.google.com/?test=four';
       return expect(expander.expand(url, mockBindings))
           .to.eventually.equal(expected);
     });
+
+    it('should not replace anything with empty whitelist', () => {
+      const expander = createExpanderWithWhitelist('');
+      const url = 'http://www.google.com/?test=ABCD';
+      const expected = 'http://www.google.com/?test=ABCD';
+      return expect(expander.expand(url, mockBindings))
+          .to.eventually.equal(expected);
+    });
+
   });
 
   describe('#expand', () => {
