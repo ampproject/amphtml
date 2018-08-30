@@ -33,7 +33,6 @@ import {htmlFor} from '../../../src/static-template';
 import {isArray, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
 import {user} from '../../../src/log';
 
 
@@ -97,9 +96,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
     /** @private {?Element} */
     this.containerEl_ = null;
 
-    /** @private {?Element} */
-    this.scrollableEl_ = null;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
   }
@@ -146,11 +142,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
           this.onCurrentPageIndexChange_(currentPageIndex);
         }, true /** callToInitialize */);
 
-    this.scrollableEl_ =
-        this.element.querySelector('.i-amphtml-story-access-overflow');
-    this.scrollableEl_.addEventListener(
-        'scroll', throttle(this.win, () => this.onScroll_(), 100));
-
     this.element.addEventListener('click', event => this.onClick_(event));
   }
 
@@ -177,26 +168,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
       // show/hide the notification based on the user's authorizations.
       this.toggle_(currentPageIndex === 0);
     }
-  }
-
-  /**
-   * Toggles the fullbleed UI on scroll.
-   * @private
-   */
-  onScroll_() {
-    let isFullBleed;
-
-    // Toggles the fullbleed UI as soon as the scrollable container, which has a
-    // 88px margin top, reaches the top of the screen.
-    const measurer =
-        () => isFullBleed = this.scrollableEl_./*OK*/scrollTop > 88;
-    const mutator = () => {
-      this.element
-          .classList.toggle('i-amphtml-story-access-fullbleed', isFullBleed);
-    };
-
-    this.element.getResources()
-        .measureMutateElement(this.element, measurer, mutator);
   }
 
   /**
