@@ -68,6 +68,7 @@ export class SsrTemplateHelper {
         return this.viewer_.hasCapability('viewerRenderTemplate');
       }
     }
+    return false;
   }
 
   /**
