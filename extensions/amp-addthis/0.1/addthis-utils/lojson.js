@@ -43,7 +43,7 @@ const nonTrackedDomainMatcher = /\.gov|\.mil/;
  * ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc
  * }}
  */
-const LojsonDataDef = {};
+let LojsonDataDef;
 
 /**
  * @typedef {{
@@ -67,7 +67,7 @@ const LojsonDataDef = {};
  *   track_textcopy: boolean
  * }}
  */
-const AtConfigDef = {};
+let AtConfigDef;
 
 const getLojsonData = (/** @type {!LojsonDataDef} */ {
   loc,
