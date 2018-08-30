@@ -112,6 +112,8 @@ Command                                                                 | Descri
 `gulp firebase`                                                         | Generates a folder `firebase` and copies over all files from `examples` and `test/manual` for firebase deployment.
 `gulp firebase --file path/to/file`                                     | Same as above, but copies over the file specified as `firebase/index.html`.
 `gulp firebase --min`                                                   | Same as `gulp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.
+`gulp firebase --nobuild`                                               | Same as `gulp firebase`, but skips the `gulp build` step.
+
 ## Manual testing
 
 For manual testing build AMP and start the Node.js server by running `gulp`.
@@ -300,12 +302,11 @@ For deploying and testing local AMP builds on [Firebase](https://firebase.google
 npm install -g firebase-tools
 firebase login
 firebase init
-gulp build # or gulp dist
 gulp firebase
 firebase deploy
 ```
 
-`gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`). It assumes that you have already run `gulp build` or `gulp dist` prior to running `gulp firebase` (use `gulp build` with `gulp firebase` and `gulp dist` with `gulp firebase --min`).  When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
+`gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`).  When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
 
 ```
 {
