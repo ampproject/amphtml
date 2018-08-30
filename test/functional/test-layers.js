@@ -37,7 +37,7 @@ describes.repeated('messaging', {
 
     before(function() {
       if (impl === 'shadow' && !Element.prototype.attachShadow) {
-        this.skip();
+        this.skipTest();
       }
     });
 
