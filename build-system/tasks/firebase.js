@@ -74,13 +74,21 @@ async function replaceUrls(filePath) {
   await fs.writeFile(filePath, result, 'utf8');
 }
 
+const tasks = [];
+
+if (!argv.nobuild) {
+  tasks.push(argv.min ? 'dist' : 'build');
+}
+
 gulp.task(
     'firebase',
     'Generates firebase folder for deployment',
+    tasks,
     generateFirebaseFolder,
     {
       options: {
         'file': 'File to deploy to firebase as index.html',
         'min': 'Source from minified files',
+        'nobuild': 'Skips the gulp build|dist step.',
       },
     });
