@@ -73,7 +73,6 @@ exports.execOrDie = function(cmd, options) {
 
 /**
  * Executes the provided command, returning the process object.
- * This will throw an exception if something goes wrong.
  * @param {string} cmd
  * @return {!Object}
  */
