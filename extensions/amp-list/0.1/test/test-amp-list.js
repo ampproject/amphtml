@@ -188,12 +188,12 @@ describes.realWin('amp-list component', {
       const allowViewerRenderTemplate = 'allow-viewer-render-template';
       beforeEach(() => {
         win.document.documentElement.setAttribute(
-          allowViewerRenderTemplate, true);
+            allowViewerRenderTemplate, true);
       });
 
       afterEach(() => {
         win.document.documentElement.removeAttribute(
-          allowViewerRenderTemplate);
+            allowViewerRenderTemplate);
       });
 
       it('should proxy rendering to viewer', () => {
@@ -213,7 +213,8 @@ describes.realWin('amp-list component', {
       });
 
       it('should error if viewer does not define response data', () => {
-        win.document.documentElement.setAttribute('allow-viewer-render-template', true);
+        win.document.documentElement.setAttribute(
+            'allow-viewer-render-template', true);
         viewerMock.expects('hasCapability')
             .withExactArgs('viewerRenderTemplate').returns(true);
         viewerMock.expects('sendMessageAwaitResponse').withExactArgs(

@@ -62,7 +62,7 @@ export class SsrTemplateHelper {
    */
   isSupported() {
     let isOptIn = false;
-    const ampdoc = this.viewer_.ampdoc;
+    const {ampdoc} = this.viewer_;
     /** @type {boolean|!Element} */
     const htmlElement =
         ampdoc.isSingleDoc() && ampdoc.getRootNode().documentElement;
