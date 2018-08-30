@@ -218,7 +218,7 @@ describes.fakeWin('amp-skimlinks', {
         sendImpressionTracking: env.sandbox.stub(),
       };
       ampSkimlinks.skimlinksLinkRewriter_ = {
-        getAnchorLinkReplacementMap: env.sandbox.stub(),
+        getAnchorReplacementList: env.sandbox.stub(),
       };
     });
 

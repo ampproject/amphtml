@@ -70,10 +70,10 @@ export class Tracking {
   /**
    * Sends "Page impression" and "Link impression" tracking requests (POST).
    * @public
-   * @param {*} anchorStatusMap
+   * @param {Array<{anchor: HTMLElement, replacementUrl: string}>} anchorReplacementList
    * @param {number} startTime
    */
-  sendImpressionTracking(anchorStatusMap, startTime) {
+  sendImpressionTracking(anchorReplacementList, startTime) {
     if (!this.tracking_) {
       return;
     }
@@ -98,7 +98,7 @@ export class Tracking {
     const {
       numberAffiliateLinks,
       urls,
-    } = this.extractAnchorTrackingInfo_(anchorStatusMap);
+    } = this.extractAnchorTrackingInfo_(anchorReplacementList);
 
     this.sendPageImpressionTracking_(
         commonData,
@@ -236,15 +236,15 @@ export class Tracking {
    *   i.e: {url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1}}
    *
    * @private
-   * @param {*} anchorStatusMap - Map of all the anchors on the page
+   * @param {Array<{anchor: HTMLElement, replacementUrl: string}>} anchorReplacementList - Map of all the anchors on the page
    *    associated with their potential replacement url.
    * @return {{numberAffiliateLinks: number, urls: Object}}
    */
-  extractAnchorTrackingInfo_(anchorStatusMap) {
+  extractAnchorTrackingInfo_(anchorReplacementList) {
     let numberAffiliateLinks = 0;
     const urls = {};
 
-    anchorStatusMap.forEach((replacementUrl, anchor) => {
+    anchorReplacementList.forEach(({replacementUrl, anchor}) => {
       urls[anchor.href] = urls[anchor.href] || {
         ae: replacementUrl ? 1 : 0,
         count: 0,

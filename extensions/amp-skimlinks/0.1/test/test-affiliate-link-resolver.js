@@ -3,10 +3,8 @@ import {AffiliateLinkResolver, STATUS__AFFILIATE, STATUS__NON_AFFILIATE, STATUS_
 import {DOMAIN_RESOLVER_API_URL} from '../constants';
 import {Services} from '../../../../src/services';
 import {Waypoint} from '../waypoint';
-import {createAnchorReplacementTuple} from '../../../../src/service/link-rewriter/link-rewriter-helpers';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
-
 
 describes.fakeWin('AffiliateLinkResolver', {
   amp: {
@@ -234,6 +232,11 @@ describes.fakeWin('AffiliateLinkResolver', {
 
 
     describe('Returns the correct data', () => {
+
+      function createAnchorReplacementObject(anchor, replacementUrl) {
+        return {anchor, replacementUrl};
+      }
+
       beforeEach(() => {
         const stubXhr = helpers.createStubXhr({
           'merchant_domains': ['merchant1.com', 'merchant2.com'],
@@ -255,7 +258,7 @@ describes.fakeWin('AffiliateLinkResolver', {
         // Replace all the unknown in the synchronous reponse,
         // asynchronous response will then overwrite it later.
         const expectedSyncData = anchorList.map(a => {
-          return createAnchorReplacementTuple(a, waypoint.getAffiliateUrl(a));
+          return createAnchorReplacementObject(a, waypoint.getAffiliateUrl(a));
         });
 
         expect(twoStepsResponse.syncResponse).to.deep.equal(expectedSyncData);
@@ -264,9 +267,9 @@ describes.fakeWin('AffiliateLinkResolver', {
       it('Should set "asyncResponse" field in the returned object when only unknown domains', () => {
         const response = resolver.resolveUnknownAnchors(anchorList);
         const expectedAsyncData = [
-          createAnchorReplacementTuple(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
-          createAnchorReplacementTuple(anchorList[1], null),
-          createAnchorReplacementTuple(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
+          createAnchorReplacementObject(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
+          createAnchorReplacementObject(anchorList[1], null),
+          createAnchorReplacementObject(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
         ];
 
         expect(response.asyncResponse).to.be.an.instanceof(Promise);
@@ -279,9 +282,9 @@ describes.fakeWin('AffiliateLinkResolver', {
         resolver.domains_ = alreadyResolvedDomains;
         const response = resolver.resolveUnknownAnchors(anchorList);
         const expectedSyncData = [
-          createAnchorReplacementTuple(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
-          createAnchorReplacementTuple(anchorList[1], null),
-          createAnchorReplacementTuple(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
+          createAnchorReplacementObject(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
+          createAnchorReplacementObject(anchorList[1], null),
+          createAnchorReplacementObject(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
         ];
         expect(response.syncResponse).to.deep.equal(expectedSyncData);
         expect(response.asyncResponse).to.be.null;
@@ -292,7 +295,7 @@ describes.fakeWin('AffiliateLinkResolver', {
         const response = resolver.resolveUnknownAnchors([excludedAnchor]);
 
         const expectedSyncData = [
-          createAnchorReplacementTuple(excludedAnchor, null),
+          createAnchorReplacementObject(excludedAnchor, null),
         ];
 
         expect(response.syncResponse).to.deep.equal(expectedSyncData);
@@ -306,9 +309,9 @@ describes.fakeWin('AffiliateLinkResolver', {
         };
         // Initial anchor should not be in the asyncResponse list
         const expectedAsyncData = [
-          createAnchorReplacementTuple(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
-          createAnchorReplacementTuple(anchorList[1], null),
-          createAnchorReplacementTuple(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
+          createAnchorReplacementObject(anchorList[0], waypoint.getAffiliateUrl(anchorList[0])),
+          createAnchorReplacementObject(anchorList[1], null),
+          createAnchorReplacementObject(anchorList[2], waypoint.getAffiliateUrl(anchorList[2])),
         ];
 
         const response = resolver.resolveUnknownAnchors(
@@ -317,7 +320,7 @@ describes.fakeWin('AffiliateLinkResolver', {
 
         expect(response.syncResponse.length).to.equal(4);
         expect(response.syncResponse).to.deep.include(
-            createAnchorReplacementTuple(initialAnchor, waypoint.getAffiliateUrl(initialAnchor)),
+            createAnchorReplacementObject(initialAnchor, waypoint.getAffiliateUrl(initialAnchor)),
         );
         expect(response.asyncResponse).to.be.an.instanceof(Promise);
         return response.asyncResponse.then(anchorReplacementTuple => {
