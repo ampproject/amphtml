@@ -133,9 +133,9 @@ export class LinkRewriter {
    * @private
    * Scan the page to find all the links on the page.
    * If new anchors are discovered, ask to the "resolveUnknownLinks"
-   * function what is the replacement url for each anchor. The response which can
-   * be synchronous, asynchronous or both at the same time will be stored
-   * internally and used if a click on one of this anchor happens later.
+   * function what is the replacement url for each anchor. The response
+   * which can be synchronous, asynchronous or both at the same time will be
+   * stored internally and used if a click on one of this anchor happens later.
    * @return {Promise}
    */
   scanLinksOnPage_() {
@@ -150,9 +150,10 @@ export class LinkRewriter {
       return Promise.resolve();
     }
 
-    // Mark all new anchors discovered to the default unknown.
-    // Note: Only anchors with a status will be considered in the click handlers.
-    // (Other anchors are assumed to be the ones exluded by linkSelector_)
+    // Register all new anchors discovered as "unknown" status.
+    // Note: Only anchors with a status will be considered in the click
+    // handlers. (Other anchors are assumed to be the ones exluded by
+    // linkSelector_)
     const unknownAnchorsTuples = unknownAnchors.map(anchor => {
       return createAnchorReplacementTuple(anchor, undefined);
     });
@@ -167,7 +168,8 @@ export class LinkRewriter {
     }
     // Anchors for which the status needs to be resolved asynchronously
     if (twoStepsResponse.asyncResponse) {
-      return twoStepsResponse.asyncResponse.then(this.updateAnchorMap_.bind(this));
+      return twoStepsResponse.asyncResponse
+          .then(this.updateAnchorMap_.bind(this));
     }
 
     return Promise.resolve();
@@ -206,7 +208,8 @@ export class LinkRewriter {
 
   /**
    * @private
-   * Remove from the internal anchor Map the links that are no longer in the page.
+   * Remove from the internal anchor Map the links that are no longer in
+   * the page.
    * @param {Array<HTMLElement>} anchorList - The list of links in the page.
    */
   removeDetachedAnchorsFromMap_(anchorList) {

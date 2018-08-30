@@ -5,8 +5,8 @@ import {dict} from '../../../src/utils/object';
 
 
 /**
- * The waypoint class is responsible for building the url to
- * Skimlinks affiliate API.
+ * The waypoint class is responsible for building the URL to
+ * Skimlinks affiliate API (also called affiliated URL).
  */
 export class Waypoint {
   /**

@@ -1,5 +1,4 @@
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {dict} from '../../../src/utils/object';
 import {generatePageImpressionId} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';

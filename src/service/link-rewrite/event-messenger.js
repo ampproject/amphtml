@@ -25,7 +25,8 @@ export class EventMessenger {
   }
 
   /**
-   * Listen for a specific event and call callback function when event is received.
+   * Listen for a specific event and call callback function when event
+   * is received.
    * @param {string} eventName
    * @param {Function} callback
    */

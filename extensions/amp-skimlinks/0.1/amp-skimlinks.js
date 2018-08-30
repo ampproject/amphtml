@@ -77,7 +77,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
 
   /**
-   *  Fires impression tracking after beacon API request.
+   * Fires impression tracking after beacon API request.
    * @param {!Object} beaconData - Json response from Beacon API.
    * @private
    */
@@ -92,12 +92,13 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   /**
    * Called only on the first page scan.
-   * Make a fallback call to beacon if no links where founds on the page.
+   * Make a fallback call to beacon if no links were founds on the page.
    * Send the impression tracking once we have the beacon API response.
    * @return {Promise}
    */
   onPageScanned_() {
-    // .firstRequest may be null if the page doesn't have any non-excluded links.
+    // .firstRequest may be null if the page doesn't have any non-excluded
+    // links.
     const beaconApiPromise = this.affiliateLinkResolver_.firstRequest ||
         // If it's the case, fallback with manual call
         this.affiliateLinkResolver_.fetchDomainResolverApi([]);
@@ -106,7 +107,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   }
 
   /**
-   * Initialise skimlinks link rewriter
+   * Initialise Skimlinks LinkRewriter
    * @return {!../../../src/service/link-rewrite/link-rewriter.LinkRewriter}
    */
   initSkimlinksLinkRewriter_() {
@@ -114,24 +115,24 @@ export class AmpSkimlinks extends AMP.BaseElement {
       linkSelector: this.skimOptions_.linkSelector,
     };
 
-    const skimlinksLinkRewriter = this.linkRewriterService_.registerLinkRewriter(
+    const linkRewriter = this.linkRewriterService_.registerLinkRewriter(
         SKIMLINKS_REWRITER_ID,
         getBoundFunction(this.affiliateLinkResolver_, 'resolveUnknownAnchors'),
         options
     );
 
     // We are only interested in the first page scan.
-    skimlinksLinkRewriter.events.on(
+    linkRewriter.events.on(
         linkRewriterEvents.PAGE_SCANNED,
         once(this.onPageScanned_.bind(this))
     );
 
-    skimlinksLinkRewriter.events.on(
+    linkRewriter.events.on(
         linkRewriterEvents.CLICK,
         this.onClick_.bind(this)
     );
 
-    return skimlinksLinkRewriter;
+    return linkRewriter;
   }
 
   /**
@@ -140,7 +141,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @private
    */
   initTracking_() {
-    // 'amp-analytics' api is waiting for CommonSignals.LOAD_START to be
+    // 'amp-analytics' API is waiting for CommonSignals.LOAD_START to be
     // triggered before sending requests.
     // Normally CommonSignals.LOAD_START is sent from layoutCallback but since
     // we are using layout = 'nodisplay', 'layoutCallback' is never called.
@@ -157,7 +158,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   onClick_(eventData) {
     // The link was not monetizable or the link was replaced
-    // by an other linkRewriter.
+    // by an other LinkRewriter.
     if (eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID) {
       this.trackingService_.sendNaClickTracking(eventData.anchor);
     }

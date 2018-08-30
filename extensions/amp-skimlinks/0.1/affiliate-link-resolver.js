@@ -18,15 +18,22 @@ export const STATUS__UNKNOWN = 'unknown';
 
 /**
  * The AffiliateLinkResolver class is in charge of "resolving"
- * links, namely, determining if the url from a link can be replaced by
- * a new Skimlinks monetisable url.
+ * links, in other words: determining if the URL from a link can be replaced by
+ * a new Skimlinks monetizable url or not.
  *
- * The class is build around one main public method `
+ * The class is built around one main public method `
  * resolveUnknownAnchors(...)` which the way for the Skimlinks LinkRewriter
- * to ask for the replacement urls of the links in the page.
+ * to ask for the replacement URLs of all the links in the page.
  *
- * The class implements a in-memory cache (this.domains_) and will
- * automatically call the domain resolver API (beaconAPI) when needed.
+ * In order to know if a link should be replaced or not, we extract the list of
+ * unique hostnames from the list of links on the page before sending it to
+ * Skimlinks domain resolver API (beaconAPI). The API response contains the
+ * list of domains which can be affiliated, enabling us to create a new
+ * Skimlinks monetizable URL for all the links belonging to a domain present
+ * in that list.
+ *
+ * The class implements an in-memory cache (this.domains_) so we only call the
+ * domain resolver API if we encounter an new domain.
  */
 export class AffiliateLinkResolver {
   /**
@@ -52,12 +59,11 @@ export class AffiliateLinkResolver {
      * Promise of the first request to beacon so we can
      * access API data outside of the linkRewriter/LinkResolver flow.
      */
-
     this.firstRequest = null;
   }
 
   /**
-   * Calls the domain resolver api (Beacon) and return the API response
+   * Calls the domain resolver API (Beacon) and return the API response
    * through a Promise.
    *
    * This method is public since it can also be called externally in case
@@ -90,7 +96,7 @@ export class AffiliateLinkResolver {
 
   /**
    * This is the function used by the Skimlinks LinkRewriter to determine
-   * which urls should be replaced.
+   * which URLs should be replaced.
    *
    * For each anchor in the list, returns as part of the synchronous or
    * asynchronous response what the url replacement should be.
@@ -106,7 +112,8 @@ export class AffiliateLinkResolver {
    * @return {*}
    */
   resolveUnknownAnchors(anchorList) {
-    const alreadyResolvedTupleList = this.mapToAnchorReplacementTuple_(anchorList);
+    const alreadyResolvedTupleList = this.mapToAnchorReplacementTuple_(
+        anchorList);
     let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);
@@ -120,19 +127,20 @@ export class AffiliateLinkResolver {
     }
 
     // Returns an object with a sync reponse and an async response.
-    return createTwoStepsResponse(alreadyResolvedTupleList, willBeResolvedPromise);
+    return createTwoStepsResponse(alreadyResolvedTupleList,
+        willBeResolvedPromise);
   }
 
 
   /**
    * Map an array of anchor to an array of "replacement tuple" where
    * a "replacement tuple" is an array of 2 elements, the first one being
-   * the anchor and the second one its associated replacement url.
+   * the anchor and the second one its associated replacement URL.
    *
-   * A falsy replacement url means the url should not be replaced.
+   * A falsy replacement URL means the URL should not be replaced.
    *
-   * The replacement url is determined based on the affiliate status of
-   * the domain of the initial url.
+   * The replacement URL is determined based on the affiliate status of
+   * the domain of the initial URL.
    *
    * E.g: [[anchor1, 'https://newurl.com'], [anchor2, null], ...]
    *
@@ -143,7 +151,8 @@ export class AffiliateLinkResolver {
   mapToAnchorReplacementTuple_(anchorList) {
     return anchorList.map(anchor => {
       let replacementUrl = null;
-      const status = this.getDomainAffiliateStatus_(this.getAnchorDomain_(anchor));
+      const status = this.getDomainAffiliateStatus_(
+          this.getAnchorDomain_(anchor));
       // Always replace unknown, we will overwrite them after asking
       // the api if needed
       if (status === STATUS__AFFILIATE || status === STATUS__UNKNOWN) {
@@ -170,7 +179,8 @@ export class AffiliateLinkResolver {
   /**
    * From a list of anchors, extract the list of domains for which
    * we don't already have the affiliate status information. This is
-   * the list of domains that will be sent to the domain resolver api (beacon)
+   * the list of domains that will be sent to the domain resolver API
+   * (beaconAPI).
    * @private
    * @param {Array<HTMLElement>} anchorList
    * @return {Array<string>} - List of domains
@@ -193,8 +203,8 @@ export class AffiliateLinkResolver {
 
   /**
    * For each domain in the list, set the affiliate status to "unknown" in
-   * the cache. This allow us to keep track of what domains have already been
-   * sent to the api, even if the api hasn't come back yet.
+   * the cache. This allows us to keep track of what domains have already been
+   * sent to the API, even if the API hasn't come back yet.
    * @private
    * @param {Array<string>} domains
    */
@@ -280,9 +290,9 @@ export class AffiliateLinkResolver {
   }
 
   /**
-   * Check if domain is excluded, (i.e all urls from this domains should
-   * be ignored). The list of excluded was generated
-   * based on the 'excluded-domains' skim-option & the internal domains.
+   * Check if a domain is excluded, (i.e all URLs from this domains should
+   * be ignored). The list of excluded was generated based on the
+   * 'excluded-domains' skim-option & the internal domains.
    * (See skim-options.js)
    *
    * @private

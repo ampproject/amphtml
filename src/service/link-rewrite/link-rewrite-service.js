@@ -54,7 +54,8 @@ export class LinkRewriteService {
    * Create and configure a new LinkRewriter on the page.
    * @param {string} linkRewriterId
    * @param {function(Array<HTMLElement>): Array<Array>} resolveUnknownLinks
-   * A function returning for each anchors the associated replacement url if any.
+   *   - A function returning for each anchors the associated replacement
+   *    url if any.
    * @param {?Object} options - e.g: { linkSelector: "a:not(.ads)""}
    * @return {!./link-rewriter.LinkRewriter}
    */
@@ -96,7 +97,8 @@ export class LinkRewriteService {
     if (suitableLinkRewriters.length) {
       let chosenLinkRewriter = null;
 
-      // Iterate by order of priority until one of the linkRewriter replaces the link.
+      // Iterate by order of priority until one of the linkRewriter
+      // replaces the link.
       for (let i = 0; i < suitableLinkRewriters.length; i++) {
         const hasReplaced = suitableLinkRewriters[i].rewriteAnchorUrl(anchor);
         if (hasReplaced) {
