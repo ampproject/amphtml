@@ -68,7 +68,7 @@
 
   <h2>AMP List Basic</h2>
   <p>Test this under slow internet (throttle to slow 3G).</p>
-  <amp-list width="396" height="80" layout=responsive
+  <amp-list width="396" height="80" layout="responsive" auto-resize
       src="/test/manual/amp-list-data.json?RANDOM">
     <template type="amp-mustache">
       <div class="story-entry">
@@ -84,7 +84,7 @@
   <div class="split"></div>
 
   <h2>AMP List Resize with Accordion</h2>
-  <amp-list width="396" height="80" layout=responsive reset-on-refresh
+  <amp-list width="396" height="80" layout=responsive reset-on-refresh auto-resize
       src="/test/manual/amp-list-data.json">
     <template type="amp-mustache">
       <div class="story-entry">
@@ -111,7 +111,7 @@
   <h2>AMP List Resize After Toggling Class</h2>
   <button on="tap:AMP.setState({listStyle: 'grid'})">Show Grid</button>
   <button on="tap:AMP.setState({listStyle: 'list'})">Show List</button>
-  <amp-list width="396" height="80" layout=responsive
+  <amp-list width="396" height="80" layout="responsive" auto-resize
       src="/test/manual/amp-list-data.json?RANDOM">
     <template type="amp-mustache">
       <div class="story-entry" [class]="'story-entry ' + listStyle">
@@ -149,6 +149,7 @@
     layout=responsive
     src="/search/countries"
     reset-on-refresh
+    auto-resize
     [src]="'/search/countries?q=' + query">
     <template type="amp-mustache">
       {{#results}}
