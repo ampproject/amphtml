@@ -71,24 +71,6 @@ describes.realWin('amp-pan-zoom', {
     env.iframe.width = 400;
   });
 
-  it('should initialize all attributes correctly', () => {
-    return getPanZoom({
-      'max-scale': '4',
-      'initial-scale': '2',
-      'initial-x': '1',
-      'initial-y': '5',
-      'reset-on-resize': '',
-      'disable-double-tap': '',
-    }).then(() => {
-      expect(impl.initialScale_).to.equal(2);
-      expect(impl.initialX_).to.equal(1);
-      expect(impl.initialY_).to.equal(5);
-      expect(impl.maxScale_).to.equal(4);
-      expect(impl.resetOnResize_).to.be.true;
-      expect(impl.disableDoubleTap_).to.be.true;
-    });
-  });
-
   it('should size contents correctly', () => {
     return getPanZoom().then(() => el.layoutCallback()).then(() => {
       expect(svg.clientWidth).to.equal(300);
