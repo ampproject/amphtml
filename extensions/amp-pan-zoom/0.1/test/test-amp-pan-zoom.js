@@ -22,8 +22,11 @@ describes.realWin('amp-pan-zoom', {
     extensions: ['amp-pan-zoom'],
   },
 }, env => {
-  let win, doc, sandbox;
-  let el, impl;
+  let win;
+  let doc;
+  let sandbox;
+  let el;
+  let impl;
   let svg;
 
   const measureMutateElementStub = (measure, mutate) => {
