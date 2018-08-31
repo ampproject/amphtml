@@ -20,7 +20,7 @@ import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
+  setUnescapedSanitizer} from '../../../third_party/mustache/mustache';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
 
 /**
@@ -39,7 +39,8 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizier(purifyTagsForTripleMustache);
+    setUnescapedSanitizer(value =>
+      purifyTagsForTripleMustache(value, this.win.document));
   }
 
   /** @override */

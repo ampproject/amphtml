@@ -20,11 +20,27 @@ const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const path = require('path');
 
+async function walk(dest) {
+  const filelist = [];
+  const files = await fs.readdir(dest);
+
+  for (let i = 0; i < files.length; i++) {
+    const file = `${dest}/${files[i]}`;
+
+    fs.statSync(file).isDirectory() ?
+      Array.prototype.push.apply(filelist, await walk(file)) :
+      filelist.push(file);
+  }
+
+  return filelist;
+}
+
 async function copyAndReplaceUrls(src, dest) {
   await fs.copy(src, dest, {overwrite: true});
-  const files = await fs.readdir(dest);
+  // Recursively gets all the files within the directory and its children.
+  const files = await walk(dest);
   const promises = files.filter(fileName => path.extname(fileName) == '.html')
-      .map(file => replaceUrls(dest + '/' + file));
+      .map(file => replaceUrls(file));
   await Promise.all(promises);
 }
 
@@ -74,13 +90,21 @@ async function replaceUrls(filePath) {
   await fs.writeFile(filePath, result, 'utf8');
 }
 
+const tasks = [];
+
+if (!argv.nobuild) {
+  tasks.push(argv.min ? 'dist' : 'build');
+}
+
 gulp.task(
     'firebase',
     'Generates firebase folder for deployment',
+    tasks,
     generateFirebaseFolder,
     {
       options: {
         'file': 'File to deploy to firebase as index.html',
         'min': 'Source from minified files',
+        'nobuild': 'Skips the gulp build|dist step.',
       },
     });

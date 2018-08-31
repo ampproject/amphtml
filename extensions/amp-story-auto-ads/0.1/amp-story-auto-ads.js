@@ -29,7 +29,7 @@ import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
-const MIN_INTERVAL = 3;
+const MIN_INTERVAL = 4;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
@@ -57,12 +57,28 @@ const DATA_ATTR = {
 
 /** @const */
 const CTA_TYPES = {
+  APPLY_NOW: 'Apply Now',
+  BOOK_NOW: 'Book',
+  BUY_TICKETS: 'Buy Tickets',
+  DOWNLOAD: 'Download',
   EXPLORE: 'Explore Now',
-  SHOP: 'Shop Now',
-  READ: 'Read Now',
+  GET_NOW: 'Get Now',
   INSTALL: 'Install Now',
   LISTEN: 'Listen Now',
+  MORE: 'More',
+  OPEN_APP: 'Open App',
+  ORDER_NOW: 'Order Now',
+  PLAY: 'Play',
+  READ: 'Read Now',
+  SHOP: 'Shop Now',
+  SHOW: 'Show',
+  SHOWTIMES: 'Showtimes',
+  SIGN_UP: 'Sign Up',
   SUBSCRIBE: 'Subscribe Now',
+  USE_APP: 'Use App',
+  VIEW: 'View',
+  WATCH: 'Watch',
+  WATCH_EPISODE: 'Watch Episode',
 };
 
 /** @const */
@@ -195,8 +211,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
       return ampStoryElement.getImpl().then(impl => {
         this.ampStory_ = impl;
-        this.navigationState_ = this.ampStory_.getNavigationState();
-        this.navigationState_.observe(this.handleStateChange_.bind(this));
       });
     });
   }
@@ -213,6 +227,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (!this.isAutomaticAdInsertionAllowed_()) {
       return Promise.resolve();
     }
+
+    this.navigationState_ = this.ampStory_.getNavigationState();
+    this.navigationState_.observe(this.handleStateChange_.bind(this));
 
     return this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD)
         .then(() => {
@@ -502,6 +519,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   handleActivePageChange_(pageIndex, pageId) {
+    if (!hasOwn(this.uniquePageIds_, pageId)) {
+      this.uniquePagesCount_++;
+      this.uniquePageIds_[pageId] = true;
+    }
+
+    if (this.adPagesCreated_ === 0) {
+      // This is protection against us running our placement algorithm in a
+      // story where no ads have been created. Most likely because INI_LOAD on
+      // the story has not fired yet.
+      return;
+    }
+
     if (this.idOfAdShowing_) {
       // We are transitioning away from an ad, so fire the exit event.
       this.analyticsEvent_(Events.AD_EXITED, {
@@ -525,10 +554,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.idOfAdShowing_ = adIndex;
     }
 
-    if (!hasOwn(this.uniquePageIds_, pageId)) {
-      this.uniquePagesCount_++;
-      this.uniquePageIds_[pageId] = true;
-    }
 
     if (this.uniquePagesCount_ > MIN_INTERVAL) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
