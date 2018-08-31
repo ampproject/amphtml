@@ -142,7 +142,7 @@ export class LinkRewriter {
     const anchorList = this.getLinksInDOM_();
     // Get the list of new links.
     const unknownAnchors = this.getUnknownAnchors_(anchorList);
-    // Delete anchors removed from the DOM anymore so they can be garbage
+    // Delete anchors removed from the DOM so they can be garbage
     // collected.
     this.anchorReplacementCache_.updateLinkList(anchorList);
 
