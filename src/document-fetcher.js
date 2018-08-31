@@ -15,6 +15,7 @@
  */
 import {Services} from './services';
 import {assertSuccess, getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
+import {dict} from './utils/object';
 import {user} from './log';
 
 /**
@@ -112,7 +113,7 @@ function xhrRequest(input, init) {
  * @return {!JsonObject}
  */
 function parseHeaders(rawHeaders) {
-  const headers = {};
+  const headers = dict({});
   // Replace instances of \r\n and \n followed by at least one space or
   // horizontal tab with a space.
   // https://tools.ietf.org/html/rfc7230#section-3.2
