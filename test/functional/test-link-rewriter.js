@@ -125,7 +125,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
             linkRewriterVendor3, linkRewriterVendor4]);
     });
 
-    it('Should ingore if priority contains unregistered rewriters', () => {
+    it('Should ignore if priority contains unregistered rewriters', () => {
       linkRewriterManager.priorityList_ = [
         'vendor2', 'vendor4', 'vendor1','vendor3',
       ];

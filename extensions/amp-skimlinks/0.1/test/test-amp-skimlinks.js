@@ -191,7 +191,7 @@ describes.fakeWin('amp-skimlinks', {
           clickType: 'contextmenu',
         });
 
-        expect(stub.calledOnce).to.be.false;
+        expect(stub.called).to.be.false;
 
       });
       it('Should send the NA click if clickType is something else', () => {

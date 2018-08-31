@@ -157,10 +157,16 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @private
    */
   onClick_(eventData) {
-    // The link was not monetizable or the link was replaced
-    // by an other LinkRewriter.
-    const doClickTracking = eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID &&
-      eventData.clickType !== EVENT_TYPE_CONTEXT_MENU; // Right click should not track.
+    const doClickTracking = (
+      // Test two scenarios:
+      //  - Link hasn't been replaced at all: eventData.linkRewriterId === null
+      //  - Link has been replaced but not by Skimlinks:
+      //    E.g: eventData.linkRewriterId === "awin"
+      eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID &&
+      // Also, context menu click should not send tracking
+      eventData.clickType !== EVENT_TYPE_CONTEXT_MENU
+    );
+
     if (doClickTracking) {
       this.trackingService_.sendNaClickTracking(eventData.anchor);
     }
