@@ -11,7 +11,7 @@ export class EventMessenger {
   /**
    * Send synchronous event to listeners.
    * @param {string} eventName
-   * @param {Object=} data - Optional data
+   * @param {Object} [data] - Optional data
    */
   send(eventName, data) {
     const handlers = this.listeners_[eventName];

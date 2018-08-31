@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-reddit" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-skimlinks" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -35,7 +35,7 @@ limitations under the License.
 
 Skimlinks allows you to monetise your content through affiliate marketing. It gives you instant access to over 24,000 merchant affiliate programs without the hassle of network sign ups, approvals or creating affiliate links.
 
-`amp-skimlinks` is the AMP version of the traditional Skimlinks scripts which allows you to automically turn your normal merchant links into monetisable links and gives you access to analytics data about how your content is performing.
+`amp-skimlinks` is the AMP version of the traditional Skimlinks scripts which allows you to automatically turn your normal merchant links into monetisable links and gives you access to analytics data about how your content is performing.
 
 ## Getting started
 
@@ -44,7 +44,7 @@ Inside the `<head>...</head>` section of your AMP page, insert this code before 
 
 Code:
 ```html
-    <script async custom-element="amp-reddit" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js"></script>
+    <script async custom-element="amp-skimlinks" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js"></script>
 ```
 
 **Add the amp-skimlinks extension**
@@ -67,7 +67,7 @@ The final code should like:
 <html ⚡>
 <head>
   ...
-  <script async custom-element='amp-skimlinks' src='https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js'></script>
+  <script async custom-element="amp-skimlinks" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js"></script>
   ...
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -103,6 +103,7 @@ Example:
 
 A whitespace separated list of domain names.
 All the links belonging to a domain in that list will not be affiliated nor tracked by skimlinks.
+By default amp-skimlinks does not exclude any domains.
 
 Example:
 ```html
@@ -115,9 +116,9 @@ Example:
 
 ##### link-selector (optional)
 
-By default, amp-skimlinks affiliate and tracks all the links on the page. `link-selector`
-allows you to restrict which links amp-skimlinks should affiliate and track. All the links
+`link-selector` allows you to restrict which links amp-skimlinks should affiliate and track. All the links
 not matching the provided selector will simply be ignored.
+By default, amp-skimlinks affiliate and tracks all the links on the page.
 
 `link-selector` value should be a valid [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)
 
@@ -139,11 +140,11 @@ Example:
 
 ##### custom-tracking-id (optional)
 
-The `custom-tracking-id` (also `called xcust`) is simply a variable passed to Skimlinks via your site that we report back to your with your commission data, allowing you to segment.
+The `custom-tracking-id` (also `called xcust`) is an optional parameter used to pass your own internal tracking id through Skimlinks' monetization system allowing you to segment your commission data in the way you want.
 
-`custom-tracking-id` has a maximum size of 50 characters, and must only contain alphanumeric characters (`a-z, 0-9`), underscores `_` or pipes `|`.
+`custom-tracking-id` should be <=50 characters and only contain upper and lowercase characters, numbers, underscores and pipes.
 
 
 ## Validation
 
-See [amp-skimlinks rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-skimlinks/validator-amp-skimlinks.protoascii) in the AMP validator specification.
+See [amp-skimlinks rules](validator-amp-skimlinks.protoascii) in the AMP validator specification.

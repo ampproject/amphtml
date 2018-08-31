@@ -5,8 +5,8 @@ import {EventMessenger} from './event-messenger';
 import {createAnchorReplacementTuple, isAnchorReplacementTuple, isTwoStepsResponse} from './link-rewriter-helpers';
 
 /**
- * LinkRewriter works conjointly with LinkRewriterManager to allow rewriting
- * links at runtime. E.g: Replacing a link by its affiliate version only if
+ * LinkRewriter works together with LinkRewriterManager to allow rewriting
+ * links at click time. E.g: Replacing a link by its affiliate version only if
  * the link can be monetised. A page can have multiple LinkRewriter running
  * at the same time.
  *
@@ -92,7 +92,7 @@ export class LinkRewriter {
    * This function is called when the user clicks on a link.
    * It swaps temporarly the href of an anchor by its associated
    * replacement url but only for the time needed by the browser
-   * to handle the click on the anchor and navigate to to the new url.
+   * to handle the click on the anchor and navigate to the new url.
    * After 300ms, if the page is still open (target="_blank" scenario),
    * the link is restored to its initial value.
    * @param {?HTMLElement} anchor

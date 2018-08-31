@@ -140,10 +140,11 @@ export class Tracking {
       platform: PLATFORM_NAME,
     });
 
-    // Triggers POST request. Second param is the object used to interpolate
+    // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in NA_CLICK_TRACKING_URL.
     this.analytics_.trigger('non-affiliate-click', {
-      data: JSON.stringify(data), rnd: 'RANDOM',
+      data: JSON.stringify(data),
+      rnd: 'RANDOM',
     });
   }
 
@@ -167,7 +168,7 @@ export class Tracking {
       t: 1,
     }, commonData));
 
-    // Triggers POST request. Second param is the object used to interpolate
+    // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL.
     this.analytics_.trigger('page-impressions', {
       data: JSON.stringify(data),
@@ -189,7 +190,7 @@ export class Tracking {
       typ: 'l',
     }, commonData));
 
-    // Triggers POST request. Second param is the object used to interpolate
+    // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
     this.analytics_.trigger('link-impressions', {
       data: JSON.stringify(data),
@@ -199,12 +200,15 @@ export class Tracking {
 
   /**
    * Initialise the amp-analytics internal API.
+   * Warning: Analytics API will not send any request until
+   * CommonSignals.LOAD_START has been triggered.
+   * (See "initTracking_" in amp-skimlinks.js)
    * @private
    * @param {AmpElement} element
    */
   setupAnalytics_(element) {
-    // Analytics are not ready until CommonSignals.LOAD_START is triggered.
     const analyticsBuilder = new CustomEventReporterBuilder(element);
+    // Configure analytics to send POST request when receiving 'page-impressions' event.
     analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
     analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
     analyticsBuilder.track('non-affiliate-click', NA_CLICK_TRACKING_URL);

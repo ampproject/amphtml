@@ -22,7 +22,7 @@ export const STATUS__UNKNOWN = 'unknown';
  * a new Skimlinks monetizable url or not.
  *
  * The class is built around one main public method `
- * resolveUnknownAnchors(...)` which the way for the Skimlinks LinkRewriter
+ * resolveUnknownAnchors(...)` which is the way for the Skimlinks LinkRewriter
  * to ask for the replacement URLs of all the links in the page.
  *
  * In order to know if a link should be replaced or not, we extract the list of
@@ -103,7 +103,7 @@ export class AffiliateLinkResolver {
    *
    * E.g: anchorList([anchor1, anchor2, anchor3])
    * => {
-   *    syncResponse: [[anchor1, 'https://newurl.com'], [anchor2, null], ...],
+   *    syncResponse: [[anchor1, 'https://newurl.com'], [anchor2, null]],
    *    asyncResponse: Promise.resolve([[anchor3, 'https://newurl.com']])
    * }
    *
@@ -224,17 +224,17 @@ export class AffiliateLinkResolver {
 
   /**
    * Filters the list of anchors for which the domain of the href is
-   * in the `domainsToAsk` list.
+   * in the `unknownDomains` list.
    * @private
    * @param {Array<HTMLElement>} anchorList
-   * @param {Array<string>} domainsToAsk
+   * @param {Array<string>} unknownDomains
    * @return {Array<HTMLElement>}
    */
-  getUnknownAnchors_(anchorList, domainsToAsk) {
+  getUnknownAnchors_(anchorList, unknownDomains) {
     return anchorList.filter(anchor => {
       const anchorDomain = this.getAnchorDomain_(anchor);
 
-      return domainsToAsk.indexOf(anchorDomain) !== -1;
+      return unknownDomains.indexOf(anchorDomain) !== -1;
     });
   }
 

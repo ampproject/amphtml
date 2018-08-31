@@ -5,8 +5,8 @@ import {Services} from '../../services';
 import {registerServiceBuilderForDoc} from '../../service';
 
 /**
- * LinkRewriterManager works conjointly with LinkRewriter to allow rewriting
- * links at runtime. E.g: Replacing a link by its affiliate version only if
+ * LinkRewriterManager works together with LinkRewriter to allow rewriting
+ * links at click time. E.g: Replacing a link by its affiliate version only if
  * the link can be monetised. A page can have multiple LinkRewriter running
  * at the same time.
  *
@@ -18,7 +18,8 @@ import {registerServiceBuilderForDoc} from '../../service';
  * - Notifying the most relevant LinkRewriter that a click happened
  *   so the linkRewriter handles the potential replacement.
  * - Sending a click event to listeners to be able to track the click
- *   even if the url has not been replaced.
+ *   even if the url has not been replaced. (No anchor mutation is allowed
+ *   in the listener handler)
  */
 export class LinkRewriterManager {
   /**
@@ -125,7 +126,7 @@ export class LinkRewriterManager {
    * @private
    * Extract the priority list from the optional html meta tag.
    * The meta tag should contain a whitespace separated list of
-   * LinkRewrited.id.
+   * LinkRewriter Ids.
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @return {Array<string>}
    */
@@ -163,12 +164,14 @@ export class LinkRewriterManager {
    * @private
    * Extract the optional priority list for this specific anchor
    * from its attribute. The 'data-link-rewriters' attribute should
-   * contain a whitespace separated list of LinkRewrited.id.
+   * contain a whitespace separated list of LinkRewriter Ids.
    * @param {HTMLElement} anchor
    * @return {Array<string>}
    */
   parseLinkRewriterPriorityForAnchor_(anchor) {
-    const dataValue = anchor.getAttribute('data-link-rewriters');
+    const dataValue = anchor.hasAttribute('data-link-rewriters')
+      ? anchor.getAttribute('data-link-rewriters').trim()
+      : null;
     if (!anchor || !dataValue) {
       return [];
     }
