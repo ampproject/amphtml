@@ -1,9 +1,9 @@
 import {AmpEvents} from '../../src/amp-events';
+import {LinkReplacementCache} from '../../src/service/link-rewriter/link-replacement-cache';
 import {LinkRewriter} from '../../src/service/link-rewriter/link-rewriter';
 import {LinkRewriterManager} from '../../src/service/link-rewriter/link-rewriter-manager';
 import {ORIGINAL_URL_ATTRIBUTE, PRIORITY_META_TAG_NAME, EVENTS as linkRewriterEvents} from '../../src/service/link-rewriter/constants';
 import {Services} from '../../src/services';
-import {anchorClickActions} from '../../src/service/navigation';
 import {createCustomEvent} from '../../src/event-helper';
 import {createTwoStepsResponse} from '../../src/service/link-rewriter/link-rewriter-helpers';
 
@@ -171,7 +171,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       env.sandbox.spy(linkRewriterManager, 'getSuitableLinkRewritersForLink_');
     });
 
-    describe('Send clicks event', () => {
+    describe('Send click event', () => {
       let linkRewriterVendor1, linkRewriterVendor2, linkRewriterVendor3;
 
       function getEventData() {
@@ -382,7 +382,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       expect(resolveFunction.called).to.be.false;
     });
 
-    it('Always update the anchor Map with unknown links', () => {
+    it('Always update the anchor cache with unknown links', () => {
       const anchor = iframeDoc.createElement('a');
       iframeDoc.body.appendChild(anchor);
 
@@ -390,21 +390,10 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       const resolveFunction = createResolveResponseHelper();
       const linkRewriter = createLinkRewriterHelper(resolveFunction);
       linkRewriter.scanLinksOnPage_();
-      expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.true;
+      expect(linkRewriter.isWatchingLink(anchor)).to.be.true;
     });
 
-    it('Should raise an error if synchronous response data is malformed', () => {
-      const anchor = iframeDoc.createElement('a');
-      iframeDoc.body.appendChild(anchor);
-
-      const syncData = [{}];
-      const resolveFunction = createResolveResponseHelper(syncData);
-      allowConsoleError(() => expect(() => {
-        createLinkRewriterHelper(resolveFunction).scanLinksOnPage_();
-      }).to.throw('Expected anchorReplacementTuple, use "createAnchorReplacementTuple()"'));
-    });
-
-    it('Update the anchor Map with synchronous response', () => {
+    it('Update the anchor cache with synchronous response', () => {
       const anchor1 = iframeDoc.createElement('a');
       const anchor2 = iframeDoc.createElement('a');
       const anchor3 = iframeDoc.createElement('a');
@@ -413,17 +402,20 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       iframeDoc.body.appendChild(anchor2);
       iframeDoc.body.appendChild(anchor3);
       const replacementUrl = 'https://redirect.com';
-      const syncData = [[anchor1, replacementUrl], [anchor2, null]];
+      const syncData = [
+        {anchor: anchor1, replacementUrl},
+        {anchor: anchor2, replacementUrl: null},
+      ];
       const resolveFunction = createResolveResponseHelper(syncData);
       const linkRewriter = createLinkRewriterHelper(resolveFunction);
       linkRewriter.scanLinksOnPage_();
 
-      expect(linkRewriter.anchorReplacementMap_.get(anchor1)).to.equal(replacementUrl);
-      expect(linkRewriter.anchorReplacementMap_.has(anchor2)).to.be.true;
-      expect(linkRewriter.anchorReplacementMap_.get(anchor2)).to.be.null;
+      expect(linkRewriter.getReplacementUrl(anchor1)).to.equal(replacementUrl);
+      expect(linkRewriter.isWatchingLink(anchor2)).to.be.true;
+      expect(linkRewriter.getReplacementUrl(anchor2)).to.be.null;
       // Should exist even in the map even if not returned
-      expect(linkRewriter.anchorReplacementMap_.has(anchor3)).to.be.true;
-      expect(linkRewriter.anchorReplacementMap_.get(anchor3)).to.be.undefined;
+      expect(linkRewriter.isWatchingLink(anchor3)).to.be.true;
+      expect(linkRewriter.getReplacementUrl(anchor3)).to.be.null;
     });
 
     // Don't know how to catch the async error and expect it at the same time.
@@ -438,20 +430,21 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       return linkRewriter.scanLinksOnPage_();
     });
 
-    it('Update the anchor Map with asynchronous response', () => {
+    it('Update the anchor cache with asynchronous response', () => {
       const anchor = iframeDoc.createElement('a');
       iframeDoc.body.appendChild(anchor);
 
-      const asyncData = Promise.resolve([[anchor, replacementUrl]]);
+      const asyncData = Promise.resolve([{anchor, replacementUrl}]);
       const resolveFunction = createResolveResponseHelper([], asyncData);
       const linkRewriter = createLinkRewriterHelper(resolveFunction);
 
       const promise = linkRewriter.scanLinksOnPage_();
-      expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.true;
-      expect(linkRewriter.anchorReplacementMap_.get(anchor)).to.be.undefined;
+      expect(linkRewriter.isWatchingLink(anchor)).to.be.true;
+      expect(linkRewriter.getReplacementUrl(anchor)).to.be.null;
 
       return promise.then(() => {
-        expect(linkRewriter.anchorReplacementMap_.get(anchor)).to.equal(replacementUrl);
+        expect(linkRewriter.getReplacementUrl(anchor)).to.equal(
+            replacementUrl);
       });
     });
 
@@ -499,13 +492,13 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         expect(linkRewriter.scanLinksOnPage_.calledOnce).to.be.true;
       });
 
-      it('Should remove detached anchor from internal Map', () => {
+      it('Should remove detached anchor from internal cache', () => {
         // Anchor is not attached to the dom
         const anchor = iframeDoc.createElement('a');
         const linkRewriter = createLinkRewriterHelper();
-        linkRewriter.anchorReplacementMap_.set(anchor, 'https://replacementurl.com');
+        linkRewriter.anchorReplacementCache_.updateLinkList([anchor]);
         linkRewriter.scanLinksOnPage_();
-        expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.false;
+        expect(linkRewriter.isWatchingLink(anchor)).to.be.false;
       });
 
       it('Should not call resolveUnknownLinks_ if no new links', () => {
@@ -513,7 +506,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         iframeDoc.body.appendChild(anchor);
         const linkRewriter = createLinkRewriterHelper();
         linkRewriter.scanLinksOnPage_();
-        expect(linkRewriter.anchorReplacementMap_.has(anchor)).to.be.true;
+        expect(linkRewriter.isWatchingLink(anchor)).to.be.true;
         // Reset since resolveUnknownLinks_ has already been called during first scanLinksOnPage_();
         linkRewriter.resolveUnknownLinks_.resetHistory();
 
@@ -527,7 +520,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         iframeDoc.body.appendChild(anchor1);
         const linkRewriter = createLinkRewriterHelper();
         linkRewriter.scanLinksOnPage_();
-        expect(linkRewriter.anchorReplacementMap_.has(anchor1)).to.be.true;
+        expect(linkRewriter.isWatchingLink(anchor1)).to.be.true;
         // Reset since resolveUnknownLinks_ has already been called during first scanLinksOnPage_();
         linkRewriter.resolveUnknownLinks_.resetHistory();
 
@@ -547,7 +540,9 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         const stub = linkRewriter.events.send;
 
         return linkRewriter.onDomUpdated().then(() => {
-          expect(stub.withArgs(linkRewriterEvents.PAGE_SCANNED).calledOnce).to.be.true;
+          expect(
+              stub.withArgs(linkRewriterEvents.PAGE_SCANNED).calledOnce
+          ).to.be.true;
         });
       });
     });
@@ -560,11 +555,11 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         linkRewriter = createLinkRewriterHelper();
       });
 
-      it('Should return true if the link is in the Map', () => {
-        linkRewriter.anchorReplacementMap_.set(anchor1, null);
+      it('Should return true if the link is in the cache', () => {
+        linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
         expect(linkRewriter.isWatchingLink(anchor1)).to.be.true;
       });
-      it('Should return false if the link is not in the Map', () => {
+      it('Should return false if the link is not in the cache', () => {
         expect(linkRewriter.isWatchingLink(anchor1)).to.be.false;
       });
     });
@@ -577,13 +572,17 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         linkRewriter = createLinkRewriterHelper();
       });
 
-      it('Should return null if link does not exist in the anchorReplacementMap_', () => {
+      it('Should return null if link does not exist in the cache', () => {
         expect(linkRewriter.getReplacementUrl(anchor1)).to.be.null;
       });
 
-      it('Should return the value in stored in the anchorReplacementMap_', () => {
+      it('Should return the value in stored in the cache', () => {
         const replacementUrl = 'https://replacement-url.com/';
-        linkRewriter.anchorReplacementMap_.set(anchor1, replacementUrl);
+        linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
+        linkRewriter.anchorReplacementCache_.updateReplacementUrls([
+          {anchor: anchor1, replacementUrl},
+        ]);
+
         expect(linkRewriter.getReplacementUrl(anchor1))
             .to.be.equal(replacementUrl);
       });
@@ -606,27 +605,37 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     });
 
     it('Should return false if anchor exist but without replacement url', () => {
-      linkRewriter.anchorReplacementMap_.set(anchor1, null);
+      linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
       expect(linkRewriter.rewriteAnchorUrl(anchor1)).to.be.false;
       expect(anchor1.href).to.equal(initialUrl);
     });
 
     it('Should return false if href is the same as replacement url', () => {
-      linkRewriter.anchorReplacementMap_.set(anchor1, initialUrl);
+      linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
+      linkRewriter.anchorReplacementCache_.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl: initialUrl},
+      ]);
+
       expect(linkRewriter.rewriteAnchorUrl(anchor1)).to.be.false;
       expect(anchor1.href).to.equal(initialUrl);
     });
 
     it('Should replace and return true if the url has been replaced', () => {
       const replacementUrl = 'https://replacementurl.com/';
-      linkRewriter.anchorReplacementMap_.set(anchor1, replacementUrl);
+      linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
+      linkRewriter.anchorReplacementCache_.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl},
+      ]);
       expect(linkRewriter.rewriteAnchorUrl(anchor1)).to.be.true;
       expect(anchor1.href).to.equal(replacementUrl);
     });
 
     it('Should set the original url attribute', () => {
       const replacementUrl = 'https://replacementurl.com/';
-      linkRewriter.anchorReplacementMap_.set(anchor1, replacementUrl);
+      linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
+      linkRewriter.anchorReplacementCache_.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl},
+      ]);
       linkRewriter.rewriteAnchorUrl(anchor1);
 
       expect(anchor1.getAttribute(ORIGINAL_URL_ATTRIBUTE)).to.equal(initialUrl);
@@ -634,7 +643,10 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
 
     it('Should restore the original link after the delay', done => {
       const replacementUrl = 'https://replacementurl.com/';
-      linkRewriter.anchorReplacementMap_.set(anchor1, replacementUrl);
+      linkRewriter.anchorReplacementCache_.updateLinkList([anchor1]);
+      linkRewriter.anchorReplacementCache_.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl},
+      ]);
       linkRewriter.rewriteAnchorUrl(anchor1);
 
       expect(anchor1.href).to.equal(replacementUrl);
@@ -646,3 +658,130 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
   });
 });
 
+
+
+describes.fakeWin('LinkReplacementCache', {amp: true}, env => {
+  let iframeDoc, cache, anchor1, anchor2, anchor3;
+
+  beforeEach(() => {
+    iframeDoc = env.ampdoc.getRootNode();
+    anchor1 = iframeDoc.createElement('a');
+    anchor2 = iframeDoc.createElement('a');
+    anchor3 = iframeDoc.createElement('a');
+    cache = new LinkReplacementCache();
+  });
+
+  describe('When updating the list of anchors', () => {
+    it('Should add new anchors in the store', () => {
+      cache.updateLinkList([anchor1, anchor2, anchor3]);
+      expect(cache.getAnchorReplacementList()).to.deep.equal([
+        {anchor: anchor1, replacementUrl: null},
+        {anchor: anchor2, replacementUrl: null},
+        {anchor: anchor3, replacementUrl: null},
+      ]);
+    });
+
+    it('Should delete anchors removed from the DOM', () => {
+      // anchor2 was initially in the DOM
+      cache.updateLinkList([anchor1, anchor2, anchor3]);
+
+      // anchor2 does not exist in the DOM anymore
+      cache.updateLinkList([anchor1, anchor3]);
+      expect(cache.getAnchorReplacementList()).to.deep.equal([
+        {anchor: anchor1, replacementUrl: null},
+        {anchor: anchor3, replacementUrl: null},
+      ]);
+    });
+
+    it('Should keep pre-existing replacement URL when updating', () => {
+      // anchor2 was initially in the DOM
+      cache.updateLinkList([anchor1, anchor2, anchor3]);
+      cache.replacementList_ = [
+        null,
+        'https://replaceanchor2.com',
+        'http://replaceanchor3.com',
+      ];
+      // anchor2 does not exist in the DOM anymore
+      cache.updateLinkList([anchor1, anchor3]);
+      expect(cache.getAnchorReplacementList()).to.deep.equal([
+        {anchor: anchor1, replacementUrl: null},
+        {anchor: anchor3, replacementUrl: 'http://replaceanchor3.com'},
+      ]);
+    });
+  });
+
+  describe('When updating replacement urls', () => {
+    beforeEach(() => {
+      cache.updateLinkList([anchor1, anchor2, anchor3]);
+    });
+
+    it('Should update the replacement urls', () => {
+      cache.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl: '/new-url1'},
+        {anchor: anchor2, replacementUrl: '/new-url2'},
+        {anchor: anchor3, replacementUrl: '/new-url3'},
+      ]);
+
+      expect(cache.getAnchorReplacementList()).to.deep.equal([
+        {anchor: anchor1, replacementUrl: '/new-url1'},
+        {anchor: anchor2, replacementUrl: '/new-url2'},
+        {anchor: anchor3, replacementUrl: '/new-url3'},
+      ]);
+    });
+
+    it('Should not touched other items of the cache', () => {
+      // Intialise with a value
+      cache.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl: '/new-url1'},
+        {anchor: anchor2, replacementUrl: '/new-url2'},
+        {anchor: anchor3, replacementUrl: '/new-url3'},
+      ]);
+
+      // Partial update to new value.
+      cache.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl: '/somethingelse'},
+      ]);
+
+      expect(cache.getAnchorReplacementList()).to.deep.equal([
+        {anchor: anchor1, replacementUrl: '/somethingelse'},
+        {anchor: anchor2, replacementUrl: '/new-url2'},
+        {anchor: anchor3, replacementUrl: '/new-url3'},
+      ]);
+    });
+
+    it('Should be able to overwrite with null value', () => {
+      // Intialise with a value
+      cache.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl: '/new-url1'},
+        {anchor: anchor2, replacementUrl: '/new-url2'},
+        {anchor: anchor3, replacementUrl: '/new-url3'},
+      ]);
+
+      // Partial update, reset anchor2 to no replacement.
+      cache.updateReplacementUrls([
+        {anchor: anchor2, replacementUrl: null},
+      ]);
+
+      expect(cache.getAnchorReplacementList()).to.deep.equal([
+        {anchor: anchor1, replacementUrl: '/new-url1'},
+        {anchor: anchor2, replacementUrl: null},
+        {anchor: anchor3, replacementUrl: '/new-url3'},
+      ]);
+    });
+
+    it('Should ignore anchors that are not in the cache', () => {
+      const unregisteredAnchor = iframeDoc.createElement('a');
+      // Intialise with a value
+      cache.updateReplacementUrls([
+        {anchor: anchor1, replacementUrl: '/new-url1'},
+        {anchor: unregisteredAnchor, replacementUrl: '/test'},
+      ]);
+
+      expect(cache.getAnchorReplacementList()).to.deep.equal([
+        {anchor: anchor1, replacementUrl: '/new-url1'},
+        {anchor: anchor2, replacementUrl: null},
+        {anchor: anchor3, replacementUrl: null},
+      ]);
+    });
+  });
+});

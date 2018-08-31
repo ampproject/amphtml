@@ -1,40 +1,6 @@
 import {hasOwn} from '../../utils/object';
 import {user} from '../../log';
 
-/**
- *
- * @param {*} anchor
- * @param {*} newUrl
- */
-export function createAnchorReplacementTuple(anchor, newUrl) {
-  return [anchor, newUrl];
-}
-
-/**
- *
- * @param {Array} tuple
- */
-export function isAnchorReplacementTuple(tuple) {
-  if (!Array.isArray(tuple)) {
-    return false;
-  }
-
-  if (tuple.length !== 2) {
-    return false;
-  }
-
-  const anchor = tuple[0];
-  const url = tuple[1];
-  if (!anchor || anchor.tagName !== 'A') {
-    return false;
-  }
-  // url === null means no replacement
-  if (url && typeof url !== 'string') {
-    return false;
-  }
-
-  return true;
-}
 
 /**
  * Create a response object for 'resolveUnknownAnchors()' function
@@ -58,8 +24,8 @@ export function isAnchorReplacementTuple(tuple) {
  *   real replacement url from your api call.
  *   Use:  createTwoStepsResponse(syncResponse, asyncResponse)
  *
- * @param {*} syncResponse
- * @param {*} asyncResponse
+ * @param {?Array<{anchor: HTMLElement, replacementUrl: ?string}>} syncResponse
+ * @param {?Promise} asyncResponse
  * @return {Object} - "two steps response" {syncResponse, asyncResponse}
  */
 export function createTwoStepsResponse(syncResponse, asyncResponse) {

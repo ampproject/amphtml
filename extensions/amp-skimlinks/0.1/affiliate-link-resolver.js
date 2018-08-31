@@ -2,7 +2,7 @@
 import {parseUrlDeprecated} from '../../../src/url';
 
 import {DOMAIN_RESOLVER_API_URL} from './constants';
-import {createAnchorReplacementTuple, createTwoStepsResponse} from '../../../src/service/link-rewriter/link-rewriter-helpers';
+import {createTwoStepsResponse} from '../../../src/service/link-rewriter/link-rewriter-helpers';
 import {dict} from '../../../src/utils/object';
 
 
@@ -112,7 +112,7 @@ export class AffiliateLinkResolver {
    * @return {*}
    */
   resolveUnknownAnchors(anchorList) {
-    const alreadyResolvedTupleList = this.mapToAnchorReplacementTuple_(
+    const alreadyResolvedResponse = this.associateWithReplacementUrl_(
         anchorList);
     let willBeResolvedPromise = null;
 
@@ -127,28 +127,31 @@ export class AffiliateLinkResolver {
     }
 
     // Returns an object with a sync reponse and an async response.
-    return createTwoStepsResponse(alreadyResolvedTupleList,
+    return createTwoStepsResponse(alreadyResolvedResponse,
         willBeResolvedPromise);
   }
 
 
   /**
-   * Map an array of anchor to an array of "replacement tuple" where
-   * a "replacement tuple" is an array of 2 elements, the first one being
-   * the anchor and the second one its associated replacement URL.
+   * Map an array of anchor to an array of "replacement object" containing
+   * the anchor and its associated replacement URL.
    *
    * A falsy replacement URL means the URL should not be replaced.
    *
    * The replacement URL is determined based on the affiliate status of
    * the domain of the initial URL.
-   *
-   * E.g: [[anchor1, 'https://newurl.com'], [anchor2, null], ...]
+   *  E.g:
+   *  associateWithReplacementUrl_([anchor1, anchor2])
+   *  => [
+   *    {anchor1, 'https://newurl.com'},
+   *    {anchor2, null},
+   *  ]
    *
    * @private
    * @param {Array<HTMLElement>} anchorList
-   * @return {*}
+   * @return {Array<{anchor: HTMLElement, replacementUrl: string}>}
    */
-  mapToAnchorReplacementTuple_(anchorList) {
+  associateWithReplacementUrl_(anchorList) {
     return anchorList.map(anchor => {
       let replacementUrl = null;
       const status = this.getDomainAffiliateStatus_(
@@ -159,7 +162,10 @@ export class AffiliateLinkResolver {
         replacementUrl = this.waypoint_.getAffiliateUrl(anchor);
       }
 
-      return createAnchorReplacementTuple(anchor, replacementUrl);
+      return (
+        /** @type {{anchor: HTMLElement, replacementUrl: string}} */
+        ({anchor, replacementUrl})
+      );
     });
   }
 
@@ -258,7 +264,7 @@ export class AffiliateLinkResolver {
       const merchantDomains = data.merchant_domains || [];
       this.updateDomainsStatusMap_(domainsToAsk, merchantDomains);
 
-      return this.mapToAnchorReplacementTuple_(anchorList);
+      return this.associateWithReplacementUrl_(anchorList);
     });
   }
 

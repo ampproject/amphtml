@@ -85,7 +85,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // Update tracking service with extra info.
     this.trackingService_.setTrackingInfo({guid});
     this.trackingService_.sendImpressionTracking(
-        this.skimlinksLinkRewriter_.getAnchorLinkReplacementMap(),
+        this.skimlinksLinkRewriter_.getAnchorReplacementList(),
         startTime
     );
   }
@@ -153,7 +153,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   /**
    * A click (left or right) on an anchor has happened,
    * fire NA clicks if needed.
-   * @param {!{linkRewriterId: ?string, anchor: !HTMLElement}} eventData - click event information
+   * @param {!{linkRewriterId: ?string, anchor: !HTMLElement, clickType: string}} eventData - click event information
    * @private
    */
   onClick_(eventData) {
