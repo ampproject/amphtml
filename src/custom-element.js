@@ -1408,7 +1408,11 @@ function createBaseCustomElementClass(win) {
      * @param {boolean} displayOn
      */
     toggleLayoutDisplay(displayOn) {
-      this.classList.toggle('i-amphtml-display', displayOn);
+      if (displayOn) {
+        this.removeAttribute('hidden');
+      } else {
+        this.setAttribute('hidden', '');
+      }
     }
 
     /**

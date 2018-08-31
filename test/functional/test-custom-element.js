@@ -1098,10 +1098,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element1.setAttribute('i-amphtml-layout', 'nodisplay');
       element1.setAttribute('layout', 'nodisplay');
       container.appendChild(element1);
-      // TODO(dvoytenko, #9353): cleanup once `toggleLayoutDisplay` API has been
-      // fully migrated.
       expect(element1.style.display).to.equal('none');
-      expect(element1).to.have.class('i-amphtml-display');
     });
 
     it('should change size without sizer', () => {
@@ -1510,21 +1507,19 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     return poll('wait for static layout',
         () => element.classList.contains('i-amphtml-layout-nodisplay'))
         .then(() => {
-          // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
-          // deployed this will start `false`.
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(element.style.display).to.be.equal('none');
 
           element.style.display = 'block';
           element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(element).not.to.have.attribute('hidden');
           expect(win.getComputedStyle(element).display).to.equal('block');
 
           element.toggleLayoutDisplay(false);
-          expect(element.classList.contains('i-amphtml-display')).to.be.false;
+          expect(element).to.have.attribute('hidden');
           expect(win.getComputedStyle(element).display).to.equal('none');
 
           element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(element).not.to.have.attribute('hidden');
           expect(win.getComputedStyle(element).display).to.equal('block');
         });
   });

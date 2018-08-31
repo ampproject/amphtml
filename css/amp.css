@@ -174,10 +174,21 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-layout-nodisplay,
-[layout=nodisplay]:not(.i-amphtml-layout-nodisplay)
+/* layout=nodisplay are automatically hidden until JS initializes. */
+[layout=nodisplay]:not(.i-amphtml-element) {
+  display: none !important;
+}
+
+/* Initialized layout=nodisplay contain [hidden] */
+.i-amphtml-layout-nodisplay[hidden],
+[layout=nodisplay][hidden]:not(.i-amphtml-layout-nodisplay)
 {
-  /* Display is set/reset in JS */
+  /* Display is set/reset via the hidden attribute */
+}
+.i-amphtml-layout-nodisplay:not([hidden]),
+[layout=nodisplay]:not(.i-amphtml-layout-nodisplay[hidden])
+{
+  /* Display is set/reset via the hidden attribute */
 }
 
 .i-amphtml-layout-fixed,
@@ -388,11 +399,6 @@ i-amphtml-sizer {
 
 .i-amphtml-error {
   /* Just state. */
-}
-
-/* layout=nodisplay are automatically hidden until displayed directly. */
-[layout=nodisplay]:not(.i-amphtml-display) {
-  display: none !important;
 }
 
 .i-amphtml-element > [placeholder],
