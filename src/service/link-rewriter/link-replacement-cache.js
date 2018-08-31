@@ -21,23 +21,13 @@ export class LinkReplacementCache {
    * @param {Array<HTMLElement>} newAnchorList - array of "<a>".
    */
   updateLinkList(newAnchorList) {
-    const newReplacementList = newAnchorList.reduce((replacementList, anchor) => {
-      let replacementValue = null;
-      const index = this.anchorList_.indexOf(anchor);
-
-      // Was the anchor already in the cache?
-      if (index !== -1) {
-        // If so copy the previous replacement URL associated with it to the
-        // new replacement list.
-        replacementValue = this.replacementList_[index];
-      }
-      replacementList.push(replacementValue);
-
-      return replacementList;
-    }, []);
+    // Copy the previous replacement URL to the
+    // new replacement list.
+    // Warning: This step needs to be done before updating this.anchorList_.
+    this.replacementList_ = newAnchorList.map(
+        this.getReplacementUrlForAnchor.bind(this));
 
     this.anchorList_ = newAnchorList;
-    this.replacementList_ = newReplacementList;
   }
 
   /**
