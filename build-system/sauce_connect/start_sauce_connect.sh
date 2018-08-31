@@ -20,7 +20,7 @@
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
 
-SC_VERSION="sc-4.5.0-linux"
+SC_VERSION="sc-4.5.1-linux"
 DOWNLOAD_URL="https://saucelabs.com/downloads/$SC_VERSION.tar.gz"
 TAR_FILE="$SC_VERSION.tar.gz"
 BINARY_FILE="$SC_VERSION/bin/sc"
