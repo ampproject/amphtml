@@ -377,12 +377,12 @@ export function maybeReportErrorToViewer(win, data) {
  */
 export function errorReportingDataForViewer(errorReportData) {
   return dict({
-    'm': errorReportData['m'],
-    'a': errorReportData['a'],
-    's': errorReportData['s'],
-    'el': errorReportData['el'],
-    'v': errorReportData['v'],
-    'jse': errorReportData['jse'],
+    'm': errorReportData['m'], // message
+    'a': errorReportData['a'], // isUserError
+    's': errorReportData['s'], // error stack
+    'el': errorReportData['el'], // tagName
+    'v': errorReportData['v'], // runtime
+    'jse': errorReportData['jse'], // detectedJsEngine
   });
 }
 
