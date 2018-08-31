@@ -15,30 +15,49 @@
  */
 
 import {IframeMessagingClient} from './iframe-messaging-client';
+import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
-import {user} from '../src/log';
-import {writeScript} from './3p';
+import {loadScript} from './3p';
 
 /** @const {string} */
 const TAG = 'RECAPTCHA';
+
+/** @const {string} */
+const MESSAGE_TAG = 'amp-recaptcha-';
 
 /** {!IframeMessaginClient|null} **/
 let iframeMessagingClient = null;
 
 /**
- * Get the recaptcha script.
- *
- * Use writeScript: Failed to execute 'write' on 'Document': It isn't possible
- * to write into a document from an asynchronously-loaded external script unless
- * it is explicitly opened.
- *
  * @param {!Window} global
- * @param {string} scriptSource The source of the script, different for post and comment embeds.
- * @param {function(*)} cb
+ * @param {!Object} data
  */
-function getRecaptchaApiJs(global, scriptSource, cb) {
-  writeScript(global, scriptSource, function() {
-    cb(global.grecaptcha);
+export function recaptcha(global, data) {
+  dev().assert(
+      data.sitekey,
+      TAG +
+    ' The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+      data.element
+  );
+
+  let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
+  const siteKey = data.sitekey;
+  recaptchaApiUrl += siteKey;
+
+  loadScript(global, recaptchaApiUrl, function() {
+    const {grecaptcha} = global;
+
+    grecaptcha.ready(function() {
+      iframeMessagingClient = new IframeMessagingClient(global);
+      iframeMessagingClient.setSentinel(global.context.sentinel);
+      iframeMessagingClient.registerCallback(
+          'action',
+          actionTypeHandler.bind(this, grecaptcha, siteKey)
+      );
+      iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'ready');
+    });
+  }, function() {
+    user().error(TAG + ' Failed to load recaptcha api script');
   });
 }
 
@@ -52,49 +71,21 @@ function getRecaptchaApiJs(global, scriptSource, cb) {
  */
 function actionTypeHandler(grecaptcha, siteKey, data) {
   if (!iframeMessagingClient) {
-    user().error(TAG, 'IframeMessagingClient does not exist.');
+    dev().error(TAG, 'IframeMessagingClient does not exist.');
     return;
   }
 
   grecaptcha.execute(siteKey, {
     action: data.action,
   })./*OK*/then(function(token) {
-    iframeMessagingClient./*OK*/sendMessage('token', {
+    iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'token', {
       token,
     });
   }).catch(function(err) {
     user().error(TAG, err);
-    iframeMessagingClient./*OK*/sendMessage('error', dict({
+    iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
       'error': (err || '').toString(),
     }));
   });
 }
 
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function recaptcha(global, data) {
-  user().assert(
-      data.sitekey,
-      TAG +
-      ' The data-sitekey attribute is required for <amp-recaptcha-input> %s',
-      data.element
-  );
-
-  let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
-  const siteKey = data.sitekey || '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE';
-  recaptchaApiUrl += siteKey;
-
-  getRecaptchaApiJs(global, recaptchaApiUrl, function(grecaptcha) {
-    grecaptcha.ready(function() {
-      iframeMessagingClient = new IframeMessagingClient(global);
-      iframeMessagingClient.setSentinel(global.context.sentinel);
-      iframeMessagingClient.registerCallback(
-          'action',
-          actionTypeHandler.bind(this, grecaptcha, siteKey)
-      );
-      iframeMessagingClient./*OK*/sendMessage('ready');
-    });
-  });
-}
