@@ -47,7 +47,7 @@ export const anchorClickActions = {
   NAVIGATE_CUSTOM_PROTOCOL: 'navigate-custom-protocol',
   NAVIGATE_OUTBOUND: 'navigate-outbound',
   OPEN_CONTEXT_MENU: 'open-context-menu',
-}
+};
 /**
  * Install navigation service for ampdoc, which handles navigations from anchor
  * tag clicks and other runtime features like AMP.navigateTo().
@@ -100,8 +100,8 @@ export class Navigation {
     /** @private @const {!./history-impl.History} */
     this.history_ = Services.historyForDoc(this.ampdoc);
 
-    /** @private @const {!./link-rewrite/link-rewrite-service.LinkRewriteService} */
-    this.linkRewriteService_ = Services.linkRewriteServiceForDoc(this.ampdoc);
+    /** @private @const {!./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
+    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(this.ampdoc);
 
     const platform = Services.platformFor(this.ampdoc.win);
     /** @private @const {boolean} */
@@ -228,7 +228,10 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
-    this.linkRewriteService_.maybeRewriteLink(target);
+    this.linkRewriterService_.maybeRewriteLink(
+        /** @type {!HTMLElement} */ (target)
+    );
+
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {

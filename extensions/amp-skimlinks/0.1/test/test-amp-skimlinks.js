@@ -1,9 +1,9 @@
 import * as DocumentReady from '../../../../src/document-ready';
 import * as SkimOptionsModule from '../skim-options';
 import * as Utils from '../utils';
+import {LinkRewriterManager} from '../../../../src/service/link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
-import {EVENTS as linkRewriterEvents} from '../../../../src/service/link-rewrite/constants';
-import LinkRewriterService from '../../../../src/service/link-rewrite/link-rewrite-service';
+import {EVENTS as linkRewriterEvents} from '../../../../src/service/link-rewriter/constants';
 import helpersFactory from './helpers';
 
 
@@ -81,30 +81,30 @@ describes.fakeWin('amp-skimlinks', {
       });
     });
 
-    describe('initSkimlinksLinkRewriter', () => {
+    describe('initSkimlinksLinkRewriter_', () => {
       let resolveFunction, linkRewriter;
 
       beforeEach(() => {
         ampSkimlinks.skimOptions_ = {
           linkSelector: '.article a',
         };
-        ampSkimlinks.linkRewriterService = new LinkRewriterService(env.ampdoc);
+        ampSkimlinks.linkRewriterService_ = new LinkRewriterManager(env.ampdoc);
         env.sandbox.spy(
-            ampSkimlinks.linkRewriterService,
+            ampSkimlinks.linkRewriterService_,
             'registerLinkRewriter'
         );
-        ampSkimlinks.trackingService = {sendNaClickTracking: env.sandbox.stub()};
+        ampSkimlinks.trackingService_ = {sendNaClickTracking: env.sandbox.stub()};
         resolveFunction = env.sandbox.stub();
         env.sandbox.stub(Utils, 'getBoundFunction').returns(resolveFunction);
 
         env.sandbox.stub(ampSkimlinks, 'onClick_');
         env.sandbox.stub(ampSkimlinks, 'onPageScanned_');
-        linkRewriter = ampSkimlinks.initSkimlinksLinkRewriter();
+        linkRewriter = ampSkimlinks.initSkimlinksLinkRewriter_();
       });
 
       it('Should register Skimlinks link rewriter', () => {
-        expect(ampSkimlinks.linkRewriterService.registerLinkRewriter.calledOnce).to.be.true;
-        const args = ampSkimlinks.linkRewriterService.registerLinkRewriter.args[0];
+        expect(ampSkimlinks.linkRewriterService_.registerLinkRewriter.calledOnce).to.be.true;
+        const args = ampSkimlinks.linkRewriterService_.registerLinkRewriter.args[0];
 
         expect(args[0]).to.equal(SKIMLINKS_REWRITER_ID);
         expect(args[1]).to.equal(resolveFunction);
@@ -132,8 +132,8 @@ describes.fakeWin('amp-skimlinks', {
     let stub;
 
     beforeEach(() => {
-      ampSkimlinks.trackingService = {sendNaClickTracking: env.sandbox.stub()};
-      stub = ampSkimlinks.trackingService.sendNaClickTracking;
+      ampSkimlinks.trackingService_ = {sendNaClickTracking: env.sandbox.stub()};
+      stub = ampSkimlinks.trackingService_.sendNaClickTracking;
     });
 
     it('Should send NA click tracking if an other linkRewriter has replaced the link', () => {
@@ -182,21 +182,21 @@ describes.fakeWin('amp-skimlinks', {
     const guid = 'my-guid';
     const beaconResponse = Promise.resolve({guid});
     beforeEach(() => {
-      ampSkimlinks.affiliateLinkResolver = {
+      ampSkimlinks.affiliateLinkResolver_ = {
         fetchDomainResolverApi: env.sandbox.stub().returns(beaconResponse),
       };
-      ampSkimlinks.trackingService = {
+      ampSkimlinks.trackingService_ = {
         setTrackingInfo: env.sandbox.stub(),
         sendImpressionTracking: env.sandbox.stub(),
       };
-      ampSkimlinks.skimlinksLinkRewriter = {
+      ampSkimlinks.skimlinksLinkRewriter_ = {
         getAnchorLinkReplacementMap: env.sandbox.stub(),
       };
     });
 
     describe('When beacon call has not been made yet', () => {
       beforeEach(() => {
-        ampSkimlinks.affiliateLinkResolver.firstRequest = null;
+        ampSkimlinks.affiliateLinkResolver_.firstRequest = null;
       });
 
       it('Should make the fallback call', () => {
@@ -204,14 +204,14 @@ describes.fakeWin('amp-skimlinks', {
             Promise.resolve());
 
         return ampSkimlinks.onPageScanned_().then(() => {
-          const stub = ampSkimlinks.affiliateLinkResolver.fetchDomainResolverApi;
+          const stub = ampSkimlinks.affiliateLinkResolver_.fetchDomainResolverApi;
           expect(stub.calledOnce).to.be.true;
         });
       });
 
       it('Should send the impression tracking', () => {
         return ampSkimlinks.onPageScanned_().then(() => {
-          const stub = ampSkimlinks.trackingService.sendImpressionTracking;
+          const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
           expect(stub.calledOnce).to.be.true;
         });
       });
@@ -221,7 +221,7 @@ describes.fakeWin('amp-skimlinks', {
           const {
             setTrackingInfo: setTrackingInfoStub,
             sendImpressionTracking: sendImpressionTrackingStub,
-          } = ampSkimlinks.trackingService;
+          } = ampSkimlinks.trackingService_;
           expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
           expect(setTrackingInfoStub.calledBefore(sendImpressionTrackingStub)).to.be.true;
         });
@@ -230,21 +230,21 @@ describes.fakeWin('amp-skimlinks', {
 
     describe('When beacon call has already been made', () => {
       beforeEach(() => {
-        ampSkimlinks.affiliateLinkResolver.firstRequest = Promise.resolve(beaconResponse);
+        ampSkimlinks.affiliateLinkResolver_.firstRequest = Promise.resolve(beaconResponse);
       });
 
       it('Should not make the fallback call', () => {
         ampSkimlinks.sendImpressionTracking_ = env.sandbox.stub().returns(
             Promise.resolve());
         return ampSkimlinks.onPageScanned_().then(() => {
-          const stub = ampSkimlinks.affiliateLinkResolver.fetchDomainResolverApi;
+          const stub = ampSkimlinks.affiliateLinkResolver_.fetchDomainResolverApi;
           expect(stub.called).to.be.false;
         });
       });
 
       it('Should send the impression tracking', () => {
         return ampSkimlinks.onPageScanned_().then(() => {
-          const stub = ampSkimlinks.trackingService.sendImpressionTracking;
+          const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
           expect(stub.calledOnce).to.be.true;
         });
       });
@@ -254,7 +254,7 @@ describes.fakeWin('amp-skimlinks', {
           const {
             setTrackingInfo: setTrackingInfoStub,
             sendImpressionTracking: sendImpressionTrackingStub,
-          } = ampSkimlinks.trackingService;
+          } = ampSkimlinks.trackingService_;
           expect(setTrackingInfoStub.withArgs({guid}).calledOnce).to.be.true;
           expect(
               setTrackingInfoStub.calledBefore(sendImpressionTrackingStub)

@@ -1,5 +1,5 @@
 export const XCUST_ATTRIBUTE_NAME = 'data-skimlinks-custom-tracking-id';
-export const AFFILIATION_API = 'https://go.redirectingat.com';
+export const AFFILIATION_API = 'https://go.skimresources.com';
 export const PLATFORM_NAME = 'amp';
 export const SKIMLINKS_REWRITER_ID = 'amp-skimlinks';
 

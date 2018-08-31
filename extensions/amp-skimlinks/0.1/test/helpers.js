@@ -1,8 +1,8 @@
 import {AmpSkimlinks} from '../amp-skimlinks';
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {Services} from '../../../../src/services';
+import {Tracking} from '../tracking';
 import {pubcode} from './constants';
-import Tracking from '../tracking';
 
 
 

@@ -1,10 +1,10 @@
 
+import {AffiliateLinkResolver, STATUS__AFFILIATE, STATUS__NON_AFFILIATE, STATUS__UNKNOWN} from '../affiliate-link-resolver';
 import {DOMAIN_RESOLVER_API_URL} from '../constants';
 import {Services} from '../../../../src/services';
-import {createAnchorReplacementTuple} from '../../../../src/service/link-rewrite/link-rewrite-helpers';
+import {Waypoint} from '../waypoint';
+import {createAnchorReplacementTuple} from '../../../../src/service/link-rewriter/link-rewriter-helpers';
 import {pubcode} from './constants';
-import AffiliateLinkResolver, {STATUS__AFFILIATE, STATUS__NON_AFFILIATE, STATUS__UNKNOWN} from '../affiliate-link-resolver';
-import Waypoint from '../waypoint';
 import helpersFactory from './helpers';
 
 
@@ -329,27 +329,27 @@ describes.fakeWin('domain-resolver', {
 
 
 
-    describe('getLinkDomain_', () => {
+    describe('getAnchorDomain_', () => {
       const resolver = new AffiliateLinkResolver({}, {}, waypoint);
 
       it('Removes  http protocol', () => {
         const anchor = helpers.createAnchor('http://test.com');
-        expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
+        expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
       });
 
       it('removes // protocol', () => {
         const anchor = helpers.createAnchor('//test.com/');
-        expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
+        expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
       });
 
       it('Removes www.', () => {
         const anchor = helpers.createAnchor('http://www.test.com');
-        expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
+        expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
       });
 
       it('Removes the path and query params', () => {
         const anchor = helpers.createAnchor('http://www.test.com/hello-word?test=1');
-        expect(resolver.getLinkDomain(anchor)).to.equal('test.com');
+        expect(resolver.getAnchorDomain_(anchor)).to.equal('test.com');
       });
     });
 

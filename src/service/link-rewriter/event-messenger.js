@@ -1,20 +1,20 @@
 
 
-export default class EventMessenger {
+export class EventMessenger {
   /**
    * Constructor
    */
   constructor() {
-    this.listeners_ = [];
+    this.listeners_ = {};
   }
 
   /**
    * Send synchronous event to listeners.
-   * @param {*} eventName
-   * @param {*} data - Optional data
+   * @param {string} eventName
+   * @param {Object} [data] - Optional data
    */
   send(eventName, data) {
-    const handlers = this.listeners_[eventName]
+    const handlers = this.listeners_[eventName];
     if (!handlers) {
       return;
     }
@@ -25,9 +25,10 @@ export default class EventMessenger {
   }
 
   /**
-   * Listen for a specific event and call callback function when event is received.
-   * @param {*} eventName
-   * @param {*} callback
+   * Listen for a specific event and call callback function when event
+   * is received.
+   * @param {string} eventName
+   * @param {Function} callback
    */
   on(eventName, callback) {
     if (this.listeners_[eventName]) {

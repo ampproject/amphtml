@@ -63,11 +63,11 @@ describes.sandboxed('Navigation', {}, () => {
       doc = win.document;
 
       handler = Services.navigationForDoc(doc);
-      const linkRewriteService = Services.linkRewriteServiceForDoc(doc);
+      const linkRewriterManager = Services.linkRewriterServiceForDoc(doc);
       handler.isIframed_ = true;
       decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
       handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
-      linkRewriterSpy = sandbox.spy(linkRewriteService, 'maybeRewriteLink');
+      linkRewriterSpy = sandbox.spy(linkRewriterManager, 'maybeRewriteLink');
       handleCustomProtocolSpy = sandbox.spy(handler,
           'handleCustomProtocolClick_');
       win.open = function() {};
