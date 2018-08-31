@@ -185,6 +185,17 @@ describes.realWin('amp-list component', {
     });
 
     describe('Viewer render template', () => {
+      const allowViewerRenderTemplate = 'allow-viewer-render-template';
+      beforeEach(() => {
+        win.document.documentElement.setAttribute(
+            allowViewerRenderTemplate, true);
+      });
+
+      afterEach(() => {
+        win.document.documentElement.removeAttribute(
+            allowViewerRenderTemplate);
+      });
+
       it('should proxy rendering to viewer', () => {
         const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
         const fromStructuredCloneable =
@@ -202,6 +213,8 @@ describes.realWin('amp-list component', {
       });
 
       it('should error if viewer does not define response data', () => {
+        win.document.documentElement.setAttribute(
+            'allow-viewer-render-template', true);
         viewerMock.expects('hasCapability')
             .withExactArgs('viewerRenderTemplate').returns(true);
         viewerMock.expects('sendMessageAwaitResponse').withExactArgs(

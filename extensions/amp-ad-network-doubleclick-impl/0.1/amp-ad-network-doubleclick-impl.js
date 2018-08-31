@@ -862,6 +862,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,
     });
+    if (this.qqid_) {
+      this.element.setAttribute('data-google-query-id', this.qqid_);
+    }
+    dev().assertElement(this.iframe).id = `google_ads_iframe_${this.ifi_}`;
     if (isMultiSizeFluid) {
       // This is a fluid + multi-size request, where the returned creative is
       // multi-size. The slot needs to not be styled with width: 100%, or the
