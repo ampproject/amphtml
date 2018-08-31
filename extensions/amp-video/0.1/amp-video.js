@@ -35,7 +35,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {setInitialDisplay, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
@@ -517,8 +517,8 @@ class AmpVideo extends AMP.BaseElement {
     }
     const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     const src = element.getAttribute('poster');
+    setInitialDisplay(poster, 'block');
     setStyles(poster, {
-      'display': 'block',
       'background-image': `url(${src})`,
       'background-size': 'cover',
     });

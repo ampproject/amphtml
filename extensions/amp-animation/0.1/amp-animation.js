@@ -28,7 +28,7 @@ import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {setInitialDisplay, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
@@ -110,9 +110,9 @@ export class AmpAnimation extends AMP.BaseElement {
           left: '0px',
           width: '1px',
           height: '1px',
-          display: 'block',
           position: 'fixed',
         });
+        setInitialDisplay(this.element, 'block');
       });
     }
 

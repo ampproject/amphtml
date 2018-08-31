@@ -22,7 +22,7 @@
 import {dev, user} from './log';
 import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
-import {setStyle, setStyles} from './style';
+import {setInitialDisplay, setStyle, setStyles} from './style';
 import {startsWith} from './string';
 
 /**
@@ -492,5 +492,5 @@ export function applyStaticLayout(element) {
  */
 function applyNoDisplayLayout(element) {
   // TODO(jridgewell, #17475): This should be using the [hidden] attribute.
-  setStyle(element, 'display', 'none');
+  setInitialDisplay(element, 'none');
 }
