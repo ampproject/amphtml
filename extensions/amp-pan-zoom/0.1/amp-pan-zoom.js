@@ -711,8 +711,8 @@ export class AmpPanZoom extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.updatePanZoomBounds_(newScale);
-    const newPosX = this.boundX_(this.posX_ + (deltaX * newScale), false);
-    const newPosY = this.boundY_(this.posY_ + (deltaY * newScale), false);
+    const newPosX = this.boundX_(this.startX_ + (deltaX * newScale), false);
+    const newPosY = this.boundY_(this.startY_ + (deltaY * newScale), false);
     return this.set_(newScale, newPosX, newPosY, animate);
   }
 
