@@ -47,6 +47,7 @@
   "url-replacement-v2": 1,
   "user-error-reporting": 1,
   "no-initial-intersection": 1,
+  "no-sync-xhr-in-ads": 1,
   "doubleclickSraExp": 0,
   "doubleclickSraReportExcludedBlock": 0.1,
   "inabox-rov": 1
