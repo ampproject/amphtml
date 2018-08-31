@@ -183,6 +183,10 @@ export function sanitizeHtml(html, diffing) {
         attribs.push('i-amphtml-binding', '');
       }
       // Elements with bindings and AMP elements must opt-out of DOM diffing.
+      // - Opt-out nodes with bindings because amp-bind scans newly
+      //   rendered elements and discards _all_ old elements _before_ diffing,
+      //   so preserving some old elements would cause loss of functionality.
+      // - Opt-out AMP elements because they don't support arbitrary mutation.
       if (hasBindings || isAmpElement) {
         if (diffing) {
           attribs.push('i-amphtml-key', String(KEY_COUNTER++));

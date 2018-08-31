@@ -372,7 +372,9 @@ export function purifyHtml(dirty, diffing = false) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
-      // Avoid disrupting Bind.scanAndApply() with DOM diffing.
+      // Don't DOM diff nodes with bindings because amp-bind scans newly
+      // rendered elements and discards _all_ old elements _before_ diffing, so
+      // preserving some old elements would cause loss of functionality.
       disableDiffingFor(node);
     }
 
