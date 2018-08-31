@@ -22,6 +22,7 @@ import {
   detectJsEngineFromStack,
   detectNonAmpJs,
   getErrorReportData,
+  errorReportingDataForViewer,
   installErrorReporting,
   isCancellation,
   maybeReportErrorToViewer,
@@ -166,10 +167,11 @@ describe('maybeReportErrorToViewer', () => {
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
-  it('should send viewer message named `error`', () => {
+  it('should send viewer message named `error` with stripped down error data '
+    + 'set', () => {
     return maybeReportErrorToViewer(win, data)
         .then(() => expect(sendMessageStub).to.have.been
-            .calledWith('error', data));
+            .calledWith('error', errorReportingDataForViewer(data)));
   });
 });
 
