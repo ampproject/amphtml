@@ -388,7 +388,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   getOffsetX_(clientX) {
     const {left} = this.elementBox_;
-    return (left - this.getViewport().getScrollLeft()) - clientX;
+    return clientX - (left - this.getViewport().getScrollLeft());
   }
 
   /**
@@ -398,7 +398,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   getOffsetY_(clientY) {
     const {top} = this.elementBox_;
-    return (top - this.getViewport().getScrollTop()) - clientY;
+    return clientY - (top - this.getViewport().getScrollTop());
   }
 
   /** @private */
@@ -668,8 +668,8 @@ export class AmpPanZoom extends AMP.BaseElement {
   onDoubletapZoom_(clientX, clientY) {
     const newScale = this.scale_ == this.minScale_ ?
       this.maxScale_ : this.minScale_;
-    const dx = (this.elementBox_.width / 2) + this.getOffsetX_(clientX);
-    const dy = (this.elementBox_.height / 2) + this.getOffsetY_(clientY);
+    const dx = (this.elementBox_.width / 2) - this.getOffsetX_(clientX);
+    const dy = (this.elementBox_.height / 2) - this.getOffsetY_(clientY);
     return this.onZoom_(newScale, dx, dy, /*animate*/ true);
   }
 
@@ -689,8 +689,8 @@ export class AmpPanZoom extends AMP.BaseElement {
     const {width, height} = this.elementBox_;
     const dist = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
     const newScale = this.startScale_ * (1 + (dir * dist / 100));
-    const deltaCenterX = width / 2 + this.getOffsetX_(centerClientX);
-    const deltaCenterY = height / 2 + this.getOffsetY_(centerClientY);
+    const deltaCenterX = width / 2 - this.getOffsetX_(centerClientX);
+    const deltaCenterY = height / 2 - this.getOffsetY_(centerClientY);
     const dx = Math.min(dist / 100, 1) * deltaCenterX;
     const dy = Math.min(dist / 100, 1) * deltaCenterY;
     this.onZoom_(newScale, dx, dy, /*animate*/ false);
