@@ -84,11 +84,7 @@ function xhrRequest(input, init) {
         const options = {
           status: xhr.status,
           statusText: xhr.statusText,
-          headers: {
-            get(header) {
-              return xhr.getResponseHeader(header);
-            },
-          },
+          headers: parseHeaders(xhr.getAllResponseHeaders()),
         };
         const response = new Response('', /** @type {!ResponseInit} */ (options));
         const promise = assertSuccess(response)
@@ -108,4 +104,26 @@ function xhrRequest(input, init) {
       xhr.send();
     }
   });
+}
+
+/**
+ * Parses XHR's response headers into JSONObject.
+ * @param {string} rawHeaders
+ * @return {!JsonObject}
+ */
+function parseHeaders(rawHeaders) {
+  const headers = {};
+  // Replace instances of \r\n and \n followed by at least one space or
+  // horizontal tab with a space.
+  // https://tools.ietf.org/html/rfc7230#section-3.2
+  const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
+  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+    const parts = line.split(':');
+    const key = parts.shift().trim();
+    if (key) {
+      const value = parts.join(':').trim();
+      headers[key] = value;
+    }
+  });
+  return headers;
 }
