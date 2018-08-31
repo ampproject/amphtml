@@ -176,7 +176,7 @@ export class LinkRewriterManager {
       return [];
     }
 
-    return dataValue.trim().split(/\s+/);
+    return dataValue.split(/\s+/);
   }
 
   /**
