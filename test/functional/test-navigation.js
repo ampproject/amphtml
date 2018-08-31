@@ -48,6 +48,7 @@ describes.sandboxed('Navigation', {}, () => {
     let handler;
     let decorationSpy;
     let handleNavSpy;
+    let linkRewriterSpy;
     let handleCustomProtocolSpy;
     let winOpenStub;
     let scrollIntoViewStub;
@@ -62,9 +63,11 @@ describes.sandboxed('Navigation', {}, () => {
       doc = win.document;
 
       handler = Services.navigationForDoc(doc);
+      const linkRewriterManager = Services.linkRewriterServiceForDoc(doc);
       handler.isIframed_ = true;
       decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
       handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
+      linkRewriterSpy = sandbox.spy(linkRewriterManager, 'maybeRewriteLink');
       handleCustomProtocolSpy = sandbox.spy(handler,
           'handleCustomProtocolClick_');
       win.open = function() {};
@@ -559,6 +562,21 @@ describes.sandboxed('Navigation', {}, () => {
         // handle nav ourselves.
         expect(event.defaultPrevented).to.be.false;
         expect(handleNavSpy).to.be.calledOnce;
+      });
+    });
+
+    describe('Link rewriting', () => {
+      it('Should give the chance to rewrite the link on click', () => {
+        handler.handle_(event);
+        expect(linkRewriterSpy).to.be.calledOnce;
+        expect(linkRewriterSpy).to.be.calledWith(anchor, 'click');
+      });
+
+      it('Should give the chance to rewrite the link on right click', () => {
+        event.type = 'contextmenu';
+        handler.handle_(event);
+        expect(linkRewriterSpy).to.be.calledOnce;
+        expect(linkRewriterSpy).to.be.calledWith(anchor, 'contextmenu');
       });
     });
 
