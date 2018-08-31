@@ -492,9 +492,6 @@ export function applyStaticLayout(element) {
  * @param {!Element} element
  */
 function applyNoDisplayLayout(element) {
-  // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
-  // everywhere, switch all relevant elements to this API. In the meantime,
-  // simply unblock display toggling via `style="display: ..."`.
+  // TODO(jridgewell, #17475): This should be using the [hidden] attribute.
   setStyle(element, 'display', 'none');
-  element.classList.add('i-amphtml-display');
 }
