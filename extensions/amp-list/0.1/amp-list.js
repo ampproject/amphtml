@@ -23,14 +23,19 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
+  requestForBatchFetch,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import {
+  setupAMPCors,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -90,9 +95,6 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
-
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
   }
@@ -104,10 +106,10 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
 
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
-        TAG, this.viewer_, this.templates_);
+        TAG, viewer, this.templates_);
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
@@ -151,22 +153,20 @@ export class AmpList extends AMP.BaseElement {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
           this.resetIfNecessary_();
-          return this.fetchList_();
+          this.fetchList_();
         }
       } else if (typeof src === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
-        this.resetIfNecessary_();
-        const items = isArray(src) ? src : [src];
-        this.scheduleRender_(items);
+        this.resetIfNecessary_(/* isFetch */ false);
+        this.scheduleRender_(isArray(src) ? src : [src]);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
-      this.resetIfNecessary_();
-      const items = isArray(state) ? state : [state];
-      this.scheduleRender_(items);
+      this.resetIfNecessary_(/* isFetch */ false);
+      this.scheduleRender_(isArray(state) ? state : [state]);
     }
   }
 
@@ -180,39 +180,40 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Wraps `toggleFallback()`. Runs in a mutate context by default but can be
-   * disabled by passing false to `mutate`.
+   * Wraps `toggleFallback()`. Must be called in a mutate context.
    * @param {boolean} show
-   * @param {boolean=} mutate
    * @private
    */
-  toggleFallback_(show, mutate = true) {
+  toggleFallback_(show) {
     // Early-out if toggling would be a no-op.
     if (!show && !this.fallbackDisplayed_) {
       return;
     }
-    const toggle = value => {
-      this.toggleFallback(value);
-      this.fallbackDisplayed_ = value;
-    };
-    if (mutate) {
-      this.mutateElement(() => toggle(show));
-    } else {
-      toggle(show);
-    }
+    this.toggleFallback(show);
+    this.fallbackDisplayed_ = show;
   }
 
   /**
-   * If `reset-on-refresh` attribute exists, then removes any previously
-   * rendered children and displays placeholder, loading indicator, etc.
+   * Removes any previously rendered children and displays placeholder, loading
+   * indicator, etc. depending on the value of `reset-on-refresh` attribute.
+   *
+   *     <amp-list reset-on-refresh="fetch|always">
+   *
+   * - "fetch": Reset only on network requests.
+   * - "always": Reset on network request OR rendering with local data.
+   *
+   * Default is "fetch" if no value is specified (boolean attribute).
+   *
+   * @param {boolean=} isFetch
    */
-  resetIfNecessary_() {
-    if (this.element.hasAttribute('reset-on-refresh')) {
+  resetIfNecessary_(isFetch = true) {
+    if ((isFetch && this.element.hasAttribute('reset-on-refresh'))
+      || this.element.getAttribute('reset-on-refresh') === 'always') {
       // Placeholder and loading don't need a mutate context.
       this.togglePlaceholder(true);
       this.toggleLoading(true, /* opt_force */ true);
       this.mutateElement(() => {
-        this.toggleFallback_(false, /* mutate */ false);
+        this.toggleFallback_(false);
         removeChildren(dev().assertElement(this.container_));
       });
     }
@@ -253,7 +254,7 @@ export class AmpList extends AMP.BaseElement {
         return this.scheduleRender_(items);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
-      }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
+      }).catch(error => this.showFallback_(error));
     }
   }
 
@@ -262,18 +263,36 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_() {
-    return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-        this.element).then(resp => {
-      // TODO(alabiaga): Since this is related to the viewer,
-      // this should be a 3rd log type?
-      const data = getData(resp);
-      user().assert(
-          resp && (typeof data !== 'undefined'),
-          'Response missing the \'data\' field');
-      return this.scheduleRender_(data);
+    let request;
+    // Construct the fetch init data that would be called by the viewer
+    // passed in as the 'originalRequest'.
+    return requestForBatchFetch(
+        this.getAmpDoc(),
+        this.element,
+        this.getPolicy_()).then(batchFetchDef => {
+      request = batchFetchDef;
+      batchFetchDef.fetchOpt = setupAMPCors(
+          this.win, batchFetchDef.xhrUrl, batchFetchDef.fetchOpt);
+      setupJsonFetchInit(batchFetchDef.fetchOpt);
+      const ampListAttributes = dict({
+        'ampListAttributes': {
+          'items': this.element.getAttribute('items') || 'items',
+          'singleItem': this.element.getAttribute('single-item'),
+          'maxItems': this.element.getAttribute('max-items'),
+        },
+      });
+      return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+          this.element, batchFetchDef, null, ampListAttributes);
+    }).then(response => {
+      request.fetchOpt.responseType = 'application/json';
+      this.ssrTemplateHelper_.verifySsrResponse(
+          this.win, response, request);
+      return response['html'];
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(() => this.onFetchSuccess_(), error => this.onFetchError_(error));
+    }).then(html => this.scheduleRender_(html))
+        .then(() => this.onFetchSuccess_(),
+            error => this.onFetchError_(error));
   }
 
   /**
@@ -320,18 +339,16 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      this.templates_.findAndRenderTemplate(
-          this.element, /** @type {!JsonObject} */ (current.data))
-          .then(element => {
-            this.container_.appendChild(element);
-          })
-          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+      const json = /** @type {!JsonObject} */ (current.data);
+      this.templates_.findAndRenderTemplate(this.element, json)
+          .then(element => this.container_.appendChild(element))
+          .then(onFulfilledCallback, onRejectedCallback);
     } else {
-      this.templates_.findAndRenderTemplateArray(
-          this.element, /** @type {!Array} */ (current.data))
-          .then(elements => this.updateBindingsForElements_(elements))
+      const array = /** @type {!Array} */ (current.data);
+      this.templates_.findAndRenderTemplateArray(this.element, array)
+          .then(results => this.updateBindings_(results))
           .then(elements => this.render_(elements))
-          .then(onFulfilledCallback.bind(this), onRejectedCallback.bind(this));
+          .then(onFulfilledCallback, onRejectedCallback);
     }
   }
 
@@ -343,17 +360,22 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindingsForElements_(elements) {
+  updateBindings_(elements) {
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {
       return Promise.resolve(elements);
     }
+    const updateWith = bind => {
+      // Forward elements to chained promise on success or failure.
+      return bind.scanAndApply(elements, [this.container_])
+          .then(() => elements, () => elements);
+    };
     // "refresh": Do _not_ block on retrieval of the Bind service before the
     // first mutation (AMP.setState).
     if (binding === 'refresh') {
       if (this.bind_ && this.bind_.signals().get('FIRST_MUTATE')) {
-        return this.updateBindingsWith_(this.bind_, elements);
+        return updateWith(this.bind_);
       } else {
         return Promise.resolve(elements);
       }
@@ -362,23 +384,11 @@ export class AmpList extends AMP.BaseElement {
     // in the newly rendered `elements`.
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
-        return this.updateBindingsWith_(bind, elements);
+        return updateWith(bind);
       } else {
         return Promise.resolve(elements);
       }
     });
-  }
-
-  /**
-   * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
-   * @param {!Array<!Element>} elements
-   * @return {!Promise<!Array<!Element>>}
-   */
-  updateBindingsWith_(bind, elements) {
-    // Forward elements to chained promise on success or failure.
-    const forwardElements = () => elements;
-    return bind.scanAndApply(elements, [this.container_])
-        .then(forwardElements, forwardElements);
   }
 
   /**
@@ -387,8 +397,9 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
-
     this.mutateElement(() => {
+      this.hideFallbackAndPlaceholder_();
+
       removeChildren(dev().assertElement(this.container_));
       elements.forEach(element => {
         if (!element.hasAttribute('role')) {
@@ -417,16 +428,24 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    const ampdoc = this.getAmpDoc();
+    return batchFetchJsonFor(
+        this.getAmpDoc(), this.element, itemsExpr, this.getPolicy_());
+  }
+
+  /**
+   * return {!UrlReplacementPolicy}
+   */
+  getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     let policy = UrlReplacementPolicy.OPT_IN;
     if (src == this.initialSrc_ ||
-      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+       (getSourceOrigin(src)
+           == getSourceOrigin(this.getAmpDoc().win.location))) {
       policy = UrlReplacementPolicy.ALL;
     }
-    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
+    return policy;
   }
 
   /** @private */
@@ -453,8 +472,35 @@ export class AmpList extends AMP.BaseElement {
       throw error;
     }
   }
-}
 
+
+  /**
+   * Must be called in mutate context.
+   * @private
+   */
+  hideFallbackAndPlaceholder_() {
+    this.toggleLoading(false);
+    if (this.getFallback()) {
+      this.toggleFallback_(false);
+    }
+    this.togglePlaceholder(false);
+  }
+
+  /**
+   * @param {*=} error
+   * @throws {!Error} If fallback element is not present.
+   * @private
+   */
+  showFallback_(error) {
+    this.toggleLoading(false);
+    if (this.getFallback()) {
+      this.toggleFallback_(true);
+      this.togglePlaceholder(false);
+    } else {
+      throw error;
+    }
+  }
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpList);

@@ -199,6 +199,7 @@ export class LocalSubscriptionPlatform {
     const promise = this.urlBuilder_.buildUrl(pingbackUrl,
         /* useAuthData */ true);
     return promise.then(url => {
+      // Content should be 'text/plain' to avoid CORS preflight.
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',

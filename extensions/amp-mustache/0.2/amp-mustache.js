@@ -19,7 +19,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
+  setUnescapedSanitizer} from '../../../third_party/mustache/mustache';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
 
 /**
@@ -38,7 +38,8 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizier(purifyTagsForTripleMustache);
+    setUnescapedSanitizer(value =>
+      purifyTagsForTripleMustache(value, this.win.document));
   }
 
   /** @override */
@@ -96,19 +97,11 @@ export class AmpMustache extends AMP.BaseTemplate {
       }
       html = mustacheRender(this.template_, mustacheData);
     }
-    return this.serializeHtml_(html);
-  }
-
-  /**
-   * Sanitizes the html and inserts it in the DOM.
-   * @param {string} html
-   * @return {!Element}
-   * @private
-   */
-  serializeHtml_(html) {
-    const sanitized = purifyHtml(html);
+    const body = purifyHtml(html);
+    // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
+    // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');
-    root./*OK*/innerHTML = sanitized;
+    root./*OK*/innerHTML = body./*OK*/innerHTML;
     return this.unwrap(root);
   }
 }

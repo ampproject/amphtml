@@ -18,6 +18,7 @@ import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
+import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
 import {dev, user} from '../../../src/log';
@@ -119,6 +120,9 @@ export class AccessService {
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
+    /** @private @const {!Observable} */
+    this.applyAuthorizationsObservable_ = new Observable();
+
     // This will fire after the first received authorization, even if
     // there are multiple sources.
     this.lastAuthorizationPromises_.then(() => {
@@ -158,6 +162,21 @@ export class AccessService {
       });
     }
     return this.readerIdPromise_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  areFirstAuthorizationsCompleted() {
+    return this.firstAuthorizationsCompleted_;
+  }
+
+  /**
+   * Registers a callback to be triggered when the document gets (re)authorized.
+   * @param {!Function} callback
+   */
+  onApplyAuthorizations(callback) {
+    this.applyAuthorizationsObservable_.add(callback);
   }
 
   /**
@@ -201,9 +220,9 @@ export class AccessService {
     // Only re-authorize sections if authorization already fired, otherwise
     // just wait and existing callback will cover new sections.
     if (this.firstAuthorizationsCompleted_) {
+      const target = dev().assertElement(event.target);
       // Guard against anything else in flight.
       return this.lastAuthorizationPromises_.then(() => {
-        const target = dev().assertElement(event.target);
         const responses = this.combinedResponses();
         this.applyAuthorizationToRoot_(target, responses);
       });
@@ -399,7 +418,9 @@ export class AccessService {
     for (let i = 0; i < elements.length; i++) {
       promises.push(this.applyAuthorizationToElement_(elements[i], response));
     }
-    return Promise.all(promises);
+    return Promise.all(promises).then(() => {
+      this.applyAuthorizationsObservable_.fire();
+    });
   }
 
   /**

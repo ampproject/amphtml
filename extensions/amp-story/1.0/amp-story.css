@@ -15,6 +15,7 @@
  */
 
 @import './amp-story-access.css';
+@import './amp-story-scroll.css';
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
 
@@ -45,7 +46,7 @@ amp-consent {
   height: auto !important;
   margin: 0 !important;
   padding: 0 !important;
-  text-align: left !important;
+  text-align: start !important;
   width: auto !important;
 }
 
@@ -182,37 +183,31 @@ amp-story-page[active] {
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
  * we don't want to schedule any further pages. */
 
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container:not([active]) {
+amp-story-page:not([active]) {
   transform: translateY(1000%) !important;
 }
 
 amp-story-page[active],
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="0"],
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="1"] {
+amp-story-page[distance="0"],
+amp-story-page[distance="1"] {
   transform: translateY(0) !important;
 }
 
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[distance="2"] {
+amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
-amp-story:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[active] {
+amp-story-page[active] {
   transition: filter 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-.i-amphtml-story-bookend-active:not([desktop]) >
-    amp-story-page.i-amphtml-layout-container[active] {
+.i-amphtml-story-bookend-active amp-story-page[active] {
   filter: blur(3px) !important;
   transition: filter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 /* TODO(gmajoulet): move the overlay to the bookend styles. */
-.i-amphtml-story-bookend-active > amp-story-page[active]::after {
+.i-amphtml-story-bookend-active amp-story-page[active]::after {
   content: '' !important;
   display: block !important;
   left: 0 !important;
@@ -231,7 +226,7 @@ amp-story:not([desktop]) >
   }
 
   100% {
-    opacity: 0.5;
+    opacity: 0.55;
   }
 }
 
@@ -372,7 +367,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   padding: 0 !important;
   position: fixed !important;
   right: 0 !important;
-  text-align: left !important;
+  text-align: start !important;
   z-index: 100002 !important;
 }
 
@@ -437,64 +432,6 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 
 .i-amphtml-story-developer-log-entry-success::before {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
-}
-
-/** Experiment disabled  */
-.i-amphtml-story-experiment-error {
-  align-items: center !important;
-  align-content: center!important;
-  background-color: #222 !important;
-  bottom: 0 !important;
-  color: #f0f0f0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 20px !important;
-  justify-content: center !important;
-  left: 0 !important;
-  padding: 32px !important;
-  position: absolute !important;
-  right: 0 !important;
-  top: 0 !important;
-  z-index: 999999 !important;
-  text-align: center !important;
-}
-
-.i-amphtml-story-experiment-icon {
-  background-repeat: no-repeat !important;
-  background-size: cover !important;
-  height: 64px !important;
-  margin: 0 auto 16px !important;
-  width: 64px !important;
-}
-
-.i-amphtml-story-experiment-icon-error {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
-}
-
-.i-amphtml-story-experiment-icon-done {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>') !important;
-}
-
-.i-amphtml-story-experiment-error button {
-  background-color: transparent !important;
-  border: 1px solid #f0f0f0 !important;
-  border-radius: 8px !important;
-  color: #f0f0f0 !important;
-  cursor: pointer !important;
-  font-size: 20px !important;
-  font-family: 'Roboto', sans-serif !important;
-  margin: 16px 0 0 !important;
-  outline: none !important;
-  padding: 8px 32px !important;
-  text-transform: uppercase !important;
-  width: 50% !important;
-}
-
-.i-amphtml-story-experiment-error button:active,
-.i-amphtml-story-experiment-error button:focus {
-  background-color: #f0f0f0 !important;
-  color: #222 !important;
 }
 
 .i-amphtml-story-toast {
@@ -572,8 +509,8 @@ amp-story .amp-video-eq,
   bottom: 12px !important;
 }
 
-[dir=rtl] amp-story .amp-video-eq,
-.i-amphtml-story-spinner {
+[dir=rtl]amp-story .amp-video-eq,
+[dir=rtl] .i-amphtml-story-spinner {
   left: 12px !important;
   right: auto !important;
 }

@@ -19,13 +19,13 @@ import {MultidocManager} from '../../../src/runtime';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -85,8 +85,8 @@ export class NextPageService {
     /** @private {boolean} */
     this.documentQueued_ = false;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
+    /** @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = null;
 
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
@@ -135,7 +135,6 @@ export class NextPageService {
       this.hideSelector_ = this.config_.hideSelectors.join(',');
     }
 
-    this.viewer_ = Services.viewerForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
@@ -146,7 +145,7 @@ export class NextPageService {
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
     const documentRef =
-        createDocumentRef(win.document.location.url, win.document.title);
+        createDocumentRef(win.document.location.href, win.document.title);
     this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
 
@@ -180,14 +179,6 @@ export class NextPageService {
       for (let i = 0; i < elements.length; i++) {
         elements[i].classList.add('i-amphtml-next-page-hidden');
       }
-    }
-
-    // Drop any amp-analytics tags from the child doc. We want to reuse the
-    // parent config instead.
-    const analytics = doc.querySelectorAll('amp-analytics');
-    for (let i = 0; i < analytics.length; i++) {
-      const item = analytics[i];
-      removeElement(item);
     }
 
     const amp =
@@ -248,8 +239,7 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      Services.xhrFor(/** @type {!Window} */ (this.win_))
-          .fetchDocument(next.ampUrl, {ampCors: false})
+      fetchDocument(/** @type {!Window} */ (this.win_), next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
             if (documentRef.cancelled) {
               // User has reached the end of the document already, don't render.
@@ -314,7 +304,7 @@ export class NextPageService {
         this.triggerAnalyticsEvent_(
             'amp-next-page-click', next.ampUrl, currentAmpUrl);
         const a2a =
-            this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+            this.navigation_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
         if (a2a) {
           // A2A is enabled, don't navigate the browser.
           e.preventDefault();

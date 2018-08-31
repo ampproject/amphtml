@@ -61,7 +61,9 @@ export class HeadingComponent {
    * */
   buildElement(headingData, doc) {
     const html = htmlFor(doc);
-    const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
+    const template =
+      html`<h3 class="i-amphtml-story-bookend-component
+        i-amphtml-story-bookend-heading"></h3>`;
 
     template.textContent = headingData.text;
 

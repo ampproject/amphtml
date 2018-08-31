@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
-import {Capability} from '../../../../src/service/viewer-impl';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
 
@@ -34,11 +34,13 @@ describes.realWin('amp-list component', {
   let viewerMock;
   let setBindService;
   let template;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    sandbox = env.sandbox;
 
     const templates = Services.templatesFor(win);
     templatesMock = sandbox.mock(templates);
@@ -86,6 +88,8 @@ describes.realWin('amp-list component', {
    * @return {!Promise}
    */
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
+    viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+        .returns(false).twice();
     listMock.expects('fetch_')
         .withExactArgs(opts.expr || DEFAULT_LIST_OPTS.expr)
         .returns(Promise.resolve(fetched))
@@ -126,14 +130,29 @@ describes.realWin('amp-list component', {
   function expectViewerProxiedFetchAndRender(
     fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
-    viewerMock.expects('canRenderTemplates').returns(true).twice();
+    viewerMock.expects('hasCapability')
+        .withExactArgs('viewerRenderTemplate').returns(true).twice();
     viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-        Capability.VIEWER_RENDER_TEMPLATE,
+        'viewerRenderTemplate',
         {
-          data: {inputData: { }, src: 'https://data.com/list.json'},
-          mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml">' +
-              '{{template}}</template>',
-          'sourceAmpComponent': 'amp-list',
+          'ampComponent': {
+            'errorTemplate': {'payload': null, 'type': 'amp-mustache'},
+            'successTemplate': {
+              'payload': '<template xmlns="http://www.w3.org/1999/xhtml">{{template}}</template>',
+              'type': 'amp-mustache',
+            },
+            'type': 'amp-list',
+          },
+          'ampListAttributes': {
+            'items': 'items', 'maxItems': null, 'singleItem': null},
+          'originalRequest': {
+            'init': {
+              'headers': {'Accept': 'application/json'},
+              'method': 'GET',
+              'requireAmpResponseSourceOrigin': false,
+            },
+            'input': 'https://data.com/list.json',
+          },
         }).returns(fetch).once();
     if (opts.resetOnRefresh) {
       listMock.expects('togglePlaceholder').withExactArgs(true).once();
@@ -143,7 +162,7 @@ describes.realWin('amp-list component', {
     listMock.expects('togglePlaceholder').withExactArgs(false).once();
     const render = Promise.resolve(rendered);
     templatesMock.expects('findAndRenderTemplate')
-        .withExactArgs(element, fetched.data)
+        .withExactArgs(element, fetched.html)
         .returns(render).once(1);
 
     return Promise.all([fetch, render]);
@@ -166,32 +185,63 @@ describes.realWin('amp-list component', {
     });
 
     describe('Viewer render template', () => {
+      const allowViewerRenderTemplate = 'allow-viewer-render-template';
+      beforeEach(() => {
+        win.document.documentElement.setAttribute(
+            allowViewerRenderTemplate, true);
+      });
+
+      afterEach(() => {
+        win.document.documentElement.removeAttribute(
+            allowViewerRenderTemplate);
+      });
+
       it('should proxy rendering to viewer', () => {
-        const resp = {data: '<div>Rendered template</div>'};
+        const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
+        const fromStructuredCloneable =
+            sandbox.spy(xhrUtils, 'fromStructuredCloneable');
+        const verifyAmpCORSHeaders =
+            sandbox.spy(xhrUtils, 'verifyAmpCORSHeaders');
+        const resp = {'html': '<div>Rendered template</div>'};
         const itemElement = doc.createElement('div');
         const rendered = expectViewerProxiedFetchAndRender(resp, itemElement);
         return list.layoutCallback().then(() => rendered).then(() => {
           expect(list.container_.contains(itemElement)).to.be.true;
+          sinon.assert.callOrder(
+              setupAMPCors, fromStructuredCloneable, verifyAmpCORSHeaders);
         });
       });
 
       it('should error if viewer does not define response data', () => {
-        viewerMock.expects('canRenderTemplates').returns(true);
+        win.document.documentElement.setAttribute(
+            'allow-viewer-render-template', true);
+        viewerMock.expects('hasCapability')
+            .withExactArgs('viewerRenderTemplate').returns(true);
         viewerMock.expects('sendMessageAwaitResponse').withExactArgs(
-            Capability.VIEWER_RENDER_TEMPLATE,
+            'viewerRenderTemplate',
             {
-              data: {
-                inputData: { },
-                src: 'https://data.com/list.json',
+              'ampComponent': {
+                'errorTemplate': {'payload': null, 'type': 'amp-mustache'},
+                'src': 'https://data.com/list.json',
               },
-              mustacheTemplate: '<template xmlns="http://www.w3.org/1999/xhtml">' +
-                  '{{template}}</template>',
-              'sourceAmpComponent': 'amp-list',
+              'successTemplate': {
+                'payload': '<template xmlns="http://www.w3.org/1999/xhtml">{{template}}</template>',
+                'type': 'amp-mustache',
+              },
+              'type': 'amp-list',
+              'originalRequest': {
+                'init': {
+                  'headers': {'Accept': 'application/json'},
+                  'method': 'GET',
+                  'requireAmpResponseSourceOrigin': false,
+                },
+                'input': 'https://data.com/list.json',
+              },
             }).returns(Promise.resolve({})).once();
         templatesMock.expects('findAndRenderTemplate').never();
         listMock.expects('toggleLoading').withExactArgs(false).once();
         return expect(list.layoutCallback()).to.eventually.be
-            .rejectedWith(/Response missing the \'data\' field/);
+            .rejectedWith(/Error proxying amp-list templates/);
       });
     });
 
@@ -286,7 +336,7 @@ describes.realWin('amp-list component', {
       });
     });
 
-    // TODO(#14772): Flaky.
+    // TODO(choumx, #14772): Flaky.
     it.skip('should only process one result at a time for rendering', () => {
       const doRenderPassSpy = sandbox.spy(list, 'doRenderPass_');
       const scheduleRenderSpy = sandbox.spy(list.renderPass_, 'schedule');
@@ -362,7 +412,8 @@ describes.realWin('amp-list component', {
       });
     });
 
-    it('should fail to load b/c data array is absent', () => {
+    // TODO: This test passes but causes all following tests to be ignored.
+    it.skip('should fail to load b/c data array is absent', () => {
       listMock.expects('fetch_').returns(Promise.resolve({})).once();
       listMock.expects('toggleLoading').withExactArgs(false).once();
       templatesMock.expects('findAndRenderTemplateArray').never();
@@ -370,7 +421,8 @@ describes.realWin('amp-list component', {
           .rejectedWith(/Response must contain an array/);
     });
 
-    it('should fail to load b/c data single-item object is absent', () => {
+    // TODO: This test passes but causes all following tests to be ignored.
+    it.skip('should fail to load b/c data single-item object is absent', () => {
       element.setAttribute('single-item', 'true');
       listMock.expects('fetch_').returns(Promise.resolve()).once();
       listMock.expects('toggleLoading').withExactArgs(false).once();
@@ -416,6 +468,8 @@ describes.realWin('amp-list component', {
 
     it('should show placeholder on fetch failure (w/o fallback)', () => {
       // Stub fetch_() to fail.
+      viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+          .returns(false).twice();
       listMock.expects('fetch_').returns(Promise.reject()).once();
       listMock.expects('toggleLoading').withExactArgs(false).once();
       listMock.expects('togglePlaceholder').never();
@@ -469,6 +523,8 @@ describes.realWin('amp-list component', {
         },
       };
       setBindService(bind);
+      viewerMock.expects('hasCapability').withExactArgs('viewerRenderTemplate')
+          .returns(false).twice();
     });
 
     it('should _not_ refetch if [src] attr changes (before layout)', () => {
@@ -489,6 +545,9 @@ describes.realWin('amp-list component', {
         expect(list.container_.contains(foo)).to.be.true;
 
         listMock.expects('fetchList_').never();
+        // Expect hiding of placeholder/loading after render.
+        listMock.expects('togglePlaceholder').withExactArgs(false).once();
+        listMock.expects('toggleLoading').withExactArgs(false).once();
 
         element.setAttribute('src', 'https://new.com/list.json');
         list.mutatedAttributesCallback({'src': items});
@@ -511,7 +570,7 @@ describes.realWin('amp-list component', {
       });
     });
 
-    it('should reset if `reset-on-refresh` is set (new data)', () => {
+    it('should not reset if `reset-on-refresh=""` (new data)', () => {
       element.setAttribute('reset-on-refresh', '');
       const items = [{title: 'foo'}];
       const foo = doc.createElement('div');
@@ -520,9 +579,32 @@ describes.realWin('amp-list component', {
       return list.layoutCallback().then(() => {
         expect(list.container_.contains(foo)).to.be.true;
 
-        // Expect display of placeholder/loading but no fetch.
+        listMock.expects('fetchList_').never();
+        // Expect hiding of placeholder/loading after render.
+        listMock.expects('togglePlaceholder').withExactArgs(false).once();
+        listMock.expects('toggleLoading').withExactArgs(false).once();
+
+        element.setAttribute('src', 'https://new.com/list.json');
+        list.mutatedAttributesCallback({'src': items});
+      });
+    });
+
+    it('should reset if `reset-on-refresh="always"` (new data)', () => {
+      element.setAttribute('reset-on-refresh', 'always');
+      const items = [{title: 'foo'}];
+      const foo = doc.createElement('div');
+      expectFetchAndRender(items, [foo]);
+
+      return list.layoutCallback().then(() => {
+        expect(list.container_.contains(foo)).to.be.true;
+
+        listMock.expects('fetchList_').never();
+        // Expect display of placeholder/loading before render.
         listMock.expects('togglePlaceholder').withExactArgs(true).once();
         listMock.expects('toggleLoading').withExactArgs(true, true).once();
+        // Expect hiding of placeholder/loading after render.
+        listMock.expects('togglePlaceholder').withExactArgs(false).once();
+        listMock.expects('toggleLoading').withExactArgs(false).once();
 
         element.setAttribute('src', 'https://new.com/list.json');
         list.mutatedAttributesCallback({'src': items});

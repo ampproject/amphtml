@@ -66,7 +66,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-access-iframe',
-    name: 'AMP Access iframe prototype',
+    name: 'AMP Access iframe prototype (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/13287',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
   },
@@ -93,6 +93,12 @@ const EXPERIMENTS = [
     name: 'AMP Auto Ads AdSense Holdout',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
+  },
+  {
+    id: 'amp-auto-ads-adsense-responsive',
+    name: 'AMP Auto Ads AdSense Responsive',
+    spec: '',
+    cleanupIssue: '',
   },
   {
     id: 'amp-google-vrview-image',
@@ -236,10 +242,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
   },
   {
-    id: 'inline-styles',
-    name: 'Enables the usage of inline styles for non fixed elements',
-    spec: 'https://github.com/ampproject/amphtml/issues/11881',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
+    id: 'amp-story-scroll',
+    name: 'Scrollable experience for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/16465',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
   },
   {
     id: 'url-replacement-v2',
@@ -297,13 +303,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'amp-google-document-embed',
-    name: 'Enables the experiment amp-google-document-embed component' +
-        ' which is a wrapper around the Google Drive document viewer embed.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'amp-image-slider',
     name: 'Enables the experimental amp-image-slider for image comparison',
     spec: 'TODO',
@@ -314,6 +313,40 @@ const EXPERIMENTS = [
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
+  },
+  {
+    id: 'faster-bind-scan',
+    name: 'Enables faster scanning of dynamic markup for bindings',
+    spec: 'https://github.com/ampproject/amphtml/pull/17229',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
+  },
+  {
+    id: 'no-initial-intersection',
+    name: 'Do not invoke context.observeIntersection callback with ' +
+        'initialintersection',
+    spec: 'https://github.com/ampproject/amphtml/issues/8562',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
+  },
+  {
+    id: 'custom-elements-v1',
+    name: 'Enable a new custom elements v1 polyfill',
+    spec: 'https://github.com/ampproject/amphtml/pull/17205',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
+  },
+  {
+    id: 'amp-carousel-scroll-snap',
+    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
+  },
+  {
+    id: 'amp-carousel-new-arrows',
+    name: 'Enables new AMP carousel navigation arrows',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17510',
+  },
+  {
+    id: 'linker-meta-opt-in',
+    name: 'Opts-in users that have included the GA client-id meta tag ',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
   },
 ];
 

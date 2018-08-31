@@ -178,4 +178,11 @@ export class ViewportBindingDef {
    * @return {!Element}
    */
   getScrollingElement() {}
+
+  /**
+   * Whether the root scroller is a native root scroller (behaves like a
+   * viewport), or an overflow scroller (scrolls like an element).
+   * @return {boolean}
+   */
+  getScrollingElementScrollsLikeViewport() {}
 }

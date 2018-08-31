@@ -277,6 +277,7 @@ function validateAllowedFields(data, allowedFields) {
     adHolderText: true,
     loadingStrategy: true,
     htmlAccessAllowed: true,
+    adContainerId: true,
   };
 
   for (const field in data) {
@@ -301,7 +302,7 @@ let experimentToggles = {};
  * @return {boolean}
  */
 export function isExperimentOn(experimentId) {
-  return !!experimentToggles[experimentId];
+  return experimentToggles && !!experimentToggles[experimentId];
 }
 
 /**

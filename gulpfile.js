@@ -42,8 +42,8 @@ const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-m
 const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
-const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 const {transpileTs} = require('./build-system/typescript');
+const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
@@ -56,6 +56,9 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 // All declared extensions.
 const extensions = {};
 const extensionAliasFilePath = {};
+
+// All a4a extensions.
+const adVendors = [];
 
 const {green, red, cyan} = colors;
 
@@ -139,6 +142,12 @@ function declareExtension(name, version, options) {
     extensions[`${name}-${v}`] =
         Object.assign({name, version: v}, defaultOptions, options);
   });
+  if (name.startsWith('amp-ad-network-')) {
+    // Get the ad network name. All ad network extensions are named
+    // in the format `amp-ad-network-${name}-impl`
+    name = name.slice(15, -5);
+    adVendors.push(name);
+  }
 }
 
 /**
@@ -260,9 +269,21 @@ function getExtensionsFromArg(examples) {
     const html = fs.readFileSync(example, 'utf8');
     const customElementTemplateRe = /custom-(element|template)="([^"]+)"/g;
     const extensionNameMatchIndex = 2;
+    let hasAd = false;
     let match;
     while ((match = customElementTemplateRe.exec(html))) {
+      if (match[extensionNameMatchIndex] == 'amp-ad') {
+        hasAd = true;
+      }
       extensions.push(match[extensionNameMatchIndex]);
+    }
+    if (hasAd) {
+      for (let i = 0; i < adVendors.length; i++) {
+        if (html.includes(`type="${adVendors[i]}"`)) {
+          extensions.push('amp-a4a');
+          extensions.push(`amp-ad-network-${adVendors[i]}-impl`);
+        }
+      }
     }
   });
 
@@ -428,6 +449,21 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
           })
       );
+    }
+
+    if (argv.with_inabox_lite) {
+      promises.push(
+          // Entry point for inabox runtime.
+          compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
+            toName: 'amp-inabox-lite.js',
+            minifiedName: 'amp4ads-lite-v0.js',
+            includePolyfills: true,
+            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
     }
 
     promises.push(
@@ -624,7 +660,13 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return promise;
     }
   }
-  return promise.then(() => buildExtensionJs(path, name, version, options));
+  return promise.then(() => {
+    if (argv.single_pass) {
+      return Promise.resolve();
+    } else {
+      return buildExtensionJs(path, name, version, options);
+    }
+  });
 }
 
 /**
@@ -673,10 +715,6 @@ function buildExtensionCss(path, name, version, options) {
  * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
-  if (argv.single_pass) {
-    console.log('Skipping extension JS build in single pass mode', name);
-    return;
-  }
   const filename = options.filename || name + '.js';
   return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
     toName: `${name}-${version}.max.js`,
@@ -854,9 +892,20 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    printConfigHelp('gulp dist --fortesting');
+    let cmd = 'gulp dist --fortesting';
+    if (argv.single_pass) {
+      cmd = cmd + ' --single_pass';
+    }
+    printConfigHelp(cmd);
   }
-  parseExtensionFlags();
+  if (argv.single_pass) {
+    if (!process.env.TRAVIS) {
+      log(green('Not building any AMP extensions in'), cyan('single_pass'),
+          green('mode.'));
+    }
+  } else {
+    parseExtensionFlags();
+  }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(() => {
         return Promise.all([
@@ -1155,8 +1204,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
-      .pipe($$.replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
-      .pipe($$.replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
+      .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
       .pipe($$.wrap, wrapper)
       .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true});
 

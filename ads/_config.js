@@ -777,6 +777,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'rfp': {
+    prefetch: 'https://js.rfp.fout.jp/rfp-amp.js',
+    preconnect: 'https://ad.rfp.fout.jp',
+    renderStartImplemented: true,
+  },
+
   'rubicon': {},
 
   'sekindo': {
@@ -864,7 +870,9 @@ export const adConfig = {
       'https://cdn2.teads.tv',
       'https://a.teads.tv',
       'https://t.teads.tv',
+      'https://r.teads.tv',
     ],
+    consentHandlingOverride: true,
   },
 
   'triplelift': {},
@@ -886,7 +894,7 @@ export const adConfig = {
   },
 
   'unruly': {
-    prefetch: 'https://video.unrulymedia.com/amp-demo/native-loader.js',
+    prefetch: 'https://video.unrulymedia.com/native/native-loader.js',
     renderStartImplemented: true,
   },
 
@@ -896,6 +904,11 @@ export const adConfig = {
       'https://ad.jp.ap.valuecommerce.com',
       'https://ad.omks.valuecommerce.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  'videointelligence': {
+    preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
   },
 

@@ -12,6 +12,8 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+  <h1>SVG renderer</h1>
+
   <h2>Examples of animations that loops infinitely</h2>
   <amp-bodymovin-animation layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop>
   </amp-bodymovin-animation>
@@ -40,6 +42,38 @@
   <h2>Example of a responsive layout animation</h2>
   <amp-bodymovin-animation layout="responsive" width="200" height="200" src="https://nainar.github.io/loader.json" loop="true">
   </amp-bodymovin-animation>
+
+  <h1>HTML renderer</h1>
+
+  <h2>Examples of animations that loops infinitely</h2>
+  <amp-bodymovin-animation renderer="html" layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop>
+  </amp-bodymovin-animation>
+
+  <amp-bodymovin-animation renderer="html" layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json">
+  </amp-bodymovin-animation>
+
+  <h2>Example of an animation that does one iteration</h2>
+  <amp-bodymovin-animation renderer="html" layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop='false'>
+  </amp-bodymovin-animation>
+
+  <h2>Example of an animation that does 2 iteration</h2>
+  <amp-bodymovin-animation renderer="html" layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop="2">
+  </amp-bodymovin-animation>
+
+  <h2>Example of an animation that doesn't autoplay</h2>
+  <amp-bodymovin-animation renderer="html" id="anim" layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop="true" name="ripple_1" noautoplay>
+  </amp-bodymovin-animation>
+
+  <h2>Example of a bodymovin animation controlled by scroll position</h2>
+  <amp-bodymovin-animation renderer="html" layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json" loop="true" id="bodymovin-scrollable">
+  </amp-bodymovin-animation>
+  <amp-position-observer intersection-ratios="1" on="scroll:bodymovin-scrollable.seekTo(percent=event.percent)" layout="nodisplay">
+  </amp-position-observer>
+
+  <h2>Example of a responsive layout animation</h2>
+  <amp-bodymovin-animation renderer="html" layout="responsive" width="200" height="200" src="https://nainar.github.io/loader.json" loop="true">
+  </amp-bodymovin-animation>
+
 </body>
 
 </html>

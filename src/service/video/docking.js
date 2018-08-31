@@ -1170,22 +1170,6 @@ export class VideoDocking {
         // duration is otherwise larger, 'ease-in' looks much nicer.
         transitionDurationMs > 200 ? 'ease-in' : 'linear';
 
-    const positioningStyles = {
-      'transform': transform(x, y, scale),
-      'transition-duration': `${transitionDurationMs}ms`,
-      'transition-timing-function': transitionTiming,
-    };
-
-    if (this.boxNeedsSizing_(width, height)) {
-      // Setting explicit dimensions is needed to match the video's aspect
-      // ratio. However, we only do this once to prevent jank in subsequent
-      // frames.
-      Object.assign(positioningStyles, {
-        'width': px(width),
-        'height': px(height),
-      });
-    }
-
     const internalElement = getInternalVideoElementFor(video.element);
     const shadowLayer = this.getShadowLayer_();
     const overlay = this.getOverlay_();
@@ -1198,9 +1182,24 @@ export class VideoDocking {
       internalElement.classList.add(BASE_CLASS_NAME);
       shadowLayer.removeAttribute('hidden');
       overlay.removeAttribute('hidden');
-      setImportantStyles(internalElement, positioningStyles);
-      setImportantStyles(shadowLayer, positioningStyles);
-      setImportantStyles(overlay, positioningStyles);
+      const els = [internalElement, shadowLayer, overlay];
+      for (let i = 0; i < els.length; i++) {
+        const el = els[i];
+        setImportantStyles(el, {
+          'transform': transform(x, y, scale),
+          'transition-duration': `${transitionDurationMs}ms`,
+          'transition-timing-function': transitionTiming,
+        });
+        if (this.boxNeedsSizing_(width, height)) {
+          // Setting explicit dimensions is needed to match the video's aspect
+          // ratio. However, we only do this once to prevent jank in subsequent
+          // frames.
+          setImportantStyles(el, {
+            'width': px(width),
+            'height': px(height),
+          });
+        }
+      }
       setImportantStyles(shadowLayer, {
         'opacity': step,
       });
@@ -1759,18 +1758,18 @@ export class VideoDocking {
       const almostDismissed = 'amp-video-docked-almost-dismissed';
       internalElement.classList.remove(almostDismissed);
       overlay.classList.remove(almostDismissed);
-      const stylesToReset = [
-        'transform',
-        'transition',
-        'width',
-        'height',
-        'opacity',
-      ];
       shadowLayer.setAttribute('hidden', '');
       overlay.setAttribute('hidden', '');
-      resetStyles(internalElement, stylesToReset);
-      resetStyles(shadowLayer, stylesToReset);
-      resetStyles(overlay, stylesToReset);
+      const els = [internalElement, shadowLayer, overlay];
+      for (let i = 0; i < els.length; i++) {
+        resetStyles(els[i], [
+          'transform',
+          'transition',
+          'width',
+          'height',
+          'opacity',
+        ]);
+      }
       this.currentlyDocked_ = null;
     });
   }

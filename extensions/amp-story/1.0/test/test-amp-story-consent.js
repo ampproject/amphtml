@@ -30,6 +30,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   let storyConsent;
   let storyConsentConfigEl;
   let storyConsentEl;
+  let storyEl;
 
   const setConfig = config => {
     storyConsentConfigEl.textContent = JSON.stringify(config);
@@ -60,12 +61,16 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     registerServiceBuilder(win, 'localization', () => localizationService);
 
     // Test DOM structure:
-    // <amp-consent>
-    //   <script type="application/json">{JSON Config}</script>
-    //   <amp-story-consent>
+    // <amp-story>
+    //   <amp-consent>
     //     <script type="application/json">{JSON Config}</script>
-    //   </amp-story-consent>
-    // </amp-consent>
+    //     <amp-story-consent>
+    //       <script type="application/json">{JSON Config}</script>
+    //     </amp-story-consent>
+    //   </amp-consent>
+    // </amp-story>
+    storyEl = win.document.createElement('amp-story');
+
     const consentEl = win.document.createElement('amp-consent');
     consentEl.setAttribute('id', CONSENT_ID);
 
@@ -78,11 +83,13 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
+    storyConsentEl.getResources = () => win.services.resources.obj;
     storyConsentEl.appendChild(storyConsentConfigEl);
 
+    storyEl.appendChild(consentEl);
     consentEl.appendChild(consentConfigEl);
     consentEl.appendChild(storyConsentEl);
-    win.document.body.appendChild(consentEl);
+    win.document.body.appendChild(storyEl);
 
     storyConsent = new AmpStoryConsent(storyConsentEl);
   });
@@ -243,9 +250,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     storyConsent.buildCallback();
 
     expect(addToWhitelistStub).to.have.callCount(3);
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.prompt');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.reject');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'accept');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'prompt');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'reject');
   });
 
   it('should broadcast the amp actions', () => {
@@ -331,5 +338,15 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
         .querySelector('.i-amphtml-story-consent-action-accept');
     expect(buttonEl.getAttribute('style'))
         .to.equal('color: rgb(255, 255, 255) !important;');
+  });
+
+  it('should require publisher-logo-src to be a URL', () => {
+    storyEl.setAttribute('publisher-logo-src', 'foo:bar');
+    allowConsoleError(() => {
+      expect(() => {
+        storyConsent.buildCallback();
+      }).to.throw('amp-story publisher-logo-src must start with ' +
+          '"https://" or "//"');
+    });
   });
 });

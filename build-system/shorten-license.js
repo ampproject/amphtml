@@ -15,7 +15,9 @@
  */
 'use strict';
 
-const batchReplace = require('gulp-batch-replace');
+const escape = require('regexp.escape');
+const pumpify = require('pumpify');
+const replace = require('gulp-regexp-sourcemaps');
 
 /* eslint-disable */
 const MIT_FULL = [
@@ -70,6 +72,11 @@ const LICENSES = [
  * version.
  */
 module.exports = function() {
-  return batchReplace(LICENSES);
+  const streams = LICENSES.map(tuple => {
+    const regex = new RegExp(escape(tuple[0]), 'g');
+    return replace(regex, tuple[1], 'shorten-license');
+  });
+
+  return pumpify.obj(streams);
 };
 
