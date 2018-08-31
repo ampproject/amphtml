@@ -101,6 +101,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-CONSENT"
     child_tag_name_oneof: "AMP-GEO"
     child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-STORY-ACCESS"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
@@ -305,6 +306,18 @@ tags: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
+}
+tags: {  # <amp-story-access>
+  html_format: AMP
+  tag_name: "AMP-STORY-ACCESS"
+  requires_extension: "amp-access"
+  mandatory_parent: "AMP-STORY"
+  attrs: {
+    name: "type"
+    value: "blocking"
+    value: "notification"
+  }
+  attr_lists: "extended-amp-global"
 }
 tags: {  # <amp-story-bookend>
   html_format: AMP
