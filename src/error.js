@@ -24,6 +24,7 @@ import {
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
+import {dict} from './utils/object';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
@@ -33,11 +34,9 @@ import {
 } from './event-helper';
 import {isProxyOrigin} from './url';
 import {makeBodyVisibleRecovery} from './style-installer';
-import {ssrDocOptIn} from './ssr-template-helper';
 import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
-import { dict } from './utils/object';
 
 /**
  * @const {string}
