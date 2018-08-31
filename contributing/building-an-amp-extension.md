@@ -715,7 +715,7 @@ enable your experiment.
 If you are testing on your localhost, use the command `AMP.toggleExperiment(id,
 true/false)` to enable the experiment.
 
-File a github issue to cleanup your experiment. Assign it to yourself as a  reminder to remove your experiment and code checks. The removal of the experiment happens when your extension has been thoroughly tested and you address any feedback from those who are testing it.
+File a github issue to cleanup your experiment. Assign it to yourself as a reminder to remove your experiment and code checks. Removal of your experiment happens after the extension has been thoroughly tested and all issues have been addressed.
 
 ## Documenting your element
 
