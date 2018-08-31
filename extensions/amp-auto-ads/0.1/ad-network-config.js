@@ -85,6 +85,9 @@ class AdNetworkConfigDef {
  * @return {?AdNetworkConfigDef}
  */
 export function getAdNetworkConfig(type, autoAmpAdsElement) {
+  if (type == '_ping_') {
+    return new PingNetworkConfig(autoAmpAdsElement);
+  }
   if (type == 'adsense') {
     return new AdSenseNetworkConfig(autoAmpAdsElement);
   }
@@ -93,6 +96,65 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
   }
   return null;
 }
+
+/**
+ * A fake ad network integration that is mainly used for testing
+ * and demo purposes. This implementation gets stripped out in compiled
+ * production code.
+ * @implements {AdNetworkCOnfigDef}
+ * @visibleForTesting
+ */
+class PingNetworkConfig {;
+  /**
+   * @param {!Element} autoAmpAdsElement
+   */
+  constructor(autoAmpAdsElement) {
+    this.autoAmpAdsElement_ = autoAmpAdsElement;
+  }
+
+  isEnabled() {
+    return true;
+  }
+
+  isResponsiveEnabled() {
+    return true;
+  }
+
+  /** @override */
+  getConfigUrl() {
+    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
+    const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
+    return buildUrl('//lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n', {}, 4096);
+  }
+
+  /** @override */
+  getAttributes() {
+    return dict({
+      'type': '_ping_'
+    });
+  }
+
+  /** @override */
+  getDefaultAdConstraints() {
+    const viewportHeight =
+      Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+    return {
+      initialMinSpacing: viewportHeight,
+      subsequentMinSpacing: [
+        {adCount: 3, spacing: viewportHeight * 2},
+        {adCount: 6, spacing: viewportHeight * 3},
+      ],
+      maxAdCount: 8,
+    };
+  }
+
+  /** @override */
+  getSizing() {
+    return {};
+  }
+
+}
+
 
 /**
  * @implements {AdNetworkConfigDef}

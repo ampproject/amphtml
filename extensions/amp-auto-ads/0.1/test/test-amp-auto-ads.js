@@ -15,11 +15,11 @@
  */
 
 import '../../../amp-ad/0.1/amp-ad';
+import '../amp-auto-ads';
 import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
-import {AmpAutoAds} from '../amp-auto-ads';
 import {Services} from '../../../../src/services';
 import {
   forceExperimentBranch,
@@ -27,85 +27,84 @@ import {
 } from '../../../../src/experiments';
 import {waitForChild} from '../../../../src/dom';
 
-describes.realWin.skip('amp-auto-ads', {
+describes.realWin('amp-auto-ads', {
   amp: {
-    runtimeOn: true,
-    ampdoc: 'single',
     extensions: ['amp-ad', 'amp-auto-ads'],
   },
 }, env => {
 
   const AD_CLIENT = 'ca-pub-1234';
   const OPT_IN_STATUS_ANCHOR_ADS = 2;
-
+  
+  let win;
+  let doc;
   let sandbox;
   let container;
   let anchor1;
   let anchor2;
   let anchor3;
   let anchor4;
-  let ampAutoAds;
-  let ampAutoAdsElem;
   let xhr;
   let whenVisible;
   let configObj;
 
   beforeEach(() => {
+
+    win = env.win;
+    doc = win.document;
+    sandbox = env.sandbox;
+
+    toggleExperiment(win, 'amp-auto-ads', true);
+
     // There seem to be a lot of tests that don't clean up after themselves,
     // meaning there are a lot of <AMP-AD>s left over in the DOM.
     // An alternative to doing this clean up would be for this test to do all
     // its DOM stuff in a dedicated window, but trying that seems to result in a
     // lot of errors.
-    const ampAds = env.win.document.getElementsByTagName('AMP-AD');
+    const ampAds = doc.getElementsByTagName('AMP-AD');
     while (ampAds.length) {
       ampAds[0].parentNode.removeChild(ampAds[0]);
     }
 
-    toggleExperiment(env.win, 'amp-auto-ads', true);
-    sandbox = env.sandbox;
-
-    const extensions = Services.extensionsFor(env.win);
+    const extensions = Services.extensionsFor(win);
     sandbox.stub(extensions, 'loadElementClass').callsFake(
         () => Promise.resolve(() => {}));
 
     const viewportMock =
-        sandbox.mock(Services.viewportForDoc(env.win.document));
+        sandbox.mock(Services.viewportForDoc(doc));
     viewportMock.expects('getSize').returns(
         {width: 320, height: 500}).atLeast(1);
 
-    container = env.win.document.createElement('div');
-    env.win.document.body.appendChild(container);
+    container = doc.createElement('div');
+    doc.body.appendChild(container);
 
-    anchor1 = env.win.document.createElement('div');
+    anchor1 = doc.createElement('div');
     anchor1.id = 'anId1';
     container.appendChild(anchor1);
 
-    const spacer = env.win.document.createElement('div');
+    const spacer = doc.createElement('div');
     spacer.style.height = '1000px';
     container.appendChild(spacer);
 
-    anchor2 = env.win.document.createElement('div');
+    anchor2 = doc.createElement('div');
     anchor2.id = 'anId2';
     container.appendChild(anchor2);
 
-    const spacer2 = env.win.document.createElement('div');
+    const spacer2 = doc.createElement('div');
     spacer2.style.height = '499px';
     container.appendChild(spacer2);
 
-    anchor3 = env.win.document.createElement('div');
+    anchor3 = doc.createElement('div');
     anchor3.id = 'anId3';
     container.appendChild(anchor3);
 
-    const spacer3 = env.win.document.createElement('div');
+    const spacer3 = doc.createElement('div');
     spacer3.style.height = '500px';
     container.appendChild(spacer3);
 
-    anchor4 = env.win.document.createElement('div');
+    anchor4 = doc.createElement('div');
     anchor4.id = 'anId4';
     container.appendChild(anchor4);
-
-    ampAutoAdsElem = env.win.document.createElement('amp-auto-ads');
-    env.win.document.body.appendChild(ampAutoAdsElem);
 
     configObj = {
       placements: [
@@ -141,7 +140,7 @@ describes.realWin.skip('amp-auto-ads', {
       optInStatus: [1],
     };
 
-    xhr = Services.xhrFor(env.win);
+    xhr = Services.xhrFor(win);
     xhr.fetchJson = () => {
       return Promise.resolve({
         json() {
@@ -154,54 +153,60 @@ describes.realWin.skip('amp-auto-ads', {
     const viewer = Services.viewerForDoc(env.ampdoc);
     whenVisible = sandbox.stub(viewer, 'whenFirstVisible');
     whenVisible.returns(Promise.resolve());
-
-    ampAutoAds = new AmpAutoAds(ampAutoAdsElem);
   });
+
+  function getAmpAutoAds(type, adClient) {
+    ampAutoAds = doc.createElement('amp-auto-ads');
+    ampAutoAds.setAttribute('type', type || '_ping_');
+    doc.body.appendChild(ampAutoAds);
+    ampAutoAds.implementation_.testing = () => {
+      console.error('overirdden')
+    }
+    return ampAutoAds.build().then(() => {
+      return ampAutoAds.layoutCallback();
+    });
+  }
 
   function verifyAdElement(adElement) {
     expect(adElement.tagName).to.equal('AMP-AD');
-    expect(adElement.getAttribute('type')).to.equal('adsense');
-    expect(adElement.getAttribute('data-ad-client')).to.equal(AD_CLIENT);
+    expect(adElement.getAttribute('type')).to.equal('_ping_');
   }
 
-  // TODO(ccordry, #16545) Unskip all these tests.
-  it.skip('should wait for viewer visible', () => {
+  it('should wait for viewer visible', () => {
+
     let resolve;
     const visible = new Promise(res => {
       resolve = res;
     });
     whenVisible.returns(visible);
-
-    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
-    ampAutoAdsElem.setAttribute('type', 'adsense');
-    ampAutoAds.buildCallback();
-
-    return Promise.resolve().then(() => {
-      expect(xhr.fetchJson).to.not.have.been.called;
-      resolve();
-      return visible;
-    }).then(() => {
-      expect(xhr.fetchJson).to.have.been.called;
+    
+    return getAmpAutoAds().then(ampAutoAds => {
+      return Promise.resolve().then(() => {
+        expect(xhr.fetchJson).to.not.have.been.called;
+        resolve();
+        return visible;
+      }).then(() => {
+        expect(xhr.fetchJson).to.have.been.called;
+      });
     });
   });
 
-  it.skip('should insert three ads on page using config', () => {
-    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
-    ampAutoAdsElem.setAttribute('type', 'adsense');
-    ampAutoAds.buildCallback();
+  it('should insert three ads on page using config', () => {
 
-    return new Promise(resolve => {
-      waitForChild(anchor4, parent => {
-        return parent.childNodes.length > 0;
-      }, () => {
-        expect(anchor1.childNodes).to.have.lengthOf(1);
-        expect(anchor2.childNodes).to.have.lengthOf(1);
-        expect(anchor3.childNodes).to.have.lengthOf(0);
-        expect(anchor4.childNodes).to.have.lengthOf(1);
-        verifyAdElement(anchor1.childNodes[0]);
-        verifyAdElement(anchor2.childNodes[0]);
-        verifyAdElement(anchor4.childNodes[0]);
-        resolve();
+    return getAmpAutoAds().then(ampAutoAds => {
+      return new Promise(resolve => {
+        waitForChild(anchor4, parent => {
+          return parent.childNodes.length > 0;
+        }, () => {
+          expect(anchor1.childNodes).to.have.lengthOf(1);
+          expect(anchor2.childNodes).to.have.lengthOf(1);
+          expect(anchor3.childNodes).to.have.lengthOf(0);
+          expect(anchor4.childNodes).to.have.lengthOf(1);
+          verifyAdElement(anchor1.childNodes[0]);
+          verifyAdElement(anchor2.childNodes[0]);
+          verifyAdElement(anchor4.childNodes[0]);
+          resolve();
+        });
       });
     });
   });
