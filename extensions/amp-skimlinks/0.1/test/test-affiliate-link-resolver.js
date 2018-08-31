@@ -8,7 +8,7 @@ import {pubcode} from './constants';
 import helpersFactory from './helpers';
 
 
-describes.fakeWin('domain-resolver', {
+describes.fakeWin('AffiliateLinkResolver', {
   amp: {
     extensions: ['amp-skimlinks'],
   },

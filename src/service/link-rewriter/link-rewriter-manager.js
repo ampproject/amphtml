@@ -92,8 +92,9 @@ export class LinkRewriterManager {
    * tracking requests, handlers of this events should not
    * mutate the anchor!
    * @param {HTMLElement} anchor
+   * @param {string} clickType - 'click' or 'contextmenu'
    */
-  maybeRewriteLink(anchor) {
+  maybeRewriteLink(anchor, clickType) {
     const suitableLinkRewriters = this.getSuitableLinkRewritersForLink_(anchor);
     if (suitableLinkRewriters.length) {
       let chosenLinkRewriter = null;
@@ -114,6 +115,7 @@ export class LinkRewriterManager {
       const eventData = {
         linkRewriterId,
         anchor,
+        clickType,
       };
 
       suitableLinkRewriters.forEach(linkRewriter => {
@@ -190,12 +192,32 @@ export class LinkRewriterManager {
    * @return {Array<./link-rewriter.LinkRewriter>} - Mutated linkRewriterList param.
    */
   insertInListBasedOnPriority_(linkRewriterList, linkRewriter, idPriorityList) {
-    const priorityIndex = idPriorityList.indexOf(linkRewriter.id);
-    if (priorityIndex > -1) {
-      linkRewriterList.splice(priorityIndex, 0, linkRewriter);
-    } else {
-      linkRewriterList.push(linkRewriter);
-    }
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#Description
+    const B_HAS_PRIORITY = 1;
+    const A_HAS_PRIORITY = -1;
+    const compareFunction = (linkRewriterA, linkRewriterB) => {
+      const indexA = idPriorityList.indexOf(linkRewriterA.id);
+      const indexB = idPriorityList.indexOf(linkRewriterB.id);
+
+      if (indexA === -1 && indexB === -1) {
+        return 0; // Nothing to changes
+      }
+      // A is not in the priority list, give it the lowest priority
+      if (indexA === -1) {
+        return B_HAS_PRIORITY;
+      }
+      // B is not in the priority list, give it the lowest priority
+      if (indexB === -1) {
+        return A_HAS_PRIORITY;
+      }
+
+      // Higher index means lower priority
+      return indexA > indexB ? B_HAS_PRIORITY : A_HAS_PRIORITY;
+    };
+
+    linkRewriterList.push(linkRewriter);
+    // Sort in place
+    linkRewriterList.sort(compareFunction);
 
     return linkRewriterList;
   }

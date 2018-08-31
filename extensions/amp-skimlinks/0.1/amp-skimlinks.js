@@ -9,10 +9,10 @@ import {AffiliateLinkResolver} from './affiliate-link-resolver';
 import {SKIMLINKS_REWRITER_ID} from './constants';
 import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewriter/constants';
 
+import {EVENT_TYPE_CONTEXT_MENU} from '../../../src/service/navigation';
 import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
-
 const startTime = new Date().getTime();
 
 
@@ -157,9 +157,17 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * @private
    */
   onClick_(eventData) {
-    // The link was not monetizable or the link was replaced
-    // by an other LinkRewriter.
-    if (eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID) {
+    const doClickTracking = (
+      // Test two scenarios:
+      //  - Link hasn't been replaced at all: eventData.linkRewriterId === null
+      //  - Link has been replaced but not by Skimlinks:
+      //    E.g: eventData.linkRewriterId === "awin"
+      eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID &&
+      // Also, context menu click should not send tracking
+      eventData.clickType !== EVENT_TYPE_CONTEXT_MENU
+    );
+
+    if (doClickTracking) {
       this.trackingService_.sendNaClickTracking(eventData.anchor);
     }
   }

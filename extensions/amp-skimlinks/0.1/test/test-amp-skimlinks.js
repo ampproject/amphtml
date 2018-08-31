@@ -144,8 +144,7 @@ describes.fakeWin('amp-skimlinks', {
       expect(stub.calledOnce).to.be.true;
     });
 
-    // TODO, confirm the logic
-    it('Should send NA click tracking if other vendor has not replaced the link', () => {
+    it('Should send NA click tracking if other vendor has replaced the link', () => {
       ampSkimlinks.onClick_({
         linkRewriterId: 'vendorX',
       });
@@ -176,6 +175,35 @@ describes.fakeWin('amp-skimlinks', {
 
       expect(stub.called).to.be.false;
     });
+
+    describe('Based on clickType', () => {
+      it('Should send the NA click tracking if clickType is "click"', () => {
+        ampSkimlinks.onClick_({
+          linkRewriterId: null,
+          clickType: 'click',
+        });
+
+        expect(stub.calledOnce).to.be.true;
+      });
+      it('Should not send the NA click tracking if clickType is "contextmenu"', () => {
+        ampSkimlinks.onClick_({
+          linkRewriterId: null,
+          clickType: 'contextmenu',
+        });
+
+        expect(stub.called).to.be.false;
+
+      });
+      it('Should send the NA click if clickType is something else', () => {
+        ampSkimlinks.onClick_({
+          linkRewriterId: null,
+          clickType: 'mouseup',
+        });
+
+        expect(stub.calledOnce).to.be.true;
+      });
+    })
+
   });
 
   describe('On page scan callback', () => {

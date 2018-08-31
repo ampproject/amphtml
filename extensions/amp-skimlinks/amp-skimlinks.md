@@ -54,7 +54,7 @@ Code:
 ```html
     <amp-skimlinks
         layout="nodisplay"
-        publisher-code="68019X1559797"
+        publisher-code="123X456"
     >
     </amp-skimlinks>
 ```

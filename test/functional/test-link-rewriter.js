@@ -97,7 +97,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
           [linkRewriterVendor2, linkRewriterVendor1]);
     });
 
-    it('Should be insert linkRewriter in the middle', () => {
+    it('Should be able to insert linkRewriter in the middle', () => {
       linkRewriterManager.priorityList_ = ['vendor2', 'vendor1', 'vendor3'];
 
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
@@ -118,11 +118,25 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
           [linkRewriterVendor2, linkRewriterVendor3]);
 
       const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
+      const linkRewriterVendor4 = registerLinkRewriterHelper('vendor4');
+
+      expect(linkRewriterManager.linkRewriters_).to.deep.equal(
+          [linkRewriterVendor2, linkRewriterVendor1,
+            linkRewriterVendor3, linkRewriterVendor4]);
+    });
+
+    it('Should ignore if priority contains unregistered rewriters', () => {
+      linkRewriterManager.priorityList_ = [
+        'vendor2', 'vendor4', 'vendor1','vendor3',
+      ];
+
+      const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
+      const linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
+      const linkRewriterVendor1 = registerLinkRewriterHelper('vendor1');
 
       expect(linkRewriterManager.linkRewriters_).to.deep.equal(
           [linkRewriterVendor2, linkRewriterVendor1, linkRewriterVendor3]);
     });
-
 
     it('Should call .onDomUpdate() after registering linkRewriter', () => {
       env.sandbox.stub(LinkRewriter.prototype, 'onDomUpdated')
@@ -157,17 +171,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       env.sandbox.spy(linkRewriterManager, 'getSuitableLinkRewritersForLink_');
     });
 
-    describe('Allowed click action types', () => {
-      it('Should return if action type not allowed', () => {
-        sendEventHelper(AmpEvents.ANCHOR_CLICK, {
-          clickActionType: anchorClickActions.NAVIGATE_CUSTOM_PROTOCOL,
-        });
-        expect(linkRewriterManager.getSuitableLinkRewritersForLink_.called).to.be.false;
-      });
-    });
-
-
-    describe('Send click event', () => {
+    describe('Send clicks event', () => {
       let linkRewriterVendor1, linkRewriterVendor2, linkRewriterVendor3;
 
       function getEventData() {
@@ -227,6 +231,13 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
         // vendor2 has isWatchingLink to false therefore can not replace.
         expect(getEventData(linkRewriterVendor2).linkRewriterId).to.be.null;
         expect(getEventData(linkRewriterVendor3).linkRewriterId).to.be.null;
+      });
+
+      it('Should set the clickType', () => {
+        linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'), 'contextmenu');
+        expect(getEventData(linkRewriterVendor1).clickType).to.equal('contextmenu');
+        expect(getEventData(linkRewriterVendor2).clickType).to.equal('contextmenu');
+        expect(getEventData(linkRewriterVendor3).clickType).to.equal('contextmenu');
       });
     });
 
