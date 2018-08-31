@@ -202,6 +202,7 @@ import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
 import {rubicon} from '../ads/rubicon';
+import {runative} from '../ads/runative';
 import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
@@ -270,6 +271,7 @@ const AMP_EMBED_ALLOWED = {
   smi2: true,
   taboola: true,
   zergnet: true,
+  runative: true,
 };
 
 init(window);
@@ -420,6 +422,7 @@ register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
 register('rubicon', rubicon);
+register('runative', runative);
 register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('sklik', sklik);

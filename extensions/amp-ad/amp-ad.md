@@ -316,6 +316,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [Rubicon Project](../../ads/rubicon.md)
+- [RUNative](../../ads/runative.md)
 - [Sekindo](../../ads/sekindo.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Sklik](../../ads/sklik.md)
