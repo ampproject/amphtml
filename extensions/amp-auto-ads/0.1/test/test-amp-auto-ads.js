@@ -159,9 +159,6 @@ describes.realWin('amp-auto-ads', {
     ampAutoAds = doc.createElement('amp-auto-ads');
     ampAutoAds.setAttribute('type', type || '_ping_');
     doc.body.appendChild(ampAutoAds);
-    ampAutoAds.implementation_.testing = () => {
-      console.error('overirdden')
-    }
     return ampAutoAds.build().then(() => {
       return ampAutoAds.layoutCallback();
     });
