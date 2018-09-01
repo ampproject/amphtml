@@ -21,13 +21,14 @@ import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {dev} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../layout-rect';
-import {px, resetStyles, setImportantStyles} from '../../src/style';
+import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../../src/utils/rate-limit';
+import {throttle} from '../utils/rate-limit';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
