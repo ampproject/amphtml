@@ -761,7 +761,7 @@ function printConfigHelp(command) {
 }
 
 /**
- * Parse the --extensions or the --noextensions flag and
+ * Parse the --extensions --extensions_from or the --noextensions flag and
  * prints a helpful message that lets the developer know how to build
  * a list of extensions or without any extensions.
  */
@@ -794,11 +794,14 @@ function parseExtensionFlags() {
       if (argv.extensions === 'minimal_set') {
         argv.extensions = MINIMAL_EXTENSION_SET.join(',');
       }
+    }
 
+    if (argv.extensions || argv.extensions_from) {
+      const extensionsToBuild = getExtensionsToBuild();
       log(green('Building extension(s):'),
-          cyan(getExtensionsToBuild().join(', ')));
+          cyan(extensionsToBuild.join(', ')));
 
-      if (maybeAddVideoService()) {
+      if (maybeAddVideoService(extensionsToBuild)) {
         log(green('⤷ Video component(s) being built, added'),
             cyan('amp-video-service'), green('to extension set.'));
       }
@@ -816,10 +819,11 @@ function parseExtensionFlags() {
 
 /**
  * Adds `amp-video-service` to the extension set if a component requires it.
+ * @param {!Array<string>}
  * @return {boolean}
  */
-function maybeAddVideoService() {
-  if (!argv.extensions.split(',').find(ext => VIDEO_EXTENSIONS.has(ext))) {
+function maybeAddVideoService(extensionsToBuild) {
+  if (!extensionsToBuild.find(ext => VIDEO_EXTENSIONS.has(ext))) {
     return false;
   }
   argv.extensions += ',amp-video-service';
