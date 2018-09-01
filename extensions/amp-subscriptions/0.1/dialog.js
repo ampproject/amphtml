@@ -146,7 +146,7 @@ export class Dialog {
     }).then(() => {
       return this.vsync_.mutatePromise(() => {
         // TODO(jridgewell, #17475): Use toggle once it switches to [hidden]
-        this.wrapper_.setAttribute('hidden');
+        this.wrapper_.setAttribute('hidden', '');
         this.viewport_.updatePaddingBottom(0);
         this.visible_ = false;
       });
