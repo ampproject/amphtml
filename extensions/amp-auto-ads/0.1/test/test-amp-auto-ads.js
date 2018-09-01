@@ -29,6 +29,7 @@ import {waitForChild} from '../../../../src/dom';
 
 describes.realWin('amp-auto-ads', {
   amp: {
+    runtimeOn: true,
     extensions: ['amp-ad', 'amp-auto-ads'],
   },
 }, env => {
