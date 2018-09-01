@@ -23,7 +23,42 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
+import {setStyle} from '../../../src/style';
 
+/**
+ * @param {!Window} win
+ * @return {boolean} True if we should show the default placeholder with
+ *    plusing.
+ */
+function isPulsingPlaceholder(win) {
+  return isExperimentOn(win, 'twitter-default-placeholder-pulse');
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean} True if we should show the default placeholder with
+ *    a fade out.
+ */
+function isFadingPlaceholder(win) {
+  return isExperimentOn(win, 'twitter-default-placeholder-fade');
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean} True if we should show the default placeholder with
+ *    a burst ending animation.
+ */
+function isBurstingPlaceholder(win) {
+  return isExperimentOn(win, 'twitter-default-placeholder-burst');
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean} True if we should show the default placeholder.
+ */
+function enableDefaultPlaceholder(win) {
+  return isExperimentOn(win, 'twitter-default-placeholder');
+}
 
 class AmpTwitter extends AMP.BaseElement {
 
@@ -49,7 +84,7 @@ class AmpTwitter extends AMP.BaseElement {
    * @override
    */
   createPlaceholderCallback() {
-    if (!isExperimentOn(this.win, 'twitter-default-placeholder')) {
+    if (!enableDefaultPlaceholder(this.win)) {
       return;
     }
 
@@ -94,7 +129,15 @@ class AmpTwitter extends AMP.BaseElement {
         {allowFullscreen: true});
     this.applyFillContent(iframe);
     iframe.classList.add('i-amphtml-twitter-iframe');
-
+    if (isPulsingPlaceholder(this.win)) {
+      this.element.classList.add('i-amphtml-twitter-pulse');
+    }
+    if (isFadingPlaceholder(this.win)) {
+      this.element.classList.add('i-amphtml-twitter-fade');
+    }
+    if (isBurstingPlaceholder(this.win)) {
+      this.element.classList.add('i-amphtml-twitter-burst');
+    }
     this.updateForLoadingState_();
     listenFor(iframe, MessageType.EMBED_SIZE, data => {
       this.updateForSuccessState_(data['height']);
@@ -112,10 +155,14 @@ class AmpTwitter extends AMP.BaseElement {
    * @private
    */
   updateForLoadingState_() {
-    this.element.setAttribute('i-amphtml-loading', 'start');
-    // Set an explicit height so we can animate it.
-    this./*OK*/changeHeight(
-        this.element./*REVIEW*/getBoundingClientRect().height);
+    let height;
+    this.measureMutateElement(() => {
+      height = this.element./*OK*/getBoundingClientRect().height;
+    }, () => {
+      this.element.setAttribute('i-amphtml-loading', 'start');
+      // Set an explicit height so we can animate it.
+      this./*OK*/changeHeight(height);
+    });
   }
 
   /**
@@ -124,13 +171,22 @@ class AmpTwitter extends AMP.BaseElement {
    * @private
    */
   updateForSuccessState_(height) {
-    if (this.userPlaceholder_) {
-      this.togglePlaceholder(false);
-    }
-
-    this.mutateElement(() => {
+    let placeholderHeight;
+    this.measureMutateElement(() => {
+      if (!this.userPlaceholder_ && isFadingPlaceholder(this.win)) {
+        // Use an explicit height so that the placeholder does not move when\
+        // the container resizes.
+        placeholderHeight = this.element./*OK*/getBoundingClientRect().height;
+      }
+    }, () => {
+      if (this.userPlaceholder_) {
+        this.togglePlaceholder(false);
+      }
       this.element.setAttribute('i-amphtml-loading', 'done');
       this./*OK*/changeHeight(height);
+      if (placeholderHeight) {
+        setStyle(this.getPlaceholder(), 'height', placeholderHeight, 'px');
+      }
     });
   }
 
@@ -172,7 +228,6 @@ class AmpTwitter extends AMP.BaseElement {
 
 
 AMP.extension('amp-twitter', '0.1', AMP => {
-  const styles = isExperimentOn(AMP.win, 'twitter-default-placeholder') ? CSS :
-    undefined;
+  const styles = enableDefaultPlaceholder(AMP.win) ? CSS : undefined;
   AMP.registerElement('amp-twitter', AmpTwitter, styles);
 });

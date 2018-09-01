@@ -19,6 +19,7 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
+import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
 import {convertEasingKeyword, defaultDurationValues,
   defaultEasingValues, defaultFlyInDistanceValues,
   defaultMarginValues, installStyles, resolvePercentageToNumber}
@@ -27,7 +28,6 @@ import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
-import {setStyles} from '../../../../src/style';
 
 /**
  * Class that implements the various preset animation providers.
@@ -66,7 +66,8 @@ export class FxProvider {
     new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.ampdoc_, this.fxType_);
-    setStyles(element, installStyles(element, this.fxType_));
+    setStyles(element, assertDoesNotContainDisplay(installStyles(
+        element, this.fxType_)));
   }
 }
 
@@ -92,6 +93,9 @@ export class FxElement {
 
     /** @const @private {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = resources;
+
+    /** @type {?number} */
+    this.viewportHeight = null;
 
     /** @type {?number} */
     this.adjustedViewportHeight = null;
@@ -154,6 +158,11 @@ export class FxElement {
       // start observing position of the element.
       this.observePositionChanges_();
     });
+
+    this.getViewportHeight_().then(viewportHeight => {
+      this.viewportHeight = viewportHeight;
+    });
+
   }
 
   /**
@@ -168,6 +177,20 @@ export class FxElement {
       this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
         this.adjustedViewportHeight = adjustedViewportHeight;
       });
+      this.getViewportHeight_().then(viewportHeight => {
+        this.viewportHeight = viewportHeight;
+      });
+    });
+  }
+
+  /**
+   * Returns the current viewport height.
+   * @return {!Promise<number>}
+   * @private
+   */
+  getViewportHeight_() {
+    return this.resources_.measureElement(() => {
+      return this.viewport_.getHeight();
     });
   }
 

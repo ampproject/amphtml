@@ -18,7 +18,7 @@ import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDocDeprecated, registerServiceBuilderForDoc} from './service';
-import {makeBodyVisible} from './style-installer';
+import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
 /**
@@ -263,7 +263,7 @@ class StartupTask extends Task {
   /** @override */
   onTaskError_(unusedError) {
     // Startup tasks run early in init. All errors should show the doc.
-    makeBodyVisible(self.document);
+    makeBodyVisibleRecovery(self.document);
   }
 
   /** @override */

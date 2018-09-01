@@ -15,6 +15,7 @@
  */
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {isExperimentOn} from '../../../src/experiments';
 
 /**
  * @abstract
@@ -48,15 +49,6 @@ export class BaseCarousel extends AMP.BaseElement {
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
-
-    this.element.addEventListener(
-        'touchend', this.toggleControls_.bind(this));
-  }
-
-  /** Toggles the controls on tap/hover */
-  toggleControls_() {
-    this.setControlsState();
-    this.hintControls();
   }
 
   /** @override */
@@ -78,11 +70,13 @@ export class BaseCarousel extends AMP.BaseElement {
    * Builds a carousel button for next/prev.
    * @param {string} className
    * @param {function()} onInteraction
+   * @param {string} internalStyles
    */
-  buildButton(className, onInteraction) {
+  buildButton(className, onInteraction, internalStyles) {
     const button = this.element.ownerDocument.createElement('div');
     button.tabIndex = 0;
     button.classList.add('amp-carousel-button');
+    button.classList.add(internalStyles);
     button.classList.add(className);
     button.setAttribute('role', 'button');
     button.onkeydown = event => {
@@ -104,12 +98,16 @@ export class BaseCarousel extends AMP.BaseElement {
   buildButtons() {
     this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
       this.interactionPrev();
-    });
+    }, isExperimentOn(this.win, 'amp-carousel-new-arrows') ?
+      'i-amphtml-carousel-button-prev-new' :
+      'i-amphtml-carousel-button-prev-legacy');
     this.element.appendChild(this.prevButton_);
 
     this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
-    });
+    }, isExperimentOn(this.win, 'amp-carousel-new-arrows') ?
+      'i-amphtml-carousel-button-next-new' :
+      'i-amphtml-carousel-button-next-legacy');
     this.element.appendChild(this.nextButton_);
   }
 
@@ -182,6 +180,10 @@ export class BaseCarousel extends AMP.BaseElement {
       Services.timerFor(this.win).delay(() => {
         this.mutateElement(() => {
           this.element.classList.remove(className);
+          this.prevButton_.classList.toggle(
+              'i-amphtml-screen-reader', !this.showControls_);
+          this.nextButton_.classList.toggle(
+              'i-amphtml-screen-reader', !this.showControls_);
         });
       }, 4000);
     });

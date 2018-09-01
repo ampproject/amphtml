@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-amp-accordion [i-amphtml-measure] {
-  /* Need to use CSS (not inline style) to use !important. Overrides a rule
-   * in amp.css */
-  position: fixed !important;
-  opacity: 0 !important;
-}
+import '../amp-recaptcha-input';
+
+describes.realWin('amp-recaptcha-input', {
+  win: { /* window spec */
+    location: '...',
+    historyOff: false,
+  },
+  amp: { /* amp spec */
+    runtimeOn: false,
+    extensions: ['amp-recaptcha-input'],
+  },
+}, () => {
+
+  describe('amp-recaptcha-input', () => {
+    it('should pass', () => {
+      expect(true).to.be.ok;
+    });
+  });
+});

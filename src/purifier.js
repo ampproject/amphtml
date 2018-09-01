@@ -73,7 +73,9 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'em',
   'i',
   'ins',
+  'li',
   'mark',
+  'ol',
   'p',
   'q',
   's',
@@ -91,6 +93,7 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'tfoot',
   'tr',
   'u',
+  'ul',
 ];
 
 /**
@@ -306,8 +309,12 @@ export function purifyHtml(dirty) {
     allowedAttributes = data.allowedAttributes;
 
     const allowAttribute = () => {
-      allowedAttributes[attrName] = true;
-      allowedAttributesChanges.push(attrName);
+      // Only add new attributes to `allowedAttributesChanges` to avoid removing
+      // default-supported attributes later erroneously.
+      if (!allowedAttributes[attrName]) {
+        allowedAttributes[attrName] = true;
+        allowedAttributesChanges.push(attrName);
+      }
     };
 
     // Allow all attributes for AMP elements. This avoids the need to whitelist
@@ -405,9 +412,10 @@ export function purifyHtml(dirty) {
  * e.g. triple mustache.
  *
  * @param {string} html
+ * @param {!Document=} doc
  * @return {string}
  */
-export function purifyTagsForTripleMustache(html) {
+export function purifyTagsForTripleMustache(html, doc = self.document) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
 
@@ -437,27 +445,11 @@ export function purifyTagsForTripleMustache(html) {
     'RETURN_DOM_FRAGMENT': true,
   });
   DOMPurify.removeAllHooks();
-  return fragmentToHtml(fragment);
-}
-
-/**
- * @param {!DocumentFragment} fragment
- * @return {string}
- */
-function fragmentToHtml(fragment) {
-  let html = '';
-  for (let i = 0; i < fragment.childNodes.length; i++) {
-    const child = fragment.childNodes[i];
-    switch (child.nodeType) {
-      case Node.TEXT_NODE:
-        html += child.textContent;
-        break;
-      case Node.ELEMENT_NODE:
-        html += child./*OK*/outerHTML;
-        break;
-    }
-  }
-  return html;
+  // Serialize DocumentFragment to HTML. XMLSerializer would also work, but adds
+  // namespaces for all elements and attributes.
+  const div = doc.createElement('div');
+  div.appendChild(fragment);
+  return div./*OK*/innerHTML;
 }
 
 /**

@@ -47,10 +47,28 @@ the button of a CTA ad.
 
 ### CTA Text Enum
 The CTA button must be configured from a pre-defined set of choices.
+  * APPLY_NOW: "Apply Now"
+  * BOOK_NOW: "Book"
+  * BUY_TICKETS: "Buy Tickets"
+  * DOWNLOAD: "Download"
   * EXPLORE: "Explore Now"
-  * SHOP: "Shop Now"
-  * READ: "Read Now"
+  * GET_NOW: "Get Now"
   * INSTALL: "Install Now" (Note that deep links to apps (e.g. whatsapp://chat) are not supported but publishers can link to the App Store page or the Google Play Store page using http/https).
+  * LISTEN: "Listen Now"
+  * MORE: "More"
+  * OPEN_APP: "Open App"
+  * ORDER_NOW: "Order Now"
+  * PLAY: "Play"
+  * READ: "Read Now"
+  * SHOP: "Shop Now"
+  * SHOW: "Show"
+  * SHOWTIMES: "Showtimes"
+  * SIGN_UP: "Sign Up"
+  * SUBSCRIBE: "Subscribe Now"
+  * USE_APP: "Use App"
+  * VIEW: "View"
+  * WATCH: "Watch"
+  * WATCH_EPISODE: "Watch Episode"
 
 If you need support for a new CTA button, please open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 

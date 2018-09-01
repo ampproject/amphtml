@@ -15,24 +15,34 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {isLayoutSizeDefined} from '../src/layout';
+import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return layout == Layout.CONTAINER ||
+        isLayoutSizeDefined(layout);
   }
 
   /** @override */
   buildCallback() {
+    if (this.getLayout() == Layout.CONTAINER) {
+      return;
+    }
     const container = this.win.document.createElement('div');
     this.applyFillContent(container);
     this.getRealChildNodes().forEach(child => {
       container.appendChild(child);
     });
     this.element.appendChild(container);
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    // Allow amp-layout to be built in prerender mode.
+    return true;
   }
 }
 

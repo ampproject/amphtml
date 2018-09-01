@@ -66,7 +66,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-access-iframe',
-    name: 'AMP Access iframe prototype',
+    name: 'AMP Access iframe prototype (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/13287',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
   },
@@ -337,6 +337,16 @@ const EXPERIMENTS = [
     id: 'amp-carousel-scroll-snap',
     name: 'Enables scroll snap on carousel across all browsers/OSes',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
+  },
+  {
+    id: 'amp-carousel-new-arrows',
+    name: 'Enables new AMP carousel navigation arrows',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17510',
+  },
+  {
+    id: 'linker-meta-opt-in',
+    name: 'Opts-in users that have included the GA client-id meta tag ',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
   },
 ];
 
