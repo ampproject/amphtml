@@ -422,8 +422,9 @@ export class AmpList extends AMP.BaseElement {
           if (autoResize) {
             const layout = this.element.getAttribute('layout');
             if (layout == Layout.FLEX_ITEM) {
-              // TODO (cathyxz): flex item does not play nice
-              // with layout container
+              // TODO (#17824): flex item + reset-on-refresh will add
+              // an invisible loader that fills the amp-list and shoves all
+              // list items out of the amp-list.
               this.attemptChangeHeight(scrollHeight).catch(() => {});
             } else if (layout !== Layout.CONTAINER) {
               this.changeToLayoutContainer_(layout);
