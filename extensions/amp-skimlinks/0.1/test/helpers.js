@@ -4,8 +4,6 @@ import {Services} from '../../../../src/services';
 import {Tracking} from '../tracking';
 import {pubcode} from './constants';
 
-
-
 const helpersFactory = env => {
   const {win} = env;
 
@@ -19,7 +17,9 @@ const helpersFactory = env => {
 
     createStubXhr(data) {
       const response = {
-        json: () => { return Promise.resolve(data); },
+        json: () => {
+          return Promise.resolve(data);
+        },
       };
 
       return {
@@ -41,10 +41,13 @@ const helpersFactory = env => {
     },
 
     createTrackingWithStubAnalytics(skimOptions) {
-      skimOptions = Object.assign({
-        tracking: true,
-        pubcode,
-      }, skimOptions);
+      skimOptions = Object.assign(
+          {
+            tracking: true,
+            pubcode,
+          },
+          skimOptions
+      );
       this.stubCustomEventReporterBuilder();
 
       return new Tracking(env, skimOptions);
