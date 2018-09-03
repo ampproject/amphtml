@@ -63,13 +63,19 @@ const helpersFactory = env => {
     },
 
     createAmpSkimlinks(extensionAttrs) {
+      const el = this.createAmpSkimlinksElement(extensionAttrs);
+      el.getAmpDoc = () => env.ampdoc;
+
+      return new AmpSkimlinks(el);
+    },
+
+    createAmpSkimlinksElement(extensionAttrs) {
       const el = document.createElement('amp-skimlinks');
       for (const k in extensionAttrs) {
         el.setAttribute(k, extensionAttrs[k]);
       }
-      el.getAmpDoc = () => env.ampdoc;
 
-      return new AmpSkimlinks(el);
+      return el;
     },
   };
 };

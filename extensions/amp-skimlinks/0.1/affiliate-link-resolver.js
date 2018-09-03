@@ -1,9 +1,7 @@
-
-import {parseUrlDeprecated} from '../../../src/url';
-
 import {DOMAIN_RESOLVER_API_URL} from './constants';
 import {createTwoStepsResponse} from '../../../src/service/link-rewriter/link-rewriter-helpers';
 import {dict} from '../../../src/utils/object';
+import {getNormalizedHostnameFromUrl, isExcludedDomain} from './utils';
 
 
 // Can be monetized
@@ -175,7 +173,7 @@ export class AffiliateLinkResolver {
    * @return {string}
    */
   getDomainAffiliateStatus_(domain) {
-    if (this.isExcludedDomain_(domain)) {
+    if (isExcludedDomain(domain, this.skimOptions_)) {
       return STATUS__IGNORE_LINK;
     }
 
@@ -196,7 +194,7 @@ export class AffiliateLinkResolver {
 
     return domains.reduce(((acc, domain) => {
       const isResolved = this.domains_[domain];
-      const isExcluded = this.isExcludedDomain_(domain);
+      const isExcluded = isExcludedDomain(domain, this.skimOptions_);
       const isDuplicate = acc.indexOf(domain) !== -1;
 
       if (!isResolved && !isExcluded && !isDuplicate) {
@@ -220,7 +218,7 @@ export class AffiliateLinkResolver {
         return;
       }
 
-      if (this.isExcludedDomain_(domain)) {
+      if (isExcludedDomain(domain, this.skimOptions_)) {
         this.domains_[domain] = STATUS__IGNORE_LINK;
       }
 
@@ -287,36 +285,9 @@ export class AffiliateLinkResolver {
    * Extracts the domain (hostname) from an anchor.
    * @private
    * @param {HTMLElement} anchor
-   * @return {string}
+   * @return {string} - Hostname, without protocol, without www.
    */
   getAnchorDomain_(anchor) {
-    const {hostname} = parseUrlDeprecated(anchor.href);
-
-    return hostname.replace(/^www\./, '');
-  }
-
-  /**
-   * Check if a domain is excluded, (i.e all URLs from this domains should
-   * be ignored). The list of excluded was generated based on the
-   * 'excluded-domains' skim-option & the internal domains.
-   * (See skim-options.js)
-   *
-   * @private
-   * @param {string} domain
-   * @return {boolean}
-   */
-  isExcludedDomain_(domain) {
-    const {excludedDomains} = this.skimOptions_;
-    // TODO: Should update the isExcluded list as a side effect for caching
-    if (!excludedDomains || !excludedDomains.length) {
-      return false;
-    }
-
-    // TODO: Validate subdomain (*.nordstrom.com)
-    if (excludedDomains.indexOf(domain) === -1) {
-      return false;
-    }
-
-    return true;
+    return getNormalizedHostnameFromUrl(anchor.href);
   }
 }

@@ -1,5 +1,5 @@
+import {parseUrlDeprecated} from '../../../src/url';
 import {user} from '../../../src/log';
-
 /**
  * Get function from an object attached with the object as its context
  * @param {*} context
@@ -24,4 +24,48 @@ export function generatePageImpressionId() {
   }
 
   return str;
+}
+
+/**
+ * @param {string} url
+ * @return {string}
+ */
+export function getNormalizedHostnameFromUrl(url) {
+  const {hostname} = parseUrlDeprecated(url);
+
+  return hostname.replace(/^www\./, '');
+}
+
+/**
+ * Check if a domain is excluded, (i.e all URLs from this domains should
+ * be ignored). The list of excluded was generated based on the
+ * 'excluded-domains' skim-option & the internal domains.
+ * (See skim-options.js)
+ * @param {string} domain
+ * @param {Object} skimOptions
+ * @return {boolean}
+ */
+export function isExcludedDomain(domain, skimOptions) {
+  const {excludedDomains} = skimOptions;
+  if (!excludedDomains || !excludedDomains.length) {
+    return false;
+  }
+
+  // TODO: Validate subdomain (*.nordstrom.com)
+  if (excludedDomains.indexOf(domain) === -1) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Check if a url belongs to an excluded domain.
+ * @param {string} url
+ * @param {Object} skimOptions
+ * @return {boolean}
+ */
+export function isExcludedUrl(url, skimOptions) {
+  const domain = getNormalizedHostnameFromUrl(url);
+  return isExcludedDomain(domain, skimOptions);
 }

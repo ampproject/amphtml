@@ -11,3 +11,13 @@ export const LINKS_IMPRESSIONS_TRACKING_URL =
     `${TRACKING_API_URL}/link?data=\${data}`;
 export const NA_CLICK_TRACKING_URL =
     `${TRACKING_API_URL}/?call=track&rnd=\${rnd}&data=\${data}`;
+
+// Domains excluded from impressions & affiliation & NA click tracking.
+export const GLOBAL_DOMAIN_BLACKLIST = [
+  'go.redirectingat.com',
+  'go.skimresources.com',
+  'facebook.com',
+  'instagram.com',
+  'youtube.com',
+  'twitter.com',
+];
