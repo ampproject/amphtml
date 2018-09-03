@@ -222,6 +222,7 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
+  {name: 'amp-skimlinks', version: '0.1', type: TYPES.AD},
   {name: 'amp-soundcloud', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-springboard-player', version: '0.1', type: TYPES.MEDIA},
   {

@@ -49,4 +49,5 @@ export const SANDBOX_AVAILABLE_VARS = {
   'FIRST_CONTENTFUL_PAINT': true,
   'FIRST_VIEWPORT_READY': true,
   'MAKE_BODY_VISIBLE': true,
+  'DOCUMENT_REFERRER': true,
 };

@@ -36,10 +36,10 @@ import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
 const TAG = 'navigation';
-/** @private @const {string} */
-const EVENT_TYPE_CLICK = 'click';
-/** @private @const {string} */
-const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
+/** @public @const {string} */
+export const EVENT_TYPE_CLICK = 'click';
+/** @public @const {string} */
+export const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -100,6 +100,9 @@ export class Navigation {
 
     /** @private @const {!./history-impl.History} */
     this.history_ = Services.historyForDoc(this.ampdoc);
+
+    /** @private @const {!./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
+    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(this.ampdoc);
 
     const platform = Services.platformFor(this.ampdoc.win);
     /** @private @const {boolean} */
@@ -254,6 +257,11 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
+    this.linkRewriterService_.maybeRewriteLink(
+        /** @type {!HTMLElement} */ (target),
+        e.type
+    );
+
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {

@@ -30,6 +30,8 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
+import {LINK_REWRITER_SERVICE_NAME} from './service/link-rewriter/constants';
+
 /** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
 export let SubscriptionService;
 
@@ -251,6 +253,14 @@ export class Services {
       getServiceForDoc(elementOrAmpDoc, 'layers'));
   }
 
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/link-rewriter/link-rewriter-manager.LinkRewriterManager}
+   */
+  static linkRewriterServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/link-rewriter/link-rewriter-manager.LinkRewriterManager} */ (
+      getServiceForDoc(elementOrAmpDoc, LINK_REWRITER_SERVICE_NAME));
+  }
   /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}
