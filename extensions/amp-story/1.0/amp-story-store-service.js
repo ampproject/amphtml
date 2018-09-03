@@ -63,6 +63,7 @@ export const UIType = {
  *    canshownavigationoverlayhint: boolean,
  *    canshowpreviouspagehelp: boolean,
  *    canshowsharinguis: boolean,
+ *    canshowsidebarbutton: boolean,
  *    canshowsystemlayerbuttons: boolean,
  *    accessstate: boolean,
  *    adstate: boolean,
@@ -75,6 +76,7 @@ export const UIType = {
  *    pausedstate: boolean,
  *    rtlstate: boolean,
  *    sharemenustate: boolean,
+ *    sidebarstate: boolean,
  *    storyaudiostate: boolean,
  *    supportedbrowserstate: boolean,
  *    uistate: !UIType,
@@ -95,6 +97,7 @@ export const StateProperty = {
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canshowpreviouspagehelp',
   CAN_SHOW_SHARING_UIS: 'canshowsharinguis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
+  CAN_SHOW_SIDEBAR_BUTTON: 'canshowsidebarbutton',
 
   // App States.
   ACCESS_STATE: 'accessstate', // amp-access paywall.
@@ -108,6 +111,7 @@ export const StateProperty = {
   PAUSED_STATE: 'pausedstate',
   RTL_STATE: 'rtlstate',
   SHARE_MENU_STATE: 'sharemenustate',
+  SIDEBAR_STATE: 'sidebarstate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   STORY_HAS_AUDIO_STATE: 'storyaudiostate',
   UI_STATE: 'uistate',
@@ -133,6 +137,8 @@ export const Action = {
   TOGGLE_PAUSED: 'togglepaused',
   TOGGLE_RTL: 'togglertl',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
+  TOGGLE_SIDEBAR: 'togglesidebar',
+  TOGGLE_STORY_HAS_SIDEBAR: 'togglestoryhassidebar',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
   TOGGLE_STORY_HAS_AUDIO: 'togglestoryhasaudio',
   TOGGLE_UI: 'toggleui',
@@ -198,6 +204,12 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_RTL:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.RTL_STATE]: !!data}));
+    case Action.TOGGLE_SIDEBAR:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.SIDEBAR_STATE]: !!data}));
+    case Action.TOGGLE_STORY_HAS_SIDEBAR:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.CAN_SHOW_SIDEBAR_BUTTON]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
@@ -315,6 +327,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
+      [StateProperty.CAN_SHOW_SIDEBAR_BUTTON]: false,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
@@ -327,6 +340,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
+      [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.UI_STATE]: UIType.MOBILE,

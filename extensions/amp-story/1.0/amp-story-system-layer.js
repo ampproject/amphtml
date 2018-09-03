@@ -56,10 +56,16 @@ const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 const HAS_AUDIO_ATTRIBUTE = 'i-amphtml-story-audio-state';
 
 /** @private @const {string} */
+const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-sidebar-state';
+
+/** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
 /** @private @const {string} */
 const INFO_CLASS = 'i-amphtml-story-info-control';
+
+/** @private @const {string} */
+const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
 /** @private @const {number} */
 const hideTimeout = 1500;
@@ -140,6 +146,13 @@ const TEMPLATE = {
           attrs: dict({
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
         },
       ],
@@ -276,7 +289,6 @@ export class SystemLayer {
     } else {
       this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
-
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     return this.getRoot();
   }
@@ -310,6 +322,8 @@ export class SystemLayer {
         this.onShareClick_();
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
+      } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
+        this.onSidebarClick_();
       }
     });
 
@@ -349,6 +363,10 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.PAGE_HAS_AUDIO_STATE, audio => {
       this.onPageAudioStateUpdate_(audio);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SIDEBAR_BUTTON, hasSidebar => {
+      this.checkSidebarDisplay_(hasSidebar);
+    });
   }
 
   /**
@@ -386,6 +404,20 @@ export class SystemLayer {
   onBookendStateUpdate_(isActive) {
     this.getShadowRoot()
         .classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * Checks if the story has a sidebar in order to display the icon representing
+   * the opening of the sidebar.
+   * @param {boolean} canShowSharingUis
+   * @private
+   */
+  checkSidebarDisplay_(hasSidebar) {
+    this.vsync_.mutate(() => {
+      hasSidebar ?
+        this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
+    });
   }
 
   /**
@@ -528,6 +560,15 @@ export class SystemLayer {
   onInfoClick_() {
     const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
     this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
+  }
+
+  /**
+   * Handles click events on the sidebar button and toggles the sidebar.
+   * @private
+   */
+  onSidebarClick_() {
+    this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+    console.log("hi");
   }
 
   /**

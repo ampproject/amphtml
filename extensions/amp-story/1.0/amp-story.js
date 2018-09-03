@@ -222,6 +222,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.adPages_ = [];
 
+    /** @private @const {!AmpSidebar} */
+    this.adPages_ = [];
+
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
@@ -248,6 +251,8 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
+
+     this.sidebar_ = null;
 
     /** @private {?HTMLMediaElement} */
     this.backgroundAudioEl_ = null;
@@ -351,6 +356,9 @@ export class AmpStory extends AMP.BaseElement {
     // Components then add their own actions.
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
     actions.setWhitelist([]);
+    actions.addToWhitelist('AMP-SIDEBAR.open');
+    actions.addToWhitelist('AMP-SIDEBAR.close');
+    actions.addToWhitelist('AMP-SIDEBAR.toggle');
   }
 
 
@@ -451,6 +459,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageIds = this.pages_.map(page => page.element.id);
     this.element.appendChild(this.systemLayer_.build(pageIds));
     this.updateAudioIcon_();
+    this.checkForSidebar_();
   }
 
   /** @private */
@@ -543,6 +552,10 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
       this.onPausedStateUpdate_(isPaused);
+    });
+
+    this.storeService_.subscribe(StateProperty.SIDEBAR_STATE, openSidebar => {
+      this.onSidebarStateUpdate_(openSidebar);
     });
 
     this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
@@ -1323,6 +1336,21 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Reacts to paused state updates.
+   * @param {boolean} open
+   * @private
+   */
+  onSidebarStateUpdate_(open) {
+    if(open){
+      const actions = Services.actionServiceForDoc(this.getAmpDoc());
+      this.sidebar_ = childElementByTag(this.element, 'amp-sidebar');
+      actions.execute(
+        this.sidebar_, 'open', null, null, null, null, ActionTrust.HIGH);
+      this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
+    }
+  }
+
+  /**
    * If browser is supported, displays the story. Otherwise, shows either the
    * default unsupported browser layer or the publisher fallback (if provided).
    * @param {boolean} isBrowserSupported
@@ -1833,6 +1861,22 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_AUDIO,
         containsMediaElementWithAudio || hasStoryAudio);
+  }
+
+  /**
+   * Checks for the presence of a sidebar. If a sidebar does exist, then an icon
+   * permitting for the opening/closing of the sidebar is shown.
+   */
+  /** @private */
+  checkForSidebar_() {
+    console.log("1");
+    const customSidebar = childElementByTag(this.element, 'amp-sidebar');
+    if(!!customSidebar){
+      //customSidebar.classList.add('i-amphtml-sidebar');
+     // this.systemLayer_.getShadowRoot().appendChild(customSidebar);
+    }
+    this.storeService_.dispatch(
+      Action.TOGGLE_STORY_HAS_SIDEBAR, !!customSidebar);
   }
 
   /** @private */
