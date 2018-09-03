@@ -1,5 +1,7 @@
-import {parseUrlDeprecated} from '../../../src/url';
+import {GLOBAL_DOMAIN_BLACKLIST} from './constants';
+import {getNormalizedHostnameFromUrl} from './utils';
 import {user} from '../../../src/log';
+
 
 const errors = {
   INVALID_PUBCODE: '"publisher-code" is required.',
@@ -39,11 +41,18 @@ export function getAmpSkimlinksOptions(element, docInfo) {
  * @param {*} internalDomains
  */
 function getExcludedDomains_(element, internalDomains) {
-  let excludedDomains = [].concat(internalDomains);
+  let excludedDomains = []
+      .concat(internalDomains)
+      .concat(GLOBAL_DOMAIN_BLACKLIST);
 
   const excludedDomainsAttr = element.getAttribute('excluded-domains');
   if (excludedDomainsAttr) {
-    excludedDomains = excludedDomainsAttr.trim().split(/\s+/);
+    excludedDomains = excludedDomains.concat(
+        excludedDomainsAttr
+            .trim()
+            .split(/\s+/)
+            .map(domain => domain.replace(/^www\./, ''))
+    );
   }
 
   return excludedDomains;
@@ -107,11 +116,11 @@ function getLinkSelector_(element) {
 function getInternalDomains_(docInfo) {
   const internalDomains = [];
   if (docInfo.canonicalUrl) {
-    internalDomains.push(parseUrlDeprecated(docInfo.canonicalUrl).hostname);
+    internalDomains.push(getNormalizedHostnameFromUrl(docInfo.canonicalUrl));
   }
 
   if (docInfo.sourceUrl) {
-    internalDomains.push(parseUrlDeprecated(docInfo.sourceUrl).hostname);
+    internalDomains.push(getNormalizedHostnameFromUrl(docInfo.sourceUrl));
   }
 
   return internalDomains;

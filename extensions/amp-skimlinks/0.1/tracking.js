@@ -1,5 +1,5 @@
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {generatePageImpressionId} from './utils';
+import {generatePageImpressionId, isExcludedUrl} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 
@@ -41,7 +41,7 @@ export class Tracking {
       customTrackingId: skimOptions.customTrackingId,
       guid: null,
     };
-
+    this.skimOptions_ = skimOptions;
     this.analytics_ = this.setupAnalytics_(element);
   }
 
@@ -111,7 +111,7 @@ export class Tracking {
    * @param {HTMLElement} anchor
    */
   sendNaClickTracking(anchor) {
-    if (!this.tracking_) {
+    if (!this.tracking_ || isExcludedUrl(anchor.href, this.skimOptions_)) {
       return;
     }
     const {
@@ -247,6 +247,10 @@ export class Tracking {
     const urls = {};
 
     anchorReplacementList.forEach(({replacementUrl, anchor}) => {
+      if (isExcludedUrl(anchor.href, this.skimOptions_)) {
+        return;
+      }
+
       urls[anchor.href] = urls[anchor.href] || {
         ae: replacementUrl ? 1 : 0,
         count: 0,

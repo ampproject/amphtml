@@ -204,6 +204,28 @@ describes.fakeWin(
             const trackingData = JSON.parse(urlVars.data);
             expect(trackingData.uc).to.equal('xcust-id');
           });
+
+          it('Should not send excludedDomains', () => {
+            const excludedDomain = 'go.redirectingat.com';
+            const trackingService = helpers.createTrackingWithStubAnalytics({
+              excludedDomains: [excludedDomain],
+            });
+
+            trackingService.sendImpressionTracking([
+              {
+                anchor: helpers.createAnchor(`https://${excludedDomain}`),
+                replacementUrl: 'https://go.skimresources.com',
+              },
+            ], startTime);
+
+            const urlVars = helpers.getAnalyticsUrlVars(
+                trackingService,
+                'page-impressions'
+            );
+
+            const trackingData = JSON.parse(urlVars.data);
+            expect(trackingData.slc).to.equal(0);
+          });
         });
 
         describe('Link impressions analytics', () => {
@@ -255,6 +277,34 @@ describes.fakeWin(
           });
 
           expect(trackingData.hae).to.equal(1);
+        });
+
+        it('Should not send excludedDomains', () => {
+          const excludedDomain = 'go.redirectingat.com';
+          const trackingService = helpers.createTrackingWithStubAnalytics({
+            excludedDomains: [excludedDomain],
+          });
+
+          const anchorList = createFakeAnchorReplacementList().concat([
+            {
+              anchor: helpers.createAnchor(`https://${excludedDomain}`),
+              replacementUrl: null,
+            },
+          ]);
+
+          trackingService.sendImpressionTracking(anchorList, startTime);
+
+          const urlVars = helpers.getAnalyticsUrlVars(
+              trackingService,
+              'link-impressions'
+          );
+
+          const trackingData = JSON.parse(urlVars.data);
+          expect(trackingData.dl).to.deep.equal({
+            'http://merchant1.com/': {count: 2, ae: 1},
+            'http://merchant2.com/': {count: 1, ae: 1},
+            'http://non-merchant.com/': {count: 1, ae: 0},
+          });
         });
       });
 
@@ -364,6 +414,18 @@ describes.fakeWin(
           );
 
           expect(urlVars.rnd).to.be.equal('RANDOM');
+        });
+
+        it('Should not send excludedDomains', () => {
+          const trackingService = setupTrackingService({
+            excludedDomains: ['non-merchant.com'],
+          });
+          const anchor = helpers.createAnchor('https://non-merchant.com/test');
+
+          trackingService.sendNaClickTracking(anchor);
+
+          const stub = trackingService.analytics_.trigger;
+          expect(stub.withArgs('non-affiliate-click').called).to.be.false;
         });
       });
     }
