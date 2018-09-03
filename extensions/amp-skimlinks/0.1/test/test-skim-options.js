@@ -16,7 +16,10 @@ describes.fakeWin(
       });
 
       beforeEach(() => {
-        docInfo = {canonicalUrl: 'https://mydomain.com/test'};
+        docInfo = {
+          canonicalUrl: 'https://mydomain.com/test',
+          sourceUrl: 'https://www.google.co.uk',
+        };
       });
 
       afterEach(() => {
@@ -41,7 +44,9 @@ describes.fakeWin(
           });
           const options = getAmpSkimlinksOptions(element, docInfo);
 
-          expect(options.excludedDomains).to.include('mydomain.com');
+          expect(options.excludedDomains).to.include.members(
+              ['mydomain.com', 'google.co.uk']
+          );
         });
 
         it('Should exclude global domain blacklist', () => {
@@ -52,6 +57,22 @@ describes.fakeWin(
           expect(options.excludedDomains).to.include
               .members(['go.redirectingat.com', 'go.skimresources.com']);
         });
+
+
+        it('Should not overwrite internal & global blacklist when using option',
+            () => {
+              const element = helpers.createAmpSkimlinksElement({
+                'publisher-code': '123X123',
+                'excluded-domains': 'www.merchant1.com',
+              });
+              const options = getAmpSkimlinksOptions(element, docInfo);
+              expect(options.excludedDomains).to.include.members([
+                'merchant1.com', // from skim-option
+                'mydomain.com', // from internal domains
+                'go.redirectingat.com', // from global blacklist
+              ]);
+            }
+        );
       });
     }
 );

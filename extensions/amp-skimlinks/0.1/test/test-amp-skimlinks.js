@@ -81,13 +81,14 @@ describes.fakeWin(
           return ampSkimlinks.buildCallback().then(() => {
             expect(SkimOptionsModule.getAmpSkimlinksOptions.calledOnce).to.be
                 .true;
-            expect(ampSkimlinks.skimOptions_).to.deep.equal({
+            expect(ampSkimlinks.skimOptions_).to.deep.include({
               pubcode: options['publisher-code'],
-              excludedDomains: ['amazon.com', 'amazon.fr'],
               tracking: options['tracking'],
               customTrackingId: options['custom-tracking-id'],
               linkSelector: options['link-selector'],
             });
+            expect(ampSkimlinks.skimOptions_.excludedDomains).to.include
+                .members(['amazon.com', 'amazon.fr']);
           });
         });
 
