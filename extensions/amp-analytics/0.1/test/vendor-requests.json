@@ -41,7 +41,7 @@
   },
    "catchpoint": {
    "endpoint": "https://r.3gl.net/hawklogserver/r.p",
-   "pageview":  "https://r.3gl.net/hawklogserver/r.p?data={%22v%22:2,%22y%22:%22load%22,%22ui%22:123324,%22si%22:1234234237,%22pi%22:092934,%22di%22:568,%22pc%22:1,%22dn%22:0,%22fc%22:7,%22wt%22:15,%22Id%22:5,%22de%22:530,%22dl%22:533,%22dc%22:1829,%22rp%22:1338,%22cl%22:1500,%22dc%22:1829,%22rp%22:334,%22cl%22:1500,%22rd%22:0,%22jsc%22:0,%22dh%22:1200,%22dw%22:1920,%22el%22:193,%22rf%22:%22http%3A%2F%2Flocalhost%3A8000%2Fexamples%2Fanalytics.amp.html%22,%22cv%22:000,%22rv%22:00,%22ri%22:100}"
+   "pageview":  "https://r.3gl.net/hawklogserver/r.p?data={\"v\":2,\"y\":\"load\",\"ui\":$UserID,\"si\":$SessionID,\"pi\":092934,\"di\":$AccountID,\"pc\":1,\"dn\":_nav_timing_,\"fc\":7,\"wt\":_nav_timing_,\"Id\":_nav_timing_,\"de\":_nav_timing_,\"dl\":_nav_timing_,\"dc\":_nav_timing_,\"rp\":1338,\"cl\":_nav_timing_,\"dc\":_nav_timing_,\"rp\":_nav_timing_,\"cl\":_nav_timing_,\"rd\":0,\"jsc\":0,\"dh\":1200,\"dw\":1920,\"el\":193,\"rf\":\"_canonical_url_\",\"cv\":$isConversion,\"rv\":$revenue,\"ri\":$revenue_items}"
   },
   "chartbeat": {
     "host": "https://ping.chartbeat.net",
