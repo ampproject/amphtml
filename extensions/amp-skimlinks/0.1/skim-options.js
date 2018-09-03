@@ -48,10 +48,10 @@ function getExcludedDomains_(element, internalDomains) {
   const excludedDomainsAttr = element.getAttribute('excluded-domains');
   if (excludedDomainsAttr) {
     excludedDomains = excludedDomains.concat(
-      excludedDomainsAttr
-        .trim()
-        .split(/\s+/)
-        .map(domain => domain.replace(/^www\./, ''))
+        excludedDomainsAttr
+            .trim()
+            .split(/\s+/)
+            .map(domain => domain.replace(/^www\./, ''))
     );
   }
 
