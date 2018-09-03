@@ -1,6 +1,4 @@
-import {Deferred} from '../../../src/utils/promise';
 import {user} from '../../../src/log';
-
 
 /**
  * Get function from an object attached with the object as its context

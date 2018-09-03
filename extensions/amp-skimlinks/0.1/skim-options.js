@@ -3,7 +3,9 @@ import {user} from '../../../src/log';
 
 const errors = {
   INVALID_PUBCODE: '"publisher-code" is required.',
-  INVALID_XCUST: '"custom-tracking-id" should be <=50 characters and only contain upper and lowercase characters, numbers, underscores and pipes.',
+  INVALID_XCUST:
+    '"custom-tracking-id" should be <=50 characters and only contain upper ' +
+    'and lowercase characters, numbers, underscores and pipes.',
   INVALID_TRACKING_STATUS: '"tracking" possible values are "true" or "false".',
 };
 

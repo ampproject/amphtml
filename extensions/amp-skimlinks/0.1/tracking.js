@@ -3,14 +3,11 @@ import {generatePageImpressionId} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 
-
-
 import {
   LINKS_IMPRESSIONS_TRACKING_URL,
   NA_CLICK_TRACKING_URL,
   PAGE_IMPRESSION_TRACKING_URL,
 } from './constants';
-
 
 /**
  * The Tracking class exposes some public methods to
@@ -95,10 +92,9 @@ export class Tracking {
       platform: PLATFORM_NAME,
     };
 
-    const {
-      numberAffiliateLinks,
-      urls,
-    } = this.extractAnchorTrackingInfo_(anchorReplacementList);
+    const {numberAffiliateLinks, urls} = this.extractAnchorTrackingInfo_(
+        anchorReplacementList
+    );
 
     this.sendPageImpressionTracking_(
         commonData,
@@ -159,14 +155,17 @@ export class Tracking {
   sendPageImpressionTracking_(commonData, numberAffiliateLinks, startTime) {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
-    const data = /** @type {!JsonObject} */ (Object.assign({
-      slc: numberAffiliateLinks,
-      // How long did it take to send the tracking
-      jsl: new Date().getTime() - startTime,
-      pref: referrer,
-      uc: customTrackingId,
-      t: 1,
-    }, commonData));
+    const data = /** @type {!JsonObject} */ (Object.assign(
+        {
+          slc: numberAffiliateLinks,
+          // How long did it take to send the tracking
+          jsl: new Date().getTime() - startTime,
+          pref: referrer,
+          uc: customTrackingId,
+          t: 1,
+        },
+        commonData
+    ));
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL.
@@ -184,11 +183,14 @@ export class Tracking {
    * @param {Object} urls
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
-    const data = /** @type {!JsonObject} */ (Object.assign({
-      dl: urls,
-      hae: numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
-      typ: 'l',
-    }, commonData));
+    const data = /** @type {!JsonObject} */ (Object.assign(
+        {
+          dl: urls,
+          hae: numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
+          typ: 'l',
+        },
+        commonData
+    ));
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
@@ -196,7 +198,6 @@ export class Tracking {
       data: JSON.stringify(data),
     });
   }
-
 
   /**
    * Initialise the amp-analytics internal API.
@@ -208,7 +209,8 @@ export class Tracking {
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
-    // Configure analytics to send POST request when receiving 'page-impressions' event.
+    // Configure analytics to send POST request when receiving
+    // 'page-impressions' event.
     analyticsBuilder.track('page-impressions', PAGE_IMPRESSION_TRACKING_URL);
     analyticsBuilder.track('link-impressions', LINKS_IMPRESSIONS_TRACKING_URL);
     analyticsBuilder.track('non-affiliate-click', NA_CLICK_TRACKING_URL);

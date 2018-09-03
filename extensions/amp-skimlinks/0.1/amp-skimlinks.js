@@ -31,7 +31,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
 
     /** @private {!../../../src/service/link-rewriter/link-rewriter-manager.LinkRewriterManager} */
-    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(this.ampDoc_);
+    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(
+        this.ampDoc_);
 
     /** @private {?Object} */
     this.skimOptions_ = null;

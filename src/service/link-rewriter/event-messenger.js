@@ -1,5 +1,3 @@
-
-
 export class EventMessenger {
   /**
    * Constructor

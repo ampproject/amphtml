@@ -25,7 +25,9 @@ export class LinkReplacementCache {
     // new replacement list.
     // Warning: This step needs to be done before updating this.anchorList_
     // since getReplacementUrlForAnchor relies on it.
-    this.replacementList_ = newAnchorList.map(this.getReplacementUrlForAnchor.bind(this));
+    this.replacementList_ = newAnchorList.map(
+        this.getReplacementUrlForAnchor.bind(this)
+    );
 
     this.anchorList_ = newAnchorList;
   }

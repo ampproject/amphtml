@@ -1,7 +1,6 @@
 import {hasOwn} from '../../utils/object';
 import {user} from '../../log';
 
-
 /**
  * Create a response object for 'resolveUnknownAnchors()' function
  * in the format expected by LinkRewriter.
@@ -30,8 +29,11 @@ import {user} from '../../log';
  */
 export function createTwoStepsResponse(syncResponse, asyncResponse) {
   if (asyncResponse) {
-    user().assert(asyncResponse instanceof Promise,
-        'createTwoStepsResponse(syncResponse, asyncResponse), if provided, second argument needs to be a promise');
+    user().assert(
+        asyncResponse instanceof Promise,
+        'createTwoStepsResponse(syncResponse, asyncResponse), if provided, ' +
+        'second argument needs to be a promise'
+    );
   }
   return {
     syncResponse,
@@ -39,15 +41,15 @@ export function createTwoStepsResponse(syncResponse, asyncResponse) {
   };
 }
 
-
 /**
  *
  * @param {*} twoStepsResponse
  */
 export function isTwoStepsResponse(twoStepsResponse) {
-  const isValid = twoStepsResponse && (
-    hasOwn(twoStepsResponse, 'syncResponse') ||
-    hasOwn(twoStepsResponse, 'asyncResponse'));
+  const isValid =
+    twoStepsResponse &&
+    (hasOwn(twoStepsResponse, 'syncResponse') ||
+      hasOwn(twoStepsResponse, 'asyncResponse'));
 
   return Boolean(isValid);
 }
