@@ -48,7 +48,7 @@ function ExtensionPayload() {}
 /** @type {string} */
 ExtensionPayload.prototype.n;
 
-/** @type {function(!Object)} */
+/** @type {function(!Object,!Object)} */
 ExtensionPayload.prototype.f;
 
 /** @type {string|undefined} */
@@ -99,6 +99,7 @@ window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
 window.AMP = {};
+window.AMP._ = {};
 
 /** @constructor */
 function AmpConfigType() {}
@@ -265,6 +266,33 @@ data.hideCta;
 data.smallHeader;
 data.showFacepile;
 data.showText;
+data.productId;
+data.imageUrl;
+data.yotpoElementId;
+data.backgroudColor;
+data.reviewIds;
+data.showBottomLine;
+data.autoplayEnabled;
+data.autoplaySpeed;
+data.showNavigation;
+data.layoutScroll;
+data.spacing;
+data.hoverColor;
+data.hoverOpacity;
+data.hoverIcon;
+data.ctaText;
+data.ctaColor;
+data.appKey;
+data.widgetType;
+data.layoutRows;
+data.demo;
+data.uploadButton;
+data.reviews;
+data.headerText;
+data.headerBackgroundColor;
+data.bodyBackgroundColor;
+data.data.fontColor;
+data.width;
 
 // 3p code
 var twttr;
@@ -272,6 +300,7 @@ twttr.events;
 twttr.events.bind;
 twttr.widgets;
 twttr.widgets.createTweet;
+twttr.widgets.createMoment;
 
 var FB;
 FB.init;

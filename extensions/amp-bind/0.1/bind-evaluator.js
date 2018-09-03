@@ -41,6 +41,9 @@ let EvaluatorErrorDef;
  * Asynchronously evaluates a set of Bind expressions.
  */
 export class BindEvaluator {
+  /**
+   * Creates an instance of BindEvaluator.
+   */
   constructor() {
     /** @const @private {!Array<BindingDef>} */
     this.bindings_ = [];
@@ -263,6 +266,7 @@ export class BindEvaluator {
 
   /**
    * Returns the expression result string for a binding to `property`.
+   * @param {string} property
    * @param {./bind-expression.BindExpressionResultDef} result
    * @return {?string}
    * @private

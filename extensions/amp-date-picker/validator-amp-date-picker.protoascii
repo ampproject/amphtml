@@ -198,41 +198,20 @@ attr_lists: {
 tags: {
   html_format: AMP
   tag_name: "TEMPLATE"
-  spec_name: "amp-date-picker > template [date-template] [dates]"
+  spec_name: "amp-date-picker > template [date-template]"
   mandatory_parent: "AMP-DATE-PICKER"
   requires_extension: "amp-mustache"
   attrs: {
     name: "date-template"
     mandatory: true
     value: ""
-  }
-  attrs: {
-    name: "dates"
-    mandatory: true
     dispatch_key: NAME_DISPATCH
-  }
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "amp-mustache"
-  }
-}
-tags: {
-  html_format: AMP
-  tag_name: "TEMPLATE"
-  spec_name: "amp-date-picker > template [date-template] [default]"
-  mandatory_parent: "AMP-DATE-PICKER"
-  requires_extension: "amp-mustache"
-  attrs: {
-    name: "date-template"
-    mandatory: true
-    value: ""
   }
   attrs: {
     name: "default"
-    mandatory: true
-    value: ""
-    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "dates"
   }
   attrs: {
     name: "type"

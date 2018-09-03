@@ -71,7 +71,10 @@ export class IntegrationAmpContext extends AbstractAmpContext {
         || this.embedType_ === 'twitter'
         || this.embedType_ === 'github'
         || this.embedType_ === 'mathml'
-        || this.embedType_ === 'reddit');
+        || this.embedType_ === 'reddit'
+        || this.embedType_ === 'yotpo'
+        || this.embedType_ === 'embedly'
+    );
   }
 
   /** @return {!Window} */
@@ -103,6 +106,9 @@ export class IntegrationAmpContext extends AbstractAmpContext {
     this.requestResize(width, height);
   }
 
+  /**
+   * Sends bootstrap loaded message.
+   */
   bootstrapLoaded() {
     this.client_.sendMessage('bootstrap-loaded');
   }

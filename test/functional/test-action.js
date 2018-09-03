@@ -758,6 +758,7 @@ describe('installActionHandler', () => {
     expect(callArgs.source).to.be.equal('button');
     expect(callArgs.caller).to.be.equal('button');
     expect(callArgs.event).to.be.equal('tap');
+    expect(callArgs.trust).to.be.equal(ActionTrust.HIGH);
   });
 
   it('should check trust level before invoking action', () => {
@@ -765,15 +766,15 @@ describe('installActionHandler', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
 
-    allowConsoleError(() => {
-      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-          'button', 'button', 'tap', ActionTrust.LOW));
-      expect(handlerSpy).to.not.be.called;
-    });
-
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'button', 'tap', ActionTrust.HIGH));
+        'button', 'button', 'tapEvent', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
+
+    return allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+          'button', 'button', 'tapEvent', ActionTrust.LOW));
+      expect(handlerSpy).to.be.calledOnce;
+    });
   });
 });
 
@@ -1005,15 +1006,15 @@ describe('Action common handler', () => {
     const handler = sandbox.spy();
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
-    allowConsoleError(() => {
-      action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-          'source1', 'caller1', 'event1', ActionTrust.LOW));
-      expect(handler).to.not.be.called;
-    });
-
     action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
         'source1', 'caller1', 'event1', ActionTrust.HIGH));
     expect(handler).to.be.calledOnce;
+
+    return allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
+          'source1', 'caller1', 'event1', ActionTrust.LOW));
+      expect(handler).to.be.calledOnce;
+    });
   });
 });
 
@@ -1310,16 +1311,16 @@ describes.fakeWin('Core events', {amp: true}, env => {
       }
     });
 
-    it('should replace functions with throws', () => {
+    it('should replace functions with throws', function*() {
       const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
       const deferredEvent = new DeferredEvent(event);
       const errorText = 'cannot access native event functions';
 
       // Specifically test these commonly used functions
-      allowConsoleError(() => {
+      yield allowConsoleError(() => {
         expect(() => deferredEvent.preventDefault()).to.throw(errorText);
       });
-      allowConsoleError(() => {
+      yield allowConsoleError(() => {
         expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
       });
 
@@ -1327,7 +1328,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       for (const key in deferredEvent) {
         const value = deferredEvent[key];
         if (typeof value === 'function') {
-          allowConsoleError(() => {
+          yield allowConsoleError(() => {
             expect(() => value()).to.throw(errorText);
           });
         }
@@ -1343,6 +1344,7 @@ describes.realWin('whitelist', {
 }, env => {
   let action;
   let target;
+  let spy;
 
   beforeEach(() => {
     const meta = createElementWithAttributes(env.win.document, 'meta', {
@@ -1352,19 +1354,20 @@ describes.realWin('whitelist', {
     env.win.document.head.appendChild(meta);
 
     action = new ActionService(env.ampdoc, env.win.document);
-    target = createExecElement('foo', sandbox.spy());
+    spy = env.sandbox.spy();
+    target = createExecElement('foo', spy);
   });
 
   it('should allow whitelisted actions', () => {
     const i = new ActionInvocation(target, 'setState', /* args */ null,
-        'source', 'caller', 'event', 0, 'AMP');
+        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
     action.invoke_(i);
-    expect(target.enqueAction).to.be.calledWithExactly(i);
+    expect(spy).to.be.calledWithExactly(i);
   });
 
   it('should not allow non-whitelisted actions', () => {
     const i = new ActionInvocation(target, 'print', /* args */ null,
-        'source', 'caller', 'event', 0, 'AMP');
+        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
     sandbox.stub(action, 'error_');
     expect(action.invoke_(i)).to.be.null;
     expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
@@ -1373,9 +1376,9 @@ describes.realWin('whitelist', {
 
   it('should allow adding actions to the whitelist', () => {
     const i = new ActionInvocation(target, 'print', /* args */ null,
-        'source', 'caller', 'event', 0, 'AMP');
+        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
     action.addToWhitelist('AMP.print');
     action.invoke_(i);
-    expect(target.enqueAction).to.be.calledWithExactly(i);
+    expect(spy).to.be.calledWithExactly(i);
   });
 });

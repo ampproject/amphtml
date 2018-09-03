@@ -53,6 +53,12 @@ export function getElementCreator(document) {
   };
 }
 
+/**
+ * Appends children to a given element
+ *
+ * @param {!Element} element
+ * @param {!Array<!Element>} children
+ */
 function appendChildren(element, children) {
   children = (!children) ? [] : Array.isArray(children) ? children : [children];
   children.forEach(child => element.appendChild(child));

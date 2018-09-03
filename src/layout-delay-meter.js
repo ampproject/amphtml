@@ -47,6 +47,9 @@ export class LayoutDelayMeter {
     this.label_ = LABEL_MAP[priority];
   }
 
+  /**
+   *
+   */
   enterViewport() {
     if (!this.label_ || this.firstInViewportTime_) {
       return;
@@ -55,6 +58,9 @@ export class LayoutDelayMeter {
     this.tryMeasureDelay_();
   }
 
+  /**
+   * starts layout
+   */
   startLayout() {
     if (!this.label_ || this.firstLayoutTime_) {
       return;
@@ -63,6 +69,9 @@ export class LayoutDelayMeter {
     this.tryMeasureDelay_();
   }
 
+  /**
+   * Tries to measure delay
+   */
   tryMeasureDelay_() {
     if (!this.performance_ || !this.performance_.isPerformanceTrackingOn()) {
       return;

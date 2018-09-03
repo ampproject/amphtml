@@ -27,12 +27,19 @@ import {parseJson} from '../src/json';
 
 let animationHandler;
 
+/**
+ * @param {!Window} global
+ * @param {!Function} cb
+ */
 function getBodymovinAnimationSdk(global, cb) {
   loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', function() {
     cb(global.bodymovin);
   });
 }
 
+/**
+ * @param {!Event} event
+ */
 function parseMessage(event) {
   const eventMessage = parseJson(getData(event));
   const action = eventMessage['action'];
@@ -53,6 +60,9 @@ function parseMessage(event) {
   }
 }
 
+/**
+ * @param {!Window} global
+ */
 export function bodymovinanimation(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
   const dataLoop = dataReceived['loop'];

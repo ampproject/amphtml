@@ -77,6 +77,7 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
+  fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
@@ -103,7 +104,8 @@ function compile(entryModuleFilenames, outputDir,
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    const checkTypes = options.checkTypes || argv.typecheck_only;
+    const checkTypes =
+        options.checkTypes || options.typeCheckOnly || argv.typecheck_only;
     const intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     // If undefined/null or false then we're ok executing the deletions
@@ -227,13 +229,33 @@ function compile(entryModuleFilenames, outputDir,
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
-    if (options.includePolyfills) {
+    if (options.includeOnlyESMLevelPolyfills) {
+      const polyfillsShadowList = [
+        'array-includes.js',
+        'document-contains.js',
+        'domtokenlist-toggle.js',
+        'math-sign.js',
+        'object-assign.js',
+        'promise.js',
+      ];
       srcs.push(
           '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js'
+          '!build/fake-module/src/polyfills/**/*.js',
+          '!build/fake-polyfills/src/polyfills.js',
+          '!src/polyfills/*.js',
+          'build/fake-polyfills/**/*.js');
+      polyfillsShadowList.forEach(polyfillFile => {
+        fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
+            'export function install() {}');
+      });
+    } else if (options.includePolyfills) {
+      srcs.push(
+          '!build/fake-module/src/polyfills.js',
+          '!build/fake-module/src/polyfills/**/*.js',
+          '!build/fake-polyfills/**/*.js',
       );
     } else {
-      srcs.push('!src/polyfills.js');
+      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
       unneededFiles.push('build/fake-module/src/polyfills.js');
     }
     unneededFiles.forEach(function(fake) {
@@ -282,6 +304,7 @@ function compile(entryModuleFilenames, outputDir,
           'node_modules/',
           'build/patched-module/',
           'build/fake-module/',
+          'build/fake-polyfills/',
         ],
         entry_point: entryModuleFilenames,
         process_common_js_modules: true,
@@ -353,7 +376,7 @@ function compile(entryModuleFilenames, outputDir,
         });
 
     // If we're only doing type checking, no need to output the files.
-    if (!argv.typecheck_only) {
+    if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
           .pipe(rename(outputFilename))
           .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
@@ -366,6 +389,8 @@ function compile(entryModuleFilenames, outputDir,
                 .pipe(gulp.dest(outputDir))
                 .on('end', resolve);
           });
+    } else {
+      stream = stream.on('end', resolve);
     }
     return stream;
   });

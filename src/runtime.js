@@ -18,6 +18,7 @@ import * as config from './config';
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
+import {LogLevel, overrideLogLevel} from './log'; // eslint-disable-line no-unused-vars
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
 import {childElementsByTag, isConnectedNode} from './dom';
@@ -158,6 +159,8 @@ function adoptShared(global, callback) {
 
   global.AMP = {
     win: global,
+    // Might not be available in tests.
+    '_': global.AMP ? global.AMP['_'] : undefined,
   };
 
   // `AMP.extension()` function is only installed in a non-minified mode.
@@ -212,12 +215,18 @@ function adoptShared(global, callback) {
    * @return {boolean}
    */
   global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
+
   /**
    * @param {string} experimentId
    * @param {boolean=} opt_on
    * @return {boolean}
    */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
+
+  /**
+   * @param {!LogLevel} level
+   */
+  global.AMP.setLogLevel = overrideLogLevel.bind(null);
 
   /**
    * Sets the function to forward tick events to.
@@ -232,13 +241,13 @@ function adoptShared(global, callback) {
   const iniPromise = callback(global, extensions);
 
   /**
-   * @param {function(!Object)|ExtensionPayload} fnOrStruct
+   * @param {function(!Object,!Object)|ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
     const register = () => {
       iniPromise.then(() => {
         if (typeof fnOrStruct == 'function') {
-          fnOrStruct(global.AMP);
+          fnOrStruct(global.AMP, global.AMP._);
         } else {
           extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
         }

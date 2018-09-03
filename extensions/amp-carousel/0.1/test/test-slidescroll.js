@@ -926,6 +926,8 @@ describes.realWin('SlideScroll', {
 
     it('should update slide when `slide` attribute is mutated', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
+        expectAsyncConsoleError(/Invalid \[slide\] value:/, 1);
+
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
 
@@ -963,6 +965,8 @@ describes.realWin('SlideScroll', {
 
     it('should goToSlide on action', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
+        expectAsyncConsoleError(/Invalid \[slide\] value:/, 4);
+
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
         const satisfiesTrust = () => true;
@@ -1061,6 +1065,48 @@ describes.realWin('SlideScroll', {
           expect(showSlideSpy).to.have.been.calledWith(4);
           expect(showSlideSpy).to.be.calledOnce;
         });
+      });
+    });
+  });
+
+  describe('button titles', () => {
+    function getNextTitle(el) {
+      return el.querySelector('.amp-carousel-button-next')
+          .getAttribute('title');
+    }
+
+    function getPrevTitle(el) {
+      return el.querySelector('.amp-carousel-button-prev')
+          .getAttribute('title');
+    }
+
+    describe('when not looping', () => {
+      it('should have the correct values on the first index', function* () {
+        const el = yield getAmpSlideScroll(false, 3);
+        expect(getPrevTitle(el)).to.equal('Previous item in carousel (1 of 3)');
+        expect(getNextTitle(el)).to.equal('Next item in carousel (2 of 3)');
+      });
+
+      it('should have the correct values on the last index', function* () {
+        const el = yield getAmpSlideScroll(false, 3);
+        el.implementation_.showSlide_(2);
+        expect(getPrevTitle(el)).to.equal('Previous item in carousel (2 of 3)');
+        expect(getNextTitle(el)).to.equal('Next item in carousel (3 of 3)');
+      });
+    });
+
+    describe('when looping', () => {
+      it('should have the correct values on the first index', function* () {
+        const el = yield getAmpSlideScroll(true, 3);
+        expect(getPrevTitle(el)).to.equal('Previous item in carousel (3 of 3)');
+        expect(getNextTitle(el)).to.equal('Next item in carousel (2 of 3)');
+      });
+
+      it('should have the correct values on the last index', function* () {
+        const el = yield getAmpSlideScroll(true, 3);
+        el.implementation_.showSlide_(2);
+        expect(getPrevTitle(el)).to.equal('Previous item in carousel (2 of 3)');
+        expect(getNextTitle(el)).to.equal('Next item in carousel (1 of 3)');
       });
     });
   });

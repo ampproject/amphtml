@@ -54,7 +54,7 @@ export class ExperimentUtils {
   maybeSelectExperiment(
     win, element, selectionBranches, experimentName) {
     const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[experimentName] = {
       isTrafficEligible: () => true,
       branches: selectionBranches,

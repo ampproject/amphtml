@@ -88,7 +88,7 @@ export function isExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
   opt_transientExperiment) {
-  const currentlyOn = isExperimentOn(win, experimentId);
+  const currentlyOn = isExperimentOn(win, /*OK*/experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
     const toggles = experimentToggles(win);
@@ -316,7 +316,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     // experiment branch (e.g., via a test setup), then randomize the branch
     // choice.
     if (!win.experimentBranches[experimentName] &&
-        isExperimentOn(win, experimentName)) {
+      isExperimentOn(win, /*OK*/experimentName)) {
       const {branches} = experiments[experimentName];
       win.experimentBranches[experimentName] = selectRandomItem(branches);
       selectedExperiments[experimentName] =

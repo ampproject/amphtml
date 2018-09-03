@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  AmpMustache,
-} from '../amp-mustache';
+import {AmpMustache} from '../amp-mustache';
 
-describe('amp-mustache template', () => {
-
+describe('amp-mustache 0.1', () => {
   it('should render', () => {
     const templateElement = document.createElement('template');
     templateElement.content.textContent = 'value = {{value}}';
@@ -443,12 +440,14 @@ describe('amp-mustache template', () => {
       templateElement.content.textContent = 'value = {{{value}}}';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
-      const result = template.render({
-        value: '<a href="javascript:alert(\'XSS\')">test</a>'
-            + '<img src="x" onerror="alert(\'XSS\')" />',
+      allowConsoleError(() => {
+        const result = template.render({
+          value: '<a href="javascript:alert(\'XSS\')">test</a>'
+              + '<img src="x" onerror="alert(\'XSS\')" />',
+        });
+        expect(result./*OK*/innerHTML).to.equal(
+            'value = <a target="_top">test</a>');
       });
-      expect(result./*OK*/innerHTML).to.equal(
-          'value = <a target="_top">test</a>');
     });
   });
 

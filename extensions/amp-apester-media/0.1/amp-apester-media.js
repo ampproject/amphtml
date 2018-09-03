@@ -242,7 +242,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @param {string} src
    * @return {!Element}
    */
-
   constructIframe_(src) {
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
@@ -441,7 +440,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           }
         },
         this.win,
-        this.iframe_,
+        /** @type {!Element}*/ (this.iframe_),
         this.unlisteners_
     );
     registerEvent(
@@ -453,7 +452,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           }
         },
         this.win,
-        this.iframe_,
+        /** @type {!Element}*/ (this.iframe_),
         this.unlisteners_
     );
     registerEvent(
@@ -464,7 +463,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           }
         },
         this.win,
-        this.iframe_,
+        /** @type {!Element}*/ (this.iframe_),
         this.unlisteners_
     );
   }

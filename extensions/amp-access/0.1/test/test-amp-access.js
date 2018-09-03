@@ -468,40 +468,6 @@ describes.fakeWin('AccessService authorization', {
     });
   });
 
-  it('should use fallback on authorization failure when available', () => {
-    expectGetReaderId('reader1');
-    adapterMock.expects('authorize')
-        .withExactArgs()
-        .returns(Promise.reject('intentional'))
-        .once();
-    service.sources_[0].authorizationFallbackResponse_ = {'error': true};
-    const promise = service.runAuthorization_();
-    expect(document.documentElement).to.have.class('amp-access-loading');
-    expect(document.documentElement).not.to.have.class('amp-access-error');
-    return promise.then(() => {
-      expect(document.documentElement).not.to.have.class('amp-access-loading');
-      expect(document.documentElement).not.to.have.class('amp-access-error');
-      expect(elementOn).to.have.attribute('amp-access-hide');
-      expect(elementOff).not.to.have.attribute('amp-access-hide');
-      expect(elementError).not.to.have.attribute('amp-access-hide');
-    });
-  });
-
-  it('should NOT fallback on authorization failure when disabled', () => {
-    expectGetReaderId('reader1');
-    adapterMock.expects('authorize')
-        .withExactArgs()
-        .returns(Promise.reject('intentional'))
-        .once();
-    service.authorizationFallbackResponse_ = {'error': true};
-    const promise = service.runAuthorization_(/* disableFallback */ true);
-    expect(document.documentElement).to.have.class('amp-access-loading');
-    expect(document.documentElement).not.to.have.class('amp-access-error');
-    return promise.then(() => {
-      expect(document.documentElement).to.have.class('amp-access-error');
-    });
-  });
-
   it('should run authorization for broadcast events on same origin', () => {
     let broadcastHandler;
     sandbox.stub(service.viewer_, 'onBroadcast').callsFake(handler => {

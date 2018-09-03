@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>DoubleClick implementation of the AMP Ad tag.  Click <a href="/extensions/amp-a4a/amp-a4a-internal.md">here</a>
+    <td>DoubleClick implementation of the AMP Ad tag.  Click <a href="/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
     for Fast Fetch details, and <a href="/extensions/amp-a4a/amp-a4a-format.md">here</a>
     for AMPHTML ad format details. This tag should
     not be directly referenced by pages and instead is dynamically loaded

@@ -44,9 +44,7 @@ import {
 } from '../../../../ads/google/a4a/utils';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {
-  toggleExperiment,
-} from '../../../../src/experiments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 /**
@@ -285,6 +283,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.getA4aAnalyticsConfig = () => {};
+      impl.buildCallback();
       sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
       // Next two lines are to ensure that internal parts not relevant for this
@@ -629,10 +629,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       // Reset counter for purpose of this test.
       delete env.win['ampAdGoogleIfiCounter'];
       new AmpAd(element).upgradeCallback();
+      sandbox.stub(AmpA4A.prototype, 'tearDownSlot').callsFake(() => {});
       return impl.getAdUrl().then(url1 => {
         expect(url1).to.match(/ifi=1/);
+        impl.tearDownSlot();
         return impl.getAdUrl().then(url2 => {
           expect(url2).to.match(/ifi=2/);
+          impl.tearDownSlot();
           return impl.getAdUrl().then(url3 => {
             expect(url3).to.match(/ifi=3/);
           });
@@ -704,8 +707,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             regexp => expect(url).to.match(regexp));
       });
     });
-    it('should return empty string if unknown consentState', () => expect(
-        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(''));
+
+    it('should return empty string if unknown consentState', () =>
+      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
+        expect(url).equal('');
+        return expect(impl.getAdUrlDeferred.promise).to.eventually.equal('');
+      }));
 
     it('should include npa=1 if unknown consent & explicit npa', () => {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
@@ -784,56 +791,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(impl.iframe).is.ok;
     });
 
-    it('should remove FIE if in all exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should remove non-FIE if in all exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not remove FIE if in remain exp', () => {
-      impl.onCreativeRender({customElementExtensions: []});
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.iframe).is.ok;
-    });
-
-    it('should remove rendered non-FIE if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.iframe).is.not.ok;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should not destroy ad promise for unrendered if in remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = 'abcdef';
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.false;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
-    it('should destroy ad promise if ad response not yet received and in ' +
-        'remain exp', () => {
-      impl.onCreativeRender();
-      impl.qqid_ = null;
-      impl.isAmpCreative_ = null;
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
-      expect(impl.unlayoutCallback()).to.be.true;
-      expect(impl.isAmpCreative_).to.be.null;
-    });
-
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
           impl.ampAnalyticsConfig_ = {};
@@ -858,7 +815,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         });
 
     it('should call #unobserve on refreshManager', () => {
-      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
       impl.refreshManager_ = {
         unobserve: sandbox.spy(),
       };
@@ -895,12 +851,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
-    it('should return true if in experiment', () => {
-      impl.setPageLevelExperiments('4');
-      expect(impl.delayAdRequestEnabled()).to.be.true;
-    });
-
-    it('should return false if not in experiment', () => {
+    it('should return false by default', () => {
       expect(impl.delayAdRequestEnabled()).to.be.false;
     });
   });
@@ -916,6 +867,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           () => Promise.resolve(VerificationStatus.OK));
     }
 
+    /**
+     * @param {{width: number, height: number}} size
+     * @param {boolean} isAmpCreative
+     */
     function mockSendXhrRequest(size, isAmpCreative) {
       return {
         arrayBuffer: () => Promise.resolve(utf8Encode(
@@ -964,7 +919,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           height: 50,
         };
       });
-      sandbox.stub(impl, 'protectedEmitLifecycleEvent_').callsFake(() => {});
       sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
         impl.element.setAttribute('height', height);
         impl.element.setAttribute('width', width);
@@ -1183,6 +1137,13 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
 
       beforeEach(() => {
         doc = env.win.document;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        doc.body.appendChild(element);
+        impl = new AmpAdNetworkDoubleclickImpl(element);
       });
 
       describe('#onNetworkFailure', () => {
@@ -1206,6 +1167,10 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       describe('centering', () => {
         const size = {width: '300px', height: '150px'};
 
+        /**
+         * @param {!Element} iframe
+         * @param {{width: number, height: number}} expectedSize
+         */
         function verifyCss(iframe, expectedSize) {
           expect(iframe).to.be.ok;
           const style = env.win.getComputedStyle(iframe);
@@ -1330,7 +1295,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           });
           impl = new AmpAdNetworkDoubleclickImpl(element);
           sandbox.stub(impl, 'getResource').returns(
-              {whenWithinRenderOutsideViewport: () => Promise.resolve()});
+              {whenWithinViewport: () => Promise.resolve()});
         });
 
         it('should use experiment value', () => {
@@ -1424,5 +1389,23 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should return null', () => expect(
             AmpAdNetworkDoubleclickImpl.prototype.getConsentPolicy())
             .to.be.null);
+      });
+
+      describe('#setPageLevelExperiments', () => {
+
+        afterEach(() => {
+          toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
+        });
+
+        it('should set invalid origin fix experiment if on canonical', () => {
+          impl.setPageLevelExperiments('');
+          expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
+
+        it('should not set invalid origin fix if exp on', () => {
+          toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
+          impl.setPageLevelExperiments('');
+          expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
       });
     });

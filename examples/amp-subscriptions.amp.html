@@ -28,10 +28,10 @@
       "services": [
         {
           "authorizationUrl": "//localhost:8000/subscription/2/entitlements",
-          "pingbackUrl": "//lipsum.com/pingback",
+          "pingbackUrl": "//localhost:8000/subscription/pingback",
           "actions":{
-            "login": "//lipsum.com/login",
-            "subscribe": "//lipsum.com/subscribe"
+            "login": "//localhost:8000/subscription/login",
+            "subscribe": "//localhost:8000/subscription/subscribe"
           }
         },
         {
@@ -188,7 +188,7 @@
       }
     },
     "pingbackSent": {
-      "on": "action-subscribe-started",
+      "on": "subscriptions-action-subscribe-started",
       "request": "event",
       "vars": {
         "eventCategory": "amp-subscriptions",

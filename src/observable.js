@@ -23,6 +23,9 @@
  */
 export class Observable {
 
+  /**
+   * Creates an instance of Observable.
+   */
   constructor() {
     /** @type {?Array<function(TYPE)>} */
     this.handlers_ = null;

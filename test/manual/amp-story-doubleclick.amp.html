@@ -28,7 +28,15 @@
   </head>
 
   <body>
-    <amp-story standalone bookend-config-src="../../examples/amp-story/bookend.json">
+    <amp-story
+      title="Amp-story-doubleclick"
+      publisher="The AMP Team"
+      publisher-logo-src="https://example.com/logo/1x1.png"
+      poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+      poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+      poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
+      standalone>
+
         <amp-story-auto-ads>
             <script type="application/json">
               {
@@ -127,8 +135,10 @@
         <amp-story-grid-layer template="vertical">
           <h1>Ninth Page</h1>
         </amp-story-grid-layer>
-        </amp-story-page>
+      </amp-story-page>
+
+      <amp-story-bookend src="../../examples/amp-story/bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
-

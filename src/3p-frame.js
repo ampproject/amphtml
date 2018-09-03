@@ -213,10 +213,16 @@ export function getBootstrapBaseUrl(
       getDefaultBootstrapBaseUrl(parentWindow);
 }
 
+/**
+ * @param {string} url
+ */
 export function setDefaultBootstrapBaseUrlForTesting(url) {
   overrideBootstrapBaseUrl = url;
 }
 
+/**
+ * @param {*} win
+ */
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
   win.defaultBootstrapSubDomain = undefined;
@@ -245,6 +251,10 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
       `${srcFileBasename}.html`;
 }
 
+/**
+ * @param {!Window} win
+ * @return {string}
+ */
 function getAdsLocalhost(win) {
   let adsUrl = urls.thirdParty; // local dev with a non-localhost server
   if (adsUrl.indexOf('ampproject.net') > -1) {

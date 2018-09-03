@@ -23,7 +23,7 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
-import {Expander} from './url-expander/expander';
+import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {
@@ -31,7 +31,9 @@ import {
   getSourceUrl,
   parseQueryString,
   parseUrlDeprecated,
+  removeAmpJsParamsFromUrl,
   removeFragment,
+  removeSearch,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
 import {getTrackImpressionPromise} from '../impression.js';
@@ -41,6 +43,7 @@ import {
 } from '../service';
 import {isExperimentOn} from '../experiments';
 import {isProtocolValid} from '../url';
+import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -49,13 +52,6 @@ const VARIANT_DELIMITER = '.';
 const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
-
-/** A whitelist for replacements whose values should not be %-encoded. */
-/** @private @const {Object<string, boolean>} */
-const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
-
-/** @const {string} */
-export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
 
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
@@ -197,7 +193,9 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the URL for this AMP document.
     this.set('AMPDOC_URL', () => {
-      return removeFragment(this.ampdoc.win.location.href);
+      return removeFragment(
+          this.addReplaceParamsIfMissing_(
+              this.ampdoc.win.location.href));
     });
 
     // Returns the host of the URL for this AMP document.
@@ -213,15 +211,13 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the Source URL for this AMP document.
-    this.setBoth('SOURCE_URL', () => {
+    const expandSourceUrl = () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
-      return removeFragment(docInfo.sourceUrl);
-    }, () => {
-      return getTrackImpressionPromise().then(() => {
-        const docInfo = Services.documentInfoForDoc(this.ampdoc);
-        return removeFragment(docInfo.sourceUrl);
-      });
-    });
+      return removeFragment(this.addReplaceParamsIfMissing_(docInfo.sourceUrl));
+    };
+    this.setBoth('SOURCE_URL',
+        () => expandSourceUrl(),
+        () => getTrackImpressionPromise().then(() => expandSourceUrl()));
 
     // Returns the host of the Source URL for this AMP document.
     this.set('SOURCE_HOST', this.getDocInfoUrl_('sourceUrl', 'host'));
@@ -314,7 +310,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns assigned variant name for the given experiment.
     this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
-      return this.getVairiantsValue_(variants => {
+      return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
@@ -326,7 +322,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns all assigned experiment variants in a serialized form.
     this.setAsync('VARIANTS', /** @type {AsyncResolverDef} */(() => {
-      return this.getVairiantsValue_(variants => {
+      return this.getVariantsValue_(variants => {
         const experiments = [];
         for (const experiment in variants) {
           const variant = variants[experiment];
@@ -563,15 +559,18 @@ export class GlobalVariableSource extends VariableSource {
         'STORY_PAGE_ID'));
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint();
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint());
     });
 
     this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(this.ampdoc.win).getFirstViewportReady();
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc.win).getFirstViewportReady());
     });
 
     this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(this.ampdoc.win).getMakeBodyVisible();
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc.win).getMakeBodyVisible());
     });
 
     this.setAsync('AMP_STATE', key => {
@@ -582,6 +581,22 @@ export class GlobalVariableSource extends VariableSource {
         return bind.getStateValue(/** @type {string} */ (key));
       });
     });
+  }
+
+  /**
+   * Merges any replacement parameters into a given URL's query string,
+   * preferring values set in the original query string.
+   * @param {string} orig The original URL
+   * @return {string} The resulting URL
+   * @private
+   */
+  addReplaceParamsIfMissing_(orig) {
+    const {replaceParams} =
+    /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
+    const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
+    const params = parseQueryString(url.search);
+    return addParamsToUrl(removeSearch(orig),
+        /** @type {!JsonObject} **/ (Object.assign({}, replaceParams, params)));
   }
 
   /**
@@ -638,11 +653,18 @@ export class GlobalVariableSource extends VariableSource {
     user().assert(param,
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
-    user().assert(typeof param == 'string', 'param should be a string');
-    const url = parseUrlDeprecated(this.ampdoc.win.location.href);
+    const url = parseUrlDeprecated(
+        removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
-    return (typeof params[param] !== 'undefined')
-      ? params[param] : defaultValue;
+    const key = user().assertString(param);
+    const {replaceParams} = Services.documentInfoForDoc(this.ampdoc);
+    if (typeof params[key] !== 'undefined') {
+      return params[key];
+    }
+    if (typeof replaceParams[key] !== 'undefined') {
+      return /** @type {string} */(replaceParams[key]);
+    }
+    return defaultValue;
   }
 
   /**
@@ -653,7 +675,7 @@ export class GlobalVariableSource extends VariableSource {
    * @template T
    * @private
    */
-  getVairiantsValue_(getter, expr) {
+  getVariantsValue_(getter, expr) {
     if (!this.variants_) {
       this.variants_ = Services.variantForOrNull(this.ampdoc.win);
     }
@@ -1023,7 +1045,7 @@ export class UrlReplacements {
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
-        REPLACEMENT_EXP_NAME);
+        'url-replacement-v2');
     if (isV2ExperimentOn) {
       // TODO(ccordy) support opt_collectVars && opt_whitelist
       return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,

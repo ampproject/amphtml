@@ -133,6 +133,10 @@ export class DefaultValidator extends FormValidator {
 /** @private visible for testing */
 export class PolyfillDefaultValidator extends FormValidator {
 
+  /**
+   * Creates an instance of PolyfillDefaultValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
     const bubbleId = `i-amphtml-validation-bubble-${validationBubbleCount++}`;
@@ -183,6 +187,10 @@ export class PolyfillDefaultValidator extends FormValidator {
  */
 export class AbstractCustomValidator extends FormValidator {
 
+  /**
+   * Creates an instance of AbstractCustomValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
 

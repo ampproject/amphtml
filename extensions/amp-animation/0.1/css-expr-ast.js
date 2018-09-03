@@ -118,6 +118,9 @@ export class CssContext {
  * @abstract
  */
 export class CssNode {
+  /**
+   * Creates an instance of CssNode.
+   */
   constructor() {}
 
   /**
@@ -817,6 +820,9 @@ export class CssRandNode extends CssNode {
  * target in a list of all selected targets.
  */
 export class CssIndexNode extends CssNode {
+  /**
+   * Creates an instance of CssIndexNode.
+   */
   constructor() {
     super();
   }

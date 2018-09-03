@@ -280,6 +280,11 @@ ValidatorTestCase.prototype.run = function() {
     message = '\n' + this.expectedOutputFile + ':1:0\n';
   }
   message += 'expected:\n' + this.expectedOutput + '\nsaw:\n' + observed;
+  if (this.expectedOutputFile !== null) {
+    message += '\n\nIf validator/' + absolutePathFor(this.expectedOutputFile) +
+               ' is incorrect, please run `gulp validator --update_tests` to ' +
+               'regenerate it based on its corresponding .html file.';
+  }
   assert.fail('', '', message, '');
 };
 
@@ -338,74 +343,60 @@ describe('ValidatorCssLengthValidation', () => {
   const validInlineStyleBlob = 'width:1px;';
   assertStrictEqual(10, validInlineStyleBlob.length);
 
-  it('accepts 50000 bytes in author stylesheet and 0 bytes in inline style', () => {
-    const stylesheet = Array(5001).join(validStyleBlob);
-    assertStrictEqual(50000, stylesheet.length);
+  it('accepts 50000 bytes in author stylesheet and 0 bytes in inline style',
+      () => {
+        const stylesheet = Array(5001).join(validStyleBlob);
+        assertStrictEqual(50000, stylesheet.length);
+        const test = new ValidatorTestCase('feature_tests/css_length.html');
+        test.inlineOutput = false;
+        test.ampHtmlFileContents = test.ampHtmlFileContents
+            .replace('.replace_amp_custom {}', stylesheet)
+            .replace('replace_inline_style', '');
+        test.expectedOutput = 'PASS';
+        test.run();
+      });
+
+  it('will not accept 50001 bytes in author stylesheet and 0 bytes in ' +
+     'inline style',
+  () => {
+    const stylesheet = Array(5001).join(validStyleBlob) + ' ';
+    assertStrictEqual(50001, stylesheet.length);
     const test = new ValidatorTestCase('feature_tests/css_length.html');
     test.inlineOutput = false;
     test.ampHtmlFileContents =
-        test.ampHtmlFileContents.replace('.replace_amp_custom {}', stylesheet)
-            .replace('replace_inline_style', '');
-    // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
+       test.ampHtmlFileContents
+           .replace('.replace_amp_custom {}', stylesheet)
+           .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:5034:0 The inline \'style\' attribute ' +
-        'is not allowed in AMP documents. Use \'style amp-custom\' tag ' +
-        'instead. (see https://www.ampproject.org/docs/guides/author-develop/' +
-        'responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]';
+       'feature_tests/css_length.html:28:2 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' is too long - document ' +
+       'contains 50001 bytes whereas the limit is 50000 bytes. ' +
+       '(see https://www.ampproject.org/docs/reference/spec' +
+       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
-  it('will not accept 50001 bytes in author stylesheet and 0 bytes in inline style',
-      () => {
-        const stylesheet = Array(5001).join(validStyleBlob) + ' ';
-        assertStrictEqual(50001, stylesheet.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('.replace_amp_custom {}', stylesheet)
-               .replace('replace_inline_style', '');
-        test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
-           'specified in tag \'style amp-custom\' is too long - we saw ' +
-           '50001 bytes whereas the limit is 50000 bytes. ' +
-           '(see https://www.ampproject.org/docs/reference/spec' +
-           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]\n' +
-           'feature_tests/css_length.html:5034:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
-
-  it('knows utf8 and rejects file with 50002 bytes but 49999 characters and 0 bytes in inline style',
-      () => {
-        const stylesheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
-        assertStrictEqual(49999, stylesheet.length); // character length
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('.replace_amp_custom {}', stylesheet)
-               .replace('replace_inline_style', '');
-        test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:28:2 The author stylesheet ' +
-           'specified in tag \'style amp-custom\' is too long - we saw ' +
-           '50002 bytes whereas the limit is 50000 bytes. ' +
-           '(see https://www.ampproject.org/docs/reference/spec' +
-           '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]\n' +
-           'feature_tests/css_length.html:5033:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
+  it('knows utf8 and rejects file with 50002 bytes but 49999 characters ' +
+     'and 0 bytes in inline style',
+  () => {
+    const stylesheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
+    assertStrictEqual(49999, stylesheet.length); // character length
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+       test.ampHtmlFileContents
+           .replace('.replace_amp_custom {}', stylesheet)
+           .replace('replace_inline_style', '');
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+       'feature_tests/css_length.html:28:2 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' is too long - document ' +
+       'contains 50002 bytes whereas the limit is 50000 bytes. ' +
+       '(see https://www.ampproject.org/docs/reference/spec' +
+       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
 
   it('accepts 0 bytes in author stylesheet and 50000 bytes in inline style',
       () => {
@@ -416,65 +407,51 @@ describe('ValidatorCssLengthValidation', () => {
         test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:34:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+        test.expectedOutput = 'PASS';
         test.run();
       });
 
-  it('will not accept 0 bytes in author stylesheet and 50001 bytes in inline style',
-      () => {
-        const inlineStyle = Array(5001).join(validInlineStyleBlob) + ' ';
-        assertStrictEqual(50001, inlineStyle.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-           test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
-               .replace('replace_inline_style', inlineStyle);
-        test.expectedOutputFile = null;
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:34:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]\n' +
-           'feature_tests/css_length.html:36:6 The author stylesheet ' +
-           'specified in tag \'style amp-custom\' and the combined inline ' +
-           'styles is too large - we saw 50001 bytes whereas the limit is ' +
-           '50000 bytes. (see https://www.ampproject.org/docs/guides/' +
-           'author-develop/responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
+  it('will not accept 0 bytes in author stylesheet and 50001 bytes in ' +
+     'inline style',
+  () => {
+    const inlineStyle = Array(5001).join(validInlineStyleBlob) + ' ';
+    assertStrictEqual(50001, inlineStyle.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+       test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
+           .replace('replace_inline_style', inlineStyle);
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+       'feature_tests/css_length.html:36:6 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' and the combined inline ' +
+       'styles is too large - document contains 50001 bytes whereas the ' +
+       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
+       '/author-develop/responsive/style_pages) ' +
+       '[AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
 
-  it('will not accept 50000 bytes in author stylesheet and 14 bytes in inline style',
-      () => {
-        const stylesheet = Array(5001).join(validStyleBlob);
-        assertStrictEqual(50000, stylesheet.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('.replace_amp_custom {}', stylesheet)
-               .replace('replace_inline_style', 'display:block;');
-        // TODO(honeybadgerdontcare): Once inline style is allowed, update test.
-        test.expectedOutput = 'FAIL\n' +
-           'feature_tests/css_length.html:5034:0 The inline \'style\' ' +
-           'attribute is not allowed in AMP documents. Use \'style ' +
-           'amp-custom\' tag instead. (see https://www.ampproject.org/' +
-           'docs/guides/author-develop/responsive/style_pages) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]\n' +
-           'feature_tests/css_length.html:5036:6 The author stylesheet ' +
-           'specified in tag \'style amp-custom\' and the combined inline ' +
-           'styles is too large - we saw 50014 bytes whereas the limit is ' +
-           '50000 bytes. (see https://www.ampproject.org/docs/guides/' +
-           'author-develop/responsive/style_pages) [AUTHOR_STYLESHEET_PROBLEM]';
-        test.run();
-      });
+  it('will not accept 50000 bytes in author stylesheet and 14 bytes in ' +
+     'inline style',
+  () => {
+    const stylesheet = Array(5001).join(validStyleBlob);
+    assertStrictEqual(50000, stylesheet.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+       test.ampHtmlFileContents
+           .replace('.replace_amp_custom {}', stylesheet)
+           .replace('replace_inline_style', 'display:block;');
+    test.expectedOutput = 'FAIL\n' +
+       'feature_tests/css_length.html:5036:6 The author stylesheet ' +
+       'specified in tag \'style amp-custom\' and the combined inline ' +
+       'styles is too large - document contains 50014 bytes whereas the ' +
+       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
+       '/author-develop/responsive/style_pages) ' +
+       '[AUTHOR_STYLESHEET_PROBLEM]';
+    test.run();
+  });
 });
 
 describe('CssLength', () => {
@@ -627,21 +604,6 @@ describe('CssLength', () => {
 });
 
 /**
- * Helper for sorting attributes.
- * @param {string} a
- * @param {string} b
- * @return {number}
- */
-function compareAttrNames(a, b) {
-  // amp-bind attributes (e.g. "[name]") should be after other attributes.
-  if (a.startsWith('[') && !b.startsWith('[')) {return 1;}
-  if (!a.startsWith('[') && b.startsWith('[')) {return -1;}
-  if (a < b) {return -1;}
-  if (a > b) {return 1;}
-  return 0;
-}
-
-/**
  * Helper for ValidatorRulesMakeSense.
  * @param {!amp.validator.AttrSpec} attrSpec
  * @param {!amp.validator.ValidatorRules} rules
@@ -655,6 +617,7 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
     // Attribute Spec names are matched against lowercased attributes,
     // so the rules *must* also be lower case or non-cased.
     const attrSpecNameRegex = new RegExp('^[^A-Z]+$');
+
     expect(attrSpecNameRegex.test(attrSpec.name)).toBe(true);
   });
   if (attrSpec.valueUrl !== null) {
@@ -666,22 +629,6 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
         expect(allowedProtocolRegex.test(allowedProtocol)).toBe(true);
       }
     });
-    // If disallowed_domain is whatever.ampproject.org then
-    // allow_relative must be false. Otherwise relative URLs would be
-    // rejected for domain whatever.ampproject.org because that is
-    // used as the base URL to parse the relative URL.
-    if ((attrSpec.valueUrl.allowRelative !== null) &&
-        attrSpec.valueUrl.allowRelative) {
-      // allow_relative is true, check to see if whatever.ampproject.org is a
-      // disallowed_domain.
-      it('allow_relative can not be true if ' +
-          'disallowed_domain is whatever.ampproject.org',
-      () => {
-        for (const disallowedDomain of attrSpec.valueUrl.disallowedDomain) {
-          expect(disallowedDomain !== 'whatever.ampproject.org');
-        }
-      });
-    }
     // If allowed_protocol is http then allow_relative should not be false
     // except for `data-` attributes.
     if (!attrSpec.name.startsWith('data-')) {
@@ -741,8 +688,12 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
   }
   // only has one of value set.
   let numValues = 0;
-  if (attrSpec.value !== null) {numValues += 1;}
-  if (attrSpec.valueCasei !== null) {numValues += 1;}
+  if (attrSpec.value.length > 0) {
+    numValues += 1;
+  }
+  if (attrSpec.valueCasei.length > 0) {
+    numValues += 1;
+  }
   if (attrSpec.valueRegex !== null) {numValues += 1;}
   if (attrSpec.valueRegexCasei !== null) {numValues += 1;}
   if (attrSpec.valueUrl !== null) {numValues += 1;}
@@ -846,6 +797,10 @@ describe('ValidatorRulesMakeSense', () => {
     const tagSpecName =
         tagSpec.specName || tagSpec.tagName || 'UNKNOWN_TAGSPEC';
 
+    // html_format must be set.
+    it('\'' + tagSpecName + '\' must have at least one htmlFormat set', () => {
+      expect(tagSpec.htmlFormat.length).toBeGreaterThan(0);
+    });
     // html_format is never UNKNOWN_CODE.
     it('tagSpec.htmlFormat should never contain UNKNOWN_CODE', () => {
       expect(tagSpec.htmlFormat.indexOf(
@@ -874,9 +829,8 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // Verify AMP4ADS extensions are whitelisted.
     if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
-        ((tagSpec.htmlFormat.length === 0) ||
-         (tagSpec.htmlFormat.indexOf(
-             amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
+        (tagSpec.htmlFormat.indexOf(
+            amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
@@ -911,9 +865,8 @@ describe('ValidatorRulesMakeSense', () => {
     }
     // Verify AMP4EMAIL extensions are whitelisted.
     if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
-        ((tagSpec.htmlFormat.length === 0) ||
-         (tagSpec.htmlFormat.indexOf(
-             amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1))) {
+        (tagSpec.htmlFormat.indexOf(
+            amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1)) {
       // AMP4EMAIL format is the source of this whitelist.
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
@@ -922,6 +875,7 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-FIT-TEXT': 0,
         'AMP-IMG': 0,
         'AMP-IMAGE-LIGHTBOX': 0,
+        'AMP-LAYOUT': 0,
         'AMP-LIGHTBOX': 0,
         'AMP-LIST': 0,
         'AMP-SELECTOR': 0,
@@ -986,8 +940,8 @@ describe('ValidatorRulesMakeSense', () => {
       if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {
         it('every <script> tag with a src attribute has a whitelist check',
             () => {
-              expect(attrSpec.value !== null ||
-                    attrSpec.valueRegex !== null).toBe(true);
+              expect(attrSpec.value.length > 0 || attrSpec.valueRegex !== null)
+                  .toBe(true);
             });
       }
       // TagSpecs with an ExtensionSpec are extensions. We have a few
@@ -1032,20 +986,13 @@ describe('ValidatorRulesMakeSense', () => {
       }
 
       if (attrSpec.dispatchKey) {
-        it('tag_spec ' + tagSpecName + ' can not have more than one dispatch_key', () => {
+        it('tag_spec ' + tagSpecName +
+           ' can not have more than one dispatch_key', () => {
           expect(seenDispatchKey).toBe(false);
           seenDispatchKey = true;
         });
       }
     }
-
-    // TODO(#15443): Figure out how to check for sorted attrs with the minified
-    // output of the new closure compiler.
-    // it('\'' + tagSpecName + '\' has attrs not sorted alphabetically by name', () => {
-    //   const sortedAttrs = Object.keys(attrNameIsUnique).sort(compareAttrNames);
-
-    //   expect(Object.keys(attrNameIsUnique)).toEqual(sortedAttrs);
-    // });
 
     // cdata
     if (tagSpec.cdata !== null) {
@@ -1121,6 +1068,30 @@ describe('ValidatorRulesMakeSense', () => {
               .toBe(true);
         });
       }
+      // We want to be certain not to allow SCRIPT tagspecs which don't either
+      // define a src attribute OR define a JSON type.
+      if (tagSpec.tagName === 'SCRIPT') {
+        let hasSrc = false;
+        let hasJson = false;
+        for (const attrSpecId of tagSpec.attrs) {
+          if (attrSpecId < 0) { continue; }
+          const attrSpec = rules.attrs[attrSpecId];
+          if (attrSpec.name === 'src') {
+            hasSrc = true;
+          }
+          if (attrSpec.name === 'type' && attrSpec.valueCasei.length > 0) {
+            for (const value of attrSpec.valueCasei) {
+              if (value === 'application/ld+json' ||
+                  value === 'application/json') {
+                hasJson = true;
+              }
+            }
+          }
+        }
+        it('script tags must be json or src', () => {
+          expect(hasSrc || hasJson).toBe(true);
+        });
+      }
       // cdata_regex and mandatory_cdata
       if ((tagSpec.cdata.cdataRegex !== null) ||
           (tagSpec.cdata.mandatoryCdata !== null)) {
@@ -1173,37 +1144,20 @@ describe('ValidatorRulesMakeSense', () => {
 
   // Verify that for every error code in our enum, we have exactly one format
   // and specificity value in the rules.
-  let numValidCodes = 0;
-  for (const code in amp.validator.ValidationError.Code) {
-    numValidCodes += 1;
-  }
-  let numErrorSpecificity = 0;
   const errorSpecificityIsUnique = {};
   it('Two specificity rules found for same error code', () => {
     for (const errorSpecificity of rules.errorSpecificity) {
       expect(errorSpecificityIsUnique.hasOwnProperty(errorSpecificity.code))
           .toBe(false);
       errorSpecificityIsUnique[errorSpecificity.code] = 0;
-      numErrorSpecificity += 1;
     }
   });
 
-  // TODO(#15443): This test is flaky. numErrorSpecificity is either 0 or 100.
-  // it('Some error codes are missing specificity rules', () => {
-  //   expect(numValidCodes).toEqual(numErrorSpecificity);
-  // });
-  let numErrorFormat = 0;
   const errorFormatIsUnique = {};
   it('Two error format string rules found for same error code', () => {
     for (const errorFormat of rules.errorFormats) {
       expect(errorFormatIsUnique.hasOwnProperty(errorFormat.code)).toBe(false);
       errorFormatIsUnique[errorFormat.code] = 0;
-      numErrorFormat += 1;
     }
   });
-
-  // TODO(#15443): This test is flaky. numErrorFormat is either 0 or 100.
-  // it('Some error codes are missing format strings', () => {
-  //   expect(numValidCodes).toEqual(numErrorFormat);
-  // });
 });

@@ -99,6 +99,10 @@ let ExtensionDef;
  */
 let ExtensionHolderDef;
 
+/**
+ * @param {string} extensionId
+ * @return {boolean}
+ */
 export function isTemplateExtension(extensionId) {
   return CUSTOM_TEMPLATES.indexOf(extensionId) >= 0;
 }
@@ -142,7 +146,7 @@ export class Extensions {
    * services and document factories. This method is called by the extension's
    * script itself when it's loaded using the regular `AMP.push()` callback.
    * @param {string} extensionId
-   * @param {function(!Object)} factory
+   * @param {function(!Object, !Object)} factory
    * @param {!Object} arg
    * @restricted
    */
@@ -150,7 +154,7 @@ export class Extensions {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
-      factory(arg);
+      factory(arg, arg['_']);
       if (getMode().localDev || getMode().test) {
         if (Object.freeze) {
           const m = holder.extension;

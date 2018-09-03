@@ -69,6 +69,9 @@ export class AmpAdCustom extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * Builds AmpAdUIHandler callback
+   */
   buildCallback() {
     this.url_ = this.element.getAttribute('data-url');
     this.slot_ = this.element.getAttribute('data-slot');

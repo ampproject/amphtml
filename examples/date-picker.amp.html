@@ -37,6 +37,10 @@
   .spacer {
     margin-bottom: 360px;
   }
+
+  .fix-resize-bug .amp-date-picker-resize-bug .DayPicker_transitionContainer {
+    min-height: 372px;
+  }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
@@ -62,11 +66,10 @@
     locale="en"
     format="DD/MM/YYYY"
     number-of-months="1"
-    day-size="50"
+    day-size="42"
     start-input-selector="#start"
     end-input-selector="#end"
     mode="overlay"
-    layout="container"
     open-after-clear
     open-after-select
   >
@@ -199,6 +202,24 @@
   <input type="date" id="end-date">
 </amp-date-picker>
 
+<h2>Day size expand bug</h2>
+
+<amp-state id="fix">
+  <script type="application/json">
+  {
+    "enabled": true
+  }
+  </script>
+</amp-state>
+
+<p>
+  <span [text]="fix.enabled ? 'The bug will not occur' : 'The bug will occur and warn in the console'">The bug will not occur</span>
+</p>
+<button on="tap:AMP.setState({fix: {enabled: !fix.enabled}})" [text]="(fix.enabled ? 'Cause' : 'Prevent') + ' bug'">Cause bug</button>
+<amp-date-picker  class="fix-resize-bug" [class]="fix.enabled ? 'fix-resize-bug' : ''" id="dseb" mode="overlay" day-size="42" input-selector="#dseb-input">
+  <input id="dseb-input" type="tel" placeholder="Date">
+</amp-date-picker>
+
 <h2>Lightbox date picker</h2>
 <button on="tap: lb.open">Show lightbox date picker</button>
 <amp-lightbox id="lb" layout="nodisplay" scrollable>
@@ -208,6 +229,21 @@
     number-of-months="12"
   ></amp-date-picker>
 </amp-lightbox>
+
+<h2>Actions</h2>
+<h3>Today</h3>
+<button on="tap: tsp.today">Today</button>
+<button on="tap: tsp.today(offset=1)">Tomorrow</button>
+<button on="tap: tsp.clear">Clear</button>
+<amp-date-picker id="tsp" layout="fixed-height" height="360"></amp-date-picker>
+
+<h3>Start and End Today</h3>
+<button on="tap: trp.startToday">Start Today</button>
+<button on="tap: trp.endToday(offset=1)">End Tomorrow</button>
+<button on="tap: trp.startToday,trp.endToday(offset=7)">Select one week</button>
+<button on="tap: trp.startToday(offset=7),trp.endToday(offset=14)">Select next week</button>
+<button on="tap: trp.clear">Clear</button>
+<amp-date-picker id="trp" type="range" layout="fixed-height" height="360"></amp-date-picker>
 
 <div class="spacer"></div>
 </body>
