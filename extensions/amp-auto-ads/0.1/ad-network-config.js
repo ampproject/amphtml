@@ -25,6 +25,7 @@ import {
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {parseUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
@@ -85,7 +86,7 @@ class AdNetworkConfigDef {
  * @return {?AdNetworkConfigDef}
  */
 export function getAdNetworkConfig(type, autoAmpAdsElement) {
-  if (type == '_ping_') {
+  if ((getMode().test || getMode().localDev) && type == '_ping_') {
     return new PingNetworkConfig(autoAmpAdsElement);
   }
   if (type == 'adsense') {
