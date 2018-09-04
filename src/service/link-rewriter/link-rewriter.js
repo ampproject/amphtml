@@ -36,7 +36,7 @@ export class LinkRewriter {
    * @param {!Document} iframeDoc
    * @param {string} id
    * @param {function(Array<HTMLElement>):TwoStepsResponse} resolveUnknownLinks
-   * @param {?{linkSelector: boolean}=} options
+   * @param {?{linkSelector: string}=} options
    */
   constructor(iframeDoc, id, resolveUnknownLinks, options) {
     /** @public {!./event-messenger.EventMessenger} */

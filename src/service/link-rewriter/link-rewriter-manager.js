@@ -21,7 +21,7 @@ import {registerServiceBuilderForDoc} from '../../service';
  * - Managing which LinkRewriter has the priority to replace a link
  *   (based on configurable priority list).
  *
- * - Watching for anchor clicks and allowing the priority LinkRewriter to
+ * - Watching for anchor clicks and allowing the top priority LinkRewriter to
  *   execute a potential "href" replacement. At the moment, only one
  *   LinkRewriter can mutate the link. If the top priority LinkRewriter decides
  *   to not replace the link, the second top priority LinkRewriter will be
@@ -69,7 +69,7 @@ export class LinkRewriterManager {
    *   - Function to determine which anchor should be replaced and by what URL.
    *     See './link-rewriter-helper.createTwoStepsResponse' to create
    *     your `TwoStepsResponse` object.
-   * @param {?{linkSelector: boolean}=} options
+   * @param {?{linkSelector: string}=} options
    *   - linkSelector is an optional CSS selector to restrict
    *    which anchors the link rewriter should handle.
    *    Anchors not matching the CSS selector will be ignored.
