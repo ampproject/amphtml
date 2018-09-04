@@ -19,56 +19,80 @@ import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-access-scroll-elt';
 
-/** @const {!JsonObject} */
-const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
-  'authorization': 'https://connect.scroll.com/amp/access'
-                   + '?rid=READER_ID'
-                   + '&cid=CLIENT_ID(scroll1)'
-                   + '&c=CANONICAL_URL'
-                   + '&o=AMPDOC_URL'
-                   + '&x=QUERY_PARAM(scrollx)',
-  'pingback': 'https://connect.scroll.com/amp/pingback'
-              + '?rid=READER_ID'
-              + '&cid=CLIENT_ID(scroll1)'
-              + '&c=CANONICAL_URL'
-              + '&o=AMPDOC_URL'
-              + '&r=DOCUMENT_REFERRER'
-              + '&x=QUERY_PARAM(scrollx)'
-              + '&d=AUTHDATA(scroll)'
-              + '&v=AUTHDATA(visitId)',
-  'namespace': 'scroll',
-});
+/**
+ * @param {string} hostname
+ * @return {!JsonObject}
+ */
+const accessConfig = hostname => {
+  /** @const {!JsonObject} */
+  const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
+    'authorization': `https://${hostname}/amp/access`
+                     + '?rid=READER_ID'
+                     + '&cid=CLIENT_ID(scroll1)'
+                     + '&c=CANONICAL_URL'
+                     + '&o=AMPDOC_URL'
+                     + '&x=QUERY_PARAM(scrollx)',
+    'pingback': `https://${hostname}/amp/pingback`
+                + '?rid=READER_ID'
+                + '&cid=CLIENT_ID(scroll1)'
+                + '&c=CANONICAL_URL'
+                + '&o=AMPDOC_URL'
+                + '&r=DOCUMENT_REFERRER'
+                + '&x=QUERY_PARAM(scrollx)'
+                + '&d=AUTHDATA(scroll)'
+                + '&v=AUTHDATA(visitId)',
+    'namespace': 'scroll',
+  });
+  return ACCESS_CONFIG;
+};
 
-const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
-  'requests': {
-    'scroll': 'https://connect.scroll.com/amp/analytics'
-              + '?rid=ACCESS_READER_ID'
-              + '&cid=CLIENT_ID(scroll1)'
-              + '&c=CANONICAL_URL'
-              + '&o=AMPDOC_URL'
-              + '&r=DOCUMENT_REFERRER'
-              + '&x=QUERY_PARAM(scrollx)'
-              + '&d=AUTHDATA(scroll.scroll)'
-              + '&v=AUTHDATA(scroll.visitId)'
-              + '&h=SOURCE_HOSTNAME'
-              + '&s=${totalEngagedTime}',
-  },
-  'triggers': {
-    'trackInterval': {
-      'on': 'timer',
-      'timerSpec': {
-        'interval': 15,
-        'maxTimerLength': 7200,
-      },
-      'request': 'scroll',
+/**
+ * @param {string} hostname
+ * @return {!JsonObject}
+ */
+const analyticsConfig = hostname => {
+  const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+    'requests': {
+      'scroll': `https://${hostname}/amp/analytics`
+                + '?rid=ACCESS_READER_ID'
+                + '&cid=CLIENT_ID(scroll1)'
+                + '&c=CANONICAL_URL'
+                + '&o=AMPDOC_URL'
+                + '&r=DOCUMENT_REFERRER'
+                + '&x=QUERY_PARAM(scrollx)'
+                + '&d=AUTHDATA(scroll.scroll)'
+                + '&v=AUTHDATA(scroll.visitId)'
+                + '&h=SOURCE_HOSTNAME'
+                + '&s=${totalEngagedTime}',
     },
-  },
-});
+    'triggers': {
+      'trackInterval': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 15,
+          'maxTimerLength': 7200,
+        },
+        'request': 'scroll',
+      },
+    },
+  });
+  return ANALYTICS_CONFIG;
+};
 
+/**
+ * @param {!JsonObject} config
+ * @return {string}
+ */
+const scrollHostname = config => {
+  return getMode().development && config['hostname']
+    ? config['hostname']
+    : 'connect.scroll.com';
+};
 
 /**
  * amp-access vendor that authenticates against the scroll.com service.
@@ -86,7 +110,8 @@ export class ScrollAccessVendor extends AccessClientAdapter {
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
   constructor(ampdoc, accessService, accessSource) {
-    super(ampdoc, ACCESS_CONFIG, {
+    const hostname = scrollHostname(accessSource.getAdapterConfig());
+    super(ampdoc, accessConfig(hostname), {
       buildUrl: accessSource.buildUrl.bind(accessSource),
       collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
@@ -105,8 +130,9 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           const isStory = this.ampdoc.getRootNode().querySelector(
               'amp-story[standalone]');
           if (response && response.scroll && !isStory) {
-            new ScrollElement(this.ampdoc).show(this.accessService_);
-            addAnalytics(this.ampdoc, this.accessSource_.getAdapterConfig());
+            const config = this.accessSource_.getAdapterConfig();
+            new ScrollElement(this.ampdoc).show(this.accessService_, config);
+            addAnalytics(this.ampdoc, config);
           }
           return response;
         });
@@ -162,8 +188,9 @@ class ScrollElement {
 
   /**
    * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
+   * @param {!JsonObject} vendorConfig
    */
-  show(accessService) {
+  show(accessService, vendorConfig) {
     Services.viewportForDoc(this.ampdoc_).addToFixedLayer(this.scrollBar_)
         .then(() => accessService.getAccessReaderId())
         .then(readerId => {
@@ -171,8 +198,9 @@ class ScrollElement {
             this.ampdoc_.getBody().removeChild(this.placeholder_);
           };
           const docInfo = Services.documentInfoForDoc(this.ampdoc_);
+          const hostname = scrollHostname(vendorConfig);
           this.iframe_.setAttribute('src',
-              'https://connect.scroll.com/amp/scrollbar'
+              `https://${hostname}/amp/scrollbar`
                 + '?rid=' + encodeURIComponent(readerId)
                 + '&o=' + encodeURIComponent(this.ampdoc_.getUrl())
                 + '&c=' + encodeURIComponent(docInfo.canonicalUrl));
@@ -203,6 +231,8 @@ function addAnalytics(ampdoc, vendorConfig) {
       'script', dict({
         'type': 'application/json',
       }));
+  const hostname = scrollHostname(vendorConfig);
+  const ANALYTICS_CONFIG = analyticsConfig(hostname);
   scriptElem.textContent = JSON.stringify(ANALYTICS_CONFIG);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = ANALYTICS_CONFIG;
