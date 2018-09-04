@@ -101,7 +101,7 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
  * A fake ad network integration that is mainly used for testing
  * and demo purposes. This implementation gets stripped out in compiled
  * production code.
- * @implements {AdNetworkCOnfigDef}
+ * @implements {AdNetworkConfigDef}
  * @visibleForTesting
  */
 class PingNetworkConfig {
