@@ -16,22 +16,27 @@ export let TwoStepsResponse;
 /**
  * LinkRewriter works together with LinkRewriterManager to allow rewriting
  * links at click time. E.g: Replacing a link by its affiliate version only if
- * the link can be monetised. A page can have multiple LinkRewriter running
- * at the same time.
+ * the link can be monetised.
+ *
+ * A page can have multiple LinkRewriter running at the same time.
  *
  * LinkRewriter class is in charge of:
- * - Scanning the page to find links based on an optional css selector.
- * - Asking the "resolveUnknownLinks" function which links can be replaced.
- * - Keeping track of the replacement link of each link on the page.
+ * - Scanning the page to find links based on an optional CSS selector.
+ *
+ * - Asking the "resolveUnknownLinks" function which links can be replaced
+ *   so we already know the replacement URL at click time.
+ *
+ * - Keeping track of the replacement link of each links on the page.
+ *
  * - Swapping the anchor url to its replacement url when instructed
- *  by the LinkRewriterManager.
+ *   by the LinkRewriterManager.
  */
 export class LinkRewriter {
-  /**.
+  /**
    * @param {!Document} iframeDoc
    * @param {string} id
    * @param {function(Array<HTMLElement>):TwoStepsResponse} resolveUnknownLinks
-   * @param {Object=} options
+   * @param {?{linkSelector: boolean}=} options
    */
   constructor(iframeDoc, id, resolveUnknownLinks, options) {
     /** @public {!./event-messenger.EventMessenger} */
@@ -48,7 +53,7 @@ export class LinkRewriter {
     this.resolveUnknownLinks_ = resolveUnknownLinks;
 
     /** @private {string} */
-    this.linkSelector_ = options.linkSelector;
+    this.linkSelector_ = options.linkSelector || 'a';
 
     /** @private {number} */
     this.restoreDelay_ = 300; //ms
@@ -212,7 +217,7 @@ export class LinkRewriter {
    * @return {Array<HTMLElement>}
    */
   getLinksInDOM_() {
-    const q = this.iframeDoc_.querySelectorAll(this.linkSelector_ || 'a');
+    const q = this.iframeDoc_.querySelectorAll(this.linkSelector_);
     return [].slice.call(q);
   }
 }
