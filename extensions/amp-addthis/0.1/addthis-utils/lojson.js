@@ -35,34 +35,41 @@ import {toArray} from '../../../../src/types';
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
 /**
- * @param {{
+ * @typedef {{
  * loc:*, title:string,
  * pubId:string,
- * atConfig: {
- * services_exclude:string,
- * services_compact:string,
- * services_expanded:string,
- * services_custom: Array,
- * ui_click: boolean,
- * ui_disable: boolean,
- * ui_delay: number,
- * ui_hover_direction: number,
- * ui_language: string,
- * ui_offset_top: number,
- * ui_offset_left: number,
- * ui_508_compliant: boolean,
- * ui_tabindex: number,
- * use_cookies: boolean,
- * track_addressbar: boolean,
- * track_clickback: boolean,
- * track_linkback: boolean,
- * track_textcopy: boolean
- * },
+ * atConfig: JsonObject<AtConfigDef>,
  * referrer: string,
  * ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc
- * }} _
+ * }}
  */
-const getLojsonData = ({
+let LojsonDataDef;
+
+/**
+ * @typedef {{
+ *   services_exclude:string,
+ *   services_compact:string,
+ *   services_expanded:string,
+ *   services_custom: Array,
+ *   ui_click: boolean,
+ *   ui_disable: boolean,
+ *   ui_delay: number,
+ *   ui_hover_direction: number,
+ *   ui_language: string,
+ *   ui_offset_top: number,
+ *   ui_offset_left: number,
+ *   ui_508_compliant: boolean,
+ *   ui_tabindex: number,
+ *   use_cookies: boolean,
+ *   track_addressbar: boolean,
+ *   track_clickback: boolean,
+ *   track_linkback: boolean,
+ *   track_textcopy: boolean
+ * }}
+ */
+let AtConfigDef;
+
+const getLojsonData = (/** @type {!LojsonDataDef} */ {
   loc,
   title,
   pubId,
@@ -84,7 +91,7 @@ const getLojsonData = ({
     port,
   };
   const parsedReferrer = referrer ? parseUrlDeprecated(referrer) : {};
-  const langParts = atConfig.ui_language.split('-');
+  const langParts = atConfig['ui_language'].split('-');
   const langWithoutLocale = langParts[0];
   const locale = langParts.slice(1);
   const service = getServiceFromUrlFragment(pageInfo.du);
@@ -98,13 +105,13 @@ const getLojsonData = ({
   return {
     amp: 1,
     bl: 0 |
-    (atConfig.use_cookies !== false ? 1 : 0) |
-    (atConfig.track_textcopy === true ? 2 : 0) |
-    (atConfig.track_addressbar === true ? 4 : 0),
+    (atConfig['use_cookies'] !== false ? 1 : 0) |
+    (atConfig['track_textcopy'] === true ? 2 : 0) |
+    (atConfig['track_addressbar'] === true ? 4 : 0),
     cb: classifyPage(pageInfo, metaElements),
     colc: Date.now(),
-    ct: atConfig.track_clickback !== false &&
-    atConfig.track_linkback !== false ? 1 : 0,
+    ct: atConfig['track_clickback'] !== false &&
+    atConfig['track_linkback'] !== false ? 1 : 0,
     dc: 1,
     dp: host,
     dr: host === parsedReferrer.host ? undefined : parsedReferrer.host,

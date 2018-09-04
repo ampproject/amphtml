@@ -301,7 +301,7 @@ class AmpAddThis extends AMP.BaseElement {
   /**
    * @private
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
-   * @return {Object<string, string>}
+   * @return {!Object<string, string>}
    */
   getATConfig_(ampDoc) {
     return AT_CONFIG_KEYS.reduce((config, key) => {
