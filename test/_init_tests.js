@@ -362,7 +362,7 @@ function maybeStubConsoleInfoLogWarn() {
   const {verboseLogging} = window.__karma__.config;
   if (!verboseLogging) {
     sinon.sandbox.stub(console, 'info').callsFake(() => {});
-    //sinon.sandbox.stub(console, 'log').callsFake(() => {});
+    sinon.sandbox.stub(console, 'log').callsFake(() => {});
     sinon.sandbox.stub(console, 'warn').callsFake(() => {});
   }
 }

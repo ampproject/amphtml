@@ -36,7 +36,6 @@ import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn} from '../../../src/utils/object';
-import {insertAfterOrAtStart, removeElement} from '../../../src/dom';
 import {isEnumValue} from '../../../src/types';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
@@ -106,9 +105,6 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isPostPromptUIRequired_ = false;
-
-    /** @private {?string} */
-    this.type_ = null;
   }
 
   /** @override */
@@ -179,7 +175,6 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    console.log("enable actions");
     this.registerAction('accept', () => this.handleAction_(ACTION_TYPE.ACCEPT));
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
@@ -277,15 +272,10 @@ export class AmpConsent extends AMP.BaseElement {
       this.currentDisplayInstance_ = instanceId;
       const uiElement = this.consentUI_[this.currentDisplayInstance_];
       setImportantStyles(uiElement, {display: 'block'});
-      if (uiElement.tagName == 'IFRAME') {
-        // TODO: Show placeholder before iframe load
-        insertAfterOrAtStart(this.element, uiElement, null);
-      } else {
-        // scheduleLayout is required everytime because some AMP element may
-        // get un laid out after toggle display (#unlayoutOnPause)
-        // for example <amp-iframe>
-        this.scheduleLayout(uiElement);
-      }
+      // scheduleLayout is required everytime because some AMP element may
+      // get un laid out after toggle display (#unlayoutOnPause)
+      // for example <amp-iframe>
+      this.scheduleLayout(uiElement);
     });
 
     const deferred = new Deferred();
@@ -312,9 +302,6 @@ export class AmpConsent extends AMP.BaseElement {
       // element.style['display] = 'none' cannot overwrite style set with
       // !important.
       setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
-      if (uiToHide.tagName == 'IFRAME') {
-        removeElement(uiToHide);
-      }
     });
     const displayInstance = /** @type {string} */ (
       this.currentDisplayInstance_);
@@ -331,7 +318,6 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} action
    */
   handleAction_(action) {
-    console.log('handle action');
     if (!isEnumValue(ACTION_TYPE, action)) {
       // Unrecognized action
       return;
@@ -602,8 +588,8 @@ export class AmpConsent extends AMP.BaseElement {
         `${TAG} should have (only) one <script> child`);
     const script = scripts[0];
     user().assert(isJsonScriptTag(script),
-        `${TAG} consent instance config should be put in a <script>` +
-        'tag with type= "application/json"');
+        `${TAG} consent instance config should be put in a <script> ` +
+        'tag with type = "application/json"');
     const config = tryParseJson(script.textContent, () => {
       user().assert(false, `${TAG}: Error parsing config`);
     });
@@ -625,16 +611,17 @@ export class AmpConsent extends AMP.BaseElement {
     }
     user().assert(CMP_CONFIG[type], `invalid CMP type ${type}`);
     const importConfig = CMP_CONFIG[type];
-    this.assertCMPConfig_(config);
+    this.assertCMPConfig_(importConfig);
     const storageKey = importConfig['storageKey'];
-    delete importConfig['storageKey'];
 
     const cmpConfig = dict({
       'consents': dict({}),
     });
 
-    cmpConfig['consents'][storageKey] = importConfig;
+    const config = Object.assign({}, importConfig);
+    delete config['storageKey'];
 
+    cmpConfig['consents'][storageKey] = config;
     return cmpConfig;
   }
 
@@ -652,11 +639,12 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Check if the CMP config is valid
+   * @param {!JsonObject} config
    */
   assertCMPConfig_(config) {
     const assertValues = ['storageKey', 'checkConsentHref', 'promptUISrc'];
     for (let i = 0; i < assertValues.length; i++) {
-      const attribute = assertValues[i]
+      const attribute = assertValues[i];
       dev().assert(config[attribute], `CMP config must specify ${attribute}`);
     }
   }

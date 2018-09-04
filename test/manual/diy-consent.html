@@ -11,7 +11,6 @@ var ampWindow = parent;
 
 // Detect 3P sentinel in the location.hash.
 var hashMatch = location.hash.match(/amp-3p-sentinel=((\d+)-\d+)/);
-console.log('IFRAME UP!!!!!');
 if (hashMatch) {
   sentinel = hashMatch[1];
   // Depth is measured from window.top.

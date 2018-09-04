@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-// import {getMode} from '../../../src/mode';
+import {getMode} from '../../../src/mode';
 
-export const CMP_CONFIG = ({
-  '_ping_': {
+export const CMP_CONFIG = ({});
+
+if (getMode().test || getMode().localDev) {
+  CMP_CONFIG['_ping_'] = {
     'storageKey': '_ping_',
     'checkConsentHref': 'http://localhost:8000/get-consent-v1',
     'promptUISrc': 'http://ads.localhost:8000/test/manual/diy-consent.html',
-  },
-});
-
-// if (getMode().test || getMode().localDev) {
-//   CMP_CONFIG['_ping_'] = {
-//     'storageKey': '_ping_',
-//     'checkConsentHref': 'http://localhost:8000/get-consent-v1',
-//     'promptUISrc': 'http://ads.localhost:8000/test/manual/diy-consent.html',
-//   };
-// }
+  };
+}
