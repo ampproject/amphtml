@@ -679,7 +679,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @param {number} centerClientY
    * @param {number} deltaX
    * @param {number} deltaY
-   *  @param {number} dir
+   * @param {number} dir
    * @private
    */
   onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir) {
