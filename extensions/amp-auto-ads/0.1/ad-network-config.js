@@ -104,7 +104,7 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
  * @implements {AdNetworkCOnfigDef}
  * @visibleForTesting
  */
-class PingNetworkConfig {;
+class PingNetworkConfig {
   /**
    * @param {!Element} autoAmpAdsElement
    */
@@ -112,25 +112,26 @@ class PingNetworkConfig {;
     this.autoAmpAdsElement_ = autoAmpAdsElement;
   }
 
+  /** @override */
   isEnabled() {
     return true;
   }
 
+  /** @override */
   isResponsiveEnabled() {
     return true;
   }
 
   /** @override */
   getConfigUrl() {
-    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-    const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
-    return buildUrl('//lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n', {}, 4096);
+    return buildUrl('//lh3.googleusercontent.com/' +
+      'pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n', {}, 4096);
   }
 
   /** @override */
   getAttributes() {
     return dict({
-      'type': '_ping_'
+      'type': '_ping_',
     });
   }
 

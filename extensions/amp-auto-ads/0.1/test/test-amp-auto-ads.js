@@ -36,7 +36,7 @@ describes.realWin('amp-auto-ads', {
 
   const AD_CLIENT = 'ca-pub-1234';
   const OPT_IN_STATUS_ANCHOR_ADS = 2;
-  
+
   let win;
   let doc;
   let sandbox;
@@ -156,7 +156,7 @@ describes.realWin('amp-auto-ads', {
     whenVisible.returns(Promise.resolve());
   });
 
-  function getAmpAutoAds(type, adClient) {
+  function getAmpAutoAds(type) {
     ampAutoAds = doc.createElement('amp-auto-ads');
     ampAutoAds.setAttribute('type', type || '_ping_');
     doc.body.appendChild(ampAutoAds);
@@ -177,7 +177,7 @@ describes.realWin('amp-auto-ads', {
       resolve = res;
     });
     whenVisible.returns(visible);
-    
+
     return getAmpAutoAds().then(ampAutoAds => {
       return Promise.resolve().then(() => {
         expect(xhr.fetchJson).to.not.have.been.called;
@@ -209,50 +209,46 @@ describes.realWin('amp-auto-ads', {
     });
   });
 
-  it.skip('should insert ads on the page when in holdout experiment branch',
+  it('should insert ads on the page when in holdout experiment branch',
       () => {
         forceExperimentBranch(env.win,
             ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
             AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
 
-        ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
-        ampAutoAdsElem.setAttribute('type', 'adsense');
-        ampAutoAds.buildCallback();
-
-        return new Promise(resolve => {
-          waitForChild(anchor4, parent => {
-            return parent.childNodes.length > 0;
-          }, () => {
-            expect(anchor1.childNodes).to.have.lengthOf(1);
-            expect(anchor2.childNodes).to.have.lengthOf(1);
-            expect(anchor3.childNodes).to.have.lengthOf(0);
-            expect(anchor4.childNodes).to.have.lengthOf(1);
-            verifyAdElement(anchor1.childNodes[0]);
-            verifyAdElement(anchor2.childNodes[0]);
-            verifyAdElement(anchor4.childNodes[0]);
-            resolve();
+        return getAmpAutoAds().then(ampAutoAds => {
+          return new Promise(resolve => {
+            waitForChild(anchor4, parent => {
+              return parent.childNodes.length > 0;
+            }, () => {
+              expect(anchor1.childNodes).to.have.lengthOf(1);
+              expect(anchor2.childNodes).to.have.lengthOf(1);
+              expect(anchor3.childNodes).to.have.lengthOf(0);
+              expect(anchor4.childNodes).to.have.lengthOf(1);
+              verifyAdElement(anchor1.childNodes[0]);
+              verifyAdElement(anchor2.childNodes[0]);
+              verifyAdElement(anchor4.childNodes[0]);
+              resolve();
+            });
           });
         });
       });
 
-  it.skip('should not insert ads on the page when in holdout control branch',
+  it('should not insert ads on the page when in holdout control branch',
       () => {
         forceExperimentBranch(env.win,
             ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
             AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
 
-        ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
-        ampAutoAdsElem.setAttribute('type', 'adsense');
-        ampAutoAds.buildCallback();
-
-        return new Promise(resolve => {
-          setTimeout(() => {
-            expect(anchor1.childNodes).to.have.lengthOf(0);
-            expect(anchor2.childNodes).to.have.lengthOf(0);
-            expect(anchor3.childNodes).to.have.lengthOf(0);
-            expect(anchor4.childNodes).to.have.lengthOf(0);
-            resolve();
-          }, 500);
+        return getAmpAutoAds().then(ampAutoAds => {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              expect(anchor1.childNodes).to.have.lengthOf(0);
+              expect(anchor2.childNodes).to.have.lengthOf(0);
+              expect(anchor3.childNodes).to.have.lengthOf(0);
+              expect(anchor4.childNodes).to.have.lengthOf(0);
+              resolve();
+            }, 500);
+          });
         });
       });
 
