@@ -186,10 +186,10 @@ export function setInitialDisplay(el, value) {
   const {style} = el;
   dev().assert(value !== '' && value !== 'none', 'Initial display value must ' +
     'not be "none". Use toggle instead.');
-  dev().assert(!style.display, 'setInitialDisplay MUST NOT be used for ' +
+  dev().assert(!style['display'], 'setInitialDisplay MUST NOT be used for ' +
     'resetting the display style. If you are looking for display:none ' +
     'toggling, use toggle instead.');
-  style.display = value;
+  style['display'] = value;
 }
 
 
