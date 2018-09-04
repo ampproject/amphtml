@@ -283,7 +283,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * that they fit within amp-pan-zoom.
    * @param {number} aspectRatio
    */
-  calculateContentDimensions_(aspectRatio) {
+  updateContentDimensions_(aspectRatio) {
     // Calculate content height if we set width to amp-pan-zoom's width
     const heightToFit = this.elementBox_.width / aspectRatio;
     // Calculate content width if we set height to be amp-pan-zoom's height
@@ -313,7 +313,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * amp-pan-zoom space.
    * @param {number} sourceAspectRatio
    */
-  calculateMaxScale_(sourceAspectRatio) {
+  updateMaxScale_(sourceAspectRatio) {
     const {width, height} = this.elementBox_;
     const elementBoxRatio = width / height;
     const maxScale = Math.max(
@@ -338,8 +338,8 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.elementBox_ = layoutRectFromDomRect(this.element
         ./*OK*/getBoundingClientRect());
 
-    this.calculateContentDimensions_(sourceAspectRatio);
-    this.calculateMaxScale_(sourceAspectRatio);
+    this.updateContentDimensions_(sourceAspectRatio);
+    this.updateMaxScale_(sourceAspectRatio);
 
     // Reset zoom and pan.
     this.startScale_ = this.scale_ = this.initialScale_;
