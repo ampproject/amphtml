@@ -16,7 +16,7 @@
 
 import {Services} from './services';
 import {dev, rethrowAsync} from './log';
-import {insertAfterOrAtStart, waitForBodyPromise} from './dom';
+import {insertAfterOrAtStart, removeElement, waitForBodyPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
@@ -73,6 +73,27 @@ export function installStylesForDoc(
   return style;
 }
 
+/**
+ * Uninstall styles for ampdoc.
+ * Remove all style elements present in style map
+ * and then deletes the style map.
+ *
+ * This is created to address shadowRoot reload problems (see #17833)
+ *
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc The ampdoc that should get styles deleted.
+ */
+export function uninstallStylesForDoc(ampdoc) {
+  const cssRoot = ampdoc.getHeadNode();
+  const styleMap = cssRoot[STYLE_MAP_PROP];
+  if (styleMap) {
+    for (const key in styleMap) {
+      const styleElement = dev().assertElement(styleMap[key]);
+      removeElement(styleElement);
+    }
+    // Delete the map itself
+    delete cssRoot[STYLE_MAP_PROP];
+  }
+}
 
 /**
  * Adds the given css text to the given document.

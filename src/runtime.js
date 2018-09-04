@@ -56,7 +56,7 @@ import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
-import {installStylesForDoc} from './style-installer';
+import {installStylesForDoc, uninstallStylesForDoc} from './style-installer';
 import {installTemplatesService} from './service/template-impl';
 import {installTimerService} from './service/timer-impl';
 import {installUrlForDoc} from './service/url-impl';
@@ -848,6 +848,12 @@ export class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
+    // Remove style map (__AMP_CSS_SM) to avoid failed to install style issue
+    // on attaching new shadow on same root
+    uninstallStylesForDoc(ampdoc);
+    // TODO: In theory, __AMP_EXT_LDR should also be cleared,
+    // for now, it seems not causing troubles.
+    // Consider clearing it on future issues.
     setViewerVisibilityState(
         Services.viewerForDoc(ampdoc), VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
