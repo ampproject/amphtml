@@ -57,6 +57,9 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 const extensions = {};
 const extensionAliasFilePath = {};
 
+// All extensions to build
+let extensionsToBuild = null;
+
 // All a4a extensions.
 const adVendors = [];
 
@@ -215,12 +218,11 @@ function buildExtensions(options) {
     return Promise.resolve();
   }
 
-  const extensionsToBuild = options.compileAll ?
-    [] : getExtensionsToBuild();
+  const extensionsToBuild = getExtensionsToBuild();
 
   const results = [];
   for (const key in extensions) {
-    if (extensionsToBuild.length > 0 &&
+    if (!options.compileAll &&
         extensionsToBuild.indexOf(extensions[key].name) == -1) {
       continue;
     }
@@ -238,7 +240,11 @@ function buildExtensions(options) {
  * @return {!Array<string>}
  */
 function getExtensionsToBuild() {
-  let extensionsToBuild = [];
+  if (extensionsToBuild) {
+    return extensionsToBuild;
+  }
+
+  extensionsToBuild = [];
 
   if (!!argv.extensions) {
     extensionsToBuild = argv.extensions.split(',');
@@ -761,9 +767,11 @@ function printConfigHelp(command) {
 }
 
 /**
- * Parse the --extensions --extensions_from or the --noextensions flag and
- * prints a helpful message that lets the developer know how to build
- * a list of extensions or without any extensions.
+ * Parses the --extensions, --extensions_from, and the --noextensions flags,
+ * and prints a helpful message that lets the developer know how to build
+ * the runtime with a list of extensions,
+ * all the extensions used by a test file,
+ * or no extensions at all.
  */
 function parseExtensionFlags() {
   if (!process.env.TRAVIS) {
@@ -797,11 +805,10 @@ function parseExtensionFlags() {
     }
 
     if (argv.extensions || argv.extensions_from) {
-      const extensionsToBuild = getExtensionsToBuild();
       log(green('Building extension(s):'),
-          cyan(extensionsToBuild.join(', ')));
+          cyan(getExtensionsToBuild().join(', ')));
 
-      if (maybeAddVideoService(extensionsToBuild)) {
+      if (maybeAddVideoService()) {
         log(green('⤷ Video component(s) being built, added'),
             cyan('amp-video-service'), green('to extension set.'));
       }
@@ -819,14 +826,13 @@ function parseExtensionFlags() {
 
 /**
  * Adds `amp-video-service` to the extension set if a component requires it.
- * @param {!Array<string>} extensionsToBuild
  * @return {boolean}
  */
-function maybeAddVideoService(extensionsToBuild) {
+function maybeAddVideoService() {
   if (!extensionsToBuild.find(ext => VIDEO_EXTENSIONS.has(ext))) {
     return false;
   }
-  argv.extensions += ',amp-video-service';
+  extensionsToBuild.push('amp-video-service');
   return true;
 }
 
