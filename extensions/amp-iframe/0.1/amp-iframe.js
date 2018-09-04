@@ -53,6 +53,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'frameborder',
   'referrerpolicy',
   'scrolling',
+  'title',
 ];
 
 /** @type {number}  */
