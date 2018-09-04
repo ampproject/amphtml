@@ -77,8 +77,29 @@
       border: #000 2px solid;
     }
 
-    #pan-zoom {
-      display: initial;
+    #bottom-align {
+      flex-direction: column-reverse;
+      justify-content: start;
+    }
+
+    #top-align {
+      flex-direction: column;
+      justify-content: start;
+    }
+
+    #left-align {
+      flex-direction: row;
+      justify-content: start;
+    }
+
+    #right-align {
+      flex-direction: row-reverse;
+      justify-content: start;
+    }
+
+    svg {
+      background-color: #4682B4;
+      opacity: 0.3;
     }
 
   </style>
@@ -114,11 +135,11 @@
   </amp-state>
 <article>
   <h1>AMP Pan Zoom</h1>
-  <h1>AMP Pan-Zoom Layout Fill</h1>
-  <p>This just tests basic features under layout fill</p>
+  <h1>AMP Pan-Zoom Bottom Aligned (Layout Fill)</h1>
+  <p>The content here is bottom aligned. </p>
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
     <amp-layout layout="responsive" height="1" width="1">
-      <amp-pan-zoom id="pan-zoom" layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
+      <amp-pan-zoom id="bottom-align" layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
       <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
           <rect class="area-half" x="5" y="5" />
           <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
@@ -152,6 +173,137 @@
               <rect class="seat-free" [class]="seat == 12 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 12})" x="80" y="80" tabindex="0" role="button" />
           </g>
         </svg>
+    </amp-pan-zoom>
+  </amp-layout>
+
+  <h1>AMP Pan-Zoom Top Aligned (Layout Fill)</h1>
+  <p>The content here is top aligned. </p>
+  <p [text]="'Current scale: ' + scale">Current scale: 1</p>
+    <amp-layout layout="responsive" height="1" width="1">
+      <amp-pan-zoom id="top-align" layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
+      <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
+          <rect class="area-half" x="5" y="5" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="10" y="10" tabindex="0" role="button" />
+            <rect class="seat-free" [class]="seat == 2 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 2})" x="30" y="10" tabindex="0" role="button" />
+            <rect class="seat-taken" x="10" y="30" />
+            <rect class="seat-free" [class]="seat == 3 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 3})" x="30" y="30" tabindex="0" role="button" />
+          </g>
+
+          <rect class="area-full" x="55" y="5" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+            <rect class="seat-taken" x="60" y="10" />
+            <rect class="seat-taken" x="80" y="10" />
+            <rect class="seat-taken" x="60" y="30" />
+            <rect class="seat-taken" x="80" y="30" />
+          </g>
+
+          <rect class="area-free" x="5" y="55" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-free" [class]="seat == 4 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 4})" x="10" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 6 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 6})" x="30" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 7 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 7})" x="10" y="80" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 10 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 10})" x="30" y="80" tabindex="0" role="button" />
+          </g>
+
+          <rect class="area-free" x="55" y="55" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-free" [class]="seat == 5 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 5})" x="60" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 8 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 8})" x="80" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 11 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 11})" x="60" y="80" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 12 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 12})" x="80" y="80" tabindex="0" role="button" />
+          </g>
+        </svg>
+    </amp-pan-zoom>
+  </amp-layout>
+
+  <h1>AMP Pan-Zoom Left Aligned (Layout Fill)</h1>
+  <p>The content here is left aligned. </p>
+  <p [text]="'Current scale: ' + scale">Current scale: 1</p>
+    <amp-layout layout="responsive" height="1" width="1">
+      <amp-pan-zoom id="left-align" layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
+      <svg viewBox="0 0 110 190" preserveAspectRatio="xMidYMin slice">
+          <rect class="area-half" x="5" y="5" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="10" y="10" tabindex="0" role="button" />
+            <rect class="seat-free" [class]="seat == 2 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 2})" x="30" y="10" tabindex="0" role="button" />
+            <rect class="seat-taken" x="10" y="30" />
+            <rect class="seat-free" [class]="seat == 3 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 3})" x="30" y="30" tabindex="0" role="button" />
+          </g>
+
+          <rect class="area-full" x="55" y="5" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+            <rect class="seat-taken" x="60" y="10" />
+            <rect class="seat-taken" x="80" y="10" />
+            <rect class="seat-taken" x="60" y="30" />
+            <rect class="seat-taken" x="80" y="30" />
+          </g>
+
+          <rect class="area-free" x="5" y="55" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-free" [class]="seat == 4 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 4})" x="10" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 6 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 6})" x="30" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 7 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 7})" x="10" y="80" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 10 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 10})" x="30" y="80" tabindex="0" role="button" />
+          </g>
+
+          <rect class="area-free" x="55" y="55" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-free" [class]="seat == 5 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 5})" x="60" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 8 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 8})" x="80" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 11 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 11})" x="60" y="80" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 12 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 12})" x="80" y="80" tabindex="0" role="button" />
+          </g>
+        </svg>
+    </amp-pan-zoom>
+  </amp-layout>
+  <h1>AMP Pan-Zoom Right Aligned (Layout Fill)</h1>
+  <p>The content here is right aligned. </p>
+  <p [text]="'Current scale: ' + scale">Current scale: 1</p>
+    <amp-layout layout="responsive" height="1" width="1">
+      <amp-pan-zoom id="right-align" layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
+      <svg viewBox="0 0 110 190" preserveAspectRatio="xMidYMin slice">
+          <rect class="area-half" x="5" y="5" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="10" y="10" tabindex="0" role="button" />
+            <rect class="seat-free" [class]="seat == 2 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 2})" x="30" y="10" tabindex="0" role="button" />
+            <rect class="seat-taken" x="10" y="30" />
+            <rect class="seat-free" [class]="seat == 3 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 3})" x="30" y="30" tabindex="0" role="button" />
+          </g>
+
+          <rect class="area-full" x="55" y="5" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+            <rect class="seat-taken" x="60" y="10" />
+            <rect class="seat-taken" x="80" y="10" />
+            <rect class="seat-taken" x="60" y="30" />
+            <rect class="seat-taken" x="80" y="30" />
+          </g>
+
+          <rect class="area-free" x="5" y="55" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-free" [class]="seat == 4 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 4})" x="10" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 6 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 6})" x="30" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 7 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 7})" x="10" y="80" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 10 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 10})" x="30" y="80" tabindex="0" role="button" />
+          </g>
+
+          <rect class="area-free" x="55" y="55" />
+          <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-free" [class]="seat == 5 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 5})" x="60" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 8 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 8})" x="80" y="60" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 11 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 11})" x="60" y="80" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 12 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 12})" x="80" y="80" tabindex="0" role="button" />
+          </g>
+        </svg>
+    </amp-pan-zoom>
+  </amp-layout>
+
+
+  <amp-layout layout="responsive" height="3" width="4">
+    <amp-pan-zoom  layout="fill">
+    <svg width="100" height="100">
+        <rect width="100%" height="100%" fill="#95B3D7"></rect>
+    </svg>
     </amp-pan-zoom>
   </amp-layout>
 </article>
