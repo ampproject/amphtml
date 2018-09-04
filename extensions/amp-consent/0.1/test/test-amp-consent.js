@@ -630,6 +630,7 @@ describes.realWin('amp-consent', {
           'amp-consent:GH': CONSENT_ITEM_STATE.ACCEPTED,
         };
         ampConsent.buildCallback();
+        ampConsent.element.classList.remove('i-amphtml-notbuilt');
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
             .to.equal('none');
@@ -668,6 +669,7 @@ describes.realWin('amp-consent', {
 
         it('hide postPromptUI', function* () {
           ampConsent.buildCallback();
+          ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
           expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
@@ -679,6 +681,7 @@ describes.realWin('amp-consent', {
             'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
           };
           ampConsent.buildCallback();
+          ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
           expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
