@@ -25,6 +25,10 @@ amp-consent {
   width: 100%;
 }
 
+amp-consent[i-amphtml-notbuilt] > * {
+  display: none !important;
+}
+
 amp-consent > * {
   max-height: 100vh !important;
 }
