@@ -445,6 +445,9 @@ export class AmpPanZoom extends AMP.BaseElement {
       });
       // Override all taps to enable tap events on content
       this.gestures_.onGesture(TapRecognizer, e => {
+
+        // A custom event is necessary here (as opposed to the click() function)
+        // because some targets (e.g. SVGs) may not be HTMLElements.
         const event = createCustomEvent(
             this.win,
             'click',
