@@ -142,7 +142,7 @@ export class ShareMenu {
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      toggle(this.element_, false);
+      toggle(dev().assertElement(this.element_), false);
       this.parentEl_.appendChild(this.element_);
     });
   }

@@ -754,7 +754,7 @@ class VideoEntry {
 
     const mask = renderInteractionOverlay(win, element);
 
-    /** @param {string} display */
+    /** @param {boolean} display */
     const setMaskDisplay = display => {
       video.mutateElement(() => {
         toggle(mask, display);

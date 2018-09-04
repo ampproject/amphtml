@@ -256,7 +256,7 @@ export class NextPageService {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
 
-                toggle(documentRef.recUnit.el, false);
+                toggle(dev().assertElement(documentRef.recUnit.el), false);
                 this.documentQueued_ = false;
                 resolve();
               } catch (e) {
