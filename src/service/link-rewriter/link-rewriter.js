@@ -5,6 +5,14 @@ import {EventMessenger} from './event-messenger';
 import {LinkReplacementCache} from './link-replacement-cache';
 import {isTwoStepsResponse} from './link-rewriter-helpers';
 
+
+/** @typedef {!Array<{anchor: HTMLElement, replacementUrl: ?string}>}} */
+export let AnchorReplacementList;
+
+/** @typedef {{syncResponse: ?AnchorReplacementList, asyncResponse: ?Promise<!AnchorReplacementList>}} */
+export let TwoStepsResponse;
+
+
 /**
  * LinkRewriter works together with LinkRewriterManager to allow rewriting
  * links at click time. E.g: Replacing a link by its affiliate version only if
@@ -20,9 +28,9 @@ import {isTwoStepsResponse} from './link-rewriter-helpers';
  */
 export class LinkRewriter {
   /**.
-   * @param {Document} iframeDoc
+   * @param {!Document} iframeDoc
    * @param {string} id
-   * @param {Function} resolveUnknownLinks
+   * @param {function(Array<HTMLElement>):TwoStepsResponse} resolveUnknownLinks
    * @param {Object=} options
    */
   constructor(iframeDoc, id, resolveUnknownLinks, options) {
@@ -36,7 +44,7 @@ export class LinkRewriter {
     this.iframeDoc_ = iframeDoc;
 
 
-    /** @private {Function} */
+    /** @private {function(Array<HTMLElement>):TwoStepsResponse} */
     this.resolveUnknownLinks_ = resolveUnknownLinks;
 
     /** @private {string} */
@@ -65,8 +73,9 @@ export class LinkRewriter {
 
   /**
    * @public
-   * Get the anchor to replacement url cache
-   * @return {Array<{anchor: HTMLElement, replacementUrl: string}>}
+   * Get the anchor to replacement url cache.
+   * Useful to extract information for tracking purposes.
+   * @return {!AnchorReplacementList}
    */
   getAnchorReplacementList() {
     return this.anchorReplacementCache_.getAnchorReplacementList();

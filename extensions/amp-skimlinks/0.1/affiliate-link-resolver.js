@@ -107,7 +107,7 @@ export class AffiliateLinkResolver {
    *
    * @public
    * @param {Array<HTMLElement>} anchorList
-   * @return {*}
+   * @return {!../../../src/service/link-rewriter/link-rewriter.TwoStepsResponse}
    */
   resolveUnknownAnchors(anchorList) {
     const alreadyResolvedResponse = this.associateWithReplacementUrl_(
@@ -147,7 +147,7 @@ export class AffiliateLinkResolver {
    *
    * @private
    * @param {Array<HTMLElement>} anchorList
-   * @return {Array<{anchor: HTMLElement, replacementUrl: string}>}
+   * @return {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList}
    */
   associateWithReplacementUrl_(anchorList) {
     return anchorList.map(anchor => {
@@ -161,7 +161,7 @@ export class AffiliateLinkResolver {
       }
 
       return (
-        /** @type {{anchor: HTMLElement, replacementUrl: string}} */
+        /** @type {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList} */
         ({anchor, replacementUrl})
       );
     });
@@ -249,7 +249,7 @@ export class AffiliateLinkResolver {
    * @private
    * @param {Array<HTMLElement>} anchorList
    * @param {Array<string>} domainsToAsk
-   * @return {Promise}
+   * @return {Promise<!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList>}
    */
   resolvedUnknownAnchorsAsync_(anchorList, domainsToAsk) {
     const promise = this.fetchDomainResolverApi(domainsToAsk);

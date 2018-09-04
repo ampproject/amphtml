@@ -1,3 +1,5 @@
+
+
 /**
  * Stores a list of anchors and their associated replacement URL.
  * This class could easily be replaced by a Map but Map is not allowed
@@ -10,7 +12,7 @@ export class LinkReplacementCache {
   constructor() {
     /** @private {Array<HTMLElement>} */
     this.anchorList_ = [];
-    /** @private {Array<string>} */
+    /** @private {Array<?string>} */
     this.replacementList_ = [];
   }
 
@@ -34,7 +36,7 @@ export class LinkReplacementCache {
 
   /**
    * @public
-   * @param {Array<{anchor: HTMLElement, replacementUrl: string}>} replacementList
+   * @param {!./link-rewriter.AnchorReplacementList} replacementList
    */
   updateReplacementUrls(replacementList) {
     replacementList.forEach(({anchor, replacementUrl}) => {
@@ -70,14 +72,14 @@ export class LinkReplacementCache {
    * @public
    * Get the list of all the anchors present in the cache, associated with their
    * replacementUrl
-   * @return {Array<{anchor: HTMLElement, replacementUrl: string}>}
+   * @return {!./link-rewriter.AnchorReplacementList}
    */
   getAnchorReplacementList() {
     return this.anchorList_.map(anchor => {
-      return {
+      return /** @type {{anchor: HTMLElement, replacementUrl: ?string}} */ ({
         anchor,
         replacementUrl: this.getReplacementUrlForAnchor(anchor),
-      };
+      });
     });
   }
 }

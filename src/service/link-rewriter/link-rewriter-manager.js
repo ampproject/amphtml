@@ -4,6 +4,7 @@ import {LinkRewriter} from './link-rewriter';
 import {Services} from '../../services';
 import {registerServiceBuilderForDoc} from '../../service';
 
+
 /**
  * LinkRewriterManager works together with LinkRewriter to allow rewriting
  * links at click time. E.g: Replacing a link by its affiliate version only if
@@ -53,10 +54,9 @@ export class LinkRewriterManager {
   /**
    * @public
    * Create and configure a new LinkRewriter on the page.
-   * @param {string} linkRewriterId
-   * @param {function(Array<HTMLElement>): Array<Array>} resolveUnknownLinks
-   *   - A function returning for each anchors the associated replacement
-   *    url if any.
+   * @param {string} linkRewriterId - A unique id used to identify the link rewriter.
+   * @param {function(Array<HTMLElement>): !./link-rewriter.TwoStepsResponse} resolveUnknownLinks
+   *   - Function to determine which anchor should be replaced and by what URL.
    * @param {?Object} options - e.g: { linkSelector: "a:not(.ads)""}
    * @return {!./link-rewriter.LinkRewriter}
    */
