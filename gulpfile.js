@@ -819,7 +819,7 @@ function parseExtensionFlags() {
 
 /**
  * Adds `amp-video-service` to the extension set if a component requires it.
- * @param {!Array<string>}
+ * @param {!Array<string>} extensionsToBuild
  * @return {boolean}
  */
 function maybeAddVideoService(extensionsToBuild) {
