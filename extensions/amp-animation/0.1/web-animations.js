@@ -31,9 +31,13 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  getVendorJsPropertyName,
+} from '../../../src/style';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, user} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
@@ -126,7 +130,8 @@ export class WebAnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        setStyles(request.target, request.vars);
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
       }
       const player = request.target.animate(request.keyframes, request.timing);
       player.pause();
@@ -635,7 +640,7 @@ export class MeasureScanner extends Scanner {
       // whitelisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
-      const object = /** {!Object<string, *>} */ (specKeyframes);
+      const object = /** @type {!Object<string, *>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = {};
       for (const prop in object) {
@@ -664,7 +669,7 @@ export class MeasureScanner extends Scanner {
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
       // https://github.com/web-animations/web-animations-js/issues/14
-      const array = /** {!Array<!Object<string, *>>} */ (specKeyframes);
+      const array = /** @type {!Array<!Object<string, *>>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;

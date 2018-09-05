@@ -232,10 +232,18 @@ export class ActionService {
     this.root_ = opt_root || ampdoc.getRootNode();
 
     /**
-     * Optional whitelist of actions e.g. ["AMP.navigateTo", "amp-form.submit"].
+     * Optional whitelist of actions, e.g.:
+     *
+     *     [{tagOrTarget: 'AMP', method: 'navigateTo'},
+     *      {tagOrTarget: 'AMP-FORM', method: 'submit'},
+     *      {tagOrTarget: '*', method: 'show'}]
+     *
      * If not null, any actions that are not in the whitelist will be ignored
-     * and throw a user error at invocation time.
-     * @private {?Array<string>}
+     * and throw a user error at invocation time. Note that `tagOrTarget` is
+     * always the canonical uppercased form (same as
+     * `Element.prototype.tagName`). If `tagOrTarget` is the wildcard '*', then
+     * the whitelisted method is allowed on any tag or target.
+     * @private {?Array<{tagOrTarget: string, method: string}>}
      */
     this.whitelist_ = this.queryWhitelist_();
 
@@ -437,25 +445,22 @@ export class ActionService {
     return !!this.findAction_(target, actionEventType, opt_stopAt);
   }
 
-  /**
-   * Overwrites the current action whitelist (if any). Takes an array of strings
-   * of the form "<tagOrTarget>.<method>" e.g. "amp-form.submit" or "AMP.print".
-   * @param {!Array<string>} whitelist
-   */
-  setWhitelist(whitelist) {
-    this.whitelist_ = whitelist;
+  /** Empties the current action whitelist (if any). */
+  clearWhitelist() {
+    this.whitelist_ = [];
   }
 
   /**
-   * Adds an action to the whitelist. Takes one string of the form
-   * "<tagOrTarget>.<method>", e.g. "amp-form.submit" or "AMP.print".
-   * @param {string} action
+   * Adds an action to the whitelist.
+   * @param {string} tagOrTarget The tag or target to whitelist, e.g.
+   *     'AMP-LIST', '*'.
+   * @param {string} method The method to whitelist, e.g. 'show', 'hide'.
    */
-  addToWhitelist(action) {
+  addToWhitelist(tagOrTarget, method) {
     if (!this.whitelist_) {
       this.whitelist_ = [];
     }
-    this.whitelist_.push(action);
+    this.whitelist_.push({tagOrTarget, method});
   }
 
   /**
@@ -529,9 +534,9 @@ export class ActionService {
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
-      const id = `${tagOrTarget}.${method}`;
-      if (!this.whitelist_.includes(id)) {
-        this.error_(`"${id}" is not whitelisted (${this.whitelist_}).`);
+      if (!isActionWhitelisted_(invocation, this.whitelist_)) {
+        this.error_(`"${tagOrTarget}.${method}" is not whitelisted ${
+          JSON.stringify(this.whitelist_)}.`);
         return null;
       }
     }
@@ -658,9 +663,10 @@ export class ActionService {
    * <meta name="amp-action-whitelist" content="AMP.setState, amp-form.submit">
    *
    * Returns:
-   * ["AMP.setState", "amp-form.submit"]
+   * [{tagOrTarget: 'AMP', method: 'setState'},
+   *  {tagOrTarget: 'AMP-FORM', method: 'submit'}]
    *
-   * @return {?Array<string>}
+   * @return {?Array<{tagOrTarget: string, method: string}>}
    * @private
    */
   queryWhitelist_() {
@@ -672,7 +678,22 @@ export class ActionService {
     if (!meta) {
       return null;
     }
-    return meta.getAttribute('content').split(',').map(action => action.trim());
+    return meta.getAttribute('content').split(',')
+        // Turn an empty string whitelist into an empty array, otherwise the
+        // parse error in the mapper below would trigger.
+        .filter(action => action)
+        .map(action => {
+          const parts = action.split('.');
+          if (parts.length < 2) {
+            this.error_(`Invalid action whitelist entry: ${action}.`);
+            return;
+          }
+          const tagOrTarget = parts[0].trim();
+          const method = parts[1].trim();
+          return {tagOrTarget, method};
+        })
+        // Filter out undefined elements because of the parse error above.
+        .filter(action => action);
   }
 
   /**
@@ -708,6 +729,22 @@ export class ActionService {
       event.detail = detail;
     }
   }
+}
+
+
+/**
+ * Returns `true` if the given action invocation is whitelisted in the given
+ * whitelist.
+ * @param {!ActionInvocation} invocation
+ * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
+ * @return {boolean}
+ * @private
+ */
+function isActionWhitelisted_(invocation, whitelist) {
+  return whitelist.some(({tagOrTarget, method}) => {
+    return (tagOrTarget === '*' || tagOrTarget === invocation.tagOrTarget) &&
+        method === invocation.method;
+  });
 }
 
 

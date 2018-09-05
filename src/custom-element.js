@@ -874,6 +874,9 @@ function createBaseCustomElementClass(win) {
       }
       this.isConnected_ = false;
       this.getResources().remove(this);
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        this.getLayers().remove(this);
+      }
       this.implementation_.detachedCallback();
     }
 
@@ -1408,7 +1411,11 @@ function createBaseCustomElementClass(win) {
      * @param {boolean} displayOn
      */
     toggleLayoutDisplay(displayOn) {
-      this.classList.toggle('i-amphtml-display', displayOn);
+      if (displayOn) {
+        this.removeAttribute('hidden');
+      } else {
+        this.setAttribute('hidden', '');
+      }
     }
 
     /**

@@ -15,7 +15,7 @@
  */
 
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpStoryAccess} from '../amp-story-access';
+import {AmpStoryAccess, Type} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-access', {amp: true}, env => {
@@ -72,10 +72,26 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     expect(buttonInDrawerEl).to.exist;
   });
 
-  it('should display the <amp-story-access> tag on state update', done => {
+  it('should display the access blocking paywall on state update', done => {
     storyAccess.buildCallback();
 
     storeService.dispatch(Action.TOGGLE_ACCESS, true);
+
+    win.requestAnimationFrame(() => {
+      expect(storyAccess.element)
+          .to.have.class('i-amphtml-story-access-visible');
+      done();
+    });
+  });
+
+  it('should show the access notification on state update', done => {
+    storyAccess.element.setAttribute('type', Type.NOTIFICATION);
+    storyAccess.buildCallback();
+
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'foo',
+      index: 0,
+    });
 
     win.requestAnimationFrame(() => {
       expect(storyAccess.element)
@@ -91,7 +107,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     storyAccess.buildCallback();
 
     expect(addToWhitelistStub).to.have.been.calledOnce;
-    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login');
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT', 'login');
   });
 
   it('should whitelist the typed <amp-access> actions', () => {
@@ -107,8 +123,10 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     storyAccess.buildCallback();
 
     expect(addToWhitelistStub).to.have.been.calledTwice;
-    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login-typefoo');
-    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login-typebar');
+    expect(addToWhitelistStub).to.have.been.calledWith(
+        'SCRIPT', 'login-typefoo');
+    expect(addToWhitelistStub).to.have.been.calledWith(
+        'SCRIPT', 'login-typebar');
   });
 
   it('should whitelist the namespaced and default <amp-access> actions', () => {
@@ -122,8 +140,8 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     expect(addToWhitelistStub).to.have.been.calledTwice;
     // Both namespaced and default actions are allowed.
-    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login');
-    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT.login-foo');
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT', 'login');
+    expect(addToWhitelistStub).to.have.been.calledWith('SCRIPT', 'login-foo');
   });
 
   it('should whitelist namespaced and typed <amp-access> actions', () => {
@@ -145,12 +163,12 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     storyAccess.buildCallback();
 
     expect(addToWhitelistStub).to.have.callCount(3);
-    expect(addToWhitelistStub)
-        .to.have.been.calledWith('SCRIPT.login-namespace1-type1');
-    expect(addToWhitelistStub)
-        .to.have.been.calledWith('SCRIPT.login-namespace1-type2');
-    expect(addToWhitelistStub)
-        .to.have.been.calledWith('SCRIPT.login-namespace2');
+    expect(addToWhitelistStub).to.have.been.calledWith(
+        'SCRIPT', 'login-namespace1-type1');
+    expect(addToWhitelistStub).to.have.been.calledWith(
+        'SCRIPT', 'login-namespace1-type2');
+    expect(addToWhitelistStub).to.have.been.calledWith(
+        'SCRIPT', 'login-namespace2');
   });
 
   it('should require publisher-logo-src to be a URL', () => {

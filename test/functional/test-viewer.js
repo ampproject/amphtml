@@ -63,6 +63,7 @@ describe('Viewer', () => {
     windowApi.Math = window.Math;
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
+    windowApi.Promise = window.Promise;
     windowApi.location = {
       hash: '#origin=g.com',
       href: '/test/viewer',
@@ -644,7 +645,6 @@ describe('Viewer', () => {
 
     it('should not expect messaging', () => {
       expect(viewer.messagingReadyPromise_).to.be.null;
-      expect(viewer.messagingMaybePromise_).to.be.null;
     });
 
     it('should fail sendMessageAwaitResponse', () => {
@@ -691,7 +691,7 @@ describe('Viewer', () => {
       }, 'https://www.example.com');
       viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
-      return viewer.messagingMaybePromise_.then(() => {
+      return viewer.messagingReadyPromise_.then(() => {
         expect(delivered.length).to.equal(1);
         const m = delivered[0];
         expect(m.eventType).to.equal('broadcast');
@@ -700,16 +700,10 @@ describe('Viewer', () => {
     });
 
     it('should post broadcast event but not fail w/o messaging', () => {
-      viewer.broadcast({type: 'type1'});
+      const result = viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
       clock.tick(20001);
-      return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
-          .then(res => {
-            expect(res).to.equal('ERROR');
-            return viewer.messagingMaybePromise_;
-          }).then(() => {
-            expect(viewer.messageQueue_.length).to.equal(0);
-          });
+      return expect(result).eventually.to.be.false;
     });
 
     it('sendMessageAwaitResponse should wait for messaging channel', () => {
@@ -1328,42 +1322,6 @@ describe('Viewer', () => {
   });
 
   describe('referrer', () => {
-    /**
-     * Tests trust determination by referrer.
-     * @param {string} referrer URL under test.
-     * @param {boolean} toBeTrusted The expected outcome.
-     */
-    function test(referrer, toBeTrusted) {
-      it('testing ' + referrer, () => {
-        const viewer = new Viewer(ampdoc);
-        expect(viewer.isTrustedReferrer_(referrer)).to.equal(toBeTrusted);
-      });
-    }
-
-    describe('should not trust host as referrer with http', () => {
-      test('http://t.co/asdf', false);
-    });
-
-    describe('should trust whitelisted hosts', () => {
-      test('https://t.co/asdf', true);
-    });
-
-    describe('should not trust non-whitelisted hosts', () => {
-      test('https://www.t.co/asdf', false);
-      test('https://t.com/asdf', false);
-      test('https://t.cn/asdf', false);
-    });
-
-    describe('isTrustedReferrer', () => {
-      it('should return true for whitelisted hosts', () => {
-        windowApi.document.referrer = 'https://t.co/docref';
-        const viewer = new Viewer(ampdoc);
-        return viewer.isTrustedReferrer().then(isTrusted => {
-          expect(isTrusted).to.equal(true);
-        });
-      });
-    });
-
     it('should return document referrer if not overriden', () => {
       windowApi.parent = {};
       windowApi.location.hash = '#';
