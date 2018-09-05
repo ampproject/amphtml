@@ -51,18 +51,20 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (this.isExperimentEnabled_) {
-      return this.mutateElement(() => {
-        toggle(this.element);
-        setStyles(this.element, {
-          'position': 'absolute',
-          'width': '1px',
-          'height': '1px',
-          'overflow': 'hidden',
-          'visibility': 'hidden',
-        });
-      });
+    if (!this.isExperimentEnabled_) {
+      return;
     }
+
+    return this.mutateElement(() => {
+      toggle(this.element);
+      setStyles(this.element, {
+        'position': 'absolute',
+        'width': '1px',
+        'height': '1px',
+        'overflow': 'hidden',
+        'visibility': 'hidden',
+      });
+    });
   }
 
   /** @override */

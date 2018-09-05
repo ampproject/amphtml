@@ -47,12 +47,12 @@ describes.realWin('amp-recaptcha-service', {
   }
 
   it('should create an iframe on register if first element to register', () => {
-    expect(recaptchaService.registeredElements_).to.be.equal(0);
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
     return getRecaptchaInput().then(ampRecaptchaInput => {
       expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
           .register(ampRecaptchaInput.implementation_).then(() => {
-            expect(recaptchaService.registeredElements_).to.be.equal(1);
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
           });
     });
@@ -61,14 +61,14 @@ describes.realWin('amp-recaptcha-service', {
   it('should only initialize once for X number of elements,' +
     ' and iframe already exists', () => {
 
-    expect(recaptchaService.registeredElements_).to.be.equal(0);
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
 
     //Create the first element
     return getRecaptchaInput().then(ampRecaptchaInput => {
       expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
           .register(ampRecaptchaInput.implementation_).then(() => {
-            expect(recaptchaService.registeredElements_).to.be.equal(1);
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
             const currentIframe = recaptchaService.iframe_;
 
@@ -77,7 +77,7 @@ describes.realWin('amp-recaptcha-service', {
               return recaptchaService
                   .register(secondAmpRecaptchaInput.implementation_)
                   .then(() => {
-                    expect(recaptchaService.registeredElements_)
+                    expect(recaptchaService.registeredElementCount_)
                         .to.be.equal(2);
                     expect(recaptchaService.iframe_).to.be.ok;
                     expect(recaptchaService.iframe_).to.be.equal(currentIframe);
@@ -89,16 +89,16 @@ describes.realWin('amp-recaptcha-service', {
 
   it('should dispose of the iframe,' +
     ' once all registered elements unregister', () => {
-    expect(recaptchaService.registeredElements_).to.be.equal(0);
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
     return getRecaptchaInput().then(ampRecaptchaInput => {
       expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
           .register(ampRecaptchaInput.implementation_).then(() => {
-            expect(recaptchaService.registeredElements_).to.be.equal(1);
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
 
             recaptchaService.unregister();
-            expect(recaptchaService.registeredElements_).to.be.equal(0);
+            expect(recaptchaService.registeredElementCount_).to.be.equal(0);
             expect(recaptchaService.iframe_).to.be.not.ok;
           });
     });

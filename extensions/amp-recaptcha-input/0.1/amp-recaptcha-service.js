@@ -40,7 +40,7 @@ export class AmpRecaptchaService {
     this.iframe_ = null;
 
     /** @private {number} */
-    this.registeredElements_ = 0;
+    this.registeredElementCount_ = 0;
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -56,7 +56,7 @@ export class AmpRecaptchaService {
    * @return {Promise}
    */
   register(elementImpl) {
-    this.registeredElements_++;
+    this.registeredElementCount_++;
     if (!this.iframe_) {
       this.initialize_(elementImpl);
     }
@@ -68,8 +68,8 @@ export class AmpRecaptchaService {
    * Used to create/destroy recaptcha boostrap iframe.
    */
   unregister() {
-    this.registeredElements_--;
-    if (this.registeredElements_ <= 0) {
+    this.registeredElementCount_--;
+    if (this.registeredElementCount_ <= 0) {
       this.dispose_();
     }
   }

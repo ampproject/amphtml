@@ -67,7 +67,7 @@ describes.realWin('amp-recaptcha-input', {
       return getRecaptchaInput().then(ampRecaptchaInput => {
         expect(
             ampRecaptchaInput.implementation_
-                .recaptchaService_.registeredElements_
+                .recaptchaService_.registeredElementCount_
         ).to.equal(1);
       });
     });
@@ -77,7 +77,7 @@ describes.realWin('amp-recaptcha-input', {
         ampRecaptchaInput.unlayoutCallback();
         expect(
             ampRecaptchaInput.implementation_
-                .recaptchaService_.registeredElements_
+                .recaptchaService_.registeredElementCount_
         ).to.equal(0);
       });
     });
