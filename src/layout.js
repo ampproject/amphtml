@@ -443,7 +443,6 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     setStyles(sizer, {
-      display: 'block',
       paddingTop:
         ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
     });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 i-amphtml-video-mask {
+  display: block;
   z-index: 1;
 }
 

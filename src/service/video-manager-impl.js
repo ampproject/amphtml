@@ -56,8 +56,8 @@ import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {setStyle} from '../style';
 import {startsWith} from '../string';
+import {toggle} from '../style';
 
 
 /** @private @const {string} */
@@ -754,10 +754,10 @@ class VideoEntry {
 
     const mask = renderInteractionOverlay(win, element);
 
-    /** @param {string} display */
+    /** @param {boolean} display */
     const setMaskDisplay = display => {
       video.mutateElement(() => {
-        setStyle(mask, 'display', display);
+        toggle(mask, display);
       });
     };
 
@@ -769,8 +769,8 @@ class VideoEntry {
 
     [
       listen(mask, 'click', () => userInteractedWith(video)),
-      listen(element, VideoEvents.AD_START, () => setMaskDisplay('none')),
-      listen(element, VideoEvents.AD_END, () => setMaskDisplay('block')),
+      listen(element, VideoEvents.AD_START, () => setMaskDisplay(false)),
+      listen(element, VideoEvents.AD_END, () => setMaskDisplay(true)),
     ].forEach(unlistener => unlisteners.push(unlistener));
   }
 
