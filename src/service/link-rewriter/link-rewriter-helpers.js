@@ -23,9 +23,9 @@ import {user} from '../../log';
  *   real replacement url from your api call.
  *   Use:  createTwoStepsResponse(syncResponse, asyncResponse)
  *
- * @param {?Array<{anchor: HTMLElement, replacementUrl: ?string}>} syncResponse
- * @param {?Promise} asyncResponse
- * @return {Object} - "two steps response" {syncResponse, asyncResponse}
+ * @param {?./link-rewriter.AnchorReplacementList} syncResponse
+ * @param {?Promise<!./link-rewriter.AnchorReplacementList>} asyncResponse
+ * @return {./link-rewriter.TwoStepsResponse} - "two steps response" {syncResponse, asyncResponse}
  */
 export function createTwoStepsResponse(syncResponse, asyncResponse) {
   if (asyncResponse) {

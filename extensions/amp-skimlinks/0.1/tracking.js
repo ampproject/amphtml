@@ -67,10 +67,9 @@ export class Tracking {
   /**
    * Sends "Page impression" and "Link impression" tracking requests (POST).
    * @public
-   * @param {Array<{anchor: HTMLElement, replacementUrl: string}>} anchorReplacementList
-   * @param {number} startTime
+   * @param {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList
    */
-  sendImpressionTracking(anchorReplacementList, startTime) {
+  sendImpressionTracking(anchorReplacementList) {
     if (!this.tracking_) {
       return;
     }
@@ -98,8 +97,7 @@ export class Tracking {
 
     this.sendPageImpressionTracking_(
         commonData,
-        numberAffiliateLinks,
-        startTime
+        numberAffiliateLinks
     );
     this.sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls);
   }
@@ -150,16 +148,15 @@ export class Tracking {
    * @private
    * @param {Object} commonData
    * @param {number} numberAffiliateLinks
-   * @param {number} startTime
    */
-  sendPageImpressionTracking_(commonData, numberAffiliateLinks, startTime) {
+  sendPageImpressionTracking_(commonData, numberAffiliateLinks) {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
     const data = /** @type {!JsonObject} */ (Object.assign(
         {
           slc: numberAffiliateLinks,
-          // How long did it take to send the tracking
-          jsl: new Date().getTime() - startTime,
+          // Javascript load time, not relevent in AMP context.
+          jsl: 0,
           pref: referrer,
           uc: customTrackingId,
           t: 1,
@@ -238,7 +235,7 @@ export class Tracking {
    *   i.e: {url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1}}
    *
    * @private
-   * @param {Array<{anchor: HTMLElement, replacementUrl: string}>} anchorReplacementList - Map of all the anchors on the page
+   * @param {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
    *    associated with their potential replacement url.
    * @return {{numberAffiliateLinks: number, urls: Object}}
    */

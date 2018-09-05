@@ -4,22 +4,34 @@ import {LinkRewriter} from './link-rewriter';
 import {Services} from '../../services';
 import {registerServiceBuilderForDoc} from '../../service';
 
+
 /**
  * LinkRewriterManager works together with LinkRewriter to allow rewriting
  * links at click time. E.g: Replacing a link by its affiliate version only if
- * the link can be monetised. A page can have multiple LinkRewriter running
- * at the same time.
+ * the link can be monetised.
+ *
+ * A page can have multiple LinkRewriter running at the same time but only one
+ * LinkRewriterManager instance.
  *
  * LinkRewriterManager class is in charge of:
- * - Keeping track of all the registered linkRewriters
- * - Notifying all the linkRewriters when the DOM has changed.
+ * - Keeping track of all the registered linkRewriters.
+ *
+ * - Notifying all the link rewriters when the DOM has changed (potential new
+ *   links on the page that LinkRewriters need to resolve ahead of the click).
+ *
  * - Managing which LinkRewriter has the priority to replace a link
  *   (based on configurable priority list).
- * - Notifying the most relevant LinkRewriter that a click happened
- *   so the linkRewriter handles the potential replacement.
+ *
+ * - Watching for anchor clicks and allowing the top priority LinkRewriter to
+ *   execute a potential "href" replacement. At the moment, only one
+ *   LinkRewriter can mutate the link. If the top priority LinkRewriter decides
+ *   to not replace the link, the second top priority LinkRewriter will be
+ *   given a chance. The iteration continues until one LinkRewriter mutates the
+ *   link or we reach the end of the list.
+ *
  * - Sending a click event to listeners to be able to track the click
  *   even if the url has not been replaced. (No anchor mutation is allowed
- *   in the listener handler)
+ *   in the listener handler).
  */
 export class LinkRewriterManager {
   /**
@@ -53,11 +65,18 @@ export class LinkRewriterManager {
   /**
    * @public
    * Create and configure a new LinkRewriter on the page.
-   * @param {string} linkRewriterId
-   * @param {function(Array<HTMLElement>): Array<Array>} resolveUnknownLinks
-   *   - A function returning for each anchors the associated replacement
-   *    url if any.
-   * @param {?Object} options - e.g: { linkSelector: "a:not(.ads)""}
+   * @param {string} linkRewriterId - A unique id used to identify the link rewriter.
+   * @param {function(Array<HTMLElement>): !./link-rewriter.TwoStepsResponse} resolveUnknownLinks
+   *   - Function to determine which anchor should be replaced and by what URL.
+   *     See './link-rewriter-helper.createTwoStepsResponse' to create
+   *     your `TwoStepsResponse` object.
+   * @param {?{linkSelector: string}=} options
+   *   - linkSelector is an optional CSS selector to restrict
+   *    which anchors the link rewriter should handle.
+   *    Anchors not matching the CSS selector will be ignored.
+   *    If not provided the link rewrite will handle all the links
+   *    found on the page.
+   *
    * @return {!./link-rewriter.LinkRewriter}
    */
   registerLinkRewriter(linkRewriterId, resolveUnknownLinks, options) {

@@ -1,6 +1,7 @@
 import * as DocumentReady from '../../../../src/document-ready';
 import * as SkimOptionsModule from '../skim-options';
 import * as Utils from '../utils';
+import {Deferred} from '../../../../src/utils/promise';
 import {LinkRewriterManager} from '../../../../src/service/link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
 import {EVENTS as linkRewriterEvents} from '../../../../src/service/link-rewriter/constants';
@@ -270,12 +271,35 @@ describes.fakeWin(
             });
           });
 
-          it('Should send the impression tracking', () => {
+          it('Should send the impression tracking if visible', () => {
             return ampSkimlinks.onPageScanned_().then(() => {
               const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
               expect(stub.calledOnce).to.be.true;
             });
           });
+
+
+          it('Should wait until visible to send the impression tracking',
+              () => {
+                const isVisibleDefer = new Deferred();
+                const fakeViewer = {
+                  whenFirstVisible: env.sandbox.stub().returns(
+                      isVisibleDefer.promise
+                  ),
+                };
+                helpers.mockServiceGetter('viewerForDoc', fakeViewer);
+
+                return ampSkimlinks.onPageScanned_().then(() => {
+                  const stub = ampSkimlinks.trackingService_
+                      .sendImpressionTracking;
+                  expect(stub.called).to.be.false;
+                  isVisibleDefer.resolve();
+                  return isVisibleDefer.promise.then(() => {
+                    expect(stub.calledOnce).to.be.true;
+                  });
+                });
+              }
+          );
 
           it('Should update tracking info with the guid', () => {
             return ampSkimlinks.onPageScanned_().then(() => {
@@ -311,12 +335,34 @@ describes.fakeWin(
             });
           });
 
-          it('Should send the impression tracking', () => {
+          it('Should send the impression tracking if visible', () => {
             return ampSkimlinks.onPageScanned_().then(() => {
               const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
               expect(stub.calledOnce).to.be.true;
             });
           });
+
+          it('Should wait until visible to send the impression tracking',
+              () => {
+                const isVisibleDefer = new Deferred();
+                const fakeViewer = {
+                  whenFirstVisible: env.sandbox.stub().returns(
+                      isVisibleDefer.promise
+                  ),
+                };
+                helpers.mockServiceGetter('viewerForDoc', fakeViewer);
+
+                return ampSkimlinks.onPageScanned_().then(() => {
+                  const stub = ampSkimlinks.trackingService_
+                      .sendImpressionTracking;
+                  expect(stub.called).to.be.false;
+                  isVisibleDefer.resolve();
+                  return isVisibleDefer.promise.then(() => {
+                    expect(stub.calledOnce).to.be.true;
+                  });
+                });
+              }
+          );
 
           it('Should update tracking info with the guid', () => {
             return ampSkimlinks.onPageScanned_().then(() => {
