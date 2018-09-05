@@ -563,6 +563,11 @@ export class MultidocManager {
 
     /**
      * Closes the document. The document can no longer be activated again.
+     *
+     * Note that currently it does not clean up everything on the shadow root.
+     * A current workaround for a clean close is to create a child element where
+     * the shadow doc would live on. After calling .close(), we can then simply
+     * remove this element.
      */
     amp.close = () => {
       this.closeShadowRoot_(shadowRoot);
