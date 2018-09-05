@@ -688,9 +688,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.troubleshootData_.creativeId =
-        dev().assertString(responseHeaders.get('google-creative-id'));
+        dev().assertString(responseHeaders.get('google-creative-id') || '-1');
     this.troubleshootData_.lineItemId =
-        dev().assertString(responseHeaders.get('google-lineitem-id'));
+        dev().assertString(responseHeaders.get('google-lineitem-id') || '-1');
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
