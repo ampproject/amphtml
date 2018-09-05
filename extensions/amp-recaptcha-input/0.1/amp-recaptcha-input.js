@@ -25,7 +25,8 @@ import {
   recaptchaServiceFor,
 } from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
-import {setStyles} from '../../../src/style';
+import {Layout} from '../../../src/layout';
+import {setStyles, toggle} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-recaptcha-input';
@@ -44,13 +45,14 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported() {
-    return true;
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
   buildCallback() {
     return this.mutateElement(() => {
+      toggle(this.element);
       setStyles(this.element, {
         'position': 'absolute',
         'width': '1px',
