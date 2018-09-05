@@ -267,7 +267,7 @@ export class AffiliateLinkResolver {
   }
 
   /**
-   * Updates the internal affiliate status "cache".
+   * Updates the internal affiliate status cache (this.domains_).
    * @private
    * @param {Array<string>} allDomains
    * @param {Array<string>} affiliateDomains

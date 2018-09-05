@@ -13,8 +13,10 @@ import {EVENT_TYPE_CONTEXT_MENU} from '../../../src/service/navigation';
 import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
-const startTime = new Date().getTime();
 
+// Used to calculate the delay between the amp-skimlinks extension being
+// loaded and the page impression tracking request.
+const startTime = new Date().getTime();
 
 export class AmpSkimlinks extends AMP.BaseElement {
   /** @param {!AmpElement} element */
