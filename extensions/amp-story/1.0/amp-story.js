@@ -222,9 +222,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.adPages_ = [];
 
-    /** @private @const {!AmpSidebar} */
-    this.adPages_ = [];
-
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
@@ -251,8 +248,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
-
-     this.sidebar_ = null;
 
     /** @private {?HTMLMediaElement} */
     this.backgroundAudioEl_ = null;
@@ -1343,9 +1338,9 @@ export class AmpStory extends AMP.BaseElement {
   onSidebarStateUpdate_(open) {
     if(open){
       const actions = Services.actionServiceForDoc(this.getAmpDoc());
-      this.sidebar_ = childElementByTag(this.element, 'amp-sidebar');
+      const sidebar = childElementByTag(this.element, 'amp-sidebar');
       actions.execute(
-        this.sidebar_, 'open', null, null, null, null, ActionTrust.HIGH);
+        sidebar, 'open', null, null, null, null, ActionTrust.HIGH);
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
   }
@@ -1866,17 +1861,13 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Checks for the presence of a sidebar. If a sidebar does exist, then an icon
    * permitting for the opening/closing of the sidebar is shown.
+   * @private
    */
-  /** @private */
   checkForSidebar_() {
-    console.log("1");
     const customSidebar = childElementByTag(this.element, 'amp-sidebar');
-    if(!!customSidebar){
-      //customSidebar.classList.add('i-amphtml-sidebar');
-     // this.systemLayer_.getShadowRoot().appendChild(customSidebar);
-    }
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_SIDEBAR, !!customSidebar);
+    return !!customSidebar;
   }
 
   /** @private */

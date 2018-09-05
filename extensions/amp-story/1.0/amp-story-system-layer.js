@@ -289,6 +289,7 @@ export class SystemLayer {
     } else {
       this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
+
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     return this.getRoot();
   }
@@ -568,7 +569,6 @@ export class SystemLayer {
    */
   onSidebarClick_() {
     this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
-    console.log("hi");
   }
 
   /**

@@ -119,16 +119,6 @@ describes.realWin('amp-story', {
     element.remove();
   });
 
-  it('should build with the expected number of pages', () => {
-    const pagesCount = 2;
-    createPages(story.element, pagesCount, ['cover', 'page-1']);
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(story.getPageCount()).to.equal(pagesCount);
-        });
-  });
-
   it('should activate the first page when built', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
 
@@ -410,6 +400,16 @@ describes.realWin('amp-story', {
         });
   });
 
+  it('should build with the expected number of pages', () => {
+    const pagesCount = 2;
+    createPages(story.element, pagesCount, ['cover', 'page-1']);
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.getPageCount()).to.equal(pagesCount);
+        });
+  });
+
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
@@ -672,6 +672,29 @@ describes.realWin('amp-story', {
     });
   });
 
+  describe('amp-story custom sidebar', () => {
+    /*it('should show the sidebar control only if a sidebar exists', () => {
+      story.systemLayer.build();
+      expect(systemLayer.getShadowRoot()).to.not.have.attribute(
+          'i-amphtml-story-sidebar-state');
+      storeService.dispatch(Action.TOGGLE_STORY_HAS_SIDEBAR, true);
+      expect(systemLayer.getShadowRoot()).to.have.attribute(
+        'i-amphtml-story-sidebar-state');
+    });*/
+
+    it('should correctly detect the presence of an amp-sidebar', () => {
+      const sidebar = win.document.createElement('amp-story-sidebar');
+      story.element.appendChild(sidebar);
+      createPages(story.element, 2, ['cover', 'page-1']);
+      return story.layoutCallback()
+        .then(() => {
+          expect(story.check
+          expect(story.storeService_.get(StateProperty.CAN_SHOW_SIDEBAR_BUTTON)).to.be.true;
+        });
+    });
+
+  });
+  
 
   describe('desktop attributes', () => {
     it('should add next page attribute', () => {
