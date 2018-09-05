@@ -19,7 +19,6 @@ describes.fakeWin(
     },
     env => {
       let helpers;
-      const startTime = new Date().getTime();
       beforeEach(() => {
         helpers = helpersFactory(env);
       });
@@ -120,7 +119,7 @@ describes.fakeWin(
               .stub(trackingService, 'extractAnchorTrackingInfo_')
               .returns({numberAffiliateLinks: 0, urls: []});
 
-          trackingService.sendImpressionTracking([], startTime);
+          trackingService.sendImpressionTracking([]);
           const stub = trackingService.analytics_.trigger;
           expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
           expect(stub.withArgs('link-impressions').calledOnce).to.be.true;
@@ -135,7 +134,7 @@ describes.fakeWin(
               .stub(trackingService, 'extractAnchorTrackingInfo_')
               .returns({numberAffiliateLinks: 0, urls: []});
 
-          trackingService.sendImpressionTracking([], startTime);
+          trackingService.sendImpressionTracking([]);
           const stub = trackingService.analytics_.trigger;
           expect(stub.withArgs('page-impressions').called).to.be.false;
           expect(stub.withArgs('link-impressions').called).to.be.false;
@@ -151,7 +150,7 @@ describes.fakeWin(
               uuid: 'page-impressions-id',
               guid: 'user-guid',
               slc: 0,
-              jsl: 200,
+              jsl: 0, // Always 0 for AMP.
               t: 1,
               platform: PLATFORM_NAME,
             };
@@ -159,7 +158,7 @@ describes.fakeWin(
               pageImpressionId: expectedData.uuid,
               guid: expectedData.guid,
             });
-            trackingService.sendImpressionTracking([], startTime);
+            trackingService.sendImpressionTracking([]);
             const urlVars = helpers.getAnalyticsUrlVars(
                 trackingService,
                 'page-impressions'
@@ -167,19 +166,13 @@ describes.fakeWin(
 
             expect(urlVars.data).to.be.a.string;
             const trackingData = JSON.parse(urlVars.data);
-            // Test 'jsl' separately since we can't controle its value.
-            expect(trackingData.jsl)
-                .to.be.a('number')
-                .but.not.to.equal(0);
-            trackingData.jsl = expectedData.jsl; // Already verified, replace by fixed value.
             expect(trackingData).to.deep.equal(expectedData);
           });
 
           it('Should set slc param correctly', () => {
             const trackingService = helpers.createTrackingWithStubAnalytics({});
             trackingService.sendImpressionTracking(
-                createFakeAnchorReplacementList(),
-                startTime
+                createFakeAnchorReplacementList()
             );
             const urlVars = helpers.getAnalyticsUrlVars(
                 trackingService,
@@ -195,7 +188,7 @@ describes.fakeWin(
             trackingService = setupTrackingService({
               customTrackingId: 'xcust-id',
             });
-            trackingService.sendImpressionTracking([], startTime);
+            trackingService.sendImpressionTracking([]);
 
             const urlVars = helpers.getAnalyticsUrlVars(
                 trackingService,
@@ -216,7 +209,7 @@ describes.fakeWin(
                 anchor: helpers.createAnchor(`https://${excludedDomain}`),
                 replacementUrl: 'https://go.skimresources.com',
               },
-            ], startTime);
+            ]);
 
             const urlVars = helpers.getAnalyticsUrlVars(
                 trackingService,
@@ -245,7 +238,7 @@ describes.fakeWin(
               pageImpressionId: expectedData.uuid,
               guid: expectedData.guid,
             });
-            trackingService.sendImpressionTracking([], startTime);
+            trackingService.sendImpressionTracking([]);
             const urlVars = helpers.getAnalyticsUrlVars(
                 trackingService,
                 'link-impressions'
@@ -260,8 +253,7 @@ describes.fakeWin(
         it('Should set dl and hae', () => {
           const trackingService = helpers.createTrackingWithStubAnalytics({});
           trackingService.sendImpressionTracking(
-              createFakeAnchorReplacementList(),
-              startTime
+              createFakeAnchorReplacementList()
           );
           const urlVars = helpers.getAnalyticsUrlVars(
               trackingService,
@@ -292,7 +284,7 @@ describes.fakeWin(
             },
           ]);
 
-          trackingService.sendImpressionTracking(anchorList, startTime);
+          trackingService.sendImpressionTracking(anchorList);
 
           const urlVars = helpers.getAnalyticsUrlVars(
               trackingService,

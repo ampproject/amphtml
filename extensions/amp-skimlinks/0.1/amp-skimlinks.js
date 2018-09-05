@@ -14,12 +14,10 @@ import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
 
-// Used to calculate the delay between the amp-skimlinks extension being
-// loaded and the page impression tracking request.
-const startTime = new Date().getTime();
-
 export class AmpSkimlinks extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
+  /**
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
 
@@ -56,6 +54,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
+
     return whenDocumentReady(
         /** @type {!Document} */ (this.ampDoc_.getRootNode())
     ).then(() => {
@@ -87,10 +86,17 @@ export class AmpSkimlinks extends AMP.BaseElement {
   sendImpressionTracking_({guid}) {
     // Update tracking service with extra info.
     this.trackingService_.setTrackingInfo({guid});
-    this.trackingService_.sendImpressionTracking(
-        this.skimlinksLinkRewriter_.getAnchorReplacementList(),
-        startTime
-    );
+    const viewer = Services.viewerForDoc(this.ampDoc_);
+    /*
+      WARNING: Up to here, the code may be have been executed during page
+      pre-rendering. Wait for the page to be visible in the viewer before
+      sending impression tracking.
+    */
+    viewer.whenFirstVisible().then(() => {
+      this.trackingService_.sendImpressionTracking(
+          this.skimlinksLinkRewriter_.getAnchorReplacementList()
+      );
+    });
   }
 
   /**

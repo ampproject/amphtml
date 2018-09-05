@@ -68,9 +68,8 @@ export class Tracking {
    * Sends "Page impression" and "Link impression" tracking requests (POST).
    * @public
    * @param {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList
-   * @param {number} startTime
    */
-  sendImpressionTracking(anchorReplacementList, startTime) {
+  sendImpressionTracking(anchorReplacementList) {
     if (!this.tracking_) {
       return;
     }
@@ -98,8 +97,7 @@ export class Tracking {
 
     this.sendPageImpressionTracking_(
         commonData,
-        numberAffiliateLinks,
-        startTime
+        numberAffiliateLinks
     );
     this.sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls);
   }
@@ -150,16 +148,15 @@ export class Tracking {
    * @private
    * @param {Object} commonData
    * @param {number} numberAffiliateLinks
-   * @param {number} startTime
    */
-  sendPageImpressionTracking_(commonData, numberAffiliateLinks, startTime) {
+  sendPageImpressionTracking_(commonData, numberAffiliateLinks) {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
     const data = /** @type {!JsonObject} */ (Object.assign(
         {
           slc: numberAffiliateLinks,
-          // How long did it take to send the tracking
-          jsl: new Date().getTime() - startTime,
+          // Javascript load time, not relevent in AMP context.
+          jsl: 0,
           pref: referrer,
           uc: customTrackingId,
           t: 1,
