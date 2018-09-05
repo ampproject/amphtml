@@ -31,9 +31,9 @@ import {
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {getSingleChildJsonConfig} from '../../../src/json';
 import {isEnumValue} from '../../../src/types';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {setImportantStyles, toggle} from '../../../src/style';
@@ -540,7 +540,7 @@ export class AmpConsent extends AMP.BaseElement {
     // one single amp-consent allowed in page.
     let config;
     try {
-      config = getSingleChildJsonConfig(this.element);
+      config = getChildJsonConfig(this.element);
     } catch (e) {
       throw this.user().createError(TAG, e);
     }

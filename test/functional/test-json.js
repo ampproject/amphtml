@@ -16,7 +16,7 @@
 
 import {
   deepEquals,
-  getSingleChildJsonConfig,
+  getChildJsonConfig,
   getValueForExpr,
   recreateNonProtoObject,
   tryParseJson,
@@ -166,7 +166,7 @@ describe('json', () => {
     });
   });
 
-  describe('getSingleChildJsonConfig', () => {
+  describe('getChildJsonConfig', () => {
     let element;
     let script;
     let text;
@@ -180,7 +180,7 @@ describe('json', () => {
 
     it('return json config', () => {
       element.appendChild(script);
-      expect(getSingleChildJsonConfig(element)).to.deep.equal({
+      expect(getChildJsonConfig(element)).to.deep.equal({
         'a': {
           'b': 'c',
         },
@@ -188,27 +188,28 @@ describe('json', () => {
     });
 
     it('throw if not one script', () => {
-      expect(() => getSingleChildJsonConfig(element)).to.throw(
-          'should have (only) one <script> child');
+      expect(() => getChildJsonConfig(element)).to.throw(
+          'Found 0 <script> children. Expected 1');
       element.appendChild(script);
       const script2 = document.createElement('script');
       element.appendChild(script2);
-      expect(() => getSingleChildJsonConfig(element)).to.throw(
-          'should have (only) one <script> child');
+      expect(() => getChildJsonConfig(element)).to.throw(
+          'Found 2 <script> children. Expected 1');
     });
 
     it('throw if type is not application/json', () => {
       script.setAttribute('type', '');
       element.appendChild(script);
-      expect(() => getSingleChildJsonConfig(element)).to.throw('config ' +
-        'should be put in a <script> tag with type = "application/json"');
+      expect(() => getChildJsonConfig(element)).to.throw(
+          '<script> child must have type="application/json"');
     });
 
     it('throw if cannot parse json', () => {
       const invalidText = '{"a":{"b": "c",}}';
       script.textContent = invalidText;
       element.appendChild(script);
-      expect(() => getSingleChildJsonConfig(element)).to.throw();
+      expect(() => getChildJsonConfig(element)).to.throw(
+          'Failed to parse <script> contents. Is it valid JSON?');
     });
   });
 
