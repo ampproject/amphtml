@@ -33,9 +33,10 @@ import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
@@ -616,6 +617,19 @@ class AmpVideo extends AMP.BaseElement {
       ranges.push([played.start(i), played.end(i)]);
     }
     return ranges;
+  }
+
+  /**
+    * @override
+    **/
+  firstLayoutCompleted() {
+    const placeholder = this.getPlaceholder();
+    if (placeholder && placeholder.classList.contains('i-amphtml-blur') &&
+      isExperimentOn(this.win, 'blurry-placeholder')) {
+      setImportantStyles(placeholder, {'opacity': 0});
+    } else {
+      this.togglePlaceholder(false);
+    }
   }
 
   /**
