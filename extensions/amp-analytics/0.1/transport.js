@@ -38,9 +38,21 @@ export class Transport {
    * @param {!Window} win
    * @param {!Object<string, string|boolean>} options
    */
-  constructor(win, options) {
+  constructor(win, options = {}) {
+    /** @private {!Window} */
     this.win_ = win;
+
+    /** @private {!Object<string, string|boolean>} */
     this.options_ = options;
+
+    /** @private {string|undefined} */
+    this.referrerPolicy_ = this.options_['referrerPolicy'];
+
+    // no-referrer is only supported in image transport
+    if (this.referrerPolicy_ === 'no-referrer') {
+      this.options_['beacon'] = false;
+      this.options_['xhrpost'] = false;
+    }
   }
 
   /**
@@ -49,13 +61,6 @@ export class Transport {
   sendRequest(request) {
     assertHttpsUrl(request, 'amp-analytics request');
     checkCorsUrl(request);
-
-    const referrerPolicy = this.options_['referrerPolicy'];
-
-    if (referrerPolicy === 'no-referrer') {
-      this.options_['beacon'] = false;
-      this.options_['xhrpost'] = false;
-    }
 
     if (this.options_['beacon'] &&
         Transport.sendRequestUsingBeacon(this.win_, request)) {
@@ -70,7 +75,8 @@ export class Transport {
       const suppressWarnings = (typeof image == 'object' &&
       image['suppressWarnings']);
       Transport.sendRequestUsingImage(
-          this.win_, request, suppressWarnings, /** @type {string|undefined} */ (referrerPolicy));
+          this.win_, request, suppressWarnings,
+          /** @type {string|undefined} */ (this.referrerPolicy_));
       return;
     }
     user().warn(TAG_, 'Failed to send request', request, this.options_);
