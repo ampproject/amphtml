@@ -303,6 +303,7 @@ exports.extensionBundles = [
   {
     name: 'amp-recaptcha-input',
     version: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   /**
