@@ -218,12 +218,12 @@ export class LayoutLayers {
     }
 
     // Dirty measurements so it is remeasured if reattached.
-    this.dirtyMeasurements();
+    layout.dirtyMeasurements();
 
     // Do not go through the normal undeclareLayer process, since there's no
     // parent layer to reparent our children. Just mark that we are no longer a
     // layer.
-    this.isLayer_ = false;
+    layout.isLayer_ = false;
   }
 
   /**
