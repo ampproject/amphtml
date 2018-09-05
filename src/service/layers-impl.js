@@ -217,7 +217,13 @@ export class LayoutLayers {
       parent.remove(layout);
     }
 
-    layout.undeclareLayer();
+    // Dirty measurements so it is remeasured if reattached.
+    layout.dirtyMeasurements();
+
+    // Do not go through the normal undeclareLayer process, since there's no
+    // parent layer to reparent our children. Just mark that we are no longer a
+    // layer.
+    layout.isLayer_ = false;
   }
 
   /**
@@ -775,7 +781,7 @@ export class LayoutElement {
       if (contained || layer.contains(layout)) {
         // Mark the layout as needing a remeasure, since its offset position
         // has likely changed.
-        layout.needsRemeasure_ = true;
+        layout.dirtyMeasurements();
 
         // And transfer ownership to the new layer.
         layout.parentLayer_ = layer;
