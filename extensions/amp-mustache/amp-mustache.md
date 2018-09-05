@@ -163,9 +163,9 @@ There's an [open proposal](https://github.com/ampproject/amphtml/issues/8395) to
 
 HTML entities are not preserved in `<template>` elements.
 
-This can be an issue if you want to server-side render a `<template>` containing user-generated text, since user-generated text containing `{{`, `}}`, `{{{`, `}}}` will be treated as a Mustache section. E.g. replacing `{{` with HTML entities `&lcub;&lcub;` won't work because they aren't preserved when the browser parses the `<template>`.
+This can be an issue if you want to server-side render a `<template>` containing user-generated text, since user-generated text containing {% raw %}`{{`, `}}`, `{{{`, `}}}`{% endraw %} will be treated as a Mustache section. E.g. replacing {% raw %}`{{`{% endraw %} with HTML entities `&lcub;&lcub;` won't work because they aren't preserved when the browser parses the `<template>`.
 
-Workarounds include replacing strings like `{{` with different characters or stripping them outright from user-generated content.
+Workarounds include replacing strings like {% raw %}`{{`{% endraw %} with different characters or stripping them outright from user-generated content.
 
 ## Validation
 
