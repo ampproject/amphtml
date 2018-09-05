@@ -867,18 +867,10 @@ function createBaseCustomElementClass(win) {
     /**
      * Called when the element is disconnected from the DOM.
      *
-     * This callback is guarded by checks to see if the element is still
-     * connected. See #12849, https://crbug.com/821195, and
-     * https://bugs.webkit.org/show_bug.cgi?id=180940.
-     *
      * @final @this {!Element}
      */
     disconnectedCallback() {
-      // Short circut: Only call DOM methods if we think we're connected.
-      if (this.isConnected_ && dom.isConnectedNode(this)) {
-        return;
-      }
-      this.disconnect();
+      this.disconnect(/* pretendDisconnected */ false);
     }
 
     /** The Custom Elements V0 sibling to `disconnectedCallback`. */
@@ -890,10 +882,20 @@ function createBaseCustomElementClass(win) {
      * Called when an element is disconnected from DOM, or when an ampDoc is
      * being disconnected (the element itself may still be connected to ampDoc).
      *
-     * This does not guard against connected elements.
+     * This callback is guarded by checks to see if the element is still
+     * connected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940.
+     * If the element is still connected to the document, you'll need to pass
+     * opt_pretendDisconnected.
+     *
+     * @param {boolean} pretendDisconnected Forces disconnection regardless
+     *     of DOM isConnected.
      */
-    disconnect() {
+    disconnect(pretendDisconnected) {
       if (this.isInTemplate_ || !this.isConnected_) {
+        return;
+      }
+      if (!pretendDisconnected && dom.isConnectedNode(this)) {
         return;
       }
       this.isConnected_ = false;
