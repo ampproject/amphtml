@@ -1758,7 +1758,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(input.value).to.equal('RANDOM');
     });
 
-    it('should not replace not whitelisted vars', () => {
+    it.only('should not replace not whitelisted vars', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
       const input = document.createElement('input');
@@ -1767,6 +1767,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       input.setAttribute('data-amp-replace', 'CANONICAL_URL');
       let expandedValue = urlReplacements.expandInputValueSync(input);
       expect(expandedValue).to.equal('RANDOM');
+      debugger;
       input.setAttribute('data-amp-replace', 'CANONICAL_URL RANDOM');
       expandedValue = urlReplacements.expandInputValueSync(input);
       expect(expandedValue).to.match(/(\d+(\.\d+)?)/);

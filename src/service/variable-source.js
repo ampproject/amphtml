@@ -227,10 +227,11 @@ export class VariableSource {
       });
       return this.buildExpr_(allKeys, isV2, opt_whiteList);
     }
+
     if (!this.replacementExpr_ && !isV2) {
-      this.replacementExpr_ = this.buildExpr_(
-          Object.keys(this.replacements_));
+      this.replacementExpr_ = this.buildExpr_(Object.keys(this.replacements_));
     }
+
     // sometimes the v1 expand will be called before the v2
     // so we need to cache both versions
     if (!this.replacementExprV2_ && isV2) {

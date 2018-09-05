@@ -55,6 +55,7 @@ export class Expander {
     if (!url.length) {
       return opt_sync ? url : Promise.resolve(url);
     }
+
     const expr = this.variableSource_
         .getExpr(opt_bindings, /*opt_ignoreArgs */ true, opt_whiteList);
 
@@ -285,6 +286,11 @@ export class Expander {
         value = Promise.resolve(binding);
       }
       return value.then(val => {
+        if (opt_collectVars) {
+          const args = opt_args ? `(${opt_args.join(',')})` : '';
+          opt_collectVars[`${name}${args}`] = val;
+        }
+
         let result;
 
         if (val == null) {
@@ -293,14 +299,12 @@ export class Expander {
           result = NOENCODE_WHITELIST[name] ? val : encodeURIComponent(val);
         }
 
-        if (opt_collectVars) {
-          opt_collectVars[name] = result;
-        }
         return result;
       }).catch(e => {
         rethrowAsync(e);
         if (opt_collectVars) {
-          opt_collectVars[name] = '';
+          const args = opt_args ? `(${opt_args.join(',')})` : '';
+          opt_collectVars[`${name}${args}`] = '';
         }
         return Promise.resolve('');
       });
@@ -310,7 +314,8 @@ export class Expander {
       // interpolate as the empty string.
       rethrowAsync(e);
       if (opt_collectVars) {
-        opt_collectVars[name] = '';
+        const args = opt_args ? `(${opt_args.join(',')})` : '';
+        opt_collectVars[`${name}${args}`] = '';
       }
       return Promise.resolve('');
     }
@@ -347,9 +352,12 @@ export class Expander {
         result = '';
       }
 
-      if (opt_collectVars) {
-        opt_collectVars[name] = result;
+      // Do not collect vars if there we tried to resolve an async macro.
+      if (opt_collectVars && (value && !value.then)) {
+        const args = opt_args ? `(${opt_args.join(',')})` : '';
+        opt_collectVars[`${name}${args}`] = value;
       }
+
 
       return result;
     } catch (e) {
@@ -357,7 +365,8 @@ export class Expander {
       // interpolate as the empty string.
       rethrowAsync(e);
       if (opt_collectVars) {
-        opt_collectVars[name] = '';
+        const args = opt_args ? `(${opt_args.join(',')})` : '';
+        opt_collectVars[`${name}${args}`] = '';
       }
       return '';
     }
