@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import '../amp-delight';
+import '../amp-delight-player';
 
-describes.realWin('amp-delight', {
+describes.realWin('amp-delight-player', {
   amp: {
-    extensions: ['amp-delight'],
+    extensions: ['amp-delight-player'],
   },
 }, env => {
   let win, doc;
@@ -29,7 +29,7 @@ describes.realWin('amp-delight', {
   });
 
   function getDelightPlayer(attributes) {
-    const delight = doc.createElement('amp-delight');
+    const delight = doc.createElement('amp-delight-player');
     for (const key in attributes) {
       delight.setAttribute(key, attributes[key]);
     }

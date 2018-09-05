@@ -32,10 +32,10 @@ import {getStyle, setStyle} from '../../../src/style';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
-import {CSS} from '../../../build/amp-delight-0.1.css';
+import {CSS} from '../../../build/amp-delight-player-0.1.css';
 
 /** @const */
-const TAG = 'amp-delight';
+const TAG = 'amp-delight-player';
 
 /** @const @enum {string} */
 const DelightState = {
@@ -45,6 +45,7 @@ const DelightState = {
   TIME_UPDATE: 'x-dl8-iframe-timeupdate',
   MUTED: 'x-dl8-iframe-muted',
   UNMUTED: 'x-dl8-iframe-unmuted',
+  DURATION: 'x-dl8-iframe-duration',
   ENTER_FULLSCREEN: 'x-dl8-iframe-enter-fullscreen',
   EXIT_FULLSCREEN: 'x-dl8-iframe-exit-fullscreen',
 };
@@ -71,6 +72,15 @@ class AmpDelight extends AMP.BaseElement {
 
     /** @private {Object} */
     this.styleCache_ = {};
+
+    /** @private {number} */
+    this.totalDuration_ = 1;
+
+    /** @private {number} */
+    this.currentTime_ = 0;
+
+    /** @private {Array} */
+    this.playedRanges_ = [];
 
     /** @private {string} */
     this.iframe_ = null;
@@ -224,6 +234,9 @@ class AmpDelight extends AMP.BaseElement {
       case DelightState.TIME_UPDATE:
         this.triggerAction_('timeupdate', null);
         element.dispatchCustomEvent(VideoEvents.SECONDS_PLAYED);
+
+        this.currentTime_ = data.payload.currentTime;
+        this.playedRanges_ = data.payload.playedRanges;
         break;
 
       case DelightState.MUTED:
@@ -234,6 +247,10 @@ class AmpDelight extends AMP.BaseElement {
       case DelightState.UNMUTED:
         this.triggerAction_('unmute', null);
         element.dispatchCustomEvent(VideoEvents.UNMUTED);
+        break;
+
+      case DelightState.DURATION:
+        this.totalDuration_ = data.payload.duration;
         break;
 
       case DelightState.ENTER_FULLSCREEN:
@@ -400,20 +417,17 @@ class AmpDelight extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
-    return 0;
+    return this.currentTime_;
   }
 
   /** @override */
   getDuration() {
-    // Not supported.
-    return 1;
+    return this.totalDuration_;
   }
 
   /** @override */
   getPlayedRanges() {
-    // Not supported.
-    return [];
+    return this.playedRanges_;
   }
 
 }

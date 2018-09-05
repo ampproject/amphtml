@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-delight`
+# `amp-delight-player`
 
 ## Description
 Displays a cloud-hosted [Delight Player](https://delight-vr.com/).
 
 ## Required script
 ``` html
-<script async custom-element="amp-delight" src="https://cdn.ampproject.org/v0/amp-delight-0.1.js"></script>
+<script async custom-element="amp-delight-player" src="https://cdn.ampproject.org/v0/amp-delight-player-0.1.js"></script>
 ```
 
 ## Supported layouts
@@ -41,12 +41,12 @@ The `data-content-id` attribute is required to load the correct video.
 Example:
 
 ```html
-<amp-delight
+<amp-delight-player
     data-content-id="-LJmX7wyfNmRe5LHw7Hy"
     layout="responsive" 
     width="16" 
     height="9">    
-</amp-delight>
+</amp-delight-player>
 ```
 
 Non-responsive layout is also supported.
@@ -54,11 +54,11 @@ Non-responsive layout is also supported.
 Example:
 
 ```html
-<amp-delight
+<amp-delight-player
     data-content-id="-LJmX7wyfNmRe5LHw7Hy"
     width="460" 
     height="200">    
-</amp-delight>
+</amp-delight-player>
 ```
 
 ## Attributes
@@ -72,10 +72,10 @@ The video's content ID. (**Required**)
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Actions
-`amp-delight` exposes four self-explanatory actions: `play`, `pause`, `mute` and `unmute`.
+`amp-delight-player` exposes four self-explanatory actions: `play`, `pause`, `mute` and `unmute`.
 
 ## Events
-`amp-delight` exposes the following events:
+`amp-delight-player` exposes the following events:
 
 * **play** Emitted whenever the player is set to playing.
 * **pause** Emitted whenever the player is paused.
@@ -89,17 +89,17 @@ These events can be used through the [`on` attribute](https://www.ampproject.org
 For example, the following listens to both `play` and `pause` and displays different divs depending on the event.
 
 ```html
-<amp-delight
+<amp-delight-player
     ... 
     on="
         play:play-div.show, pause-div.hide;
         pause:pause-div.show, play-div.hide;
     ">
-</amp-delight>
+</amp-delight-player>
 
 <div id="play-div"> ... </div>
 <div id="pause-div"> ... </div>
 ```
 
 ## Validation
-See [amp-delight rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight/validator-amp-delight.protoascii) in the AMP validator specification.
+See [amp-delight-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/validator-amp-delight-player.protoascii) in the AMP validator specification.
