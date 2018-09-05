@@ -688,9 +688,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.troubleshootData_.creativeId =
-        (/** @type {string} **/ (responseHeaders.get('google-creative-id')));
+        dev().assertString(responseHeaders.get('google-creative-id'));
     this.troubleshootData_.lineItemId =
-        (/** @type {string} **/ (responseHeaders.get('google-lineitem-id')));
+        dev().assertString(responseHeaders.get('google-lineitem-id'));
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -716,7 +716,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (responseHeaders.get('amp-ff-pageview-tokens')) {
       this.removePageviewStateToken();
       this.setPageviewStateToken(
-          /** @type {string} */ (responseHeaders.get('amp-ff-pageview-tokens')));
+          dev().assertString(responseHeaders.get('amp-ff-pageview-tokens')));
     }
 
     return size;
