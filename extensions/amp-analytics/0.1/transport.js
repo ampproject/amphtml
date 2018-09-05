@@ -46,7 +46,7 @@ export class Transport {
     this.options_ = options;
 
     /** @private {string|undefined} */
-    this.referrerPolicy_ = this.options_['referrerPolicy'];
+    this.referrerPolicy_ = /** @type {string|undefined} */ (this.options_['referrerPolicy']);
 
     // no-referrer is only supported in image transport
     if (this.referrerPolicy_ === 'no-referrer') {
