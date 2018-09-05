@@ -29,18 +29,14 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {
-  childElementsByTag,
-  isJsonScriptTag,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
+import {scopedQuerySelectorAll} from '../../../src/dom';
 import {setImportantStyles, toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -542,17 +538,12 @@ export class AmpConsent extends AMP.BaseElement {
   assertAndParseConfig_() {
     // All consent config within the amp-consent component. There will be only
     // one single amp-consent allowed in page.
-    // TODO: Make this a shared helper method.
-    const scripts = childElementsByTag(this.element, 'script');
-    user().assert(scripts.length == 1,
-        `${TAG} should have (only) one <script> child`);
-    const script = scripts[0];
-    user().assert(isJsonScriptTag(script),
-        `${TAG} consent instance config should be put in a <script>` +
-        'tag with type= "application/json"');
-    const config = tryParseJson(script.textContent, () => {
-      user().assert(false, `${TAG}: Error parsing config`);
-    });
+    let config;
+    try {
+      config = getChildJsonConfig(this.element);
+    } catch (e) {
+      throw this.user().createError(TAG, e);
+    }
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     user().assert(Object.keys(consents).length != 0,
