@@ -20,7 +20,7 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe';
 
-describe.skip('integration amp-carousel', () => {
+describe('integration amp-carousel', () => {
 
   let fixture;
   beforeEach(() => {
@@ -62,7 +62,7 @@ describe.skip('integration amp-carousel', () => {
       });
     });
 
-    it('should not be able to go past the first or last item', () => {
+    it.skip('should not be able to go past the first or last item', () => {
       return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
         fixture.doc.body.classList.add('amp-mode-mouse');
         const amp = fixture.doc.querySelector('#carousel-1');
