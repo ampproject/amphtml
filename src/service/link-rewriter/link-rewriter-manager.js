@@ -10,7 +10,8 @@ import {registerServiceBuilderForDoc} from '../../service';
  * links at click time. E.g: Replacing a link by its affiliate version only if
  * the link can be monetised.
  *
- * A page can have multiple LinkRewriter running at the same time.
+ * A page can have multiple LinkRewriter running at the same time but only one
+ * LinkRewriterManager instance.
  *
  * LinkRewriterManager class is in charge of:
  * - Keeping track of all the registered linkRewriters.
