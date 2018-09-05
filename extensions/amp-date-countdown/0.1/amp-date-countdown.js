@@ -77,6 +77,36 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
+
+    /** @const {function(!Element)} */
+    this.boundRendered_ = this.rendered_.bind(this);
+
+    /** @private {string} */
+    this.endDate_ = '';
+
+    /** @private {number} */
+    this.timestampMs_ = 0;
+
+    /** @private {number} */
+    this.timestampSeconds_ = 0;
+
+    /** @private {number} */
+    this.offsetSeconds_ = 0;
+
+    /** @private {string} */
+    this.locale_ = '';
+
+    /** @private {string} */
+    this.whenEnded_ = '';
+
+    /** @private {string} */
+    this.biggestUnit_ = '';
+
+    /** @private {!Object|null} */
+    this.localeWordList_ = null;
+
+    /** @private {!Object|null} */
+    this.countDownTimer_ = null;
   }
 
   /** @override */
@@ -84,9 +114,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
-
-    /** @const {function(!Element)} */
-    this.boundRendered_ = this.rendered_.bind(this);
 
     //Note: One of end-date, timestamp-ms, timestamp-seconds is required.
     /** @private {string} */
@@ -121,9 +148,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     /** @private {!Object|null} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
-
-    /** @private {!Object|null} */
-    this.countDownTimer_ = null;
 
     Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       const EPOCH = this.getEpoch_() + (this.offsetSeconds_ * 1000);
