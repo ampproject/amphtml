@@ -231,11 +231,12 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
+    let fetch;
     if (this.ssrTemplateHelper_.isSupported()) {
-      return this.ssrTemplate_();
+      fetch = this.ssrTemplate_();
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
-      return this.fetch_(itemsExpr).then(items => {
+      fetch = this.fetch_(itemsExpr).then(items => {
         if (this.element.hasAttribute('single-item')) {
           user().assert(typeof items !== 'undefined',
               'Response must contain an array or object at "%s". %s',
@@ -254,8 +255,9 @@ export class AmpList extends AMP.BaseElement {
         return this.scheduleRender_(items);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
-      }).catch(error => this.showFallback_(error));
+      });
     }
+    return fetch.catch(error => this.showFallback_(error));
   }
 
   /**
@@ -269,12 +271,14 @@ export class AmpList extends AMP.BaseElement {
     return requestForBatchFetch(
         this.getAmpDoc(),
         this.element,
-        this.getPolicy_()).then(batchFetchDef => {
-      request = batchFetchDef;
-      batchFetchDef.fetchOpt = setupAMPCors(
-          this.win, batchFetchDef.xhrUrl, batchFetchDef.fetchOpt);
-      setupJsonFetchInit(batchFetchDef.fetchOpt);
-      const ampListAttributes = dict({
+        this.getPolicy_()).then(r => {
+      request = r;
+
+      request.fetchOpt = setupAMPCors(
+          this.win, request.xhrUrl, request.fetchOpt);
+      setupJsonFetchInit(r.fetchOpt);
+
+      const attributes = dict({
         'ampListAttributes': {
           'items': this.element.getAttribute('items') || 'items',
           'singleItem': this.element.getAttribute('single-item'),
@@ -282,17 +286,14 @@ export class AmpList extends AMP.BaseElement {
         },
       });
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-          this.element, batchFetchDef, null, ampListAttributes);
+          this.element, request, /* opt_templates */ null, attributes);
     }).then(response => {
       request.fetchOpt.responseType = 'application/json';
-      this.ssrTemplateHelper_.verifySsrResponse(
-          this.win, response, request);
+      this.ssrTemplateHelper_.verifySsrResponse(this.win, response, request);
       return response['html'];
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(html => this.scheduleRender_(html))
-        .then(() => this.onFetchSuccess_(),
-            error => this.onFetchError_(error));
+    }).then(html => this.scheduleRender_(html));
   }
 
   /**
@@ -339,9 +340,11 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      const json = /** @type {!JsonObject} */ (current.data);
-      this.templates_.findAndRenderTemplate(this.element, json)
-          .then(element => this.container_.appendChild(element))
+      // TODO(alabiaga): This is a misleading type cast. Instead, we should use
+      // a new API on template-impl.js and amp-mustache.js as discussed.
+      const html = /** @type {!JsonObject} */ (current.data);
+      this.templates_.findAndRenderTemplate(this.element, html)
+          .then(element => this.render_([element]))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
       const array = /** @type {!Array} */ (current.data);
@@ -447,32 +450,6 @@ export class AmpList extends AMP.BaseElement {
     }
     return policy;
   }
-
-  /** @private */
-  onFetchSuccess_() {
-    if (this.getFallback()) {
-      // Hide in case fallback was displayed for a previous fetch.
-      this.toggleFallback_(false);
-    }
-    this.togglePlaceholder(false);
-    this.toggleLoading(false);
-  }
-
-  /**
-   * @param {*=} error
-   * @private
-   * @throws {!Error} throws error if fallback element is not present.
-   */
-  onFetchError_(error) {
-    this.toggleLoading(false);
-    if (this.getFallback()) {
-      this.toggleFallback(true);
-      this.togglePlaceholder(false);
-    } else {
-      throw error;
-    }
-  }
-
 
   /**
    * Must be called in mutate context.
