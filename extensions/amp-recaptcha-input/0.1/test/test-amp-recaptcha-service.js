@@ -32,21 +32,27 @@ describes.realWin('amp-recaptcha-service', {
     recaptchaService = new AmpRecaptchaService(win);
   });
 
-  function getElement() {
-    const element = doc.createElement('amp-recaptcha-input');
-    doc.body.appendChild(element);
-    return element.build()
-        .then(() => element.layoutCallback())
-        .then(() => element);
+  function getRecaptchaInput() {
+    const ampRecaptchaInput = doc.createElement('amp-recaptcha-input');
+    ampRecaptchaInput.setAttribute('layout',
+        'nodisplay');
+    ampRecaptchaInput.setAttribute('data-sitekey',
+        '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
+    doc.body.appendChild(ampRecaptchaInput);
+    return ampRecaptchaInput.build().then(() => {
+      return ampRecaptchaInput.layoutCallback();
+    }).then(() => {
+      return ampRecaptchaInput;
+    });
   }
 
   it('should create an iframe on register if first element to register', () => {
-    expect(recaptchaService.registeredElements_.length).to.be.equal(0);
-    return getElement().then(element => {
-      expect(element).to.be.ok;
+    expect(recaptchaService.registeredElements_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
-          .register(element.implementation_).then(() => {
-            expect(recaptchaService.registeredElements_.length).to.be.equal(1);
+          .register(ampRecaptchaInput.implementation_).then(() => {
+            expect(recaptchaService.registeredElements_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
           });
     });
@@ -55,22 +61,23 @@ describes.realWin('amp-recaptcha-service', {
   it('should only initialize once for X number of elements,' +
     ' and iframe already exists', () => {
 
-    expect(recaptchaService.registeredElements_.length).to.be.equal(0);
+    expect(recaptchaService.registeredElements_).to.be.equal(0);
 
     //Create the first element
-    return getElement().then(element => {
-      expect(element).to.be.ok;
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
-          .register(element.implementation_).then(() => {
-            expect(recaptchaService.registeredElements_.length).to.be.equal(1);
+          .register(ampRecaptchaInput.implementation_).then(() => {
+            expect(recaptchaService.registeredElements_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
             const currentIframe = recaptchaService.iframe_;
 
             // Create our second element
-            return getElement().then(secondElement => {
+            return getRecaptchaInput().then(secondAmpRecaptchaInput => {
               return recaptchaService
-                  .register(secondElement.implementation_).then(() => {
-                    expect(recaptchaService.registeredElements_.length)
+                  .register(secondAmpRecaptchaInput.implementation_)
+                  .then(() => {
+                    expect(recaptchaService.registeredElements_)
                         .to.be.equal(2);
                     expect(recaptchaService.iframe_).to.be.ok;
                     expect(recaptchaService.iframe_).to.be.equal(currentIframe);
@@ -82,16 +89,16 @@ describes.realWin('amp-recaptcha-service', {
 
   it('should dispose of the iframe,' +
     ' once all registered elements unregister', () => {
-    expect(recaptchaService.registeredElements_.length).to.be.equal(0);
-    return getElement().then(element => {
-      expect(element).to.be.ok;
+    expect(recaptchaService.registeredElements_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
-          .register(element.implementation_).then(() => {
-            expect(recaptchaService.registeredElements_.length).to.be.equal(1);
+          .register(ampRecaptchaInput.implementation_).then(() => {
+            expect(recaptchaService.registeredElements_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
 
-            recaptchaService.unregister(element.implementation_);
-            expect(recaptchaService.registeredElements_.length).to.be.equal(0);
+            recaptchaService.unregister();
+            expect(recaptchaService.registeredElements_).to.be.equal(0);
             expect(recaptchaService.iframe_).to.be.not.ok;
           });
     });

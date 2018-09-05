@@ -39,8 +39,8 @@ export class AmpRecaptchaService {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @const @private {!Array} */
-    this.registeredElements_ = [];
+    /** @private {number} */
+    this.registeredElements_ = 0;
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -53,35 +53,30 @@ export class AmpRecaptchaService {
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
    * @param {!AMP.BaseElement} elementImpl
+   * @return {Promise}
    */
   register(elementImpl) {
-    this.registeredElements_.push(elementImpl);
+    this.registeredElements_++;
     if (!this.iframe_) {
-      return this.initialize_(elementImpl);
+      this.initialize_(elementImpl);
     }
-    return Promise.resolve();
+    return elementImpl.loadPromise(this.iframe_);
   }
 
   /**
    * Function to unregister as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
-   * @param {!AMP.BaseElement} elementImpl
    */
-  unregister(elementImpl) {
-    this.registeredElements_.splice(
-        this.registeredElements_.indexOf(elementImpl),
-        1
-    );
-
-    if (this.registeredElements_.length <= 0) {
+  unregister() {
+    this.registeredElements_--;
+    if (this.registeredElements_ <= 0) {
       this.dispose_();
     }
   }
 
   /**
-   * Function to create and load our recaptcha boostrap iframe.
-  * @param {!AMP.BaseElement} elementImpl
-   * @return {Promise}
+   * Function to create our recaptcha boostrap iframe.
+   * @param {!AMP.BaseElement} elementImpl
    * @private
    */
   initialize_(elementImpl) {
@@ -101,7 +96,6 @@ export class AmpRecaptchaService {
     this.unlistenMessage_ = () => disposers.forEach(d => d());
 
     elementImpl.element.appendChild(this.iframe_);
-    return elementImpl.loadPromise(this.iframe_);
   }
 
   /**

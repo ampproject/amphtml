@@ -20,12 +20,12 @@
  * recaptcha tokens
  */
 
+import {Layout} from '../../../src/layout';
 import {
   installRecaptchaService,
   recaptchaServiceFor,
 } from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
-import {Layout} from '../../../src/layout';
 import {setStyles, toggle} from '../../../src/style';
 
 /** @const */
@@ -72,7 +72,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.recaptchaService_.unregister(this);
+    this.recaptchaService_.unregister();
     return true;
   }
 }
