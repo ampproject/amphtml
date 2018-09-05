@@ -35,7 +35,6 @@ import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {hasOwn} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
@@ -662,7 +661,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (from == null) {
       from = dict({});
     }
-    return dict(deepMerge(from, to, 1));
+    return /** @type {!JsonObject} */ deepMerge(from, to, 1);
   }
 
   /**

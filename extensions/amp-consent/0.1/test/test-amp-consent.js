@@ -141,8 +141,8 @@ describes.realWin('amp-consent', {
           'consents': {
             '_ping_': {
               'promptIfUnknownForGeoGroup': 'eea',
-              'checkConsentHref': '/override'
-            }
+              'checkConsentHref': '/override',
+            },
           },
           'postPromptUI': 'test',
         }), '_ping_');
@@ -201,7 +201,7 @@ describes.realWin('amp-consent', {
 
         // Check invalid CMP
         consentElement.setAttribute('type', 'not_exist');
-         allowConsoleError(() => {
+        allowConsoleError(() => {
           expect(() => ampConsent.buildCallback()).to.throw(invalidCMPError);
         });
 
