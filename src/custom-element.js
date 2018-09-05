@@ -874,6 +874,7 @@ function createBaseCustomElementClass(win) {
       }
       this.isConnected_ = false;
       this.getResources().remove(this);
+      this.getLayers().remove(this);
       this.implementation_.detachedCallback();
     }
 
