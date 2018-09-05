@@ -51,35 +51,29 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return this.mutateElement(() => {
-      toggle(this.element);
-      setStyles(this.element, {
-        'position': 'absolute',
-        'width': '1px',
-        'height': '1px',
-        'overflow': 'hidden',
-        'visibility': 'hidden',
+    if (this.isExperimentEnabled_) {
+      return this.mutateElement(() => {
+        toggle(this.element);
+        setStyles(this.element, {
+          'position': 'absolute',
+          'width': '1px',
+          'height': '1px',
+          'overflow': 'hidden',
+          'visibility': 'hidden',
+        });
       });
-    });
+    }
   }
 
   /** @override */
   layoutCallback() {
-    if (this.isExperimentEnabled_) {
-      return this.recaptchaService_.register(this);
-    }
-    return Promise.resolve();
+    return this.recaptchaService_.register(this);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   unlayoutCallback() {
-    if (this.isExperimentEnabled_) {
-      this.recaptchaService_.unregister(this);
-      return true;
-    }
-    return false;
+    this.recaptchaService_.unregister(this);
+    return true;
   }
 }
 
