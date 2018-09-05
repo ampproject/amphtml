@@ -721,14 +721,17 @@ function createBaseCustomElementClass(win) {
     /**
      * Called when the element is first connected to the DOM. Calls
      * {@link firstAttachedCallback} if this is the first attachment.
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected.  Chrome and Safari can trigger connectedCallback even when
+     * the node is disconnected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
+     * connectedCallback will later be called when the disconnected root is
+     * connected to the document tree.
+     *
      * @final @this {!Element}
      */
     connectedCallback() {
-      // Chrome and Safari can trigger connectedCallback even when the node is
-      // disconnected. See #12849, https://crbug.com/821195, and
-      // https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
-      // connectedCallback will later be called when the disconnected root is
-      // connected to the document tree.
       if (this.isConnected_ || !dom.isConnectedNode(this)) {
         return;
       }
@@ -863,13 +866,34 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when the element is disconnected from the DOM.
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940.
+     *
      * @final @this {!Element}
      */
     disconnectedCallback() {
-      if (this.isInTemplate_) {
+      // Short circut: Only call DOM methods if we think we're connected.
+      if (this.isConnected_ && dom.isConnectedNode(this)) {
         return;
       }
-      if (!this.isConnected_ || dom.isConnectedNode(this)) {
+      this.disconnect();
+    }
+
+    /** The Custom Elements V0 sibling to `disconnectedCallback`. */
+    detachedCallback() {
+      this.disconnectedCallback();
+    }
+
+    /**
+     * Called when an element is disconnected from DOM, or when an ampDoc is
+     * being disconnected (the element itself may still be connected to ampDoc).
+     *
+     * This does not guard against connected elements.
+     */
+    disconnect() {
+      if (this.isInTemplate_ || !this.isConnected_) {
         return;
       }
       this.isConnected_ = false;
@@ -878,11 +902,6 @@ function createBaseCustomElementClass(win) {
         this.getLayers().remove(this);
       }
       this.implementation_.detachedCallback();
-    }
-
-    /** The Custom Elements V0 sibling to `disconnectedCallback`. */
-    detachedCallback() {
-      this.disconnectedCallback();
     }
 
     /**
