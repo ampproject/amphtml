@@ -376,13 +376,14 @@ export function maybeReportErrorToViewer(win, data) {
  * @visibleForTesting
  */
 export function errorReportingDataForViewer(errorReportData) {
+  const {m, a, s, el, v, jse} = errorReportData;
   return dict({
-    'm': errorReportData['m'], // message
-    'a': errorReportData['a'], // isUserError
-    's': errorReportData['s'], // error stack
-    'el': errorReportData['el'], // tagName
-    'v': errorReportData['v'], // runtime
-    'jse': errorReportData['jse'], // detectedJsEngine
+    m, // message
+    a, // isUserError
+    s, // error stack
+    el, // tagName
+    v, // runtime
+    jse, // detectedJsEngine
   });
 }
 
