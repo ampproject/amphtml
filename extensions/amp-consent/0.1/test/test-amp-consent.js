@@ -152,7 +152,7 @@ describes.realWin('amp-consent', {
         doc.body.appendChild(consentElement);
         const ampConsent = new AmpConsent(consentElement);
         ampConsent.buildCallback();
-        console.log('final config is ', ampConsent.consentConfig_);
+
         expect(ampConsent.consentConfig_).to.deep.equal(dict({
           '_ping_': {
             'checkConsentHref': '/override',

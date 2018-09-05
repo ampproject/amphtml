@@ -30,9 +30,9 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
 import {getChildJsonConfig} from '../../../src/json';
+import {deepMerge, dict, map} from '../../../src/utils/object';
+import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn} from '../../../src/utils/object';
@@ -659,20 +659,10 @@ export class AmpConsent extends AMP.BaseElement {
     if (to === null || to === undefined) {
       to = dict({});
     }
-
-    for (const property in from) {
-      if (hasOwn(to, property)) {
-        if (isObject(from[property])) {
-          if (!isObject(to[property])) {
-            to[property] = {};
-          }
-          to[property] = this.mergeConfig_(from[property], to[property]);
-        }
-      } else {
-        to[property] = from[property];
-      }
+    if (from == null) {
+      from = dict({});
     }
-    return to;
+    return dict(deepMerge(from, to, 1));
   }
 
   /**
