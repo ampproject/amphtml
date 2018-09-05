@@ -247,6 +247,9 @@ function getExtensionsToBuild() {
   extensionsToBuild = [];
 
   if (!!argv.extensions) {
+    if (argv.extensions === 'minimal_set') {
+      argv.extensions = MINIMAL_EXTENSION_SET.join(',');
+    }
     extensionsToBuild = argv.extensions.split(',');
   }
 
@@ -768,9 +771,8 @@ function printConfigHelp(command) {
 
 /**
  * Parses the --extensions, --extensions_from, and the --noextensions flags,
- * and prints a helpful message that lets the developer know how to build
- * the runtime with a list of extensions,
- * all the extensions used by a test file,
+ * and prints a helpful message that lets the developer know how to build the
+ * runtime with a list of extensions, all the extensions used by a test file,
  * or no extensions at all.
  */
 function parseExtensionFlags() {
@@ -798,10 +800,6 @@ function parseExtensionFlags() {
         process.exit(1);
       }
       argv.extensions = argv.extensions.replace(/\s/g, '');
-
-      if (argv.extensions === 'minimal_set') {
-        argv.extensions = MINIMAL_EXTENSION_SET.join(',');
-      }
     }
 
     if (argv.extensions || argv.extensions_from) {
