@@ -23,7 +23,7 @@ import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {openWindowDialog} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -70,7 +70,7 @@ class AmpSocialShare extends AMP.BaseElement {
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
       if (!this.systemShareSupported_()) {
-        setStyle(element, 'display', 'none');
+        toggle(element, false);
         return;
       }
     } else {
@@ -79,7 +79,7 @@ class AmpSocialShare extends AMP.BaseElement {
         !!this.win.document.querySelectorAll(
             'amp-social-share[type=system][data-mode=replace]').length;
       if (systemOnly) {
-        setStyle(element, 'display', 'none');
+        toggle(element, false);
         return;
       }
     }

@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {removeChildren} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 
 /** @type {string} */
 const OBJ_PROP = '__BUBBLE_OBJ';
@@ -49,6 +49,7 @@ export class ValidationBubble {
 
     /** @private @const {!Element} */
     this.bubbleElement_ = ampdoc.win.document.createElement('div');
+    toggle(this.bubbleElement_, false);
 
     this.bubbleElement_.classList.add('i-amphtml-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
@@ -120,9 +121,7 @@ function hideBubble(state) {
   state.bubbleElement.removeAttribute('aria-alert');
   state.bubbleElement.removeAttribute('role');
   removeChildren(state.bubbleElement);
-  setStyles(state.bubbleElement, {
-    display: 'none',
-  });
+  toggle(state.bubbleElement, false);
 }
 
 
@@ -150,8 +149,8 @@ function showBubbleElement(state) {
   state.bubbleElement.setAttribute('role', 'alert');
   state.bubbleElement.setAttribute('aria-live', 'assertive');
   state.bubbleElement.appendChild(messageDiv);
+  toggle(state.bubbleElement, true);
   setStyles(state.bubbleElement, {
-    display: 'block',
     top: `${state.targetRect.top - 10}px`,
     left: `${state.targetRect.left + state.targetRect.width / 2}px`,
   });

@@ -27,7 +27,7 @@ form.amp-form-submit-error [submit-error] {
   box-shadow: 0 5px 15px 0 rgba(0, 0, 0, .5);
   max-width: 200px;
   position: absolute;
-  display: none;
+  display: block;
   box-sizing: border-box;
   padding: 10px;
   border-radius: 5px;

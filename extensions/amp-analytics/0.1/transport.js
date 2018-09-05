@@ -24,7 +24,7 @@ import {createPixel} from '../../../src/pixel';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -148,7 +148,7 @@ export function sendRequestUsingIframe(win, request) {
   assertHttpsUrl(request, 'amp-analytics request');
   /** @const {!Element} */
   const iframe = win.document.createElement('iframe');
-  setStyle(iframe, 'display', 'none');
+  toggle(iframe, false);
   iframe.onload = iframe.onerror = () => {
     Services.timerFor(win).delay(() => {
       removeElement(iframe);

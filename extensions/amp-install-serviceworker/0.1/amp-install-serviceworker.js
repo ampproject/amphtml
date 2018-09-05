@@ -20,7 +20,6 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
-import {setStyle} from '../../../src/style';
 import {toggle} from '../../../src/style';
 
 /** @private @const {string} */
@@ -106,7 +105,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    */
   insertIframe_() {
     return this.mutateElement(() => {
-      setStyle(this.element, 'display', 'none');
+      toggle(this.element, false);
       const iframe = this.win.document.createElement('iframe');
       iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
       iframe.src = this.iframeSrc_;

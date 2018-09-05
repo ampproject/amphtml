@@ -28,7 +28,7 @@ import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {renderAsElement} from './simple-template';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 
 /** @const {string} Class to toggle the share menu. */
@@ -142,7 +142,7 @@ export class ShareMenu {
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      setStyle(this.element_, 'display', 'none');
+      toggle(dev().assertElement(this.element_), false);
       this.parentEl_.appendChild(this.element_);
     });
   }

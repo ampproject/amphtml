@@ -21,6 +21,7 @@ import {
   setImportantStyles,
   setStyle,
   setStyles,
+  toggle,
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
@@ -779,7 +780,7 @@ class TransferLayerBody {
       setStyle(element, 'pointer-events', 'initial');
       const placeholder = fe.placeholder = this.doc_.createElement(
           'i-amphtml-fpa');
-      setStyle(placeholder, 'display', 'none');
+      toggle(placeholder, false);
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }
 
