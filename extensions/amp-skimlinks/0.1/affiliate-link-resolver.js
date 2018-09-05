@@ -245,7 +245,7 @@ export class AffiliateLinkResolver {
   /**
    * Creates the asyncResponse part of the 'resolveUnknownAnchors' response.
    * Fetch the domain resolver api before determining the
-   * "replacement tuple" list.
+   * AnchorReplacementList.
    * @private
    * @param {Array<HTMLElement>} anchorList
    * @param {Array<string>} domainsToAsk
