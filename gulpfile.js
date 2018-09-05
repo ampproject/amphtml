@@ -218,11 +218,12 @@ function buildExtensions(options) {
     return Promise.resolve();
   }
 
-  const extensionsToBuild = getExtensionsToBuild();
+  const extensionsToBuild = options.compileAll ?
+    [] : getExtensionsToBuild();
 
   const results = [];
   for (const key in extensions) {
-    if (!options.compileAll &&
+    if (extensionsToBuild.length > 0 &&
         extensionsToBuild.indexOf(extensions[key].name) == -1) {
       continue;
     }
