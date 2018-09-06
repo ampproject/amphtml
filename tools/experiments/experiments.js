@@ -342,6 +342,11 @@ const EXPERIMENTS = [
     name: 'Opts-in users that have included the GA client-id meta tag ',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
   },
+  {
+    id: 'amp-consent-v2',
+    name: 'Enables CMP support to amp-consent component',
+    spec: 'https://github.com/ampproject/amphtml/issues/17742',
+  },
 ];
 
 if (getMode().localDev) {
