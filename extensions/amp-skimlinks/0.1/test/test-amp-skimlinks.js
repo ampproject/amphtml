@@ -252,6 +252,7 @@ describes.fakeWin(
           ampSkimlinks.skimlinksLinkRewriter_ = {
             getAnchorReplacementList: env.sandbox.stub(),
           };
+          ampSkimlinks.ampDoc_ = ampSkimlinks.getAmpDoc();
         });
 
         describe('When beacon call has not been made yet', () => {

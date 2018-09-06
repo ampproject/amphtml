@@ -21,18 +21,17 @@ export class AmpSkimlinks extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = Services.xhrFor(this.win);
+    /** @private {?../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = null;
 
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = this.getAmpDoc();
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = null;
 
-    /** @private {!../../../src/service/document-info-impl.DocumentInfoDef} */
-    this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
+    /** @private {?../../../src/service/document-info-impl.DocumentInfoDef} */
+    this.docInfo_ = null;
 
-    /** @private {!../../../src/service/link-rewriter/link-rewriter-manager.LinkRewriterManager} */
-    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(
-        this.ampDoc_);
+    /** @private {?../../../src/service/link-rewriter/link-rewriter-manager.LinkRewriterManager} */
+    this.linkRewriterService_ = null;
 
     /** @private {?Object} */
     this.skimOptions_ = null;
@@ -53,6 +52,12 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.xhr_ = Services.xhrFor(this.win);
+    this.ampDoc_ = this.getAmpDoc();
+    this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
+    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(
+        this.ampDoc_);
+
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
 
     return whenDocumentReady(
@@ -67,9 +72,14 @@ export class AmpSkimlinks extends AMP.BaseElement {
    */
   startSkimcore_() {
     this.trackingService_ = this.initTracking_();
-    this.waypoint_ = new Waypoint(this.ampDoc_, this.trackingService_);
+    this.waypoint_ = new Waypoint(
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
+        (this.ampDoc_),
+        this.trackingService_
+    );
     this.affiliateLinkResolver_ = new AffiliateLinkResolver(
-        this.xhr_,
+        /** @type {!../../../src/service/xhr-impl.Xhr} */
+        (this.xhr_),
         this.skimOptions_,
         this.waypoint_
     );
@@ -86,7 +96,10 @@ export class AmpSkimlinks extends AMP.BaseElement {
   sendImpressionTracking_({guid}) {
     // Update tracking service with extra info.
     this.trackingService_.setTrackingInfo({guid});
-    const viewer = Services.viewerForDoc(this.ampDoc_);
+    const viewer = Services.viewerForDoc(
+        /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+        (this.ampDoc_)
+    );
     /*
       WARNING: Up to here, the code may be have been executed during page
       pre-rendering. Wait for the page to be visible in the viewer before
