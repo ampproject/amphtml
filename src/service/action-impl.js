@@ -20,10 +20,9 @@ import {RAW_OBJECT_ARGS_KEY} from '../action-constants';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
-import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
+import {hasOwn, map} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -56,7 +55,6 @@ const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit', 'clear'],
-  'amp-sidebar': ['open', 'close', 'toggle'],
 };
 
 /**
@@ -150,7 +148,6 @@ export class ActionInvocation {
    * `source` is #btn.
    * `caller` is #div.
    * `event` is a "click" Event object.
-   * `actionEventType` is "tap".
    * `trust` depends on whether this action was a result of a user gesture.
    * `tagOrTarget` is "amp-form".
    * `sequenceId` is a pseudo-UUID.
@@ -159,16 +156,15 @@ export class ActionInvocation {
    * @param {string} method Name of the action being invoked.
    * @param {?JsonObject} args Named action arguments.
    * @param {?Element} source Element that generated the `event`.
-   * @param {?Element} caller Element containing the on="..." action handler.
-   * @param {?ActionEventDef} event The event object that triggered this action.
+   * @param {?Element} caller Element that contains the invoked handler.
+   * @param {?ActionEventDef} event The event that triggered this action.
    * @param {ActionTrust} trust The trust level of this invocation's trigger.
-   * @param {?string} actionEventType The AMP event name that triggered this.
    * @param {?string} tagOrTarget The global target name or the element tagName.
    * @param {number} sequenceId An identifier for this action's sequence (all
    *   actions triggered by one event e.g. "tap:form1.submit, form2.submit").
    */
   constructor(node, method, args, source, caller, event, trust,
-    actionEventType = '?', tagOrTarget = null, sequenceId = Math.random()) {
+    tagOrTarget = null, sequenceId = Math.random()) {
     /** @const {!Node} */
     this.node = node;
     /** @const {string} */
@@ -183,8 +179,6 @@ export class ActionInvocation {
     this.event = event;
     /** @const {ActionTrust} */
     this.trust = trust;
-    /** @const {?string} */
-    this.actionEventType = actionEventType;
     /** @const {string} */
     this.tagOrTarget = tagOrTarget || node.tagName;
     /** @const {number} */
@@ -204,8 +198,8 @@ export class ActionInvocation {
       return false;
     }
     if (this.trust < minimumTrust) {
-      user().error(TAG_, `"${this.actionEventType}" is not allowed to invoke ` +
-          `"${this.tagOrTarget}.${this.method}".`);
+      user().error(TAG_, `Insufficient trust for "${this.method}" ` +
+          `(${this.trust} < ${minimumTrust}).`);
       return false;
     }
     return true;
@@ -247,6 +241,7 @@ export class ActionService {
      * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
      */
     this.globalMethodHandlers_ = map();
+
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
@@ -294,8 +289,6 @@ export class ActionService {
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
-        // For get requests, the delegating to the viewer needs to happen
-        // before this.
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
@@ -392,15 +385,11 @@ export class ActionService {
    */
   installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
-    if(!!handler){
-      console.log(handler);
-      console.log(target);
-    } 
     const targetId = target.getAttribute('id') || '';
-    const debugId = target.tagName + '#' + targetId;
+    const debugid = target.tagName + '#' + targetId;
     dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
-    'AMP element or a whitelisted target element is expected: %s', debugId);
+    'AMP element or a whitelisted target element is expected: %s', debugid);
 
     if (target[ACTION_HANDLER_]) {
       dev().error(TAG_, `Action handler already installed for ${target}`);
@@ -493,8 +482,8 @@ export class ActionService {
           : this.root_.getElementById(target);
         if (node) {
           const invocation = new ActionInvocation(node, actionInfo.method,
-              args, source, action.node, event, trust,
-              actionEventType, node.tagName || target, sequenceId);
+              args, source, /* caller */ action.node, event, trust,
+              node.tagName || target, sequenceId);
           return this.invoke_(invocation);
         } else {
           this.error_(`Target "${target}" not found for action ` +
@@ -528,6 +517,7 @@ export class ActionService {
    * @param {!ActionInvocation} invocation
    * @return {?Promise}
    * @private
+   * @visibleForTesting
    */
   invoke_(invocation) {
     const {method, tagOrTarget} = invocation;
@@ -783,7 +773,7 @@ export function parseActionMap(s, context) {
   do {
     tok = toks.next();
     if (tok.type == TokenType.EOF ||
-            (tok.type == TokenType.SEPARATOR && tok.value == ';')) {
+            tok.type == TokenType.SEPARATOR && tok.value == ';') {
       // Expected, ignore.
     } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
 
@@ -941,9 +931,9 @@ export function dereferenceExprsInArgs(args, event) {
   if (!args) {
     return args;
   }
-  const data = dict();
-  if (event && getDetail(/** @type {!Event} */ (event))) {
-    data['event'] = getDetail(/** @type {!Event} */ (event));
+  const data = map();
+  if (event && event.detail) {
+    data['event'] = event.detail;
   }
   const applied = map();
   Object.keys(args).forEach(key => {
@@ -965,7 +955,7 @@ export function dereferenceExprsInArgs(args, event) {
  * @param {!Element} context
  * @param {?T} condition
  * @param {string=} opt_message
- * @return {T}
+ * @return T
  * @template T
  * @private
  */
@@ -1088,8 +1078,8 @@ class ParserTokenizer {
 
     // A numeric. Notice that it steals the `.` from separators.
     if (convertValues && (isNum(c) ||
-            (c == '.' && newIndex + 1 < this.str_.length &&
-            isNum(this.str_[newIndex + 1])))) {
+            c == '.' && newIndex + 1 < this.str_.length &&
+            isNum(this.str_[newIndex + 1]))) {
       let hasFraction = c == '.';
       let end = newIndex + 1;
       for (; end < this.str_.length; end++) {
