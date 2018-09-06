@@ -81,9 +81,10 @@ describes.realWin('amp-analytics', {
       'strings defined. Analytics data will not be sent from this page.';
   const oneScriptChildError = '[AmpAnalytics <unknown id>] The tag should ' +
       'contain only one <script> child.';
-  const configParseError = '[AmpAnalytics <unknown id>] Analytics config ' +
-      'could not be parsed. Is it in a valid JSON format? TypeError: Cannot ' +
-      'read property \'toUpperCase\' of null';
+  const scriptTypeError = '[AmpAnalytics <unknown id>] ' +
+      '<script> child must have type="application/json"';
+  const configParseError = '[AmpAnalytics <unknown id>] Failed to ' +
+      'parse <script> contents. Is it valid JSON?';
   const onAndRequestAttributesError = '[AmpAnalytics <unknown id>] "on" and ' +
       '"request" attributes are required for data to be collected.';
   const onAndRequestAttributesInaboxError = '[AmpAnalytics <unknown id>] ' +
@@ -451,7 +452,7 @@ describes.realWin('amp-analytics', {
 
   it('does not send a hit when script tag does not have a type attribute',
       function() {
-        expectAsyncConsoleError(configParseError);
+        expectAsyncConsoleError(scriptTypeError);
         expectAsyncConsoleError(noRequestStringsError);
         expectAsyncConsoleError(noTriggersError);
         const el = doc.createElement('amp-analytics');
@@ -469,6 +470,27 @@ describes.realWin('amp-analytics', {
           expect(sendRequestSpy).to.have.not.been.called;
         });
       });
+
+  it('does not send a hit when json config is not valid', function() {
+    expectAsyncConsoleError(configParseError);
+    expectAsyncConsoleError(noRequestStringsError);
+    expectAsyncConsoleError(noTriggersError);
+    const el = doc.createElement('amp-analytics');
+    const script = doc.createElement('script');
+    script.setAttribute('type', 'application/json');
+    script.textContent = '{"a",}';
+    el.appendChild(script);
+    doc.body.appendChild(el);
+    const analytics = new AmpAnalytics(el);
+    el.connectedCallback();
+    analytics.createdCallback();
+    analytics.buildCallback();
+    sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+
+    return waitForNoSendRequest(analytics).then(() => {
+      expect(sendRequestSpy).to.have.not.been.called;
+    });
+  });
 
   it('does not send a hit when request is not provided', function() {
     expectAsyncConsoleError(onAndRequestAttributesError);
