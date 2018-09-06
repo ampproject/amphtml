@@ -170,7 +170,7 @@ export function isInternalElement(tag) {
 /**
  * Parses the CSS length value. If no units specified, the assumed value is
  * "px". Returns undefined in case of parsing error.
- * @param {string|undefined} s
+ * @param {string|undefined|null} s
  * @return {!LengthDef|undefined}
  */
 export function parseLength(s) {
@@ -353,9 +353,11 @@ export function applyStaticLayout(element) {
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
   user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  /** @const {string|null|undefined} */
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
     parseLength(widthAttr) : widthAttr;
   user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  /** @const {string|null|undefined} */
   const inputHeight = (heightAttr && heightAttr != 'fluid') ?
     parseLength(heightAttr) : heightAttr;
   user().assert(inputHeight !== undefined, 'Invalid height value: %s',
@@ -441,7 +443,6 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     setStyles(sizer, {
-      display: 'block',
       paddingTop:
         ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
     });
@@ -459,8 +460,7 @@ export function applyStaticLayout(element) {
     intrinsicSizer.setAttribute('src',
         `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     element.insertBefore(sizer, element.firstChild);
-    // TODO(jpettitt): sizer is leaked and can't be cleaned up.
-    element.sizerElement = intrinsicSizer;
+    element.sizerElement = sizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
@@ -491,9 +491,6 @@ export function applyStaticLayout(element) {
  * @param {!Element} element
  */
 function applyNoDisplayLayout(element) {
-  // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
-  // everywhere, switch all relevant elements to this API. In the meantime,
-  // simply unblock display toggling via `style="display: ..."`.
+  // TODO(jridgewell, #17475): This should be using the [hidden] attribute.
   setStyle(element, 'display', 'none');
-  element.classList.add('i-amphtml-display');
 }

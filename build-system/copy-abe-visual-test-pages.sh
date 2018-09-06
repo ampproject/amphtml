@@ -34,7 +34,7 @@ SRC_DIR=$(dirname "$AMPHTML_DIR")
 ABE_DIR="$SRC_DIR/amp-by-example"
 ABE_TESTS_PATH="examples/visual-tests/amp-by-example"
 ABE_TESTS_DIR="$AMPHTML_DIR/$ABE_TESTS_PATH"
-ABE_TESTS_JSON_FILE="$AMPHTML_DIR/test/visual-diff/visual-tests.js"
+ABE_TESTS_JSON_FILE="$AMPHTML_DIR/test/visual-diff/visual-tests"
 ABE_COMPONENTS_DIR="$ABE_TESTS_DIR/components"
 ABE_CLONE_PATH="git@github.com:ampproject/amp-by-example.git"
 
@@ -149,11 +149,15 @@ echo $(GREEN "Copy this code into the") $(CYAN "webpages") $(GREEN "section of")
 RUN "cd $ABE_COMPONENTS_DIR"
 for COMPONENT_DIR in `ls -d */`
 do
-  COMPONENT=`basename $COMPONENT_DIR`
-  echo "    {"
-  echo "      \"url\": \"examples/visual-tests/amp-by-example/components/$COMPONENT/index.html\","
-  echo "      \"name\": \"$COMPONENT - Amp By Example\""
-  echo "    },"
+  COMPONENT_NAME=`basename $COMPONENT_DIR`
+  COMPONENT_URL="examples/visual-tests/amp-by-example/components/$COMPONENT_NAME/index.html"
+  if ! grep -q $COMPONENT_URL $ABE_TESTS_JSON_FILE
+  then
+    echo "    {"
+    echo "      \"url\": \"$COMPONENT_URL\","
+    echo "      \"name\": \"$COMPONENT_NAME - Amp By Example\""
+    echo "    },"
+  fi
 done
 
 echo -e "\n"

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import {Services} from '../../src/services';
 import {
@@ -35,7 +34,6 @@ import {dev} from '../../src/log';
 import {loadPromise} from '../../src/event-helper';
 import {preconnectForElement} from '../../src/preconnect';
 import {toggleExperiment} from '../../src/experiments';
-import {validateData} from '../../3p/3p';
 
 describe.configure().ifNewChrome().run('3p-frame', () => {
 
@@ -45,7 +43,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   let preconnect;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -247,7 +245,8 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
       const c = win.document.getElementById('c');
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
-      validateData(win.context.data, ['ping', 'testAttr']);
+      expect(win.context.data).to.have.property('ping', 'pong');
+      expect(win.context.data).to.have.property('testAttr', 'value');
       document.head.removeChild(link);
     });
   });

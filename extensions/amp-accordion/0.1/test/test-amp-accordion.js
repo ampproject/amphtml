@@ -16,6 +16,7 @@
 
 import '../amp-accordion';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {poll} from '../../../../testing/iframe';
 import {tryFocus} from '../../../../src/dom';
 
 
@@ -25,17 +26,25 @@ describes.realWin('amp-accordion', {
   },
 }, env => {
   let win, doc;
+  let counter = 0;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    counter += 1;
   });
 
-  function getAmpAccordion() {
+  function getAmpAccordion(opt_shouldSetId) {
     win.sessionStorage.clear();
     const ampAccordion = doc.createElement('amp-accordion');
+    if (opt_shouldSetId) {
+      ampAccordion.setAttribute('id', `acc${counter}`);
+    }
     for (let i = 0; i < 3; i++) {
       const section = doc.createElement('section');
+      if (opt_shouldSetId) {
+        section.setAttribute('id', `acc${counter}sec${i}`);
+      }
       section.innerHTML = '<h2 tabindex="0">Section ' + i +
           '<span>nested stuff<span></h2><div id=\'test' + i +
           '\'>Loreum ipsum</div>';
@@ -46,7 +55,9 @@ describes.realWin('amp-accordion', {
     }
     doc.body.appendChild(ampAccordion);
     return ampAccordion.build().then(() => {
-      ampAccordion.implementation_.mutateElement = fn => fn();
+      ampAccordion.implementation_.mutateElement = fn => new Promise(() => {
+        fn();
+      });
       return ampAccordion.layoutCallback();
     }).then(() => ampAccordion);
   }
@@ -135,6 +146,80 @@ describes.realWin('amp-accordion', {
       expect(headerElements[1]
           .getAttribute('aria-expanded')).to.equal('false');
     });
+  });
+
+  it('should trigger a section\'s expand event the section is expanded ' +
+    'without animation',
+  () => {
+    let impl;
+    return getAmpAccordion(true).then(ampAccordion => {
+      impl = ampAccordion.implementation_;
+      impl.sections_[0].setAttribute('on',
+          `expand:acc${counter}.expand(section='acc${counter}sec${2}')`);
+      expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
+      impl.toggle_(impl.sections_[0], true);
+      return poll('wait for first section to expand',
+          () => impl.sections_[0].hasAttribute('expanded'));
+    })
+        .then(() => {
+          expect(impl.sections_[2].hasAttribute('expanded')).to.be.true;
+        });
+  });
+
+  it('should trigger a section\'s collapse event the section is expanded ' +
+    'without animation',
+  () => {
+    let impl;
+    return getAmpAccordion(true).then(ampAccordion => {
+      impl = ampAccordion.implementation_;
+      impl.sections_[1].setAttribute('on',
+          `collapse:acc${counter}.expand(section='acc${counter}sec${2}')`);
+      expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
+      impl.toggle_(impl.sections_[1], false);
+      return poll('wait for first section to expand',
+          () => !impl.sections_[1].hasAttribute('expanded'));
+    })
+        .then(() => {
+          expect(impl.sections_[2].hasAttribute('expanded')).to.be.true;
+        });
+  });
+
+  it('should trigger a section\'s expand event the section is expanded ' +
+    'with animation',
+  () => {
+    let impl;
+    return getAmpAccordion(true).then(ampAccordion => {
+      ampAccordion.setAttribute('animate', '');
+      impl = ampAccordion.implementation_;
+      impl.sections_[0].setAttribute('on',
+          `expand:acc${counter}.expand(section='acc${counter}sec${2}')`);
+      expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
+      impl.toggle_(impl.sections_[0], true);
+      return poll('wait for first section to expand',
+          () => impl.sections_[0].hasAttribute('expanded'));
+    })
+        .then(() => {
+          expect(impl.sections_[2].hasAttribute('expanded')).to.be.true;
+        });
+  });
+
+  it('should trigger a section\'s collapse event the section is expanded ' +
+    'with animation',
+  () => {
+    let impl;
+    return getAmpAccordion(true).then(ampAccordion => {
+      ampAccordion.setAttribute('animate', '');
+      impl = ampAccordion.implementation_;
+      impl.sections_[1].setAttribute('on',
+          `collapse:acc${counter}.expand(section='acc${counter}sec${2}')`);
+      expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
+      impl.toggle_(impl.sections_[1], false);
+      return poll('wait for first section to expand',
+          () => !impl.sections_[1].hasAttribute('expanded'));
+    })
+        .then(() => {
+          expect(impl.sections_[2].hasAttribute('expanded')).to.be.true;
+        });
   });
 
   it('should stay expanded on the expand action when expanded',

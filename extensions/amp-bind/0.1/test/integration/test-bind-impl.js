@@ -16,11 +16,10 @@
 
 /**
  * @fileoverview "Unit" test for bind-impl.js. Runs as an integration test
- *               because it requires building web-worker binary.
+ * because it requires building web-worker binary.
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
@@ -32,7 +31,7 @@ import {toArray} from '../../../../../src/types';
 
 /**
  * @param {!Object} env
- * @param {!Element} container
+ * @param {?Element} container
  * @param {string} binding
  * @param {string=} opt_tag Tag name of element (default is <p>).
  * @param {boolean=} opt_amp Is this an AMP element?
@@ -50,7 +49,7 @@ function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
   }
   if (opt_head) {
     env.win.document.head.appendChild(element);
-  } else {
+  } else if (container) {
     container.appendChild(element);
   }
   return element;
@@ -92,7 +91,25 @@ function onBindReadyAndSetState(env, bind, state, opt_isAmpStateMutation) {
  * @return {!Promise}
  */
 function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
-  return bind.setStateWithExpression(expression, scope).then(() => {
+  return bind.initializePromiseForTesting().then(() => {
+    return bind.setStateWithExpression(expression, scope);
+  }).then(() => {
+    env.flushVsync();
+    return bind.setStatePromiseForTesting();
+  });
+}
+
+/**
+ * @param {!Object} env
+ * @param {!Bind} bind
+ * @param {!Array<!Element>} added
+ * @param {!Array<!Element>} removed
+ * @return {!Promise}
+ */
+function onBindReadyAndScanAndApply(env, bind, added, removed) {
+  return bind.initializePromiseForTesting().then(() => {
+    return bind.scanAndApply(added, removed);
+  }).then(() => {
     env.flushVsync();
   });
 }
@@ -256,6 +273,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       chunkInstanceForTesting(ampdoc);
 
       viewer = Services.viewerForDoc(ampdoc);
+      sandbox.stub(viewer, 'sendMessage');
       bind = new Bind(ampdoc);
       // Connected <div> element created by describes.js.
       container = win.document.getElementById('parent');
@@ -265,6 +283,15 @@ describe.configure().ifNewChrome().run('Bind', function() {
 
     afterEach(() => {
       clock.uninstall();
+    });
+
+    it('should send "bindReady" to viewer on init', () => {
+      expect(viewer.sendMessage).to.not.be.called;
+      return onBindReady(env, bind).then(() => {
+        expect(viewer.sendMessage).to.be.calledOnce;
+        expect(viewer.sendMessage)
+            .to.be.calledWithExactly('bindReady', undefined);
+      });
     });
 
     it('should scan for bindings when ampdoc is ready', () => {
@@ -564,11 +591,11 @@ describe.configure().ifNewChrome().run('Bind', function() {
           '{foo: bar}', sinon.match({event: {bar: 123}}));
     });
 
-    it('should only allow one action per event in invoke()', () => {
+    // TODO(choumx, #16721): Causes browser crash for some reason.
+    it.skip('should only allow one action per event in invoke()', () => {
       const {sandbox} = env;
       sandbox.stub(bind, 'setStateWithExpression');
       const userError = sandbox.stub(user(), 'error');
-
 
       const invocation = {
         method: 'setState',
@@ -817,6 +844,25 @@ describe.configure().ifNewChrome().run('Bind', function() {
           expect(qux.textContent).to.be.equal('4');
         });
       });
+    });
+
+    it('should scanAndApply()', function*() {
+      const foo = createElement(env, container, '[text]="foo"');
+      yield onBindReadyAndSetState(env, bind, {foo: 'foo'});
+      expect(foo.textContent).to.equal('foo');
+
+      // The new `onePlusOne` element should be scanned and evaluated despite
+      // not being attached to the DOM.
+      const onePlusOne = createElement(
+          env, /* container */ null, '[text]="1+1"');
+      yield onBindReadyAndScanAndApply(env, bind,
+          /* added */ [onePlusOne], /* removed */ [foo]);
+      expect(onePlusOne.textContent).to.equal('2');
+
+      // The binding for the `foo` element should have been removed, so
+      // performing AMP.setState({foo: ...}) should not change it.
+      yield onBindReadyAndSetState(env, bind, {foo: 'bar'});
+      expect(foo.textContent).to.not.equal('bar');
     });
   }); // in single ampdoc
 });

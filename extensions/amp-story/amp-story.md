@@ -43,7 +43,7 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
+This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 {% endcall %}
 
 [TOC]
@@ -445,6 +445,36 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
     <img alt="Bookend textbox component" src="img/amp-story-bookend-component-textbox.png" />
   </noscript>
 </amp-img>
+
+**AMP-to-AMP linking**
+
+For documents displayed in an AMP viewer, links typically navigate `_top` or open in a new window. Links to AMP pages, however, may continue to be displayed in the viewer. To enable this behavior, add `"amphtml": true` to a component that supports links. For example:
+
+```json
+...
+{
+  "type": "small",
+  "title": "This is India an the best places you should go",
+  "url": "http://example.com/my-amp-document.html",
+  "image": "http://placehold.it/256x128",
+  "amphtml": true
+},
+{
+  "type": "cta-link",
+  "links": [
+    {
+      "text": "Sign Up",
+      "url": "example.com/signup",
+      "amphtml": true
+    },
+    {
+      "text": "Subscribe",
+      "url": "example.com/subscribe"
+    }
+  ]
+},
+...
+```
 
 #### Social sharing
 

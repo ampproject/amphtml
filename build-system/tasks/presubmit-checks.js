@@ -75,6 +75,10 @@ const forbiddenTerms = {
         'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
         'for a list of alternatives.',
   },
+  'document-register-element.node': {
+    message: 'Use `document-register-element.patched` instead',
+    whitelist: ['build-system/tasks/update-packages.js'],
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -141,12 +145,14 @@ const forbiddenTerms = {
         'temporary workarounds.',
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/config.js',
     ],
   },
   // Service factories that should only be installed once.
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/service/action-impl.js',
       'src/service/standard-actions-impl.js',
       'src/runtime.js',
@@ -193,6 +199,7 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/ampdoc-impl.js',
       'testing/describes.js',
       'testing/iframe.js',
@@ -204,12 +211,14 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/performance-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/storage-impl.js',
     ],
@@ -224,6 +233,7 @@ const forbiddenTerms = {
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
@@ -233,6 +243,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -262,6 +273,7 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
@@ -325,12 +337,14 @@ const forbiddenTerms = {
     whitelist: [
       // viewer-impl.sendMessage
       'src/error.js',
+      'src/service/navigation.js',
       'src/service/viewer-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
-      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
+      'extensions/amp-bind/0.1/bind-impl.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
 
       // iframe-messaging-client.sendMessage
@@ -343,16 +357,17 @@ const forbiddenTerms = {
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
-      'src/service/xhr-impl.js',
-      'src/service/viewer-impl.js',
-      'src/service/viewer-cid-api.js',
-      'src/service/storage-impl.js',
-      'src/service/history-impl.js',
-      'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
+      'src/service/cid-impl.js',
+      'src/service/history-impl.js',
+      'src/service/storage-impl.js',
+      'src/ssr-template-helper.js',
+      'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
+      'src/utils/xhr-utils.js',
     ],
   },
   // Privacy sensitive
@@ -382,7 +397,7 @@ const forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/error.js',
-      'src/service/xhr-impl.js',
+      'src/utils/xhr-utils.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
@@ -532,6 +547,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/log.js', // Has actual implementation of assertElement.
       'dist.3p/current/integration.js', // Includes the previous.
+      'src/polyfills/custom-elements.js',
     ],
   },
   'startupChunk\\(': {
@@ -549,6 +565,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'build-system/app.js',
+      'build-system/tasks/firebase.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
@@ -597,6 +614,25 @@ const forbiddenTerms = {
     whitelist: [
       'viewer-api/swipe-api.js',
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
+    ],
+  },
+  'this\\.skip\\(\\)': {
+    message: 'Use of `this.skip()` is forbidden in test files. Use ' +
+        '`this.skipTest()` from within a `before()` block instead. See #17245.',
+    checkInTestFolder: true,
+    whitelist: [
+      'test/_init_tests.js',
+    ],
+  },
+  '[^\\.]makeBodyVisible\\(': {
+    message: 'This is a protected function. If you are calling this to show ' +
+        'body after an error please use `makeBodyVisibleRecovery`',
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/style-installer.js',
+      'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
     ],
   },
 };
@@ -871,6 +907,17 @@ function isInTestFolder(path) {
 }
 
 /**
+ * Check if file is inside the build-system/babel-plugins test/fixture folder.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isInBuildSystemFixtureFolder(filePath) {
+  const folder = path.dirname(filePath);
+  return folder.startsWith('build-system/babel-plugins') &&
+    folder.includes('test/fixtures');
+}
+
+/**
  * Strip Comments
  * @param {string} contents
  */
@@ -910,9 +957,9 @@ function matchTerms(file, terms) {
     const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
-    if (Array.isArray(whitelist) &&
+    if (isInBuildSystemFixtureFolder(relative) || (Array.isArray(whitelist) &&
       (whitelist.indexOf(relative) != -1 ||
-      (isInTestFolder(relative) && !checkInTestFolder))) {
+      (isInTestFolder(relative) && !checkInTestFolder)))) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build

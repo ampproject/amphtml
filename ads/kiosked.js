@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../src/utils/object';
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -23,7 +24,7 @@ import {validateData, writeScript} from '../3p/3p';
 export function kiosked(global, data) {
   let scriptId;
   validateData(data, ['scriptid'], []);
-  if (data.hasOwnProperty('scriptid')) {
+  if (hasOwn(data, 'scriptid')) {
     scriptId = data['scriptid'];
   }
   window.addEventListener('kioskedAdRender', function() {

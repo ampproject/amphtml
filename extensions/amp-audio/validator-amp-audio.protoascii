@@ -19,8 +19,8 @@ tags: {  # amp-audio
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-audio"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     deprecated_allow_duplicates: true
     requires_usage: GRANDFATHERED
   }
@@ -38,7 +38,7 @@ attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -56,7 +56,9 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   }
   attrs: {
     name: "preload"
-    value_regex_casei: "auto|metadata|none|"
+    value_casei: "auto"
+    value_casei: "metadata"
+    value_casei: "none"
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"

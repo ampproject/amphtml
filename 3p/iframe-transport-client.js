@@ -93,7 +93,7 @@ export class IframeTransportClient {
     return this.creativeIdToContext_[creativeId] ||
         (this.creativeIdToContext_[creativeId] =
             new IframeTransportContext(this.win_, this.iframeMessagingClient_,
-              creativeId, this.vendor_));
+                creativeId, this.vendor_));
   }
 
   /**

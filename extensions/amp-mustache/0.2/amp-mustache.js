@@ -19,7 +19,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
+  setUnescapedSanitizer} from '../../../third_party/mustache/mustache';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
 
 /**
@@ -38,11 +38,18 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizier(purifyTagsForTripleMustache);
+    setUnescapedSanitizer(value =>
+      purifyTagsForTripleMustache(value, this.win.document));
   }
 
   /** @override */
   compileCallback() {
+    // If viewer is renderTemplate capable, skip the handling of the mustache
+    // templates as its rendering is managed by the viewer. This template will
+    // only be responsible for sanitizing and inserting it into the DOM.
+    if (this.viewerCanRenderTemplates()) {
+      return;
+    }
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
@@ -81,15 +88,20 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   render(data) {
-    let mustacheData = data;
-    // Also render any nested templates.
-    if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+    let html = data;
+    if (!this.viewerCanRenderTemplates()) {
+      let mustacheData = data;
+      // Also render any nested templates.
+      if (typeof data === 'object') {
+        mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      }
+      html = mustacheRender(this.template_, mustacheData);
     }
-    const html = mustacheRender(this.template_, mustacheData);
-    const sanitized = purifyHtml(html);
+    const body = purifyHtml(html);
+    // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
+    // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');
-    root./*OK*/innerHTML = sanitized;
+    root./*OK*/innerHTML = body./*OK*/innerHTML;
     return this.unwrap(root);
   }
 }
