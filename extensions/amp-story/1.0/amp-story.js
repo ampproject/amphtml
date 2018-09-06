@@ -1335,9 +1335,9 @@ export class AmpStory extends AMP.BaseElement {
    */
   onSidebarStateUpdate_(open) {
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
-    if(open && this.sidebar_){
+    if (open && this.sidebar_) {
       actions.execute(
-        this.sidebar_, 'open', null, null, null, null, ActionTrust.HIGH);
+          this.sidebar_, 'open', null, null, null, null, ActionTrust.HIGH);
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
   }
@@ -1575,26 +1575,6 @@ export class AmpStory extends AMP.BaseElement {
         });
       });
     });
-  }
-
-
-  /**
-   * Handle actions that require at least high trust.
-   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
-   * @return {?Promise}
-   * @private
-   */
-  actionHandler_(invocation) {
-    console.log("handle");
-    console.log(invocation);
-    if (invocation.method == 'open') {
-      this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-    } else if (invocation.method == 'close') {
-      this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
-    } else if (invocation.method == 'toggle') {
-      this.storeService_.dispatch(Action.TOGGLE_PAUSED, !this.storeService_.get(StateProperty.PAUSED_STATE));
-    }
-    return null;
   }
 
   /**
@@ -1881,18 +1861,20 @@ export class AmpStory extends AMP.BaseElement {
    */
   checkForSidebar_() {
     this.sidebar_ = this.element.querySelector('amp-sidebar');
-    if(!!this.sidebar_){
-      this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_SIDEBAR, !!this.sidebar_);
+    if (!!this.sidebar_) {
+      this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_SIDEBAR,
+          !!this.sidebar_);
       const actions = Services.actionServiceForDoc(this.getAmpDoc());
       actions.addToWhitelist('AMP-SIDEBAR.open');
       actions.addToWhitelist('AMP-SIDEBAR.close');
       actions.addToWhitelist('AMP-SIDEBAR.toggle');
       const sidebarObserver = new this.win.MutationObserver(() => {
-        this.storeService_.dispatch(Action.TOGGLE_PAUSED, this.sidebar_.hasAttribute('open'));
+        this.storeService_.dispatch(Action.TOGGLE_PAUSED,
+            this.sidebar_.hasAttribute('open'));
       });
-      sidebarObserver.observe(this.sidebar_, {attributes: open})
+      sidebarObserver.observe(this.sidebar_, {attributes: open});
     }
-    
+
   }
 
   /** @private */
