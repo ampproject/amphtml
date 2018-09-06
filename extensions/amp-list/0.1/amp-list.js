@@ -382,10 +382,8 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      // TODO(alabiaga): This is a misleading type cast. Instead, we should use
-      // a new API on template-impl.js and amp-mustache.js as discussed.
-      const html = /** @type {!JsonObject} */ (current.data);
-      this.templates_.findAndRenderTemplate(this.element, html)
+      const html = current.data;
+      this.templates_.findAndInsertRenderedTemplate(this.element, html)
           .then(element => this.render_([element]))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {

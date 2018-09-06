@@ -147,6 +147,18 @@ export class Templates {
   /**
    * Renders the specified template element using the supplied data.
    * @param {!Element} templateElement
+   * @param {string} html
+   * @return {!Promise<!Element>}
+   */
+  insertRenderedTemplate(templateElement, html) {
+    return this.getImplementation_(templateElement).then(impl => {
+      return this.insert_(impl, html);
+    });
+  }
+
+  /**
+   * Renders the specified template element using the supplied data.
+   * @param {!Element} templateElement
    * @param {!JsonObject} data
    * @return {!Promise<!Element>}
    */
@@ -188,6 +200,21 @@ export class Templates {
     return this.renderTemplate(
         this.findTemplate(parent, opt_querySelector),
         data);
+  }
+
+  /**
+   * Discovers the already rendered template for the specified parent and
+   * inserts it in the DOM. The template can be specified either via "template"
+   * attribute  or as a child "template" element. When specified via "template"
+   * attribute, the value indicates the ID of the template element.
+   * @param {!Element} parent
+   * @param {string} html
+   * @param {string=} opt_querySelector
+   * @return {!Promise<!Element>}
+   */
+  findAndInsertRenderedTemplate(parent, html, opt_querySelector) {
+    return this.insertRenderedTemplate(
+        this.findTemplate(parent, opt_querySelector), html);
   }
 
   /**
@@ -342,6 +369,16 @@ export class Templates {
    */
   render_(impl, data) {
     return impl.render(data);
+  }
+
+  /**
+   * @param {!BaseTemplate} impl
+   * @param {string} html
+   * @return {!Element}
+   * @private
+   */
+  insert_(impl, html) {
+    return impl.insert(html);
   }
 }
 

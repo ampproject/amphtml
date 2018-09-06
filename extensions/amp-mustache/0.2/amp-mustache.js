@@ -88,7 +88,13 @@ export class AmpMustache extends AMP.BaseTemplate {
   }
 
   /** @override */
+  insert(html) {
+    this.serializeHtml_(html);
+  }
+
+  /** @override */
   render(data) {
+<<<<<<< HEAD
     let html = data;
     if (!this.viewerCanRenderTemplates()) {
       let mustacheData = data;
@@ -98,9 +104,20 @@ export class AmpMustache extends AMP.BaseTemplate {
       }
       html = mustacheRender(this.template_, mustacheData,
           /* partials */ undefined);
+=======
+    let mustacheData = data;
+    // Also render any nested templates.
+    if (typeof data === 'object') {
+      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+>>>>>>> changes
     }
+<<<<<<< HEAD
     const diffing = isExperimentOn(self, 'amp-list-diffing');
     const body = purifyHtml(html, diffing);
+=======
+    const html = mustacheRender(this.template_, mustacheData);
+    const body = purifyHtml(html);
+>>>>>>> changes
     // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
     // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');
