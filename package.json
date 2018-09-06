@@ -55,9 +55,15 @@
     "baconipsum": "0.1.2",
     "bluebird": "3.5.2",
     "body-parser": "1.18.3",
+<<<<<<< HEAD
     "browserify": "16.2.3",
     "bundlesize": "0.17.0",
     "chai": "4.2.0",
+=======
+    "browserify": "16.2.2",
+    "bundlesize": "^0.17.0",
+    "chai": "4.1.2",
+>>>>>>> fixes
     "chai-as-promised": "7.1.1",
     "cli-highlight": "2.0.0",
     "codecov": "3.1.0",
@@ -88,8 +94,13 @@
     "fs-extra": "7.0.0",
     "glob-move": "1.0.1",
     "globs-to-files": "1.0.0",
+<<<<<<< HEAD
     "google-closure-compiler": "20180910.1.0",
     "gulp": "3.9.1",
+=======
+    "google-closure-compiler": "20180716.0.1",
+    "gulp": "^3.9.1",
+>>>>>>> fixes
     "gulp-ava": "0.19.0",
     "gulp-closure-compiler": "0.4.0",
     "gulp-eslint": "5.0.0",

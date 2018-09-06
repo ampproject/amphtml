@@ -3274,7 +3274,7 @@ builtin-status-codes@^3.0.0:
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
   integrity sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
 
-bundlesize@0.17.0:
+bundlesize@^0.17.0:
   version "0.17.0"
   resolved "https://registry.yarnpkg.com/bundlesize/-/bundlesize-0.17.0.tgz#212ae5731ab0554d2acd509d23e1de18640b2008"
   integrity sha512-w/jYWQupw/eijqx4LV6PPr1z0HmfXT8SMCg9tls1a3xrr6/PtC22MoFrYJ8j/uPLSANRQ+8WiN/gXuhTY6wogQ==
@@ -7374,7 +7374,7 @@ gulp-wrap@0.14.0:
     tryit "^1.0.1"
     vinyl-bufferstream "^1.0.1"
 
-gulp@3.9.1:
+gulp@^3.9.1:
   version "3.9.1"
   resolved "https://registry.yarnpkg.com/gulp/-/gulp-3.9.1.tgz#571ce45928dd40af6514fc4011866016c13845b4"
   integrity sha1-VxzkWSjdQK9lFPxAEYZgFsE4RbQ=

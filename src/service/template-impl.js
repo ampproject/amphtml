@@ -71,6 +71,15 @@ export class BaseTemplate {
 
   /**
    * To be implemented by subclasses.
+   * @param {string} unusedData
+   * @return {!Element}
+   */
+  insert(unusedData) {
+    throw new Error('Not implemented');
+  }
+
+  /**
+   * To be implemented by subclasses.
    * @param {!JsonObject|string} unusedData
    * @return {!Element}
    */
