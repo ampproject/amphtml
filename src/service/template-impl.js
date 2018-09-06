@@ -55,6 +55,9 @@ export class BaseTemplate {
     /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView || win;
 
+    /** @private @const */
+    this.viewer_ = getServiceForDoc(this.element, 'viewer');
+
     this.compileCallback();
   }
 
@@ -114,8 +117,7 @@ export class BaseTemplate {
    * @return {boolean}
    */
   viewerCanRenderTemplates() {
-    return getServiceForDoc(this.element, 'viewer')
-        .hasCapability('viewerRenderTemplate');
+    return this.viewer_.hasCapability('viewerRenderTemplate');
   }
 }
 
