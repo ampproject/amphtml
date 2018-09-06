@@ -101,7 +101,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
         (this.ampDoc_)
     );
     /*
-      WARNING: Up to here, the code may be have been executed during page
+      WARNING: Up to here, the code may have been executed during page
       pre-rendering. Wait for the page to be visible in the viewer before
       sending impression tracking.
     */

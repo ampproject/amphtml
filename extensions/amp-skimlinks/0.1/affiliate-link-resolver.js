@@ -10,7 +10,7 @@ export const STATUS__AFFILIATE = 'affiliate';
 export const STATUS__NON_AFFILIATE = 'non-affiliate';
 // Can't be monetized and can't be tracked
 export const STATUS__IGNORE_LINK = 'ignore';
-// We don't know yet if the link can me monitized. Will be considered as
+// We don't know yet if the link can me monetized. Will be considered as
 // 'can be monetized' until we have the answer from the API.
 export const STATUS__UNKNOWN = 'unknown';
 
