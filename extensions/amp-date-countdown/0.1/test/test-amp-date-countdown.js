@@ -48,6 +48,7 @@ describes.realWin('amp-date-countdown', {
     //     .callsFake(() => whenFirstVisiblePromise);
 
     element = win.document.createElement('amp-date-countdown');
+    element.setAttribute('end-date', ISOEndDate);
     win.document.body.appendChild(element);
     //element.build();
     impl = element.implementation_;
