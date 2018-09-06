@@ -615,7 +615,7 @@ gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
     type: '  Pass in "canary" to generate a canary changelog',
-    version: '  The git tag and github release label',
+    tag: '  The git tag and github release label',
   },
 });
 
