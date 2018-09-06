@@ -38,7 +38,7 @@
   "amp-consent": 1,
   "amp-img-native-srcset": 1,
   "amp-story-v1": 1,
-  "amp-carousel-scroll-snap": 0.01,
+  "amp-carousel-scroll-snap": 0.1,
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01,
   "faster-bind-scan": 1,
