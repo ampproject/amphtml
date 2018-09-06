@@ -30,14 +30,14 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {getChildJsonConfig} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
+import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {scopedQuerySelectorAll} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {scopedQuerySelectorAll} from '../../../src/dom';
 import {setImportantStyles, toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -126,7 +126,7 @@ export class AmpConsent extends AMP.BaseElement {
     const config = this.mergeConfig_(cmpConfig, inlineConfig);
 
     // TODO: Decide what to do with incorrect configuration.
-    this.assertAndParseConfig_(/** @type {!JsonObject} */ (config));
+    this.assertAndParseConfig_(config);
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
@@ -211,8 +211,7 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
 
-      const iframes =
-          scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
 
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
@@ -530,7 +529,7 @@ export class AmpConsent extends AMP.BaseElement {
    *   }
    * }
    * TODO: Add support for policy config
-   * @param {!Object} config
+   * @param {!JsonObject} config
    */
   assertAndParseConfig_(config) {
     const consents = config['consents'];
@@ -568,7 +567,7 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Read the inline config from publisher
-   * @return {?JsonObject|undefined}
+   * @return {?JsonObject}
    */
   getInlineConfig_() {
     // All consent config within the amp-consent component. There will be only
@@ -636,11 +635,11 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Merge inline config and CMP config
    * @param {?JsonObject} from
-   * @param {?JsonObject|undefined} to
+   * @param {?JsonObject} to
    * @return {!JsonObject}
    */
   mergeConfig_(from, to) {
-    if (to === null || to === undefined) {
+    if (to === null) {
       to = dict({});
     }
     if (from == null) {
