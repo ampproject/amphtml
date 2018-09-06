@@ -236,8 +236,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.nextPage_ = null;
 
-    this.actions_ = Services.actionServiceForDoc(this.getAmpDoc());
-
     /** @private @const */
     this.desktopMedia_ = this.win.matchMedia(
         `(min-width: ${DESKTOP_WIDTH_THRESHOLD}px) and ` +
@@ -352,12 +350,8 @@ export class AmpStory extends AMP.BaseElement {
 
     // Disallow all actions in a (standalone) story.
     // Components then add their own actions.
-   
-    this.actions_.setWhitelist([]);
-    //if(this.checkForSidebar_()){
-      
-    
-
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    actions.setWhitelist([]);
   }
 
 
@@ -1340,10 +1334,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(open) {
-    //this.sidebar_ = childElementByTag(this.element, 'amp-sidebar');
-    //const act = Services.actionServiceForDoc(this.getAmpDoc());
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
     if(open && this.sidebar_){
-      this.actions_.execute(
+      actions.execute(
         this.sidebar_, 'open', null, null, null, null, ActionTrust.HIGH);
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
@@ -1887,15 +1880,19 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   checkForSidebar_() {
-    this.sidebar_ = this.element.querySelector('amp-sidebar')//childElementByTag(this.element, 'amp-sidebar');
+    this.sidebar_ = this.element.querySelector('amp-sidebar');
     if(!!this.sidebar_){
-      this.actions_.addToWhitelist('AMP-SIDEBAR.open');
-      this.actions_.addToWhitelist('AMP-SIDEBAR.close');
-      this.actions_.addToWhitelist('AMP-SIDEBAR.toggle');
-      this.actions_.installActionHandler(this.sidebar_, this.actionHandler_.bind(this), ActionTrust.HIGH); 
       this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_SIDEBAR, !!this.sidebar_);
+      const actions = Services.actionServiceForDoc(this.getAmpDoc());
+      actions.addToWhitelist('AMP-SIDEBAR.open');
+      actions.addToWhitelist('AMP-SIDEBAR.close');
+      actions.addToWhitelist('AMP-SIDEBAR.toggle');
+      const sidebarObserver = new this.win.MutationObserver(() => {
+        this.storeService_.dispatch(Action.TOGGLE_PAUSED, this.sidebar_.hasAttribute('open'));
+      });
+      sidebarObserver.observe(this.sidebar_, {attributes: open})
     }
-    return !!this.sidebar_;
+    
   }
 
   /** @private */
