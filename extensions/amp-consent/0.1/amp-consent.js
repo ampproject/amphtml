@@ -581,7 +581,7 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Read and format the CMP config
-   * The returned CMP config should looks like, where "foo" is the storageKey
+   * The returned CMP config should looks like
    * {
    *   "consents": {
    *     "foo": {
@@ -604,16 +604,16 @@ export class AmpConsent extends AMP.BaseElement {
     user().assert(CMP_CONFIG[type], `invalid CMP type ${type}`);
     const importConfig = CMP_CONFIG[type];
     this.validateCMPConfig_(importConfig);
-    const storageKey = importConfig['storageKey'];
+    const constentInstance = importConfig['consentInstanceId'];
 
     const cmpConfig = dict({
       'consents': dict({}),
     });
 
     const config = Object.assign({}, importConfig);
-    delete config['storageKey'];
+    delete config['consentInstanceId'];
 
-    cmpConfig['consents'][storageKey] = config;
+    cmpConfig['consents'][constentInstance] = config;
     return cmpConfig;
   }
 
@@ -634,7 +634,8 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {!JsonObject} config
    */
   validateCMPConfig_(config) {
-    const assertValues = ['storageKey', 'checkConsentHref', 'promptUISrc'];
+    const assertValues =
+        ['consentInstanceId', 'checkConsentHref', 'promptUISrc'];
     for (let i = 0; i < assertValues.length; i++) {
       const attribute = assertValues[i];
       dev().assert(config[attribute], `CMP config must specify ${attribute}`);
