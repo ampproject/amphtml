@@ -20,6 +20,7 @@
  * recaptcha tokens
  */
 
+import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
   installRecaptchaService,
@@ -69,7 +70,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.recaptchaService_.register(this);
+    return this.recaptchaService_.register(this.element);
   }
 
   /** @override */
@@ -81,5 +82,5 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
 AMP.extension(TAG, '0.1', AMP => {
   installRecaptchaService(AMP.win);
-  AMP.registerElement(TAG, AmpRecaptchaInput);
+  AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });

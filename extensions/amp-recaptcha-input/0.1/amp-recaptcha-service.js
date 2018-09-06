@@ -24,6 +24,7 @@ import {dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {listenFor} from '../../../src/iframe-helper';
+import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 
 export class AmpRecaptchaService {
@@ -33,11 +34,17 @@ export class AmpRecaptchaService {
    */
   constructor(window) {
 
-    /** @private {!Window} */
+    /** @const @private {!Window} */
     this.win_ = window;
+
+    /** @const @private {!element} */
+    this.body_ = this.win_.document.body;
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.iframeLoadPromise_ = null;
 
     /** @private {number} */
     this.registeredElementCount_ = 0;
@@ -52,15 +59,16 @@ export class AmpRecaptchaService {
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
-   * @param {!AMP.BaseElement} elementImpl
+   * @param {!Element} element
    * @return {Promise}
    */
-  register(elementImpl) {
+  register(element) {
     this.registeredElementCount_++;
     if (!this.iframe_) {
-      this.initialize_(elementImpl);
+      this.initialize_(element);
+      this.iframeLoadPromise = loadPromise(this.iframe_);
     }
-    return elementImpl.loadPromise(this.iframe_);
+    return this.iframeLoadPromise_;
   }
 
   /**
@@ -76,13 +84,13 @@ export class AmpRecaptchaService {
 
   /**
    * Function to create our recaptcha boostrap iframe.
-   * @param {!AMP.BaseElement} elementImpl
+   * @param {!Element} element
    * @private
    */
-  initialize_(elementImpl) {
+  initialize_(element) {
 
     /* the third parameter 'recaptcha' ties it to the 3p/recaptcha.js */
-    this.iframe_ = getIframe(this.win_, elementImpl.element, 'recaptcha');
+    this.iframe_ = getIframe(this.win_, element, 'recaptcha');
 
     const listenIframe = (evName, cb) => listenFor(
         dev().assertElement(this.iframe_),
@@ -95,7 +103,8 @@ export class AmpRecaptchaService {
     ];
     this.unlistenMessage_ = () => disposers.forEach(d => d());
 
-    elementImpl.element.appendChild(this.iframe_);
+    this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
+    this.body_.appendChild(this.iframe_);
   }
 
   /**
@@ -106,6 +115,7 @@ export class AmpRecaptchaService {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+      this.iframeLoadPromise_ = null;
 
       this.willBeReady_ = new Deferred();
     }
