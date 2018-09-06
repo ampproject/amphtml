@@ -22,7 +22,6 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {isJsonScriptTag} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
 const TAG = 'analytics-config';

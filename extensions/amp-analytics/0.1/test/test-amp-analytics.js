@@ -471,7 +471,7 @@ describes.realWin('amp-analytics', {
         });
       });
 
-  it('does not send a hit when json config is not valid', function () {
+  it('does not send a hit when json config is not valid', function() {
     expectAsyncConsoleError(configParseError);
     expectAsyncConsoleError(noRequestStringsError);
     expectAsyncConsoleError(noTriggersError);
