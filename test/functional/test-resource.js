@@ -864,12 +864,29 @@ describes.realWin('Resource', {amp: true}, env => {
         elementMock.expects('pauseCallback').once();
         resource.pauseOnRemove();
       });
+    });
 
-      it('should call disconnectedCallback on remove for built ele', () => {
-        expect(Resource.forElementOptional(resource.element))
-            .to.equal(resource);
-        elementMock.expects('disconnectedCallback').once();
+    describe('manual disconnect', () => {
+      beforeEach(() => {
+        element.setAttribute('layout', 'nodisplay');
+        doc.body.appendChild(element);
+        resource = Resource.forElementOptional(element);
+        resources = element.getResources();
+      });
+
+      it('should call disconnect on remove for built ele', () => {
+        sandbox.stub(element, 'isConnected').value(false);
+        const remove = sandbox.spy(resources, 'remove');
         resource.disconnect();
+        expect(remove).to.have.been.called;
+        expect(Resource.forElementOptional(resource.element)).to.not.exist;
+      });
+
+      it('should call disconnected regardless of isConnected', () => {
+        // element is already connected to DOM
+        const spy = sandbox.spy(resources, 'remove');
+        resource.disconnect();
+        expect(spy).to.have.been.called;
         expect(Resource.forElementOptional(resource.element)).to.not.exist;
       });
     });
