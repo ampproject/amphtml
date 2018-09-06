@@ -232,7 +232,6 @@ export class SystemLayer {
 
     /** @private {number} */
     this.timeoutId_ = null;
-
   }
 
   /**
@@ -446,7 +445,7 @@ export class SystemLayer {
    * @private
    */
   hideAfterTimeout_() {
-    if(this.timeoutId_) {
+    if (this.timeoutId_) {
       this.timer_.cancel(this.timeoutId_);
     }
     this.timeoutId_ = this.timer_.delay(() => this.hideInteral_(), hideTimeout);
