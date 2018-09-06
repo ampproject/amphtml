@@ -230,6 +230,8 @@ export class SystemLayer {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
+    /** @private {?number|?string} */
+    this.timeoutId_ = null;
   }
 
   /**
@@ -443,7 +445,10 @@ export class SystemLayer {
    * @private
    */
   hideAfterTimeout_() {
-    this.timer_.delay(() => this.hideInteral_(), hideTimeout);
+    if (this.timeoutId_) {
+      this.timer_.cancel(this.timeoutId_);
+    }
+    this.timeoutId_ = this.timer_.delay(() => this.hideInteral_(), hideTimeout);
   }
 
   /**
