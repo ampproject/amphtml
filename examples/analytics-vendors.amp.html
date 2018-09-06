@@ -65,6 +65,7 @@
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
+      <option>iplabel</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
@@ -544,6 +545,23 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End INFOnline example -->
 
+<!-- iplabel rumbi. Ensure you replace "ampTrackerId" with your tracker id . -->
+<amp-analytics type="iplabel" id="iplabel" >
+<script type="application/json">
+{
+  "vars": {
+   "trackerId":"ampTrackerId",
+   "customdim":"",
+   "business":"",
+   "abtesting":"",
+   "infrastructure":"",
+   "customer":"",
+   "clientip":"",
+   "urlgroup":""
+  }
+}
+</script>
+</amp-analytics>
 <!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
 <amp-analytics type="krux" id="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
 <script type="application/json">
