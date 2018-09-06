@@ -97,8 +97,8 @@ subresource URLs, would send:
 AMP-Cache-Transform: any
 ```
 
-The responder may respond with an SXG with subresource URLs rewritten for a
-particular cache, or with the original subresource URLs.
+The responder may send an SXG with subresource URLs rewritten for a
+particular cache or with the original subresource URLs, or a non-SXG response.
 
 A requestor wishing to receive an SXG to be served from and prefetched from the
 Google AMP Cache (e.g. [Googlebot](https://support.google.com/webmasters/answer/182072))
