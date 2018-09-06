@@ -530,7 +530,7 @@ class AmpVideo extends AMP.BaseElement {
     poster.classList.add('i-amphtml-android-poster-bug');
     poster.onload = () => {
       this.fadeOutBlur_();
-    }
+    };
     this.applyFillContent(poster);
     element.appendChild(poster);
   }
