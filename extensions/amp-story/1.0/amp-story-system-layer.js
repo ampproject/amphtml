@@ -458,7 +458,7 @@ export class SystemLayer {
       return;
     }
     this.currentClicks_--;
-    if(this.currentClicks_ == 0) {
+    if (this.currentClicks_ == 0) {
       this.vsync_.mutate(() => {
         this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
       });
