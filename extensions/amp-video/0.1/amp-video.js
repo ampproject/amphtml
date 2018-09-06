@@ -528,7 +528,9 @@ class AmpVideo extends AMP.BaseElement {
       'background-size': 'cover',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
-    poster.onload = this.fadeOutBlur_();
+    poster.onload = () => {
+      this.fadeOutBlur_();
+    }
     this.applyFillContent(poster);
     element.appendChild(poster);
   }
@@ -654,7 +656,6 @@ class AmpVideo extends AMP.BaseElement {
       (placeholder.getAttribute('opacity') != 0) &&
         isExperimentOn(this.win, 'blurry-placeholder')) {
       // triggers the CSS fade out animation
-      console.log(placeholder);
       setImportantStyles(placeholder, {'opacity': 0});
       return true;
     }
