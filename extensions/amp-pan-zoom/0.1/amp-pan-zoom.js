@@ -31,13 +31,13 @@ import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../../../src/layout-rect';
+import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
-
-import {dict} from '../../../src/utils/object';
 import {px, scale, setStyles, translate} from '../../../src/style';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -147,6 +147,21 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     /** @private */
     this.disableDoubleTap_ = false;
+
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseDown_ = null;
+
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseUp_ = null;
+
+    /** @private {UnlistenDef|null} */
+    this.unlistenMouseMove_ = null;
+
+    /** @private */
+    this.mouseStartY_ = 0;
+
+    /** @private */
+    this.mouseStartX_ = 0;
   }
 
   /** @override */
@@ -204,12 +219,12 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.createZoomButton_();
-    return this.resetContentDimensions_().then(this.setupGestures_());
+    return this.resetContentDimensions_().then(this.setupEvents_());
   }
 
   /** @override */
   pauseCallback() {
-    this.cleanupGestures_();
+    this.cleanupEvents_();
   }
 
   /** @override */
@@ -217,12 +232,12 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (this.content_) {
       this.scheduleLayout(this.content_);
     }
-    this.setupGestures_();
+    this.setupEvents_();
   }
 
   /** @override */
   unlayoutCallback() {
-    this.cleanupGestures_();
+    this.cleanupEvents_();
     return true;
   }
 
@@ -246,6 +261,7 @@ export class AmpPanZoom extends AMP.BaseElement {
 
   /**
    * Creates zoom buttoms
+   * @private
    */
   createZoomButton_() {
     this.zoomButton_ = this.element.ownerDocument.createElement('div');
@@ -282,6 +298,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * Calculate the width and height of the content dimensions such
    * that they fit within amp-pan-zoom.
    * @param {number} aspectRatio
+   * @private
    */
   updateContentDimensions_(aspectRatio) {
     // Calculate content height if we set width to amp-pan-zoom's width
@@ -312,6 +329,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * that when zoomed to max, the smaller dimension fits the entire
    * amp-pan-zoom space.
    * @param {number} sourceAspectRatio
+   * @private
    */
   updateMaxScale_(sourceAspectRatio) {
     const {width, height} = this.elementBox_;
@@ -351,6 +369,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * Measures and resets the content dimensions, after the element
    * dimensions changes.
    * @return {!Promise}
+   * @private
    */
   resetContentDimensions_() {
     const content = dev().assertElement(this.content_);
@@ -373,14 +392,6 @@ export class AmpPanZoom extends AMP.BaseElement {
     });
   }
 
-  /** @private */
-  cleanupGestures_() {
-    if (this.gestures_) {
-      this.gestures_.cleanup();
-      this.gestures_ = null;
-    }
-  }
-
   /**
    * Given a x offset relative to the viewport, return the x offset
    * relative to the amp-pan-zoom component.
@@ -399,6 +410,91 @@ export class AmpPanZoom extends AMP.BaseElement {
   getOffsetY_(clientY) {
     const {top} = this.elementBox_;
     return clientY - (top - this.getViewport().getScrollTop());
+  }
+
+  /**
+   * @private
+   */
+  setupEvents_() {
+    this.setupGestures_();
+    this.unlistenMouseDown_ =
+      listen(this.element, 'mousedown', this.onMouseDown_.bind(this));
+  }
+
+  /**
+   * Unlisten a listener and clear. If null, does nothing
+   * @param {UnlistenDef|null} handle
+   * @private
+   */
+  unlisten_(handle) {
+    if (handle) {
+      handle();
+      handle = null;
+    }
+  }
+
+  /**
+   * @private
+   */
+  cleanupEvents_() {
+    this.cleanupGestures_();
+    this.unlisten_(this.unlistenMouseDown_);
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
+  }
+
+  /**
+   * Mouse down handler for panning in desktop mode
+   * @param {Event} e
+   */
+  onMouseDown_(e) {
+    e.preventDefault();
+    const {clientX, clientY} = e;
+
+
+    // This is to prevent right mouse button down when left still down
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
+
+    this.mouseStartX_ = clientX;
+    this.mouseStartY_ = clientY;
+
+    this.unlistenMouseMove_ =
+        listen(this.element, 'mousemove', this.onMouseMove_.bind(this));
+    this.unlistenMouseUp_ =
+        listen(this.win, 'mouseup', this.onMouseUp_.bind(this));
+  }
+
+  /**
+   * @param {Event} e
+   * @private
+   */
+  onMouseMove_(e) {
+    e.preventDefault();
+    const {clientX, clientY} = e;
+    const deltaX = clientX - this.mouseStartX_;
+    const deltaY = clientY - this.mouseStartY_;
+    this.onMove_(deltaX, deltaY, /*animate*/ false);
+  }
+
+  /**
+   * Handler on mouse button up
+   * @param {Event} e
+   * @private
+   */
+  onMouseUp_(e) {
+    e.preventDefault();
+    this.release_();
+    this.unlisten_(this.unlistenMouseMove_);
+    this.unlisten_(this.unlistenMouseUp_);
+  }
+
+  /** @private */
+  cleanupGestures_() {
+    if (this.gestures_) {
+      this.gestures_.cleanup();
+      this.gestures_ = null;
+    }
   }
 
   /** @private */
