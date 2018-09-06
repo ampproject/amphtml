@@ -164,6 +164,7 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
+      'extensions/amp-story/1.0/amp-story.js'
     ],
   },
   'installActivityService': {

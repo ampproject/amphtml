@@ -57,6 +57,7 @@ export class AmpSidebar extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
@@ -102,6 +103,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.initialScrollTop_ = 0;
   }
 
+  actionHandler(invocation) {
+    console.log(invocation);
+  }
   /** @override */
   buildCallback() {
     const {element} = this;
@@ -320,6 +324,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_(opt_invocation) {
+    console.log("opened");
     if (this.isOpen_()) {
       return;
     }
@@ -339,6 +344,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
+    console.log("closed");
     if (!this.isOpen_()) {
       return;
     }

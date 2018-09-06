@@ -56,6 +56,7 @@ const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit', 'clear'],
+  'amp-sidebar': ['open', 'close', 'toggle'],
 };
 
 /**
@@ -391,6 +392,10 @@ export class ActionService {
    */
   installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
+    if(!!handler){
+      console.log(handler);
+      console.log(target);
+    } 
     const targetId = target.getAttribute('id') || '';
     const debugId = target.tagName + '#' + targetId;
     dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||

@@ -414,6 +414,7 @@ export class SystemLayer {
    * @private
    */
   checkSidebarDisplay_(hasSidebar) {
+    console.log("**" + hasSidebar);
     this.vsync_.mutate(() => {
       hasSidebar ?
         this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '') :

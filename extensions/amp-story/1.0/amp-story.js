@@ -236,6 +236,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.nextPage_ = null;
 
+    this.actions_ = Services.actionServiceForDoc(this.getAmpDoc());
+
     /** @private @const */
     this.desktopMedia_ = this.win.matchMedia(
         `(min-width: ${DESKTOP_WIDTH_THRESHOLD}px) and ` +
@@ -279,6 +281,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} */
     this.pausedStateToRestore_ = false;
 
+    this.sidebar_ = null;
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -349,11 +352,12 @@ export class AmpStory extends AMP.BaseElement {
 
     // Disallow all actions in a (standalone) story.
     // Components then add their own actions.
-    const actions = Services.actionServiceForDoc(this.getAmpDoc());
-    actions.setWhitelist([]);
-    actions.addToWhitelist('AMP-SIDEBAR.open');
-    actions.addToWhitelist('AMP-SIDEBAR.close');
-    actions.addToWhitelist('AMP-SIDEBAR.toggle');
+   
+    this.actions_.setWhitelist([]);
+    //if(this.checkForSidebar_()){
+      
+    
+
   }
 
 
@@ -1336,11 +1340,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(open) {
-    if(open){
-      const actions = Services.actionServiceForDoc(this.getAmpDoc());
-      const sidebar = childElementByTag(this.element, 'amp-sidebar');
-      actions.execute(
-        sidebar, 'open', null, null, null, null, ActionTrust.HIGH);
+    //this.sidebar_ = childElementByTag(this.element, 'amp-sidebar');
+    //const act = Services.actionServiceForDoc(this.getAmpDoc());
+    if(open && this.sidebar_){
+      this.actions_.execute(
+        this.sidebar_, 'open', null, null, null, null, ActionTrust.HIGH);
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
   }
@@ -1580,6 +1584,25 @@ export class AmpStory extends AMP.BaseElement {
     });
   }
 
+
+  /**
+   * Handle actions that require at least high trust.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private
+   */
+  actionHandler_(invocation) {
+    console.log("handle");
+    console.log(invocation);
+    if (invocation.method == 'open') {
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    } else if (invocation.method == 'close') {
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    } else if (invocation.method == 'toggle') {
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, !this.storeService_.get(StateProperty.PAUSED_STATE));
+    }
+    return null;
+  }
 
   /**
    * Handles a background-audio attribute set on an <amp-story> tag.
@@ -1864,10 +1887,15 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   checkForSidebar_() {
-    const customSidebar = childElementByTag(this.element, 'amp-sidebar');
-    this.storeService_.dispatch(
-      Action.TOGGLE_STORY_HAS_SIDEBAR, !!customSidebar);
-    return !!customSidebar;
+    this.sidebar_ = this.element.querySelector('amp-sidebar')//childElementByTag(this.element, 'amp-sidebar');
+    if(!!this.sidebar_){
+      this.actions_.addToWhitelist('AMP-SIDEBAR.open');
+      this.actions_.addToWhitelist('AMP-SIDEBAR.close');
+      this.actions_.addToWhitelist('AMP-SIDEBAR.toggle');
+      this.actions_.installActionHandler(this.sidebar_, this.actionHandler_.bind(this), ActionTrust.HIGH); 
+      this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_SIDEBAR, !!this.sidebar_);
+    }
+    return !!this.sidebar_;
   }
 
   /** @private */
