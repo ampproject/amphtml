@@ -26,12 +26,12 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
-import {childElementByTag, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
+import {removeChildren} from '../../../src/dom';
 import {setStyles, toggle} from '../../../src/style';
 import {
   setupAMPCors,
@@ -438,7 +438,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Undoes previous size-defined layout
+   * Undoes previous size-defined layout, must be called in mutation context.
    * @param {string} previousLayout
    */
   undoPreviousLayout_(previousLayout) {
@@ -463,15 +463,13 @@ export class AmpList extends AMP.BaseElement {
         this.element.classList.remove('i-amphtml-layout-intrinsic');
         break;
     }
-    const sizer = childElementByTag(this.element, 'i-amphtml-sizer');
-    if (sizer) {
-      this.element.removeChild(sizer);
-    }
+    this.element./*OK*/changeSize();
     this.element.classList.remove('i-amphtml-layout-size-defined');
   }
 
   /**
-   * Converts the amp-list to de facto layout container.
+   * Converts the amp-list to de facto layout container. Must be called in
+   * mutation context.
    * @param {string} previousLayout
    * @private
    */
