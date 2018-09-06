@@ -93,6 +93,13 @@ export class Transport {
    */
   sendRequestUsingIframe(request) {
     assertHttpsUrl(request, 'amp-analytics request');
+    user().assert(
+        parseUrlDeprecated(request).origin !=
+        parseUrlDeprecated(this.win_.location.href).origin,
+        'Origin of iframe request must not be equal to the document origin.' +
+        ' See https://github.com/ampproject/' +
+        ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+
     /** @const {!Element} */
     const iframe = this.win_.document.createElement('iframe');
     toggle(iframe, false);
@@ -101,17 +108,11 @@ export class Transport {
         removeElement(iframe);
       }, 5000);
     };
-    user().assert(
-        parseUrlDeprecated(request).origin !=
-        parseUrlDeprecated(this.win_.location.href).origin,
-        'Origin of iframe request must not be equal to the document origin.' +
-        ' See https://github.com/ampproject/' +
-        ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+
     iframe.setAttribute('amp-analytics', '');
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     iframe.src = request;
     this.win_.document.body.appendChild(iframe);
-    return iframe;
   }
 
   /**
