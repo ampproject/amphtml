@@ -46,6 +46,7 @@ export class Toast {
     } else {
       toast.appendChild(childNodeOrText);
     }
+    
     const storyEl = win.document.querySelector('amp-story');
     storyEl.appendChild(toast);
 
