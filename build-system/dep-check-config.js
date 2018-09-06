@@ -284,15 +284,27 @@ exports.rules = [
           'src/service/navigation.js',
 	  'extensions/amp-mowplayer/0.1/amp-mowplayer.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js->' +
+          'src/friendly-iframe-embed.js',
+      'extensions/amp-a4a/0.1/template-validator.js->' +
+          'src/friendly-iframe-embed.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->' +
+          'src/service/extensions-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->' +
+          'src/service/extensions-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/template-validator.js->' +
+          'src/service/extensions-impl.js',
       'extensions/amp-analytics/0.1/linker-manager.js->' +
           'src/service/navigation.js',
       'extensions/amp-list/0.1/amp-list.js->' +
           'src/service/xhr-impl.js',
       'extensions/amp-form/0.1/amp-form.js->' +
           'src/service/xhr-impl.js',
-      // Accessing extension-location.calculateExtensionScriptUrl().
-      'extensions/amp-script/0.1/amp-script.js->' +
-            'src/service/extension-location.js',
+      'extensions/amp-a4a/0.1/template-validator.js->' +
+          'src/service/extensions-impl.js',
+       // Accessing extension-location.calculateExtensionScriptUrl().
+       'extensions/amp-script/0.1/amp-script.js->' +
+          'src/service/extension-location.js',
     ],
   },
   {

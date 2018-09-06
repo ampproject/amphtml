@@ -78,6 +78,7 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {hasExtensionId} from '../../../src/service/extensions-impl';
 import {
   incrementLoadingAds,
   is3pThrottled,
@@ -914,7 +915,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
     if (creativeMetaData &&
-        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
+        !hasExtensionId(
+            creativeMetaData.customElementExtensions, 'amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);

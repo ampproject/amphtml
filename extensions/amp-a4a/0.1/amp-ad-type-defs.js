@@ -59,6 +59,8 @@ export let ValidatorOutput;
       minifiedCreative: string,
       customElementExtensions: !Array<string>,
       customStylesheets: !Array<{href: string}>,
+      extensions: !Array<
+          !../../../src/friendly-iframe-embed.CustomElementExtensionDef>,
       images: (Array<string>|undefined),
     }} */
 export let CreativeMetaDataDef;

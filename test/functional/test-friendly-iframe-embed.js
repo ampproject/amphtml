@@ -20,6 +20,7 @@ import {
   getFriendlyIframeEmbedOptional,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
+  preloadExtensions,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
@@ -137,7 +138,6 @@ describe('friendly-iframe-embed', () => {
   });
 
   it('should install extensions', () => {
-
     // Extensions preloading have been requested.
     extensionsMock.expects('preloadExtension')
         .withExactArgs('amp-test')
@@ -156,7 +156,34 @@ describe('friendly-iframe-embed', () => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
+      customElementExtensions: ['amp-test'],
+    });
+    return embedPromise.then(embed => {
+      expect(installExtWin).to.equal(embed.win);
+    });
+  });
+
+  it('should install extensions with versions', () => {
+    // Extensions preloading have been requested.
+    extensionsMock.expects('preloadExtension')
+        .withExactArgs('amp-mustache', '0.2')
+        .returns(Promise.resolve())
+        .once();
+
+    // Extensions are installed.
+    let installExtWin;
+    extensionsMock.expects('installExtensionsInChildWindow')
+        .withExactArgs(sinon.match(arg => {
+          installExtWin = arg;
+          return true;
+        }), [{'custom-element': 'amp-mustache', 'src': '0.2'}],
+            /* preinstallCallback */ undefined)
+        .once();
+
+    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<amp-test></amp-test>',
+      extensions: [{'custom-element': 'amp-mustache', 'src': '0.2'}],
     });
     return embedPromise.then(embed => {
       expect(installExtWin).to.equal(embed.win);
@@ -185,7 +212,7 @@ describe('friendly-iframe-embed', () => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
+      extensions: ['amp-test'],
     });
     return embedPromise.then(embed => {
       resourcesMock.expects('removeForChildWindow')
@@ -219,7 +246,7 @@ describe('friendly-iframe-embed', () => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '',
-      extensionIds: [],
+      extensions: [],
     });
     return embedPromise.then(embed => {
       expect(embed.isVisible()).to.be.false;
@@ -836,6 +863,35 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.bottom).to.be.empty;
       expect(iframe.style.width).to.be.empty;
       expect(iframe.style.height).to.be.empty;
+    });
+  });
+
+  describe('preloadExtensions', () => {
+    it('should preload extensions with versions', () => {
+      const preloadCallStub = sandbox.stub();
+      sandbox.stub(Services, 'extensionsFor')
+          .withArgs({}).returns({'preloadExtension': preloadCallStub});
+      const extensions =
+          {'extensions': [{'custom-element': 'amp-list', 'src': '0.1'},
+            {'custom-element': 'amp-mustache', 'src': '0.2'}]};
+      preloadExtensions(extensions, {});
+      expect(preloadCallStub.firstCall)
+          .to.be.calledWithExactly('amp-list', '0.1');
+      expect(preloadCallStub.secondCall)
+          .to.be.calledWithExactly('amp-mustache', '0.2');
+    });
+
+    it('should preload extensions without versions', () => {
+      const preloadCallStub = sandbox.stub();
+      sandbox.stub(Services, 'extensionsFor')
+          .withArgs({}).returns({'preloadExtension': preloadCallStub});
+      const extensions =
+          {'customElementExtensions': ['amp-list', 'amp-mustache']};
+      preloadExtensions(extensions, {});
+      expect(preloadCallStub.firstCall)
+          .to.be.calledWithExactly('amp-list');
+      expect(preloadCallStub.secondCall)
+          .to.be.calledWithExactly('amp-mustache');
     });
   });
 });

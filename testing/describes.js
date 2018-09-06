@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+* Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -671,13 +671,17 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
+<<<<<<< HEAD
     maybeTrackImpression(self);
     const extensionIds = [];
     if (spec.extensions) {
+=======
+    const extensions = [];
+    if (spec.extensions && spec.extensions.length) {
+>>>>>>> changes
       spec.extensions.forEach(extensionIdWithVersion => {
         const tuple = extensionIdWithVersion.split(':');
         const extensionId = tuple[0];
-        extensionIds.push(extensionId);
         // Default to 0.1 if no version was provided.
         const version = tuple[1] || '0.1';
         const installer = extensionsBuffer[`${extensionId}:${version}`];
@@ -749,7 +753,7 @@ class AmpFixture {
           embedIframe, container, {
             url: 'http://ads.localhost:8000/example',
             html,
-            extensionIds,
+            extensions,
           }, embedWin => {
             interceptEventListeners(embedWin);
             interceptEventListeners(embedWin.document);
@@ -772,7 +776,7 @@ class AmpFixture {
       const {ampdoc} = ret;
       env.ampdoc = ampdoc;
       const promise = Promise.all([
-        env.extensions.installExtensionsInDoc(ampdoc, extensionIds),
+        env.extensions.installExtensionsInDoc(ampdoc, extensions),
         ampdoc.whenReady(),
       ]);
       completePromise = completePromise ?

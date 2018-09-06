@@ -55,6 +55,7 @@ import {
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
+import {preloadExtensions} from '../../../src/friendly-iframe-embed';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -124,6 +125,8 @@ export let SizeInfoDef;
 /** @typedef {{
       minifiedCreative: string,
       customElementExtensions: !Array<string>,
+      extensions: !Array<
+          !../../../src/friendly-iframe-embed.CustomElementExtensionDef>,
       customStylesheets: !Array<{href: string}>,
       images: (Array<string>|undefined),
       ctaType: (string|undefined),
@@ -313,6 +316,7 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Used as a signal in some of the CSI pings.
      * @private @const {string}
+     * @visibleForTesting
      */
     this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
         '-1';
@@ -778,9 +782,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.updateLayoutPriority(LayoutPriority.CONTENT);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          const extensions = Services.extensionsFor(this.win);
-          creativeMetaDataDef.customElementExtensions.forEach(
-              extensionId => extensions.preloadExtension(extensionId));
+          preloadExtensions(creativeMetaDataDef, this.win);
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
             this.preconnect.preload(font.href));
@@ -1388,7 +1390,9 @@ export class AmpA4A extends AMP.BaseElement {
           // Need to guarantee that this is no longer null
           url: /** @type {string} */ (this.adUrl_),
           html: creativeMetaData.minifiedCreative,
-          extensionIds: creativeMetaData.customElementExtensions || [],
+          extensions: creativeMetaData.extensions || [],
+          customElementExtensions:
+              creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
@@ -1589,9 +1593,18 @@ export class AmpA4A extends AMP.BaseElement {
         throw new Error('Invalid runtime offsets');
       }
       const metaData = {};
+      if (metaDataObj['extensions']) {
+        metaData.extensions = metaDataObj['extensions'];
+        if (!isArray(metaData.extensions)) {
+          throw new Error(
+              'Invalid extensions', metaData.extensions);
+        }
+      } else {
+        metaData.extensions = [];
+      }
       if (metaDataObj['customElementExtensions']) {
         metaData.customElementExtensions =
-          metaDataObj['customElementExtensions'];
+            metaDataObj['customElementExtensions'];
         if (!isArray(metaData.customElementExtensions)) {
           throw new Error(
               'Invalid extensions', metaData.customElementExtensions);

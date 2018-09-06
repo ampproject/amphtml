@@ -20,9 +20,9 @@ import {
   ValidatorResult,
 } from './amp-ad-type-defs';
 import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
-import {Services} from '../../../src/services';
 import {getAmpAdMetadata} from './amp-ad-utils';
-import {pushIfNotExist} from '../../../src/utils/array';
+import {hasExtensionId} from '../../../src/service/extensions-impl';
+import {preloadExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
 
@@ -79,16 +79,11 @@ export class TemplateValidator extends Validator {
         .fetch(parsedResponseBody.templateUrl)
         .then(template => {
           const creativeMetadata = getAmpAdMetadata(template);
-          if (parsedResponseBody.analytics) {
-            pushIfNotExist(
-                creativeMetadata['customElementExtensions'], 'amp-analytics');
-          }
-          pushIfNotExist(
-              creativeMetadata['customElementExtensions'], 'amp-mustache');
-
-          const extensions = Services.extensionsFor(context.win);
-          creativeMetadata.customElementExtensions.forEach(
-              extensionId => extensions./*OK*/preloadExtension(extensionId));
+          const extensions = creativeMetadata['extensions']
+              || creativeMetadata['customElementExtensions'] || [];
+          this.addAnalyticsOrMustacheIfApplicable(
+              extensions, parsedResponseBody);
+          preloadExtensions(creativeMetadata, context.win);
           // TODO(levitzky) Add preload logic for fonts / images.
           return Promise.resolve(
               /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
@@ -100,5 +95,27 @@ export class TemplateValidator extends Validator {
                 type: ValidatorResult.AMP,
               }));
         });
+  }
+
+  /**
+   * Adds the mustache or analytics extensions if not already installed.
+   * TODO(alabiaga): If not installed we load the 0.1 versions of the
+   * extensions. Should we default to the latest version?
+   * @param {!Array<!../../../src/friendly-iframe-embed.CustomElementExtensionDef|string>} extensions
+   * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
+   */
+  addAnalyticsOrMustacheIfApplicable(extensions, parsedResponseBody) {
+    if (parsedResponseBody.analytics) {
+      const analyticsTag = 'amp-analytics';
+      const ampAnalyticsExt = hasExtensionId(extensions, analyticsTag);
+      if (!ampAnalyticsExt) {
+        extensions.push(analyticsTag);
+      }
+    }
+    const ampMustacheTag = 'amp-mustache';
+    const ampMustacheExt = hasExtensionId(extensions, ampMustacheTag);
+    if (!ampMustacheExt) {
+      extensions.push(ampMustacheTag);
+    }
   }
 }

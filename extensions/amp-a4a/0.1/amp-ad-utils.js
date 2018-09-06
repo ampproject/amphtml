@@ -87,6 +87,15 @@ export function getAmpAdMetadata(creative) {
       throw new Error('Invalid runtime offsets');
     }
     const metaData = {};
+    if (metaDataObj['extensions']) {
+      metaData.extensions = metaDataObj['extensions'];
+      if (!isArray(metaData.extensions)) {
+        throw new Error(
+            'Invalid extensions', metaData.extensions);
+      }
+    } else {
+      metaData.customElementExtensions = [];
+    }
     if (metaDataObj['customElementExtensions']) {
       metaData.customElementExtensions =
         metaDataObj['customElementExtensions'];

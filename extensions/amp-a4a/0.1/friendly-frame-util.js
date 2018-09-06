@@ -72,7 +72,9 @@ export function renderCreativeIntoFriendlyFrame(
         host: element,
         url: /** @type {string} */ (adUrl),
         html: creativeMetadata.minifiedCreative,
-        extensionIds: creativeMetadata.customElementExtensions || [],
+        extensions: creativeMetadata.extensions || [],
+        customElementExtensions:
+            creativeMetadata.customElementExtensions || [],
         fonts: fontsArray,
       }, embedWin => {
         installUrlReplacementsForEmbed(element.getAmpDoc(), embedWin,

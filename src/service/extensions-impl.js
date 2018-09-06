@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CustomElementExtensionDef} from '../friendly-iframe-embed';
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {
@@ -414,12 +415,12 @@ export class Extensions {
    * callback, if specified, is executed after polyfills have been configured
    * but before the first extension is installed.
    * @param {!Window} childWin
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<string|!../../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef>} extensionData
    * @param {function(!Window)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */
-  installExtensionsInChildWindow(childWin, extensionIds,
+  installExtensionsInChildWindow(childWin, extensionData,
     opt_preinstallCallback) {
     const topWin = this.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
@@ -445,13 +446,18 @@ export class Extensions {
     stubLegacyElements(childWin);
 
     const promises = [];
-    extensionIds.forEach(extensionId => {
+    extensionData.forEach(extension => {
+      let extensionId;
+      if (extension && typeof extension == 'object') {
+        extensionId = extension['custom-element'];
+      } else {
+        extensionId = extension;
+      }
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       if (!LEGACY_ELEMENTS.includes(extensionId)) {
         stubElementIfNotKnown(childWin, extensionId);
       }
-
       // Install CSS.
       const promise = this.preloadExtension(extensionId).then(extension => {
         // Adopt embeddable extension services.
@@ -629,6 +635,23 @@ export class Extensions {
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
+}
+
+/**
+ * @param {!Array<!../friendly-iframe-embed.CustomElementExtensionDef|string>} customElementExtensions
+ * @param {string} extensionId
+ * @return {boolean}
+ */
+export function hasExtensionId(customElementExtensions, extensionId) {
+  for (let i = 0; i < customElementExtensions.length; i++) {
+    const extensionDefOrId = customElementExtensions[i];
+    if ((extensionDefOrId && typeof extensionDefOrId == 'object'
+        && extensionId === extensionDefOrId['custom-element'])
+        || (extensionDefOrId === extensionId)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

@@ -70,6 +70,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
+import {hasExtensionId} from '../../../src/service/extensions-impl';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
@@ -464,7 +465,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
     if (creativeMetaData &&
-        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
+        !hasExtensionId(
+            creativeMetaData.customElementExtensions, 'amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);

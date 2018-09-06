@@ -33,7 +33,6 @@ import {
 } from './style';
 import {toWin} from './types';
 
-
 /** @const {string} */
 const EMBED_PROP = '__AMP_EMBED__';
 
@@ -48,19 +47,33 @@ const EXCLUDE_INI_LOAD =
  *   document. Can include whatever is normally allowed in an AMP document,
  *   except for AMP `<script>` declarations. Those should be passed as an
  *   array of `extensionIds`.
- * - extensionsIds: An optional array of AMP extension IDs used in this embed.
+ * - customElementExtensions: An optional array of AMP extension IDs.
+ *     used in this embed.
+ * - extensions: An optional array of AMP extension IDs w/wo versions
+ *     used in this embed. If specified, this will trump the extensions
+ *     specified in customElementExtensions.
  * - fonts: An optional array of fonts used in this embed.
  *
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: string,
- *   extensionIds: (?Array<string>|undefined),
+ *   customElementExtensions: (?Array<string>|undefined),
+ *   extensions: ?Array<CustomElementExtensionDef>,
  *   fonts: (?Array<string>|undefined),
  * }}
  */
 export let FriendlyIframeSpec;
 
+/**
+ * Parameter used to specify a version when specifying extension(s) for the
+ * FriendlyIframeSpec extension definitions.
+ * @typedef {{
+ *  custom-element: string,
+ *  src: string
+ * }}
+ */
+export let CustomElementExtensionDef;
 
 /**
  * @type {boolean|undefined}
@@ -135,11 +148,9 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
 
-  // Pre-load extensions.
-  if (spec.extensionIds) {
-    spec.extensionIds.forEach(
-        extensionId => extensions.preloadExtension(extensionId));
-  }
+  // Pre-load extensions. The extensions field is the preferred
+  // means of settings extensions as it allows for versions.
+  preloadExtensions(spec, win);
 
   const html = mergeHtml(spec);
 
@@ -210,7 +221,9 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
     extensions.installExtensionsInChildWindow(
-        childWin, spec.extensionIds || [], opt_preinstallCallback);
+        childWin,
+        spec.extensions || spec.customElementExtensions || [],
+        opt_preinstallCallback);
     // Ready to be shown.
     embed.startRender_();
     return embed;
@@ -628,4 +641,27 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
  */
 export function isInFie(element) {
   return !!closestBySelector(element, '.i-amphtml-fie');
+}
+
+/**
+ * @param {!../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef|!FriendlyIframeSpec} metaData
+ * @param {!Window} win
+ */
+export function preloadExtensions(metaData, win) {
+  if (metaData.extensions && metaData.extensions.length) {
+    metaData.extensions.forEach(
+        extensionDefOrId => {
+          const extensionId = extensionDefOrId['custom-element'];
+          const version = extensionDefOrId['src'];
+          Services.extensionsFor(win)
+              ./*OK*/preloadExtension(extensionId, version);
+        });
+  } else if (metaData.customElementExtensions
+        && metaData.customElementExtensions.length) {
+    metaData.customElementExtensions.forEach(extensionId => {
+      Services.extensionsFor(win)
+          ./*OK*/preloadExtension(extensionId);
+    });
+  }
+
 }
