@@ -231,7 +231,7 @@ export class SystemLayer {
     this.timer_ = Services.timerFor(this.win_);
 
     /** @private {number} */
-    this.currentClicks_ = 0;
+    this.timeoutId_ = null;
 
   }
 
@@ -446,7 +446,10 @@ export class SystemLayer {
    * @private
    */
   hideAfterTimeout_() {
-    this.timer_.delay(() => this.hideInteral_(), hideTimeout);
+    if(this.timeoutId_) {
+      this.timer_.cancel(this.timeoutId_);
+    }
+    this.timeoutId_ = this.timer_.delay(() => this.hideInteral_(), hideTimeout);
   }
 
   /**
@@ -457,12 +460,9 @@ export class SystemLayer {
     if (!this.isBuilt_) {
       return;
     }
-    this.currentClicks_--;
-    if (this.currentClicks_ == 0) {
-      this.vsync_.mutate(() => {
-        this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
-      });
-    }
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+    });
   }
 
   /**
@@ -512,7 +512,6 @@ export class SystemLayer {
    */
   onAudioIconClick_(mute) {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
-    this.currentClicks_++;
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
       this.hideAfterTimeout_();
