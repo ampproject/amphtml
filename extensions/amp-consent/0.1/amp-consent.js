@@ -123,10 +123,10 @@ export class AmpConsent extends AMP.BaseElement {
 
     const cmpConfig = this.getCMPConfig_();
 
-    const config = this.mergeConfig_(cmpConfig, inlineConfig);
+    const config = deepMerge(cmpConfig || {}, inlineConfig || {}, 1);
 
     // TODO: Decide what to do with incorrect configuration.
-    this.assertAndParseConfig_(config);
+    this.validateAndParseConfig_(/** @type {!JsonObject} */ (config));
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
@@ -531,7 +531,7 @@ export class AmpConsent extends AMP.BaseElement {
    * TODO: Add support for policy config
    * @param {!JsonObject} config
    */
-  assertAndParseConfig_(config) {
+  validateAndParseConfig_(config) {
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     user().assert(Object.keys(consents).length != 0,
@@ -581,6 +581,15 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Read and format the CMP config
+   * The returned CMP config should looks like, where "foo" is the storageKey
+   * {
+   *   "consents": {
+   *     "foo": {
+   *       "checkConsentHref": "https://fake.com",
+   *       "promptUISrc": "https://fake.com/promptUI.html"
+   *     }
+   *   }
+   * }
    * @return {?JsonObject}
    */
   getCMPConfig_() {
@@ -594,7 +603,7 @@ export class AmpConsent extends AMP.BaseElement {
     }
     user().assert(CMP_CONFIG[type], `invalid CMP type ${type}`);
     const importConfig = CMP_CONFIG[type];
-    this.assertCMPConfig_(importConfig);
+    this.validateCMPConfig_(importConfig);
     const storageKey = importConfig['storageKey'];
 
     const cmpConfig = dict({
@@ -624,28 +633,12 @@ export class AmpConsent extends AMP.BaseElement {
    * Check if the CMP config is valid
    * @param {!JsonObject} config
    */
-  assertCMPConfig_(config) {
+  validateCMPConfig_(config) {
     const assertValues = ['storageKey', 'checkConsentHref', 'promptUISrc'];
     for (let i = 0; i < assertValues.length; i++) {
       const attribute = assertValues[i];
       dev().assert(config[attribute], `CMP config must specify ${attribute}`);
     }
-  }
-
-  /**
-   * Merge inline config and CMP config
-   * @param {?JsonObject} from
-   * @param {?JsonObject} to
-   * @return {!JsonObject}
-   */
-  mergeConfig_(from, to) {
-    if (to === null) {
-      to = dict({});
-    }
-    if (from == null) {
-      from = dict({});
-    }
-    return /** @type {!JsonObject} */ (deepMerge(from, to, 1));
   }
 
   /**

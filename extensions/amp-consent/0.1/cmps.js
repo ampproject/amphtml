@@ -16,6 +16,15 @@
 
 import {getMode} from '../../../src/mode';
 
+/**
+ * The CMP config should looks like
+ * {
+ *   'storageKey': string, // The key to store consent information
+ *   'checkConsentHref': url, // remote endpoint
+ *   'promptUISrc': url, // the src for prompt iframe window
+ * }
+ */
+
 export const CMP_CONFIG = ({});
 
 if (getMode().test || getMode().localDev) {
