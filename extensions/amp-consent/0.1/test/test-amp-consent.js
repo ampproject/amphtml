@@ -195,15 +195,17 @@ describes.realWin('amp-consent', {
           expect(() => ampConsent.buildCallback()).to.throw(consentExistError);
         });
 
-        scriptElement.textContent = '"abc": {"a",}';
-        allowConsoleError(() => {
-          expect(() => ampConsent.buildCallback()).to.throw(invalidJsonError);
-
         // Check invalid CMP
         consentElement.setAttribute('type', 'not_exist');
         allowConsoleError(() => {
           expect(() => ampConsent.buildCallback()).to.throw(invalidCMPError);
         });
+
+        scriptElement.textContent = '"abc": {"a",}';
+        allowConsoleError(() => {
+          expect(() => ampConsent.buildCallback()).to.throw(invalidJsonError);
+        });
+
 
         // Check there is only one script object
         scriptElement.textContent = JSON.stringify(defaultConfig);
@@ -686,6 +688,7 @@ describes.realWin('amp-consent', {
     });
   });
 });
+
 
 /**
  * Create an <amp-consent> element from config for testing

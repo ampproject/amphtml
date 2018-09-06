@@ -126,7 +126,7 @@ export class AmpConsent extends AMP.BaseElement {
     const config = this.mergeConfig_(cmpConfig, inlineConfig);
 
     // TODO: Decide what to do with incorrect configuration.
-    this.assertAndParseConfig_(config);
+    this.assertAndParseConfig_(/** @type {!JsonObject} */ (config));
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
@@ -530,17 +530,9 @@ export class AmpConsent extends AMP.BaseElement {
    *   }
    * }
    * TODO: Add support for policy config
-   * @param {!JsonObject} config
+   * @param {!Object} config
    */
-  assertAndParseConfig_() {
-    // All consent config within the amp-consent component. There will be only
-    // one single amp-consent allowed in page.
-    let config;
-    try {
-      config = getChildJsonConfig(this.element);
-    } catch (e) {
-      throw this.user().createError(TAG, e);
-    }
+  assertAndParseConfig_(config) {
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     user().assert(Object.keys(consents).length != 0,
@@ -581,18 +573,11 @@ export class AmpConsent extends AMP.BaseElement {
   getInlineConfig_() {
     // All consent config within the amp-consent component. There will be only
     // one single amp-consent allowed in page.
-    // TODO: Make this a shared helper method.
-    const scripts = childElementsByTag(this.element, 'script');
-    user().assert(scripts.length == 1,
-        `${TAG} should have (only) one <script> child`);
-    const script = scripts[0];
-    user().assert(isJsonScriptTag(script),
-        `${TAG} consent instance config should be put in a <script> ` +
-        'tag with type = "application/json"');
-    const config = tryParseJson(script.textContent, () => {
-      user().assert(false, `${TAG}: Error parsing config`);
-    });
-    return config;
+    try {
+      return getChildJsonConfig(this.element);
+    } catch (e) {
+      throw this.user().createError(TAG, e);
+    }
   }
 
   /**
@@ -661,7 +646,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (from == null) {
       from = dict({});
     }
-    return /** @type {!JsonObject} */ deepMerge(from, to, 1);
+    return /** @type {!JsonObject} */ (deepMerge(from, to, 1));
   }
 
   /**
