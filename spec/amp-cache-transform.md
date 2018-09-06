@@ -47,9 +47,11 @@ of those transforms.
 
 The presence of the `AMP-Cache-Transform` header indicates that the requestor
 would prefer an `application/signed-exchange` variant of the resource at the
-given URL, but would accept a non-SXG variant. (If a requestor sends this, it
-should also include the relevant `application/signed-exchange;v=something` in
-its `Accept` header.)
+given URL, but would accept a non-SXG variant. If a requestor sends this, it
+should also explicitly include the relevant
+`application/signed-exchange;v=something` in its `Accept` header, so that the
+responder knows which versions of the SXG standard are supported by the
+requestor.
 
 The value of the header indicates target-specific constraints on the transformed
 AMP within the SXG. If a server is unable to meet those constraints, it should
