@@ -1,6 +1,6 @@
 # `AMP-Cache-Transform` HTTP request header
 
-## Rationale
+## Problem
 
 The [Signed Exchanges](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html)
 (**SXG**) spec introduces a [new format](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#application-signed-exchange)
@@ -47,7 +47,9 @@ of those transforms.
 
 The presence of the `AMP-Cache-Transform` header indicates that the requestor
 would prefer an `application/signed-exchange` variant of the resource at the
-given URL, but would accept a non-SXG variant.
+given URL, but would accept a non-SXG variant. (If a requestor sends this, it
+should also include the relevant `application/signed-exchange;v=something` in
+its `Accept` header.)
 
 The value of the header indicates target-specific constraints on the transformed
 AMP within the SXG. If a server is unable to meet those constraints, it should
@@ -62,7 +64,7 @@ The header value is a [parameterised list from header-structure-07](https://tool
 
 The list represents an ordered set of constraints. The server should respond
 with an SXG variant matching the first parameterised identifier that it can
-satisfy. If it can satisfy none of them, then it should respond with non-SXG
+satisfy. If it cannot satisfy any of them, then it should respond with non-SXG
 content.
 
 For each identifier:
@@ -80,6 +82,9 @@ For each identifier:
  4. Otherwise, the identifier is invalid and cannot be satisfied. The server
     should attempt to match the next one.
 
+If the server content-negotiates on `AMP-Cache-Transform`, it must include
+`Vary: AMP-Cache-Transform` in all responses, whether signed or unsigned.
+
 ### URL rewrites
 
 The exact set of rewrites is not yet fully specified; a few
@@ -87,6 +92,21 @@ The exact set of rewrites is not yet fully specified; a few
 are available, and a [reference implementation](https://github.com/ampproject/amppackager)
 will soon be available. In the interim, the Google AMP Cache will not require
 any rewrites (and, as a result, will not prefetch any subresources).
+
+## Caching proxy behavior
+
+An intermediary proxy may choose to cache these SXG responses and serve them to
+future requestors. Strict adherence to
+[Vary](https://tools.ietf.org/html/rfc7234#section-4.1) would mean that, e.g. a
+response to a request containing `AMP-Cache-Transform: any` would not match a
+response to a request containing `AMP-Cache-Transform: google, any`, since the
+two requests are not semantically equivalent. However, this would lead to
+unnecessary duplication in the cache, as the former response obviously can serve
+the latter response.
+
+If the proxy can ensure that a cached response satisfies a new request (either
+because the new request is a superset of the cached request, or through some
+unspecified examination of the response), then it can serve that response.
 
 ## Example
 
