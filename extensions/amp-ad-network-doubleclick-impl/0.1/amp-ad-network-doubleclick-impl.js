@@ -238,6 +238,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
+
+    /**
+     * @private {boolean}
+     * Set to true when initial expansion effort fails. If true, the slot will
+     * attempt to expand again when outside of the viewport.
+     */
+    this.reattemptToExpandFluidCreative_ = false;
   }
 
   /**
@@ -782,21 +789,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     return super.layoutCallback().then(superReturn => {
-      if (this.isFluidRequest_ && this.isVerifiedAmpCreative()) {
-        // This is an AMP fluid creative that will be rendered in a friendly
-        // frame.
-        dev().assert(this.iframe && this.iframe.contentWindow &&
-            this.iframe.contentWindow.document &&
-            this.iframe.contentWindow.document.body,
-        'Attempting to expand fluid creative without properly set up ' +
-            'friendly frame. Slot id: ' +
-            this.element.getAttribute('data-amp-slot-index'));
-        this.attemptChangeHeight(
-            this.iframe.contentWindow.document.body./*OK*/scrollHeight)
-            .then(() => this.fireFluidDelayedImpression());
-      }
+      this.expandFluidCreative_();
       return Promise.resolve(superReturn);
     });
+  }
+
+  /** @override */
+  viewportCallback(inViewport) {
+    if (this.reattemptToExpandFluidCreative_ && !inViewport) {
+      this.expandFluidCreative_();
+    }
+    super.viewportCallback(inViewport);
   }
 
   /** @override  */
@@ -905,6 +908,37 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
 
     this.postTroubleshootMessage();
+  }
+
+  /**
+   * Attempts to expand a fluid creative. If the attempt fails, we will
+   * re-attempt whenever the slot is out of the viewport until we succeed,
+   * contingent on when viewportCallback is invoked.
+   */
+  expandFluidCreative_() {
+    if (this.isFluidRequest_ &&
+        // If a size was returned in the response, then this is a multi-size
+        // response, not a fluid response.
+        !this.returnedSize_ &&
+        this.isVerifiedAmpCreative()) {
+      // This is an AMP fluid creative that will be rendered in a friendly
+      // frame.
+      dev().assert(this.iframe && this.iframe.contentWindow &&
+          this.iframe.contentWindow.document &&
+          this.iframe.contentWindow.document.body,
+      'Attempting to expand fluid creative without properly set up ' +
+          'friendly frame. Slot id: ' +
+          this.element.getAttribute('data-amp-slot-index'));
+      this.attemptChangeHeight(
+          this.iframe.contentWindow.document.body./*OK*/scrollHeight)
+          .then(() => {
+            this.fireFluidDelayedImpression();
+            this.reattemptToExpandFluidCreative_ = false;
+          })
+          .catch(() => {
+            this.reattemptToExpandFluidCreative_ = true;
+          });
+    }
   }
 
   /**
