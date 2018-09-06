@@ -230,6 +230,9 @@ export class SystemLayer {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
+    /** @const @private {number} */
+    this.currentClicks_ = 0;
+
   }
 
   /**
@@ -454,9 +457,12 @@ export class SystemLayer {
     if (!this.isBuilt_) {
       return;
     }
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
-    });
+    this.currentClicks_--;
+    if(this.currentClicks_ == 0) {
+      this.vsync_.mutate(() => {
+        this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+      });
+    }
   }
 
   /**
@@ -506,6 +512,7 @@ export class SystemLayer {
    */
   onAudioIconClick_(mute) {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
+    this.currentClicks_++;
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
       this.hideAfterTimeout_();
