@@ -51,7 +51,7 @@ describes.realWin('amp-recaptcha-service', {
     return getRecaptchaInput().then(ampRecaptchaInput => {
       expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
-          .register(ampRecaptchaInput.implementation_).then(() => {
+          .register(ampRecaptchaInput).then(() => {
             expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
           });
@@ -67,7 +67,7 @@ describes.realWin('amp-recaptcha-service', {
     return getRecaptchaInput().then(ampRecaptchaInput => {
       expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
-          .register(ampRecaptchaInput.implementation_).then(() => {
+          .register(ampRecaptchaInput).then(() => {
             expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
             const currentIframe = recaptchaService.iframe_;
@@ -75,7 +75,7 @@ describes.realWin('amp-recaptcha-service', {
             // Create our second element
             return getRecaptchaInput().then(secondAmpRecaptchaInput => {
               return recaptchaService
-                  .register(secondAmpRecaptchaInput.implementation_)
+                  .register(secondAmpRecaptchaInput)
                   .then(() => {
                     expect(recaptchaService.registeredElementCount_)
                         .to.be.equal(2);
@@ -93,7 +93,7 @@ describes.realWin('amp-recaptcha-service', {
     return getRecaptchaInput().then(ampRecaptchaInput => {
       expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
-          .register(ampRecaptchaInput.implementation_).then(() => {
+          .register(ampRecaptchaInput).then(() => {
             expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
 

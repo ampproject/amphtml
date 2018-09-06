@@ -37,7 +37,7 @@ export class AmpRecaptchaService {
     /** @const @private {!Window} */
     this.win_ = window;
 
-    /** @const @private {!element} */
+    /** @const @private {!Element} */
     this.body_ = this.win_.document.body;
 
     /** @private {?Element} */
@@ -66,7 +66,7 @@ export class AmpRecaptchaService {
     this.registeredElementCount_++;
     if (!this.iframe_) {
       this.initialize_(element);
-      this.iframeLoadPromise = loadPromise(this.iframe_);
+      this.iframeLoadPromise_ = loadPromise(this.iframe_);
     }
     return this.iframeLoadPromise_;
   }
