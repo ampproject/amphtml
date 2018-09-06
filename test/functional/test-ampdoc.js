@@ -16,7 +16,6 @@
 
 import * as docready from '../../src/document-ready';
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
 import {
   AmpDocService,
   AmpDocShadow,
@@ -37,7 +36,7 @@ describe('AmpDocService', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -64,6 +63,54 @@ describe('AmpDocService', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
       expect(service.getAmpDoc(div)).to.equal(service.singleDoc_);
+    });
+
+    // For example, <amp-next-page> creates shadow documents in single-doc
+    // mode.
+    describe('shadow documents', () => {
+      let host;
+      let shadowRoot;
+      let content;
+
+      beforeEach(() => {
+        content = document.createElement('span');
+        host = document.createElement('div');
+        if (isShadowDomSupported()) {
+          if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+            shadowRoot = host.attachShadow({mode: 'open'});
+          } else {
+            shadowRoot = host.createShadowRoot();
+          }
+          shadowRoot.appendChild(content);
+        }
+        document.body.appendChild(host);
+      });
+
+      afterEach(() => {
+        if (host.parentNode) {
+          host.parentNode.removeChild(host);
+        }
+      });
+
+      it('should yield the single doc', () => {
+        if (!shadowRoot) {
+          return;
+        }
+
+        service.installShadowDoc('https://a.org/', shadowRoot);
+        const ampDoc = service.getAmpDoc(content);
+        expect(ampDoc).to.equal(service.singleDoc_);
+      });
+
+      it('should yield the shadow doc when explicitly asked', () => {
+        if (!shadowRoot) {
+          return;
+        }
+
+        const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+        const ampDoc = service.getAmpDoc(content, {closestAmpDoc: true});
+        expect(ampDoc).to.equal(newAmpDoc);
+      });
     });
   });
 
@@ -193,7 +240,7 @@ describe('AmpDocService', () => {
     let host, content;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       ampdocService = new AmpDocService(window, /* isSingleDoc */ false);
       content = document.createElement('span');
       host = document.createElement('div');
@@ -297,7 +344,7 @@ describe('AmpDocSingle', () => {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdoc = new AmpDocSingle(window);
   });
 
@@ -417,7 +464,7 @@ describe('AmpDocShadow', () => {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     content = document.createElement('div');
     host = document.createElement('div');
     shadowRoot = createShadowRoot(host);
@@ -516,7 +563,7 @@ describe('AmpDocShell', () => {
   let ampdocShell;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdocShell = new AmpDocShell(window);
   });
 

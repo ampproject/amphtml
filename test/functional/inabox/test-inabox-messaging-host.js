@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {layoutRectLtwh} from '../../../src/layout-rect';
@@ -92,6 +91,17 @@ describes.realWin('inabox-host:messaging', {}, env => {
           type: 'send-positions',
         }),
       })).to.be.false;
+    });
+
+    it('should tolerate message with null source', () => {
+      host.processMessage({
+        source: null,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'send-positions',
+        }),
+      });
     });
   });
 
@@ -189,7 +199,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         }),
       });
 
-      postMessageSpy.reset();
+      postMessageSpy.resetHistory();
       callback({x: 1});
       expect(postMessageSpy).to.be.calledOnce;
     });

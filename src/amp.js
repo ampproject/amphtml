@@ -30,7 +30,11 @@ import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {installStylesForDoc, makeBodyVisible} from './style-installer';
+import {
+  installStylesForDoc,
+  makeBodyVisible,
+  makeBodyVisibleRecovery,
+} from './style-installer';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
 import {startupChunk} from './chunk';
@@ -49,7 +53,7 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self); // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
@@ -57,7 +61,7 @@ try {
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(self.document);
+  makeBodyVisibleRecovery(self.document);
   throw e;
 }
 startupChunk(self.document, function initial() {
@@ -96,7 +100,7 @@ startupChunk(self.document, function initial() {
       installPullToRefreshBlocker(self);
 
       maybeValidate(self);
-      makeBodyVisible(self.document, /* waitForServices */ true);
+      makeBodyVisible(self.document);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');

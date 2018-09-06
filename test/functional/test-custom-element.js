@@ -21,7 +21,7 @@ import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {poll} from '../../testing/iframe';
 
 
@@ -113,14 +113,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
       container = doc.createElement('div');
       doc.body.appendChild(container);
 
-      ElementClass = doc.registerElement('amp-test', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-test', TestElement),
-      });
-      StubElementClass = doc.registerElement('amp-stub', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-stub', ElementStub),
-      });
+      ElementClass = createAmpElementForTesting(win, 'amp-test', TestElement);
+      StubElementClass = createAmpElementForTesting(win, 'amp-stub',
+          ElementStub);
+
+      win.customElements.define('amp-test', ElementClass);
+      win.customElements.define('amp-stub', StubElementClass);
+
       win.ampExtendedElements['amp-test'] = TestElement;
       win.ampExtendedElements['amp-stub'] = ElementStub;
       ampdoc.declareExtension('amp-stub');
@@ -1099,10 +1098,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element1.setAttribute('i-amphtml-layout', 'nodisplay');
       element1.setAttribute('layout', 'nodisplay');
       container.appendChild(element1);
-      // TODO(dvoytenko, #9353): cleanup once `toggleLayoutDisplay` API has been
-      // fully migrated.
       expect(element1.style.display).to.equal('none');
-      expect(element1).to.have.class('i-amphtml-display');
     });
 
     it('should change size without sizer', () => {
@@ -1469,9 +1465,9 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    StubElementClass = doc.registerElement('amp-stub2', {
-      prototype: createAmpElementProtoForTesting(win, 'amp-stub2', ElementStub),
-    });
+    StubElementClass = createAmpElementForTesting(win, 'amp-stub2',
+        ElementStub);
+    win.customElements.define('amp-stub2', StubElementClass);
     env.ampdoc.declareExtension('amp-stub2');
     element = new StubElementClass();
   });
@@ -1511,21 +1507,19 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     return poll('wait for static layout',
         () => element.classList.contains('i-amphtml-layout-nodisplay'))
         .then(() => {
-          // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
-          // deployed this will start `false`.
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(element.style.display).to.be.equal('none');
 
           element.style.display = 'block';
           element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(element).not.to.have.attribute('hidden');
           expect(win.getComputedStyle(element).display).to.equal('block');
 
           element.toggleLayoutDisplay(false);
-          expect(element.classList.contains('i-amphtml-display')).to.be.false;
+          expect(element).to.have.attribute('hidden');
           expect(win.getComputedStyle(element).display).to.equal('none');
 
           element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
+          expect(element).not.to.have.attribute('hidden');
           expect(win.getComputedStyle(element).display).to.equal('block');
         });
   });
@@ -1647,10 +1641,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
       win = env.win;
       doc = win.document;
       clock = lolex.install({target: win});
-      ElementClass = doc.registerElement('amp-test-loader', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-test-loader', TestElement),
-      });
+      ElementClass = createAmpElementForTesting(win, 'amp-test-loader',
+          TestElement);
+      win.customElements.define('amp-test-loader', ElementClass);
       win.ampExtendedElements['amp-test-loader'] = TestElement;
       LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
       resources = Services.resourcesForDoc(doc);
@@ -1986,10 +1979,9 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    ElementClass = doc.registerElement('amp-test-overflow', {
-      prototype: createAmpElementProtoForTesting(
-          win, 'amp-test-overflow', TestElement),
-    });
+    ElementClass = createAmpElementForTesting(win, 'amp-test-overflow',
+        TestElement);
+    win.customElements.define('amp-test-overflow', ElementClass);
     resources = Services.resourcesForDoc(doc);
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();

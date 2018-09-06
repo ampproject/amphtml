@@ -20,7 +20,7 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
-import {setStyles} from '../../../src/style';
+import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */
@@ -143,9 +143,7 @@ export class IframeTransport {
           'data-amp-3p-sentinel': sentinel,
         }));
     frame.sentinel = sentinel;
-    setStyles(frame, {
-      display: 'none',
-    });
+    toggle(frame, false);
     frame.src = this.frameUrl_;
     const frameData = /** @const {FrameData} */ ({
       frame,
@@ -174,22 +172,22 @@ export class IframeTransport {
     // TODO(jonkeller): Consider merging with jank-meter.js
     IframeTransport.performanceObservers_[this.type_] =
         new this.ampWin_.PerformanceObserver(entryList => {
-        if (!entryList) {
-          return;
-        }
-        entryList.getEntries().forEach(entry => {
-          if (entry && entry['entryType'] == 'longtask' &&
+          if (!entryList) {
+            return;
+          }
+          entryList.getEntries().forEach(entry => {
+            if (entry && entry['entryType'] == 'longtask' &&
               (entry['name'] == 'cross-origin-descendant') &&
               entry.attribution) {
-            entry.attribution.forEach(attrib => {
-              if (this.frameUrl_ == attrib.containerSrc &&
+              entry.attribution.forEach(attrib => {
+                if (this.frameUrl_ == attrib.containerSrc &&
                     ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
-                user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
-              }
-            });
-          }
+                  user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
+                }
+              });
+            }
+          });
         });
-      });
     IframeTransport.performanceObservers_[this.type_].observe({
       entryTypes: ['longtask'],
     });

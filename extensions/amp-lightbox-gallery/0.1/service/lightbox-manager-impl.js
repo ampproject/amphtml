@@ -295,8 +295,7 @@ export class LightboxManager {
     }
     const ariaDescribedBy = element.getAttribute('aria-describedby');
     if (ariaDescribedBy) {
-      const descriptionElement = element.ownerDocument
-          .getElementById(ariaDescribedBy);
+      const descriptionElement = this.ampdoc_.getElementById(ariaDescribedBy);
       if (descriptionElement) {
         return descriptionElement./*OK*/innerText;
       }
@@ -361,7 +360,7 @@ export class LightboxManager {
   getThumbnailSrcset_(element) {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
-      const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
+      const thumbnailImage = this.ampdoc_.getElementById(thumbnailId);
       if (thumbnailImage && thumbnailImage.tagName == 'AMP-IMG') {
         return srcsetFromElement(thumbnailImage);
       }

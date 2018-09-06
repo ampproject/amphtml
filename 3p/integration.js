@@ -59,12 +59,15 @@ import {urls} from '../src/config';
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
 import {bodymovinanimation} from './bodymovinanimation';
+import {embedly} from './embedly';
 import {facebook} from './facebook';
 import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
+import {recaptcha} from './recaptcha';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
+import {viqeoplayer} from './viqeoplayer';
 import {yotpo} from './yotpo';
 
 import {_ping_} from '../ads/_ping_';
@@ -168,6 +171,7 @@ import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
+import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mytarget} from '../ads/mytarget';
@@ -197,7 +201,9 @@ import {realclick} from '../ads/realclick';
 import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
+import {rfp} from '../ads/rfp';
 import {rubicon} from '../ads/rubicon';
+import {runative} from '../ads/runative';
 import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
@@ -219,6 +225,7 @@ import {uas} from '../ads/uas';
 import {unruly} from '../ads/unruly';
 import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
+import {videointelligence} from '../ads/videointelligence';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
@@ -255,6 +262,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   kuadio: true,
   'mantis-recommend': true,
+  miximedia: true,
   mywidget: true,
   outbrain: true,
   plista: true,
@@ -264,6 +272,7 @@ const AMP_EMBED_ALLOWED = {
   smi2: true,
   taboola: true,
   zergnet: true,
+  runative: true,
 };
 
 init(window);
@@ -336,6 +345,7 @@ register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('eadv', eadv);
 register('eas', eas);
+register('embedly', embedly);
 register('engageya', engageya);
 register('epeex', epeex);
 register('eplanning', eplanning);
@@ -380,6 +390,7 @@ register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
 register('microad', microad);
+register('miximedia', miximedia);
 register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mytarget', mytarget);
@@ -406,11 +417,14 @@ register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
 register('realclick', realclick);
+register('recaptcha', recaptcha);
 register('reddit', reddit);
 register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
+register('rfp', rfp);
 register('rubicon', rubicon);
+register('runative', runative);
 register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
@@ -433,7 +447,9 @@ register('uas', uas);
 register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
+register('videointelligence', videointelligence);
 register('videonow', videonow);
+register('viqeoplayer', viqeoplayer);
 register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);

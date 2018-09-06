@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   RANDOM_NUMBER_GENERATORS,
   experimentToggles,
@@ -102,7 +101,7 @@ describe('isExperimentOn', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     win = {
       document: {
         cookie: '',
@@ -122,7 +121,7 @@ describe('isExperimentOn', () => {
   function expectExperiment(cookieString, experimentId) {
     resetExperimentTogglesForTesting(win);
     win.document.cookie = cookieString;
-    return expect(isExperimentOn(win, experimentId));
+    return expect(isExperimentOn(win, /*OK*/experimentId));
   }
 
   describe('with only cookie flag', () => {
@@ -221,7 +220,7 @@ describe('toggleExperiment', () => {
   let expTime;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     clock.tick(1);
     expTime = new Date(1 + 180 * 24 * 60 * 60 * 1000).toUTCString();
@@ -599,7 +598,7 @@ describe('experiment branch tests', () => {
           branches: ['branch1_id', 'branch2_id'],
         },
       };
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       sandbox.win = {
         location: {
           hostname: 'test.server.name.com',

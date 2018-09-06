@@ -221,6 +221,9 @@ function createBaseCustomElementClass(win) {
       /** @private {!./size-list.SizeList|null|undefined} */
       this.heightsList_ = undefined;
 
+      /** @public {boolean} */
+      this.warnOnMissingOverflow = true;
+
       /**
        * This element can be assigned by the {@link applyStaticLayout} to a
        * child element that will be used to size this element.
@@ -718,14 +721,17 @@ function createBaseCustomElementClass(win) {
     /**
      * Called when the element is first connected to the DOM. Calls
      * {@link firstAttachedCallback} if this is the first attachment.
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected.  Chrome and Safari can trigger connectedCallback even when
+     * the node is disconnected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
+     * connectedCallback will later be called when the disconnected root is
+     * connected to the document tree.
+     *
      * @final @this {!Element}
      */
     connectedCallback() {
-      // Chrome and Safari can trigger connectedCallback even when the node is
-      // disconnected. See #12849, https://crbug.com/821195, and
-      // https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
-      // connectedCallback will later be called when the disconnected root is
-      // connected to the document tree.
       if (this.isConnected_ || !dom.isConnectedNode(this)) {
         return;
       }
@@ -860,23 +866,44 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when the element is disconnected from the DOM.
+     *
      * @final @this {!Element}
      */
     disconnectedCallback() {
-      if (this.isInTemplate_) {
-        return;
-      }
-      if (!this.isConnected_ || dom.isConnectedNode(this)) {
-        return;
-      }
-      this.isConnected_ = false;
-      this.getResources().remove(this);
-      this.implementation_.detachedCallback();
+      this.disconnect(/* pretendDisconnected */ false);
     }
 
     /** The Custom Elements V0 sibling to `disconnectedCallback`. */
     detachedCallback() {
       this.disconnectedCallback();
+    }
+
+    /**
+     * Called when an element is disconnected from DOM, or when an ampDoc is
+     * being disconnected (the element itself may still be connected to ampDoc).
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940.
+     * If the element is still connected to the document, you'll need to pass
+     * opt_pretendDisconnected.
+     *
+     * @param {boolean} pretendDisconnected Forces disconnection regardless
+     *     of DOM isConnected.
+     */
+    disconnect(pretendDisconnected) {
+      if (this.isInTemplate_ || !this.isConnected_) {
+        return;
+      }
+      if (!pretendDisconnected && dom.isConnectedNode(this)) {
+        return;
+      }
+      this.isConnected_ = false;
+      this.getResources().remove(this);
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        this.getLayers().remove(this);
+      }
+      this.implementation_.detachedCallback();
     }
 
     /**
@@ -1405,7 +1432,11 @@ function createBaseCustomElementClass(win) {
      * @param {boolean} displayOn
      */
     toggleLayoutDisplay(displayOn) {
-      this.classList.toggle('i-amphtml-display', displayOn);
+      if (displayOn) {
+        this.removeAttribute('hidden');
+      } else {
+        this.setAttribute('hidden', '');
+      }
     }
 
     /**
@@ -1534,7 +1565,7 @@ function createBaseCustomElementClass(win) {
     isInA4A_() {
       return (
       // in FIE
-        this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+        (this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView) ||
 
           // in inabox
           getMode().runtime == 'inabox');
@@ -1569,7 +1600,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {{cleanup:boolean,force:boolean}=} opt_options
+     * @param {{cleanup:boolean, force:boolean}=} opt_options
      * @public @final @this {!Element}
      */
     toggleLoading(state, opt_options) {
@@ -1665,7 +1696,7 @@ function createBaseCustomElementClass(win) {
     overflowCallback(overflown, requestedHeight, requestedWidth) {
       this.getOverflowElement();
       if (!this.overflowElement_) {
-        if (overflown) {
+        if (overflown && this.warnOnMissingOverflow) {
           user().warn(TAG,
               'Cannot resize element and overflow is not available', this);
         }
@@ -1753,11 +1784,11 @@ function isInternalOrServiceNode(node) {
  * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For testing only.
  * @return {!Object} Prototype of element.
  */
-export function createAmpElementProtoForTesting(
+export function createAmpElementForTesting(
   win, name, opt_implementationClass) {
-  const ElementProto = createCustomElementClass(win, name).prototype;
+  const Element = createCustomElementClass(win, name);
   if (getMode().test && opt_implementationClass) {
-    ElementProto.implementationClassForTesting = opt_implementationClass;
+    Element.prototype.implementationClassForTesting = opt_implementationClass;
   }
-  return ElementProto;
+  return Element;
 }

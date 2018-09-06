@@ -70,7 +70,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?AMP.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
-    /** {?Element} iframe instance */
+    /** @type {?Element} iframe instance */
     this.iframe = null;
 
     /** @private {?IntersectionObserver} */
@@ -165,6 +165,9 @@ export class AmpAdXOriginIframeHandler {
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
+          if (!!data['hasOverflow']) {
+            this.element_.warnOnMissingOverflow = false;
+          }
           this.handleResize_(data['height'], data['width'], source, origin);
         }, true, true));
 

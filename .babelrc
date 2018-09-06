@@ -10,6 +10,6 @@
     }]
   ],
   "sourceType": "module",
-  "ignore": ["sha384-generated.js", "access-expr-impl.js"],
+  "ignore": ["sha384-generated.js"],
   "plugins": ["transform-remove-strict-mode"]
 }

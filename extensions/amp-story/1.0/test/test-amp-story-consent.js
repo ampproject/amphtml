@@ -17,17 +17,20 @@
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
 import {LocalizationService} from '../localization';
+import {Services} from '../../../../src/services';
 import {computedStyle} from '../../../../src/style';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-consent', {amp: true}, env => {
   const CONSENT_ID = 'CONSENT_ID';
   let win;
+  let consentConfigEl;
   let defaultConfig;
   let getComputedStyleStub;
   let storyConsent;
   let storyConsentConfigEl;
   let storyConsentEl;
+  let storyEl;
 
   const setConfig = config => {
     storyConsentConfigEl.textContent = JSON.stringify(config);
@@ -37,6 +40,10 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     win = env.win;
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
+
+    const consentConfig = {
+      consents: {ABC: {checkConsentHref: 'https://example.com'}},
+    };
 
     defaultConfig = {
       title: 'Foo title.',
@@ -54,23 +61,35 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     registerServiceBuilder(win, 'localization', () => localizationService);
 
     // Test DOM structure:
-    // <amp-consent>
-    //   <amp-story-consent>
+    // <amp-story>
+    //   <amp-consent>
     //     <script type="application/json">{JSON Config}</script>
-    //   </amp-story-consent>
-    // </amp-consent>
+    //     <amp-story-consent>
+    //       <script type="application/json">{JSON Config}</script>
+    //     </amp-story-consent>
+    //   </amp-consent>
+    // </amp-story>
+    storyEl = win.document.createElement('amp-story');
+
     const consentEl = win.document.createElement('amp-consent');
     consentEl.setAttribute('id', CONSENT_ID);
+
+    consentConfigEl = win.document.createElement('script');
+    consentConfigEl.setAttribute('type', 'application/json');
+    consentConfigEl.textContent = JSON.stringify(consentConfig);
 
     storyConsentConfigEl = win.document.createElement('script');
     storyConsentConfigEl.setAttribute('type', 'application/json');
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
+    storyConsentEl.getResources = () => win.services.resources.obj;
     storyConsentEl.appendChild(storyConsentConfigEl);
 
+    storyEl.appendChild(consentEl);
+    consentEl.appendChild(consentConfigEl);
     consentEl.appendChild(storyConsentEl);
-    win.document.body.appendChild(consentEl);
+    win.document.body.appendChild(storyEl);
 
     storyConsent = new AmpStoryConsent(storyConsentEl);
   });
@@ -231,9 +250,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     storyConsent.buildCallback();
 
     expect(addToWhitelistStub).to.have.callCount(3);
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.prompt');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.reject');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'accept');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'prompt');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'reject');
   });
 
   it('should broadcast the amp actions', () => {
@@ -269,6 +288,36 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
         .to.equal(CONSENT_ID);
   });
 
+  it('should set the consent ID in the store if right amp-geo group', () => {
+    const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
+    consentConfigEl.textContent = JSON.stringify(config);
+
+    sandbox.stub(Services, 'geoForDocOrNull')
+        .resolves({matchedISOCountryGroups: ['eea']});
+
+    storyConsent.buildCallback();
+
+    return Promise.resolve().then(() => {
+      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
+          .to.equal(CONSENT_ID);
+    });
+  });
+
+  it('should not set consent ID in the store if wrong amp-geo group', () => {
+    const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
+    consentConfigEl.textContent = JSON.stringify(config);
+
+    sandbox.stub(Services, 'geoForDocOrNull')
+        .resolves({matchedISOCountryGroups: ['othergroup']});
+
+    storyConsent.buildCallback();
+
+    return Promise.resolve().then(() => {
+      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
+          .to.be.null;
+    });
+  });
+
   it('should set the font color to black if background is white', () => {
     const styles = {'background-color': 'rgb(255, 255, 255)'};
     getComputedStyleStub.returns(styles);
@@ -289,5 +338,15 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
         .querySelector('.i-amphtml-story-consent-action-accept');
     expect(buttonEl.getAttribute('style'))
         .to.equal('color: rgb(255, 255, 255) !important;');
+  });
+
+  it('should require publisher-logo-src to be a URL', () => {
+    storyEl.setAttribute('publisher-logo-src', 'foo:bar');
+    allowConsoleError(() => {
+      expect(() => {
+        storyConsent.buildCallback();
+      }).to.throw('amp-story publisher-logo-src must start with ' +
+          '"https://" or "//"');
+    });
   });
 });
