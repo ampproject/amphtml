@@ -25,6 +25,7 @@ describe('Linker Manager', () => {
   let registerSpy;
   let isProxyStub;
   let findMetaTagStub;
+  let docInfoStub;
 
   beforeEach(() => {
     // Linker uses a timestamp value to generate checksum.
@@ -41,10 +42,10 @@ describe('Linker Manager', () => {
       },
     };
 
-    sandbox.stub(Services, 'documentInfoForDoc')
+    docInfoStub = sandbox.stub(Services, 'documentInfoForDoc')
         .returns({
-          sourceUrl: 'www.example.com ',
-          canonicalUrl: 'www.example.com',
+          sourceUrl: 'https://www.example.com',
+          canonicalUrl: 'https://www.example.com',
         });
 
     registerSpy = sandbox.spy();
@@ -54,7 +55,8 @@ describe('Linker Manager', () => {
 
     isProxyStub = sandbox.stub().returns(true);
     sandbox.stub(Services, 'urlForDoc').returns({
-      isProxyOrigin: isProxyStub,
+      isProxyOrigin: isProxySpy,
+      parse: url => new URL(url),
     });
   });
 
@@ -197,7 +199,6 @@ describe('Linker Manager', () => {
     };
 
     const manager = new LinkerManager(ampdoc, config);
-
     sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
     const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
     expandStub.withArgs('CLIENT_ID(_ga)')

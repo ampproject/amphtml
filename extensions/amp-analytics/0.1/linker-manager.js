@@ -207,7 +207,8 @@ export class LinkerManager {
       const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(
           this.ampdoc_);
 
-      domains = [sourceUrl, canonicalUrl];
+      domains = ([sourceUrl, canonicalUrl])
+          .map(url => urlService.parse(url).hostname);
     }
 
     // See if any domains match.
