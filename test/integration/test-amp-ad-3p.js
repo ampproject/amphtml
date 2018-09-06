@@ -22,16 +22,15 @@ import {
 import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
-function createFixture() {
-  return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
-}
 
 // TODO(lannka, 16825): This is flaky.
-describe.configure().skip('amp-ad 3P', () => {
+describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
-    return createFixture().then(f => {
+    return createFixtureIframe('test/fixtures/3p-ad.html', 
+      3000, 
+      () => {}).then(f => {
       fixture = f;
       installPlatformService(fixture.win);
     });
@@ -76,7 +75,8 @@ describe.configure().skip('amp-ad 3P', () => {
       });
 
       // make sure the context.data is the same instance as the data param
-      // passed into the vendor function. see #10628
+      // passed into the vendor function. see #10628'
+
       expect(context.data).to.equal(
           iframe.contentWindow.networkIntegrationDataParamForTesting);
 
