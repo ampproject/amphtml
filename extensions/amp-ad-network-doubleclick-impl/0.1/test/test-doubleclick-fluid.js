@@ -254,4 +254,25 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
           .to.be.calledOnce;
     });
   });
+
+  it('should resize slot after initial failure to do so', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
+    attemptChangeHeightStub.onCall(0).returns(Promise.reject());
+    attemptChangeHeightStub.onCall(1).returns(Promise.resolve());
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    return impl.layoutCallback().then(() => {
+      expect(impl.reattemptToExpandFluidCreative_).to.be.true;
+      expect(attemptChangeHeightStub).to.be.calledOnce;
+      // Should do nothing
+      impl.viewportCallback(true);
+      expect(attemptChangeHeightStub).to.be.calledOnce;
+      impl.viewportCallback(false);
+      expect(attemptChangeHeightStub).to.be.calledTwice;
+    });
+  });
 });
