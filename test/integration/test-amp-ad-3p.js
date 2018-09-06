@@ -23,7 +23,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
 
-// TODO(lannka, 16825): This is flaky.
+// TODO(lannka, 16825): This is flaky
 describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
   let fixture;
 
