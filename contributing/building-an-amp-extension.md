@@ -30,8 +30,8 @@ rating viewer, you'd do this by building an extension.
 # Checklist for creating an experiment
 
 -[] Create your directory structure.
--[] Create an experiment. 
--[] Check previous PRs of past experiments to model your extension after, if applicable. 
+-[] Create an experiment.
+-[] Check previous PRs of past experiments to model your extension after, if applicable.
 
 ## A word on contributing
 
@@ -706,7 +706,7 @@ Class AmpMyElement extends AMP.BaseElement {
 AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 ```
 
-### Enable experiment
+### Enabling and removing your experiment
 
 Users wanting to experiment with your element can then go to the
 [experiments page](https://cdn.ampproject.org/experiments.html) and
@@ -714,6 +714,8 @@ enable your experiment.
 
 If you are testing on your localhost, use the command `AMP.toggleExperiment(id,
 true/false)` to enable the experiment.
+
+File a github issue to cleanup your experiment. Assign it to yourself as a reminder to remove your experiment and code checks. Removal of your experiment happens after the extension has been thoroughly tested and all issues have been addressed.
 
 ## Documenting your element
 
