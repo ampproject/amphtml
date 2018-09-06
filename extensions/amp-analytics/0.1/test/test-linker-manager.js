@@ -23,7 +23,7 @@ describe('Linker Manager', () => {
   let sandbox;
   let ampdoc;
   let registerSpy;
-  let isProxySpy;
+  let isProxyStub;
   let findMetaTagStub;
 
   beforeEach(() => {
@@ -52,9 +52,9 @@ describe('Linker Manager', () => {
       registerAnchorMutator: registerSpy,
     });
 
-    isProxySpy = sandbox.spy();
+    isProxyStub = sandbox.stub().returns(true);
     sandbox.stub(Services, 'urlForDoc').returns({
-      isProxyOrigin: isProxySpy,
+      isProxyOrigin: isProxyStub,
     });
   });
 
@@ -177,13 +177,13 @@ describe('Linker Manager', () => {
     });
   });
 
-  it('should not add linker if not proxy && proxyOnly == true', () => {
+  it('should add linker if not proxy && proxyOnly == false', () => {
 
     const config = {
       linkers: {
         testLinker1: {
           enabled: true,
-          proxyOnly: true,
+          proxyOnly: false,
           ids: {
             _key: 'CLIENT_ID(_ga)',
             gclid: '234',
@@ -200,12 +200,16 @@ describe('Linker Manager', () => {
     const manager = new LinkerManager(ampdoc, config);
 
     sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
-    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
+    const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
+    expandStub.withArgs('CLIENT_ID(_ga)')
+        .returns('amp-12345');
+    isProxyStub.returns(true);
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
+      debugger;
       manager.handleAnchorMutation(a);
-      return expect(a.href).to.equal('https://www.example.com');
+      return expect(a.href).to.not.equal('https://www.example.com');
     });
   });
 
