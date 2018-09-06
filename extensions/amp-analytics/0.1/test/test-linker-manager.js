@@ -207,7 +207,6 @@ describe('Linker Manager', () => {
     manager.init();
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
-      debugger;
       manager.handleAnchorMutation(a);
       return expect(a.href).to.not.equal('https://www.example.com');
     });
