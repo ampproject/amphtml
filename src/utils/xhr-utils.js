@@ -23,6 +23,7 @@ import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
 import {parseJson} from '../json';
+import {serializeQueryString} from '../url';
 import {utf8Encode} from './bytes';
 
 /** @private @const {!Array<string>} */
@@ -31,24 +32,8 @@ const allowedMethods_ = ['GET', 'POST'];
 /** @private @const {string} */
 const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 
-/**
- * The "init" argument of the Fetch API. Currently, only "credentials: include"
- * is implemented.  Note ampCors with explicit false indicates that
- * __amp_source_origin should not be appended to the URL to allow for
- * potential caching or response across pages.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- *
- * @typedef {{
- *   body: (!Object|!Array|undefined|string),
- *   credentials: (string|undefined),
- *   headers: (!JsonObject|undefined),
- *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
- * }}
- */
-export let FetchInitDef;
+/** @private @const {!Array<function(*):boolean>} */
+const allowedJsonBodyTypes_ = [isArray, isObject];
 
 /**
  * Serializes a fetch request so that it can be passed to `postMessage()`,
@@ -97,7 +82,7 @@ export function toStructuredCloneable(input, init) {
   const newInit = Object.assign({}, init);
   if (isFormDataWrapper(init.body)) {
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
-    newInit.body = fromIterator(init.body.entries());
+    newInit.body = fromIterator(/** @type {!FormDataWrapper} **/ (init.body).entries());
   }
   return {input, init: newInit};
 }
@@ -322,6 +307,36 @@ export function setupAMPCors(win, input, init) {
 }
 
 /**
+ * @param {?FetchInitDef=} init
+ * @return {!FetchInitDef}
+ */
+export function setupJsonFetchInit(init) {
+  const fetchInit = setupInit(init, 'application/json');
+  if (fetchInit.method == 'POST' && !isFormDataWrapper(fetchInit.body)) {
+    // Assume JSON strict mode where only objects or arrays are allowed
+    // as body.
+    dev().assert(
+        allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
+        'body must be of type object or array. %s',
+        fetchInit.body
+    );
+
+    // Content should be 'text/plain' to avoid CORS preflight.
+    fetchInit.headers['Content-Type'] = fetchInit.headers['Content-Type'] ||
+        'text/plain;charset=utf-8';
+    const headerContentType = fetchInit.headers['Content-Type'];
+    // Cast is valid, because we checked that it is not form data above.
+    if (headerContentType === 'application/x-www-form-urlencoded') {
+      fetchInit.body =
+        serializeQueryString(/** @type {!JsonObject} */ (fetchInit.body));
+    } else {
+      fetchInit.body = JSON.stringify(/** @type {!JsonObject} */ (fetchInit.body));
+    }
+  }
+  return fetchInit;
+}
+
+/**
  * Normalized method name by uppercasing.
  * @param {string|undefined} method
  * @return {string}
@@ -344,9 +359,9 @@ function normalizeMethod_(method) {
 /**
  * Verifies if response has the correct headers
  * @param {!Window} win
- * @param {!FetchResponse} response
+ * @param {!FetchResponse|!Response} response
  * @param {!FetchInitDef=} init
- * @return {!FetchResponse}
+ * @return {!FetchResponse|!Response}
  */
 export function verifyAmpCORSHeaders(win, response, init) {
   const allowSourceOriginHeader = response.headers.get(
