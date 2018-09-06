@@ -396,6 +396,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * Given a x offset relative to the viewport, return the x offset
    * relative to the amp-pan-zoom component.
    * @param {number} clientX
+   * @private
    */
   getOffsetX_(clientX) {
     const {left} = this.elementBox_;
@@ -406,6 +407,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * Given a y offset relative to the viewport, return the y offset
    * relative to the amp-pan-zoom component.
    * @param {number} clientY
+   * @private
    */
   getOffsetY_(clientY) {
     const {top} = this.elementBox_;
@@ -446,11 +448,11 @@ export class AmpPanZoom extends AMP.BaseElement {
   /**
    * Mouse down handler for panning in desktop mode
    * @param {Event} e
+   * @private
    */
   onMouseDown_(e) {
     e.preventDefault();
     const {clientX, clientY} = e;
-
 
     // This is to prevent right mouse button down when left still down
     this.unlisten_(this.unlistenMouseMove_);
