@@ -46,8 +46,8 @@ export class Toast {
     } else {
       toast.appendChild(childNodeOrText);
     }
-
-    win.document.body.appendChild(toast);
+    const storyEl = win.document.querySelector('amp-story');
+    storyEl.appendChild(toast);
 
     Services.timerFor(win)
         .delay(() => removeElement(toast), TOAST_VISIBLE_TIME_MS);
