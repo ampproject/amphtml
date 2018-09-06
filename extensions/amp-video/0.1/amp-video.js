@@ -198,6 +198,10 @@ class AmpVideo extends AMP.BaseElement {
     this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
 
+    // Fade out blur on poster load.
+    const posterEl = element.getElementsByTagName('i-amphtml-poster');
+    posterEl.onload = this.fadeOutBlur_();
+
     // Gather metadata
     const artist = element.getAttribute('artist');
     const title = element.getAttribute('title');
@@ -524,6 +528,7 @@ class AmpVideo extends AMP.BaseElement {
       'background-size': 'cover',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
+    poster.onload = this.fadeOutBlur_();
     this.applyFillContent(poster);
     element.appendChild(poster);
   }
@@ -620,14 +625,11 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
+    * Called when the video is first loaded.
     * @override
-    **/
+    */
   firstLayoutCompleted() {
-    const placeholder = this.getPlaceholder();
-    if (placeholder && placeholder.classList.contains('i-amphtml-blur') &&
-      isExperimentOn(this.win, 'blurry-placeholder')) {
-      setImportantStyles(placeholder, {'opacity': 0});
-    } else {
+    if (!this.fadeOutBlur_()) {
       this.togglePlaceholder(false);
     }
   }
@@ -638,6 +640,25 @@ class AmpVideo extends AMP.BaseElement {
    */
   getUrlService_() {
     return Services.urlForDoc(this.element);
+  }
+
+  /**
+    * Fades out a blurry placeholder if one currently exists.
+    * @return {boolean} whether or not there was a blurry placeholder that was
+    * faded.
+    */
+  fadeOutBlur_() {
+    const placeholder = this.getPlaceholder();
+    // checks for the existance of a visible blurry placeholder
+    if (placeholder && placeholder.classList.contains('i-amphtml-blur') &&
+      (placeholder.getAttribute('opacity') != 0) &&
+        isExperimentOn(this.win, 'blurry-placeholder')) {
+      // triggers the CSS fade out animation
+      console.log(placeholder);
+      setImportantStyles(placeholder, {'opacity': 0});
+      return true;
+    }
+    return false;
   }
 }
 

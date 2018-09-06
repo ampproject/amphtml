@@ -505,6 +505,7 @@ describes.realWin('amp-video', {
       if (addBlurClass) {
         img.classList.add('i-amphtml-blur');
       }
+      v.setAttribute('poster', '');
       doc.body.appendChild(v);
       v.appendChild(img);
       v.build();
@@ -513,7 +514,7 @@ describes.realWin('amp-video', {
       return impl;
     }
 
-    it('should set placeholder opacity to 0 on image load', () => {
+    it('should only fade out blurry image placeholders', () => {
       let impl = getVideoWithBlur(true, true);
       impl.buildCallback();
       impl.layoutCallback();
@@ -548,6 +549,26 @@ describes.realWin('amp-video', {
       el = impl.element;
       img = el.firstChild;
       expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+    });
+
+    it('should fade out the blurry image placeholder on video load', () => {
+      const impl = getVideoWithBlur(true, true);
+      impl.buildCallback();
+      impl.firstLayoutCompleted();
+      const el = impl.element;
+      const img = el.firstChild;
+      expect(img.style.opacity).to.equal('0');
+      expect(impl.togglePlaceholder).to.not.be.called;
+    });
+
+    it('should fade out the blurry image placeholder on poster load', () => {
+      const impl = getVideoWithBlur(true, true);
+      impl.buildCallback();
+      impl.layoutCallback();
+      const el = impl.element;
+      const img = el.firstChild;
+      expect(img.style.opacity).to.equal('0');
+      expect(impl.togglePlaceholder).to.not.be.called;
     });
   });
 
