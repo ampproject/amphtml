@@ -123,6 +123,11 @@
   "lotame": {
     "pageview": "https://bcp.crwdcntrl.net/amp?c=$account&pv=y"
   },
+  "iplabel": {
+    "collectorUrl": "m.col.ip-label.net",
+    "endpoint": "https://m.col.ip-label.net/coll/",
+    "onload": "https://m.col.ip-label.net/coll/?T=notrackerID&m=2502|_nav_timing_|2508|_nav_timing_|2509|_nav_timing_|2510|_nav_timing_|2512|_nav_timing_|2514|_nav_timing_|2515|_nav_timing_|2517|_nav_timing_|2520|_nav_timing_&ts=_timestamp_&ua=_user_agent_&d=$ipldim&i=$clientip&d[1]=$customdim&d[2]=$business&d[3]=$abtesting&d[4]=$infrastructure&d[5]=$customer&u=$urlgroup&w=_available_screen_width_&h=_available_screen_height_&r=_document_referrer_&l=_browser_language_"
+  },
   "krux": {
     "beaconHost": "https://beacon.krxd.net",
     "timing": "t_navigation_type=0&t_dns=_domain_lookup_time_&t_tcp=_tcp_connect_time_&t_http_request=_server_response_time_&t_http_response=_page_download_time_&t_content_ready=_content_load_time_&t_window_load=_page_load_time_&t_redirect=_redirect_time_",
