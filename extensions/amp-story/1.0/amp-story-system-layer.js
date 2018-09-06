@@ -230,7 +230,7 @@ export class SystemLayer {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @private {number} */
+    /** @private {?number} */
     this.timeoutId_ = null;
   }
 
