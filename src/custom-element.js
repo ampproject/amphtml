@@ -874,6 +874,9 @@ function createBaseCustomElementClass(win) {
       }
       this.isConnected_ = false;
       this.getResources().remove(this);
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        this.getLayers().remove(this);
+      }
       this.implementation_.detachedCallback();
     }
 

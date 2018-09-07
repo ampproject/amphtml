@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Transport, sendRequest, sendRequestUsingIframe} from '../transport';
+import {Transport} from '../transport';
 import {adopt} from '../../../../src/runtime';
 import {loadPromise} from '../../../../src/event-helper';
 
@@ -35,6 +35,10 @@ describe('amp-analytics.transport', () => {
     sandbox.stub(Transport, 'sendRequestUsingImage');
     sandbox.stub(Transport, 'sendRequestUsingBeacon').returns(beaconRetval);
     sandbox.stub(Transport, 'sendRequestUsingXhr').returns(xhrRetval);
+  }
+
+  function sendRequest(win, request, options) {
+    new Transport(win, options).sendRequest(request);
   }
 
   function assertCallCounts(
@@ -123,6 +127,11 @@ describe('amp-analytics.transport', () => {
 
   describe('sendRequestUsingIframe', () => {
     const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
+
+    function sendRequestUsingIframe(win, url) {
+      return new Transport(win).sendRequestUsingIframe(url);
+    }
+
     it('should create and delete an iframe', () => {
       const clock = sandbox.useFakeTimers();
       const iframe = sendRequestUsingIframe(window, url);

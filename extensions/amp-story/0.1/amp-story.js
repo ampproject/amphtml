@@ -84,7 +84,7 @@ import {
   computedStyle,
   resetStyles,
   setImportantStyles,
-  setStyle,
+  toggle,
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
@@ -942,7 +942,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      setStyle(this.element, 'display', 'none');
+      toggle(this.element, false);
 
       // Reading the height is what forces the repaint.  The conditional exists
       // only to workaround the fact that the closure compiler would otherwise
@@ -950,7 +950,7 @@ export class AmpStory extends AMP.BaseElement {
       // always >= 0, this conditional will always be executed.
       const height = this.element./*OK*/offsetHeight;
       if (height >= 0) {
-        setStyle(this.element, 'display', '');
+        toggle(this.element, true);
       }
     });
   }
