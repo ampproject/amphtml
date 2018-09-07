@@ -2358,10 +2358,6 @@ describe('amp-a4a', () => {
         a4a.mutateElement = func => func();
         a4a.togglePlaceholder = sandbox.spy();
 
-        // We don't really care about the behavior of the following methods, so
-        // long as they're called the appropriate number of times. We stub them
-        // out here because they would otherwise throw errors unrelated to the
-        // behavior actually being tested.
         sandbox.stub(AmpA4A.prototype, 'initiateAdRequest').returns(undefined);
         sandbox.stub(AmpA4A.prototype, 'tearDownSlot').returns(undefined);
         const callback = sandbox.spy();
