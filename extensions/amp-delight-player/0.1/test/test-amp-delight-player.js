@@ -37,11 +37,13 @@ describes.realWin('amp-delight-player', {
     delight.setAttribute('height', '180');
     delight.setAttribute('layout', 'responsive');
     doc.body.appendChild(delight);
-    return delight.build().then(() => delight.layoutCallback()).then(() => delight);
+    return delight.build()
+        .then(() => delight.layoutCallback())
+        .then(() => delight);
   }
 
   it('renders', () => {
-    return allowConsoleError(() => { 
+    return allowConsoleError(() => {
       return getDelightPlayer({
         'data-content-id': '-LKbXyaXMJ1h-4GVXhvO',
       }).then(delight => {
