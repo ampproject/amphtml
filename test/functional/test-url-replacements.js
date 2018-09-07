@@ -444,7 +444,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           });
     });
 
-    it('should merge extra params into SOURCE_URL', () => {
+    it('should ignore extra params that already exists in SOURCE_URL', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/a/o.com/foo/?a=1&safe=1&amp_r=hello%3Dworld%26safe=evil');
