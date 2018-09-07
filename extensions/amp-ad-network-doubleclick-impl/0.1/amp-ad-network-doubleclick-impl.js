@@ -789,14 +789,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     return super.layoutCallback().then(superReturn => {
+      // We expand fluid here because we must first wait for the iframe to fire
+      // onload.
       this.expandFluidCreative_();
-      return Promise.resolve(superReturn);
+      return superReturn;
     });
   }
 
   /** @override */
   viewportCallback(inViewport) {
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
+      // If the initial expansion attempt failed (e.g., the slot was within the
+      // viewport), then we will re-attempt to expand it here whenever the slot
+      // is outside the viewport.
       this.expandFluidCreative_();
     }
     super.viewportCallback(inViewport);
@@ -923,12 +928,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.isVerifiedAmpCreative()) {
       // This is an AMP fluid creative that will be rendered in a friendly
       // frame.
-      dev().assert(this.iframe && this.iframe.contentWindow &&
-          this.iframe.contentWindow.document &&
-          this.iframe.contentWindow.document.body,
-      'Attempting to expand fluid creative without properly set up ' +
-          'friendly frame. Slot id: ' +
-          this.element.getAttribute('data-amp-slot-index'));
+      if (!this.iframe || !this.iframe.contentWindow ||
+          !this.iframe.contentWindow.document ||
+          !this.iframe.contentWindow.document.body) {
+        dev().error(TAG, 'Attempting to expand fluid creative without ' +
+            'a properly set up friendly frame. Slot id: ' +
+            this.element.getAttribute('data-amp-slot-index'));
+      }
       this.attemptChangeHeight(
           this.iframe.contentWindow.document.body./*OK*/scrollHeight)
           .then(() => {
