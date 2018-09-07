@@ -199,6 +199,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isFluidRequest_ = false;
 
+    /**
+     * @private {boolean}
+     * Indicates that the primary size of the slot is fluid.
+     */
+    this.isFluidPrimaryRequest_ = false;
+
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
 
@@ -289,8 +295,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluidRequest_ = layout == Layout.FLUID;
-    return this.isFluidRequest_ || isLayoutSizeDefined(layout);
+    this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
+    if (!this.isFluidRequest_) {
+      this.isFluidRequest_ = this.isFluidPrimaryRequest_;
+    }
+    return this.isFluidPrimaryRequest_ || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -375,6 +384,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');
+    if (!this.isFluidRequest_) {
+      this.isFluidRequest_ =
+          this.element.getAttribute('data-multi-size').indexOf('fluid') != -1;
+    }
   }
 
   /** @override */
@@ -452,7 +465,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = this.isFluidRequest_ ? {width: 0, height: 0} :
+    this.initialSize_ = this.isFluidPrimaryRequest_ ? {width: 0, height: 0} :
       (width && height ?
         // width/height could be 'auto' in which case we fallback to measured.
         {width, height} : this.getIntersectionElementLayoutBox());
@@ -460,7 +473,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey = this.generateAdKey_(
         `${this.initialSize_.width}x${this.initialSize_.height}`);
-    this.parameterSize = this.isFluidRequest_ ?
+    this.parameterSize = this.isFluidPrimaryRequest_ ?
       '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -481,7 +494,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.initialSize_.width,
           this.initialSize_.height,
           multiSizeValidation == 'true',
-          this.isFluidRequest_);
+          this.isFluidPrimaryRequest_);
       if (dimensions.length) {
         this.parameterSize += '|' + dimensions
             .map(dimension => dimension.join('x'))

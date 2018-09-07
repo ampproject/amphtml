@@ -43,7 +43,8 @@ export const ADSENSE_MCRSPV_TAG = 'mcrspv';
  * @param {boolean} multiSizeValidation A flag that if set to true will enforce
  *   the rule that ensures multi-size dimensions are no less than 2/3rds of
  *   their primary dimension's counterpart.
- * @param {boolean=} isFluid Indicates whether this ad slot is Fluid-enabled.
+ * @param {boolean=} isFluidPrimary Indicates whether the ad slot's primary
+ *   size is fluid.
  * @return {?Array<!Array<number>>} An array of dimensions.
  */
 export function getMultiSizeDimensions(
@@ -51,7 +52,7 @@ export function getMultiSizeDimensions(
   primaryWidth,
   primaryHeight,
   multiSizeValidation,
-  isFluid = false) {
+  isFluidPrimary = false) {
 
   const dimensions = [];
   const arrayOfSizeStrs = multiSizeDataStr.split(',');
@@ -59,6 +60,12 @@ export function getMultiSizeDimensions(
   for (let i = 0; i < arrayOfSizeStrs.length; i++) {
 
     const sizeStr = arrayOfSizeStrs[i];
+    if (!isFluidPrimary && sizeStr.toLowerCase() == 'fluid') {
+      // If the primary size is fluid, then the dummy 320x50 size will
+      // automatically be included.
+      dimensions.push([320, 50]);
+      continue;
+    }
     const size = sizeStr.split('x');
 
     // Make sure that each size is specified in the form WxH.
@@ -81,7 +88,7 @@ export function getMultiSizeDimensions(
     }
 
     // Check that secondary size is not larger than primary size.
-    if (!isFluid && !validateDimensions(width, height,
+    if (!isFluidPrimary && !validateDimensions(width, height,
         w => w > primaryWidth,
         h => h > primaryHeight,
         badParams => badParams.map(badParam =>
