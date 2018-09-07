@@ -36,8 +36,9 @@ export class Toast {
   /**
    * @param {!Window} win
    * @param {!Node|string} childNodeOrText
+   * @param {Element} storyEl
    */
-  static show(win, childNodeOrText) {
+  static show(win, childNodeOrText, storyEl) {
     const toast = createElementWithAttributes(win.document, 'div',
         /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME}));
 
@@ -46,8 +47,7 @@ export class Toast {
     } else {
       toast.appendChild(childNodeOrText);
     }
-    
-    const storyEl = win.document.querySelector('amp-story');
+
     storyEl.appendChild(toast);
 
     Services.timerFor(win)
