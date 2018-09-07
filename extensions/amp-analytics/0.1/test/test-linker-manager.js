@@ -89,8 +89,7 @@ describe('Linker Manager', () => {
     expect(registerSpy.calledOnce).to.be.true;
     expect(registerSpy).calledWith(
         sinon.match.func,
-        Priority.ANALYTICS_LINKER,
-    );
+        Priority.ANALYTICS_LINKER);
   });
 
   it('does not register the callback if no linkers config', () => {
