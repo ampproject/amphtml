@@ -200,6 +200,9 @@ export class ShareWidget {
     /** @protected @const {!Window} */
     this.win = win;
 
+    /** @protected @const {!Element} */
+    this.storyEl = storyEl;
+
     /** @protected {?Element} */
     this.root = null;
 
@@ -276,12 +279,12 @@ export class ShareWidget {
             'Could not retrieve LocalizationService.');
         const failureString = localizationService.getLocalizedString(
             LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
-        Toast.show(this.win, failureString);
+        Toast.show(this.storyEl, failureString);
       });
       return;
     }
 
-    Toast.show(this.win, buildCopySuccessfulToast(this.win.document, url));
+    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url));
   }
 
   /** @private */
