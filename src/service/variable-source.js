@@ -112,9 +112,6 @@ export class VariableSource {
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
-    /** @private {!RegExp|undefined} */
-    this.replacementExprV2_ = undefined;
-
     /** @private @const {!Object<string, !ReplacementDef>} */
     this.replacements_ = Object.create(null);
 
@@ -206,9 +203,8 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {boolean=} isV2 Flag to ignore capture of args.
    */
-  getExpr(opt_bindings, isV2) {
+  getExpr(opt_bindings) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -221,22 +217,14 @@ export class VariableSource {
           allKeys.push(key);
         }
       });
-      return this.buildExpr_(allKeys, isV2);
+      return this.buildExpr_(allKeys);
     }
 
-    if (!this.replacementExpr_ && !isV2) {
+    if (!this.replacementExpr_) {
       this.replacementExpr_ = this.buildExpr_(Object.keys(this.replacements_));
     }
 
-    // sometimes the v1 expand will be called before the v2
-    // so we need to cache both versions
-    if (!this.replacementExprV2_ && isV2) {
-      this.replacementExprV2_ = this.buildExpr_(
-          Object.keys(this.replacements_), isV2);
-    }
-
-    return isV2 ? this.replacementExprV2_ :
-      this.replacementExpr_;
+    return this.replacementExpr_;
   }
 
   /**
@@ -244,16 +232,14 @@ export class VariableSource {
    */
   resetExpr() {
     this.replacementExpr_ = null;
-    this.replacementExprV2_ = null;
   }
 
   /**
    * @param {!Array<string>} keys
-   * @param {boolean=} isV2 flag to ignore capture of args
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys, isV2) {
+  buildExpr_(keys) {
     // If a whitelist is present, the keys must belong to the whitelist.
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
@@ -285,12 +271,7 @@ export class VariableSource {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     // FOO_BAR(arg1, arg2)
-    let regexStr = '\\$?(' + all + ')';
-    // ignore the capturing of arguments in new parser
-    if (!isV2) {
-      regexStr += '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?';
-    }
-    return new RegExp(regexStr, 'g');
+    return new RegExp('\\$?(' + all + ')', 'g');
   }
 
   /**

@@ -89,6 +89,7 @@ export class Expander {
         name,
         length,
       };
+
       if (!opt_whiteList || opt_whiteList[name]) {
         matches.push(info);
       }
