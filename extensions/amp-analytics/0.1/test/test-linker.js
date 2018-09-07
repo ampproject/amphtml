@@ -82,7 +82,7 @@ describe('Linker', () => {
       output: '1*efercj*key1*dmFsdWUx*name*Ym9i*color*Z3JlZW4.*car*dGVzbGE.',
     },
     {
-      description: 'value contains URL unsafe chars',
+      description: 'encodes URL unsafe chars in values',
       version: '1',
       pairs: {
         cid: '12345',
@@ -91,7 +91,7 @@ describe('Linker', () => {
       output: '1*vz1vnu*cid*MTIzNDU.*ref*aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
     },
     {
-      description: 'works if value has *',
+      description: 'encodes * in values',
       version: '1',
       pairs: {
         'key': '*hi*',
@@ -108,15 +108,17 @@ describe('Linker', () => {
       },
       output: '1*1pf8zsw*key*5Lit5paH*key2*z4A.',
     },
-  ];
-
-  tests.forEach(test => {
-    it(test.description, () => {
-      expect(createLinker(test.version, test.pairs)).to.equal(test.output);
-    });
-  });
-
-  const testsWithInvalidKeys = [
+    {
+      description: 'allows base64 chars in keys',
+      version: '1',
+      pairs: {
+        '0x3': '0x3',
+        '_gb': '_gb',
+        'g.b': 'g.b',
+        'nn-': 'nn-',
+      },
+      output: '1*10d75fz*0x3*MHgz*_gb*X2di*g.b*Zy5i*nn-*bm4t',
+    },
     {
       description: 'ignore invalid keys',
       version: '1',
@@ -125,6 +127,7 @@ describe('Linker', () => {
         'valid': 'abc',
       },
       output: '1*bn7mun*valid*YWJj',
+      expectErrors: 1,
     },
     {
       description: 'return empty string if all keys are invalid',
@@ -134,14 +137,16 @@ describe('Linker', () => {
         'invalid!': 'abc',
       },
       output: '',
+      expectErrors: 2,
     },
   ];
 
-  testsWithInvalidKeys.forEach(test => {
+  tests.forEach(test => {
     it(test.description, () => {
-      allowConsoleError(() => {
-        expect(createLinker(test.version, test.pairs)).to.equal(test.output);
-      });
+      if (test.expectErrors) {
+        expectAsyncConsoleError(/Invalid linker key/, test.expectErrors);
+      }
+      expect(createLinker(test.version, test.pairs)).to.equal(test.output);
     });
   });
 });
