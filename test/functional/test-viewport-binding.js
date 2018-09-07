@@ -557,6 +557,12 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       expect(scrollerCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent'))
           .to.equal('1px solid transparent');
 
+      // Wrapper must additionally have `will-change: transform` to avoid iOS
+      // rendering bug where contents inside the `-webkit-overflow-scrolling`
+      // element would occasionally fail to paint. This bug appears to trigger
+      // more often when Shadow DOM is involved.
+      expect(wrapperCss.willChange).to.equal('transform');
+
       // Preserve and inherit the customized body styles.
       win.document.body.style.display = 'flex';
       win.document.body.style.flexDirection = 'row';
