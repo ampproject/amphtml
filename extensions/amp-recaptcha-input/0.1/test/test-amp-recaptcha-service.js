@@ -14,4 +14,96 @@
  * limitations under the License.
  */
 
-describe('amp-recaptcha-service', () => {});
+import '../amp-recaptcha-input';
+import {AmpRecaptchaService} from '../amp-recaptcha-service';
+
+describes.realWin('amp-recaptcha-service', {
+  amp: { /* amp spec */
+    extensions: ['amp-recaptcha-input'],
+  },
+}, env => {
+  let win, doc;
+  let recaptchaService;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+
+    recaptchaService = new AmpRecaptchaService(win);
+  });
+
+  function getRecaptchaInput() {
+    const ampRecaptchaInput = doc.createElement('amp-recaptcha-input');
+    ampRecaptchaInput.setAttribute('layout',
+        'nodisplay');
+    ampRecaptchaInput.setAttribute('data-sitekey',
+        '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
+    doc.body.appendChild(ampRecaptchaInput);
+    return ampRecaptchaInput.build().then(() => {
+      return ampRecaptchaInput.layoutCallback();
+    }).then(() => {
+      return ampRecaptchaInput;
+    });
+  }
+
+  it('should create an iframe on register if first element to register', () => {
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
+      return recaptchaService
+          .register(ampRecaptchaInput).then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+          });
+    });
+  });
+
+  it('should only initialize once for X number of elements,' +
+    ' and iframe already exists', () => {
+
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+
+    //Create the first element
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
+      return recaptchaService
+          .register(ampRecaptchaInput).then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+            const currentIframe = recaptchaService.iframe_;
+
+            // Create our second element
+            return getRecaptchaInput().then(secondAmpRecaptchaInput => {
+              return recaptchaService
+                  .register(secondAmpRecaptchaInput)
+                  .then(() => {
+                    expect(recaptchaService.registeredElementCount_)
+                        .to.be.equal(2);
+                    expect(recaptchaService.iframe_).to.be.ok;
+                    expect(recaptchaService.iframe_).to.be.equal(currentIframe);
+                  });
+            });
+          });
+    });
+  });
+
+  it('should dispose of the iframe,' +
+    ' once all registered elements unregister', () => {
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
+      return recaptchaService
+          .register(ampRecaptchaInput).then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+
+            recaptchaService.unregister();
+            expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+            expect(recaptchaService.iframe_).to.be.not.ok;
+          });
+    });
+  });
+
+});
+
+
