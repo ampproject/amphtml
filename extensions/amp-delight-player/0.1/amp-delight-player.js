@@ -122,8 +122,7 @@ class AmpDelight extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.contentID_ = user().assert(
-        (this.element.getAttribute('data-content-id') ||
-    this.element.getAttribute('data-content-id')),
+        (this.element.getAttribute('data-content-id')),
         'The data-content-id attribute is required',
         this.element);
 
