@@ -685,6 +685,7 @@ export function openWindowDialog(win, url, target, opt_features) {
  */
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
+            element.hasAttribute('type') &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
 }
 

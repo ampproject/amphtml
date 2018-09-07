@@ -98,7 +98,7 @@
     "gulp-help": "1.6.1",
     "gulp-intercept": "0.1.0",
     "gulp-load-plugins": "1.5.0",
-    "gulp-regexp-sourcemaps": "1.0.1",
+    "gulp-regexp-sourcemaps": "^1.0.1",
     "gulp-rename": "1.3.0",
     "gulp-sourcemaps": "2.6.4",
     "gulp-uglify": "3.0.0",
@@ -206,6 +206,8 @@
       "/test/fixtures/",
       "<rootDir>/build/"
     ],
-    "reporters": ["jest-dot-reporter"]
+    "reporters": [
+      "jest-dot-reporter"
+    ]
   }
 }
