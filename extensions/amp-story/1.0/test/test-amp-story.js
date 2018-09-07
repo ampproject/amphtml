@@ -673,28 +673,75 @@ describes.realWin('amp-story', {
   });
 
   describe('amp-story custom sidebar', () => {
-    it('should show the sidebar control only if a sidebar exists', () => {
-      story.systemLayer.build();
-      expect(systemLayer.getShadowRoot()).to.not.have.attribute(
-          'i-amphtml-story-sidebar-state');
-      storeService.dispatch(Action.TOGGLE_STORY_HAS_SIDEBAR, true);
-      expect(systemLayer.getShadowRoot()).to.have.attribute(
-        'i-amphtml-story-sidebar-state');
+
+    it('should show the sidebar control if a sidebar exists', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.storeService_
+                .get(StateProperty.CAN_SHOW_SIDEBAR_BUTTON)).to.be.true;
+          });
     });
 
-    /*it('should correctly detect the presence of an amp-sidebar', () => {
-      const sidebar = win.document.createElement('amp-story-sidebar');
-      story.element.appendChild(sidebar);
+    it('should open the sidebar on button click', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            execute: () => {sidebar.setAttribute('open', '');}});
+      story.buildCallback();
       return story.layoutCallback()
-        .then(() => {
-          expect(story.check
-          expect(story.storeService_.get(StateProperty.CAN_SHOW_SIDEBAR_BUTTON)).to.be.true;
-        });
-    });*/
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+            expect(story.sidebar_).to.have.attribute('open');
+          });
+    });
 
+    it('should pause the story when the sidebar is opened', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            execute: () => {sidebar.setAttribute('open', '');}});
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.false;
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+          }).then(() => {
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.true;
+          });
+    });
+
+    it('should unpause the story when the sidebar is closed', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+      const sidebar = win.document.createElement('amp-sidebar');
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            execute: () => {sidebar.setAttribute('open', '');}});
+      story.element.appendChild(sidebar);
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+          }).then(() => {
+            story.sidebar_.removeAttribute('open');
+          }).then(() => {
+            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+                .to.be.false;
+          });
+    });
   });
-  
+
 
   describe('desktop attributes', () => {
     it('should add next page attribute', () => {

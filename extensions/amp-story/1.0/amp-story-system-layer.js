@@ -415,11 +415,11 @@ export class SystemLayer {
    * @private
    */
   checkSidebarDisplay_(hasSidebar) {
-    this.vsync_.mutate(() => {
-      hasSidebar ?
-        this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '') :
-        this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
-    });
+    if(hasSidebar){
+      this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '')
+    } else {
+      this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
+    }
   }
 
   /**

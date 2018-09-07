@@ -1861,7 +1861,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   checkForSidebar_() {
     this.sidebar_ = this.element.querySelector('amp-sidebar');
-    if (!!this.sidebar_) {
+    if (this.sidebar_) {
       this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_SIDEBAR,
           !!this.sidebar_);
       const actions = Services.actionServiceForDoc(this.getAmpDoc());
