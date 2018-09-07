@@ -21,11 +21,13 @@ import {
 } from '../../testing/iframe';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
+import {parseUrlDeprecated} from '../../src/url';
 
 
 // TODO(lannka, 16825): This is flaky
-describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
+describe.configure().retryOnSaucelabs().run('amp-ad 3P', (param1) => {
   let fixture;
+  let location;
 
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/3p-ad.html', 
@@ -33,6 +35,7 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
       () => {}).then(f => {
       fixture = f;
       installPlatformService(fixture.win);
+      location = parseUrlDeprecated(fixture.win.parent.location);
     });
   });
 
@@ -41,6 +44,7 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
     let iframe;
     let lastIO = null;
     const platform = Services.platformFor(fixture.win);
+
     return poll('frame to be in DOM', () => {
       return fixture.doc.querySelector('amp-ad > iframe');
     }, undefined, 5000).then(iframeElement => {
@@ -99,30 +103,20 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
       expect(initialIntersection.time).to.be.a('number');
       expect(context.isMaster).to.exist;
       expect(context.computeInMasterFrame).to.exist;
-      expect(context.location).to.deep.equal({
-        hash: '',
-        host: 'localhost:9876',
-        hostname: 'localhost',
-        href: 'http://localhost:9876/context.html',
-        origin: 'http://localhost:9876',
-        pathname: '/context.html',
-        port: '9876',
-        protocol: 'http:',
-        search: '',
-      });
+      expect(context.location).to.deep.equal(location);
       expect(parseInt(context.pageViewId, 10)).to.be.greaterThan(0);
       // In some browsers the referrer is empty. But in Chrome it works, so
       // we always check there.
       if (context.referrer !== '' || platform.isChrome()) {
         expect(context.referrer).to.contain(
-            'http://localhost:' + location.port);
+            location.origin);
       }
       expect(context.startTime).to.be.a('number');
       // Edge has different opinion about window.location in srcdoc iframe.
       // Nevertheless this only happens in test. In real world AMP will not
       // in srcdoc iframe.
       expect(context.sourceUrl).to.equal(platform.isEdge()
-        ? 'http://localhost:9876/context.html' : 'about:srcdoc');
+        ? location.href : 'about:srcdoc');
 
       expect(context.tagName).to.equal('AMP-AD');
 
