@@ -1019,7 +1019,6 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    debugger;
     return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,
         opt_sync, opt_whiteList);
   }

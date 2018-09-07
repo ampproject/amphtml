@@ -57,9 +57,9 @@ export class Expander {
     }
 
     const expr = this.variableSource_
-        .getExpr(opt_bindings, /*opt_ignoreArgs */ true, opt_whiteList);
+        .getExpr(opt_bindings, /*opt_ignoreArgs */ true);
 
-    const matches = this.findMatches_(url, expr);
+    const matches = this.findMatches_(url, expr, opt_whiteList);
     // if no keywords move on
     if (!matches.length) {
       return opt_sync ? url : Promise.resolve(url);
@@ -73,10 +73,12 @@ export class Expander {
    * Structures the regex matching into the desired format
    * @param {string} url url to be substituted
    * @param {RegExp} expression regex containing all keywords
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *   that can be substituted.
    * @return {Array<Object<string, string|number>>} array of objects representing
    *  matching keywords
    */
-  findMatches_(url, expression) {
+  findMatches_(url, expression, opt_whiteList) {
     const matches = [];
     url.replace(expression, (match, name, startPosition) => {
       const {length} = match;
@@ -87,7 +89,9 @@ export class Expander {
         name,
         length,
       };
-      matches.push(info);
+      if (!opt_whiteList || opt_whiteList[name]) {
+        matches.push(info);
+      }
     });
     return matches;
   }

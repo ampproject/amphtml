@@ -168,8 +168,7 @@ export class VariableSource {
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].sync = syncResolver;
-    this.replacementExpr_ = undefined;
-    this.replacementExprV2_ = undefined;
+    this.resetExpr();
     return this;
   }
 
@@ -188,8 +187,7 @@ export class VariableSource {
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].async = asyncResolver;
-    this.replacementExpr_ = undefined;
-    this.replacementExprV2_ = undefined;
+    this.resetExpr();
     return this;
   }
 
@@ -209,10 +207,8 @@ export class VariableSource {
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
    * @param {boolean=} isV2 Flag to ignore capture of args.
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *   that can be substituted.
    */
-  getExpr(opt_bindings, isV2, opt_whiteList) {
+  getExpr(opt_bindings, isV2) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -225,7 +221,7 @@ export class VariableSource {
           allKeys.push(key);
         }
       });
-      return this.buildExpr_(allKeys, isV2, opt_whiteList);
+      return this.buildExpr_(allKeys, isV2);
     }
 
     if (!this.replacementExpr_ && !isV2) {
@@ -236,7 +232,7 @@ export class VariableSource {
     // so we need to cache both versions
     if (!this.replacementExprV2_ && isV2) {
       this.replacementExprV2_ = this.buildExpr_(
-          Object.keys(this.replacements_), isV2, opt_whiteList);
+          Object.keys(this.replacements_), isV2);
     }
 
     return isV2 ? this.replacementExprV2_ :
@@ -244,25 +240,27 @@ export class VariableSource {
   }
 
   /**
+   * Clear cached regex for matching macros.
+   */
+  resetExpr() {
+    this.replacementExpr_ = null;
+    this.replacementExprV2_ = null;
+  }
+
+  /**
    * @param {!Array<string>} keys
    * @param {boolean=} isV2 flag to ignore capture of args
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *   that can be substituted.
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys, isV2, opt_whiteList) {
+  buildExpr_(keys, isV2) {
     // If a whitelist is present, the keys must belong to the whitelist.
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
     if (this.getUrlMacroWhitelist_()) {
       keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
     }
-    // If a whitelist is passed into the call to GlobalVariableSource.expand_
-    // then we only resolve values contained in the whitelist.
-    if (opt_whiteList) {
-      keys = keys.filter(key => opt_whiteList[key]);
-    }
+
     if (keys.length === 0) {
       const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
       return regexThatMatchesNothing;
