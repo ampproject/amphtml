@@ -161,7 +161,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @private
    */
   isResponsive_() {
-    return this.autoFormat_ == 'rspv';
+    return this.getRafmtParam_() != null;
+  }
+
+  /**
+   * @return {?number}
+   * @private
+   */
+  getRafmtParam_() {
+    return AmpAdNetworkAdsenseImpl.isAutoResponsive_(this.autoFormat_) ?
+      13 : (AmpAdNetworkAdsenseImpl.isMCResponsive_(this.autoFormat_) ?
+        15 : null);
   }
 
   /** @override */
@@ -222,7 +232,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const viewportSize = this.getViewport().getSize();
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              viewportSize),
+              this.autoFormat_, viewportSize),
           viewportSize.width).catch(() => {});
     }
     // This should happen last, as some diversion criteria rely on some of the
@@ -329,7 +339,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.ifi_,
       'rc': this.fromResumeCallback ? 1 : null,
-      'rafmt': this.isResponsive_() ? 13 : null,
+      'rafmt': this.getRafmtParam_(),
       'pfx': pfx ? '1' : '0',
       // Matched content specific fields.
       'crui': this.element.getAttribute('data-matched-content-ui-type'),
@@ -527,18 +537,42 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /**
+   * @param {?string} autoFormat
+   * @return {boolean}
+   * @private
+   */
+  static isAutoResponsive_(autoFormat) {
+    return autoFormat === 'rspv';
+  }
+
+  /**
+   * @param {?string} autoFormat
+   * @return {boolean}
+   * @private
+   */
+  static isMCResponsive_(autoFormat) {
+    return autoFormat === 'mcrspv';
+  }
+
+  /**
    * Calculates the appropriate height for a full-width responsive ad of the
    * given width.
+   * @param {string} autoFormat
    * @param {!{width: number, height: number}} viewportSize
    * @return {number}
    * @private
    */
-  static getResponsiveHeightForContext_(viewportSize) {
-    const minHeight = 100;
-    const maxHeight = Math.min(300, viewportSize.height);
-    // We aim for a 6:5 aspect ratio.
-    const idealHeight = Math.round(viewportSize.width / 1.2);
-    return clamp(idealHeight, minHeight, maxHeight);
+  static getResponsiveHeightForContext_(autoFormat, viewportSize) {
+    if (AmpAdNetworkAdsenseImpl.isAutoResponsive_(autoFormat)) {
+      const minHeight = 100;
+      const maxHeight = Math.min(300, viewportSize.height);
+      // We aim for a 6:5 aspect ratio.
+      const idealHeight = Math.round(viewportSize.width / 1.2);
+      return clamp(idealHeight, minHeight, maxHeight);
+    } else if (AmpAdNetworkAdsenseImpl.isMCResponsive_(autoFormat)) {
+      return Math.floor((viewportSize.width * 3.4) + 112);
+    }
+    return 0;
   }
 }
 
