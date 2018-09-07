@@ -58,6 +58,13 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       toggle(this.element);
+      /**
+       * We are applying styles here, to minizime the amp.css file.
+       * These styles will create an in-place element, that is 1x1,
+       * but invisible. Absolute positioning keeps it where it would have
+       * been, without taking up space. Thus, layoutCallback will still
+       * be called at the appropriate time
+       */
       setStyles(this.element, {
         'position': 'absolute',
         'width': '1px',
@@ -70,6 +77,11 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    /**
+     * TODO(torch2424): Fix possible race condition,
+     * of this getting called twice.
+     * See <amp-analytics> layoutCallback()
+     */
     return this.recaptchaService_.register(this.element);
   }
 

@@ -19,11 +19,8 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {getService, registerServiceBuilder} from '../../../src/service';
-import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 
@@ -48,12 +45,6 @@ export class AmpRecaptchaService {
 
     /** @private {number} */
     this.registeredElementCount_ = 0;
-
-    /** @private {?Function} */
-    this.unlistenMessage_ = null;
-
-    /** @private {!Deferred} */
-    this.willBeReady_ = new Deferred();
   }
 
   /**
@@ -64,9 +55,8 @@ export class AmpRecaptchaService {
    */
   register(element) {
     this.registeredElementCount_++;
-    if (!this.iframe_) {
+    if (!this.iframeLoadPromise_) {
       this.initialize_(element);
-      this.iframeLoadPromise_ = loadPromise(this.iframe_);
     }
     return this.iframeLoadPromise_;
   }
@@ -92,19 +82,9 @@ export class AmpRecaptchaService {
     /* the third parameter 'recaptcha' ties it to the 3p/recaptcha.js */
     this.iframe_ = getIframe(this.win_, element, 'recaptcha');
 
-    const listenIframe = (evName, cb) => listenFor(
-        dev().assertElement(this.iframe_),
-        evName,
-        cb,
-        true);
-
-    const disposers = [
-      listenIframe('ready', this.willBeReady_.resolve),
-    ];
-    this.unlistenMessage_ = () => disposers.forEach(d => d());
-
     this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
     this.body_.appendChild(this.iframe_);
+    this.iframeLoadPromise_ = loadPromise(this.iframe_);
   }
 
   /**
@@ -116,12 +96,6 @@ export class AmpRecaptchaService {
       removeElement(this.iframe_);
       this.iframe_ = null;
       this.iframeLoadPromise_ = null;
-
-      this.willBeReady_ = new Deferred();
-    }
-
-    if (this.unlistenMessage_) {
-      this.unlistenMessage_();
     }
   }
 }

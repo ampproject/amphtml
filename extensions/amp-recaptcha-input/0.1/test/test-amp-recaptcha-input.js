@@ -57,6 +57,8 @@ describes.realWin('amp-recaptcha-input', {
 
     it('Should apply styles aftyer build', () => {
       return getRecaptchaInput().then(ampRecaptchaInput => {
+        expect(win.getComputedStyle(ampRecaptchaInput).position)
+            .to.equal('absolute');
         expect(win.getComputedStyle(ampRecaptchaInput).visibility)
             .to.equal('hidden');
       });
