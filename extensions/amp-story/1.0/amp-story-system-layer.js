@@ -365,9 +365,10 @@ export class SystemLayer {
       this.onPageAudioStateUpdate_(audio);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.CAN_SHOW_SIDEBAR_BUTTON, hasSidebar => {
-      this.checkSidebarDisplay_(hasSidebar);
-    });
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SIDEBAR_BUTTON,
+        hasSidebar => {
+          this.checkSidebarDisplay_(hasSidebar);
+        });
   }
 
   /**
@@ -410,7 +411,7 @@ export class SystemLayer {
   /**
    * Checks if the story has a sidebar in order to display the icon representing
    * the opening of the sidebar.
-   * @param {boolean} canShowSharingUis
+   * @param {boolean} hasSidebar
    * @private
    */
   checkSidebarDisplay_(hasSidebar) {
