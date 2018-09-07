@@ -26,6 +26,7 @@ import {
 import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
+import {addMissingParamsToUrl, isProtocolValid} from '../url';
 import {
   addParamsToUrl,
   getSourceUrl,
@@ -33,7 +34,6 @@ import {
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
-  removeSearch,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
 import {getTrackImpressionPromise} from '../impression.js';
@@ -43,7 +43,6 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isExperimentOn} from '../experiments';
-import {isProtocolValid} from '../url';
 import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
@@ -584,10 +583,7 @@ export class GlobalVariableSource extends VariableSource {
     if (!replaceParams) {
       return orig;
     }
-    const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
-    const params = parseQueryString(url.search);
-    return addParamsToUrl(removeSearch(orig),
-        /** @type {!JsonObject} **/ (Object.assign({}, replaceParams, params)));
+    return addMissingParamsToUrl(removeAmpJsParamsFromUrl(orig), replaceParams);
   }
 
   /**

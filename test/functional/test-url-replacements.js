@@ -322,7 +322,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .then(res => {
             expect(res).to.contain(
                 encodeURIComponent(
-                    'https://cdn.ampproject.org/a/o.com/foo/?hello=world&test=case'));
+                    'https://cdn.ampproject.org/a/o.com/foo/?test=case&hello=world'));
           });
     });
 
@@ -355,13 +355,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should merge multiple extra params safely in AMPDOC_URL', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated(
-          'https://cdn.ampproject.org/a/o.com/foo/?test=case&hello=you&amp_r=hello%3Dworld%26goodnight%3Dmoon');
+          'https://cdn.ampproject.org/a/o.com/foo/?test=case&a&hello=you&amp_r=hello%3Dworld%26goodnight%3Dmoon');
       return Services.urlReplacementsForDoc(win.ampdoc)
           .expandUrlAsync('?url=AMPDOC_URL')
           .then(res => {
             expect(res).to.contain(
                 encodeURIComponent(
-                    'https://cdn.ampproject.org/a/o.com/foo/?hello=you&goodnight=moon&test=case'));
+                    'https://cdn.ampproject.org/a/o.com/foo/?test=case&a&hello=you&goodnight=moon'));
           });
     });
   });
@@ -440,11 +440,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .expandUrlAsync('?url=SOURCE_URL')
           .then(res => {
             expect(res).to.equal(
-                '?url=' + encodeURIComponent('http://o.com/foo/?hello=world&a='));
+                '?url=' + encodeURIComponent('http://o.com/foo/?a&hello=world'));
           });
     });
 
-    it('should merge extra params into SOURCE_URL', () => {
+    it('should ignore extra params that already exists in SOURCE_URL', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/a/o.com/foo/?a=1&safe=1&amp_r=hello%3Dworld%26safe=evil');
@@ -455,26 +455,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .expandUrlAsync('?url=SOURCE_URL')
           .then(res => {
             expect(res).to.equal(
-                '?url=' + encodeURIComponent('http://o.com/foo/?hello=world&safe=1&a=1'));
+                '?url=' + encodeURIComponent('http://o.com/foo/?a=1&safe=1&hello=world'));
           });
     });
 
-    it('should not change SOURCE_URL if amp_r does not exist', () => {
-      const win = getFakeWindow();
-      win.location = parseUrlDeprecated(
-          'https://cdn.ampproject.org/a/o.com/foo/?a');
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return Promise.resolve();
-      });
-      return Services.urlReplacementsForDoc(win.ampdoc)
-          .expandUrlAsync('?url=SOURCE_URL')
-          .then(res => {
-            expect(res).to.equal(
-                '?url=' + encodeURIComponent('http://o.com/foo/?a'));
-          });
-    });
-
-    it('should not change SOURCE_URL if extra params are not available', () => {
+    it('should not change SOURCE_URL if is not ad landing page', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/v/o.com/foo/?a&amp_r=hello%3Dworld');
