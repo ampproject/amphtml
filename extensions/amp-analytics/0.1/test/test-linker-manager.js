@@ -177,7 +177,8 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      return expect(a.href).to.not.equal('https://www.example.com');
+      expect(a.href.indexOf(
+          'https:\/\/www\.example\.com\?testLinker1=1*')).to.equal(0);
     });
   });
 
@@ -216,9 +217,8 @@ describe('Linker Manager', () => {
 
         return Promise.all(manager.allLinkerPromises_).then(() => {
           manager.handleAnchorMutation(a);
-          expect(a.href).to.equal(
-              'https:\/\/www\.example\.com\?' +
-              'testLinker1=1*bpg5m4*_key*YW1wLTEyMzQ1*gclid*MjM0');
+          expect(a.href.indexOf(
+              'https:\/\/www\.example\.com\?testLinker1=1*')).to.equal(0);
         });
       });
 
@@ -252,14 +252,14 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      expect(a.href).to.not.equal('https://www.example.com');
-
+      expect(a.href.indexOf(
+          'https:\/\/www\.example\.com\?testLinker1=1*')).to.equal(0);
       const parsedUrl = new URL(a.href);
       const param1 = parsedUrl.searchParams.get('testLinker1').split(DELIMITER);
       expect(param1[2]).to.equal('_key');
       expect(param1[3]).to.match(BASE64_REGEX);
       expect(param1[4]).to.equal('gclid');
-      return expect(param1[5]).to.equal('MjM0');
+      expect(param1[5]).to.equal('MjM0');
     });
   });
 
@@ -293,7 +293,7 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      return expect(a.href).to.equal('https://www.example.com');
+      expect(a.href).to.equal('https://www.example.com');
     });
   });
 
@@ -322,7 +322,7 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      return expect(a.href).to.equal('https://www.example.com');
+      expect(a.href).to.equal('https://www.example.com');
     });
   });
 
@@ -350,7 +350,7 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      return expect(a.href).to.equal('https://www.example.com');
+      expect(a.href).to.equal('https://www.example.com');
     });
   });
 
@@ -384,7 +384,7 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      return expect(a.href).not.to.equal('https://www.example.com');
+      expect(a.href).not.to.equal('https://www.example.com');
     });
   });
 
@@ -420,7 +420,7 @@ describe('Linker Manager', () => {
 
         return Promise.all(manager.allLinkerPromises_).then(() => {
           manager.handleAnchorMutation(a);
-          return expect(a.href).to.equal('https://www.example.com');
+          expect(a.href).to.equal('https://www.example.com');
         });
       });
 });
