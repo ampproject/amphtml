@@ -255,24 +255,35 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-  it('should resize slot after initial failure to do so', () => {
+  it('should set expansion re-attempt flag after initial failure', () => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
     const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
-    attemptChangeHeightStub.onCall(0).returns(Promise.reject());
-    attemptChangeHeightStub.onCall(1).returns(Promise.resolve());
+    attemptChangeHeightStub.returns(Promise.reject());
     sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
     impl.buildCallback();
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
-    return impl.layoutCallback().then(() => {
+    return impl.expandFluidCreative_().then(() => {
+      expect(attemptChangeHeightStub).to.be.calledOnce;
       expect(impl.reattemptToExpandFluidCreative_).to.be.true;
-      expect(attemptChangeHeightStub).to.be.calledOnce;
-      // Should do nothing
-      impl.viewportCallback(true);
-      expect(attemptChangeHeightStub).to.be.calledOnce;
-      impl.viewportCallback(false);
-      expect(attemptChangeHeightStub).to.be.calledTwice;
     });
+  });
+
+  it('should re-attempt expansion after initial failure', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
+    attemptChangeHeightStub.returns(Promise.resolve());
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    impl.reattemptToExpandFluidCreative_ = true;
+    // Should do nothing
+    impl.viewportCallback(true);
+    expect(attemptChangeHeightStub).to.not.be.called;
+    impl.viewportCallback(false);
+    expect(attemptChangeHeightStub).to.be.calledOnce;
   });
 });

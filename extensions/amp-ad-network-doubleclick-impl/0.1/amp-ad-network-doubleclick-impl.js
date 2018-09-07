@@ -919,6 +919,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Attempts to expand a fluid creative. If the attempt fails, we will
    * re-attempt whenever the slot is out of the viewport until we succeed,
    * contingent on when viewportCallback is invoked.
+   * @return {!Promise} The promise that resolves once the height change
+   *   attempt either succeeds or is rejected. If no attempt is made,
+   *   Promise.resovle() is returned. Used mainly for testing.
    */
   expandFluidCreative_() {
     if (this.isFluidRequest_ &&
@@ -935,7 +938,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             'a properly set up friendly frame. Slot id: ' +
             this.element.getAttribute('data-amp-slot-index'));
       }
-      this.attemptChangeHeight(
+      return this.attemptChangeHeight(
           this.iframe.contentWindow.document.body./*OK*/scrollHeight)
           .then(() => {
             this.fireFluidDelayedImpression();
@@ -945,6 +948,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.reattemptToExpandFluidCreative_ = true;
           });
     }
+    return Promise.resolve();
   }
 
   /**
