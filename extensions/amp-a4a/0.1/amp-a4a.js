@@ -915,10 +915,16 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(!this.isRefreshing);
     this.isRefreshing = true;
     this.tearDownSlot();
-    this.initiateAdRequest();
-    dev().assert(this.adPromise_);
+    //this.initiateAdRequest();
+    debugger;
+    if (!this.adPromise_) {
+      // For whatever reasons, the adPromise has been nullified, and we will be
+      // unable to proceed. The current creative will continue to be displayed.
+      this.isRefreshing = false;
+      return;
+    }
     const promiseId = this.promiseId_;
-    return this.adPromise_.then(() => {
+    return dev().assert(this.adPromise_).then(() => {
       if (!this.isRefreshing || promiseId != this.promiseId_) {
         // If this refresh cycle was canceled, such as in a no-content
         // response case, keep showing the old creative.
@@ -988,7 +994,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
+  layoutCallback() { debugger;
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
@@ -1071,7 +1077,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Attempts to tear down and set all state variables to initial conditions.
    * @protected
    */
-  tearDownSlot() {
+  tearDownSlot() { debugger;
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     this.uiHandler.applyUnlayoutUI();
@@ -1113,7 +1119,7 @@ export class AmpA4A extends AMP.BaseElement {
    *   this.isRefreshing is true.
    * @protected
    */
-  destroyFrame(force = false) {
+  destroyFrame(force = false) { debugger;
     if (!force && this.isRefreshing) {
       return;
     }
@@ -1208,7 +1214,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Forces the UI Handler to collapse this slot.
    * @visibleForTesting
    */
-  forceCollapse() {
+  forceCollapse() { debugger;
     if (this.isRefreshing) {
       // If, for whatever reason, the new creative would collapse this slot,
       // stick with the old creative until the next refresh cycle.

@@ -315,7 +315,7 @@ export class RefreshManager {
         this.unobserve();
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
-      }, /** @type {number} */ (this.refreshInterval_));
+      }, /** @type {number} */ (5000));
     });
   }
 
