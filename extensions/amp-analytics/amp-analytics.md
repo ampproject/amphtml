@@ -737,7 +737,7 @@ In this example configuration this parameter would be appendend to any outgoing 
 Lets say this linker configured on a page being served at the URL  `https://www-amp-example-com.cdn.ampproject.org/v/s/www.amp.example.com/amp/cool/story`. The canonical url is given as `https://www.example.com/cool/story`
 
 There could be several outlinks on this example page:
-URL | Matches | |
+URL | Matches | Notes |
 --- | :---: | ---
 https://www.example.com/another/story | yes | matches canonical hostname
 https://www.amp.example.com/foo | yes | matches source hostname
