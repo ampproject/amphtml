@@ -2362,16 +2362,9 @@ describe('amp-a4a', () => {
         // long as they're called the appropriate number of times. We stub them
         // out here because they would otherwise throw errors unrelated to the
         // behavior actually being tested.
-        const initiateAdRequestMock =
-            sandbox.stub(AmpA4A.prototype, 'initiateAdRequest');
-        initiateAdRequestMock.returns(undefined);
-        const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
-        tearDownSlotMock.returns(undefined);
-        const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
-        destroyFrameMock.returns(undefined);
-        sandbox.stub(analytics, 'triggerAnalyticsEvent');
+        sandbox.stub(AmpA4A.prototype, 'initiateAdRequest').returns(undefined);
+        sandbox.stub(AmpA4A.prototype, 'tearDownSlot').returns(undefined);
         const callback = sandbox.spy();
-
         return a4a.refresh(callback).then(() => {
           expect(callback).to.not.be.called;
         });
