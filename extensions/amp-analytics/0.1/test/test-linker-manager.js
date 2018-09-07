@@ -25,6 +25,7 @@ describe('Linker Manager', () => {
   let registerSpy;
   let isProxyStub;
   let findMetaTagStub;
+  let docInfoStub;
 
   beforeEach(() => {
     // Linker uses a timestamp value to generate checksum.
@@ -41,10 +42,10 @@ describe('Linker Manager', () => {
       },
     };
 
-    sandbox.stub(Services, 'documentInfoForDoc')
+    docInfoStub = sandbox.stub(Services, 'documentInfoForDoc')
         .returns({
-          sourceUrl: 'www.example.com ',
-          canonicalUrl: 'www.example.com',
+          sourceUrl: 'https://www.example.com/some/path?q=123',
+          canonicalUrl: 'https://www.example.com',
         });
 
     registerSpy = sandbox.spy();
@@ -55,6 +56,7 @@ describe('Linker Manager', () => {
     isProxyStub = sandbox.stub().returns(true);
     sandbox.stub(Services, 'urlForDoc').returns({
       isProxyOrigin: isProxyStub,
+      parse: url => new URL(url),
     });
   });
 
@@ -177,6 +179,46 @@ describe('Linker Manager', () => {
     });
   });
 
+  it('should add linker with default destinationDomains and matching hostname',
+      () => {
+        const config = {
+          linkers: {
+            testLinker1: {
+              enabled: true,
+              ids: {
+                _key: 'CLIENT_ID(_ga)',
+                gclid: '234',
+              },
+            },
+          },
+        };
+
+        const a = {
+          href: 'https://www.example.com',
+          hostname: 'www.example.com',
+        };
+
+        const manager = new LinkerManager(ampdoc, config);
+        sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
+        const expandStub = sandbox.stub(manager,
+            'expandTemplateWithUrlParams_');
+        expandStub.withArgs('CLIENT_ID(_ga)')
+            .returns('amp-12345');
+        expandStub.returnsArg(0);
+        docInfoStub.returns({
+          sourceUrl: 'https://www.example.com/foo/bar',
+          canonicalUrl: 'https://www.example.com/foo/bar',
+        });
+
+        manager.init();
+
+        return Promise.all(manager.allLinkerPromises_).then(() => {
+          manager.handleAnchorMutation(a);
+          return expect(a.href).to
+              .match(/https:\/\/www\.example\.com\?testLinker1=1~\w+~_key~amp-12345~gclid~234/);
+        });
+      });
+
   it('should add linker if not proxy && proxyOnly == false', () => {
     const config = {
       linkers: {
@@ -197,7 +239,6 @@ describe('Linker Manager', () => {
     };
 
     const manager = new LinkerManager(ampdoc, config);
-
     sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
     const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
     expandStub.withArgs('CLIENT_ID(_ga)')
