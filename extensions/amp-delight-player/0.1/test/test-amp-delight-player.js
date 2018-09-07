@@ -37,12 +37,7 @@ describes.realWin('amp-delight-player', {
     delight.setAttribute('height', '180');
     delight.setAttribute('layout', 'responsive');
     doc.body.appendChild(delight);
-
-    env.win.document.body.appendChild(delight);
-
-    delight.layoutCallback();
-
-    return Promise.resolve(delight);
+    return delight.build().then(() => delight.layoutCallback()).then(() => delight);
   }
 
   it('renders', () => {
@@ -55,6 +50,7 @@ describes.realWin('amp-delight-player', {
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
             'https://players.delight-vr.com/player/-LKbXyaXMJ1h-4GVXhvO');
+        expect(iframe.vr).to.equal('true');
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
     });
@@ -68,21 +64,4 @@ describes.realWin('amp-delight-player', {
     });
   });
 
-  describe('createPlaceholderCallback', () => {
-    it('should create a placeholder image', () => {
-      return allowConsoleError(() => { 
-        return getDelightPlayer({
-          'data-content-id': '-LKbXyaXMJ1h-4GVXhvO',
-        }).then(delight => {
-          const img = delight.querySelector('amp-img');
-          expect(img).to.not.be.null;
-          expect(img.getAttribute('src')).to.equal(
-              'https://players.d]elight-vr.com/poster/-LKbXyaXMJ1h-4GVXhvO');
-          expect(img.getAttribute('layout')).to.equal('responsive');
-          expect(img.hasAttribute('placeholder')).to.be.true;
-          expect(img.getAttribute('alt')).to.equal('Loading video');
-        });
-      });
-    });
-  });
 });

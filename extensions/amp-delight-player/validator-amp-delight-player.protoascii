@@ -1,5 +1,5 @@
 #
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,13 +21,15 @@ tags: {  # amp-delight-player
     name: "amp-delight-player"
     version: "0.1"
     version: "latest"
+    requires_usage: GRANDFATHERED
+    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 
 tags: {  # <amp-delight-player>
   html_format: AMP
-  tag_name: "amp-delight-player"
+  tag_name: "AMP-DELIGHT-PLAYER"
   requires_extension: "amp-delight-player"
   attrs: {
       name: "data-content-id"

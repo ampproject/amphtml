@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 import {ActionTrust} from '../../../src/action-constants';
+import {Deferred} from '../../../src/utils/promise';
 import {IFrameManager} from './iframe-manager';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFrameFor, objOrParseJson} from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getStyle, setStyle} from '../../../src/style';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
 
@@ -39,15 +35,26 @@ const TAG = 'amp-delight-player';
 
 /** @const @enum {string} */
 const DelightState = {
-  PLAY: 'x-dl8-iframe-play',
-  PAUSE: 'x-dl8-iframe-pause',
-  END: 'x-dl8-iframe-ended',
-  TIME_UPDATE: 'x-dl8-iframe-timeupdate',
-  MUTED: 'x-dl8-iframe-muted',
-  UNMUTED: 'x-dl8-iframe-unmuted',
-  DURATION: 'x-dl8-iframe-duration',
-  ENTER_FULLSCREEN: 'x-dl8-iframe-enter-fullscreen',
-  EXIT_FULLSCREEN: 'x-dl8-iframe-exit-fullscreen',
+  READY: 'x-dl8-to-parent-ready',
+  PLAYING: 'x-dl8-to-parent-playing',
+  PAUSED: 'x-dl8-to-parent-paused',
+  ENDED: 'x-dl8-to-parent-ended',
+  TIME_UPDATE: 'x-dl8-to-parent-timeupdate',
+  DURATION: 'x-dl8-to-parent-duration',
+  MUTED: 'x-dl8-to-parent-muted',
+  UNMUTED: 'x-dl8-to-parent-unmuted',
+  ENTERED_FULLSCREEN: 'x-dl8-to-parent-entered-fullscreen',
+  EXITED_FULLSCREEN: 'x-dl8-to-parent-exited-fullscreen',
+  PLAY: 'x-dl8-to-iframe-play',
+  PAUSE: 'x-dl8-to-iframe-pause',
+  ENTER_FULLSCREEN: 'x-dl8-to-iframe-enter-fullscreen',
+  EXIT_FULLSCREEN: 'x-dl8-to-iframe-exit-fullscreen',
+  MUTE: 'x-dl8-to-iframe-mute',
+  UNMUTE: 'x-dl8-to-iframe-unmute',
+  ENABLE_INTERFACE: 'x-dl8-to-iframe-enable-interface',
+  DISABLE_INTERFACE: 'x-dl8-to-iframe-disable-interface',
+  EXPANDED: 'x-dl8-iframe-enter-fullscreen',
+  MINIMIZED: 'x-dl8-iframe-exit-fullscreen',
 };
 
 /**
@@ -82,8 +89,20 @@ class AmpDelight extends AMP.BaseElement {
     /** @private {Array} */
     this.playedRanges_ = [];
 
+    /** @private {boolean} */
+    this.isFullscreen_ = false;
+
     /** @private {string} */
     this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
 
     /** @private {HTMLElement} */
     this.placeholderEl_ = null;
@@ -108,6 +127,10 @@ class AmpDelight extends AMP.BaseElement {
         'The data-content-id attribute is required',
         this.element);
 
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
   }
@@ -125,9 +148,7 @@ class AmpDelight extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    return this.loadPromise(iframe).then(() => {
-      this.triggerAction_('load', null);
-    });
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -136,6 +157,14 @@ class AmpDelight extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
+
     return true;
   }
 
@@ -166,7 +195,7 @@ class AmpDelight extends AMP.BaseElement {
   firstLayoutCompleted() {
     const el = this.placeholderEl_;
     const isInViewport = this.isInViewport();
-    
+
     if (el && isInViewport) {
       return new Promise(resolve => {
 
@@ -216,23 +245,29 @@ class AmpDelight extends AMP.BaseElement {
     const {element} = this;
 
     switch (data['type']) {
-      case DelightState.PLAY:
-        this.triggerAction_('play', null);
+      case DelightState.READY:
+        this.triggerAction_(VideoEvents.LOAD, null);
+        element.dispatchCustomEvent(VideoEvents.LOAD);
+        this.playerReadyResolver_(this.iframe_);
+        break;
+
+      case DelightState.PLAYING:
+        this.triggerAction_(VideoEvents.PLAYING, null);
         element.dispatchCustomEvent(VideoEvents.PLAYING);
         break;
 
-      case DelightState.PAUSE:
-        this.triggerAction_('pause', null);
+      case DelightState.PAUSED:
+        this.triggerAction_(VideoEvents.PAUSE, null);
         element.dispatchCustomEvent(VideoEvents.PAUSE);
         break;
 
-      case DelightState.END:
-        this.triggerAction_('end', null);
+      case DelightState.ENDED:
+        this.triggerAction_(VideoEvents.ENDED, null);
         element.dispatchCustomEvent(VideoEvents.ENDED);
         break;
 
       case DelightState.TIME_UPDATE:
-        this.triggerAction_('timeupdate', null);
+        this.triggerAction_(VideoEvents.SECONDS_PLAYED, null);
         element.dispatchCustomEvent(VideoEvents.SECONDS_PLAYED);
 
         this.currentTime_ = data.payload.currentTime;
@@ -240,12 +275,12 @@ class AmpDelight extends AMP.BaseElement {
         break;
 
       case DelightState.MUTED:
-        this.triggerAction_('mute', null);
+        this.triggerAction_(VideoEvents.MUTED, null);
         element.dispatchCustomEvent(VideoEvents.MUTED);
         break;
 
       case DelightState.UNMUTED:
-        this.triggerAction_('unmute', null);
+        this.triggerAction_(VideoEvents.UNMUTED, null);
         element.dispatchCustomEvent(VideoEvents.UNMUTED);
         break;
 
@@ -253,12 +288,20 @@ class AmpDelight extends AMP.BaseElement {
         this.totalDuration_ = data.payload.duration;
         break;
 
-      case DelightState.ENTER_FULLSCREEN:
+      case DelightState.EXPANDED:
         this.setFullHeight_();
         break;
 
-      case DelightState.EXIT_FULLSCREEN:
+      case DelightState.MINIMIZED:
         this.setInlineHeight_();
+        break;
+
+      case DelightState.ENTERED_FULLSCREEN:
+        this.isFullscreen_ = true;
+        break;
+
+      case DelightState.EXITED_FULLSCREEN:
+        this.isFullscreen_ = false;
         break;
     }
   }
@@ -279,13 +322,18 @@ class AmpDelight extends AMP.BaseElement {
 
   /**
    * Sends a command to the player through postMessage.
-   * @param {string} command
+   * @param {string} type
+   * @param {Object} [payload={}]
    * @private
    */
-  sendCommand_(command) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(command, '*');
-    }
+  sendCommand_(type, payload = {}) {
+    this.playerReadyPromise_.then(iframe => {
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow./*OK*/postMessage(
+            JSON.stringify({type, payload}), '*'
+        );
+      }
+    });
   }
 
   /**
@@ -354,50 +402,41 @@ class AmpDelight extends AMP.BaseElement {
 
   /** @override */
   mute() {
-    this.sendCommand_(DelightState.MUTED);
+    this.sendCommand_(DelightState.MUTE);
   }
 
   /** @override */
   unmute() {
-    this.sendCommand_(DelightState.UNMUTED);
+    this.sendCommand_(DelightState.UNMUTE);
   }
 
   /** @override */
   showControls() {
-    // Not supported
+    this.sendCommand_(DelightState.ENABLE_INTERFACE);
   }
 
   /** @override */
   hideControls() {
-    // Not supported
+    this.sendCommand_(DelightState.DISABLE_INTERFACE);
   }
 
   /**
    * @override
    */
   fullscreenEnter() {
-    if (!this.iframe_) {
-      return;
-    }
-    fullscreenEnter(dev().assertElement(this.iframe_));
+    this.sendCommand_(DelightState.ENTER_FULLSCREEN);
   }
 
-  /**c
+  /**
    * @override
    */
-  fullscreenit() {
-    if (!this.iframe_) {
-      return;
-    }
-    fullscreenExit(dev().assertElement(this.iframe_));
+  fullscreenExit() {
+    this.sendCommand_(DelightState.EXIT_FULLSCREEN);
   }
 
   /** @override */
   isFullscreen() {
-    if (!this.iframe_) {
-      return false;
-    }
-    return isFullscreenElement(dev().assertElement(this.iframe_));
+    return this.isFullscreen_;
   }
 
   /** @override */
