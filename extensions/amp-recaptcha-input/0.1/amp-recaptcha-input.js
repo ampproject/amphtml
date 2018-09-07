@@ -42,6 +42,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     this.recaptchaService_ = recaptchaServiceFor(this.win);
 
     /** @private {boolean} */
+    this.isRegistered_ = false;
+
+    /** @private {boolean} */
     this.isExperimentEnabled_ = isExperimentOn(this.win, 'amp-recaptcha-input');
   }
 
@@ -77,17 +80,18 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    /**
-     * TODO(torch2424): Fix possible race condition,
-     * of this getting called twice.
-     * See <amp-analytics> layoutCallback()
-     */
-    return this.recaptchaService_.register(this.element);
+    if (!this.isRegistered_) {
+      this.isRegistered_ = true;
+      return this.recaptchaService_.register(this.element);
+    }
   }
 
   /** @override */
   unlayoutCallback() {
-    this.recaptchaService_.unregister();
+    if (this.isRegistered_) {
+      this.recaptchaService_.unregister();
+      this.isRegistered_ = false;
+    }
     return true;
   }
 }
