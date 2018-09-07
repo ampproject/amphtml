@@ -35,7 +35,7 @@ const TOAST_VISIBLE_TIME_MS = 2600;
  */
 export class Toast {
   /**
-   * @param {Element} storyEl
+   * @param {!Element} storyEl
    * @param {!Node|string} childNodeOrText
    */
   static show(storyEl, childNodeOrText) {
