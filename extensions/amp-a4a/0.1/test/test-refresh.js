@@ -136,7 +136,6 @@ describe('refresh', () => {
     it('should execute the refresh event correctly', () => {
       // Attach element to DOM, as is necessary for request ampdoc.
       window.document.body.appendChild(mockA4a.element);
-      mockA4a.adPromise_ = Promise.resolve();
       const refreshSpy = sandbox.spy(mockA4a, 'refresh');
 
       // Ensure initial call to initiateRefreshCycle doesn't trigger refresh, as
