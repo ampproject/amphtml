@@ -657,11 +657,13 @@ describes.realWin('amp-consent', {
                 'checkConsentHref': 'https://response3',
               },
             },
-            'postPromptUI': 'test',
+            // There's already an amp-consent from a parent beforeEach with a
+            // test postPromptUI
+            'postPromptUI': 'test2',
           });
           consentElement = createConsentElement(doc, defaultConfig);
           postPromptUI = doc.createElement('div');
-          postPromptUI.setAttribute('id', 'test');
+          postPromptUI.setAttribute('id', 'test2');
           consentElement.appendChild(postPromptUI);
           doc.body.appendChild(consentElement);
           ampConsent = new AmpConsent(consentElement);
