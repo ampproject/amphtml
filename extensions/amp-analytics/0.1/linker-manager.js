@@ -188,9 +188,10 @@ export class LinkerManager {
    */
   maybeAppendLinker_(el, name, config) {
     const {href, hostname} = el;
+    const urlService = Services.urlForDoc(this.ampdoc_);
+
     // If we are not on proxy, linker must be explicity enabled.
-    const isProxyOrigin = Services.urlForDoc(this.ampdoc_)
-        .isProxyOrigin(href);
+    const isProxyOrigin = urlService.isProxyOrigin(href);
     if (!isProxyOrigin && config['proxyOnly'] !== false) {
       return;
     }
