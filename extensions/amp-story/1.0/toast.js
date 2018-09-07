@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {toWin} from '../../../src/types';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 
 
@@ -34,11 +35,12 @@ const TOAST_VISIBLE_TIME_MS = 2600;
  */
 export class Toast {
   /**
-   * @param {!Window} win
-   * @param {!Node|string} childNodeOrText
    * @param {Element} storyEl
+   * @param {!Node|string} childNodeOrText
    */
-  static show(win, childNodeOrText, storyEl) {
+  static show(storyEl, childNodeOrText) {
+    const win = toWin(storyEl.ownerDocument.defaultView)
+
     const toast = createElementWithAttributes(win.document, 'div',
         /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME}));
 
