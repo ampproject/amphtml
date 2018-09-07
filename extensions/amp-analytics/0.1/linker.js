@@ -15,36 +15,28 @@
  */
 
 import {WindowInterface} from '../../../src/window-interface';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {crc32} from './crc32';
+import {user} from '../../../src/log';
 
 /** @const {string} */
-const DELIMITER = '~';
+const DELIMITER = '*';
+const KEY_VALIDATOR = /^[a-zA-Z0-9\-_.]+$/;
+const TAG = 'amp-analytics/linker';
+
 
 /**
- * Creates the linker param from the given config, and returns the url with
- * the given param attached.
+ * Generate the completed querystring.
+ * <paramName>=<version>*<checksum>*<key1>*<value1>*<key2>*<value2>...
  * @param {string} version
  * @param {!Object} pairs
  * @return {string}
  */
 export function createLinker(version, pairs) {
-  if (!pairs || !Object.keys(pairs).length) {
+  const encodedPairs = serialize(pairs);
+  if (encodedPairs === '') {
     return '';
   }
-
-  return generateParam(version, pairs);
-}
-
-
-/**
- * Generate the completed querystring.
- * <paramName>=<version>~<checksum>~<key1>~<value1>~<key2>~<value2>...
- * @param {string} version
- * @param {!Object} pairs
- * @return {string}
- */
-function generateParam(version, pairs) {
-  const encodedPairs = encodePairs(pairs);
   const checksum = getCheckSum(encodedPairs);
   return [version, checksum, encodedPairs].join(DELIMITER);
 }
@@ -85,11 +77,19 @@ function getFingerprint() {
  * @param {!Object} pairs
  * @return {string}
  */
-function encodePairs(pairs) {
-  const keys = Object.keys(pairs);
-
-  return keys
-      .map(key => encode(key) + DELIMITER + encode(pairs[key]))
+function serialize(pairs) {
+  if (!pairs) {
+    return '';
+  }
+  return Object.keys(pairs)
+      .filter(key => {
+        const valid = KEY_VALIDATOR.test(key);
+        if (!valid) {
+          user().error(TAG, 'Invalid linker key: ' + key);
+        }
+        return valid;
+      })
+      .map(key => key + DELIMITER + encode(pairs[key]))
       .join(DELIMITER);
 }
 
@@ -110,5 +110,5 @@ function getMinSinceEpoch() {
  * @param {string} value
  */
 function encode(value) {
-  return encodeURIComponent(String(value)).replace(/~/g, '%7E');
+  return base64UrlEncodeFromString(String(value));
 }
