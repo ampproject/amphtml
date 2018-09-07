@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {toWin} from '../../../src/types';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {toWin} from '../../../src/types';
 
 
 /** @private @const {string} */
@@ -39,7 +39,7 @@ export class Toast {
    * @param {!Node|string} childNodeOrText
    */
   static show(storyEl, childNodeOrText) {
-    const win = toWin(storyEl.ownerDocument.defaultView)
+    const win = toWin(storyEl.ownerDocument.defaultView);
 
     const toast = createElementWithAttributes(win.document, 'div',
         /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME}));
