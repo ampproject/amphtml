@@ -4,12 +4,14 @@
       "id": "google",
       "name": "Google AMP Cache",
       "docs": "https://developers.google.com/amp/cache/",
+      "cacheDomain": "cdn.ampproject.org",
       "updateCacheApiDomainSuffix": "cdn.ampproject.org"
     },
     {
       "id": "cloudflare",
       "name": "Cloudflare AMP Cache",
       "docs": "https://amp.cloudflare.com/",
+      "cacheDomain": "cdn.cloudflare.com",
       "updateCacheApiDomainSuffix": "amp.cloudflare.com"
     }
   ]

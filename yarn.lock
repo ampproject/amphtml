@@ -5837,7 +5837,7 @@ gulp-match@^1.0.3:
   dependencies:
     minimatch "^3.0.3"
 
-gulp-regexp-sourcemaps@1.0.1:
+gulp-regexp-sourcemaps@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/gulp-regexp-sourcemaps/-/gulp-regexp-sourcemaps-1.0.1.tgz#a8812244852c10950683a948e1c0dad0b1249979"
   dependencies:
