@@ -15,6 +15,7 @@
  */
 
 import {
+  addMissingParamsToUrl,
   addParamToUrl,
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
@@ -531,6 +532,24 @@ describe('addParamsToUrl', () => {
     url = addParamsToUrl('https://${host}/${path}#hash-value', params);
 
     expect(url).to.equal('https://${host}/${path}?hello=world&foo=bar#hash-value');
+  });
+});
+
+describe('addMissingParamsToUrl', () => {
+  let url;
+  const params = {
+    hello: 'world',
+    foo: 'bar',
+    replace: 'error',
+    safe: 'error',
+  };
+  beforeEach(() => {
+    url = 'https://www.ampproject.org/get/here?replace=1&safe#hash-value';
+  });
+
+  it('should not replace existing params', () => {
+    expect(addMissingParamsToUrl(url, params)).to.equal(
+        'https://www.ampproject.org/get/here?replace=1&safe&hello=world&foo=bar#hash-value');
   });
 });
 
