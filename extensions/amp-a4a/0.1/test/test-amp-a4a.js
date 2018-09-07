@@ -2341,6 +2341,42 @@ describe('amp-a4a', () => {
         });
       });
     });
+
+    it('should fail gracefully if race conditions nullify adPromise', () => {
+      return createIframePromise().then(f => {
+        const fixture = f;
+        setupForAdTesting(fixture);
+        const a4aElement = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.adPromise_ = null;
+        a4a.getAmpDoc = () => a4a.win.document;
+        a4a.getResource = () => {
+          return {
+            layoutCanceled: () => {},
+          };
+        };
+        a4a.mutateElement = func => func();
+        a4a.togglePlaceholder = sandbox.spy();
+
+        // We don't really care about the behavior of the following methods, so
+        // long as they're called the appropriate number of times. We stub them
+        // out here because they would otherwise throw errors unrelated to the
+        // behavior actually being tested.
+        const initiateAdRequestMock =
+            sandbox.stub(AmpA4A.prototype, 'initiateAdRequest');
+        initiateAdRequestMock.returns(undefined);
+        const tearDownSlotMock = sandbox.stub(AmpA4A.prototype, 'tearDownSlot');
+        tearDownSlotMock.returns(undefined);
+        const destroyFrameMock = sandbox.stub(AmpA4A.prototype, 'destroyFrame');
+        destroyFrameMock.returns(undefined);
+        sandbox.stub(analytics, 'triggerAnalyticsEvent');
+        const callback = sandbox.spy();
+
+        return a4a.refresh(callback).then(() => {
+          expect(callback).to.not.be.called;
+        });
+      });
+    });
   });
 
   describe('buildCallback', () => {

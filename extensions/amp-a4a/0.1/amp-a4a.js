@@ -915,13 +915,11 @@ export class AmpA4A extends AMP.BaseElement {
     dev().assert(!this.isRefreshing);
     this.isRefreshing = true;
     this.tearDownSlot();
-    //this.initiateAdRequest();
-    debugger;
+    this.initiateAdRequest();
     if (!this.adPromise_) {
       // For whatever reasons, the adPromise has been nullified, and we will be
       // unable to proceed. The current creative will continue to be displayed.
-      this.isRefreshing = false;
-      return;
+      return Promise.resolve();
     }
     const promiseId = this.promiseId_;
     return dev().assert(this.adPromise_).then(() => {
@@ -994,7 +992,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() { debugger;
+  layoutCallback() {
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
@@ -1077,7 +1075,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Attempts to tear down and set all state variables to initial conditions.
    * @protected
    */
-  tearDownSlot() { debugger;
+  tearDownSlot() {
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
     this.uiHandler.applyUnlayoutUI();
@@ -1119,7 +1117,7 @@ export class AmpA4A extends AMP.BaseElement {
    *   this.isRefreshing is true.
    * @protected
    */
-  destroyFrame(force = false) { debugger;
+  destroyFrame(force = false) {
     if (!force && this.isRefreshing) {
       return;
     }
@@ -1214,7 +1212,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Forces the UI Handler to collapse this slot.
    * @visibleForTesting
    */
-  forceCollapse() { debugger;
+  forceCollapse() {
     if (this.isRefreshing) {
       // If, for whatever reason, the new creative would collapse this slot,
       // stick with the old creative until the next refresh cycle.
