@@ -150,7 +150,8 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       // Wrapper must additionally have `will-change: transform` to avoid iOS
       // rendering bug where contents inside the `-webkit-overflow-scrolling`
       // element would occasionally fail to paint. This bug appears to trigger
-      // more often when Shadow DOM is involved.
+      // more often when Shadow DOM is involved. The cost of this is relatively
+      // low since this only adds one additional layer for the body.
       'will-change': 'transform',
     });
     // Other properties will be copied from the `<body>`.
