@@ -120,7 +120,7 @@ describe('Linker', () => {
       output: '1*10d75fz*0x3*MHgz*_gb*X2di*g.b*Zy5i*nn-*bm4t',
     },
     {
-      description: 'ignore invalid keys',
+      description: 'ignores invalid keys',
       version: '1',
       pairs: {
         '*invalid': '123',
@@ -130,7 +130,7 @@ describe('Linker', () => {
       expectErrors: 1,
     },
     {
-      description: 'return empty string if all keys are invalid',
+      description: 'returns empty string if all keys are invalid',
       version: '1',
       pairs: {
         '*invalid': '123',
@@ -138,6 +138,36 @@ describe('Linker', () => {
       },
       output: '',
       expectErrors: 2,
+    },
+    {
+      description: 'works for Google Analytics generated Client ID',
+      version: '1',
+      pairs: {
+        '_ga': '1218435055.1536188913',
+      },
+      output: '1*im1xrd*_ga*MTIxODQzNTA1NS4xNTM2MTg4OTEz',
+    },
+    {
+      description: 'works for AMP CID API generated Client ID',
+      version: '1',
+      pairs: {
+        '_ga': 'amp-' +
+          'oRg8vByriPdstwLgkz-UNWbp2P13vNFsnhES5vW8s5WodTOoea0mTiY7X62utLyz',
+      },
+      output: '1*s5ix2m*_ga*' +
+        'YW1wLW9SZzh2QnlyaVBkc3R3TGdrei1VTldicDJQMT' +
+        'N2TkZzbmhFUzV2VzhzNVdvZFRPb2VhMG1UaVk3WDYydXRMeXo.',
+    },
+    {
+      description: 'works for AMP Viewer generated Client ID',
+      version: '1',
+      pairs: {
+        '_ga':
+            'WgcaAD4XN2lydhQVNFruk6X8zwoUg6K2RnaRlhjs6CXvTv4aJV-3oVLdI1WxxvJb',
+      },
+      output: '1*m7cqu6*_ga*' +
+        'V2djYUFENFhOMmx5ZGhRVk5GcnVrNlg4endvVWc2Sz' +
+        'JSbmFSbGhqczZDWHZUdjRhSlYtM29WTGRJMVd4eHZKYg..',
     },
   ];
 
