@@ -23,9 +23,15 @@ import {Deferred} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {getService, registerServiceBuilder} from '../../../src/service';
-import {listenFor} from '../../../src/iframe-helper';
+import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
+
+/** @const {string} */
+const TAG = 'RECAPTCHA-SERVICE';
+
+/** @const {string} */
+const MESSAGE_TAG = 'amp-recaptcha-';
 
 export class AmpRecaptchaService {
 
@@ -82,6 +88,39 @@ export class AmpRecaptchaService {
   }
 
   /**
+   * Function to call .execute() on the recaptcha API within
+   * our iframe, to dispatch recaptcha actions.
+   * Returns a Promise that resolves the recaptcha token.
+   * @param {String} action
+   * @return {Promise}
+   */
+  execute(action) {
+    // TODO(torch2424): Find a way to know which message is for which Promise
+    // Want to use an ID system, since we don't want a queue, we want to allow all requests to launch at once
+    return new Promise((resolve, reject) => {
+      if (!this.iframe_) {
+        reject(new Error('An iframe is not created. You must register before executing'));
+        return;
+      }
+
+      this.recaptchaApiReady_.then(() => {
+
+        const message = dict({
+          'action': 'amp_' + action,
+        });
+        
+        // Send the message
+        postMessage(
+          dev().assertElement(this.iframe_),
+          MESSAGE_TAG + 'action',
+          message,
+          '*',
+          true);
+      });
+    });
+  }
+
+  /**
    * Function to create our recaptcha boostrap iframe.
    * @param {!Element} element
    * @private
@@ -90,16 +129,12 @@ export class AmpRecaptchaService {
 
     /* the third parameter 'recaptcha' ties it to the 3p/recaptcha.js */
     this.iframe_ = getIframe(this.win_, element, 'recaptcha');
-
-    const listenIframe = (evName, cb) => listenFor(
-        dev().assertElement(this.iframe_),
-        evName,
-        cb,
-        true);
     
-    this.unlisteners_.push(
-      listenIframe('ready', this.recaptchaApiReady_.resolve)
-    );
+    this.unlisteners_ = [
+      this.listenIframe_(MESSAGE_TAG + 'ready', this.recaptchaApiReady_.resolve),
+      this.listenIframe_(MESSAGE_TAG + 'token', this.tokenMessageHandler.bind(this)),
+      this.listenIframe_(MESSAGE_TAG + 'error', this.tokenMessageHandler.bind(this))
+    ];
 
     this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
     this.body_.appendChild(this.iframe_);
@@ -135,6 +170,25 @@ export class AmpRecaptchaService {
       cb,
       true);
   }
+
+  /**
+   * Function to handle token messages from the recaptcha iframe
+   * @param {Function} callback
+   * @param {Object} data
+   */
+   tokenMessageHandler_(callback, data) {
+    callback(data.token);
+   }
+
+  /**
+   * Function to handle error messages from the recaptcha iframe
+   * @param {Function} callback
+   * @param {Object} data
+   */
+  errorMessageHandler_(data) {
+    callback(new Error(data.error));
+  }
+
 }
 
 /**

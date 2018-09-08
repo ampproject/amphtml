@@ -51,7 +51,7 @@ export function recaptcha(global, data) {
       iframeMessagingClient = new IframeMessagingClient(global);
       iframeMessagingClient.setSentinel(global.context.sentinel);
       iframeMessagingClient.registerCallback(
-          'action',
+          MESSAGE_TAG + 'action',
           actionTypeHandler.bind(this, grecaptcha, siteKey)
       );
       iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'ready');
