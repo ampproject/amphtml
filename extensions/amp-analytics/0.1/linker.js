@@ -26,32 +26,38 @@ const TAG = 'amp-analytics/linker';
 
 
 /**
- * Generate the completed querystring.
- * <paramName>=<version>*<checksum>*<key1>*<value1>*<key2>*<value2>...
+ * Creates the linker string, in the format of
+ * <version>*<checksum>*<serializedIds>
+ *
+ * where
+ *   checksum: base36(CRC32(<fingerprint>*<minuteSinceEpoch>*<serializedIds>))
+ *   serializedIds: <id1>*<idValue1>*<id2>*<idValue2>...
+ *                  values are base64 encoded
+ *   fingerprint: <userAgent>*<timezoneOffset>*<userLanguage>
+ *
  * @param {string} version
- * @param {!Object} pairs
+ * @param {!Object} ids
  * @return {string}
  */
-export function createLinker(version, pairs) {
-  const encodedPairs = serialize(pairs);
-  if (encodedPairs === '') {
+export function createLinker(version, ids) {
+  const serializedIds = serialize(ids);
+  if (serializedIds === '') {
     return '';
   }
-  const checksum = getCheckSum(encodedPairs);
-  return [version, checksum, encodedPairs].join(DELIMITER);
+  const checksum = getCheckSum(serializedIds);
+  return [version, checksum, serializedIds].join(DELIMITER);
 }
 
 
 /**
  * Create a unique checksum hashing the fingerprint and a few other values.
- * base36(CRC32(fingerprint + timestampRoundedInMin + kv pairs))
- * @param {string} encodedPairs
+ * @param {string} serializedIds
  * @return {string}
  */
-function getCheckSum(encodedPairs) {
+function getCheckSum(serializedIds) {
   const fingerprint = getFingerprint();
   const timestamp = getMinSinceEpoch();
-  const crc = crc32([fingerprint, timestamp, encodedPairs].join(DELIMITER));
+  const crc = crc32([fingerprint, timestamp, serializedIds].join(DELIMITER));
   // Encoded to base36 for less bytes.
   return crc.toString(36);
 }
@@ -59,7 +65,6 @@ function getCheckSum(encodedPairs) {
 
 /**
  * Generates a semi-unique value for page visitor.
- * User Agent + ~ + timezone + ~ + language.
  * @return {string}
  */
 function getFingerprint() {
