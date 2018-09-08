@@ -291,7 +291,7 @@ export class Expander {
         value = Promise.resolve(binding);
       }
       return value.then(val => {
-        this.maybeCollectVars_(opt_collectVars, name, val, opt_args);
+        this.maybeCollectVars_(name, val, opt_collectVars, opt_args);
 
         let result;
 
@@ -304,7 +304,7 @@ export class Expander {
         return result;
       }).catch(e => {
         rethrowAsync(e);
-        this.maybeCollectVars_(opt_collectVars, name, '', opt_args);
+        this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
         return Promise.resolve('');
       });
 
@@ -312,7 +312,7 @@ export class Expander {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      this.maybeCollectVars_(opt_collectVars, name, '', opt_args);
+      this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
       return Promise.resolve('');
     }
   }
@@ -343,11 +343,11 @@ export class Expander {
         // Normal case.
         result = NOENCODE_WHITELIST[name] ? value.toString() :
           encodeURIComponent(/** @type {string} */ (value));
-        this.maybeCollectVars_(opt_collectVars, name, value, opt_args);
+        this.maybeCollectVars_(name, value, opt_collectVars, opt_args);
       } else {
         // Most likely a broken binding gets us here.
         result = '';
-        this.maybeCollectVars_(opt_collectVars, name, '', opt_args);
+        this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
       }
 
       return result;
@@ -355,20 +355,20 @@ export class Expander {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      this.maybeCollectVars_(opt_collectVars, name, '', opt_args);
+      this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
       return '';
     }
   }
 
   /**
    * Collect vars if given the optional object. Handles formatting of kv pairs.
-   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
-   *   variable resolutions.
    * @param {string} name Name of the macro.
    * @param {*} value Raw macro resolution value.
+   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   *   variable resolutions.
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    */
-  maybeCollectVars_(opt_collectVars, name, value, opt_args) {
+  maybeCollectVars_(name, value, opt_collectVars, opt_args) {
     if (!opt_collectVars) {
       return;
     }
