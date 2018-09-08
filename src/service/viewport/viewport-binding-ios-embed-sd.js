@@ -22,6 +22,7 @@ import {
   computedStyle,
   px,
   setImportantStyles,
+  setInitialDisplay,
 } from '../../style';
 import {dev} from '../../log';
 import {htmlFor} from '../../static-template';
@@ -124,6 +125,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     this.wrapper_ = dev().assertElement(scroller.firstElementChild);
 
     // Notice that the -webkit-overflow-scrolling is set later.
+    setInitialDisplay(this.scroller_, 'block');
     setImportantStyles(this.scroller_, {
       'overflow-x': 'hidden',
       'overflow-y': 'auto',
@@ -135,7 +137,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       'margin': '0',
       'width': '100%',
       'box-sizing': 'border-box',
-      'display': 'block',
       'padding-top': '0px', // Will be updated for top offset.
       // The scroller must have a 1px transparent border for two purposes:
       // (1) to cancel out margin collapse in body's children so that position

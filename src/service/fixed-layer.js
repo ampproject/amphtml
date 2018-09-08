@@ -19,6 +19,7 @@ import {
   computedStyle,
   getVendorJsPropertyName,
   setImportantStyles,
+  setInitialDisplay,
   setStyle,
   setStyles,
   toggle,
@@ -739,7 +740,6 @@ class TransferLayerBody {
       borderImage: 'none',
       boxSizing: 'border-box',
       boxShadow: 'none',
-      display: 'block',
       float: 'none',
       margin: 0,
       opacity: 1,
@@ -749,6 +749,7 @@ class TransferLayerBody {
       transition: 'none',
       visibility: 'visible',
     });
+    setInitialDisplay(this.layer_, 'block');
     doc.documentElement.appendChild(this.layer_);
   }
 
