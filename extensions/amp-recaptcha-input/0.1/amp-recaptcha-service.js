@@ -60,6 +60,12 @@ export class AmpRecaptchaService {
 
     /** @private {Array} */
     this.unlisteners_ = [];
+
+    /** @private {number} */
+    this.executeCount_ = 0;
+
+    /** @private {Object} */
+    this.executeMap = {};
   }
 
   /**
@@ -97,27 +103,33 @@ export class AmpRecaptchaService {
   execute(action) {
     // TODO(torch2424): Find a way to know which message is for which Promise
     // Want to use an ID system, since we don't want a queue, we want to allow all requests to launch at once
-    return new Promise((resolve, reject) => {
-      if (!this.iframe_) {
-        reject(new Error('An iframe is not created. You must register before executing'));
-        return;
-      }
+    if (!this.iframe_) {
+      return Promise.reject(new Error('An iframe is not created. You must register before executing'));
+    }
 
-      this.recaptchaApiReady_.then(() => {
+    const executePromise = new Deffered();
+    const messageId = this.executeCount_;
+    this.executeMap_[this.executeCount_] = {
+      resolve: executePromise.resolve,
+      reject: executePromise.reject
+    };
+    this.executeCount_++;
+    this.recaptchaApiReady_.then(() => {
 
-        const message = dict({
-          'action': 'amp_' + action,
-        });
-        
-        // Send the message
-        postMessage(
-          dev().assertElement(this.iframe_),
-          MESSAGE_TAG + 'action',
-          message,
-          '*',
-          true);
+      const message = dict({
+        'id': messageId,
+        'action': 'amp_' + action,
       });
+
+      // Send the message
+      postMessage(
+        dev().assertElement(this.iframe_),
+        MESSAGE_TAG + 'action',
+        message,
+        '*',
+        true);
     });
+    return executePromise;
   }
 
   /**
@@ -135,6 +147,8 @@ export class AmpRecaptchaService {
       this.listenIframe_(MESSAGE_TAG + 'token', this.tokenMessageHandler.bind(this)),
       this.listenIframe_(MESSAGE_TAG + 'error', this.tokenMessageHandler.bind(this))
     ];
+    this.executeCount_ = 0;
+    this.executeMap = {};
 
     this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
     this.body_.appendChild(this.iframe_);
@@ -153,6 +167,8 @@ export class AmpRecaptchaService {
       this.iframeLoadPromise_ = null;
       this.recaptchaApiReady_ = new Deferred();
       this.unlisteners_ = [];
+      this.executeCount_ = 0;
+      this.executeMap = {};
     }
   }
 
@@ -177,7 +193,7 @@ export class AmpRecaptchaService {
    * @param {Object} data
    */
    tokenMessageHandler_(callback, data) {
-    callback(data.token);
+    this.executeMap[data.id].resolve(data.token);
    }
 
   /**
@@ -186,7 +202,7 @@ export class AmpRecaptchaService {
    * @param {Object} data
    */
   errorMessageHandler_(data) {
-    callback(new Error(data.error));
+    this.executeMap[data.id].reject(new Error(data.error));
   }
 
 }

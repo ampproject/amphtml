@@ -80,11 +80,13 @@ function actionTypeHandler(grecaptcha, siteKey, data) {
   })./*OK*/then(function(token) {
     // .then() promise pollyfilled by recaptcha api script
     iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'token', {
+      id: data.id,
       token,
     });
   }).catch(function(err) {
     user().error(TAG, err);
     iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
+      id: data.id,
       'error': err.message,
     }));
   });
