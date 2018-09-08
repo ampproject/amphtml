@@ -22,7 +22,7 @@
 import {dev, user} from './log';
 import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
-import {setStyle, setStyles} from './style';
+import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
 
 /**
@@ -334,7 +334,7 @@ export function applyStaticLayout(element) {
       element.sizerElement =
           element.querySelector('i-amphtml-sizer') || undefined;
     } else if (layout == Layout.NODISPLAY) {
-      applyNoDisplayLayout(element);
+      toggle(element, false);
     }
     return layout;
   }
@@ -432,7 +432,7 @@ export function applyStaticLayout(element) {
   if (layout == Layout.NODISPLAY) {
     // CSS defines layout=nodisplay automatically with `display:none`. Thus
     // no additional styling is needed.
-    applyNoDisplayLayout(element);
+    toggle(element, false);
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: dev().assertString(width),
@@ -484,13 +484,4 @@ export function applyStaticLayout(element) {
     setStyle(element, 'height', 0);
   }
   return layout;
-}
-
-
-/**
- * @param {!Element} element
- */
-function applyNoDisplayLayout(element) {
-  // TODO(jridgewell, #17475): This should be using the [hidden] attribute.
-  setStyle(element, 'display', 'none');
 }
