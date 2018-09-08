@@ -279,7 +279,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} */
     this.pausedStateToRestore_ = false;
 
-    /** @private {string} */
+    /** @private {?string} */
     this.title_ = null;
 
     /** @private @const {!LocalizationService} */
