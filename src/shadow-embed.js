@@ -31,7 +31,7 @@ import {
 } from './dom';
 import {dev} from './log';
 import {installCssTransformer} from './style-installer';
-import {setStyle} from './style';
+import {setInitialDisplay, setStyle} from './style';
 import {toArray, toWin} from './types';
 
 /**
@@ -202,7 +202,7 @@ export function importShadowBody(shadowRoot, body, deep) {
     resultBody = dev().assertElement(doc.importNode(body, deep));
   } else {
     resultBody = doc.createElement('amp-body');
-    setStyle(resultBody, 'display', 'block');
+    setInitialDisplay(resultBody, 'block');
     for (let i = 0; i < body.attributes.length; i++) {
       resultBody.setAttribute(
           body.attributes[0].name, body.attributes[0].value);

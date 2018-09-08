@@ -174,6 +174,23 @@ export function assertDoesNotContainDisplay(styles) {
   return styles;
 }
 
+/**
+ * Sets the initial display style of an element. This is a last resort. If you
+ * can set the initial display using CSS, YOU MUST.
+ * DO NOT USE THIS TO ARBITRARILY SET THE DISPLAY STYLE AFTER INITIAL SETUP.
+ *
+ * @param {!Element} el
+ * @param {string} value
+ */
+export function setInitialDisplay(el, value) {
+  const {style} = el;
+  dev().assert(value !== '' && value !== 'none', 'Initial display value must ' +
+    'not be "none". Use toggle instead.');
+  dev().assert(!style['display'], 'setInitialDisplay MUST NOT be used for ' +
+    'resetting the display style. If you are looking for display:none ' +
+    'toggling, use toggle instead.');
+  style['display'] = value;
+}
 
 
 /**
