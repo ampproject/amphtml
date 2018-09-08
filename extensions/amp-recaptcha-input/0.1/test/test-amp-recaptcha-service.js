@@ -102,7 +102,27 @@ describes.realWin('amp-recaptcha-service', {
             expect(recaptchaService.iframe_).to.be.not.ok;
           });
     });
-  });
+    });
+
+  it('should unlisten to all listeners,' +
+    ' once all registered elements unregister', () => {
+      expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+      return getRecaptchaInput().then(ampRecaptchaInput => {
+        expect(ampRecaptchaInput).to.be.ok;
+        return recaptchaService
+          .register(ampRecaptchaInput).then(() => {
+            expect(recaptchaService.unlisteners_.length).to.be.equal(1);
+
+            // Stub out the unlisten function
+            const unlistener = sandbox.stub();
+            recaptchaService.unlisteners_[0] = unlistener;
+
+            recaptchaService.unregister();
+            expect(recaptchaService.unlisteners_.length).to.be.equal(0);
+            expect(unlistener).to.be.called;
+          });
+      });
+    });
 
 });
 

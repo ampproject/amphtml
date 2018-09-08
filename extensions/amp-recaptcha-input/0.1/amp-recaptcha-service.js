@@ -96,11 +96,10 @@ export class AmpRecaptchaService {
         evName,
         cb,
         true);
-
-    const disposers = [
-      listenIframe('ready', this.willBeReady_.resolve),
-    ];
-    this.unlistenMessage_ = () => disposers.forEach(d => d());
+    
+    this.unlisteners_.push(
+      listenIframe('ready', this.recaptchaApiReady_.resolve)
+    );
 
     this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
     this.body_.appendChild(this.iframe_);
@@ -114,9 +113,27 @@ export class AmpRecaptchaService {
   dispose_() {
     if (this.iframe_) {
       removeElement(this.iframe_);
+      this.unlisteners_.forEach(unlistener => unlistener());
       this.iframe_ = null;
       this.iframeLoadPromise_ = null;
+      this.recaptchaApiReady_ = new Deferred();
+      this.unlisteners_ = [];
     }
+  }
+
+  /**
+   * Function to create a listener for our iframe
+   * @param {String} evName
+   * @param {Function} cb
+   * @return {Function}
+   * @private
+   */
+  listenIframe_(evName, cb) {
+    return listenFor(
+      dev().assertElement(this.iframe_),
+      evName,
+      cb,
+      true);
   }
 }
 
