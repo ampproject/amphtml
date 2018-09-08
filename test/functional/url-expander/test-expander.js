@@ -358,36 +358,36 @@ describes.realWin('Expander', {
     });
 
     describe('collectVars', () => {
-      const tests = [
+      const asyncTests = [
         {
           description: 'sibling macros',
           input: 'UPPERCASE(aaaa)LOWERCASE(BBB)',
           output: {
-            UPPERCASE: 'AAAA',
-            LOWERCASE: 'bbb',
+            'UPPERCASE(aaaa)': 'AAAA',
+            'LOWERCASE(BBB)': 'bbb',
           },
         },
         {
           description: 'nested macros',
           input: 'LOWERCASE(UPPERCASE(TRIM(aAaA    )))',
           output: {
-            TRIM: 'aAaA',
-            UPPERCASE: 'AAAA',
-            LOWERCASE: 'aaaa',
+            'TRIM(aAaA)': 'aAaA',
+            'UPPERCASE([object Promise])': 'AAAA',
+            'LOWERCASE([object Promise])': 'aaaa',
           },
         },
         {
           description: 'macros that resolve undefined should be empty string',
           input: 'UPPERCASE(foo)BROKEN',
           output: {
-            UPPERCASE: 'FOO',
+            'UPPERCASE(foo)': 'FOO',
             BROKEN: '',
           },
         },
       ];
 
       describe('called asyncronously', () => {
-        tests.forEach(test => {
+        asyncTests.forEach(test => {
           const {description, input, output} = test;
           it(description, function*() {
             const vars = {};
@@ -403,14 +403,42 @@ describes.realWin('Expander', {
           expander.expand(input, mockBindings, /* opt_collectVars */ vars);
           yield macroTask();
           expect(vars).to.deep.equal({
-            CLIENT_ID: 'amp-GA12345',
-            UPPERCASE: 'FOO',
+            'CLIENT_ID(__ga)': 'amp-GA12345',
+            'UPPERCASE(foo)': 'FOO',
           });
         });
       });
 
+      const syncTests = [
+        {
+          description: 'sibling macros',
+          input: 'UPPERCASE(aaaa)LOWERCASE(BBB)',
+          output: {
+            'UPPERCASE(aaaa)': 'AAAA',
+            'LOWERCASE(BBB)': 'bbb',
+          },
+        },
+        {
+          description: 'nested macros',
+          input: 'LOWERCASE(UPPERCASE(TRIM(aAaA    )))',
+          output: {
+            'TRIM(aAaA)': 'aAaA',
+            'UPPERCASE(aAaA)': 'AAAA',
+            'LOWERCASE(AAAA)': 'aaaa',
+          },
+        },
+        {
+          description: 'macros that resolve undefined should be empty string',
+          input: 'UPPERCASE(foo)BROKEN',
+          output: {
+            'UPPERCASE(foo)': 'FOO',
+            BROKEN: '',
+          },
+        },
+      ];
+
       describe('called syncronously', () => {
-        tests.forEach(test => {
+        syncTests.forEach(test => {
           const {description, input, output} = test;
           it(description, () => {
             const vars = {};
@@ -420,7 +448,7 @@ describes.realWin('Expander', {
           });
         });
 
-        it('should return empty string for async functions', () => {
+        it('should not add async functions', () => {
           const vars = {};
           const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
           allowConsoleError(() => {
@@ -428,8 +456,7 @@ describes.realWin('Expander', {
                 /* opt_sync */ true);
           });
           expect(vars).to.deep.equal({
-            CLIENT_ID: '',
-            UPPERCASE: 'FOO',
+            'UPPERCASE(foo)': 'FOO',
           });
         });
       });
