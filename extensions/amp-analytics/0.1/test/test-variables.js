@@ -23,7 +23,6 @@ import {
   variableServiceFor,
 } from '../variables';
 import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describe('amp-analytics.VariableService', function() {
   let variables;

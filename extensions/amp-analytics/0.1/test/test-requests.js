@@ -19,7 +19,6 @@ import {ExpansionOptions, installVariableService} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Requests', {amp: 1}, env => {
   let ampdoc;
