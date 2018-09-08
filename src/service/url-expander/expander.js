@@ -56,8 +56,7 @@ export class Expander {
       return opt_sync ? url : Promise.resolve(url);
     }
 
-    const expr = this.variableSource_
-        .getExpr(opt_bindings, /*opt_ignoreArgs */ true);
+    const expr = this.variableSource_.getExpr(opt_bindings);
 
     const matches = this.findMatches_(url, expr, opt_whiteList);
     // if no keywords move on

@@ -109,8 +109,8 @@ export class VariableSource {
     /** @protected @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @private {!RegExp|undefined} */
-    this.replacementExpr_ = undefined;
+    /** @private {?RegExp} */
+    this.replacementExpr_ = null;
 
     /** @private @const {!Object<string, !ReplacementDef>} */
     this.replacements_ = Object.create(null);
