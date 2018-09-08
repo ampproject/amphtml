@@ -41,8 +41,8 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     /** @private {!./amp-recaptcha-service.AmpRecaptchaService} */
     this.recaptchaService_ = recaptchaServiceFor(this.win);
 
-    /** @private {boolean} */
-    this.isRegistered_ = false;
+    /** @private {?Promise} */
+    this.registerPromise_ = null;
 
     /** @private {boolean} */
     this.isExperimentEnabled_ = isExperimentOn(this.win, 'amp-recaptcha-input');
@@ -80,17 +80,17 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.isRegistered_) {
-      this.isRegistered_ = true;
-      return this.recaptchaService_.register(this.element);
+    if (!this.registerPromise_) {
+      this.registerPromise_ = this.recaptchaService_.register(this.element);
     }
+    return this.registerPromise_;
   }
 
   /** @override */
   unlayoutCallback() {
-    if (this.isRegistered_) {
+    if (this.registerPromise_) {
       this.recaptchaService_.unregister();
-      this.isRegistered_ = false;
+      this.registerPromise_ = null;
     }
     return true;
   }

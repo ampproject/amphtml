@@ -68,7 +68,7 @@ describes.realWin('amp-recaptcha-input', {
       return getRecaptchaInput().then(ampRecaptchaInput => {
         expect(
             ampRecaptchaInput.implementation_
-                .isRegistered_
+                .registerPromise_
         ).to.be.ok;
         expect(
             ampRecaptchaInput.implementation_
@@ -81,7 +81,7 @@ describes.realWin('amp-recaptcha-input', {
       return getRecaptchaInput().then(ampRecaptchaInput => {
         expect(
             ampRecaptchaInput.implementation_
-                .isRegistered_
+                .registerPromise_
         ).to.be.ok;
         expect(
             ampRecaptchaInput.implementation_
@@ -101,7 +101,7 @@ describes.realWin('amp-recaptcha-input', {
       return getRecaptchaInput().then(ampRecaptchaInput => {
         expect(
             ampRecaptchaInput.implementation_
-                .isRegistered_
+                .registerPromise_
         ).to.be.ok;
         expect(
             ampRecaptchaInput.implementation_
@@ -120,7 +120,7 @@ describes.realWin('amp-recaptcha-input', {
       return getRecaptchaInput().then(ampRecaptchaInput => {
         expect(
             ampRecaptchaInput.implementation_
-                .isRegistered_
+                .registerPromise_
         ).to.be.ok;
         expect(
             ampRecaptchaInput.implementation_
@@ -129,7 +129,7 @@ describes.realWin('amp-recaptcha-input', {
         ampRecaptchaInput.unlayoutCallback();
         expect(
             ampRecaptchaInput.implementation_
-                .isRegistered_
+                .registerPromise_
         ).to.not.be.ok;
         expect(
             ampRecaptchaInput.implementation_
@@ -143,6 +143,5 @@ describes.realWin('amp-recaptcha-input', {
 
       });
     });
-
   });
 });
