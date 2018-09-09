@@ -24,7 +24,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
-const TAG = 'amp-analytics-linker';
+const TAG = 'amp-analytics/linker-manager';
 
 /**
  * The name of the Google CID API as it appears in the meta tag to opt-in.
@@ -40,10 +40,10 @@ export class LinkerManager {
    * @param {?string} type
    */
   constructor(ampdoc, config, type) {
-    /** @private */
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {JsonObject} */
+    /** @private {?JsonObject|undefined} */
     this.config_ = config['linkers'];
 
     /** @private {!JsonObject} */
@@ -55,7 +55,7 @@ export class LinkerManager {
     /** @private {!Array<Promise>} */
     this.allLinkerPromises_ = [];
 
-    /** @private {JsonObject} */
+    /** @private {!JsonObject} */
     this.resolvedLinkers_ = dict();
   }
 
@@ -67,11 +67,11 @@ export class LinkerManager {
    * before they are ready.
    */
   init() {
-    if (!this.config_) {
+    if (!isObject(this.config_)) {
       return;
     }
 
-    this.config_ = this.processConfig_(this.config_);
+    this.config_ = this.processConfig_(/** @type {!JsonObject} */(this.config_));
     // Each linker config has it's own set of macros to resolve.
     this.allLinkerPromises_ = Object.keys(this.config_).map(name => {
       const ids = this.config_[name]['ids'];
