@@ -823,7 +823,7 @@ export class AmpStory extends AMP.BaseElement {
   extractTitle_() {
     if (this.element.hasAttribute('title')) {
       this.title_ = this.element.getAttribute('title');
-      this.element.setAttribute('title', '');
+      this.element.removeAttribute('title');
     }
   }
 
