@@ -603,8 +603,8 @@ describes.realWin('amp-video', {
           expect(video.hasAttribute('src')).to.be.false;
           // also make sure removed from amp-video since Stories media-pool
           // may copy it back from amp-video.
-          expect(video.parentNode.hasAttribute('src')).to.be.false;
-          expect(video.parentNode.hasAttribute('type')).to.be.false;
+          expect(v.hasAttribute('src')).to.be.false;
+          expect(v.hasAttribute('type')).to.be.false;
           const sources = video.querySelectorAll('source');
           expect(sources.length).to.equal(1);
           const cachedSource = sources[0];
