@@ -36,7 +36,7 @@ export class LinkerManager {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {JsonObject} config
+   * @param {!JsonObject} config
    * @param {?string} type
    */
   constructor(ampdoc, config, type) {
