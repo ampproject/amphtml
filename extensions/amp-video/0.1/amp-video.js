@@ -317,6 +317,10 @@ class AmpVideo extends AMP.BaseElement {
       const srcSource = this.createSourceElement_(src, type);
       const ampOrigSrc = this.element.getAttribute('amp-orig-src');
       srcSource.setAttribute('amp-orig-src', ampOrigSrc);
+      // Also make sure src is removed from amp-video since Stories media-pool
+      // may copy it back from amp-video.
+      this.element.removeAttribute('src');
+      this.element.removeAttribute('type');
       sources.unshift(srcSource);
     }
 

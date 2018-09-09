@@ -601,6 +601,10 @@ describes.realWin('amp-video', {
         }).then(v => {
           video = v.querySelector('video');
           expect(video.hasAttribute('src')).to.be.false;
+          // also make sure removed from amp-video since Stories media-pool
+          // may copy it back from amp-video.
+          expect(v.hasAttribute('src')).to.be.false;
+          expect(v.hasAttribute('type')).to.be.false;
           const sources = video.querySelectorAll('source');
           expect(sources.length).to.equal(1);
           const cachedSource = sources[0];
@@ -677,15 +681,21 @@ describes.realWin('amp-video', {
 
     describe('after visible', () => {
       it('should add original source after cache one - single src', () => {
+        let ampVideoElement;
         return getVideo({
           'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
           'amp-orig-src': 'https://example.com/video.mp4',
         }).then(v => {
+          ampVideoElement = v;
           video = v.querySelector('video');
           makeVisible();
           return visiblePromise;
         }).then(() => {
           expect(video.hasAttribute('src')).to.be.false;
+          // also make sure removed from amp-video since Stories media-pool
+          // may copy it back from amp-video.
+          expect(ampVideoElement.hasAttribute('src')).to.be.false;
+          expect(ampVideoElement.hasAttribute('type')).to.be.false;
           const sources = video.querySelectorAll('source');
           expect(sources.length).to.equal(2);
           expect(sources[0].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video.mp4');
