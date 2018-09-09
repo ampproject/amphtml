@@ -162,9 +162,15 @@ const SHARE_WIDGET_PILL_CONTAINER = {
       children: [
         {
           tag: 'span',
-          attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
-          localizedStringId:
-              LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
+          attrs: dict({'class': 'i-amphtml-story-share-pill-background'}),
+          children: [
+            {
+              tag: 'span',
+              attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
+              localizedStringId:
+                  LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
+            },
+          ],
         },
       ],
     },

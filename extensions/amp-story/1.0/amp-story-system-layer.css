@@ -303,10 +303,11 @@ div.i-amphtml-story-share-pill-container {
 /* Share text for share box */
 span.i-amphtml-story-share-pill-label {
   font-family: 'Roboto', sans-serif!important;
-  position: absolute!important;
-  right: 15px!important;
   text-align: center!important;
-  width: 60px!important;
+  /*position: absolute!important;
+  right: 15px!important;
+  /*width: 60px!important;*/
+  width: fit-content !important;
   font-size: 12px!important;
   font-weight: bold!important;
   letter-spacing: .5px!important;
@@ -325,14 +326,28 @@ span.i-amphtml-story-share-pill-label {
 .i-amphtml-story-share-pill:before {
   position: absolute!important;
   content: ''!important;
-  width: 58px!important;
+  /*width: 58px!important;*/
   height: 40px!important;
   padding: 0 16px!important;
-  background-color: rgba(255, 255, 255, .2)!important;
-  border-radius: 500px!important;
+  
+  
   box-sizing: initial !important;
-  transition: width 300ms ease-in-out!important;
   right: 0 !important;
+}
+
+.i-amphtml-story-share-pill-background {
+  background-color: rgba(255, 255, 255, .2)!important;
+  width: fit-content !important;
+  padding: 10px;
+  transition: width 300ms ease-in-out!important;
+  border-radius: 500px!important;
+  position: absolute;
+  right: 15px;
+}
+
+.i-amphtml-story-share-pill-background:hover {
+  background-color: rgba(255, 255, 255, .2)!important;
+  width: 100% !important;
 }
 
 [dir=rtl] .i-amphtml-story-share-pill:before {
