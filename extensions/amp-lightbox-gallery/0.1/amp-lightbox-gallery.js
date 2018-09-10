@@ -774,7 +774,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         toggle(this.element, true);
         setStyles(this.element, {
           opacity: 0,
-          display: '',
         });
         this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
         this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
@@ -976,9 +975,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
                 }), MOTION_DURATION_RATIO, ENTER_CURVE_);
               },
               () => {
-                setStyles(dev().assertElement(this.carousel_), {
+                const carousel = dev().assertElement(this.carousel_);
+                toggle(carousel, true);
+                setStyles(carousel, {
                   opacity: 0,
-                  display: '',
                 });
                 sourceElement.classList.add('i-amphtml-ghost');
                 this.element.ownerDocument.body.appendChild(transLayer);
