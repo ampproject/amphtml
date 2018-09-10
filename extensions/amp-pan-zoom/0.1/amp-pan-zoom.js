@@ -504,14 +504,8 @@ export class AmpPanZoom extends AMP.BaseElement {
     if (this.gestures_) {
       return;
     }
-    // TODO (#12881): this and the subsequent use of event.preventDefault
-    // is a temporary solution to #12362. We should revisit this problem after
-    // resolving #12881 or change the use of window.event to the specific event
-    // triggering the gesture.
-    this.gestures_ = Gestures.get(
-        this.element,
-        /* opt_shouldNotPreventDefault */ false
-    );
+
+    this.gestures_ = Gestures.get(this.element);
 
     this.gestures_.onPointerDown(() => {
       if (this.motion_) {
@@ -565,7 +559,6 @@ export class AmpPanZoom extends AMP.BaseElement {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
         .onGesture(SwipeXYRecognizer, e => {
-          event.preventDefault();
           const {
             deltaX,
             deltaY,
@@ -717,6 +710,7 @@ export class AmpPanZoom extends AMP.BaseElement {
     }));
     this.action_.trigger(this.element, 'transformEnd', transformEndEvent,
         ActionTrust.HIGH);
+    this.element.dispatchCustomEvent('transformEnd');
   }
 
   /**
@@ -897,7 +891,9 @@ export class AmpPanZoom extends AMP.BaseElement {
       this.scale_ = newScale;
       this.posX_ = newPosX;
       this.posY_ = newPosY;
-      return this.updatePanZoom_();
+      return this.updatePanZoom_().then(() => {
+        this.triggerTransformEnd_(newScale, newPosX, newPosY);
+      });
     }
   }
 
