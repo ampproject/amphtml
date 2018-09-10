@@ -630,6 +630,7 @@ describes.realWin('amp-consent', {
           'amp-consent:GH': CONSENT_ITEM_STATE.ACCEPTED,
         };
         ampConsent.buildCallback();
+        ampConsent.element.classList.remove('i-amphtml-notbuilt');
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
             .to.equal('none');
@@ -656,11 +657,13 @@ describes.realWin('amp-consent', {
                 'checkConsentHref': 'https://response3',
               },
             },
-            'postPromptUI': 'test',
+            // There's already an amp-consent from a parent beforeEach with a
+            // test postPromptUI
+            'postPromptUI': 'test2',
           });
           consentElement = createConsentElement(doc, defaultConfig);
           postPromptUI = doc.createElement('div');
-          postPromptUI.setAttribute('id', 'test');
+          postPromptUI.setAttribute('id', 'test2');
           consentElement.appendChild(postPromptUI);
           doc.body.appendChild(consentElement);
           ampConsent = new AmpConsent(consentElement);
@@ -668,6 +671,7 @@ describes.realWin('amp-consent', {
 
         it('hide postPromptUI', function* () {
           ampConsent.buildCallback();
+          ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
           expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
@@ -679,6 +683,7 @@ describes.realWin('amp-consent', {
             'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
           };
           ampConsent.buildCallback();
+          ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
           expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)

@@ -35,7 +35,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {setInitialDisplay, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
@@ -317,6 +317,10 @@ class AmpVideo extends AMP.BaseElement {
       const srcSource = this.createSourceElement_(src, type);
       const ampOrigSrc = this.element.getAttribute('amp-orig-src');
       srcSource.setAttribute('amp-orig-src', ampOrigSrc);
+      // Also make sure src is removed from amp-video since Stories media-pool
+      // may copy it back from amp-video.
+      this.element.removeAttribute('src');
+      this.element.removeAttribute('type');
       sources.unshift(srcSource);
     }
 
@@ -517,8 +521,8 @@ class AmpVideo extends AMP.BaseElement {
     }
     const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     const src = element.getAttribute('poster');
+    setInitialDisplay(poster, 'block');
     setStyles(poster, {
-      'display': 'block',
       'background-image': `url(${src})`,
       'background-size': 'cover',
     });
