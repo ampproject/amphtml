@@ -638,16 +638,14 @@ export function playAds(global) {
       postMessage({event: VideoEvents.PLAYING});
       adsManager.start();
     } catch (adError) {
-      postMessage({event: VideoEvents.PLAYING});
-      playVideo();
+      onAdError();
     }
   } else if (!adRequestFailed) {
     // Ad request did not yet resolve but also did not yet fail.
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    postMessage({event: VideoEvents.PLAYING});
-    playVideo();
+    onAdError();
   }
 }
 
@@ -721,6 +719,7 @@ export function onAdError() {
     adsManager.destroy();
   }
   videoPlayer.addEventListener(interactEvent, showControls);
+  // playVideo already contains postMessage({event: VideoEvents.PLAYING});
   playVideo();
 }
 
