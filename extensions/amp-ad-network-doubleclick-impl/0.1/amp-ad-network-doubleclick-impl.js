@@ -798,13 +798,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
       // is outside the viewport.
       this.expandFluidCreative_();
     }
-    super.viewportCallback(inViewport);
   }
 
   /** @override  */
@@ -937,6 +937,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         dev().error(TAG, 'Attempting to expand fluid creative without ' +
             'a properly set up friendly frame. Slot id: ' +
             this.element.getAttribute('data-amp-slot-index'));
+        return Promise.reject();
       }
       return this.attemptChangeHeight(
           this.iframe.contentWindow.document.body./*OK*/scrollHeight)
