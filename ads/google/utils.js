@@ -60,10 +60,12 @@ export function getMultiSizeDimensions(
   for (let i = 0; i < arrayOfSizeStrs.length; i++) {
 
     const sizeStr = arrayOfSizeStrs[i];
-    if (!isFluidPrimary && sizeStr.toLowerCase() == 'fluid') {
-      // If the primary size is fluid, then the dummy 320x50 size will
-      // automatically be included.
-      dimensions.push([320, 50]);
+    if (sizeStr.toLowerCase() == 'fluid') {
+      if (!isFluidPrimary) {
+        // If the primary size is fluid, then the dummy 320x50 size will
+        // automatically be included.
+        dimensions.push([320, 50]);
+      }
       continue;
     }
     const size = sizeStr.split('x');

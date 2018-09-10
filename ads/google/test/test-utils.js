@@ -79,13 +79,24 @@ describe('#getMultiSizeDimensions', () => {
   });
 
   it('should add dummy size for fluid', () => {
-    expect(getMultiSizeDimensions('fluid')).to.deep.equal([[320, 50]]);
+    expect(
+        getMultiSizeDimensions('fluid', 300, 300, /* useLowerBound */ false))
+        .to.deep.equal([[320, 50]]);
+  });
+
+  it('should not add dummy size for fluid if fluid is primary size', () => {
+    expect(getMultiSizeDimensions('fluid', 300, 300,
+        /* useLowerBound */ false,
+        /* isFluidPrimary */ true))
+        .to.deep.equal([]);
   });
 
   it('should allow fluid with fixed sizes', () => {
-    expect(getMultiSizeDimensions('fluid,300x300'))
+    expect(getMultiSizeDimensions(
+        'fluid,300x300', 300, 300, /* useLowerBound */ false))
         .to.deep.equal([[320, 50], [300, 300]]);
-    expect(getMultiSizeDimensions('300x300,fluid'))
+    expect(getMultiSizeDimensions(
+        '300x300,fluid', 300, 300, /* useLowerBound */ false))
         .to.deep.equal([[300, 300], [320, 50]]);
   });
 });
