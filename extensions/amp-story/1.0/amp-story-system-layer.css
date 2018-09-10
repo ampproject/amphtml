@@ -304,9 +304,7 @@ div.i-amphtml-story-share-pill-container {
 span.i-amphtml-story-share-pill-label {
   font-family: 'Roboto', sans-serif!important;
   text-align: center!important;
-  /*position: absolute!important;
-  right: 15px!important;
-  /*width: 60px!important;*/
+  float: right !important;
   width: fit-content !important;
   font-size: 12px!important;
   font-weight: bold!important;
@@ -320,6 +318,7 @@ span.i-amphtml-story-share-pill-label {
 [dir=rtl] span.i-amphtml-story-share-pill-label {
   right: auto !important;
   left: 15px !important;
+  float: left !important;
 }
 
 /* background for the share box */
@@ -329,25 +328,20 @@ span.i-amphtml-story-share-pill-label {
   /*width: 58px!important;*/
   height: 40px!important;
   padding: 0 16px!important;
-  
-  
+  transition: width 300ms ease-in-out!important;
   box-sizing: initial !important;
   right: 0 !important;
 }
 
 .i-amphtml-story-share-pill-background {
   background-color: rgba(255, 255, 255, .2)!important;
-  width: fit-content !important;
+  max-width: fit-content !important;
+  width: 150px;
   padding: 10px;
-  transition: width 300ms ease-in-out!important;
   border-radius: 500px!important;
   position: absolute;
   right: 15px;
-}
-
-.i-amphtml-story-share-pill-background:hover {
-  background-color: rgba(255, 255, 255, .2)!important;
-  width: 100% !important;
+  transition: width 300ms ease-in-out!important;
 }
 
 [dir=rtl] .i-amphtml-story-share-pill:before {
@@ -409,12 +403,13 @@ span.i-amphtml-story-share-pill-label {
   transition-delay: calc(30ms * 9)!important;
 }
 
-.i-amphtml-story-share-pill .i-amphtml-story-share-list {
-  padding: 0!important;
+.i-amphtml-story-share-pill:hover .i-amphtml-story-share-pill-background {
+  width: calc(100%-32px) !important;
+  max-width: 800px !important;
 }
 
-.i-amphtml-story-share-pill:hover:before {
-  width: calc(100% - 32px) !important;
+.i-amphtml-story-share-pill .i-amphtml-story-share-list {
+  padding: 0!important;
 }
 
 .i-amphtml-story-share-pill .i-amphtml-story-share-icon {
@@ -431,6 +426,7 @@ span.i-amphtml-story-share-pill-label {
   background-size: 24px 24px !important;
   background-position: center center !important;
   padding: 0 !important;
+  background-color: yellow;
 }
 
 [desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
@@ -446,10 +442,6 @@ span.i-amphtml-story-share-pill-label {
 
 [desktop] .i-amphtml-story-share-icon:active::before {
   display: none !important;
-}
-
-[desktop] .i-amphtml-story-share-list {
-  margin-right: 72px !important;
 }
 
 [dir=rtl][desktop] .i-amphtml-story-share-list {

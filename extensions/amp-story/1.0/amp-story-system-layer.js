@@ -31,7 +31,9 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
+import {setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import { px } from '../../../src/style';
 
 
 /** @private @const {string} */
@@ -567,8 +569,32 @@ export class SystemLayer {
         .appendChild(shareWidget.build(getAmpdoc(this.parentEl_)));
 
     this.systemLayerEl_.appendChild(this.sharePillContainerNode_);
-  }
+    SHARE_DD = 'i-amphtml-story-share-pill';
+    this.getShadowRoot().addEventListener('mouseover', event => {
+      const target = dev().assertElement(event.target);
 
+      if (matches(target, `.${SHARE_DD}, .${SHARE_DD} *`)) {
+        this.swag();
+      }
+    });
+    
+  }
+  /**
+   * Builds and appends the share pill. Desktop only.
+   * @private
+   */
+  swag() {
+
+    const shareList = this.systemLayerEl_.querySelector('.i-amphtml-story-share-list');
+    const elem = this.systemLayerEl_.querySelector('.i-amphtml-story-share-pill-label');
+    const style = this.win_.getComputedStyle(elem);
+    const width = elem.offsetWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
+    const bg = this.systemLayerEl_.querySelector('.i-amphtml-story-share-pill-background');
+    //bg.style.maxwidth = null;
+    //setImportantStyles(bg, {'max-width': px(margin)});
+    const margin = width + 20;
+    setImportantStyles(shareList, {'margin-right': px(margin)});
+  }
   /**
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
    * @private
