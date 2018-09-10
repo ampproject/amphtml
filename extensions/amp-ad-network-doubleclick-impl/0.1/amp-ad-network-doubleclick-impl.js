@@ -921,7 +921,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * contingent on when viewportCallback is invoked.
    * @return {!Promise} The promise that resolves once the height change
    *   attempt either succeeds or is rejected. If no attempt is made,
-   *   Promise.resovle() is returned. Used mainly for testing.
+   *   Promise.resovle() is returned. If for any reason the body of the iframe
+   *   cannot be accessed, the promise will be rejected. Used mainly for
+   *   testing.
    */
   expandFluidCreative_() {
     if (this.isFluidRequest_ &&
@@ -937,7 +939,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         dev().error(TAG, 'Attempting to expand fluid creative without ' +
             'a properly set up friendly frame. Slot id: ' +
             this.element.getAttribute('data-amp-slot-index'));
-        return Promise.reject();
+        return Promise.reject('Cannot access body of friendly frame');
       }
       return this.attemptChangeHeight(
           this.iframe.contentWindow.document.body./*OK*/scrollHeight)
