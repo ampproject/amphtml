@@ -77,4 +77,15 @@ describe('#getMultiSizeDimensions', () => {
         /* Ignore lowerbound */ false);
     verifyArray(actual, 0, multiSizes.length);
   });
+
+  it('should add dummy size for fluid', () => {
+    expect(getMultiSizeDimensions('fluid')).to.deep.equal([[320, 50]]);
+  });
+
+  it('should allow fluid with fixed sizes', () => {
+    expect(getMultiSizeDimensions('fluid,300x300'))
+        .to.deep.equal([[320, 50], [300, 300]]);
+    expect(getMultiSizeDimensions('300x300,fluid'))
+        .to.deep.equal([[300, 300], [320, 50]]);
+  });
 });

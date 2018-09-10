@@ -385,8 +385,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');
     if (!this.isFluidRequest_) {
-      this.isFluidRequest_ =
-          this.element.getAttribute('data-multi-size').indexOf('fluid') != -1;
+      const multiSizeStr = this.element.getAttribute('data-multi-size');
+      this.isFluidRequest_ = multiSizeStr &&
+          multiSizeStr.indexOf('fluid') != -1;
     }
   }
 
