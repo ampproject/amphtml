@@ -114,8 +114,8 @@ The new attributes:
 
 The following guidelines apply to the image for the publisher logo:
 
-- The file must be a raster file, such as `.jpg`, `.png`, or `.gif`.  Don't use vector files, such as `.svg` or `.eps`.
-- Don't use animation.
+- The file should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- Avoid animated images, such as animated gifs.
 - The graphic part of the logo should be legible on the background color.
 
 <table>
@@ -156,19 +156,24 @@ The following guidelines apply to the image for the publisher logo:
   </tr>
 </table>
 
-- The logo must be a square, not a rectangle.
+- The logo shape should be a square, not a rectangle.
 - The background color should not be transparent.
-- Publishers should only use one logo per brand that is consistent across AMP stories.
+- Use one logo per brand that is consistent across AMP stories.
+- The logo should be at least 96x96 pixels.
 
 #### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
 
 The following guidelines apply to the image for the story poster image(s):
 
-- The poster image must be representative of the entire AMP story.
-- The poster image must be visible to the user when the user begins the AMP story.  However, the image file URL used in the metadata does not have to match exactly the URL used on the first page of the story.  The URL used in the metadata can include sizing, cropping, or minor styling changes for the preview purpose.
-- The poster image must be a raster file, such as `.jpg`, `.png`, or `.gif`.  Don't use vector files, such as `.svg` or `.eps`.
+- The poster image should be representative of the entire AMP story.
+- The poster image should be visible to the user when the user begins the AMP story.  However, the image file URL used in the metadata does not have to match exactly the URL used on the first page of the story.  The URL used in the metadata can include sizing, cropping, or minor styling changes for the preview purpose.
+- The poster image should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
 - The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
-- If the first page of the story includes video as the background, use a thumbnail from the video as the poster image.  The thumbnail should be the most representative frame from the video.  Verify that the thumbnail that you provide is useful and representative of the AMP story.  The first frame in a video is often not representative of the video.
+- If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
+- Each poster image should meet the recommended minimium size:
+  - Portrait: 696px x 928px
+  - Landscape: 928px x 696px
+  - Square: 928px x 928px
 
 ## Overview
 
