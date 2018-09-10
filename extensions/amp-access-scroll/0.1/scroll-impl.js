@@ -21,6 +21,7 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {parseQueryString} from '../../../src/url';
 
 const TAG = 'amp-access-scroll-elt';
 
@@ -133,17 +134,105 @@ export class ScrollAccessVendor extends AccessClientAdapter {
 
   /** @override */
   authorize() {
+    // TODO(dbow): Handle timeout?
     return super.authorize()
         .then(response => {
           const isStory = this.ampdoc.getRootNode().querySelector(
               'amp-story[standalone]');
-          if (response && response.scroll && !isStory) {
-            const config = this.accessSource_.getAdapterConfig();
-            new ScrollElement(this.ampdoc).show(this.accessSource_, config);
-            addAnalytics(this.ampdoc, config);
+          if (response && response.scroll) {
+            if (!isStory) {
+              const config = this.accessSource_.getAdapterConfig();
+              new ScrollElement(this.ampdoc).show(this.accessSource_, config);
+              addAnalytics(this.ampdoc, config);
+            }
+          } else {
+            if (
+              response &&
+              response.blocker &&
+              ScrollContentBlocker.shouldCheck(this.ampdoc)
+            ) {
+              new ScrollContentBlocker(this.ampdoc, this.accessSource_).check();
+            }
           }
           return response;
         });
+  }
+}
+
+/**
+ * Coordinate with the Scroll App's Content Blocker on Safari browsers.
+ */
+class ScrollContentBlocker {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {boolean}
+   * @static
+   */
+  static shouldCheck(ampdoc) {
+    const queryParams = parseQueryString(ampdoc.win.location.search);
+    return !queryParams['scrollnoblockerrefresh'];
+  }
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
+   */
+  constructor(ampdoc, accessSource) {
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
+    this.accessSource_ = accessSource;
+  }
+
+  /**
+   * Check if the Scroll App blocks the resource request.
+   */
+  check() {
+    Services.xhrFor(this.ampdoc_.win)
+        .fetchJson('https://block.scroll.com/check.json')
+        .then(() => false, e => this.blockedByScrollApp_(e.message))
+        .then(blockedByScrollApp => {
+          if (blockedByScrollApp === true) {
+            this.connectWithApp_();
+          }
+        });
+  }
+
+  /**
+   * Whether the given error message indicates the Scroll App blocked the
+   * request.
+   *
+   * @param {string} message
+   * @return {boolean}
+   * @private
+   */
+  blockedByScrollApp_(message) {
+    return (
+      message.indexOf(
+          'XHR Failed fetching (https://block.scroll.com/...): ' +
+          'Resource blocked by content blocker'
+      ) === 0
+    );
+  }
+
+  /**
+   * Redirect to the Scroll App connect page.
+   *
+   * @private
+   */
+  connectWithApp_() {
+    // TODO(dbow): ping /embed/event
+    this.accessSource_.buildUrl((
+      'https://beta.scroll.com/loginwithapp'
+      + '?rid=READER_ID'
+      + '&cid=CLIENT_ID(scroll1)'
+      + '&c=CANONICAL_URL'
+      + '&o=AMPDOC_URL'
+      + '&x=QUERY_PARAM(scrollx)'
+    ), false).then(url => {
+      this.ampdoc_.win.top.location = url;
+    });
   }
 }
 
