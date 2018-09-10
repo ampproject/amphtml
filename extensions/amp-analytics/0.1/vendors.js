@@ -966,7 +966,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'linkers': {
       '_gl': {
         'ids': {
-          '_ga': '${clientId(AMP_ECID_GOOGLE,,_ga)}',
+          '_ga': '${clientId}',
         },
       },
     },
