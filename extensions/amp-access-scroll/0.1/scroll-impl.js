@@ -25,19 +25,19 @@ import {installStylesForDoc} from '../../../src/style-installer';
 const TAG = 'amp-access-scroll-elt';
 
 /**
- * @param {string} hostname
+ * @param {string} connectHostname
  * @return {!JsonObject}
  */
-const accessConfig = hostname => {
+const accessConfig = connectHostname => {
   /** @const {!JsonObject} */
   const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
-    'authorization': `https://${hostname}/amp/access`
+    'authorization': `${connectHostname}/amp/access`
                      + '?rid=READER_ID'
                      + '&cid=CLIENT_ID(scroll1)'
                      + '&c=CANONICAL_URL'
                      + '&o=AMPDOC_URL'
                      + '&x=QUERY_PARAM(scrollx)',
-    'pingback': `https://${hostname}/amp/pingback`
+    'pingback': `${connectHostname}/amp/pingback`
                 + '?rid=READER_ID'
                 + '&cid=CLIENT_ID(scroll1)'
                 + '&c=CANONICAL_URL'
@@ -52,13 +52,13 @@ const accessConfig = hostname => {
 };
 
 /**
- * @param {string} hostname
+ * @param {string} connectHostname
  * @return {!JsonObject}
  */
-const analyticsConfig = hostname => {
+const analyticsConfig = connectHostname => {
   const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'requests': {
-      'scroll': `https://${hostname}/amp/analytics`
+      'scroll': `${connectHostname}/amp/analytics`
                 + '?rid=ACCESS_READER_ID'
                 + '&cid=CLIENT_ID(scroll1)'
                 + '&c=CANONICAL_URL'
@@ -85,13 +85,25 @@ const analyticsConfig = hostname => {
 };
 
 /**
+ * The TLD for scroll URLs.
+ *
+ * Enables amp-access-scroll to work with dev/staging environments.
+ *
  * @param {!JsonObject} config
  * @return {string}
  */
-const scrollHostname = config => {
-  return getMode().development && config['hostname']
-    ? config['hostname']
-    : 'connect.scroll.com';
+const scrollTld = config => {
+  return getMode().development && config['tld'] ? config['tld'] : '.scroll.com';
+};
+
+/**
+ * The connect server hostname.
+ *
+ * @param {!JsonObject} config
+ * @return {string}
+ */
+const connectHostname = config => {
+  return `https://connect${scrollTld(config)}`;
 };
 
 /**
@@ -110,8 +122,8 @@ export class ScrollAccessVendor extends AccessClientAdapter {
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
   constructor(ampdoc, accessService, accessSource) {
-    const hostname = scrollHostname(accessSource.getAdapterConfig());
-    super(ampdoc, accessConfig(hostname), {
+    const scrollConfig = accessSource.getAdapterConfig();
+    super(ampdoc, accessConfig(connectHostname(scrollConfig)), {
       buildUrl: accessSource.buildUrl.bind(accessSource),
       collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
@@ -198,9 +210,8 @@ class ScrollElement {
             this.ampdoc_.getBody().removeChild(this.placeholder_);
           };
           const docInfo = Services.documentInfoForDoc(this.ampdoc_);
-          const hostname = scrollHostname(vendorConfig);
           this.iframe_.setAttribute('src',
-              `https://${hostname}/amp/scrollbar`
+              `${connectHostname(vendorConfig)}/amp/scrollbar`
                 + '?rid=' + encodeURIComponent(readerId)
                 + '&o=' + encodeURIComponent(this.ampdoc_.getUrl())
                 + '&c=' + encodeURIComponent(docInfo.canonicalUrl));
@@ -231,8 +242,7 @@ function addAnalytics(ampdoc, vendorConfig) {
       'script', dict({
         'type': 'application/json',
       }));
-  const hostname = scrollHostname(vendorConfig);
-  const ANALYTICS_CONFIG = analyticsConfig(hostname);
+  const ANALYTICS_CONFIG = analyticsConfig(connectHostname(vendorConfig));
   scriptElem.textContent = JSON.stringify(ANALYTICS_CONFIG);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = ANALYTICS_CONFIG;
