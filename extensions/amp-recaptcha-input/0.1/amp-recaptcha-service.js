@@ -62,7 +62,7 @@ export class AmpRecaptchaService {
     this.unlisteners_ = [];
 
     /** @private {Object} */
-    this.executeMap = {};
+    this.executeMap_ = {};
   }
 
   /**
@@ -104,13 +104,13 @@ export class AmpRecaptchaService {
       return Promise.reject(new Error('An iframe is not created. You must register before executing'));
     }
 
-    const executePromise = new Deffered();
+    const executePromise = new Deferred();
     const messageId = resourceId;
     this.executeMap_[messageId] = {
       resolve: executePromise.resolve,
       reject: executePromise.reject
     };
-    this.recaptchaApiReady_.then(() => {
+    this.recaptchaApiReady_.promise.then(() => {
 
       const message = dict({
         'id': messageId,
@@ -125,7 +125,7 @@ export class AmpRecaptchaService {
         '*',
         true);
     });
-    return executePromise;
+    return executePromise.promise;
   }
 
   /**
@@ -143,7 +143,7 @@ export class AmpRecaptchaService {
       this.listenIframe_(MESSAGE_TAG + 'token', this.tokenMessageHandler_.bind(this)),
       this.listenIframe_(MESSAGE_TAG + 'error', this.errorMessageHandler_.bind(this))
     ];
-    this.executeMap = {};
+    this.executeMap_ = {};
 
     this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
     this.body_.appendChild(this.iframe_);
@@ -162,7 +162,7 @@ export class AmpRecaptchaService {
       this.iframeLoadPromise_ = null;
       this.recaptchaApiReady_ = new Deferred();
       this.unlisteners_ = [];
-      this.executeMap = {};
+      this.executeMap_ = {};
     }
   }
 
@@ -187,8 +187,8 @@ export class AmpRecaptchaService {
    * @param {Object} data
    */
    tokenMessageHandler_(callback, data) {
-     this.executeMap[data.id].resolve(data.token);
-     delete this.executeMap[data.id];
+     this.executeMap_[data.id].resolve(data.token);
+     delete this.executeMap_[data.id];
    }
 
   /**
@@ -197,10 +197,9 @@ export class AmpRecaptchaService {
    * @param {Object} data
    */
   errorMessageHandler_(data) {
-    this.executeMap[data.id].reject(new Error(data.error));
-    delete this.executeMap[data.id];
+    this.executeMap_[data.id].reject(new Error(data.error));
+    delete this.executeMap_[data.id];
   }
-
 }
 
 /**
