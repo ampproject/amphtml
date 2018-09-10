@@ -632,9 +632,6 @@ class AmpVideo extends AMP.BaseElement {
     * @override
   */
   firstLayoutCompleted() {
-    if (this.getPlaceholder() == null) {
-      this.togglePlaceholder(false);
-    }
     this.fadeOutBlur_();
   }
 
@@ -653,7 +650,7 @@ class AmpVideo extends AMP.BaseElement {
     */
   fadeOutBlur_() {
     const placeholder = this.getPlaceholder();
-    // checks for the existance of a visible blurry placeholder
+    // checks for the existence of a visible blurry placeholder
     if (placeholder && placeholder.classList.contains('i-amphtml-blur') &&
       isExperimentOn(this.win, 'blurry-placeholder')) {
       setImportantStyles(placeholder, {'opacity': 0.0});
