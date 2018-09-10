@@ -638,14 +638,16 @@ export function playAds(global) {
       postMessage({event: VideoEvents.PLAYING});
       adsManager.start();
     } catch (adError) {
-      onAdError();
+      postMessage({event: VideoEvents.PLAYING});
+      playVideo();
     }
   } else if (!adRequestFailed) {
     // Ad request did not yet resolve but also did not yet fail.
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    onAdError();
+    postMessage({event: VideoEvents.PLAYING});
+    playVideo();
   }
 }
 
@@ -702,8 +704,8 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
+  videoPlayer.addEventListener(interactEvent, showControls);
   if (playbackStarted) {
-    videoPlayer.addEventListener(interactEvent, showControls);
     playVideo();
   }
 }
@@ -719,7 +721,6 @@ export function onAdError() {
     adsManager.destroy();
   }
   videoPlayer.addEventListener(interactEvent, showControls);
-  // playVideo already contains postMessage({event: VideoEvents.PLAYING});
   playVideo();
 }
 
