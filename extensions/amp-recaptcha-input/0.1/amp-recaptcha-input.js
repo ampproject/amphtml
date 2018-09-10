@@ -41,7 +41,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     super(element);
 
     /** @private {?string} **/
-    this.siteKey_ = null;
+    this.sitekey_ = null;
 
     /** @private {?string} */
     this.action_ = null;
@@ -67,7 +67,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       return;
     }
 
-    this.siteKey_ = user().assert(
+    this.sitekey_ = user().assert(
         this.element.getAttribute('data-sitekey'),
         'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
         this.element);
@@ -113,11 +113,20 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     return true;
   }
 
-  /** @override */
+  /**
+   * Function to return the recaptcha token.
+   * Will be an override of AMP.AsyncInput
+   */
   getValue() {
-    return this.recaptchaService_.execute(
-        this.element.getResourceId(), this.siteKey_, this.action_
-    );
+    if (this.sitekey_ && this.action_) {
+      return this.recaptchaService_.execute(
+          this.element.getResourceId(), this.sitekey_, this.action_
+      );
+    }
+    return Promise.reject(new Error(
+        'amp-recaptcha-input requires both the data-sitekey,' +
+        ' and data-action attribute'
+    ));
   }
 }
 

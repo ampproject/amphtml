@@ -41,8 +41,8 @@ export function recaptcha(global, data) {
   );
 
   let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
-  const siteKey = data.sitekey;
-  recaptchaApiUrl += siteKey;
+  const {sitekey} = data;
+  recaptchaApiUrl += sitekey;
 
   loadScript(global, recaptchaApiUrl, function() {
     const {grecaptcha} = global;
@@ -74,7 +74,7 @@ function actionTypeHandler(grecaptcha, data) {
     return;
   }
 
-  grecaptcha.execute(data.siteKey, {
+  grecaptcha.execute(data.sitekey, {
     action: data.action,
   })./*OK*/then(function(token) {
     // .then() promise pollyfilled by recaptcha api script

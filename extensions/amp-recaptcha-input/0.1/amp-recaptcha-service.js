@@ -91,14 +91,14 @@ export class AmpRecaptchaService {
   /**
    * Function to call .execute() on the recaptcha API within
    * our iframe, to dispatch recaptcha actions.
-   * Takes in an element resource ID, siteKey, and the action to execute.
+   * Takes in an element resource ID, sitekey, and the action to execute.
    * Returns a Promise that resolves the recaptcha token.
    * @param {number} resourceId
-   * @param {string} siteKey
+   * @param {string} sitekey
    * @param {string} action
    * @return {Promise}
    */
-  execute(resourceId, siteKey, action) {
+  execute(resourceId, sitekey, action) {
     if (!this.iframe_) {
       return Promise.reject(new Error(
           'An iframe is not created. You must register before executing'
@@ -115,7 +115,7 @@ export class AmpRecaptchaService {
 
       const message = dict({
         'id': messageId,
-        'siteKey': siteKey,
+        'sitekey': sitekey,
         'action': 'amp_' + action,
       });
 
