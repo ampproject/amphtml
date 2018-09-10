@@ -23,7 +23,6 @@ import {
   variableServiceFor,
 } from '../variables';
 import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describe('amp-analytics.VariableService', function() {
   let variables;
@@ -168,14 +167,9 @@ describe('amp-analytics.VariableService', function() {
     beforeEach(() => {
       ampdoc = env.ampdoc;
       win = env.win;
-      toggleExperiment(env.win, 'url-replacement-v2', true);
       installVariableService(win);
       variables = variableServiceFor(win);
       urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
-    });
-
-    afterEach(() => {
-      toggleExperiment(env.win, 'url-replacement-v2');
     });
 
     function check(input, output) {

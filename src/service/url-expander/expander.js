@@ -55,10 +55,10 @@ export class Expander {
     if (!url.length) {
       return opt_sync ? url : Promise.resolve(url);
     }
-    const expr = this.variableSource_
-        .getExpr(opt_bindings, /*opt_ignoreArgs */ true, opt_whiteList);
 
-    const matches = this.findMatches_(url, expr);
+    const expr = this.variableSource_.getExpr(opt_bindings);
+
+    const matches = this.findMatches_(url, expr, opt_whiteList);
     // if no keywords move on
     if (!matches.length) {
       return opt_sync ? url : Promise.resolve(url);
@@ -72,10 +72,12 @@ export class Expander {
    * Structures the regex matching into the desired format
    * @param {string} url url to be substituted
    * @param {RegExp} expression regex containing all keywords
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *   that can be substituted.
    * @return {Array<Object<string, string|number>>} array of objects representing
    *  matching keywords
    */
-  findMatches_(url, expression) {
+  findMatches_(url, expression, opt_whiteList) {
     const matches = [];
     url.replace(expression, (match, name, startPosition) => {
       const {length} = match;
@@ -86,7 +88,10 @@ export class Expander {
         name,
         length,
       };
-      matches.push(info);
+
+      if (!opt_whiteList || opt_whiteList[name]) {
+        matches.push(info);
+      }
     });
     return matches;
   }
@@ -252,10 +257,14 @@ export class Expander {
       // If there is no sync resolution we can not wait.
       user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
-    } else {
+    } else if (bindingInfo.async !== undefined && bindingInfo.async !== null) {
       // Prefer the async over the sync but it may not exist.
-      binding = bindingInfo.async || bindingInfo.sync;
+      binding = bindingInfo.async;
+    } else {
+      // Use sync if it is the last option.
+      binding = bindingInfo.sync;
     }
+
     return opt_sync ?
       this.evaluateBindingSync_(binding, name, opt_args, opt_collectVars) :
       this.evaluateBindingAsync_(binding, name, opt_args, opt_collectVars);
@@ -285,6 +294,8 @@ export class Expander {
         value = Promise.resolve(binding);
       }
       return value.then(val => {
+        this.maybeCollectVars_(name, val, opt_collectVars, opt_args);
+
         let result;
 
         if (val == null) {
@@ -293,15 +304,10 @@ export class Expander {
           result = NOENCODE_WHITELIST[name] ? val : encodeURIComponent(val);
         }
 
-        if (opt_collectVars) {
-          opt_collectVars[name] = result;
-        }
         return result;
       }).catch(e => {
         rethrowAsync(e);
-        if (opt_collectVars) {
-          opt_collectVars[name] = '';
-        }
+        this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
         return Promise.resolve('');
       });
 
@@ -309,9 +315,7 @@ export class Expander {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      if (opt_collectVars) {
-        opt_collectVars[name] = '';
-      }
+      this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
       return Promise.resolve('');
     }
   }
@@ -338,17 +342,16 @@ export class Expander {
         // may return a promise.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
-      } else if (typeof value === 'string' || typeof value === 'number') {
+      } else if (typeof value === 'string' || typeof value === 'number' ||
+          typeof value === 'boolean') {
         // Normal case.
         result = NOENCODE_WHITELIST[name] ? value.toString() :
           encodeURIComponent(/** @type {string} */ (value));
+        this.maybeCollectVars_(name, value, opt_collectVars, opt_args);
       } else {
         // Most likely a broken binding gets us here.
         result = '';
-      }
-
-      if (opt_collectVars) {
-        opt_collectVars[name] = result;
+        this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
       }
 
       return result;
@@ -356,10 +359,30 @@ export class Expander {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      if (opt_collectVars) {
-        opt_collectVars[name] = '';
-      }
+      this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
       return '';
     }
+  }
+
+  /**
+   * Collect vars if given the optional object. Handles formatting of kv pairs.
+   * @param {string} name Name of the macro.
+   * @param {*} value Raw macro resolution value.
+   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   *   variable resolutions.
+   * @param {?Array=} opt_args Arguments to be passed if binding is function.
+   */
+  maybeCollectVars_(name, value, opt_collectVars, opt_args) {
+    if (!opt_collectVars) {
+      return;
+    }
+
+    let args = '';
+    if (opt_args) {
+      const rawArgs = opt_args.filter(arg => arg !== '')
+          .join(',');
+      args = `(${rawArgs})`;
+    }
+    opt_collectVars[`${name}${args}`] = value || '';
   }
 }

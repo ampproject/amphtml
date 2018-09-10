@@ -1663,7 +1663,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(a.href).to.equal('http://whitelisted.com/link?out=QUERY_PARAM(foo)&guid=123');
     });
 
-    it('should add URL parameters and repalce whitelisted'
+    it('should add URL parameters and replace whitelisted'
       + ' values for http whitelisted URL\'s(non-secure)', () => {
       a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'CLIENT_ID');
@@ -1676,7 +1676,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
 
-    it('should add URL parameters and not repalce whitelisted'
+    it('should add URL parameters and not replace whitelisted'
       + ' values for non whitelisted http URL\'s(non-secure)', () => {
       a.href = 'http://example2.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'CLIENT_ID');
