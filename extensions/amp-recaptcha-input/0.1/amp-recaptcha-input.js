@@ -28,6 +28,8 @@ import {
 } from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
+import {user} from '../../../src/log';
+
 
 /** @const */
 const TAG = 'amp-recaptcha-input';
@@ -37,6 +39,12 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {?string} **/
+    this.siteKey = null;
+
+    /** @private {?string} */
+    this.action_ = null;
 
     /** @private {!./amp-recaptcha-service.AmpRecaptchaService} */
     this.recaptchaService_ = recaptchaServiceFor(this.win);
@@ -55,6 +63,16 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     if (!this.isExperimentEnabled_) {
       return;
     }
+
+    this.siteKey_ = user().assert(
+      this.element.getAttribute('data-sitekey'),
+      'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+      this.element);
+
+    this.action_ = user().assert(
+      this.element.getAttribute('data-action'),
+      'The data-action attribute is required for <amp-recaptcha-input> %s',
+      this.element);
 
     return this.mutateElement(() => {
       toggle(this.element);
@@ -89,6 +107,11 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   unlayoutCallback() {
     this.recaptchaService_.unregister();
     return true;
+  }
+
+  /** @override */
+  getValue() {
+    return this.recaptchaService_.execute(this.element.getResourceId(), this.action_)
   }
 }
 

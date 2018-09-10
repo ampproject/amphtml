@@ -61,9 +61,6 @@ export class AmpRecaptchaService {
     /** @private {Array} */
     this.unlisteners_ = [];
 
-    /** @private {number} */
-    this.executeCount_ = 0;
-
     /** @private {Object} */
     this.executeMap = {};
   }
@@ -96,24 +93,23 @@ export class AmpRecaptchaService {
   /**
    * Function to call .execute() on the recaptcha API within
    * our iframe, to dispatch recaptcha actions.
+   * Takes in an element resource ID, and the action to execute.
    * Returns a Promise that resolves the recaptcha token.
+   * @param {number} resourceId
    * @param {String} action
    * @return {Promise}
    */
-  execute(action) {
-    // TODO(torch2424): Find a way to know which message is for which Promise
-    // Want to use an ID system, since we don't want a queue, we want to allow all requests to launch at once
+  execute(resourceId, action) {
     if (!this.iframe_) {
       return Promise.reject(new Error('An iframe is not created. You must register before executing'));
     }
 
     const executePromise = new Deffered();
-    const messageId = this.executeCount_;
-    this.executeMap_[this.executeCount_] = {
+    const messageId = resourceId;
+    this.executeMap_[messageId] = {
       resolve: executePromise.resolve,
       reject: executePromise.reject
     };
-    this.executeCount_++;
     this.recaptchaApiReady_.then(() => {
 
       const message = dict({
@@ -147,7 +143,6 @@ export class AmpRecaptchaService {
       this.listenIframe_(MESSAGE_TAG + 'token', this.tokenMessageHandler.bind(this)),
       this.listenIframe_(MESSAGE_TAG + 'error', this.tokenMessageHandler.bind(this))
     ];
-    this.executeCount_ = 0;
     this.executeMap = {};
 
     this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
@@ -167,7 +162,6 @@ export class AmpRecaptchaService {
       this.iframeLoadPromise_ = null;
       this.recaptchaApiReady_ = new Deferred();
       this.unlisteners_ = [];
-      this.executeCount_ = 0;
       this.executeMap = {};
     }
   }
@@ -193,7 +187,8 @@ export class AmpRecaptchaService {
    * @param {Object} data
    */
    tokenMessageHandler_(callback, data) {
-    this.executeMap[data.id].resolve(data.token);
+     this.executeMap[data.id].resolve(data.token);
+     delete this.executeMap[data.id];
    }
 
   /**
@@ -203,6 +198,7 @@ export class AmpRecaptchaService {
    */
   errorMessageHandler_(data) {
     this.executeMap[data.id].reject(new Error(data.error));
+    delete this.executeMap[data.id];
   }
 
 }
