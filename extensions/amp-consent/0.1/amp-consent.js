@@ -41,7 +41,6 @@ import {
 } from '../../../src/dom';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {scopedQuerySelectorAll} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
