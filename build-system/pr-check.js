@@ -216,13 +216,12 @@ function isIntegrationTest(filePath) {
 
 /**
  * Determines if the given file contains flag configurations, by comparing it
- * against the well-known json config filenames for prod and canary.
+ * against the well-known json config filename.
  * @param {string} filePath
  * @return {boolean}
  */
 function isFlagConfig(filePath) {
-  const filename = path.basename(filePath);
-  return (filename == 'prod-config.json' || filename == 'canary-config.json');
+  return path.basename(filePath) == 'amp-config.json';
 }
 
 /**
@@ -554,18 +553,19 @@ function main() {
   const buildTargets = determineBuildTargets(files);
 
   // Exit early if flag-config files are mixed with runtime files.
-  if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
-    console.log(fileLogPrefix, colors.red('ERROR:'),
-        'Looks like your PR contains',
-        colors.cyan('{prod|canary}-config.json'),
-        'in addition to some other files');
-    const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
-    console.log(fileLogPrefix, colors.red('ERROR:'),
-        'Please move these files to a separate PR:',
-        colors.cyan(nonFlagConfigFiles.join(', ')));
-    stopTimer('pr-check.js', startTime);
-    process.exit(1);
-  }
+  // TODO(rsimha): Temporarily disabled to allow #18009. Re-enable soon after.
+  // if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
+  //   console.log(fileLogPrefix, colors.red('ERROR:'),
+  //       'Looks like your PR contains',
+  //       colors.cyan('amp-config.json'),
+  //       'in addition to some other files');
+  //   const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
+  //   console.log(fileLogPrefix, colors.red('ERROR:'),
+  //       'Please move these files to a separate PR:',
+  //       colors.cyan(nonFlagConfigFiles.join(', ')));
+  //   stopTimer('pr-check.js', startTime);
+  //   process.exit(1);
+  // }
 
   console.log(
       fileLogPrefix, 'Detected build targets:',

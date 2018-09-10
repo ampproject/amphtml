@@ -757,16 +757,17 @@ function printNobuildHelp() {
 }
 
 /**
- * Prints a helpful message that lets the developer know how to switch configs.
+ * Prints a helpful message that lets the developer know how to enable canary.
  * @param {string} command Command being run.
  */
-function printConfigHelp(command) {
+function printCanaryHelp(command) {
   if (!process.env.TRAVIS) {
-    log(green('Building the runtime for local testing with the'),
-        cyan((argv.config === 'canary') ? 'canary' : 'prod'),
-        green('AMP config.'));
-    log(green('⤷ Use'), cyan('--config={canary|prod}'), green('with your'),
-        cyan(command), green('command to specify which config to apply.'));
+    log(green('Building the runtime for local testing in'),
+        cyan(argv.canary ? 'canary' : 'prod'), green('mode.'));
+    if (!argv.canary) {
+      log(green('⤷ Use'), cyan('--canary'), green('with your'),
+          cyan(command), green('command to enable canary mode.'));
+    }
   }
 }
 
@@ -841,13 +842,13 @@ function maybeAddVideoService() {
  * @param {string} targetFile File to which the config is to be written.
  */
 function enableLocalTesting(targetFile) {
-  const config = (argv.config === 'canary') ? 'canary' : 'prod';
+  const canary = !!argv.canary;
   const baseConfigFile =
-      'build-system/global-configs/' + config + '-config.json';
+      'build-system/global-configs/amp-config.json';
 
   return removeConfig(targetFile).then(() => {
     return applyConfig(
-        config, targetFile, baseConfigFile,
+        canary, targetFile, baseConfigFile,
         /* opt_localDev */ true, /* opt_localBranch */ true);
   });
 }
@@ -860,7 +861,7 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
-  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+  printCanaryHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
   return compileCss(watch).then(() => {
     return Promise.all([
@@ -905,7 +906,7 @@ function dist() {
     if (argv.single_pass) {
       cmd = cmd + ' --single_pass';
     }
-    printConfigHelp(cmd);
+    printCanaryHelp(cmd);
   }
   if (argv.single_pass) {
     if (!process.env.TRAVIS) {
@@ -1659,7 +1660,7 @@ function toPromise(readable) {
  */
 gulp.task('build', 'Builds the AMP library', maybeUpdatePackages, build, {
   options: {
-    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    canary: '  Whether to enable canary mode in AMP_CONFIG. Defaults to false.',
     extensions: '  Builds only the listed extensions.',
     extensions_from: '  Builds only the extensions from the listed AMP(s).',
     noextensions: '  Builds with no extensions.',
@@ -1683,7 +1684,7 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
     pseudo_names: '  Compiles with readable names. ' +
             'Great for profiling and debugging production code.',
     fortesting: '  Compiles production binaries for local testing',
-    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    canary: '  Whether to enable canary mode in AMP_CONFIG. Defaults to false.',
     single_pass: 'Compile AMP\'s primary JS bundles in a single invocation',
     extensions: '  Builds only the listed extensions.',
     extensions_from: '  Builds only the extensions from the listed AMP(s).',
