@@ -140,8 +140,8 @@ export class AmpRecaptchaService {
     
     this.unlisteners_ = [
       this.listenIframe_(MESSAGE_TAG + 'ready', this.recaptchaApiReady_.resolve),
-      this.listenIframe_(MESSAGE_TAG + 'token', this.tokenMessageHandler.bind(this)),
-      this.listenIframe_(MESSAGE_TAG + 'error', this.tokenMessageHandler.bind(this))
+      this.listenIframe_(MESSAGE_TAG + 'token', this.tokenMessageHandler_.bind(this)),
+      this.listenIframe_(MESSAGE_TAG + 'error', this.errorMessageHandler_.bind(this))
     ];
     this.executeMap = {};
 
