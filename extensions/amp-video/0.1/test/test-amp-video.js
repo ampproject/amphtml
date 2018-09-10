@@ -567,6 +567,7 @@ describes.realWin('amp-video', {
       impl.layoutCallback();
       const el = impl.element;
       const img = el.firstChild;
+      impl.posterImg_.onload();
       expect(img.style.opacity).to.equal('0');
       expect(impl.togglePlaceholder).to.not.be.called;
     });

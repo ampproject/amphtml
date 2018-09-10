@@ -90,6 +90,9 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
+
+    /** @private {?Element} */
+    this.posterImg_ = null;
   }
 
   /**
@@ -198,9 +201,10 @@ class AmpVideo extends AMP.BaseElement {
     this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
 
-    // Fade out blur on poster load.
-    const posterEl = element.getElementsByTagName('i-amphtml-poster');
-    posterEl.onload = this.fadeOutBlur_();
+    const posterFunc = () => {
+      this.fadeOutBlur_();
+    };
+    this.getPosterFromVideo_(posterFunc);
 
     // Gather metadata
     const artist = element.getAttribute('artist');
@@ -528,9 +532,6 @@ class AmpVideo extends AMP.BaseElement {
       'background-size': 'cover',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
-    poster.onload = () => {
-      this.fadeOutBlur_();
-    };
     this.applyFillContent(poster);
     element.appendChild(poster);
   }
@@ -629,11 +630,12 @@ class AmpVideo extends AMP.BaseElement {
   /**
     * Called when the video is first loaded.
     * @override
-    */
+  */
   firstLayoutCompleted() {
-    if (!this.fadeOutBlur_()) {
+    if (this.getPlaceholder() == null) {
       this.togglePlaceholder(false);
     }
+    this.fadeOutBlur_();
   }
 
   /**
@@ -653,13 +655,27 @@ class AmpVideo extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     // checks for the existance of a visible blurry placeholder
     if (placeholder && placeholder.classList.contains('i-amphtml-blur') &&
-      (placeholder.getAttribute('opacity') != 0) &&
-        isExperimentOn(this.win, 'blurry-placeholder')) {
-      // triggers the CSS fade out animation
-      setImportantStyles(placeholder, {'opacity': 0});
-      return true;
+      isExperimentOn(this.win, 'blurry-placeholder')) {
+      setImportantStyles(placeholder, {'opacity': 0.0});
+    } else {
+      this.togglePlaceholder(false);
     }
-    return false;
+  }
+
+  /**
+   * Adds an onloading event for the actual poster element for the case where
+   * the poster has a blurry image placeholder and loads before the video
+   * element.
+   * @param {*function()} opacityChangeFunc
+   * @private
+   */
+  getPosterFromVideo_(opacityChangeFunc) {
+    const poster = this.video_.getAttribute('poster');
+    if (poster != null) {
+      this.posterImg_ = new Image();
+      this.posterImg_.src = poster;
+      this.posterImg_.onload = opacityChangeFunc;
+    }
   }
 }
 
