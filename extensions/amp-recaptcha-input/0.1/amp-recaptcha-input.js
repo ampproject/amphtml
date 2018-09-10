@@ -41,7 +41,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     super(element);
 
     /** @private {?string} **/
-    this.siteKey = null;
+    this.siteKey_ = null;
 
     /** @private {?string} */
     this.action_ = null;
@@ -68,14 +68,14 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     }
 
     this.siteKey_ = user().assert(
-      this.element.getAttribute('data-sitekey'),
-      'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
-      this.element);
+        this.element.getAttribute('data-sitekey'),
+        'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+        this.element);
 
     this.action_ = user().assert(
-      this.element.getAttribute('data-action'),
-      'The data-action attribute is required for <amp-recaptcha-input> %s',
-      this.element);
+        this.element.getAttribute('data-action'),
+        'The data-action attribute is required for <amp-recaptcha-input> %s',
+        this.element);
 
     return this.mutateElement(() => {
       toggle(this.element);
@@ -115,7 +115,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   getValue() {
-    return this.recaptchaService_.execute(this.element.getResourceId(), this.action_)
+    return this.recaptchaService_.execute(
+        this.element.getResourceId(), this.siteKey_, this.action_
+    );
   }
 }
 

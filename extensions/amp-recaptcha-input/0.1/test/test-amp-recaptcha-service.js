@@ -43,9 +43,9 @@ describes.realWin('amp-recaptcha-service', {
     ampRecaptchaInput.setAttribute('layout',
         'nodisplay');
     ampRecaptchaInput.setAttribute('data-sitekey',
-      '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
+        '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
     ampRecaptchaInput.setAttribute('data-action',
-      'recaptcha_testing');
+        'recaptcha_testing');
     doc.body.appendChild(ampRecaptchaInput);
     return ampRecaptchaInput.build().then(() => {
       return ampRecaptchaInput.layoutCallback();
@@ -110,14 +110,14 @@ describes.realWin('amp-recaptcha-service', {
             expect(recaptchaService.iframe_).to.be.not.ok;
           });
     });
-    });
+  });
 
   it('should unlisten to all listeners,' +
     ' once all registered elements unregister', () => {
-      expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-      return getRecaptchaInput().then(ampRecaptchaInput => {
-        expect(ampRecaptchaInput).to.be.ok;
-        return recaptchaService
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
+      return recaptchaService
           .register(ampRecaptchaInput).then(() => {
             expect(recaptchaService.unlisteners_.length).to.be.equal(3);
 
@@ -129,48 +129,48 @@ describes.realWin('amp-recaptcha-service', {
             expect(recaptchaService.unlisteners_.length).to.be.equal(0);
             expect(unlistener).to.be.called;
           });
-      });
     });
+  });
 
   it('should return when the iframe is' +
     ' loaded and ready', () => {
-      expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-      return getRecaptchaInput().then(ampRecaptchaInput => {
-        expect(ampRecaptchaInput).to.be.ok;
-        return recaptchaService
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
+      return recaptchaService
           .register(ampRecaptchaInput).then(() => {
             expect(recaptchaService.unlisteners_.length).to.be.equal(3);
             expect(recaptchaService.iframeLoadPromise_).to.be.ok;
             expect(recaptchaService.recaptchaApiReady_).to.be.ok;
-            
+
             return recaptchaService.iframeLoadPromise_.then(() => {
               expect(true).to.be.ok;
             });
           });
-      });
     });
+  });
 
   it('should add the element to the execute map on successful execute', () => {
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);
     return getRecaptchaInput().then(ampRecaptchaInput => {
       expect(ampRecaptchaInput).to.be.ok;
       return recaptchaService
-        .register(ampRecaptchaInput).then(() => {
-          expect(recaptchaService.unlisteners_.length).to.be.equal(3);
+          .register(ampRecaptchaInput).then(() => {
+            expect(recaptchaService.unlisteners_.length).to.be.equal(3);
 
-          recaptchaService.execute(0, '');
-          
-          const executeMapKeys = Object.keys(recaptchaService.executeMap_);
-          expect(executeMapKeys.length).to.be.equal(1);
-          expect(executeMapKeys[0]).to.be.equal('0');
-        });
+            recaptchaService.execute(0, '', '');
+
+            const executeMapKeys = Object.keys(recaptchaService.executeMap_);
+            expect(executeMapKeys.length).to.be.equal(1);
+            expect(executeMapKeys[0]).to.be.equal('0');
+          });
     });
   });
-    
+
   it('should reject if there is no iframe on execute', () => {
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);
     expect(recaptchaService.iframe_).to.not.be.ok;
-    return recaptchaService.execute(0, '').catch(err => {
+    return recaptchaService.execute(0, '', '').catch(err => {
       expect(err).to.be.ok;
     });
   });

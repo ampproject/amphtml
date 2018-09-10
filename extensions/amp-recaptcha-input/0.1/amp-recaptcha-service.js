@@ -21,14 +21,12 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getIframe} from '../../../src/3p-frame';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
-
-/** @const {string} */
-const TAG = 'RECAPTCHA-SERVICE';
 
 /** @const {string} */
 const MESSAGE_TAG = 'amp-recaptcha-';
@@ -93,37 +91,41 @@ export class AmpRecaptchaService {
   /**
    * Function to call .execute() on the recaptcha API within
    * our iframe, to dispatch recaptcha actions.
-   * Takes in an element resource ID, and the action to execute.
+   * Takes in an element resource ID, siteKey, and the action to execute.
    * Returns a Promise that resolves the recaptcha token.
    * @param {number} resourceId
-   * @param {String} action
+   * @param {string} siteKey
+   * @param {string} action
    * @return {Promise}
    */
-  execute(resourceId, action) {
+  execute(resourceId, siteKey, action) {
     if (!this.iframe_) {
-      return Promise.reject(new Error('An iframe is not created. You must register before executing'));
+      return Promise.reject(new Error(
+          'An iframe is not created. You must register before executing'
+      ));
     }
 
     const executePromise = new Deferred();
     const messageId = resourceId;
     this.executeMap_[messageId] = {
       resolve: executePromise.resolve,
-      reject: executePromise.reject
+      reject: executePromise.reject,
     };
     this.recaptchaApiReady_.promise.then(() => {
 
       const message = dict({
         'id': messageId,
+        'siteKey': siteKey,
         'action': 'amp_' + action,
       });
 
       // Send the message
       postMessage(
-        dev().assertElement(this.iframe_),
-        MESSAGE_TAG + 'action',
-        message,
-        '*',
-        true);
+          dev().assertElement(this.iframe_),
+          MESSAGE_TAG + 'action',
+          message,
+          '*',
+          true);
     });
     return executePromise.promise;
   }
@@ -137,11 +139,17 @@ export class AmpRecaptchaService {
 
     /* the third parameter 'recaptcha' ties it to the 3p/recaptcha.js */
     this.iframe_ = getIframe(this.win_, element, 'recaptcha');
-    
+
     this.unlisteners_ = [
-      this.listenIframe_(MESSAGE_TAG + 'ready', this.recaptchaApiReady_.resolve),
-      this.listenIframe_(MESSAGE_TAG + 'token', this.tokenMessageHandler_.bind(this)),
-      this.listenIframe_(MESSAGE_TAG + 'error', this.errorMessageHandler_.bind(this))
+      this.listenIframe_(
+          MESSAGE_TAG + 'ready', this.recaptchaApiReady_.resolve
+      ),
+      this.listenIframe_(
+          MESSAGE_TAG + 'token', this.tokenMessageHandler_.bind(this)
+      ),
+      this.listenIframe_(
+          MESSAGE_TAG + 'error', this.errorMessageHandler_.bind(this)
+      ),
     ];
     this.executeMap_ = {};
 
@@ -168,32 +176,30 @@ export class AmpRecaptchaService {
 
   /**
    * Function to create a listener for our iframe
-   * @param {String} evName
+   * @param {string} evName
    * @param {Function} cb
    * @return {Function}
    * @private
    */
   listenIframe_(evName, cb) {
     return listenFor(
-      dev().assertElement(this.iframe_),
-      evName,
-      cb,
-      true);
+        dev().assertElement(this.iframe_),
+        evName,
+        cb,
+        true);
   }
 
   /**
    * Function to handle token messages from the recaptcha iframe
-   * @param {Function} callback
    * @param {Object} data
    */
-   tokenMessageHandler_(callback, data) {
-     this.executeMap_[data.id].resolve(data.token);
-     delete this.executeMap_[data.id];
-   }
+  tokenMessageHandler_(data) {
+    this.executeMap_[data.id].resolve(data.token);
+    delete this.executeMap_[data.id];
+  }
 
   /**
    * Function to handle error messages from the recaptcha iframe
-   * @param {Function} callback
    * @param {Object} data
    */
   errorMessageHandler_(data) {

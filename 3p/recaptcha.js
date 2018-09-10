@@ -52,7 +52,7 @@ export function recaptcha(global, data) {
       iframeMessagingClient.setSentinel(global.context.sentinel);
       iframeMessagingClient.registerCallback(
           MESSAGE_TAG + 'action',
-          actionTypeHandler.bind(this, grecaptcha, siteKey)
+          actionTypeHandler.bind(this, grecaptcha)
       );
       iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'ready');
     });
@@ -66,27 +66,26 @@ export function recaptcha(global, data) {
  * and sending the token back to the parent amp-recaptcha component
  *
  * @param {*} grecaptcha
- * @param {string} siteKey
  * @param {Object} data
  */
-function actionTypeHandler(grecaptcha, siteKey, data) {
+function actionTypeHandler(grecaptcha, data) {
   if (!iframeMessagingClient) {
     dev().error(TAG, 'IframeMessagingClient does not exist.');
     return;
   }
 
-  grecaptcha.execute(siteKey, {
+  grecaptcha.execute(data.siteKey, {
     action: data.action,
   })./*OK*/then(function(token) {
     // .then() promise pollyfilled by recaptcha api script
-    iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'token', {
-      id: data.id,
-      token,
-    });
+    iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'token', dict({
+      'id': data.id,
+      'token': token,
+    }));
   }).catch(function(err) {
     user().error(TAG, err);
     iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
-      id: data.id,
+      'id': data.id,
       'error': err.message,
     }));
   });

@@ -51,9 +51,6 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
-
-    /** @private {Object} */
-    this.requestMap = {};
   }
 
   /**
