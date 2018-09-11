@@ -319,7 +319,7 @@ function reportErrorToServer(message, filename, line, col, error) {
       // Report the error to viewer if it has the capability. The data passed
       // to the viewer is exactly the same as the data passed to the server
       // below.
-      maybeReportErrorToViewer(this, data);
+      maybeReportErrorToViewer(this, dev().assert(data));
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
