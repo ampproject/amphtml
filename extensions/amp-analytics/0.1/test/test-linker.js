@@ -23,11 +23,13 @@ describe('Linker', () => {
   beforeEach(() => {
     // Linker uses a timestamp value to generate checksum.
     sandbox = sinon.sandbox;
-    sandbox.useFakeTimers();
-    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(400);
+    sandbox.useFakeTimers(1533329483292);
+    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
 
     const mockWin = mockWindowInterface(sandbox);
-    mockWin.getUserAgent.returns('Chrome 70');
+    mockWin.getUserAgent.returns('Mozilla/5.0 (X11; Linux x86_64) ' +
+        'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 ' +
+        'Safari/537.36');
     mockWin.getUserLanguage.returns('en-US');
   });
 
@@ -60,7 +62,7 @@ describe('Linker', () => {
       pairs: {
         foo: '123',
       },
-      output: '1*1mkbmc3*foo*MTIz',
+      output: '1*14cn7x*foo*MTIz',
     },
     {
       description: 'appends one key value pair',
@@ -68,7 +70,7 @@ describe('Linker', () => {
       pairs: {
         key1: 'value1',
       },
-      output: '1*h9i6qb*key1*dmFsdWUx',
+      output: '1*1f66u1p*key1*dmFsdWUx',
     },
     {
       description: 'appends many key value pairs',
@@ -79,7 +81,7 @@ describe('Linker', () => {
         color: 'green',
         car: 'tesla',
       },
-      output: '1*efercj*key1*dmFsdWUx*name*Ym9i*color*Z3JlZW4.*car*dGVzbGE.',
+      output: '1*6orwo8*key1*dmFsdWUx*name*Ym9i*color*Z3JlZW4.*car*dGVzbGE.',
     },
     {
       description: 'encodes URL unsafe chars in values',
@@ -88,7 +90,7 @@ describe('Linker', () => {
         cid: '12345',
         ref: 'https://www.example.com',
       },
-      output: '1*vz1vnu*cid*MTIzNDU.*ref*aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
+      output: '1*1m48hbv*cid*MTIzNDU.*ref*aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
     },
     {
       description: 'encodes * in values',
@@ -97,7 +99,7 @@ describe('Linker', () => {
         'key': '*hi*',
         'key2': '***',
       },
-      output: '1*lpias9*key*KmhpKg..*key2*Kioq',
+      output: '1*1fo13qb*key*KmhpKg..*key2*Kioq',
     },
     {
       description: 'encodes unicode in values',
@@ -106,7 +108,7 @@ describe('Linker', () => {
         'key': '中文',
         'key2': 'π',
       },
-      output: '1*1pf8zsw*key*5Lit5paH*key2*z4A.',
+      output: '1*bgtsvu*key*5Lit5paH*key2*z4A.',
     },
     {
       description: 'allows base64 chars in keys',
@@ -117,7 +119,7 @@ describe('Linker', () => {
         'g.b': 'g.b',
         'nn-': 'nn-',
       },
-      output: '1*10d75fz*0x3*MHgz*_gb*X2di*g.b*Zy5i*nn-*bm4t',
+      output: '1*uidf2s*0x3*MHgz*_gb*X2di*g.b*Zy5i*nn-*bm4t',
     },
     {
       description: 'ignores invalid keys',
@@ -126,7 +128,7 @@ describe('Linker', () => {
         '*invalid': '123',
         'valid': 'abc',
       },
-      output: '1*bn7mun*valid*YWJj',
+      output: '1*m20mv5*valid*YWJj',
       expectErrors: 1,
     },
     {
@@ -145,7 +147,7 @@ describe('Linker', () => {
       pairs: {
         '_ga': '1218435055.1536188913',
       },
-      output: '1*im1xrd*_ga*MTIxODQzNTA1NS4xNTM2MTg4OTEz',
+      output: '1*5x9ojm*_ga*MTIxODQzNTA1NS4xNTM2MTg4OTEz',
     },
     {
       description: 'works for AMP CID API generated Client ID',
@@ -154,7 +156,7 @@ describe('Linker', () => {
         '_ga': 'amp-' +
           'oRg8vByriPdstwLgkz-UNWbp2P13vNFsnhES5vW8s5WodTOoea0mTiY7X62utLyz',
       },
-      output: '1*s5ix2m*_ga*' +
+      output: '1*1fkd1zz*_ga*' +
         'YW1wLW9SZzh2QnlyaVBkc3R3TGdrei1VTldicDJQMT' +
         'N2TkZzbmhFUzV2VzhzNVdvZFRPb2VhMG1UaVk3WDYydXRMeXo.',
     },
@@ -165,7 +167,7 @@ describe('Linker', () => {
         '_ga':
             'WgcaAD4XN2lydhQVNFruk6X8zwoUg6K2RnaRlhjs6CXvTv4aJV-3oVLdI1WxxvJb',
       },
-      output: '1*m7cqu6*_ga*' +
+      output: '1*19eaxqc*_ga*' +
         'V2djYUFENFhOMmx5ZGhRVk5GcnVrNlg4endvVWc2Sz' +
         'JSbmFSbGhqczZDWHZUdjRhSlYtM29WTGRJMVd4eHZKYg..',
     },
