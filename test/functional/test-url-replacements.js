@@ -24,6 +24,7 @@ import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
+import {getMode} from '../../src/mode';
 import {
   installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
@@ -524,6 +525,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
         '?a=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&b=CLIENT_ID(_ga)',
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
       expect(res).to.match(/^\?a=12345.54321&b=12345.54321/);
+    });
+  });
+
+  it('should replace CLIENT_ID with null for inabox', () => {
+    getMode().runtime = 'inabox';
+    return expandUrlAsync('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
+        /*opt_bindings*/undefined, {withCid: true}).then(res => {
+      expect(res).to.equal('?a=&b=');
     });
   });
 
