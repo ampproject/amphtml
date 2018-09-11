@@ -375,7 +375,7 @@ export class PlatformStore {
   getSupportedFactorWeight_(factorName, platform) {
     return platform.getSupportedFactor(factorName)
         .then(factorValue => {
-          if (!factorValue) {
+          if (typeof factorValue !== 'number') {
             return 0;
           }
           return this.scoreConfig_[factorName] *
