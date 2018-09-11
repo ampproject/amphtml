@@ -19,7 +19,7 @@ import {toggleExperiment} from '../../../../../src/experiments';
 
 describe.configure().skipSafari().skipEdge()
     .run('amp-recaptcha-input', function() {
-      describes.integration('amp-recaptcha execute', {
+      describes.integration('amp-recaptcha', {
         extensions: ['amp-recaptcha-input'],
       }, env => {
 
@@ -38,7 +38,9 @@ describe.configure().skipSafari().skipEdge()
           ampRecaptchaInput.setAttribute('data-sitekey',
               '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
           ampRecaptchaInput.setAttribute('data-action',
-              'integration_testing');
+            'integration_testing');
+          ampRecaptchaInput.setAttribute('data-fortesting',
+            'true');
           doc.body.appendChild(ampRecaptchaInput);
           return ampRecaptchaInput.build().then(() => {
             return ampRecaptchaInput.layoutCallback();

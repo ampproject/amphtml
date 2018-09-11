@@ -24,6 +24,9 @@ const TAG = 'RECAPTCHA';
 /** @const {string} */
 const MESSAGE_TAG = 'amp-recaptcha-';
 
+/** @const {string} */
+const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
+
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -35,10 +38,14 @@ export function recaptcha(global, data) {
     ' The data-sitekey attribute is required for <amp-recaptcha-input> %s',
       data.element
   );
-
-  let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
-  const {sitekey} = data;
-  recaptchaApiUrl += sitekey;
+  
+  let recaptchaApiUrl;
+  if (data.fortesting) {
+    recaptchaApiUrl = getMockRecaptchaApiUrl_();
+  } else {
+    const {sitekey} = data;
+    recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
+  }
 
   loadScript(global, recaptchaApiUrl, function() {
     const {grecaptcha} = global;
@@ -82,5 +89,14 @@ function actionTypeHandler(global, grecaptcha, data) {
       'error': err.message,
     }));
   });
+}
+
+/**
+ * Function to return the url to our mock recaptcha API
+ * @visibleForTesting
+ * @private
+ */
+function getMockRecaptchaApiUrl_() {
+  return 'http://localhost:9876/base/extensions/amp-recaptcha-input/0.1/test/mock-recaptcha-api.js';
 }
 
