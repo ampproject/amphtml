@@ -22,6 +22,7 @@ import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {computedStyle} from '../../../../src/style';
 import {dict} from '../../../../src/utils/object';
+import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
@@ -184,9 +185,8 @@ describes.realWin('amp-consent', {
 
         doc.body.appendChild(consentElement);
         const ampConsent = new AmpConsent(consentElement);
-        allowConsoleError(() => {
-          expect(() => ampConsent.buildCallback()).to.throw(scriptTypeError);
-        });
+        expect(() => ampConsent.buildCallback()).to.throw(scriptTypeError);
+
 
         // Check consent config exists
         scriptElement.setAttribute('type', 'application/json');
@@ -202,18 +202,14 @@ describes.realWin('amp-consent', {
         });
 
         scriptElement.textContent = '"abc": {"a",}';
-        allowConsoleError(() => {
-          expect(() => ampConsent.buildCallback()).to.throw(invalidJsonError);
-        });
+        expect(() => ampConsent.buildCallback()).to.throw(invalidJsonError);
 
 
         // Check there is only one script object
         scriptElement.textContent = JSON.stringify(defaultConfig);
         const script2 = doc.createElement('script');
         consentElement.appendChild(script2);
-        allowConsoleError(() => {
-          expect(() => ampConsent.buildCallback()).to.throw(multiScriptError);
-        });
+        expect(() => ampConsent.buildCallback()).to.throw(multiScriptError);
       });
 
       it('relative checkConsentHref is resolved', function* () {
@@ -619,6 +615,65 @@ describes.realWin('amp-consent', {
         expect(ampConsent.notificationUiManager_.queueSize_).to.equal(2);
         ampConsent.scheduleDisplay_('ABC');
         expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
+      });
+    });
+
+    describe('promptUISrc', () => {
+      it('should ignore promptUISrc w/ promptUI', function* () {
+        expectAsyncConsoleError('[amp-consent] child element of <amp-consent>' +
+            ' with promptUI id 123 not found');
+        expectAsyncConsoleError('Element expected:  ');
+        consentElement = createConsentElement(doc, dict({
+          'consents': {
+            'test': {
+              'checkConsentHref': 'https://response1',
+              'promptUI': '123',
+              'promptUISrc': 'https://promptUISrc',
+            },
+          },
+        }));
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        ampConsent.buildCallback();
+        yield macroTask();
+        yield macroTask();
+        expect(ampConsent.consentUI_['test']).to.be.not.ok;
+      });
+
+      it('should create iframe from promptUISrc', function* () {
+        consentElement = createConsentElement(doc, dict({
+          'consents': {
+            'test': {
+              'checkConsentHref': 'https://response1',
+              'promptUISrc': 'https://promptUISrc',
+            },
+          },
+        }));
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        ampConsent.buildCallback();
+        yield macroTask();
+        yield macroTask();
+        expect(ampConsent.consentUI_['test'].tagName).to.equal('IFRAME');
+      });
+
+      it('should append/remove iframe to document', function* () {
+        consentElement = createConsentElement(doc, dict({
+          'consents': {
+            'test': {
+              'checkConsentHref': 'https://response1',
+              'promptUISrc': 'https://promptUISrc',
+            },
+          },
+        }));
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        ampConsent.buildCallback();
+        yield macroTask();
+        yield macroTask();
+        expect(elementByTag(consentElement, 'iframe')).to.not.be.null;
+        ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
+        expect(elementByTag(consentElement, 'iframe')).to.be.null;
       });
     });
 
