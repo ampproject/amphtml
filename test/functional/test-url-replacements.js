@@ -24,6 +24,7 @@ import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
+import {getMode} from '../../src/mode';
 import {
   installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
@@ -518,6 +519,17 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace CLIENT_ID with empty string for inabox', () => {
+    setCookie(window, '_ga', 'GA1.2.12345.54321');
+    const origMode = getMode().runtime;
+    getMode().runtime = 'inabox';
+    return expandUrlAsync('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
+        /*opt_bindings*/undefined, {withCid: true}).then(res => {
+      getMode().runtime = origMode;
+      expect(res).to.equal('?a=&b=');
+    });
+  });
+
   it('should parse _ga cookie correctly', () => {
     setCookie(window, '_ga', 'GA1.2.12345.54321');
     return expandUrlAsync(
@@ -526,6 +538,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(res).to.match(/^\?a=12345.54321&b=12345.54321/);
     });
   });
+
 
   // TODO(alanorozco, #11827): Make this test work on Safari.
   it.configure().skipSafari().run('should replace CLIENT_ID synchronously ' +

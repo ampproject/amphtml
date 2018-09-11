@@ -37,7 +37,6 @@ const WHITELISTED_VARIABLES = [
   'CANONICAL_HOSTNAME',
   'CANONICAL_PATH',
   'CANONICAL_URL',
-  'CLIENT_ID',
   'COUNTER',
   'DOCUMENT_CHARSET',
   'DOCUMENT_REFERRER',
@@ -116,6 +115,8 @@ export class A4AVariableSource extends VariableSource {
 
     this.set('HTML_ATTR',
         /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
+
+    this.set('CLIENT_ID', () => null);
 
     for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
       const varName = WHITELISTED_VARIABLES[v];
