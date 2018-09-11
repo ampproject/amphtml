@@ -42,7 +42,7 @@ describes.realWin('amp-recaptcha-input', {
     }
     if (!skipAction) {
       ampRecaptchaInput.setAttribute('data-action',
-          'recaptcha_testing');
+          'unit_testing');
     }
     doc.body.appendChild(ampRecaptchaInput);
     return ampRecaptchaInput.build().then(() => {

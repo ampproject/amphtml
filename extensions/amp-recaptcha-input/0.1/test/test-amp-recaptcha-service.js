@@ -45,7 +45,7 @@ describes.realWin('amp-recaptcha-service', {
     ampRecaptchaInput.setAttribute('data-sitekey',
         '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
     ampRecaptchaInput.setAttribute('data-action',
-        'recaptcha_testing');
+        'unit_testing');
     doc.body.appendChild(ampRecaptchaInput);
     return ampRecaptchaInput.build().then(() => {
       return ampRecaptchaInput.layoutCallback();

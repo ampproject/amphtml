@@ -480,6 +480,7 @@ const defaultAllowedTypesInCustomFrame = [
   // draw3p. See amp-ad docs.
   'facebook',
   'twitter',
+  'recaptcha',
   'doubleclick',
   'yieldbot',
   '_ping_',

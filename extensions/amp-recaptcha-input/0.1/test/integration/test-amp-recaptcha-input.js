@@ -14,46 +14,45 @@
  * limitations under the License.
  */
 
+import '../../amp-recaptcha-input';
+import {toggleExperiment} from '../../../../../src/experiments';
+
 describe.configure().skipSafari().skipEdge()
     .run('amp-recaptcha-input', function() {
-
-      // Extend timeout slightly for flakes on Windows environments
-      this.timeout(4000);
-      const extensions = ['amp-recaptcha-input'];
-
-      const bodyTemplate = `
-    <amp-recaptcha-input 
-      id="amp-recaptcha-input-1"
-      layout="nodisplay"
-      data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE"
-      data-action="integration_test">
-    </amp-recaptcha-input>
-  `;
-
       describes.integration('amp-recaptcha execute', {
-        body: bodyTemplate,
-        extensions,
+        extensions: ['amp-recaptcha-input']
       }, env => {
 
         let win;
+        let doc;
         beforeEach(() => {
           win = env.win;
+          doc = win.document;
+          toggleExperiment(win, 'amp-recaptcha-input', true);
         });
 
+        function getRecaptchaInput() {
+          const ampRecaptchaInput = doc.createElement('amp-recaptcha-input');
+          ampRecaptchaInput.setAttribute('layout',
+            'nodisplay');
+          ampRecaptchaInput.setAttribute('data-sitekey',
+            '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
+          ampRecaptchaInput.setAttribute('data-action',
+            'integration_testing');
+          doc.body.appendChild(ampRecaptchaInput);
+          return ampRecaptchaInput.build().then(() => {
+            return ampRecaptchaInput.layoutCallback();
+          }).then(() => {
+            return ampRecaptchaInput;
+          });
+        }
+
         it('should be able to return a token on execute', () => {
-
-          const ampRecaptchaInput =
-        win.document.getElementById('amp-recaptcha-input-1');
-
-          return ampRecaptchaInput.implementation_.layoutCallback().then(() => {
+          return getRecaptchaInput().then(ampRecaptchaInput => {
             return ampRecaptchaInput.implementation_.getValue().then(token => {
               expect(token).to.be.ok;
             });
-
           });
-
         });
-
-
       });
     });
