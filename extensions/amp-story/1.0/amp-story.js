@@ -279,9 +279,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} */
     this.pausedStateToRestore_ = false;
 
-    /** @private {?string} */
-    this.title_ = null;
-
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -350,7 +347,10 @@ export class AmpStory extends AMP.BaseElement {
       this.analytics_.onNavigationStateChange(stateChangeEvent);
     });
 
-    this.extractTitle_();
+    // Removes title in order to prevent incorrect titles appearing on link
+    // hover. (See www./github.com/ampproject/amphtml/issues/17654)
+    this.element.removeAttribute('title');
+
     // Disallow all actions in a (standalone) story.
     // Components then add their own actions.
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
@@ -813,18 +813,6 @@ export class AmpStory extends AMP.BaseElement {
     }
     dev().error(TAG, `amp-consent only allows tags: ${allowedTags}`);
     toRemoveChildren.forEach(el => consentEl.removeChild(el));
-  }
-
-  /**
-   * Stores the title attribute value in memory then sets it to an empty string
-   * in order to avoid incorrect titles during mouse hover in the bookend.
-   * @private
-   */
-  extractTitle_() {
-    if (this.element.hasAttribute('title')) {
-      this.title_ = this.element.getAttribute('title');
-      this.element.removeAttribute('title');
-    }
   }
 
   /**
