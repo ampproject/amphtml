@@ -49,6 +49,8 @@ describes.realWin('amp-consent', {
     ampdoc = env.ampdoc;
     win = env.win;
     toggleExperiment(win, 'multi-consent', true);
+    toggleExperiment(win, 'amp-consent-v2', true);
+
 
     storageValue = {};
     jsonMockResponses = {
@@ -111,13 +113,55 @@ describes.realWin('amp-consent', {
         });
       });
 
-      it('read config', () => {
+      it('read inline config', () => {
         consentElement = createConsentElement(doc, defaultConfig);
         doc.body.appendChild(consentElement);
         const ampConsent = new AmpConsent(consentElement);
         ampConsent.buildCallback();
         expect(ampConsent.consentConfig_).to.deep.equal(
             defaultConfig['consents']);
+      });
+
+      it('read cmp config', () => {
+        consentElement = createConsentElement(doc, dict({}), '_ping_');
+        doc.body.appendChild(consentElement);
+        const ampConsent = new AmpConsent(consentElement);
+        ampConsent.buildCallback();
+        expect(ampConsent.consentConfig_).to.deep.equal(dict({
+          '_ping_': {
+            'checkConsentHref': 'http://localhost:8000/get-consent-v1',
+            'promptUISrc':
+                'http://ads.localhost:8000/test/manual/diy-consent.html',
+          },
+        }));
+      });
+
+      it('merge inline config w/ cmp config', () => {
+        consentElement = createConsentElement(doc, dict({
+          'consents': {
+            '_ping_': {
+              'promptIfUnknownForGeoGroup': 'eea',
+              'checkConsentHref': '/override',
+            },
+          },
+          'postPromptUI': 'test',
+        }), '_ping_');
+        const postPromptUI = document.createElement('div');
+        postPromptUI.setAttribute('id', 'test');
+        consentElement.appendChild(postPromptUI);
+        doc.body.appendChild(consentElement);
+        const ampConsent = new AmpConsent(consentElement);
+        ampConsent.buildCallback();
+
+        expect(ampConsent.consentConfig_).to.deep.equal(dict({
+          '_ping_': {
+            'checkConsentHref': '/override',
+            'promptUISrc':
+                'http://ads.localhost:8000/test/manual/diy-consent.html',
+            'promptIfUnknownForGeoGroup': 'eea',
+          },
+        }));
+        expect(ampConsent.postPromptUI_).to.not.be.null;
       });
 
       it('assert valid config', () => {
@@ -128,6 +172,7 @@ describes.realWin('amp-consent', {
             'amp-consent: Found 2 <script> children. Expected 1';
         const invalidJsonError = 'amp-consent: Failed to parse <script> ' +
             'contents. Is it valid JSON?';
+        const invalidCMPError = 'invalid CMP type';
         // Check script type equals to application/json
         const consentElement = doc.createElement('amp-consent');
         consentElement.setAttribute('id', 'test');
@@ -150,10 +195,17 @@ describes.realWin('amp-consent', {
           expect(() => ampConsent.buildCallback()).to.throw(consentExistError);
         });
 
+        // Check invalid CMP
+        consentElement.setAttribute('type', 'not_exist');
+        allowConsoleError(() => {
+          expect(() => ampConsent.buildCallback()).to.throw(invalidCMPError);
+        });
+
         scriptElement.textContent = '"abc": {"a",}';
         allowConsoleError(() => {
           expect(() => ampConsent.buildCallback()).to.throw(invalidJsonError);
         });
+
 
         // Check there is only one script object
         scriptElement.textContent = JSON.stringify(defaultConfig);
@@ -578,6 +630,7 @@ describes.realWin('amp-consent', {
           'amp-consent:GH': CONSENT_ITEM_STATE.ACCEPTED,
         };
         ampConsent.buildCallback();
+        ampConsent.element.classList.remove('i-amphtml-notbuilt');
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
             .to.equal('none');
@@ -604,11 +657,13 @@ describes.realWin('amp-consent', {
                 'checkConsentHref': 'https://response3',
               },
             },
-            'postPromptUI': 'test',
+            // There's already an amp-consent from a parent beforeEach with a
+            // test postPromptUI
+            'postPromptUI': 'test2',
           });
           consentElement = createConsentElement(doc, defaultConfig);
           postPromptUI = doc.createElement('div');
-          postPromptUI.setAttribute('id', 'test');
+          postPromptUI.setAttribute('id', 'test2');
           consentElement.appendChild(postPromptUI);
           doc.body.appendChild(consentElement);
           ampConsent = new AmpConsent(consentElement);
@@ -616,6 +671,7 @@ describes.realWin('amp-consent', {
 
         it('hide postPromptUI', function* () {
           ampConsent.buildCallback();
+          ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
           expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
@@ -627,6 +683,7 @@ describes.realWin('amp-consent', {
             'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
           };
           ampConsent.buildCallback();
+          ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
           expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
@@ -637,16 +694,21 @@ describes.realWin('amp-consent', {
   });
 });
 
+
 /**
  * Create an <amp-consent> element from config for testing
  * @param {Document} doc
  * @param {!JsonObject} config
+ * @param {string=} opt_type
  * @return {Element}
  */
-function createConsentElement(doc, config) {
+function createConsentElement(doc, config, opt_type) {
   const consentElement = doc.createElement('amp-consent');
   consentElement.setAttribute('id', 'amp-consent');
   consentElement.setAttribute('layout', 'nodisplay');
+  if (opt_type) {
+    consentElement.setAttribute('type', opt_type);
+  }
   const scriptElement = doc.createElement('script');
   scriptElement.setAttribute('type', 'application/json');
   scriptElement.textContent = JSON.stringify(config);

@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-amp-consent {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  overflow: hidden !important;
-  background: rgba(255, 255, 255, .7);
-  z-index: 1000;
-  width: 100%;
-}
+import {getMode} from '../../../src/mode';
 
-amp-consent[i-amphtml-notbuilt] > * {
-  display: none !important;
-}
+/**
+ * The CMP config should looks like
+ * {
+ *   'consentInstanceId': string, // The key to store consent information
+ *   'checkConsentHref': url, // remote endpoint
+ *   'promptUISrc': url, // the src for prompt iframe window
+ * }
+ */
 
-amp-consent > * {
-  max-height: 100vh !important;
-}
+export const CMP_CONFIG = ({});
 
-amp-consent.amp-active {
-  visibility: visible;
-}
-
-amp-consent.amp-hidden {
-  visibility: hidden;
+if (getMode().test || getMode().localDev) {
+  CMP_CONFIG['_ping_'] = {
+    'consentInstanceId': '_ping_',
+    'checkConsentHref': 'http://localhost:8000/get-consent-v1',
+    'promptUISrc': 'http://ads.localhost:8000/test/manual/diy-consent.html',
+  };
 }

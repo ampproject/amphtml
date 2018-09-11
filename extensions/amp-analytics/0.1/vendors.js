@@ -963,6 +963,13 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'metric': 'cm',
     },
     'optout': '_gaUserPrefs.ioo',
+    'linkers': {
+      '_gl': {
+        'ids': {
+          '_ga': '${clientId}',
+        },
+      },
+    },
   },
 
   'iplabel': {

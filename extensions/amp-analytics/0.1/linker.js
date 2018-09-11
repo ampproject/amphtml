@@ -15,51 +15,49 @@
  */
 
 import {WindowInterface} from '../../../src/window-interface';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {crc32} from './crc32';
+import {user} from '../../../src/log';
 
 /** @const {string} */
-const DELIMITER = '~';
+const DELIMITER = '*';
+const KEY_VALIDATOR = /^[a-zA-Z0-9\-_.]+$/;
+const TAG = 'amp-analytics/linker';
+
 
 /**
- * Creates the linker param from the given config, and returns the url with
- * the given param attached.
+ * Creates the linker string, in the format of
+ * <version>*<checksum>*<serializedIds>
+ *
+ * where
+ *   checksum: base36(CRC32(<fingerprint>*<minuteSinceEpoch>*<serializedIds>))
+ *   serializedIds: <id1>*<idValue1>*<id2>*<idValue2>...
+ *                  values are base64 encoded
+ *   fingerprint: <userAgent>*<timezoneOffset>*<userLanguage>
+ *
  * @param {string} version
- * @param {!Object} pairs
+ * @param {!Object} ids
  * @return {string}
  */
-export function createLinker(version, pairs) {
-  if (!pairs || !Object.keys(pairs).length) {
+export function createLinker(version, ids) {
+  const serializedIds = serialize(ids);
+  if (serializedIds === '') {
     return '';
   }
-
-  return generateParam(version, pairs);
-}
-
-
-/**
- * Generate the completed querystring.
- * <paramName>=<version>~<checksum>~<key1>~<value1>~<key2>~<value2>...
- * @param {string} version
- * @param {!Object} pairs
- * @return {string}
- */
-function generateParam(version, pairs) {
-  const encodedPairs = encodePairs(pairs);
-  const checksum = getCheckSum(encodedPairs);
-  return [version, checksum, encodedPairs].join(DELIMITER);
+  const checksum = getCheckSum(serializedIds);
+  return [version, checksum, serializedIds].join(DELIMITER);
 }
 
 
 /**
  * Create a unique checksum hashing the fingerprint and a few other values.
- * base36(CRC32(fingerprint + timestampRoundedInMin + kv pairs))
- * @param {string} encodedPairs
+ * @param {string} serializedIds
  * @return {string}
  */
-function getCheckSum(encodedPairs) {
+function getCheckSum(serializedIds) {
   const fingerprint = getFingerprint();
   const timestamp = getMinSinceEpoch();
-  const crc = crc32([fingerprint, timestamp, encodedPairs].join(DELIMITER));
+  const crc = crc32([fingerprint, timestamp, serializedIds].join(DELIMITER));
   // Encoded to base36 for less bytes.
   return crc.toString(36);
 }
@@ -67,7 +65,6 @@ function getCheckSum(encodedPairs) {
 
 /**
  * Generates a semi-unique value for page visitor.
- * User Agent + ~ + timezone + ~ + language.
  * @return {string}
  */
 function getFingerprint() {
@@ -85,11 +82,19 @@ function getFingerprint() {
  * @param {!Object} pairs
  * @return {string}
  */
-function encodePairs(pairs) {
-  const keys = Object.keys(pairs);
-
-  return keys
-      .map(key => encode(key) + DELIMITER + encode(pairs[key]))
+function serialize(pairs) {
+  if (!pairs) {
+    return '';
+  }
+  return Object.keys(pairs)
+      .filter(key => {
+        const valid = KEY_VALIDATOR.test(key);
+        if (!valid) {
+          user().error(TAG, 'Invalid linker key: ' + key);
+        }
+        return valid;
+      })
+      .map(key => key + DELIMITER + encode(pairs[key]))
       .join(DELIMITER);
 }
 
@@ -110,5 +115,5 @@ function getMinSinceEpoch() {
  * @param {string} value
  */
 function encode(value) {
-  return encodeURIComponent(String(value)).replace(/~/g, '%7E');
+  return base64UrlEncodeFromString(String(value));
 }

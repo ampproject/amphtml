@@ -22,6 +22,7 @@ import {
   computedStyle,
   px,
   setImportantStyles,
+  setInitialDisplay,
 } from '../../style';
 import {dev} from '../../log';
 import {htmlFor} from '../../static-template';
@@ -124,6 +125,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     this.wrapper_ = dev().assertElement(scroller.firstElementChild);
 
     // Notice that the -webkit-overflow-scrolling is set later.
+    setInitialDisplay(this.scroller_, 'block');
     setImportantStyles(this.scroller_, {
       'overflow-x': 'hidden',
       'overflow-y': 'auto',
@@ -135,7 +137,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
       'margin': '0',
       'width': '100%',
       'box-sizing': 'border-box',
-      'display': 'block',
       'padding-top': '0px', // Will be updated for top offset.
       // The scroller must have a 1px transparent border for two purposes:
       // (1) to cancel out margin collapse in body's children so that position
@@ -146,6 +147,12 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     setImportantStyles(this.wrapper_, {
       'overflow': 'visible',
       'position': 'relative',
+      // Wrapper must additionally have `will-change: transform` to avoid iOS
+      // rendering bug where contents inside the `-webkit-overflow-scrolling`
+      // element would occasionally fail to paint. This bug appears to trigger
+      // more often when Shadow DOM is involved. The cost of this is relatively
+      // low since this only adds one additional layer for the body.
+      'will-change': 'transform',
     });
     // Other properties will be copied from the `<body>`.
 
