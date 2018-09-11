@@ -29,8 +29,7 @@ import {tryFocus} from '../dom';
  * @return {boolean}
  */
 function isShowable(element) {
-  return getStyle(element, 'display') == 'none'
-      || element.hasAttribute('hidden');
+  return element.hasAttribute('hidden');
 }
 
 /** @const {string} */
@@ -249,7 +248,6 @@ export class StandardActions {
         target./*OK*/expand();
       } else {
         toggle(target, true);
-        target.removeAttribute('hidden');
       }
     });
 
