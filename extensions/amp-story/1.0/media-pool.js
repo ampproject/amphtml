@@ -180,7 +180,7 @@ export class MediaPool {
       [MediaType.AUDIO]:
           isExperimentOn(win, 'disable-amp-story-default-media') ? '' :
             BLANK_AUDIO_SRC,
-      [MediaType.AUDIO]:
+      [MediaType.VIDEO]:
           isExperimentOn(win, 'disable-amp-story-default-media') ? '' :
             BLANK_VIDEO_SRC,
     };
