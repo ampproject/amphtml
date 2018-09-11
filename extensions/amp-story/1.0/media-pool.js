@@ -37,6 +37,7 @@ import {ampMediaElementFor} from './utils';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 
 
@@ -171,6 +172,19 @@ export class MediaPool {
      */
     this.blessed_ = false;
 
+    /**
+     * The default source to use for pool-created audio sources,
+     * @private @const {!Object<!MediaType, string>}
+     */
+    this.defaultSources_ = {
+      [MediaType.AUDIO]:
+          isExperimentOn(win, 'disable-amp-story-default-media') ? '' :
+            BLANK_AUDIO_SRC,
+      [MediaType.VIDEO]:
+          isExperimentOn(win, 'disable-amp-story-default-media') ? '' :
+            BLANK_VIDEO_SRC,
+    };
+
     /** @private {?Array<!AmpElement>} */
     this.ampElementsToBless_ = null;
 
@@ -253,15 +267,13 @@ export class MediaPool {
    * @return {!Sources} The default source for the specified type of media.
    */
   getDefaultSource_(mediaType) {
-    switch (mediaType) {
-      case MediaType.AUDIO:
-        return new Sources(BLANK_AUDIO_SRC);
-      case MediaType.VIDEO:
-        return new Sources(BLANK_VIDEO_SRC);
-      default:
-        dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
-        return new Sources();
+    const sourceStr = this.defaultSources_[mediaType];
+    if (sourceStr === undefined) {
+      dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
+      return new Sources();
     }
+
+    return new Sources(sourceStr);
   }
 
 
