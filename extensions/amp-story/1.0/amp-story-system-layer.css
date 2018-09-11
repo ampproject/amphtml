@@ -316,8 +316,6 @@ span.i-amphtml-story-share-pill-label {
 }
 
 [dir=rtl] span.i-amphtml-story-share-pill-label {
-  right: auto !important;
-  left: 15px !important;
   float: left !important;
 }
 
@@ -325,7 +323,6 @@ span.i-amphtml-story-share-pill-label {
 .i-amphtml-story-share-pill:before {
   position: absolute!important;
   content: ''!important;
-  /*width: 58px!important;*/
   height: 40px!important;
   padding: 0 16px!important;
   transition: width 300ms ease-in-out!important;
@@ -342,11 +339,16 @@ span.i-amphtml-story-share-pill-label {
   position: absolute;
   right: 15px;
   transition: width 300ms ease-in-out!important;
+  left: auto !important;
 }
 
 [dir=rtl] .i-amphtml-story-share-pill:before {
-  right: auto !important;
   left: 0 !important;
+}
+
+[dir=rtl] .i-amphtml-story-share-pill-background {
+  right: auto !important;
+  left: 15px !important;
 }
 
 .i-amphtml-story-share-pill .i-amphtml-story-share-item  {
@@ -403,10 +405,6 @@ span.i-amphtml-story-share-pill-label {
   transition-delay: calc(30ms * 9)!important;
 }
 
-.i-amphtml-story-share-pill:hover .i-amphtml-story-share-pill-background {
-
-}
-
 .i-amphtml-story-share-pill .i-amphtml-story-share-list {
   padding: 0!important;
 }
@@ -425,7 +423,6 @@ span.i-amphtml-story-share-pill-label {
   background-size: 24px 24px !important;
   background-position: center center !important;
   padding: 0 !important;
-  background-color: yellow;
 }
 
 [desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
