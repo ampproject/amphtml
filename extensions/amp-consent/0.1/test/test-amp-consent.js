@@ -21,6 +21,7 @@ import {
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {computedStyle} from '../../../../src/style';
+import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
@@ -48,6 +49,8 @@ describes.realWin('amp-consent', {
     ampdoc = env.ampdoc;
     win = env.win;
     toggleExperiment(win, 'multi-consent', true);
+    toggleExperiment(win, 'amp-consent-v2', true);
+
 
     storageValue = {};
     jsonMockResponses = {
@@ -97,9 +100,8 @@ describes.realWin('amp-consent', {
     describe('consent config', () => {
       let defaultConfig;
       let consentElement;
-      let scriptElement;
       beforeEach(() => {
-        defaultConfig = {
+        defaultConfig = dict({
           'consents': {
             'ABC': {
               'checkConsentHref': 'https://response1',
@@ -108,17 +110,11 @@ describes.realWin('amp-consent', {
               'checkConsentHref': 'https://response1',
             },
           },
-        };
-        consentElement = doc.createElement('amp-consent');
-        consentElement.setAttribute('id', 'amp-consent');
-        consentElement.setAttribute('layout', 'nodisplay');
-        scriptElement = doc.createElement('script');
-        scriptElement.setAttribute('type', 'application/json');
+        });
       });
 
-      it('read config', () => {
-        scriptElement.textContent = JSON.stringify(defaultConfig);
-        consentElement.appendChild(scriptElement);
+      it('read inline config', () => {
+        consentElement = createConsentElement(doc, defaultConfig);
         doc.body.appendChild(consentElement);
         const ampConsent = new AmpConsent(consentElement);
         ampConsent.buildCallback();
@@ -126,48 +122,109 @@ describes.realWin('amp-consent', {
             defaultConfig['consents']);
       });
 
-      it.skip('assert valid config', () => {
-        // TODO(@zhouyx): Unskip/remove this test that check for error throwing
+      it('read cmp config', () => {
+        consentElement = createConsentElement(doc, dict({}), '_ping_');
+        doc.body.appendChild(consentElement);
+        const ampConsent = new AmpConsent(consentElement);
+        ampConsent.buildCallback();
+        expect(ampConsent.consentConfig_).to.deep.equal(dict({
+          '_ping_': {
+            'checkConsentHref': 'http://localhost:8000/get-consent-v1',
+            'promptUISrc':
+                'http://ads.localhost:8000/test/manual/diy-consent.html',
+          },
+        }));
+      });
+
+      it('merge inline config w/ cmp config', () => {
+        consentElement = createConsentElement(doc, dict({
+          'consents': {
+            '_ping_': {
+              'promptIfUnknownForGeoGroup': 'eea',
+              'checkConsentHref': '/override',
+            },
+          },
+          'postPromptUI': 'test',
+        }), '_ping_');
+        const postPromptUI = document.createElement('div');
+        postPromptUI.setAttribute('id', 'test');
+        consentElement.appendChild(postPromptUI);
+        doc.body.appendChild(consentElement);
+        const ampConsent = new AmpConsent(consentElement);
+        ampConsent.buildCallback();
+
+        expect(ampConsent.consentConfig_).to.deep.equal(dict({
+          '_ping_': {
+            'checkConsentHref': '/override',
+            'promptUISrc':
+                'http://ads.localhost:8000/test/manual/diy-consent.html',
+            'promptIfUnknownForGeoGroup': 'eea',
+          },
+        }));
+        expect(ampConsent.postPromptUI_).to.not.be.null;
+      });
+
+      it('assert valid config', () => {
+        const scriptTypeError = 'amp-consent: <script> child ' +
+            'must have type="application/json"';
+        const consentExistError = 'amp-consent: consents config is required';
+        const multiScriptError =
+            'amp-consent: Found 2 <script> children. Expected 1';
+        const invalidJsonError = 'amp-consent: Failed to parse <script> ' +
+            'contents. Is it valid JSON?';
+        const invalidCMPError = 'invalid CMP type';
         // Check script type equals to application/json
+        const consentElement = doc.createElement('amp-consent');
+        consentElement.setAttribute('id', 'test');
+        consentElement.setAttribute('layout', 'nodisplay');
+        const scriptElement = doc.createElement('script');
         scriptElement.textContent = JSON.stringify(defaultConfig);
-        consentElement.appendChild(scriptElement);
         scriptElement.setAttribute('type', '');
-        allowConsoleError(() => {
-          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
-        });
+        consentElement.appendChild(scriptElement);
+
         doc.body.appendChild(consentElement);
         const ampConsent = new AmpConsent(consentElement);
         allowConsoleError(() => {
-          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+          expect(() => ampConsent.buildCallback()).to.throw(scriptTypeError);
         });
 
         // Check consent config exists
         scriptElement.setAttribute('type', 'application/json');
         scriptElement.textContent = JSON.stringify({});
         allowConsoleError(() => {
-          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+          expect(() => ampConsent.buildCallback()).to.throw(consentExistError);
         });
+
+        // Check invalid CMP
+        consentElement.setAttribute('type', 'not_exist');
+        allowConsoleError(() => {
+          expect(() => ampConsent.buildCallback()).to.throw(invalidCMPError);
+        });
+
+        scriptElement.textContent = '"abc": {"a",}';
+        allowConsoleError(() => {
+          expect(() => ampConsent.buildCallback()).to.throw(invalidJsonError);
+        });
+
 
         // Check there is only one script object
         scriptElement.textContent = JSON.stringify(defaultConfig);
         const script2 = doc.createElement('script');
         consentElement.appendChild(script2);
         allowConsoleError(() => {
-          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+          expect(() => ampConsent.buildCallback()).to.throw(multiScriptError);
         });
       });
 
       it('relative checkConsentHref is resolved', function* () {
         const fetchSpy = sandbox.spy(xhrServiceMock, 'fetchJson');
-        const config = {
+        consentElement = createConsentElement(doc, dict({
           'consents': {
             'XYZ': {
               'checkConsentHref': '/r/1',
             },
           },
-        };
-        scriptElement.textContent = JSON.stringify(config);
-        consentElement.appendChild(scriptElement);
+        }));
         const ampConsent = new AmpConsent(consentElement);
         doc.body.appendChild(consentElement);
         const getUrlStub = sandbox.stub(ampdoc, 'getUrl');
@@ -187,21 +244,16 @@ describes.realWin('amp-consent', {
   describe('server communication', () => {
     let defaultConfig;
     let ampConsent;
+    let consentElement;
     beforeEach(() => {
-      defaultConfig = {
+      defaultConfig = dict({
         'consents': {
           'ABC': {
             'checkConsentHref': 'https://response1',
           },
         },
-      };
-      const consentElement = doc.createElement('amp-consent');
-      consentElement.setAttribute('id', 'amp-consent');
-      consentElement.setAttribute('layout', 'nodisplay');
-      const scriptElement = doc.createElement('script');
-      scriptElement.setAttribute('type', 'application/json');
-      scriptElement.textContent = JSON.stringify(defaultConfig);
-      consentElement.appendChild(scriptElement);
+      });
+      consentElement = createConsentElement(doc, defaultConfig);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
     });
@@ -227,27 +279,20 @@ describes.realWin('amp-consent', {
   describe('amp-geo integration', () => {
     let defaultConfig;
     let ampConsent;
-    let scriptElement;
     let consentElement;
     beforeEach(() => {
-      defaultConfig = {
+      defaultConfig = dict({
         'consents': {
           'ABC': {
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
-      };
-      consentElement = doc.createElement('amp-consent');
-      consentElement.setAttribute('id', 'amp-consent');
-      consentElement.setAttribute('layout', 'nodisplay');
-      scriptElement = doc.createElement('script');
-      scriptElement.setAttribute('type', 'application/json');
-      scriptElement.textContent = JSON.stringify(defaultConfig);
-      doc.body.appendChild(consentElement);
+      });
+      consentElement = createConsentElement(doc, defaultConfig);
     });
 
     it('in geo group', function* () {
-      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       ISOCountryGroups = ['unknown', 'testGroup'];
       ampConsent.buildCallback();
@@ -256,7 +301,7 @@ describes.realWin('amp-consent', {
     });
 
     it('not in geo group', function* () {
-      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       ISOCountryGroups = ['unknown'];
       ampConsent.buildCallback();
@@ -266,16 +311,15 @@ describes.realWin('amp-consent', {
 
     it('promptIfUnknow override geo', function* () {
       ISOCountryGroups = ['unknown'];
-      defaultConfig = {
+      consentElement = createConsentElement(doc, dict({
         'consents': {
           'ABC': {
             'checkConsentHref': 'https://response1',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
-      };
-      scriptElement.textContent = JSON.stringify(defaultConfig);
-      consentElement.appendChild(scriptElement);
+      }));
+      doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       ampConsent.buildCallback();
       yield macroTask();
@@ -284,16 +328,15 @@ describes.realWin('amp-consent', {
 
     it('promptIfUnknow override geo with false value', function* () {
       ISOCountryGroups = ['unknown'];
-      defaultConfig = {
+      consentElement = createConsentElement(doc, dict({
         'consents': {
           'ABC': {
             'checkConsentHref': 'https://response3',
             'promptIfUnknownForGeoGroup': 'unknown',
           },
         },
-      };
-      scriptElement.textContent = JSON.stringify(defaultConfig);
-      consentElement.appendChild(scriptElement);
+      }));
+      doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       ampConsent.buildCallback();
       yield macroTask();
@@ -302,16 +345,15 @@ describes.realWin('amp-consent', {
 
     it('checkConsentHref w/o promptIfUnknow not override geo', function* () {
       ISOCountryGroups = ['testGroup'];
-      defaultConfig = {
+      consentElement = createConsentElement(doc, dict({
         'consents': {
           'ABC': {
             'checkConsentHref': 'https://response2',
             'promptIfUnknownForGeoGroup': 'testGroup',
           },
         },
-      };
-      scriptElement.textContent = JSON.stringify(defaultConfig);
-      consentElement.appendChild(scriptElement);
+      }));
+      doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       ampConsent.buildCallback();
       yield macroTask();
@@ -322,10 +364,9 @@ describes.realWin('amp-consent', {
   describe('policy config', () => {
     let defaultConfig;
     let ampConsent;
-    let scriptElement;
     let consentElement;
     beforeEach(() => {
-      defaultConfig = {
+      defaultConfig = dict({
         'consents': {
           'ABC': {
             'checkConsentHref': 'https://response1',
@@ -334,14 +375,8 @@ describes.realWin('amp-consent', {
             'checkConsentHref': 'https://response1',
           },
         },
-      };
-      consentElement = doc.createElement('amp-consent');
-      consentElement.setAttribute('id', 'amp-consent');
-      consentElement.setAttribute('layout', 'nodisplay');
-      scriptElement = doc.createElement('script');
-      scriptElement.setAttribute('type', 'application/json');
-      scriptElement.textContent = JSON.stringify(defaultConfig);
-      consentElement.appendChild(scriptElement);
+      });
+      consentElement = createConsentElement(doc, defaultConfig);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
     });
@@ -407,7 +442,7 @@ describes.realWin('amp-consent', {
     });
 
     it('override default policy', function* () {
-      defaultConfig = {
+      consentElement = createConsentElement(doc, {
         'consents': {
           'ABC': {
             'checkConsentHref': 'https://response1',
@@ -423,8 +458,8 @@ describes.realWin('amp-consent', {
             },
           },
         },
-      };
-      scriptElement.textContent = JSON.stringify(defaultConfig);
+      });
+      doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       ampConsent.buildCallback();
       yield macroTask();
@@ -449,21 +484,16 @@ describes.realWin('amp-consent', {
     let event;
     let ampIframe;
     let iframe;
+    let consentElement;
     beforeEach(() => {
-      defaultConfig = {
+      defaultConfig = dict({
         'consents': {
           'ABC': {
             'checkConsentHref': 'https://response1',
           },
         },
-      };
-      const consentElement = doc.createElement('amp-consent');
-      consentElement.setAttribute('id', 'amp-consent');
-      consentElement.setAttribute('layout', 'nodisplay');
-      const scriptElement = doc.createElement('script');
-      scriptElement.setAttribute('type', 'application/json');
-      scriptElement.textContent = JSON.stringify(defaultConfig);
-      consentElement.appendChild(scriptElement);
+      });
+      consentElement = createConsentElement(doc, defaultConfig);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
       actionSpy = sandbox.stub(ampConsent, 'handleAction_');
@@ -505,7 +535,7 @@ describes.realWin('amp-consent', {
     let consentElement;
     let postPromptUI;
     beforeEach(() => {
-      defaultConfig = {
+      defaultConfig = dict({
         'consents': {
           'ABC': {
             'checkConsentHref': 'https://response1',
@@ -521,17 +551,11 @@ describes.realWin('amp-consent', {
           },
         },
         'postPromptUI': 'test',
-      };
-      consentElement = doc.createElement('amp-consent');
-      consentElement.setAttribute('id', 'amp-consent');
-      consentElement.setAttribute('layout', 'nodisplay');
-      const scriptElement = doc.createElement('script');
-      scriptElement.setAttribute('type', 'application/json');
-      scriptElement.textContent = JSON.stringify(defaultConfig);
+      });
+      consentElement = createConsentElement(doc, defaultConfig);
       uiElement = document.createElement('div');
       uiElement.setAttribute('id', '123');
       consentElement.appendChild(uiElement);
-      consentElement.appendChild(scriptElement);
       postPromptUI = document.createElement('div');
       postPromptUI.setAttribute('id', 'test');
       consentElement.appendChild(postPromptUI);
@@ -606,6 +630,7 @@ describes.realWin('amp-consent', {
           'amp-consent:GH': CONSENT_ITEM_STATE.ACCEPTED,
         };
         ampConsent.buildCallback();
+        ampConsent.element.classList.remove('i-amphtml-notbuilt');
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
             .to.equal('none');
@@ -626,23 +651,19 @@ describes.realWin('amp-consent', {
 
       describe('hide/show postPromptUI', () => {
         beforeEach(() => {
-          defaultConfig = {
+          defaultConfig = dict({
             'consents': {
               'ABC': {
                 'checkConsentHref': 'https://response3',
               },
             },
-            'postPromptUI': 'test',
-          };
-          consentElement = doc.createElement('amp-consent');
-          consentElement.setAttribute('id', 'amp-consent');
-          consentElement.setAttribute('layout', 'nodisplay');
-          const scriptElement = doc.createElement('script');
-          scriptElement.setAttribute('type', 'application/json');
-          scriptElement.textContent = JSON.stringify(defaultConfig);
-          consentElement.appendChild(scriptElement);
+            // There's already an amp-consent from a parent beforeEach with a
+            // test postPromptUI
+            'postPromptUI': 'test2',
+          });
+          consentElement = createConsentElement(doc, defaultConfig);
           postPromptUI = doc.createElement('div');
-          postPromptUI.setAttribute('id', 'test');
+          postPromptUI.setAttribute('id', 'test2');
           consentElement.appendChild(postPromptUI);
           doc.body.appendChild(consentElement);
           ampConsent = new AmpConsent(consentElement);
@@ -650,6 +671,7 @@ describes.realWin('amp-consent', {
 
         it('hide postPromptUI', function* () {
           ampConsent.buildCallback();
+          ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
           expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
@@ -661,6 +683,7 @@ describes.realWin('amp-consent', {
             'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
           };
           ampConsent.buildCallback();
+          ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
           expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
@@ -670,3 +693,25 @@ describes.realWin('amp-consent', {
     });
   });
 });
+
+
+/**
+ * Create an <amp-consent> element from config for testing
+ * @param {Document} doc
+ * @param {!JsonObject} config
+ * @param {string=} opt_type
+ * @return {Element}
+ */
+function createConsentElement(doc, config, opt_type) {
+  const consentElement = doc.createElement('amp-consent');
+  consentElement.setAttribute('id', 'amp-consent');
+  consentElement.setAttribute('layout', 'nodisplay');
+  if (opt_type) {
+    consentElement.setAttribute('type', opt_type);
+  }
+  const scriptElement = doc.createElement('script');
+  scriptElement.setAttribute('type', 'application/json');
+  scriptElement.textContent = JSON.stringify(config);
+  consentElement.appendChild(scriptElement);
+  return consentElement;
+}

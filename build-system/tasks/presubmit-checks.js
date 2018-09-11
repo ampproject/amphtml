@@ -342,8 +342,9 @@ const forbiddenTerms = {
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
-      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
+      'extensions/amp-bind/0.1/bind-impl.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
 
       // iframe-messaging-client.sendMessage
@@ -623,6 +624,17 @@ const forbiddenTerms = {
       'test/_init_tests.js',
     ],
   },
+  '[^\\.]makeBodyVisible\\(': {
+    message: 'This is a protected function. If you are calling this to show ' +
+        'body after an error please use `makeBodyVisibleRecovery`',
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/style-installer.js',
+      'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
+    ],
+  },
 };
 
 const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded' +
@@ -785,6 +797,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
       'dist.3p/current/integration.js',
     ],
   },

@@ -362,8 +362,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA ||
           exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER).length;
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
-        .whenFirstVisible()
-        .then(() => getIdentityToken(this.win, this.getAmpDoc()));
+        .whenFirstVisible().then(() =>
+          getIdentityToken(
+              this.win, this.getAmpDoc(), super.getConsentPolicy()));
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');
@@ -862,6 +863,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,
     });
+    if (this.qqid_) {
+      this.element.setAttribute('data-google-query-id', this.qqid_);
+    }
+    dev().assertElement(this.iframe).id = `google_ads_iframe_${this.ifi_}`;
     if (isMultiSizeFluid) {
       // This is a fluid + multi-size request, where the returned creative is
       // multi-size. The slot needs to not be styled with width: 100%, or the

@@ -704,8 +704,8 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
+  videoPlayer.addEventListener(interactEvent, showControls);
   if (playbackStarted) {
-    videoPlayer.addEventListener(interactEvent, showControls);
     playVideo();
   }
 }
@@ -1137,12 +1137,14 @@ function onMessage(global, event) {
       break;
     case 'resize':
       if (msg.args && msg.args.width && msg.args.height) {
-        const dimsStyles = {
+        setStyles(wrapperDiv, {
           'width': px(msg.args.width),
           'height': px(msg.args.height),
-        };
-        setStyles(wrapperDiv, dimsStyles);
-        setStyles(bigPlayDiv, dimsStyles);
+        });
+        setStyles(bigPlayDiv, {
+          'width': px(msg.args.width),
+          'height': px(msg.args.height),
+        });
         if (adsActive) {
           adsManager.resize(
               msg.args.width, msg.args.height,
