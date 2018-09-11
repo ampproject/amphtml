@@ -64,7 +64,7 @@ export function recaptcha(global, data) {
  * @param {Object} data
  */
 function actionTypeHandler(global, grecaptcha, data) {
-  
+
   const executePromise = grecaptcha.execute(data.sitekey, {
     action: data.action,
   });
@@ -75,7 +75,7 @@ function actionTypeHandler(global, grecaptcha, data) {
       'id': data.id,
       'token': token,
     }));
-  }, function (err) {
+  }, function(err) {
     user().error(TAG, err);
     global.context./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
       'id': data.id,

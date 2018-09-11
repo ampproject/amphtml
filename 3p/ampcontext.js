@@ -267,27 +267,30 @@ export class AbstractAmpContext {
   }
 
   /**
-   * Function to register a callback on the context iframe messaging client
-   * This is to accept messages of any type, for 3p communication
+   * Function to register a callback on the iframe messaging client.
+   * This is to accept messages of any type, for 3p communication.
+   * Please use the specific functions for context messaging where possible.
    * @param {string} messageType
-   * @param {Function} callback
+   * @param {function(?JsonObject)} callback
    */
   registerCallback(messageType, callback) {
     this.client_.registerCallback(
-      messageType, callback
+        messageType, callback
     );
   }
 
   /**
-   * Function to send a message using the private iframe messaging client
+   * Function to send a message using the iframe messaging client.
+   * This is to send messages of any type, for 3p communication.
+   * Please use the specific functions for context messaging where possible.
    *  @param {string} messageType
    *  @param {JsonObject=} opt_payload The payload of message to send.
    */
   sendMessage(messageType, opt_payload) {
-      this.client_.sendMessage(
+    this.client_.sendMessage(
         messageType,
         opt_payload
-      );
+    );
   }
 
   /**

@@ -104,7 +104,7 @@ export class AmpRecaptchaService {
           'An iframe is not created. You must register before executing'
       ));
     }
-    
+
     const executePromise = new Deferred();
     const messageId = resourceId;
     this.executeMap_[messageId] = {
@@ -142,7 +142,7 @@ export class AmpRecaptchaService {
 
     this.unlisteners_ = [
       this.listenIframe_(
-        MESSAGE_TAG + 'ready', this.recaptchaApiReady_.resolve
+          MESSAGE_TAG + 'ready', this.recaptchaApiReady_.resolve
       ),
       this.listenIframe_(
           MESSAGE_TAG + 'token', this.tokenMessageHandler_.bind(this)
