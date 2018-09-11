@@ -31,9 +31,9 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
-import {setImportantStyles} from '../../../src/style';
+import {px} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import { px } from '../../../src/style';
+import {setImportantStyles} from '../../../src/style';
 
 
 /** @private @const {string} */
@@ -62,6 +62,9 @@ const SHARE_CLASS = 'i-amphtml-story-share-control';
 
 /** @private @const {string} */
 const INFO_CLASS = 'i-amphtml-story-info-control';
+
+/** @private @const {string} */
+const SHARE_PILL_CLASS = 'i-amphtml-story-share-pill';
 
 /** @private @const {number} */
 const hideTimeout = 1500;
@@ -238,7 +241,7 @@ export class SystemLayer {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    this.w = null;
+    this.shareLabelWidth_ = null;
 
   }
 
@@ -566,56 +569,66 @@ export class SystemLayer {
 
     const shareWidget = new ShareWidget(this.win_, this.parentEl_);
 
+    this.systemLayerEl_.appendChild(this.sharePillContainerNode_);
     this.sharePillContainerNode_
         .querySelector('.i-amphtml-story-share-pill')
         .appendChild(shareWidget.build(getAmpdoc(this.parentEl_)));
-
-    this.systemLayerEl_.appendChild(this.sharePillContainerNode_);
-    SHARE_DD = 'i-amphtml-story-share-pill';
     this.getShadowRoot().addEventListener('mouseover', event => {
       const target = dev().assertElement(event.target);
 
-      if (matches(target, `.${SHARE_DD}, .${SHARE_DD} *`)) {
-        this.changeMargin();
+      if (matches(target, `.${SHARE_PILL_CLASS}, .${SHARE_PILL_CLASS} *`)) {
+        this.changeMargin_();
       }
     });
 
     this.getShadowRoot().addEventListener('mouseout', event => {
       const target = dev().assertElement(event.target);
 
-      if (matches(target, `.${SHARE_DD}, .${SHARE_DD} *`)) {
+      if (matches(target, `.${SHARE_PILL_CLASS}, .${SHARE_PILL_CLASS} *`)) {
         this.removeExtend_();
       }
     });
-    
-    
+
+
   }
   /**
    * Builds and appends the share pill. Desktop only.
    * @private
    */
-  changeMargin() {
-    const shareList = this.systemLayerEl_.querySelector('.i-amphtml-story-share-list');
-    const elem = this.systemLayerEl_.querySelector('.i-amphtml-story-share-pill-label');
-    const style = this.win_.getComputedStyle(elem);
-    const width = elem.offsetWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
-    const bg = this.systemLayerEl_.querySelector('.i-amphtml-story-share-pill-background');
-    setImportantStyles(bg, {
+  changeMargin_() {
+    if (this.shareLabelWidth_ == null) {
+      const shareList = this.systemLayerEl_
+          .querySelector('.i-amphtml-story-share-list');
+      const elem = this.systemLayerEl_
+          .querySelector('.i-amphtml-story-share-pill-label');
+      const style = this.win_.getComputedStyle(elem);
+      const width = elem.offsetWidth - parseFloat(style.paddingLeft) -
+        parseFloat(style.paddingRight) - parseFloat(style.borderLeftWidth) -
+          parseFloat(style.borderRightWidth);
+      this.shareLabelWidth_ = width;
+      const margin = width + 20;
+      setImportantStyles(shareList, {'margin-right': px(margin)});
+    }
+
+    const background = this.systemLayerEl_
+        .querySelector('.i-amphtml-story-share-pill-background');
+    setImportantStyles(background, {
       'width': 'calc(100% - 32px)',
       'max-width': px(800),
     });
-    this.w = width;
-    const margin = width + 20;
-    setImportantStyles(shareList, {'margin-right': px(margin)});
+
   }
 
+  /**
+   * Shortens the length of share pill to be just long enough to encapsulate the
+   * share pill label.
+   */
   removeExtend_() {
-    console.log(this.w);
-    const bg = this.systemLayerEl_.querySelector('.i-amphtml-story-share-pill-background');
-
-    setImportantStyles(bg, {'width': px(this.w)});
-
+    const background = this.systemLayerEl_
+        .querySelector('.i-amphtml-story-share-pill-background');
+    setImportantStyles(background, {'width': px(this.shareLabelWidth_)});
   }
+
   /**
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
    * @private
