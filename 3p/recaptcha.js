@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {IframeMessagingClient} from './iframe-messaging-client';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {loadScript} from './3p';
@@ -24,9 +23,6 @@ const TAG = 'RECAPTCHA';
 
 /** @const {string} */
 const MESSAGE_TAG = 'amp-recaptcha-';
-
-/** {!IframeMessaginClient|null} **/
-let iframeMessagingClient = null;
 
 /**
  * @param {!Window} global
@@ -48,13 +44,11 @@ export function recaptcha(global, data) {
     const {grecaptcha} = global;
 
     grecaptcha.ready(function() {
-      iframeMessagingClient = new IframeMessagingClient(global);
-      iframeMessagingClient.setSentinel(global.context.sentinel);
-      iframeMessagingClient.registerCallback(
+      global.context.registerCallback(
           MESSAGE_TAG + 'action',
-          actionTypeHandler.bind(this, grecaptcha)
+          actionTypeHandler.bind(this, global, grecaptcha)
       );
-      iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'ready');
+      global.context./*OK*/sendMessage(MESSAGE_TAG + 'ready');
     });
   }, function() {
     user().error(TAG + ' Failed to load recaptcha api script');
@@ -65,26 +59,25 @@ export function recaptcha(global, data) {
  * Function to handle executing actions using the grecaptcha Object,
  * and sending the token back to the parent amp-recaptcha component
  *
+ * @param {!Window} global
  * @param {*} grecaptcha
  * @param {Object} data
  */
-function actionTypeHandler(grecaptcha, data) {
-  if (!iframeMessagingClient) {
-    dev().error(TAG, 'IframeMessagingClient does not exist.');
-    return;
-  }
-
-  grecaptcha.execute(data.sitekey, {
+function actionTypeHandler(global, grecaptcha, data) {
+  
+  const executePromise = grecaptcha.execute(data.sitekey, {
     action: data.action,
-  })./*OK*/then(function(token) {
-    // .then() promise pollyfilled by recaptcha api script
-    iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'token', dict({
+  });
+
+  // .then() promise pollyfilled by recaptcha api script
+  executePromise./*OK*/then(function(token) {
+    global.context./*OK*/sendMessage(MESSAGE_TAG + 'token', dict({
       'id': data.id,
       'token': token,
     }));
-  }).catch(function(err) {
+  }, function (err) {
     user().error(TAG, err);
-    iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
+    global.context./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
       'id': data.id,
       'error': err.message,
     }));

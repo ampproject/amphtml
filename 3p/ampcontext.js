@@ -267,6 +267,30 @@ export class AbstractAmpContext {
   }
 
   /**
+   * Function to register a callback on the context iframe messaging client
+   * This is to accept messages of any type, for 3p communication
+   * @param {string} messageType
+   * @param {Function} callback
+   */
+  registerCallback(messageType, callback) {
+    this.client_.registerCallback(
+      messageType, callback
+    );
+  }
+
+  /**
+   * Function to send a message using the private iframe messaging client
+   *  @param {string} messageType
+   *  @param {JsonObject=} opt_payload The payload of message to send.
+   */
+  sendMessage(messageType, opt_payload) {
+      this.client_.sendMessage(
+        messageType,
+        opt_payload
+      );
+  }
+
+  /**
    *  Parse the metadata attributes from the name and add them to
    *  the class instance.
    *  @param {!Object|string} data

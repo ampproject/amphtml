@@ -15,4 +15,45 @@
  */
 
 describe.configure().skipSafari().skipEdge()
-    .run('amp-recaptcha-input', function() {});
+  .run('amp-recaptcha-input', function() {
+  
+  // Extend timeout slightly for flakes on Windows environments
+  this.timeout(4000);
+  const extensions = ['amp-recaptcha-input'];
+
+  const bodyTemplate = `
+    <amp-recaptcha-input 
+      id="amp-recaptcha-input-1"
+      layout="nodisplay"
+      data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE"
+      data-action="integration_test">
+    </amp-recaptcha-input>
+  `;
+
+  describes.integration('amp-recaptcha execute', {
+    body: bodyTemplate,
+    extensions,
+  }, env => {
+
+    let win;
+    beforeEach(() => {
+      win = env.win;
+    });
+
+    it('should be able to return a token on execute', () => {
+      
+      const ampRecaptchaInput = 
+        win.document.getElementById('amp-recaptcha-input-1');
+      
+      return ampRecaptchaInput.implementation_.layoutCallback().then(() => {
+        return ampRecaptchaInput.implementation_.getValue().then(token => {
+          expect(token).to.be.ok;
+        });
+
+      });
+
+    });
+
+
+  });
+});
