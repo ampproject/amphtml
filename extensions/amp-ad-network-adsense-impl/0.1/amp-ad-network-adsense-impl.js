@@ -210,8 +210,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
-        .whenFirstVisible()
-        .then(() => getIdentityToken(this.win, this.getAmpDoc()));
+        .whenFirstVisible().then(() =>
+          getIdentityToken(
+              this.win, this.getAmpDoc(), super.getConsentPolicy()));
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
 

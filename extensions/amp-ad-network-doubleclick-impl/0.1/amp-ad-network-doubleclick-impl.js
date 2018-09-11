@@ -362,8 +362,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA ||
           exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER).length;
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
-        .whenFirstVisible()
-        .then(() => getIdentityToken(this.win, this.getAmpDoc()));
+        .whenFirstVisible().then(() =>
+          getIdentityToken(
+              this.win, this.getAmpDoc(), super.getConsentPolicy()));
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');

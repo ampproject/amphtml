@@ -16,6 +16,7 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
@@ -659,7 +660,7 @@ describe('Google A4A utils', () => {
         freshLifetimeSecs: '1234',
         validLifetimeSecs: '5678',
       }));
-      return getIdentityToken(env.win, env.win.document).then(result => {
+      return getIdentityToken(env.win, env.win.document, '').then(result => {
         expect(result.token).to.equal('abc');
         expect(result.jar).to.equal('');
         expect(result.pucrd).to.equal('');
@@ -697,6 +698,40 @@ describe('Google A4A utils', () => {
           {fetchJson: () => Promise.reject('some network failure')});
       return getIdentityToken(env.win, env.win.document)
           .then(result => expect(result).to.jsonEqual({}));
+    });
+
+    it('should fetch if SUFFICIENT consent', () => {
+      env.expectFetch(getUrl(), JSON.stringify({
+        newToken: 'abc',
+        '1p_jar': 'some_jar',
+        pucrd: 'some_pucrd',
+        freshLifetimeSecs: '1234',
+        validLifetimeSecs: '5678',
+      }));
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
+          }));
+      return getIdentityToken(env.win, env.win.document, 'default').then(
+          result => expect(result.token).to.equal('abc'));
+    });
+
+    it('should not fetch if INSUFFICIENT consent', () => {
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
+          }));
+      return expect(getIdentityToken(env.win, env.win.document, 'default'))
+          .to.eventually.jsonEqual({});
+    });
+
+    it('should not fetch if UNKNOWN consent', () => {
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
+          }));
+      return expect(getIdentityToken(env.win, env.win.document, 'default'))
+          .to.eventually.jsonEqual({});
     });
   });
 
