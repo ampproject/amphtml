@@ -12,67 +12,25 @@
   <meta name="amp-google-client-id-api" content="googleanalytics">
 </head>
 <body>
-  <amp-analytics>
-    <script type="application/json">
-    {
-      "requests": {
-        "endpoint": "/analytics/foo?b=${encoded}"
-      },
-      "triggers": {
-        "pageview": {
-          "on": "visible",
-          "request": "endpoint"
-        }
-      },
-      "linkers" : {
-        "ga": {
-          "ids": {
-            "_ga": "CLIENT_ID(_ga)",
-            "gclid": "QUERY_PARAM(gclid)"
-          },
-          "destinationDomains": ["www.google.com"],
-          "enabled": true
-        },
-        "linker2": {
-          "ids": {
-            "_cid": "CLIENT_ID(foo)",
-            "t": "${title}"
-          },
-          "destinationDomains": ["www.example.com"],
-          "enabled": true
-        }
-      }
-    }
-    </script>
-  </amp-analytics>
   <amp-analytics type="googleanalytics">
     <script type="application/json">
     {
-      "requests": {
-        "endpoint": "/analytics/foo?b=goog"
-      },
       "triggers": {
         "pageview": {
           "on": "visible",
-          "request": "endpoint"
+          "request": "pageview"
         }
       },
       "linkers" : {
-        "ga": {
-          "ids": {
-            "_ga": "CLIENT_ID(_ga)"
-          },
-          "destinationDomains": ["www.ampproject.com"]
-        }
+        "enabled": true,
+        "proxyOnly": false,
+        "destinationDomains": ["ads.localhost"]
       }
     }
     </script>
   </amp-analytics>
   <h1 id="top">AMP Analytics</h1>
-    <div><a href="https://www.example.com">example.com #1</a></div>
-    <div><a href="https://www.example.com">example.com #2</a></div>
-    <div><a href="https://www.google.com">google.com</a></div>
-    <div><a href="https://www.ampproject.com">ampproject.com</a></div>
+    <div><a href="http://ads.localhost:8000/examples/linkers-ga.html">ads.localhost</a></div>
   <p>
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet
     neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in
