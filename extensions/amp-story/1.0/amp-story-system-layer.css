@@ -404,8 +404,7 @@ span.i-amphtml-story-share-pill-label {
 }
 
 .i-amphtml-story-share-pill:hover .i-amphtml-story-share-pill-background {
-  width: calc(100%-32px) !important;
-  max-width: 800px !important;
+
 }
 
 .i-amphtml-story-share-pill .i-amphtml-story-share-list {

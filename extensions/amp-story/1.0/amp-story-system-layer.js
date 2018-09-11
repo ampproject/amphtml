@@ -238,6 +238,8 @@ export class SystemLayer {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
+    this.w = null;
+
   }
 
   /**
@@ -574,26 +576,45 @@ export class SystemLayer {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${SHARE_DD}, .${SHARE_DD} *`)) {
-        this.swag();
+        this.changeMargin();
       }
     });
+
+    this.getShadowRoot().addEventListener('mouseout', event => {
+      const target = dev().assertElement(event.target);
+
+      if (matches(target, `.${SHARE_DD}, .${SHARE_DD} *`)) {
+        this.removeExtend_();
+      }
+    });
+    
     
   }
   /**
    * Builds and appends the share pill. Desktop only.
    * @private
    */
-  swag() {
-
+  changeMargin() {
     const shareList = this.systemLayerEl_.querySelector('.i-amphtml-story-share-list');
     const elem = this.systemLayerEl_.querySelector('.i-amphtml-story-share-pill-label');
     const style = this.win_.getComputedStyle(elem);
     const width = elem.offsetWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
     const bg = this.systemLayerEl_.querySelector('.i-amphtml-story-share-pill-background');
-    //bg.style.maxwidth = null;
-    //setImportantStyles(bg, {'max-width': px(margin)});
+    setImportantStyles(bg, {
+      'width': 'calc(100% - 32px)',
+      'max-width': px(800),
+    });
+    this.w = width;
     const margin = width + 20;
     setImportantStyles(shareList, {'margin-right': px(margin)});
+  }
+
+  removeExtend_() {
+    console.log(this.w);
+    const bg = this.systemLayerEl_.querySelector('.i-amphtml-story-share-pill-background');
+
+    setImportantStyles(bg, {'width': px(this.w)});
+
   }
   /**
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
