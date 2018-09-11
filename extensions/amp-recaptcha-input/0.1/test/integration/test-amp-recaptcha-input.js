@@ -20,7 +20,7 @@ import {toggleExperiment} from '../../../../../src/experiments';
 describe.configure().skipSafari().skipEdge()
     .run('amp-recaptcha-input', function() {
       describes.integration('amp-recaptcha execute', {
-        extensions: ['amp-recaptcha-input']
+        extensions: ['amp-recaptcha-input'],
       }, env => {
 
         let win;
@@ -34,11 +34,11 @@ describe.configure().skipSafari().skipEdge()
         function getRecaptchaInput() {
           const ampRecaptchaInput = doc.createElement('amp-recaptcha-input');
           ampRecaptchaInput.setAttribute('layout',
-            'nodisplay');
+              'nodisplay');
           ampRecaptchaInput.setAttribute('data-sitekey',
-            '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
+              '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
           ampRecaptchaInput.setAttribute('data-action',
-            'integration_testing');
+              'integration_testing');
           doc.body.appendChild(ampRecaptchaInput);
           return ampRecaptchaInput.build().then(() => {
             return ampRecaptchaInput.layoutCallback();
