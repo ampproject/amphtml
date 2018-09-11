@@ -1501,29 +1501,6 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     expect(elements[0].tagName.toLowerCase()).to.equal('content');
   });
 
-  it('toggleLayoutDisplay should add/remove display class', () => {
-    element.setAttribute('layout', 'nodisplay');
-    win.document.body.appendChild(element);
-    return poll('wait for static layout',
-        () => element.classList.contains('i-amphtml-layout-nodisplay'))
-        .then(() => {
-          expect(element.style.display).to.be.equal('none');
-
-          element.style.display = 'block';
-          element.toggleLayoutDisplay(true);
-          expect(element).not.to.have.attribute('hidden');
-          expect(win.getComputedStyle(element).display).to.equal('block');
-
-          element.toggleLayoutDisplay(false);
-          expect(element).to.have.attribute('hidden');
-          expect(win.getComputedStyle(element).display).to.equal('none');
-
-          element.toggleLayoutDisplay(true);
-          expect(element).not.to.have.attribute('hidden');
-          expect(win.getComputedStyle(element).display).to.equal('block');
-        });
-  });
-
   it('getPlaceholder should return nothing', () => {
     expect(element.getPlaceholder()).to.be.null;
   });
