@@ -451,6 +451,10 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   onMouseDown_(e) {
+    // Return early for right click
+    if (e.button == 2) {
+      return;
+    }
     e.preventDefault();
     const {clientX, clientY} = e;
 
@@ -472,6 +476,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   onMouseMove_(e) {
+    // Prevent swiping by accident
     e.preventDefault();
     const {clientX, clientY} = e;
     const deltaX = clientX - this.mouseStartX_;
@@ -843,9 +848,11 @@ export class AmpPanZoom extends AMP.BaseElement {
       if (this.scale_ <= 1) {
         this.unregisterPanningGesture_();
         this.toggleZoomButtonIn_();
+        this.content_.classList.remove('i-amphtml-pan-zoom-scrollable');
       } else {
         this.registerPanningGesture_();
         this.toggleZoomButtonOut_();
+        this.content_.classList.add('i-amphtml-pan-zoom-scrollable');
       }
     });
   }
