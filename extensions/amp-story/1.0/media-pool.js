@@ -268,7 +268,7 @@ export class MediaPool {
    */
   getDefaultSource_(mediaType) {
     const sourceStr = this.defaultSources_[mediaType];
-    if (!sourceStr) {
+    if (sourceStr === undefined) {
       dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
       return new Sources();
     }
