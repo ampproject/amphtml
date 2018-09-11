@@ -704,8 +704,8 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
+  videoPlayer.addEventListener(interactEvent, showControls);
   if (playbackStarted) {
-    videoPlayer.addEventListener(interactEvent, showControls);
     playVideo();
   }
 }
