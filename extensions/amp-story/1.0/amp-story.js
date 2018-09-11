@@ -348,7 +348,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     // Removes title in order to prevent incorrect titles appearing on link
-    // hover. (See www./github.com/ampproject/amphtml/issues/17654)
+    // hover. (See 17654)
     this.element.removeAttribute('title');
 
     // Disallow all actions in a (standalone) story.
