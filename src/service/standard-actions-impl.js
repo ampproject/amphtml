@@ -91,6 +91,34 @@ export class StandardActions {
   }
 
   /**
+   * Extract id argument as node, and forward invocation to handler
+   * (invocation.node be document)
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @param {string} globalName
+   * @param {string} name
+   * @param {ActionHandlerDef} handler
+   * @return {?Promise}
+   */
+  forwardGlobalTargetAliasForMethod(invocation, globalName, name, handler) {
+    // Check if 'id' presents as argument
+    if (!('id' in invocation.args)) {
+      user().error(TAG,
+          `Missing target element id for '${globalName}.${name}'`);
+      return null;
+    }
+    const nodeId = invocation.args['id'];
+    delete invocation.args['id'];
+    const node = this.ampdoc.getRootNode().getElementById(nodeId);
+    if (!node) {
+      user().error(TAG,
+          `Cannot find element of id '${nodeId}' for '${globalName}.${name}'`);
+      return null;
+    }
+    invocation.node = dev().assertElement(node);
+    return handler(invocation);
+  }
+
+  /**
    * Handles global `AMP` actions.
    * See `amp-actions-and-events.md` for details.
    * @param {!./action-impl.ActionInvocation} invocation
@@ -144,6 +172,10 @@ export class StandardActions {
             .catch(reason => {
               dev().error(TAG, 'Failed to opt out of CID', reason);
             });
+
+      case 'scrollTo':
+        return this.forwardGlobalTargetAliasForMethod(
+            invocation, 'AMP', method, this.handleScrollTo.bind(this));
     }
     throw user().createError('Unknown AMP action ', method);
   }
