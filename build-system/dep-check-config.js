@@ -156,6 +156,8 @@ exports.rules = [
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
+      'ads/google/a4a/**->src/consent.js',
+      'ads/google/a4a/**->src/consent-state.js',
       'ads/google/a4a/**->src/dom.js',
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
