@@ -139,9 +139,11 @@ export class LocalSubscriptionPlatform {
         if (action == 'login') {
           // The "login" action is somewhat special b/c viewers can
           // enhance this action, e.g. to provide save/link feature.
-          const platform = this.serviceAdapter_.selectPlatformForLogin();
-          this.serviceAdapter_.delegateActionToService(
-              action, platform.getServiceId());
+          this.serviceAdapter_.selectPlatformForLogin()
+              .then(platform => {
+                this.serviceAdapter_.delegateActionToService(
+                    action, platform.getServiceId());
+              });
         } else {
           this.executeAction(action);
         }
@@ -212,8 +214,8 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  supportsCurrentViewer() {
-    return false;
+  getSupportedFactor(unusedFactor) {
+    return 0;
   }
 
   /** @override */

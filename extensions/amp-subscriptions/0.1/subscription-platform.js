@@ -57,10 +57,11 @@ export class SubscriptionPlatform {
   pingback(unusedSelectedPlatform) {}
 
   /**
-   * Tells if this platform supports the current viewer.
-   * @return {boolean}
+   * Tells if the platform supports a score factor
+   * @param {string} unusedFactor
+   * @return {!Promise<number>}
    */
-  supportsCurrentViewer() {}
+  getSupportedFactor(unusedFactor) {}
 
   /**
    * Executes action for the local platform.

@@ -35,9 +35,21 @@ describes.realWin('Platform store', {}, () => {
     grantReason: GrantReason.SUBSCRIBER,
   });
 
+  /**
+   * fake handler for supportScoreFactor
+   * @param {string} factor
+   * @param {!Object} factorMap
+   * @return {boolean}
+   */
+  function fakeGetSupportedFactor(factor, factorMap) {
+    return Promise.resolve(factorMap[factor] || 0);
+  }
+
   beforeEach(() => {
     platformStore = new PlatformStore(serviceIds, {
       supportsViewer: 9,
+      testFactor1: 10,
+      testFactor2: 10,
     }, fallbackEntitlement);
   });
 
@@ -221,10 +233,6 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should choose a platform based on subscription', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local',
         raw: '',
@@ -237,8 +245,9 @@ describes.realWin('Platform store', {}, () => {
         raw: '',
         service: 'another',
       }));
-      expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
-          .equal(localPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_()
+          .then(platform => platform.getServiceId()))
+          .to.eventually.equal(localPlatform.getServiceId());
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local',
         raw: '',
@@ -251,65 +260,114 @@ describes.realWin('Platform store', {}, () => {
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
       }));
-      expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
-          .equal(anotherPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_()
+          .then(platform => platform.getServiceId()))
+          .to.eventually.equal(anotherPlatform.getServiceId());
     });
 
-    it('should choose a platform based on if it supports current '
-        + 'viewer', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => true);
+    it('should choose local platform if all other conditions are same', () => {
+      sandbox.stub(localPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
+      sandbox.stub(anotherPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
+
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
-          .equal(anotherPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_()
+          .then(platform => platform.getServiceId()))
+          .to.eventually.equal(localPlatform.getServiceId());
     });
 
-    it('should not choose a platform based on supports for current '
-        + 'viewer, if prefer supportsViewer is 0', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => true);
+    it('should chose platform based on score weight', () => {
+      sandbox.stub(localPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
+      // +9
+      sandbox.stub(anotherPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor,
+              {'supportsViewer': true}));
+
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      platformStore.scoreConfig_ = {supportsViewer: 0};
-      expect(platformStore.selectApplicablePlatform_().getServiceId())
-          .to.be.equal(localPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_()
+          .then(platform => platform.getServiceId()))
+          .to.eventually.equal(anotherPlatform.getServiceId());
     });
 
-    it('should choose a local if all other conditions are same', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
+    it('should chose platform based on multiple factors', () => {
+      // +10
+      sandbox.stub(localPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor,
+              {'testFactor1': 1}));
+      // +9
+      sandbox.stub(anotherPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor,
+              {'supportsViewer': 1}));
+
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
-          .equal(localPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_()
+          .then(platform => platform.getServiceId()))
+          .to.eventually.equal(localPlatform.getServiceId());
+    });
+
+    it('should chose platform specified factors', () => {
+      // +10
+      sandbox.stub(localPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor,
+              {'testFactor1': 1}));
+      // +9
+      sandbox.stub(anotherPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor,
+              {'supportsViewer': 1}));
+
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local'}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.selectApplicablePlatform_('supporsViewer')
+          .then(platform => platform.getServiceId()))
+          .to.eventually.equal(localPlatform.getServiceId());
+    });
+
+    it('should chose platform handle negative factor values', () => {
+      // +10, -10
+      sandbox.stub(localPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor,
+              {testFactor1: 1, testFactor2: -1}));
+      // +9
+      sandbox.stub(anotherPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor,
+              {'supportsViewer': 1}));
+
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local'}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.selectApplicablePlatform_(true)
+          .then(platform => platform.getServiceId()))
+          .to.eventually.equal(anotherPlatform.getServiceId());
     });
 
     it('should use baseScore', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
+      sandbox.stub(localPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
+      sandbox.stub(anotherPlatform, 'getSupportedFactor')
+          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
       localPlatformBaseScore = 1;
       anotherPlatformBaseScore = 10;
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
-          .equal(anotherPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_()
+          .then(platform => platform.getServiceId()))
+          .to.eventually.equal(anotherPlatform.getServiceId());
     });
   });
 
@@ -466,23 +524,6 @@ describes.realWin('Platform store', {}, () => {
         done();
       });
       platformStore.resolvePlatform('local', localPlatform);
-    });
-  });
-
-  describe('selectPlatformForLogin', () => {
-    it('should return the platform which ever supports viewer', () => {
-      const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'service1';
-      platform.supportsCurrentViewer = () => true;
-      const localPlatform = new SubscriptionPlatform();
-      localPlatform.getServiceId = () => 'service2';
-      sandbox.stub(platformStore, 'getAvailablePlatforms')
-          .callsFake(() => [platform, localPlatform]);
-      sandbox.stub(platformStore, 'getLocalPlatform')
-          .callsFake(() => localPlatform);
-      const returnedPlatform = platformStore.selectPlatformForLogin();
-      expect(returnedPlatform.getServiceId()).to.be.equal(
-          platform.getServiceId());
     });
   });
 });

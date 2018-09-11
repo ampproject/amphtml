@@ -92,7 +92,7 @@ export class ServiceAdapter {
   /**
    * Returns login platform based on platform selection
    *
-   * @return {!./subscription-platform.SubscriptionPlatform}
+   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatformForLogin() {
     return this.subscriptionService_.selectPlatformForLogin();

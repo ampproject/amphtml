@@ -366,6 +366,24 @@ export class PlatformStore {
   }
 
   /**
+   * Calculates weight to add/remove based on getSupportedFactor()
+   * @param {string} factorName
+   * @param {!./subscription-platform.SubscriptionPlatform} platform
+   * @return {!Promise<number>}
+   * @private
+   */
+  getSupportedFactorWeight_(factorName, platform) {
+    return platform.getSupportedFactor(factorName)
+        .then(factorValue => {
+          if (!factorValue) {
+            return 0;
+          }
+          return this.scoreConfig_[factorName] *
+            Math.min(1, Math.max(-1, factorValue));
+        });
+  }
+
+  /**
    * Returns most qualified platform. Qualification of a platform is based on an
    * integer weight. Every platform starts with weight 0 and evaluated against
    * the following parameters,
@@ -374,60 +392,83 @@ export class PlatformStore {
    *
    * In the end candidate with max weight is selected. However if candidate's
    * weight is equal to local platform, then local platform is selected.
-   * @return {!./subscription-platform.SubscriptionPlatform}
+   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
+   * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
-  selectApplicablePlatform_() {
+  selectApplicablePlatform_(optionalFactor) {
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
-    /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
-    const platformWeights = [];
 
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    this.getAvailablePlatforms().forEach(platform => {
-      let weight = 0;
+    /// Subscriber wins immediatly.
+    const availablePlatforms = this.getAvailablePlatforms();
+    for (const platformIdx in availablePlatforms) {
+      const platform = availablePlatforms[platformIdx];
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
-
-      // Subscriber wins immediatly.
       if (entitlement.isSubscriber()) {
-        weight += 100000;
+        return Promise.resolve(platform);
       }
-
-      // Add the base score
-      weight += platform.getBaseScore();
-
-      // If supports the current viewer, gains weight 9
-      if (platform.supportsCurrentViewer()) {
-        weight += this.scoreConfig_['supportsViewer'];
-      }
-
-      platformWeights.push({
-        platform,
-        weight,
-      });
-      if (platform.getServiceId() === 'local') {
-        localWeight = weight;
-      }
-    });
-
-    platformWeights.sort(function(platform1, platform2) {
-      return platform2.weight - platform1.weight;
-    });
-    // Nobody supports current viewer, nor is anybody subscribed
-    if (platformWeights.length === 0) {
-      return localPlatform;
     }
 
-    const winningWeight = platformWeights[0].weight;
+    // Get weights for all of the platforms
+    return Promise.all(this.getAvailablePlatforms().map(platform => {
+      return this.calculatePlatformWeight_(platform, optionalFactor)
+          .then(weight => {
+            if (platform.getServiceId() === 'local') {
+              localWeight = weight;
+            }
+            return {
+              platform,
+              weight,
+            };
+          });
+    }))
+        .then(platformWeights => {
+          platformWeights.sort(function(platform1, platform2) {
+            return platform2.weight - platform1.weight;
+          });
 
-    if (winningWeight > localWeight) {
-      return platformWeights[0].platform;
+          const winningWeight = platformWeights[0].weight;
+          // Highest wins, local wins a tie
+          if (winningWeight > localWeight) {
+            return platformWeights[0].platform;
+          }
+          return localPlatform;
+        });
+  }
+
+  /**
+   * Calculate platform weight
+   * @param {!./subscription-platform.SubscriptionPlatform} platform
+   * @param {string=} optionalFactor if specified only calculate this factor
+   * @return {!Promise<number>}
+   * @private
+   */
+  calculatePlatformWeight_(platform, optionalFactor) {
+    /** @type {!Array<Promise<number>|number>} */
+    const platformFactorResults = [0];
+
+    // Start with base score
+    const weight = platform.getBaseScore();
+
+    // Iterate score factors checking service support
+    for (const factor in this.scoreConfig_) {
+      if (hasOwn(this.scoreConfig_, factor) &&
+        (!optionalFactor || optionalFactor === factor)) {
+        platformFactorResults.push(
+            this.getSupportedFactorWeight_(factor, platform));
+      }
     }
 
-    return localPlatform;
+    return Promise.all(platformFactorResults)
+        .then(factorWeights => {
+          return weight + factorWeights
+              .reduce(function(a, b) { return a + b; });
+        });
   }
 
   /**
@@ -451,29 +492,9 @@ export class PlatformStore {
 
   /**
    * Evaluates platforms and select the one to be selected for login.
-   * @return {!./subscription-platform.SubscriptionPlatform}
+   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatformForLogin() {
-    const platformScores = [];
-    this.getAvailablePlatforms().forEach(platform => {
-      let score = 0;
-      if (platform.supportsCurrentViewer()) {
-        score += 1000;
-      }
-      platformScores.push({
-        platform,
-        score,
-      });
-    });
-
-    platformScores.sort(function(platform1, platform2) {
-      return platform2.weight - platform1.weight;
-    });
-
-    if (platformScores.length === 0 || platformScores[0].score === 0) {
-      return this.getLocalPlatform();
-    }
-
-    return platformScores[0].platform;
+    return this.selectApplicablePlatform_('supportsViewer');
   }
 }

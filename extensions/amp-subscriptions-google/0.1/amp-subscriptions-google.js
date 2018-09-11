@@ -202,8 +202,13 @@ export class GoogleSubscriptionsPlatform {
   pingback() {}
 
   /** @override */
-  supportsCurrentViewer() {
-    return this.isGoogleViewer_;
+  getSupportedFactor(factorName) {
+    switch (factorName) {
+      case 'supportsViewer':
+        return Promise.resolve(this.isGoogleViewer_ ? 1 : 0);
+      default:
+        return Promise.resolve(0);
+    }
   }
 
   /**

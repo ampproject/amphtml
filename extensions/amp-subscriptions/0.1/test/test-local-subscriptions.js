@@ -176,17 +176,9 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       const loginStub = sandbox.stub(
           localSubscriptionPlatform.serviceAdapter_,
           'selectPlatformForLogin'
-      ).callsFake(() => platform);
-      const delegateStub = sandbox.stub(
-          localSubscriptionPlatform.serviceAdapter_,
-          'delegateActionToService'
-      );
+      ).resolves(platform);
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.be.called;
-      expect(delegateStub).to.be.calledWith(
-          'login',
-          serviceId,
-      );
     });
 
     it('should delegate service selection to scoreBasedLogin '
@@ -196,11 +188,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       const loginStub = sandbox.stub(
           localSubscriptionPlatform.serviceAdapter_,
           'selectPlatformForLogin'
-      ).callsFake(() => platform);
-      sandbox.stub(
-          localSubscriptionPlatform.serviceAdapter_,
-          'delegateActionToService'
-      );
+      ).resolves(platform);
       const platform = {};
       const serviceId = 'serviceId';
       platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
