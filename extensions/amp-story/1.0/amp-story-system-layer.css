@@ -443,11 +443,6 @@ span.i-amphtml-story-share-pill-label {
   display: none !important;
 }
 
-[dir=rtl][desktop] .i-amphtml-story-share-list {
-  margin-right: 0 !important;
-  margin-left: 72px !important;
-}
-
 /* system layer changes */
 
 [desktop] .i-amphtml-story-share-pill-container {

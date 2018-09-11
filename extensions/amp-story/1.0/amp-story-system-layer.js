@@ -607,7 +607,11 @@ export class SystemLayer {
           parseFloat(style.borderRightWidth);
       this.shareLabelWidth_ = width;
       const margin = width + 20;
-      setImportantStyles(shareList, {'margin-right': px(margin)});
+      if(this.storeService_.get(StateProperty.RTL_STATE)){
+        setImportantStyles(shareList, {'margin-left': px(margin)});
+      } else {
+        setImportantStyles(shareList, {'margin-right': px(margin)});
+      }      
     }
 
     const background = this.systemLayerEl_
