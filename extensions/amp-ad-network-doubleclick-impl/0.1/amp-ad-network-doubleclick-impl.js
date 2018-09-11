@@ -238,6 +238,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
+
+    /**
+     * @private {boolean}
+     * Set to true when initial expansion effort fails. If true, the slot will
+     * attempt to expand again when outside of the viewport.
+     */
+    this.reattemptToExpandFluidCreative_ = false;
   }
 
   /**
@@ -782,21 +789,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   layoutCallback() {
     return super.layoutCallback().then(superReturn => {
-      if (this.isFluidRequest_ && this.isVerifiedAmpCreative()) {
-        // This is an AMP fluid creative that will be rendered in a friendly
-        // frame.
-        dev().assert(this.iframe && this.iframe.contentWindow &&
-            this.iframe.contentWindow.document &&
-            this.iframe.contentWindow.document.body,
-        'Attempting to expand fluid creative without properly set up ' +
-            'friendly frame. Slot id: ' +
-            this.element.getAttribute('data-amp-slot-index'));
-        this.attemptChangeHeight(
-            this.iframe.contentWindow.document.body./*OK*/scrollHeight)
-            .then(() => this.fireFluidDelayedImpression());
-      }
+      // We expand fluid here because we must first wait for the iframe to fire
+      // onload.
+      this.expandFluidCreative_();
       return superReturn;
     });
+  }
+
+  /** @override */
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
+    if (this.reattemptToExpandFluidCreative_ && !inViewport) {
+      // If the initial expansion attempt failed (e.g., the slot was within the
+      // viewport), then we will re-attempt to expand it here whenever the slot
+      // is outside the viewport.
+      this.expandFluidCreative_();
+    }
   }
 
   /** @override  */
@@ -905,6 +913,45 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
 
     this.postTroubleshootMessage();
+  }
+
+  /**
+   * Attempts to expand a fluid creative. If the attempt fails, we will
+   * re-attempt whenever the slot is out of the viewport until we succeed,
+   * contingent on when viewportCallback is invoked.
+   * @return {!Promise} The promise that resolves once the height change
+   *   attempt either succeeds or is rejected. If no attempt is made,
+   *   Promise.resovle() is returned. If for any reason the body of the iframe
+   *   cannot be accessed, the promise will be rejected. Used mainly for
+   *   testing.
+   */
+  expandFluidCreative_() {
+    if (this.isFluidRequest_ &&
+        // If a size was returned in the response, then this is a multi-size
+        // response, not a fluid response.
+        !this.returnedSize_ &&
+        this.isVerifiedAmpCreative()) {
+      // This is an AMP fluid creative that will be rendered in a friendly
+      // frame.
+      if (!this.iframe || !this.iframe.contentWindow ||
+          !this.iframe.contentWindow.document ||
+          !this.iframe.contentWindow.document.body) {
+        dev().error(TAG, 'Attempting to expand fluid creative without ' +
+            'a properly set up friendly frame. Slot id: ' +
+            this.element.getAttribute('data-amp-slot-index'));
+        return Promise.reject('Cannot access body of friendly frame');
+      }
+      return this.attemptChangeHeight(
+          this.iframe.contentWindow.document.body./*OK*/scrollHeight)
+          .then(() => {
+            this.fireFluidDelayedImpression();
+            this.reattemptToExpandFluidCreative_ = false;
+          })
+          .catch(() => {
+            this.reattemptToExpandFluidCreative_ = true;
+          });
+    }
+    return Promise.resolve();
   }
 
   /**
