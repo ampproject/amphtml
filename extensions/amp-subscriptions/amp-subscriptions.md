@@ -309,6 +309,15 @@ For instance, this button will execute the "subscribe" action:
 
 By default, the actions are hidden and must be explicitly shown using the `subscriptions-display` expression.
 
+Several actions can be combined together into a `subscriptions-actions` section:
+
+```
+<div subscriptions-actions subscriptions-display="EXPR1 or EXPR2">
+  <button subscriptions-action="action1" subscriptions-display="EXPR1">...</button>
+  <button subscriptions-action="action2" subscriptions-display="EXPR2">...</button>
+</div>
+```
+
 ## Paywall dialogs
 
 The paywall dialogs are shown automatically based on the authorization/entitlements response.
