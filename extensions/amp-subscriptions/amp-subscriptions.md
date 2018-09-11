@@ -141,6 +141,8 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
   ],
   "score": {
     "supportsViewer": 10,
+    "anotherFactor": 5,
+    "negativeFactor": -10
   },
   "fallbackEntitlement": {
     "source": "fallback",
@@ -158,11 +160,17 @@ If you'd like to test the document's behavior in the context of a particular vie
 
 
 ## Selecting platform
-So if no platforms are selected, we compete all the platforms based on platforms like
+So if no platforms are selected, we compete all the platforms based on platforms by calculating a score for each and choosing the highest scoring platform.
 
-1. Does the platform support the Viewer
+The score is calculated by taking the `baseScore` in the platform service configuration and adding or subtracting dynamically calculated weights from `score[factor name]` if the service indicates that `factor name` is true for this pageview.
 
-You can add `"baseScore"` < 100 key in any service configuration in case you want to increase `"baseScore"` of any platform so that it wins over other score evaluation factors.
+Available scoring factors:
+
+1. `supportsViewer` Does the platform support the Viewer. Indicates that a platform can cooperate with the current AMP viewer environment for this pageview.
+
+In addition to the dynamic scoring factors each platform has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service.
+
+In the event of a tie the local service wins.
 
 ## Error fallback
 In case if all configured platforms fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` platform. The document's unblocking will be based on this fallback entitlement.
