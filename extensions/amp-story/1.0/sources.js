@@ -32,7 +32,7 @@ export class Sources {
    */
   constructor(opt_srcAttr, opt_srcEls, opt_trackEls) {
     /** @private @const {?string} */
-    this.srcAttr_ = opt_srcAttr && opt_srcAttr.length ? opt_srcAttr : null;
+    this.srcAttr_ = opt_srcAttr !== undefined ? opt_srcAttr : null;
 
     /** @private @const {!IArrayLike<!Element>} */
     this.srcEls_ = opt_srcEls || [];
