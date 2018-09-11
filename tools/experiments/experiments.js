@@ -230,6 +230,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
   {
+    id: 'disable-amp-story-default-media',
+    name: 'Removes default media for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/14535',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
+  },
+  {
     id: 'amp-story-responsive-units',
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
@@ -303,12 +309,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'amp-image-slider',
-    name: 'Enables the experimental amp-image-slider for image comparison',
-    spec: 'TODO',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17165',
-  },
-  {
     id: 'blurry-placeholder',
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
@@ -347,6 +347,11 @@ const EXPERIMENTS = [
     id: 'linker-meta-opt-in',
     name: 'Opts-in users that have included the GA client-id meta tag ',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
+  },
+  {
+    id: 'amp-consent-v2',
+    name: 'Enables CMP support to amp-consent component',
+    spec: 'https://github.com/ampproject/amphtml/issues/17742',
   },
 ];
 
