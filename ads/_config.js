@@ -62,6 +62,8 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  *
  *   // The width / height ratio for matched content full width ad units.
+ *   // If absent, it means the network does not support matched content full
+ *   // width ad unit.
  *   // Example value: 0.27
  *   mcFullWidthHeightRatio: number
  * }

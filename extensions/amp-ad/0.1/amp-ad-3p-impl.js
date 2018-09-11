@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {
+  ADSENSE_MCRSPV_TAG,
+} from '../../../ads/google/utils';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
@@ -217,6 +220,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'Ad units with data-full-width must have width="100vw".');
     user().assert(!!this.config.fullWidthHeightRatio,
         'Ad network does not support full width ads.');
+    user().assert(!!this.config.mcFullWidthHeightRatio,
+        'Ad network does not support matched content full width ads.');
     dev().info(TAG_3P_IMPL,
         '#${this.getResource().getId()} Full width requested');
     return true;
@@ -432,8 +437,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   getFullWidthHeight_(width, maxHeight) {
-    if (this.element.getAttribute('data-auto-format') == 'mcrspv' &&
-        !!this.config.mcFullWidthHeightRatio) {
+    if (this.element.getAttribute('data-auto-format') == ADSENSE_MCRSPV_TAG) {
       return Math.max(MIN_FULL_WIDTH_HEIGHT,
           Math.round(width / this.config.mcFullWidthHeightRatio));
     }
