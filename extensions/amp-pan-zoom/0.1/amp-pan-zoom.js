@@ -845,7 +845,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   onZoomRelease_() {
     return this.release_().then(() => {
       // After the scale is updated, also register or unregister panning
-      if (this.scale_ <= 1) {
+      if (this.scale_ <= this.minScale_) {
         this.unregisterPanningGesture_();
         this.toggleZoomButtonIn_();
         this.content_.classList.remove('i-amphtml-pan-zoom-scrollable');
