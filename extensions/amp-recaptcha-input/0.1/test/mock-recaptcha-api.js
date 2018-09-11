@@ -19,10 +19,14 @@
  * Mock  Recaptcha API script for integration
  */
 
-console.log('ayyeee lmao');
+console.log('Loaded mock script');
 
 window.grecaptcha = {
-  execute: () => {
-    console.log('hello!');
+  ready: (callback) => {
+    callback();
+  },
+  execute: (sitekey, actionObject) => {
+    // TODO: Verify sitekey and action object
+    return Promise.resolve('mock-token');
   }
 }

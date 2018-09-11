@@ -28,6 +28,25 @@ import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 
+/**
+ * @fileoverview
+ * Service used by AMP recaptcha elements, to utilize
+ * the recaptcha API that is within a bootstrap Iframe.
+ *
+ * Here are the following iframe messages using .postMessage()
+ * used between the iframe and recaptcha service:
+ * amp-recaptcha-ready / Service <- Iframe : 
+ *   Iframe and Recaptcha API are ready.
+ * amp-recaptcha-action / Service -> Iframe : 
+ *   Execute and action using supplied data
+ * amp-recaptcha-token / Service <- Iframe : 
+ *   Response to 'amp-recaptcha-action'. The token
+ *   returned by the recaptcha API.
+ * amp-recaptcha-error / Service <- Iframe : 
+ *   Response to 'amp-recaptcha-action'. Error
+ *   From attempting to get a token from action.
+ */
+
 /** @const {string} */
 const MESSAGE_TAG = 'amp-recaptcha-';
 

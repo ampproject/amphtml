@@ -18,6 +18,24 @@ import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {loadScript} from './3p';
 
+/**
+ * @fileoverview
+ * Boostrap Iframe for communicating with the recaptcha API.
+ *
+ * Here are the following iframe messages using .postMessage()
+ * used between the iframe and recaptcha service:
+ * amp-recaptcha-ready / Service <- Iframe : 
+ *   Iframe and Recaptcha API are ready.
+ * amp-recaptcha-action / Service -> Iframe : 
+ *   Execute and action using supplied data
+ * amp-recaptcha-token / Service <- Iframe : 
+ *   Response to 'amp-recaptcha-action'. The token
+ *   returned by the recaptcha API.
+ * amp-recaptcha-error / Service <- Iframe : 
+ *   Response to 'amp-recaptcha-action'. Error
+ *   From attempting to get a token from action.
+ */
+
 /** @const {string} */
 const TAG = 'RECAPTCHA';
 
@@ -97,6 +115,6 @@ function actionTypeHandler(global, grecaptcha, data) {
  * @private
  */
 function getMockRecaptchaApiUrl_() {
-  return 'http://localhost:9876/base/extensions/amp-recaptcha-input/0.1/test/mock-recaptcha-api.js';
+  return '/extensions/amp-recaptcha-input/0.1/test/mock-recaptcha-api.js';
 }
 
