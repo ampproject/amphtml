@@ -1740,30 +1740,6 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  describe('inabox nested transport iframe', () => {
-    let origAmpMode;
-    beforeEach(() => {
-      origAmpMode = env.win.AMP_MODE;
-      env.win.AMP_MODE = 'inabox';
-      // Unfortunately need to fake sandbox analytics element's parent
-      // to an AMP element
-      doc.body.classList.add('i-amphtml-element');
-    });
-
-    afterEach(() => {
-      doc.body.classList.remove('i-amphtml-element');
-      env.win.AMP_MODE = origAmpMode;
-    });
-
-    it('sends a basic hit', function() {
-      const analytics = getAnalyticsTag(trivialConfig);
-      return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.withArgs('https://example.com/bar'))
-            .to.be.calledOnce;
-      });
-    });
-  });
-
   describe('resourceTiming', () => {
     // NOTE: The following tests verify plumbing for resource timing variables.
     // More tests for resource timing can be found in test-resource-timing.js.
