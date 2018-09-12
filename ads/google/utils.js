@@ -74,8 +74,8 @@ export function getMultiSizeDimensions(
     const sizeStr = arrayOfSizeStrs[i];
     if (sizeStr.toLowerCase() == 'fluid') {
       if (!isFluidPrimary) {
-        // If the primary size is fluid, then the dummy 320x50 size will
-        // automatically be included.
+        // If the primary size is fluid, then the dummy size will already be
+        // included.
         dimensions.push(DUMMY_FLUID_SIZE_ARR);
       }
       continue;
