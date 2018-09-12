@@ -395,6 +395,7 @@ describes.realWin('amp-ad-3p-impl', {
 
     beforeEach(() => {
       adConfig['_ping_'].fullWidthHeightRatio = 1.2;
+      adConfig['_ping_'].mcFullWidthHeightRatio = 0.27;
       win.document.body.removeChild(ad3p.element);
     });
 
@@ -439,6 +440,26 @@ describes.realWin('amp-ad-3p-impl', {
                 (height, width) => {
                   expect(width).to.equal(VIEWPORT_WIDTH);
                   expect(height).to.equal(250);
+                  return Promise.resolve();
+                });
+
+        const callback = impl.buildCallback();
+        expect(callback).to.exist;
+        expect(attemptChangeSizeSpy).to.be.calledOnce;
+      });
+
+      it('should schedule a resize for matched content responsive', () => {
+        constructImpl({
+          width: '100vw',
+          height: '280',
+          'data-auto-format': 'mcrspv',
+          'data-full-width': '',
+        });
+        const attemptChangeSizeSpy =
+            sandbox.stub(impl, 'attemptChangeSize').callsFake(
+                (height, width) => {
+                  expect(width).to.equal(VIEWPORT_WIDTH);
+                  expect(height).to.equal(1111);
                   return Promise.resolve();
                 });
 

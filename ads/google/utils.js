@@ -23,6 +23,15 @@ import {user} from '../../src/log';
 export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
 
 /**
+ * The attribute value for AdSense data-auto-format tag.
+ * For full-width responsive ad: data-auto-format='rspv'.
+ * For full-width matched content responsive ad: data-auto-format='mcrspv'
+ * @const {string}
+ */
+export const ADSENSE_RSPV_TAG = 'rspv';
+export const ADSENSE_MCRSPV_TAG = 'mcrspv';
+
+/**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
  * set of primary dimensions, this function will return all valid multi-size
  * [width, height] pairs in an array.
