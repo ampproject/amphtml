@@ -21,6 +21,9 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Pass} from '../../../src/pass';
+import {
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -28,14 +31,20 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
+import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {createLoaderElement} from '../../../src/loader';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {getServiceForDoc} from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
+import {getValueForExpr} from '../../../src/json';
+import {
+  installPositionObserverServiceForDoc,
+} from '../../../src/service/position-observer/position-observer-impl';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {removeChildren} from '../../../src/dom';
 import {setStyles, toggle} from '../../../src/style';
 import {
   setupAMPCors,
@@ -93,6 +102,24 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
     this.bind_ = null;
 
+    /** @private @const {boolean} */
+    this.loadMoreEnabled_ =
+        isExperimentOn(this.getAmpDoc().win, 'amp-list-load-more') &&
+        element.hasAttribute('load-more');
+
+    /** @private {?string} */
+    this.loadMoreSrc_ = null;
+    /** @private {?Element} */
+    this.loadMoreOverflow_ = null;
+    /** @private {?Element} */
+    this.loadMoreLoadingOverlay_ = null;
+    /** @private {?Element} */
+    this.loadMoreLoadingElement_ = null;
+    /** @private {?Element} */
+    this.loadMoreFailedElement_ = null;
+    /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
+    this.positionObserver_ = null;
+
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
@@ -130,6 +157,15 @@ export class AmpList extends AMP.BaseElement {
     Services.bindForDocOrNull(this.element).then(bind => {
       this.bind_ = bind;
     });
+
+    if (this.loadMoreEnabled_) {
+      this.loadMoreOverflow_ = this.getOverflowElement();
+      this.getLoadMoreLoadingElement_();
+      if (!this.loadMoreLoadingElement_) {
+        this.getLoadMoreLoadingOverlay_();
+      }
+      this.getLoadMoreFailedElement_();
+    }
   }
 
   /** @override */
@@ -257,17 +293,15 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Fetches JSON from the endpoint at the `src` attribute and renders it.
-   * Returns a promise that resolves when rendering is complete.
-   *
-   * If the viewer has the 'ssrTemplate' capability, then both the JSON fetch
-   * and rendering of the template are delegated to the viewer.
-   *
-   * @param {boolean=} opt_refresh Forces refresh of browser cache.
+   * Request list data from `src` and return a promise that resolves when
+   * the list has been populated with rendered list items. If the viewer is
+   * capable of rendering the templates, then the fetching of the list and
+   * transformation of the template is handled by the viewer.
+   * @param {boolean=} opt_append
    * @return {!Promise}
    * @private
    */
-  fetchList_(opt_refresh = false) {
+  fetchList_(opt_append) {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -275,6 +309,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isSupported()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
+      // TODO resolve SSR version of infinite scroll
       const itemsExpr = this.element.getAttribute('items') || 'items';
       fetch = this.fetch_(itemsExpr, opt_refresh).then(items => {
         if (this.element.hasAttribute('single-item')) {
@@ -284,6 +319,11 @@ export class AmpList extends AMP.BaseElement {
           if (!isArray(items)) {
             items = [items];
           }
+        } else if (this.loadMoreEnabled_) {
+          const nextExpr = this.element.getAttribute('load-more-bookmark')
+            || 'load-more-src';
+          this.loadMoreSrc_ = /** @type {string} */
+            (getValueForExpr(items, nextExpr));
         }
         user().assert(isArray(items),
             'Response must contain an array at "%s". %s',
@@ -292,7 +332,7 @@ export class AmpList extends AMP.BaseElement {
         if (maxLen < items.length) {
           items = items.slice(0, maxLen);
         }
-        return this.scheduleRender_(items);
+        return this.scheduleRender_(items, opt_append);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
       });
@@ -341,10 +381,11 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Schedules a fetch result to be rendered in the near future.
    * @param {!Array|?JsonObject|string|undefined} data
+   * @param {boolean=} opt_append
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(data) {
+  scheduleRender_(data, opt_append) {
     dev().info(TAG, 'schedule:', data);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
@@ -353,6 +394,16 @@ export class AmpList extends AMP.BaseElement {
       this.renderPass_.schedule();
     }
     this.renderItems_ = {data, resolver, rejecter};
+
+    // TODO: figure out how item -> data changed
+    if (this.renderItems_ && opt_append) {
+      this.renderItems_.data.push(data);
+      this.renderItems_.resolve = resolver;
+      this.renderItems_.rejecter = rejecter;
+    } else {
+      this.renderItems_ = {data, opt_append, resolver, rejecter};
+    }
+
     return promise;
   }
 
@@ -382,15 +433,18 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      const html = /** @type {string} */ (current.data);
-      this.templates_.findAndSetHtmlForTemplate(this.element, html)
-          .then(element => this.render_([element]))
+      // TODO(alabiaga): This is a misleading type cast. Instead, we should use
+      // a new API on template-impl.js and amp-mustache.js as discussed.
+      const html = /** @type {!JsonObject} */ (current.data);
+      this.templates_.findAndRenderTemplate(this.element, html)
+          .then(element => this.render_([element], current.opt_append))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
       const array = /** @type {!Array} */ (current.data);
       this.templates_.findAndRenderTemplateArray(this.element, array)
           .then(results => this.updateBindings_(results))
-          .then(elements => this.render_(elements))
+          .then(elements => this.render_(elements, current.opt_append))
+          .then(() => this.loadMoreEnabled_ && this.setLoadMore_())
           .then(onFulfilledCallback, onRejectedCallback);
     }
   }
@@ -436,13 +490,18 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {!Array<!Element>} elements
+   * @param {boolean} append
+   * @return {!Promise}
    * @private
    */
-  render_(elements) {
+  render_(elements, append) {
     dev().info(TAG, 'render:', elements);
     const container = dev().assertElement(this.container_);
 
-    this.mutateElement(() => {
+    if (!append) {
+      removeChildren(dev().assertElement(this.container_));
+    }
+    return this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
 
       const diffing = isExperimentOn(this.win, 'amp-list-diffing');
@@ -564,13 +623,154 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * @private
+   */
+  setLoadMore_() {
+    if (!this.loadMoreSrc_ && !this.loadMoreOverflow_) {
+      return;
+    }
+    const triggerOnScroll = this.element.getAttribute('load-more') === 'auto';
+    if (triggerOnScroll) {
+      this.maybeSetupLoadMoreAuto_();
+    }
+    if (this.loadMoreOverflow_) {
+      this.getVsync().mutate(() => {
+        this.loadMoreOverflow_.classList.toggle(
+            'amp-visible', !!this.loadMoreSrc_);
+        listen(this.loadMoreOverflow_, 'click', () => this.loadMoreCallback_());
+      });
+    }
+    if (!this.loadMoreOverflow_ && !triggerOnScroll) {
+      user().error(TAG,
+          'load-more is specified but no means of paging (overflow or ' +
+          'load-more=auto) is available', this);
+    }
+  }
+
+  /**
+   * @private
+   */
+  loadMoreCallback_() {
+    if (!this.loadMoreSrc_) {
+      return;
+    }
+    if (this.loadMoreOverflow_) {
+      this.loadMoreOverflow_.onclick = null;
+    }
+    this.element.setAttribute('src', this.loadMoreSrc_);
+    this.loadMoreSrc_ = null;
+    this.toggleLoadMoreLoading_(true);
+    return this.fetchList_(/* opt_append */ true)
+        .catch(() => this.setLoadMoreFailed_())
+        .then(() => this.toggleLoadMoreLoading_(false));
+  }
+
+  /**
+   * @private
+   */
+  getLoadMoreLoadingElement_() {
+    if (!this.loadMoreLoadingElement_) {
+      this.loadMoreLoadingElement_ = childElementByAttr(
+          this.element, 'load-more-loading');
+    }
+    return this.loadMoreLoadingElement_;
+  }
+
+  /**
+   * @private
+   */
+  getLoadMoreLoadingOverlay_() {
+    if (!this.loadMoreLoadingOverlay_) {
+      this.loadMoreLoadingOverlay_ = createLoaderElement(
+          this.win.document, 'load-more-loading');
+      this.loadMoreLoadingOverlay_.setAttribute('load-more-loading', '');
+      this.loadMoreOverflow_.appendChild(this.loadMoreLoadingOverlay_);
+    }
+    return this.loadMoreLoadingOverlay_;
+  }
+
+  /**
+   * @param {boolean} state
+   * @private
+   */
+  toggleLoadMoreLoading_(state) {
+    if (this.loadMoreLoadingElement_) {
+      this.getVsync().mutate(() => {
+        if (state) {
+          this.loadMoreOverflow_.classList.toggle('amp-visible', false);
+        }
+        this.loadMoreLoadingElement_.classList.toggle('amp-visible', state);
+      });
+    } else if (this.loadMoreOverflow_) {
+      this.mutateElement(() => {
+        this.loadMoreOverflow_.classList.toggle('amp-load-more-loading', state);
+        this.loadMoreLoadingOverlay_.classList.toggle('amp-active', !state);
+      });
+    }
+  }
+
+  /**
+   * @private
+   */
+  setLoadMoreFailed_() {
+    if (!this.loadMoreFailedElement_ && !this.loadMoreOverflow_) {
+      return;
+    }
+    this.mutateElement(() => {
+      if (this.loadMoreFailedElement_) {
+        this.loadMoreFailedElement_.classList.toggle('amp-visible', true);
+      }
+      if (this.loadMoreOverflow_) {
+        this.loadMoreOverflow_.classList.toggle('amp-visible', false);
+      }
+    });
+  }
+
+  /**
+   * @private
+   */
+  getLoadMoreFailedElement_() {
+    if (!this.loadMoreFailedElement_) {
+      this.loadMoreFailedElement_ = childElementByAttr(
+          this.element, 'load-more-failed');
+    }
+    return this.loadMoreFailedElement_;
+  }
+
+
+  /**
    * @param {string} itemsExpr
    * @param {boolean} refresh
    * @private
    */
   fetch_(itemsExpr, refresh) {
     return batchFetchJsonFor(
-        this.getAmpDoc(), this.element, itemsExpr, this.getPolicy_(), refresh);
+        this.getAmpDoc(), this.element, itemsExpr, this.getPolicy_())
+        .then(f => {
+          return new Promise(r => setTimeout(r, 2000)).then(() => f);
+        });
+  }
+
+  /**
+   * @private
+   */
+  maybeSetupLoadMoreAuto_() {
+    if (!this.positionObserver_) {
+      installPositionObserverServiceForDoc(this.getAmpDoc());
+      this.positionObserver_ = getServiceForDoc(
+          this.getAmpDoc(),
+          'position-observer'
+      );
+      this.positionObserver_.observe(this.container_,
+          PositionObserverFidelity.LOW,
+          ({positionRect, viewportRect}) => {
+            const ratio = 1.5;
+            if (this.loadMoreSrc_ &&
+                positionRect.bottom < ratio * viewportRect.bottom) {
+              this.loadMoreCallback_();
+            }
+          });
+    }
   }
 
   /**
