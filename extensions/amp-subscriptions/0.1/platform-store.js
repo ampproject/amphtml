@@ -428,7 +428,7 @@ export class PlatformStore {
 
   /**
    * Calculate and return weights for all platforms
-   * @return {!Promise<!array<!./subscription-platform.SubscriptionPlatform>>}
+   * @return {!Promise<!Array<!./subscription-platform.SubscriptionPlatform>>}
    * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
