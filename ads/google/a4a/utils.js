@@ -243,15 +243,22 @@ export function groupAmpAdsByType(win, type, groupFn) {
 export function googlePageParameters(a4a, startTime) {
   const {win} = a4a;
   const ampDoc = a4a.getAmpDoc();
+  // Do not wait longer than 1 second to retrieve referrer to ensure
+  // viewer integration issues do not cause ad requests to hang indefinitely.
+  const referrerPromise = Services.timerFor(win).timeoutPromise(
+      1000, Services.viewerForDoc(ampDoc).getReferrerUrl())
+      .catch(() => {
+        dev().error('AMP-A4A', 'Referrer timeout!');
+        return '';
+      });
   return Promise.all([
-    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
-    Services.viewerForDoc(ampDoc).getReferrerUrl()])
+    getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'), referrerPromise])
       .then(promiseResults => {
         const clientId = promiseResults[0];
-        const documentInfo = Services.documentInfoForDoc(ampDoc);
+        const referrer = promiseResults[1];
+        const {pageViewId, canonicalUrl} = Services.documentInfoForDoc(ampDoc);
         // Read by GPT for GA/GPT integration.
-        win.gaGlobal = win.gaGlobal ||
-        {cid: clientId, hid: documentInfo.pageViewId};
+        win.gaGlobal = win.gaGlobal || {cid: clientId, hid: pageViewId};
         const {screen} = win;
         const viewport = Services.viewportForDoc(ampDoc);
         const viewportRect = viewport.getRect();
@@ -287,11 +294,10 @@ export function googlePageParameters(a4a, startTime) {
           'debug_experiment_id':
               (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] ||
                   null,
-          'url': documentInfo.canonicalUrl,
+          'url': canonicalUrl || null,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
-          'loc': win.location.href == documentInfo.canonicalUrl ?
-            null : win.location.href,
-          'ref': promiseResults[1] || null,
+          'loc': win.location.href == canonicalUrl ? null : win.location.href,
+          'ref': referrer || null,
         };
       });
 }
