@@ -497,7 +497,7 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
         sandbox.stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
-            .returns(new Promise(unused_resolve => {}));
+            .returns(new Promise(() => {}));
         const createElementStub =
           sandbox.stub(impl.win.document, 'createElement');
         createElementStub.withArgs('iframe').returns({
