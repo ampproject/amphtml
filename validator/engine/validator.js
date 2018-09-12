@@ -3062,13 +3062,13 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
   } else if (!width.isSet && !height.isSet) {
     return amp.validator.AmpLayout.Layout.CONTAINER;
   } else if (
-      (height.isSet && height.isFluid) || (width.isSet && width.isFluid)) {
+    (height.isSet && height.isFluid) || (width.isSet && width.isFluid)) {
     return amp.validator.AmpLayout.Layout.FLUID;
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
   } else if (
-      height.isSet && width.isSet &&
-      (sizesAttr !== undefined || heightsAttr !== undefined)) {
+    height.isSet && width.isSet &&
+    (sizesAttr !== undefined || heightsAttr !== undefined)) {
     return amp.validator.AmpLayout.Layout.RESPONSIVE;
   } else {
     return amp.validator.AmpLayout.Layout.FIXED;
