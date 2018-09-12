@@ -298,11 +298,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'amp-img-native-srcset',
-    name: 'Enables native browser implementation of srcset and sizes',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
-  },
-  {
     id: 'layers',
     name: 'Enables the new Layers position/measurement system',
     spec: 'https://github.com/ampproject/amphtml/issues/3434',
