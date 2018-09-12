@@ -33,7 +33,6 @@ import {
   StateProperty,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
-import {getState} from '../../../src/history';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryConsent} from './amp-story-consent';
@@ -94,6 +93,7 @@ import {findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
+import {getState} from '../../../src/history';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
