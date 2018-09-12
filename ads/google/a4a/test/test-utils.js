@@ -483,6 +483,36 @@ describe('Google A4A utils', () => {
         });
       });
     });
+
+    it('should handle referrer url promise timeout', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        sandbox.stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
+            .returns(new Promise(() => {}));
+        const createElementStub =
+          sandbox.stub(impl.win.document, 'createElement');
+        createElementStub.withArgs('iframe').returns({
+          sandbox: {
+            supports: () => false,
+          },
+        });
+        expectAsyncConsoleError(/Referrer timeout/, 1);
+        return fixture.addElement(elem).then(() => {
+          return expect(
+              googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
+              /[&?]ref=[&$]/);
+        });
+      });
+    });
   });
 
   describe('#mergeExperimentIds', () => {
