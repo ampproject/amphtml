@@ -384,11 +384,11 @@ export class PlatformStore {
   }
 
   /**
-   * Returns most qualified platform. Qualification of a platform is based on an
-   * integer weight. Every platform starts with weight 0 and evaluated against
+   * Returns most qualified platform. Qualification of a platform is based on
+   * weight. Every platform starts with weight 0 and evaluated against
    * the following parameters,
-   * - user is subscribed with platform (Gives weight 10)
-   * - supports the current viewer (Gives weight 9)
+   * - base weight
+   * - weight factors the platform supports multiploed by score in the config
    *
    * In the end candidate with max weight is selected. However if candidate's
    * weight is equal to local platform, then local platform is selected.
@@ -427,7 +427,7 @@ export class PlatformStore {
   }
 
   /**
-   * Iterate platforms and return the highest scoring
+   * Calculate and return weights for all platforms
    * @return {!Promise<!array<!./subscription-platform.SubscriptionPlatform>>}
    * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
