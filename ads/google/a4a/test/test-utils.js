@@ -54,7 +54,7 @@ function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
   installExtensionsService(fixture.win);
   const {doc} = fixture;
-  // TODO(a4a-cam@): This is necessary in the short term, until A4A isunused
+  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
   // smarter about host document styling.  The issue is that it needs to
   // inherit the AMP runtime style element in order for shadow DOM-enclosed
   // elements to behave properly.  So we have to set up a minimal one here.
