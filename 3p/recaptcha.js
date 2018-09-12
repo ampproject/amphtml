@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../src/log';
+import {dev} from '../src/log';
 import {dict} from '../src/utils/object';
-import {loadScript} from './3p';
+import {loadScript, validateData} from './3p';
 
 /**
  * @fileoverview
@@ -50,71 +50,28 @@ const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
  * @param {!Object} data
  */
 export function recaptcha(global, data) {
-  dev().assert(
-      data.sitekey,
-      TAG +
-    ' The data-sitekey attribute is required for <amp-recaptcha-input>'
-  );
 
-  if (data.fortesting) {
-    mockRecaptchaApi_(global);
-    recaptchaApiLoaded_(global);
-  } else {
-    const {sitekey} = data;
-    const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
-    loadScript(
-        global,
-        recaptchaApiUrl,
-        recaptchaApiLoaded_.bind(this, global),
-        recaptchaApiLoadError_.bind(this)
+  validateData(data, ['sitekey', 'action']);
+
+  const {sitekey} = data;
+  const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
+
+  loadScript(global, recaptchaApiUrl, function() {
+    const {grecaptcha} = global;
+
+    grecaptcha.ready(function() {
+      global.context.registerCallback(
+          MESSAGE_TAG + 'action',
+          actionTypeHandler.bind(null, global, grecaptcha)
+      );
+      global.context./*OK*/sendMessage(MESSAGE_TAG + 'ready');
+    });
+  }, function() {
+    global.context.report3pError(
+        TAG + ' Failed to load recaptcha api script'
     );
-  }
-}
-
-/**
- * Function to mock out the grecaptcha Object for testing
- * @param {!Window} global
- * @visibleForTesting
- * @private
- */
-function mockRecaptchaApi_(global) {
-  global.grecaptcha = {
-    ready: function(callback) {
-      callback();
-    },
-    execute: function() {
-      return {
-        then: function(callback) {
-          callback('mock token');
-        },
-      };
-    },
-  };
-}
-
-/**
- * Function called after succesfully getting the recaptcha Api
- * @param {!Window} global
- * @private
- */
-function recaptchaApiLoaded_(global) {
-  const {grecaptcha} = global;
-
-  grecaptcha.ready(function() {
-    global.context.registerCallback(
-        MESSAGE_TAG + 'action',
-        actionTypeHandler_.bind(this, global, grecaptcha)
-    );
-    global.context./*OK*/sendMessage(MESSAGE_TAG + 'ready');
+    dev().error(TAG + ' Failed to load recaptcha api script');
   });
-}
-
-/**
- * Function called after failing to get the recaptcha Api
- * @private
- */
-function recaptchaApiLoadError_() {
-  user().error(TAG + ' Failed to load recaptcha api script');
 }
 
 /**
@@ -124,9 +81,8 @@ function recaptchaApiLoadError_() {
  * @param {!Window} global
  * @param {*} grecaptcha
  * @param {Object} data
- * @private
  */
-function actionTypeHandler_(global, grecaptcha, data) {
+function actionTypeHandler(global, grecaptcha, data) {
 
   const executePromise = grecaptcha.execute(data.sitekey, {
     action: data.action,
@@ -139,13 +95,11 @@ function actionTypeHandler_(global, grecaptcha, data) {
       'token': token,
     }));
   }, function(err) {
-    user().error(TAG, err);
+    dev().error(TAG, err);
     global.context./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
       'id': data.id,
       'error': err.message,
     }));
   });
 }
-
-
 

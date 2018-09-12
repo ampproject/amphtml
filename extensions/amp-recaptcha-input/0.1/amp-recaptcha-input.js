@@ -116,8 +116,10 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   /**
    * Function to return the recaptcha token.
    * Will be an override of AMP.AsyncInput
+   * @return {Promise<string>}
    */
   getValue() {
+
     if (this.sitekey_ && this.action_) {
       return this.recaptchaService_.execute(
           this.element.getResourceId(), this.sitekey_, this.action_
