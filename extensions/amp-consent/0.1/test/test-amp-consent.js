@@ -262,13 +262,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('parse server response', function* () {
-      const parseSpy = sandbox.spy(ampConsent, 'isPromptRequired_');
+    it('read promptIfUnknown from server response', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(parseSpy).to.be.calledWith('ABC', null, {
-        'promptIfUnknown': true,
-      });
+      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
     });
   });
 

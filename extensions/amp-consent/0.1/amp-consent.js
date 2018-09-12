@@ -405,20 +405,26 @@ export class AmpConsent extends AMP.BaseElement {
         config['promptIfUnknownForGeoGroup'],
     'neither checkConsentHref nor ' +
     'promptIfUnknownForGeoGroup is defined');
-    let geoPromise = Promise.resolve(null);
-    let remoteConfigPromise = Promise.resolve(null);
+    let promptPromise = null;
     if (config['promptIfUnknownForGeoGroup']) {
       const geoGroup = config['promptIfUnknownForGeoGroup'];
-      geoPromise = this.isConsentRequiredGeo_(geoGroup);
+      promptPromise = this.isConsentRequiredGeo_(geoGroup);
     } else {
-      remoteConfigPromise = this.getConsentRemote_(instanceId);
+      promptPromise =
+          this.getConsentRemote_(instanceId).then(remoteConfigResponse => {
+            if (!remoteConfigResponse ||
+                !remoteConfigResponse['promptIfUnknown']) {
+              this.user().error(TAG, 'Expecting promptIfUnknown from ' +
+                'checkConsentHref when promptIfUnknownForGeoGroup is not ' +
+                'specified');
+              // Set to false if not defined
+              return false;
+            }
+            return !!remoteConfigResponse['promptIfUnknown'];
+          });
     }
-
-    return geoPromise.then(promptIfUnknown => {
-      return remoteConfigPromise.then(response => {
-        this.consentRequired_[instanceId] =
-            this.isPromptRequired_(instanceId, promptIfUnknown, response);
-      });
+    return promptPromise.then(prompt => {
+      this.consentRequired_[instanceId] = !!prompt;
     });
   }
 
@@ -665,28 +671,6 @@ export class AmpConsent extends AMP.BaseElement {
       const attribute = assertValues[i];
       dev().assert(config[attribute], `CMP config must specify ${attribute}`);
     }
-  }
-
-  /**
-   * Determine to prompt or not based on
-   * geo location and checkConsentHref response
-   * @param {string} instanceId
-   * @param {?boolean} prompt
-   * @param {?JsonObject} remoteConfig
-   * @return {boolean}
-   */
-  isPromptRequired_(instanceId, prompt, remoteConfig) {
-    console.log(instanceId, prompt, remoteConfig);
-    if (prompt != null) {
-      return prompt;
-    }
-    if (!remoteConfig || !remoteConfig['promptIfUnknown']) {
-      this.user().error(TAG, 'Expecting promptIfUnknown from checkConsentHref' +
-        ' when promptIfUnknownForGeoGroup is not specified');
-      // Set to false if not defined
-      return false;
-    }
-    return !!remoteConfig['promptIfUnknown'];
   }
 
   /**
