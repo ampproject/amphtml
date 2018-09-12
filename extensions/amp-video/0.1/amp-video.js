@@ -663,7 +663,7 @@ class AmpVideo extends AMP.BaseElement {
    * Adds an onloading event for the actual poster element for the case where
    * the poster has a blurry image placeholder and loads before the video
    * element.
-   * @param {*function()} opacityChangeFunc
+   * @param {function()} opacityChangeFunc
    * @private
    */
   getPosterFromVideo_(opacityChangeFunc) {
