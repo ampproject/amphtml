@@ -1767,6 +1767,14 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!JsonObject|undefined}
    */
   getAdditionalContextMetadata(opt_isSafeframe) {}
+
+  /**
+   * Returns whether the received creative is verified AMP.
+   * @return {boolean} True if the creative is verified AMP, false otherwise.
+   */
+  isVerifiedAmpCreative() {
+    return this.isVerifiedAmpCreative_;
+  }
 }
 
 /**
