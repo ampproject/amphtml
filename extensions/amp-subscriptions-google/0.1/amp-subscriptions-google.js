@@ -202,7 +202,7 @@ export class GoogleSubscriptionsPlatform {
   pingback() {}
 
   /** @override */
-  getSupportedFactor(factorName) {
+  getSupportedScoreFactor(factorName) {
     switch (factorName) {
       case 'supportsViewer':
         return Promise.resolve(this.isGoogleViewer_ ? 1 : 0);

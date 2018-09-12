@@ -41,7 +41,7 @@ describes.realWin('Platform store', {}, () => {
    * @param {!Object} factorMap
    * @return {boolean}
    */
-  function fakeGetSupportedFactor(factor, factorMap) {
+  function fakeGetSupportedScoreFactor(factor, factorMap) {
     return Promise.resolve(factorMap[factor] || 0);
   }
 
@@ -198,6 +198,40 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('getAllPlatformWeights_', () => {
+    let localPlatform;
+    let anotherPlatform;
+    const localPlatformBaseScore = 0;
+    const anotherPlatformBaseScore = 0;
+    beforeEach(() => {
+      localPlatform = new SubscriptionPlatform();
+      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(localPlatform, 'getBaseScore')
+          .callsFake(() => localPlatformBaseScore);
+      anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => anotherPlatformBaseScore);
+      platformStore.resolvePlatform('local', localPlatform);
+      platformStore.resolvePlatform('another', anotherPlatform);
+    });
+    it('should return sorted array of platforms and weights', () => {
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local'}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another'}));
+      return platformStore.getAllPlatformWeights_().then(weights => {
+        expect(weights).deep.equal([{platform: localPlatform, weight: 0},
+          {platform: anotherPlatform, weight: 0}]);
+      });
+    });
+  });
+
   describe('selectPlatform', () => {
     it('should call selectApplicablePlatform_ if areAllPlatformsResolved_ '
         + 'is true', () => {
@@ -266,10 +300,10 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should choose local platform if all other conditions are same', () => {
-      sandbox.stub(localPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
-      sandbox.stub(anotherPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
 
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local', raw: '', service: 'local'}));
@@ -281,11 +315,11 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should chose platform based on score weight', () => {
-      sandbox.stub(localPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
       // +9
-      sandbox.stub(anotherPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor,
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
               {'supportsViewer': true}));
 
       platformStore.resolveEntitlement('local', new Entitlement({
@@ -299,12 +333,12 @@ describes.realWin('Platform store', {}, () => {
 
     it('should chose platform based on multiple factors', () => {
       // +10
-      sandbox.stub(localPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor,
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
               {'testFactor1': 1}));
       // +9
-      sandbox.stub(anotherPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor,
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
               {'supportsViewer': 1}));
 
       platformStore.resolveEntitlement('local', new Entitlement({
@@ -318,12 +352,12 @@ describes.realWin('Platform store', {}, () => {
 
     it('should chose platform specified factors', () => {
       // +10
-      sandbox.stub(localPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor,
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
               {'testFactor1': 1}));
       // +9
-      sandbox.stub(anotherPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor,
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
               {'supportsViewer': 1}));
 
       platformStore.resolveEntitlement('local', new Entitlement({
@@ -337,12 +371,12 @@ describes.realWin('Platform store', {}, () => {
 
     it('should chose platform handle negative factor values', () => {
       // +10, -10
-      sandbox.stub(localPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor,
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
               {testFactor1: 1, testFactor2: -1}));
       // +9
-      sandbox.stub(anotherPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor,
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
               {'supportsViewer': 1}));
 
       platformStore.resolveEntitlement('local', new Entitlement({
@@ -355,10 +389,10 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should use baseScore', () => {
-      sandbox.stub(localPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
-      sandbox.stub(anotherPlatform, 'getSupportedFactor')
-          .callsFake(factor => fakeGetSupportedFactor(factor, {}));
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
       localPlatformBaseScore = 1;
       anotherPlatformBaseScore = 10;
       platformStore.resolveEntitlement('local', new Entitlement({

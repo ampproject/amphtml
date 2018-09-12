@@ -214,7 +214,7 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  getSupportedFactor(unusedFactor) {
+  getSupportedScoreFactor(unusedFactor) {
     return 0;
   }
 

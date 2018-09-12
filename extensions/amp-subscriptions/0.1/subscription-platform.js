@@ -61,7 +61,7 @@ export class SubscriptionPlatform {
    * @param {string} unusedFactor
    * @return {!Promise<number>}
    */
-  getSupportedFactor(unusedFactor) {}
+  getSupportedScoreFactor(unusedFactor) {}
 
   /**
    * Executes action for the local platform.

@@ -187,8 +187,8 @@ export class ViewerSubscriptionPlatform {
 
 
   /** @override */
-  getSupportedFactor(factorName) {
-    return this.platform_.getSupportedFactor(factorName);
+  getSupportedScoreFactor(factorName) {
+    return this.platform_.getSupportedScoreFactor(factorName);
   }
 
   /** @override */

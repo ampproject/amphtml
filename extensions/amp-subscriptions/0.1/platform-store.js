@@ -366,14 +366,14 @@ export class PlatformStore {
   }
 
   /**
-   * Calculates weight to add/remove based on getSupportedFactor()
+   * Calculates weight to add/remove based on getSupportedScoreFactor()
    * @param {string} factorName
    * @param {!./subscription-platform.SubscriptionPlatform} platform
    * @return {!Promise<number>}
    * @private
    */
   getSupportedFactorWeight_(factorName, platform) {
-    return platform.getSupportedFactor(factorName)
+    return platform.getSupportedScoreFactor(factorName)
         .then(factorValue => {
           if (typeof factorValue !== 'number') {
             return 0;
@@ -398,7 +398,6 @@ export class PlatformStore {
    */
   selectApplicablePlatform_(optionalFactor) {
     const localPlatform = this.getLocalPlatform();
-    let localWeight = 0;
 
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
@@ -413,32 +412,37 @@ export class PlatformStore {
         return Promise.resolve(platform);
       }
     }
+    return this.getAllPlatformWeights_(optionalFactor)
+        .then(platformWeights => {
+          platformWeights.sort(function(platform1, platform2) {
+            // Force local platform to win ties
+            if (platform2.weight == platform1.weight &&
+              platform2 == localPlatform) {
+              return 1;
+            }
+            return platform2.weight - platform1.weight;
+          });
+          return platformWeights[0].platform;
+        });
+  }
 
+  /**
+   * Iterate platforms and return the highest scoring
+   * @return {!Promise<!array<!./subscription-platform.SubscriptionPlatform>>}
+   * @param {string=} optionalFactor if present only use this factor for calculation
+   * @private
+   */
+  getAllPlatformWeights_(optionalFactor) {
     // Get weights for all of the platforms
     return Promise.all(this.getAvailablePlatforms().map(platform => {
       return this.calculatePlatformWeight_(platform, optionalFactor)
           .then(weight => {
-            if (platform.getServiceId() === 'local') {
-              localWeight = weight;
-            }
             return {
               platform,
               weight,
             };
           });
-    }))
-        .then(platformWeights => {
-          platformWeights.sort(function(platform1, platform2) {
-            return platform2.weight - platform1.weight;
-          });
-
-          const winningWeight = platformWeights[0].weight;
-          // Highest wins, local wins a tie
-          if (winningWeight > localWeight) {
-            return platformWeights[0].platform;
-          }
-          return localPlatform;
-        });
+    }));
   }
 
   /**
