@@ -41,7 +41,8 @@ export const DUMMY_FLUID_SIZE = '320x50';
  * Required size to be sent with fluid requests in array format.
  * @const {!Array<number>}
  */
-export const DUMMY_FLUID_SIZE_ARR = [320, 50];
+const DUMMY_FLUID_SIZE_ARR =
+    DUMMY_FLUID_SIZE.split('x').map(dim => Number(dim));
 
 /**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
@@ -75,7 +76,7 @@ export function getMultiSizeDimensions(
     if (sizeStr.toLowerCase() == 'fluid') {
       if (!isFluidPrimary) {
         // If the primary size is fluid, then the dummy size will already be
-        // included.
+        // be included.
         dimensions.push(DUMMY_FLUID_SIZE_ARR);
       }
       continue;
