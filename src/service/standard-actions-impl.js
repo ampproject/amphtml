@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionInvocation} from './action-impl';
 import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
@@ -96,7 +97,7 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    * @param {string} globalName
    * @param {string} name
-   * @param {ActionHandlerDef} handler
+   * @param {./action-impl.ActionHandlerDef} handler
    * @return {?Promise}
    */
   forwardGlobalTargetAliasForMethod(invocation, globalName, name, handler) {
@@ -114,8 +115,10 @@ export class StandardActions {
           `Cannot find element of id '${nodeId}' for '${globalName}.${name}'`);
       return null;
     }
-    invocation.node = dev().assertElement(node);
-    return handler(invocation);
+    return handler(new ActionInvocation(dev().assertElement(node),
+        invocation.method, invocation.args, invocation.source,
+        invocation.caller, invocation.event, invocation.trust,
+        invocation.actionEventType));
   }
 
   /**

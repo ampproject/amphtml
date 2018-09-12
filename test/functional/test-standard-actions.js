@@ -420,6 +420,7 @@ describes.sandboxed('StandardActions', {}, () => {
       document.body.appendChild(element);
       invocation.args = {id};
       invocation.method = 'scrollTo';
+      invocation.trust = 100;
       standardActions.handleAmpTarget(invocation);
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });

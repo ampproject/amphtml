@@ -124,7 +124,7 @@ export let ActionInfoDef;
  *
  * @typedef {function(!ActionInvocation, number=, !Array<!ActionInfoDef>=):?Promise}
  */
-let ActionHandlerDef;
+export let ActionHandlerDef;
 
 /**
  * @typedef {Event|DeferredEvent}
