@@ -345,8 +345,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const ampAdResourceId = this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
-        // Create  3p transport frame within creative frame if inabox.
-        this.isInabox_ ? this.win : this.getAmpDoc().win,
+        this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
   }
