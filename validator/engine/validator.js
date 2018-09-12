@@ -3061,13 +3061,14 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
     return inputLayout;
   } else if (!width.isSet && !height.isSet) {
     return amp.validator.AmpLayout.Layout.CONTAINER;
-  } else if (height.isFluid) {
+  } else if (
+    (height.isSet && height.isFluid) || (width.isSet && width.isFluid)) {
     return amp.validator.AmpLayout.Layout.FLUID;
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
   } else if (
     height.isSet && width.isSet &&
-      (sizesAttr !== undefined || heightsAttr !== undefined)) {
+    (sizesAttr !== undefined || heightsAttr !== undefined)) {
     return amp.validator.AmpLayout.Layout.RESPONSIVE;
   } else {
     return amp.validator.AmpLayout.Layout.FIXED;
@@ -3452,7 +3453,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     return;
   }
   const inputWidth = new amp.validator.CssLength(
-      widthAttr, /* allowAuto */ true, /* allowFluid */ false);
+      widthAttr, /* allowAuto */ true,
+      /* allowFluid */ inputLayout === amp.validator.AmpLayout.Layout.FLUID);
   if (!inputWidth.isValid) {
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
@@ -3517,10 +3519,9 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
         result);
     return;
   }
-  // FIXED, FIXED_HEIGHT, FLUID, INTRINSIC, RESPONSIVE must have height set.
+  // FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
   if ((layout === amp.validator.AmpLayout.Layout.FIXED ||
        layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
-       layout === amp.validator.AmpLayout.Layout.FLUID ||
        layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
        layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
       !height.isSet) {
@@ -3542,9 +3543,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
         getTagSpecUrl(spec), result);
     return;
   }
-  // FIXED, FLUID, INTRINSIC, RESPONSIVE must have width set and not be auto.
+  // FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
   if (layout === amp.validator.AmpLayout.Layout.FIXED ||
-      layout === amp.validator.AmpLayout.Layout.FLUID ||
       layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
       layout === amp.validator.AmpLayout.Layout.RESPONSIVE) {
     if (!width.isSet) {
