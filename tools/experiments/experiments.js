@@ -286,6 +286,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    id: 'sandbox-ads',
+    name: 'Applies a sandbox to ad iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/14240',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'video-service',
     name: 'Enables new implementation of unified Video Interface services.',
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
