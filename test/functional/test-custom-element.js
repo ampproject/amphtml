@@ -22,7 +22,6 @@ import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {poll} from '../../testing/iframe';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {

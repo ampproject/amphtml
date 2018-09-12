@@ -17,7 +17,7 @@
 import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
-import {computedStyle, getStyle, toggle} from '../style';
+import {computedStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
