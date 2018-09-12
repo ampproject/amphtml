@@ -125,6 +125,7 @@ module.exports = {
     '!dist.3p/current/**/ampcontext-lib.js',
     '!dist.3p/current/**/iframe-transport-client-lib.js',
     '!out/**/*.*',
+    '!validator/validator.pb.go',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',
