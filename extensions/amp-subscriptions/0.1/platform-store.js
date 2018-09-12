@@ -404,14 +404,15 @@ export class PlatformStore {
 
     /// Subscriber wins immediatly.
     const availablePlatforms = this.getAvailablePlatforms();
-    for (const platformIdx in availablePlatforms) {
-      const platform = availablePlatforms[platformIdx];
+    while (availablePlatforms.length) {
+      const platform = availablePlatforms.pop();
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
       if (entitlement.isSubscriber()) {
         return Promise.resolve(platform);
       }
     }
+
     return this.getAllPlatformWeights_(optionalFactor)
         .then(platformWeights => {
           platformWeights.sort(function(platform1, platform2) {
@@ -428,7 +429,7 @@ export class PlatformStore {
 
   /**
    * Calculate and return weights for all platforms
-   * @return {!Promise<!Array<!./subscription-platform.SubscriptionPlatform>>}
+   * @return {!Promise<!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>>}
    * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
