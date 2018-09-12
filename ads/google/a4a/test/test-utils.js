@@ -54,7 +54,7 @@ function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
   installExtensionsService(fixture.win);
   const {doc} = fixture;
-  // TODO(a4a-cam@): This is necessary in the short term, until A4A is
+  // TODO(a4a-cam@): This is necessary in the short term, until A4A isunused
   // smarter about host document styling.  The issue is that it needs to
   // inherit the AMP runtime style element in order for shadow DOM-enclosed
   // elements to behave properly.  So we have to set up a minimal one here.
@@ -480,6 +480,36 @@ describe('Google A4A utils', () => {
           return expect(
               googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
               /[&?]bc=1[&$]/);
+        });
+      });
+    });
+
+    it('should handle referrer url promise timeout', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        sandbox.stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
+            .returns(new Promise(unused_resolve => {}));
+        const createElementStub =
+          sandbox.stub(impl.win.document, 'createElement');
+        createElementStub.withArgs('iframe').returns({
+          sandbox: {
+            supports: () => false,
+          },
+        });
+        expectAsyncConsoleError(/Referrer timeout/, 1);
+        return fixture.addElement(elem).then(() => {
+          return expect(
+              googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
+              /[&?]ref=[&$]/);
         });
       });
     });
