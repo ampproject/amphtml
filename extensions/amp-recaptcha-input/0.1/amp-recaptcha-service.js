@@ -35,14 +35,14 @@ import {removeElement} from '../../../src/dom';
  *
  * Here are the following iframe messages using .postMessage()
  * used between the iframe and recaptcha service:
- * amp-recaptcha-ready / Service <- Iframe : 
+ * amp-recaptcha-ready / Service <- Iframe :
  *   Iframe and Recaptcha API are ready.
- * amp-recaptcha-action / Service -> Iframe : 
+ * amp-recaptcha-action / Service -> Iframe :
  *   Execute and action using supplied data
- * amp-recaptcha-token / Service <- Iframe : 
+ * amp-recaptcha-token / Service <- Iframe :
  *   Response to 'amp-recaptcha-action'. The token
  *   returned by the recaptcha API.
- * amp-recaptcha-error / Service <- Iframe : 
+ * amp-recaptcha-error / Service <- Iframe :
  *   Response to 'amp-recaptcha-action'. Error
  *   From attempting to get a token from action.
  */

@@ -24,14 +24,14 @@ import {loadScript} from './3p';
  *
  * Here are the following iframe messages using .postMessage()
  * used between the iframe and recaptcha service:
- * amp-recaptcha-ready / Service <- Iframe : 
+ * amp-recaptcha-ready / Service <- Iframe :
  *   Iframe and Recaptcha API are ready.
- * amp-recaptcha-action / Service -> Iframe : 
+ * amp-recaptcha-action / Service -> Iframe :
  *   Execute and action using supplied data
- * amp-recaptcha-token / Service <- Iframe : 
+ * amp-recaptcha-token / Service <- Iframe :
  *   Response to 'amp-recaptcha-action'. The token
  *   returned by the recaptcha API.
- * amp-recaptcha-error / Service <- Iframe : 
+ * amp-recaptcha-error / Service <- Iframe :
  *   Response to 'amp-recaptcha-action'. Error
  *   From attempting to get a token from action.
  */
@@ -53,31 +53,68 @@ export function recaptcha(global, data) {
   dev().assert(
       data.sitekey,
       TAG +
-    ' The data-sitekey attribute is required for <amp-recaptcha-input> %s',
-      data.element
+    ' The data-sitekey attribute is required for <amp-recaptcha-input>'
   );
-  
-  let recaptchaApiUrl;
+
   if (data.fortesting) {
-    recaptchaApiUrl = getMockRecaptchaApiUrl_();
+    mockRecaptchaApi_(global);
+    recaptchaApiLoaded_(global);
   } else {
     const {sitekey} = data;
-    recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
+    const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
+    loadScript(
+        global,
+        recaptchaApiUrl,
+        recaptchaApiLoaded_.bind(this, global),
+        recaptchaApiLoadError_.bind(this)
+    );
   }
+}
 
-  loadScript(global, recaptchaApiUrl, function() {
-    const {grecaptcha} = global;
+/**
+ * Function to mock out the grecaptcha Object for testing
+ * @param {!Window} global
+ * @visibleForTesting
+ * @private
+ */
+function mockRecaptchaApi_(global) {
+  global.grecaptcha = {
+    ready: function(callback) {
+      callback();
+    },
+    execute: function() {
+      return {
+        then: function(callback) {
+          callback('mock token');
+        },
+      };
+    },
+  };
+}
 
-    grecaptcha.ready(function() {
-      global.context.registerCallback(
-          MESSAGE_TAG + 'action',
-          actionTypeHandler.bind(this, global, grecaptcha)
-      );
-      global.context./*OK*/sendMessage(MESSAGE_TAG + 'ready');
-    });
-  }, function() {
-    user().error(TAG + ' Failed to load recaptcha api script');
+/**
+ * Function called after succesfully getting the recaptcha Api
+ * @param {!Window} global
+ * @private
+ */
+function recaptchaApiLoaded_(global) {
+  const {grecaptcha} = global;
+
+  grecaptcha.ready(function() {
+    global.context.registerCallback(
+        MESSAGE_TAG + 'action',
+        actionTypeHandler_.bind(this, global, grecaptcha)
+    );
+    global.context./*OK*/sendMessage(MESSAGE_TAG + 'ready');
   });
+}
+
+/**
+ * Function called after failing to get the recaptcha Api
+ * @private
+ */
+function recaptchaApiLoadError_() {
+  user().error(TAG + ' Failed to load recaptcha api script');
 }
 
 /**
@@ -87,8 +124,9 @@ export function recaptcha(global, data) {
  * @param {!Window} global
  * @param {*} grecaptcha
  * @param {Object} data
+ * @private
  */
-function actionTypeHandler(global, grecaptcha, data) {
+function actionTypeHandler_(global, grecaptcha, data) {
 
   const executePromise = grecaptcha.execute(data.sitekey, {
     action: data.action,
@@ -109,12 +147,5 @@ function actionTypeHandler(global, grecaptcha, data) {
   });
 }
 
-/**
- * Function to return the url to our mock recaptcha API
- * @visibleForTesting
- * @private
- */
-function getMockRecaptchaApiUrl_() {
-  return '/extensions/amp-recaptcha-input/0.1/test/mock-recaptcha-api.js';
-}
+
 

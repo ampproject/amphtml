@@ -20,6 +20,7 @@ import {toggleExperiment} from '../../../../../src/experiments';
 describe.configure().skipSafari().skipEdge()
     .run('amp-recaptcha-input', function() {
       describes.integration('amp-recaptcha', {
+        body: '',
         extensions: ['amp-recaptcha-input'],
       }, env => {
 
@@ -38,9 +39,9 @@ describe.configure().skipSafari().skipEdge()
           ampRecaptchaInput.setAttribute('data-sitekey',
               '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
           ampRecaptchaInput.setAttribute('data-action',
-            'integration_testing');
+              'integration_testing');
           ampRecaptchaInput.setAttribute('data-fortesting',
-            'true');
+              'true');
           doc.body.appendChild(ampRecaptchaInput);
           return ampRecaptchaInput.build().then(() => {
             return ampRecaptchaInput.layoutCallback();
@@ -49,7 +50,8 @@ describe.configure().skipSafari().skipEdge()
           });
         }
 
-        it('should be able to return a token on execute', () => {
+        it('should be able to message boostrap iframe' +
+          ' return a mock token on execute', () => {
           return getRecaptchaInput().then(ampRecaptchaInput => {
             return ampRecaptchaInput.implementation_.getValue().then(token => {
               expect(token).to.be.ok;
