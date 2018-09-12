@@ -14,29 +14,12 @@
  * limitations under the License.
  */
 
-amp-consent {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed;
-  bottom: 0;
-  left: 0;
+.i-amphtml-recaptcha-iframe {
+  position: fixed !important;
+  top: 0px !important;
+  left: 0px !important;
+  height: 1px !important;
+  width: 1px !important;
   overflow: hidden !important;
-  background: rgba(255, 255, 255, .7);
-  z-index: 1000;
-  width: 100%;
-}
-
-amp-consent[i-amphtml-notbuilt] > * {
-  display: none !important;
-}
-
-amp-consent > * {
-  max-height: 100vh !important;
-}
-
-amp-consent.amp-active {
-  visibility: visible;
-}
-
-amp-consent.amp-hidden {
-  visibility: hidden;
+  visibility: hidden !important;
 }

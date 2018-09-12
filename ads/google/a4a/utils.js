@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getBinaryType} from '../../../src/experiments';
+import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
@@ -788,26 +790,35 @@ export let IdentityToken;
 
 /**
  * @param {!Window} win
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {?string} consentPolicyId
  * @return {!Promise<!IdentityToken>}
  */
-export function getIdentityToken(win, elementOrAmpDoc) {
+export function getIdentityToken(win, ampDoc, consentPolicyId) {
+  // If configured to use amp-consent, delay request until consent state is
+  // resolved.
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
-      executeIdentityTokenFetch(win, elementOrAmpDoc);
+      (consentPolicyId ? getConsentPolicyState(ampDoc, consentPolicyId) :
+        Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
+          .then(consentState =>
+            consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+            consentState == CONSENT_POLICY_STATE.UNKNOWN ?
+            /** @type{!IdentityToken} */({}) :
+              executeIdentityTokenFetch(win, ampDoc));
   return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
 }
 
 /**
  * @param {!Window} win
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {number=} redirectsRemaining (default 1)
  * @param {string=} domain
  * @param {number=} startTime
  * @return {!Promise<!IdentityToken>}
  */
-function executeIdentityTokenFetch(win, elementOrAmpDoc, redirectsRemaining = 1,
+function executeIdentityTokenFetch(win, ampDoc, redirectsRemaining = 1,
   domain = undefined, startTime = Date.now()) {
-  const url = getIdentityTokenRequestUrl(win, elementOrAmpDoc, domain);
+  const url = getIdentityTokenRequestUrl(win, ampDoc, domain);
   return Services.xhrFor(win).fetchJson(url, {
     mode: 'cors',
     method: 'GET',
@@ -828,7 +839,7 @@ function executeIdentityTokenFetch(win, elementOrAmpDoc, redirectsRemaining = 1,
             return {fetchTimeMs};
           }
           return executeIdentityTokenFetch(
-              win, elementOrAmpDoc, redirectsRemaining, altDomain, startTime);
+              win, ampDoc, redirectsRemaining, altDomain, startTime);
         } else if (freshLifetimeSecs > 0 && validLifetimeSecs > 0 &&
             typeof token == 'string') {
           return {token, jar, pucrd, freshLifetimeSecs, validLifetimeSecs,
@@ -845,13 +856,12 @@ function executeIdentityTokenFetch(win, elementOrAmpDoc, redirectsRemaining = 1,
 
 /**
  * @param {!Window} win
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {string=} domain
  * @return {string} url
  * @visibleForTesting
  */
-export function getIdentityTokenRequestUrl(win, elementOrAmpDoc,
-  domain = undefined) {
+export function getIdentityTokenRequestUrl(win, ampDoc, domain = undefined) {
   if (!domain && win != win.top && win.location.ancestorOrigins) {
     const matches = IDENTITY_DOMAIN_REGEXP_.exec(
         win.location.ancestorOrigins[win.location.ancestorOrigins.length - 1]);
@@ -859,7 +869,7 @@ export function getIdentityTokenRequestUrl(win, elementOrAmpDoc,
   }
   domain = domain || '.google.com';
   const canonical =
-    extractHost(Services.documentInfoForDoc(elementOrAmpDoc).canonicalUrl);
+    extractHost(Services.documentInfoForDoc(ampDoc).canonicalUrl);
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 }
 

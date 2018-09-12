@@ -55,6 +55,9 @@ export class AmpDocService {
       this.singleDoc_ = new AmpDocSingle(win);
     }
 
+    /** @private @const */
+    this.alwaysClosestAmpDoc_ = isExperimentOn(win, 'ampdoc-closest');
+
     /** Guarded by 'ampdoc-shell' experiment
      * @private {?AmpDocShell}
      */
@@ -106,7 +109,7 @@ export class AmpDocService {
     }
 
     // Single document: return it immediately.
-    if (this.singleDoc_ && !closestAmpDoc) {
+    if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
       return this.singleDoc_;
     }
 
@@ -120,7 +123,12 @@ export class AmpDocService {
       }
     }
 
-    dev().assert(opt_node);
+    // TODO(sparhami) Should we always require a node to be passed? This will
+    // make sure any functionality that works for a standalone AmpDoc works if
+    // the AmpDoc is loaded in a shadow doc.
+    if (!this.singleDoc_) {
+      dev().assert(opt_node);
+    }
     // Otherwise discover and possibly create the ampdoc.
     let n = opt_node;
     while (n) {
@@ -128,7 +136,7 @@ export class AmpDocService {
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
-      if (n.ampdoc_ && !closestAmpDoc) {
+      if (n.ampdoc_ && (this.alwaysClosestAmpDoc_ || !closestAmpDoc)) {
         return n.ampdoc_;
       }
 

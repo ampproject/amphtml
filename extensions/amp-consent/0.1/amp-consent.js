@@ -35,10 +35,13 @@ import {dev, user} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  insertAfterOrAtStart,
+  removeElement,
+} from '../../../src/dom';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {scopedQuerySelectorAll} from '../../../src/dom';
-import {setImportantStyles, toggle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -130,8 +133,10 @@ export class AmpConsent extends AMP.BaseElement {
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      toggle(child, false);
       // <amp-consent> will manualy schedule layout for its children.
-      this.setAsOwner(children[i]);
+      this.setAsOwner(child);
     }
 
     const consentPolicyManagerPromise =
@@ -211,7 +216,7 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
 
-      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+      const iframes = this.element.querySelectorAll('iframe');
 
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
@@ -269,11 +274,16 @@ export class AmpConsent extends AMP.BaseElement {
       // Display the current instance
       this.currentDisplayInstance_ = instanceId;
       const uiElement = this.consentUI_[this.currentDisplayInstance_];
-      setImportantStyles(uiElement, {display: 'block'});
-      // scheduleLayout is required everytime because some AMP element may
-      // get un laid out after toggle display (#unlayoutOnPause)
-      // for example <amp-iframe>
-      this.scheduleLayout(uiElement);
+      toggle(uiElement, true);
+      if (uiElement.tagName == 'IFRAME') {
+        // TODO: Apply placeholder and hide iframe
+        insertAfterOrAtStart(this.element, uiElement, null);
+      } else {
+        // scheduleLayout is required everytime because some AMP element may
+        // get un laid out after toggle display (#unlayoutOnPause)
+        // for example <amp-iframe>
+        this.scheduleLayout(uiElement);
+      }
     });
 
     const deferred = new Deferred();
@@ -296,10 +306,10 @@ export class AmpConsent extends AMP.BaseElement {
         dev().error(TAG,
             `${this.currentDisplayInstance_} no consent ui to hide`);
       }
-      // Cannot use #toggle() because Safari bug with version older than 10.3
-      // element.style['display] = 'none' cannot overwrite style set with
-      // !important.
-      setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
+      toggle(dev().assertElement(uiToHide), false);
+      if (uiToHide.tagName == 'IFRAME') {
+        removeElement(uiToHide);
+      }
     });
     const displayInstance = /** @type {string} */ (
       this.currentDisplayInstance_);
@@ -674,7 +684,9 @@ export class AmpConsent extends AMP.BaseElement {
    */
   initPromptUI_(instanceId) {
     const promptUI = this.consentConfig_[instanceId]['promptUI'];
+    const promptUISrc = this.consentConfig_[instanceId]['promptUISrc'];
     if (promptUI) {
+      // Always respect promptUI first
       let element = this.getAmpDoc().getElementById(promptUI);
       if (!element || !this.element.contains(element)) {
         element = null;
@@ -682,6 +694,10 @@ export class AmpConsent extends AMP.BaseElement {
           `promptUI id ${promptUI} not found`);
       }
       this.consentUI_[instanceId] = dev().assertElement(element);
+    } else if (promptUISrc && isExperimentOn(this.win, 'amp-consent-v2')) {
+      // Create an iframe element with the provided src
+      this.consentUI_[instanceId] =
+          this.createPromptIframeFromSrc_(promptUISrc);
     }
 
     // Get current consent state
@@ -709,6 +725,19 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Create the iframe if promptUISrc is valid
+   * @param {string} promptUISrc
+   * @return {!Element}
+   */
+  createPromptIframeFromSrc_(promptUISrc) {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    iframe.src = assertHttpsUrl(promptUISrc, this.element);
+    iframe.setAttribute('sandbox', 'allow-scripts');
+    return iframe;
+  }
+
+
+  /**
    * Handles the display of postPromptUI
    */
   handlePostPromptUI_() {
@@ -729,8 +758,7 @@ export class AmpConsent extends AMP.BaseElement {
         classList.add('amp-active');
         classList.remove('amp-hidden');
         this.getViewport().addToFixedLayer(this.element);
-        setImportantStyles(dev().assertElement(this.postPromptUI_),
-            {display: 'block'});
+        toggle(dev().assertElement(this.postPromptUI_), true);
         // Will need to scheduleLayout for postPromptUI
         // upon request for using AMP component.
       });
@@ -746,11 +774,7 @@ export class AmpConsent extends AMP.BaseElement {
           classList.remove('amp-active');
         }
         this.getViewport().removeFromFixedLayer(this.element);
-        // Cannot use #toggle() because Safari bug with version older than 10.3
-        // element.style['display] = 'none' cannot overwrite style set with
-        // !important.
-        setImportantStyles(dev().assertElement(this.postPromptUI_),
-            {display: 'none'});
+        toggle(dev().assertElement(this.postPromptUI_), false);
       });
     });
   }
