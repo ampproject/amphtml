@@ -15,9 +15,9 @@
  */
 
 import {
-  ADSENSE_RSPV_WHITELISTED_HEIGHT,
-  ADSENSE_RSPV_TAG,
   ADSENSE_MCRSPV_TAG,
+  ADSENSE_RSPV_TAG,
+  ADSENSE_RSPV_WHITELISTED_HEIGHT,
 } from './utils';
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {camelCaseToDash} from '../../src/string';

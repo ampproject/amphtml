@@ -21,9 +21,9 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
-  ADSENSE_RSPV_WHITELISTED_HEIGHT,
-  ADSENSE_RSPV_TAG,
   ADSENSE_MCRSPV_TAG,
+  ADSENSE_RSPV_TAG,
+  ADSENSE_RSPV_WHITELISTED_HEIGHT,
 } from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -172,15 +172,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @return {?number}
    * @private
    */
-  getRafmtParam_() { 
-    switch (this.autoFormat_) {
+  getRafmtParam_() {
+    if (this.autoFormat_) {
+      switch (this.autoFormat_) {
         case ADSENSE_RSPV_TAG:
-            return 13;
+          return 13;
         case ADSENSE_MCRSPV_TAG:
-            return 15;
+          return 15;
         default:
-            return null;
+          return null;
+      }
     }
+    return null;
   }
 
   /** @override */
@@ -556,16 +559,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   static getResponsiveHeightForContext_(autoFormat, viewportSize) {
     switch (autoFormat) {
-        case ADSENSE_RSPV_TAG:
-            const minHeight = 100;
-            const maxHeight = Math.min(300, viewportSize.height);
-            // We aim for a 6:5 aspect ratio.
-            const idealHeight = Math.round(viewportSize.width / 1.2);
-            return clamp(idealHeight, minHeight, maxHeight);
-        case ADSENSE_MCRSPV_TAG:
-            return Math.floor((viewportSize.width * 3.4) + 112);
-        default:
-            return 0;
+      case ADSENSE_RSPV_TAG:
+        const minHeight = 100;
+        const maxHeight = Math.min(300, viewportSize.height);
+        // We aim for a 6:5 aspect ratio.
+        const idealHeight = Math.round(viewportSize.width / 1.2);
+        return clamp(idealHeight, minHeight, maxHeight);
+      case ADSENSE_MCRSPV_TAG:
+        return Math.floor((viewportSize.width * 3.4) + 112);
+      default:
+        return 0;
     }
   }
 }
