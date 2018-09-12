@@ -299,7 +299,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   isLayoutSupported(layout) {
     this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
-    this.isFluidRequest_ = this.isFluidRequest || this.isFluidPrimaryRequest_;
+    this.isFluidRequest_ = this.isFluidRequest_ || this.isFluidPrimaryRequest_;
     return this.isFluidPrimaryRequest_ || isLayoutSizeDefined(layout);
   }
 
