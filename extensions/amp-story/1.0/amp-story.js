@@ -34,6 +34,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
+import {getState} from '../../../src/history';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
@@ -1192,11 +1193,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string}
    */
   getHistoryStatePageId_() {
-    const {history} = this.win;
-    if (history && history.state) {
-      return history.state.ampStoryPageId;
-    }
-    return null;
+    const state = getState(this.win.history);
+    return state ? state.ampStoryPageId : null;
   }
 
 
