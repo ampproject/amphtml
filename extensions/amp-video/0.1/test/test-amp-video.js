@@ -540,7 +540,7 @@ describes.realWin('amp-video', {
       el = impl.element;
       img = el.firstChild;
       expect(img.style.opacity).to.be.equal('');
-      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+      expect(impl.togglePlaceholder).to.not.be.called;
 
       impl = getVideoWithBlur(false, false);
       impl.buildCallback();
@@ -548,7 +548,7 @@ describes.realWin('amp-video', {
       impl.firstLayoutCompleted();
       el = impl.element;
       img = el.firstChild;
-      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+      expect(impl.togglePlaceholder).to.not.be.called;
     });
 
     it('should fade out the blurry image placeholder on video load', () => {

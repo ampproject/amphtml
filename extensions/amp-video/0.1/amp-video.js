@@ -201,10 +201,8 @@ class AmpVideo extends AMP.BaseElement {
     this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
 
-    const posterFunc = () => {
-      this.fadeOutBlur_();
-    };
-    this.getPosterFromVideo_(posterFunc);
+    const posterFunc = () => {this.hideBlurryPlaceholder_();};
+    this.onPosterLoaded_(posterFunc);
 
     // Gather metadata
     const artist = element.getAttribute('artist');
@@ -632,7 +630,7 @@ class AmpVideo extends AMP.BaseElement {
     * @override
   */
   firstLayoutCompleted() {
-    this.fadeOutBlur_();
+    this.hideBlurryPlaceholder_();
   }
 
   /**
@@ -645,17 +643,17 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
     * Fades out a blurry placeholder if one currently exists.
-    * @return {boolean} whether or not there was a blurry placeholder that was
-    * faded.
     */
-  fadeOutBlur_() {
+  hideBlurryPlaceholder_() {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
-    if (placeholder && placeholder.classList.contains('i-amphtml-blur') &&
-      isExperimentOn(this.win, 'blurry-placeholder')) {
-      setImportantStyles(placeholder, {'opacity': 0.0});
-    } else {
-      this.togglePlaceholder(false);
+    if (placeholder) {
+      if (placeholder.classList.contains('i-amphtml-blur') &&
+        isExperimentOn(this.win, 'blurry-placeholder')) {
+        setImportantStyles(placeholder, {'opacity': 0.0});
+      } else {
+        this.togglePlaceholder(false);
+      }
     }
   }
 
@@ -663,15 +661,16 @@ class AmpVideo extends AMP.BaseElement {
    * Adds an onloading event for the actual poster element for the case where
    * the poster has a blurry image placeholder and loads before the video
    * element.
-   * @param {function()} opacityChangeFunc
+   * @param {function()} callback The function that executes when the poster is
+   * loaded.
    * @private
    */
-  getPosterFromVideo_(opacityChangeFunc) {
+  onPosterLoaded_(callback) {
     const poster = this.video_.getAttribute('poster');
     if (poster != null) {
       this.posterImg_ = new Image();
       this.posterImg_.src = poster;
-      this.posterImg_.onload = opacityChangeFunc;
+      this.posterImg_.onload = callback;
     }
   }
 }
