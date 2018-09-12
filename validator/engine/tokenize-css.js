@@ -310,10 +310,10 @@ class Tokenizer {
       } else {
         ++currentCol;
       }
+      eofToken = new parse_css.EOFToken();
+      eofToken.line = currentLine;
+      eofToken.col = currentCol;
     }
-    eofToken = new parse_css.EOFToken();
-    eofToken.line = currentLine;
-    eofToken.col = currentCol;
 
     let iterationCount = 0;
     while (!this.eof(this.next())) {
