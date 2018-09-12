@@ -23,11 +23,11 @@ import {
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
 import {dev, user} from '../../../src/log';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getTopWindow} from '../../../src/service';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getTopWindow} from '../../../src/service';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics.Transport';
@@ -41,7 +41,7 @@ export class Transport {
    * @param {!Window} win
    * @param {!JsonObject} options
    */
-  constructor(win, options = {}) {
+  constructor(win, options = /** @type {!JsonObject} */({})) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -106,13 +106,15 @@ export class Transport {
    *
    * @param {!Window} win
    * @param {!Element} element
+   * @param {!../../../src/preconnect.Preconnect|undefined} opt_preconnect
    */
-  initIframeTransport(win, element) {
+  maybeInitIframeTransport(win, element, opt_preconnect) {
     if (!this.options_['iframe'] || this.iframeTransport_) {
       return;
     }
-    //element.getImpl().preconnect
-    //    .preload(getIframeTransportScriptUrl(win), 'script');
+    if (opt_preconnect) {
+      opt_preconnect.preload(getIframeTransportScriptUrl(win), 'script');
+    }
 
     const type = element.getAttribute('type');
     const ampAdResourceId = user().assertString(

@@ -167,7 +167,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.transport_.initIframeTransport(this.getAmpDoc().win, this.element);
+    this.transport_.maybeInitIframeTransport(
+        this.getAmpDoc().win, this.element);
   }
 
   /** @override */
@@ -249,7 +250,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    this.transport_.initIframeTransport(this.getAmpDoc().win, this.element);
+    this.transport_.maybeInitIframeTransport(
+        this.getAmpDoc().win, this.element, this.preconnect);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
