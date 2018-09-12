@@ -507,7 +507,6 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
         amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
         ['style']));
   }
-  return parse_css.TRIVIAL_ERROR_TOKEN;
 };
 
 /**
