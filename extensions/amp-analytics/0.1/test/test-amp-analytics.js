@@ -205,7 +205,7 @@ describes.realWin('amp-analytics', {
     return config;
   }
 
-  describe.only('vendor request tests', () => {
+  describe('vendor request tests', () => {
     const actualResults = {};
     let vendorCount = 0;
     let vendorNumber = Object.keys(ANALYTICS_CONFIG).length;
@@ -214,7 +214,9 @@ describes.realWin('amp-analytics', {
       const config = ANALYTICS_CONFIG[vendor];
       vendorCount++;
       if (vendorCount == vendorNumber) {
-        expect(Object.keys(vendorRequests)).to.have.length(0);
+        it('check all config exists', () => {
+          expect(Object.keys(vendorRequests)).to.have.length(0);
+        });
       }
       if (!config.requests) {
         continue;
