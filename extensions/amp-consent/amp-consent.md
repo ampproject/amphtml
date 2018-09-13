@@ -162,7 +162,7 @@ AMP sends the consent instance ID, a generated user id only for this usage and t
 
 To use `promptIfUnknownForGeoGroup`, a `<amp-geo>` component must be included and properly configured. The `promptIfUnknownForGeoGroup` then accepts a key of a geo group of country codes. More details on how `<amp-geo>` works can be found [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md).
 
-In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. `promptIfUnknown`'s value from response will be respected.
+In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. The value from `<amp-geo>` will be respected.
 
 #### promptUI
 
