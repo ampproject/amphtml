@@ -85,10 +85,10 @@ exports.extensionBundles = [
   },
   {name: 'amp-brid-player', version: '0.1', type: TYPES.MEDIA},
   {
-    name: 'amp-delight-player', 
-    version: '0.1', 
+    name: 'amp-delight-player',
+    version: '0.1',
     options: {hasCss: true},
-    type: TYPES.MEDIA
+    type: TYPES.MEDIA,
   },
   {name: 'amp-brightcove', version: '0.1', type: TYPES.MEDIA},
   {
