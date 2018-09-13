@@ -284,7 +284,7 @@ class AmpDelight extends AMP.BaseElement {
       case DelightEvent.PING: {
         const {guid} = data;
         if (guid) {
-          this.iframe_.contentWindow.postMessage(JSON.stringify({
+          this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
             type: DelightEvent.PONG,
             guid,
             idx: 0,
