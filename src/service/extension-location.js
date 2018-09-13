@@ -72,3 +72,18 @@ export function calculateEntryPointScriptUrl(
   }
   return `${base}/${entryPoint}.js`;
 }
+
+/**
+ * Parse the extension version from a given script URL.
+ * @param {string} scriptUrl
+ * @return {!Object<string, string>}
+ */
+export function parseExtensionUrl(scriptUrl) {
+  const regex = /^(.*)\/(.*)-([0-9.]+)\.js$/i;
+  const matches = scriptUrl.match(regex);
+
+  return {
+    extensionId: matches[2],
+    extensionVersion: matches[3],
+  };
+}
