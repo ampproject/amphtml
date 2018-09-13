@@ -916,9 +916,13 @@ export class AmpA4A extends AMP.BaseElement {
     this.isRefreshing = true;
     this.tearDownSlot();
     this.initiateAdRequest();
-    dev().assert(this.adPromise_);
+    if (!this.adPromise_) {
+      // For whatever reasons, the adPromise has been nullified, and we will be
+      // unable to proceed. The current creative will continue to be displayed.
+      return Promise.resolve();
+    }
     const promiseId = this.promiseId_;
-    return this.adPromise_.then(() => {
+    return dev().assert(this.adPromise_).then(() => {
       if (!this.isRefreshing || promiseId != this.promiseId_) {
         // If this refresh cycle was canceled, such as in a no-content
         // response case, keep showing the old creative.

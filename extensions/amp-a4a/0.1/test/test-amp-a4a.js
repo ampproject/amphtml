@@ -2341,6 +2341,31 @@ describe('amp-a4a', () => {
         });
       });
     });
+
+    it('should fail gracefully if race conditions nullify adPromise', () => {
+      return createIframePromise().then(f => {
+        const fixture = f;
+        setupForAdTesting(fixture);
+        const a4aElement = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.adPromise_ = null;
+        a4a.getAmpDoc = () => a4a.win.document;
+        a4a.getResource = () => {
+          return {
+            layoutCanceled: () => {},
+          };
+        };
+        a4a.mutateElement = func => func();
+        a4a.togglePlaceholder = sandbox.spy();
+
+        sandbox.stub(AmpA4A.prototype, 'initiateAdRequest').returns(undefined);
+        sandbox.stub(AmpA4A.prototype, 'tearDownSlot').returns(undefined);
+        const callback = sandbox.spy();
+        return a4a.refresh(callback).then(() => {
+          expect(callback).to.not.be.called;
+        });
+      });
+    });
   });
 
   describe('buildCallback', () => {
