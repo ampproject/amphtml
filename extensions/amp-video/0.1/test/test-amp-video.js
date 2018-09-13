@@ -505,7 +505,7 @@ describes.realWin('amp-video', {
       if (addBlurClass) {
         img.classList.add('i-amphtml-blur');
       }
-      v.setAttribute('poster', '');
+      v.setAttribute('poster', 'img.png');
       doc.body.appendChild(v);
       v.appendChild(img);
       v.build();
@@ -567,7 +567,7 @@ describes.realWin('amp-video', {
       impl.layoutCallback();
       const el = impl.element;
       const img = el.firstChild;
-      impl.posterImg_.onload();
+      impl.posterDummyImageForTesting_.onload();
       expect(img.style.opacity).to.equal('0');
       expect(impl.togglePlaceholder).to.not.be.called;
     });

@@ -92,7 +92,7 @@ class AmpVideo extends AMP.BaseElement {
     this.unlisteners_ = [];
 
     /** @private {?Element} */
-    this.posterImg_ = null;
+    this.posterDummyImageForTesting_ = null;
   }
 
   /**
@@ -201,8 +201,7 @@ class AmpVideo extends AMP.BaseElement {
     this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
 
-    const posterFunc = () => {this.hideBlurryPlaceholder_();};
-    this.onPosterLoaded_(posterFunc);
+    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
     // Gather metadata
     const artist = element.getAttribute('artist');
@@ -626,11 +625,13 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
-    * Called when the video is first loaded.
-    * @override
-  */
+   * Called when video is first loaded.
+   * @override
+   */
   firstLayoutCompleted() {
-    this.hideBlurryPlaceholder_();
+    if (this.getPlaceholder() && !this.hideBlurryPlaceholder_()) {
+      this.togglePlaceholder(false);
+    }
   }
 
   /**
@@ -642,8 +643,9 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
-    * Fades out a blurry placeholder if one currently exists.
-    */
+  * Fades out a blurry placeholder if one currently exists.
+  * @return {boolean} if there was a blurred image placeholder that was hidden.
+  */
   hideBlurryPlaceholder_() {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
@@ -651,26 +653,27 @@ class AmpVideo extends AMP.BaseElement {
       if (placeholder.classList.contains('i-amphtml-blur') &&
         isExperimentOn(this.win, 'blurry-placeholder')) {
         setImportantStyles(placeholder, {'opacity': 0.0});
-      } else {
-        this.togglePlaceholder(false);
+        return true;
       }
     }
+    return false;
   }
 
   /**
-   * Adds an onloading event for the actual poster element for the case where
-   * the poster has a blurry image placeholder and loads before the video
-   * element.
+   * Sets a callback when the poster is loaded.
    * @param {function()} callback The function that executes when the poster is
    * loaded.
    * @private
    */
   onPosterLoaded_(callback) {
     const poster = this.video_.getAttribute('poster');
-    if (poster != null) {
-      this.posterImg_ = new Image();
-      this.posterImg_.src = poster;
-      this.posterImg_.onload = callback;
+    if (poster) {
+      const posterImg = new Image();
+      if (getMode().test) {
+        this.posterDummyImageForTesting_ = posterImg;
+      }
+      posterImg.onload = callback;
+      posterImg.src = poster;
     }
   }
 }
