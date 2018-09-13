@@ -107,6 +107,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isPostPromptUIRequired_ = false;
+
+    /** @private {!Object<string, Promise<?JsonObject>>} */
+    this.remoteConfigPromises_ = map();
   }
 
   /** @override */
@@ -367,8 +370,11 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.registerConsentInstance(
           instanceId, this.consentConfig_[instanceId]);
 
+      this.passSharedData_(instanceId);
+
       const isConsentRequiredPromise = this.getConsentRequiredPromise_(
           instanceId, this.consentConfig_[instanceId]);
+
 
       const handlePromptPromise = isConsentRequiredPromise.then(() => {
         return this.initPromptUI_(instanceId);
@@ -399,30 +405,35 @@ export class AmpConsent extends AMP.BaseElement {
         config['promptIfUnknownForGeoGroup'],
     'neither checkConsentHref nor ' +
     'promptIfUnknownForGeoGroup is defined');
-    let remoteConfigPromise = Promise.resolve(null);
-    if (config['checkConsentHref']) {
-      remoteConfigPromise = this.getConsentRemote_(instanceId);
-      this.passSharedData_(instanceId, remoteConfigPromise);
-    }
-    let geoPromise = Promise.resolve();
+    let promptPromise = null;
     if (config['promptIfUnknownForGeoGroup']) {
       const geoGroup = config['promptIfUnknownForGeoGroup'];
-      geoPromise = this.isConsentRequiredGeo_(geoGroup);
+      promptPromise = this.isConsentRequiredGeo_(geoGroup);
+    } else {
+      promptPromise =
+          this.getConsentRemote_(instanceId).then(remoteConfigResponse => {
+            if (!remoteConfigResponse ||
+                !remoteConfigResponse['promptIfUnknown']) {
+              this.user().error(TAG, 'Expecting promptIfUnknown from ' +
+                'checkConsentHref when promptIfUnknownForGeoGroup is not ' +
+                'specified');
+              // Set to false if not defined
+              return false;
+            }
+            return !!remoteConfigResponse['promptIfUnknown'];
+          });
     }
-    return geoPromise.then(promptIfUnknown => {
-      return remoteConfigPromise.then(response => {
-        this.consentRequired_[instanceId] =
-            this.isPromptRequired_(instanceId, response, promptIfUnknown);
-      });
+    return promptPromise.then(prompt => {
+      this.consentRequired_[instanceId] = !!prompt;
     });
   }
 
   /**
    * Blindly pass sharedData
    * @param {string} instanceId
-   * @param {!Promise<!JsonObject>} responsePromise
    */
-  passSharedData_(instanceId, responsePromise) {
+  passSharedData_(instanceId) {
+    const responsePromise = this.getConsentRemote_(instanceId);
     const sharedDataPromise = responsePromise.then(response => {
       if (!response || response['sharedData'] === undefined) {
         return null;
@@ -500,32 +511,42 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Get localStored consent info, and send request to get consent from endpoint
+   * if there is checkConsentHref specified.
    * @param {string} instanceId
-   * @return {!Promise<!JsonObject>}
+   * @return {!Promise<?JsonObject>}
    */
   getConsentRemote_(instanceId) {
-    // Note: Expect the request to look different in following versions.
-    const request = /** @type {!JsonObject} */ ({
-      'consentInstanceId': instanceId,
-    });
-    const init = {
-      credentials: 'include',
-      method: 'POST',
-      body: request,
-      requireAmpResponseSourceOrigin: false,
-    };
-    const href =
-        this.consentConfig_[instanceId]['checkConsentHref'];
-    assertHttpsUrl(href, this.element);
-    const ampdoc = this.getAmpDoc();
-    const sourceBase = getSourceUrl(ampdoc.getUrl());
-    const resolvedHref = resolveRelativeUrl(href, sourceBase);
-    const viewer = Services.viewerForDoc(ampdoc);
-    return viewer.whenFirstVisible().then(() => {
-      return Services.xhrFor(this.win)
-          .fetchJson(resolvedHref, init)
-          .then(res => res.json());
-    });
+    if (this.remoteConfigPromises_[instanceId]) {
+      return this.remoteConfigPromises_[instanceId];
+    }
+    if (!this.consentConfig_[instanceId]['checkConsentHref']) {
+      this.remoteConfigPromises_[instanceId] = Promise.resolve(null);
+    } else {
+      // Note: Expect the request to look different in following versions.
+      const request = /** @type {!JsonObject} */ ({
+        'consentInstanceId': instanceId,
+      });
+      const init = {
+        credentials: 'include',
+        method: 'POST',
+        body: request,
+        requireAmpResponseSourceOrigin: false,
+      };
+      const href =
+          this.consentConfig_[instanceId]['checkConsentHref'];
+      assertHttpsUrl(href, this.element);
+      const ampdoc = this.getAmpDoc();
+      const sourceBase = getSourceUrl(ampdoc.getUrl());
+      const resolvedHref = resolveRelativeUrl(href, sourceBase);
+      const viewer = Services.viewerForDoc(ampdoc);
+      this.remoteConfigPromises_[instanceId] =
+          viewer.whenFirstVisible().then(() => {
+            return Services.xhrFor(this.win)
+                .fetchJson(resolvedHref, init)
+                .then(res => res.json());
+          });
+    }
+    return this.remoteConfigPromises_[instanceId];
   }
 
   /**
@@ -650,31 +671,6 @@ export class AmpConsent extends AMP.BaseElement {
       const attribute = assertValues[i];
       dev().assert(config[attribute], `CMP config must specify ${attribute}`);
     }
-  }
-
-  /**
-   * Parse response from server endpoint
-   * The response format example:
-   * {
-   *   "promptIfUnknown": true/false
-   * }
-   * TODO: Support vendor lists
-   * @param {string} instanceId
-   * @param {?JsonObject} response
-   * @param {boolean=} opt_initValue
-   * @return {boolean}
-   */
-  isPromptRequired_(instanceId, response, opt_initValue) {
-    let promptIfUnknown = opt_initValue;
-    if (response && response['promptIfUnknown'] == true) {
-      promptIfUnknown = true;
-    } else if (response && response['promptIfUnknown'] == false) {
-      promptIfUnknown = false;
-    } else if (promptIfUnknown == undefined) {
-      // Set to false if not defined
-      promptIfUnknown = false;
-    }
-    return promptIfUnknown;
   }
 
   /**
