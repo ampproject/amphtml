@@ -310,10 +310,10 @@ class Tokenizer {
       } else {
         ++currentCol;
       }
-      eofToken = new parse_css.EOFToken();
-      eofToken.line = currentLine;
-      eofToken.col = currentCol;
     }
+    eofToken = new parse_css.EOFToken();
+    eofToken.line = currentLine;
+    eofToken.col = currentCol;
 
     let iterationCount = 0;
     while (!this.eof(this.next())) {
@@ -413,6 +413,8 @@ class Tokenizer {
     this.consumeComments();
     this.consume();
     const mark = new parse_css.Token();
+    mark.line = this.getLine();
+    mark.col = this.getCol();
     if (whitespace(this.code_)) {
       // Merge consecutive whitespace into one token.
       while (whitespace(this.next())) {
