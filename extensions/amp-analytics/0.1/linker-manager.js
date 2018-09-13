@@ -115,7 +115,7 @@ export class LinkerManager {
   processConfig_(config) {
     const processedConfig = dict();
     const defaultConfig = {
-      enabled: this.isLegacyOptIn_(),
+      enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
     const linkerNames = Object.keys(config).filter(key => {
       const value = config[key];
@@ -178,6 +178,16 @@ export class LinkerManager {
     const isGaType = this.type_ === 'googleanalytics';
 
     return !!(optInMeta && isGaType);
+  }
+
+  /**
+   * If the browser is Safari 12 or above.
+   * @return {boolean}
+   * @private
+   */
+  isSafari12OrAbove_() {
+    const platform = Services.platformFor(this.ampdoc_.win);
+    return platform.isSafari() && (platform.getMajorVersion() >= 12);
   }
 
   /**
