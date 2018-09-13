@@ -17,6 +17,12 @@
 import '../amp-recaptcha-input';
 import {AmpRecaptchaService} from '../amp-recaptcha-service';
 
+/**
+ * Tests for the iframe communicatiuon will be done in
+ * integration. As 3p frames in unit tests are stubbed out
+ * with a "fake iframe" document.
+ */
+
 describes.realWin('amp-recaptcha-service', {
   amp: { /* amp spec */
     extensions: ['amp-recaptcha-input'],
@@ -37,7 +43,9 @@ describes.realWin('amp-recaptcha-service', {
     ampRecaptchaInput.setAttribute('layout',
         'nodisplay');
     ampRecaptchaInput.setAttribute('data-sitekey',
-        '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
+        'fake-sitekey-fortesting');
+    ampRecaptchaInput.setAttribute('data-action',
+        'unit-testing');
     doc.body.appendChild(ampRecaptchaInput);
     return ampRecaptchaInput.build().then(() => {
       return ampRecaptchaInput.layoutCallback();
@@ -104,6 +112,68 @@ describes.realWin('amp-recaptcha-service', {
     });
   });
 
+  it('should unlisten to all listeners,' +
+    ' once all registered elements unregister', () => {
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
+      return recaptchaService
+          .register(ampRecaptchaInput).then(() => {
+            expect(recaptchaService.unlisteners_.length).to.be.equal(3);
+
+            // Stub out the unlisten function
+            const unlistener = sandbox.stub();
+            recaptchaService.unlisteners_[0] = unlistener;
+
+            recaptchaService.unregister();
+            expect(recaptchaService.unlisteners_.length).to.be.equal(0);
+            expect(unlistener).to.be.called;
+          });
+    });
+  });
+
+  it('should return when the iframe is' +
+    ' loaded and ready', () => {
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
+      return recaptchaService
+          .register(ampRecaptchaInput).then(() => {
+            expect(recaptchaService.unlisteners_.length).to.be.equal(3);
+            expect(recaptchaService.iframeLoadPromise_).to.be.ok;
+            expect(recaptchaService.recaptchaApiReady_).to.be.ok;
+
+            return recaptchaService.iframeLoadPromise_.then(() => {
+              expect(true).to.be.ok;
+            });
+          });
+    });
+  });
+
+  it('should add the element to the execute map on successful execute', () => {
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return getRecaptchaInput().then(ampRecaptchaInput => {
+      expect(ampRecaptchaInput).to.be.ok;
+      return recaptchaService
+          .register(ampRecaptchaInput).then(() => {
+            expect(recaptchaService.unlisteners_.length).to.be.equal(3);
+
+            recaptchaService.execute(0, '', '');
+
+            const executeMapKeys = Object.keys(recaptchaService.executeMap_);
+            expect(executeMapKeys.length).to.be.equal(1);
+            expect(executeMapKeys[0]).to.be.equal('0');
+          });
+    });
+  });
+
+  it('should reject if there is no iframe on execute', () => {
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    expect(recaptchaService.iframe_).to.not.be.ok;
+    return recaptchaService.execute(0, '', '').catch(err => {
+      expect(err).to.be.ok;
+    });
+  });
 });
 
 
