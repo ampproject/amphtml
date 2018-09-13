@@ -48,6 +48,8 @@
 <div class="button-set">
   <h3>AMP.navigateTo()</h3>
   <button on="tap:AMP.navigateTo(url='http://google.com')">google.com</button>
+  <button on="tap:AMP.navigateTo(url='http://google.com', target='_self')">google.com (_self)</button>
+  <button on="tap:AMP.navigateTo(url='http://google.com', target='_blank')">google.com (_blank)</button>
 
   <select on="change:AMP.navigateTo(url=event.value)">
     <option value="http://google.com">google.com</option>

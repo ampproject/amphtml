@@ -544,8 +544,8 @@ actions that apply to the whole document.
     <th>Description</th>
   </tr>
   <tr>
-    <td><code>navigateTo(url=STRING)</code></td>
-    <td>Navigates current window to given URL. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</td>
+    <td><code>navigateTo(url=STRING, target=STRING)</code></td>
+    <td>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_self</code> and <code>_blank</code>). Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</td>
   </tr>
   <tr>
     <td><code>goBack</code></td>

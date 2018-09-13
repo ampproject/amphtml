@@ -177,8 +177,9 @@ export class Navigation {
    * @param {!Window} win
    * @param {string} url
    * @param {string=} opt_requestedBy
+   * @param {string=} opt_target
    */
-  navigateTo(win, url, opt_requestedBy) {
+  navigateTo(win, url, opt_requestedBy, opt_target) {
     const urlService = Services.urlForDoc(this.ampdoc);
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
@@ -198,8 +199,20 @@ export class Navigation {
       }
     }
 
-    // Otherwise, perform normal behavior of navigating the top frame.
-    win.top.location.href = url;
+    if (opt_target) {
+      // If a target is given
+      switch (opt_target) {
+        case '_self':
+        case '_blank':
+          win.top.open(url, opt_target);
+          break;
+        default:
+          user().error(TAG, `Target '${opt_target}' not supported.`);
+      }
+    } else {
+      // Otherwise, perform normal behavior of navigating the top frame.
+      win.top.location.href = url;
+    }
   }
 
   /**
