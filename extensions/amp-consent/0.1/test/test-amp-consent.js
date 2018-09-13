@@ -20,7 +20,6 @@ import {
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {computedStyle} from '../../../../src/style';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
