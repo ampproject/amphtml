@@ -15,7 +15,7 @@
  */
 
 import * as experiments from '../../../../src/experiments';
-import {LinkerManager} from '../linker-manager';
+import {LinkerManager, isFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 import {installPlatformService} from '../../../../src/service/platform-impl';
@@ -308,6 +308,45 @@ describe('Linker Manager', () => {
     });
   });
 
+  it('should match friendly domain if destinationDomains unspecified', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        testLinker1: {
+          ids: {
+            id: '111',
+          },
+        },
+      },
+    };
+
+    const manager = new LinkerManager(ampdoc, config);
+    sandbox.stub(manager, 'expandTemplateWithUrlParams_').returnsArg(0);
+    manager.init();
+
+    return Promise.all(manager.allLinkerPromises_).then(() => {
+      const url1 = {
+        href: 'https://www.example.com/path',
+        hostname: 'www.example.com',
+      };
+      const url2 = {
+        href: 'https://amp.www.example.com/path',
+        hostname: 'amp.www.example.com',
+      };
+      const url3 = {
+        href: 'https://amp.google.com/path',
+        hostname: 'amp.google.com',
+      };
+      manager.handleAnchorMutation(url1);
+      manager.handleAnchorMutation(url2);
+      manager.handleAnchorMutation(url3);
+
+      expect(url1.href).to.contain('testLinker1=');
+      expect(url2.href).to.contain('testLinker1=');
+      expect(url3.href).to.not.contain('testLinker1=');
+    });
+  });
+
   it('should respect proxyOnly config', () => {
     const config = {
       linkers: {
@@ -547,4 +586,18 @@ describe('Linker Manager', () => {
           expect(a.href).to.equal('https://www.example.com');
         });
       });
+});
+
+describe('isFriendlyDomains', () => {
+  it('should work', () => {
+    expect(isFriendlyDomains('amp.example.com', 'www.example.com')).to.be.true;
+    expect(isFriendlyDomains('m.example.com', 'www.example.com')).to.be.true;
+    expect(isFriendlyDomains('amp.www.example.com', 'example.com')).to.be.true;
+    expect(isFriendlyDomains('amp.example.com', 'm.www.example.com'))
+        .to.be.true;
+
+    expect(isFriendlyDomains('amp.example.com', 'amp.google.com')).to.be.false;
+    expect(isFriendlyDomains('web.amp.example.com', 'web.m.example.com'))
+        .to.be.false;
+  });
 });

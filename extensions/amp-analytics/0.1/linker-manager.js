@@ -230,26 +230,55 @@ export class LinkerManager {
       return;
     }
 
-    let /** @type {Array} */ domains = config['destinationDomains'];
+    const /** @type {Array} */ domains = config['destinationDomains'];
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, `${name} destinationDomains must be an array.`);
       return;
     }
 
-    // If no domains given, default to canonical and source.
-    if (!domains) {
-      const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(
-          this.ampdoc_);
-
-      domains = ([sourceUrl, canonicalUrl])
-          .map(url => urlService.parse(url).hostname);
-    }
-
     // See if any domains match.
-    if (domains.includes(hostname)) {
-      const newUrl = addParamToUrl(href, name, this.resolvedLinkers_[name]);
-      el.href = newUrl;
+    if (domains && !domains.includes(hostname)) {
+      return;
     }
+
+    // If no domains given, default to friendly domain matching.
+    if (!domains) {
+      const {sourceUrl} = Services.documentInfoForDoc(this.ampdoc_);
+      const sourceOrigin = urlService.parse(sourceUrl).hostname;
+      if (!isFriendlyDomains(sourceOrigin, hostname)) {
+        return;
+      }
+    }
+
+    el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
   }
+}
+
+/**
+ * Domains are considered to be friends if they are identical
+ * after removing these prefixes: m. www. amp.
+ * URL scheme & port are not taken into consideration.
+ *
+ * Note that this algorithm will break corner cases like
+ *   www.com vs amp.com vs m.com
+ * Or
+ *   amp.wordpress.com vs www.wordpress.com
+ *
+ * @param {string} domain1
+ * @param {string} domain2
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isFriendlyDomains(domain1, domain2) {
+  return getBaseDomain(domain1) === getBaseDomain(domain2);
+}
+
+/**
+ * Strips out all prefixing m. www. amp. from a domain name.
+ * @param {string} domain
+ * @return {string}
+ */
+function getBaseDomain(domain) {
+  return domain.replace(/^(?:www\.|m\.|amp\.)+/, '');
 }
