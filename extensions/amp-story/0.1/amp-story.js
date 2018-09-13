@@ -93,6 +93,7 @@ import {findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
+import {getState} from '../../../src/history';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
@@ -1013,11 +1014,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string}
    */
   getHistoryStatePageId_() {
-    const {history} = this.win;
-    if (history && history.state) {
-      return history.state.ampStoryPageId;
-    }
-    return null;
+    const state = getState(this.win.history);
+    return state ? state.ampStoryPageId : null;
   }
 
 
