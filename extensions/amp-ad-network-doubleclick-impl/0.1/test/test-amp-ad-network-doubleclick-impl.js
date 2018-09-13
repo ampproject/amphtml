@@ -644,6 +644,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
+    it('has correct sz with fluid as multi-size', () => {
+      element.setAttribute('width', '300');
+      element.setAttribute('height', '250');
+      element.setAttribute('data-multi-size', 'fluid');
+      new AmpAd(element).upgradeCallback();
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        expect(url).to.match(/sz=300x250%7C320x50&/));
+    });
     it('should have the correct ifi numbers - no refresh', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
