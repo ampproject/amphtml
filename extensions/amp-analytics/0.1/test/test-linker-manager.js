@@ -15,7 +15,7 @@
  */
 
 import * as experiments from '../../../../src/experiments';
-import {LinkerManager, isFriendlyDomains} from '../linker-manager';
+import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 import {installPlatformService} from '../../../../src/service/platform-impl';
@@ -47,8 +47,8 @@ describe('Linker Manager', () => {
 
     sandbox.stub(Services, 'documentInfoForDoc')
         .returns({
-          sourceUrl: 'https://amp.example.com/some/path?q=123',
-          canonicalUrl: 'https://www.example.com/some/path?q=123',
+          sourceUrl: 'https://amp.source.com/some/path?q=123',
+          canonicalUrl: 'https://www.canonical.com/some/path?q=123',
         });
 
     registerSpy = sandbox.spy();
@@ -149,8 +149,8 @@ describe('Linker Manager', () => {
     expect(registerSpy).to.be.called;
 
     const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
+      href: 'https://www.source.com',
+      hostname: 'www.source.com',
     };
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
@@ -183,8 +183,8 @@ describe('Linker Manager', () => {
     };
 
     const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
+      href: 'https://www.source.com',
+      hostname: 'www.source.com',
     };
 
     const manager = new LinkerManager(ampdoc, config);
@@ -199,7 +199,7 @@ describe('Linker Manager', () => {
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
       expect(a.href.indexOf(
-          'https:\/\/www\.example\.com\?testLinker1=1*')).to.equal(0);
+          'https:\/\/www\.source\.com\?testLinker1=1*')).to.equal(0);
     });
   });
 
@@ -230,12 +230,12 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       const canonicalDomainlUrl = {
-        href: 'https://www.example.com/path',
-        hostname: 'www.example.com',
+        href: 'https://www.canonical.com/path',
+        hostname: 'www.canonical.com',
       };
       const sourceDomainUrl = {
-        href: 'https://amp.example.com/path',
-        hostname: 'amp.example.com',
+        href: 'https://amp.source.com/path',
+        hostname: 'amp.source.com',
       };
       manager.handleAnchorMutation(canonicalDomainlUrl);
       manager.handleAnchorMutation(sourceDomainUrl);
@@ -326,24 +326,36 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       const url1 = {
-        href: 'https://www.example.com/path',
-        hostname: 'www.example.com',
+        href: 'https://www.source.com/path',
+        hostname: 'www.source.com',
       };
       const url2 = {
-        href: 'https://amp.www.example.com/path',
-        hostname: 'amp.www.example.com',
+        href: 'https://amp.www.source.com/path',
+        hostname: 'amp.www.source.com',
       };
       const url3 = {
+        href: 'https://canonical.com/path',
+        hostname: 'canonical.com',
+      };
+      const url4 = {
+        href: 'https://amp.www.canonical.com/path',
+        hostname: 'amp.www.canonical.com',
+      };
+      const url5 = {
         href: 'https://amp.google.com/path',
         hostname: 'amp.google.com',
       };
       manager.handleAnchorMutation(url1);
       manager.handleAnchorMutation(url2);
       manager.handleAnchorMutation(url3);
+      manager.handleAnchorMutation(url4);
+      manager.handleAnchorMutation(url5);
 
       expect(url1.href).to.contain('testLinker1=');
       expect(url2.href).to.contain('testLinker1=');
-      expect(url3.href).to.not.contain('testLinker1=');
+      expect(url3.href).to.contain('testLinker1=');
+      expect(url4.href).to.contain('testLinker1=');
+      expect(url5.href).to.not.contain('testLinker1=');
     });
   });
 
@@ -373,8 +385,8 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       const a = {
-        href: 'https://www.example.com',
-        hostname: 'www.example.com',
+        href: 'https://www.source.com',
+        hostname: 'www.source.com',
       };
       manager.handleAnchorMutation(a);
       expect(a.href).to.contain('testLinker1=');
@@ -407,8 +419,8 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       const a = {
-        href: 'https://www.example.com',
-        hostname: 'www.example.com',
+        href: 'https://www.source.com',
+        hostname: 'www.source.com',
       };
       manager.handleAnchorMutation(a);
       expect(a.href).to.not.contain('testLinker1=');
@@ -430,8 +442,8 @@ describe('Linker Manager', () => {
     };
 
     const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
+      href: 'https://www.source.com',
+      hostname: 'www.source.com',
     };
 
     const manager = new LinkerManager(ampdoc, config);
@@ -441,7 +453,7 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      expect(a.href).to.equal('https://www.example.com');
+      expect(a.href).to.equal('https://www.source.com');
     });
   });
 
@@ -458,8 +470,8 @@ describe('Linker Manager', () => {
     };
 
     const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
+      href: 'https://www.source.com',
+      hostname: 'www.source.com',
     };
 
     const manager = new LinkerManager(ampdoc, config);
@@ -469,7 +481,7 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      expect(a.href).to.equal('https://www.example.com');
+      expect(a.href).to.equal('https://www.source.com');
     });
   });
 
@@ -492,8 +504,8 @@ describe('Linker Manager', () => {
     };
 
     const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
+      href: 'https://www.source.com',
+      hostname: 'www.source.com',
     };
 
     const manager = new LinkerManager(ampdoc, config, 'googleanalytics');
@@ -531,8 +543,8 @@ describe('Linker Manager', () => {
     };
 
     const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
+      href: 'https://www.source.com',
+      hostname: 'www.source.com',
     };
 
     const manager = new LinkerManager(ampdoc, config, 'googleanalytics');
@@ -547,7 +559,7 @@ describe('Linker Manager', () => {
 
     return Promise.all(manager.allLinkerPromises_).then(() => {
       manager.handleAnchorMutation(a);
-      expect(a.href).to.equal('https://www.example.com');
+      expect(a.href).to.equal('https://www.source.com');
     });
   });
 
@@ -565,8 +577,8 @@ describe('Linker Manager', () => {
         };
 
         const a = {
-          href: 'https://www.example.com',
-          hostname: 'www.example.com',
+          href: 'https://www.source.com',
+          hostname: 'www.source.com',
         };
 
         const manager = new LinkerManager(ampdoc, config);
@@ -583,21 +595,21 @@ describe('Linker Manager', () => {
 
         return Promise.all(manager.allLinkerPromises_).then(() => {
           manager.handleAnchorMutation(a);
-          expect(a.href).to.equal('https://www.example.com');
+          expect(a.href).to.equal('https://www.source.com');
         });
       });
 });
 
-describe('isFriendlyDomains', () => {
+describe('areFriendlyDomains', () => {
   it('should work', () => {
-    expect(isFriendlyDomains('amp.example.com', 'www.example.com')).to.be.true;
-    expect(isFriendlyDomains('m.example.com', 'www.example.com')).to.be.true;
-    expect(isFriendlyDomains('amp.www.example.com', 'example.com')).to.be.true;
-    expect(isFriendlyDomains('amp.example.com', 'm.www.example.com'))
+    expect(areFriendlyDomains('amp.source.com', 'www.source.com')).to.be.true;
+    expect(areFriendlyDomains('m.source.com', 'www.source.com')).to.be.true;
+    expect(areFriendlyDomains('amp.www.source.com', 'source.com')).to.be.true;
+    expect(areFriendlyDomains('amp.source.com', 'm.www.source.com'))
         .to.be.true;
 
-    expect(isFriendlyDomains('amp.example.com', 'amp.google.com')).to.be.false;
-    expect(isFriendlyDomains('web.amp.example.com', 'web.m.example.com'))
+    expect(areFriendlyDomains('amp.source.com', 'amp.google.com')).to.be.false;
+    expect(areFriendlyDomains('web.amp.source.com', 'web.m.source.com'))
         .to.be.false;
   });
 });

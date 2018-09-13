@@ -244,9 +244,12 @@ export class LinkerManager {
 
     // If no domains given, default to friendly domain matching.
     if (!domains) {
-      const {sourceUrl} = Services.documentInfoForDoc(this.ampdoc_);
+      const {sourceUrl, canonicalUrl} =
+          Services.documentInfoForDoc(this.ampdoc_);
       const sourceOrigin = urlService.parse(sourceUrl).hostname;
-      if (!isFriendlyDomains(sourceOrigin, hostname)) {
+      const canonicalOrigin = urlService.parse(canonicalUrl).hostname;
+      if (!areFriendlyDomains(sourceOrigin, hostname)
+          && !areFriendlyDomains(canonicalOrigin, hostname)) {
         return;
       }
     }
@@ -270,7 +273,7 @@ export class LinkerManager {
  * @return {boolean}
  * @visibleForTesting
  */
-export function isFriendlyDomains(domain1, domain2) {
+export function areFriendlyDomains(domain1, domain2) {
   return getBaseDomain(domain1) === getBaseDomain(domain2);
 }
 
