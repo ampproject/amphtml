@@ -559,7 +559,7 @@ function getAmpConfig() {
     reject(new Error(xhr.statusText));
   });
   // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
-  xhr.open('GET', '/v0.js?' + Math.random(), true);
+  xhr.open('GET', 'https://cdn.ampproject.org/v0.js?' + Math.random(), true);
   xhr.send(null);
   return promise.then(text => {
     const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
@@ -574,10 +574,22 @@ function getAmpConfig() {
   });
 }
 
+/**
+ * Writes the current AMP version to the DOM.
+ */
+function updateVersion() {
+  const link = document.getElementById('amp-version');
+  link.textContent = self.AMP_CONFIG.v;
+  link.href = 'https://github.com/ampproject/amphtml/releases/tag/' +
+      // Remove first 2 chars which are not include in tag name.
+      self.AMP_CONFIG.v.substr(2);
+}
+
 
 // Start up.
 getAmpConfig().then(() => {
   onDocumentReady(document, () => {
+    updateVersion();
     build();
     update();
   });
