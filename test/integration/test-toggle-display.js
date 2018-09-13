@@ -60,9 +60,9 @@ describe.configure().retryOnSaucelabs().run('toggle display helper', () => {
       setup(img);
 
       toggle(img, false);
-      expect(fixture.win.getComputedStyle(img).display).to.equal('none');
+      expect(img).to.have.display('none');
       toggle(img, true);
-      expect(fixture.win.getComputedStyle(img).display).to.not.equal('none');
+      expect(img).to.not.have.display('none');
     });
   });
 });

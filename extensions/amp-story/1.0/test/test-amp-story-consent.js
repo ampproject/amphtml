@@ -166,8 +166,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     // For some reason the win object provided by the test environment does not
     // return all the styles.
-    const styles = computedStyle(window, buttonEl);
-    expect(styles.display).to.equal('block');
+    expect(buttonEl).to.have.display('block');
   });
 
   it('should hide the decline button if onlyAccept is true', () => {
@@ -181,8 +180,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     // For some reason the win object provided by the test environment does not
     // return all the styles.
-    const styles = computedStyle(window, buttonEl);
-    expect(styles.display).to.equal('none');
+    expect(buttonEl).to.have.display('none');
   });
 
   it('should hide the external link by default', () => {
@@ -191,8 +189,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const linkEl = storyConsent.storyConsentEl_
         .querySelector('.i-amphtml-story-consent-external-link');
 
-    const styles = computedStyle(window, linkEl);
-    expect(styles.display).to.equal('none');
+    expect(linkEl).to.have.display('none');
   });
 
   it('should require an external link title if a URL is provided', () => {
@@ -239,8 +236,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const linkEl = storyConsent.storyConsentEl_
         .querySelector('.i-amphtml-story-consent-external-link');
 
-    const styles = computedStyle(window, linkEl);
-    expect(styles.display).not.to.equal('none');
+    expect(linkEl).not.to.have.display('none');
   });
 
   it('should whitelist the <amp-consent> actions', () => {

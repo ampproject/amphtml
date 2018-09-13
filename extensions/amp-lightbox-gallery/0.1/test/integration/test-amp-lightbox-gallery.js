@@ -85,20 +85,20 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         const closeButton = getButton(win.document,
             'i-amphtml-lbg-button-close');
         expect(closeButton.getAttribute('aria-label')).to.equal('Close');
-        expect(win.getComputedStyle(closeButton).display).to.equal('block');
+        expect(closeButton).to.have.display('block');
 
         const galleryButton = getButton(win.document,
             'i-amphtml-lbg-button-gallery');
         expect(galleryButton.getAttribute('aria-label')).to.equal('Gallery');
-        expect(win.getComputedStyle(galleryButton).display).to.equal('none');
+        expect(galleryButton).to.have.display('none');
 
         const prevButton = getButton(win.document, 'i-amphtml-lbg-button-prev');
         expect(prevButton.getAttribute('aria-label')).to.equal('Prev');
-        expect(win.getComputedStyle(prevButton).display).to.equal('none');
+        expect(prevButton).to.have.display('none');
 
         const nextButton = getButton(win.document, 'i-amphtml-lbg-button-next');
         expect(nextButton.getAttribute('aria-label')).to.equal('Next');
-        expect(win.getComputedStyle(nextButton).display).to.equal('none');
+        expect(nextButton).to.have.display('none');
       });
     });
 

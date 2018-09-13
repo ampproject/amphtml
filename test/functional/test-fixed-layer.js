@@ -1209,7 +1209,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.exist;
-      expect(fe.placeholder.style['display']).to.equal('none');
+      expect(fe.placeholder).to.have.display('none');
 
       expect(fixedLayer.transferLayer_).to.exist;
       const layer = fixedLayer.transferLayer_.layer_;
