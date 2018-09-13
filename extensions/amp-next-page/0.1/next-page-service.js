@@ -26,9 +26,9 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
+import {removeElement} from '../../../src/dom';
 import {setStyle, toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {removeElement} from '../../../src/dom';
 
 // TODO(emarchiori): Make this a configurable parameter.
 const SEPARATOR_RECOS = 3;
