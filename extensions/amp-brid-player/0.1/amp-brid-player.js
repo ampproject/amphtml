@@ -37,6 +37,7 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setStyles} from '../../../src/style';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -114,7 +115,7 @@ class AmpBridPlayer extends AMP.BaseElement {
         encodeURIComponent(feedType) +
         '/' + encodeURIComponent(this.feedID_) +
         '/' + encodeURIComponent(this.partnerID_) +
-        '/' + encodeURIComponent(this.playerID_) + '/0/1';
+        '/' + encodeURIComponent(this.playerID_) + '/0/1/?amp=1';
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
@@ -161,8 +162,6 @@ class AmpBridPlayer extends AMP.BaseElement {
         'message',
         this.handleBridMessage_.bind(this)
     );
-
-    this.element.appendChild(iframe);
 
     return this.loadPromise(iframe)
         .then(() => this.playerReadyPromise_);
@@ -260,6 +259,15 @@ class AmpBridPlayer extends AMP.BaseElement {
     if (params[2] == 'trigger') {
       if (params[3] == 'ready') {
         this.playerReadyResolver_(this.iframe_);
+      } else if (params[3] == 'play') {
+    	if (this.element.hasAttribute('data-outstream')) {
+          setStyles(this.element, {transition: 'height 2s',
+        	  height: '100%'});
+        }
+      } else if (params[3] == 'adEnd') {
+        if (this.element.hasAttribute('data-outstream')) {
+          setStyles(this.element, {height: '0px'});
+        }
       }
       redispatch(element, params[3], {
         'ready': VideoEvents.LOAD,
