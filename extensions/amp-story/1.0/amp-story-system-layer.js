@@ -365,7 +365,7 @@ export class SystemLayer {
       this.onPageAudioStateUpdate_(audio);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.CAN_SHOW_SIDEBAR_BUTTON,
+    this.storeService_.subscribe(StateProperty.STORY_HAS_SIDEBAR_STATE,
         hasSidebar => {
           this.checkSidebarDisplay_(hasSidebar);
         });
@@ -415,8 +415,8 @@ export class SystemLayer {
    * @private
    */
   checkSidebarDisplay_(hasSidebar) {
-    if(hasSidebar){
-      this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '')
+    if (hasSidebar) {
+      this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '');
     } else {
       this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
     }

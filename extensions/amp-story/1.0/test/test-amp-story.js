@@ -119,6 +119,16 @@ describes.realWin('amp-story', {
     element.remove();
   });
 
+  it('should build with the expected number of pages', () => {
+    const pagesCount = 2;
+    createPages(story.element, pagesCount, ['cover', 'page-1']);
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.getPageCount()).to.equal(pagesCount);
+        });
+  });
+
   it('should activate the first page when built', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
 
@@ -400,16 +410,6 @@ describes.realWin('amp-story', {
         });
   });
 
-  it('should build with the expected number of pages', () => {
-    const pagesCount = 2;
-    createPages(story.element, pagesCount, ['cover', 'page-1']);
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(story.getPageCount()).to.equal(pagesCount);
-        });
-  });
-
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
@@ -673,26 +673,30 @@ describes.realWin('amp-story', {
   });
 
   describe('amp-story custom sidebar', () => {
-
     it('should show the sidebar control if a sidebar exists', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
+
       const sidebar = win.document.createElement('amp-sidebar');
       story.element.appendChild(sidebar);
+
       return story.layoutCallback()
           .then(() => {
             expect(story.storeService_
-                .get(StateProperty.CAN_SHOW_SIDEBAR_BUTTON)).to.be.true;
+                .get(StateProperty.STORY_HAS_SIDEBAR_STATE)).to.be.true;
           });
     });
 
     it('should open the sidebar on button click', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
+
       const sidebar = win.document.createElement('amp-sidebar');
       story.element.appendChild(sidebar);
+
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {},
             addToWhitelist: () => {},
             execute: () => {sidebar.setAttribute('open', '');}});
+
       story.buildCallback();
       return story.layoutCallback()
           .then(() => {
@@ -703,12 +707,15 @@ describes.realWin('amp-story', {
 
     it('should pause the story when the sidebar is opened', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
+
       const sidebar = win.document.createElement('amp-sidebar');
       story.element.appendChild(sidebar);
+
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {},
             addToWhitelist: () => {},
             execute: () => {sidebar.setAttribute('open', '');}});
+
       story.buildCallback();
       return story.layoutCallback()
           .then(() => {
@@ -723,12 +730,15 @@ describes.realWin('amp-story', {
 
     it('should unpause the story when the sidebar is closed', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
+
       const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {},
             addToWhitelist: () => {},
             execute: () => {sidebar.setAttribute('open', '');}});
-      story.element.appendChild(sidebar);
+
       story.buildCallback();
       return story.layoutCallback()
           .then(() => {

@@ -63,7 +63,7 @@ export const UIType = {
  *    canshownavigationoverlayhint: boolean,
  *    canshowpreviouspagehelp: boolean,
  *    canshowsharinguis: boolean,
- *    canshowsidebarbutton: boolean,
+ *    storyhassidebarstate: boolean,
  *    canshowsystemlayerbuttons: boolean,
  *    accessstate: boolean,
  *    adstate: boolean,
@@ -97,7 +97,6 @@ export const StateProperty = {
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canshowpreviouspagehelp',
   CAN_SHOW_SHARING_UIS: 'canshowsharinguis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
-  CAN_SHOW_SIDEBAR_BUTTON: 'canshowsidebarbutton',
 
   // App States.
   ACCESS_STATE: 'accessstate', // amp-access paywall.
@@ -114,6 +113,7 @@ export const StateProperty = {
   SIDEBAR_STATE: 'sidebarstate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   STORY_HAS_AUDIO_STATE: 'storyaudiostate',
+  STORY_HAS_SIDEBAR_STATE: 'storyhassidebarstate',
   UI_STATE: 'uistate',
 
   // App data.
@@ -209,7 +209,7 @@ const actions = (state, action, data) => {
           {}, state, {[StateProperty.SIDEBAR_STATE]: !!data}));
     case Action.TOGGLE_STORY_HAS_SIDEBAR:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.CAN_SHOW_SIDEBAR_BUTTON]: !!data}));
+          {}, state, {[StateProperty.STORY_HAS_SIDEBAR_STATE]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
@@ -327,7 +327,6 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
-      [StateProperty.CAN_SHOW_SIDEBAR_BUTTON]: false,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
@@ -343,6 +342,7 @@ export class AmpStoryStoreService {
       [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
+      [StateProperty.STORY_HAS_SIDEBAR_STATE]: false,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',

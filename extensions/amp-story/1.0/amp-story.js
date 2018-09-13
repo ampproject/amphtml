@@ -1336,8 +1336,8 @@ export class AmpStory extends AMP.BaseElement {
   onSidebarStateUpdate_(open) {
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
     if (open && this.sidebar_) {
-      actions.execute(
-          this.sidebar_, 'open', null, null, null, null, ActionTrust.HIGH);
+      actions.execute(this.sidebar_, 'open', /* args */ null, /* source */ null,
+          /* caller */ null, /* event */ null, ActionTrust.HIGH);
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
   }
@@ -1576,6 +1576,7 @@ export class AmpStory extends AMP.BaseElement {
       });
     });
   }
+
 
   /**
    * Handles a background-audio attribute set on an <amp-story> tag.
