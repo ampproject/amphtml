@@ -347,6 +347,10 @@ export class AmpStory extends AMP.BaseElement {
       this.analytics_.onNavigationStateChange(stateChangeEvent);
     });
 
+    // Removes title in order to prevent incorrect titles appearing on link
+    // hover. (See 17654)
+    this.element.removeAttribute('title');
+
     // Disallow all actions in a (standalone) story.
     // Components then add their own actions.
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
@@ -812,7 +816,6 @@ export class AmpStory extends AMP.BaseElement {
     dev().error(TAG, `amp-consent only allows tags: ${allowedTags}`);
     toRemoveChildren.forEach(el => consentEl.removeChild(el));
   }
-
 
   /**
    * @private
