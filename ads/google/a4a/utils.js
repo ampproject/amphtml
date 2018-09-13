@@ -67,6 +67,9 @@ const visibilityStateCodes = {
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
 
+/** @type {string} */
+export const SANDBOX_HEADER = 'amp-ff-sandbox';
+
 /**
  * Element attribute that stores experiment IDs.
  *
