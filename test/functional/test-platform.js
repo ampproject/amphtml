@@ -186,6 +186,17 @@ describe('Platform', () => {
     testStandalone(userAgent, isStandalone);
   });
 
+  it('Desktop Safari 12', () => {
+    isSafari = true;
+    isWebKit = true;
+    majorVersion = 12;
+    userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) ' +
+        'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 ' +
+        'Safari/605.1.15';
+    testUserAgent(userAgent);
+    testStandalone(userAgent, isStandalone);
+  });
+
   it('Nexus 6 Chrome', () => {
     isAndroid = true;
     isChrome = true;
