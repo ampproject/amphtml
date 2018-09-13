@@ -16,7 +16,6 @@
 'use strict';
 
 const https = require('https');
-const readline = require('readline');
 const {getStdout} = require('./exec');
 
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
@@ -198,19 +197,17 @@ function main() {
     if (!process.env.TRAVIS && updatesNeeded.length > 0) {
       console.log(yellow('\nWARNING: Detected missing updates for'),
           cyan(updatesNeeded.join(', ')));
-      console.log(yellow('⤷ Press any key to continue install...'));
+      console.log(yellow('⤷ Continuing install in'), cyan('5'),
+          yellow('seconds...'));
       console.log(yellow('⤷ Press'), cyan('Ctrl + C'),
           yellow('to abort and fix...'));
-      readline.emitKeypressEvents(process.stdin);
-      process.stdin.setRawMode(true);
-      process.stdin.on('keypress', (unusedStr, key) => {
-        if (key.ctrl && key.name === 'c') {
-          process.exit(1);
-        } else {
-          console.log(yellow('\nAttempting to install packages...'));
-          process.exit(0);
-        }
-      });
+      let resolver;
+      const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+      setTimeout(() => {
+        console.log(yellow('\nAttempting to install packages...'));
+        resolver();
+      }, 5000);
+      return deferred;
     }
   });
 }
