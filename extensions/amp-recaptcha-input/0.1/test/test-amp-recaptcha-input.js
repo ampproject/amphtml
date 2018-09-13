@@ -32,12 +32,18 @@ describes.realWin('amp-recaptcha-input', {
     toggleExperiment(win, 'amp-recaptcha-input', true);
   });
 
-  function getRecaptchaInput() {
+  function getRecaptchaInput(skipSiteKey, skipAction) {
     const ampRecaptchaInput = doc.createElement('amp-recaptcha-input');
     ampRecaptchaInput.setAttribute('layout',
         'nodisplay');
-    ampRecaptchaInput.setAttribute('data-sitekey',
-        '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
+    if (!skipSiteKey) {
+      ampRecaptchaInput.setAttribute('data-sitekey',
+          'fake-sitekey-fortesting');
+    }
+    if (!skipAction) {
+      ampRecaptchaInput.setAttribute('data-action',
+          'unit-testing');
+    }
     doc.body.appendChild(ampRecaptchaInput);
     return ampRecaptchaInput.build().then(() => {
       return ampRecaptchaInput.layoutCallback();
@@ -47,6 +53,25 @@ describes.realWin('amp-recaptcha-input', {
   }
 
   describe('amp-recaptcha-input', () => {
+
+    it('Rejects because data-sitekey is missing', () => {
+      return allowConsoleError(() => {
+        return getRecaptchaInput(true)
+            .should.eventually.be.rejectedWith(
+                /The data-sitekey attribute is required for/
+            );
+      });
+    });
+
+    it('Rejects because data-action is missing', () => {
+      return allowConsoleError(() => {
+        return getRecaptchaInput(undefined, true)
+            .should.eventually.be.rejectedWith(
+                /The data-action attribute is required for/
+            );
+      });
+    });
+
 
     it('Should be visible after built', () => {
       return getRecaptchaInput().then(ampRecaptchaInput => {
@@ -140,7 +165,6 @@ describes.realWin('amp-recaptcha-input', {
             ampRecaptchaInput.implementation_
                 .recaptchaService_.registeredElementCount_
         ).to.equal(0);
-
       });
     });
   });

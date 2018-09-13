@@ -14,79 +14,55 @@
  * limitations under the License.
  */
 
-import {IframeMessagingClient} from './iframe-messaging-client';
-import {dev, user} from '../src/log';
-import {dict} from '../src/utils/object';
-import {loadScript} from './3p';
+import {dev} from '../src/log';
+import {loadScript, validateData} from './3p';
+
+/**
+ * @fileoverview
+ * Boostrap Iframe for communicating with the recaptcha API.
+ *
+ * Here are the following iframe messages using .postMessage()
+ * used between the iframe and recaptcha service:
+ * amp-recaptcha-ready / Service <- Iframe :
+ *   Iframe and Recaptcha API are ready.
+ * amp-recaptcha-action / Service -> Iframe :
+ *   Execute and action using supplied data
+ * amp-recaptcha-token / Service <- Iframe :
+ *   Response to 'amp-recaptcha-action'. The token
+ *   returned by the recaptcha API.
+ * amp-recaptcha-error / Service <- Iframe :
+ *   Response to 'amp-recaptcha-action'. Error
+ *   From attempting to get a token from action.
+ */
 
 /** @const {string} */
 const TAG = 'RECAPTCHA';
 
 /** @const {string} */
-const MESSAGE_TAG = 'amp-recaptcha-';
-
-/** {!IframeMessaginClient|null} **/
-let iframeMessagingClient = null;
+const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function recaptcha(global, data) {
-  dev().assert(
-      data.sitekey,
-      TAG +
-    ' The data-sitekey attribute is required for <amp-recaptcha-input> %s',
-      data.element
-  );
 
-  let recaptchaApiUrl = 'https://www.google.com/recaptcha/api.js?render=';
-  const siteKey = data.sitekey;
-  recaptchaApiUrl += siteKey;
+  validateData(data, ['sitekey', 'action']);
+
+  const {sitekey} = data;
+  const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
 
   loadScript(global, recaptchaApiUrl, function() {
     const {grecaptcha} = global;
 
     grecaptcha.ready(function() {
-      iframeMessagingClient = new IframeMessagingClient(global);
-      iframeMessagingClient.setSentinel(global.context.sentinel);
-      iframeMessagingClient.registerCallback(
-          'action',
-          actionTypeHandler.bind(this, grecaptcha, siteKey)
-      );
-      iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'ready');
+      // TODO(@torch2424) Send Ready Event, and listen to actions
     });
   }, function() {
-    user().error(TAG + ' Failed to load recaptcha api script');
-  });
-}
-
-/**
- * Function to handle executing actions using the grecaptcha Object,
- * and sending the token back to the parent amp-recaptcha component
- *
- * @param {*} grecaptcha
- * @param {string} siteKey
- * @param {Object} data
- */
-function actionTypeHandler(grecaptcha, siteKey, data) {
-  if (!iframeMessagingClient) {
-    dev().error(TAG, 'IframeMessagingClient does not exist.');
-    return;
-  }
-
-  grecaptcha.execute(siteKey, {
-    action: data.action,
-  })./*OK*/then(function(token) {
-    // .then() promise pollyfilled by recaptcha api script
-    iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'token', {
-      token,
-    });
-  }).catch(function(err) {
-    user().error(TAG, err);
-    iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
-      'error': err.message,
-    }));
+    global.context.report3pError(
+        TAG + ' Failed to load recaptcha api script'
+    );
+    dev().error(TAG + ' Failed to load recaptcha api script');
   });
 }
 
