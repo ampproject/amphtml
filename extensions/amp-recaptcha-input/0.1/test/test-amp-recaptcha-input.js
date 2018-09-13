@@ -38,11 +38,11 @@ describes.realWin('amp-recaptcha-input', {
         'nodisplay');
     if (!skipSiteKey) {
       ampRecaptchaInput.setAttribute('data-sitekey',
-          '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE');
+          'fake-sitekey-fortesting');
     }
     if (!skipAction) {
       ampRecaptchaInput.setAttribute('data-action',
-          'unit_testing');
+          'unit-testing');
     }
     doc.body.appendChild(ampRecaptchaInput);
     return ampRecaptchaInput.build().then(() => {

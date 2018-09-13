@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../src/log';
-import {dict} from '../src/utils/object';
 import {loadScript, validateData} from './3p';
 
 /**
@@ -40,9 +39,6 @@ import {loadScript, validateData} from './3p';
 const TAG = 'RECAPTCHA';
 
 /** @const {string} */
-const MESSAGE_TAG = 'amp-recaptcha-';
-
-/** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 
 /**
@@ -60,46 +56,13 @@ export function recaptcha(global, data) {
     const {grecaptcha} = global;
 
     grecaptcha.ready(function() {
-      global.context.registerCallback(
-          MESSAGE_TAG + 'action',
-          actionTypeHandler.bind(null, global, grecaptcha)
-      );
-      global.context./*OK*/sendMessage(MESSAGE_TAG + 'ready');
+      // TODO(@torch2424) Send Ready Event, and listen to actions
     });
   }, function() {
     global.context.report3pError(
         TAG + ' Failed to load recaptcha api script'
     );
     dev().error(TAG + ' Failed to load recaptcha api script');
-  });
-}
-
-/**
- * Function to handle executing actions using the grecaptcha Object,
- * and sending the token back to the parent amp-recaptcha component
- *
- * @param {!Window} global
- * @param {*} grecaptcha
- * @param {Object} data
- */
-function actionTypeHandler(global, grecaptcha, data) {
-
-  const executePromise = grecaptcha.execute(data.sitekey, {
-    action: data.action,
-  });
-
-  // .then() promise pollyfilled by recaptcha api script
-  executePromise./*OK*/then(function(token) {
-    global.context./*OK*/sendMessage(MESSAGE_TAG + 'token', dict({
-      'id': data.id,
-      'token': token,
-    }));
-  }, function(err) {
-    dev().error(TAG, err);
-    global.context./*OK*/sendMessage(MESSAGE_TAG + 'error', dict({
-      'id': data.id,
-      'error': err.message,
-    }));
   });
 }
 
