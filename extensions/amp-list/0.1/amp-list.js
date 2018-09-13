@@ -147,7 +147,7 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     dev().info(TAG, 'mutate:', mutations);
     const src = mutations['src'];
-    const state = mutations['state'];
+    const state = /** @type {!JsonObject}*/(mutations)['state'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.

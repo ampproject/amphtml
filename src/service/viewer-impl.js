@@ -88,9 +88,9 @@ const TRUSTED_VIEWER_HOSTS = [
 ];
 
 /**
- * @typedef {function(*):(!Promise<*>|undefined)}
+ * @typedef {function(!JsonObject):(!Promise|undefined)}
  */
-export let RequestResponder;
+let RequestResponderDef;
 
 
 /**
@@ -137,7 +137,7 @@ export class Viewer {
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
 
-    /** @private {!Object<string, !RequestResponder>} */
+    /** @private {!Object<string, !RequestResponderDef>} */
     this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
@@ -851,7 +851,7 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {!RequestResponder} responder
+   * @param {!RequestResponderDef} responder
    * @return {!UnlistenDef}
    */
   onMessageRespond(eventType, responder) {
