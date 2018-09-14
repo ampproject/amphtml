@@ -443,9 +443,11 @@ function getInvalidType(input) {
 		errorValue = null;
 	for (const invalidType in input.validity) {
 		if (invalidType === 'valueMissing' && input.validity[invalidType]) {
+			// Checking for valueMissing Error
 			isValueMissingError = true;
 			errorValue = invalidType;
 		} else if (isValueMissingError && invalidType === 'badInput' && input.validity[invalidType]) {
+			// Checking for badInput error given that valueMissingError is already found
 			return invalidType;
 		} else if (input.validity[invalidType]) {
 			return invalidType;
