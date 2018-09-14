@@ -12,6 +12,7 @@ These players include:
 - [amp-3q-player](https://www.ampproject.org/docs/reference/components/amp-3q-player)
 - [amp-brid-player](https://www.ampproject.org/docs/reference/components/amp-brid-player)
 - [amp-dailymotion](https://www.ampproject.org/docs/reference/components/amp-dailymotion)
+- [amp-delight-player](https://www.ampproject.org/docs/reference/components/amp-delight-player)
 - [amp-gfycat](https://www.ampproject.org/docs/reference/components/amp-gfycat)
 - [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video)
 - [amp-nexxtv-player](https://www.ampproject.org/docs/reference/components/amp-nexxtv-player)
