@@ -41,6 +41,13 @@ module.exports = function(context) {
       }
 
       if (arg.type !== 'Literal' || typeof arg.value !== 'string') {
+        if (arg.type === 'CallExpression') {
+          const {callee} = arg;
+          if (callee.type === 'Identifier' && callee.name === 'assertNotDisplay') {
+            return;
+          }
+        }
+
         return context.report({
           node: arg || node,
           message: 'property argument (the second argument) to setStyle must be a string literal',

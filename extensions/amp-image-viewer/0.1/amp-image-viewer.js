@@ -37,6 +37,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
+import {setStyles} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -282,7 +283,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.srcset_ = srcsetFromElement(ampImg);
 
     return this.mutateElement(() => {
-      st.setStyles(dev().assertElement(this.image_), {
+      setStyles(dev().assertElement(this.image_), {
         top: 0,
         left: 0,
         width: 0,
@@ -350,7 +351,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       const image = dev().assertElement(this.image_);
       return this.mutateElement(() => {
         // Set the actual dimensions of the image
-        st.setStyles(image, {
+        setStyles(image, {
           top: st.px(this.imageBox_.top),
           left: st.px(this.imageBox_.left),
           width: st.px(this.imageBox_.width),
@@ -558,7 +559,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   updatePanZoom_() {
-    st.setStyles(dev().assertElement(this.image_), {
+    setStyles(dev().assertElement(this.image_), {
       transform: st.translate(this.posX_, this.posY_) +
           ' ' + st.scale(this.scale_),
     });
