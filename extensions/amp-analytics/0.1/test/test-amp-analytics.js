@@ -207,11 +207,21 @@ describes.realWin('amp-analytics', {
 
   describe('vendor request tests', () => {
     const actualResults = {};
+    let vendorCount = 0;
+    let vendorNumber = Object.keys(ANALYTICS_CONFIG).length;
+    let vendorRequests = Object.assign({}, VENDOR_REQUESTS);
     for (const vendor in ANALYTICS_CONFIG) {
       const config = ANALYTICS_CONFIG[vendor];
+      vendorCount++;
+      if (vendorCount == vendorNumber) {
+        it('check all config exists', () => {
+          expect(Object.keys(vendorRequests)).to.have.length(0);
+        });
+      }
       if (!config.requests) {
         continue;
       }
+      delete vendorRequests[vendor];
       actualResults[vendor] = {};
       describe('analytics vendor: ' + vendor, function() {
         beforeEach(() => {
