@@ -18,6 +18,17 @@ import {getMode} from '../mode';
 import {urls} from '../config';
 
 /**
+ * Internal structure that maintains the state of an extension through loading.
+ *
+ * @typedef {{
+ *   extensionId: (string|undefined),
+ *   extensionVersion: (string|undefined),
+ * }}
+ * @private
+ */
+let ExtensionInfoDef;
+
+/**
  * Calculate the base url for any scripts.
  * @param {!Location} location The window's location
  * @param {boolean=} opt_isLocalDev
@@ -76,7 +87,7 @@ export function calculateEntryPointScriptUrl(
 /**
  * Parse the extension version from a given script URL.
  * @param {string} scriptUrl
- * @return {!Object<string, string>}
+ * @return {!ExtensionInfoDef}
  */
 export function parseExtensionUrl(scriptUrl) {
   const regex = /^(.*)\/(.*)-([0-9.]+)\.js$/i;
