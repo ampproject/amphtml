@@ -442,10 +442,10 @@ function getInvalidType(input) {
 	let isValueMissingError = false,
 		errorValue = null;
 	for (const invalidType in input.validity) {
-		if (invalidType == 'valueMissing' && input.validity[invalidType]) {
+		if (invalidType === 'valueMissing' && input.validity[invalidType]) {
 			isValueMissingError = true;
 			errorValue = invalidType;
-		} else if (isValueMissingError && invalidType == 'badInput' && input.validity[invalidType]) {
+		} else if (isValueMissingError && invalidType === 'badInput' && input.validity[invalidType]) {
 			return invalidType;
 		} else if (input.validity[invalidType]) {
 			return invalidType;
