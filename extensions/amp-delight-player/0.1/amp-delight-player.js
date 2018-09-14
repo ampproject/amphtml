@@ -407,7 +407,6 @@ class AmpDelight extends AMP.BaseElement {
     this.styleCache_.padding = getStyle(this.element, 'padding');
     this.styleCache_.zIndex = getStyle(this.element, 'zIndex');
     this.styleCache_.position = getStyle(this.element, 'position');
-    this.styleCache_.display = getStyle(this.element, 'display');
 
     setStyle(this.element, 'width', '100%');
     setStyle(this.element, 'height', '100%');
@@ -417,7 +416,6 @@ class AmpDelight extends AMP.BaseElement {
     setStyle(this.element, 'padding', '0');
     setStyle(this.element, 'z-index', '9999999');
     setStyle(this.element, 'position', 'fixed');
-    setStyle(this.element, 'display', 'block');
 
     this.iframeWidth_ = this.iframe_.width;
     this.iframeHeight_ = this.iframe_.height;
@@ -429,7 +427,6 @@ class AmpDelight extends AMP.BaseElement {
     this.iframeStyleCache_.padding = getStyle(this.iframe_, 'padding');
     this.iframeStyleCache_.zIndex = getStyle(this.iframe_, 'zIndex');
     this.iframeStyleCache_.position = getStyle(this.iframe_, 'position');
-    this.iframeStyleCache_.display = getStyle(this.iframe_, 'display');
 
     this.iframe_.width = '100%';
     this.iframe_.height = '100%';
@@ -441,7 +438,6 @@ class AmpDelight extends AMP.BaseElement {
     setStyle(this.iframe_, 'padding', '0');
     setStyle(this.iframe_, 'z-index', '9999999');
     setStyle(this.iframe_, 'position', 'fixed');
-    setStyle(this.iframe_, 'display', 'block');
     let viewportMeta = document.querySelector('#dl8-meta-viewport');
     if (!viewportMeta) {
       viewportMeta = document.createElement('meta');
