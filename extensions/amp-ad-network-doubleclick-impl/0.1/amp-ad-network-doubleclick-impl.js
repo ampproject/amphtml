@@ -30,6 +30,7 @@ import {
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
+  SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -255,6 +256,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * attempt to expand again when outside of the viewport.
      */
     this.reattemptToExpandFluidCreative_ = false;
+
+    /**
+     * Whether or not the iframe containing the ad should be sandboxed via the
+     * "sandbox" attribute.
+     * @private {boolean}
+     */
+    this.shouldSandbox_ = false;
   }
 
   /**
@@ -711,6 +719,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   extractSize(responseHeaders) {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
+    this.shouldSandbox_ = responseHeaders.get(SANDBOX_HEADER) == 'true';
     this.troubleshootData_.creativeId =
         responseHeaders.get('google-creative-id');
     this.troubleshootData_.lineItemId =
@@ -744,6 +753,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     return size;
+  }
+
+  /** @override */
+  sandboxHTMLCreativeFrame() {
+    return this.shouldSandbox_;
   }
 
   /**
@@ -783,6 +797,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     sraRequests = null;
     this.sraDeferred = null;
     this.qqid_ = null;
+    this.shouldSandbox_ = false;
     this.consentState = null;
     this.getAdUrlDeferred = new Deferred();
     this.removePageviewStateToken();
