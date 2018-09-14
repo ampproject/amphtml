@@ -17,6 +17,7 @@
 import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
+import {WindowInterface} from '../../../src/window-interface';
 import {addParamToUrl} from '../../../src/url';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
@@ -25,12 +26,6 @@ import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics/linker-manager';
-
-/**
- * The name of the Google CID API as it appears in the meta tag to opt-in.
- * @const @private {string}
- */
-const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
 
 export class LinkerManager {
 
@@ -57,6 +52,8 @@ export class LinkerManager {
 
     /** @private {!JsonObject} */
     this.resolvedLinkers_ = dict();
+
+    this.urlService_ = Services.urlForDoc(this.ampdoc_);
   }
 
 
@@ -103,8 +100,10 @@ export class LinkerManager {
     if (this.allLinkerPromises_.length) {
       const navigation = Services.navigationForDoc(this.ampdoc_);
       navigation.registerAnchorMutator(
-          this.handleAnchorMutation.bind(this), Priority.ANALYTICS_LINKER);
+          this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
+
+    return Promise.all(this.allLinkerPromises_);
   }
 
   /**
@@ -126,6 +125,9 @@ export class LinkerManager {
       return isLinkerConfig;
     });
 
+    const location = WindowInterface.getLocation(this.ampdoc_.win);
+    const isProxyOrigin =
+        this.urlService_.isProxyOrigin(location);
     linkerNames.forEach(name => {
       const mergedConfig =
           Object.assign({}, defaultConfig, config[name]);
@@ -133,6 +135,10 @@ export class LinkerManager {
       if (mergedConfig['enabled'] !== true) {
         user().info(TAG, `linker config for ${name} is not enabled and` +
             'will be ignored.');
+        return;
+      }
+
+      if (!isProxyOrigin && mergedConfig['proxyOnly'] !== false) {
         return;
       }
 
@@ -173,8 +179,8 @@ export class LinkerManager {
       return false;
     }
 
-    const optInMeta = this.ampdoc_.win.document.head
-        ./*OK*/querySelector(`meta[name=${GOOGLE_CID_API_META_NAME}]`);
+    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
+        'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
     const isGaType = this.type_ === 'googleanalytics';
 
     return !!(optInMeta && isGaType);
@@ -194,9 +200,9 @@ export class LinkerManager {
    * Called on click on any anchor element. Adds linker param if a match for
    * given linker configuration.
    * @param {!Element} element
-   * @visibleForTesting
+   * @private
    */
-  handleAnchorMutation(element) {
+  handleAnchorMutation_(element) {
     if (!element.href) {
       return;
     }
@@ -222,34 +228,59 @@ export class LinkerManager {
    */
   maybeAppendLinker_(el, name, config) {
     const {href, hostname} = el;
-    const urlService = Services.urlForDoc(this.ampdoc_);
 
-    // If we are not on proxy, linker must be explicity enabled.
-    const isProxyOrigin = urlService.isProxyOrigin(href);
-    if (!isProxyOrigin && config['proxyOnly'] !== false) {
-      return;
-    }
-
-    let /** @type {Array} */ domains = config['destinationDomains'];
+    const /** @type {Array} */ domains = config['destinationDomains'];
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, `${name} destinationDomains must be an array.`);
       return;
     }
 
-    // If no domains given, default to canonical and source.
-    if (!domains) {
-      const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(
-          this.ampdoc_);
-
-      domains = ([sourceUrl, canonicalUrl])
-          .map(url => urlService.parse(url).hostname);
-    }
-
     // See if any domains match.
-    if (domains.includes(hostname)) {
-      const newUrl = addParamToUrl(href, name, this.resolvedLinkers_[name]);
-      el.href = newUrl;
+    if (domains && !domains.includes(hostname)) {
+      return;
     }
+
+    // If no domains given, default to friendly domain matching.
+    if (!domains) {
+      const {sourceUrl, canonicalUrl} =
+          Services.documentInfoForDoc(this.ampdoc_);
+      const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
+      const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
+      if (!areFriendlyDomains(sourceOrigin, hostname)
+          && !areFriendlyDomains(canonicalOrigin, hostname)) {
+        return;
+      }
+    }
+
+    el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
   }
+}
+
+/**
+ * Domains are considered to be friends if they are identical
+ * after removing these prefixes: m. www. amp.
+ * URL scheme & port are not taken into consideration.
+ *
+ * Note that this algorithm will break corner cases like
+ *   www.com vs amp.com vs m.com
+ * Or
+ *   amp.wordpress.com vs www.wordpress.com
+ *
+ * @param {string} domain1
+ * @param {string} domain2
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function areFriendlyDomains(domain1, domain2) {
+  return getBaseDomain(domain1) === getBaseDomain(domain2);
+}
+
+/**
+ * Strips out all prefixing m. www. amp. from a domain name.
+ * @param {string} domain
+ * @return {string}
+ */
+function getBaseDomain(domain) {
+  return domain.replace(/^(?:www\.|m\.|amp\.)+/, '');
 }

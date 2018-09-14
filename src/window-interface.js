@@ -24,6 +24,15 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
+   * @return {!Location}
+   */
+  static getLocation(win) {
+    return win.location;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
    * @return {string}
    */
   static getDocumentReferrer(win) {
