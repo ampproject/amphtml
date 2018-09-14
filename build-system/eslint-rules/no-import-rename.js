@@ -38,10 +38,11 @@ const imports = {
   'src/experiments': ['isExperimentOn'],
   'src/style': [
     'assertDoesNotContainDisplay',
+    'assertNotDisplay',
     'resetStyles',
+    'setImportantStyles',
     'setStyle',
     'setStyles',
-    'setImportantStyles',
   ],
   'src/dom': [
     'escapeCssSelectorIdent',
