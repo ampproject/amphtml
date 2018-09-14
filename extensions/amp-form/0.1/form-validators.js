@@ -451,5 +451,6 @@ function getInvalidType(input) {
 			return invalidType;
 		}
 	}
+	// checking if only error found is valueMissing Error else return null
 	return isValueMissingError ? errorValue : null;
 }
