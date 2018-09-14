@@ -156,6 +156,24 @@ export function setStyles(element, styles) {
 
 
 /**
+ * Asserts that the style is not the `display` style.
+ * This is the only possible way to pass a dynamic style to setStyle.
+ *
+ * If you wish to set `display`, use the `toggle` helper instead. This is so
+ * changes to display can trigger necessary updates. See #17475.
+ *
+ * @param {string} style
+ * @return {string}
+ */
+export function assertNotDisplay(style) {
+  if (style === 'display') {
+    dev().error('STYLE', '`display` style detected. You must use toggle ' +
+      'instead.');
+  }
+  return style;
+}
+
+/**
  * Asserts that the styles does not contain the `display` style.
  * This is the only possible way to pass a dynamic styles object to setStyles
  * and setImportantStyles.
