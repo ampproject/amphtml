@@ -17,6 +17,7 @@
 import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
+import {WindowInterface} from '../../../src/window-interface';
 import {addParamToUrl} from '../../../src/url';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
@@ -57,6 +58,8 @@ export class LinkerManager {
 
     /** @private {!JsonObject} */
     this.resolvedLinkers_ = dict();
+
+    this.urlService_ = Services.urlForDoc(this.ampdoc_);
   }
 
 
@@ -103,8 +106,10 @@ export class LinkerManager {
     if (this.allLinkerPromises_.length) {
       const navigation = Services.navigationForDoc(this.ampdoc_);
       navigation.registerAnchorMutator(
-          this.handleAnchorMutation.bind(this), Priority.ANALYTICS_LINKER);
+          this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
+
+    return Promise.all(this.allLinkerPromises_);
   }
 
   /**
@@ -126,6 +131,9 @@ export class LinkerManager {
       return isLinkerConfig;
     });
 
+    const location = WindowInterface.getLocation(this.ampdoc_.win);
+    const isProxyOrigin =
+        this.urlService_.isProxyOrigin(location);
     linkerNames.forEach(name => {
       const mergedConfig =
           Object.assign({}, defaultConfig, config[name]);
@@ -133,6 +141,10 @@ export class LinkerManager {
       if (mergedConfig['enabled'] !== true) {
         user().info(TAG, `linker config for ${name} is not enabled and` +
             'will be ignored.');
+        return;
+      }
+
+      if (!isProxyOrigin && mergedConfig['proxyOnly'] !== false) {
         return;
       }
 
@@ -194,9 +206,9 @@ export class LinkerManager {
    * Called on click on any anchor element. Adds linker param if a match for
    * given linker configuration.
    * @param {!Element} element
-   * @visibleForTesting
+   * @private
    */
-  handleAnchorMutation(element) {
+  handleAnchorMutation_(element) {
     if (!element.href) {
       return;
     }
@@ -222,13 +234,6 @@ export class LinkerManager {
    */
   maybeAppendLinker_(el, name, config) {
     const {href, hostname} = el;
-    const urlService = Services.urlForDoc(this.ampdoc_);
-
-    // If we are not on proxy, linker must be explicity enabled.
-    const isProxyOrigin = urlService.isProxyOrigin(href);
-    if (!isProxyOrigin && config['proxyOnly'] !== false) {
-      return;
-    }
 
     const /** @type {Array} */ domains = config['destinationDomains'];
     // If given domains, but not in the right format.
@@ -246,8 +251,8 @@ export class LinkerManager {
     if (!domains) {
       const {sourceUrl, canonicalUrl} =
           Services.documentInfoForDoc(this.ampdoc_);
-      const sourceOrigin = urlService.parse(sourceUrl).hostname;
-      const canonicalOrigin = urlService.parse(canonicalUrl).hostname;
+      const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
+      const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
       if (!areFriendlyDomains(sourceOrigin, hostname)
           && !areFriendlyDomains(canonicalOrigin, hostname)) {
         return;
