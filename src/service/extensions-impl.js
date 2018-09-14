@@ -23,7 +23,10 @@ import {
   registerServiceBuilderForDoc,
   setParentWindow,
 } from '../service';
-import {calculateExtensionScriptUrl} from './extension-location';
+import {
+  calculateExtensionScriptUrl,
+  parseExtensionUrl,
+} from './extension-location';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -259,7 +262,8 @@ export class Extensions {
     }
     oldScriptElement.removeAttribute('custom-element');
     oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
-    return this.preloadExtension(extensionId);
+    const urlParts = parseExtensionUrl(oldScriptElement.src);
+    return this.preloadExtension(extensionId, urlParts.extensionVersion);
   }
 
   /**
