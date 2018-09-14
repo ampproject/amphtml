@@ -27,6 +27,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
+const config = require('./config');
+const minimatch = require('minimatch');
 const path = require('path');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
@@ -191,12 +193,25 @@ function isVisualDiffFile(filePath) {
 }
 
 /**
+ * Determines if the given file is a unit test.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isUnitTest(filePath) {
+  return config.unitTestPaths.some(pattern => {
+    return minimatch(filePath, pattern);
+  });
+}
+
+/**
  * Determines if the given file is an integration test.
  * @param {string} filePath
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  return filePath.includes('test/integration/');
+  return config.integrationTestPaths.some(pattern => {
+    return minimatch(filePath, pattern);
+  });
 }
 
 /**
@@ -223,6 +238,7 @@ function determineBuildTargets(filePaths) {
       'VALIDATOR_WEBUI',
       'VALIDATOR',
       'RUNTIME',
+      'UNIT_TEST',
       'INTEGRATION_TEST',
       'DOCS',
       'FLAG_CONFIG',
@@ -241,6 +257,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('DOCS');
     } else if (isFlagConfig(p)) {
       targetSet.add('FLAG_CONFIG');
+    } else if (isUnitTest(p)) {
+      targetSet.add('UNIT_TEST');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
     } else if (isVisualDiffFile(p)) {
@@ -565,18 +583,22 @@ function main() {
       command.testDocumentLinks();
     }
     if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildCss();
       command.runJsonCheck();
       command.runDepAndTypeChecks();
-      // Run unit tests only if the PR contains runtime changes.
+      // Run unit tests only if the PR contains runtime or build-system changes.
       if (buildTargets.has('RUNTIME') ||
           buildTargets.has('BUILD_SYSTEM')) {
         // Before running all tests, run tests modified by the PR. (Fail early.)
         command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
+      } else if (buildTargets.has('UNIT_TEST')) {
+        // PR contains only test changes. Run just the modified unit tests.
+        command.runUnitTestsOnLocalChanges();
       }
     }
   }
