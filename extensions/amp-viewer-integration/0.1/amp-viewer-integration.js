@@ -29,10 +29,9 @@ import {
   getAmpdoc,
   registerServiceBuilder,
 } from '../../../src/service';
-import {getData} from '../../../src/event-helper';
+import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
-import {listen, listenOnce} from '../../../src/event-helper';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';

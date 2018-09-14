@@ -21,7 +21,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
-import {closest} from '../../../src/dom';
+import {closest, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -29,7 +29,6 @@ import {numeric, px, setStyles as setStylesTransition} from '../../../src/transi
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
 import {setImportantStyles, setStyles} from '../../../src/style';
-import {tryFocus} from '../../../src/dom';
 
 const TAG = 'amp-accordion';
 const MAX_TRANSITION_DURATION = 500; // ms

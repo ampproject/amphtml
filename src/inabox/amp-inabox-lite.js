@@ -19,7 +19,10 @@
  */
 
 import '../polyfills';
-import {Navigation} from '../service/navigation';
+import {
+  Navigation,
+  installGlobalNavigationHandlerForDoc,
+} from '../service/navigation';
 import {Services} from '../services';
 import {
   adopt,
@@ -46,7 +49,6 @@ import {stubElementsForDoc} from '../service/custom-element-registry';
 import {installActionServiceForDoc} from '../service/action-impl';
 import {installCidService} from '../service/cid-impl';
 import {installDocumentInfoServiceForDoc} from '../service/document-info-impl';
-import {installGlobalNavigationHandlerForDoc} from '../service/navigation';
 import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHistoryServiceForDoc} from '../service/history-impl';
 import {installResourcesServiceForDoc} from '../service/resources-impl';
