@@ -473,6 +473,7 @@ register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
+// TODO(@torch2424) Remove this in follow up PR.
 const defaultAllowedTypesInCustomFrame = [
   // Entries must be reasonably safe and not allow overriding the injected
   // JS URL.
@@ -480,6 +481,7 @@ const defaultAllowedTypesInCustomFrame = [
   // draw3p. See amp-ad docs.
   'facebook',
   'twitter',
+  'recaptcha',
   'doubleclick',
   'yieldbot',
   '_ping_',

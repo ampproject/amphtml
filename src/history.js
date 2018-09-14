@@ -14,5 +14,17 @@
  * limitations under the License.
  */
 
-describe.configure().skipSafari().skipEdge()
-    .run('amp-recaptcha-input', function() {});
+/**
+ * Gets state from History.
+ * But IE11 throws if there is no state.
+ *
+ * @param {!History} history
+ * @return {*}
+ */
+export function getState(history) {
+  try {
+    return history.state;
+  } catch (e) {
+    return null;
+  }
+}

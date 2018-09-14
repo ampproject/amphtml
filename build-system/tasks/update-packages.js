@@ -19,7 +19,7 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const {exec, getStderr} = require('../exec');
+const {exec, execOrDie, getStderr} = require('../exec');
 
 const yarnExecutable = 'npx yarn';
 
@@ -125,7 +125,7 @@ function runYarnCheck() {
     const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
-    exec(yarnExecutable);
+    execOrDie(yarnExecutable); // Stop execution when Ctrl + C is detected.
   } else {
     log(colors.green('All packages in'),
         colors.cyan('node_modules'), colors.green('are up to date.'));

@@ -286,6 +286,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    id: 'sandbox-ads',
+    name: 'Applies a sandbox to ad iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/14240',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'video-service',
     name: 'Enables new implementation of unified Video Interface services.',
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
@@ -296,11 +302,6 @@ const EXPERIMENTS = [
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
-  },
-  {
-    id: 'amp-img-native-srcset',
-    name: 'Enables native browser implementation of srcset and sizes',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
   },
   {
     id: 'layers',
