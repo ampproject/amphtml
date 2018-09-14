@@ -39,7 +39,7 @@ describes.realWin('Platform store', {}, () => {
    * fake handler for supportScoreFactor
    * @param {string} factor
    * @param {!Object} factorMap
-   * @return {boolean}
+   * @return {number}
    */
   function fakeGetSupportedScoreFactor(factor, factorMap) {
     return factorMap[factor] || 0;
