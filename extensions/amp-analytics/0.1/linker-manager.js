@@ -27,12 +27,6 @@ import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics/linker-manager';
 
-/**
- * The name of the Google CID API as it appears in the meta tag to opt-in.
- * @const @private {string}
- */
-const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
-
 export class LinkerManager {
 
   /**
@@ -186,7 +180,7 @@ export class LinkerManager {
     }
 
     const optInMeta = this.ampdoc_.win.document.head
-        ./*OK*/querySelector(`meta[name=${GOOGLE_CID_API_META_NAME}]`);
+        ./*OK*/querySelector('meta[name="amp-google-client-id-api"][content="googleanalytics"]');
     const isGaType = this.type_ === 'googleanalytics';
 
     return !!(optInMeta && isGaType);
