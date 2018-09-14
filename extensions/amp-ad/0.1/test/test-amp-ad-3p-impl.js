@@ -22,11 +22,13 @@ import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {LayoutPriority} from '../../../../src/layout';
+import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
 import {stubService} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
+
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -49,6 +51,7 @@ function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
 
 describes.realWin('amp-ad-3p-impl', {
   amp: {
+    runtimeOn: false,
     canonicalUrl: 'https://canonical.url',
   },
   allowExternalResources: true,
@@ -317,8 +320,10 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should only allow rendering one ad per second', function* () {
-      const clock = lolex.install({target: win});
+      const clock = lolex.install({
+        target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
       const ad3p2 = createAmpAd(win);
+      const oneSecPromise = Services.timerFor(win).promise(1001);
       expect(ad3p.renderOutsideViewport()).to.equal(3);
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
 
@@ -329,8 +334,8 @@ describes.realWin('amp-ad-3p-impl', {
       clock.tick(999);
       yield macroTask();
       expect(ad3p2.renderOutsideViewport()).to.equal(false);
-      clock.tick(1);
-      yield macroTask();
+      clock.tick(2);
+      yield oneSecPromise;
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
     });
 
