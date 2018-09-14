@@ -179,8 +179,8 @@ export class LinkerManager {
       return false;
     }
 
-    const optInMeta = this.ampdoc_.win.document.head
-        ./*OK*/querySelector('meta[name="amp-google-client-id-api"][content="googleanalytics"]');
+    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
+        'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
     const isGaType = this.type_ === 'googleanalytics';
 
     return !!(optInMeta && isGaType);
