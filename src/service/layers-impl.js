@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {computedStyle} from '../style';
 import {dev} from '../log';
 import {filterSplice} from '../utils/array';
+import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
 import {getMode} from '../mode';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
@@ -1265,7 +1266,10 @@ function frameParent(node) {
   dev().assert(node.nodeType === Node.DOCUMENT_NODE);
   try {
     const {defaultView} = node;
-    return defaultView && defaultView.frameElement;
+    const frameElement = defaultView && defaultView.frameElement;
+    return frameElement && getFriendlyIframeEmbedOptional(frameElement)
+      ? frameElement
+      : null;
   } catch (e) { }
   return null;
 }
