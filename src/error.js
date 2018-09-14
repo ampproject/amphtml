@@ -298,7 +298,8 @@ function reportErrorToServer(message, filename, line, col, error) {
     makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
-    return;
+    // Commented to hit getErrorReportData()
+    //return;
   }
   let hasNonAmpJs = false;
   try {
@@ -310,10 +311,13 @@ function reportErrorToServer(message, filename, line, col, error) {
     // Only report 1% of errors on pages with non-AMP JS.
     // These errors can almost never be acted upon, but spikes such as
     // due to buggy browser extensions may be helpful to notify authors.
-    return;
+    // Commented to hit getErrorReportData()
+    //return;
   }
   const data = getErrorReportData(message, filename, line, col, error,
-      hasNonAmpJs);
+    hasNonAmpJs);
+  // TODO: Remove this. This is top stop the final request
+  return;
   if (data) {
     // Report the error to viewer if it has the capability. The data passed
     // to the viewer is exactly the same as the data passed to the server
@@ -553,6 +557,12 @@ export function getErrorReportData(message, filename, line, col, error,
 
   pushLimit(accumulatedErrorMessages, message, 25);
 
+  console.log('Testing Logs in error.js:');
+  console.log('Input', message, filename, line, col, error,
+    hasNonAmpJs);
+
+  console.log('Output', data);
+  
   return data;
 }
 
