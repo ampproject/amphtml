@@ -466,7 +466,6 @@ class AmpDelight extends AMP.BaseElement {
     setStyle(this.element, 'padding', this.styleCache_.padding);
     setStyle(this.element, 'z-index', this.styleCache_.zIndex);
     setStyle(this.element, 'position', this.styleCache_.position);
-    setStyle(this.element, 'display', this.styleCache_.display);
 
     this.iframe_.width = this.iframeWidth_;
     this.iframe_.height = this.iframeHeight_;
@@ -478,7 +477,6 @@ class AmpDelight extends AMP.BaseElement {
     setStyle(this.iframe_, 'padding', this.iframeStyleCache_.padding);
     setStyle(this.iframe_, 'zIndex', this.iframeStyleCache_.zIndex);
     setStyle(this.iframe_, 'position', this.iframeStyleCache_.position);
-    setStyle(this.iframe_, 'display', this.iframeStyleCache_.display);
     const viewportMeta = document.querySelector('#dl8-meta-viewport');
     if (viewportMeta) {
       document.head.removeChild(viewportMeta);
