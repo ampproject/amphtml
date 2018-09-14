@@ -369,18 +369,16 @@ export class PlatformStore {
    * Calculates weight to add/remove based on getSupportedScoreFactor()
    * @param {string} factorName
    * @param {!./subscription-platform.SubscriptionPlatform} platform
-   * @return {!Promise<number>}
+   * @return {number}
    * @private
    */
   getSupportedFactorWeight_(factorName, platform) {
-    return platform.getSupportedScoreFactor(factorName)
-        .then(factorValue => {
-          if (typeof factorValue !== 'number') {
-            return 0;
-          }
-          return this.scoreConfig_[factorName] *
-            Math.min(1, Math.max(-1, factorValue));
-        });
+    const factorValue = platform.getSupportedScoreFactor(factorName);
+    if (typeof factorValue !== 'number') {
+      return 0;
+    }
+    return this.scoreConfig_[factorName] *
+      Math.min(1, Math.max(-1, factorValue));
   }
 
   /**
@@ -392,7 +390,7 @@ export class PlatformStore {
    *
    * In the end candidate with max weight is selected. However if candidate's
    * weight is equal to local platform, then local platform is selected.
-   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
+   * @return {!./subscription-platform.SubscriptionPlatform}
    * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
@@ -409,53 +407,47 @@ export class PlatformStore {
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
       if (entitlement.isSubscriber()) {
-        return Promise.resolve(platform);
+        return platform;
       }
     }
 
-    return this.getAllPlatformWeights_(optionalFactor)
-        .then(platformWeights => {
-          platformWeights.sort(function(platform1, platform2) {
-            // Force local platform to win ties
-            if (platform2.weight == platform1.weight &&
-              platform2 == localPlatform) {
-              return 1;
-            }
-            return platform2.weight - platform1.weight;
-          });
-          return platformWeights[0].platform;
-        });
+    const platformWeights = this.getAllPlatformWeights_(optionalFactor);
+    platformWeights.sort((platform1, platform2) => {
+      // Force local platform to win ties
+      if (platform2.weight == platform1.weight &&
+        platform2.platform == localPlatform) {
+        return 1;
+      }
+      return platform2.weight - platform1.weight;
+    });
+    return platformWeights[0].platform;
   }
 
   /**
    * Calculate and return weights for all platforms
-   * @return {!Promise<!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>>}
+   * @return {!Array<{platform:!./subscription-platform.SubscriptionPlatform, weight: number}>}
    * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
   getAllPlatformWeights_(optionalFactor) {
     // Get weights for all of the platforms
-    return Promise.all(this.getAvailablePlatforms().map(platform => {
-      return this.calculatePlatformWeight_(platform, optionalFactor)
-          .then(weight => {
-            return {
-              platform,
-              weight,
-            };
-          });
-    }));
+    return this.getAvailablePlatforms().map(platform => {
+      return {
+        platform,
+        weight: this.calculatePlatformWeight_(platform, optionalFactor),
+      };
+    });
   }
 
   /**
    * Calculate platform weight
    * @param {!./subscription-platform.SubscriptionPlatform} platform
    * @param {string=} optionalFactor if specified only calculate this factor
-   * @return {!Promise<number>}
+   * @return {number}
    * @private
    */
   calculatePlatformWeight_(platform, optionalFactor) {
-    /** @type {!Array<Promise<number>|number>} */
-    const platformFactorResults = [0];
+    const factorWeights = [0]; // reduce always needs somthing to work with
 
     // Start with base score
     const weight = platform.getBaseScore();
@@ -464,16 +456,11 @@ export class PlatformStore {
     for (const factor in this.scoreConfig_) {
       if (hasOwn(this.scoreConfig_, factor) &&
         (!optionalFactor || optionalFactor === factor)) {
-        platformFactorResults.push(
-            this.getSupportedFactorWeight_(factor, platform));
+        factorWeights.push(this.getSupportedFactorWeight_(factor, platform));
       }
     }
 
-    return Promise.all(platformFactorResults)
-        .then(factorWeights => {
-          return weight + factorWeights
-              .reduce(function(a, b) { return a + b; });
-        });
+    return weight + factorWeights.reduce((a, b) => { return a + b; });
   }
 
   /**
@@ -497,7 +484,7 @@ export class PlatformStore {
 
   /**
    * Evaluates platforms and select the one to be selected for login.
-   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
+   * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
     return this.selectApplicablePlatform_('supportsViewer');

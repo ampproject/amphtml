@@ -42,7 +42,7 @@ describes.realWin('Platform store', {}, () => {
    * @return {boolean}
    */
   function fakeGetSupportedScoreFactor(factor, factorMap) {
-    return Promise.resolve(factorMap[factor] || 0);
+    return factorMap[factor] || 0;
   }
 
   beforeEach(() => {
@@ -212,8 +212,8 @@ describes.realWin('Platform store', {}, () => {
       sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
       sandbox.stub(anotherPlatform, 'getBaseScore')
           .callsFake(() => anotherPlatformBaseScore);
-      platformStore.resolvePlatform('local', localPlatform);
-      platformStore.resolvePlatform('another', anotherPlatform);
+      platformStore.resolvePlatform('another', localPlatform);
+      platformStore.resolvePlatform('local', anotherPlatform);
     });
     it('should return sorted array of platforms and weights', () => {
       sandbox.stub(localPlatform, 'getSupportedScoreFactor')
@@ -225,10 +225,10 @@ describes.realWin('Platform store', {}, () => {
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      return platformStore.getAllPlatformWeights_().then(weights => {
-        expect(weights).deep.equal([{platform: localPlatform, weight: 0},
-          {platform: anotherPlatform, weight: 0}]);
-      });
+      expect(platformStore.getAllPlatformWeights_())
+          .to.deep.equal(
+              [{platform: localPlatform, weight: 0},
+                {platform: anotherPlatform, weight: 0}]);
     });
   });
 
@@ -279,9 +279,8 @@ describes.realWin('Platform store', {}, () => {
         raw: '',
         service: 'another',
       }));
-      expect(platformStore.selectApplicablePlatform_()
-          .then(platform => platform.getServiceId()))
-          .to.eventually.equal(localPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(localPlatform.getServiceId());
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local',
         raw: '',
@@ -294,9 +293,8 @@ describes.realWin('Platform store', {}, () => {
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
       }));
-      expect(platformStore.selectApplicablePlatform_()
-          .then(platform => platform.getServiceId()))
-          .to.eventually.equal(anotherPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(anotherPlatform.getServiceId());
     });
 
     it('should choose local platform if all other conditions are same', () => {
@@ -309,9 +307,8 @@ describes.realWin('Platform store', {}, () => {
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      expect(platformStore.selectApplicablePlatform_()
-          .then(platform => platform.getServiceId()))
-          .to.eventually.equal(localPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(localPlatform.getServiceId());
     });
 
     it('should chose platform based on score weight', () => {
@@ -320,15 +317,14 @@ describes.realWin('Platform store', {}, () => {
       // +9
       sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
           .callsFake(factor => fakeGetSupportedScoreFactor(factor,
-              {'supportsViewer': true}));
+              {'supportsViewer': 1}));
 
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      expect(platformStore.selectApplicablePlatform_()
-          .then(platform => platform.getServiceId()))
-          .to.eventually.equal(anotherPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(anotherPlatform.getServiceId());
     });
 
     it('should chose platform based on multiple factors', () => {
@@ -345,9 +341,8 @@ describes.realWin('Platform store', {}, () => {
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      expect(platformStore.selectApplicablePlatform_()
-          .then(platform => platform.getServiceId()))
-          .to.eventually.equal(localPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(localPlatform.getServiceId());
     });
 
     it('should chose platform specified factors', () => {
@@ -365,8 +360,8 @@ describes.realWin('Platform store', {}, () => {
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
       expect(platformStore.selectApplicablePlatform_('supporsViewer')
-          .then(platform => platform.getServiceId()))
-          .to.eventually.equal(localPlatform.getServiceId());
+          .getServiceId())
+          .to.equal(localPlatform.getServiceId());
     });
 
     it('should chose platform handle negative factor values', () => {
@@ -383,9 +378,8 @@ describes.realWin('Platform store', {}, () => {
         source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
-      expect(platformStore.selectApplicablePlatform_(true)
-          .then(platform => platform.getServiceId()))
-          .to.eventually.equal(anotherPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(anotherPlatform.getServiceId());
     });
 
     it('should use baseScore', () => {
@@ -400,8 +394,7 @@ describes.realWin('Platform store', {}, () => {
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another'}));
       expect(platformStore.selectApplicablePlatform_()
-          .then(platform => platform.getServiceId()))
-          .to.eventually.equal(anotherPlatform.getServiceId());
+          .getServiceId()).to.equal(anotherPlatform.getServiceId());
     });
   });
 

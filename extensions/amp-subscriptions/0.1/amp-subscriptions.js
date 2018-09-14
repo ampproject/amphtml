@@ -519,7 +519,7 @@ export class SubscriptionService {
 
   /**
    * Evaluates platforms and select the one to be selected for login.
-   * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
+   * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
     return this.platformStore_.selectPlatformForLogin();

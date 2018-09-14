@@ -139,11 +139,9 @@ export class LocalSubscriptionPlatform {
         if (action == 'login') {
           // The "login" action is somewhat special b/c viewers can
           // enhance this action, e.g. to provide save/link feature.
-          this.serviceAdapter_.selectPlatformForLogin()
-              .then(platform => {
-                this.serviceAdapter_.delegateActionToService(
-                    action, platform.getServiceId());
-              });
+          const platform = this.serviceAdapter_.selectPlatformForLogin();
+          this.serviceAdapter_.delegateActionToService(
+              action, platform.getServiceId());
         } else {
           this.executeAction(action);
         }
