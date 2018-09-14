@@ -126,7 +126,6 @@ See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions
 }
 
 function getJsTestExtensionFile(name) {
-  const className = pascalCase(name);
   return `/**
  * Copyright ${year} The AMP HTML Authors. All Rights Reserved.
  *
@@ -143,12 +142,12 @@ function getJsTestExtensionFile(name) {
  * limitations under the License.
  */
 
-import {${className}} from '../${name}';
+import '../${name}';
 
 describes.realWin('${name}', {
   amp: {
     extensions: ['${name}'],
-  }
+  },
 }, env => {
 
   let win;
@@ -197,12 +196,13 @@ export class ${className} extends AMP.BaseElement {
     /** @private {string} */
     this.myText_ = 'hello world';
 
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
+    /** @private {?Element} */
+    this.container_ = null;
   }
 
   /** @override */
   buildCallback() {
+    this.container_ = this.win.document.createElement('div');
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_, /* replacedContent */ true);
@@ -248,6 +248,7 @@ function makeExtension() {
         'Error! Please pass in the "--name" flag with a value'));
   }
   const {name} = argv;
+  const examplesFile = getExamplesFile(name);
 
   fs.mkdirpSync(`extensions/${name}/0.1/test`);
   fs.writeFileSync(`extensions/${name}/${name}.md`,
@@ -258,11 +259,18 @@ function makeExtension() {
       getJsExtensionFile(name));
   fs.writeFileSync(`extensions/${name}/0.1/test/test-${name}.js`,
       getJsTestExtensionFile(name));
+  fs.writeFileSync(`extensions/${name}/0.1/test/validator-${name}.html`,
+      examplesFile);
+
+  const examplesFileValidatorOut = examplesFile.trim().split('\n')
+      .map(line => `|  ${line}`)
+      .join('\n');
+
+  fs.writeFileSync(`extensions/${name}/0.1/test/validator-${name}.out`,
+      ['PASS', examplesFileValidatorOut].join('\n'));
+
   fs.writeFileSync(`examples/${name}.amp.html`,
-      getExamplesFile(name));
-  fs.writeFileSync(`validator/testdata/feature_tests/${name}.html`,
-      getExamplesFile(name));
-  fs.writeFileSync(`validator/testdata/feature_tests/${name}.out`, 'PASS');
+      examplesFile);
 }
 
 gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
