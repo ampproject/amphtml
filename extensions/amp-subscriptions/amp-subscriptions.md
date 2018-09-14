@@ -160,7 +160,7 @@ If you'd like to test the document's behavior in the context of a particular vie
 
 
 ## Selecting a Service
-No service returns an entitlement that grants access we compete all the service by calculating a score for each and choosing the highest scoring service.
+If no service returns an entitlement that grants access. All services are compared by calculating a score for each and the highest scoring service is selected.
 
 The score is calculated by taking the `baseScore` in the service configuration and adding or subtracting dynamically calculated weights from `score[factor name]` if the service indicates that `factor name` is true for this page view.
 
@@ -168,12 +168,12 @@ Available scoring factors:
 
 1. `supportsViewer` Indicates that a service can cooperate with the current AMP viewer environment for this page view.
 
-In addition to the dynamic scoring factors each service has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service.
+In addition to the dynamic scoring factors, each service has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service.
 
 In the event of a tie the local service wins.
 
 ## Error fallback
-In case if all configured services fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` service. The document's unblocking will be based on this fallback entitlement.
+If all configured services fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` service. The document's unblocking will be based on this fallback entitlement.
 
 ### The "local" service configuration
 
