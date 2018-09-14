@@ -52,7 +52,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
     it('should open and close correctly', () => {
       const lightbox = win.document.getElementById('amp-lightbox-gallery');
       return openLightbox(win.document).then(() => {
-        expect(lightbox.style.display).to.not.equal('none');
+        expect(lightbox).to.not.have.display('none');
         const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
         expect(carouselQuery.length).to.equal(1);
         const carousel = carouselQuery[0];
@@ -69,7 +69,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         closeButton.click();
         return lightboxClose;
       }).then(() => {
-        expect(lightbox.style.display).to.equal('none');
+        expect(lightbox).to.have.display('none');
       });
     });
 
@@ -201,7 +201,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
 
 function openLightbox(document) {
   const lightbox = document.getElementById('amp-lightbox-gallery');
-  expect(lightbox.style.display).to.equal('none');
+  expect(lightbox).to.have.display('none');
   const ampImage = document.getElementById('img0');
   const imageLoadedPromise = waitForImageToLoad(ampImage);
   return imageLoadedPromise.then(() => {
@@ -223,13 +223,15 @@ function getButton(document, className) {
 
 function waitForLightboxOpen(lightbox) {
   return poll('wait for amp-lightbox-gallery to open', () => {
-    return lightbox.style.display == '' && lightbox.style.opacity == '';
+    const styles = lightbox.ownerNode.defaultView.getComputedStyle(lightbox);
+    return styles.display != 'none' && lightbox.style.opacity == '';
   });
 }
 
 function waitForLightboxClose(lightbox, carousel) {
   return poll('wait for amp-lightbox-gallery to close', () => {
-    return carousel.style.display == 'none';
+    const styles = carousel.ownerNode.defaultView.getComputedStyle(carousel);
+    return styles.display == 'none';
   });
 }
 

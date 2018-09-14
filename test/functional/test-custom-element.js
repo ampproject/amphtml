@@ -1097,7 +1097,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element1.setAttribute('i-amphtml-layout', 'nodisplay');
       element1.setAttribute('layout', 'nodisplay');
       container.appendChild(element1);
-      expect(element1.style.display).to.equal('none');
+      expect(element1).to.have.display('none');
     });
 
     it('should change size without sizer', () => {

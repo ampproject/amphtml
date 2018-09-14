@@ -18,6 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
 
@@ -309,7 +310,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(html.trim()).to.equal(
             '<i-amphtml-fpa style="display: none"></i-amphtml-fpa>');
         this.firstElementChild = createElement('i-amphtml-fpa');
-        this.firstElementChild.style.display = 'none';
+        toggle(this.firstElementChild, false);
       },
     };
     return elem;

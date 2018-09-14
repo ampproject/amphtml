@@ -105,7 +105,7 @@ describes.realWin('amp-ima-video', {
         .to.exist;
     expect(removeEventListenerSpy).to.be.calledWith(
         imaVideoObj.getPropertiesForTesting().interactEvent);
-    expect(bigPlayDivMock.style.display).to.eql('none');
+    expect(bigPlayDivMock).to.have.display('none');
     expect(initSpy).to.be.called;
     expect(loadSpy).to.be.called;
     // TODO - Fix one I figure out how to spy on internals.
@@ -379,8 +379,8 @@ describes.realWin('amp-ima-video', {
     expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.true;
     expect(removeEventListenerSpy).to.have.been.calledWith(
         imaVideoObj.getPropertiesForTesting().interactEvent);
-    expect(imaVideoObj.getPropertiesForTesting().adContainerDiv.style.display)
-        .to.eql('block');
+    expect(imaVideoObj.getPropertiesForTesting().adContainerDiv).to.have
+        .display('block');
     expect(removeEventListenerSpy).to.have.been.calledWith('ended');
     // TODO - Fix when I can spy on internals.
     //expect(hideControlsSpy).to.have.been.called;
@@ -431,8 +431,8 @@ describes.realWin('amp-ima-video', {
     expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.true;
     expect(removeEventListenerSpy).to.have.been.calledWith(
         imaVideoObj.getPropertiesForTesting().interactEvent);
-    expect(imaVideoObj.getPropertiesForTesting().adContainerDiv.style.display)
-        .to.eql('block');
+    expect(imaVideoObj.getPropertiesForTesting().adContainerDiv).to.have
+        .display('block');
     expect(removeEventListenerSpy).to.have.been.calledWith('ended');
     // TODO - Fix when I can spy on internals.
     //expect(hideControlsSpy).to.have.been.called;
@@ -640,8 +640,8 @@ describes.realWin('amp-ima-video', {
 
     imaVideoObj.playVideo();
 
-    expect(imaVideoObj.getPropertiesForTesting().adContainerDiv.style.display)
-        .to.eql('none');
+    expect(imaVideoObj.getPropertiesForTesting().adContainerDiv).to.have
+        .display('none');
     expect(imaVideoObj.getPropertiesForTesting().playerState).to.eql(
         imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING);
     // TODO - Why doesn't this work?
@@ -726,8 +726,8 @@ describes.realWin('amp-ima-video', {
 
     imaVideoObj.showControls();
 
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
-        .to.eql('flex');
+    expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have
+        .display('flex');
     expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout)
         .to.be.null;
   });
@@ -748,8 +748,8 @@ describes.realWin('amp-ima-video', {
 
     imaVideoObj.showControls();
 
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
-        .to.eql('flex');
+    expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have
+        .display('flex');
     expect(imaVideoObj.getPropertiesForTesting().hideControlsTimeout)
         .not.to.be.undefined;
   });
@@ -768,8 +768,8 @@ describes.realWin('amp-ima-video', {
 
     imaVideoObj.hideControls();
 
-    expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
-        .to.eql('none');
+    expect(imaVideoObj.getPropertiesForTesting().controlsDiv).to.have
+        .display('none');
   });
 
   it('suppresses IMA load with unknown consent', () => {
