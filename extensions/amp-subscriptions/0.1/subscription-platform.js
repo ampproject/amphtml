@@ -59,7 +59,7 @@ export class SubscriptionPlatform {
   /**
    * Tells if the platform supports a score factor
    * @param {string} unusedFactor
-   * @return {!Promise<number>}
+   * @return {number}
    */
   getSupportedScoreFactor(unusedFactor) {}
 
