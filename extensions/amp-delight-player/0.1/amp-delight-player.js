@@ -25,6 +25,7 @@ import {getStyle, setStyle} from '../../../src/style';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
@@ -65,13 +66,14 @@ const DelightEvent = {
   WINDOW_DEVICEMOTION: 'x-dl8-iframe-window-devicemotion',
 };
 
+/** @implements {../../../src/video-interface.VideoInterface} */
 class AmpDelight extends AMP.BaseElement {
 
-  /** @param {!AmpDelight} element */
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
+    /** @private @const */
     this.actions_ = Services.actionServiceForDoc(element);
 
     /** @private {string} */
@@ -129,7 +131,10 @@ class AmpDelight extends AMP.BaseElement {
         this.dispatchDeviceMotionEvents_.bind(this);
   }
 
-  /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     this.preconnect.url(this.baseURL_, onLayout);
   }
@@ -246,7 +251,7 @@ class AmpDelight extends AMP.BaseElement {
   /** @override */
   resumeCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.play();
+      this.play(false);
     }
     return super.resumeCallback();
   }
@@ -267,95 +272,101 @@ class AmpDelight extends AMP.BaseElement {
 
     const {element} = this;
 
-    switch (data.type) {
+    switch (data['type']) {
       case DelightEvent.REDIRECT: {
-        let {pathname, host} = data;
-        const hasQueryParams = data.search.length > 1;
+        let pathname = data['pathname'];
+        let host = data['host'];
+        const search = data['search'];
+        const protocol = data['protocol'];
+        const hash = data['hash'];
+        const hasQueryParams = search.length > 1;
         host = host.replace('/', '');
-        if (pathname.startsWith('/')) {
+        if (startsWith(pathname, '/')) {
           pathname = pathname.substring(1);
         }
-        window.location = `${data.protocol}//${host}/${pathname}
-        ${data.search}
+        window.location = `${protocol}//${host}/${pathname}
+        ${search}
         ${hasQueryParams ? '&' : '?'}dl8-start-from-cors-fallback=true
-        ${data.hash}`;
+        ${hash}`;
         break;
       }
       case DelightEvent.PING: {
-        const {guid} = data;
+        const guid = data['guid'];
         if (guid) {
-          this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+          this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(/** @type {JsonObject} */ ({
             type: DelightEvent.PONG,
             guid,
             idx: 0,
-          }), '*');
+          })), '*');
         }
         break;
       }
-      case DelightEvent.READY:
+      case DelightEvent.READY: {
         this.triggerAction_(VideoEvents.LOAD, null);
         element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
         break;
-
-      case DelightEvent.PLAYING:
+      }
+      case DelightEvent.PLAYING: {
         this.triggerAction_(VideoEvents.PLAYING, null);
         element.dispatchCustomEvent(VideoEvents.PLAYING);
         break;
-
-      case DelightEvent.PAUSED:
+      }
+      case DelightEvent.PAUSED: {
         this.triggerAction_(VideoEvents.PAUSE, null);
         element.dispatchCustomEvent(VideoEvents.PAUSE);
         break;
-
-      case DelightEvent.ENDED:
+      }
+      case DelightEvent.ENDED: {
         this.triggerAction_(VideoEvents.ENDED, null);
         element.dispatchCustomEvent(VideoEvents.ENDED);
         break;
-
-      case DelightEvent.TIME_UPDATE:
+      }
+      case DelightEvent.TIME_UPDATE: {
         this.triggerAction_(VideoEvents.SECONDS_PLAYED, null);
         element.dispatchCustomEvent(VideoEvents.SECONDS_PLAYED);
-
-        this.currentTime_ = data.payload.currentTime;
-        this.playedRanges_ = data.payload.playedRanges;
+        const payload = data['payload'];
+        this.currentTime_ = payload.currentTime;
+        this.playedRanges_ = payload.playedRanges;
         break;
-
-      case DelightEvent.MUTED:
+      }
+      case DelightEvent.MUTED: {
         this.triggerAction_(VideoEvents.MUTED, null);
         element.dispatchCustomEvent(VideoEvents.MUTED);
         break;
-
-      case DelightEvent.UNMUTED:
+      }
+      case DelightEvent.UNMUTED: {
         this.triggerAction_(VideoEvents.UNMUTED, null);
         element.dispatchCustomEvent(VideoEvents.UNMUTED);
         break;
-
-      case DelightEvent.DURATION:
-        this.totalDuration_ = data.payload.duration;
+      }
+      case DelightEvent.DURATION: {
+        const payload = data['payload'];
+        this.totalDuration_ = payload.duration;
         break;
-
-      case DelightEvent.EXPANDED:
+      }
+      case DelightEvent.EXPANDED: {
         this.setFullHeight_();
         break;
-
-      case DelightEvent.MINIMIZED:
+      }
+      case DelightEvent.MINIMIZED: {
         this.setInlineHeight_();
         break;
-
-      case DelightEvent.ENTERED_FULLSCREEN:
+      }
+      case DelightEvent.ENTERED_FULLSCREEN: {
         this.isFullscreen_ = true;
         break;
-
-      case DelightEvent.EXITED_FULLSCREEN:
+      }
+      case DelightEvent.EXITED_FULLSCREEN: {
         this.isFullscreen_ = false;
         break;
+      }
     }
   }
 
   /**
-   * Triggers either a submit-success or submit-error action with response data.
-   * @param {!FormEvents} name
+   * Triggers a video event.
+   * @param {string} name
    * @param {?Object} detail
    * @private
    */
@@ -370,14 +381,14 @@ class AmpDelight extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} type
-   * @param {Object} [payload={}]
+   * @param {Object=} payload
    * @private
    */
   sendCommand_(type, payload = {}) {
     this.playerReadyPromise_.then(iframe => {
       if (iframe && iframe.contentWindow) {
         iframe.contentWindow./*OK*/postMessage(
-            JSON.stringify({type, payload}), '*'
+            JSON.stringify(/** @type {JsonObject} */ ({type, payload})), '*'
         );
       }
     });
