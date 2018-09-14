@@ -16,18 +16,18 @@
 
 export const BYSIDE_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
- 'webcareZone': 'webcare',
+    'webcareZone': 'webcare',
     'webcareId': '',
     'channel': '',
     'fid': '',
- 'lang': 'pt',
+    'lang': 'pt',
   },
   'requests': {
     'host': '//${webcareZone}.byside.com/',
     'base': '${host}BWA${webcareId}/amp/',
     'pageview': '${base}pixel.php',
- 'event': '${base}signal.php?event_id=${eventId}' +
-   '&event_label=${eventLabel}&fields=${fields}',
+    'event': '${base}signal.php?event_id=${eventId}' +
+    '&event_label=${eventLabel}&fields=${fields}',
   },
   'extraUrlParams': {
     'webcare_id': '${webcareId}',
