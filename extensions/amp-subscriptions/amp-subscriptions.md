@@ -160,7 +160,7 @@ If you'd like to test the document's behavior in the context of a particular vie
 
 
 ## Selecting a Service
-If no service returns an entitlement that grants access. All services are compared by calculating a score for each and the highest scoring service is selected.
+If no service returns an entitlement that grants access, all services are compared by calculating a score for each and the highest scoring service is selected.
 
 The score is calculated by taking the `baseScore` in the service configuration and adding or subtracting dynamically calculated weights from `score[factor name]` if the service indicates that `factor name` is true for this page view.
 
