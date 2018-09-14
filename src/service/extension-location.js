@@ -94,7 +94,7 @@ export function parseExtensionUrl(scriptUrl) {
   const matches = scriptUrl.match(regex);
 
   return {
-    extensionId: matches[2],
-    extensionVersion: matches[3],
+    extensionId: matches ? matches[2] : undefined,
+    extensionVersion: matches ? matches[3] : undefined,
   };
 }
