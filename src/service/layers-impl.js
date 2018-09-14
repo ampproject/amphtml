@@ -700,7 +700,7 @@ export class LayoutElement {
     // Layers in a parent document may contain children of an FIE.
     // Only one level FIE is supported.
     const frame = frameParent(other.ownerDocument);
-    return frame && element.contains(frame);
+    return !!frame && element.contains(frame);
   }
 
   /**
