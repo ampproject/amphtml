@@ -276,6 +276,23 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be
               .calledOnce;
         });
+
+    it('should consume sandbox header', () => {
+      impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'amp-ff-sandbox':
+              return 'true';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.sandboxHTMLCreativeFrame()).to.be.true;
+    });
   });
 
   describe('#onCreativeRender', () => {

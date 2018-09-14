@@ -23,6 +23,11 @@ import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
+  applySandbox,
+  generateSentinel,
+  getDefaultBootstrapBaseUrl,
+} from '../../../src/3p-frame';
+import {
   assertHttpsUrl,
   tryDecodeUriComponent,
 } from '../../../src/url';
@@ -30,10 +35,6 @@ import {cancellation, isCancellation} from '../../../src/error';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, duplicateErrorIfNecessary, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  generateSentinel,
-  getDefaultBootstrapBaseUrl,
-} from '../../../src/3p-frame';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -85,9 +86,6 @@ export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 
 /** @type {string} @visibleForTesting */
 export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
-
-/** @type {string} @visibileForTesting */
-export const SANDBOX_HEADER = 'amp-ff-sandbox';
 
 /** @type {string} */
 const TAG = 'amp-a4a';
@@ -165,15 +163,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
 };
-
-/**
- * The sandboxing flags to use when applying the "sandbox" attribute to ad
- * iframes. See http://go/mdn/HTML/Element/iframe#attr-sandbox.
- * @const {string} @visibleForTesting
- */
-export const IFRAME_SANDBOXING_FLAGS = 'allow-forms allow-pointer-lock ' +
-    'allow-popups allow-popups-to-escape-sandbox allow-same-origin ' +
-    'allow-scripts allow-top-navigation-by-user-activation';
 
 /**
  * Utility function that ensures any error thrown is handled by optional
@@ -274,13 +263,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
         this.getNonAmpCreativeRenderingMethod();
-
-    /**
-     * Whether or not the iframe containing the ad should be sandboxed via the
-     * "sandbox" attribute.
-     * @private {boolean}
-     */
-    this.shouldSandbox_ = false;
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -717,10 +699,6 @@ export class AmpA4A extends AMP.BaseElement {
             this.preconnect.preload(
                 getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
           }
-          const browserSupportsSandbox = this.win.HTMLIFrameElement &&
-              'sandbox' in this.win.HTMLIFrameElement.prototype;
-          this.shouldSandbox_ = browserSupportsSandbox &&
-              fetchResponse.headers.get(SANDBOX_HEADER) == 'true';
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
@@ -1250,6 +1228,11 @@ export class AmpA4A extends AMP.BaseElement {
         `onCrossDomainIframeCreated ${iframe}`);
   }
 
+  /** @return {boolean} whether html creatives should be sandboxed. */
+  sandboxHTMLCreativeFrame() {
+    return isExperimentOn(this.win, 'sandbox-ads');
+  }
+
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
@@ -1445,9 +1428,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
-    if (this.shouldSandbox_) {
-      mergedAttributes['sandbox'] = IFRAME_SANDBOXING_FLAGS;
-    }
     if (isExperimentOn(this.win, 'no-sync-xhr-in-ads')) {
       // Block synchronous XHR in ad. These are very rare, but super bad for UX
       // as they block the UI thread for the arbitrary amount of time until the
@@ -1458,6 +1438,9 @@ export class AmpA4A extends AMP.BaseElement {
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', /** @type {!JsonObject} */ (
           Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
+    if (this.sandboxHTMLCreativeFrame()) {
+      applySandbox(this.iframe);
+    }
     // TODO(keithwrightbos): noContentCallback?
     this.xOriginIframeHandler_ = new AMP.AmpAdXOriginIframeHandler(this);
     // Iframe is appended to element as part of xorigin frame handler init.
