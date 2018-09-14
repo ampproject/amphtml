@@ -76,7 +76,6 @@ describe.configure().run('amp-image-lightbox', function() {
 function waitForLightboxOpen(document) {
   return poll('wait for image-lightbox-1 to open', () => {
     const lightbox = document.getElementById('image-lightbox-1');
-    debugger;
     return getComputedStyle(lightbox).display != 'none';
   });
 }
