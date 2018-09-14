@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const LOTAME_CONFIG  = /** @type {!JsonObject} */ ({
+export const LOTAME_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'pageview': 'https://bcp.crwdcntrl.net/amp?c=${account}&pv=y',
   },

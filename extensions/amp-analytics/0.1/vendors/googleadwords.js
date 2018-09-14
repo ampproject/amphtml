@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const GOOGLEADWORDS_CONFIG  = /** @type {!JsonObject} */ ({
+export const GOOGLEADWORDS_CONFIG = /** @type {!JsonObject} */ ({
   // https://developers.google.com/adwords/amp/landing-pages
   'requests': {
     'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',

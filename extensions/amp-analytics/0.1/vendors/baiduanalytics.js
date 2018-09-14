@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const BAIDUANALYTICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const BAIDUANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://hm.baidu.com',
     'base': '${host}/hm.gif?' +

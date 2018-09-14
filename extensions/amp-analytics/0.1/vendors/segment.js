@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const SEGMENT_CONFIG  = /** @type {!JsonObject} */ ({
+export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {
     'beacon': false,
     'xhrpost': false,

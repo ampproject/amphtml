@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const INFONLINE_CONFIG  = /** @type {!JsonObject} */ ({
+export const INFONLINE_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'sv': 'ke',
     'ap': '1',

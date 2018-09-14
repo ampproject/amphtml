@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const TOPMAILRU_CONFIG  = /** @type {!JsonObject} */ ({
+export const TOPMAILRU_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {
     'beacon': false,
     'xhrpost': false,

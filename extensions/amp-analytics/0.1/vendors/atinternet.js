@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const ATINTERNET_CONFIG  = /** @type {!JsonObject} */ ({
+export const ATINTERNET_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'requests': {
     'base': 'https://${log}${domain}/hit.xiti?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',

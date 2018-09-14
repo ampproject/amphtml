@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const BYSIDE_CONFIG  = /** @type {!JsonObject} */ ({
+export const BYSIDE_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
  'webcareZone': 'webcare',
     'webcareId': '',

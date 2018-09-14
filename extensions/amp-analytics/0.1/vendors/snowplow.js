@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const SNOWPLOW_CONFIG  = /** @type {!JsonObject} */ ({
+export const SNOWPLOW_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'duid': 'CLIENT_ID(_sp_id)',
   },

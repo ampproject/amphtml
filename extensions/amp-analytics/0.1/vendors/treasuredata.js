@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const TREASUREDATA_CONFIG  = /** @type {!JsonObject} */ ({
+export const TREASUREDATA_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'host': 'in.treasuredata.com',
     'writeKey': '',

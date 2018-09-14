@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const TOP100_CONFIG  = /** @type {!JsonObject} */ ({
+export const TOP100_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'pid': '',
     'rid': 'PAGE_VIEW_ID',

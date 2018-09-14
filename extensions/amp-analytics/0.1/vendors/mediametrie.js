@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const MEDIAMETRIE_CONFIG  = /** @type {!JsonObject} */ ({
+export const MEDIAMETRIE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://prof.estat.com/m/web',
     'pageview': '${host}/${serial}?' +

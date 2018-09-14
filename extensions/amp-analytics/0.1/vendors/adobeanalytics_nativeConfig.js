@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const ADOBEANALYTICS_NATIVECONFIG_CONFIG  = /** @type {!JsonObject} */ ({
+export const ADOBEANALYTICS_NATIVECONFIG_CONFIG = /** @type {!JsonObject} */ ({
   'triggers': {
     'pageLoad': {
       'on': 'visible',

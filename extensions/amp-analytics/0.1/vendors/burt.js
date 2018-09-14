@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const BURT_CONFIG  = /** @type {!JsonObject} */ ({
+export const BURT_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'trackingKey': 'ignore',
     'category': '',

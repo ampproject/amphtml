@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const CHARTBEAT_CONFIG  = /** @type {!JsonObject} */ ({
+export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://ping.chartbeat.net',
     'basePrefix': '/ping?h=${domain}&' +

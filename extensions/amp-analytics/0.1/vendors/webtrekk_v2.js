@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const WEBTREKK_V2_CONFIG  = /** @type {!JsonObject} */ ({
+export const WEBTREKK_V2_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'actionName': 'webtrekk_ignore',
     'contentId': '${title}',

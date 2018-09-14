@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const FACEBOOKPIXEL_CONFIG  = /** @type {!JsonObject} */ ({
+export const FACEBOOKPIXEL_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'pixelId': 'PIXEL-ID',
   },

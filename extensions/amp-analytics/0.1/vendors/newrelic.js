@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const NEWRELIC_CONFIG  = /** @type {!JsonObject} */ ({
+export const NEWRELIC_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'pageview': 'https://${beacon}/amp?appId=${appId}' +
       '&licenseKey=${licenseKey}' +

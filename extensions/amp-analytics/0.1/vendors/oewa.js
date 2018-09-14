@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const OEWA_CONFIG  = /** @type {!JsonObject} */ ({
+export const OEWA_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'requests': {
     'pageview': '${url}?s=${s}' +

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const PISTATS_CONFIG  = /** @type {!JsonObject} */ ({
+export const PISTATS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://events.pi-stats.com',
     'basePrefix': '${host}/eventsamp/?' +

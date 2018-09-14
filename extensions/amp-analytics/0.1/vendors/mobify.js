@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const MOBIFY_CONFIG  = /** @type {!JsonObject} */ ({
+export const MOBIFY_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'projectSlug': 'mobify-project-id',
     'templateName': 'page-type',

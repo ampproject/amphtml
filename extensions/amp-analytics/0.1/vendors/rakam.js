@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const RAKAM_CONFIG  = /** @type {!JsonObject} */ ({
+export const RAKAM_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'deviceId': 'CLIENT_ID(rakam_device_id)',
   },

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const PIANO_CONFIG  = /** @type {!JsonObject} */ ({
+export const PIANO_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://api-v3.tinypass.com',
     'basePrefix': '/api/v3',

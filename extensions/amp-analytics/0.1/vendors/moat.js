@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const MOAT_CONFIG  = /** @type {!JsonObject} */ ({
+export const MOAT_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'element': ':root',
   },

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const ADOBEANALYTICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const ADOBEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {'xhrpost': false, 'beacon': false, 'image': true},
   'vars': {
     'pageName': 'TITLE',

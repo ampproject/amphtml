@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const ORACLEINFINITYANALYTICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const ORACLEINFINITYANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {
     'beacon': false,
     'xhrpost': false,

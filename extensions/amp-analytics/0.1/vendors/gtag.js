@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const GTAG_CONFIG  = /** @type {!JsonObject} */ ({
+export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
   'configRewriter': {
     'url': 'https://www.googletagmanager.com/gtag/amp',
   },

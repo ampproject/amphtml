@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const METRIKA_CONFIG  = /** @type {!JsonObject} */ ({
+export const METRIKA_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {'beacon': true, 'xhrpost': true, 'image': false},
   'requests': {
     'pageview': '${_watch}?browser-info=${_brInfo}&${_siteInfo}&${_suffix}',

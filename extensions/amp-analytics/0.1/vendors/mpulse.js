@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const MPULSE_CONFIG  = /** @type {!JsonObject} */ ({
+export const MPULSE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'onvisible': 'https://${beacon_url}?' +
       'h.d=${h.d}' +

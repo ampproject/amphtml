@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const SIMPLEREACH_CONFIG  = /** @type {!JsonObject} */ ({
+export const SIMPLEREACH_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'pid': '',
     'published_at': '',

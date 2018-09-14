@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const DYNATRACE_CONFIG  = /** @type {!JsonObject} */ ({
+export const DYNATRACE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'endpoint': '${protocol}://${tenant}${separator}${environment}:${port}/ampbf/${tenantpath}',
     'pageview': '${endpoint}?type=js&' +

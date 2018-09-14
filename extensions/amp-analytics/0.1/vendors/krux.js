@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const KRUX_CONFIG  = /** @type {!JsonObject} */ ({
+export const KRUX_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'beaconHost': 'https://beacon.krxd.net',
     'timing': 't_navigation_type=0&' +

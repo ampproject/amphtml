@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const EULERIANANALYTICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const EULERIANANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'analyticsHost': '',
     'documentLocation': 'SOURCE_URL',

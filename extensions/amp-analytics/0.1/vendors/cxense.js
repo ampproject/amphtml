@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const CXENSE_CONFIG  = /** @type {!JsonObject} */ ({
+export const CXENSE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://scomcluster.cxense.com',
     'base': '${host}/Repo/rep.gif',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const SHINYSTAT_CONFIG  = /** @type {!JsonObject} */ ({
+export const SHINYSTAT_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {
     'beacon': false,
     'xhrpost': false,

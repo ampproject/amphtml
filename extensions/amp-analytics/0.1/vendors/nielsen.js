@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const NIELSEN_CONFIG  = /** @type {!JsonObject} */ ({
+export const NIELSEN_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'sessionId': 'CLIENT_ID(imrworldwide)',
     'prefix': '',

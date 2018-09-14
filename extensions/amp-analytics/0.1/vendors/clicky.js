@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const CLICKY_CONFIG  = /** @type {!JsonObject} */ ({
+export const CLICKY_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'site_id': '',
   },

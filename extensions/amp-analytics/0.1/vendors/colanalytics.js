@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const COLANALYTICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const COLANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://ase.clmbtech.com',
     'base': '${host}/message',

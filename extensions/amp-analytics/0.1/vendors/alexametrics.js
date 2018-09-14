@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const ALEXAMETRICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const ALEXAMETRICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'base': 'https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}',
     'pageview': '${base}&jsv=amp-${ampVersion}' +

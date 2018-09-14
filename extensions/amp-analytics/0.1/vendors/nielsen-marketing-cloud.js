@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const NIELSEN_MARKETING_CLOUD_CONFIG  = /** @type {!JsonObject} */ ({
+export const NIELSEN_MARKETING_CLOUD_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {
     'beacon': false,
     'xhrpost': false,

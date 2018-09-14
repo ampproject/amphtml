@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const IPLABEL_CONFIG  = /** @type {!JsonObject} */ ({
+export const IPLABEL_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'collectorUrl': 'm.col.ip-label.net',
     'endpoint': 'https://${collectorUrl}/coll/',

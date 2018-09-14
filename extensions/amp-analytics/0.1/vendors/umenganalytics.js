@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const UMENGANALYTICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const UMENGANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'siteid': '',
     'initial_view_time': '',

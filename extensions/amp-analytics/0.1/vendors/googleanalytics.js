@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const GOOGLEANALYTICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'eventValue': '0',
     'documentLocation': 'SOURCE_URL',

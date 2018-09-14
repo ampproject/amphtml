@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const MPARTICLE_CONFIG  = /** @type {!JsonObject} */ ({
+export const MPARTICLE_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'eventType': 'Unknown',
     'debug': false,

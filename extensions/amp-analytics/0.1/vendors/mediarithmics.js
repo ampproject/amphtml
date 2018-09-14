@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const MEDIARITHMICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const MEDIARITHMICS_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'domain': 'events.mediarithmics.com',
     'url': 'SOURCE_URL',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const PARSELY_CONFIG  = /** @type {!JsonObject} */ ({
+export const PARSELY_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://srv.pixel.parsely.com',
     'basePrefix': '${host}/plogger/?' +

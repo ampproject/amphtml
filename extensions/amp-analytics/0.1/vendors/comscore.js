@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const COMSCORE_CONFIG  = /** @type {!JsonObject} */ ({
+export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'c2': '1000001',
   },

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const AFSANALYTICS_CONFIG  = /** @type {!JsonObject} */ ({
+export const AFSANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'server': 'www',
     'websiteid': 'xxxxxxxx',

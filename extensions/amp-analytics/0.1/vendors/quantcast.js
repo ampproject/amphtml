@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const QUANTCAST_CONFIG  = /** @type {!JsonObject} */ ({
+export const QUANTCAST_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'labels': '',
   },

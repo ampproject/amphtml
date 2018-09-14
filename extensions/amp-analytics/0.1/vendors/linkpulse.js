@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const LINKPULSE_CONFIG  = /** @type {!JsonObject} */ ({
+export const LINKPULSE_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'id': '',
     'pageUrl': 'CANONICAL_URL',

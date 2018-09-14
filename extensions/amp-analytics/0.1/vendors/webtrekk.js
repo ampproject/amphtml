@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const WEBTREKK_CONFIG  = /** @type {!JsonObject} */ ({
+export const WEBTREKK_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'trackURL': 'https://${trackDomain}/${trackId}/wt',
     'parameterPrefix': '?p=432,${contentId},1,' +

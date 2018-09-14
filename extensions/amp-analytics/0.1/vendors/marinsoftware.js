@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const MARINSOFTWARE_CONFIG  = /** @type {!JsonObject} */ ({
+export const MARINSOFTWARE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'base': 'https://tracker.marinsm.com/tp',
     'baseParams': 'cid=${trackerId}' +
