@@ -16,7 +16,12 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {computedStyle, removeAlphaFromColor, setStyle, toggle} from '../../../src/style';
+import {
+  computedStyle,
+  removeAlphaFromColor,
+  setStyle,
+  toggle,
+} from '../../../src/style';
 import {dev,user} from '../../../src/log';
 import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
 

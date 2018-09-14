@@ -21,7 +21,10 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {appendEncodedParamStringToUrl, parseQueryString} from '../../../src/url';
+import {
+  appendEncodedParamStringToUrl,
+  parseQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';

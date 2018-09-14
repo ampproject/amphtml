@@ -52,7 +52,10 @@ import {cancellation} from '../../../../src/error';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
-import {incrementLoadingAds, is3pThrottled} from '../../../amp-ad/0.1/concurrent-load';
+import {
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../../amp-ad/0.1/concurrent-load';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {

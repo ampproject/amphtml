@@ -55,7 +55,9 @@ import {installResourcesServiceForDoc} from '../service/resources-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installStorageServiceForDoc} from '../service/storage-impl';
 import {installUrlForDoc} from '../service/url-impl';
-import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
+import {
+  installUrlReplacementsServiceForDoc,
+} from '../service/url-replacements-impl';
 
 getMode(self).runtime = 'inabox';
 

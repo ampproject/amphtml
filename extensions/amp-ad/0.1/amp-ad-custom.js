@@ -19,7 +19,11 @@ import {CommonSignals} from '../../../src/common-signals';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-import {ancestorElementsByTag, childElementByTag, removeChildren} from '../../../src/dom';
+import {
+  ancestorElementsByTag,
+  childElementByTag,
+  removeChildren,
+} from '../../../src/dom';
 import {hasOwn} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 

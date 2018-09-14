@@ -25,7 +25,11 @@ import {closest, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {numeric, px, setStyles as setStylesTransition} from '../../../src/transition';
+import {
+  numeric,
+  px,
+  setStyles as setStylesTransition,
+} from '../../../src/transition';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
 import {setImportantStyles, setStyles} from '../../../src/style';

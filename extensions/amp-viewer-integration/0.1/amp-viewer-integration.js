@@ -15,7 +15,11 @@
  */
 
 import {AmpViewerIntegrationVariableService} from './variable-service';
-import {HighlightHandler, HighlightInfoDef, getHighlightParam} from './highlight-handler';
+import {
+  HighlightHandler,
+  HighlightInfoDef,
+  getHighlightParam,
+} from './highlight-handler';
 import {
   Messaging,
   WindowPortEmulator,

@@ -17,7 +17,10 @@
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {StateChangeEventDef, StateChangeType} from '../../amp-story/1.0/navigation-state';
+import {
+  StateChangeEventDef,
+  StateChangeType,
+} from '../../amp-story/1.0/navigation-state';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
 import {dev, user} from '../../../src/log';

@@ -20,7 +20,11 @@ import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getBinaryType, isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {
+  getBinaryType,
+  isExperimentOn,
+  toggleExperiment,
+} from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface, getSourceOriginForBookendComponent} from './bookend-component-interface';
+import {
+  BookendComponentInterface,
+  getSourceOriginForBookendComponent,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';

@@ -27,7 +27,11 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
-import {createShadowRootWithStyle, getRGBFromCssColorValue, getTextColorForRGB} from './utils';
+import {
+  createShadowRootWithStyle,
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isArray} from '../../../src/types';

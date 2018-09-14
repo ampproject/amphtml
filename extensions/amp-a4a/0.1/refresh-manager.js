@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {RefreshIntersectionObserverWrapper} from './refresh-intersection-observer-wrapper';
+import {
+  RefreshIntersectionObserverWrapper,
+} from './refresh-intersection-observer-wrapper';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 

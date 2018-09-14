@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 import {Deferred} from '../../../src/utils/promise';
-import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY, VideoEvents} from '../../../src/video-interface';
+import {
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoEvents,
+} from '../../../src/video-interface';
 import {
   SandboxOptions,
   createFrameFor,
