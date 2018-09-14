@@ -685,23 +685,31 @@ export class LayoutElement {
     if (layout === this) {
       return false;
     }
-    const element = this.element_;
-    const other = layout.element_;
+    return this.contains_(this.element_, layout.element_);
+  }
+
+  /**
+   * A check that the LayoutElement is contained by this layer.
+   *
+   * @param {!Element} element
+   * @param {!Element} other
+   * @return {boolean}
+   */
+  contains_(element, other) {
     if (element.contains(other)) {
       return true;
     }
 
-    if (this.sameDocument_(layout)) {
-      // Layers inside a shadow tree may contain children from the light tree.
-      const rootNode = rootNodeFor(element);
-      const host = rootNode && rootNode.host;
-      return !!host && host.contains(other);
+    // Layers in a parent document may contain children of an FIE.
+    if (element.ownerDocument !== other.ownerDocument) {
+      const frame = frameParent(/** @type {!Node} */(other.ownerDocument));
+      return !!frame && this.contains_(element, frame);
     }
 
-    // Layers in a parent document may contain children of an FIE.
-    // Only one level FIE is supported.
-    const frame = frameParent(/** @type {!Node} */(other.ownerDocument));
-    return !!frame && element.contains(frame);
+    // Layers inside a shadow tree may contain children from the light tree.
+    const rootNode = rootNodeFor(element);
+    const host = rootNode && rootNode.host;
+    return !!host && host.contains(other);
   }
 
   /**
@@ -1236,7 +1244,8 @@ export class LayoutElement {
       return positionLt(0, 0);
     }
 
-    const position = this.getScrolledPosition();
+    const {ownerDocument} = this.element_;
+    const position = this.getScrolledPosition(ownerDocument.documentElement);
     return positionLt(
         position.left - this.getScrollLeft(),
         position.top - this.getScrollTop()

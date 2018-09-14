@@ -182,11 +182,16 @@ describes.realWin('Layers', {amp: true}, env => {
           let layout;
           let parentLayout;
           let rootLayout;
+
           beforeEach(() => {
             return new Promise(res => {
               if (impl === 'fie') {
                 res(friendlyIframe().then(struct => {
-                  return struct.body;
+                  const {iframe, body} = struct;
+                  // ensure the scrolling element has enough content to scroll
+                  iframe.style.width = '200vw';
+                  iframe.style.height = '200vh';
+                  return body;
                 }));
               } else {
                 res(root);
@@ -201,16 +206,17 @@ describes.realWin('Layers', {amp: true}, env => {
               scrollingElement.style.height = '100vh';
               scrollingElement.style.position = 'absolute';
               scrollingElement.style.overflow = 'scroll';
-              parent.style.width = '110vw';
-              parent.style.height = '110vh';
+              parent.style.width = '200vw';
+              parent.style.height = '200vh';
               parent.style.position = 'absolute';
               parent.style.overflow = 'scroll';
-              div.style.width = '120vw';
-              div.style.height = '120vh';
+              div.style.width = '250vw';
+              div.style.height = '250vh';
               div.style.position = 'absolute';
               div.style.overflow = 'scroll';
 
               const layers = Services.layersForDoc(parent);
+              debugger;
               layers.declareLayer(parent);
               layers.add(div);
               layout = LayoutElement.for(div);
@@ -297,7 +303,6 @@ describes.realWin('Layers', {amp: true}, env => {
               top: 0,
             });
 
-            debugger;
             scroll(scrollingElement, 10, 0);
             expect(rootLayout.getScrollTop()).to.equal(10);
             expect(rootLayout.getScrolledPosition()).to.deep.equal({
@@ -345,30 +350,44 @@ describes.realWin('Layers', {amp: true}, env => {
           let parentLayout;
           let rootLayout;
           beforeEach(() => {
-            parent = createElement();
-            div = createElement();
-            parent.appendChild(div);
-            root.appendChild(parent);
+            return new Promise(res => {
+              if (impl === 'fie') {
+                res(friendlyIframe().then(struct => {
+                  const {iframe, body} = struct;
+                  // ensure the scrolling element has enough content to scroll
+                  iframe.style.width = '200vw';
+                  iframe.style.height = '200vh';
+                  return body;
+                }));
+              } else {
+                res(root);
+              }
+            }).then(container => {
+              parent = createElement();
+              div = createElement();
+              parent.appendChild(div);
+              container.appendChild(parent);
 
-            scrollingElement.style.width = '100vw';
-            scrollingElement.style.height = '100vh';
-            scrollingElement.style.position = 'absolute';
-            scrollingElement.style.overflow = 'scroll';
-            parent.style.width = '110vw';
-            parent.style.height = '110vh';
-            parent.style.position = 'absolute';
-            parent.style.overflow = 'scroll';
-            div.style.width = '120vw';
-            div.style.height = '120vh';
-            div.style.position = 'absolute';
-            div.style.overflow = 'scroll';
+              scrollingElement.style.width = '100vw';
+              scrollingElement.style.height = '100vh';
+              scrollingElement.style.position = 'absolute';
+              scrollingElement.style.overflow = 'scroll';
+              parent.style.width = '110vw';
+              parent.style.height = '110vh';
+              parent.style.position = 'absolute';
+              parent.style.overflow = 'scroll';
+              div.style.width = '120vw';
+              div.style.height = '120vh';
+              div.style.position = 'absolute';
+              div.style.overflow = 'scroll';
 
-            const layers = Services.layersForDoc(parent);
-            layers.declareLayer(parent);
-            layers.add(div);
-            layout = LayoutElement.for(div);
-            parentLayout = LayoutElement.for(parent);
-            rootLayout = LayoutElement.for(scrollingElement);
+              const layers = Services.layersForDoc(parent);
+              layers.declareLayer(parent);
+              layers.add(div);
+              layout = LayoutElement.for(div);
+              parentLayout = LayoutElement.for(parent);
+              rootLayout = LayoutElement.for(scrollingElement);
+            });
           });
 
           it('calculates layout offsets without scrolls', () => {
