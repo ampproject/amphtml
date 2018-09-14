@@ -360,6 +360,8 @@ export function applySandbox(iframe) {
     // We should consider turning this off! But since the top navigation
     // issue is the big one, we'll leave this allowed for now.
     'allow-modals',
+    // Give access to raw mouse movements.
+    'allow-pointer-lock',
     // This remains subject to popup blocking, it just makes it supported
     // at all.
     'allow-popups',

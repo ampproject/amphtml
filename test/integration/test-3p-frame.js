@@ -304,7 +304,8 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     expect(iframe.getAttribute('sandbox')).to.equal(
         'allow-top-navigation-by-user-activation ' +
         'allow-popups-to-escape-sandbox allow-forms ' +
-        'allow-modals allow-popups allow-same-origin allow-scripts');
+        'allow-modals allow-pointer-lock allow-popups allow-same-origin ' +
+        'allow-scripts');
   });
 
   it('should set sandbox (direct call)', () => {
@@ -313,7 +314,8 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     expect(iframe.getAttribute('sandbox')).to.equal(
         'allow-top-navigation-by-user-activation ' +
         'allow-popups-to-escape-sandbox allow-forms ' +
-        'allow-modals allow-popups allow-same-origin allow-scripts');
+        'allow-modals allow-pointer-lock allow-popups allow-same-origin ' +
+        'allow-scripts');
   });
 
   it('should not set sandbox without feature detection', () => {
