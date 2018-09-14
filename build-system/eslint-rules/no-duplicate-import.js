@@ -15,6 +15,14 @@
  */
 'use strict';
 
+// Enforces imports statements from a module are not duplicated
+//
+// Good
+// import { x, y, z } from './hello';
+//
+// Bad
+// import { x, z } from './hello';
+// import { y } from './hello';
 module.exports = {
   meta: {
     fixable: 'code',
