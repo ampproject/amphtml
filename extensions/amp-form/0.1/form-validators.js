@@ -450,6 +450,7 @@ function getInvalidType(input) {
 			// Checking for badInput error given that valueMissingError is already found
 			return invalidType;
 		} else if (input.validity[invalidType]) {
+			// Returning if any other error found
 			return invalidType;
 		}
 	}
