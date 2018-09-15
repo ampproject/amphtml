@@ -52,7 +52,9 @@ import {MOBIFY_CONFIG} from './vendors/mobify';
 import {MPARTICLE_CONFIG} from './vendors/mparticle';
 import {NEWRELIC_CONFIG} from './vendors/newrelic';
 import {NIELSEN_CONFIG} from './vendors/nielsen';
-import {NIELSEN_MARKETING_CLOUD_CONFIG} from './vendors/nielsen-marketing-cloud';
+import {
+  NIELSEN_MARKETING_CLOUD_CONFIG,
+} from './vendors/nielsen-marketing-cloud';
 import {OEWADIRECT_CONFIG} from './vendors/oewadirect';
 import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
@@ -60,7 +62,9 @@ import {PIANO_CONFIG} from './vendors/piano';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
-import {ADOBEANALYTICS_NATIVECONFIG_CONFIG} from './vendors/adobeanalytics_nativeConfig';
+import {
+  ADOBEANALYTICS_NATIVECONFIG_CONFIG,
+} from './vendors/adobeanalytics_nativeConfig';
 import {INFONLINE_CONFIG} from './vendors/infonline';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SEGMENT_CONFIG} from './vendors/segment';
@@ -75,7 +79,9 @@ import {LINKPULSE_CONFIG} from './vendors/linkpulse';
 import {RAKAM_CONFIG} from './vendors/rakam';
 import {IBEATANALYTICS_CONFIG} from './vendors/ibeatanalytics';
 import {TOPMAILRU_CONFIG} from './vendors/topmailru';
-import {ORACLEINFINITYANALYTICS_CONFIG} from './vendors/oracleInfinityAnalytics';
+import {
+  ORACLEINFINITYANALYTICS_CONFIG,
+} from './vendors/oracleInfinityAnalytics';
 import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
 

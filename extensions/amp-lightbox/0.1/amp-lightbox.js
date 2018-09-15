@@ -23,12 +23,14 @@ import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {
   assertDoesNotContainDisplay,
+  computedStyle,
+  px,
   resetStyles,
+  setImportantStyles,
   setStyle,
   setStyles,
   toggle,
 } from '../../../src/style';
-import {computedStyle, px, setImportantStyles} from '../../../src/style';
 import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
