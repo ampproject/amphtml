@@ -701,7 +701,7 @@ export class LayoutElement {
     }
 
     // Layers in a parent document may contain children of an FIE.
-    if (element.ownerDocument !== other.ownerDocument) {
+    if (!sameDocument(element, other)) {
       const frame = frameParent(/** @type {!Node} */(other.ownerDocument));
       return !!frame && this.contains_(element, frame);
     }
@@ -1240,7 +1240,7 @@ export class LayoutElement {
   relativeScrolledPositionForChildren_(layout) {
     // If the child's layout element is in an another document, its scroll
     // position is relative to the root of that document.
-    if (!this.sameDocument_(layout)) {
+    if (!sameDocument(this.element_, layout.element_)) {
       return positionLt(0, 0);
     }
 
@@ -1251,18 +1251,18 @@ export class LayoutElement {
         position.top - this.getScrollTop()
     );
   }
+}
 
-  /**
-   * Whether the layout belongs to the same owner document as this layout,
-   * meaning they share relative coordinate systems.
-   *
-   * @param {!LayoutElement} layout
-   * @return {boolean}
-   * @private
-   */
-  sameDocument_(layout) {
-    return this.element_.ownerDocument === layout.element_.ownerDocument;
-  }
+/**
+ * Whether the layout belongs to the same owner document as this layout,
+ * meaning they share relative coordinate systems.
+ *
+ * @param {!Element} element
+ * @param {!Element} other
+ * @return {boolean}
+ */
+function sameDocument(element, other) {
+  return element.ownerDocument === other.ownerDocument;
 }
 
 /**
