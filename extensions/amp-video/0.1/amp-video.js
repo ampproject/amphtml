@@ -629,7 +629,7 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   firstLayoutCompleted() {
-    if (this.getPlaceholder() && !this.hideBlurryPlaceholder_()) {
+    if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
   }
@@ -643,9 +643,9 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
-  * Fades out a blurry placeholder if one currently exists.
-  * @return {boolean} if there was a blurred image placeholder that was hidden.
-  */
+   * Fades out a blurry placeholder if one currently exists.
+   * @return {boolean} if there was a blurred image placeholder that was hidden.
+   */
   hideBlurryPlaceholder_() {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
