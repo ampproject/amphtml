@@ -26,7 +26,6 @@ const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
 /** @const @private {string} */
 const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
 
-
 /** @type {boolean|undefined} */
 let reportValiditySupported;
 
@@ -36,7 +35,6 @@ let checkValiditySupported;
 /** @type {number} */
 let validationBubbleCount = 0;
 
-
 /**
  * @param {boolean} isSupported
  * @private visible for testing.
@@ -44,7 +42,6 @@ let validationBubbleCount = 0;
 export function setReportValiditySupportedForTesting(isSupported) {
   reportValiditySupported = isSupported;
 }
-
 
 /**
  * @param {boolean} isSupported
@@ -54,7 +51,6 @@ export function setCheckValiditySupportedForTesting(isSupported) {
   checkValiditySupported = isSupported;
 }
 
-
 /** @const @enum {string} */
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
@@ -63,16 +59,14 @@ const CustomValidationTypes = {
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
-
 /**
  * Form validator interface.
  * @abstract
  */
 export class FormValidator {
-
   /**
-   * @param {!HTMLFormElement} form
-   */
+	 * @param {!HTMLFormElement} form
+	 */
   constructor(form) {
     /** @protected @const {!HTMLFormElement} */
     this.form = form;
@@ -87,25 +81,25 @@ export class FormValidator {
     this.root = this.ampdoc.getRootNode();
 
     /**
-     * Tribool indicating last known validity of form.
-     * @private {boolean|null}
-     */
+		 * Tribool indicating last known validity of form.
+		 * @private {boolean|null}
+		 */
     this.formValidity_ = null;
   }
 
   /**
-   * Called to report validation errors.
-   */
+	 * Called to report validation errors.
+	 */
   report() {}
 
   /**
-   * @param {!Event} unusedEvent
-   */
+	 * @param {!Event} unusedEvent
+	 */
   onBlur(unusedEvent) {}
 
   /**
-   * @param {!Event} unusedEvent
-   */
+	 * @param {!Event} unusedEvent
+	 */
   onInput(unusedEvent) {}
 
   /** @return {!NodeList} */
@@ -114,10 +108,10 @@ export class FormValidator {
   }
 
   /**
-   * Fires a valid/invalid event from the form if its validity state
-   * has changed since the last invocation of this function.
-   * @visibleForTesting
-   */
+	 * Fires a valid/invalid event from the form if its validity state
+	 * has changed since the last invocation of this function.
+	 * @visibleForTesting
+	 */
   fireValidityEventIfNecessary() {
     const previousValidity = this.formValidity_;
     this.formValidity_ = this.form.checkValidity();
@@ -130,10 +124,8 @@ export class FormValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class DefaultValidator extends FormValidator {
-
   /** @override */
   report() {
     this.form.reportValidity();
@@ -141,14 +133,12 @@ export class DefaultValidator extends FormValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class PolyfillDefaultValidator extends FormValidator {
-
   /**
-   * Creates an instance of PolyfillDefaultValidator.
-   * @param {!HTMLFormElement} form
-   */
+	 * Creates an instance of PolyfillDefaultValidator.
+	 * @param {!HTMLFormElement} form
+	 */
   constructor(form) {
     super(form);
     const bubbleId = `i-amphtml-validation-bubble-${validationBubbleCount++}`;
@@ -161,7 +151,7 @@ export class PolyfillDefaultValidator extends FormValidator {
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
-        inputs[i]./*REVIEW*/focus();
+        inputs[i]./*REVIEW*/ focus();
         this.validationBubble_.show(inputs[i], inputs[i].validationMessage);
         break;
       }
@@ -192,24 +182,22 @@ export class PolyfillDefaultValidator extends FormValidator {
   }
 }
 
-
 /**
  * @abstract
  * @private visible for testing
  */
 export class AbstractCustomValidator extends FormValidator {
-
   /**
-   * Creates an instance of AbstractCustomValidator.
-   * @param {!HTMLFormElement} form
-   */
+	 * Creates an instance of AbstractCustomValidator.
+	 * @param {!HTMLFormElement} form
+	 */
   constructor(form) {
     super(form);
   }
 
   /**
-   * @param {!Element} input
-   */
+	 * @param {!Element} input
+	 */
   reportInput(input) {
     const invalidType = getInvalidType(input);
     if (invalidType) {
@@ -218,8 +206,8 @@ export class AbstractCustomValidator extends FormValidator {
   }
 
   /**
-   * Hides all validation messages.
-   */
+	 * Hides all validation messages.
+	 */
   hideAllValidations() {
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
@@ -228,27 +216,26 @@ export class AbstractCustomValidator extends FormValidator {
   }
 
   /**
-   * @param {!Element} input
-   * @param {string=} invalidType
-   * @return {?Element}
-   */
+	 * @param {!Element} input
+	 * @param {string=} invalidType
+	 * @return {?Element}
+	 */
   getValidationFor(input, invalidType) {
     if (!input.id) {
       return null;
     }
     const property = VALIDATION_CACHE_PREFIX + invalidType;
     if (!(property in input)) {
-      const selector = `[visible-when-invalid=${invalidType}]`
-          + `[validation-for=${input.id}]`;
+      const selector = `[visible-when-invalid=${invalidType}]` + `[validation-for=${input.id}]`;
       input[property] = this.root.querySelector(selector);
     }
     return input[property];
   }
 
   /**
-   * @param {!Element} input
-   * @param {string} invalidType
-   */
+	 * @param {!Element} input
+	 * @param {string} invalidType
+	 */
   showValidationFor(input, invalidType) {
     const validation = this.getValidationFor(input, invalidType);
     if (!validation) {
@@ -259,15 +246,13 @@ export class AbstractCustomValidator extends FormValidator {
     }
     input[VISIBLE_VALIDATION_CACHE] = validation;
 
-    this.resources.mutateElement(input,
-        () => input.setAttribute('aria-invalid', 'true'));
-    this.resources.mutateElement(validation,
-        () => validation.classList.add('visible'));
+    this.resources.mutateElement(input, () => input.setAttribute('aria-invalid', 'true'));
+    this.resources.mutateElement(validation, () => validation.classList.add('visible'));
   }
 
   /**
-   * @param {!Element} input
-   */
+	 * @param {!Element} input
+	 */
   hideValidationFor(input) {
     const visibleValidation = this.getVisibleValidationFor(input);
     if (!visibleValidation) {
@@ -275,36 +260,33 @@ export class AbstractCustomValidator extends FormValidator {
     }
     delete input[VISIBLE_VALIDATION_CACHE];
 
-    this.resources.mutateElement(input,
-        () => input.removeAttribute('aria-invalid'));
-    this.resources.mutateElement(visibleValidation,
-        () => visibleValidation.classList.remove('visible'));
+    this.resources.mutateElement(input, () => input.removeAttribute('aria-invalid'));
+    this.resources.mutateElement(visibleValidation, () => visibleValidation.classList.remove('visible'));
   }
 
   /**
-   * @param {!Element} input
-   * @return {?Element}
-   */
+	 * @param {!Element} input
+	 * @return {?Element}
+	 */
   getVisibleValidationFor(input) {
     return input[VISIBLE_VALIDATION_CACHE];
   }
 
   /**
-   * Whether an input should validate after an interaction.
-   * @param {!Element} unusedInput
-   * @return {boolean}
-   */
+	 * Whether an input should validate after an interaction.
+	 * @param {!Element} unusedInput
+	 * @return {boolean}
+	 */
   shouldValidateOnInteraction(unusedInput) {
     throw Error('Not Implemented');
   }
 
   /**
-   * @param {!Event} event
-   */
+	 * @param {!Event} event
+	 */
   onInteraction(event) {
     const input = dev().assertElement(event.target);
-    const shouldValidate =
-        !!input.checkValidity && this.shouldValidateOnInteraction(input);
+    const shouldValidate = !!input.checkValidity && this.shouldValidateOnInteraction(input);
 
     this.hideValidationFor(input);
     if (shouldValidate && !input.checkValidity()) {
@@ -323,10 +305,8 @@ export class AbstractCustomValidator extends FormValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
-
   /** @override */
   report() {
     this.hideAllValidations();
@@ -334,7 +314,7 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         this.reportInput(inputs[i]);
-        inputs[i]./*REVIEW*/focus();
+        inputs[i]./*REVIEW*/ focus();
         break;
       }
     }
@@ -348,10 +328,8 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
-
   /** @override */
   report() {
     this.hideAllValidations();
@@ -365,7 +343,7 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     }
 
     if (firstInvalidInput) {
-      firstInvalidInput./*REVIEW*/focus();
+      firstInvalidInput./*REVIEW*/ focus();
     }
 
     this.fireValidityEventIfNecessary();
@@ -376,7 +354,6 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     return !!this.getVisibleValidationFor(input);
   }
 }
-
 
 /** @private visible for testing */
 export class AsYouGoValidator extends AbstractCustomValidator {
@@ -392,7 +369,6 @@ export class AsYouGoValidator extends AbstractCustomValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   /** @override */
@@ -407,7 +383,6 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   }
 }
 
-
 /**
  * Returns the form validator instance.
  *
@@ -415,8 +390,7 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
  * @return {!FormValidator}
  */
 export function getFormValidator(form) {
-  const customValidation = form.getAttribute(
-      'custom-validation-reporting');
+  const customValidation = form.getAttribute('custom-validation-reporting');
   switch (customValidation) {
     case CustomValidationTypes.AsYouGo:
       return new AsYouGoValidator(form);
@@ -435,7 +409,6 @@ export function getFormValidator(form) {
   return new PolyfillDefaultValidator(form);
 }
 
-
 /**
  * Returns whether reportValidity API is supported.
  * @param {?Document} doc
@@ -447,7 +420,6 @@ function isReportValiditySupported(doc) {
   }
   return !!reportValiditySupported;
 }
-
 
 /**
  * Returns whether reportValidity API is supported.
@@ -461,17 +433,27 @@ export function isCheckValiditySupported(doc) {
   return checkValiditySupported;
 }
 
-
 /**
  * Returns invalid error type on the input.
  * @param {!Element} input
  * @return {?string}
  */
 function getInvalidType(input) {
+  let isValueMissingError = false,
+      errorValue = null;
   for (const invalidType in input.validity) {
-    if (input.validity[invalidType]) {
+    if (invalidType === 'valueMissing' && input.validity[invalidType]) {
+      // Checking for valueMissing Error
+      isValueMissingError = true;
+      errorValue = invalidType;
+    } else if (isValueMissingError && invalidType === 'badInput' && input.validity[invalidType]) {
+      // Checking for badInput error given that valueMissingError is already found
+      return invalidType;
+    } else if (input.validity[invalidType]) {
+      // Returning if any other error found
       return invalidType;
     }
   }
-  return null;
+  // checking if only error found is valueMissing Error else return null
+  return isValueMissingError ? errorValue : null;
 }
