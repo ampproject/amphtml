@@ -25,7 +25,9 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {install as installCustomElements} from '../src/polyfills/custom-elements';
+import {
+  install as installCustomElements,
+} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStylesLegacy} from '../src/style-installer';

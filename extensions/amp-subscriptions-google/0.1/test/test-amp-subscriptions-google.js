@@ -19,7 +19,10 @@ import {
   Entitlements,
   SubscribeResponse,
 } from '../../../../third_party/subscriptions-project/swg';
-import {Entitlement, GrantReason} from '../../../amp-subscriptions/0.1/entitlement';
+import {
+  Entitlement,
+  GrantReason,
+} from '../../../amp-subscriptions/0.1/entitlement';
 import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   PageConfig,

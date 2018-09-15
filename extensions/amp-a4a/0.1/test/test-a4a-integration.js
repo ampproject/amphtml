@@ -24,7 +24,7 @@ import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
-import {getA4ARegistry} from '../../../../ads/_a4a-config';
+import {getA4ARegistry, signingServerURLs} from '../../../../ads/_a4a-config';
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {loadPromise} from '../../../../src/event-helper';
@@ -32,7 +32,6 @@ import {
   resetScheduledElementForTesting,
   upgradeOrRegisterElement,
 } from '../../../../src/service/custom-element-registry';
-import {signingServerURLs} from '../../../../ads/_a4a-config';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';

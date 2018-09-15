@@ -17,9 +17,9 @@
 import {dict} from './utils/object';
 import {
   fromStructuredCloneable,
+  toStructuredCloneable,
   verifyAmpCORSHeaders,
 } from './utils/xhr-utils';
-import {toStructuredCloneable} from './utils/xhr-utils';
 
 /**
  * @typedef {{
