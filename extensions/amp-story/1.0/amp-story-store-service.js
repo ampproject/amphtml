@@ -138,7 +138,7 @@ export const Action = {
   TOGGLE_RTL: 'togglertl',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SIDEBAR: 'togglesidebar',
-  TOGGLE_STORY_HAS_SIDEBAR: 'togglestoryhassidebar',
+  TOGGLE_HAS_SIDEBAR: 'togglehassidebar',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
   TOGGLE_STORY_HAS_AUDIO: 'togglestoryhasaudio',
   TOGGLE_UI: 'toggleui',
@@ -205,9 +205,16 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.RTL_STATE]: !!data}));
     case Action.TOGGLE_SIDEBAR:
+      // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
+      if (state[StateProperty.SIDEBAR_STATE] === data) {
+        return state;
+      }
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.SIDEBAR_STATE]: !!data}));
-    case Action.TOGGLE_STORY_HAS_SIDEBAR:
+          {}, state, {
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.SIDEBAR_STATE]: !!data,
+          }));
+    case Action.TOGGLE_HAS_SIDEBAR:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.STORY_HAS_SIDEBAR_STATE]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:

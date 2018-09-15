@@ -56,7 +56,7 @@ const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 const HAS_AUDIO_ATTRIBUTE = 'i-amphtml-story-audio-state';
 
 /** @private @const {string} */
-const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-sidebar-state';
+const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
 
 /** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
@@ -367,8 +367,8 @@ export class SystemLayer {
 
     this.storeService_.subscribe(StateProperty.STORY_HAS_SIDEBAR_STATE,
         hasSidebar => {
-          this.checkSidebarDisplay_(hasSidebar);
-        });
+          this.onHasSidebarStateUpdate_(hasSidebar);
+        }, true /** callToInitialize */);
   }
 
   /**
@@ -414,7 +414,7 @@ export class SystemLayer {
    * @param {boolean} hasSidebar
    * @private
    */
-  checkSidebarDisplay_(hasSidebar) {
+  onHasSidebarStateUpdate_(hasSidebar) {
     if (hasSidebar) {
       this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '');
     } else {

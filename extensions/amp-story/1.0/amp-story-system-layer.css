@@ -183,7 +183,7 @@
   display: none !important;
 }
 
-[i-amphtml-story-sidebar-state] .i-amphtml-story-sidebar-control {
+[i-amphtml-story-has-sidebar] .i-amphtml-story-sidebar-control {
   display: block !important;
 }
 
