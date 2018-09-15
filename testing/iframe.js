@@ -25,7 +25,9 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {install as installCustomElements} from '../src/polyfills/custom-elements';
+import {
+  install as installCustomElements,
+} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installStylesLegacy} from '../src/style-installer';
@@ -226,6 +228,10 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+      // Required for timer service, which now refers not to the global
+      // Promise but the passed in window Promise in it's constructor as
+      // it is an embedabble service. b\17733
+      iframe.contentWindow.Promise = window.Promise;
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
       const ampdoc =
           Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
