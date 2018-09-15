@@ -30,15 +30,22 @@ describes.sandboxed('StandardActions', {}, () => {
   let scrollStub;
   let ampdoc;
 
-  function createElement() {
-    return document.createElement('div');
+  function createElement(id = null) {
+    const element = document.createElement('div');
+    if (id !== null) {
+      element.id = id;
+    }
+    return element;
   }
 
-  function createAmpElement() {
+  function createAmpElement(id = null) {
     const element = createElement();
     element.classList.add('i-amphtml-element');
     element.collapse = sandbox.stub();
     element.expand = sandbox.stub();
+    if (id !== null) {
+      element.id = id;
+    }
     return element;
   }
 
@@ -407,6 +414,16 @@ describes.sandboxed('StandardActions', {}, () => {
       expect(optoutStub).to.be.calledOnce;
     });
 
+    it('should implement scrollTo', () => {
+      const id = 'AMP-scrollTo';
+      const element = createElement(id);
+      document.body.appendChild(element);
+      invocation.args = {id};
+      invocation.method = 'scrollTo';
+      invocation.trust = 100;
+      standardActions.handleAmpTarget(invocation);
+      expectAmpElementToHaveBeenScrolledIntoView(element);
+    });
 
     it('should implement setState()', () => {
       const invokeSpy = sandbox.stub();
