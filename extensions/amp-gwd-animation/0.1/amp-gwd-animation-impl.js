@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/dom';
-import {hasOwn} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
 

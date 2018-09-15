@@ -35,6 +35,7 @@ import {
   assertDoesNotContainDisplay,
   computedStyle,
   getVendorJsPropertyName,
+  setStyles,
 } from '../../../src/style';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
@@ -45,7 +46,6 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
-import {setStyles} from '../../../src/style';
 
 
 /** @const {string} */

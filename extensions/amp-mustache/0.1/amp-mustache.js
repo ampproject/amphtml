@@ -18,9 +18,15 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizer} from '../../../third_party/mustache/mustache';
-import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
+import {
+  parse as mustacheParse,
+  render as mustacheRender,
+  setUnescapedSanitizer,
+} from '../../../third_party/mustache/mustache';
+import {
+  sanitizeHtml,
+  sanitizeTagsForTripleMustache,
+} from '../../../src/sanitizer';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-mustache';

@@ -21,13 +21,14 @@ import {
 } from '../../video-interface';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
+  installPositionObserverServiceForDoc,
 } from '../position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
 } from '../position-observer/position-observer-worker';
 import {Services} from '../../services';
 import {closestBySelector, isRTL, removeElement} from '../../dom';
-import {createCustomEvent} from '../../event-helper';
+import {createCustomEvent, listen, listenOnce} from '../../event-helper';
 // Source for this constant is css/video-docking.css:
 import {cssText} from '../../../build/video-docking.css.js';
 import {dev, user} from '../../log';
@@ -35,12 +36,8 @@ import {dict} from '../../utils/object';
 import {getInternalVideoElementFor} from '../../utils/video';
 import {getServiceForDoc} from '../../service';
 import {htmlFor, htmlRefs} from '../../static-template';
-import {
-  installPositionObserverServiceForDoc,
-} from '../position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../style-installer';
 import {isFiniteNumber} from '../../types';
-import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
 import {once} from '../../utils/function';

@@ -15,7 +15,10 @@
  */
 
 import {Services} from '../../src/services';
-import {installGlobalSubmitListenerForDoc, onDocumentFormSubmit_} from '../../src/document-submit';
+import {
+  installGlobalSubmitListenerForDoc,
+  onDocumentFormSubmit_,
+} from '../../src/document-submit';
 
 describe('test-document-submit onDocumentFormSubmit_', () => {
   let sandbox;

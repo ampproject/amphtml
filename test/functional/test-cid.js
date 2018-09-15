@@ -29,7 +29,9 @@ import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {
+  installDocumentInfoServiceForDoc,
+} from '../../src/service/document-info-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {
   installExtensionsService,

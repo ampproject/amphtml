@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
-import {validateData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global

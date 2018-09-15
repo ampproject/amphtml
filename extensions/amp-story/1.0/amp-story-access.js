@@ -28,12 +28,11 @@ import {
   copyChildren,
   removeChildren,
 } from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isArray, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles} from '../../../src/style';
-import {user} from '../../../src/log';
 
 
 /** @const {string} */

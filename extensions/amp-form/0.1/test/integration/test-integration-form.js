@@ -17,7 +17,9 @@
 import {AmpEvents} from '../../../../../src/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
-import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
+import {
+  installGlobalSubmitListenerForDoc,
+} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from

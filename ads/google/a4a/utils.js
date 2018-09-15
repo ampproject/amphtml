@@ -20,15 +20,15 @@ import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getBinaryType} from '../../../src/experiments';
+import {
+  getBinaryType,
+  isExperimentOn,
+  toggleExperiment,
+} from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {
-  isExperimentOn,
-  toggleExperiment,
-} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 

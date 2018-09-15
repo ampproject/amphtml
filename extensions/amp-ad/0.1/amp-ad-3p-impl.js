@@ -25,6 +25,7 @@ import {
 import {
   Layout, // eslint-disable-line no-unused-vars
   LayoutPriority,
+  isLayoutSizeDefined,
 } from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
@@ -45,10 +46,8 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getIframe} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {preloadBootstrap} from '../../../src/3p-frame';
 import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */

@@ -26,10 +26,11 @@ import {
 import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
-import {addMissingParamsToUrl, isProtocolValid} from '../url';
 import {
+  addMissingParamsToUrl,
   addParamsToUrl,
   getSourceUrl,
+  isProtocolValid,
   parseQueryString,
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,

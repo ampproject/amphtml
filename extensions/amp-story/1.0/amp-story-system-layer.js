@@ -20,7 +20,10 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
-import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
+import {
+  DevelopmentModeLog,
+  DevelopmentModeLogButtonSet,
+} from './development-ui';
 import {LocalizedStringId} from './localization';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
