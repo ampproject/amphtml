@@ -21,7 +21,9 @@ import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
-import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
+import {
+  installUrlReplacementsForEmbed,
+} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 
 /**

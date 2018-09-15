@@ -26,7 +26,7 @@ import {
   installAmpdocServices,
 } from '../../src/runtime';
 import {createShadowRoot} from '../../src/shadow-embed';
-import {deactivateChunking} from '../../src/chunk';
+import {deactivateChunking, runChunksForTesting} from '../../src/chunk';
 import {
   getServiceForDoc,
   getServicePromise,
@@ -35,7 +35,6 @@ import {
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 

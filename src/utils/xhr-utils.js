@@ -18,12 +18,17 @@ import {Services} from '../services';
 import {dev, user} from '../log';
 import {dict, map} from './object';
 import {fromIterator} from './array';
-import {getCorsUrl, getSourceOrigin, getWinOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
+import {getCorsUrl,
+  getSourceOrigin,
+  getWinOrigin,
+  isProxyOrigin,
+  parseUrlDeprecated,
+  serializeQueryString,
+} from '../url';
 import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
 import {parseJson} from '../json';
-import {serializeQueryString} from '../url';
 import {utf8Encode} from './bytes';
 
 /** @private @const {!Array<string>} */

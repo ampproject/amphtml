@@ -18,7 +18,11 @@ import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
 import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
-import {parseQueryString, parseUrlDeprecated, tryDecodeUriComponent} from '../../../src/url.js';
+import {
+  parseQueryString,
+  parseUrlDeprecated,
+  tryDecodeUriComponent,
+} from '../../../src/url.js';
 
 /** @typedef {{
  *    debug: boolean,

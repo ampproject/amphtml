@@ -16,8 +16,7 @@
 
 import {getMultiSizeDimensions} from '../ads/google/utils';
 import {loadScript, validateData} from '../3p/3p';
-import {rethrowAsync} from '../src/log';
-import {user} from '../src/log';
+import {rethrowAsync, user} from '../src/log';
 
 /**
  * @param {!Window} global

@@ -46,15 +46,13 @@ import {
   translate,
 } from '../../../src/transition';
 import {dev, user} from '../../../src/log';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
   getElementServiceForDoc,
 } from '../../../src/element-service';
-import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {px, setStyles} from '../../../src/style';
+import {px, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
-import {toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */

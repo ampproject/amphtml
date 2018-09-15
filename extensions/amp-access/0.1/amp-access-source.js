@@ -22,14 +22,17 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  getSourceOrigin,
+  parseQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {getValueForExpr} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
-import {parseQueryString} from '../../../src/url';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 

@@ -15,7 +15,9 @@
  */
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
-import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
+import {
+  LocalSubscriptionPlatformRenderer,
+} from '../local-subscription-platform-renderer';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';

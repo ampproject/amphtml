@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {FetchResponse, assertSuccess, getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
+import {
+  FetchResponse,
+  assertSuccess,
+  getViewerInterceptResponse,
+  setupAMPCors,
+  setupInit,
+  setupInput,
+  verifyAmpCORSHeaders,
+} from './utils/xhr-utils';
 import {Services} from './services';
 import {user} from './log';
 

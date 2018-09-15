@@ -23,7 +23,11 @@ import {
 import {ActionTrust} from '../../../../src/action-constants';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
-import {DEPRECATED_SHARE_PROVIDERS_KEY, SHARE_PROVIDERS_KEY, ScrollableShareWidget} from '../amp-story-share';
+import {
+  DEPRECATED_SHARE_PROVIDERS_KEY,
+  SHARE_PROVIDERS_KEY,
+  ScrollableShareWidget,
+} from '../amp-story-share';
 import {EventType, dispatch} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../localization';

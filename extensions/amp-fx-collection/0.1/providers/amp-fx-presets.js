@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../../../src/style';
+import {computedStyle, setStyles} from '../../../../src/style';
 import {dev, user} from '../../../../src/log';
-import {setStyles} from '../../../../src/style';
 
 export const Presets = {
   'parallax': {

@@ -22,10 +22,9 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 
-import {dev, user} from '../src/log';
+import {dev, rethrowAsync, user} from '../src/log';
 import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
-import {rethrowAsync} from '../src/log';
 
 
 /** @typedef {function(!Window, !Object)}  */

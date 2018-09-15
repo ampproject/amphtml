@@ -17,7 +17,12 @@
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  isProxyOrigin,
+  removeFragment,
+  serializeQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/dom';
@@ -25,11 +30,6 @@ import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {
-  isProxyOrigin,
-  removeFragment,
-  serializeQueryString,
-} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';

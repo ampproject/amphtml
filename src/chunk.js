@@ -17,7 +17,10 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {getServiceForDocDeprecated, registerServiceBuilderForDoc} from './service';
+import {
+  getServiceForDocDeprecated,
+  registerServiceBuilderForDoc,
+} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 

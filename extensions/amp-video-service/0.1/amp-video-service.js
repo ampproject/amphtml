@@ -29,11 +29,10 @@ import {VideoEvents} from '../../../src/video-interface';
 import {
   VideoServiceSignals,
 } from '../../../src/service/video-service-interface';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isFiniteNumber} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
 
 
 /** @private @const {string} */

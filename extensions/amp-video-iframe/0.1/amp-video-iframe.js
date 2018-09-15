@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 import {Deferred} from '../../../src/utils/promise';
-import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
+import {
+  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoEvents,
+} from '../../../src/video-interface';
 import {
   SandboxOptions,
   createFrameFor,
@@ -23,7 +26,6 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {

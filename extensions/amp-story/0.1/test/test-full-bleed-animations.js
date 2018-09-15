@@ -21,7 +21,10 @@
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {PRESETS} from '../animation-presets';
-import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-presets-utils';
+import {
+  calculateTargetScalingFactor,
+  targetFitsWithinPage,
+} from '../animation-presets-utils';
 
 describes.realWin('amp-story-full-bleed-animations', {
   amp: {

@@ -20,7 +20,9 @@ import {
 } from '../../../amp-a4a/0.1/template-validator';
 import {AmpAdTemplate} from '../amp-ad-custom';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
-import {data} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
+import {
+  data,
+} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
 import {tryParseJson} from '../../../../src/json';
 import {utf8Encode} from '../../../../src/utils/bytes';
 

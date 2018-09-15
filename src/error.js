@@ -25,10 +25,14 @@ import {
   isUserErrorMessage,
 } from './log';
 import {dict} from './utils/object';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
+import {
+  experimentTogglesOrNull,
+  getBinaryType,
+  isCanary,
+  isExperimentOn,
+} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
-import {isExperimentOn} from './experiments';
 import {
   isLoadErrorMessage,
 } from './event-helper';

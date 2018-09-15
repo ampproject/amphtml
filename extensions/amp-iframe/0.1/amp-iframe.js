@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
-import {LayoutPriority} from '../../../src/layout';
+import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData} from '../../../src/event-helper';
@@ -32,7 +32,6 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';

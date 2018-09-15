@@ -34,9 +34,8 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue, isObject, toArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject, toArray} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-ima-video';

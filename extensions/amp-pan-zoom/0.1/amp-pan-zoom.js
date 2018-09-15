@@ -29,14 +29,13 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../../../src/layout-rect';
-import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
 import {px, scale, setStyles, translate} from '../../../src/style';
 
