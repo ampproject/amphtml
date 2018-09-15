@@ -468,10 +468,21 @@ export function isCheckValiditySupported(doc) {
  * @return {?string}
  */
 function getInvalidType(input) {
+  let isValueMissingError = false,
+      errorValue = null;
   for (const invalidType in input.validity) {
-    if (input.validity[invalidType]) {
+    if (invalidType === 'valueMissing' && input.validity[invalidType]) {
+      isValueMissingError = true;
+      errorValue = invalidType;
+    } else if (
+      isValueMissingError
+      && invalidType === 'badInput'
+      && input.validity[invalidType]
+    ) {
+      return invalidType;
+    } else if (input.validity[invalidType]) {
       return invalidType;
     }
   }
-  return null;
+  return isValueMissingError ? errorValue : null;
 }
