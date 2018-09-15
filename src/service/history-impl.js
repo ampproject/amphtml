@@ -24,6 +24,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../service';
+import {getState} from '../history';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -389,8 +390,9 @@ export class HistoryBindingNatural_ {
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
-    if (history.state && history.state[HISTORY_PROP_] !== undefined) {
-      this.startIndex_ = Math.min(history.state[HISTORY_PROP_],
+    const state = getState(history);
+    if (state && state[HISTORY_PROP_] !== undefined) {
+      this.startIndex_ = Math.min(state[HISTORY_PROP_],
           this.startIndex_);
     }
 
@@ -472,8 +474,10 @@ export class HistoryBindingNatural_ {
     history.replaceState = this.historyReplaceState_.bind(this);
 
     this.popstateHandler_ = e => {
+      const state = /** @type {!JsonObject} */(
+        /** @type {!PopStateEvent} */(e).state);
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
-          JSON.stringify(e.state));
+        JSON.stringify(state));
       this.onHistoryEvent_();
     };
     this.win.addEventListener('popstate', this.popstateHandler_);
@@ -621,7 +625,7 @@ export class HistoryBindingNatural_ {
   /** @private */
   getState_() {
     if (this.supportsState_) {
-      return this.win.history.state;
+      return getState(this.win.history);
     }
     return this.unsupportedState_;
   }

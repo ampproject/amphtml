@@ -22,6 +22,12 @@ module.exports = function(context) {
   const setStylesCall = 'CallExpression[callee.name=setStyles], CallExpression[callee.name=setImportantStyles]';
   const resetStylesCall = 'CallExpression[callee.name=resetStyles]';
 
+  const displayMessage = [
+    'Do not set the display property using setStyle.',
+    'Only the `toggle` helper in `src/style.js` is permitted to change the `display: none` style of an element.',
+    'Or use `setInitialDisplay` to setup an initial `display: block`, `inline-block`, etc., if it is not possible to do so in CSS.',
+  ].join('\n\t');
+
   return {
     [setStyleCall]: function(node) {
       const filePath = context.getFilename();
@@ -35,9 +41,23 @@ module.exports = function(context) {
       }
 
       if (arg.type !== 'Literal' || typeof arg.value !== 'string') {
+        if (arg.type === 'CallExpression') {
+          const {callee} = arg;
+          if (callee.type === 'Identifier' && callee.name === 'assertNotDisplay') {
+            return;
+          }
+        }
+
         return context.report({
           node: arg || node,
           message: 'property argument (the second argument) to setStyle must be a string literal',
+        });
+      }
+
+      if (arg.value === 'display') {
+        context.report({
+          node: arg,
+          message: displayMessage,
         });
       }
     },
@@ -75,6 +95,15 @@ module.exports = function(context) {
           });
           continue;
         }
+
+        const {key} = prop;
+        // `"display": "none"`, and `display: none` use two different AST keys.
+        if (key.value === 'display' || key.name === 'display') {
+          context.report({
+            node: prop,
+            message: displayMessage,
+          });
+        }
       }
     },
 
@@ -102,6 +131,13 @@ module.exports = function(context) {
             message: 'Style names must be string literals',
           });
           continue;
+        }
+
+        if (el.value === 'display') {
+          context.report({
+            node: el,
+            message: displayMessage,
+          });
         }
       }
     },

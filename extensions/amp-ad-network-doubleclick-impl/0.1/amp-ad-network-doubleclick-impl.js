@@ -30,6 +30,7 @@ import {
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
+  SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -47,6 +48,10 @@ import {
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {
+  DUMMY_FLUID_SIZE,
+  getMultiSizeDimensions,
+} from '../../../ads/google/utils';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
@@ -68,7 +73,6 @@ import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   incrementLoadingAds,
@@ -199,6 +203,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isFluidRequest_ = false;
 
+    /**
+     * @private {boolean}
+     * Indicates that the primary size of the slot is fluid.
+     */
+    this.isFluidPrimaryRequest_ = false;
+
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
 
@@ -246,6 +256,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * attempt to expand again when outside of the viewport.
      */
     this.reattemptToExpandFluidCreative_ = false;
+
+    /**
+     * Whether or not the iframe containing the ad should be sandboxed via the
+     * "sandbox" attribute.
+     * @private {boolean}
+     */
+    this.shouldSandbox_ = false;
   }
 
   /**
@@ -289,8 +306,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluidRequest_ = layout == Layout.FLUID;
-    return this.isFluidRequest_ || isLayoutSizeDefined(layout);
+    this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
+    this.isFluidRequest_ = this.isFluidRequest_ || this.isFluidPrimaryRequest_;
+    return this.isFluidPrimaryRequest_ || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -375,6 +393,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');
+    if (!this.isFluidRequest_) {
+      const multiSizeStr = this.element.getAttribute('data-multi-size');
+      this.isFluidRequest_ = !!multiSizeStr &&
+          multiSizeStr.indexOf('fluid') != -1;
+    }
   }
 
   /** @override */
@@ -452,7 +475,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = this.isFluidRequest_ ? {width: 0, height: 0} :
+    this.initialSize_ = this.isFluidPrimaryRequest_ ? {width: 0, height: 0} :
       (width && height ?
         // width/height could be 'auto' in which case we fallback to measured.
         {width, height} : this.getIntersectionElementLayoutBox());
@@ -460,8 +483,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey = this.generateAdKey_(
         `${this.initialSize_.width}x${this.initialSize_.height}`);
-    this.parameterSize = this.isFluidRequest_ ?
-      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
+    this.parameterSize = this.isFluidPrimaryRequest_
+      ? DUMMY_FLUID_SIZE
+      : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
       if (this.element.getAttribute('layout') == 'responsive') {
@@ -481,7 +505,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.initialSize_.width,
           this.initialSize_.height,
           multiSizeValidation == 'true',
-          this.isFluidRequest_);
+          this.isFluidPrimaryRequest_);
       if (dimensions.length) {
         this.parameterSize += '|' + dimensions
             .map(dimension => dimension.join('x'))
@@ -695,6 +719,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   extractSize(responseHeaders) {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
+    this.shouldSandbox_ = responseHeaders.get(SANDBOX_HEADER) == 'true';
     this.troubleshootData_.creativeId =
         responseHeaders.get('google-creative-id');
     this.troubleshootData_.lineItemId =
@@ -728,6 +753,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     return size;
+  }
+
+  /** @override */
+  sandboxHTMLCreativeFrame() {
+    return this.shouldSandbox_;
   }
 
   /**
@@ -767,6 +797,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     sraRequests = null;
     this.sraDeferred = null;
     this.qqid_ = null;
+    this.shouldSandbox_ = false;
     this.consentState = null;
     this.getAdUrlDeferred = new Deferred();
     this.removePageviewStateToken();

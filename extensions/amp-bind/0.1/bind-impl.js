@@ -480,16 +480,16 @@ export class Bind {
   /**
    * Calls setState(s), where s is data.state with the non-overridable keys
    * removed.
-   * @param {*} data
+   * @param {!JsonObject} data
    * @return {!Promise}
    * @private
    */
   premutate_(data) {
     const ignoredKeys = [];
     return this.initializePromise_.then(() => {
-      Object.keys(data.state).forEach(key => {
+      Object.keys(data['state']).forEach(key => {
         if (!this.overridableKeys_.includes(key)) {
-          delete data.state[key];
+          delete data['state'][key];
           ignoredKeys.push(key);
         }
       });
@@ -498,7 +498,7 @@ export class Bind {
               'because they are missing the overridable attribute: ' +
               ignoredKeys.join(', '));
       }
-      return this.setState(data.state);
+      return this.setState(data['state']);
     });
   }
 
