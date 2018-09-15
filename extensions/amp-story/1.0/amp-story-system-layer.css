@@ -166,6 +166,7 @@
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text {
   width: max-content !important;
+  color: #fff !important;
 }
 
 .i-amphtml-story-sound-display {
