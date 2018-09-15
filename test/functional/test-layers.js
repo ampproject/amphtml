@@ -53,7 +53,7 @@ describes.realWin('Layers', {amp: true}, env => {
         return {
           iframe,
           body: iframe.contentDocument.body,
-        }
+        };
       });
     }
 
@@ -109,7 +109,7 @@ describes.realWin('Layers', {amp: true}, env => {
           root.appendChild(div);
 
           expect(LayoutElement.getParentLayer(div)).to.equal(
-            LayoutElement.for(scrollingElement));
+              LayoutElement.for(scrollingElement));
         });
 
         it('returns null if element is fixed', () => {
@@ -137,7 +137,7 @@ describes.realWin('Layers', {amp: true}, env => {
 
           beforeEach(() => {
             return friendlyIframe().then(struct => {
-              iframe = struct.iframe,
+              iframe = struct.iframe;
               iframeBody = struct.body;
             });
           });
@@ -147,7 +147,7 @@ describes.realWin('Layers', {amp: true}, env => {
             iframeBody.appendChild(div);
 
             expect(LayoutElement.getParentLayer(div)).to.equal(
-              LayoutElement.for(scrollingElement));
+                LayoutElement.for(scrollingElement));
           });
 
           it('returns frameElement if element is fixed', () => {
@@ -156,7 +156,7 @@ describes.realWin('Layers', {amp: true}, env => {
 
             div.style.position = 'fixed';
             expect(LayoutElement.getParentLayer(div)).to.equal(
-              LayoutElement.for(iframe));
+                LayoutElement.for(iframe));
           });
 
           it('returns parent if parent element is fixed', () => {
@@ -216,7 +216,6 @@ describes.realWin('Layers', {amp: true}, env => {
               div.style.overflow = 'scroll';
 
               const layers = Services.layersForDoc(parent);
-              debugger;
               layers.declareLayer(parent);
               layers.add(div);
               layout = LayoutElement.for(div);
