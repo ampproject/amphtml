@@ -198,6 +198,7 @@ exports.getBundleFlags = function(g) {
     }
   });
   flagsArray.push('--js_module_root', `${g.tmp}/node_modules/`);
+  flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
 
