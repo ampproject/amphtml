@@ -65,9 +65,9 @@ For detailed information on testing, see [TESTING.md](TESTING.md).
   src/            - source code for the AMP runtime
   test/           - tests for the AMP runtime and builtins
   testing/        - testing infrastructure
-  third_party     - third party code used in AMP
-  tools           - code for AMP related tools
-  validator       - AMP Validator runners and tools
+  third_party/    - third party code used in AMP
+  tools/          - code for AMP related tools
+  validator/      - AMP Validator runners and tools
   
 </pre>
 
