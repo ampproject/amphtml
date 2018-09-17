@@ -30,6 +30,7 @@ const multer = require('multer');
 const path = require('path');
 const request = require('request');
 const pc = process;
+const countries = require('../examples/countries.json');
 
 app.use(bodyParser.json());
 app.use('/amp4test', require('./amp4test'));
@@ -1093,6 +1094,28 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(file);
   });
+});
+
+/**
+ * Autosuggest endpoint
+ */
+app.get('/search/countries', function(req, res) {
+  let filtered = [];
+  if (req.query.hasOwnProperty('q')) {
+    const query = req.query.q.toLowerCase();
+
+    filtered = countries.items
+        .filter(country => country.name.toLowerCase().startsWith(query));
+  }
+
+  const results = {
+    'items': [
+      {
+        'results': filtered,
+      },
+    ],
+  };
+  res.send(results);
 });
 
 /**
