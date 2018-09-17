@@ -1,11 +1,3 @@
-⚡⚡⚡
-
-The first **[AMP Contributor Summit](https://amphtml.wordpress.com/2018/06/28/announcing-the-amp-contributor-summit/)** for developers who contribute to the AMP open source project--or who want to start contributing--will be in **San Francisco, California September 25-26, 2018** with an **optional New Contributor Day on September 24**.
-
-If you are a contributor to AMP or you want to become one please **[apply to attend](https://events.withgoogle.com/amp-contributor-summit/)**!
-
-⚡⚡⚡
-
 # AMP HTML ⚡
 
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
