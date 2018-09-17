@@ -41,7 +41,7 @@ let UpdatedErrorsDef;
  * Construct the correct form verifier based on whether
  * a config block is present.
  * @param {!HTMLFormElement} form
- * @param {function():Promise<!../../../src/utils/xhr-utils.FetchResponse>} xhr
+ * @param {function():Promise<!Response>} xhr
  */
 export function getFormVerifier(form, xhr) {
   if (form.hasAttribute('verify-xhr')) {
@@ -164,7 +164,7 @@ export class DefaultVerifier extends FormVerifier { }
 export class AsyncVerifier extends FormVerifier {
   /**
    * @param {!HTMLFormElement} form
-   * @param {function():Promise<!../../../src/utils/xhr-utils.FetchResponse>} xhr
+   * @param {function():Promise<!Response>} xhr
    */
   constructor(form, xhr) {
     super(form);

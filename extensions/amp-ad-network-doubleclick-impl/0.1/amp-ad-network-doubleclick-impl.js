@@ -190,7 +190,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?../../../src/utils/xhr-utils.FetchResponse>} */
+    /** @protected {!Deferred<?Response>} */
     this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
@@ -723,9 +723,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.shouldSandbox_ = responseHeaders.get(SANDBOX_HEADER) == 'true';
     this.troubleshootData_.creativeId =
-        responseHeaders.get('google-creative-id');
+        dev().assertString(responseHeaders.get('google-creative-id') || '-1');
     this.troubleshootData_.lineItemId =
-        responseHeaders.get('google-lineitem-id');
+        dev().assertString(responseHeaders.get('google-lineitem-id') || '-1');
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -751,7 +751,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (responseHeaders.get('amp-ff-pageview-tokens')) {
       this.removePageviewStateToken();
       this.setPageviewStateToken(
-          responseHeaders.get('amp-ff-pageview-tokens'));
+          dev().assertString(responseHeaders.get('amp-ff-pageview-tokens')));
     }
 
     return size;

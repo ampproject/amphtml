@@ -21,6 +21,7 @@ import {
   install as installDOMTokenListToggle,
 } from './polyfills/domtokenlist-toggle';
 import {install as installDocContains} from './polyfills/document-contains';
+import {install as installFetch} from './polyfills/fetch';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
@@ -29,6 +30,7 @@ import {installCustomElements as installRegisterElement} from
 import {isExperimentOn} from './experiments';
 
 installDOMTokenListToggle(self);
+installFetch(self);
 installMathSign(self);
 installObjectAssign(self);
 installPromise(self);

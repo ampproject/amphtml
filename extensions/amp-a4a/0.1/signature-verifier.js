@@ -315,7 +315,8 @@ export class SignatureVerifier {
                   'Fast Fetch keyset spec requires Content-Type: ' +
                       'application/jwk-set+json');
               return response.json().then(
-                  jwkSet => {
+                  jsonResponse => {
+                    const jwkSet = /** @type {!JsonObject} */ (jsonResponse);
                     // This is supposed to be a JSON Web Key Set, as defined in
                     // Section 5 of RFC 7517. However, the signing service could
                     // misbehave and send an arbitrary JSON value, so we have to

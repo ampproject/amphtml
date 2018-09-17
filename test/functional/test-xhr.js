@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  FetchResponse,
-  assertSuccess,
-  fetchPolyfill,
-} from '../../src/utils/xhr-utils';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
+import {assertSuccess} from '../../src/utils/xhr-utils';
+import {fetchPolyfill} from '../../src/polyfills/fetch';
 import {getCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
@@ -332,12 +329,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
-          if (test.desc == 'Native' && 'Response' in Window) {
-            return new Response(body, init);
-          } else {
-            init.responseText = body;
-            return new FetchResponse(init);
-          }
+          return new Response(body, init);
         }
         const mockXhr = {
           status: 200,
@@ -480,12 +472,8 @@ describe.configure().skipSafari().run('XHR', function() {
 
       beforeEach(() => {
         xhr = xhrServiceForTesting(test.win);
-        const mockXhr = {
-          status: 200,
-          responseText: TEST_TEXT,
-        };
         fetchStub = sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
-            () => Promise.resolve(new FetchResponse(mockXhr)));
+            () => Promise.resolve(new Response(TEST_TEXT)));
       });
 
       it('should be able to fetch a document', () => {
@@ -624,87 +612,6 @@ describe.configure().skipSafari().run('XHR', function() {
         allowConsoleError(() => { expect(nullFn).to.throw(); });
       });
 
-    });
-  });
-
-  describe('FetchResponse', () => {
-    const TEST_TEXT = 'this is some test text';
-    const mockXhr = {
-      status: 200,
-      responseText: TEST_TEXT,
-    };
-
-    it('should provide text', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text().then(result => {
-        expect(result).to.equal(TEST_TEXT);
-      });
-    });
-
-    it('should provide text only once', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text().then(result => {
-        expect(result).to.equal(TEST_TEXT);
-        expect(response.text.bind(response), 'should throw').to.throw(Error,
-            /Body already used/);
-      });
-    });
-
-    it('should be cloneable and each instance should provide text', () => {
-      const response = new FetchResponse(mockXhr);
-      const clone = response.clone();
-      return Promise.all([
-        response.text(),
-        clone.text(),
-      ]).then(results => {
-        expect(results[0]).to.equal(TEST_TEXT);
-        expect(results[1]).to.equal(TEST_TEXT);
-      });
-    });
-
-    it('should not be cloneable if body is already accessed', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text()
-          .then(() => {
-            expect(() => response.clone(), 'should throw').to.throw(
-                Error,
-                /Body already used/);
-          });
-    });
-
-    scenarios.forEach(test => {
-      if (test.desc === 'Polyfill') {
-        // FetchRequest is only returned by the Polyfill version of Xhr.
-        describe('#text', () => {
-          let xhr;
-
-          beforeEach(() => {
-            xhr = xhrServiceForTesting(test.win);
-            setupMockXhr();
-          });
-
-          it('should return text from a full XHR request', () => {
-            const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
-                response => {
-                  expect(response).to.be.instanceof(FetchResponse);
-                  return response.text().then(result => {
-                    expect(result).to.equal(TEST_TEXT);
-                  });
-                });
-            xhrCreated.then(
-                xhr => xhr.respond(
-                    200, {
-                      'Content-Type': 'text/plain',
-                      'Access-Control-Expose-Headers':
-                          'AMP-Access-Control-Allow-Source-Origin',
-                      'AMP-Access-Control-Allow-Source-Origin':
-                          'https://acme.com',
-                    },
-                    TEST_TEXT));
-            return promise;
-          });
-        });
-      }
     });
   });
 
