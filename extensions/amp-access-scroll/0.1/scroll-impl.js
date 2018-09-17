@@ -86,15 +86,15 @@ const analyticsConfig = connectHostname => {
 };
 
 /**
- * The TLD for scroll URLs.
+ * The TLD for scroll URLs in development mode.
  *
  * Enables amp-access-scroll to work with dev/staging environments.
  *
  * @param {!JsonObject} config
  * @return {string}
  */
-const scrollTld = config => {
-  return getMode().development && config['tld'] ? config['tld'] : '.scroll.com';
+const devTld = config => {
+  return getMode().development && config['tld'] ? config['tld'] : '';
 };
 
 /**
@@ -104,7 +104,21 @@ const scrollTld = config => {
  * @return {string}
  */
 const connectHostname = config => {
-  return `https://connect${scrollTld(config)}`;
+  return `https://connect${devTld(config) || '.scroll.com'}`;
+};
+
+/**
+ * The scroll web server hostname.
+ *
+ * @param {!JsonObject} config
+ * @return {string}
+ */
+const scrollHostname = config => {
+  const devScrollTld = devTld(config);
+  if (devScrollTld) {
+    return `https://scroll${devScrollTld}`;
+  }
+  return 'https://scroll.com';
 };
 
 /**
@@ -142,7 +156,8 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           if (response && response.scroll) {
             if (!isStory) {
               const config = this.accessSource_.getAdapterConfig();
-              new ScrollElement(this.ampdoc).show(this.accessSource_, config);
+              new ScrollElement(this.ampdoc).handleScrollUser(
+                  this.accessSource_, config);
               addAnalytics(this.ampdoc, config);
             }
           } else {
@@ -194,7 +209,12 @@ class ScrollContentBlocker {
         .then(() => false, e => this.blockedByScrollApp_(e.message))
         .then(blockedByScrollApp => {
           if (blockedByScrollApp === true) {
-            this.connectWithApp_();
+            // TODO(dbow): ping /embed/event
+            // TODO(dbow): Ideally we would automatically redirect to the page
+            // here, but for now we are adding a button so we redirect on user
+            // action.
+            new ScrollElement(this.ampdoc_).addActivateButton(
+                this.accessSource_, this.accessSource_.getAdapterConfig());
           }
         });
   }
@@ -215,31 +235,12 @@ class ScrollContentBlocker {
       ) === 0
     );
   }
-
-  /**
-   * Redirect to the Scroll App connect page.
-   *
-   * @private
-   */
-  connectWithApp_() {
-    // TODO(dbow): ping /embed/event
-    this.accessSource_.buildUrl((
-      'https://beta.scroll.com/loginwithapp'
-      + '?rid=READER_ID'
-      + '&cid=CLIENT_ID(scroll1)'
-      + '&c=CANONICAL_URL'
-      + '&o=AMPDOC_URL'
-      + '&x=QUERY_PARAM(scrollx)'
-    ), false).then(url => {
-      this.ampdoc_.win.top.location = url;
-    });
-  }
 }
 
 /**
- * UI for logged-in Scroll users.
+ * UI for Scroll users.
  *
- * Presents a fixed bar at the bottom of the screen.
+ * Presents a fixed bar at the bottom of the screen with Scroll content.
  */
 class ScrollElement {
   /**
@@ -252,22 +253,9 @@ class ScrollElement {
     this.ampdoc_ = ampdoc;
 
     /** @const {!Element} */
-    this.placeholder_ = document.createElement('div');
-    this.placeholder_.classList.add('amp-access-scroll-bar');
-    this.placeholder_.classList.add('amp-access-scroll-placeholder');
-    const img = document.createElement('img');
-    img.setAttribute('src',
-        'https://static.scroll.com/assets/icn-scroll-logo.svg');
-    img.setAttribute('layout', 'fixed');
-    img.setAttribute('width', 26);
-    img.setAttribute('height', 26);
-    this.placeholder_.appendChild(img);
-    ampdoc.getBody().appendChild(this.placeholder_);
-
-
-    /** @const {!Element} */
     this.scrollBar_ = document.createElement('div');
     this.scrollBar_.classList.add('amp-access-scroll-bar');
+
     /** @const {!Element} */
     this.iframe_ = document.createElement('iframe');
     this.iframe_.setAttribute('scrolling', 'no');
@@ -281,26 +269,64 @@ class ScrollElement {
                                          'allow-popups-to-escape-sandbox');
     this.scrollBar_.appendChild(this.iframe_);
     ampdoc.getBody().appendChild(this.scrollBar_);
+
+    // Promote to fixed layer.
+    Services.viewportForDoc(ampdoc).addToFixedLayer(this.scrollBar_);
   }
 
   /**
+   * Add a scrollbar placeholder and then load the scrollbar URL in the iframe.
+   *
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    * @param {!JsonObject} vendorConfig
    */
-  show(accessSource, vendorConfig) {
-    const SCROLLBAR_URL = `${connectHostname(vendorConfig)}/amp/scrollbar`
-                          + '?rid=READER_ID'
-                          + '&cid=CLIENT_ID(scroll1)'
-                          + '&c=CANONICAL_URL'
-                          + '&o=AMPDOC_URL';
-    Services.viewportForDoc(this.ampdoc_).addToFixedLayer(this.scrollBar_)
-        .then(() => accessSource.buildUrl(SCROLLBAR_URL, false))
-        .then(scrollbarUrl => {
-          this.iframe_.onload = () => {
-            this.ampdoc_.getBody().removeChild(this.placeholder_);
-          };
-          this.iframe_.setAttribute('src', scrollbarUrl);
-        });
+  handleScrollUser(accessSource, vendorConfig) {
+    // Add a placeholder element to display while scrollbar iframe loads.
+    const placeholder = document.createElement('div');
+    placeholder.classList.add('amp-access-scroll-bar');
+    placeholder.classList.add('amp-access-scroll-placeholder');
+    const img = document.createElement('img');
+    img.setAttribute('src',
+        'https://static.scroll.com/assets/icn-scroll-logo.svg');
+    img.setAttribute('layout', 'fixed');
+    img.setAttribute('width', 26);
+    img.setAttribute('height', 26);
+    placeholder.appendChild(img);
+    this.ampdoc_.getBody().appendChild(placeholder);
+
+    // Set iframe to scrollbar URL.
+    accessSource.buildUrl((
+      `${connectHostname(vendorConfig)}/amp/scrollbar`
+      + '?rid=READER_ID'
+      + '&cid=CLIENT_ID(scroll1)'
+      + '&c=CANONICAL_URL'
+      + '&o=AMPDOC_URL'
+    ), false).then(scrollbarUrl => {
+      this.iframe_.onload = () => {
+        // On iframe load, remove placeholder element.
+        this.ampdoc_.getBody().removeChild(placeholder);
+      };
+      this.iframe_.setAttribute('src', scrollbarUrl);
+    });
+  }
+
+  /**
+   * Add link to the Scroll App connect page.
+   *
+   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
+   * @param {!JsonObject} vendorConfig
+   */
+  addActivateButton(accessSource, vendorConfig) {
+    accessSource.buildUrl((
+      `${scrollHostname(vendorConfig)}/activateamp`
+      + '?rid=READER_ID'
+      + '&cid=CLIENT_ID(scroll1)'
+      + '&c=CANONICAL_URL'
+      + '&o=AMPDOC_URL'
+      + '&x=QUERY_PARAM(scrollx)'
+    ), false).then(url => {
+      this.iframe_.setAttribute('src', url);
+    });
   }
 }
 
