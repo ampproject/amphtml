@@ -67,18 +67,21 @@ amp-story[standalone][desktop] {
   right: -150px !important;
   bottom: -150px !important;
   left: -150px !important;
-  opacity: 0 !important;
   filter: blur(50px) !important;
   background-size: cover !important;
   background-color: transparent !important;
   background-position: center center !important;
   will-change: opacity, z-index !important;
   z-index: 0 !important;
+  opacity: 0 !important;
+  /** Don't hide the inactive background before the active one is visible. */
+  transition: opacity 0ms linear 300ms !important;
 }
 
 .i-amphtml-story-background.active {
   opacity: 1 !important;
   z-index: 1 !important;
+  transition: opacity 300ms cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 [desktop] amp-story-page[distance] {
