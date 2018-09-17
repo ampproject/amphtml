@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {getStyle, setStyle, setStyles} from '../../src/style';
+import {
+  getStyle,
+  setInitialDisplay,
+  setStyle,
+  setStyles,
+  toggle,
+} from '../../src/style';
 import {loadScript, validateData} from '../../3p/3p';
 import {tryParseJson} from '../../src/json.js';
 
@@ -143,7 +149,7 @@ export function resizeSuccessHandler(global, container, requestedHeight) {
   currentAmpHeight = requestedHeight;
   const overflow = global.document.getElementById('overflow');
   if (overflow) {
-    setStyle(overflow, 'display', 'none');
+    toggle(overflow, false);
     resizeCsa(container, requestedHeight);
   }
 }
@@ -163,7 +169,7 @@ export function resizeDeniedHandler(global, container, requestedHeight) {
   const containerHeight = parseInt(getStyle(container, 'height'), 10);
   if (containerHeight > currentAmpHeight) {
     if (overflow) {
-      setStyle(overflow, 'display', '');
+      toggle(overflow, true);
       resizeCsa(container, currentAmpHeight - overflowHeight);
     } else {
       createOverflow(global, container, requestedHeight);
@@ -347,8 +353,8 @@ function getOverflowChevron(global) {
     height: '36px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    display: 'block',
   });
+  setInitialDisplay(chevron, 'block');
   chevron./*OK*/innerHTML = svg;
   return chevron;
 }

@@ -22,7 +22,7 @@ import {
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {camelCaseToDash} from '../../src/string';
 import {hasOwn} from '../../src/utils/object';
-import {setStyles} from '../../src/style';
+import {setInitialDisplay, setStyles} from '../../src/style';
 import {user} from '../../src/log';
 import {validateData} from '../../3p/3p';
 
@@ -72,8 +72,8 @@ export function adsense(global, data) {
       });
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
+  setInitialDisplay(i, 'inline-block');
   setStyles(i, {
-    display: 'inline-block',
     width: '100%',
     height: '100%',
   });
