@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {Deferred} from '../../../src/utils/promise';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -30,8 +31,8 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import {setStyles, toggle} from '../../../src/style';
 import {
   setupAMPCors,
   setupJsonFetchInit,
@@ -97,6 +98,7 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
+
   }
 
   /** @override */
@@ -400,9 +402,10 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
+    const autoResize = this.element.hasAttribute('auto-resize');
+
     this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
-
       removeChildren(dev().assertElement(this.container_));
       elements.forEach(element => {
         if (!element.hasAttribute('role')) {
@@ -414,16 +417,81 @@ export class AmpList extends AMP.BaseElement {
       const event = createCustomEvent(this.win,
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
-
       // Change height if needed.
       this.measureElement(() => {
         const scrollHeight = this.container_./*OK*/scrollHeight;
         const height = this.element./*OK*/offsetHeight;
         if (scrollHeight > height) {
-          this.attemptChangeHeight(scrollHeight).catch(() => {});
+          if (autoResize) {
+            const layout = this.element.getAttribute('layout');
+            if (layout == Layout.FLEX_ITEM) {
+              // TODO (#17824): flex item + reset-on-refresh will add
+              // an invisible loader that fills the amp-list and shoves all
+              // list items out of the amp-list.
+              this.attemptChangeHeight(scrollHeight).catch(() => {});
+            } else if (layout !== Layout.CONTAINER) {
+              this.changeToLayoutContainer_(layout);
+            }
+          } else {
+            this.attemptChangeHeight(scrollHeight).catch(() => {});
+          }
         }
       });
-    }, this.container_);
+    });
+  }
+
+  /**
+   * Undoes previous size-defined layout, must be called in mutation context.
+   * @param {string} previousLayout
+   */
+  undoPreviousLayout_(previousLayout) {
+    switch (previousLayout) {
+      case Layout.RESPONSIVE:
+        this.element.classList.remove('i-amphtml-layout-responsive');
+        break;
+      case Layout.FIXED:
+        this.element.classList.remove('i-amphtml-layout-fixed');
+        setStyles(this.element, {
+          height: '',
+        });
+        break;
+      case Layout.FIXED_HEIGHT:
+        this.element.classList.remove('i-amphtml-layout-fixed-height');
+        setStyles(this.element, {
+          height: '',
+          width: '',
+        });
+        break;
+      case Layout.INTRINSIC:
+        this.element.classList.remove('i-amphtml-layout-intrinsic');
+        break;
+    }
+    // The changeSize call removes the sizer element
+    this.element./*OK*/changeSize();
+    this.element.classList.remove('i-amphtml-layout-size-defined');
+  }
+
+  /**
+   * Converts the amp-list to de facto layout container. Must be called in
+   * mutation context.
+   * @param {string} previousLayout
+   * @private
+   */
+  changeToLayoutContainer_(previousLayout) {
+    this.undoPreviousLayout_(previousLayout);
+    this.container_.classList.remove(
+        'i-amphtml-fill-content',
+        'i-amphtml-replaced-content'
+    );
+    // The overflow element is generally hidden with visibility hidden,
+    // but after changing to layout container, this causes an undesirable
+    // empty white space so we hide it with display none instead.
+    const overflowElement = this.getOverflowElement();
+    if (overflowElement) {
+      toggle(overflowElement, false);
+    }
+
+    this.element.setAttribute('layout', 'container');
   }
 
   /**
