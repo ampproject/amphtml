@@ -32,6 +32,7 @@ import {
   AnimationManager,
   hasAnimations,
 } from './animation';
+import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
@@ -48,7 +49,9 @@ import {
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
+import {
+  getFriendlyIframeEmbedOptional,
+} from '../../../src/friendly-iframe-embed';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
@@ -333,7 +336,8 @@ export class AmpStoryPage extends AMP.BaseElement {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-img':
           case 'amp-anim':
-            mediaEl.addEventListener('load', resolve, true /* useCapture */);
+            mediaEl.signals().whenSignal(CommonSignals.LOAD_END)
+                .then(resolve, resolve);
             break;
           case 'amp-audio':
           case 'amp-video':

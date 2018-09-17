@@ -67,12 +67,14 @@
     "amphtml-internal/is-experiment-on": 2,
     "amphtml-internal/no-array-destructuring": 2,
     "amphtml-internal/no-deep-destructuring": 2,
+    "amphtml-internal/no-duplicate-import": 2,
     "amphtml-internal/no-es2015-number-props": 2,
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
     "amphtml-internal/no-has-own-property-method": 1,
     "amphtml-internal/no-import": 2,
+    "amphtml-internal/no-import-rename": 2,
     "amphtml-internal/no-mixed-operators": 2,
     "amphtml-internal/no-spread": 2,
     "amphtml-internal/no-style-display": 2,
@@ -108,7 +110,7 @@
     "max-len": [2, 80, 4, {
       "ignoreTrailingComments": true,
       "ignoreRegExpLiterals": true,
-      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
+      "ignorePattern": "^} from.*;|= require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
       "ignoreUrls": true
     }],
     "no-alert": 2,

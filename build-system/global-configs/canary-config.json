@@ -37,13 +37,13 @@
   "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
   "amp-consent": 1,
-  "amp-img-native-srcset": 1,
   "amp-story-v1": 1,
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01,
   "faster-bind-scan": 1,
   "font-display-swap": 1,
   "amp-date-picker": 1,
+  "linker-meta-opt-in": 1,
   "amp-carousel-scroll-snap": 1,
   "amp-carousel-new-arrows": 0.01,
   "user-error-reporting": 1,
@@ -51,5 +51,5 @@
   "doubleclickSraExp": 0,
   "doubleclickSraReportExcludedBlock": 0.1,
   "inabox-rov": 1,
-  "layers": 1
+  "layers": 0
 }
