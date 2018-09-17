@@ -82,6 +82,14 @@ exports.gitBranchName = function() {
 };
 
 /**
+ * Returns the commit hash of the latest commit.
+ * @return {string}
+ */
+exports.gitCommitHash = function() {
+  return getStdout('git rev-parse --verify HEAD').trim();
+};
+
+/**
  * Returns the email of the author of the latest commit on the local branch.
  * @return {string}
  */

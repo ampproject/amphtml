@@ -317,8 +317,9 @@ const command = {
     }
     timedExecOrDie(cmd);
   },
-  runBundleSizeCheck: function() {
-    timedExecOrDie('gulp bundle-size');
+  runBundleSizeCheck: function(storeBundleSize = false) {
+    const extraArgs = storeBundleSize ? '--store' : '';
+    timedExecOrDie(`gulp bundle-size ${extraArgs}`);
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
@@ -441,7 +442,7 @@ function runAllCommands() {
     command.buildRuntimeMinified(/* extensions */ true);
     // Disable bundle-size check on release branch builds.
     if (process.env['TRAVIS_BRANCH'] === 'master') {
-      command.runBundleSizeCheck();
+      command.runBundleSizeCheck(/* storeBundleSize */ true);
     }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
