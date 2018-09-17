@@ -428,7 +428,7 @@ describes.realWin('amp-analytics', {
     analytics.buildCallback();
     const iniPromise = analytics.iniPromise_;
     expect(iniPromise).to.be.ok;
-    expect(el).to.have.display('none');
+    expect(el).to.have.attribute('hidden');
     // Viewer.whenFirstVisible is the first blocking call to initialize.
     expect(whenFirstVisibleStub).to.be.calledOnce;
 

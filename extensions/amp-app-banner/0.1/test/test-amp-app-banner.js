@@ -123,7 +123,6 @@ describes.realWin('amp-app-banner', {
   function testRemoveBanner(config = {iosMeta, androidManifest}) {
     return getAppBanner(config).then(banner => {
       expect(banner.parentElement).to.be.null;
-      expect(banner).to.have.display('none');
     });
   }
 

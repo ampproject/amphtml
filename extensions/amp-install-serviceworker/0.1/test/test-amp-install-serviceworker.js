@@ -439,7 +439,7 @@ describes.fakeWin('url rewriter', {
       const iframe = element.querySelector('iframe');
       expect(iframe).to.exist;
       expect(iframe.src).to.equal('https://example.com/shell#preload');
-      expect(iframe).to.have.display('none');
+      expect(iframe).to.have.attribute('hidden');
       expect(iframe.getAttribute('sandbox'))
           .to.equal('allow-scripts allow-same-origin');
     });

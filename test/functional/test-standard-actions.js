@@ -51,13 +51,13 @@ describes.sandboxed('StandardActions', {}, () => {
   function expectElementToHaveBeenHidden(element) {
     expect(mutateElementStub).to.be.calledOnce;
     expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-    expect(element).to.have.display('none');
+    expect(element).to.have.attribute('hidden');
   }
 
   function expectElementToHaveBeenShown(element) {
     expect(mutateElementStub).to.be.calledOnce;
     expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-    expect(element).to.not.have.display('none');
+    expect(element).to.not.have.attribute('hidden');
     expect(element.hasAttribute('hidden')).to.be.false;
   }
 

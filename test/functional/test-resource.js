@@ -446,7 +446,7 @@ describes.realWin('Resource', {amp: true}, env => {
       return owner;
     });
     resource.completeCollapse();
-    expect(resource.element).to.have.display('none');
+    expect(resource.element).to.have.attribute('hidden');
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
     expect(resource.isFixed()).to.be.false;

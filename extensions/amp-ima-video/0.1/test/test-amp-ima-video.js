@@ -77,12 +77,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const bigPlayDivMock = {
-      style: {
-        display: '',
-      },
-      removeEventListener() {},
-    };
+    const bigPlayDivMock = doc.createElement('div');
     const removeEventListenerSpy = sandbox.spy(
         bigPlayDivMock, 'removeEventListener');
     const adDisplayContainerMock = {initialize() {}};
@@ -105,7 +100,7 @@ describes.realWin('amp-ima-video', {
         .to.exist;
     expect(removeEventListenerSpy).to.be.calledWith(
         imaVideoObj.getPropertiesForTesting().interactEvent);
-    expect(bigPlayDivMock).to.have.display('none');
+    expect(bigPlayDivMock).to.have.attribute('hidden');
     expect(initSpy).to.be.called;
     expect(loadSpy).to.be.called;
     // TODO - Fix one I figure out how to spy on internals.
