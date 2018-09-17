@@ -280,7 +280,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   pauseCallback() {
     this.timer_.delay((() => {
       this.advancement_.stop();
-      console.log('swagg');
       this.stopListeningToVideoEvents_();
       this.pauseAllMedia_(true /** rewindToBeginning */);
 
