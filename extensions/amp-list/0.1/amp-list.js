@@ -463,6 +463,7 @@ export class AmpList extends AMP.BaseElement {
         this.element.classList.remove('i-amphtml-layout-intrinsic');
         break;
     }
+    // The changeSize call removes the sizer element
     this.element./*OK*/changeSize();
     this.element.classList.remove('i-amphtml-layout-size-defined');
   }
