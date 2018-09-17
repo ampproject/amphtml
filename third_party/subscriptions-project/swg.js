@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.25 */
+/** Version: 0.1.22.27 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -2142,6 +2142,17 @@ function createElement(doc, tagName, attributes, opt_content) {
 
 
 /**
+ * Removes the element.
+ * @param {!Element} element
+ */
+function removeElement(element) {
+  if (element.parentElement) {
+    element.parentElement.removeChild(element);
+  }
+}
+
+
+/**
  * Removes all children from the parent element.
  * @param {!Element} parent
  */
@@ -2326,7 +2337,7 @@ class ButtonApi {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -2648,6 +2659,12 @@ class View {
    * @abstract
    */
   shouldFadeBody() {}
+
+  /**
+   * @return {boolean}
+   * @abstract
+   */
+  hasLoadingIndicator() {}
 }
 
 /**
@@ -2712,13 +2729,15 @@ class ActivityIframeView extends View {
    * @param {string} src
    * @param {!Object<string, ?>=} args
    * @param {boolean=} shouldFadeBody
+   * @param {boolean=} hasLoadingIndicator
    */
   constructor(
       win,
       activityPorts,
       src,
       args,
-      shouldFadeBody = false) {
+      shouldFadeBody = false,
+      hasLoadingIndicator = false) {
     super();
 
     /** @private @const {!Window} */
@@ -2743,6 +2762,9 @@ class ActivityIframeView extends View {
 
     /** @private @const {boolean} */
     this.shouldFadeBody_ = shouldFadeBody;
+
+    /** @private @const {boolean} */
+    this.hasLoadingIndicator_ = hasLoadingIndicator;
 
     /** @private {?web-activities/activity-ports.ActivityIframePort} */
     this.port_ = null;
@@ -2779,6 +2801,14 @@ class ActivityIframeView extends View {
    */
   shouldFadeBody() {
     return this.shouldFadeBody_;
+  }
+
+  /**
+   * Returns if the view shows loading indicator.
+   * @return {boolean}
+   */
+  hasLoadingIndicator() {
+    return this.hasLoadingIndicator_;
   }
 
   /**
@@ -3191,15 +3221,18 @@ class SubscribeResponse {
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
    * @param {?UserData} userData
+   * @param {?Entitlements} entitlements
    * @param {function():!Promise} completeHandler
    */
-  constructor(raw, purchaseData, userData, completeHandler) {
+  constructor(raw, purchaseData, userData, entitlements, completeHandler) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
     this.purchaseData = purchaseData;
     /** @const {?UserData} */
     this.userData = userData;
+    /** @const {?Entitlements} */
+    this.entitlements = entitlements;
     /** @private @const {function():!Promise} */
     this.completeHandler_ = completeHandler;
   }
@@ -3212,6 +3245,7 @@ class SubscribeResponse {
         this.raw,
         this.purchaseData,
         this.userData,
+        this.entitlements,
         this.completeHandler_);
   }
 
@@ -3222,6 +3256,7 @@ class SubscribeResponse {
     return {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
+      'entitlements': this.entitlements ? this.entitlements.json() : null,
     };
   }
 
@@ -4211,7 +4246,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.25',
+    '_client': 'SwG 0.1.22.27',
   });
 }
 
@@ -4362,8 +4397,7 @@ class PayCompleteFlow {
       deps.dialogManager().popupClosed();
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
-      const promise = validatePayResponse(
-          deps.win(), port, flow.complete.bind(flow));
+      const promise = validatePayResponse(deps, port, flow.complete.bind(flow));
       deps.callbacks().triggerSubscribeResponse(promise);
       return promise.then(response => {
         flow.start(response);
@@ -4410,14 +4444,22 @@ class PayCompleteFlow {
   start(response) {
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
+    const args = {
+      'publicationId': this.deps_.pageConfig().getPublicationId(),
+    };
+    // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
+    if (response.userData && response.entitlements) {
+      args['idToken'] = response.userData.idToken;
+      this.deps_.entitlementsManager().pushNextEntitlements(
+          response.entitlements.raw);
+    } else {
+      args['loginHint'] = response.userData && response.userData.email;
+    }
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
         feUrl('/payconfirmiframe'),
-        feArgs({
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'loginHint': response.userData && response.userData.email,
-        }),
+        feArgs(args),
         /* shouldFadeBody */ true);
     this.activityIframeView_.onMessage(data => {
       if (data['entitlements']) {
@@ -4452,13 +4494,12 @@ class PayCompleteFlow {
 
 
 /**
- * @param {!Window} win
+ * @param {!./deps.DepsDef} deps
  * @param {!web-activities/activity-ports.ActivityPort} port
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
- * @package Visible for testing only.
  */
-function validatePayResponse(win, port, completeHandler) {
+function validatePayResponse(deps, port, completeHandler) {
   // Do not require security immediately: it will be checked below.
   return port.acceptResult().then(result => {
     if (result.origin != payOrigin()) {
@@ -4467,7 +4508,7 @@ function validatePayResponse(win, port, completeHandler) {
     const data = /** @type {!Object} */ (result.data);
     if (data['redirectEncryptedCallbackData']) {
       // Data is supplied as an encrypted blob.
-      const xhr = new Xhr(win);
+      const xhr = new Xhr(deps.win());
       const url = payDecryptUrl();
       const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
         method: 'post',
@@ -4483,16 +4524,17 @@ function validatePayResponse(win, port, completeHandler) {
       return data;
     }
     throw new Error('channel mismatch');
-  }).then(data => parseSubscriptionResponse(data, completeHandler));
+  }).then(data => parseSubscriptionResponse(deps, data, completeHandler));
 }
 
 
 /**
+ * @param {!./deps.DepsDef} deps
  * @param {*} data
  * @param {function():!Promise} completeHandler
  * @return {!SubscribeResponse}
  */
-function parseSubscriptionResponse(data, completeHandler) {
+function parseSubscriptionResponse(deps, data, completeHandler) {
   let swgData = null;
   let raw = null;
   if (data) {
@@ -4524,6 +4566,7 @@ function parseSubscriptionResponse(data, completeHandler) {
       raw,
       parsePurchaseData(swgData),
       parseUserData(swgData),
+      parseEntitlements(deps, swgData),
       completeHandler);
 }
 
@@ -4551,6 +4594,20 @@ function parseUserData(swgData) {
   }
   const jwt = /** @type {!Object} */ (new JwtHelper().decode(idToken));
   return new UserData(idToken, jwt);
+}
+
+
+/**
+ * @param {!./deps.DepsDef} deps
+ * @param {!Object} swgData
+ * @return {?../api/entitlements.Entitlements}
+ * @package Visible for testing.
+ */
+function parseEntitlements(deps, swgData) {
+  if (swgData['signedEntitlements']) {
+    return deps.entitlementsManager().parseEntitlements(swgData);
+  }
+  return null;
 }
 
 /**
@@ -4689,6 +4746,7 @@ class DeferredAccountFlow {
         '',  // raw field doesn't matter in this case
         purchaseData,
         userData,
+        entitlements,
         () => Promise.resolve()  // completeHandler doesn't matter in this case
     ));
     return response;
@@ -5156,6 +5214,9 @@ class Dialog {
 
     /** @private {boolean} */
     this.hidden_ = false;
+
+    /** @private {?./view.View} */
+    this.previousProgressView_ = null;
   }
 
   /**
@@ -5263,12 +5324,31 @@ class Dialog {
   }
 
   /**
-   * Whether to display loading indicator.
-   * @param {boolean} isLoading
+   * Transitions to the next view.
+   * @private
    */
-  setLoading(isLoading) {
-    if (isLoading) {
+  entryTransitionToNextView_() {
+    if (this.view_ && this.view_.hasLoadingIndicator()) {
+      // Temporarily cache the old view.
+      this.previousProgressView_ = this.view_;
+    } else {
+      // Since loading indicator will be shown, remove contents of old view.
+      removeChildren(this.getContainer());
+      // When loading indicator was not displayed in the previous view,
+      // loading indicator must be displayed while transitioning to new view.
       this.loadingView_.show();
+    }
+  }
+
+   /**
+   * Transition out of an old view.
+   * @private
+   */
+  exitTransitionFromOldView_() {
+    // If previous view is still around, remove it.
+    if (this.previousProgressView_) {
+      removeElement(this.previousProgressView_.getElement());
+      this.previousProgressView_ = null;
     } else {
       this.loadingView_.hide();
     }
@@ -5285,14 +5365,10 @@ class Dialog {
    * @return {!Promise}
    */
   openView(view) {
-    if (this.view_) {
-      // TODO(dparikh): Maybe I need to keep it until the new one is ready.
-      removeChildren(this.getContainer());
-    }
-    this.view_ = view;
-
     setImportantStyles(view.getElement(), resetViewStyles);
-    this.setLoading(true);
+    this.entryTransitionToNextView_();
+
+    this.view_ = view;
     this.getContainer().appendChild(view.getElement());
 
     // If the current view should fade the parent document.
@@ -5310,12 +5386,12 @@ class Dialog {
         }
         this.show_();
       }
-      this.setLoading(false);
+      this.exitTransitionFromOldView_();
     });
   }
 
   /**
-   * Show the iframe
+   * Show the iframe.
    * @private
    */
   show_() {
@@ -6868,7 +6944,8 @@ class WaitForSubscriptionLookupApi {
           publicationId: deps.pageConfig().getPublicationId(),
           productId: deps.pageConfig().getProductId(),
         }),
-        /* shouldFadeBody */ true
+        /* shouldFadeBody */ true,
+        /* hasLoadingIndicator */ true
     );
   }
 
