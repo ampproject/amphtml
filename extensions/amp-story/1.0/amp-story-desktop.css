@@ -74,11 +74,13 @@ amp-story[standalone][desktop] {
   background-position: center center !important;
   will-change: opacity, z-index !important;
   z-index: 0 !important;
+  transition: opacity 0s linear 0.3s !important;
 }
 
 .i-amphtml-story-background.active {
   opacity: 1 !important;
   z-index: 1 !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 [desktop] amp-story-page[distance] {
