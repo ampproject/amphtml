@@ -558,6 +558,7 @@ export function getErrorReportData(message, filename, line, col, error,
   pushLimit(accumulatedErrorMessages, message, 25);
 
   console.log('Testing Logs in error.js:');
+  console.log('getMode()', getMode());
   console.log('Input', message, filename, line, col, error,
     hasNonAmpJs);
 
