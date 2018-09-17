@@ -141,6 +141,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
 
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win);
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
      * optimizations that make the document less useful at crawl time, e.g.
@@ -276,14 +278,16 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.advancement_.stop();
+    this.timer_.delay((() => {
+      this.advancement_.stop();
+      console.log('swagg');
+      this.stopListeningToVideoEvents_();
+      this.pauseAllMedia_(true /** rewindToBeginning */);
 
-    this.stopListeningToVideoEvents_();
-    this.pauseAllMedia_(true /** rewindToBeginning */);
-
-    if (this.animationManager_) {
-      this.animationManager_.cancelAll();
-    }
+      if (this.animationManager_) {
+        this.animationManager_.cancelAll();
+      }
+    }), 600);
   }
 
 
