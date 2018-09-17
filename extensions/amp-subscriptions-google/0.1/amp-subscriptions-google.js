@@ -24,6 +24,7 @@ import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
 import {Entitlement, GrantReason} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {ampSubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 
@@ -204,7 +205,7 @@ export class GoogleSubscriptionsPlatform {
   /** @override */
   getSupportedScoreFactor(factorName) {
     switch (factorName) {
-      case 'supportsViewer':
+      case ampSubscriptionsScoreFactor.SUPPORTS_VIEWER:
         return this.isGoogleViewer_ ? 1 : 0;
       default:
         return 0;

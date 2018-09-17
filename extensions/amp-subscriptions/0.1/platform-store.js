@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {DEFAULT_SCORE_CONFIG, ampSubscriptionsScoreFactor} from './score-factors.js';
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
@@ -81,9 +82,7 @@ export class PlatformStore {
     this.fallbackEntitlement_ = fallbackEntitlement;
 
     /** @private @const {!Object<string, number>} */
-    this.scoreConfig_ = Object.assign({
-      'supportsViewer': 10,
-    }, scoreConfig);
+    this.scoreConfig_ = Object.assign(DEFAULT_SCORE_CONFIG, scoreConfig);
   }
 
   /**
@@ -487,6 +486,7 @@ export class PlatformStore {
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
-    return this.selectApplicablePlatform_('supportsViewer');
+    return this.selectApplicablePlatform_(
+        ampSubscriptionsScoreFactor.SUPPORTS_VIEWER);
   }
 }
