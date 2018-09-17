@@ -20,7 +20,7 @@ import {tryParseJson} from '../../../src/json';
   * Handles an XHR response by calling lineCallback for each line delineation.
   * Uses streaming where possible otherwise falls back to text.
   * @param {!Window} win
-  * @param {!../../../src/utils/xhr-utils.FetchResponse} response
+  * @param {!Response} response
   * @param {function(string, boolean)} lineCallback
   * @private
   */

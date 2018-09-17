@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {FetchResponse} from '../../src/utils/xhr-utils';
 import {Services} from '../../src/services';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
 
@@ -28,10 +27,6 @@ describes.sandboxed('BatchedXhr', {}, env => {
   describes.fakeWin('#fetch', {}, env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
-    const mockXhr = {
-      status: 200,
-      responseText: TEST_RESPONSE,
-    };
     const textInit = {headers: {'Accept': 'text/plain'}};
     const jsonInit = {headers: {'Accept': 'application/json'}};
     let xhr;
@@ -40,7 +35,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
       fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
-          () => Promise.resolve(new FetchResponse(mockXhr)));
+          () => Promise.resolve(new Response(TEST_RESPONSE)));
     });
 
     it('should fetch a generic request once for identical URLs', () => {
@@ -87,10 +82,11 @@ describes.sandboxed('BatchedXhr', {}, env => {
   describes.fakeWin('#fetchJson', {}, env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
-    const mockXhr = {
+    const init = {
       status: 200,
-      responseText: TEST_RESPONSE,
-      responseType: 'json',
+      headers: {
+        'content-type': 'application-json',
+      },
     };
     let xhr;
     let fetchStub;
@@ -98,7 +94,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
       fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
-          () => Promise.resolve(new FetchResponse(mockXhr)));
+          () => Promise.resolve(new Response(TEST_RESPONSE, init)));
     });
 
     it('should fetch JSON GET requests once for identical URLs', () => {
@@ -135,17 +131,13 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
   describes.fakeWin('#fetchText', {}, env => {
     const TEST_RESPONSE = 'Hello, world!';
-    const mockXhr = {
-      status: 200,
-      responseText: TEST_RESPONSE,
-    };
     let xhr;
     let fetchStub;
 
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
       fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
-          () => Promise.resolve(new FetchResponse(mockXhr)));
+          () => Promise.resolve(new Response(TEST_RESPONSE)));
     });
 
     it('should fetch text GET requests once for identical URLs', () => {

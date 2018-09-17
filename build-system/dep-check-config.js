@@ -303,6 +303,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
+      'src/polyfills.js->src/polyfills/fetch.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/promise.js',

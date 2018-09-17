@@ -25,7 +25,7 @@ const TAG = 'amp-ad-util';
  * Sends a CORS XHR request to the given URL.
  * @param {!Window} win
  * @param {string} url Request URL to send XHR to.
- * @return {!Promise<!../../../src/utils/xhr-utils.FetchResponse>}
+ * @return {!Promise<!Response>}
  */
 export function sendXhrRequest(win, url) {
   return Services.xhrFor(win).fetch(url, {

@@ -1166,7 +1166,7 @@ export class AmpA4A extends AMP.BaseElement {
    * headers. Must be less than or equal to the original size of the ad slot
    * along each dimension. May be overridden by network.
    *
-   * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} responseHeaders
+   * @param {!Headers} responseHeaders
    * @return {?SizeInfoDef}
    */
   extractSize(responseHeaders) {
@@ -1234,7 +1234,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Send ad request, extract the creative and signature from the response.
    * @param {string} adUrl Request URL to send XHR to.
-   * @return {!Promise<?../../../src/utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<?Response>}
    * @protected
    */
   sendXhrRequest(adUrl) {
