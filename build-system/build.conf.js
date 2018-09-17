@@ -18,6 +18,6 @@
 module.exports = {
   plugins: [
     require.resolve('./babel-plugins/babel-plugin-transform-parenthesize-expression'),
-    require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'),
+    //require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'),
   ],
 };
