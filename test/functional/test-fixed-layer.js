@@ -168,6 +168,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       id,
       ownerDocument: documentApi,
       autoTop: '',
+      tagName: id,
       toString: () => {
         return id;
       },
