@@ -17,12 +17,13 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {createFrameFor, objOrParseJson} from '../../../src/iframe-video';
 import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
 import {getStyle, setStyle} from '../../../src/style';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
@@ -67,14 +68,11 @@ const DelightEvent = {
 };
 
 /** @implements {../../../src/video-interface.VideoInterface} */
-class AmpDelight extends AMP.BaseElement {
+class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private @const */
-    this.actions_ = Services.actionServiceForDoc(element);
 
     /** @private {string} */
     this.baseURL_ = 'https://players.delight-vr.com';
@@ -323,8 +321,6 @@ class AmpDelight extends AMP.BaseElement {
         break;
       }
       case DelightEvent.TIME_UPDATE: {
-        this.triggerAction_(VideoEvents.SECONDS_PLAYED, null);
-        element.dispatchCustomEvent(VideoEvents.SECONDS_PLAYED);
         const payload = data['payload'];
         this.currentTime_ = payload.currentTime;
         this.playedRanges_ = payload.playedRanges;
@@ -375,7 +371,8 @@ class AmpDelight extends AMP.BaseElement {
     const event =
         createCustomEvent(this.win, `${TAG}.${name}`,
             dict({'response': detail}));
-    this.actions_.trigger(element, name, event, ActionTrust.HIGH);
+    const actions = Services.actionServiceForDoc(this.element);
+    actions.trigger(element, name, event, ActionTrust.HIGH);
   }
 
   /**
@@ -699,5 +696,5 @@ class AmpDelight extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpDelight, CSS);
+  AMP.registerElement(TAG, AmpDelightPlayer, CSS);
 });
