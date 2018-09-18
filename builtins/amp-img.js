@@ -120,7 +120,6 @@ export class AmpImg extends BaseElement {
     if (this.element.hasAttribute('i-amphtml-ssr')) {
       this.img_ = this.element.querySelector('img');
     }
-    
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
     if (this.element.id) {
@@ -145,8 +144,8 @@ export class AmpImg extends BaseElement {
     this.fillContent_ = this.element.querySelector('.i-amphtml-fill-content');
     const placeholder = this.getPlaceholder();
     if (placeholder &&
-    placeholder.classList.contains('i-amphtml-blur') &&
-    isExperimentOn(this.win, 'blurry-placeholder')) {
+      placeholder.classList.contains('i-amphtml-blur') &&
+      isExperimentOn(this.win, 'blurry-placeholder')) {
       this.blurredPlaceholder_ = placeholder;
     }
     if (this.blurredPlaceholder_ && this.fillContent_) {
