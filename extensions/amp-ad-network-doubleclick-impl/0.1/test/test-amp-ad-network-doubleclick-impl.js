@@ -1473,9 +1473,12 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
 
       describe('#setPageLevelExperiments', () => {
         let randomlySelectUnsetExperimentsStub;
+        let extractUrlExperimentIdStub;
         beforeEach(() => {
           randomlySelectUnsetExperimentsStub =
             sandbox.stub(impl, 'randomlySelectUnsetExperiments_');
+          extractUrlExperimentIdStub =
+            sandbox.stub(impl, 'extractUrlExperimentId_');
           sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
           sandbox.stub(impl, 'getAmpDoc').returns({});
           sandbox.stub(Services, 'viewerForDoc').returns(
@@ -1501,9 +1504,16 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should select SRA experiments', () => {
           randomlySelectUnsetExperimentsStub.returns(
               {doubleclickSraExp: '117152667'});
+          extractUrlExperimentIdStub.returns(undefined);
           impl.buildCallback();
           expect(impl.experimentIds.includes('117152667')).to.be.true;
           expect(impl.useSra).to.be.true;
+        });
+
+        it('should force-select SRA experiment from URL experiment ID', () => {
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments('8');
+          expect(impl.experimentIds.includes('117152667')).to.be.true;
         });
 
         describe('should properly limit SRA traffic', () => {
