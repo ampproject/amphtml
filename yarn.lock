@@ -5937,14 +5937,15 @@ gulp-sourcemaps@2.6.4:
     strip-bom-string "1.X"
     through2 "2.X"
 
-gulp-uglify@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/gulp-uglify/-/gulp-uglify-3.0.0.tgz#0df0331d72a0d302e3e37e109485dddf33c6d1ca"
+gulp-uglify@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/gulp-uglify/-/gulp-uglify-3.0.1.tgz#8d3eee466521bea6b10fd75dff72adf8b7ea2d97"
   dependencies:
     gulplog "^1.0.0"
     has-gulplog "^0.1.0"
     lodash "^4.13.1"
     make-error-cause "^1.1.1"
+    safe-buffer "^5.1.2"
     through2 "^2.0.0"
     uglify-js "^3.0.5"
     vinyl-sourcemaps-apply "^0.2.0"
