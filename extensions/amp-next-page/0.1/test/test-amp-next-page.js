@@ -73,6 +73,7 @@ env => {
 
   afterEach(() => {
     xhrMock.verify();
+    fetchDocumentMock.verify();
     toggleExperiment(win, 'amp-next-page', false);
   });
 
