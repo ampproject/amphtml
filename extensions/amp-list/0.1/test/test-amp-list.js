@@ -367,7 +367,7 @@ describes.realWin('amp-list component', {
       return list.layoutCallback().catch(() => {});
     });
 
-    describe.only('DOM diffing', () => {
+    describe('DOM diffing', () => {
       beforeEach(() => {
         toggleExperiment(win, 'amp-list-diffing', true, true);
       });
