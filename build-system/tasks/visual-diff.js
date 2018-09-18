@@ -27,7 +27,7 @@ const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
-const {execOrDie, execScriptAsync} = require('../exec');
+const {execScriptAsync} = require('../exec');
 const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
 const {gitBranchName, gitCommitterEmail} = require('../git');
 
@@ -41,13 +41,10 @@ const PORT = 8000;
 const BASE_URL = `http://${HOST}:${PORT}`;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
-const CONFIGS = ['canary', 'prod'];
 const CSS_SELECTOR_RETRY_MS = 100;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
     CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
-const AMP_RUNTIME_TARGET_FILES = [
-  'dist/amp.js', 'dist/amp-esm.js', 'dist.3p/current/integration.js'];
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
 const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
@@ -361,33 +358,6 @@ function createPercyPuppeteerController(assetsDir, assetsBaseUrl) {
 }
 
 /**
- * Cleans up any existing AMP config from the runtime and 3p frame.
- */
-function cleanupAmpConfig() {
-  log('verbose', 'Cleaning up existing AMP config');
-  AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
-    execOrDie(
-        `gulp prepend-global --local_dev --target ${targetFile} --remove`,
-        {'stdio': 'ignore'});
-  });
-}
-
-/**
- * Applies the AMP config to the runtime and 3p frame.
- *
- * @param {string} config Config to apply. One of 'canary' or 'prod'.
- */
-function applyAmpConfig(config) {
-  log('verbose', 'Switching to the', colors.cyan(config), 'AMP config');
-  AMP_RUNTIME_TARGET_FILES.forEach(targetFile => {
-    execOrDie(
-        `gulp prepend-global --local_dev --fortesting --target ${targetFile} ` +
-        `--${config}`,
-        {'stdio': 'ignore'});
-  });
-}
-
-/**
  * Sets the AMP config, launches a server, and generates Percy snapshots for a
  * set of given webpages.
  *
@@ -418,19 +388,11 @@ async function generateSnapshots(percy, page, webpages) {
     log('fatal', 'No tests left to run!');
     return;
   } else {
-    log('info', 'Executing', colors.cyan(webpages.length),
-        'visual diff tests for each of', colors.cyan(CONFIGS.join(', ')),
-        'configurations');
+    log('info', 'Executing', colors.cyan(webpages.length), 'visual diff tests');
   }
 
-  for (const config of CONFIGS) {
-    applyAmpConfig(config);
-    log('verbose',
-        'Generating snapshots using the', colors.cyan(config), 'AMP config');
-    log('travis', colors.cyan(config), ': ');
-    await snapshotWebpages(percy, page, webpages, config);
-  }
-  await cleanupAmpConfig();
+  log('verbose', 'Generating snapshots...');
+  await snapshotWebpages(percy, page, webpages);
 }
 
 /**
@@ -440,12 +402,10 @@ async function generateSnapshots(percy, page, webpages) {
  * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  * @param {!JsonObject} webpages a JSON objects containing details about the
  *     pages to snapshot.
- * @param {string} config Config being used. One of 'canary' or 'prod'.
  */
-async function snapshotWebpages(percy, page, webpages, config) {
+async function snapshotWebpages(percy, page, webpages) {
   for (const webpage of webpages) {
-    const {url, viewport} = webpage;
-    const name = `${webpage.name} (${config})`;
+    const {name, url, viewport} = webpage;
     log('verbose', 'Visual diff test', colors.yellow(name));
 
     await enableExperiments(page, webpage['experiments']);
@@ -789,6 +749,7 @@ gulp.task(
         'percy_branch': '  Override the PERCY_BRANCH environment variable',
         'percy_disabled':
           '  Disables Percy integration (for testing local changes only)',
+        'nobuild': '  Skip build',
       },
     }
 );
