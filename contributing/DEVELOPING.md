@@ -87,6 +87,22 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 
 We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
 
+## Code Reviews
+
+Before any code can be merged into the AMP repository, it has to be reviewed and approved by the [owner and a core committer](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md).
+
+- If you are contributing a fix or a new feature to AMP, be sure to follow the tips on [preparing your code for review](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code-for-a-feature-coding--implementation-phase) and follow [instructions](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review) on how to submit a pull request.
+
+- Pull requests in AMP are triaged similar to Issues and within 2 days of submitting a PR, someone will be assigned as the reviewer. If you have been working with a core committer or someone else already, @mentioning them in the PR description will be helpful.
+
+- After a reviewer is assigned, expect comments on your code within a few days. Feel free to @mention the reviewer if your PR is high priority or if you don't hear back after 2 days since opening the PR.
+
+- Turnaround time for a PR to be merged is variable and depends on the size and quality of the code. Most PRs go through multiple cycles of review comments. It can take anywhere between a day for simple fixes to weeks for larger features.
+
+- When you have addressed all the review comments from the reviewer, please be sure to @mention them with a **"All requested changes are done, please take another look"** comment in the PR so they would know PR is ready for the next round.
+
+- If your PR is urgent or not progressing at the pace outlined above, please feel free to ping the [#contributing](https://amphtml.slack.com/messages/contributing) channel on Slack.
+
 ## Builds and releases
 
 - The [AMP buildcop](buildcop.md) helps ensure that AMP's builds remain green (i.e. everything builds and all of the tests pass).  If you run into issues with builds that seem unrelated to your changes see if the issue is present on [Travis](https://travis-ci.org/ampproject/amphtml/builds) and let the buildcop know.
