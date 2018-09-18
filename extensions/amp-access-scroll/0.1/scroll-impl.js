@@ -118,18 +118,14 @@ const connectHostname = config => {
 export class ScrollAccessVendor extends AccessClientAdapter {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
-  constructor(ampdoc, accessService, accessSource) {
+  constructor(ampdoc, accessSource) {
     const scrollConfig = accessSource.getAdapterConfig();
     super(ampdoc, accessConfig(connectHostname(scrollConfig)), {
       buildUrl: accessSource.buildUrl.bind(accessSource),
       collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
-
-    /** @private {!../../amp-access/0.1/amp-access.AccessService} */
-    this.accessService_ = accessService;
 
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
@@ -143,7 +139,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
               'amp-story[standalone]');
           if (response && response.scroll && !isStory) {
             const config = this.accessSource_.getAdapterConfig();
-            new ScrollElement(this.ampdoc).show(this.accessService_, config);
+            new ScrollElement(this.ampdoc).show(this.accessSource_, config);
             addAnalytics(this.ampdoc, config);
           }
           return response;
@@ -199,22 +195,22 @@ class ScrollElement {
   }
 
   /**
-   * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
+   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    * @param {!JsonObject} vendorConfig
    */
-  show(accessService, vendorConfig) {
+  show(accessSource, vendorConfig) {
+    const SCROLLBAR_URL = `${connectHostname(vendorConfig)}/amp/scrollbar`
+                          + '?rid=READER_ID'
+                          + '&cid=CLIENT_ID(scroll1)'
+                          + '&c=CANONICAL_URL'
+                          + '&o=AMPDOC_URL';
     Services.viewportForDoc(this.ampdoc_).addToFixedLayer(this.scrollBar_)
-        .then(() => accessService.getAccessReaderId())
-        .then(readerId => {
+        .then(() => accessSource.buildUrl(SCROLLBAR_URL, false))
+        .then(scrollbarUrl => {
           this.iframe_.onload = () => {
             this.ampdoc_.getBody().removeChild(this.placeholder_);
           };
-          const docInfo = Services.documentInfoForDoc(this.ampdoc_);
-          this.iframe_.setAttribute('src',
-              `${connectHostname(vendorConfig)}/amp/scrollbar`
-                + '?rid=' + encodeURIComponent(readerId)
-                + '&o=' + encodeURIComponent(this.ampdoc_.getUrl())
-                + '&c=' + encodeURIComponent(docInfo.canonicalUrl));
+          this.iframe_.setAttribute('src', scrollbarUrl);
         });
   }
 }
