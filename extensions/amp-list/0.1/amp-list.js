@@ -30,6 +30,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -144,27 +145,32 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     dev().info(TAG, 'mutate:', mutations);
+    let promise;
     const src = mutations['src'];
-    const state = /** @type {!JsonObject}*/(mutations)['state'];
+    const state = /** @type {!JsonObject} */ (mutations)['state'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
           this.resetIfNecessary_();
-          this.fetchList_();
+          promise = this.fetchList_();
         }
       } else if (typeof src === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
         this.resetIfNecessary_(/* isFetch */ false);
-        this.scheduleRender_(isArray(src) ? src : [src]);
+        promise = this.scheduleRender_(isArray(src) ? src : [src]);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
       this.resetIfNecessary_(/* isFetch */ false);
-      this.scheduleRender_(isArray(state) ? state : [state]);
+      promise = this.scheduleRender_(isArray(state) ? state : [state]);
+    }
+    // Only return the promise for easier testing.
+    if (getMode().test) {
+      return promise;
     }
   }
 
@@ -449,6 +455,7 @@ export class AmpList extends AMP.BaseElement {
       const event = createCustomEvent(this.win,
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
+
       // Change height if needed.
       this.measureElement(() => {
         const scrollHeight = this.container_./*OK*/scrollHeight;
