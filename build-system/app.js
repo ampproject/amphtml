@@ -1142,7 +1142,7 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         hostName + '/dist/amp-shadow.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp-inabox-lite.js');
+        hostName + '/dist/amp-inabox.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
