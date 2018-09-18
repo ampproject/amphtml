@@ -55,7 +55,7 @@ env => {
     doc.body.appendChild(element);
     nextPage = new AmpNextPage(element);
 
-    ampdoc.getUrl = () => 'https://example.com/example';
+    ampdoc.getUrl = () => document.location.href;
 
     xhrMock = sandbox.mock(Services.xhrFor(win));
     fetchDocumentMock = sandbox.mock(DocFetcher);
