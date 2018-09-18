@@ -36,7 +36,11 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {setimportantStyles, setInitialDisplay, setStyles} from '../../../src/style';
+import {
+ setImportantStyles,
+ setInitialDisplay,
+ setStyles,
+} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
