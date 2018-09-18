@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {computedStyle} from '../style';
 import {dev} from '../log';
 import {filterSplice} from '../utils/array';
+import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
 import {getMode} from '../mode';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
@@ -579,8 +580,6 @@ export class LayoutElement {
    * If the element is itself a layer, it still looks in the element's ancestry
    * for a parent layer.
    *
-   * TODO(jridgewell, #12554): Needs to traverse FIE boundary.
-   *
    * @param {!Element} node
    * @param {boolean=} opt_force Whether to force a re-lookup
    * @return {?LayoutElement}
@@ -593,10 +592,11 @@ export class LayoutElement {
       }
     }
 
-    const win = /** @type {!Window } */ (dev().assert(
+    let win = /** @type {!Window } */ (dev().assert(
         node.ownerDocument.defaultView));
     let el = node;
     let op = node;
+    let last = node;
     while (el) {
       // Ensure the node (if it a layer itself) is not return as the parent
       // layer.
@@ -610,29 +610,58 @@ export class LayoutElement {
       // optimization.
       if (el === op) {
         if (computedStyle(win, op).position == 'fixed') {
-          // Ensure this fixed-position element is a layer.
-          Services.layersForDoc(op).declareLayer(op);
+          let parent;
+          if (op !== node) {
+            // If the offset parent is not the original node (meaning offset
+            // parent is a parent node), the offset parent is the parent layer.
+            parent = op;
+          } else {
+            // Ok, our original node was fixed-position. If it's inside an FIE,
+            // the FIE's frame element is the parent layer. This is because
+            // fixed-position elements inside an iframe are fixed relative to
+            // that iframe.
+            parent = frameParent(node.ownerDocument);
+          }
 
-          // If the op is fixed-position, it defines a new layer. But, if the
-          // node is the op, we can't return the node as its own parent layer.
-          // In that case, it doesn't have a parent layer.
-          // TODO(jridgewell, #12554): Fixed position's parent is the FIE
-          // element.
-          return op === node ? null : LayoutElement.for(op);
+          // Parent is either a parent node (offset parent), an FIE's frame
+          // element, or nothing.
+          if (parent) {
+            // Ensure fixed-position parent is a layer.
+            Services.layersForDoc(parent).declareLayer(parent);
+            return LayoutElement.for(parent);
+          }
+
+          // Else, the original node defines its own layer.
+          return null;
         }
         op = op./*OK*/offsetParent;
       }
 
+      last = el;
       // Traversal happens first to the `assignedSlot` (since the slot is in
       // between the current `el` and its `parentNode`), then to either the
       // `parentNode` (for normal tree traversal) or the `host` (for traversing
       // from shadow trees to light trees).
-      // Note `parentNode` and `host` are mutually exclusive.
+      // Note `parentNode` and `host` are mutually exclusive on Elements.
       el = el.assignedSlot || el.parentNode || el.host;
+
+      // If none of that succeeds, then we've hit the Document node which may
+      // have a parent frameElement if we're in an FIE.
+      if (!el) {
+        el = frameParent(last);
+        // Set the offset parent to the parent iframe, since it may be
+        // fixed-position.
+        op = el;
+        // Update our window reference if we crossed a FIE boundary.
+        if (el) {
+          win = /** @type {!Window } */ (dev().assert(
+              el.ownerDocument.defaultView));
+        }
+      }
     }
 
-    // Use isConnected if available, but always pass if it's not.
-    dev().assert(node.isConnected !== false, 'node not in the DOM tree');
+    dev().assert(last.nodeType === Node.DOCUMENT_NODE,
+        'node not in the DOM tree');
     return null;
   }
 
@@ -649,9 +678,6 @@ export class LayoutElement {
    * A check that the LayoutElement is contained by this layer, and the element
    * is not the layer's element.
    *
-   * TODO(jridgewell, #12554): This needs to account for FIE root, since it
-   * will be a child layout of the host element.
-   *
    * @param {!LayoutElement} layout
    * @return {boolean}
    */
@@ -659,10 +685,25 @@ export class LayoutElement {
     if (layout === this) {
       return false;
     }
-    const element = this.element_;
-    const other = layout.element_;
+    return this.contains_(this.element_, layout.element_);
+  }
+
+  /**
+   * A check that the LayoutElement is contained by this layer.
+   *
+   * @param {!Element} element
+   * @param {!Element} other
+   * @return {boolean}
+   */
+  contains_(element, other) {
     if (element.contains(other)) {
       return true;
+    }
+
+    // Layers in a parent document may contain children of an FIE.
+    if (!sameDocument(element, other)) {
+      const frame = frameParent(/** @type {!Node} */(other.ownerDocument));
+      return !!frame && this.contains_(element, frame);
     }
 
     // Layers inside a shadow tree may contain children from the light tree.
@@ -1125,11 +1166,9 @@ export class LayoutElement {
    * Remeasures the element, and all children, since this element was marked
    * dirty.
    *
-   * @param {!PositionDef=} opt_relativeTo A performance optimization used when
-   *     recursively measuring the child nodes of the layer.
    * @private
    */
-  remeasure_(opt_relativeTo) {
+  remeasure_() {
     this.updateScrollPosition_();
     this.needsRemeasure_ = false;
     const element = this.element_;
@@ -1137,13 +1176,10 @@ export class LayoutElement {
     // We need a relative box to measure our offset. Importantly, this box must
     // be negatively offset by its scroll position, to account for the fact
     // that getBoundingClientRect() will only return scrolled positions.
-    let relative = opt_relativeTo;
-    if (!relative) {
-      const parent = this.getParentLayer();
-      relative = parent ?
-        relativeScrolledPositionForChildren(parent) :
-        positionLt(0, 0);
-    }
+    const parent = this.getParentLayer();
+    const relative = parent
+      ? parent.relativeScrolledPositionForChildren_(this)
+      : positionLt(0, 0);
 
     this.size_ = sizeWh(element./*OK*/clientWidth, element./*OK*/clientHeight);
 
@@ -1171,11 +1207,10 @@ export class LayoutElement {
     // invalidated by the parent changing.
     const children = this.children_;
     if (children.length) {
-      const relative = relativeScrolledPositionForChildren(this);
       for (let i = 0; i < children.length; i++) {
         // TODO(jridgewell): We can probably optimize this if this layer
         // didn't change at all.
-        children[i].remeasure_(relative);
+        children[i].remeasure_();
       }
     }
   }
@@ -1191,23 +1226,61 @@ export class LayoutElement {
       this.scrollTop_ = this.element_./*OK*/scrollTop;
     }
   }
+
+  /**
+   * Creates a relative measurement box to measure the offset of children
+   * against. This negatively applies the current scroll position of the layer
+   * to the coordinates, since the bounding box measurement of the child will
+   * have positively applied that scroll position.
+   *
+   * @param {!LayoutElement} layout
+   * @return {!PositionDef}
+   * @private
+   */
+  relativeScrolledPositionForChildren_(layout) {
+    // If the child's layout element is in an another document, its scroll
+    // position is relative to the root of that document.
+    if (!sameDocument(this.element_, layout.element_)) {
+      return positionLt(0, 0);
+    }
+
+    const {ownerDocument} = this.element_;
+    const position = this.getScrolledPosition(ownerDocument.documentElement);
+    return positionLt(
+        position.left - this.getScrollLeft(),
+        position.top - this.getScrollTop()
+    );
+  }
 }
 
 /**
- * Creates a relative measurement box to measure the offset of children
- * against. This negatively applies the current scroll position of the layer to
- * the coordinates, since the bounding box measurement of the child will have
- * positively applied that scroll position.
+ * Whether the layout belongs to the same owner document as this layout,
+ * meaning they share relative coordinate systems.
  *
- * @param {!LayoutElement} layer
- * @return {!PositionDef}
+ * @param {!Element} element
+ * @param {!Element} other
+ * @return {boolean}
  */
-function relativeScrolledPositionForChildren(layer) {
-  const position = layer.getScrolledPosition();
-  return positionLt(
-      position.left - layer.getScrollLeft(),
-      position.top - layer.getScrollTop()
-  );
+function sameDocument(element, other) {
+  return element.ownerDocument === other.ownerDocument;
+}
+
+/**
+ * Attempts to cross the FIE boundary to the parent node.
+ *
+ * @param {!Node} node
+ * @return {?Element}
+ */
+function frameParent(node) {
+  dev().assert(node.nodeType === Node.DOCUMENT_NODE);
+  try {
+    const {defaultView} = node;
+    const frameElement = defaultView && defaultView.frameElement;
+    return frameElement && getFriendlyIframeEmbedOptional(frameElement)
+      ? frameElement
+      : null;
+  } catch (e) { }
+  return null;
 }
 
 /**
