@@ -143,7 +143,7 @@ export class AmpImg extends BaseElement {
     const placeholder = this.getPlaceholder();
     if (placeholder &&
     placeholder.classList.contains('i-amphtml-blur') &&
-    true ) {//isExperimentOn(this.win, 'blurry-placeholder')) {
+    isExperimentOn(this.win, 'blurry-placeholder')) {
       this.blurredPlaceholder_ = placeholder;
     }
     if (this.blurredPlaceholder_ && this.fillContent_) {
