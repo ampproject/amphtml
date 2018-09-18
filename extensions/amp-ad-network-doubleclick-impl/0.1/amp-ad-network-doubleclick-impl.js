@@ -306,8 +306,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const renderOutsideViewport = this.renderOutsideViewport();
     // False will occur when throttle in effect.
-    if (!!this.experimentIds.filter(exp =>
-      exp == DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES.EXP).length &&
+    if (this.experimentIds.includes(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES.EXP) &&
       typeof renderOutsideViewport === 'boolean') {
       return renderOutsideViewport;
     }
