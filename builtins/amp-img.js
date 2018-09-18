@@ -117,7 +117,10 @@ export class AmpImg extends BaseElement {
 
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
-
+    if (this.element.hasAttribute('i-amphtml-ssr')) {
+      this.img_ = this.element.querySelector('img');
+    }
+    
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
     if (this.element.id) {
@@ -169,9 +172,6 @@ export class AmpImg extends BaseElement {
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
-    }
-    if (this.element.hasAttribute('i-amphtml-ssr')) {
-      this.img_ = this.element.querySelector('img');
     }
     return this.loadPromise(img);
   }
