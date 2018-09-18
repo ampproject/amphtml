@@ -51,8 +51,11 @@ export class AmpImg extends BaseElement {
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
 
-    /** @private {boolean} */
-    this.hasBlurredPlaceholder_ = false;
+    /** @private {?Element} */
+    this.blurredPlaceholder_ = null;
+
+    /** @private {?Element} */
+    this.fillContent_ = null;
   }
 
   /** @override */
@@ -136,13 +139,15 @@ export class AmpImg extends BaseElement {
     this.applyFillContent(this.img_, true);
     this.element.appendChild(this.img_);
 
+    this.fillContent_ = this.element.querySelector('.i-amphtml-fill-content');
     const placeholder = this.getPlaceholder();
-    this.hasBlurredPlaceholder_ = placeholder &&
+    if (placeholder &&
     placeholder.classList.contains('i-amphtml-blur') &&
-    isExperimentOn(this.win, 'blurry-placeholder');
-    if (this.hasBlurredPlaceholder_) {
-      setImportantStyles(this.element.querySelector('.i-amphtml-fill-content'),
-          {'visibility': 'hidden'});
+    true ) {//isExperimentOn(this.win, 'blurry-placeholder')) {
+      this.blurredPlaceholder_ = placeholder;
+    }
+    if (this.blurredPlaceholder_ && this.fillContent_) {
+      setImportantStyles(this.fillContent_, {'visibility': 'hidden'});
     }
   }
 
@@ -186,10 +191,9 @@ export class AmpImg extends BaseElement {
 
   /** @override **/
   firstLayoutCompleted() {
-    if (this.hasBlurredPlaceholder_) {
-      setImportantStyles(this.getPlaceholder(), {'opacity': 0});
-      setImportantStyles(this.element.querySelector('.i-amphtml-fill-content'),
-          {'visibility': 'visible'});
+    if (this.blurredPlaceholder_ && this.fillContent_) {
+      setImportantStyles(this.blurredPlaceholder_, {'opacity': 0});
+      setImportantStyles(this.fillContent_, {'visibility': 'visible'});
     } else {
       this.togglePlaceholder(false);
     }
