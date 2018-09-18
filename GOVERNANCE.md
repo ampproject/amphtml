@@ -1,5 +1,7 @@
 # AMP Project open source governance
 
+**Note:** An [update to this policy is being discussed](https://amphtml.wordpress.com/2018/09/18/governance/).
+
 This document describes the governance model for the AMP open source project, and in particular the [AMP HTML GitHub project](https://github.com/ampproject/amphtml).
 
 Our governance model is as follows:
