@@ -57,15 +57,18 @@ For detailed information on testing, see [TESTING.md](TESTING.md).
   css/            - default css
   dist/           - (generated) main JS binaries are created here. This is what
                     gets deployed to cdn.ampproject.org.
-  dist.3p/        - (generated) JS binaries and HTML files for 3p embeds and ads.
+  dist.3p/        - (generated) JS binaries and HTML files for 3p embeds and ads
                     This is what gets deployed to 3p.ampproject.net.
-  docs/           - documentation about AMP
   examples/       - example AMP HTML files and corresponding assets
   extensions/     - plugins which extend the AMP HTML runtime's core set of tags
   spec/           - The AMP HTML Specification files
   src/            - source code for the AMP runtime
   test/           - tests for the AMP runtime and builtins
   testing/        - testing infrastructure
+  third_party/    - third party code used in AMP
+  tools/          - code for AMP related tools
+  validator/      - AMP Validator runners and tools
+  
 </pre>
 
 ## Supported browsers
