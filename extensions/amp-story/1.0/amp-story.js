@@ -537,6 +537,16 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(action, data);
     });
 
+    this.element.addEventListener('click', event => {
+      const firstPageEl = user().assertElement(
+          this.element.querySelector('amp-story-page'),
+          'Story must have at least one page.');
+      const currentPage = this.getHistoryStatePageId_() || firstPageEl.id;
+      const page = this.getPageById(currentPage);
+
+      page.maybePerformNavigation(event);
+    });
+
     this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
       this.onAdStateUpdate_(isAd);
     });

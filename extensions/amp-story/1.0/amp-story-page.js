@@ -733,6 +733,22 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
+   * Performs navigation if click was meant to do so.
+   * @param {!Event} event The click event.
+   */
+  maybePerformNavigation(event) {
+    if (this.advancement_.constructor.name == 'MultipleAdvancementConfig') {
+      // Get manual advancement.
+      this.advancement_.getAdvancementModes()
+          .find(el => el.constructor.name == 'ManualAdvancement')
+          .maybePerformNavigation(event);
+    } else if (this.advancement_.constructor.name == 'ManualAdvancement') {
+      this.advancement_.maybePerformNavigation(event);
+    }
+  }
+
+
+  /**
    * Navigates to the previous page in the story.
    */
   previous() {

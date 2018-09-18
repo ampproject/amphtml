@@ -248,6 +248,13 @@ class MultipleAdvancementConfig extends AdvancementConfig {
       advancementMode.stop();
     });
   }
+
+  /**
+   * Get the AdvancementConfigs array.
+   */
+  getAdvancementModes() {
+    return this.advancementModes_;
+  }
 }
 
 
@@ -263,7 +270,6 @@ class ManualAdvancement extends AdvancementConfig {
   constructor(element) {
     super();
     this.element_ = element;
-    this.clickListener_ = this.maybePerformNavigation_.bind(this);
     this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
 
     if (element.ownerDocument.defaultView) {
@@ -294,7 +300,6 @@ class ManualAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
-    this.element_.addEventListener('click', this.clickListener_, true);
     if (!this.hasAutoAdvanceStr_) {
       super.onProgressUpdate();
     }
@@ -303,7 +308,6 @@ class ManualAdvancement extends AdvancementConfig {
   /** @override */
   stop() {
     super.stop();
-    this.element_.removeEventListener('click', this.clickListener_, true);
   }
 
   /** @override */
@@ -344,13 +348,24 @@ class ManualAdvancement extends AdvancementConfig {
 
 
   /**
+   * Checks if current element is a descendant of amp-story-page. It will not be
+   * when it's in a shadow root, for example.
+   * @param {!Event} event
+   */
+  isAmpStoryPageDescendant_(event) {
+    return !!closest(dev().assertElement(event.target), el => {
+      return el.localName == 'amp-story-page';
+    });
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
-   * @private
    */
-  maybePerformNavigation_(event) {
-    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event)) {
+  maybePerformNavigation(event) {
+    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event) ||
+      !this.isAmpStoryPageDescendant_(event)) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
       return;
