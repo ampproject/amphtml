@@ -107,7 +107,7 @@
     "gulp-wrap": "0.14.0",
     "gzip-size": "5.0.0",
     "is-running": "2.1.0",
-    "jest": "23.4.1",
+    "jest": "23.6.0",
     "jest-dot-reporter": "1.0.6",
     "jison": "0.4.18",
     "jsdom": "11.11.0",
