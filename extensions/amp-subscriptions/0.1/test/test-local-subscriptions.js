@@ -144,6 +144,16 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       element.setAttribute('subscriptions-service', 'local');
     });
 
+    // This must be a sync call to avoid Safari popup blocker issues.
+    it('should call executeAction synchronosly when service is "auto"', () => {
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      element.setAttribute('subscriptions-service', 'auto');
+      localSubscriptionPlatform.handleClick_(element);
+      expect(executeStub).to.be.calledWith(
+          element.getAttribute('subscriptions-action'));
+    });
+
     it('should call executeAction with subscriptions-action value', () => {
       const executeStub = sandbox.stub(localSubscriptionPlatform,
           'executeAction');
@@ -151,6 +161,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       expect(executeStub).to.be.calledWith(
           element.getAttribute('subscriptions-action'));
     });
+
 
     it('should delegate action to service specified in '
         + 'subscriptions-service', () => {
@@ -197,7 +208,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
           localSubscriptionPlatform.serviceAdapter_,
           'selectPlatformForLogin'
       ).callsFake(() => platform);
-      sandbox.stub(
+      const delegateStub = sandbox.stub(
           localSubscriptionPlatform.serviceAdapter_,
           'delegateActionToService'
       );
@@ -206,6 +217,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.be.called;
+      expect(delegateStub).to.be.calledWith(
+          'login',
+          serviceId,
+      );
     });
 
     it('should NOT delegate for scoreBasedLogin for non-login action', () => {

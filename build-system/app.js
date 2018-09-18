@@ -914,7 +914,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
 });
 
 app.use('/subscription/pingback', (req, res) => {
-  assertCors(req, res, ['GET']);
+  assertCors(req, res, ['POST']);
   res.json({
     done: true,
   });

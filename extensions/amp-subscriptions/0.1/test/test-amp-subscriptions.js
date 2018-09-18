@@ -256,6 +256,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
             serviceId: 'local',
           }
       );
+      expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
+          {
+            serviceId: 'local',
+          }
+      );
     });
   });
 

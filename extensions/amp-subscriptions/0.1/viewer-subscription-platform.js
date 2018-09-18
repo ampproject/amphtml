@@ -185,9 +185,10 @@ export class ViewerSubscriptionPlatform {
     this.platform_.pingback(selectedPlatform);
   }
 
+
   /** @override */
-  supportsCurrentViewer() {
-    return this.platform_.supportsCurrentViewer();
+  getSupportedScoreFactor(factorName) {
+    return this.platform_.getSupportedScoreFactor(factorName);
   }
 
   /** @override */
