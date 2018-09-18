@@ -14,5 +14,26 @@
  * limitations under the License.
  */
 
-describe.configure().skipSafari().skipEdge()
-    .run('amp-recaptcha-input', function() {});
+export const INFONLINE_CONFIG = /** @type {!JsonObject} */ ({
+  'vars': {
+    'sv': 'ke',
+    'ap': '1',
+  },
+  'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+  'requests': {
+    'pageview': '${url}?st=${st}' +
+      '&sv=${sv}' +
+      '&ap=${ap}' +
+      '&co=${co}' +
+      '&cp=${cp}' +
+      '&ps=${ps}' +
+      '&host=${canonicalHost}' +
+      '&path=${canonicalPath}',
+  },
+  'triggers': {
+    'pageview': {
+      'on': 'visible',
+      'request': 'pageview',
+    },
+  },
+});

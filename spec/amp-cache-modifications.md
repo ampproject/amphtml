@@ -143,7 +143,7 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 </details>
 
-#### All image URLs are rewritten as AMP cache URLs except those in `amp-mustache` `template`
+#### <a name="cache-urls"></a>All image URLs are rewritten as AMP cache URLs except those in `amp-mustache` `template`
 
 <details>
 <summary>example</summary>

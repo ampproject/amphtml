@@ -369,6 +369,8 @@ data.headerBackgroundColor;
 data.bodyBackgroundColor;
 data.data.fontColor;
 data.width;
+data.sitekey;
+data.fortesting;
 
 // 3p code
 var twttr;
@@ -393,6 +395,9 @@ animationHandler.pause;
 animationHandler.stop;
 animationHandler.goToAndStop;
 animationHandler.totalFrames;
+
+var grecaptcha;
+grecaptcha.execute;
 
 // Validator
 var amp;

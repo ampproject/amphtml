@@ -310,15 +310,8 @@ async function launchBrowser() {
  */
 async function runVisualTests(page, visualTestsConfig) {
   // Create a Percy client and start a build.
-  const buildDir = '../../' + visualTestsConfig.assets_dir;
-  const percy = new Percy({
-    loaders: [
-      new FileSystemAssetLoader({
-        buildDir: path.resolve(__dirname, buildDir),
-        mountPath: visualTestsConfig.assets_base_url,
-      }),
-    ],
-  });
+  const percy = createPercyPuppeteerController(
+      visualTestsConfig.assets_dir, visualTestsConfig.assets_base_url);
   await percy.startBuild();
   const {buildId} = percy;
   fs.writeFileSync('PERCY_BUILD_ID', buildId);
@@ -336,6 +329,34 @@ async function runVisualTests(page, visualTestsConfig) {
   } else {
     log('info', 'Build', colors.cyan(buildId),
         'is now being processed by Percy.');
+  }
+}
+
+/**
+ * Create a new Percy-Puppeteer controller and return it.
+ *
+ * @param {string} assetsDir path to the assets dir.
+ * @param {string} assetsBaseUrl the base URL for served assets.
+ * @return {!Percy} a Percy-Puppeteer controller.
+ */
+function createPercyPuppeteerController(assetsDir, assetsBaseUrl) {
+  if (!argv.percy_disabled) {
+    const buildDir = '../../' + assetsDir;
+    return new Percy({
+      loaders: [
+        new FileSystemAssetLoader({
+          buildDir: path.resolve(__dirname, buildDir),
+          mountPath: assetsBaseUrl,
+        }),
+      ],
+    });
+  } else {
+    return {
+      startBuild: () => {},
+      snapshot: () => {},
+      finalizeBuild: () => {},
+      buildId: '[PERCY_DISABLED]',
+    };
   }
 }
 
@@ -457,16 +478,10 @@ async function snapshotWebpages(percy, page, webpages, config) {
         webpage.loading_incomplete_css, webpage.loading_complete_css);
 
     if (webpage.loading_complete_delay_ms) {
-      if (typeof webpage.loading_complete_delay_ms !== 'number' &&
-          webpage.loading_complete_delay_ms > 0) {
-        log('verbose', 'Waiting',
-            colors.cyan(webpage.loading_complete_delay_ms + 'ms'),
-            'for loading to complete');
-        await sleep(webpage.loading_complete_delay_ms || 0);
-      } else {
-        log('warning', 'Skipping unknown delay',
-            webpage.loading_complete_delay_ms);
-      }
+      log('verbose', 'Waiting',
+          colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
+          'for loading to complete');
+      await sleep(webpage.loading_complete_delay_ms);
     }
 
     if (webpage.enable_percy_javascript) {
@@ -724,7 +739,8 @@ async function visualDiff() {
     return;
   }
 
-  if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
+  if (!argv.percy_disabled &&
+      (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN)) {
     log('fatal', 'Could not find', colors.cyan('PERCY_PROJECT'), 'and',
         colors.cyan('PERCY_TOKEN'), 'environment variables');
   }
@@ -771,6 +787,8 @@ gulp.task(
         'percy_project': '  Override the PERCY_PROJECT environment variable',
         'percy_token': '  Override the PERCY_TOKEN environment variable',
         'percy_branch': '  Override the PERCY_BRANCH environment variable',
+        'percy_disabled':
+          '  Disables Percy integration (for testing local changes only)',
       },
     }
 );

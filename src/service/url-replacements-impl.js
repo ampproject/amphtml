@@ -27,15 +27,17 @@ import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {
+  addMissingParamsToUrl,
   addParamsToUrl,
   getSourceUrl,
+  isProtocolValid,
   parseQueryString,
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
-  removeSearch,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
+import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
 import {
@@ -43,7 +45,6 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isExperimentOn} from '../experiments';
-import {isProtocolValid} from '../url';
 import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
@@ -257,6 +258,11 @@ export class GlobalVariableSource extends VariableSource {
       user().assertString(scope,
           'The first argument to CLIENT_ID, the fallback' +
           /*OK*/' Cookie name, is required');
+
+      if (getMode().runtime == 'inabox') {
+        return /** @type {!Promise<ResolverReturnDef>} */(Promise.resolve(null));
+      }
+
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
@@ -584,10 +590,7 @@ export class GlobalVariableSource extends VariableSource {
     if (!replaceParams) {
       return orig;
     }
-    const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
-    const params = parseQueryString(url.search);
-    return addParamsToUrl(removeSearch(orig),
-        /** @type {!JsonObject} **/ (Object.assign({}, replaceParams, params)));
+    return addMissingParamsToUrl(removeAmpJsParamsFromUrl(orig), replaceParams);
   }
 
   /**

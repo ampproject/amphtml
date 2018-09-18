@@ -22,20 +22,17 @@ import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
-import {deepEquals, parseJson} from '../../../src/json';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
+import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {filterSplice, findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
-import {isArray, isObject, toArray} from '../../../src/types';
+import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
 import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
@@ -480,16 +477,16 @@ export class Bind {
   /**
    * Calls setState(s), where s is data.state with the non-overridable keys
    * removed.
-   * @param {*} data
+   * @param {!JsonObject} data
    * @return {!Promise}
    * @private
    */
   premutate_(data) {
     const ignoredKeys = [];
     return this.initializePromise_.then(() => {
-      Object.keys(data.state).forEach(key => {
+      Object.keys(data['state']).forEach(key => {
         if (!this.overridableKeys_.includes(key)) {
-          delete data.state[key];
+          delete data['state'][key];
           ignoredKeys.push(key);
         }
       });
@@ -498,7 +495,7 @@ export class Bind {
               'because they are missing the overridable attribute: ' +
               ignoredKeys.join(', '));
       }
-      return this.setState(data.state);
+      return this.setState(data['state']);
     });
   }
 

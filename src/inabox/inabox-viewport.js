@@ -21,13 +21,14 @@ import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {dev} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../layout-rect';
-import {px, resetStyles, setImportantStyles} from '../../src/style';
+import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../../src/utils/rate-limit';
+import {throttle} from '../utils/rate-limit';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
@@ -145,6 +146,9 @@ export class ViewportBindingInabox {
       this.scrollObservable_.fire();
     }, MIN_EVENT_INTERVAL);
 
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -177,9 +181,14 @@ export class ViewportBindingInabox {
   /** @override */
   getLayoutRect(el) {
     const b = el./*OK*/getBoundingClientRect();
+    let {left, top} = b;
+    if (this.useLayers_) {
+      left -= this.viewportRect_.left;
+      top -= this.viewportRect_.top;
+    }
     return layoutRectLtwh(
-        Math.round(b.left + this.boxRect_.left),
-        Math.round(b.top + this.boxRect_.top),
+        Math.round(left + this.boxRect_.left),
+        Math.round(top + this.boxRect_.top),
         Math.round(b.width),
         Math.round(b.height));
   }

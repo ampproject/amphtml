@@ -19,8 +19,10 @@ import {
   computedStyle,
   getVendorJsPropertyName,
   setImportantStyles,
+  setInitialDisplay,
   setStyle,
   setStyles,
+  toggle,
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
@@ -738,7 +740,6 @@ class TransferLayerBody {
       borderImage: 'none',
       boxSizing: 'border-box',
       boxShadow: 'none',
-      display: 'block',
       float: 'none',
       margin: 0,
       opacity: 1,
@@ -748,6 +749,7 @@ class TransferLayerBody {
       transition: 'none',
       visibility: 'visible',
     });
+    setInitialDisplay(this.layer_, 'block');
     doc.documentElement.appendChild(this.layer_);
   }
 
@@ -779,7 +781,7 @@ class TransferLayerBody {
       setStyle(element, 'pointer-events', 'initial');
       const placeholder = fe.placeholder = this.doc_.createElement(
           'i-amphtml-fpa');
-      setStyle(placeholder, 'display', 'none');
+      toggle(placeholder, false);
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }
 

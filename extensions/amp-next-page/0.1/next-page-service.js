@@ -16,7 +16,9 @@
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/runtime';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
+import {
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {fetchDocument} from '../../../src/document-fetcher';
@@ -26,7 +28,8 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {setStyle} from '../../../src/style';
+import {removeElement} from '../../../src/dom';
+import {setStyle, toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 // TODO(emarchiori): Make this a configurable parameter.
@@ -181,6 +184,14 @@ export class NextPageService {
       }
     }
 
+    // Drop any amp-analytics tags from the child doc. We want to reuse the
+    // parent config instead.
+    const analytics = doc.querySelectorAll('amp-analytics');
+    for (let i = 0; i < analytics.length; i++) {
+      const item = analytics[i];
+      removeElement(item);
+    }
+
     const amp =
         this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
     installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
@@ -256,7 +267,7 @@ export class NextPageService {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
 
-                setStyle(documentRef.recUnit.el, 'display', 'none');
+                toggle(dev().assertElement(documentRef.recUnit.el), false);
                 this.documentQueued_ = false;
                 resolve();
               } catch (e) {

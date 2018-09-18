@@ -82,7 +82,7 @@ import {
   px,
   resetStyles,
   setImportantStyles,
-  setStyle,
+  toggle,
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
@@ -91,6 +91,7 @@ import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
+import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
@@ -346,6 +347,10 @@ export class AmpStory extends AMP.BaseElement {
       this.variableService_.onNavigationStateChange(stateChangeEvent);
       this.analytics_.onNavigationStateChange(stateChangeEvent);
     });
+
+    // Removes title in order to prevent incorrect titles appearing on link
+    // hover. (See 17654)
+    this.element.removeAttribute('title');
 
     // Disallow all actions in a (standalone) story.
     // Components then add their own actions.
@@ -813,7 +818,6 @@ export class AmpStory extends AMP.BaseElement {
     toRemoveChildren.forEach(el => consentEl.removeChild(el));
   }
 
-
   /**
    * @private
    */
@@ -1120,7 +1124,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      setStyle(this.element, 'display', 'none');
+      toggle(this.element, false);
 
       // Reading the height is what forces the repaint.  The conditional exists
       // only to workaround the fact that the closure compiler would otherwise
@@ -1128,7 +1132,7 @@ export class AmpStory extends AMP.BaseElement {
       // always >= 0, this conditional will always be executed.
       const height = this.element./*OK*/offsetHeight;
       if (height >= 0) {
-        setStyle(this.element, 'display', '');
+        toggle(this.element, true);
       }
     });
   }
@@ -1192,11 +1196,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string}
    */
   getHistoryStatePageId_() {
-    const {history} = this.win;
-    if (history && history.state) {
-      return history.state.ampStoryPageId;
-    }
-    return null;
+    const state = getState(this.win.history);
+    return state ? state.ampStoryPageId : null;
   }
 
 

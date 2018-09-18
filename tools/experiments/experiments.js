@@ -230,6 +230,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
   {
+    id: 'disable-amp-story-default-media',
+    name: 'Removes default media for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/14535',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
+  },
+  {
     id: 'amp-story-responsive-units',
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
@@ -280,6 +286,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    id: 'sandbox-ads',
+    name: 'Applies a sandbox to ad iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/14240',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'video-service',
     name: 'Enables new implementation of unified Video Interface services.',
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
@@ -292,21 +304,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'amp-img-native-srcset',
-    name: 'Enables native browser implementation of srcset and sizes',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
-  },
-  {
     id: 'layers',
     name: 'Enables the new Layers position/measurement system',
     spec: 'https://github.com/ampproject/amphtml/issues/3434',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
-  },
-  {
-    id: 'amp-image-slider',
-    name: 'Enables the experimental amp-image-slider for image comparison',
-    spec: 'TODO',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17165',
   },
   {
     id: 'blurry-placeholder',
@@ -353,6 +354,11 @@ const EXPERIMENTS = [
     id: 'linker-meta-opt-in',
     name: 'Opts-in users that have included the GA client-id meta tag ',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
+  },
+  {
+    id: 'amp-consent-v2',
+    name: 'Enables CMP support to amp-consent component',
+    spec: 'https://github.com/ampproject/amphtml/issues/17742',
   },
 ];
 

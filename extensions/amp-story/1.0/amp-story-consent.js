@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty, getStoreService} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
@@ -27,10 +31,13 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
-import {createShadowRootWithStyle} from './utils';
+import {
+  createShadowRootWithStyle,
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
