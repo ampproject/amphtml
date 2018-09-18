@@ -22,11 +22,14 @@
 import {Deferred} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getIframe} from '../../../src/3p-frame';
+import {getIframe, getBootstrapBaseUrl} from '../../../src/3p-frame';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
+import {parseUrlDeprecated} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
+import {setStyle} from '../../../src/style';
+
 
 /**
  * @fileoverview
@@ -156,8 +159,7 @@ export class AmpRecaptchaService {
    */
   initialize_(element) {
 
-    /* the third parameter 'recaptcha' ties it to the 3p/recaptcha.js */
-    this.iframe_ = getIframe(this.win_, element, 'recaptcha');
+    this.iframe_ = this.createRecaptchaFrame_();
 
     this.unlisteners_ = [
       this.listenIframe_(
@@ -191,6 +193,32 @@ export class AmpRecaptchaService {
       this.unlisteners_ = [];
       this.executeMap_ = {};
     }
+  }
+
+  /**
+   * Function to create our bootstrap iframe.
+   * 
+   * @return {Element}
+   * @private
+   */
+  createRecaptchaFrame_() {
+
+    const iframe = this.win_.document.createElement('iframe');
+
+    // TODO(@torch2424) get the correct booststrap url. Perhaps hardcode this for now.
+    const baseUrl = getBootstrapBaseUrl(this.win_);
+    console.log(baseUrl);
+    iframe.src = baseUrl;
+    iframe.ampLocation = parseUrlDeprecated(baseUrl);
+    iframe.setAttribute('scrolling', 'no');
+    setStyle(iframe, 'border', 'none');
+    /** @this {!Element} */
+    iframe.onload = function() {
+      // Chrome does not reflect the iframe readystate.
+      this.readyState = 'complete';
+    };
+
+    return iframe;
   }
 
   /**

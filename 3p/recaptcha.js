@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {dev} from '../src/log';
+import {IframeMessagingClient} from './iframe-messaging-client';
 import {loadScript, validateData} from './3p';
 
 /**
@@ -41,13 +45,18 @@ const TAG = 'RECAPTCHA';
 /** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 
+/** {!IframeMessaginClient|null} **/
+let iframeMessagingClient = null;
+
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-export function recaptcha(global, data) {
+function recaptcha(global, data) {
 
-  validateData(data, ['sitekey', 'action']);
+  //validateData(data, ['sitekey', 'action']);
+
+  console.log(document.referrer);
 
   const {sitekey} = data;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
@@ -57,12 +66,49 @@ export function recaptcha(global, data) {
 
     grecaptcha.ready(function() {
       // TODO(@torch2424) Send Ready Event, and listen to actions
+      iframeMessagingClient = new IframeMessagingClient(global);
+      iframeMessagingClient.setSentinel(TAG);
+      iframeMessagingClient.registerCallback(
+          'amp-recaptcha-action',
+          actionTypeHandler.bind(this, grecaptcha)
+      );
+      iframeMessagingClient./*OK*/sendMessage(MESSAGE_TAG + 'ready');
     });
   }, function() {
     global.context.report3pError(
         TAG + ' Failed to load recaptcha api script'
     );
     dev().error(TAG + ' Failed to load recaptcha api script');
+  });
+}
+
+/**
+ * Function to handle executing actions using the grecaptcha Object,
+ * and sending the token back to the parent amp-recaptcha component
+ *
+ * @param {!Window} global
+ * @param {*} grecaptcha
+ * @param {Object} data
+ * @private
+ */
+function actionTypeHandler_(global, grecaptcha, data) {
+
+  const executePromise = grecaptcha.execute(data.sitekey, {
+    action: data.action,
+  });
+
+  // .then() promise pollyfilled by recaptcha api script
+  executePromise./*OK*/then(function(token) {
+    iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-token', dict({
+      'id': data.id,
+      'token': token,
+    }));
+  }, function(err) {
+    user().error(TAG, err);
+    iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
+      'id': data.id,
+      'error': err.message,
+    }));
   });
 }
 

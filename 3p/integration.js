@@ -64,7 +64,6 @@ import {facebook} from './facebook';
 import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
-import {recaptcha} from './recaptcha';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 import {viqeoplayer} from './viqeoplayer';
@@ -417,7 +416,6 @@ register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
 register('realclick', realclick);
-register('recaptcha', recaptcha);
 register('reddit', reddit);
 register('relap', relap);
 register('revcontent', revcontent);
@@ -473,7 +471,6 @@ register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
-// TODO(@torch2424) Remove this in follow up PR.
 const defaultAllowedTypesInCustomFrame = [
   // Entries must be reasonably safe and not allow overriding the injected
   // JS URL.
@@ -481,7 +478,6 @@ const defaultAllowedTypesInCustomFrame = [
   // draw3p. See amp-ad docs.
   'facebook',
   'twitter',
-  'recaptcha',
   'doubleclick',
   'yieldbot',
   '_ping_',
