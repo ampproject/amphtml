@@ -47,6 +47,7 @@ describes.realWin('amp-list component', {
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
+    element.getPlaceholder = () => null;
 
     const template = doc.createElement('template');
     template.content.appendChild(doc.createTextNode('{{template}}'));
