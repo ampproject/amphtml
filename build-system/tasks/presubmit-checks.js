@@ -337,12 +337,14 @@ const forbiddenTerms = {
     whitelist: [
       // viewer-impl.sendMessage
       'src/error.js',
+      'src/service/navigation.js',
       'src/service/viewer-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
-      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
+      'extensions/amp-bind/0.1/bind-impl.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
 
       // iframe-messaging-client.sendMessage
@@ -563,6 +565,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'build-system/app.js',
+      'build-system/tasks/firebase.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
@@ -619,6 +622,17 @@ const forbiddenTerms = {
     checkInTestFolder: true,
     whitelist: [
       'test/_init_tests.js',
+    ],
+  },
+  '[^\\.]makeBodyVisible\\(': {
+    message: 'This is a protected function. If you are calling this to show ' +
+        'body after an error please use `makeBodyVisibleRecovery`',
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/style-installer.js',
+      'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
     ],
   },
 };
@@ -783,6 +797,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
       'dist.3p/current/integration.js',
     ],
   },

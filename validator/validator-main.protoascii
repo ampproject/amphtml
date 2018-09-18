@@ -26,7 +26,7 @@ min_validator_revision_required: 348
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 713
+spec_file_revision: 733
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -2963,6 +2963,7 @@ tags: {
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
@@ -3866,9 +3867,8 @@ tags {
 tags {
   html_format: AMP
   html_format: AMP4ADS
+  html_format: AMP4EMAIL
   html_format: EXPERIMENTAL
-  # AMP4EMAIL is omitted. There is additional latency in rendering A4E templates,
-  # which reduces the time available to render the template during the submitting state
   tag_name: "DIV"
   spec_name: "FORM DIV [submitting]"
   mandatory_ancestor: "FORM"
@@ -3882,6 +3882,9 @@ tags {
   html_format: AMP
   html_format: AMP4ADS
   html_format: EXPERIMENTAL
+  # AMP4EMAIL is omitted. There is additional latency in rendering A4E
+  # templates, which reduces the time available to render the template during
+  # the submitting state.
   tag_name: "DIV"
   spec_name: "FORM DIV [submitting][template]"
   mandatory_ancestor: "FORM"
@@ -4816,6 +4819,7 @@ tags: {  # <amp-layout>
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: CONTAINER
   }
 }
 tags: {  # <amp-pixel>
@@ -5777,7 +5781,7 @@ error_formats {
 }
 error_formats {
   code: INVALID_JSON_CDATA
-  format: "JSON contents are invalid data that can not be parsed."
+  format: "The script tag contains invalid JSON that cannot be parsed."
 }
 error_formats {
   code: DISALLOWED_PROPERTY_IN_ATTR_VALUE

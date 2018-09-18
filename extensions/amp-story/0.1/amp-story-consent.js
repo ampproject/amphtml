@@ -27,10 +27,13 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
-import {createShadowRootWithStyle} from './utils';
+import {
+  createShadowRootWithStyle,
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
@@ -214,9 +217,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
       createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
       // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
-      this.actions_.addToWhitelist('AMP-CONSENT.accept');
-      this.actions_.addToWhitelist('AMP-CONSENT.prompt');
-      this.actions_.addToWhitelist('AMP-CONSENT.reject');
+      this.actions_.addToWhitelist('AMP-CONSENT', 'accept');
+      this.actions_.addToWhitelist('AMP-CONSENT', 'prompt');
+      this.actions_.addToWhitelist('AMP-CONSENT', 'reject');
 
       this.setAcceptButtonFontColor_();
 
@@ -227,11 +230,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return false;
   }
 
   /**

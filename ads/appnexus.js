@@ -126,14 +126,14 @@ function appnexusAst(global, data) {
     apntag.onEvent('adAvailable', data.target, isAdAvailable);
     apntag.onEvent('adNoBid', data.target, context.noContentAvailable);
   });
-}
 
-/**
- * resolve getAd with an available ad object
- *
- * @param {{targetId: string}} adObj
- */
-function isAdAvailable(adObj) {
-  global.context.renderStart({width: adObj.width, height: adObj.height});
-  global.apntag.showTag(adObj.targetId, global.window);
+  /**
+   * resolve getAd with an available ad object
+   *
+   * @param {{targetId: string}} adObj
+   */
+  function isAdAvailable(adObj) {
+    global.context.renderStart({width: adObj.width, height: adObj.height});
+    global.apntag.showTag(adObj.targetId, global.window);
+  }
 }

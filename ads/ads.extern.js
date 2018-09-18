@@ -60,6 +60,7 @@ data.tweetid
 data.formula
 var mathjax
 mathjax.Hub
+mathjax.Hub.Config
 mathjax.Hub.Queue
 window.MathJax
 
@@ -77,6 +78,10 @@ THREE.WebGLRenderer.prototype.setSize
 THREE.WebGLRenderer.prototype.setPixelRatio
 THREE.WebGLRenderer.prototype.setClearColor
 THREE.WebGLRenderer.prototype.render
+/** @type {boolean} */
+THREE.WebGLRenderer.prototype.gammaOutput
+/** @type {number} */
+THREE.WebGLRenderer.prototype.gammaFactor
 
 THREE.Light = class extends THREE.Object3D {};
 THREE.DirectionalLight = class extends THREE.Light {};

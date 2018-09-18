@@ -18,10 +18,14 @@ import {
   AdSenseAmpAutoAdsHoldoutBranches,
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {
+  AdSenseAmpAutoAdsResponsiveBranches,
+  getAdSenseAmpAutoAdsResponsiveExperimentBranch,
+} from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
 import {parseUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
@@ -82,6 +86,9 @@ class AdNetworkConfigDef {
  * @return {?AdNetworkConfigDef}
  */
 export function getAdNetworkConfig(type, autoAmpAdsElement) {
+  if ((getMode().test || getMode().localDev) && type == '_ping_') {
+    return new PingNetworkConfig(autoAmpAdsElement);
+  }
   if (type == 'adsense') {
     return new AdSenseNetworkConfig(autoAmpAdsElement);
   }
@@ -90,6 +97,66 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
   }
   return null;
 }
+
+/**
+ * A fake ad network integration that is mainly used for testing
+ * and demo purposes. This implementation gets stripped out in compiled
+ * production code.
+ * @implements {AdNetworkConfigDef}
+ * @visibleForTesting
+ */
+class PingNetworkConfig {
+  /**
+   * @param {!Element} autoAmpAdsElement
+   */
+  constructor(autoAmpAdsElement) {
+    this.autoAmpAdsElement_ = autoAmpAdsElement;
+  }
+
+  /** @override */
+  isEnabled() {
+    return true;
+  }
+
+  /** @override */
+  isResponsiveEnabled() {
+    return true;
+  }
+
+  /** @override */
+  getConfigUrl() {
+    return buildUrl('//lh3.googleusercontent.com/' +
+      'pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n', {}, 4096);
+  }
+
+  /** @override */
+  getAttributes() {
+    return dict({
+      'type': '_ping_',
+    });
+  }
+
+  /** @override */
+  getDefaultAdConstraints() {
+    const viewportHeight =
+      Services.viewportForDoc(this.autoAmpAdsElement_).getSize().height;
+    return {
+      initialMinSpacing: viewportHeight,
+      subsequentMinSpacing: [
+        {adCount: 3, spacing: viewportHeight * 2},
+        {adCount: 6, spacing: viewportHeight * 3},
+      ],
+      maxAdCount: 8,
+    };
+  }
+
+  /** @override */
+  getSizing() {
+    return {};
+  }
+
+}
+
 
 /**
  * @implements {AdNetworkConfigDef}
@@ -114,7 +181,8 @@ class AdSenseNetworkConfig {
    * @param {!Window} win
    */
   isResponsiveEnabled(win) {
-    return (isExperimentOn(win, 'amp-auto-ads-adsense-responsive'));
+    const branch = getAdSenseAmpAutoAdsResponsiveExperimentBranch(win);
+    return branch != AdSenseAmpAutoAdsResponsiveBranches.CONTROL;
   }
 
   /** @override */

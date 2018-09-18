@@ -23,7 +23,10 @@ import {
   registerServiceBuilderForDoc,
   setParentWindow,
 } from '../service';
-import {calculateExtensionScriptUrl} from './extension-location';
+import {
+  calculateExtensionScriptUrl,
+  parseExtensionUrl,
+} from './extension-location';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -259,7 +262,8 @@ export class Extensions {
     }
     oldScriptElement.removeAttribute('custom-element');
     oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
-    return this.preloadExtension(extensionId);
+    const urlParts = parseExtensionUrl(oldScriptElement.src);
+    return this.preloadExtension(extensionId, urlParts.extensionVersion);
   }
 
   /**
@@ -679,8 +683,9 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
+ * @visibleForTesting
  */
-function adoptStandardServicesForEmbed(childWin) {
+export function adoptStandardServicesForEmbed(childWin) {
   // The order of service adoptations is important.
   // TODO(dvoytenko): Refactor service registration if this set becomes
   // to pass the "embeddable" flag if this set becomes too unwieldy.
@@ -688,6 +693,7 @@ function adoptStandardServicesForEmbed(childWin) {
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
   adoptServiceForEmbed(childWin, 'navigation');
+  adoptServiceForEmbed(childWin, 'timer');
 }
 
 

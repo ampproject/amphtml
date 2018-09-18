@@ -17,38 +17,28 @@
 import {Services} from '../services';
 import {
   assertSuccess,
-  fetchPolyfill,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
   setupInput,
+  setupJsonFetchInit,
   verifyAmpCORSHeaders,
 } from '../utils/xhr-utils';
-import {dev, user} from '../log';
 import {
   getCorsUrl,
   parseUrlDeprecated,
-  serializeQueryString,
 } from '../url';
 import {getService, registerServiceBuilder} from '../service';
-import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {user} from '../log';
 
 /**
- * Special case for fetchJson
  * @typedef {{
- *   body: (!JsonObject|!FormData|undefined),
- *   credentials: (string|undefined),
- *   headers: (!JsonObject|undefined),
- *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
+ *  xhrUrl: string,
+ *  fetchOpt: !FetchInitDef
  * }}
  */
-export let FetchInitJsonDef;
-
-/** @private @const {!Array<function(*):boolean>} */
-const allowedJsonBodyTypes_ = [isArray, isObject];
+export let FetchRequestDef;
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -83,8 +73,8 @@ export class Xhr {
    * be either the native fetch or our polyfill.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef} init
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>|!Promise<!Response>}
+   * @param {!FetchInitDef} init
+   * @return {!Promise<!Response>|!Promise<!Response>}
    * @private
    */
   fetch_(input, init) {
@@ -97,16 +87,9 @@ export class Xhr {
           // will expect a native `FormData` object in the `body` property, so
           // the native `FormData` object needs to be unwrapped.
           if (isFormDataWrapper(init.body)) {
-            init.body = init.body.getFormData();
+            init.body = /** @type {!FormDataWrapper} */ (init.body).getFormData();
           }
-          // Fallback to xhr polyfill since `fetch` api does not support
-          // responseType = 'document'. We do this so we don't have to do any
-          // parsing and document construction on the UI thread which would be
-          // expensive.
-          if (init.responseType == 'document') {
-            return fetchPolyfill(input, init);
-          }
-          return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+          return (this.win.fetch).apply(null, arguments);
         });
   }
 
@@ -122,8 +105,8 @@ export class Xhr {
    *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef=} init
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
+   * @param {!FetchInitDef=} init
+   * @return {!Promise<!Response>}
    * @private
    */
   fetchAmpCors_(input, init = {}) {
@@ -147,34 +130,12 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitJsonDef=} opt_init
+   * @param {?FetchInitDef=} opt_init
    * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    */
   fetchJson(input, opt_init, opt_allowFailure) {
-    const init = setupInit(opt_init, 'application/json');
-    if (init.method == 'POST' && !isFormDataWrapper(init.body)) {
-      // Assume JSON strict mode where only objects or arrays are allowed
-      // as body.
-      dev().assert(
-          allowedJsonBodyTypes_.some(test => test(init.body)),
-          'body must be of type object or array. %s',
-          init.body
-      );
-
-      // Content should be 'text/plain' to avoid CORS preflight.
-      init.headers['Content-Type'] = init.headers['Content-Type'] ||
-          'text/plain;charset=utf-8';
-      const headerContentType = init.headers['Content-Type'];
-      // Cast is valid, because we checked that it is not form data above.
-      if (headerContentType === 'application/x-www-form-urlencoded') {
-        init.body =
-          serializeQueryString(/** @type {!JsonObject} */ (init.body));
-      } else {
-        init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
-      }
-    }
-    return this.fetch(input, init);
+    return this.fetch(input, setupJsonFetchInit(opt_init));
   }
 
   /**
@@ -186,35 +147,17 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<!Response>}
    */
   fetchText(input, opt_init) {
     return this.fetch(input, setupInit(opt_init, 'text/plain'));
   }
 
   /**
-   * Creates an XHR request with responseType=document
-   * and returns a promise for the initialized `Document`.
-   * Note this does not return a `Response`, since this is not a standard
-   * Fetch response type.
-   *
-   * @param {string} input
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init
-   * @return {!Promise<!Document>}
-   */
-  fetchDocument(input, opt_init) {
-    const init = setupInit(opt_init, 'text/html');
-    init.responseType = 'document';
-    return this.fetch(input, init)
-        .then(response =>
-          /** @type {!../utils/xhr-utils.FetchResponse} */(response).document());
-  }
-
-  /**
    * @param {string} input URL
-   * @param {?../utils/xhr-utils.FetchInitDef=} opt_init Fetch options object.
-   * @return {!Promise<!../utils/xhr-utils.FetchResponse>}
+   * @param {?FetchInitDef=} opt_init Fetch options object.
+   * @return {!Promise<!Response>}
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
@@ -230,7 +173,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {!../utils/xhr-utils.FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} opt_init
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
@@ -250,7 +193,6 @@ export class Xhr {
     return getCorsUrl(win, url);
   }
 }
-
 
 /**
  * @param {!Window} window

@@ -30,6 +30,7 @@ const multer = require('multer');
 const path = require('path');
 const request = require('request');
 const pc = process;
+const countries = require('../examples/countries.json');
 
 app.use(bodyParser.json());
 app.use('/amp4test', require('./amp4test'));
@@ -932,7 +933,8 @@ app.get('/adzerk/*', (req, res) => {
       pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
   fs.readFileAsync(filePath).then(file => {
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+    res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
+    res.setHeader('AMP-Ad-Response-Type', 'template');
     res.end(file);
   }).error(() => {
     res.status(404);
@@ -1092,6 +1094,28 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(file);
   });
+});
+
+/**
+ * Autosuggest endpoint
+ */
+app.get('/search/countries', function(req, res) {
+  let filtered = [];
+  if (req.query.hasOwnProperty('q')) {
+    const query = req.query.q.toLowerCase();
+
+    filtered = countries.items
+        .filter(country => country.name.toLowerCase().startsWith(query));
+  }
+
+  const results = {
+    'items': [
+      {
+        'results': filtered,
+      },
+    ],
+  };
+  res.send(results);
 });
 
 /**

@@ -135,6 +135,9 @@ export function getIframe(
     // request completes.
     iframe.setAttribute('allow', 'sync-xhr \'none\';');
   }
+  if (isExperimentOn(parentWindow, 'sandbox-ads')) {
+    applySandbox(iframe);
+  }
   iframe.setAttribute('data-amp-3p-sentinel',
       attributes['_context']['sentinel']);
   return iframe;
@@ -329,6 +332,56 @@ function getCustomBootstrapBaseUrl(
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
   parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';
+}
+
+/**
+ * Applies a sandbox to the iframe, if the required flags can be allowed.
+ * @param {!Element} iframe
+ * @visibleForTesting
+ */
+export function applySandbox(iframe) {
+  if (!iframe.sandbox || !iframe.sandbox.supports) {
+    return; // Can't feature detect support
+  }
+  // If these flags are not supported by the UA we don't apply any
+  // sandbox.
+  const requiredFlags = [
+    // This only allows navigation when user interacts and thus prevents
+    // ads from auto navigating the user.
+    'allow-top-navigation-by-user-activation',
+    // Crucial because otherwise even target=_blank opened links are
+    // still sandboxed which they may not expect.
+    'allow-popups-to-escape-sandbox',
+  ];
+  // These flags are not feature detected. Put stuff here where either
+  // they have always been supported or support is not crucial.
+  const otherFlags = [
+    'allow-forms',
+    // We should consider turning this off! But since the top navigation
+    // issue is the big one, we'll leave this allowed for now.
+    'allow-modals',
+    // Give access to raw mouse movements.
+    'allow-pointer-lock',
+    // This remains subject to popup blocking, it just makes it supported
+    // at all.
+    'allow-popups',
+    // This applies inside the iframe and is crucial to not break the web.
+    'allow-same-origin',
+    'allow-scripts',
+  ];
+  // Not allowed
+  // - allow-top-navigation
+  // - allow-orientation-lock
+  // - allow-pointer-lock
+  // - allow-presentation
+  for (let i = 0; i < requiredFlags.length; i++) {
+    const flag = requiredFlags[i];
+    if (!iframe.sandbox.supports(flag)) {
+      dev().info(TAG, `Iframe doesn't support ${flag}`);
+      return;
+    }
+  }
+  iframe.sandbox = requiredFlags.join(' ') + ' ' + otherFlags.join(' ');
 }
 
 /**

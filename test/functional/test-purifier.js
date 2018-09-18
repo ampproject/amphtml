@@ -392,11 +392,32 @@ function runSanitizerTests() {
       expect(purify('<span validation-for="form1"></span>'))
           .to.equal('<span validation-for="form1"></span>');
     });
+
+    it('should avoid disallowing default-supported attributes', () => {
+      // We whitelist all attributes of AMP elements, but make sure we don't
+      // remove default-supported attributes from the whitelist afterwards.
+      const html =
+          '<amp-img style="color: red"></amp-img><p style="color: blue"></p>';
+      expect(purify(html)).to.equal(html);
+    });
+
+    it('should allow <amp-lightbox> attributes', () => {
+      expect(purify('<amp-lightbox scrollable></amp-lightbox>'))
+          .to.equal('<amp-lightbox scrollable=""></amp-lightbox>');
+    });
   });
 
   describe('purifyTagsForTripleMustache', () => {
     it('should output basic text', () => {
       expect(purifyTagsForTripleMustache('abc')).to.be.equal('abc');
+    });
+
+    it('should output HTML entities', () => {
+      const entity = '&lt;tag&gt;';
+      expect(purifyTagsForTripleMustache(entity)).to.be.equal(entity);
+      // DOMPurify short-circuits when there are no '<' characters.
+      expect(purifyTagsForTripleMustache(`<p>${entity}</p>`))
+          .to.be.equal(`<p>${entity}</p>`);
     });
 
     it('should output valid markup', () => {
@@ -428,6 +449,11 @@ function runSanitizerTests() {
     it('should compensate for broken markup', () => {
       expect(purifyTagsForTripleMustache('<b>a<i>b')).to.be.equal(
           '<b>a<i>b</i></b>');
+    });
+
+    it('should support list tags', () => {
+      const html = '<ol><li></li></ol><ul></ul>';
+      expect(purifyTagsForTripleMustache(html)).to.be.equal(html);
     });
 
     describe('should sanitize `style` attribute', () => {

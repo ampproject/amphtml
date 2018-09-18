@@ -43,7 +43,7 @@ describes.realWin(
       function getApester(attributes, opt_responsive) {
         const media = doc.createElement('amp-apester-media');
         const regularResponse = {
-          code: 200,
+          status: 200,
           message: 'ok',
           payload: {
             interactionId: '5aaa70c79aaf0c5443078d31',
@@ -59,7 +59,7 @@ describes.realWin(
           },
         };
         const playlistResponse = {
-          code: 200,
+          status: 200,
           message: 'ok',
           payload: [
             {
@@ -90,6 +90,7 @@ describes.realWin(
         if (attributes) {
           xhrMock.expects('fetchJson').returns(
               Promise.resolve({
+                status: 200,
                 json() {
                   return Promise.resolve(currentResopnse);
                 },
@@ -126,7 +127,7 @@ describes.realWin(
           const placeholder = ape.querySelector('div[placeholder]');
           expect(placeholder).to.not.be.null;
           expect(placeholder.getAttribute('aria-label'))
-              .to.equal('Loading video');
+              .to.equal('Loading Apester Media');
           const url = new URL(iframe.src);
           const qs = new URLSearchParams(url.searchParams);
           expect(url.hostname).to.equal('renderer.apester.com');

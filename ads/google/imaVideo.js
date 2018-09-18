@@ -704,8 +704,8 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
+  videoPlayer.addEventListener(interactEvent, showControls);
   if (playbackStarted) {
-    videoPlayer.addEventListener(interactEvent, showControls);
     playVideo();
   }
 }
@@ -848,6 +848,8 @@ function onProgressClick(event) {
   // instead of clicking and dragging.
   clearInterval(hideControlsTimeout);
   onProgressMove(event);
+  event.preventDefault();
+  event.stopPropagation();
   clearInterval(uiTicker);
   document.addEventListener(mouseMoveEvent, onProgressMove);
   document.addEventListener(mouseUpEvent, onProgressClickEnd);
@@ -1123,14 +1125,26 @@ function onMessage(global, event) {
       }
       postMessage({event: VideoEvents.UNMUTED});
       break;
+    case 'hideControls':
+      if (!adsActive) {
+        hideControls();
+      }
+      break;
+    case 'showControls':
+      if (!adsActive) {
+        showControls();
+      }
+      break;
     case 'resize':
       if (msg.args && msg.args.width && msg.args.height) {
-        const dimsStyles = {
+        setStyles(wrapperDiv, {
           'width': px(msg.args.width),
           'height': px(msg.args.height),
-        };
-        setStyles(wrapperDiv, dimsStyles);
-        setStyles(bigPlayDiv, dimsStyles);
+        });
+        setStyles(bigPlayDiv, {
+          'width': px(msg.args.width),
+          'height': px(msg.args.height),
+        });
         if (adsActive) {
           adsManager.resize(
               msg.args.width, msg.args.height,

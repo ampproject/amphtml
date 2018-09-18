@@ -50,6 +50,11 @@ let PlacementSizingDef;
 const TARGET_AD_HEIGHT_PX = 250;
 
 /**
+ * @const
+ */
+const MAXIMUM_RESPONSIVE_WIDTH = 1200;
+
+/**
  * @enum {number}
  */
 export const PlacementState = {
@@ -236,9 +241,9 @@ export class Placement {
    * @private
    */
   getPlacementSizing_(sizing, isResponsiveEnabled) {
-    if (isResponsiveEnabled) {
-      const viewport = this.resources_.getViewport();
-      const viewportWidth = viewport.getWidth();
+    const viewport = this.resources_.getViewport();
+    const viewportWidth = viewport.getWidth();
+    if (isResponsiveEnabled && viewportWidth <= MAXIMUM_RESPONSIVE_WIDTH) {
       const viewportHeight = viewport.getHeight();
       const responsiveHeight =
         getResponsiveHeightForContext_(viewportWidth, viewportHeight);
@@ -329,7 +334,7 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     user().warn(TAG, 'No anchor in placement');
     return;
   }
-  const anchorElements = getAnchorElements(ampdoc.getBody(), anchor);
+  const anchorElements = getAnchorElements(ampdoc.getRootNode(), anchor);
   if (!anchorElements.length) {
     user().warn(TAG, 'No anchor element found');
     return;
@@ -365,7 +370,7 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
 /**
  * Looks up the element(s) addresses by the anchorObj.
  *
- * @param {!Element} rootElement
+ * @param {(Document|ShadowRoot|Element)} rootElement
  * @param {!Object} anchorObj
  * @return {!Array<!Element>}
  */
@@ -375,7 +380,8 @@ function getAnchorElements(rootElement, anchorObj) {
     user().warn(TAG, 'No selector in anchor');
     return [];
   }
-  let elements = [].slice.call(scopedQuerySelectorAll(rootElement, selector));
+  let elements = [].slice.call(scopedQuerySelectorAll(
+      rootElement.documentElement || rootElement, selector));
 
   const minChars = anchorObj['min_c'] || 0;
   if (minChars > 0) {

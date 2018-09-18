@@ -35,7 +35,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {setInitialDisplay, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
@@ -82,7 +82,7 @@ class AmpVideo extends AMP.BaseElement {
     this.muted_ = false;
 
     /** @private {boolean} */
-    this.isPrerenderAllowed_ = false;
+    this.prerenderAllowed_ = false;
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
@@ -101,6 +101,16 @@ class AmpVideo extends AMP.BaseElement {
       this.getUrlService_().assertHttpsUrl(videoSrc, this.element);
       this.preconnect.url(videoSrc, opt_onLayout);
     }
+  }
+
+  /**
+   * @override
+   */
+  firstAttachedCallback() {
+    // Only allow prerender if video sources are cached on CDN. Set this value
+    // in `firstAttachedCallback` since `buildCallback` is too late and the
+    // element children may not be available in the constructor.
+    this.prerenderAllowed_ = this.hasAnyCachedSources_();
   }
 
   /**
@@ -139,7 +149,7 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   prerenderAllowed() {
-    return this.isPrerenderAllowed_;
+    return this.prerenderAllowed_;
   }
 
   /**
@@ -173,8 +183,6 @@ class AmpVideo extends AMP.BaseElement {
       console/*OK*/.error(
           'No "poster" attribute has been provided for amp-video.');
     }
-
-    this.isPrerenderAllowed_ = this.hasAnyCachedSources_();
 
     // Enable inline play for iOS.
     this.video_.setAttribute('playsinline', '');
@@ -266,8 +274,6 @@ class AmpVideo extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT,
         dev().assertElement(this.video_),
         /* opt_removeMissingAttrs */ true);
@@ -277,6 +283,7 @@ class AmpVideo extends AMP.BaseElement {
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
     if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
@@ -310,6 +317,10 @@ class AmpVideo extends AMP.BaseElement {
       const srcSource = this.createSourceElement_(src, type);
       const ampOrigSrc = this.element.getAttribute('amp-orig-src');
       srcSource.setAttribute('amp-orig-src', ampOrigSrc);
+      // Also make sure src is removed from amp-video since Stories media-pool
+      // may copy it back from amp-video.
+      this.element.removeAttribute('src');
+      this.element.removeAttribute('type');
       sources.unshift(srcSource);
     }
 
@@ -395,21 +406,19 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {boolean}
    */
   hasAnyCachedSources_() {
     const {element} = this;
     const sources = toArray(childElementsByTag(element, 'source'));
     sources.push(element);
-
     for (let i = 0; i < sources.length; i++) {
       if (this.isCachedByCDN_(sources[i])) {
         return true;
       }
     }
-
     return false;
   }
-
 
   /**
    * @private
@@ -512,8 +521,8 @@ class AmpVideo extends AMP.BaseElement {
     }
     const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     const src = element.getAttribute('poster');
+    setInitialDisplay(poster, 'block');
     setStyles(poster, {
-      'display': 'block',
       'background-image': `url(${src})`,
       'background-size': 'cover',
     });
