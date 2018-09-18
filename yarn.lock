@@ -12953,9 +12953,9 @@ to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
-topological-sort@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/topological-sort/-/topological-sort-0.2.0.tgz#4e2cf8c37b7ca5283406c48edb86d6407ebc5f3c"
+topological-sort@0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/topological-sort/-/topological-sort-0.3.0.tgz#3ca539982c71a13f0a7b3be2ad4ae4dd437a1e3b"
 
 touch@3.1.0, touch@^3.1.0:
   version "3.1.0"
