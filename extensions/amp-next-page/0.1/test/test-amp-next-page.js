@@ -22,6 +22,11 @@ import {macroTask} from '../../../../testing/yield';
 import {setStyle} from '../../../../src/style';
 import {toggleExperiment} from '../../../../src/experiments';
 
+const EXAMPLE_PAGE = `
+    <header>Header</header>
+    <div style="height:1000px"></div>
+    <footer>Footer</footer>`;
+
 describes.realWin('amp-next-page component', {
   amp: {
     extensions: ['amp-next-page'],
@@ -31,7 +36,6 @@ env => {
   let win, doc, ampdoc;
   let element;
   let nextPage;
-  let xhrMock;
   let fetchDocumentMock;
   let viewport;
   let sizes;
@@ -57,7 +61,6 @@ env => {
 
     ampdoc.getUrl = () => document.location.href;
 
-    xhrMock = sandbox.mock(Services.xhrFor(win));
     fetchDocumentMock = sandbox.mock(DocFetcher);
     sandbox.stub(Services.resourcesForDoc(ampdoc), 'mutateElement')
         .callsFake((unused, mutator) => {
@@ -71,7 +74,6 @@ env => {
   });
 
   afterEach(() => {
-    xhrMock.verify();
     fetchDocumentMock.verify();
     toggleExperiment(win, 'amp-next-page', false);
   });
@@ -104,7 +106,8 @@ env => {
 
     it('does not fetch the next document before 3 viewports away',
         function* () {
-          fetchDocumentMock.expects('fetchDocument').never();
+          const xhrMock = sandbox.mock(Services.xhrFor(win));
+          xhrMock.expects('fetch').never();
           sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
             // 4x viewports away
             return Promise.resolve(
@@ -113,10 +116,13 @@ env => {
 
           win.dispatchEvent(new Event('scroll'));
           yield macroTask();
+
+          xhrMock.verify();
         });
 
     it('fetches the next document within 3 viewports away', function* () {
-      fetchDocumentMock.expects('fetchDocument').returns(Promise.resolve());
+      const xhrMock = sandbox.mock(Services.xhrFor(win));
+      xhrMock.expects('fetch').returns(Promise.resolve());
 
       sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
         // 1x viewport away
@@ -129,10 +135,9 @@ env => {
     });
 
     it('only fetches the next document once', function*() {
-      fetchDocumentMock.expects('fetchDocument')
-          // Promise which is never resolved.
-          .returns(new Promise(() => {}))
-          .once();
+      const xhrMock = sandbox.mock(Services.xhrFor(win));
+      // Promise which is never resolved.
+      xhrMock.expects('fetch').returns(new Promise(() => {})).once();
 
       sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
         // 1x viewport away
@@ -144,13 +149,11 @@ env => {
       yield macroTask();
       win.dispatchEvent(new Event('scroll'));
       yield macroTask();
+      xhrMock.verify();
     });
 
     it('adds the hidden class to hideSelector elements', function* () {
-      const exampleDoc = createExampleDocument(doc);
-      fetchDocumentMock.expects('fetchDocument')
-          .returns(Promise.resolve(exampleDoc))
-          .once();
+      env.fetchMock.get('*', EXAMPLE_PAGE);
 
       const nextPageService =
           yield getServicePromiseForDoc(ampdoc, 'next-page');
@@ -180,14 +183,11 @@ env => {
     });
 
     it('removes amp-analytics tags from child documents', function* () {
-      const exampleDoc = createExampleDocument(doc);
-      exampleDoc.body.innerHTML +=
-          '<amp-analytics id="analytics1"></amp-analytics>';
-      exampleDoc.body.innerHTML +=
-          '<amp-analytics id="analytics2"></amp-analytics>';
-      fetchDocumentMock.expects('fetchDocument')
-          .returns(Promise.resolve(exampleDoc))
-          .once();
+      const examplePage = `${EXAMPLE_PAGE}
+          <amp-analytics id="analytics1"></amp-analytics>
+          <amp-analytics id="analytics2"></amp-analytics>`;
+      env.fetchMock.get('*', examplePage);
+
       const nextPageService =
           yield getServicePromiseForDoc(ampdoc, 'next-page');
       const attachShadowDocSpy =
@@ -433,7 +433,8 @@ env => {
               },
             ],
           };
-          fetchDocumentMock.expects('fetchDocument').returns(Promise.reject());
+          env.fetchMock.get('*', 404);
+
           element.innerHTML = `<script type="application/json">
                                  ${JSON.stringify(config)}
                                </script>`;
@@ -449,28 +450,6 @@ env => {
         });
   });
 });
-
-/**
- * Creates an example document as a child of {@code doc} to be embedded as a
- * shadow document.
- * @param {!Document} doc Parent document to use to create new elements.
- * @return {!Document} New {@code DocumentFragment} with example content.
- */
-function createExampleDocument(doc) {
-  const childDoc = doc.createDocumentFragment();
-  const head = doc.createElement('head');
-  const body = doc.createElement('body');
-  childDoc.appendChild(head);
-  childDoc.appendChild(body);
-  childDoc.head = head;
-  childDoc.body = body;
-
-  childDoc.body.innerHTML = `
-      <header>Header</header>
-      <div style="height:1000px"></div>
-      <footer>Footer</footer>`;
-  return childDoc;
-}
 
 /**
  * Creates a new XML document from the specified XML text.

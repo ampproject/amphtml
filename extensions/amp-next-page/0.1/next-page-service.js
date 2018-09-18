@@ -22,7 +22,6 @@ import {
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {fetchDocument} from '../../../src/document-fetcher';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -67,6 +66,9 @@ export class NextPageService {
 
     /** @private {?Element} */
     this.element_ = null;
+
+    /** @private {?../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = null;
 
     /** @private {?./config.AmpNextPageConfig} */
     this.config_ = null;
@@ -134,6 +136,7 @@ export class NextPageService {
     this.win_ = win;
     this.separator_ = separator || this.createDefaultSeparator_();
     this.element_ = element;
+    this.xhr_ = Services.xhrFor(win);
 
     if (this.config_.hideSelectors) {
       this.hideSelector_ = this.config_.hideSelectors.join(',');
@@ -252,7 +255,20 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      fetchDocument(/** @type {!Window} */ (this.win_), next.ampUrl, {ampCors: false})
+      this.xhr_.fetch(next.ampUrl, {ampCors: false})
+          .then(response => {
+            // Update AMP URL in case we were redirected.
+            documentRef.ampUrl = response.url;
+            return response.text();
+          })
+          .then(html => {
+            const doc =
+                this.win_.document.implementation.createHTMLDocument('');
+            doc.open();
+            doc.write(html);
+            doc.close();
+            return doc;
+          })
           .then(doc => new Promise((resolve, reject) => {
             if (documentRef.cancelled) {
               // User has reached the end of the document already, don't render.
