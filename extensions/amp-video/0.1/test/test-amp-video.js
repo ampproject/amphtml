@@ -20,7 +20,7 @@ import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {mockServiceForDoc} from '../../../../testing/test-helper';
-
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-video', {
   amp: {
@@ -476,6 +476,101 @@ describes.realWin('amp-video', {
             const pPause = listenOncePromise(v, VideoEvents.PAUSE);
             return Promise.all([pEnded, pPause]);
           });
+    });
+  });
+
+  describe('blurred image placeholder', () => {
+    beforeEach(() => {
+      toggleExperiment(win, 'blurry-placeholder', true, true);
+    });
+
+    /**
+     * Creates an amp-video with an image child that could potentially be a
+     * blurry placeholder.
+     * @param {boolean} addPlaceholder Whether the child should have a
+     *     placeholder attribute.
+     * @param {boolean} addBlurClass Whether the child should have the
+     *     class that allows it to be a blurred placeholder.
+     * @return {AmpImg} An amp-video potentially with a blurry placeholder
+     */
+    function getVideoWithBlur(addPlaceholder, addBlurClass) {
+      const v = doc.createElement('amp-video');
+      const img = doc.createElement('img');
+      if (addPlaceholder) {
+        img.setAttribute('placeholder', '');
+        v.getPlaceholder = () => img;
+      } else {
+        v.getPlaceholder = sandbox.stub();
+      }
+      if (addBlurClass) {
+        img.classList.add('i-amphtml-blur');
+      }
+      v.setAttribute('poster', 'img.png');
+      doc.body.appendChild(v);
+      v.appendChild(img);
+      v.build();
+      const impl = v.implementation_;
+      impl.togglePlaceholder = sandbox.stub();
+      return impl;
+    }
+
+    it('should only fade out blurry image placeholders', () => {
+      let impl = getVideoWithBlur(true, true);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      let el = impl.element;
+      let img = el.firstChild;
+      expect(img.style.opacity).to.equal('0');
+      expect(impl.togglePlaceholder).to.not.be.called;
+
+      impl = getVideoWithBlur(true, false);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      el = impl.element;
+      img = el.firstChild;
+      expect(img.style.opacity).to.be.equal('');
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+
+      impl = getVideoWithBlur(false, true);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      el = impl.element;
+      img = el.firstChild;
+      expect(img.style.opacity).to.be.equal('');
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+
+      impl = getVideoWithBlur(false, false);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      el = impl.element;
+      img = el.firstChild;
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+    });
+
+    it('should fade out the blurry image placeholder on video load', () => {
+      const impl = getVideoWithBlur(true, true);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      const el = impl.element;
+      const img = el.firstChild;
+      expect(img.style.opacity).to.equal('0');
+      expect(impl.togglePlaceholder).to.not.be.called;
+    });
+
+    it('should fade out the blurry image placeholder on poster load', () => {
+      const impl = getVideoWithBlur(true, true);
+      impl.buildCallback();
+      impl.layoutCallback();
+      const el = impl.element;
+      const img = el.firstChild;
+      impl.posterDummyImageForTesting_.onload();
+      expect(img.style.opacity).to.equal('0');
+      expect(impl.togglePlaceholder).to.not.be.called;
     });
   });
 
