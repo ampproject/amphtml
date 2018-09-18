@@ -16,14 +16,7 @@
 
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ImaPlayerData} from './ima-player-data';
-import {
-  camelCaseToTitleCase,
-  px,
-  setInitialDisplay,
-  setStyle,
-  setStyles,
-  toggle,
-} from '../../src/style';
+import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
@@ -219,19 +212,19 @@ export function imaVideo(global, data) {
     'position': 'relative',
     'width': px(videoWidth),
     'height': px(videoHeight),
+    'display': 'table-cell',
     'vertical-align': 'middle',
     'text-align': 'center',
     'cursor': 'pointer',
   });
-  setInitialDisplay(bigPlayDiv, 'table-cell');
   // Inner div so we can v and h align.
   playButtonDiv = createIcon(global, 'play');
   playButtonDiv.id = 'ima-play-button';
   setStyles(playButtonDiv, {
+    'display': 'inline-block',
     'max-width': '120px',
     'max-height': '120px',
   });
-  setInitialDisplay(playButtonDiv, 'inline-block');
   bigPlayDiv.appendChild(playButtonDiv);
 
   // Video controls.
@@ -248,12 +241,11 @@ export function imaVideo(global, data) {
     'background-image': `url(${controlsBg})`,
     'background-position': 'bottom',
     'color': 'white',
+    'display': 'none',
     'justify-content': 'center',
     'align-items': 'center',
     'user-select': 'none',
   });
-  setInitialDisplay(controlsDiv, 'flex');
-  toggle(controlsDiv, false);
   // Play button
   playPauseDiv = createIcon(global, 'play');
   playPauseDiv.id = 'ima-play-pause';
@@ -344,7 +336,6 @@ export function imaVideo(global, data) {
     'width': '100%',
     'height': '100%',
   });
-  setInitialDisplay(adContainerDiv, 'block');
 
   // Wraps our content video.
   contentDiv = global.document.createElement('div');
@@ -577,7 +568,7 @@ export function onClick(global) {
   uiTicker = setInterval(uiTickerClick, 500);
   setInterval(playerDataTick, 1000);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
-  toggle(bigPlayDiv, false);
+  setStyle(bigPlayDiv, 'display', 'none');
   if (adDisplayContainer) {
     adDisplayContainer.initialize();
   }
@@ -750,7 +741,7 @@ export function onContentPauseRequested(global) {
   adsActive = true;
   postMessage({event: VideoEvents.AD_START});
   videoPlayer.removeEventListener(interactEvent, showControls);
-  toggle(adContainerDiv, true);
+  setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
   hideControls();
   videoPlayer.pause();
@@ -931,7 +922,7 @@ export function onPlayPauseClick() {
  * @visibleForTesting
  */
 export function playVideo() {
-  toggle(adContainerDiv, false);
+  setStyle(adContainerDiv, 'display', 'none');
   playerState = PlayerStates.PLAYING;
   // Kick off the hide controls timer.
   showControls();
@@ -1063,7 +1054,7 @@ function onFullscreenChange(global) {
  * @visibleForTesting
  */
 export function showControls() {
-  toggle(controlsDiv, true);
+  setStyle(controlsDiv, 'display', 'flex');
   // Hide controls after 3 seconds
   if (playerState == PlayerStates.PLAYING) {
     // Reset hide controls timer.
@@ -1078,7 +1069,7 @@ export function showControls() {
  * @visibleForTesting
  */
 export function hideControls() {
-  toggle(controlsDiv, false);
+  setStyle(controlsDiv, 'display', 'none');
 }
 
 /**
