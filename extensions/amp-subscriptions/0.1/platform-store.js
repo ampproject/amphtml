@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {DEFAULT_SCORE_CONFIG, ampSubscriptionsScoreFactor} from './score-factors.js';
+import {DEFAULT_SCORE_CONFIG, ampSubscriptionsScoreFactor}
+  from './score-factors.js';
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
