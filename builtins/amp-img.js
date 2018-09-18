@@ -50,6 +50,9 @@ export class AmpImg extends BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
+
+    /** @private {boolean} */
+    this.hasBlurredPlaceholder_ = false;
   }
 
   /** @override */
@@ -111,9 +114,7 @@ export class AmpImg extends BaseElement {
 
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
-    if (this.element.hasAttribute('i-amphtml-ssr')) {
-      this.img_ = this.element.querySelector('img');
-    }
+
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
     if (this.element.id) {
@@ -134,6 +135,15 @@ export class AmpImg extends BaseElement {
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);
     this.element.appendChild(this.img_);
+
+    const placeholder = this.getPlaceholder();
+    this.hasBlurredPlaceholder_ = placeholder &&
+    placeholder.classList.contains('i-amphtml-blur') &&
+    isExperimentOn(this.win, 'blurry-placeholder');
+    if (this.hasBlurredPlaceholder_) {
+      setImportantStyles(this.element.querySelector('.i-amphtml-fill-content'),
+          {'visibility': 'hidden'});
+    }
   }
 
   /** @override */
@@ -155,6 +165,9 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
+    if (this.element.hasAttribute('i-amphtml-ssr')) {
+      this.img_ = this.element.querySelector('img');
+    }
     return this.loadPromise(img);
   }
 
@@ -173,10 +186,10 @@ export class AmpImg extends BaseElement {
 
   /** @override **/
   firstLayoutCompleted() {
-    const placeholder = this.getPlaceholder();
-    if (placeholder && placeholder.classList.contains('i-amphtml-blur') &&
-      isExperimentOn(this.win, 'blurry-placeholder')) {
-      setImportantStyles(placeholder, {'opacity': 0});
+    if (this.hasBlurredPlaceholder_) {
+      setImportantStyles(this.getPlaceholder(), {'opacity': 0});
+      setImportantStyles(this.element.querySelector('.i-amphtml-fill-content'),
+          {'visibility': 'visible'});
     } else {
       this.togglePlaceholder(false);
     }
