@@ -405,9 +405,7 @@ async function generateSnapshots(percy, page, webpages) {
  */
 async function snapshotWebpages(percy, page, webpages) {
   for (const webpage of webpages) {
-    const {url, viewport} = webpage;
-    // TODO(rsimha): Remove the (prod) suffix after #18009 is merged.
-    const name = `${webpage.name} (prod)`;
+    const {name, url, viewport} = webpage;
     log('verbose', 'Visual diff test', colors.yellow(name));
 
     await enableExperiments(page, webpage['experiments']);
