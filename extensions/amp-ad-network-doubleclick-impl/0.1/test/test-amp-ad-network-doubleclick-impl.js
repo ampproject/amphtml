@@ -1383,6 +1383,23 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should return 12 if no experiment header', () => {
           expect(impl.idleRenderOutsideViewport()).to.equal(12);
         });
+
+        it('should not return renderOutsideViewport boolean not set', () => {
+          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+          expect(impl.idleRenderOutsideViewport()).to.equal(12);
+        });
+
+        it('should not return renderOutsideViewport boolean ctrl', () => {
+          impl.experimentIds.push('21062567');
+          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+          expect(impl.idleRenderOutsideViewport()).to.equal(12);
+        });
+
+        it('should return renderOutsideViewport boolean, exp', () => {
+          impl.experimentIds.push('21062568');
+          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
       });
 
       describe('idle renderNonAmpCreative', () => {
