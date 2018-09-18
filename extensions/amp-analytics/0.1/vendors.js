@@ -40,6 +40,7 @@ import {GEMIUS_CONFIG} from './vendors/gemius';
 import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
+import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {KRUX_CONFIG} from './vendors/krux';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {LOTAME_CONFIG} from './vendors/lotame';
@@ -181,6 +182,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'googleadwords': GOOGLEADWORDS_CONFIG,
   'gtag': GTAG_CONFIG,
   'googleanalytics': GOOGLEANALYTICS_CONFIG,
+  'pressboard': PRESSBOARD_CONFIG,
   'krux': KRUX_CONFIG,
   'iplabel': IPLABEL_CONFIG,
   'lotame': LOTAME_CONFIG,

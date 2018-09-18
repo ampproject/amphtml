@@ -1,0 +1,77 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
+  'vars': {
+    'mediaId': '',
+    'campaignId': '',
+    'storyRequestId': '',
+    'geoNameId': '',
+    'country': '',
+    'region': '',
+    'city': '',
+    'dbInstance': '',
+    'timeZoneOffset': ''
+  },
+  'requests': {
+    'host': 'https://adserver.pressboard.ca',
+    'common_params': '&amp=1&url=${canonicalUrl}' +
+      '&uid=${clientId(_pressboardmedia)}' +
+      '&referrer=${documentReferrer}' +
+      '&rand=${random}' +
+      '&mid=${mediaId}&cid=${campaignId}&sid=${storyRequestId}' +
+      '&geoid=${geoNameId}&cn=${country}&rg=${region}&ct=${city}' +
+      '&dbi=${dbInstance}&tz=${timeZoneOffset}',
+    'conversion_params': '&asurl=${sourceUrl}' +
+      '&asw=${scrollWidth}&ash=${scrollHeight}' +
+      '&asnw=${screenWidth}&asnh=${screenHeight}' +
+      '&aasnw=${availableScreenWidth}&aasnh=${availableScreenHeight}' +
+      '&asl=${scrollLeft}&ast=${scrollTop}',
+    'conversion': '${host}' +
+      '/track/attention-amp?' +
+      '${common_params}' +
+      '${conversion_params}'
+  },
+  'triggers': {
+    'trackPageview': {
+      'on': 'visible',
+      'request': 'attention'
+    },
+    'trackAnchorClicks': {
+      'on': 'click',
+      'selector': 'a',
+      'request': 'attention'
+    },
+    'pageTimer': {
+      'on': 'timer',
+      'timerSpec': {
+        'interval': 1,
+        'startSpec': {
+          'on': 'visible'
+        },
+        'stopSpec': {
+          'on': 'hidden'
+        }
+      },
+      'request': 'attention'
+    }
+  },
+  'transport': {
+    'beacon': false,
+    'xhrpost': false,
+    'image': true
+  }
+})
