@@ -117,6 +117,15 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_NO_RECOVER: '21062235',
 };
 
+/** @const {string} */
+const DOUBLECLICK_IDLE_BOOL_EXP = 'doubleclickIdleExp';
+
+/** @const @enum{string} */
+const DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES = {
+  CONTROL: '21062567',
+  EXP: '21062568',
+};
+
 /**
  * Map of pageview tokens to the instances they belong to.
  * @private {!Object<string, !AmpAdNetworkDoubleclickImpl>}
@@ -295,13 +304,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (vpRange === false) {
       return vpRange;
     }
+    const renderOutsideViewport = this.renderOutsideViewport();
+    // False will occur when throttle in effect.
+    if (!!this.experimentIds.filter(exp =>
+      exp == DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES.EXP).length &&
+      typeof renderOutsideViewport === 'boolean') {
+      return renderOutsideViewport;
+    }
     this.isIdleRender_ = true;
     // NOTE(keithwrightbos): handle race condition where previous
     // idleRenderOutsideViewport marked slot as idle render despite never
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource().whenWithinViewport(this.renderOutsideViewport()).then(
+    this.getResource().whenWithinViewport(renderOutsideViewport).then(
         () => this.isIdleRender_ = false);
     return vpRange;
   }
@@ -341,8 +357,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
         },
+        [DOUBLECLICK_IDLE_BOOL_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.keys(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES).map(
+              key => DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES[key]),
+        },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
+    console.log('setExps', setExps);
     Object.keys(setExps).forEach(expName =>
       setExps[expName] && this.experimentIds.push(setExps[expName]));
   }
