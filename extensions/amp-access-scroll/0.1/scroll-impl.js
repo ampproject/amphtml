@@ -86,15 +86,15 @@ const analyticsConfig = connectHostname => {
 };
 
 /**
- * The TLD for scroll URLs in development mode.
+ * The eTLD for scroll URLs in development mode.
  *
  * Enables amp-access-scroll to work with dev/staging environments.
  *
  * @param {!JsonObject} config
  * @return {string}
  */
-const devTld = config => {
-  return getMode().development && config['tld'] ? config['tld'] : '';
+const devEtld = config => {
+  return getMode().development && config['etld'] ? config['etld'] : '';
 };
 
 /**
@@ -104,7 +104,7 @@ const devTld = config => {
  * @return {string}
  */
 const connectHostname = config => {
-  return `https://connect${devTld(config) || '.scroll.com'}`;
+  return `https://connect${devEtld(config) || '.scroll.com'}`;
 };
 
 /**
@@ -114,9 +114,9 @@ const connectHostname = config => {
  * @return {string}
  */
 const scrollHostname = config => {
-  const devScrollTld = devTld(config);
-  if (devScrollTld) {
-    return `https://scroll${devScrollTld}`;
+  const devScrollEtld = devEtld(config);
+  if (devScrollEtld) {
+    return `https://scroll${devScrollEtld}`;
   }
   return 'https://scroll.com';
 };
@@ -209,7 +209,6 @@ class ScrollContentBlocker {
         .then(() => false, e => this.blockedByScrollApp_(e.message))
         .then(blockedByScrollApp => {
           if (blockedByScrollApp === true) {
-            // TODO(dbow): ping /embed/event
             // TODO(dbow): Ideally we would automatically redirect to the page
             // here, but for now we are adding a button so we redirect on user
             // action.
