@@ -41,8 +41,7 @@ import {expandTemplate} from '../../../src/string';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
-import {isArray} from '../../../src/types';
-import {isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
@@ -345,8 +344,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const ampAdResourceId = this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
-        // Create  3p transport frame within creative frame if inabox.
-        this.isInabox_ ? this.win : this.getAmpDoc().win,
+        this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
   }

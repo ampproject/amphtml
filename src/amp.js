@@ -22,7 +22,12 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Services} from './services';
-import {adopt, installAmpdocServices, installBuiltins, installRuntimeServices} from './runtime';
+import {
+  adopt,
+  installAmpdocServices,
+  installBuiltins,
+  installRuntimeServices,
+} from './runtime';
 import {cssText} from '../build/css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installDocService} from './service/ampdoc-impl';

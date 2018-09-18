@@ -16,9 +16,8 @@
 
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
 import {once} from '../../../src/utils/function';
-import {registerServiceBuilder} from '../../../src/service';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */

@@ -24,6 +24,10 @@
   position: absolute;
 }
 
+.i-amphtml-pan-zoom-scrollable {
+  cursor: all-scroll;
+}
+
 .amp-pan-zoom-button {
   position: absolute;
   right: 12px;

@@ -309,7 +309,7 @@ export class Response extends FetchResponse {
 export function install(win) {
   if (!win.fetch) {
     Object.defineProperty(win, 'fetch', {
-      value: fetch,
+      value: fetchPolyfill,
       writable: true,
       enumerable: true,
       configurable: true,

@@ -35,9 +35,12 @@ import {dev, user} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  insertAfterOrAtStart,
+  removeElement,
+} from '../../../src/dom';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {scopedQuerySelectorAll} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -104,6 +107,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isPostPromptUIRequired_ = false;
+
+    /** @private {!Object<string, Promise<?JsonObject>>} */
+    this.remoteConfigPromises_ = map();
   }
 
   /** @override */
@@ -213,7 +219,7 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
 
-      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+      const iframes = this.element.querySelectorAll('iframe');
 
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
@@ -272,10 +278,15 @@ export class AmpConsent extends AMP.BaseElement {
       this.currentDisplayInstance_ = instanceId;
       const uiElement = this.consentUI_[this.currentDisplayInstance_];
       toggle(uiElement, true);
-      // scheduleLayout is required everytime because some AMP element may
-      // get un laid out after toggle display (#unlayoutOnPause)
-      // for example <amp-iframe>
-      this.scheduleLayout(uiElement);
+      if (uiElement.tagName == 'IFRAME') {
+        // TODO: Apply placeholder and hide iframe
+        insertAfterOrAtStart(this.element, uiElement, null);
+      } else {
+        // scheduleLayout is required everytime because some AMP element may
+        // get un laid out after toggle display (#unlayoutOnPause)
+        // for example <amp-iframe>
+        this.scheduleLayout(uiElement);
+      }
     });
 
     const deferred = new Deferred();
@@ -299,6 +310,9 @@ export class AmpConsent extends AMP.BaseElement {
             `${this.currentDisplayInstance_} no consent ui to hide`);
       }
       toggle(dev().assertElement(uiToHide), false);
+      if (uiToHide.tagName == 'IFRAME') {
+        removeElement(uiToHide);
+      }
     });
     const displayInstance = /** @type {string} */ (
       this.currentDisplayInstance_);
@@ -356,8 +370,11 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.registerConsentInstance(
           instanceId, this.consentConfig_[instanceId]);
 
+      this.passSharedData_(instanceId);
+
       const isConsentRequiredPromise = this.getConsentRequiredPromise_(
           instanceId, this.consentConfig_[instanceId]);
+
 
       const handlePromptPromise = isConsentRequiredPromise.then(() => {
         return this.initPromptUI_(instanceId);
@@ -388,30 +405,35 @@ export class AmpConsent extends AMP.BaseElement {
         config['promptIfUnknownForGeoGroup'],
     'neither checkConsentHref nor ' +
     'promptIfUnknownForGeoGroup is defined');
-    let remoteConfigPromise = Promise.resolve(null);
-    if (config['checkConsentHref']) {
-      remoteConfigPromise = this.getConsentRemote_(instanceId);
-      this.passSharedData_(instanceId, remoteConfigPromise);
-    }
-    let geoPromise = Promise.resolve();
+    let promptPromise = null;
     if (config['promptIfUnknownForGeoGroup']) {
       const geoGroup = config['promptIfUnknownForGeoGroup'];
-      geoPromise = this.isConsentRequiredGeo_(geoGroup);
+      promptPromise = this.isConsentRequiredGeo_(geoGroup);
+    } else {
+      promptPromise =
+          this.getConsentRemote_(instanceId).then(remoteConfigResponse => {
+            if (!remoteConfigResponse ||
+                !remoteConfigResponse['promptIfUnknown']) {
+              this.user().error(TAG, 'Expecting promptIfUnknown from ' +
+                'checkConsentHref when promptIfUnknownForGeoGroup is not ' +
+                'specified');
+              // Set to false if not defined
+              return false;
+            }
+            return !!remoteConfigResponse['promptIfUnknown'];
+          });
     }
-    return geoPromise.then(promptIfUnknown => {
-      return remoteConfigPromise.then(response => {
-        this.consentRequired_[instanceId] =
-            this.isPromptRequired_(instanceId, response, promptIfUnknown);
-      });
+    return promptPromise.then(prompt => {
+      this.consentRequired_[instanceId] = !!prompt;
     });
   }
 
   /**
    * Blindly pass sharedData
    * @param {string} instanceId
-   * @param {!Promise<!JsonObject>} responsePromise
    */
-  passSharedData_(instanceId, responsePromise) {
+  passSharedData_(instanceId) {
+    const responsePromise = this.getConsentRemote_(instanceId);
     const sharedDataPromise = responsePromise.then(response => {
       if (!response || response['sharedData'] === undefined) {
         return null;
@@ -489,32 +511,42 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Get localStored consent info, and send request to get consent from endpoint
+   * if there is checkConsentHref specified.
    * @param {string} instanceId
-   * @return {!Promise<!JsonObject>}
+   * @return {!Promise<?JsonObject>}
    */
   getConsentRemote_(instanceId) {
-    // Note: Expect the request to look different in following versions.
-    const request = /** @type {!JsonObject} */ ({
-      'consentInstanceId': instanceId,
-    });
-    const init = {
-      credentials: 'include',
-      method: 'POST',
-      body: request,
-      requireAmpResponseSourceOrigin: false,
-    };
-    const href =
-        this.consentConfig_[instanceId]['checkConsentHref'];
-    assertHttpsUrl(href, this.element);
-    const ampdoc = this.getAmpDoc();
-    const sourceBase = getSourceUrl(ampdoc.getUrl());
-    const resolvedHref = resolveRelativeUrl(href, sourceBase);
-    const viewer = Services.viewerForDoc(ampdoc);
-    return viewer.whenFirstVisible().then(() => {
-      return Services.xhrFor(this.win)
-          .fetchJson(resolvedHref, init)
-          .then(res => res.json());
-    });
+    if (this.remoteConfigPromises_[instanceId]) {
+      return this.remoteConfigPromises_[instanceId];
+    }
+    if (!this.consentConfig_[instanceId]['checkConsentHref']) {
+      this.remoteConfigPromises_[instanceId] = Promise.resolve(null);
+    } else {
+      // Note: Expect the request to look different in following versions.
+      const request = /** @type {!JsonObject} */ ({
+        'consentInstanceId': instanceId,
+      });
+      const init = {
+        credentials: 'include',
+        method: 'POST',
+        body: request,
+        requireAmpResponseSourceOrigin: false,
+      };
+      const href =
+          this.consentConfig_[instanceId]['checkConsentHref'];
+      assertHttpsUrl(href, this.element);
+      const ampdoc = this.getAmpDoc();
+      const sourceBase = getSourceUrl(ampdoc.getUrl());
+      const resolvedHref = resolveRelativeUrl(href, sourceBase);
+      const viewer = Services.viewerForDoc(ampdoc);
+      this.remoteConfigPromises_[instanceId] =
+          viewer.whenFirstVisible().then(() => {
+            return Services.xhrFor(this.win)
+                .fetchJson(resolvedHref, init)
+                .then(res => res.json());
+          });
+    }
+    return this.remoteConfigPromises_[instanceId];
   }
 
   /**
@@ -642,38 +674,15 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Parse response from server endpoint
-   * The response format example:
-   * {
-   *   "promptIfUnknown": true/false
-   * }
-   * TODO: Support vendor lists
-   * @param {string} instanceId
-   * @param {?JsonObject} response
-   * @param {boolean=} opt_initValue
-   * @return {boolean}
-   */
-  isPromptRequired_(instanceId, response, opt_initValue) {
-    let promptIfUnknown = opt_initValue;
-    if (response && response['promptIfUnknown'] == true) {
-      promptIfUnknown = true;
-    } else if (response && response['promptIfUnknown'] == false) {
-      promptIfUnknown = false;
-    } else if (promptIfUnknown == undefined) {
-      // Set to false if not defined
-      promptIfUnknown = false;
-    }
-    return promptIfUnknown;
-  }
-
-  /**
    * Handle Prompt UI.
    * @param {string} instanceId
    * @return {Promise}
    */
   initPromptUI_(instanceId) {
     const promptUI = this.consentConfig_[instanceId]['promptUI'];
+    const promptUISrc = this.consentConfig_[instanceId]['promptUISrc'];
     if (promptUI) {
+      // Always respect promptUI first
       let element = this.getAmpDoc().getElementById(promptUI);
       if (!element || !this.element.contains(element)) {
         element = null;
@@ -681,6 +690,10 @@ export class AmpConsent extends AMP.BaseElement {
           `promptUI id ${promptUI} not found`);
       }
       this.consentUI_[instanceId] = dev().assertElement(element);
+    } else if (promptUISrc && isExperimentOn(this.win, 'amp-consent-v2')) {
+      // Create an iframe element with the provided src
+      this.consentUI_[instanceId] =
+          this.createPromptIframeFromSrc_(promptUISrc);
     }
 
     // Get current consent state
@@ -706,6 +719,19 @@ export class AmpConsent extends AMP.BaseElement {
           }
         });
   }
+
+  /**
+   * Create the iframe if promptUISrc is valid
+   * @param {string} promptUISrc
+   * @return {!Element}
+   */
+  createPromptIframeFromSrc_(promptUISrc) {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    iframe.src = assertHttpsUrl(promptUISrc, this.element);
+    iframe.setAttribute('sandbox', 'allow-scripts');
+    return iframe;
+  }
+
 
   /**
    * Handles the display of postPromptUI

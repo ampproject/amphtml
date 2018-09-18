@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-describe.configure().skipSafari().skipEdge()
-    .run('amp-recaptcha-input', function() {});
+export const BG_CONFIG = /** @type {!JsonObject} */ ({
+});
