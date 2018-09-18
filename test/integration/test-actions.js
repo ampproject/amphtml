@@ -60,7 +60,7 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       yield poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
 
       button.click();
-      yield poll('#imgToToggle displayed', waitForDisplay(img, ''));
+      yield poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
     });
 
     describe.configure().skipIfPropertiesObfuscated().run('navigate',
