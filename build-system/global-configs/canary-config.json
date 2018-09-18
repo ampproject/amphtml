@@ -50,6 +50,7 @@
   "no-initial-intersection": 1,
   "doubleclickSraExp": 0,
   "doubleclickSraReportExcludedBlock": 0.1,
+  "doubleclickIdleExp": 0.01,
   "inabox-rov": 1,
   "layers": 1
 }
