@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor}
+  from './score-factors.js';
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
@@ -81,9 +83,7 @@ export class PlatformStore {
     this.fallbackEntitlement_ = fallbackEntitlement;
 
     /** @private @const {!Object<string, number>} */
-    this.scoreConfig_ = Object.assign({
-      'supportsViewer': 10,
-    }, scoreConfig);
+    this.scoreConfig_ = Object.assign(DEFAULT_SCORE_CONFIG, scoreConfig);
   }
 
   /**
@@ -366,68 +366,101 @@ export class PlatformStore {
   }
 
   /**
-   * Returns most qualified platform. Qualification of a platform is based on an
-   * integer weight. Every platform starts with weight 0 and evaluated against
+   * Calculates weight to add/remove based on getSupportedScoreFactor()
+   * @param {string} factorName
+   * @param {!./subscription-platform.SubscriptionPlatform} platform
+   * @return {number}
+   * @private
+   */
+  getSupportedFactorWeight_(factorName, platform) {
+    const factorValue = platform.getSupportedScoreFactor(factorName);
+    if (typeof factorValue !== 'number') {
+      return 0;
+    }
+    return this.scoreConfig_[factorName] *
+      Math.min(1, Math.max(-1, factorValue));
+  }
+
+  /**
+   * Returns most qualified platform. Qualification of a platform is based on
+   * weight. Every platform starts with weight 0 and evaluated against
    * the following parameters,
-   * - user is subscribed with platform (Gives weight 10)
-   * - supports the current viewer (Gives weight 9)
+   * - base weight
+   * - weight factors the platform supports multiploed by score in the config
    *
    * In the end candidate with max weight is selected. However if candidate's
    * weight is equal to local platform, then local platform is selected.
    * @return {!./subscription-platform.SubscriptionPlatform}
+   * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
-  selectApplicablePlatform_() {
+  selectApplicablePlatform_(optionalFactor) {
     const localPlatform = this.getLocalPlatform();
-    let localWeight = 0;
-    /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
-    const platformWeights = [];
 
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    this.getAvailablePlatforms().forEach(platform => {
-      let weight = 0;
+    // Subscriber wins immediatly.
+    const availablePlatforms = this.getAvailablePlatforms();
+    while (availablePlatforms.length) {
+      const platform = availablePlatforms.pop();
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
-
-      // Subscriber wins immediatly.
       if (entitlement.isSubscriber()) {
-        weight += 100000;
+        return platform;
       }
+    }
 
-      // Add the base score
-      weight += platform.getBaseScore();
-
-      // If supports the current viewer, gains weight 9
-      if (platform.supportsCurrentViewer()) {
-        weight += this.scoreConfig_['supportsViewer'];
+    const platformWeights = this.getAllPlatformWeights_(optionalFactor);
+    platformWeights.sort((platform1, platform2) => {
+      // Force local platform to win ties
+      if (platform2.weight == platform1.weight &&
+        platform2.platform == localPlatform) {
+        return 1;
       }
-
-      platformWeights.push({
-        platform,
-        weight,
-      });
-      if (platform.getServiceId() === 'local') {
-        localWeight = weight;
-      }
-    });
-
-    platformWeights.sort(function(platform1, platform2) {
       return platform2.weight - platform1.weight;
     });
-    // Nobody supports current viewer, nor is anybody subscribed
-    if (platformWeights.length === 0) {
-      return localPlatform;
+    return platformWeights[0].platform;
+  }
+
+  /**
+   * Calculate and return weights for all platforms
+   * @return {!Array<{platform:!./subscription-platform.SubscriptionPlatform, weight: number}>}
+   * @param {string=} optionalFactor if present only use this factor for calculation
+   * @private
+   */
+  getAllPlatformWeights_(optionalFactor) {
+    // Get weights for all of the platforms
+    return this.getAvailablePlatforms().map(platform => {
+      return {
+        platform,
+        weight: this.calculatePlatformWeight_(platform, optionalFactor),
+      };
+    });
+  }
+
+  /**
+   * Calculate platform weight
+   * @param {!./subscription-platform.SubscriptionPlatform} platform
+   * @param {string=} optionalFactor if specified only calculate this factor
+   * @return {number}
+   * @private
+   */
+  calculatePlatformWeight_(platform, optionalFactor) {
+    const factorWeights = [0]; // reduce always needs somthing to work with
+
+    // Start with base score
+    const weight = platform.getBaseScore();
+
+    // Iterate score factors checking service support
+    for (const factor in this.scoreConfig_) {
+      if (hasOwn(this.scoreConfig_, factor) &&
+        (!optionalFactor || optionalFactor === factor)) {
+        factorWeights.push(this.getSupportedFactorWeight_(factor, platform));
+      }
     }
 
-    const winningWeight = platformWeights[0].weight;
-
-    if (winningWeight > localWeight) {
-      return platformWeights[0].platform;
-    }
-
-    return localPlatform;
+    return weight + factorWeights.reduce((a, b) => { return a + b; });
   }
 
   /**
@@ -454,26 +487,7 @@ export class PlatformStore {
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
-    const platformScores = [];
-    this.getAvailablePlatforms().forEach(platform => {
-      let score = 0;
-      if (platform.supportsCurrentViewer()) {
-        score += 1000;
-      }
-      platformScores.push({
-        platform,
-        score,
-      });
-    });
-
-    platformScores.sort(function(platform1, platform2) {
-      return platform2.weight - platform1.weight;
-    });
-
-    if (platformScores.length === 0 || platformScores[0].score === 0) {
-      return this.getLocalPlatform();
-    }
-
-    return platformScores[0].platform;
+    return this.selectApplicablePlatform_(
+        SubscriptionsScoreFactor.SUPPORTS_VIEWER);
   }
 }
