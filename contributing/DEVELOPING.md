@@ -73,11 +73,11 @@ For detailed information on testing, see [TESTING.md](TESTING.md).
 
 ## Supported browsers
 
-In general we support the 2 latest versions of major browsers like Chrome, Firefox, Edge, Safari, Opera, and UC Browser. We support desktop, phone, tablet and the web view version of these respective browsers.
+In general we support the 2 latest versions of major browsers like Chrome, Firefox, Edge, Safari, Opera, and UC Browser. We support desktop, phone, tablet and the web view version of these respective browsers. For iOS we support the latest 2 __major__ versions which covers about 2 years.
 
 Beyond that the core AMP library and builtin elements should aim for very wide browser support and we accept fixes for all browsers with market share greater than 1 percent.
 
-In particular, we try to maintain "it might not be perfect but isn't broken"-support for the Android 4.0 system browser and Chrome 28+ on phones.
+In particular, we try to maintain "it might not be perfect but isn't broken"-support for IE 11, iOS 8, the Android 4.0 system browser and Chrome 41. 
 
 ## Eng docs
 
