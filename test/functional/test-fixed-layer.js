@@ -269,7 +269,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         return 0;
       },
       hasAttribute: name => {
-        return !!attrs[name];
+        return Object.prototype.hasOwnProperty.call(attrs, name);
       },
       setAttribute: (name, value) => {
         attrs[name] = value;
