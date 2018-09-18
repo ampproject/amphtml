@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DEFAULT_SCORE_CONFIG, ampSubscriptionsScoreFactor}
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor}
   from './score-factors.js';
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
@@ -400,7 +400,7 @@ export class PlatformStore {
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    /// Subscriber wins immediatly.
+    // Subscriber wins immediatly.
     const availablePlatforms = this.getAvailablePlatforms();
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
@@ -488,6 +488,6 @@ export class PlatformStore {
    */
   selectPlatformForLogin() {
     return this.selectApplicablePlatform_(
-        ampSubscriptionsScoreFactor.SUPPORTS_VIEWER);
+        SubscriptionsScoreFactor.SUPPORTS_VIEWER);
   }
 }

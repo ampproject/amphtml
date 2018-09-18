@@ -18,7 +18,7 @@
  * Possible score factors.
  * @const @enum {string}
  */
-export const ampSubscriptionsScoreFactor = {
+export const SubscriptionsScoreFactor = {
   // Platform supports the current viewer environment
   SUPPORTS_VIEWER: 'supportsViewer',
 };
