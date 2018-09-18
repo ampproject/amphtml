@@ -365,6 +365,17 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           include3pDirectories: true,
           includePolyfills: false,
         }),
+    compileJs('./3p/', 'recaptcha.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+        minifiedName: 'recaptcha.js',
+        checkTypes: opt_checkTypes,
+        watch,
+        minify: shouldMinify,
+        preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+        externs: ['ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: true,
+      }),
     compileJs('./src/', 'amp.js', './dist', {
       toName: 'amp.js',
       minifiedName: 'v0.js',
@@ -481,7 +492,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify),
         thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html',shouldMinify)
+          '3p/nameframe.max.html', 'nameframe.html', shouldMinify),
+        thirdPartyBootstrap(
+          '3p/recaptcha.max.html', 'recaptcha.html', shouldMinify)
+
     );
 
     if (watch) {
@@ -492,6 +506,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       $$.watch('3p/frame.max.html', function() {
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify);
+      });
+      $$.watch('3p/recaptcha.max.html', function() {
+        thirdPartyBootstrap(
+          '3p/recaptcha.max.html', 'recaptcha.html', shouldMinify);
       });
     }
 

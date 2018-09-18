@@ -99,7 +99,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!this.registerPromise_) {
-      this.registerPromise_ = this.recaptchaService_.register(this.element);
+      this.registerPromise_ = this.recaptchaService_.register(this.sitekey_);
     }
     return this.registerPromise_;
   }

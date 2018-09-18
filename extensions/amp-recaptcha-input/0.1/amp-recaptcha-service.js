@@ -50,9 +50,6 @@ import {setStyle} from '../../../src/style';
  *   From attempting to get a token from action.
  */
 
-/** @const {string} */
-const MESSAGE_TAG = 'amp-recaptcha-';
-
 export class AmpRecaptchaService {
 
   /**
@@ -88,13 +85,13 @@ export class AmpRecaptchaService {
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
-   * @param {!Element} element
+   * @param {!String} sitekey
    * @return {Promise}
    */
-  register(element) {
+  register(sitekey) {
     this.registeredElementCount_++;
     if (!this.iframeLoadPromise_) {
-      this.initialize_(element);
+      this.initialize_(sitekey);
     }
     return this.iframeLoadPromise_;
   }
@@ -144,7 +141,7 @@ export class AmpRecaptchaService {
       // Send the message
       postMessage(
           dev().assertElement(this.iframe_),
-          MESSAGE_TAG + 'action',
+          'amp-recaptcha-action',
           message,
           '*',
           true);
@@ -154,22 +151,22 @@ export class AmpRecaptchaService {
 
   /**
    * Function to create our recaptcha boostrap iframe.
-   * @param {!Element} element
+   * @param {!String} sitekey
    * @private
    */
-  initialize_(element) {
+  initialize_(sitekey) {
 
-    this.iframe_ = this.createRecaptchaFrame_();
+    this.iframe_ = this.createRecaptchaFrame_(sitekey);
 
     this.unlisteners_ = [
       this.listenIframe_(
-          MESSAGE_TAG + 'ready', this.recaptchaApiReady_.resolve
+          'amp-recaptcha-ready', this.recaptchaApiReady_.resolve
       ),
       this.listenIframe_(
-          MESSAGE_TAG + 'token', this.tokenMessageHandler_.bind(this)
+        'amp-recaptcha-token', this.tokenMessageHandler_.bind(this)
       ),
       this.listenIframe_(
-          MESSAGE_TAG + 'error', this.errorMessageHandler_.bind(this)
+        'amp-recaptcha-error', this.errorMessageHandler_.bind(this)
       ),
     ];
     this.executeMap_ = {};
@@ -198,19 +195,25 @@ export class AmpRecaptchaService {
   /**
    * Function to create our bootstrap iframe.
    * 
+   * @param {string} sitekey
    * @return {Element}
    * @private
    */
-  createRecaptchaFrame_() {
+  createRecaptchaFrame_(sitekey) {
 
     const iframe = this.win_.document.createElement('iframe');
 
     // TODO(@torch2424) get the correct booststrap url. Perhaps hardcode this for now.
-    const baseUrl = getBootstrapBaseUrl(this.win_);
-    console.log(baseUrl);
+    const baseUrl = 'http://ads.localhost:8000/dist.3p/current/recaptcha.max.html';
+    console.log(getBootstrapBaseUrl(this.win_));
     iframe.src = baseUrl;
     iframe.ampLocation = parseUrlDeprecated(baseUrl);
     iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('data-amp-3p-sentinel', 'recaptcha')
+    iframe.setAttribute('name', JSON.stringify({
+      'sitekey': sitekey,
+      'sentinel': 'recaptcha'
+    }));
     setStyle(iframe, 'border', 'none');
     /** @this {!Element} */
     iframe.onload = function() {
