@@ -109,7 +109,7 @@ describes.realWin('amp-app-banner', {
     return getAppBanner({iosMeta, androidManifest}).then(banner => {
       return banner.implementation_.isDismissed().then(() => {
         expect(banner.parentElement).to.not.be.null;
-        expect(banner.style.display).to.be.equal('');
+        expect(banner).to.not.have.display('none');
         const bannerTop = banner.querySelector(
             'i-amphtml-app-banner-top-padding');
         expect(bannerTop).to.exist;
@@ -123,7 +123,6 @@ describes.realWin('amp-app-banner', {
   function testRemoveBanner(config = {iosMeta, androidManifest}) {
     return getAppBanner(config).then(banner => {
       expect(banner.parentElement).to.be.null;
-      expect(banner.style.display).to.be.equal('none');
     });
   }
 

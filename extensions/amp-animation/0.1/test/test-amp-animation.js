@@ -117,7 +117,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.element.style['left']).to.equal('0px');
         expect(anim.element.style['width']).to.equal('1px');
         expect(anim.element.style['height']).to.equal('1px');
-        expect(anim.element.style['display']).to.equal('block');
+        expect(anim.element).to.have.display('block');
       });
     });
 

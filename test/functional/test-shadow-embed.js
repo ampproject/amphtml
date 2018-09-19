@@ -115,17 +115,15 @@ describes.sandboxed('shadow-embed', {}, () => {
 
                 it('should add host style for polyfill', () => {
                   const doc = hostElement.ownerDocument;
-                  const win = doc.defaultView;
                   doc.body.appendChild(hostElement);
                   const slot = doc.createElement('div');
                   hostElement.appendChild(slot);
-                  expect(win.getComputedStyle(slot).display).to.equal('block');
+                  expect(slot).to.have.display('block');
                   const shadowRoot = createShadowRoot(hostElement);
                   expect(hostElement).to.have.class(
                       'i-amphtml-shadow-host-polyfill');
-                  expect(win.getComputedStyle(slot).display).to.equal('none');
-                  expect(win.getComputedStyle(shadowRoot).display)
-                      .to.not.equal('none');
+                  expect(slot).to.have.display('none');
+                  expect(shadowRoot).to.not.have.display('none');
                   doc.body.removeChild(hostElement);
                 });
               }

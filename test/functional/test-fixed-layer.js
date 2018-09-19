@@ -18,6 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
 
@@ -167,6 +168,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       id,
       ownerDocument: documentApi,
       autoTop: '',
+      tagName: id,
       toString: () => {
         return id;
       },
@@ -267,7 +269,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         return 0;
       },
       hasAttribute: name => {
-        return !!attrs[name];
+        return Object.prototype.hasOwnProperty.call(attrs, name);
       },
       setAttribute: (name, value) => {
         attrs[name] = value;
@@ -309,7 +311,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(html.trim()).to.equal(
             '<i-amphtml-fpa style="display: none"></i-amphtml-fpa>');
         this.firstElementChild = createElement('i-amphtml-fpa');
-        this.firstElementChild.style.display = 'none';
+        toggle(this.firstElementChild, false);
       },
     };
     return elem;
@@ -1209,7 +1211,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.exist;
-      expect(fe.placeholder.style['display']).to.equal('none');
+      expect(fe.placeholder).to.have.attribute('hidden');
 
       expect(fixedLayer.transferLayer_).to.exist;
       const layer = fixedLayer.transferLayer_.layer_;

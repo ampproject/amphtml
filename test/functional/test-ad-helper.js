@@ -59,7 +59,8 @@ describe('ad-helper', () => {
         const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
         nonWhitelistedElement.style.position = 'sticky';
         // Check if browser support position:sticky
-        if (computedStyle(iframe.win, nonWhitelistedElement) != 'sticky') {
+        const styles = computedStyle(iframe.win, nonWhitelistedElement);
+        if (styles.position != 'sticky') {
           return;
         }
         iframe.doc.body.appendChild(nonWhitelistedElement);

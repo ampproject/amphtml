@@ -250,7 +250,7 @@ describes.realWin('amp-install-serviceworker', {
         const returnedValue = fn();
         expect(iframe).to.exist;
         expect(calledSrc).to.undefined;
-        expect(install.style.display).to.equal('none');
+        expect(install).to.have.display('none');
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.getAttribute('sandbox')).to.equal(
             'allow-same-origin allow-scripts');
@@ -439,7 +439,7 @@ describes.fakeWin('url rewriter', {
       const iframe = element.querySelector('iframe');
       expect(iframe).to.exist;
       expect(iframe.src).to.equal('https://example.com/shell#preload');
-      expect(iframe.style.display).to.equal('none');
+      expect(iframe).to.have.attribute('hidden');
       expect(iframe.getAttribute('sandbox'))
           .to.equal('allow-scripts allow-same-origin');
     });

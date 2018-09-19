@@ -30,14 +30,18 @@ describe('Style', () => {
 
   it('toggle', () => {
     const element = document.createElement('div');
-    st.toggle(element);
-    expect(element.style.display).to.equal('none');
-    st.toggle(element);
-    expect(element.style.display).to.equal('');
+
     st.toggle(element, true);
-    expect(element.style.display).to.equal('');
+    expect(element).to.not.have.attribute('hidden');
     st.toggle(element, false);
-    expect(element.style.display).to.equal('none');
+    expect(element).to.have.attribute('hidden');
+    st.toggle(element, true);
+    expect(element).to.not.have.attribute('hidden');
+
+    st.toggle(element);
+    expect(element).to.have.attribute('hidden');
+    st.toggle(element);
+    expect(element).to.not.have.attribute('hidden');
   });
 
   it('setStyle', () => {

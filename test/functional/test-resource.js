@@ -446,7 +446,7 @@ describes.realWin('Resource', {amp: true}, env => {
       return owner;
     });
     resource.completeCollapse();
-    expect(resource.element.style.display).to.equal('none');
+    expect(resource.element).to.have.attribute('hidden');
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
     expect(resource.isFixed()).to.be.false;
@@ -454,27 +454,15 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   it('should show and request measure on expand', () => {
-    resource.element.style.display = 'none';
+    resource.completeCollapse();
     resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
     resource.isFixed_ = false;
     resource.requestMeasure = sandbox.stub();
 
     resource.completeExpand();
-    expect(resource.element.style.display).to.not.equal('none');
+    expect(resource.element).to.not.have.display('none');
     expect(resource.requestMeasure).to.be.calledOnce;
   });
-
-  it('should show and request measure on expand', () => {
-    resource.element.style.display = 'none';
-    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
-    resource.isFixed_ = false;
-    resource.requestMeasure = sandbox.stub();
-
-    resource.completeExpand();
-    expect(resource.element.style.display).to.not.equal('none');
-    expect(resource.requestMeasure).to.be.calledOnce;
-  });
-
 
   it('should ignore startLayout if already completed or failed or going',
       () => {

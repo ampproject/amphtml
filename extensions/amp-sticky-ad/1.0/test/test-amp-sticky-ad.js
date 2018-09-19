@@ -412,7 +412,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
         borderWidth = win.getComputedStyle(win.document.body, null)
             .getPropertyValue('border-bottom-width');
         expect(borderWidth).to.equal('0px');
-        expect(ampStickyAd.style.display).to.equal('none');
+        expect(ampStickyAd).to.have.display('none');
       });
     });
   });

@@ -158,7 +158,7 @@ describes.realWin('amp-playbuzz', {
       const placeholder = ins.querySelector('[placeholder]');
       const iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder).to.not.have.display('');
       expect(placeholder.getAttribute('aria-label'))
           .to.equal('Loading interactive element');
     }).then(ins => {
@@ -173,7 +173,7 @@ describes.realWin('amp-playbuzz', {
       testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
       //Should test placeholder too
       ins.implementation_.iframePromise_.then(() => {
-        expect(placeholder.style.display).to.be.equal('none');
+        expect(placeholder).to.have.display('none');
       });
     });
   });

@@ -546,7 +546,6 @@ export class Resource {
    */
   completeExpand() {
     toggle(this.element, true);
-    this.element.removeAttribute('hidden');
     this.requestMeasure();
   }
 

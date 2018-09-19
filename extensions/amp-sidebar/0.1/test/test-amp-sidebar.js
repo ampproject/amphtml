@@ -222,7 +222,7 @@ describes.realWin('amp-sidebar 0.1 version', {
 
         clock.tick(600);
         expect(doc.activeElement).to.equal(sidebarElement);
-        expect(sidebarElement.style.display).to.equal('');
+        expect(sidebarElement).to.not.have.display('none');
         expect(impl.scheduleLayout).to.be.calledOnce;
 
         // second call to open_() should be a no-op and not increase call
@@ -264,7 +264,7 @@ describes.realWin('amp-sidebar 0.1 version', {
             expect(sidebarElement.hasAttribute('open')).to.be.false;
             expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
             clock.tick(600);
-            expect(sidebarElement.style.display).to.equal('none');
+            expect(sidebarElement).to.have.display('none');
             expect(impl.schedulePause).to.be.calledOnce;
             expect(historyPopSpy).to.be.calledOnce;
             expect(impl.historyId_).to.equal(-1);
@@ -294,13 +294,13 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         clock.tick(600);
         expect(doc.activeElement).to.equal(sidebarElement);
-        expect(sidebarElement.style.display).to.equal('');
+        expect(sidebarElement).to.not.have.display('none');
         expect(impl.scheduleLayout).to.be.calledOnce;
         impl.toggle_();
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         clock.tick(600);
-        expect(sidebarElement.style.display).to.equal('none');
+        expect(sidebarElement).to.have.display('none');
         expect(impl.schedulePause).to.be.calledOnce;
       });
     });
@@ -329,7 +329,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         clock.tick(600);
-        expect(sidebarElement.style.display).to.equal('none');
+        expect(sidebarElement).to.have.display('none');
         expect(impl.schedulePause).to.be.calledOnce;
       });
     });
@@ -432,7 +432,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         clock.tick(600);
-        expect(sidebarElement.style.display).to.equal('none');
+        expect(sidebarElement).to.have.display('none');
         expect(impl.schedulePause).to.be.calledOnce;
       });
     });
@@ -473,7 +473,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal(
             'false');
-        expect(sidebarElement.style.display).to.equal('');
+        expect(sidebarElement).to.not.have.display('');
         expect(impl.schedulePause).to.have.not.been.called;
       });
     });
@@ -513,7 +513,7 @@ describes.realWin('amp-sidebar 0.1 version', {
           anchor.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-        expect(sidebarElement.style.display).to.equal('');
+        expect(sidebarElement).to.not.have.display('');
         expect(impl.schedulePause).to.have.not.been.called;
       });
     });
@@ -541,7 +541,7 @@ describes.realWin('amp-sidebar 0.1 version', {
           li.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-        expect(sidebarElement.style.display).to.equal('');
+        expect(sidebarElement).to.not.have.display('');
         expect(impl.schedulePause).to.have.not.been.called;
       });
     });
