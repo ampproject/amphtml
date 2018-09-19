@@ -37,7 +37,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.timeElement_ = null;
 
     /** @private {boolean} */
-    this.cutOffSet_ = false;
+    this.cutOffReached_ = false;
   }
 
   /** @override */
@@ -62,7 +62,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    if (inViewport && !this.cutOffSet_) {
+    if (inViewport && !this.cutOffReached_) {
       this.setFuzzyTimestampValue_();
     }
   }
@@ -81,7 +81,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
       if (secondsAgo > cutoff) {
         this.timeElement_.textContent = this.title_;
-        this.cutOffSet_ = true;
+        this.cutOffReached_ = true;
       } else {
         this.timeElement_.textContent = timeago(this.datetime_, this.locale_);
       }
