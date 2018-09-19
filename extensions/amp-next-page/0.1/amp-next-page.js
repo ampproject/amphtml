@@ -30,6 +30,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {getSourceOrigin} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -100,11 +101,10 @@ export class AmpNextPage extends AMP.BaseElement {
    */
   register_(service, configJson, separator) {
     const {element} = this;
-    const docInfo = Services.documentInfoForDoc(element);
     const urlService = Services.urlForDoc(element);
 
-    const url = urlService.parse(docInfo.url);
-    const sourceOrigin = urlService.getSourceOrigin(url);
+    const url = urlService.parse(this.getAmpDoc().getUrl());
+    const sourceOrigin = getSourceOrigin(url);
 
     const config = assertConfig(element, configJson, url.origin, sourceOrigin);
 

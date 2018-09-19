@@ -107,7 +107,8 @@ function assertReco(context, reco, origin, sourceOrigin) {
   user().assertString(reco.image, 'image must be a string');
   user().assertString(reco.title, 'title must be a string');
 
-  if (sourceOrigin !== origin) {
+  // Rewrite canonical URLs to cache URLs, when served from the cache.
+  if (sourceOrigin !== origin && url.origin === sourceOrigin) {
     reco.ampUrl = `${origin}/c/` +
         (url.protocol === 'https:' ? 's/' : '') +
         encodeURIComponent(url.host) +
