@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { dict } from './utils/object';
+import {dict} from './utils/object';
 import {
   fromStructuredCloneable,
   toStructuredCloneable,
@@ -61,7 +61,7 @@ export class SsrTemplateHelper {
    * @return {boolean}
    */
   isSupported() {
-    const { ampdoc } = this.viewer_;
+    const {ampdoc} = this.viewer_;
     if (ampdoc.isSingleDoc()) {
       const htmlElement = ampdoc.getRootNode().documentElement;
       if (htmlElement.hasAttribute('allow-viewer-render-template')) {
@@ -90,17 +90,17 @@ export class SsrTemplateHelper {
         // The document fragment can't be used in the message channel API thus
         // serializeToString for a string representation of the dom tree.
         mustacheTemplate = this.xmls_.serializeToString(
-          this.templates_.findTemplate(element));
+            this.templates_.findTemplate(element));
       }
     }
     return this.viewer_.sendMessageAwaitResponse(
-      'viewerRenderTemplate',
-      this.buildPayload_(
-        request,
-        mustacheTemplate,
-        opt_templates,
-        opt_attributes
-      ));
+        'viewerRenderTemplate',
+        this.buildPayload_(
+            request,
+            mustacheTemplate,
+            opt_templates,
+            opt_attributes
+        ));
   }
 
   /**
@@ -113,7 +113,7 @@ export class SsrTemplateHelper {
    */
   buildPayload_(
     request, mustacheTemplate, opt_templates, opt_attributes = {}) {
-    const ampComponent = dict({ 'type': this.sourceComponent_ });
+    const ampComponent = dict({'type': this.sourceComponent_});
     if (opt_templates['successTemplate'] || mustacheTemplate) {
       ampComponent['successTemplate'] = {
         'type': 'amp-mustache',
@@ -153,10 +153,10 @@ export class SsrTemplateHelper {
    */
   verifySsrResponse(win, response, request) {
     verifyAmpCORSHeaders(
-      win,
-      fromStructuredCloneable(
-        response,
-        request.fetchOpt.responseType),
-      request.fetchOpt);
+        win,
+        fromStructuredCloneable(
+            response,
+            request.fetchOpt.responseType),
+        request.fetchOpt);
   }
 }
