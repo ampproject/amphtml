@@ -311,6 +311,7 @@ tags: {
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
                  "https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+"
                  "/css/(all|brands|solid|regular|light|fontawesome)\\.css|"
+                 "https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z]+\\.css|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
   attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
