@@ -590,9 +590,7 @@ export class SafeframeHostApi {
           (payload['resize_r'] + payload['resize_l']);
 
     // Make sure we are actually resizing here.
-    if (isNaN(resizeWidth) || isNaN(resizeHeight) ||
-        resizeWidth > this.creativeSize_.width ||
-        resizeHeight > this.creativeSize_.height) {
+    if (isNaN(resizeWidth) || isNaN(resizeHeight)) {
       dev().error(TAG, 'Invalid resize values.');
       return;
     }
