@@ -110,7 +110,7 @@
     "jest": "23.6.0",
     "jest-dot-reporter": "1.0.6",
     "jison": "0.4.18",
-    "jsdom": "11.11.0",
+    "jsdom": "11.12.0",
     "json-stable-stringify": "1.0.1",
     "json5": "1.0.1",
     "karma": "2.0.5",
