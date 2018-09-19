@@ -1429,19 +1429,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Must be executed in the mutate context. Removes `display:none` from the
-     * element set via `layout=nodisplay`.
-     * @param {boolean} displayOn
-     */
-    toggleLayoutDisplay(displayOn) {
-      if (displayOn) {
-        this.removeAttribute('hidden');
-      } else {
-        this.setAttribute('hidden', '');
-      }
-    }
-
-    /**
      * Returns an optional placeholder element for this custom element.
      * @return {?Element}
      * @package @final @this {!Element}
