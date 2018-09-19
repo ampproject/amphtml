@@ -21,7 +21,6 @@ import {
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {dict} from '../../../../src/utils/object';
-import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
@@ -580,66 +579,11 @@ describes.realWin('amp-consent', {
       });
     });
 
-    describe('promptUISrc', () => {
-      it('should ignore promptUISrc w/ promptUI', function* () {
-        expectAsyncConsoleError('[amp-consent] child element of <amp-consent>' +
-            ' with promptUI id 123 not found');
-        expectAsyncConsoleError('Element expected:  ');
-        consentElement = createConsentElement(doc, dict({
-          'consents': {
-            'test': {
-              'checkConsentHref': 'https://response1',
-              'promptUI': '123',
-              'promptUISrc': 'https://promptUISrc',
-            },
-          },
-        }));
-        doc.body.appendChild(consentElement);
-        ampConsent = new AmpConsent(consentElement);
-        ampConsent.buildCallback();
-        yield macroTask();
-        yield macroTask();
-        expect(ampConsent.consentUI_['test']).to.be.not.ok;
-      });
-
-      it('should create iframe from promptUISrc', function* () {
-        consentElement = createConsentElement(doc, dict({
-          'consents': {
-            'test': {
-              'checkConsentHref': 'https://response1',
-              'promptUISrc': 'https://promptUISrc',
-            },
-          },
-        }));
-        doc.body.appendChild(consentElement);
-        ampConsent = new AmpConsent(consentElement);
-        ampConsent.buildCallback();
-        yield macroTask();
-        yield macroTask();
-        expect(ampConsent.consentUI_['test'].tagName).to.equal('IFRAME');
-      });
-
-      it('should append/remove iframe to document', function* () {
-        consentElement = createConsentElement(doc, dict({
-          'consents': {
-            'test': {
-              'checkConsentHref': 'https://response1',
-              'promptUISrc': 'https://promptUISrc',
-            },
-          },
-        }));
-        doc.body.appendChild(consentElement);
-        ampConsent = new AmpConsent(consentElement);
-        ampConsent.buildCallback();
-        yield macroTask();
-        yield macroTask();
-        expect(elementByTag(consentElement, 'iframe')).to.not.be.null;
-        ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
-        expect(elementByTag(consentElement, 'iframe')).to.be.null;
-      });
-    });
-
     describe('postPromptUI', () => {
+      let postPromptUI;
+      beforeEach(() => {
+        postPromptUI = doc.getElementById('test');
+      });
       it('handle postPromptUI', function* () {
         storageValue = {
           'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
@@ -650,15 +594,15 @@ describes.realWin('amp-consent', {
         ampConsent.element.classList.remove('i-amphtml-notbuilt');
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(ampConsent.element).to.have.display('none');
-        expect(ampConsent.postPromptUI_).to.have.display('none');
+        expect(postPromptUI).to.have.display('none');
         yield macroTask();
 
         expect(ampConsent.element).to.not.have.display('none');
         expect(ampConsent.element.classList.contains('amp-active')).to.be.true;
         expect(ampConsent.element.classList.contains('amp-hidden')).to.be.false;
-        expect(ampConsent.postPromptUI_).to.not.have.display('none');
+        expect(postPromptUI).to.not.have.display('none');
         ampConsent.scheduleDisplay_('ABC');
-        expect(ampConsent.postPromptUI_).to.have.display('none');
+        expect(postPromptUI).to.have.display('none');
       });
 
       describe('hide/show postPromptUI', () => {
@@ -684,9 +628,9 @@ describes.realWin('amp-consent', {
         it('hide postPromptUI', function* () {
           ampConsent.buildCallback();
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
-          expect(ampConsent.postPromptUI_).to.not.be.null;
+          expect(postPromptUI).to.not.be.null;
           yield macroTask();
-          expect(ampConsent.postPromptUI_).to.have.display('none');
+          expect(postPromptUI).to.have.display('none');
         });
 
         it('show postPromptUI', function* () {
@@ -695,9 +639,9 @@ describes.realWin('amp-consent', {
           };
           ampConsent.buildCallback();
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
-          expect(ampConsent.postPromptUI_).to.not.be.null;
+          expect(postPromptUI).to.not.be.null;
           yield macroTask();
-          expect(ampConsent.postPromptUI_).to.not.have.display('none');
+          expect(postPromptUI).to.not.have.display('none');
         });
       });
     });
