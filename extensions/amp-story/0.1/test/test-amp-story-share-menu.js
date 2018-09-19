@@ -144,7 +144,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     shareMenu.build();
 
-    expect(shareMenu.element_.style.display).to.equal('none');
+    expect(shareMenu.element_).to.have.display('none');
   });
 
   it('should load the amp-social-share extension if system share', () => {

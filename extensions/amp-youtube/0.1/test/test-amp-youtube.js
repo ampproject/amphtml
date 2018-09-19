@@ -326,7 +326,7 @@ describes.realWin('amp-youtube', {
       expect(unlistenSpy).to.have.been.called;
       expect(yt.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder).to.not.have.display('');
     });
   });
 

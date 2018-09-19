@@ -51,7 +51,13 @@ body {
   text-size-adjust: 100%;
 }
 
+/**
+ * We intentionally break with HTML5's default [hidden] styling to apply
+ * !important.
+ */
 [hidden] {
+  /* This must be !important, else the toggle helper system would break down
+     due to specificity */
   display: none !important;
 }
 

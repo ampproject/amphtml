@@ -57,6 +57,6 @@ describes.realWin('validation-bubble', {amp: true}, env => {
     expect(bubbleEl.style.left).to.equal('500px');
 
     bubble.hide();
-    expect(bubbleEl.style.display).to.equal('none');
+    expect(bubbleEl).to.have.display('none');
   });
 });

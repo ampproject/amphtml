@@ -680,15 +680,6 @@ export class BaseElement {
   }
 
   /**
-   * Must be executed in the mutate context. Removes `display:none` from the
-   * element set via `layout=nodisplay`.
-   * @param {boolean} displayOn
-   */
-  toggleLayoutDisplay(displayOn) {
-    this.element.toggleLayoutDisplay(displayOn);
-  }
-
-  /**
    * Returns an optional placeholder element for this custom element.
    * @return {?Element}
    * @public @final

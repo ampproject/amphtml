@@ -134,7 +134,7 @@ describes.realWin('amp-byside-content', {
       const placeholder = elem.querySelector('[placeholder]');
       const iframe = elem.querySelector('iframe');
       expect(iframe).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder).to.not.have.display('none');
     }).then(elem => {
       const placeholder = elem.querySelector('[placeholder]');
       elem.getVsync = () => {
@@ -148,7 +148,7 @@ describes.realWin('amp-byside-content', {
 
       // test placeholder too
       elem.implementation_.iframePromise_.then(() => {
-        expect(placeholder.style.display).to.be.equal('none');
+        expect(placeholder).to.have.display('none');
       });
     });
   });

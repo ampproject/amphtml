@@ -41,7 +41,13 @@ import {isFiniteNumber} from '../../types';
 import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
 import {once} from '../../utils/function';
-import {px, resetStyles, setImportantStyles, translate} from '../../style';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  toggle,
+  translate,
+} from '../../style';
 
 
 /** @private @const {number} */
@@ -143,8 +149,8 @@ const transform = (x, y, scale) => `translate(${x}px, ${y}px) scale(${scale})`;
  * @private
  */
 function swap(a, b) {
-  a.setAttribute('hidden', '');
-  b.removeAttribute('hidden');
+  toggle(a, false);
+  toggle(b, true);
 }
 
 
@@ -546,7 +552,7 @@ export class VideoDocking {
       } = this.getControls_();
       const overlay = this.getOverlay_();
 
-      container.removeAttribute('hidden');
+      toggle(container, true);
       container.classList.add('amp-video-docked-controls-shown');
       overlay.classList.add('amp-video-docked-controls-bg');
 
@@ -1177,8 +1183,8 @@ export class VideoDocking {
 
     video.mutateElement(() => {
       internalElement.classList.add(BASE_CLASS_NAME);
-      shadowLayer.removeAttribute('hidden');
-      overlay.removeAttribute('hidden');
+      toggle(shadowLayer, true);
+      toggle(overlay, true);
       const els = [internalElement, shadowLayer, overlay];
       for (let i = 0; i < els.length; i++) {
         const el = els[i];
@@ -1755,8 +1761,8 @@ export class VideoDocking {
       const almostDismissed = 'amp-video-docked-almost-dismissed';
       internalElement.classList.remove(almostDismissed);
       overlay.classList.remove(almostDismissed);
-      shadowLayer.setAttribute('hidden', '');
-      overlay.setAttribute('hidden', '');
+      toggle(shadowLayer, false);
+      toggle(overlay, false);
       const els = [internalElement, shadowLayer, overlay];
       for (let i = 0; i < els.length; i++) {
         resetStyles(els[i], [
