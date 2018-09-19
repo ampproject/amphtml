@@ -55,7 +55,7 @@ describes.realWin('amp-timeago', {
     expect(timeElement.textContent).to.equal('Sunday 1 January 2017');
   });
 
-  it('should display updated fuzzy timestamp when viewportCallback is called', async function() {
+  it('should update fuzzy timestamp on viewportCallback', async function() {
     const date = new Date();
     date.setSeconds(date.getSeconds() - 10);
     element.setAttribute('datetime', date.toISOString());
