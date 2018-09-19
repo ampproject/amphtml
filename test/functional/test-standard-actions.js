@@ -22,6 +22,7 @@ import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
 import {setParentWindow} from '../../src/service';
+import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, () => {
@@ -50,13 +51,13 @@ describes.sandboxed('StandardActions', {}, () => {
   function expectElementToHaveBeenHidden(element) {
     expect(mutateElementStub).to.be.calledOnce;
     expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-    expect(element.style.display).to.equal('none');
+    expect(element).to.have.attribute('hidden');
   }
 
   function expectElementToHaveBeenShown(element) {
     expect(mutateElementStub).to.be.calledOnce;
     expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-    expect(element.style.display).to.not.equal('none');
+    expect(element).to.not.have.attribute('hidden');
     expect(element.hasAttribute('hidden')).to.be.false;
   }
 
@@ -116,9 +117,9 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"show" action', () => {
-    it('should handle normal element (inline css)', () => {
+    it('should handle normal element (toggle)', () => {
       const element = createElement();
-      element.style.display = 'none';
+      toggle(element, false);
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
@@ -132,9 +133,17 @@ describes.sandboxed('StandardActions', {}, () => {
       expectElementToHaveBeenShown(element);
     });
 
-    it('should handle AmpElement (inline css)', () => {
+    it('should handle AmpElement (toggle)', () => {
       const element = createAmpElement();
-      element.style.display = 'none';
+      toggle(element, false);
+      const invocation = {node: element, satisfiesTrust: () => true};
+      standardActions.handleShow(invocation);
+      expectAmpElementToHaveBeenShown(element);
+    });
+
+    it('should handle AmpElement (hidden attribute)', () => {
+      const element = createAmpElement();
+      element.setAttribute('hidden', '');
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectAmpElementToHaveBeenShown(element);
@@ -143,9 +152,9 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"toggle" action', () => {
-    it('should show normal element when hidden (inline css)', () => {
+    it('should show normal element when hidden (toggle)', () => {
       const element = createElement();
-      element.style.display = 'none';
+      toggle(element, false);
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
@@ -166,9 +175,17 @@ describes.sandboxed('StandardActions', {}, () => {
       expectElementToHaveBeenHidden(element);
     });
 
-    it('should show AmpElement when hidden (inline css)', () => {
+    it('should show AmpElement when hidden (toggle)', () => {
       const element = createAmpElement();
-      element.style.display = 'none';
+      toggle(element, false);
+      const invocation = {node: element, satisfiesTrust: () => true};
+      standardActions.handleToggle(invocation);
+      expectAmpElementToHaveBeenShown(element);
+    });
+
+    it('should show AmpElement when hidden (hidden attribute)', () => {
+      const element = createAmpElement();
+      element.setAttribute('hidden', '');
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenShown(element);
