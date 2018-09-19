@@ -451,7 +451,7 @@ export class AmpList extends AMP.BaseElement {
    * amp-list's height to fit the target.
    *
    * @param {!Element} target
-   * @param {?function():boolean} opt_decider
+   * @param {function():boolean=} opt_decider
    * @private
    */
   attemptToFit_(target, opt_decider) {
