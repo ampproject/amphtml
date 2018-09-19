@@ -278,6 +278,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pauseCallback() {
     this.advancement_.stop();
     this.stopListeningToVideoEvents_();
+
     this.pauseAllMedia_(true /** rewindToBeginning */);
 
     if (this.animationManager_) {
