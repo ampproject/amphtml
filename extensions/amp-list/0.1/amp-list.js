@@ -437,7 +437,7 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       const diffing = isExperimentOn(this.win, 'amp-list-diffing');
-      if (this.container_.hasChildNodes() && diffing) {
+      if (diffing && this.container_.hasChildNodes()) {
         const newContainer = this.createContainer_();
         this.addElementsToContainer_(elements, newContainer);
 

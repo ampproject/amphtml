@@ -257,9 +257,10 @@ export function purifyHtml(dirty, diffing = false) {
 
   // Disables DOM diffing for a given node and allows it to be replaced.
   const disableDiffingFor = node => {
-    if (diffing) {
+    const key = 'i-amphtml-key';
+    if (diffing && !node.hasAttribute(key)) {
       // set-dom uses node attribute keys for opting out of diffing.
-      node.setAttribute('i-amphtml-key', KEY_COUNTER++);
+      node.setAttribute(key, KEY_COUNTER++);
     }
   };
 
