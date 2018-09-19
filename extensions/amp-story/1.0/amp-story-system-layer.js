@@ -365,7 +365,7 @@ export class SystemLayer {
       this.onPageAudioStateUpdate_(audio);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.STORY_HAS_SIDEBAR_STATE,
+    this.storeService_.subscribe(StateProperty.HAS_SIDEBAR_STATE,
         hasSidebar => {
           this.onHasSidebarStateUpdate_(hasSidebar);
         }, true /** callToInitialize */);

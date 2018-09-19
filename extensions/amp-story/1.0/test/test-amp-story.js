@@ -682,7 +682,7 @@ describes.realWin('amp-story', {
       return story.layoutCallback()
           .then(() => {
             expect(story.storeService_
-                .get(StateProperty.STORY_HAS_SIDEBAR_STATE)).to.be.true;
+                .get(StateProperty.HAS_SIDEBAR_STATE)).to.be.true;
           });
     });
 

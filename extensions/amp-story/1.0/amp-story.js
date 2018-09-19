@@ -695,7 +695,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.initializeBookend_();
-    this.checkForSidebar_();
+    this.initializeSidebar_();
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
@@ -1861,7 +1861,7 @@ export class AmpStory extends AMP.BaseElement {
    * permitting for the opening/closing of the sidebar is shown.
    * @private
    */
-  checkForSidebar_() {
+  initializeSidebar_() {
     this.sidebar_ = this.element.querySelector('amp-sidebar');
     if (this.sidebar_) {
       this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
@@ -1870,14 +1870,15 @@ export class AmpStory extends AMP.BaseElement {
       actions.addToWhitelist('AMP-SIDEBAR.open');
       actions.addToWhitelist('AMP-SIDEBAR.close');
       actions.addToWhitelist('AMP-SIDEBAR.toggle');
-      const sidebarObserver = new this.win.MutationObserver(() => {
+      if (this.win.MutationObserver) {
+        const sidebarObserver = new this.win.MutationObserver(() => {
           this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
               this.sidebar_.hasAttribute('open'));
-         if(!this.win.MutationObserver) {
-            this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
-         }
-      });
-      sidebarObserver.observe(this.sidebar_, {attributes: open});
+        });
+        sidebarObserver.observe(this.sidebar_, {attributes: open});
+      } else {
+        this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+      } 
     }
   }
 

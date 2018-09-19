@@ -103,6 +103,7 @@ export const StateProperty = {
   AD_STATE: 'adstate',
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
+  HAS_SIDEBAR_STATE: 'hassidebarstate',
   INFO_DIALOG_STATE: 'infodialogstate',
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
@@ -113,7 +114,6 @@ export const StateProperty = {
   SIDEBAR_STATE: 'sidebarstate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   STORY_HAS_AUDIO_STATE: 'storyaudiostate',
-  STORY_HAS_SIDEBAR_STATE: 'storyhassidebarstate',
   UI_STATE: 'uistate',
 
   // App data.
@@ -216,7 +216,7 @@ const actions = (state, action, data) => {
           }));
     case Action.TOGGLE_HAS_SIDEBAR:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.STORY_HAS_SIDEBAR_STATE]: !!data}));
+          {}, state, {[StateProperty.HAS_SIDEBAR_STATE]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
@@ -349,7 +349,7 @@ export class AmpStoryStoreService {
       [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
-      [StateProperty.STORY_HAS_SIDEBAR_STATE]: false,
+      [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
