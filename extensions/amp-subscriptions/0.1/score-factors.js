@@ -19,6 +19,8 @@
  * @const @enum {string}
  */
 export const SubscriptionsScoreFactor = {
+  // User is known to platform and has a form of payment registered
+  IS_READY_TO_PAY: 'isReadyToPay',
   // Platform supports the current viewer environment
   SUPPORTS_VIEWER: 'supportsViewer',
 };
@@ -28,5 +30,6 @@ export const SubscriptionsScoreFactor = {
  * on page config if needed.
  */
 export const DEFAULT_SCORE_CONFIG = {
+  isReadyToPay: 0,
   supportsViewer: 10,
 };
