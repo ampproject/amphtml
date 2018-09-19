@@ -40,7 +40,9 @@ module.exports = function(babel) {
   return {
     visitor: {
       CallExpression(path) {
-        const {callee} = path.node;
+        const {node} = path;
+        const {callee} = node;
+        const {parenthesized} = node.extra || {};
         const isMemberAndCallExpression = t.isMemberExpression(callee)
             && t.isCallExpression(callee.object);
 
@@ -65,7 +67,12 @@ module.exports = function(babel) {
         // don't remove.
         const args = path.node.arguments[0];
         if (args) {
-          path.replaceWith(args);
+          if (parenthesized) {
+            path.replaceWith(t.parenthesizedExpression(args));
+            path.skip();
+          } else {
+            path.replaceWith(args);
+          }
         } else {
           // This is to resolve right hand side usage of expression where
           // no argument is passed in.
