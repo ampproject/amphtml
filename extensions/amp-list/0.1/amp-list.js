@@ -17,20 +17,26 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {Deferred} from '../../../src/utils/promise';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
+  requestForBatchFetch,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import {setStyles, toggle} from '../../../src/style';
+import {
+  setupAMPCors,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -92,6 +98,7 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
+
   }
 
   /** @override */
@@ -142,7 +149,7 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     dev().info(TAG, 'mutate:', mutations);
     const src = mutations['src'];
-    const state = mutations['state'];
+    const state = /** @type {!JsonObject}*/(mutations)['state'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
@@ -226,11 +233,12 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
+    let fetch;
     if (this.ssrTemplateHelper_.isSupported()) {
-      return this.ssrTemplate_();
+      fetch = this.ssrTemplate_();
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
-      return this.fetch_(itemsExpr).then(items => {
+      fetch = this.fetch_(itemsExpr).then(items => {
         if (this.element.hasAttribute('single-item')) {
           user().assert(typeof items !== 'undefined',
               'Response must contain an array or object at "%s". %s',
@@ -249,8 +257,9 @@ export class AmpList extends AMP.BaseElement {
         return this.scheduleRender_(items);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
-      }).catch(error => this.showFallback_(error));
+      });
     }
+    return fetch.catch(error => this.showFallback_(error));
   }
 
   /**
@@ -258,16 +267,35 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_() {
-    return this.ssrTemplateHelper_.fetchAndRenderTemplate(
-        this.element).then(resp => {
-      const data = getData(resp);
-      user().assert(
-          resp && (typeof data !== 'undefined'),
-          'Response missing the "data" field.');
-      return this.scheduleRender_(data);
+    let request;
+    // Construct the fetch init data that would be called by the viewer
+    // passed in as the 'originalRequest'.
+    return requestForBatchFetch(
+        this.getAmpDoc(),
+        this.element,
+        this.getPolicy_()).then(r => {
+      request = r;
+
+      request.fetchOpt = setupAMPCors(
+          this.win, request.xhrUrl, request.fetchOpt);
+      setupJsonFetchInit(r.fetchOpt);
+
+      const attributes = dict({
+        'ampListAttributes': {
+          'items': this.element.getAttribute('items') || 'items',
+          'singleItem': this.element.getAttribute('single-item'),
+          'maxItems': this.element.getAttribute('max-items'),
+        },
+      });
+      return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+          this.element, request, /* opt_templates */ null, attributes);
+    }).then(response => {
+      request.fetchOpt.responseType = 'application/json';
+      this.ssrTemplateHelper_.verifySsrResponse(this.win, response, request);
+      return response['html'];
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).catch(error => this.showFallback_(error));
+    }).then(html => this.scheduleRender_(html));
   }
 
   /**
@@ -314,9 +342,11 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      const json = /** @type {!JsonObject} */ (current.data);
-      this.templates_.findAndRenderTemplate(this.element, json)
-          .then(element => this.container_.appendChild(element))
+      // TODO(alabiaga): This is a misleading type cast. Instead, we should use
+      // a new API on template-impl.js and amp-mustache.js as discussed.
+      const html = /** @type {!JsonObject} */ (current.data);
+      this.templates_.findAndRenderTemplate(this.element, html)
+          .then(element => this.render_([element]))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
       const array = /** @type {!Array} */ (current.data);
@@ -372,9 +402,10 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
+    const autoResize = this.element.hasAttribute('auto-resize');
+
     this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
-
       removeChildren(dev().assertElement(this.container_));
       elements.forEach(element => {
         if (!element.hasAttribute('role')) {
@@ -386,16 +417,81 @@ export class AmpList extends AMP.BaseElement {
       const event = createCustomEvent(this.win,
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
-
       // Change height if needed.
       this.measureElement(() => {
         const scrollHeight = this.container_./*OK*/scrollHeight;
         const height = this.element./*OK*/offsetHeight;
         if (scrollHeight > height) {
-          this.attemptChangeHeight(scrollHeight).catch(() => {});
+          if (autoResize) {
+            const layout = this.element.getAttribute('layout');
+            if (layout == Layout.FLEX_ITEM) {
+              // TODO (#17824): flex item + reset-on-refresh will add
+              // an invisible loader that fills the amp-list and shoves all
+              // list items out of the amp-list.
+              this.attemptChangeHeight(scrollHeight).catch(() => {});
+            } else if (layout !== Layout.CONTAINER) {
+              this.changeToLayoutContainer_(layout);
+            }
+          } else {
+            this.attemptChangeHeight(scrollHeight).catch(() => {});
+          }
         }
       });
-    }, this.container_);
+    });
+  }
+
+  /**
+   * Undoes previous size-defined layout, must be called in mutation context.
+   * @param {string} previousLayout
+   */
+  undoPreviousLayout_(previousLayout) {
+    switch (previousLayout) {
+      case Layout.RESPONSIVE:
+        this.element.classList.remove('i-amphtml-layout-responsive');
+        break;
+      case Layout.FIXED:
+        this.element.classList.remove('i-amphtml-layout-fixed');
+        setStyles(this.element, {
+          height: '',
+        });
+        break;
+      case Layout.FIXED_HEIGHT:
+        this.element.classList.remove('i-amphtml-layout-fixed-height');
+        setStyles(this.element, {
+          height: '',
+          width: '',
+        });
+        break;
+      case Layout.INTRINSIC:
+        this.element.classList.remove('i-amphtml-layout-intrinsic');
+        break;
+    }
+    // The changeSize call removes the sizer element
+    this.element./*OK*/changeSize();
+    this.element.classList.remove('i-amphtml-layout-size-defined');
+  }
+
+  /**
+   * Converts the amp-list to de facto layout container. Must be called in
+   * mutation context.
+   * @param {string} previousLayout
+   * @private
+   */
+  changeToLayoutContainer_(previousLayout) {
+    this.undoPreviousLayout_(previousLayout);
+    this.container_.classList.remove(
+        'i-amphtml-fill-content',
+        'i-amphtml-replaced-content'
+    );
+    // The overflow element is generally hidden with visibility hidden,
+    // but after changing to layout container, this causes an undesirable
+    // empty white space so we hide it with display none instead.
+    const overflowElement = this.getOverflowElement();
+    if (overflowElement) {
+      toggle(overflowElement, false);
+    }
+
+    this.element.setAttribute('layout', 'container');
   }
 
   /**
@@ -403,16 +499,24 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    const ampdoc = this.getAmpDoc();
+    return batchFetchJsonFor(
+        this.getAmpDoc(), this.element, itemsExpr, this.getPolicy_());
+  }
+
+  /**
+   * return {!UrlReplacementPolicy}
+   */
+  getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     let policy = UrlReplacementPolicy.OPT_IN;
     if (src == this.initialSrc_ ||
-      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+       (getSourceOrigin(src)
+           == getSourceOrigin(this.getAmpDoc().win.location))) {
       policy = UrlReplacementPolicy.ALL;
     }
-    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
+    return policy;
   }
 
   /**

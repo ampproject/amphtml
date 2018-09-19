@@ -53,7 +53,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     systemLayer = new SystemLayer(win);
   });
 
-  it('should build UI', () => {
+  it.skip('should build UI', () => {
     const initializeListeners =
         sandbox.stub(systemLayer, 'initializeListeners_').callsFake(NOOP);
 

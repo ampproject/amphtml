@@ -21,10 +21,17 @@ import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 import {dev, user} from '../../../src/log';
-import {fullscreenEnter, fullscreenExit, isFullscreenElement, removeElement} from '../../../src/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}

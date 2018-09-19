@@ -19,7 +19,10 @@ import {
   Entitlements,
   SubscribeResponse,
 } from '../../../../third_party/subscriptions-project/swg';
-import {Entitlement, GrantReason} from '../../../amp-subscriptions/0.1/entitlement';
+import {
+  Entitlement,
+  GrantReason,
+} from '../../../amp-subscriptions/0.1/entitlement';
 import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   PageConfig,
@@ -220,7 +223,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should reauthorize on complete subscribe', () => {
     const promise = Promise.resolve();
-    const response = new SubscribeResponse(null, null, null, () => promise);
+    const response = new SubscribeResponse(null, null, null, null,
+        () => promise);
     serviceAdapterMock.expects('reAuthorizePlatform')
         .withExactArgs(platform)
         .once();

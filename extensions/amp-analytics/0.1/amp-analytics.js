@@ -34,16 +34,15 @@ import {
   expandPostMessage,
 } from './requests';
 import {Services} from '../../../src/services';
+import {Transport} from './transport';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
-import {isArray} from '../../../src/types';
-import {isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
-import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
 
@@ -87,7 +86,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
 
-    /** @private {?./instrumentation.AnalyticsGroup} */
+    /** @private {?./analytics-group.AnalyticsGroup} */
     this.analyticsGroup_ = null;
 
     /** @private {!./variables.VariableService} */
@@ -98,6 +97,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.iniPromise_ = null;
+
+    this.transport_ = null;
 
     /** @private {?IframeTransport} */
     this.iframeTransport_ = null;
@@ -201,6 +202,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return this.iniPromise_;
     }
     toggle(this.element, false);
+
     this.iniPromise_ =
         Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
             // Rudimentary "idle" signal.
@@ -219,6 +221,8 @@ export class AmpAnalytics extends AMP.BaseElement {
             })
             .then(config => {
               this.config_ = config;
+              this.transport_ =
+                  new Transport(this.win, this.config_['transport'] || {});
             })
             .then(this.registerTriggers_.bind(this))
             .then(() => {
@@ -340,8 +344,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const ampAdResourceId = this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
-        // Create  3p transport frame within creative frame if inabox.
-        this.isInabox_ ? this.win : this.getAmpDoc().win,
+        this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
   }
@@ -728,14 +731,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (trigger['iframePing']) {
       user().assert(trigger['on'] == 'visible',
           'iframePing is only available on page view requests.');
-      sendRequestUsingIframe(this.win, request);
+      this.transport_.sendRequestUsingIframe(request);
     } else if (this.config_['transport'] &&
         this.config_['transport']['iframe']) {
       user().assert(this.iframeTransport_,
           'iframe transport was inadvertently deleted');
       this.iframeTransport_.sendRequest(request);
     } else {
-      sendRequest(this.win, request, this.config_['transport'] || {});
+      this.transport_.sendRequest(request);
     }
   }
 

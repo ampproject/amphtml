@@ -27,10 +27,14 @@ import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent, scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  escapeCssSelectorIdent,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {map, omit} from '../../../src/utils/object';
-import {setStyles} from '../../../src/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
@@ -197,7 +201,7 @@ class AnimationRunner {
 
     return this.firstFrameProps_.then(firstFrameProps =>
       this.vsync_.mutatePromise(() => {
-        setStyles(this.target_, firstFrameProps);
+        setStyles(this.target_, assertDoesNotContainDisplay(firstFrameProps));
       }));
   }
 

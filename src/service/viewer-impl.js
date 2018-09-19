@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
+import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
@@ -33,7 +33,6 @@ import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {startsWith} from '../string';
-import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -88,9 +87,9 @@ const TRUSTED_VIEWER_HOSTS = [
 ];
 
 /**
- * @typedef {function(*):(!Promise<*>|undefined)}
+ * @typedef {function(!JsonObject):(!Promise|undefined)}
  */
-export let RequestResponder;
+let RequestResponderDef;
 
 
 /**
@@ -137,7 +136,7 @@ export class Viewer {
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
 
-    /** @private {!Object<string, !RequestResponder>} */
+    /** @private {!Object<string, !RequestResponderDef>} */
     this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
@@ -851,7 +850,7 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {!RequestResponder} responder
+   * @param {!RequestResponderDef} responder
    * @return {!UnlistenDef}
    */
   onMessageRespond(eventType, responder) {

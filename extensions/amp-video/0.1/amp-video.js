@@ -33,9 +33,14 @@ import {htmlFor} from '../../../src/static-template';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {
+  setImportantStyles,
+  setInitialDisplay,
+  setStyles,
+} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
@@ -89,6 +94,9 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
+
+    /** @private {?Element} */
+    this.posterDummyImageForTesting_ = null;
   }
 
   /**
@@ -196,6 +204,8 @@ class AmpVideo extends AMP.BaseElement {
 
     this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
+
+    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
     // Gather metadata
     const artist = element.getAttribute('artist');
@@ -317,6 +327,10 @@ class AmpVideo extends AMP.BaseElement {
       const srcSource = this.createSourceElement_(src, type);
       const ampOrigSrc = this.element.getAttribute('amp-orig-src');
       srcSource.setAttribute('amp-orig-src', ampOrigSrc);
+      // Also make sure src is removed from amp-video since Stories media-pool
+      // may copy it back from amp-video.
+      this.element.removeAttribute('src');
+      this.element.removeAttribute('type');
       sources.unshift(srcSource);
     }
 
@@ -517,8 +531,8 @@ class AmpVideo extends AMP.BaseElement {
     }
     const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     const src = element.getAttribute('poster');
+    setInitialDisplay(poster, 'block');
     setStyles(poster, {
-      'display': 'block',
       'background-image': `url(${src})`,
       'background-size': 'cover',
     });
@@ -619,11 +633,56 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
+   * Called when video is first loaded.
+   * @override
+   */
+  firstLayoutCompleted() {
+    if (!this.hideBlurryPlaceholder_()) {
+      this.togglePlaceholder(false);
+    }
+  }
+
+  /**
    * @return {!../../../src/service/url-impl.Url}
    * @private
    */
   getUrlService_() {
     return Services.urlForDoc(this.element);
+  }
+
+  /**
+   * Fades out a blurry placeholder if one currently exists.
+   * @return {boolean} if there was a blurred image placeholder that was hidden.
+   */
+  hideBlurryPlaceholder_() {
+    const placeholder = this.getPlaceholder();
+    // checks for the existence of a visible blurry placeholder
+    if (placeholder) {
+      if (placeholder.classList.contains('i-amphtml-blur') &&
+        isExperimentOn(this.win, 'blurry-placeholder')) {
+        setImportantStyles(placeholder, {'opacity': 0.0});
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Sets a callback when the poster is loaded.
+   * @param {function()} callback The function that executes when the poster is
+   * loaded.
+   * @private
+   */
+  onPosterLoaded_(callback) {
+    const poster = this.video_.getAttribute('poster');
+    if (poster) {
+      const posterImg = new Image();
+      if (getMode().test) {
+        this.posterDummyImageForTesting_ = posterImg;
+      }
+      posterImg.onload = callback;
+      posterImg.src = poster;
+    }
   }
 }
 

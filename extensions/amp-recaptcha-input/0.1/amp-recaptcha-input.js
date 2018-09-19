@@ -13,3 +13,126 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @fileoverview Async Input Element that uses the
+ * amp-recaptcha-service to dispatch actions, and return
+ * recaptcha tokens
+ */
+
+import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
+import {Layout} from '../../../src/layout';
+import {
+  installRecaptchaService,
+  recaptchaServiceFor,
+} from './amp-recaptcha-service';
+import {isExperimentOn} from '../../../src/experiments';
+import {setStyles, toggle} from '../../../src/style';
+import {user} from '../../../src/log';
+
+
+/** @const */
+const TAG = 'amp-recaptcha-input';
+
+export class AmpRecaptchaInput extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?string} **/
+    this.sitekey_ = null;
+
+    /** @private {?string} */
+    this.action_ = null;
+
+    /** @private {!./amp-recaptcha-service.AmpRecaptchaService} */
+    this.recaptchaService_ = recaptchaServiceFor(this.win);
+
+    /** @private {?Promise} */
+    this.registerPromise_ = null;
+
+    /** @private {boolean} */
+    this.isExperimentEnabled_ = isExperimentOn(this.win, 'amp-recaptcha-input');
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
+  buildCallback() {
+    if (!this.isExperimentEnabled_) {
+      return;
+    }
+
+    this.sitekey_ = user().assert(
+        this.element.getAttribute('data-sitekey'),
+        'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+        this.element);
+
+    this.action_ = user().assert(
+        this.element.getAttribute('data-action'),
+        'The data-action attribute is required for <amp-recaptcha-input> %s',
+        this.element);
+
+    return this.mutateElement(() => {
+      toggle(this.element);
+      /**
+       * We are applying styles here, to minizime the amp.css file.
+       * These styles will create an in-place element, that is 1x1,
+       * but invisible. Absolute positioning keeps it where it would have
+       * been, without taking up space. Thus, layoutCallback will still
+       * be called at the appropriate time
+       */
+      setStyles(this.element, {
+        'position': 'absolute',
+        'width': '1px',
+        'height': '1px',
+        'overflow': 'hidden',
+        'visibility': 'hidden',
+      });
+    });
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (!this.registerPromise_) {
+      this.registerPromise_ = this.recaptchaService_.register(this.element);
+    }
+    return this.registerPromise_;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.registerPromise_) {
+      this.recaptchaService_.unregister();
+      this.registerPromise_ = null;
+    }
+    return true;
+  }
+
+  /**
+   * Function to return the recaptcha token.
+   * Will be an override of AMP.AsyncInput
+   * @return {Promise<string>}
+   */
+  getValue() {
+
+    if (this.sitekey_ && this.action_) {
+      return this.recaptchaService_.execute(
+          this.element.getResourceId(), this.sitekey_, this.action_
+      );
+    }
+    return Promise.reject(new Error(
+        'amp-recaptcha-input requires both the data-sitekey,' +
+        ' and data-action attribute'
+    ));
+  }
+}
+
+AMP.extension(TAG, '0.1', AMP => {
+  installRecaptchaService(AMP.win);
+  AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
+});
