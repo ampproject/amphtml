@@ -94,7 +94,7 @@ describes.realWin('amp-ad-3p-impl', {
         expect(iframe.tagName).to.equal('IFRAME');
         const url = iframe.getAttribute('src');
         expect(url).to.match(/^http:\/\/ads.localhost:/);
-        expect(iframe.style.display).to.equal('');
+        expect(iframe).to.not.have.attribute('hidden');
 
         expect(url).to.match(/frame(.max)?.html/);
         const data = JSON.parse(iframe.name).attributes;
