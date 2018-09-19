@@ -7554,9 +7554,9 @@ jest-docblock@^23.2.0:
   dependencies:
     detect-newline "^2.1.0"
 
-jest-dot-reporter@1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/jest-dot-reporter/-/jest-dot-reporter-1.0.6.tgz#2eefca2e299806fdd09e9896e50201948b8bc037"
+jest-dot-reporter@1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/jest-dot-reporter/-/jest-dot-reporter-1.0.7.tgz#f386bfc8d1ed33a72732d2c0404a7591917f3b3d"
   dependencies:
     chalk "2.4.1"
     moment "2.22.2"

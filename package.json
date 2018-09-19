@@ -108,7 +108,7 @@
     "gzip-size": "5.0.0",
     "is-running": "2.1.0",
     "jest": "23.6.0",
-    "jest-dot-reporter": "1.0.6",
+    "jest-dot-reporter": "1.0.7",
     "jison": "0.4.18",
     "jsdom": "11.12.0",
     "json-stable-stringify": "1.0.1",
