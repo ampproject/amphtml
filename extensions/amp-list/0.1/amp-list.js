@@ -432,12 +432,13 @@ export class AmpList extends AMP.BaseElement {
   render_(elements) {
     dev().info(TAG, 'render:', elements);
     const autoResize = this.element.hasAttribute('auto-resize');
+    const container = dev().assertElement(this.container_);
 
     this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
 
       const diffing = isExperimentOn(this.win, 'amp-list-diffing');
-      if (diffing && this.container_.hasChildNodes()) {
+      if (diffing && container.hasChildNodes()) {
         const newContainer = this.createContainer_();
         this.addElementsToContainer_(elements, newContainer);
 
@@ -446,10 +447,10 @@ export class AmpList extends AMP.BaseElement {
         // Use `i-amphtml-key` as a node key for identifying when to skip
         // DOM diffing and replace. Needed for AMP elements, for example.
         diff.KEY = 'i-amphtml-key';
-        diff(this.container_, newContainer);
+        diff(container, newContainer);
       } else {
-        removeChildren(dev().assertElement(this.container_));
-        this.addElementsToContainer_(elements, this.container_);
+        removeChildren(container);
+        this.addElementsToContainer_(elements, container);
       }
 
       const event = createCustomEvent(this.win,
