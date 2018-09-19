@@ -1,7 +1,7 @@
 ### Linker ID Forwarding
 #### Overview
 
-The `linkers` configuration object is used to enable cross domain ID syncing. `amp-analytics` uses this configuration to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page then can read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
+Each linker will have an associated configuration object. `amp-analytics` uses this configuration to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page then can read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
 
 This document is intended to outline the configuration options will determine in which contexts the linker parameter will be appending to outgoing links. The structure of the configuration object is illustrated below.
 
