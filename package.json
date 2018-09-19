@@ -134,7 +134,7 @@
     "karma-super-dots-reporter": "0.2.0",
     "lazypipe": "1.0.1",
     "lolex": "2.7.5",
-    "markdown-link-check": "3.6.2",
+    "markdown-link-check": "3.7.2",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
     "mkpath": "1.0.0",
