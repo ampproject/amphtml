@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-const conf = require('./build.conf');
-const colors = require('ansi-colors');
-const babelify = require('babelify');
 const babel = require('babel-core');
+const babelify = require('babelify');
 const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;
+const colors = require('ansi-colors');
+const conf = require('./build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const move = require('glob-move');
@@ -77,7 +77,7 @@ exports.getFlags = function(config) {
     define: config.define,
     // Turn off warning for "Unknown @define" since we use define to pass
     // args such as FORTESTING to our runner.
-    jscomp_off: ['unknownDefines', 'suspiciousCode', 'uselessCode'],
+    jscomp_off: ['unknownDefines'],
     jscomp_error: [
       'checkTypes',
       'accessControls',
@@ -364,18 +364,18 @@ function setupBundles(graph) {
 }
 
 function transform(graph) {
-  console.log(colors.green(`temp directory ${graph.tmp}`));
+  console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
     // Don't transform node_module files for now and just copy it.
-    if (f.indexOf('node_modules/') === 0) {
+    if (f.startsWith('node_modules/')) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
-      const code = babel.transformFileSync(f, {
+      const {code} = babel.transformFileSync(f, {
         plugins: conf.plugins,
         babelrc: false,
         retainLines: true,
-      }).code;
+      });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);
     }
   });
