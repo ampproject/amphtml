@@ -25,6 +25,7 @@
  */
 import {
   Action,
+  StateProperty,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
@@ -277,7 +278,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     this.advancement_.stop();
-    
+
     this.stopListeningToVideoEvents_();
     this.pauseAllMedia_(true /** rewindToBeginning */);
 
@@ -460,7 +461,8 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.pause();
       } else {
         return mediaPool.pause(
-            /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+            /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning,
+            this.storeService_.get(StateProperty.DESKTOP_STATE));
       }
     });
   }

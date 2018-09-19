@@ -740,8 +740,8 @@ export class MediaPool {
             if (desktopState) {
               this.timer_.delay(() => {
                 this.enqueueMediaElementTask_(
-                  /** @type {!HTMLMediaElement} */ (poolMediaEl),
-                  new RewindTask());
+                    /** @type {!HTMLMediaElement} */ (poolMediaEl),
+                    new RewindTask());
               }, 300);
             } else {
               this.enqueueMediaElementTask_(
