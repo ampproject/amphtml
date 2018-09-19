@@ -51,6 +51,7 @@ import {
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {findIndex} from '../../../src/utils/array';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
@@ -108,7 +109,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {!AdvancementConfig} */
+    /** @private @const {(!AdvancementConfig|!./page-advancement.ManualAdvancement|!./page-advancement.MultipleAdvancementConfig)} **/
     this.advancement_ = AdvancementConfig.forPage(this);
 
     /** @const @private {!function(boolean)} */
@@ -739,9 +740,18 @@ export class AmpStoryPage extends AMP.BaseElement {
   maybePerformNavigation(event) {
     if (this.advancement_.constructor.name == 'MultipleAdvancementConfig') {
       // Get manual advancement.
-      this.advancement_.getAdvancementModes()
-          .find(el => el.constructor.name == 'ManualAdvancement')
-          .maybePerformNavigation(event);
+      const advancementModes = dev().assert(
+          this.advancement_.getAdvancementModes(),
+          'No advancement modes found in page navigation');
+      if (!advancementModes) { return; }
+
+      const manualAdvIndex =
+        dev().assert(findIndex(advancementModes,
+            elem => elem.constructor.name == 'ManualAdvancement'),
+        'No manual advancement found.');
+      if (!manualAdvIndex) { return; }
+
+      advancementModes[manualAdvIndex].maybePerformNavigation(event);
     } else if (this.advancement_.constructor.name == 'ManualAdvancement') {
       this.advancement_.maybePerformNavigation(event);
     }

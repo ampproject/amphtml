@@ -61,6 +61,9 @@ export class AdvancementConfig {
 
     /** @private {boolean} */
     this.isRunning_ = false;
+
+    /** @private {?Array<!AdvancementConfig>} */
+    this.advancementModes_ = null;
   }
 
   /**
@@ -127,6 +130,18 @@ export class AdvancementConfig {
     return 1;
   }
 
+  /**
+   * @return {?Array<!AdvancementConfig>}
+   */
+  getAdvancementModes() {
+    return this.advancementModes_;
+  }
+
+  /**
+   * @param {!Event} unusedEvent
+   */
+  maybePerformNavigation(unusedEvent) {}
+
   /** @protected */
   onProgressUpdate() {
     const progress = this.getProgress();
@@ -162,7 +177,7 @@ export class AdvancementConfig {
   /**
    * Provides an AdvancementConfig object for the specified amp-story-page.
    * @param {!./amp-story-page.AmpStoryPage} page
-   * @return {!AdvancementConfig}
+   * @return {!AdvancementConfig | !ManualAdvancement | !MultipleAdvancementConfig}
    */
   static forPage(page) {
     const rootEl = page.element;
@@ -193,7 +208,7 @@ export class AdvancementConfig {
  * AdvancementConfig implementations by simply delegating all of its calls to
  * an array of underlying advancement modes.
  */
-class MultipleAdvancementConfig extends AdvancementConfig {
+export class MultipleAdvancementConfig extends AdvancementConfig {
   /**
    * @param {!Array<!AdvancementConfig>} advancementModes A list of
    *     AdvancementConfigs to which all calls should be delegated.
@@ -201,7 +216,7 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   constructor(advancementModes) {
     super();
 
-    /** @private @const {!Array<!AdvancementConfig>} */
+    /** @private {!Array<!AdvancementConfig>} */
     this.advancementModes_ = advancementModes;
   }
 
@@ -262,7 +277,7 @@ class MultipleAdvancementConfig extends AdvancementConfig {
  * Always provides a progress of 1.0.  Advances when the user taps the
  * corresponding section, depending on language settings.
  */
-class ManualAdvancement extends AdvancementConfig {
+export class ManualAdvancement extends AdvancementConfig {
   /**
    * @param {!Element} element The element that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
@@ -362,6 +377,7 @@ class ManualAdvancement extends AdvancementConfig {
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
+   * @override
    */
   maybePerformNavigation(event) {
     if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event) ||
