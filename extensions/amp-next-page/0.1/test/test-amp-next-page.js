@@ -55,8 +55,7 @@ env => {
     doc.body.appendChild(element);
     nextPage = new AmpNextPage(element);
 
-    // sourceUrl is set to about:srcdoc, which has no host.
-    sandbox.stub(Services.documentInfoForDoc(element), 'sourceUrl').value('/');
+    ampdoc.getUrl = () => document.location.href;
 
     xhrMock = sandbox.mock(Services.xhrFor(win));
     fetchDocumentMock = sandbox.mock(DocFetcher);
