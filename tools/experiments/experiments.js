@@ -354,6 +354,11 @@ const EXPERIMENTS = [
     name: 'Enables form support in linker',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
   },
+  {
+    id: 'amp-list-load-more',
+    name: 'Enables load-more related functionality in amp-list',
+    spec: 'https://github.com/ampproject/amphtml/issues/13575',
+  },
 ];
 
 if (getMode().localDev) {
