@@ -112,9 +112,9 @@ function valueOrDefault(value, defaultValue) {
 }
 
 /**
- * @param {string} config Prod or canary
+ * @param {boolean} canary Canary mode in AMP_CONFIG. Defaults to false.
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
- * @param {string} filename File containing the (prod or canary) config
+ * @param {string} filename File containing the AMP config
  * @param {boolean=} opt_localDev Whether to enable local development
  * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
@@ -122,7 +122,7 @@ function valueOrDefault(value, defaultValue) {
  * @return {!Promise}
  */
 function applyConfig(
-  config, target, filename, opt_localDev, opt_localBranch, opt_branch,
+  canary, target, filename, opt_localDev, opt_localBranch, opt_branch,
   opt_fortesting) {
   return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
       .then(() => {
@@ -139,8 +139,9 @@ function applyConfig(
           log(red(`Error parsing config file: ${filename}`));
           throw e;
         }
+        configJson = Object.assign({canary: canary ? 1 : 0}, configJson);
         if (opt_localDev) {
-          configJson = enableLocalDev(config, target, configJson);
+          configJson = enableLocalDev(target, configJson);
         }
         if (opt_fortesting) {
           configJson = Object.assign({test: true}, configJson);
@@ -155,18 +156,18 @@ function applyConfig(
       })
       .then(() => {
         if (!process.env.TRAVIS) {
-          log('Wrote', cyan(config), 'AMP config to', cyan(target));
+          log('Wrote AMP config to', cyan(target), 'in',
+              cyan(canary ? 'canary' : 'prod'), 'mode.');
         }
       });
 }
 
 /**
- * @param {string} config Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
  * @param {string} configJson The json object in which to enable local dev
  * @return {string}
  */
-function enableLocalDev(config, target, configJson) {
+function enableLocalDev(target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
   if (!process.env.TRAVIS) {
     log('Enabled local development mode in', cyan(target));
@@ -230,36 +231,24 @@ function main() {
     return removeConfig(target);
   }
 
-  if (!(argv.prod || argv.canary)) {
-    log(red('One of --prod or --canary should be provided.'));
-    return;
-  }
-
   let filename = '';
 
   // Prod by default.
-  const config = argv.canary ? 'canary' : 'prod';
-  if (argv.canary) {
-    filename = valueOrDefault(argv.canary,
-        'build-system/global-configs/canary-config.json');
-  } else {
-    filename = valueOrDefault(argv.prod,
-        'build-system/global-configs/prod-config.json');
-  }
+  const canary = !!argv.canary;
+  filename = valueOrDefault(argv.config_file,
+      'build-system/global-configs/amp-config.json');
   return removeConfig(target).then(() => {
     return applyConfig(
-        config, target, filename,
+        canary, target, filename,
         argv.local_dev, argv.local_branch, argv.branch, argv.fortesting);
   });
 }
 
 gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
   options: {
-    'target': '  The file to prepend the json config to.',
-    'canary': '  Prepend the default canary config. ' +
-        'Takes in an optional value for a custom canary config source.',
-    'prod': '  Prepend the default prod config. ' +
-        'Takes in an optional value for a custom prod config source.',
+    'target': '  The file to which the json config will be prepended.',
+    'canary': '  Whether to enable canary mode or not. Defaults to false.',
+    'config_file': '  Use a custom AMP config source file.',
     'local_dev': '  Enables runtime to be used for local development.',
     'branch': '  Switch to a git branch to get config source from. ' +
         'Uses master by default.',
