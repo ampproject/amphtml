@@ -153,7 +153,7 @@
     "pretty-bytes": "5.1.0",
     "prop-types": "15.6.2",
     "pumpify": "1.5.1",
-    "puppeteer": "1.6.1",
+    "puppeteer": "1.8.0",
     "react": "16.4.1",
     "react-addons-shallow-compare": "15.6.2",
     "react-dates": "17.2.0",
