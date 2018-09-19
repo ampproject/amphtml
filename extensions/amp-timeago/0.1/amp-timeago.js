@@ -32,6 +32,12 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
     /** @private {string} */
     this.title_ = '';
+
+    /** @private {?Element} */
+    this.timeElement_ = null;
+
+    /** @private {boolean} */
+    this.cutOffReached_ = false;
   }
 
   /** @override */
@@ -47,32 +53,43 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.element.title = this.title_;
     this.element.textContent = '';
 
-    const timeElement = document.createElement('time');
-    timeElement.setAttribute('datetime', this.datetime_);
+    this.timeElement_ = document.createElement('time');
+    this.timeElement_.setAttribute('datetime', this.datetime_);
 
-    if (this.element.hasAttribute('cutoff')) {
-      const cutoff = parseInt(this.element.getAttribute('cutoff'), 10);
-      const elDate = new Date(this.datetime_);
-      const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
+    this.setFuzzyTimestampValue_();
+    this.element.appendChild(this.timeElement_);
+  }
 
-      if (secondsAgo > cutoff) {
-        timeElement.textContent = this.title_;
-      } else {
-        timeElement.textContent = timeago(this.datetime_, this.locale_);
-      }
-    } else {
-      timeElement.textContent = timeago(this.datetime_, this.locale_);
+  /** @override */
+  viewportCallback(inViewport) {
+    if (inViewport && !this.cutOffReached_) {
+      this.setFuzzyTimestampValue_();
     }
-
-    this.element.appendChild(timeElement);
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
-}
 
+  /** @private */
+  setFuzzyTimestampValue_() {
+    if (this.element.hasAttribute('cutoff')) {
+      const cutoff = parseInt(this.element.getAttribute('cutoff'), 10);
+      const elDate = new Date(this.datetime_);
+      const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
+
+      if (secondsAgo > cutoff) {
+        this.timeElement_.textContent = this.title_;
+        this.cutOffReached_ = true;
+      } else {
+        this.timeElement_.textContent = timeago(this.datetime_, this.locale_);
+      }
+    } else {
+      this.timeElement_.textContent = timeago(this.datetime_, this.locale_);
+    }
+  }
+}
 
 AMP.extension('amp-timeago', '0.1', AMP => {
   AMP.registerElement('amp-timeago', AmpTimeAgo);
