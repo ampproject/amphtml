@@ -173,7 +173,7 @@
     "touch": "3.1.0",
     "traverse": "0.6.6",
     "try-net-connect": "3.0.2",
-    "tsickle": "0.32.0",
+    "tsickle": "0.33.0",
     "typescript": "2.9.2",
     "uglifyify": "5.0.1",
     "vinyl-buffer": "1.0.1",
