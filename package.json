@@ -102,7 +102,7 @@
     "gulp-rename": "1.4.0",
     "gulp-sourcemaps": "2.6.4",
     "gulp-uglify": "3.0.1",
-    "gulp-watch": "5.0.0",
+    "gulp-watch": "5.0.1",
     "gulp-webserver": "0.9.1",
     "gulp-wrap": "0.14.0",
     "gzip-size": "5.0.0",
