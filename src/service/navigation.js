@@ -188,7 +188,7 @@ export class Navigation {
     }
     
     user().assert(
-        TAG, !target || VALID_TARGETS.includes(opt_target),
+        TAG, !opt_target || VALID_TARGETS.includes(opt_target),
         `Target '${opt_target}' not supported.`);
     
     // If we have a target of "_blank", we will want to open a new window. A target
