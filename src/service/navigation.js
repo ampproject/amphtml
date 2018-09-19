@@ -40,6 +40,7 @@ const TAG = 'navigation';
 const EVENT_TYPE_CLICK = 'click';
 /** @private @const {string} */
 const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
+const VALID_TARGETS = ['_self', '_blank'];
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -200,15 +201,10 @@ export class Navigation {
     }
 
     if (opt_target) {
-      // If a target is given
-      switch (opt_target) {
-        case '_self':
-        case '_blank':
-          win.top.open(url, opt_target);
-          break;
-        default:
-          user().error(TAG, `Target '${opt_target}' not supported.`);
-      }
+      user().assert(
+          TAG, VALID_TARGETS.includes(opt_target),
+          `Target '${opt_target}' not supported.`);
+      win.top.open(url, opt_target);
     } else {
       // Otherwise, perform normal behavior of navigating the top frame.
       win.top.location.href = url;
