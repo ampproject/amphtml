@@ -3149,13 +3149,17 @@ combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@2.15.1, commander@^2.11.0, commander@^2.15.1:
+commander@2.15.1, commander@^2.11.0:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
 
 commander@^2.14.1:
   version "2.16.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.16.0.tgz#f16390593996ceb4f3eeb020b31d78528f7f8a50"
+
+commander@^2.16.0:
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.18.0.tgz#2bf063ddee7c7891176981a2cc798e5754bc6970"
 
 commander@^2.9.0, commander@~2.12.1:
   version "2.12.2"
@@ -9081,13 +9085,13 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-markdown-link-check@3.6.2:
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.6.2.tgz#98c463cfdd563d3354d83642510033311f3a95f5"
+markdown-link-check@3.7.2:
+  version "3.7.2"
+  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.7.2.tgz#4e3485c22d2dc70c9cbe63258fc7e155a9e3c1c1"
   dependencies:
     async "^2.6.1"
     chalk "^2.4.1"
-    commander "^2.15.1"
+    commander "^2.16.0"
     link-check "^4.4.4"
     lodash "^4.17.10"
     markdown-link-extractor "^1.2.0"
