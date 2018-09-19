@@ -186,6 +186,17 @@ export class Navigation {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
       return;
     }
+    
+    user().assert(
+        TAG, !target || VALID_TARGETS.includes(opt_target),
+        `Target '${opt_target}' not supported.`);
+    
+    // If we have a target of "_blank", we will want to open a new window. A target
+    // of "_self" should behave like it would on an anchor tag and update the URL.
+    if (opt_target == '_blank') {
+      win.top.open(url, opt_target);
+      return;
+    }
 
     // If this redirect was requested by a feature that opted into A2A,
     // try to ask the viewer to navigate this AMP URL.
@@ -200,15 +211,8 @@ export class Navigation {
       }
     }
 
-    if (opt_target) {
-      user().assert(
-          TAG, VALID_TARGETS.includes(opt_target),
-          `Target '${opt_target}' not supported.`);
-      win.top.open(url, opt_target);
-    } else {
-      // Otherwise, perform normal behavior of navigating the top frame.
-      win.top.location.href = url;
-    }
+    // Otherwise, perform normal behavior of navigating the top frame.
+    win.top.location.href = url;
   }
 
   /**
