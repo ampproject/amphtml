@@ -715,7 +715,7 @@ export class MediaPool {
   }
 
 
-/**
+  /**
    * Pauses the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
    * @param {boolean=} rewindToBeginning Whether to rewind the currentTime

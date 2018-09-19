@@ -276,13 +276,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-      this.advancement_.stop();
-      this.stopListeningToVideoEvents_();
-      this.pauseAllMedia_(true /** rewindToBeginning */);
+    this.advancement_.stop();
+    this.stopListeningToVideoEvents_();
+    this.pauseAllMedia_(true /** rewindToBeginning */);
 
-      if (this.animationManager_) {
-        this.animationManager_.cancelAll();
-      }
+    if (this.animationManager_) {
+      this.animationManager_.cancelAll();
+    }
   }
 
 
