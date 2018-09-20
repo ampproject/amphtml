@@ -24,6 +24,7 @@ import {
 import {LayoutPriority} from '../../../../src/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '../../../../src/services';
+import {Transport} from '../transport';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
 import {
@@ -343,45 +344,21 @@ describes.realWin('amp-analytics', {
       },
     };
 
-    it('does not unnecessarily preload iframe transport script', function() {
+    it('initialize iframe transport', () => {
       const el = doc.createElement('amp-analytics');
       el.setAttribute('type', 'foo');
       doc.body.appendChild(el);
       const analytics = new AmpAnalytics(el);
-      sandbox.stub(analytics, 'assertAmpAdResourceId')
-          .callsFake(() => 'fakeId');
-      const preloadSpy = sandbox.spy(analytics, 'preload');
 
       sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
           .returns(Promise.resolve(sampleconfig));
 
       analytics.buildCallback();
       analytics.preconnectCallback();
+      const initSpy = sandbox.spy(
+          Transport.prototype, 'maybeInitIframeTransport');
       return analytics.layoutCallback().then(() => {
-        expect(preloadSpy).to.have.not.been.called;
-      });
-    });
-
-    it('preloads iframe transport script if relevant', function() {
-      const el = doc.createElement('amp-analytics');
-      el.setAttribute('type', 'foo');
-      doc.body.appendChild(el);
-      const analytics = new AmpAnalytics(el);
-      sandbox.stub(analytics, 'assertAmpAdResourceId')
-          .callsFake(() => 'fakeId');
-      const preloadSpy = sandbox.spy(analytics, 'preload');
-      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
-          .returns(Promise.resolve(Object.assign({}, sampleconfig, {
-            'transport': {
-              'iframe': 'http://example.com',
-            },
-          })));
-      analytics.buildCallback();
-      analytics.preconnectCallback();
-      return analytics.layoutCallback().then(() => {
-        expect(preloadSpy.withArgs(
-            'http://localhost:9876/dist/iframe-transport-client-lib.js',
-            'script')).to.be.calledOnce;
+        expect(initSpy).to.be.called;
       });
     });
   });
