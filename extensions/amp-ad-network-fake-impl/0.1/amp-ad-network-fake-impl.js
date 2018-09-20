@@ -32,7 +32,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     user().assert(this.element.hasAttribute('src'),
-      'Attribute src required for <amp-ad type="fake">: %s', this.element);
+        'Attribute src required for <amp-ad type="fake">: %s', this.element);
     setTimeout(() => {
       user().error('Hiiii');
       console.log('setTimeout called this');

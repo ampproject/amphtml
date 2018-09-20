@@ -25,10 +25,15 @@ import {
   isUserErrorMessage,
 } from './log';
 import {dict} from './utils/object';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
+import {
+  experimentTogglesOrNull,
+  getBinaryType,
+  isCanary,
+  isExperimentOn,
+} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
-import {isExperimentOn} from './experiments';
+
 import {
   isLoadErrorMessage,
 } from './event-helper';
@@ -313,7 +318,7 @@ function reportErrorToServer(message, filename, line, col, error) {
     return;
   }
   const data = getErrorReportData(message, filename, line, col, error,
-    hasNonAmpJs);
+      hasNonAmpJs);
   if (data) {
     // Report the error to viewer if it has the capability. The data passed
     // to the viewer is exactly the same as the data passed to the server
@@ -486,7 +491,7 @@ export function getErrorReportData(message, filename, line, col, error,
   data['rt'] = runtime;
 
   // Add our a4a id if we are inabox
-  if (runtime === "inabox") {
+  if (runtime === 'inabox') {
     data['a4aId'] = getMode().a4aId;
   }
 
@@ -557,7 +562,7 @@ export function getErrorReportData(message, filename, line, col, error,
   data['fr'] = self.location.originalHash || self.location.hash;
 
   pushLimit(accumulatedErrorMessages, message, 25);
-  
+
   return data;
 }
 
