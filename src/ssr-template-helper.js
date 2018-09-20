@@ -47,9 +47,6 @@ export class SsrTemplateHelper {
     /** @private @const */
     this.templates_ = templates;
 
-    /** @private @const {!XMLSerializer} */
-    this.xmls_ = new XMLSerializer();
-
     /** @private @const */
     this.sourceComponent_ = sourceComponent;
   }
@@ -87,10 +84,7 @@ export class SsrTemplateHelper {
     if (!opt_templates) {
       const template = this.templates_.maybeFindTemplate(element);
       if (template) {
-        // The document fragment can't be used in the message channel API thus
-        // serializeToString for a string representation of the dom tree.
-        mustacheTemplate = this.xmls_.serializeToString(
-            this.templates_.findTemplate(element));
+        mustacheTemplate = template.innerHTML;
       }
     }
     return this.viewer_.sendMessageAwaitResponse(
@@ -114,18 +108,19 @@ export class SsrTemplateHelper {
   buildPayload_(
     request, mustacheTemplate, opt_templates, opt_attributes = {}) {
     const ampComponent = dict({'type': this.sourceComponent_});
-    if ((opt_templates && opt_templates['successTemplate']) || mustacheTemplate) {
+    if ((opt_templates && opt_templates['successTemplate'])
+        || mustacheTemplate) {
       ampComponent['successTemplate'] = {
         'type': 'amp-mustache',
         'payload': (opt_templates && opt_templates['successTemplate'])
-          ? this.xmls_.serializeToString(opt_templates['successTemplate'])
+          ? opt_templates['successTemplate'].innerHTML
           : mustacheTemplate,
       };
     }
     if (opt_templates && opt_templates['errorTemplate']) {
       ampComponent['errorTemplate'] = {
         'type': 'amp-mustache',
-        'payload': this.xmls_.serializeToString(opt_templates['errorTemplate']),
+        'payload': opt_templates['errorTemplate'].innerHTML,
       };
     }
 
