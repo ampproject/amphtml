@@ -341,7 +341,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
     this.preload(getIframeTransportScriptUrl(this.getAmpDoc().win), 'script');
-    const ampAdResourceId = this.assertAmpAdResourceId();
+    const ampAdResourceId = this.isInabox_ ? '1' : this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
         this.getAmpDoc().win,

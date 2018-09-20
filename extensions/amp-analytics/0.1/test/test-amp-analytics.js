@@ -384,6 +384,31 @@ describes.realWin('amp-analytics', {
             'script')).to.be.calledOnce;
       });
     });
+
+    it('preloads iframe transport script with inabox', function() {
+      env.win.AMP_MODE.runtime = 'inabox';
+      const el = doc.createElement('amp-analytics');
+      el.setAttribute('type', 'foo');
+      doc.body.appendChild(el);
+      const analytics = new AmpAnalytics(el);
+      const assertAmpAdResourceIdSpy = sandbox.spy(
+          analytics, 'assertAmpAdResourceId');
+      const preloadSpy = sandbox.spy(analytics, 'preload');
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .returns(Promise.resolve(Object.assign({}, sampleconfig, {
+            'transport': {
+              'iframe': 'http://example.com',
+            },
+          })));
+      analytics.buildCallback();
+      analytics.preconnectCallback();
+      return analytics.layoutCallback().then(() => {
+        expect(preloadSpy.withArgs(
+            'http://localhost:9876/dist/iframe-transport-client-lib.js',
+            'script')).to.be.calledOnce;
+        assert(assertAmpAdResourceIdSpy.notCalled);
+      });
+    });
   });
 
   it('sends a basic hit', function() {
