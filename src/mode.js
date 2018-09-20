@@ -165,6 +165,11 @@ export function resetRtvVersionForTesting() {
  * @return {?string}
  */
 function getA4AId_(win) {
+
+  if (!win.document || !win.document.querySelector) {
+    return null;
+  }
+
   const a4aIdMetaTag = win.document
       .querySelector('head meta[name="amp4ads-id"]');
 
@@ -172,5 +177,5 @@ function getA4AId_(win) {
     return a4aIdMetaTag.getAttribute('content');
   }
 
-  return;
+  return null;
 }
