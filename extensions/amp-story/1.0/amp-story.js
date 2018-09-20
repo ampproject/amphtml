@@ -1317,7 +1317,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Reacts to sidebar state updates.
+   * Reacts to paused state updates.
    * @param {boolean} isPaused
    * @private
    */
@@ -1331,7 +1331,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Reacts to paused state updates.
+   * Reacts to sidebar state updates.
    * @param {boolean} sidebarState
    * @private
    */
