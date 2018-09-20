@@ -67,7 +67,7 @@ export class Transport {
   sendRequest(request) {
     if (this.options_['iframe']) {
       if (!this.iframeTransport_) {
-        user().error(TAG_, 'iframe transport was inadvertently deleted');
+        dev().error(TAG_, 'iframe transport was inadvertently deleted');
         return;
       }
       this.iframeTransport_.sendRequest(request);

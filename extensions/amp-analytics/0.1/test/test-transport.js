@@ -216,5 +216,20 @@ describes.realWin('amp-analytics.transport', {
       transport.deleteIframeTransport();
       expect(transport.iframeTransport_).to.be.null;
     });
+
+    it('send via iframe transport', () => {
+      setupStubs(true, true);
+      const transport = new Transport(win, {
+        beacon: true, xhrpost: true, image: true,
+        iframe: '//test',
+      });
+      const iframeTransportSendRequestSpy = sandbox.spy();
+      transport.iframeTransport_ = {
+        sendRequest: iframeTransportSendRequestSpy,
+      };
+      transport.sendRequest('test test');
+      assertCallCounts(0, 0, 0);
+      expect(iframeTransportSendRequestSpy).to.be.calledWith('test test');
+    });
   });
 });
