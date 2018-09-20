@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const config = describe.configure().ifNewChrome();
+const config = describe.configure().ifNewChrome().skipSinglePass();
 config.run('amp-carousel', function() {
   this.timeout(10000);
 
