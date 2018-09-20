@@ -48,6 +48,8 @@ const TAG = 'amp-video-iframe';
 const SANDBOX = [
   SandboxOptions.ALLOW_SCRIPTS,
   SandboxOptions.ALLOW_SAME_ORIGIN,
+  SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
+  SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
 /**
