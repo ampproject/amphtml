@@ -48,12 +48,12 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
   'triggers': {
     'trackPageview': {
       'on': 'visible',
-      'request': 'attention',
+      'request': 'conversion',
     },
     'trackAnchorClicks': {
       'on': 'click',
       'selector': 'a',
-      'request': 'attention',
+      'request': 'conversion',
     },
     'pageTimer': {
       'on': 'timer',
@@ -66,7 +66,7 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
           'on': 'hidden',
         },
       },
-      'request': 'attention',
+      'request': 'conversion',
     },
   },
   'transport': {
