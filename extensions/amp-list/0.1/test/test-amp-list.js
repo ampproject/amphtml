@@ -18,6 +18,7 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-list component', {
   amp: {
@@ -123,8 +124,8 @@ describes.realWin('amp-list component', {
     listMock.expects('measureElement').callsFake(m => m()).atLeast(1);
 
     // Hide loading/placeholder during render.
-    listMock.expects('toggleLoading').withExactArgs(false).once();
-    listMock.expects('togglePlaceholder').withExactArgs(false).once();
+    listMock.expects('toggleLoading').withExactArgs(false).atLeast(1);
+    listMock.expects('togglePlaceholder').withExactArgs(false).atLeast(1);
   }
 
   describe('without amp-bind', () => {
@@ -364,6 +365,48 @@ describes.realWin('amp-list component', {
       listMock.expects('toggleLoading').withExactArgs(false).once();
       listMock.expects('togglePlaceholder').never();
       return list.layoutCallback().catch(() => {});
+    });
+
+    describe('DOM diffing', () => {
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-list-diffing', true, true);
+      });
+
+      it('should keep unchanged elements', function*() {
+        const items = [{title: 'Title1'}];
+        const itemElement = doc.createElement('div');
+        const rendered = expectFetchAndRender(items, [itemElement]);
+        yield list.layoutCallback().then(() => rendered);
+
+        const newItems = [{title: 'Title2'}];
+        const newItemElement = doc.createElement('div');
+        templates.findAndRenderTemplateArray
+            .withArgs(element, newItems)
+            .returns(Promise.resolve([newItemElement]));
+        yield list.mutatedAttributesCallback({src: newItems});
+
+        expect(list.container_.contains(itemElement)).to.be.true;
+        expect(list.container_.contains(newItemElement)).to.be.false;
+      });
+
+      it('should use i-amphtml-key as a replacement key', function*() {
+        const items = [{title: 'Title1'}];
+        const itemElement = doc.createElement('div');
+        itemElement.setAttribute('i-amphtml-key', '1');
+        const rendered = expectFetchAndRender(items, [itemElement]);
+        yield list.layoutCallback().then(() => rendered);
+
+        const newItems = [{title: 'Title2'}];
+        const newItemElement = doc.createElement('div');
+        newItemElement.setAttribute('i-amphtml-key', '2');
+        templates.findAndRenderTemplateArray
+            .withArgs(element, newItems)
+            .returns(Promise.resolve([newItemElement]));
+        yield list.mutatedAttributesCallback({src: newItems});
+
+        expect(list.container_.contains(itemElement)).to.be.false;
+        expect(list.container_.contains(newItemElement)).to.be.true;
+      });
     });
 
     describe('SSR templates', () => {
