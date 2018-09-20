@@ -385,6 +385,7 @@ async function generateSnapshots(percy, webpages) {
     await snapshotWebpages(
         percy, pages, webpages.slice(i, i + NUM_PARALLEL_PAGES));
   }
+  log('travis', '\n');
 }
 
 /**
@@ -485,7 +486,6 @@ async function snapshotWebpages(percy, pages, webpages) {
     await percy.snapshot(name, page, snapshotOptions);
     log('travis', colors.cyan('●'));
   }
-  log('travis', '\n');
 }
 
 /**
