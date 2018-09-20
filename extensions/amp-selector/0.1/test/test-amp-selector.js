@@ -675,9 +675,11 @@ describes.realWin('amp-selector', {
       expect(impl.options_[0].hasAttribute('selected')).to.be.false;
       expect(impl.options_[3].hasAttribute('selected')).to.be.true;
 
+      expect(ampSelector.hasAttribute('aria-disabled')).to.be.false;
+
+      ampSelector.setAttribute('disabled', '');
       impl.mutatedAttributesCallback({disabled: true});
 
-      expect(ampSelector.hasAttribute('disabled')).to.be.true;
       expect(ampSelector.getAttribute('aria-disabled')).to.equal('true');
 
       impl.clickHandler_({target: impl.options_[0]});

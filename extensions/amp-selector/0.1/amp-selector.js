@@ -151,10 +151,8 @@ export class AmpSelector extends AMP.BaseElement {
     const disabled = mutations['disabled'];
     if (disabled !== undefined) {
       if (disabled) {
-        this.element.setAttribute('disabled', '');
         this.element.setAttribute('aria-disabled', 'true');
       } else {
-        this.element.removeAttribute('disabled');
         this.element.removeAttribute('aria-disabled');
       }
     }
