@@ -721,7 +721,12 @@ export class LayoutElement {
     dev().assert(this.isLayer());
     dev().assert(this.contains(child));
 
-    this.children_.push(child);
+    // Parents track the children, but not all children are aware of there
+    // parents. When a child finds its parent, it adds itself to the parent.
+    // This might lead to a double tracking.
+    if (this.children_.indexOf(child) === -1) {
+      this.children_.push(child);
+    }
   }
 
   /**
