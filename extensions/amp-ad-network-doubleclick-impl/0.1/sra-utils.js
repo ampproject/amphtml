@@ -313,7 +313,7 @@ function serializeItem_(key, value) {
  * @param {string} creative
  * @param {!Object<string,string>} headersObj
  * @param {boolean} done
- * @param {!Array<function(?../../../src/utils/xhr-utils.FetchResponse)>} sraRequestAdUrlResolvers
+ * @param {!Array<function(?Response)>} sraRequestAdUrlResolvers
  * @param {string} sraUrl url of SRA request for error reporting
  */
 export function sraBlockCallbackHandler(
@@ -337,7 +337,7 @@ export function sraBlockCallbackHandler(
   // Construct pseudo fetch response to be passed down the A4A
   // promise chain for this block.
   const headers =
-/** @type {?../../../src/utils/xhr-utils.FetchResponseHeaders} */
+/** @type {?Headers} */
 ({
   get: name => {
     // TODO(keithwrightbos) - fix upstream so response writes
@@ -351,7 +351,7 @@ export function sraBlockCallbackHandler(
   has: name => !!headersObj[name.toLowerCase()],
 });
   const fetchResponse =
-/** @type {?../../../src/utils/xhr-utils.FetchResponse} */
+/** @type {?Response} */
 ({
   headers,
   arrayBuffer: () => tryResolve(() => utf8Encode(creative)),

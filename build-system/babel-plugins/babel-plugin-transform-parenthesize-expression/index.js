@@ -14,5 +14,22 @@
  * limitations under the License.
  */
 
-describe.configure().skipSafari().skipEdge()
-    .run('amp-recaptcha-input', function() {});
+module.exports = function(babel) {
+  const {types: t} = babel;
+  return {
+    visitor: {
+      Expression: {
+        exit(path) {
+          const {node} = path;
+          const {parenthesized} = node.extra || {};
+          if (!parenthesized) {
+            return;
+          }
+
+          path.replaceWith(t.parenthesizedExpression(node));
+          path.skip();
+        },
+      },
+    },
+  };
+};

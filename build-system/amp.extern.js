@@ -370,6 +370,7 @@ data.bodyBackgroundColor;
 data.data.fontColor;
 data.width;
 data.sitekey;
+data.fortesting;
 
 // 3p code
 var twttr;

@@ -21,7 +21,9 @@ import {
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
 } from '../refresh-manager';
-import {RefreshIntersectionObserverWrapper} from '../refresh-intersection-observer-wrapper';
+import {
+  RefreshIntersectionObserverWrapper,
+} from '../refresh-intersection-observer-wrapper';
 import {Services} from '../../../../src/services';
 
 function getTestElement() {

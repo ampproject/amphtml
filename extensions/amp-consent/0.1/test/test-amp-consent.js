@@ -20,7 +20,6 @@ import {
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {computedStyle} from '../../../../src/style';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
@@ -262,13 +261,10 @@ describes.realWin('amp-consent', {
       });
     });
 
-    it('parse server response', function* () {
-      const parseSpy = sandbox.spy(ampConsent, 'isPromptRequired_');
+    it('read promptIfUnknown from server response', function* () {
       ampConsent.buildCallback();
       yield macroTask();
-      expect(parseSpy).to.be.calledWith('ABC', {
-        'promptIfUnknown': true,
-      });
+      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
     });
   });
 
@@ -305,7 +301,7 @@ describes.realWin('amp-consent', {
       expect(ampConsent.consentRequired_['ABC']).to.equal(false);
     });
 
-    it('promptIfUnknow override geo', function* () {
+    it('geo override promptIfUnknown', function* () {
       ISOCountryGroups = ['unknown'];
       consentElement = createConsentElement(doc, dict({
         'consents': {
@@ -319,41 +315,7 @@ describes.realWin('amp-consent', {
       ampConsent = new AmpConsent(consentElement);
       ampConsent.buildCallback();
       yield macroTask();
-      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
-    });
-
-    it('promptIfUnknow override geo with false value', function* () {
-      ISOCountryGroups = ['unknown'];
-      consentElement = createConsentElement(doc, dict({
-        'consents': {
-          'ABC': {
-            'checkConsentHref': 'https://response3',
-            'promptIfUnknownForGeoGroup': 'unknown',
-          },
-        },
-      }));
-      doc.body.appendChild(consentElement);
-      ampConsent = new AmpConsent(consentElement);
-      ampConsent.buildCallback();
-      yield macroTask();
       expect(ampConsent.consentRequired_['ABC']).to.equal(false);
-    });
-
-    it('checkConsentHref w/o promptIfUnknow not override geo', function* () {
-      ISOCountryGroups = ['testGroup'];
-      consentElement = createConsentElement(doc, dict({
-        'consents': {
-          'ABC': {
-            'checkConsentHref': 'https://response2',
-            'promptIfUnknownForGeoGroup': 'testGroup',
-          },
-        },
-      }));
-      doc.body.appendChild(consentElement);
-      ampConsent = new AmpConsent(consentElement);
-      ampConsent.buildCallback();
-      yield macroTask();
-      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
     });
   });
 
@@ -687,21 +649,16 @@ describes.realWin('amp-consent', {
         ampConsent.buildCallback();
         ampConsent.element.classList.remove('i-amphtml-notbuilt');
         expect(ampConsent.postPromptUI_).to.not.be.null;
-        expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
-            .to.equal('none');
-        expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
-            ['display']).to.equal('none');
+        expect(ampConsent.element).to.have.display('none');
+        expect(ampConsent.postPromptUI_).to.have.display('none');
         yield macroTask();
 
-        expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
-            .to.not.equal('none');
+        expect(ampConsent.element).to.not.have.display('none');
         expect(ampConsent.element.classList.contains('amp-active')).to.be.true;
         expect(ampConsent.element.classList.contains('amp-hidden')).to.be.false;
-        expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
-            ['display']).to.not.equal('none');
+        expect(ampConsent.postPromptUI_).to.not.have.display('none');
         ampConsent.scheduleDisplay_('ABC');
-        expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
-            ['display']).to.equal('none');
+        expect(ampConsent.postPromptUI_).to.have.display('none');
       });
 
       describe('hide/show postPromptUI', () => {
@@ -729,8 +686,7 @@ describes.realWin('amp-consent', {
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
-          expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
-              ['display']).to.equal('none');
+          expect(ampConsent.postPromptUI_).to.have.display('none');
         });
 
         it('show postPromptUI', function* () {
@@ -741,8 +697,7 @@ describes.realWin('amp-consent', {
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           yield macroTask();
-          expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
-              ['display']).to.not.equal('none');
+          expect(ampConsent.postPromptUI_).to.not.have.display('none');
         });
       });
     });

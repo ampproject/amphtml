@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {FetchResponse, assertSuccess, getViewerInterceptResponse, setupAMPCors, setupInit, setupInput, verifyAmpCORSHeaders} from './utils/xhr-utils';
 import {Services} from './services';
+import {
+  assertSuccess,
+  getViewerInterceptResponse,
+  setupAMPCors,
+  setupInit,
+  setupInput,
+  verifyAmpCORSHeaders,
+} from './utils/xhr-utils';
+import {dict} from './utils/object';
 import {user} from './log';
 
 /**
@@ -81,7 +89,12 @@ function xhrRequest(input, init) {
       // whole document loading to complete. This is fine for the use cases
       // we have now, but may need to be reimplemented later.
       if (xhr.readyState == /* COMPLETE */ 4) {
-        const response = new FetchResponse(xhr);
+        const options = {
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: parseHeaders(xhr.getAllResponseHeaders()),
+        };
+        const response = new Response('', /** @type {!ResponseInit} */ (options));
         const promise = assertSuccess(response)
             .then(response => ({response, xhr}));
         resolve(promise);
@@ -99,4 +112,25 @@ function xhrRequest(input, init) {
       xhr.send();
     }
   });
+}
+
+/**
+ * Parses XHR's response headers into JSONObject.
+ * @param {string} rawHeaders
+ * @return {!JsonObject}
+ */
+function parseHeaders(rawHeaders) {
+  const headers = dict({});
+  // Replace instances of \r\n and \n followed by at least one space or
+  // horizontal tab with a space.
+  const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
+  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+    const parts = line.split(':');
+    const key = parts.shift().trim();
+    if (key) {
+      const value = parts.join(':').trim();
+      headers[key] = value;
+    }
+  });
+  return headers;
 }

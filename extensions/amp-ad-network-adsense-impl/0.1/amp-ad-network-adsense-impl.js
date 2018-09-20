@@ -31,6 +31,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
+  SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
@@ -158,6 +159,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {number} slot index specific to google inventory */
     this.ifi_ = 0;
+
+    /**
+     * Whether or not the iframe containing the ad should be sandboxed via the
+     * "sandbox" attribute.
+     * @private {boolean}
+     */
+    this.shouldSandbox_ = false;
   }
 
   /**
@@ -402,6 +410,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   extractSize(responseHeaders) {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
+    this.shouldSandbox_ = responseHeaders.get(SANDBOX_HEADER) == 'true';
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -443,6 +452,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   isXhrAllowed() {
     return isCdnProxy(this.win) || getMode(this.win).localDev ||
         getMode(this.win).test;
+  }
+
+  /** @override */
+  sandboxHTMLCreativeFrame() {
+    return this.shouldSandbox_;
   }
 
   /** @override */
@@ -501,6 +515,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = null;
     this.qqid_ = null;
     this.isAmpCreative_ = null;
+    this.shouldSandbox_ = false;
     return superResult;
   }
 

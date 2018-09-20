@@ -545,8 +545,8 @@ chai.Assertion.addMethod('display', function(display) {
   const tagName = obj.tagName.toLowerCase();
   this.assert(
       value === display,
-      'expected element \'' + tagName + '\' to be #{exp}, got #{act}.',
-      'expected element \'' + tagName + '\' not to be #{act}.',
+      'expected element \'' + tagName + '\' to be display #{exp}, got #{act}.',
+      'expected element \'' + tagName + '\' not to be display #{act}.',
       display,
       value
   );

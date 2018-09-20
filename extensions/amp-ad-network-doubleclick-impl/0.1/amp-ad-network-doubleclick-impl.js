@@ -30,6 +30,7 @@ import {
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
+  SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -47,6 +48,10 @@ import {
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {
+  DUMMY_FLUID_SIZE,
+  getMultiSizeDimensions,
+} from '../../../ads/google/utils';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
@@ -68,7 +73,6 @@ import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   incrementLoadingAds,
@@ -77,7 +81,10 @@ import {
 } from '../../amp-ad/0.1/concurrent-load';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isCancellation} from '../../../src/error';
-import {isExperimentOn} from '../../../src/experiments';
+import {
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
@@ -86,7 +93,6 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -109,6 +115,15 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
+};
+
+/** @const {string} */
+const DOUBLECLICK_IDLE_BOOL_EXP = 'doubleclickIdleExp';
+
+/** @const @enum{string} */
+const DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES = {
+  CONTROL: '21062567',
+  EXP: '21062568',
 };
 
 /**
@@ -184,7 +199,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?../../../src/utils/xhr-utils.FetchResponse>} */
+    /** @protected {!Deferred<?Response>} */
     this.sraDeferred = new Deferred();
 
     /** @private {?RefreshManager} */
@@ -198,6 +213,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.isFluidRequest_ = false;
+
+    /**
+     * @private {boolean}
+     * Indicates that the primary size of the slot is fluid.
+     */
+    this.isFluidPrimaryRequest_ = false;
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = null;
@@ -246,6 +267,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * attempt to expand again when outside of the viewport.
      */
     this.reattemptToExpandFluidCreative_ = false;
+
+    /**
+     * Whether or not the iframe containing the ad should be sandboxed via the
+     * "sandbox" attribute.
+     * @private {boolean}
+     */
+    this.shouldSandbox_ = false;
   }
 
   /**
@@ -276,21 +304,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (vpRange === false) {
       return vpRange;
     }
+    const renderOutsideViewport = this.renderOutsideViewport();
+    // False will occur when throttle in effect.
+    if (this.experimentIds.includes(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES.EXP) &&
+      typeof renderOutsideViewport === 'boolean') {
+      return renderOutsideViewport;
+    }
     this.isIdleRender_ = true;
     // NOTE(keithwrightbos): handle race condition where previous
     // idleRenderOutsideViewport marked slot as idle render despite never
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource().whenWithinViewport(this.renderOutsideViewport()).then(
+    this.getResource().whenWithinViewport(renderOutsideViewport).then(
         () => this.isIdleRender_ = false);
     return vpRange;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluidRequest_ = layout == Layout.FLUID;
-    return this.isFluidRequest_ || isLayoutSizeDefined(layout);
+    this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
+    this.isFluidRequest_ = this.isFluidRequest_ || this.isFluidPrimaryRequest_;
+    return this.isFluidPrimaryRequest_ || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -320,6 +355,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               'meta[name=amp-ad-doubleclick-sra]'),
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
+        },
+        [DOUBLECLICK_IDLE_BOOL_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.keys(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES).map(
+              key => DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES[key]),
         },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -375,6 +415,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');
+    if (!this.isFluidRequest_) {
+      const multiSizeStr = this.element.getAttribute('data-multi-size');
+      this.isFluidRequest_ = !!multiSizeStr &&
+          multiSizeStr.indexOf('fluid') != -1;
+    }
   }
 
   /** @override */
@@ -452,7 +497,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = this.isFluidRequest_ ? {width: 0, height: 0} :
+    this.initialSize_ = this.isFluidPrimaryRequest_ ? {width: 0, height: 0} :
       (width && height ?
         // width/height could be 'auto' in which case we fallback to measured.
         {width, height} : this.getIntersectionElementLayoutBox());
@@ -460,8 +505,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey = this.generateAdKey_(
         `${this.initialSize_.width}x${this.initialSize_.height}`);
-    this.parameterSize = this.isFluidRequest_ ?
-      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
+    this.parameterSize = this.isFluidPrimaryRequest_
+      ? DUMMY_FLUID_SIZE
+      : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
       if (this.element.getAttribute('layout') == 'responsive') {
@@ -481,7 +527,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.initialSize_.width,
           this.initialSize_.height,
           multiSizeValidation == 'true',
-          this.isFluidRequest_);
+          this.isFluidPrimaryRequest_);
       if (dimensions.length) {
         this.parameterSize += '|' + dimensions
             .map(dimension => dimension.join('x'))
@@ -695,10 +741,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   extractSize(responseHeaders) {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
+    this.shouldSandbox_ = responseHeaders.get(SANDBOX_HEADER) == 'true';
     this.troubleshootData_.creativeId =
-        responseHeaders.get('google-creative-id');
+        dev().assertString(responseHeaders.get('google-creative-id') || '-1');
     this.troubleshootData_.lineItemId =
-        responseHeaders.get('google-lineitem-id');
+        dev().assertString(responseHeaders.get('google-lineitem-id') || '-1');
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -724,10 +771,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (responseHeaders.get('amp-ff-pageview-tokens')) {
       this.removePageviewStateToken();
       this.setPageviewStateToken(
-          responseHeaders.get('amp-ff-pageview-tokens'));
+          dev().assertString(responseHeaders.get('amp-ff-pageview-tokens')));
     }
 
     return size;
+  }
+
+  /** @override */
+  sandboxHTMLCreativeFrame() {
+    return this.shouldSandbox_;
   }
 
   /**
@@ -767,6 +819,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     sraRequests = null;
     this.sraDeferred = null;
     this.qqid_ = null;
+    this.shouldSandbox_ = false;
     this.consentState = null;
     this.getAdUrlDeferred = new Deferred();
     this.removePageviewStateToken();
