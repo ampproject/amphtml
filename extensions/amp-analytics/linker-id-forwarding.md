@@ -3,7 +3,7 @@
 
 Each linker will have an associated configuration object. `amp-analytics` uses this configuration to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page then can read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
 
-This document is intended to outline the configuration options will determine in which contexts the linker parameter will be appending to outgoing links. The structure of the configuration object is illustrated below.
+This document outlines the configuration options that will determine in which contexts the linker parameter will append to outgoing links. The structure of the configuration object is illustrated below.
 
 
 #### Format
@@ -18,16 +18,16 @@ This document is intended to outline the configuration options will determine in
 }
 ```
 
-- `paramName` - This user defined name determines the name of the query parameter to be appended to the links.
-- `ids` - An object containing key-value pairs that will be partially encoded and passed along in the param.
+- `paramName` - This user defined name determines the name of the query parameter appended to the links.
+- `ids` - An object containing key-value pairs that is partially encoded and passed along in the param.
 - `proxyOnly` - (optional) Flag indicating whether the links should only be appended on pages served on a proxy origin. Defaults to `true`.
 - `destinationDomains` - (optional) Links will be decorated if their domains are included in this array. Defaults to [`canonical`](https://github.com/ampproject/amphtml/blob/3b0feadab3b9b12ddb80edc9a30f959087134905/spec/amp-html-format.md#canon) and `source` domains.
 - `enabled` - Publishers must explicity set this to `true` to opt-in to using this feature.
 
-This linker will then use this configuration to generate a string in this structure: `<paramName>=<version>*<checkSum>*<idName1>*<idValue1>*<idName2>*<idValue2>...` For more details see [Linker Param Format](./linker-id-receiving.md#Format)
+This linker uses this configuration to generate a string in this structure: `<paramName>=<version>*<checkSum>*<idName1>*<idValue1>*<idName2>*<idValue2>...` For more details see [Linker Param Format](./linker-id-receiving.md#Format)
 
 #### Turning it on
-The most common use case will simply be enabling this feature for an analytics provider that is already supporting linkers. To do this you will add the `linkers` configuration object and the `enabled: true` entry to your already existing analytics tag.
+The most common use case is simply enabling this feature for an analytics provider that is already supporting linkers. To do this you will add the `linkers` configuration object and the `enabled: true` entry to your already existing analytics tag.
 
 ```html
 <amp-analytics type=foo-analytics>
@@ -43,7 +43,8 @@ The most common use case will simply be enabling this feature for an analytics p
 ```
 
 #### Advanced
-Sometimes you may want more granular control. For example you may have a config that looks like this:
+An example of a config that grants more granular control may look like the example below:
+
 ```javascript
 "linkers": {
   "linker1" : {
@@ -56,11 +57,11 @@ Sometimes you may want more granular control. For example you may have a config 
   }
 }
 ```
-In this example configuration the parameter would be appendend to any outgoing links matching the `source` or `canonical` domains. This is because the `destinationDomains` entry has been omitted and this is the default behavior. You can see that `proxyOnly` has been set to `false`. This overrides the default behavior and indicates that the linker should manage outgoing links in all contexts that this amp page might be served in. Finally we have set `enabled` to be `true`. This is necessary to tell the runtime that we would like to enable this linker configuration.
+In this example configuration, the parameter would be appendend to any outgoing links matching the `source` or `canonical` domains. This is because the `destinationDomains` entry has been omitted and this is the default behavior. The example has `proxyOnly` set to `false`, this overrides the default behavior and indicates that the linker should manage outgoing links in all contexts this amp page might be served in. Finally, we have set `enabled` to be `true`. This is necessary to tell the runtime that we would like to enable this linker configuration.
 
 #### Destination Domain Matching
 
-Lets say there is a linker configured on a page being served at the URL  `https://www-amp-example-com.cdn.ampproject.org/v/s/www.amp.example.com/amp/cool/story`. The canonical url is given as `https://www.example.com/cool/story` from the html on the page. (`<link rel="canonical" href="https://www.example.com/cool/story">`)
+If there is a linker configured on a page being served at the URL  `https://www-amp-example-com.cdn.ampproject.org/v/s/www.amp.example.com/amp/cool/story`, the canonical url is given as `https://www.example.com/cool/story` from the html on the page. (`<link rel="canonical" href="https://www.example.com/cool/story">`)
 
 On this example page there could be several outlinks. We will assume that the `destinationDomains` entry has been omitted, and therefore the linker will fallback to the default behavior. The table below shows some of the cases in which the linker would append the param.
 
@@ -71,10 +72,10 @@ URL | Matches | Notes
 `https://www.foo.example.com/bar` | no | not the same hostname
 `https://www.google.com` | no | different domain
 
-Remember that this is just the default behavior if no `destinationDomains` array is specified. You may always add additional domains to match in this array.
+Note that this is the default behavior when the `destinationDomains` array is not specified. You may always add additional domains to match in this array.
 
 #### Configuration Inheritance
-As outlined above some items in the configuration objects will have default values. Additionally, you may override these values at the `amp-analytics` element level to suit your use case. Then values will then be merged where the more specific configuration will take precedence over their parents. Keep in mind these defaults are set only for the `linkers` object in which they are defined. If you have multiple `amp-analytics` elements on your page you will need to set the configuration for each top level linkers object you wish to enable.
+Some items in the configuration objects have default values. However, you may override these values at the `amp-analytics` element level to suit your use case. The values will be merged and the more specific configuration will take precedence over their parents. Keep in mind these defaults are set only for the `linkers` object in which they are defined. If you have multiple `amp-analytics` elements on your page you will need to set the configuration for each top level linkers object you wish to enable.
 
 Example:
 ```javascript
@@ -94,4 +95,4 @@ Example:
 }
 ```
 
-In this example `linker2` would be appended only on the proxy, while `linker1` would be shown in all contexts as defined in the parent config.
+In the above example `linker2` would be appended only on the proxy, while `linker1` would be shown in all contexts as defined in the parent config.
