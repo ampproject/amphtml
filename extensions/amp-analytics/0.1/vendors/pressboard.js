@@ -29,9 +29,9 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://adserver.pressboard.ca',
     'common_params': '&amp=1&url=${canonicalUrl}' +
-      '&uid=${clientId(_pressboardmedia)}' +
       '&referrer=${documentReferrer}' +
       '&rand=${random}' +
+      '&uid=${clientId(_pressboardmedia)}' +
       '&mid=${mediaId}&cid=${campaignId}&sid=${storyRequestId}' +
       '&geoid=${geoNameId}&cn=${country}&rg=${region}&ct=${city}' +
       '&dbi=${dbInstance}&tz=${timeZoneOffset}',

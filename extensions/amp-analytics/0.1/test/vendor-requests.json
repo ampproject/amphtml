@@ -123,8 +123,8 @@
   "pressboard": {
     "host": "https://adserver.pressboard.ca",
     "common_params": "&amp=1&url=_canonical_url_&referrer=_document_referrer_&rand=_random_&uid=_client_id_&mid=$mediaId&cid=$campaignId&sid=$storyRequestId&geoid=$geoNameId&cn=$country&rg=$region&ct=$city&dbi=$dbInstance&tz=$timeZoneOffset",
-    "conversion_params": "&asurl=_source_url_&asw=_scroll_width_&ash=_scroll_height&asnw=_screen_width_&asnh=_screen_height_&aasnw=_available_screen_width&aasnh=_available_screen_height&asl=_scroll_left_&ast=_scroll_top_",
-    "conversion": "https://adserver.pressboard.ca/track/attention-amp?&amp=1&url=_canonical_url_&referrer=_document_referrer_&rand=_random_&uid=_client_id_&mid=$mediaId&cid=$campaignId&sid=$storyRequestId&geoid=$geoNameId&cn=$country&rg=$region&ct=$city&dbi=$dbInstance&tz=$timeZoneOffset&asurl=_source_url_&asw=_scroll_width_&ash=_scroll_height&asnw=_screen_width_&asnh=_screen_height_&aasnw=_available_screen_width&aasnh=_available_screen_height&asl=_scroll_left_&ast=_scroll_top_"
+    "conversion_params": "&asurl=_source_url_&asw=_scroll_width_&ash=_scroll_height_&asnw=_screen_width_&asnh=_screen_height_&aasnw=_available_screen_width_&aasnh=_available_screen_height_&asl=_scroll_left_&ast=_scroll_top_",
+    "conversion": "https://adserver.pressboard.ca/track/attention-amp?&amp=1&url=_canonical_url_&referrer=_document_referrer_&rand=_random_&uid=_client_id_&mid=$mediaId&cid=$campaignId&sid=$storyRequestId&geoid=$geoNameId&cn=$country&rg=$region&ct=$city&dbi=$dbInstance&tz=$timeZoneOffset&asurl=_source_url_&asw=_scroll_width_&ash=_scroll_height_&asnw=_screen_width_&asnh=_screen_height_&aasnw=_available_screen_width_&aasnh=_available_screen_height_&asl=_scroll_left_&ast=_scroll_top_"
   },
   "lotame": {
     "pageview": "https://bcp.crwdcntrl.net/amp?c=$account&pv=y"
