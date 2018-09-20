@@ -226,11 +226,18 @@ const PURIFY_CONFIG = {
 };
 
 /**
+ * Monotonically increasing counter used for keying nodes.
+ * @private {number}
+ */
+let KEY_COUNTER = 0;
+
+/**
  * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
+ * @param {boolean=} diffing
  * @return {!Node}
  */
-export function purifyHtml(dirty) {
+export function purifyHtml(dirty, diffing = false) {
   const config = Object.assign({}, PURIFY_CONFIG, {
     'ADD_ATTR': WHITELISTED_ATTRS,
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
@@ -248,6 +255,15 @@ export function purifyHtml(dirty) {
   let allowedAttributes;
   const allowedAttributesChanges = [];
 
+  // Disables DOM diffing for a given node and allows it to be replaced.
+  const disableDiffingFor = node => {
+    const key = 'i-amphtml-key';
+    if (diffing && !node.hasAttribute(key)) {
+      // set-dom uses node attribute keys for opting out of diffing.
+      node.setAttribute(key, KEY_COUNTER++);
+    }
+  };
+
   /**
    * @param {!Node} node
    * @param {{tagName: string, allowedTags: !Object<string, boolean>}} data
@@ -260,6 +276,8 @@ export function purifyHtml(dirty) {
     // calculation is not possible).
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
+      // AMP elements don't support arbitrary mutation, so don't DOM diff them.
+      disableDiffingFor(node);
     }
     // Set `target` attribute for <a> tags if necessary.
     if (tagName === 'a') {
@@ -355,6 +373,10 @@ export function purifyHtml(dirty) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
+      // Don't DOM diff nodes with bindings because amp-bind scans newly
+      // rendered elements and discards _all_ old elements _before_ diffing, so
+      // preserving some old elements would cause loss of functionality.
+      disableDiffingFor(node);
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
