@@ -345,17 +345,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win, 'expDfpInvOrigDeprecated')) {
       this.experimentIds.push('21060933');
     }
+    let forcedExperimentId;
     if (urlExperimentId) {
-      const experimentId = {
+      forcedExperimentId = {
         // SRA
         '7': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_CONTROL,
         '8': DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
 
       }[urlExperimentId];
-      if (experimentId) {
-        this.experimentIds.push(experimentId);
-        return;
+      if (forcedExperimentId) {
+        this.experimentIds.push(forcedExperimentId);
       }
     }
     const experimentInfoMap =
@@ -364,10 +364,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // Only select into SRA experiments if SRA not already explicitly
         // enabled and refresh is not being used by any slot.
         [DOUBLECLICK_SRA_EXP]: {
-          isTrafficEligible: () => !this.win.document./*OK*/querySelector(
-              'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'),
+          isTrafficEligible: () => !forcedExperimentId &&
+              !this.win.document./*OK*/querySelector(
+                  'meta[name=amp-ad-enable-refresh], ' +
+                  'amp-ad[type=doubleclick][data-enable-refresh], ' +
+                  'meta[name=amp-ad-doubleclick-sra]'),
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
         },
