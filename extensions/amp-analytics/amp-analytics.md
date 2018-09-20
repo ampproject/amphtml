@@ -687,11 +687,11 @@ Referrer policy is only available for `image` transport. If `referrerPolicy: no-
 
 #### Linkers
 
-The `linkers` feature used to enable cross domain ID syncing. `amp-analytics` will use a configuration object to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page then can read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
+The `linkers` feature is used to enable cross domain ID syncing. `amp-analytics` will use a [configuration object](./linker-id-forwarding.md#format) to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page will read the linker string from the URL param and perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
 
-For more information on setting up your linker configuration please see [Linker ID Forwarding](./linker-id-forwarding.md)
+Detials on setting up your linker configuration are outlined in [Linker ID Forwarding](./linker-id-forwarding.md)
 
-For information on how this parameter is created, and/or if you are looking to ingest this parameter please see [Linker ID Receiving](./linker-id-receiving.md)
+If you need to ingest this paramter, information on how this parameter is created is illistrated in [Linker ID Receiving](./linker-id-receiving.md).
 
 ## Validation
 
