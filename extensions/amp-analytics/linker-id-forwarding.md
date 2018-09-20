@@ -74,7 +74,7 @@ URL | Matches | Notes
 
 Note that this is the default behavior when the `destinationDomains` array is not specified. You may always add additional domains to match in this array.
 
-#### Configuration Inheritance
+#### Default configuration
 Some items in the configuration objects have default values. However, you may override these values at the `amp-analytics` element level to suit your use case. The values will be merged and the more specific configuration will take precedence over their parents. Keep in mind these defaults are set only for the `linkers` object in which they are defined. If you have multiple `amp-analytics` elements on your page you will need to set the configuration for each top level linkers object you wish to enable.
 
 Example:
