@@ -529,9 +529,9 @@ export class AmpForm {
               dev().assertString(this.xhrAction_), this.method_);
           request.fetchOpt = setupInit(request.fetchOpt);
           request.fetchOpt = setupAMPCors(
-            this.win_, request.xhrUrl, request.fetchOpt);
+              this.win_, request.xhrUrl, request.fetchOpt);
           request.xhrUrl = setupInput(
-            this.win_, request.xhrUrl, request.fetchOpt);
+              this.win_, request.xhrUrl, request.fetchOpt);
           return this.ssrTemplateHelper_.fetchAndRenderTemplate(
               this.form_,
               request,

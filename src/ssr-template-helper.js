@@ -84,7 +84,7 @@ export class SsrTemplateHelper {
     if (!opt_templates) {
       const template = this.templates_.maybeFindTemplate(element);
       if (template) {
-        mustacheTemplate = template.innerHTML;
+        mustacheTemplate = template./*REVIEW*/innerHTML;
       }
     }
     return this.viewer_.sendMessageAwaitResponse(
@@ -113,14 +113,14 @@ export class SsrTemplateHelper {
       ampComponent['successTemplate'] = {
         'type': 'amp-mustache',
         'payload': (opt_templates && opt_templates['successTemplate'])
-          ? opt_templates['successTemplate'].innerHTML
+          ? opt_templates['successTemplate']./*REVIEW*/innerHTML
           : mustacheTemplate,
       };
     }
     if (opt_templates && opt_templates['errorTemplate']) {
       ampComponent['errorTemplate'] = {
         'type': 'amp-mustache',
-        'payload': opt_templates['errorTemplate'].innerHTML,
+        'payload': opt_templates['errorTemplate']./*REVIEW*/innerHTML,
       };
     }
 
