@@ -139,6 +139,11 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.layoutCompleted_ = true;
+    // If a placeholder exists and it's taller than amp-list, attempt a resize.
+    const placeholder = this.getPlaceholder();
+    if (placeholder) {
+      this.attemptToFit_(placeholder);
+    }
     return this.fetchList_();
   }
 
@@ -431,7 +436,6 @@ export class AmpList extends AMP.BaseElement {
    */
   render_(elements) {
     dev().info(TAG, 'render:', elements);
-    const autoResize = this.element.hasAttribute('auto-resize');
     const container = dev().assertElement(this.container_);
 
     this.mutateElement(() => {
@@ -457,26 +461,48 @@ export class AmpList extends AMP.BaseElement {
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
 
-      // Change height if needed.
-      this.measureElement(() => {
-        const scrollHeight = this.container_./*OK*/scrollHeight;
-        const height = this.element./*OK*/offsetHeight;
-        if (scrollHeight > height) {
-          if (autoResize) {
-            const layout = this.element.getAttribute('layout');
-            if (layout == Layout.FLEX_ITEM) {
-              // TODO (#17824): flex item + reset-on-refresh will add
-              // an invisible loader that fills the amp-list and shoves all
-              // list items out of the amp-list.
-              this.attemptChangeHeight(scrollHeight).catch(() => {});
-            } else if (layout !== Layout.CONTAINER) {
-              this.changeToLayoutContainer_(layout);
-            }
-          } else {
-            this.attemptChangeHeight(scrollHeight).catch(() => {});
+      // Attempt to resize to fit new rendered contents.
+      this.attemptToFit_(this.container_, () => {
+        // If auto-resize is set, then change to container layout instead of
+        // changing height (with one exception).
+        if (this.element.hasAttribute('auto-resize')) {
+          const layout = this.element.getAttribute('layout');
+          if (layout == Layout.FLEX_ITEM) {
+            // TODO(cathyxz, #17824): Flex-item + reset-on-refresh will add
+            // an invisible loader that fills the amp-list and shoves all
+            // list items out of the amp-list.
+            return true;
+          } else if (layout !== Layout.CONTAINER) {
+            this.changeToLayoutContainer_(layout);
           }
+          return false;
         }
+        return true;
       });
+    });
+  }
+
+  /**
+   * Attempts to change the height of the amp-list to fit a target child.
+   *
+   * If the target's height is greater than the amp-list's height, and
+   * opt_decider returns truthy (or is not provided), then attempt to change the
+   * amp-list's height to fit the target.
+   *
+   * @param {!Element} target
+   * @param {function():boolean=} opt_decider
+   * @private
+   */
+  attemptToFit_(target, opt_decider) {
+    this.measureElement(() => {
+      const scrollHeight = target./*OK*/scrollHeight;
+      const height = this.element./*OK*/offsetHeight;
+      if (scrollHeight > height) {
+        const shouldResize = !opt_decider || opt_decider();
+        if (shouldResize) {
+          this.attemptChangeHeight(scrollHeight).catch(() => {});
+        }
+      }
     });
   }
 
@@ -506,7 +532,7 @@ export class AmpList extends AMP.BaseElement {
         this.element.classList.remove('i-amphtml-layout-intrinsic');
         break;
     }
-    // The changeSize call removes the sizer element
+    // The changeSize() call removes the sizer element.
     this.element./*OK*/changeSize();
     this.element.classList.remove('i-amphtml-layout-size-defined');
   }
