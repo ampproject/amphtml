@@ -37,7 +37,7 @@
     "@babel/helper-plugin-test-runner": "7.0.0-beta.54",
     "@percy/puppeteer": "0.3.3",
     "acorn-globals": "4.1.0",
-    "ajv": "6.5.2",
+    "ajv": "6.5.3",
     "ajv-keywords": "3.2.0",
     "ansi-colors": "3.0.5",
     "ast-replace": "1.1.3",
