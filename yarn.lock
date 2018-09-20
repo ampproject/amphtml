@@ -371,12 +371,12 @@
     pretty-ms "^0.2.1"
     text-table "^0.2.0"
 
-"@percy/puppeteer@0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-0.3.3.tgz#60cf6a075f7c657d5be08fb05cf8ce73f4174d4b"
+"@percy/puppeteer@0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-0.4.0.tgz#c8e6c802d11767e0d816bc2747af7123674df9dc"
   dependencies:
     mime-types "^2.1.17"
-    percy-client "^2.6.0"
+    percy-client "^3.0.0"
     walk "^2.3.9"
 
 "@samverschueren/stream-to-observable@^0.3.0":
@@ -10205,9 +10205,9 @@ pend@~1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/pend/-/pend-1.2.0.tgz#7a57eb550a6783f9115331fcf4663d5c8e007a50"
 
-percy-client@^2.6.0:
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/percy-client/-/percy-client-2.10.0.tgz#9e70e5c51dc32721ea72fd35efe4b18657e897a6"
+percy-client@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/percy-client/-/percy-client-3.0.0.tgz#86289f8224817cf550c9b21aaf994b7fa16f291d"
   dependencies:
     base64-js "^1.2.3"
     bluebird "^3.5.1"
