@@ -52,7 +52,7 @@
     "babel-preset-env": "1.7.0",
     "babelify": "8.0.0",
     "baconipsum": "0.1.2",
-    "bluebird": "3.5.1",
+    "bluebird": "3.5.2",
     "body-parser": "1.18.3",
     "browserify": "16.2.2",
     "bundlesize": "0.17.0",
