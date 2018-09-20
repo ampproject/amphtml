@@ -114,15 +114,15 @@ export class SsrTemplateHelper {
   buildPayload_(
     request, mustacheTemplate, opt_templates, opt_attributes = {}) {
     const ampComponent = dict({'type': this.sourceComponent_});
-    if (opt_templates['successTemplate'] || mustacheTemplate) {
+    if ((opt_templates && opt_templates['successTemplate']) || mustacheTemplate) {
       ampComponent['successTemplate'] = {
         'type': 'amp-mustache',
-        'payload': opt_templates['successTemplate']
+        'payload': (opt_templates && opt_templates['successTemplate'])
           ? this.xmls_.serializeToString(opt_templates['successTemplate'])
           : mustacheTemplate,
       };
     }
-    if (opt_templates['errorTemplate']) {
+    if (opt_templates && opt_templates['errorTemplate']) {
       ampComponent['errorTemplate'] = {
         'type': 'amp-mustache',
         'payload': this.xmls_.serializeToString(opt_templates['errorTemplate']),
