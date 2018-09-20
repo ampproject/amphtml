@@ -63,6 +63,7 @@
       <option>facebook-pixel</option>
       <option>gemius</option>
       <option>googleanalytics</option>
+      <option>pressboard</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
       <option>iplabel</option>
@@ -573,6 +574,25 @@ For complete documentation and additional examples please see: https://marketing
   "extraUrlParams": {
     "user.status": "developer",
     "page.keywords": "amp, mobile, examples"
+  }
+}
+</script>
+</amp-analytics>
+
+<!-- Pressboard tracking. Ensure you replace &media value with a valid media-id, and &ref value with an html-encoded URL of a pressboard sponsored story related to the used media-id -->
+<amp-analytics type="pressboard" id="pressboard" config="https://adserver.pressboard.ca/amp/config?media=5&ref=http%3A%2F%2Fwww.pressboardmedia.com%2Fnative-advertising-advice-from-the-co-founder-of-stackadapt%2F">
+<script type="application/json">
+{
+  "vars": {
+    "mediaId": "",
+    "campaignId": "",
+    "storyRequestId": "",
+    "geoNameId": "",
+    "country": "",
+    "region": "",
+    "city": "",
+    "dbInstance": "",
+    "timeZoneOffset": ""
   }
 }
 </script>
