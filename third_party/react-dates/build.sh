@@ -9,5 +9,7 @@
 ./third_party/react-dates/index.js | \
 node ./build-system/scope-require.js | \
 ./node_modules/.bin/derequire > ./third_party/react-dates/bundle.js
+# This is to temporary get around a closure bug where it does not see modules
+# that have no exports for single pass compilation.
 echo "\nexports.erwinmHack=1;" >> ./third_party/react-dates/bundle.js
 cp ./node_modules/react-dates/lib/css/_datepicker.css ./third_party/react-dates/

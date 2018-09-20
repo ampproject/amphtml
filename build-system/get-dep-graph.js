@@ -296,7 +296,7 @@ exports.getGraph = function(entryModules, config) {
     graph.sorted = Array.from(topo.sort().keys()).reverse();
 
     setupBundles(graph);
-    transform(graph);
+    transformPathsToTempDir(graph);
     resolve(graph);
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
@@ -363,7 +363,13 @@ function setupBundles(graph) {
   });
 }
 
-function transform(graph) {
+/**
+ * Takes all of the nodes in the dependency graph and transfers them
+ * to a temporary directory where we can run babel transformations.
+ *
+ * @param {!Object} graph
+ */
+function transformPathsToTempDir(graph) {
   console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
