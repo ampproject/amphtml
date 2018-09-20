@@ -720,12 +720,10 @@ export class MediaPool {
    * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
    * @param {boolean=} rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
-   * @param {boolean=} desktopState Whether to rewind the currentTime
-   *     of media items to the beginning.
    * @return {!Promise} A promise that is resolved when the specified media
    *     element has been successfully paused.
    */
-  pause(domMediaEl, rewindToBeginning = false, desktopState = false) {
+  pause(domMediaEl, rewindToBeginning = false) {
     const mediaType = this.getMediaType_(domMediaEl);
     const poolMediaEl =
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
@@ -737,17 +735,9 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
         .then(() => {
           if (rewindToBeginning) {
-            if (desktopState) {
-              this.timer_.delay(() => {
-                this.enqueueMediaElementTask_(
-                    /** @type {!HTMLMediaElement} */ (poolMediaEl),
-                    new RewindTask());
-              }, 300);
-            } else {
-              this.enqueueMediaElementTask_(
-                  /** @type {!HTMLMediaElement} */ (poolMediaEl),
-                  new RewindTask());
-            }
+            this.enqueueMediaElementTask_(
+                /** @type {!HTMLMediaElement} */ (poolMediaEl),
+                new RewindTask());
           }
         });
   }

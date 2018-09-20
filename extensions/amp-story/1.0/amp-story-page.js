@@ -26,6 +26,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
@@ -141,6 +142,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win);
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
@@ -280,7 +284,17 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.stop();
 
     this.stopListeningToVideoEvents_();
-    this.pauseAllMedia_(true /** rewindToBeginning */);
+    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
+
+      // The rewinding is delayed on desktop so that it happens at a lower
+      // opacity instead of immediately jumping to the first frame. See #17985.
+      this.pauseAllMedia_(false /** rewindToBeginning */);
+      this.timer_.delay(() => {
+        this.rewindAllMedia_();
+      }, 300);
+    } else {
+      this.pauseAllMedia_(true /** rewindToBeginning */);
+    }
 
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
@@ -461,8 +475,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.pause();
       } else {
         return mediaPool.pause(
-            /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning,
-            this.storeService_.get(StateProperty.DESKTOP_STATE));
+            /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
       }
     });
   }
@@ -547,6 +560,21 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Rewinds all media on this page.
+   * @return {!Promise} Promise that resolves after the callbacks are called.
+   * @private
+   */
+  rewindAllMedia_() {
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      if (this.isBotUserAgent_) {
+        mediaEl.rewindToBeginning();
+      } else {
+        return mediaPool.rewindToBeginning(
+            /** @type {!HTMLMediaElement} */ (mediaEl));
+      }
+    });
+  }
 
   /**
    * Starts playing animations, if the animation manager is available.
