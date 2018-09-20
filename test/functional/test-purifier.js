@@ -25,10 +25,11 @@ import {
 /**
  * Helper that serializes output of purifyHtml() to string.
  * @param {string} html
+ * @param {boolean=} diffing
  * @return {string}
  */
-function purify(html) {
-  const body = purifyHtml(html);
+function purify(html, diffing = false) {
+  const body = purifyHtml(html, diffing);
   return body.innerHTML;
 }
 
@@ -404,6 +405,20 @@ function runSanitizerTests() {
     it('should allow <amp-lightbox> attributes', () => {
       expect(purify('<amp-lightbox scrollable></amp-lightbox>'))
           .to.equal('<amp-lightbox scrollable=""></amp-lightbox>');
+    });
+
+    it('should output "i-amphtml-key" attribute if diffing is enabled', () => {
+      // Elements with bindings should have i-amphtml-key="<number>".
+      expect(purify('<p [x]="y"></p>', true)).to.match(
+          /<p data-amp-bind-x="y" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>/);
+      // AMP elements should have i-amphtml-key="<number>".
+      expect(purify('<amp-img></amp-img>', true)).to.match(
+          /<amp-img i-amphtml-key="(\d+)"><\/amp-img>/);
+      // AMP elements with bindings should have i-amphtml-key="<number>".
+      expect(purify('<amp-img [x]="y"></amp-img>', true)).to.match(
+          /<amp-img i-amphtml-key="(\d+)" data-amp-bind-x="y" i-amphtml-binding=""><\/amp-img>/);
+      // Other elements should NOT have i-amphtml-key-set.
+      expect(purify('<p></p>')).to.equal('<p></p>');
     });
   });
 
