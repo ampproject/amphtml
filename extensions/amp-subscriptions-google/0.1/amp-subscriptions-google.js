@@ -106,6 +106,9 @@ export class GoogleSubscriptionsPlatform {
     this.isGoogleViewer_ = false;
     this.resolveGoogleViewer_(Services.viewerForDoc(ampdoc));
 
+    /** @private {boolean} */
+    this.isReadyToPay_ = false;
+
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
   }
@@ -161,6 +164,13 @@ export class GoogleSubscriptionsPlatform {
   /** @override */
   getEntitlements() {
     return this.runtime_.getEntitlements().then(swgEntitlements => {
+      // Get and store the isReadyToPay signal which is independent of
+      // any entitlments existing.
+      if (swgEntitlements.isReadyToPay) {
+        this.isReadyToPay_ = true;
+      }
+
+      // Get the specifc entitlement we're looking for
       const swgEntitlement = swgEntitlements.getEntitlementForThis();
       if (!swgEntitlement) {
         return null;
@@ -211,6 +221,8 @@ export class GoogleSubscriptionsPlatform {
     switch (factorName) {
       case SubscriptionsScoreFactor.SUPPORTS_VIEWER:
         return this.isGoogleViewer_ ? 1 : 0;
+      case SubscriptionsScoreFactor.IS_READY_TO_PAY:
+        return this.isReadyToPay_ ? 1 : 0;
       default:
         return 0;
     }
