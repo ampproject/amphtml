@@ -72,6 +72,10 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
@@ -85,9 +89,6 @@ import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
@@ -336,12 +337,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Executes page level experiment diversion and pushes any experiment IDs
    * onto this.experimentIds.
+   * @param {?string} urlExperimentId
    * @visibleForTesting
    */
-  setPageLevelExperiments() {
+  setPageLevelExperiments(urlExperimentId) {
     if (!isCdnProxy(this.win) && !isExperimentOn(
         this.win, 'expDfpInvOrigDeprecated')) {
       this.experimentIds.push('21060933');
+    }
+    if (urlExperimentId) {
+      const experimentId = {
+        // SRA
+        '7': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_CONTROL,
+        '8': DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+        '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+
+      }[urlExperimentId];
+      if (experimentId) {
+        this.experimentIds.push(experimentId);
+        return;
+      }
     }
     const experimentInfoMap =
     /** @type {!Object<string,
@@ -376,6 +391,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
   }
 
+  /**
+   * For easier unit testing.
+   * @return {?string}
+   */
+  extractUrlExperimentId_() {
+    return extractUrlExperimentId(this.win, this.element);
+  }
+
   /** @private */
   maybeDeprecationWarn_() {
     const warnDeprecation = feature => user().warn(
@@ -400,14 +423,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
-    this.setPageLevelExperiments();
+    this.setPageLevelExperiments(this.extractUrlExperimentId_());
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search)) ||
         !!this.win.document.querySelector(
             'meta[name=amp-ad-doubleclick-sra]') ||
-        !!this.experimentIds.filter(exp =>
-          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA ||
-          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER).length;
+        [DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER].some(
+            eid => this.experimentIds.indexOf(eid) >= 0);
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible().then(() =>
           getIdentityToken(
