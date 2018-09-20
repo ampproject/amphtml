@@ -279,8 +279,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} */
     this.pausedStateToRestore_ = false;
 
+    /** @private {?Element} */
     this.sidebar_ = null;
-    
+
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -547,8 +548,8 @@ export class AmpStory extends AMP.BaseElement {
       this.onPausedStateUpdate_(isPaused);
     });
 
-    this.storeService_.subscribe(StateProperty.SIDEBAR_STATE, openSidebar => {
-      this.onSidebarStateUpdate_(openSidebar);
+    this.storeService_.subscribe(StateProperty.SIDEBAR_STATE, sidebarState => {
+      this.onSidebarStateUpdate_(sidebarState);
     });
 
     this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
@@ -1331,15 +1332,27 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Reacts to paused state updates.
-   * @param {boolean} open
+   * @param {boolean} sidebarState
    * @private
    */
-  onSidebarStateUpdate_(open) {
+  onSidebarStateUpdate_(sidebarState) {
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
-    if (open && this.sidebar_) {
+    if (this.win.MutationObserver) {
+      sidebarObserver = new this.win.MutationObserver(() => {
+        this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
+            this.sidebar_.hasAttribute('open'));
+      });
+      if (sidebarState) {
+        sidebarObserver.observe(this.sidebar_, {attributes: open});
+      } else {
+        sidebarObserver.disconnect();
+      }
+    } else {
+      this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    }
+    if (sidebarState && this.sidebar_) {
       actions.execute(this.sidebar_, 'open', /* args */ null, /* source */ null,
           /* caller */ null, /* event */ null, ActionTrust.HIGH);
-      //this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
   }
 
@@ -1863,23 +1876,15 @@ export class AmpStory extends AMP.BaseElement {
    */
   initializeSidebar_() {
     this.sidebar_ = this.element.querySelector('amp-sidebar');
-    if (this.sidebar_) {
-      this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
-          !!this.sidebar_);
-      const actions = Services.actionServiceForDoc(this.getAmpDoc());
-      actions.addToWhitelist('AMP-SIDEBAR.open');
-      actions.addToWhitelist('AMP-SIDEBAR.close');
-      actions.addToWhitelist('AMP-SIDEBAR.toggle');
-      if (this.win.MutationObserver) {
-        const sidebarObserver = new this.win.MutationObserver(() => {
-          this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
-              this.sidebar_.hasAttribute('open'));
-        });
-        sidebarObserver.observe(this.sidebar_, {attributes: open});
-      } else {
-        this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
-      } 
+    if (!this.sidebar_) {
+      return;
     }
+    this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
+        !!this.sidebar_);
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    actions.addToWhitelist('AMP-SIDEBAR.open');
+    actions.addToWhitelist('AMP-SIDEBAR.close');
+    actions.addToWhitelist('AMP-SIDEBAR.toggle');
   }
 
   /** @private */
