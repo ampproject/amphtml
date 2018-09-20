@@ -24,7 +24,7 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
     'region': '',
     'city': '',
     'dbInstance': '',
-    'timeZoneOffset': ''
+    'timeZoneOffset': '',
   },
   'requests': {
     'host': 'https://adserver.pressboard.ca',
@@ -43,35 +43,35 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
     'conversion': '${host}' +
       '/track/attention-amp?' +
       '${common_params}' +
-      '${conversion_params}'
+      '${conversion_params}',
   },
   'triggers': {
     'trackPageview': {
       'on': 'visible',
-      'request': 'attention'
+      'request': 'attention',
     },
     'trackAnchorClicks': {
       'on': 'click',
       'selector': 'a',
-      'request': 'attention'
+      'request': 'attention',
     },
     'pageTimer': {
       'on': 'timer',
       'timerSpec': {
         'interval': 1,
         'startSpec': {
-          'on': 'visible'
+          'on': 'visible',
         },
         'stopSpec': {
-          'on': 'hidden'
-        }
+          'on': 'hidden',
+        },
       },
-      'request': 'attention'
-    }
+      'request': 'attention',
+    },
   },
   'transport': {
     'beacon': false,
     'xhrpost': false,
-    'image': true
-  }
-})
+    'image': true,
+  },
+});
