@@ -25,7 +25,7 @@ limitations under the License.
 ```
 
 ## Configuration
-
+Before starting any Nativo AMP setup, please reach out to your account manager for the most up to date documentation
 For semantics of configuration, please [contact Nativo](http://www.nativo.net/#contact-us).
 
 
