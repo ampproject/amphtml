@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {
   assertHttpsUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {getData} from '../../../src/event-helper';
 import {
   insertAfterOrAtStart,
   removeElement,
@@ -57,6 +59,15 @@ export class ConsentUI {
     /** @private {!Window} */
     this.win_ = baseInstance.win;
 
+    /** @private {?Deferred} */
+    this.iframeReady_ = null;
+
+    /** @private {?Element} */
+    this.placeholder_ = null;
+
+    /** @private @const {!Function} */
+    this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
+
     this.init_(config, opt_postPromptUI);
   }
 
@@ -91,6 +102,7 @@ export class ConsentUI {
       this.isCreatedIframe_ = true;
       this.ui_ =
           this.createPromptIframeFromSrc_(promptUISrc);
+      this.placeholder_ = this.createPlaceholder_();
     }
   }
 
@@ -102,22 +114,26 @@ export class ConsentUI {
       // No prompt UI specified, nothing to do
       return;
     }
-    toggle(this.parent_, true);
+    toggle(dev().assertElement(this.parent_), true);
     const {classList} = this.parent_;
     classList.add('amp-active');
     classList.remove('amp-hidden');
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
-    toggle(this.ui_, true);
     if (this.isCreatedIframe_) {
-      // TODO: Apply placeholder and hide iframe
-      insertAfterOrAtStart(this.parent_, this.ui_, null);
-    }
-    if (!this.isPostPrompt_ && !this.isCreatedIframe_) {
-      // scheduleLayout is required everytime because some AMP element may
-      // get un laid out after toggle display (#unlayoutOnPause)
-      // for example <amp-iframe>
-      this.baseInstance_.scheduleLayout(this.ui_);
+      this.iframeReady_ = new Deferred();
+      this.loadIframe_();
+      this.iframeReady_.promise.then(() => {
+        this.showIframe_();
+      });
+    } else {
+      toggle(this.ui_, true);
+      if (!this.isPostPrompt_) {
+        // scheduleLayout is required everytime because some AMP element may
+        // get un laid out after toggle display (#unlayoutOnPause)
+        // for example <amp-iframe>
+        this.baseInstance_.scheduleLayout(this.ui_);
+      }
     }
   }
 
@@ -138,7 +154,7 @@ export class ConsentUI {
     this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
     toggle(this.ui_, false);
     if (this.isCreatedIframe_) {
-      removeElement(this.ui_);
+      this.resetIframe_();
     }
   }
 
@@ -151,6 +167,90 @@ export class ConsentUI {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
     iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
     iframe.setAttribute('sandbox', 'allow-scripts');
+    const {classList} = iframe;
+    classList.add('i-amphtml-consent-fill');
+    // Append iframe lazily to save resources.
     return iframe;
+  }
+
+  /**
+   * Create the default placeholder
+   * @return {!Element}
+   */
+  createPlaceholder_() {
+    // TODO: Allow publishers to provide placeholder upon request
+    const placeholder = this.parent_.ownerDocument.createElement('placeholder');
+    toggle(placeholder, false);
+    const {classList} = placeholder;
+    classList.add('i-amphtml-consent-fill');
+    classList.add('i-amphtml-consent-placeholder');
+    insertAfterOrAtStart(this.parent_, placeholder, null);
+    return placeholder;
+  }
+
+
+  /**
+   * Apply placeholder
+   * Set up event listener to handle UI related messages.
+   */
+  loadIframe_() {
+    const {classList} = this.parent_;
+    classList.add('loading');
+    toggle(dev().assertElement(this.placeholder_), true);
+    toggle(dev().assertElement(this.ui_), false);
+    this.win_.addEventListener('message', this.boundHandleIframeMessages_);
+    insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+  }
+
+  /**
+   * Hide the placeholder
+   * Apply animation to show the iframe
+   */
+  showIframe_() {
+    const {classList} = this.parent_;
+    toggle(dev().assertElement(this.placeholder_), false);
+    toggle(dev().assertElement(this.ui_), true);
+    classList.remove('loading');
+    classList.add('i-amphtml-consent-ui-in');
+    classList.add('consent-iframe-active');
+  }
+
+  /**
+   * Remove the iframe from doc
+   * Remove event listener
+   * Reset UI state
+   */
+  resetIframe_() {
+    const {classList} = this.parent_;
+    classList.remove('i-amphtml-consent-ui-in');
+    classList.remove('consent-iframe-active');
+    this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
+    removeElement(dev().assertElement(this.ui_));
+  }
+
+  /**
+   * Listen to iframe messages and handle events.
+   * Current supported APIs:
+   *
+   * Required message from iframe to hide placeholder and display iframe
+   * {
+   *   type: 'consent-ui-ready'
+   * }
+   * @param {!Event} event
+   */
+  handleIframeMessages_(event) {
+    if (this.ui_.contentWindow !== event.source) {
+      // Ignore messages from else where
+      return;
+    }
+
+    const data = getData(event);
+    if (!data) {
+      return;
+    }
+
+    if (data['type'] == 'consent-ui-ready') {
+      this.iframeReady_.resolve();
+    }
   }
 }
