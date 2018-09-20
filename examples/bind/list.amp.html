@@ -13,10 +13,26 @@
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 </head>
 <body>
+  <amp-state id="otherFoods">
+    <script type="application/json">
+      [{
+        "name": "pizza",
+        "quantity": 1976,
+        "unitPrice": 3.50
+      }, {
+        "name": "ice cream",
+        "quantity": 108,
+        "unitPrice": 6.50
+      }]
+    </script>
+  </amp-state>
 
   <button on="tap:AMP.setState({src:'/list/fruit-data/get'})">Show Fruit</button>
   <button on="tap:AMP.setState({src:'/list/vegetable-data/get'})">Show Vegetables</button>
+  <button on="tap:AMP.setState({src: otherFoods})">Show Other Foods</button>
 
+  <hr>
+  
   <button on="tap:AMP.setState({
     src: [{
       name: 'pizza',
@@ -41,7 +57,8 @@
     }]
   })">Show Desserts (local)</button>
 
-  <button on="tap:AMP.setState({foo: foo+1})">increment foo</button>
+  <button on="tap:AMP.setState({foo: foo+1})">Increment foo</button>
+  <button on="tap:AMP.setState({src: (src || []).concat([{name: 'burger', quantity: 1, unitPrice: random()}])})">Add burger</button>
 
   <template id="my-template" type="amp-mustache">
     <strong>Product</strong>: {{name}}

@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-/**
- * Possible score factors.
- * @const @enum {string}
- */
-export const SubscriptionsScoreFactor = {
-  // User is known to platform and has a form of payment registered
-  IS_READY_TO_PAY: 'isReadyToPay',
-  // Platform supports the current viewer environment
-  SUPPORTS_VIEWER: 'supportsViewer',
-};
+module.exports = function(babel) {
+  const {types: t} = babel;
+  return {
+    visitor: {
+      Expression: {
+        exit(path) {
+          const {node} = path;
+          const {parenthesized} = node.extra || {};
+          if (!parenthesized) {
+            return;
+          }
 
-/**
- * Default value for supportsViewer, requied by selectPlatformForLogin().
- * All other score factors are ignored if not specifed in the publisher
- * config so adding a default here would be meaningless.
- */
-export const DEFAULT_SCORE_CONFIG = {
-  supportsViewer: 10,
+          path.replaceWith(t.parenthesizedExpression(node));
+          path.skip();
+        },
+      },
+    },
+  };
 };
