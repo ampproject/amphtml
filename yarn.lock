@@ -1128,9 +1128,9 @@ asyncreduce@~0.1.4:
   dependencies:
     runnel "~0.5.0"
 
-atob@2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.1.tgz#ae2d5a729477f289d60dd7f96a6314a22dd6c22a"
+atob@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
 
 atob@^2.0.0:
   version "2.0.3"
