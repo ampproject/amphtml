@@ -19,6 +19,7 @@ import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentPolicyManager} from './consent-policy-manager';
+import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
@@ -35,10 +36,6 @@ import {dev, user} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {
-  insertAfterOrAtStart,
-  removeElement,
-} from '../../../src/dom';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
@@ -72,7 +69,7 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
 
-    /** @private {!Object<string, !Element>} */
+    /** @private {!Object<string, !ConsentUI>} */
     this.consentUI_ = map();
 
     /** @private {!JsonObject} */
@@ -84,13 +81,10 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {!Object} */
     this.consentRequired_ = map();
 
-    /** @private {boolean} */
-    this.uiInit_ = false;
-
     /** @private {?string} */
     this.currentDisplayInstance_ = null;
 
-    /** @private {?Element} */
+    /** @private {?ConsentUI} */
     this.postPromptUI_ = null;
 
     /** @private {!Object<string, ?function()>} */
@@ -266,27 +260,8 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.vsync_.mutate(() => {
-      if (!this.uiInit_) {
-        this.uiInit_ = true;
-        toggle(this.element, true);
-      }
-
-      this.element.classList.remove('amp-hidden');
-      this.element.classList.add('amp-active');
-      this.getViewport().addToFixedLayer(this.element);
-      // Display the current instance
       this.currentDisplayInstance_ = instanceId;
-      const uiElement = this.consentUI_[this.currentDisplayInstance_];
-      toggle(uiElement, true);
-      if (uiElement.tagName == 'IFRAME') {
-        // TODO: Apply placeholder and hide iframe
-        insertAfterOrAtStart(this.element, uiElement, null);
-      } else {
-        // scheduleLayout is required everytime because some AMP element may
-        // get un laid out after toggle display (#unlayoutOnPause)
-        // for example <amp-iframe>
-        this.scheduleLayout(uiElement);
-      }
+      this.consentUI_[this.currentDisplayInstance_].show();
     });
 
     const deferred = new Deferred();
@@ -298,22 +273,18 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    const uiToHide = this.currentDisplayInstance_ &&
-        this.consentUI_[this.currentDisplayInstance_];
+    if (!this.currentDisplayInstance_ ||
+        !this.consentUI_[this.currentDisplayInstance_]) {
+      dev().error(TAG,
+          `${this.currentDisplayInstance_} no consent ui to hide`);
+    }
+
+    const uiToHide = this.consentUI_[this.currentDisplayInstance_];
+
     this.vsync_.mutate(() => {
-      this.element.classList.add('amp-hidden');
-      this.element.classList.remove('amp-active');
-      // Need to remove from fixed layer and add it back to update element's top
-      this.getViewport().removeFromFixedLayer(this.element);
-      if (!uiToHide) {
-        dev().error(TAG,
-            `${this.currentDisplayInstance_} no consent ui to hide`);
-      }
-      toggle(dev().assertElement(uiToHide), false);
-      if (uiToHide.tagName == 'IFRAME') {
-        removeElement(uiToHide);
-      }
+      uiToHide.hide();
     });
+
     const displayInstance = /** @type {string} */ (
       this.currentDisplayInstance_);
     if (this.dialogResolver_[displayInstance]) {
@@ -586,12 +557,8 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.consentConfig_ = consents;
     if (config['postPromptUI']) {
-      const postPromptUI = config['postPromptUI'];
-      this.postPromptUI_ = this.getAmpDoc().getElementById(postPromptUI);
-      if (!this.postPromptUI_) {
-        this.user().error(TAG, 'postPromptUI element with ' +
-          `id=${postPromptUI} not found`);
-      }
+      this.postPromptUI_ =
+          new ConsentUI(this, dict({}), config['postPromptUI']);
     }
     this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
@@ -679,22 +646,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise}
    */
   initPromptUI_(instanceId) {
-    const promptUI = this.consentConfig_[instanceId]['promptUI'];
-    const promptUISrc = this.consentConfig_[instanceId]['promptUISrc'];
-    if (promptUI) {
-      // Always respect promptUI first
-      let element = this.getAmpDoc().getElementById(promptUI);
-      if (!element || !this.element.contains(element)) {
-        element = null;
-        this.user().error(TAG, 'child element of <amp-consent> with ' +
-          `promptUI id ${promptUI} not found`);
-      }
-      this.consentUI_[instanceId] = dev().assertElement(element);
-    } else if (promptUISrc && isExperimentOn(this.win, 'amp-consent-v2')) {
-      // Create an iframe element with the provided src
-      this.consentUI_[instanceId] =
-          this.createPromptIframeFromSrc_(promptUISrc);
-    }
+    const config = this.consentConfig_[instanceId];
+    this.consentUI_[instanceId] =
+        new ConsentUI(this, config);
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceState(instanceId)
@@ -721,19 +675,6 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Create the iframe if promptUISrc is valid
-   * @param {string} promptUISrc
-   * @return {!Element}
-   */
-  createPromptIframeFromSrc_(promptUISrc) {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.src = assertHttpsUrl(promptUISrc, this.element);
-    iframe.setAttribute('sandbox', 'allow-scripts');
-    return iframe;
-  }
-
-
-  /**
    * Handles the display of postPromptUI
    */
   handlePostPromptUI_() {
@@ -741,40 +682,26 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
-    const {classList} = this.element;
+    if (!this.postPromptUI_) {
+      return;
+    }
+
     this.notificationUiManager_.onQueueEmpty(() => {
-      if (!this.postPromptUI_) {
-        return;
-      }
       this.vsync_.mutate(() => {
-        if (!this.uiInit_) {
-          this.uiInit_ = true;
-          toggle(this.element, true);
-        }
-        classList.add('amp-active');
-        classList.remove('amp-hidden');
-        this.getViewport().addToFixedLayer(this.element);
-        toggle(dev().assertElement(this.postPromptUI_), true);
+        this.postPromptUI_.show();
         // Will need to scheduleLayout for postPromptUI
         // upon request for using AMP component.
       });
     });
 
     this.notificationUiManager_.onQueueNotEmpty(() => {
-      if (!this.postPromptUI_) {
-        return;
-      }
       this.vsync_.mutate(() => {
-        if (!this.currentDisplayInstance_) {
-          classList.add('amp-hidden');
-          classList.remove('amp-active');
-        }
-        this.getViewport().removeFromFixedLayer(this.element);
-        toggle(dev().assertElement(this.postPromptUI_), false);
+        this.postPromptUI_.hide();
       });
     });
   }
 }
+
 
 AMP.extension('amp-consent', '0.1', AMP => {
   AMP.registerElement('amp-consent', AmpConsent, CSS);
