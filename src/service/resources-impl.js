@@ -661,9 +661,9 @@ export class Resources {
     }
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
-      if (opt_disconnect) {
-        resource.disconnect();
-      }
+    }
+    if (opt_disconnect) {
+      resource.disconnect();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
