@@ -272,7 +272,7 @@ async function launchBrowsers(numPages) {
   const pages = [];
   for (let i = 0; i < numPages; i++) {
     const browser = await puppeteer.launch(browserOptions)
-        .catch(err => log.fatal(err));
+        .catch(err => log('fatal', err));
     browsers_.push(browser);
 
     const page = (await browser.pages())[0];
@@ -382,8 +382,8 @@ async function generateSnapshots(percy, webpages) {
 
   log('verbose', 'Generating snapshots...');
   for (let i = 0; i < webpages.length; i += NUM_PARALLEL_PAGES) {
-    await snapshotWebpages(percy, pages,
-        webpages.slice(i, i + NUM_PARALLEL_PAGES), config);
+    await snapshotWebpages(
+        percy, pages, webpages.slice(i, i + NUM_PARALLEL_PAGES));
   }
 }
 
@@ -398,7 +398,7 @@ async function generateSnapshots(percy, webpages) {
  * @param {!Array<!JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function snapshotWebpages(percy, page, webpages) {
+async function snapshotWebpages(percy, pages, webpages) {
   if (pages.length < webpages.length) {
     log('fatal', 'snapshotWebpages() called with `pages` and `webpages` with',
         'different lengths');
@@ -444,8 +444,7 @@ async function snapshotWebpages(percy, page, webpages) {
     const webpage = webpages[pageId];
     const page = pages[pageId];
 
-    const {url, viewport} = webpage;
-    const name = `${webpage.name} (${config})`;
+    const {name, url, viewport} = webpage;
 
     log('verbose', 'Navigation to page', colors.yellow(`${BASE_URL}/${url}`),
         'on tab', colors.cyan(`#${pageId + 1}`), 'is done, verifying page');
