@@ -48,6 +48,7 @@ describes.realWin('amp-list component', {
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
+    element.getPlaceholder = () => null;
 
     const template = doc.createElement('template');
     template.content.appendChild(doc.createTextNode('{{template}}'));
@@ -142,7 +143,25 @@ describes.realWin('amp-list component', {
       });
     });
 
-    it('should attemptChangeHeight after render', () => {
+    it('should attemptChangeHeight the placeholder, if present', () => {
+      const items = [{title: 'Title1'}];
+      const itemElement = doc.createElement('div');
+
+      const placeholder = doc.createElement('div');
+      placeholder.style.height = '1337px';
+      element.appendChild(placeholder);
+      element.getPlaceholder = () => placeholder;
+
+      expectFetchAndRender(items, [itemElement]);
+
+      listMock.expects('attemptChangeHeight')
+          .withExactArgs(1337)
+          .returns(Promise.resolve());
+
+      return list.layoutCallback();
+    });
+
+    it('should attemptChangeHeight rendered contents', () => {
       const items = [{title: 'Title1'}];
       const itemElement = doc.createElement('div');
       itemElement.style.height = '1337px';
