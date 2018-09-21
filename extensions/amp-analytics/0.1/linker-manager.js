@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {addParamToUrl} from '../../../src/url';
+import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
+/** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
 
 export class LinkerManager {
@@ -94,6 +97,8 @@ export class LinkerManager {
         });
         this.resolvedLinkers_[name] =
             createLinker(/* version */ '1', expandedIds);
+        // This resolution indicates that we have finished a single linker.
+        return Promise.resolve();
       });
     });
 
@@ -103,7 +108,10 @@ export class LinkerManager {
           this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
 
-    return Promise.all(this.allLinkerPromises_);
+    const linkersFinalPromise = Promise.all(this.allLinkerPromises_);
+    this.enableFormSupport_(linkersFinalPromise);
+
+    return linkersFinalPromise;
   }
 
   /**
@@ -116,6 +124,7 @@ export class LinkerManager {
     const defaultConfig = {
       enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
+
     const linkerNames = Object.keys(config).filter(key => {
       const value = config[key];
       const isLinkerConfig = isObject(value);
@@ -133,7 +142,7 @@ export class LinkerManager {
           Object.assign({}, defaultConfig, config[name]);
 
       if (mergedConfig['enabled'] !== true) {
-        user().info(TAG, `linker config for ${name} is not enabled and` +
+        user().info(TAG, `linker config for ${name} is not enabled and ` +
             'will be ignored.');
         return;
       }
@@ -255,7 +264,45 @@ export class LinkerManager {
 
     el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
   }
+
+
+  /**
+   *
+   * @param {*} linkersFinalPromise
+   */
+  enableFormSupport_(linkersFinalPromise) {
+    const doc = this.ampdoc_.getRootNode();
+
+    // TODO: find a way to listen to this and only add new info.
+    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.appendLinkerDataToForm_(doc.querySelectorAll('form'));
+    });
+
+    linkersFinalPromise.then(() => {
+      const forms = this.ampdoc_.getRootNode().querySelectorAll('form');
+      forms.forEach(form => {
+        this.appendLinkerDataToForm_(form);
+      })
+    });
+  }
+  /**
+   *
+   * @param {*} form
+   */
+  appendLinkerDataToForm_(form) {
+    Object.keys(this.resolvedLinkers_).forEach(key => {
+      const attrs = {
+        type: 'hidden',
+        name: key,
+        value: this.resolvedLinkers_[key],
+      }
+      const inputEl = createElementWithAttributes(this.ampdoc_.getRootNode(),
+          'input', attrs);
+      form.appendChild(inputEl);
+    });
+  }
 }
+
 
 /**
  * Domains are considered to be friends if they are identical
