@@ -109,13 +109,11 @@ export class SsrTemplateHelper {
     const successTemplateKey = 'successTemplate';
     const successTemplate =
       (opt_templates && opt_templates[successTemplateKey])
-        ? opt_templates[successTemplateKey] : null;
-    if (successTemplate || mustacheTemplate) {
+        ? opt_templates[successTemplateKey] : mustacheTemplate;
+    if (successTemplate) {
       ampComponent[successTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': successTemplate
-          ? successTemplate./*REVIEW*/innerHTML
-          : mustacheTemplate./*REVIEW*/innerHTML,
+        'payload': successTemplate./*REVIEW*/innerHTML,
       };
     }
 
