@@ -49,7 +49,7 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {
@@ -732,27 +732,28 @@ export class AmpStoryPage extends AMP.BaseElement {
     return null;
   }
 
-
   /**
    * Performs navigation if click was meant to do so.
    * @param {!Event} event The click event.
    */
   maybePerformNavigation(event) {
     if (this.advancement_.constructor.name == 'MultipleAdvancementConfig') {
-      // Get manual advancement.
-      const advancementModes = dev().assert(
-          this.advancement_.getAdvancementModes(),
-          'No advancement modes found in page navigation');
-      if (!advancementModes) { return; }
+      // Get manual advancement from the MultipleAdvancementConfig array.
+      const advancementModes = this.advancement_.getAdvancementModes();
+      if (!advancementModes) {
+        user().error(TAG, 'No advancement modes found in page navigation');
+        return;
+      }
 
-      const manualAdvIndex =
-        dev().assert(findIndex(advancementModes,
-            elem => elem.constructor.name == 'ManualAdvancement'),
-        'No manual advancement found.');
-      if (!manualAdvIndex) { return; }
+      const manualAdvIndex = findIndex(advancementModes,
+          mode => mode.constructor.name === 'ManualAdvancement');
+      if (manualAdvIndex < 0) {
+        user().error(TAG, 'No manual advancement mode found.');
+        return;
+      }
 
       advancementModes[manualAdvIndex].maybePerformNavigation(event);
-    } else if (this.advancement_.constructor.name == 'ManualAdvancement') {
+    } else if (this.advancement_.constructor.name === 'ManualAdvancement') {
       this.advancement_.maybePerformNavigation(event);
     }
   }
