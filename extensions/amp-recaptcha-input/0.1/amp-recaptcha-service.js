@@ -28,7 +28,7 @@ import {getDevelopmentBootstrapBaseUrl} from '../../../src/3p-frame';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
-import {parseUrlDeprecated, isProxyUrl, getSourceOrigin} from '../../../src/url';
+import {parseUrlDeprecated, isProxyUrl, getSourceOrigin, getSourceUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
@@ -213,20 +213,21 @@ export class AmpRecaptchaService {
       // This is verified by the recaptcha frame to 
       // verify the origin on its messages
       let subDomain = undefined;
-      const hostname = parseUrlDeprecated(this.win_.location.href);
       
       if(isProxyUrl(this.win_.location.href)) {
-        subDomain = hostname.split('.')[0];
+        subDomain = getSourceUrl(this.win_.location.href);
       } else {
-        // TODO(@torch2424) Actual punycode conversion
-        subDomain = subDomain.split('-').join('--');
-        subDomain = subDomain.split('.').join('-');
+        subdomain = parseUrlDeprecated(this.win_.location.href).hostname;
       }
-      
+
+      subDomain = subDomain.split('-').join('--');
+      subDomain = subDomain.split('.').join('-');
+
       baseUrl = 'https://' + subDomain +
         `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
         `recaptcha.html`;
     }
+
 
     iframe.src = baseUrl;
     iframe.ampLocation = parseUrlDeprecated(baseUrl);
