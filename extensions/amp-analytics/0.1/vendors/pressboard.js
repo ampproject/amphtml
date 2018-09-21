@@ -30,31 +30,28 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
     'host': 'https://adserver.pressboard.ca',
     'common_params': '&amp=1&url=${canonicalUrl}' +
       '&referrer=${documentReferrer}' +
+      '&ts=${timestamp}' +
+      '&ua=${userAgent}' +
       '&rand=${random}' +
       '&uid=${clientId(_pressboardmedia)}' +
       '&mid=${mediaId}&cid=${campaignId}&sid=${storyRequestId}' +
       '&geoid=${geoNameId}&cn=${country}&rg=${region}&ct=${city}' +
       '&dbi=${dbInstance}&tz=${timeZoneOffset}',
-    'conversion_params': '&asurl=${sourceUrl}' +
-      '&asw=${scrollWidth}&ash=${scrollHeight}' +
-      '&asnw=${screenWidth}&asnh=${screenHeight}' +
-      '&aasnw=${availableScreenWidth}&aasnh=${availableScreenHeight}' +
-      '&asl=${scrollLeft}&ast=${scrollTop}',
+    'conversion_params': '&hbt=${requestCount}' +
+      '&pvid=${pageViewId}' +
+      '&asurl=${sourceUrl}' +
+      '&ash=${scrollHeight}' +
+      '&asnh=${screenHeight}' +
+      '&aasnh=${availableScreenHeight}' +
+      '&avh=${viewportHeight}' +
+      '&ast=${scrollTop}'+
+      '&atet=${totalEngagedTime}',
     'conversion': '${host}' +
       '/track/attention-amp?' +
       '${common_params}' +
       '${conversion_params}',
   },
   'triggers': {
-    'trackPageview': {
-      'on': 'visible',
-      'request': 'conversion',
-    },
-    'trackAnchorClicks': {
-      'on': 'click',
-      'selector': 'a',
-      'request': 'conversion',
-    },
     'pageTimer': {
       'on': 'timer',
       'timerSpec': {
