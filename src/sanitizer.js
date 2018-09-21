@@ -23,7 +23,7 @@ import {
   isValidAttr,
   rewriteAttributeValue,
 } from './purifier';
-import {dict, map} from './utils/object';
+import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {startsWith} from './string';
 import {user} from './log';
@@ -64,6 +64,12 @@ const SELF_CLOSING_TAGS = dict({
 const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /**
+ * Monotonically increasing counter used for keying nodes.
+ * @private {number}
+ */
+let KEY_COUNTER = 0;
+
+/**
  * Sanitizes the provided HTML.
  *
  * This function expects the HTML to be already pre-sanitized and thus it does
@@ -71,17 +77,10 @@ const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
  * cases, such as <SCRIPT>, <STYLE>, <IFRAME>.
  *
  * @param {string} html
+ * @param {boolean=} diffing
  * @return {string}
  */
-export function sanitizeHtml(html) {
-  return sanitizeWithCaja(html);
-}
-
-/**
- * @param {string} html
- * @return {string}
- */
-function sanitizeWithCaja(html) {
+export function sanitizeHtml(html, diffing) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
@@ -105,19 +104,21 @@ function sanitizeWithCaja(html) {
         }
         return;
       }
-      const isBinding = map();
+      const isAmpElement = startsWith(tagName, 'amp-');
       // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
       // brackets before custom validation and restoring them afterwards.
+      const bindingAttribs = [];
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
         if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
-          isBinding[i] = true;
           attribs[i] = attr.slice(1, -1);
+          bindingAttribs.push(i);
         }
       }
+
       if (cajaBlacklistedTags[tagName]) {
         ignore++;
-      } else if (!startsWith(tagName, 'amp-')) {
+      } else if (!isAmpElement) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
@@ -129,13 +130,13 @@ function sanitizeWithCaja(html) {
           // Restore some of the attributes that AMP is directly responsible
           // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
-            const attrib = attribs[i];
-            if (WHITELISTED_ATTRS.includes(attrib)) {
+            const attrName = attribs[i];
+            if (WHITELISTED_ATTRS.includes(attrName)) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+            } else if (attrName.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
-                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrib)) {
+                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrName)) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -164,8 +165,7 @@ function sanitizeWithCaja(html) {
               attribs[index] = '_top';
             }
           } else if (hasHref) {
-            attribs.push('target');
-            attribs.push('_top');
+            attribs.push('target', '_top');
           }
         }
       }
@@ -175,7 +175,23 @@ function sanitizeWithCaja(html) {
         }
         return;
       }
-      let emittedBindingMarker = false;
+      // Filter out bindings with empty attribute values.
+      const hasBindings = bindingAttribs.some(i => !!attribs[i + 1]);
+      if (hasBindings) {
+        // Set a custom attribute to identify elements with bindings.
+        // This is an optimization that avoids the need for a DOM scan later.
+        attribs.push('i-amphtml-binding', '');
+      }
+      // Elements with bindings and AMP elements must opt-out of DOM diffing.
+      // - Opt-out nodes with bindings because amp-bind scans newly
+      //   rendered elements and discards _all_ old elements _before_ diffing,
+      //   so preserving some old elements would cause loss of functionality.
+      // - Opt-out AMP elements because they don't support arbitrary mutation.
+      if (hasBindings || isAmpElement) {
+        if (diffing) {
+          attribs.push('i-amphtml-key', String(KEY_COUNTER++));
+        }
+      }
       emit('<');
       emit(tagName);
       for (let i = 0; i < attribs.length; i += 2) {
@@ -187,27 +203,17 @@ function sanitizeWithCaja(html) {
           continue;
         }
         emit(' ');
-        if (isBinding[i]) {
-          emit('[' + attrName + ']');
-        } else {
-          emit(attrName);
-        }
+        emit(bindingAttribs.includes(i) ? `[${attrName}]` : attrName);
         emit('="');
         if (attrValue) {
           // Rewrite attribute values unless this attribute is a binding.
-          // Bindings contain expressions not scalars and shouldn't be modified.
-          const rewrite = (isBinding[i])
+          // Bindings contain expressions and shouldn't be rewritten.
+          const rewrite = (bindingAttribs.includes(i))
             ? attrValue
             : rewriteAttributeValue(tagName, attrName, attrValue);
           emit(htmlSanitizer.escapeAttrib(rewrite));
         }
         emit('"');
-        // Set a custom attribute to mark this element as containing a binding.
-        // This is an optimization that obviates the need for DOM scan later.
-        if (isBinding[i] && !emittedBindingMarker) {
-          emit(' i-amphtml-binding');
-          emittedBindingMarker = true;
-        }
       }
       emit('>');
     },

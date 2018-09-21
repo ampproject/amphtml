@@ -189,6 +189,11 @@ export class SubscriptionService {
           SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
           subscriptionPlatform.getServiceId()
       );
+      // Deprecated event fired for backward compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
+          subscriptionPlatform.getServiceId()
+      );
       this.fetchEntitlements_(subscriptionPlatform);
     });
   }
@@ -397,6 +402,10 @@ export class SubscriptionService {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId());
+      // Deprecated events are fire for backwards compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED_DEPRECATED,
+          selectedPlatform.getServiceId());
       if (selectedEntitlement.granted) {
         this.subscriptionAnalytics_.serviceEvent(
             SubscriptionAnalyticsEvents.ACCESS_GRANTED,
@@ -453,6 +462,11 @@ export class SubscriptionService {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+          subscriptionPlatform.getServiceId()
+      );
+      // deprecated event fired for backward compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
           subscriptionPlatform.getServiceId()
       );
       this.platformStore_.reset();

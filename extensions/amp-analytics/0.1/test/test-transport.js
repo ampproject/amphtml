@@ -170,4 +170,66 @@ describes.realWin('amp-analytics.transport', {
       });
     });
   });
+
+  describe('iframe transport', () => {
+
+    it('does not initialize transport iframe if not used', () => {
+      const transport = new Transport(win, {
+        image: true,
+        xhrpost: true,
+        beacon: false,
+      });
+
+      const ampAnalyticsEl = null;
+
+      const preconnectSpy = sandbox.spy();
+      transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
+        preload: preconnectSpy,
+      });
+      expect(transport.iframeTransport_).to.be.null;
+      expect(preconnectSpy).to.not.be.called;
+    });
+
+    it('initialize iframe transport when used', () => {
+      const transport = new Transport(win, {
+        iframe: '//test',
+      });
+
+      const ad = doc.createElement('amp-ad');
+      ad.getResourceId = () => '123';
+      doc.body.appendChild(ad);
+      const frame = doc.createElement('iframe');
+      ad.appendChild(frame);
+      frame.contentWindow.document.write(
+          '<amp-analytics type="bg"></amp-analytics>');
+      frame.contentWindow.__AMP_TOP = win;
+      const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
+
+      const preconnectSpy = sandbox.spy();
+      transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
+        preload: preconnectSpy,
+      });
+      expect(transport.iframeTransport_).to.be.ok;
+      expect(preconnectSpy).to.be.called;
+
+      transport.deleteIframeTransport();
+      expect(transport.iframeTransport_).to.be.null;
+    });
+
+    it('send via iframe transport', () => {
+      setupStubs(true, true);
+      const transport = new Transport(win, {
+        beacon: true, xhrpost: true, image: true,
+        iframe: '//test',
+      });
+      const iframeTransportSendRequestSpy = sandbox.spy();
+      transport.iframeTransport_ = {
+        sendRequest: iframeTransportSendRequestSpy,
+      };
+      transport.sendRequest('test test');
+      assertCallCounts(0, 0, 0);
+      expect(iframeTransportSendRequestSpy).to.be.calledWith('test test');
+    });
+  });
 });

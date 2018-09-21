@@ -73,11 +73,11 @@ For detailed information on testing, see [TESTING.md](TESTING.md).
 
 ## Supported browsers
 
-In general we support the 2 latest versions of major browsers like Chrome, Firefox, Edge, Safari, Opera, and UC Browser. We support desktop, phone, tablet and the web view version of these respective browsers.
+In general we support the 2 latest versions of major browsers like Chrome, Firefox, Edge, Safari, Opera, and UC Browser. We support desktop, phone, tablet and the web view version of these respective browsers. For iOS we support the latest 2 __major__ versions which covers about 2 years.
 
 Beyond that the core AMP library and builtin elements should aim for very wide browser support and we accept fixes for all browsers with market share greater than 1 percent.
 
-In particular, we try to maintain "it might not be perfect but isn't broken"-support for the Android 4.0 system browser and Chrome 28+ on phones.
+In particular, we try to maintain "it might not be perfect but isn't broken"-support for IE 11, iOS 8, the Android 4.0 system browser and Chrome 41. 
 
 ## Eng docs
 
@@ -93,9 +93,9 @@ Before any code can be merged into the AMP repository, it has to be reviewed and
 
 - If you are contributing a fix or a new feature to AMP, be sure to follow the tips on [preparing your code for review](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code-for-a-feature-coding--implementation-phase) and follow [instructions](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review) on how to submit a pull request.
 
-- Pull requests in AMP are triaged similar to Issues and within 2 days of submitting a PR, someone will be assigned as the reviewer. If you have been working with a core committer or someone else already, @mentioning them in the PR description will be helpful.
+- Pull requests in AMP are triaged similar to Issues and within 2 business days of submitting a PR, someone will be assigned as the reviewer. If you have been working with a core committer or someone else already, @mentioning them in the PR description will be helpful.
 
-- After a reviewer is assigned, expect comments on your code within a few days. Feel free to @mention the reviewer if your PR is high priority or if you don't hear back after 2 days since opening the PR.
+- After a reviewer is assigned, expect comments on your code within a few days. Feel free to @mention the reviewer if your PR is high priority or if you don't hear back after 2 business days since opening the PR.
 
 - Turnaround time for a PR to be merged is variable and depends on the size and quality of the code. Most PRs go through multiple cycles of review comments. It can take anywhere between a day for simple fixes to weeks for larger features.
 

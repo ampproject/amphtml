@@ -72,6 +72,10 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
@@ -85,9 +89,6 @@ import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
@@ -115,6 +116,15 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
+};
+
+/** @const {string} */
+const DOUBLECLICK_IDLE_BOOL_EXP = 'doubleclickIdleExp';
+
+/** @const @enum{string} */
+const DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES = {
+  CONTROL: '21062567',
+  EXP: '21062568',
 };
 
 /**
@@ -295,13 +305,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (vpRange === false) {
       return vpRange;
     }
+    const renderOutsideViewport = this.renderOutsideViewport();
+    // False will occur when throttle in effect.
+    if (this.experimentIds.includes(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES.EXP) &&
+      typeof renderOutsideViewport === 'boolean') {
+      return renderOutsideViewport;
+    }
     this.isIdleRender_ = true;
     // NOTE(keithwrightbos): handle race condition where previous
     // idleRenderOutsideViewport marked slot as idle render despite never
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource().whenWithinViewport(this.renderOutsideViewport()).then(
+    this.getResource().whenWithinViewport(renderOutsideViewport).then(
         () => this.isIdleRender_ = false);
     return vpRange;
   }
@@ -321,12 +337,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Executes page level experiment diversion and pushes any experiment IDs
    * onto this.experimentIds.
+   * @param {?string} urlExperimentId
    * @visibleForTesting
    */
-  setPageLevelExperiments() {
+  setPageLevelExperiments(urlExperimentId) {
     if (!isCdnProxy(this.win) && !isExperimentOn(
         this.win, 'expDfpInvOrigDeprecated')) {
       this.experimentIds.push('21060933');
+    }
+    let forcedExperimentId;
+    if (urlExperimentId) {
+      forcedExperimentId = {
+        // SRA
+        '7': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_CONTROL,
+        '8': DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+        '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+
+      }[urlExperimentId];
+      if (forcedExperimentId) {
+        this.experimentIds.push(forcedExperimentId);
+      }
     }
     const experimentInfoMap =
     /** @type {!Object<string,
@@ -334,12 +364,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // Only select into SRA experiments if SRA not already explicitly
         // enabled and refresh is not being used by any slot.
         [DOUBLECLICK_SRA_EXP]: {
-          isTrafficEligible: () => !this.win.document./*OK*/querySelector(
-              'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'),
+          isTrafficEligible: () => !forcedExperimentId &&
+              !this.win.document./*OK*/querySelector(
+                  'meta[name=amp-ad-enable-refresh], ' +
+                  'amp-ad[type=doubleclick][data-enable-refresh], ' +
+                  'meta[name=amp-ad-doubleclick-sra]'),
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
+        },
+        [DOUBLECLICK_IDLE_BOOL_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.keys(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES).map(
+              key => DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES[key]),
         },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -354,6 +390,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   randomlySelectUnsetExperiments_(experimentInfoMap) {
     return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  }
+
+  /**
+   * For easier unit testing.
+   * @return {?string}
+   */
+  extractUrlExperimentId_() {
+    return extractUrlExperimentId(this.win, this.element);
   }
 
   /** @private */
@@ -380,14 +424,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
-    this.setPageLevelExperiments();
+    this.setPageLevelExperiments(this.extractUrlExperimentId_());
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search)) ||
         !!this.win.document.querySelector(
             'meta[name=amp-ad-doubleclick-sra]') ||
-        !!this.experimentIds.filter(exp =>
-          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA ||
-          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER).length;
+        [DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER].some(
+            eid => this.experimentIds.indexOf(eid) >= 0);
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible().then(() =>
           getIdentityToken(
