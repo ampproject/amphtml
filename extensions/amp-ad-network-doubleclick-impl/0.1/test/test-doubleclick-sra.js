@@ -30,7 +30,6 @@ import {Deferred} from '../../../../src/utils/promise';
 import {
   EXPERIMENT_ATTRIBUTE,
 } from '../../../../ads/google/a4a/utils';
-import {FetchResponseHeaders} from '../../../../src/utils/xhr-utils';
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
@@ -419,11 +418,7 @@ describes.realWin('Doubleclick SRA', config , env => {
             });
             return Promise.resolve(slotDataString);
           },
-          headers: new FetchResponseHeaders({
-            getResponseHeader(name) {
-              return headers[name];
-            },
-          }),
+          headers,
         }));
       }
     }
@@ -447,11 +442,10 @@ describes.realWin('Doubleclick SRA', config , env => {
           }).returns(Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
         bodyUsed: false,
-        headers: new FetchResponseHeaders({
-          getResponseHeader(name) {
-            return headers[name];
-          },
-        }),
+        headers: {
+          get: header => headers[header],
+          has: header => header in headers,
+        },
         text: () => {
           throw new Error('should not be SRA!');
         },

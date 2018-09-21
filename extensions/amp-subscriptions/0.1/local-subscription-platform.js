@@ -214,8 +214,8 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  supportsCurrentViewer() {
-    return false;
+  getSupportedScoreFactor(unusedFactor) {
+    return 0;
   }
 
   /** @override */

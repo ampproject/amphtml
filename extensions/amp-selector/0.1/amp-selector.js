@@ -58,9 +58,6 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {!Array<!Element>} */
     this.inputs_ = [];
 
-    /** @private {boolean} */
-    this.isDisabled_ = false;
-
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
@@ -85,7 +82,6 @@ export class AmpSelector extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
-    this.isDisabled_ = this.element.hasAttribute('disabled');
 
     if (!this.element.hasAttribute('role')) {
       this.element.setAttribute('role', 'listbox');
@@ -95,7 +91,7 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.setAttribute('aria-multiselectable', 'true');
     }
 
-    if (this.isDisabled_) {
+    if (this.element.hasAttribute('disabled')) {
       this.element.setAttribute('aria-disabled', 'true');
     }
 
@@ -115,10 +111,9 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction('clear', this.clearAllSelections_.bind(this));
 
     this.init_();
-    if (!this.isDisabled_) {
-      this.element.addEventListener('click', this.clickHandler_.bind(this));
-      this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
-    }
+
+    this.element.addEventListener('click', this.clickHandler_.bind(this));
+    this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
 
     this.registerAction('selectUp', invocation => {
       const {args} = invocation;
@@ -152,6 +147,14 @@ export class AmpSelector extends AMP.BaseElement {
     const selected = mutations['selected'];
     if (selected !== undefined) {
       this.selectedAttributeMutated_(selected);
+    }
+    const disabled = mutations['disabled'];
+    if (disabled !== undefined) {
+      if (disabled) {
+        this.element.setAttribute('aria-disabled', 'true');
+      } else {
+        this.element.removeAttribute('aria-disabled');
+      }
     }
   }
 
@@ -283,7 +286,7 @@ export class AmpSelector extends AMP.BaseElement {
   setInputs_() {
     const selectedValues = [];
     const elementName = this.element.getAttribute('name');
-    if (!elementName || this.isDisabled_) {
+    if (!elementName || this.element.hasAttribute('disabled')) {
       return selectedValues;
     }
     const formId = this.element.getAttribute('form');
@@ -361,6 +364,9 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   clickHandler_(event) {
+    if (this.element.hasAttribute('disabled')) {
+      return;
+    }
     let el = dev().assertElement(event.target);
     if (!el) {
       return;
@@ -422,6 +428,9 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   keyDownHandler_(event) {
+    if (this.element.hasAttribute('disabled')) {
+      return;
+    }
     const {keyCode} = event;
     switch (keyCode) {
       case KeyCodes.LEFT_ARROW: /* fallthrough */

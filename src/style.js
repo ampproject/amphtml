@@ -218,9 +218,13 @@ export function setInitialDisplay(el, value) {
  */
 export function toggle(element, opt_display) {
   if (opt_display === undefined) {
-    opt_display = getStyle(element, 'display') == 'none';
+    opt_display = element.hasAttribute('hidden');
   }
-  setStyle(element, 'display', opt_display ? '' : 'none');
+  if (opt_display) {
+    element.removeAttribute('hidden');
+  } else {
+    element.setAttribute('hidden', '');
+  }
 }
 
 /**
