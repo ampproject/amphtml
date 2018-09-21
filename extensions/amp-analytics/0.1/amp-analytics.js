@@ -95,6 +95,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iniPromise_ = null;
 
+    /** @private {./transport.Transport} */
     this.transport_ = null;
 
     /** @private {boolean} */
@@ -451,7 +452,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
               this.element, request, this.preconnect,
-              this.sendRequest_.bind(this),
+              this.transport_,
               this.isSandbox_);
         }
       }
@@ -669,26 +670,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
             this.element).expandUrlAsync(key));
-  }
-
-  /**
-   * @param {string} request The full request string to send.
-   * @param {!JsonObject} trigger
-   * @private
-   */
-  sendRequest_(request, trigger) {
-    if (!request) {
-      const TAG = this.getName_();
-      this.user().error(TAG, 'Request not sent. Contents empty.');
-      return;
-    }
-    if (trigger['iframePing']) {
-      user().assert(trigger['on'] == 'visible',
-          'iframePing is only available on page view requests.');
-      this.transport_.sendRequestUsingIframe(request);
-    } else {
-      this.transport_.sendRequest(request);
-    }
   }
 
   /**
