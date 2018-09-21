@@ -44,7 +44,7 @@ export const PRESSBOARD_CONFIG = /** @type {!JsonObject} */ ({
       '&asnh=${screenHeight}' +
       '&aasnh=${availableScreenHeight}' +
       '&avh=${viewportHeight}' +
-      '&ast=${scrollTop}'+
+      '&ast=${scrollTop}' +
       '&atet=${totalEngagedTime}',
     'conversion': '${host}' +
       '/track/attention-amp?' +
