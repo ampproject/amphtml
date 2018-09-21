@@ -72,61 +72,61 @@ export class SsrTemplateHelper {
    * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
    * @param {!FetchRequestDef} request The fetch/XHR related data.
-   * @param {?SsrTemplateDef=} ampFormTemplates Response templates for amp-form
-   *     to pass into the payload. If provided, finding the template (for
-   *     amp-list) in the passed in element is not attempted.
+   * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
+   *     the payload. If provided, finding the template in the passed in
+   *     element is not attempted.
    * @param {!Object=} opt_attributes Additional JSON to send to viewer.
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
   fetchAndRenderTemplate(
-    element, request, ampFormTemplates = null, opt_attributes = {}) {
-    let ampListTemplate;
-    if (!ampFormTemplates) {
-      ampListTemplate = this.templates_.maybeFindTemplate(element);
+    element, request, opt_templates = null, opt_attributes = {}) {
+    let mustacheTemplate;
+    if (!mustacheTemplate) {
+      mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
     return this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate',
         this.buildPayload_(
             request,
-            ampListTemplate,
-            ampFormTemplates,
+            mustacheTemplate,
+            opt_templates,
             opt_attributes
         ));
   }
 
   /**
    * @param {!FetchRequestDef} request
-   * @param {string|undefined} ampListTemplate
-   * @param {?SsrTemplateDef=} ampFormTemplates
+   * @param {?Element} mustacheTemplate
+   * @param {?SsrTemplateDef=} opt_templates
    * @param {!Object=} opt_attributes
    * @return {!JsonObject}
    * @private
    */
   buildPayload_(
-    request, ampListTemplate, ampFormTemplates, opt_attributes = {}) {
+    request, mustacheTemplate, opt_templates, opt_attributes = {}) {
     const ampComponent = dict({'type': this.sourceComponent_});
 
     const successTemplateKey = 'successTemplate';
-    const ampFormSuccessTemplate =
-      (ampFormTemplates && ampFormTemplates[successTemplateKey])
-        ? ampFormTemplates[successTemplateKey] : null;
-    if (ampFormSuccessTemplate || ampListTemplate) {
+    const successTemplate =
+      (opt_templates && opt_templates[successTemplateKey])
+        ? opt_templates[successTemplateKey] : null;
+    if (successTemplate || mustacheTemplate) {
       ampComponent[successTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': ampFormSuccessTemplate
-          ? ampFormSuccessTemplate./*REVIEW*/innerHTML
-          : ampListTemplate./*REVIEW*/innerHTML,
+        'payload': successTemplate
+          ? successTemplate./*REVIEW*/innerHTML
+          : mustacheTemplate./*REVIEW*/innerHTML,
       };
     }
 
     const errorTemplateKey = 'errorTemplate';
-    const ampFormErrorTemplate =
-      (ampFormTemplates && ampFormTemplates[errorTemplateKey])
-        ? ampFormTemplates[errorTemplateKey] : null;
-    if (ampFormErrorTemplate) {
+    const errorTemplate =
+      (opt_templates && opt_templates[errorTemplateKey])
+        ? opt_templates[errorTemplateKey] : null;
+    if (errorTemplate) {
       ampComponent[errorTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': ampFormErrorTemplate./*REVIEW*/innerHTML,
+        'payload': errorTemplate./*REVIEW*/innerHTML,
       };
     }
 
