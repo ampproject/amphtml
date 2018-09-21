@@ -257,11 +257,7 @@ export class VariableSource {
     if (this.getUrlMacroWhitelist_()) {
       keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
     }
-    // If a whitelist is passed into the call to GlobalVariableSource.expand_
-    // then we only resolve values contained in the whitelist.
-    if (opt_whiteList) {
-      keys = keys.filter(key => opt_whiteList[key]);
-    }
+
     if (keys.length === 0) {
       const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
       return regexThatMatchesNothing;
