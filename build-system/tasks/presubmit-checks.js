@@ -612,7 +612,6 @@ const forbiddenTerms = {
   'eslint no-unused-vars': {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
-      'viewer-api/swipe-api.js',
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
     ],
   },
