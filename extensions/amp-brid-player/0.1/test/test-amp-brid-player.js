@@ -70,7 +70,7 @@ describes.realWin('amp-brid-player', {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          'https://services.brid.tv/services/iframe/video/13663/264/4144/0/1');
+          'https://services.brid.tv/services/iframe/video/13663/264/4144/0/1/?amp=1');
     });
   });
 
