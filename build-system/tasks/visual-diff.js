@@ -41,7 +41,8 @@ const PORT = 8000;
 const BASE_URL = `http://${HOST}:${PORT}`;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
-const NUM_PARALLEL_PAGES = 5;
+const MAX_PARALLEL_PAGES = 10;
+const WAIT_FOR_PRODUCER_OR_CONSUMER_MS = 1000;
 const CSS_SELECTOR_RETRY_MS = 100;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
@@ -58,7 +59,7 @@ const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
 const preVisualDiffTasks =
     (argv.nobuild || argv.verify_status) ? [] : ['build'];
 
-const browsers_ = [];
+let browser_;
 let webServerProcess_;
 
 /**
@@ -251,15 +252,14 @@ function verifyBuildStatus(status, buildId) {
 }
 
 /**
- * Launches multiple Puppeteer controlled browsers and returns a page in each.
+ * Launches a Puppeteer controlled browser.
  *
- * Waits until the browsers are up and reachable, and ties their lifecycle to
- * this process's lifecycle.
+ * Waits until the browser is up and reachable, and ties its lifecycle to this
+ * process's lifecycle.
  *
- * @param {number} numPages how many pages to open.
- * @return {!Array<!puppeteer.Page>} a Puppeteer controlled page.
+ * @return {!puppeteer.Browser} a Puppeteer controlled browser.
  */
-async function launchBrowsers(numPages) {
+async function launchBrowser() {
   const browserOptions = {
     args: ['--no-sandbox', '--disable-extensions'],
     dumpio: argv.chrome_debug,
@@ -269,22 +269,26 @@ async function launchBrowsers(numPages) {
     browserOptions['args'].push('--disable-gpu');
   }
 
-  const pages = [];
-  for (let i = 0; i < numPages; i++) {
-    const browser = await puppeteer.launch(browserOptions)
-        .catch(err => log('fatal', err));
-    browsers_.push(browser);
+  browser_ = await puppeteer.launch(browserOptions)
+      .catch(err => log('fatal', err));
 
-    const page = (await browser.pages())[0];
-    await page.setViewport({
-      width: VIEWPORT_WIDTH,
-      height: VIEWPORT_HEIGHT,
-    });
-    page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
-    await page.setJavaScriptEnabled(true);
-    pages.push(page);
-  }
-  return pages;
+  return browser_;
+}
+
+/**
+ * Opens a new browser tab, resizes its viewport, and returns a Page handler.
+ *
+ * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
+ */
+async function newPage(browser) {
+  const page = await browser.newPage();
+  await page.setViewport({
+    width: VIEWPORT_WIDTH,
+    height: VIEWPORT_HEIGHT,
+  });
+  page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
+  await page.setJavaScriptEnabled(true);
+  return page;
 }
 
 /**
@@ -373,43 +377,34 @@ async function generateSnapshots(percy, webpages) {
     log('info', 'Executing', colors.cyan(webpages.length), 'visual diff tests');
   }
 
-  const pages = await launchBrowsers(NUM_PARALLEL_PAGES);
+  const browser = await launchBrowser();
   if (argv.master) {
-    await pages[0].goto(
+    const page = await newPage(browser);
+    await page.goto(
         `${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
-    await percy.snapshot('Blank page', pages[0], SNAPSHOT_EMPTY_BUILD_OPTIONS);
+    await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
 
   log('verbose', 'Generating snapshots...');
-  for (let i = 0; i < webpages.length; i += NUM_PARALLEL_PAGES) {
-    await snapshotWebpages(
-        percy, pages, webpages.slice(i, i + NUM_PARALLEL_PAGES));
-  }
-  log('travis', '\n');
+  await snapshotWebpages(percy, browser, webpages);
 }
 
 /**
  * Generates Percy snapshots for a set of given webpages.
  *
- * Note that `pages.length >= webpages.length` must be true.
- *
  * @param {!Percy} percy a Percy-Puppeteer controller.
- * @param {!Array<!puppeteer.Pages>} pages an array of Puppeteer controlled
- *     pages.
+ * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {!Array<!JsonObject>} webpages an array of JSON objects containing
- *     details about the pages to snapshot.
+ *     details about the webpages to snapshot.
  */
-async function snapshotWebpages(percy, pages, webpages) {
-  if (pages.length < webpages.length) {
-    log('fatal', 'snapshotWebpages() called with `pages` and `webpages` with',
-        'different lengths');
-  }
+async function snapshotWebpages(percy, browser, webpages) {
+  const pagePromises = {};
+  for (const webpage of webpages) {
+    while (Object.keys(pagePromises).length >= MAX_PARALLEL_PAGES) {
+      await sleep(WAIT_FOR_PRODUCER_OR_CONSUMER_MS);
+    }
 
-  const navigationPromises = {};
-  for (let pageId = 0; pageId < webpages.length; pageId++) {
-    const webpage = webpages[pageId];
-    const page = pages[pageId];
-
+    const page = await newPage(browser);
     const {name, url, viewport} = webpage;
     log('verbose', 'Visual diff test', colors.yellow(name));
 
@@ -421,8 +416,7 @@ async function snapshotWebpages(percy, pages, webpages) {
         height: viewport.height,
       });
     }
-    log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`),
-        'on tab', colors.cyan(`#${pageId + 1}`));
+    log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
 
     // Navigate to an empty page first to support different webpages that only
     // modify the #anchor name.
@@ -433,59 +427,60 @@ async function snapshotWebpages(percy, pages, webpages) {
     // in the resulting Percy build. Also attempt to wait until there are no
     // more network requests. This method is flaky since Puppeteer doesn't
     // always understand Chrome's network activity, so ignore timeouts again.
-    navigationPromises[pageId] = page.goto(
+    const pagePromise = page.goto(
         `${BASE_URL}/${url}`, {waitUntil: 'networkidle0'})
-        .then(() => pageId, () => pageId);
+        .then(() => {}, () => {})
+        .then(async() => {
+          log('verbose', 'Navigation to page',
+              colors.yellow(`${BASE_URL}/${url}`), 'is done, verifying page');
+
+          await page.bringToFront();
+
+          await verifyCssElements(page, url, webpage.forbidden_css,
+              webpage.loading_incomplete_css, webpage.loading_complete_css);
+
+          if (webpage.loading_complete_delay_ms) {
+            log('verbose', 'Waiting',
+                colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
+                'for loading to complete');
+            await sleep(webpage.loading_complete_delay_ms);
+          }
+
+          const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
+
+          if (webpage.enable_percy_javascript) {
+            snapshotOptions.enableJavaScript = true;
+            // Remove all scripts that have an external source, leaving only
+            // those scripts that are inlined in the page inside a <script> tag.
+            await page.evaluate(
+                'document.head.querySelectorAll("script[src]").forEach(' +
+                'node => node./*OK*/remove())');
+          }
+
+          if (viewport) {
+            snapshotOptions.widths = [viewport.width];
+            log('verbose', 'Wrapping viewport-constrained page in an iframe');
+            await page.evaluate(WRAP_IN_IFRAME_SCRIPT
+                .replace(/__WIDTH__/g, viewport.width)
+                .replace(/__HEIGHT__/g, viewport.height));
+            await page.setViewport({
+              width: VIEWPORT_WIDTH,
+              height: VIEWPORT_HEIGHT,
+            });
+          }
+
+          await percy.snapshot(name, page, snapshotOptions);
+          await page.close();
+          log('travis', colors.cyan('●'));
+        })
+        .then(() => delete pagePromises[name]);
+    pagePromises[name] = pagePromise;
   }
 
-  while (Object.keys(navigationPromises).length > 0) {
-    const pageId = await Promise.race(Object.values(navigationPromises));
-    delete navigationPromises[pageId];
-
-    const webpage = webpages[pageId];
-    const page = pages[pageId];
-
-    const {name, url, viewport} = webpage;
-
-    log('verbose', 'Navigation to page', colors.yellow(`${BASE_URL}/${url}`),
-        'on tab', colors.cyan(`#${pageId + 1}`), 'is done, verifying page');
-    await page.bringToFront();
-    await verifyCssElements(page, url, webpage.forbidden_css,
-        webpage.loading_incomplete_css, webpage.loading_complete_css);
-
-    if (webpage.loading_complete_delay_ms) {
-      log('verbose', 'Waiting',
-          colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
-          'for loading to complete');
-      await sleep(webpage.loading_complete_delay_ms);
-    }
-
-    const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
-
-    if (webpage.enable_percy_javascript) {
-      snapshotOptions.enableJavaScript = true;
-      // Remove all scripts that have an external source, leaving only those
-      // scripts that are inlined in the page inside a <script> tag.
-      await page.evaluate(
-          'document.head.querySelectorAll("script[src]").forEach(' +
-          'node => node./*OK*/remove())');
-    }
-
-    if (viewport) {
-      snapshotOptions.widths = [viewport.width];
-      log('verbose', 'Wrapping viewport-constrained page in an iframe');
-      await page.evaluate(WRAP_IN_IFRAME_SCRIPT
-          .replace(/__WIDTH__/g, viewport.width)
-          .replace(/__HEIGHT__/g, viewport.height));
-      await page.setViewport({
-        width: VIEWPORT_WIDTH,
-        height: VIEWPORT_HEIGHT,
-      });
-    }
-
-    await percy.snapshot(name, page, snapshotOptions);
-    log('travis', colors.cyan('●'));
+  while (Object.keys(pagePromises).length > 0) {
+    await sleep(WAIT_FOR_PRODUCER_OR_CONSUMER_MS);
   }
+  log('travis', '\n');
 }
 
 /**
@@ -703,7 +698,8 @@ async function visualDiff() {
   });
 
   if (argv.skip) {
-    const page = (await launchBrowsers(1))[0];
+    const browser = await launchBrowser();
+    const page = await newPage(browser);
     await createEmptyBuild(page);
     process.exit(0);
     return;
@@ -725,8 +721,8 @@ function setupCleanup_() {
 }
 
 async function cleanup_() {
-  for (const browser of browsers_) {
-    await browser.close();
+  if (browser_) {
+    await browser_.close();
   }
   if (!webServerProcess_.killed) {
     // Explicitly exit the webserver.
