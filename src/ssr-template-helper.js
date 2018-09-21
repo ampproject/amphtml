@@ -108,19 +108,23 @@ export class SsrTemplateHelper {
   buildPayload_(
     request, mustacheTemplate, opt_templates, opt_attributes = {}) {
     const ampComponent = dict({'type': this.sourceComponent_});
-    if ((opt_templates && opt_templates['successTemplate'])
-        || mustacheTemplate) {
+
+    const successTemplate = (opt_templates && opt_templates['successTemplate'])
+      ? opt_templates['successTemplate']./*REVIEW*/innerHTML : null;
+    if (successTemplate || mustacheTemplate) {
       ampComponent['successTemplate'] = {
         'type': 'amp-mustache',
-        'payload': (opt_templates && opt_templates['successTemplate'])
-          ? opt_templates['successTemplate']./*REVIEW*/innerHTML
-          : mustacheTemplate,
+        'payload': successTemplate
+          ? successTemplate : mustacheTemplate,
       };
     }
-    if (opt_templates && opt_templates['errorTemplate']) {
+
+    const errorTemplate = (opt_templates && opt_templates['errorTemplate'])
+      ? opt_templates['errorTemplate']./*REVIEW*/innerHTML : null;
+    if (errorTemplate) {
       ampComponent['errorTemplate'] = {
         'type': 'amp-mustache',
-        'payload': opt_templates['errorTemplate']./*REVIEW*/innerHTML,
+        'payload': errorTemplate,
       };
     }
 
