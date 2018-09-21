@@ -610,18 +610,19 @@ amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
   visibility: visible;
 }
 
-amp-list[load-more] > [overflow] > .i-amphtml-loader {
+amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
   visibility: hidden;
 }
- amp-list[load-more] > [overflow].amp-load-more-loading > .i-amphtml-loader {
-  visibility: visible;
-}
- amp-list[load-more] > [load-more-loading],
-amp-list[load-more] > [load-more-failed] {
+
+amp-list[load-more] > [load-more-loading],
+amp-list[load-more] > [load-more-failed],
+amp-list[load-more] > [load-more-button]{
   visibility: hidden;
 }
- amp-list[load-more] > [load-more-loading].amp-visible,
-amp-list[load-more] > [load-more-failed].amp-visible {
+
+amp-list[load-more] > [load-more-loading].amp-visible,
+amp-list[load-more] > [load-more-failed].amp-visible,
+amp-list[load-more] > [load-more-button].amp-visible {
   visibility: visible;
 }
 
