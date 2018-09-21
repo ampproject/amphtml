@@ -30,7 +30,7 @@ import {dict, map} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';
 import {isArray, isFiniteNumber} from '../../../src/types';
 
-const TAG = 'AMP-ANALYTICS';
+const TAG = 'AMP-ANALYTICS/requests';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -39,10 +39,10 @@ export class RequestHandler {
    * @param {!Element} ampAnalyticsElement
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
-   * @param {function(string, !JsonObject)} handler
+   * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
-  constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
+  constructor(ampAnalyticsElement, request, preconnect, transport, isSandbox) {
 
     /** @const {!Window} */
     this.win = ampAnalyticsElement.getAmpDoc().win;
@@ -93,8 +93,8 @@ export class RequestHandler {
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
 
-    /** @private {function(string, !JsonObject)} */
-    this.handler_ = handler;
+    /** @private {./transport.Transport} */
+    this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
     this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
@@ -230,7 +230,7 @@ export class RequestHandler {
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: batchSegmentsPromise,
     } = this;
-    const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
+    const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
     baseUrlTemplatePromise.then(preUrl => {
@@ -244,8 +244,18 @@ export class RequestHandler {
           requestUrlPromise =
               constructExtraUrlParamStrs(baseUrl, extraUrlParamsPromise);
         }
-        requestUrlPromise.then(requestUrl => {
-          this.handler_(requestUrl, lastTrigger);
+        requestUrlPromise.then(request => {
+          if (!request) {
+            user().error(TAG, 'Request not sent. Contents empty.');
+            return;
+          }
+          if (trigger['iframePing']) {
+            user().assert(trigger['on'] == 'visible',
+                'iframePing is only available on page view requests.');
+            this.transport_.sendRequestUsingIframe(request);
+          } else {
+            this.transport_.sendRequest(request);
+          }
         });
       });
     });
