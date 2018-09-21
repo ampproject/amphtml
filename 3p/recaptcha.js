@@ -17,12 +17,12 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {dict} from '../src/utils/object';
-import {initLogConstructor, setReportError, dev} from '../src/log';
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {loadScript, validateData} from './3p';
 import {MessageType} from '../src/3p-frame-messaging';
-import {setExperimentToggles,} from './3p';
+import {dev, initLogConstructor, setReportError} from '../src/log';
+import {dict} from '../src/utils/object';
+import {loadScript, setExperimentToggles, validateData} from './3p';
+
 import {tryParseJson} from '../src/json';
 
 /**
@@ -71,11 +71,11 @@ function recaptcha() {
 
   // Get the data from our name attribute
   const dataObject = dev().assert(
-    typeof window.name === 'string' ? tryParseJson(window.name) : window.name,
-    'Could not parse the window name.');
-  
+      typeof window.name === 'string' ? tryParseJson(window.name) : window.name,
+      'Could not parse the window name.');
+
   // Get our sitekey from the iframe name attribute
-  const sitekey = dataObject.sitekey;
+  const {sitekey} = dataObject;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
 
   loadScript(window, recaptchaApiUrl, function() {

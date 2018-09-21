@@ -240,11 +240,7 @@ export function resetBootstrapBaseUrlForTesting(win) {
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
-    return overrideBootstrapBaseUrl || getAdsLocalhost(parentWindow)
-          + '/dist.3p/'
-          + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
-            : `current/${srcFileBasename}.max`)
-          + '.html';
+    return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename)
   }
   // Ensure same sub-domain is used despite potentially different file.
   parentWindow.defaultBootstrapSubDomain =
@@ -252,6 +248,20 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   return 'https://' + parentWindow.defaultBootstrapSubDomain +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
       `${srcFileBasename}.html`;
+}
+
+/**
+ * Function to return the development boostrap base URL
+ * @param {!Window} parentWindow
+ * @param {!string} srcFileBasename
+ * @return {string}
+ */
+export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
+  return overrideBootstrapBaseUrl || getAdsLocalhost(parentWindow)
+    + '/dist.3p/'
+    + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
+      : `current/${srcFileBasename}.max`)
+    + '.html';
 }
 
 /**

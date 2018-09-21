@@ -19,17 +19,18 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
+import {urls} from '../../../src/config';
 import {Deferred} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getIframe, getBootstrapBaseUrl} from '../../../src/3p-frame';
+import {getMode} from '../../../src/mode';
+import {getDevelopmentBootstrapBaseUrl} from '../../../src/3p-frame';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
-import {parseUrlDeprecated} from '../../../src/url';
+import {parseUrlDeprecated, isProxyUrl, getSourceOrigin} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
-
 
 /**
  * @fileoverview
@@ -85,7 +86,7 @@ export class AmpRecaptchaService {
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
-   * @param {!String} sitekey
+   * @param {string} sitekey
    * @return {Promise}
    */
   register(sitekey) {
@@ -151,7 +152,7 @@ export class AmpRecaptchaService {
 
   /**
    * Function to create our recaptcha boostrap iframe.
-   * @param {!String} sitekey
+   * @param {string} sitekey
    * @private
    */
   initialize_(sitekey) {
@@ -163,10 +164,10 @@ export class AmpRecaptchaService {
           'amp-recaptcha-ready', this.recaptchaApiReady_.resolve
       ),
       this.listenIframe_(
-        'amp-recaptcha-token', this.tokenMessageHandler_.bind(this)
+          'amp-recaptcha-token', this.tokenMessageHandler_.bind(this)
       ),
       this.listenIframe_(
-        'amp-recaptcha-error', this.errorMessageHandler_.bind(this)
+          'amp-recaptcha-error', this.errorMessageHandler_.bind(this)
       ),
     ];
     this.executeMap_ = {};
@@ -194,7 +195,7 @@ export class AmpRecaptchaService {
 
   /**
    * Function to create our bootstrap iframe.
-   * 
+   *
    * @param {string} sitekey
    * @return {Element}
    * @private
@@ -202,17 +203,38 @@ export class AmpRecaptchaService {
   createRecaptchaFrame_(sitekey) {
 
     const iframe = this.win_.document.createElement('iframe');
+    
+    // Get our iframe src, depends on dev vs. prod
+    let baseUrl = undefined;
+    if (getMode().localDev || getMode().test) {
+      baseUrl = getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha')
+    } else {
+      // Need to have the subdomain match the original document url.
+      // This is verified by the recaptcha frame to 
+      // verify the origin on its messages
+      let subDomain = undefined;
+      const hostname = parseUrlDeprecated(this.win_.location.href);
+      
+      if(isProxyUrl(this.win_.location.href)) {
+        subDomain = hostname.split('.')[0];
+      } else {
+        // TODO(@torch2424) Actual punycode conversion
+        subDomain = subDomain.split('-').join('--');
+        subDomain = subDomain.split('.').join('-');
+      }
+      
+      baseUrl = 'https://' + subDomain +
+        `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+        `recaptcha.html`;
+    }
 
-    // TODO(@torch2424) get the correct booststrap url. Perhaps hardcode this for now.
-    const baseUrl = 'http://ads.localhost:8000/dist.3p/current/recaptcha.max.html';
-    console.log(getBootstrapBaseUrl(this.win_));
     iframe.src = baseUrl;
     iframe.ampLocation = parseUrlDeprecated(baseUrl);
     iframe.setAttribute('scrolling', 'no');
-    iframe.setAttribute('data-amp-3p-sentinel', 'recaptcha')
+    iframe.setAttribute('data-amp-3p-sentinel', 'recaptcha');
     iframe.setAttribute('name', JSON.stringify({
       'sitekey': sitekey,
-      'sentinel': 'recaptcha'
+      'sentinel': 'recaptcha',
     }));
     setStyle(iframe, 'border', 'none');
     /** @this {!Element} */
