@@ -154,7 +154,7 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
     analytics.buildCallback();
-    sendRequestSpy = sandbox.stub(analytics, 'sendRequest_');
+    sendRequestSpy = sandbox.stub(Transport.prototype, 'sendRequest');
     postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
     return analytics;
   }
@@ -385,7 +385,7 @@ describes.realWin('amp-analytics', {
     analytics.buildCallback();
     // Initialization has not started.
     expect(analytics.iniPromise_).to.be.null;
-    sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+    sendRequestSpy = sandbox.spy(Transport.prototype, 'sendRequest');
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy).to.have.not.been.called;
@@ -441,7 +441,7 @@ describes.realWin('amp-analytics', {
         el.connectedCallback();
         analytics.createdCallback();
         analytics.buildCallback();
-        sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+        sendRequestSpy = sandbox.spy(Transport.prototype, 'sendRequest');
 
         return waitForNoSendRequest(analytics).then(() => {
           expect(sendRequestSpy).to.have.not.been.called;
@@ -462,7 +462,7 @@ describes.realWin('amp-analytics', {
     el.connectedCallback();
     analytics.createdCallback();
     analytics.buildCallback();
-    sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+    sendRequestSpy = sandbox.spy(Transport.prototype, 'sendRequest');
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy).to.have.not.been.called;
