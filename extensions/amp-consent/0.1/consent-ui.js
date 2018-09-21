@@ -107,7 +107,7 @@ export class ConsentUI {
   }
 
   /**
-   * Display the UI. TODO: Apply placeholder when necessary
+   * Display the UI.
    */
   show() {
     if (!this.ui_) {
@@ -121,9 +121,11 @@ export class ConsentUI {
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
     if (this.isCreatedIframe_) {
-      this.iframeReady_ = new Deferred();
-      this.loadIframe_();
-      this.iframeReady_.promise.then(() => {
+      this.loadIframe_().then(() => {
+        // It is safe to assume that the loadIframe_ promise will resolve
+        // before resetIframe_. Because the iframe needs to be shown first
+        // being hidden. CMP iframe is responsible to call consent-iframe-ready
+        // API before consent-response API.
         this.showIframe_();
       });
     } else {
@@ -178,7 +180,7 @@ export class ConsentUI {
    * @return {!Element}
    */
   createPlaceholder_() {
-    // TODO: Allow publishers to provide placeholder upon request
+    // TODO(@zhouyx): Allow publishers to provide placeholder upon request
     const placeholder = this.parent_.ownerDocument.createElement('placeholder');
     toggle(placeholder, false);
     const {classList} = placeholder;
@@ -192,14 +194,17 @@ export class ConsentUI {
   /**
    * Apply placeholder
    * Set up event listener to handle UI related messages.
+   * @return {!Promise}
    */
   loadIframe_() {
+    this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     classList.add('loading');
     toggle(dev().assertElement(this.placeholder_), true);
     toggle(dev().assertElement(this.ui_), false);
     this.win_.addEventListener('message', this.boundHandleIframeMessages_);
     insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+    return this.iframeReady_.promise;
   }
 
   /**
