@@ -72,67 +72,66 @@ export class SsrTemplateHelper {
    * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
    * @param {!FetchRequestDef} request The fetch/XHR related data.
-   * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
-   *     the payload. If provided, finding the template in the passed in
-   *     element is not attempted.
+   * @param {?SsrTemplateDef=} ampFormTemplates Response templates for amp-form
+   *     to pass into the payload. If provided, finding the template (for
+   *     amp-list) in the passed in element is not attempted.
    * @param {!Object=} opt_attributes Additional JSON to send to viewer.
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
   fetchAndRenderTemplate(
-    element, request, opt_templates = null, opt_attributes = {}) {
-    let mustacheTemplate;
-    if (!opt_templates) {
-      const template = this.templates_.maybeFindTemplate(element);
-      if (template) {
-        mustacheTemplate = template./*REVIEW*/innerHTML;
-      }
+    element, request, ampFormTemplates = null, opt_attributes = {}) {
+    let ampListTemplate;
+    if (!ampFormTemplates) {
+      ampListTemplate = this.templates_.maybeFindTemplate(element);
     }
     return this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate',
         this.buildPayload_(
             request,
-            mustacheTemplate,
-            opt_templates,
+            ampListTemplate,
+            ampFormTemplates,
             opt_attributes
         ));
   }
 
   /**
    * @param {!FetchRequestDef} request
-   * @param {string|undefined} mustacheTemplate
-   * @param {?SsrTemplateDef=} opt_templates
+   * @param {string|undefined} ampListTemplate
+   * @param {?SsrTemplateDef=} ampFormTemplates
    * @param {!Object=} opt_attributes
    * @return {!JsonObject}
    * @private
    */
   buildPayload_(
-    request, mustacheTemplate, opt_templates, opt_attributes = {}) {
+    request, ampListTemplate, ampFormTemplates, opt_attributes = {}) {
     const ampComponent = dict({'type': this.sourceComponent_});
 
-    const successTemplate = (opt_templates && opt_templates['successTemplate'])
-      ? opt_templates['successTemplate']./*REVIEW*/innerHTML : null;
-    if (successTemplate || mustacheTemplate) {
-      ampComponent['successTemplate'] = {
+    const successTemplateKey = 'successTemplate';
+    const ampFormSuccessTemplate =
+      (ampFormTemplates && ampFormTemplates[successTemplateKey])
+        ? ampFormTemplates[successTemplateKey] : null;
+    if (ampFormSuccessTemplate || ampListTemplate) {
+      ampComponent[successTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': successTemplate
-          ? successTemplate : mustacheTemplate,
+        'payload': ampFormSuccessTemplate
+          ? ampFormSuccessTemplate./*REVIEW*/innerHTML
+          : ampListTemplate./*REVIEW*/innerHTML,
       };
     }
 
-    const errorTemplate = (opt_templates && opt_templates['errorTemplate'])
-      ? opt_templates['errorTemplate']./*REVIEW*/innerHTML : null;
-    if (errorTemplate) {
-      ampComponent['errorTemplate'] = {
+    const errorTemplateKey = 'errorTemplate';
+    const ampFormErrorTemplate =
+      (ampFormTemplates && ampFormTemplates[errorTemplateKey])
+        ? ampFormTemplates[errorTemplateKey] : null;
+    if (ampFormErrorTemplate) {
+      ampComponent[errorTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': errorTemplate,
+        'payload': ampFormErrorTemplate./*REVIEW*/innerHTML,
       };
     }
 
-    const additionalAttr = opt_attributes && Object.keys(opt_attributes);
-    if (additionalAttr) {
-      Object.keys(opt_attributes).forEach(key => {
-        ampComponent[key] = opt_attributes[key];
-      });
+    if (opt_attributes) {
+      Object.assign(ampComponent, opt_attributes);
     }
 
     const data = dict({
