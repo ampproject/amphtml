@@ -1347,7 +1347,7 @@ export class AmpStory extends AMP.BaseElement {
       } else {
         sidebarObserver.disconnect();
       }
-    } else {
+    } else if(sidebarState == open) {
       this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     }
     if (sidebarState && this.sidebar_) {
