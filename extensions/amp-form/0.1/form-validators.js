@@ -477,7 +477,7 @@ function getInvalidType(input) {
     }
   }
   // Finding error type with value true
-  const response = validityTypes.find(type =>
-    input.validity[type] === true) || null;
-  return response;
+  const response = validityTypes.filter(type =>
+    input.validity[type] === true);
+  return response.length ? response[0] : null;
 }
