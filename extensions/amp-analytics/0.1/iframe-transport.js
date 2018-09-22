@@ -24,7 +24,7 @@ import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */
-const TAG_ = 'amp-analytics.IframeTransport';
+const TAG_ = 'amp-analytics/iframe-transport';
 
 /** @private @const {number} */
 const LONG_TASK_REPORTING_THRESHOLD = 5;

@@ -25,7 +25,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
-const TAG = 'Analytics.Variables';
+const TAG = 'amp-analytics/variables';
 
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
