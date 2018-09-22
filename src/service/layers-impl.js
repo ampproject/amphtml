@@ -185,7 +185,7 @@ export class LayoutLayers {
 
     // Layout may have been removed from the tracked layouts (due to
     // reparenting).
-    if (this.layouts_.indexOf(layout) === -1) {
+    if (!this.layouts_.includes(layout)) {
       this.layouts_.push(layout);
     }
 
@@ -585,6 +585,9 @@ export class LayoutElement {
    * @return {?LayoutElement}
    */
   static getParentLayer(node, opt_force) {
+    if (isDestroyed(node)) {
+      return null;
+    }
     if (!opt_force) {
       const layout = LayoutElement.forOptional(node);
       if (layout) {
@@ -724,7 +727,7 @@ export class LayoutElement {
     // Parents track the children, but not all children are aware of there
     // parents. When a child finds its parent, it adds itself to the parent.
     // This might lead to a double tracking.
-    if (this.children_.indexOf(child) === -1) {
+    if (!this.children_.includes(child)) {
       this.children_.push(child);
     }
   }
@@ -1286,6 +1289,21 @@ function frameParent(node) {
       : null;
   } catch (e) { }
   return null;
+}
+
+/**
+ * Checks several references to see if the node's context window has been
+ * destroyed (eg, a node inside an iframe that was disconnected from the DOM).
+ *
+ * @param {!Node} node
+ */
+function isDestroyed(node) {
+  const {ownerDocument} = node;
+  if (!ownerDocument) {
+    return true;
+  }
+  const {defaultView} = ownerDocument;
+  return !defaultView || !defaultView.document;
 }
 
 /**
