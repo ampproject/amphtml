@@ -32,8 +32,7 @@ import {map} from '../../../src/utils/object';
 import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
-const TAG = 'amp-analytics';
-
+const TAG = 'amp-analytics/analytics-root';
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or

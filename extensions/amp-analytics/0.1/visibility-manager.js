@@ -28,7 +28,7 @@ import {isArray, isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 
-const TAG = 'VISIBILITY-MANAGER';
+const TAG = 'amp-analytics/visibility-manager';
 
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 

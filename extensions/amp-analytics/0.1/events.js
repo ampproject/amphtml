@@ -36,7 +36,7 @@ const MIN_TIMER_INTERVAL_SECONDS = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
-const TAG = 'analytics-events';
+const TAG = 'amp-analytics/events';
 
 /**
  * Events that can result in analytics data to be sent.

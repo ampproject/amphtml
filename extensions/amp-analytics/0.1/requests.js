@@ -30,7 +30,7 @@ import {dict, map} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';
 import {isArray, isFiniteNumber} from '../../../src/types';
 
-const TAG = 'AMP-ANALYTICS/requests';
+const TAG = 'amp-analytics/requests';
 
 const BATCH_INTERVAL_MIN = 200;
 

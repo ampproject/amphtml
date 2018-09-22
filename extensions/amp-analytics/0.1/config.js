@@ -23,7 +23,7 @@ import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
 
-const TAG = 'analytics-config';
+const TAG = 'amp-analytics/config';
 
 export class AnalyticsConfig {
 
