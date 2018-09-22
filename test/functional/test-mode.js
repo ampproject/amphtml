@@ -23,24 +23,9 @@ import {parseUrlDeprecated} from '../../src/url';
 
 describe('getMode', () => {
 
-  let a4aIdMetaElement;
-
-  function addA4AMetaTagToDocument() {
-    a4aIdMetaElement = document.createElement('meta');
-    a4aIdMetaElement.setAttribute('name', 'amp4ads-id');
-    a4aIdMetaElement.setAttribute('content',
-        'vendor=doubleclick,type=impression-id,value=12345');
-    document.head.appendChild(a4aIdMetaElement);
-  }
-
-  function removeA4AMetaTagToDocument() {
-    document.head.removeChild(a4aIdMetaElement);
-  }
-
   function getWin(url) {
     const win = {
       location: parseUrlDeprecated(url),
-      document,
     };
     return win;
   }
@@ -67,21 +52,6 @@ describe('getMode', () => {
     const url = 'https://www.example.com/amp.html';
     const mode = getMode(getWin(url));
     expect(mode.lite).to.be.false;
-  });
-
-  it('Should not have an a4aId if no a4a meta tag in head', () => {
-    const url = 'https://www.example.com/amp.html';
-    const mode = getMode(getWin(url));
-    expect(mode.a4aId).to.be.not.ok;
-  });
-
-
-  it('Should be able to get the a4aId if on the document', () => {
-    addA4AMetaTagToDocument();
-    const url = 'https://www.example.com/amp.html';
-    const mode = getMode(getWin(url));
-    expect(mode.a4aId).to.be.ok;
-    removeA4AMetaTagToDocument();
   });
 });
 

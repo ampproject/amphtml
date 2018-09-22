@@ -81,8 +81,6 @@ function getMode_(win) {
 
   const searchQuery = parseQueryString_(win.location.search);
 
-  const a4aId = getA4AId_(win);
-
   if (!rtvVersion) {
     rtvVersion = getRtvVersion(win, isLocalDev);
   }
@@ -109,7 +107,6 @@ function getMode_(win) {
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
     log: hashQuery['log'],
-    a4aId,
     version,
     rtvVersion,
   };
@@ -159,23 +156,3 @@ export function resetRtvVersionForTesting() {
   rtvVersion = '';
 }
 
-/**
- * Function to get the amp4ads-identifier from the meta tag on the document
- * @param {!Window} win
- * @return {?string}
- */
-function getA4AId_(win) {
-
-  if (!win.document || !win.document.querySelector) {
-    return null;
-  }
-
-  const a4aIdMetaTag = win.document
-      .querySelector('head meta[name="amp4ads-id"]');
-
-  if (a4aIdMetaTag) {
-    return a4aIdMetaTag.getAttribute('content');
-  }
-
-  return null;
-}
