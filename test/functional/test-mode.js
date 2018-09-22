@@ -22,7 +22,6 @@ import {
 import {parseUrlDeprecated} from '../../src/url';
 
 describe('getMode', () => {
-
   function getWin(url) {
     const win = {
       location: parseUrlDeprecated(url),

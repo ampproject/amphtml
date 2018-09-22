@@ -155,4 +155,3 @@ export function getRtvVersionForTesting(win, isLocalDev) {
 export function resetRtvVersionForTesting() {
   rtvVersion = '';
 }
-
