@@ -114,6 +114,6 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
         'i-amphtml-story-has-sidebar');
     storeService.dispatch(Action.TOGGLE_HAS_SIDEBAR, true);
     expect(systemLayer.getShadowRoot()).to.have.attribute(
-      'i-amphtml-story-has-sidebar');
+        'i-amphtml-story-has-sidebar');
   });
 });
