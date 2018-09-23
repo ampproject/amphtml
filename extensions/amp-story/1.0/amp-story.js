@@ -282,6 +282,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?Element} */
     this.sidebar_ = null;
 
+    /** @private {?MutationObserver} */
+    this.sidebarObserver_ = null;
+
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -1338,21 +1341,27 @@ export class AmpStory extends AMP.BaseElement {
   onSidebarStateUpdate_(sidebarState) {
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
     if (this.win.MutationObserver) {
-      sidebarObserver = new this.win.MutationObserver(() => {
-        this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
-            this.sidebar_.hasAttribute('open'));
-      });
-      if (sidebarState) {
-        sidebarObserver.observe(this.sidebar_, {attributes: open});
-      } else {
-        sidebarObserver.disconnect();
+      if (!this.sidebarObserver_) {
+        this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {
+          mutationsList.forEach(function(mutation) {
+            if (mutation.attributeName == 'open') {
+              this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
+                  this.sidebar_.hasAttribute('open'));
+              return;
+            }
+          }.bind(this));
+        });
       }
-    } else if(sidebarState == open) {
+      if (sidebarState) {
+        this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
+        actions.execute(this.sidebar_, 'open', /* args */ null,
+        /* source */ null, /* caller */ null, /* event */ null,
+            ActionTrust.HIGH);
+      } else {
+        this.sidebarObserver_.disconnect();
+      }
+    } else if (sidebarState) {
       this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
-    }
-    if (sidebarState && this.sidebar_) {
-      actions.execute(this.sidebar_, 'open', /* args */ null, /* source */ null,
-          /* caller */ null, /* event */ null, ActionTrust.HIGH);
     }
   }
 
