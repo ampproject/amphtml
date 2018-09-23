@@ -568,7 +568,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   rewindAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       if (this.isBotUserAgent_) {
-        mediaEl.rewindToBeginning();
+        // No-op.
       } else {
         return mediaPool.rewindToBeginning(
             /** @type {!HTMLMediaElement} */ (mediaEl));
