@@ -1352,7 +1352,7 @@ export class AmpStory extends AMP.BaseElement {
           }.bind(this));
         });
       }
-      if (sidebarState) {
+      if (this.sidebar_ && sidebarState) {
         this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
         actions.execute(this.sidebar_, 'open', /* args */ null,
         /* source */ null, /* caller */ null, /* event */ null,
