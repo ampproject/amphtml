@@ -24,6 +24,7 @@
   transform: translateZ(0) !important;
   /* Remove webkit tap highlight grayish color */
   -webkit-tap-highlight-color: rgba(0,0,0,0);
+  cursor: col-resize;
 }
 
 .i-amphtml-image-slider-left-mask {
