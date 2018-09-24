@@ -26,7 +26,7 @@ wonder why we're not just writing Javascript directly, or why we're
 not encoding our rules in JSON or YAML or even, gasp, XML? Besides the
 additional type safety that we gain from our approach, it allows us to
 share the rule specifications, error codes, etc. between multiple
-validator implemenations, including an implementation in C++. This
+validator implementations, including an implementation in C++. This
 makes it much easier to keep otherwise likely divergent behavior in
 sync.
 """
