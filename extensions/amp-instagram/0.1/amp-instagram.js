@@ -113,7 +113,7 @@ class AmpInstagram extends AMP.BaseElement {
     image.setAttribute('layout', 'fill');
     image.setAttribute('referrerpolicy', 'origin');
 
-    this.propagateAttributes(['alt'], image);
+    image.setAttribute('alt', 'Instagram');
     /*
      * Add instagram default styling
      */
@@ -152,9 +152,7 @@ class AmpInstagram extends AMP.BaseElement {
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
-    //Add title to the iframe for better accessibility.
-    iframe.setAttribute('title', 'Instagram: ' +
-        this.element.getAttribute('alt'));
+
     iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/embed/' +
         this.captioned_ + '?cr=1&v=9';
