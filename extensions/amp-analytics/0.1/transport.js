@@ -30,7 +30,7 @@ import {removeElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
-const TAG_ = 'amp-analytics.Transport';
+const TAG_ = 'amp-analytics/transport';
 
 /**
  * Transport defines the ways how the analytics pings are going to be sent.
