@@ -208,23 +208,28 @@ export class LayoutLayers {
       return;
     }
 
-    const index = this.layouts_.indexOf(layout);
+    const layouts = this.layouts_;
+    const index = layouts.indexOf(layout);
     if (index > -1) {
-      this.layouts_.splice(index, 1);
+      layouts.splice(index, 1);
     }
 
     const parent = layout.getParentLayer();
     if (parent) {
       parent.remove(layout);
+    } else {
+      // Don't know who the parent is.
+      // Ensure the entire layer tree removes the layout.
+      for (let i = 0; i < layouts.length; i++) {
+        layouts[i].remove(layout);
+      }
     }
 
-    // Dirty measurements so it is remeasured if reattached.
-    layout.dirtyMeasurements();
+    // The layout it likely to be reparented under a new layer.
+    layout.forgetParentLayer();
 
-    // Do not go through the normal undeclareLayer process, since there's no
-    // parent layer to reparent our children. Just mark that we are no longer a
-    // layer.
-    layout.isLayer_ = false;
+    // Measurements have likely changed due to CSS rules matching.
+    layout.dirtyMeasurements();
   }
 
   /**
@@ -588,6 +593,7 @@ export class LayoutElement {
     if (isDestroyed(node)) {
       return null;
     }
+
     if (!opt_force) {
       const layout = LayoutElement.forOptional(node);
       if (layout) {
@@ -738,13 +744,9 @@ export class LayoutElement {
    * @param {!LayoutElement} child
    */
   remove(child) {
-    dev().assert(this.isLayer());
-    dev().assert(child.getParentLayer() === this);
-
     const i = this.children_.indexOf(child);
     if (i > -1) {
       this.children_.splice(i, 1);
-      child.forgetParentLayer();
     }
   }
 
@@ -798,6 +800,10 @@ export class LayoutElement {
     }
 
     const element = this.element_;
+    if (isDestroyed(element)) {
+      return;
+    }
+
     const win = /** @type {!Window } */ (dev().assert(
         element.ownerDocument.defaultView));
     // If it remains fixed, it will still be a layer.
@@ -809,7 +815,7 @@ export class LayoutElement {
     // Handle if this was a fixed position layer (and therefore had null parent
     // layer).
     const parent = this.getParentLayer() ||
-        LayoutElement.getParentLayer(this.element_, true);
+        LayoutElement.getParentLayer(element, true);
     this.transfer_(/** @type {!LayoutElement} */ (dev().assert(parent)));
   }
 
