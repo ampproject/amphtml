@@ -25,7 +25,6 @@ import {AffiliateLinkResolver} from './affiliate-link-resolver';
 import {SKIMLINKS_REWRITER_ID} from './constants';
 import {EVENTS as linkRewriterEvents} from './link-rewriter/constants';
 
-import {EVENT_TYPE_CONTEXT_MENU} from '../../../src/service/navigation';
 import {LinkRewriterManager} from './link-rewriter/link-rewriter-manager';
 import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
@@ -220,7 +219,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
       //    E.g: eventData.linkRewriterId === "awin"
       eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID &&
       // Also, context menu click should not send tracking
-      eventData.clickType !== EVENT_TYPE_CONTEXT_MENU
+      eventData.clickType !== 'contextmenu'
     );
 
     if (doClickTracking) {

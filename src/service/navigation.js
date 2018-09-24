@@ -36,10 +36,10 @@ import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
 const TAG = 'navigation';
-/** @public @const {string} */
-export const EVENT_TYPE_CLICK = 'click';
-/** @public @const {string} */
-export const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
+/** @private @const {string} */
+const EVENT_TYPE_CLICK = 'click';
+/** @private @const {string} */
+const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
