@@ -81,7 +81,7 @@ export class SsrTemplateHelper {
   fetchAndRenderTemplate(
     element, request, opt_templates = null, opt_attributes = {}) {
     let mustacheTemplate;
-    if (!mustacheTemplate) {
+    if (!opt_templates) {
       mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
     return this.viewer_.sendMessageAwaitResponse(
