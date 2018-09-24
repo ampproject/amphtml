@@ -85,7 +85,7 @@ export default {
     string: 'Ampliar la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Debe habilitar el experimento amp-stories para ver este contenido',
+    string: 'Debe habilitar el experimento amp-story para ver este contenido',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'La página se ve mejor en modo vertical',
