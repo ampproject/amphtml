@@ -51,7 +51,7 @@ describes.realWin('amp-delight-player', {
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-            'https://players.delight-vr.com/player/-LLoCCZqWi18O73b6M0w');
+            'https://players.delight-vr.com/player/-LLoCCZqWi18O73b6M0w?amp=1');
         expect(iframe.allow).to.equal('vr');
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
