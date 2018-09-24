@@ -67,8 +67,14 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
      ```shell
      git remote add upstream git@github.com:ampproject/amphtml.git
      ```
+
+11.  Fetch data from the `upstream` remote:
+     
+     ```shell
+     git fetch upstream
+     ```
     
-11.  Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become 
+12.  Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become 
      outdated).
      
      ```shell
