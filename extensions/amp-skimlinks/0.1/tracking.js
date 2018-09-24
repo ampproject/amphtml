@@ -17,12 +17,12 @@
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
 import {generatePageImpressionId, isExcludedUrl} from './utils';
 
-import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
-
 import {
   LINKS_IMPRESSIONS_TRACKING_URL,
   NA_CLICK_TRACKING_URL,
   PAGE_IMPRESSION_TRACKING_URL,
+  PLATFORM_NAME,
+  XCUST_ATTRIBUTE_NAME,
 } from './constants';
 
 /**

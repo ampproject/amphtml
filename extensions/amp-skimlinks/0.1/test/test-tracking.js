@@ -15,7 +15,6 @@
  */
 
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
-import {PLATFORM_NAME} from '../constants';
 import {pubcode} from './constants';
 import helpersFactory from './helpers';
 
@@ -23,6 +22,7 @@ import {
   LINKS_IMPRESSIONS_TRACKING_URL,
   NA_CLICK_TRACKING_URL,
   PAGE_IMPRESSION_TRACKING_URL,
+  PLATFORM_NAME,
   XCUST_ATTRIBUTE_NAME,
 } from '../constants';
 

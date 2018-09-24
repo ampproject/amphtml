@@ -48,7 +48,6 @@ describes.sandboxed('Navigation', {}, () => {
     let handler;
     let decorationSpy;
     let handleNavSpy;
-    let linkRewriterSpy;
     let handleCustomProtocolSpy;
     let winOpenStub;
     let scrollIntoViewStub;
