@@ -78,6 +78,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
      outdated).
      
      ```shell
+     git fetch upstream master
      git branch -u upstream/master master
      ```
     
