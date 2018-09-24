@@ -903,7 +903,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.sourceElement_ = sourceElement;
 
     // Initialize the viewer.
-    this.sourceImage_ = sourceElement.querySelector('.i-amphtml-fill-content');
+    this.sourceImage_ = sourceElement.querySelector('img:not(.i-amphtml-intrinsic-sizer)');
     this.imageViewer_.init(this.sourceElement_, this.sourceImage_);
 
     // Discover caption.

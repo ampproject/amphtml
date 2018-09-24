@@ -22,12 +22,73 @@
 <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+  <!--
+    - Test layout: intrinsic, fill, fixed, fixed-height, responsive
+  -->
   <amp-img on="tap:ampimagelightbox"
     role="button"
     src="https://ampbyexample.com/img/Border_Collie.jpg"
     layout="intrinsic"
     width="600"
     height="491"></amp-img>
+
+  <div style="width:600px;height:491px;position:relative ">
+    <amp-img on="tap:ampimagelightbox"
+      role="button"
+      src="https://ampbyexample.com/img/Border_Collie.jpg"
+      layout="fill"
+      width="600"
+      height="491"></amp-img>
+  </div>
+
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://ampbyexample.com/img/Border_Collie.jpg"
+    layout="fixed"
+    width="600"
+    height="491"></amp-img>
+
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://ampbyexample.com/img/Border_Collie.jpg"
+    layout="fixed-height"
+    width="auto"
+    height="491"></amp-img>
+
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://ampbyexample.com/img/Border_Collie.jpg"
+    layout="responsive"
+    width="600"
+    height="491"></amp-img>
+
+    <amp-img on="tap:ampimagelightbox"
+      role="button"
+      src="https://ampbyexample.com/img/Border_Collie.jpg"
+      layout="flex-item"
+      width="600"
+      height="491"></amp-img>
+
+  <!--
+    - if image have fallback
+  -->
+
+  <amp-img on="tap:ampimagelightbox"
+    role="button"
+    src="https://ampbyexample.com/img/Border_Collie.gif"
+    layout="responsive"
+    width="600"
+    height="491">
+    <amp-img on="tap:ampimagelightbox"
+      fallback
+      role="button"
+      src="https://ampbyexample.com/img/Border_Collie.jpg"
+      layout="responsive"
+      width="600"
+      height="491"></amp-img>
+  </amp-img>
+
+  <amp-image-lightbox id="ampimagelightbox" layout="nodisplay"></amp-image-lightbox>
   
 </body>
 </html>
