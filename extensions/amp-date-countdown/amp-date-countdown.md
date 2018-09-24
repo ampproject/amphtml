@@ -83,10 +83,10 @@ m | minute - 0, 1, 2,...12, 13..Infinity
 mm | minute - 01, 01, 02, 03..Infinity
 s | second - 0, 1, 2,...12, 13..Infinity
 ss | second - 00, 01, 02, 03..Infinity
-days | i18n string for day or days
-hours | i18n string for hour or hours
-minutes | i18n string for minute or minutes
-seconds | i18n string for second or seconds
+days | internationalization string for day or days
+hours | internationalization string for hour or hours
+minutes | internationalization string for minute or minutes
+seconds | internationalization string for second or seconds
 
 #### Samples of formatted values
 
@@ -129,7 +129,7 @@ Specifies whether to stop the timer when it reaches 0 seconds. The value can be 
 
 ##### locale (optional)
 
-An i18n language string for each timer unit. The default value is `en` (for English).
+An internationalization language string for each timer unit. The default value is `en` (for English).
 Supported values:
 
 Code | Language
