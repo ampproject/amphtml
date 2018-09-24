@@ -1043,7 +1043,7 @@ export class LayoutElement {
     const stopAt = opt_ancestor
       ? LayoutElement.getParentLayer(opt_ancestor)
       : null;
-    for (let l = this; l !== stopAt; l = l.getParentLayer()) {
+    for (let l = this; l && l !== stopAt; l = l.getParentLayer()) {
       const position = l.getOffsetFromParent();
       // Calculate the scrolled position. If the element has offset 200, and
       // the parent is scrolled 150, then the scrolled position is just 50.
@@ -1078,7 +1078,7 @@ export class LayoutElement {
       ? LayoutElement.getParentLayer(opt_ancestor)
       : null;
 
-    for (let l = this; l !== stopAt; l = l.getParentLayer()) {
+    for (let l = this; l && l !== stopAt; l = l.getParentLayer()) {
       const position = l.getOffsetFromParent();
       // Add up every offset position in the ancestry.
       x += position.left;
@@ -1141,11 +1141,14 @@ export class LayoutElement {
    * @template T
    */
   iterateAncestry(iterator, state) {
-    const activeLayer = Services.layersForDoc(this.element_).getActiveLayer();
+    const activeLayer = isDestroyed(this.element_)
+      ? null
+      : Services.layersForDoc(this.element_).getActiveLayer();
 
     // Gather, and update whether the layers are descendants of the active
     // layer.
-    let isActive = activeLayer === this || activeLayer.contains(this);
+    let isActive = activeLayer === this ||
+        (!!activeLayer && activeLayer.contains(this));
     dev().assert(ANCESTRY_CACHE.length === 0, 'ancestry cache must be empty');
 
     let layer = this;
