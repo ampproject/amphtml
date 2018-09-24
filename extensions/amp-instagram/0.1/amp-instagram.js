@@ -113,7 +113,7 @@ class AmpInstagram extends AMP.BaseElement {
     image.setAttribute('layout', 'fill');
     image.setAttribute('referrerpolicy', 'origin');
 
-    image.setAttribute('alt', 'Instagram');
+    image.setAttribute('alt', 'Instagram: ' + this.element.getAttribute('alt'));
     /*
      * Add instagram default styling
      */
