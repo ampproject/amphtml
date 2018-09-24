@@ -21,4 +21,3 @@ export const EVENTS = {
 
 export const ORIGINAL_URL_ATTRIBUTE = 'data-link-rewriter-original-url';
 export const PRIORITY_META_TAG_NAME = 'amp-link-rewriter-priorities';
-export const LINK_REWRITER_SERVICE_NAME = 'link-rewriter-service';

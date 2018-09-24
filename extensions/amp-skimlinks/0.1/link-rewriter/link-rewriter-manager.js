@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../amp-events';
-import {EVENTS, LINK_REWRITER_SERVICE_NAME, PRIORITY_META_TAG_NAME} from './constants';
+import {AmpEvents} from '../../../../src/amp-events';
+import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
 import {LinkRewriter} from './link-rewriter';
-import {Services} from '../../services';
-import {registerServiceBuilderForDoc} from '../../service';
+import {Priority} from '../../../../src/service/navigation';
+import {Services} from '../../../../src/services';
 
 
 /**
@@ -51,7 +51,7 @@ import {registerServiceBuilderForDoc} from '../../service';
  */
 export class LinkRewriterManager {
   /**
-   * @param {!../ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
 
@@ -75,6 +75,9 @@ export class LinkRewriterManager {
     this.linkRewriters_ = [];
 
     this.installGlobalEventListener_(this.iframeDoc_);
+    const navigation = Services.navigationForDoc(ampdoc);
+    navigation.registerAnchorMutator(
+        this.maybeRewriteLink.bind(this), Priority.LINK_REWRITER_MANAGER);
   }
 
 
@@ -129,7 +132,7 @@ export class LinkRewriterManager {
    * @param {HTMLElement} anchor
    * @param {string} clickType - 'click' or 'contextmenu'
    */
-  maybeRewriteLink(anchor, clickType) {
+  maybeRewriteLink(anchor, clickType = 'click') {
     const suitableLinkRewriters = this.getSuitableLinkRewritersForLink_(anchor);
     if (suitableLinkRewriters.length) {
       let chosenLinkRewriter = null;
@@ -164,7 +167,7 @@ export class LinkRewriterManager {
    * Extract the priority list from the optional html meta tag.
    * The meta tag should contain a whitespace separated list of
    * LinkRewriter Ids.
-   * @param {!../ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {Array<string>}
    */
   getPriorityList_(ampdoc) {
@@ -274,18 +277,4 @@ export class LinkRewriterManager {
       return acc;
     }, []);
   }
-}
-
-
-/**
- * Register the global LinkRewriteService.
- * @param {!../ampdoc-impl.AmpDoc} ampdoc
- */
-export function installGlobalLinkRewriterServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(
-      ampdoc,
-      LINK_REWRITER_SERVICE_NAME,
-      LinkRewriterManager,
-      true
-  );
 }

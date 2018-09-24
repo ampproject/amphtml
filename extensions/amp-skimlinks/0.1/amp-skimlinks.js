@@ -23,9 +23,10 @@ import {Tracking} from './tracking';
 
 import {AffiliateLinkResolver} from './affiliate-link-resolver';
 import {SKIMLINKS_REWRITER_ID} from './constants';
-import {EVENTS as linkRewriterEvents} from '../../../src/service/link-rewriter/constants';
+import {EVENTS as linkRewriterEvents} from './link-rewriter/constants';
 
 import {EVENT_TYPE_CONTEXT_MENU} from '../../../src/service/navigation';
+import {LinkRewriterManager} from './link-rewriter/link-rewriter-manager';
 import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
 import {getBoundFunction} from './utils';
@@ -46,7 +47,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?../../../src/service/document-info-impl.DocumentInfoDef} */
     this.docInfo_ = null;
 
-    /** @private {?../../../src/service/link-rewriter/link-rewriter-manager.LinkRewriterManager} */
+    /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
     this.linkRewriterService_ = null;
 
     /** @private {?Object} */
@@ -61,7 +62,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?./waypoint.Waypoint} */
     this.waypoint_ = null;
 
-    /** @private {?../../../src/service/link-rewriter/link-rewriter.LinkRewriter} */
+    /** @private {?./link-rewriter/link-rewriter.LinkRewriter} */
     this.skimlinksLinkRewriter_ = null;
 
   }
@@ -71,8 +72,12 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
     this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
-    this.linkRewriterService_ = Services.linkRewriterServiceForDoc(
-        this.ampDoc_);
+    /**
+     * Only one instance of LinkRewriterManager
+     * should be shared between all extensions. Since Skimlinks is the only
+     * extension using it we can instanciate it here for now.
+     */
+    this.linkRewriterService_ = new LinkRewriterManager(this.ampDoc_);
 
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
 
@@ -146,7 +151,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   /**
    * Initialise Skimlinks LinkRewriter
-   * @return {!../../../src/service/link-rewriter/link-rewriter.LinkRewriter}
+   * @return {!./link-rewriter/link-rewriter.LinkRewriter}
    */
   initSkimlinksLinkRewriter_() {
     const options = {

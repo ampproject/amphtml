@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {user} from '../../log';
+import {user} from '../../../../src/log';
 
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {EventMessenger} from './event-messenger';

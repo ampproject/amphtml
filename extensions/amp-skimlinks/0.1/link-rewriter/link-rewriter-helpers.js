@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../utils/object';
-import {user} from '../../log';
+import {hasOwn} from '../../../../src/utils/object';
+import {user} from '../../../../src/log';
 
 /**
  * Create a response object for 'resolveUnknownAnchors()' function

@@ -83,7 +83,7 @@ export class Tracking {
   /**
    * Sends "Page impression" and "Link impression" tracking requests (POST).
    * @public
-   * @param {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList
+   * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList
    */
   sendImpressionTracking(anchorReplacementList) {
     if (!this.tracking_) {
@@ -251,7 +251,7 @@ export class Tracking {
    *   i.e: {url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1}}
    *
    * @private
-   * @param {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
+   * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
    *    associated with their potential replacement url.
    * @return {{numberAffiliateLinks: number, urls: Object}}
    */

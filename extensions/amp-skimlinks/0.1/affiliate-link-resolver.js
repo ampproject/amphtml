@@ -15,7 +15,7 @@
  */
 
 import {DOMAIN_RESOLVER_API_URL} from './constants';
-import {createTwoStepsResponse} from '../../../src/service/link-rewriter/link-rewriter-helpers';
+import {createTwoStepsResponse} from './link-rewriter/link-rewriter-helpers';
 import {dict} from '../../../src/utils/object';
 import {getNormalizedHostnameFromUrl, isExcludedDomain} from './utils';
 
@@ -123,7 +123,7 @@ export class AffiliateLinkResolver {
    *
    * @public
    * @param {Array<HTMLElement>} anchorList
-   * @return {!../../../src/service/link-rewriter/link-rewriter.TwoStepsResponse}
+   * @return {!./link-rewriter/link-rewriter.TwoStepsResponse}
    */
   resolveUnknownAnchors(anchorList) {
     const alreadyResolvedResponse = this.associateWithReplacementUrl_(
@@ -163,7 +163,7 @@ export class AffiliateLinkResolver {
    *
    * @private
    * @param {Array<HTMLElement>} anchorList
-   * @return {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList}
+   * @return {!./link-rewriter/link-rewriter.AnchorReplacementList}
    */
   associateWithReplacementUrl_(anchorList) {
     return anchorList.map(anchor => {
@@ -177,7 +177,7 @@ export class AffiliateLinkResolver {
       }
 
       return (
-        /** @type {!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList} */
+        /** @type {!./link-rewriter/link-rewriter.AnchorReplacementList} */
         ({anchor, replacementUrl})
       );
     });
@@ -265,7 +265,7 @@ export class AffiliateLinkResolver {
    * @private
    * @param {Array<HTMLElement>} anchorList
    * @param {Array<string>} domainsToAsk
-   * @return {Promise<!../../../src/service/link-rewriter/link-rewriter.AnchorReplacementList>}
+   * @return {Promise<!./link-rewriter/link-rewriter.AnchorReplacementList>}
    */
   resolvedUnknownAnchorsAsync_(anchorList, domainsToAsk) {
     const promise = this.fetchDomainResolverApi(domainsToAsk);

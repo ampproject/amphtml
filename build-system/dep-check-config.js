@@ -286,6 +286,8 @@ exports.rules = [
           'src/service/xhr-impl.js',
       'extensions/amp-form/0.1/amp-form.js->' +
           'src/service/xhr-impl.js',
+      'extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js->' +
+        'src/service/navigation.js',
     ],
   },
   {

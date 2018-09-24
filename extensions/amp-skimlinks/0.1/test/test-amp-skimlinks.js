@@ -18,9 +18,9 @@ import * as DocumentReady from '../../../../src/document-ready';
 import * as SkimOptionsModule from '../skim-options';
 import * as Utils from '../utils';
 import {Deferred} from '../../../../src/utils/promise';
-import {LinkRewriterManager} from '../../../../src/service/link-rewriter/link-rewriter-manager';
+import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
-import {EVENTS as linkRewriterEvents} from '../../../../src/service/link-rewriter/constants';
+import {EVENTS as linkRewriterEvents} from '../link-rewriter/constants';
 import helpersFactory from './helpers';
 
 describes.fakeWin(

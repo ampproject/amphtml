@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
-import {LinkReplacementCache} from '../../src/service/link-rewriter/link-replacement-cache';
-import {LinkRewriter} from '../../src/service/link-rewriter/link-rewriter';
-import {LinkRewriterManager} from '../../src/service/link-rewriter/link-rewriter-manager';
+import {AmpEvents} from '../../../../src/amp-events';
+import {LinkReplacementCache} from '../link-rewriter/link-replacement-cache';
+import {LinkRewriter} from '../link-rewriter/link-rewriter';
+import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
 import {
   ORIGINAL_URL_ATTRIBUTE,
   PRIORITY_META_TAG_NAME,
   EVENTS as linkRewriterEvents,
-} from '../../src/service/link-rewriter/constants';
-import {Services} from '../../src/services';
-import {createCustomEvent} from '../../src/event-helper';
-import {createTwoStepsResponse} from '../../src/service/link-rewriter/link-rewriter-helpers';
+} from '../link-rewriter/constants';
+import {Services} from '../../../../src/services';
+import {createCustomEvent} from '../../../../src/event-helper';
+import {createTwoStepsResponse} from '../link-rewriter/link-rewriter-helpers';
 
 describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
   let iframeDoc, linkRewriterManager, win;
