@@ -250,7 +250,7 @@ Pingback is an endpoint provided by in the "local" service configuration and cal
 
 Pingback is optional. It's only enabled when the "pingbackUrl" property is specified.
 
-As the body, pingback POST request recieves the entitlement object returned by the "winning" authorization endpoint.
+As the body, pingback POST request receives the entitlement object returned by the "winning" authorization endpoint.
 
 **Important:** The pingback JSON object is sent with `Content-type: text/plain`.  This is intentional as it removes the need for a CORS preflight check.
 
@@ -381,10 +381,10 @@ Following are the events and the conditions when the events are triggered.
  - A service can request for re-authorizing itself after any action performed e.g. `Login`. Once the re-authorization is complete and new entitlement is fetched for the service ``subscriptions-service-re-authorized` is triggered.
  - This event is fired with `serviceId` of the selected service.
 7. `subscriptions-action-delegated`:
- - A service can request its action to be delegated to another service, in such scenerio `subscriptions-action-delegated` is triggered just before handing over the event to the other service.
+ - A service can request its action to be delegated to another service, in such scenario `subscriptions-action-delegated` is triggered just before handing over the event to the other service.
  - This event is fired with `serviceId` and `action` of the selected service.
 8. `subscriptions-entitlement-resolved`:
- - Once the service is registered, the entitlments from it are requested. `subscriptions-entitlement-resolved` event is triggered when the entitlement fetch from the service is completed.
+ - Once the service is registered, the entitlements from it are requested. `subscriptions-entitlement-resolved` event is triggered when the entitlement fetch from the service is completed.
  - This event is fired with `serviceId` and `action` of the selected service.
 9. `subscriptions-started`:service
  - This event is triggered when `amp-subscriptions` is initialized.
