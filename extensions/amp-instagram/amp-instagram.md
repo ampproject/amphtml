@@ -70,7 +70,7 @@ For example, in https://instagram.com/p/fBwFP, `fBwFP` is the data-shortcode.
 
 ##### data-captioned
 
-Include the Instagram caption.  `amp-instagram` will attept to resize to the correct height including the caption.
+Include the Instagram caption.  `amp-instagram` will attempt to resize to the correct height including the caption.
 
 ##### common attributes
 
