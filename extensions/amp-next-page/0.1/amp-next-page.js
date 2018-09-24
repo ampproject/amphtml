@@ -75,7 +75,7 @@ export class AmpNextPage extends AMP.BaseElement {
       element.classList.add('i-amphtml-next-page');
 
       const src = element.getAttribute('src');
-      let configPromise = Promise.resolve({});
+      let configPromise;
       let pagesPromise = Promise.resolve([]);
 
       const type = element.getAttribute('type');
