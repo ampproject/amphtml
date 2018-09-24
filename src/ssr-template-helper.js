@@ -96,7 +96,7 @@ export class SsrTemplateHelper {
 
   /**
    * @param {!FetchRequestDef} request
-   * @param {?Element} mustacheTemplate
+   * @param {?Element|undefined} mustacheTemplate
    * @param {?SsrTemplateDef=} opt_templates
    * @param {!Object=} opt_attributes
    * @return {!JsonObject}
