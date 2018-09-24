@@ -61,7 +61,7 @@ import {AstNode, AstNodeType} from './bind-expr-defines';
 
         options: {
             ranges: boolean           (optional: true ==> token location info will include a .range[] member)
-            flex: boolean             (optional: true ==> flex-like lexing behaviour where the rules are tested exhaustively to find the longest match)
+§            flex: boolean             (optional: true ==> flex-like lexing behavior where the rules are tested exhaustively to find the longest match)
             backtrack_lexer: boolean  (optional: true ==> lexer regexes are tested in order and for each matching regex the action code is invoked; the lexer terminates the scan when a token is returned by the action code)
         },
 
@@ -119,97 +119,97 @@ break;
 case 9:
 
         this.$ = new AstNode(AstNodeType.NOT, [$$[$0]]);
-      
+
 break;
 case 10:
 
         this.$ = new AstNode(AstNodeType.UNARY_MINUS, [$$[$0]]);
-      
+
 break;
 case 11:
 
         this.$ = new AstNode(AstNodeType.UNARY_PLUS, [$$[$0]]);
-      
+
 break;
 case 12:
 
         this.$ = new AstNode(AstNodeType.PLUS, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 13:
 
         this.$ = new AstNode(AstNodeType.MINUS, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 14:
 
         this.$ = new AstNode(AstNodeType.MULTIPLY, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 15:
 
         this.$ = new AstNode(AstNodeType.DIVIDE, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 16:
 
         this.$ = new AstNode(AstNodeType.MODULO, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 17:
 
         this.$ = new AstNode(AstNodeType.LOGICAL_AND, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 18:
 
         this.$ = new AstNode(AstNodeType.LOGICAL_OR, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 19:
 
         this.$ = new AstNode(AstNodeType.LESS_OR_EQUAL, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 20:
 
         this.$ = new AstNode(AstNodeType.LESS, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 21:
 
         this.$ = new AstNode(AstNodeType.GREATER_OR_EQUAL, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 22:
 
         this.$ = new AstNode(AstNodeType.GREATER, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 23:
 
         this.$ = new AstNode(AstNodeType.NOT_EQUAL, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 24:
 
         this.$ = new AstNode(AstNodeType.EQUAL, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 25:
 
         this.$ = new AstNode(AstNodeType.TERNARY, [$$[$0-4], $$[$0-2], $$[$0]]);
-      
+
 break;
 case 26:
 
         this.$ = new AstNode(AstNodeType.INVOCATION, [undefined, $$[$0]], $$[$0-1]);
-      
+
 break;
 case 27:
 
         this.$ = new AstNode(AstNodeType.INVOCATION, [$$[$0-3], $$[$0]], $$[$0-1]);
-      
+
 break;
 case 28:
 
@@ -217,7 +217,7 @@ case 28:
           const array = new AstNode(AstNodeType.ARRAY, [$$[$0-1]]);
           this.$ = new AstNode(AstNodeType.INVOCATION, [$$[$0-5], array], $$[$0-3]);
         }
-      
+
 break;
 case 29:
 
@@ -225,156 +225,156 @@ case 29:
           const array = new AstNode(AstNodeType.ARRAY, [$$[$0-3], $$[$0-1]]);
           this.$ = new AstNode(AstNodeType.INVOCATION, [$$[$0-7], array], $$[$0-5]);
         }
-      
+
 break;
 case 30:
 
         this.$ = new AstNode(AstNodeType.ARROW_FUNCTION, [undefined, $$[$0]]);
-      
+
 break;
 case 31:
 
         const param = new AstNode(AstNodeType.LITERAL, null, [$$[$0-2]]);
         this.$ = new AstNode(AstNodeType.ARROW_FUNCTION, [param, $$[$0]]);
-      
+
 break;
 case 32:
 
         this.$ = new AstNode(AstNodeType.ARROW_FUNCTION, [$$[$0-3], $$[$0]]);
-      
+
 break;
 case 33:
 
         this.$ = new AstNode(AstNodeType.LITERAL, null, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 34:
 
         this.$ = $$[$0-2];
         this.$.value.push($$[$0]);
-      
+
 break;
 case 35:
 
         this.$ = new AstNode(AstNodeType.ARGS, []);
-      
+
 break;
 case 36:
 
         this.$ = new AstNode(AstNodeType.ARGS, [$$[$0-1]]);
-      
+
 break;
 case 37:
 
         this.$ = new AstNode(AstNodeType.MEMBER_ACCESS, [$$[$0-1], $$[$0]]);
-      
+
 break;
 case 38:
 
         this.$ = new AstNode(AstNodeType.MEMBER, null, $$[$0]);
-      
+
 break;
 case 39:
 
         this.$ = new AstNode(AstNodeType.MEMBER, [$$[$0-1]]);
-      
+
 break;
 case 40:
 
         this.$ = new AstNode(AstNodeType.VARIABLE, null, $$[$0]);
-      
+
 break;
 case 41: case 42: case 43: case 61:
 
         this.$ = $$[$0];
-      
+
 break;
 case 44:
 
         const string = yytext.substr(1, yyleng - 2);
         this.$ = new AstNode(AstNodeType.LITERAL, null, string);
-      
+
 break;
 case 45:
 
         this.$ = new AstNode(AstNodeType.LITERAL, null, Number(yytext));
-      
+
 break;
 case 46:
 
         this.$ = new AstNode(AstNodeType.LITERAL, null, true);
-      
+
 break;
 case 47:
 
         this.$ = new AstNode(AstNodeType.LITERAL, null, false);
-      
+
 break;
 case 48:
 
         this.$ = new AstNode(AstNodeType.LITERAL, null, null);
-      
+
 break;
 case 49:
 
         this.$ = new AstNode(AstNodeType.ARRAY_LITERAL, []);
-      
+
 break;
 case 50:
 
         this.$ = new AstNode(AstNodeType.ARRAY_LITERAL, [$$[$0-1]]);
-      
+
 break;
 case 51:
 
         this.$ = new AstNode(AstNodeType.ARRAY_LITERAL, [$$[$0-2]]);
-      
+
 break;
 case 52:
 
         this.$ = new AstNode(AstNodeType.ARRAY, [$$[$0]]);
-      
+
 break;
 case 53: case 58:
 
         this.$ = $$[$0-2];
         this.$.args.push($$[$0]);
-      
+
 break;
 case 54:
 
         this.$ = new AstNode(AstNodeType.OBJECT_LITERAL, []);
-      
+
 break;
 case 55:
 
         this.$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$$[$0-1]]);
-      
+
 break;
 case 56:
 
         this.$ = new AstNode(AstNodeType.OBJECT_LITERAL, [$$[$0-2]]);
-      
+
 break;
 case 57:
 
         this.$ = new AstNode(AstNodeType.OBJECT, [$$[$0]]);
-      
+
 break;
 case 59:
 
         this.$ = new AstNode(AstNodeType.KEY_VALUE, [$$[$0-2], $$[$0]]);
-      
+
 break;
 case 60:
 
         this.$ = new AstNode(AstNodeType.LITERAL, null, $$[$0]);
-      
+
 break;
 case 62:
 
         this.$ = $$[$0-1];
-      
+
 break;
 }
 },
