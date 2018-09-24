@@ -99,7 +99,8 @@ export class AmpNextPage extends AMP.BaseElement {
 
         pagesPromise = consent.then(
             state => this.fetchAdSensePages_(client, slot,
-                state === CONSENT_POLICY_STATE.SUFFICIENT))
+                state === CONSENT_POLICY_STATE.SUFFICIENT ||
+                state === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
             .catch(error => {
               user().warn(
                   TAG, 'error fetching recommendations from AdSense', error);
