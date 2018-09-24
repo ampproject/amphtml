@@ -28,19 +28,19 @@ export default {
     string: 'Ablehnen',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Sehen Sie auf der ursprünglichen Domäne',
+    string: 'Auf der originalen Webseite anschauen',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'Mehr über die AMP Ergebnisse',
+    string: 'Mehr Informationen zum Thema AMP Ergebnisse',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Weiter klicken',
+    string: 'Nächste Seite',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Zurück klicken',
+    string: 'Vorherige Seite',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Der Link konnte nicht zur Zwischenablage kopiert werden',
+    string: 'Der Link konnte nicht in die Zwischenablage kopiert werden',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
     string: 'Der Link wurde kopiert.',
@@ -55,7 +55,7 @@ export default {
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Link erhalten',
+    string: 'Link kopieren',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -89,10 +89,10 @@ export default {
         'sehen',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'Diese Seite is am Besten im Portrait Mode',
+    string: 'Diese Seite sieht am Besten im "Hochformat" aus',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Es tut uns sehr leid, aber es sieht so aus als dass der Browser ' +
+    string: 'Es tut uns sehr leid, aber es sieht so aus als wenn der Browser ' +
         'dieses Erlebnis nicht unterstützt.',
   },
 };
