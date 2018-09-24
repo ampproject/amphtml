@@ -15,7 +15,6 @@
  */
 
 import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
-import * as sinon from 'sinon';
 
 
 describe('PullToRefreshBlocker', () => {
@@ -26,7 +25,7 @@ describe('PullToRefreshBlocker', () => {
   let blocker;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     eventListeners = {};
     const documentApi = {

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {endsWith} from './string';
 import {
   isProxyOrigin,
-  parseUrl,
+  parseUrlDeprecated,
   tryDecodeUriComponent,
 } from './url';
-import {endsWith} from './string';
 import {urls} from './config';
 
 
@@ -139,7 +139,7 @@ function trySetCookie(win, name, value, expirationTime, domain) {
     // Do not throw if setting the cookie failed Exceptions can be thrown
     // when AMP docs are opened on origins that do not allow setting
     // cookies such as null origins.
-  };
+  }
 }
 
 /**
@@ -159,8 +159,8 @@ function checkOriginForSettingCookie(win, options, name) {
         + name);
   }
 
-  const current = parseUrl(win.location.href).hostname.toLowerCase();
-  const proxy = parseUrl(urls.cdn).hostname.toLowerCase();
+  const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
+  const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
   if (current == proxy || endsWith(current, '.' + proxy)) {
     throw new Error('Should never attempt to set cookie on proxy origin.'
         + ' (in depth check): ' + name);

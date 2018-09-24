@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {FormEvents} from './form-events';
+import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
 import {toWin} from '../../../src/types';
+
+/** @const @private {string} */
+const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
+
+/** @const @private {string} */
+const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
 
 
 /** @type {boolean|undefined} */
@@ -72,10 +78,13 @@ export class FormValidator {
     this.form = form;
 
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = getAmpdoc(form);
+    this.ampdoc = Services.ampdoc(form);
 
-    /** @protected @const {!Document} */
-    this.doc = /** @type {!Document} */ (form.ownerDocument);
+    /** @const @protected {!../../../src/service/resources-impl.Resources} */
+    this.resources = Services.resourcesForDoc(form);
+
+    /** @protected @const {!Document|!ShadowRoot} */
+    this.root = this.ampdoc.getRootNode();
 
     /**
      * Tribool indicating last known validity of form.
@@ -99,6 +108,11 @@ export class FormValidator {
    */
   onInput(unusedEvent) {}
 
+  /** @return {!NodeList} */
+  inputs() {
+    return this.form.querySelectorAll('input,select,textarea');
+  }
+
   /**
    * Fires a valid/invalid event from the form if its validity state
    * has changed since the last invocation of this function.
@@ -109,7 +123,7 @@ export class FormValidator {
     this.formValidity_ = this.form.checkValidity();
     if (previousValidity !== this.formValidity_) {
       const win = toWin(this.form.ownerDocument.defaultView);
-      const type = this.formValidity_ ? 'valid' : 'invalid';
+      const type = this.formValidity_ ? FormEvents.VALID : FormEvents.INVALID;
       const event = createCustomEvent(win, type, null, {bubbles: true});
       this.form.dispatchEvent(event);
     }
@@ -131,6 +145,10 @@ export class DefaultValidator extends FormValidator {
 /** @private visible for testing */
 export class PolyfillDefaultValidator extends FormValidator {
 
+  /**
+   * Creates an instance of PolyfillDefaultValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
     const bubbleId = `i-amphtml-validation-bubble-${validationBubbleCount++}`;
@@ -140,7 +158,7 @@ export class PolyfillDefaultValidator extends FormValidator {
 
   /** @override */
   report() {
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         inputs[i]./*REVIEW*/focus();
@@ -181,14 +199,12 @@ export class PolyfillDefaultValidator extends FormValidator {
  */
 export class AbstractCustomValidator extends FormValidator {
 
+  /**
+   * Creates an instance of AbstractCustomValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
-
-    /** @private @const {!Object<string, ?Element>} */
-    this.inputValidationsDict_ = {};
-
-    /** @private @const {!Object<string, ?Element>} */
-    this.inputVisibleValidationDict_ = {};
   }
 
   /**
@@ -205,27 +221,28 @@ export class AbstractCustomValidator extends FormValidator {
    * Hides all validation messages.
    */
   hideAllValidations() {
-    for (const id in this.inputVisibleValidationDict_) {
-      const input = this.doc.getElementById(id);
-      this.hideValidationFor(dev().assertElement(input));
+    const inputs = this.inputs();
+    for (let i = 0; i < inputs.length; i++) {
+      this.hideValidationFor(dev().assertElement(inputs[i]));
     }
   }
 
   /**
    * @param {!Element} input
-   * @param {!string} invalidType
+   * @param {string=} invalidType
    * @return {?Element}
    */
   getValidationFor(input, invalidType) {
     if (!input.id) {
       return null;
     }
-    const selector = `[visible-when-invalid=${invalidType}]` +
-        `[validation-for=${input.id}]`;
-    if (this.inputValidationsDict_[selector] === undefined) {
-      this.inputValidationsDict_[selector] = this.doc.querySelector(selector);
+    const property = VALIDATION_CACHE_PREFIX + invalidType;
+    if (!(property in input)) {
+      const selector = `[visible-when-invalid=${invalidType}]`
+          + `[validation-for=${input.id}]`;
+      input[property] = this.root.querySelector(selector);
     }
-    return this.inputValidationsDict_[selector];
+    return input[property];
   }
 
   /**
@@ -237,14 +254,15 @@ export class AbstractCustomValidator extends FormValidator {
     if (!validation) {
       return;
     }
-
     if (!validation.textContent.trim()) {
       validation.textContent = input.validationMessage;
     }
+    input[VISIBLE_VALIDATION_CACHE] = validation;
 
-    input.setAttribute('aria-invalid', 'true');
-    validation.classList.add('visible');
-    this.inputVisibleValidationDict_[input.id] = validation;
+    this.resources.mutateElement(input,
+        () => input.setAttribute('aria-invalid', 'true'));
+    this.resources.mutateElement(validation,
+        () => validation.classList.add('visible'));
   }
 
   /**
@@ -255,9 +273,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!visibleValidation) {
       return;
     }
-    input.removeAttribute('aria-invalid');
-    visibleValidation.classList.remove('visible');
-    delete this.inputVisibleValidationDict_[input.id];
+    delete input[VISIBLE_VALIDATION_CACHE];
+
+    this.resources.mutateElement(input,
+        () => input.removeAttribute('aria-invalid'));
+    this.resources.mutateElement(visibleValidation,
+        () => visibleValidation.classList.remove('visible'));
   }
 
   /**
@@ -265,10 +286,7 @@ export class AbstractCustomValidator extends FormValidator {
    * @return {?Element}
    */
   getVisibleValidationFor(input) {
-    if (!input.id) {
-      return null;
-    }
-    return this.inputVisibleValidationDict_[input.id];
+    return input[VISIBLE_VALIDATION_CACHE];
   }
 
   /**
@@ -285,7 +303,9 @@ export class AbstractCustomValidator extends FormValidator {
    */
   onInteraction(event) {
     const input = dev().assertElement(event.target);
-    const shouldValidate = this.shouldValidateOnInteraction(input);
+    const shouldValidate =
+        !!input.checkValidity && this.shouldValidateOnInteraction(input);
+
     this.hideValidationFor(input);
     if (shouldValidate && !input.checkValidity()) {
       this.reportInput(input);
@@ -310,7 +330,7 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
   /** @override */
   report() {
     this.hideAllValidations();
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         this.reportInput(inputs[i]);
@@ -336,7 +356,7 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
   report() {
     this.hideAllValidations();
     let firstInvalidInput = null;
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         firstInvalidInput = firstInvalidInput || inputs[i];
@@ -448,10 +468,16 @@ export function isCheckValiditySupported(doc) {
  * @return {?string}
  */
 function getInvalidType(input) {
+  // 'badInput' takes precedence over others.
+  const validityTypes = ['badInput'];
   for (const invalidType in input.validity) {
-    if (input.validity[invalidType]) {
-      return invalidType;
+    // add other types after
+    if (!validityTypes.includes(invalidType)) {
+      validityTypes.push(invalidType);
     }
   }
-  return null;
+  // Finding error type with value true
+  const response = validityTypes.filter(type =>
+    input.validity[type] === true);
+  return response.length ? response[0] : null;
 }

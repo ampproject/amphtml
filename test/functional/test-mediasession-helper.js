@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
+import {isProtocolValid} from '../../src/url';
 import {
-  setMediaSession,
-  parseSchemaImage,
-  parseOgImage,
   parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+  setMediaSession,
 } from '../../src/mediasession-helper';
 
 const schemaTemplate = `
@@ -62,6 +64,11 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
   let head;
 
   beforeEach(() => {
+    // Stub only to work around the fact that there's no Ampdoc, so the service
+    // cannot be retrieved.
+    // Otherwise this test would barf because `form` is detached.
+    sandbox.stub(Services, 'urlForDoc').returns({isProtocolValid});
+
     head = document.querySelector('head');
     // Favicon
     favicon = document.createElement('link');
@@ -131,7 +138,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': 'Some title',
     };
-    setMediaSession(ampdoc.win, fakeMetaData);
+    setMediaSession(ampdoc, fakeMetaData);
     const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
     expect(newMetaData).to.deep.equal(fakeMetaData);
   });
@@ -146,7 +153,9 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': '',
     };
-    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    allowConsoleError(() => {
+      expect(() => {setMediaSession(ampdoc, fakeMetaData);}).to.throw();
+    });
   });
 
   it('should throw if artwork src is invalid - string', () => {
@@ -159,7 +168,9 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': '',
     };
-    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    allowConsoleError(() => {
+      expect(() => {setMediaSession(ampdoc, fakeMetaData);}).to.throw();
+    });
   });
 
   it('should throw if artwork is not array', () => {
@@ -169,6 +180,8 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       'artwork': 'https://NotArray',
       'title': '',
     };
-    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    allowConsoleError(() => {
+      expect(() => {setMediaSession(ampdoc, fakeMetaData);}).to.throw();
+    });
   });
 });

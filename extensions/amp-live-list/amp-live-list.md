@@ -47,9 +47,11 @@ limitations under the License.
 
 ## Behavior
 
-`amp-live-list` provides support for content that is updated live on the client,
-so that the user can consume new information as it is available without having
-to refresh or navigate to a different page. The core use case for this component
+`amp-live-list` provides instant content updates from the client.
+Depending on implementation,
+it can update the DOM without user interaction,
+such as refreshing or navigating to a different page.
+The core use case for this component
 is live blogs: coverage for breaking news or live events where the user can stay
 on or keep returning to the same page to see new updates as they come in. Common
 examples are award shows, sporting events, and elections.
@@ -256,6 +258,12 @@ that have elapsed since Thursday, 1 January 1970).
 
 If present, the entry is assumed to be deleted.
 
+##### sort (Optional)
+
+If present and has a value of "ascending" (any other value is currently
+invalid), newer items will be inserted at the bottom of the live-list instead
+of the top.
+
 ## Styling
 
 On very slow connections the javascript and styles of the component
@@ -280,7 +288,7 @@ added, and will be removed once the next set of new items are inserted on a subs
 highlighting effect like the css below.
 
 ```css
-.live-list-item-new {
+.amp-live-list-item-new {
   animation: amp-live-list-item-highlight 2s;
 }
 

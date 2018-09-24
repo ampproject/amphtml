@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
 import {A4AVariableSource} from '../a4a-variable-source';
+import {createIframePromise} from '../../../../testing/iframe';
 import {installDocumentInfoServiceForDoc} from
-    '../../../../src/service/document-info-impl';
+  '../../../../src/service/document-info-impl';
 
 
 describe('A4AVariableSource', () => {
@@ -66,6 +66,15 @@ describe('A4AVariableSource', () => {
 
   it('should replace AD_NAV_REDIRECT_COUNT', () => {
     expect(expandSync('AD_NAV_REDIRECT_COUNT')).to.match(/\d/);
+  });
+
+  it('should replace HTML_ATTR', () => {
+    expect(expandSync('HTML_ATTR', ['div', 'id'])).to.equal(
+        '[{\"id\":\"parent\"}]');
+  });
+
+  it('should replace CLIENT_ID with null', () => {
+    return expect(expandSync('CLIENT_ID', ['a'])).to.be.null;
   });
 
   function undefinedVariable(varName) {

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {ScrollManager} from './scroll-manager';
+import {Services} from '../../../src/services';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
@@ -27,11 +29,10 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
+import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
-const TAG = 'amp-analytics';
-
+const TAG = 'amp-analytics/analytics-root';
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
@@ -60,6 +61,9 @@ export class AnalyticsRoot {
 
     /** @private {?./visibility-manager.VisibilityManager} */
     this.visibilityManager_ = null;
+
+    /** @private {?./scroll-manager.ScrollManager} */
+    this.scrollManager_ = null;
   }
 
   /** @override */
@@ -70,6 +74,9 @@ export class AnalyticsRoot {
     }
     if (this.visibilityManager_) {
       this.visibilityManager_.dispose();
+    }
+    if (this.scrollManager_) {
+      this.scrollManager_.dispose();
     }
   }
 
@@ -142,11 +149,26 @@ export class AnalyticsRoot {
   getElementById(unusedId) {}
 
   /**
+   * Returns the tracker for the specified name and list of allowed types.
+   *
+   * @param {string} name
+   * @param {!Object<string, function(new:./events.EventTracker)>} whitelist
+   * @return {?./events.EventTracker}
+   */
+  getTrackerForWhitelist(name, whitelist) {
+    const trackerProfile = whitelist[name];
+    if (trackerProfile) {
+      return this.getTracker(name, trackerProfile);
+    }
+    return null;
+  }
+
+  /**
    * Returns the tracker for the specified name and type. If the tracker
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
+   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {
@@ -181,7 +203,7 @@ export class AnalyticsRoot {
     // Special case selectors. The selection method is irrelavant.
     // And no need to wait for document ready.
     if (selector == ':root') {
-      return Promise.resolve(this.getRootElement());
+      return tryResolve(() => this.getRootElement());
     }
     if (selector == ':host') {
       return new Promise(resolve => {
@@ -195,13 +217,18 @@ export class AnalyticsRoot {
       let found;
       let result = null;
       // Query search based on the selection method.
-      if (selectionMethod == 'scope') {
-        found = scopedQuerySelector(context, selector);
-      } else if (selectionMethod == 'closest') {
-        found = closestBySelector(context, selector);
-      } else {
-        found = this.getRoot().querySelector(selector);
+      try {
+        if (selectionMethod == 'scope') {
+          found = scopedQuerySelector(context, selector);
+        } else if (selectionMethod == 'closest') {
+          found = closestBySelector(context, selector);
+        } else {
+          found = this.getRoot().querySelector(selector);
+        }
+      } catch (e) {
+        user().assert(false, `Invalid query selector ${selector}`);
       }
+
       // DOM search can "look" outside the boundaries of the root, thus make
       // sure the result is contained.
       if (found && this.contains(found)) {
@@ -245,7 +272,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(
-      listener, context, selector, selectionMethod = null) {
+    listener, context, selector, selectionMethod = null) {
     return event => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path
@@ -257,7 +284,7 @@ export class AnalyticsRoot {
       const rootElement = this.getRootElement();
       const isSelectAny = (selector == '*');
       const isSelectRoot = (selector == ':root');
-      let target = event.target;
+      let {target} = event;
       while (target) {
 
         // Target must be contained by this root.
@@ -278,7 +305,7 @@ export class AnalyticsRoot {
 
         // Check if the target matches the selector.
         if (isSelectAny ||
-            isSelectRoot && target == rootElement ||
+            (isSelectRoot && target == rootElement) ||
             matchesNoInline(target, selector)) {
           listener(target, event);
           // Don't fire the event multiple times even if the more than one
@@ -318,6 +345,20 @@ export class AnalyticsRoot {
    * @abstract
    */
   createVisibilityManager() {}
+
+  /**
+   *  Returns the Scroll Managet corresponding to this analytics root.
+   * The Scroll Manager is created lazily as needed, and will handle
+   * calling all handlers for a scroll event.
+   * @return {!./scroll-manager.ScrollManager}
+   */
+  getScrollManager() {
+    if (!this.scrollManager_) {
+      this.scrollManager_ = new ScrollManager(this.ampdoc);
+    }
+
+    return this.scrollManager_;
+  }
 }
 
 
@@ -440,7 +481,7 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
 
 /**
  * @param  {!Element} el
- * @param  {!string} selector
+ * @param  {string} selector
  * @return {boolean}
  */
 function matchesNoInline(el, selector) {

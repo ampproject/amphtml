@@ -14,21 +14,31 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust';
-import {Services} from './services';
-import {dev, user} from './log';
+import {ActionTrust} from './action-constants';
 import {
+  SOURCE_ORIGIN_PARAM,
   assertHttpsUrl,
   checkCorsUrl,
-  SOURCE_ORIGIN_PARAM,
   isProxyOrigin,
 } from './url';
+import {Services} from './services';
+import {dev, user} from './log';
+import {isExtensionScriptInNode} from './element-service';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise}
  */
 export function installGlobalSubmitListenerForDoc(ampdoc) {
-  ampdoc.getRootNode().addEventListener('submit', onDocumentFormSubmit_, true);
+  // Register global submit event listener only if the amp-form
+  // extension is used. Allowing the usage of native forms, otherwise.
+  return isExtensionScriptInNode(ampdoc, 'amp-form')
+      .then(ampFormInstalled => {
+        if (ampFormInstalled) {
+          ampdoc.getRootNode().addEventListener(
+              'submit', onDocumentFormSubmit_, true);
+        }
+      });
 }
 
 
@@ -69,7 +79,7 @@ export function onDocumentFormSubmit_(e) {
   for (let i = 0; i < inputs.length; i++) {
     user().assert(!inputs[i].name ||
         inputs[i].name != SOURCE_ORIGIN_PARAM,
-        'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+    'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
   }
 
   const action = form.getAttribute('action');
@@ -131,6 +141,8 @@ export function onDocumentFormSubmit_(e) {
     e.stopImmediatePropagation();
 
     const actions = Services.actionServiceForDoc(form);
-    actions.execute(form, 'submit', /*args*/ null, form, e, ActionTrust.HIGH);
+    actions.execute(
+        form, 'submit', /*args*/ null, /*source*/ form, /*caller*/ form, e,
+        ActionTrust.HIGH);
   }
 }

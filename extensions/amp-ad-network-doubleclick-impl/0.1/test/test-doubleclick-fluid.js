@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8Encode} from '../../../../src/utils/bytes';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
+import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {utf8Encode} from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -38,6 +39,46 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
+const rawCreative = `
+  <script>
+  parent./*OK*/postMessage(
+      JSON.stringify(/** @type {!JsonObject} */ ({
+        e: 'sentinel',
+        c: '1234',
+      })), '*');
+  parent./*OK*/postMessage(
+      JSON.stringify(/** @type {!JsonObject} */ ({
+        s: 'creative_geometry_update',
+        p: '{"width":"1px","height":"250px","sentinel":"sentinel"}',
+      })), '*');
+  </script>`;
+
+/**
+ * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
+ * tests.
+ * @param {!AmpAdNetworkDoubleclickImpl} impl
+ * @param {!Object} sandbox Sinon sandbox to mock out properties.
+ */
+function createScaffoldingForFluidRendering(impl, sandbox) {
+  impl.getVsync = () => {
+    return {
+      run: runArgs => {
+        runArgs.mutate();
+      },
+    };
+  };
+  impl.buildCallback();
+  impl.attemptChangeHeight = () => Promise.resolve();
+  sandbox.stub(impl, 'sendXhrRequest').returns(Promise.resolve({
+    arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
+    headers: {has: () => false, get: () => undefined},
+  }));
+  impl.sentinel = 'sentinel';
+  impl.initiateAdRequest();
+  impl.safeframeApi_ = new SafeframeHostApi(
+      impl, true, impl.creativeSize_);
+  sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
+}
 
 describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   let impl;
@@ -81,19 +122,26 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     const getLayout = () => 'fluid';
     impl.getLayout = getLayout;
     impl.isLayoutSupported('fluid');
+    impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
     multiSizeImpl.getLayout = getLayout;
     multiSizeImpl.isLayoutSupported('fluid');
-    impl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
+    multiSizeImpl.experimentalNonAmpCreativeRenderMethod_ = 'safeframe';
   });
 
   afterEach(() => {
     sandbox.restore();
-    impl.maybeRemoveListenerForFluid();
+    removeSafeframeListener();
+    impl.cleanupAfterTest();
     impl = null;
   });
 
+  it('should start with height 0', () => {
+    impl.buildCallback();
+    expect(element.getAttribute('style')).to.match(/height: 0px/);
+  });
+
   it('should be fluid enabled', () => {
-    expect(impl.isFluid_).to.be.true;
+    expect(impl.isFluidRequest_).to.be.true;
   });
 
   it('should have a supported layout', () => {
@@ -140,56 +188,102 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
+  it('should style iframe/slot correctly on multi-size creative', () => {
+    multiSizeImpl.buildCallback();
+    multiSizeImpl.sentinel = 'sentinel';
+    multiSizeImpl.adPromise_ = Promise.resolve();
+    multiSizeImpl.creativeBody_ = utf8Encode('foo');
+    multiSizeImpl.returnedSize_ = {width: 250, height: 100};
+    return multiSizeImpl.layoutCallback().then(() => {
+      const iframeStyleString = multiSizeImpl.iframe.getAttribute('style');
+      const slotStyleString = multiSizeImpl.element.getAttribute('style');
+      expect(slotStyleString).to.match(/width: 250px/);
+      expect(iframeStyleString).to.match(/position: relative/);
+      expect(multiSizeImpl.element.getAttribute('height')).to.be.null;
+    });
+  });
+
   it('should have an iframe child with initial size 0x0', () => {
     impl.buildCallback();
-    return utf8Encode('foo').then(creative => {
-      impl.sentinel = 'sentinel';
-      impl.adPromise_ = Promise.resolve();
-      impl.creativeBody_ = creative;
-      return impl.layoutCallback().then(() => {
-        const styleString = impl.iframe.getAttribute('style');
-        expect(styleString).to.match(/width: 0px/);
-        expect(styleString).to.match(/height: 0px/);
-      });
+    impl.sentinel = 'sentinel';
+    impl.adPromise_ = Promise.resolve();
+    impl.creativeBody_ = utf8Encode('foo');
+    return impl.layoutCallback().then(() => {
+      const styleString = impl.iframe.getAttribute('style');
+      expect(styleString).to.match(/width: 0px/);
+      expect(styleString).to.match(/height: 0px/);
     });
   });
 
   it('should fire delayed impression ping', () => {
-    impl.getVsync = () => {
-      return {
-        run: runArgs => {
-          runArgs.mutate();
-        },
-      };
-    };
-    impl.buildCallback();
-    const rawCreative = `
-        <script>
-        parent./*OK*/postMessage(
-            JSON.stringify(/** @type {!JsonObject} */ ({
-              e: 'sentinel',
-            })), '*');
-        parent./*OK*/postMessage(
-            JSON.stringify(/** @type {!JsonObject} */ ({
-              s: 'creative_geometry_update',
-              p: '{"width":"1px","height":"1px","sentinel":"sentinel"}',
-            })), '*');
-        </script>`;
-    const connectFluidMessagingChannelSpy =
-        sandbox.spy(impl, 'connectFluidMessagingChannel');
-    const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize_');
-    impl.attemptChangeHeight = () => Promise.resolve();
-    return utf8Encode(rawCreative).then(creative => {
-      impl.sentinel = 'sentinel';
-      impl.initiateAdRequest();
-      return impl.adPromise_.then(() => {
-        impl.creativeBody_ = creative;
-        return impl.layoutCallback().then(() => {
-          expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
-          expect(onFluidResizeSpy).to.be.calledOnce;
-        });
+    createScaffoldingForFluidRendering(impl, sandbox);
+    const connectMessagingChannelSpy =
+          sandbox./*OK*/spy(impl.safeframeApi_,
+              'connectMessagingChannel');
+    const onFluidResizeSpy = sandbox./*OK*/spy(impl.safeframeApi_,
+        'onFluidResize_');
+    return impl.adPromise_.then(() => {
+      return impl.layoutCallback().then(() => {
+        expect(connectMessagingChannelSpy).to.be.calledOnce;
+        expect(onFluidResizeSpy).to.be.calledOnce;
       });
     });
   });
 
+  it('should set height on iframe', () => {
+    createScaffoldingForFluidRendering(impl, sandbox);
+    return impl.adPromise_.then(() => {
+      return impl.layoutCallback().then(() => {
+        expect(impl.iframe.style.height).to.equal('250px');
+      });
+    });
+  });
+
+  it('should resize slot and fire impression for AMP fluid creative', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.resolve());
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
+    return impl.layoutCallback().then(() => {
+      expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk'))
+          .to.be.calledOnce;
+    });
+  });
+
+  it('should set expansion re-attempt flag after initial failure', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
+    attemptChangeHeightStub.returns(Promise.reject());
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    return impl.expandFluidCreative_().then(() => {
+      expect(attemptChangeHeightStub).to.be.calledOnce;
+      expect(impl.reattemptToExpandFluidCreative_).to.be.true;
+    });
+  });
+
+  it('should re-attempt expansion after initial failure', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
+    attemptChangeHeightStub.returns(Promise.resolve());
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    impl.reattemptToExpandFluidCreative_ = true;
+    // Should do nothing
+    impl.viewportCallback(true);
+    expect(attemptChangeHeightStub).to.not.be.called;
+    impl.viewportCallback(false);
+    expect(attemptChangeHeightStub).to.be.calledOnce;
+  });
 });

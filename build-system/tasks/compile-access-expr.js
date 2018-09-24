@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const jison = require('jison');
-const gulp = require('gulp');
 const fs = require('fs-extra');
+const gulp = require('gulp');
+const jison = require('jison');
 
 gulp.task('compile-access-expr', function() {
   const path = 'extensions/amp-access/0.1/';
@@ -29,8 +29,14 @@ gulp.task('compile-access-expr', function() {
 
   const license = fs.readFileSync(
       'build-system/tasks/js-license.txt', 'utf8');
-  const jsExports = 'exports.parser = parser;';
+  const suppressCheckTypes = '/** @fileoverview ' +
+      '@suppress {checkTypes, suspiciousCode, uselessCode} */';
+  const jsExports = 'export const accessParser = parser;';
 
-  const out = license + '\n\n' + jsModule + '\n\n' + jsExports + '\n';
+  const out = [
+    license,
+    suppressCheckTypes,
+    jsModule,
+    jsExports].join('\n\n') + '\n';
   fs.writeFileSync(path + 'access-expr-impl.js', out);
 });

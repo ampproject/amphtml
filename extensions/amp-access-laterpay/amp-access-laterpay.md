@@ -32,7 +32,7 @@ limitations under the License.
         <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
       </div>
       <div>
-        <code>&lt;script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.1.js">&lt;/script></code>
+        <code>&lt;script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.2.js">&lt;/script></code>
       </div>
     </td>
   </tr>
@@ -94,6 +94,14 @@ The following values can be set in the `laterpay` config object:
     This is necessary in cases where matching a purchase option by an article’s URL is not flexible enough. See the <a href="http://docs.laterpay.net/connector/inpage_configuration/article_id/">configuration page for the LaterPay Connector()</a> to see learn about some example scenarios in which this is useful.</td>
   </tr>
   <tr>
+    <td><code>jwt</code></td>
+    <td>JWT token for dynamic payment configuration</td>
+    <td>This option allows you specify a signed JSON Web Token with a configuration for the available paid content. This means that you can provide an in page configuration, programatically generated in your pages rather than specifying it manually on LaterPay's Connector Admin interface. This might be specially useful when configuring Single Purchases for many different articles.
+    <br />
+    If you'd like more information on how to create this token and what content can be specified in it, please refer to LaterPay's <a href="http://docs.laterpay.net/connector/connector_script_3_beta/#jwt-paid-content-api">JWT Paid Content API</a> documentation for the Connector Script integration.
+    </td>
+  </tr>
+  <tr>
     <td><code>locale</code></td>
     <td>string</td>
     <td>Defines the style of price formatting appropriate for the locale.</td>
@@ -107,6 +115,11 @@ The following values can be set in the `laterpay` config object:
     <td><code>scrollToTopAfterAuth</code></td>
     <td>boolean</td>
     <td>If true, scrolls the page to the top after the authorization process is successful. This can be helpful if the place where you show the dialog is further below in the page and the user could be confused by their current scroll position after returning to the page.</td>
+  </tr>
+  <tr>
+    <td><code>region</code></td>
+    <td>string</td>
+    <td>Specify if you are on the <code>eu</code> or <code>us</code> <a href="https://connectormwi.laterpay.net/docs/regions-environments-locales.html">LaterPay region</a>.</td>
   </tr>
   <tr>
     <td><code>sandbox</code></td>
@@ -205,11 +218,6 @@ The following message keys can be translated or customized, but be aware that th
     <th class="col-fourty">Key</th>
     <th class="col-fourty">Description</th>
     <th>Default value</th>
-  </tr>
-  <tr>
-    <td><code>premiumContentTitle</code></td>
-    <td>The Premium Content purchase option allows the user to buy just the currently shown article for the specified price. The title for this option cannot be specified in the Connector UI but it can be customized here.</td>
-    <td>'Buy only this article'</td>
   </tr>
   <tr>
     <td><code>payLaterButton</code></td>

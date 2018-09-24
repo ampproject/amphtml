@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import '../amp-social-share';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
-import '../amp-social-share';
 
 const STRINGS = {
   'text': 'Hello world',
@@ -46,12 +46,12 @@ describes.realWin('amp-social-share', {
     isIos = false;
     isSafari = false;
     platform = Services.platformFor(win);
-    sandbox.stub(platform, 'isIos', () => isIos);
-    sandbox.stub(platform, 'isSafari', () => isSafari);
+    sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+    sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
     sandbox./*OK*/stub(win, 'open').returns(true);
   });
 
-  function getShare(type, opt_endpoint, opt_params) {
+  function getShare(type, opt_endpoint, opt_params, opt_target) {
     const share = doc.createElement('amp-social-share');
     share.addEventListener = sandbox.spy();
     if (opt_endpoint) {
@@ -60,6 +60,10 @@ describes.realWin('amp-social-share', {
 
     for (const key in opt_params) {
       share.setAttribute('data-param-' + key, opt_params[key]);
+    }
+
+    if (opt_target) {
+      share.setAttribute('data-target', opt_target);
     }
 
     share.setAttribute('type', type);
@@ -79,23 +83,29 @@ describes.realWin('amp-social-share', {
     const share = doc.createElement('amp-social-share');
     share.setAttribute('type', 'unknown-provider');
     doc.body.appendChild(share);
-    return expect(loaded(share)).to.be.eventually.rejectedWith(
-        /data-share-endpoint attribute is required/);
+    return allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /data-share-endpoint attribute is required/);
+    });
   });
 
   it('errors if type is missing', () => {
     const share = doc.createElement('amp-social-share');
     doc.body.appendChild(share);
-    return expect(loaded(share)).to.be.eventually.rejectedWith(
-        /type attribute is required/);
+    return allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /type attribute is required/);
+    });
   });
 
   it('errors if type has space characters', () => {
     const share = doc.createElement('amp-social-share');
     share.setAttribute('type', 'hello world');
     doc.body.appendChild(share);
-    return expect(loaded(share)).to.be.eventually.rejectedWith(
-        /Space characters are not allowed in type attribute value/);
+    return allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /Space characters are not allowed in type attribute value/);
+    });
   });
 
   it('renders unconfigured providers if share endpoint provided', () => {
@@ -168,13 +178,29 @@ describes.realWin('amp-social-share', {
     });
   });
 
+  it('opens mailto: window in _self', () => {
+    const params = {
+      'recipient': 'sample@xyz.com',
+    };
+    return getShare('email', undefined, params, '_self').then(el => {
+      el.implementation_.handleClick_();
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
+          'mailto:sample%40xyz.com?subject=doc%20title&' +
+            'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+            '&recipient=sample%40xyz.com',
+          '_self', 'resizable,scrollbars,width=640,height=480'
+      );
+    });
+  });
+
   it('opens mailto: window in _top on iOS Safari with recipient', () => {
     const params = {
       'recipient': 'sample@xyz.com',
     };
     isIos = true;
     isSafari = true;
-    return getShare('email', undefined, params).then(el => {
+    return getShare('email', undefined, params, '_top').then(el => {
       el.implementation_.handleClick_();
       expect(el.implementation_.win.open).to.be.calledOnce;
       expect(el.implementation_.win.open).to.be.calledWith(
@@ -185,6 +211,26 @@ describes.realWin('amp-social-share', {
       );
     });
   });
+
+  it('opens mailto: window in _top on iOS Safari with recipient even if user ' +
+    'attempts to override with `data-target`', () => {
+    const params = {
+      'recipient': 'sample@xyz.com',
+    };
+    isIos = true;
+    isSafari = true;
+    return getShare('email', undefined, params, '_self').then(el => {
+      el.implementation_.handleClick_();
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
+          'mailto:sample%40xyz.com?subject=doc%20title&' +
+            'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+            '&recipient=sample%40xyz.com',
+          '_top', 'resizable,scrollbars,width=640,height=480'
+      );
+    });
+  });
+
 
   it('opens mailto: window in _top on iOS Safari without recipient', () => {
     isIos = true;

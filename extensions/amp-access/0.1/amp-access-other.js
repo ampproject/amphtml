@@ -21,19 +21,19 @@ import {isProxyOrigin} from '../../../src/url';
 const TAG = 'amp-access-other';
 
 
-/** @implements {./amp-access.AccessTypeAdapterDef} */
+/** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessOtherAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!./amp-access.AccessTypeAdapterContextDef} context
+   * @param {!./amp-access-source.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private {?JsonObject} */
@@ -63,7 +63,8 @@ export class AccessOtherAdapter {
     dev().fine(TAG, 'Use the authorization fallback for type=other');
     // Disallow authorization for proxy origin (`cdn.ampproject.org`).
     dev().assert(!this.isProxyOrigin_, 'Cannot authorize for proxy origin');
-    return Promise.resolve(dev().assert(this.authorizationResponse_));
+    const response = dev().assert(this.authorizationResponse_);
+    return Promise.resolve(response);
   }
 
   /** @override */
@@ -75,5 +76,10 @@ export class AccessOtherAdapter {
   pingback() {
     dev().fine(TAG, 'Ignore pingback');
     return Promise.resolve();
+  }
+
+  /** @override */
+  postAction() {
+    // Nothing to do.
   }
 }

@@ -16,13 +16,12 @@
 
 import {
   computeInMasterFrame,
-  validateSrcPrefix,
-  validateSrcContains,
+  loadScript,
   nextTick,
   validateData,
-  loadScript,
+  validateSrcContains,
+  validateSrcPrefix,
 } from '../../3p/3p';
-import * as sinon from 'sinon';
 
 describe('3p', () => {
 
@@ -30,7 +29,7 @@ describe('3p', () => {
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
   });
 
@@ -96,16 +95,16 @@ describe('3p', () => {
       }, ['foo', 'bar']);
       clock.tick(1);
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         validateData({
           width: '',
           type: 'xxxxxx',
           foo: true,
           bar: true,
         }, ['foo', 'bar', 'persika']);
-      }).to.throw(/Missing attribute for xxxxxx: persika./);
+      }).to.throw(/Missing attribute for xxxxxx: persika./); });
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         validateData({
           width: '',
           type: 'xxxxxx',
@@ -114,6 +113,7 @@ describe('3p', () => {
         }, [['red', 'green', 'blue']]);
       }).to.throw(
           /xxxxxx must contain exactly one of attributes: red, green, blue./);
+      });
     });
 
     it('should check mandatory fields with alternative options', () => {
@@ -137,24 +137,20 @@ describe('3p', () => {
         location: true,
         mode: true,
       }, /* mandatory */[], /* optional */[]);
-      clock.tick(1);
 
       validateData({
         width: '',
         foo: true,
         bar: true,
       }, /* mandatory */[], ['foo', 'bar']);
-      clock.tick(1);
 
-      validateData({
-        type: 'TEST',
-        foo: true,
-        'not-whitelisted': true,
-      }, [], ['foo']);
-
-      expect(() => {
-        clock.tick(1);
-      }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+      allowConsoleError(() => { expect(() => {
+        validateData({
+          type: 'TEST',
+          foo: true,
+          'not-whitelisted': true,
+        }, [], ['foo']);
+      }).to.throw(/Unknown attribute for TEST: not-whitelisted./); });
     });
 
     it('should check mandatory and optional fields', () => {

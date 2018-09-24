@@ -16,16 +16,20 @@
 
 tags: {  # amp-timeago
   html_format: AMP
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-timeago"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-timeago>
   html_format: AMP
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "AMP-TIMEAGO"
   requires_extension: "amp-timeago"
   attrs: {

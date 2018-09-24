@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import './polyfills';
+
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {AmpContext} from './ampcontext.js';
 import {initLogConstructor, setReportError} from '../src/log';
 
@@ -34,7 +37,8 @@ setReportError(() => {});
 try {
   const windowContextCreated = new Event('amp-windowContextCreated');
   window.context = new AmpContext(window);
-  // Allows for pre-existence, consider validating correct window.context lib instance?
+  // Allows for pre-existence, consider validating correct window.context lib
+  // instance?
   window.dispatchEvent(windowContextCreated);
 } catch (err) {
   // do nothing with error

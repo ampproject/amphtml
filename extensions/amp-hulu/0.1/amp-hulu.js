@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
 
 class AmpHulu extends AMP.BaseElement {
   /** @param {!AmpElement} element */

@@ -16,9 +16,9 @@
 
 
 import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  randomlySelectUnsetExperiments,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
   getExperimentBranch,
+  randomlySelectUnsetExperiments,
 } from '../../src/experiments';
 
 
@@ -31,8 +31,8 @@ export const ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME =
  * @enum {string}
  */
 export const AdSenseAmpAutoAdsHoldoutBranches = {
-  CONTROL: '3782001',  // don't run amp-auto-ads
-  EXPERIMENT: '3782002',  // do run amp-auto-ads
+  CONTROL: '3782001', // don't run amp-auto-ads
+  EXPERIMENT: '3782002', // do run amp-auto-ads
 };
 
 
@@ -60,4 +60,4 @@ export function getAdSenseAmpAutoAdsExpBranch(win) {
   randomlySelectUnsetExperiments(win, experiments);
   return getExperimentBranch(win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME)
       || null;
-};
+}

@@ -1,0 +1,59 @@
+<!---
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!doctype html>
+<html>
+  <head>
+    <link href="polymer.html" rel="import">
+    <link href="polymer-extension-toolbar.html" rel="import">
+    <style is="custom-style">
+      body {
+        background-color: #fff;
+        font-height: 18px;
+        font-size: 14px;
+        font-weight: 300;
+        margin: 0;
+        padding: 0 !important;
+        width: 780px;
+      }
+    </style>
+  </head>
+  <body unresolved>
+    <dom-module id="popup-validator-not-present">
+      <style scope="popup-validator-not-present">
+        #message { margin: 10px 20px 20px; }
+      </style>
+      <template>
+        <extension-toolbar id="toolbar"></extension-toolbar>
+        <div id="message">{{ validatorNotPresentText }}</div>
+      </template>
+      <script>
+        Polymer({
+          is: 'popup-validator-not-present',
+          properties: {
+            validatorNotPresentText: {
+              type: String,
+              value: chrome.i18n.getMessage("validatorNotPresentText"),
+            },
+          },
+          ready: function() {
+            this.$.toolbar.changeSpinnerState(false);
+          },
+        });
+      </script>
+    </dom-module>
+    <popup-validator-not-present></popup-validator-not-present>
+  </body>
+</html>

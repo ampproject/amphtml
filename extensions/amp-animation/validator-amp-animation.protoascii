@@ -15,15 +15,21 @@
 #
 
 tags: {  # amp-animation
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-animation"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-animation> (json)
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "amp-animation extension .json script"
   mandatory_parent: "AMP-ANIMATION"
@@ -44,8 +50,10 @@ tags: {  # <amp-animation> (json)
   }
 }
 tags: {  # <amp-animation>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-ANIMATION"
-  mandatory_parent: "BODY"
   requires_extension: "amp-animation"
   requires: "amp-animation extension .json script"
   attrs: {

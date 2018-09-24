@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {
   activateChunkingForTesting,
   chunkInstanceForTesting,
@@ -22,8 +23,6 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
 describe('chunk', () => {
@@ -139,7 +138,7 @@ describe('chunk', () => {
     describe('visible', () => {
       beforeEach(() => {
         const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
+        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return true;
         });
       });
@@ -159,7 +158,7 @@ describe('chunk', () => {
           beforeEach(() => {
             fakeWin = env.win;
             const viewer = Services.viewerForDoc(env.win.document);
-            env.sandbox.stub(viewer, 'isVisible', () => {
+            env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
               return true;
             });
             window.addEventListener('unhandledrejection', onReject);
@@ -182,13 +181,13 @@ describe('chunk', () => {
     describe('invisible', () => {
       beforeEach(() => {
         const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
+        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return false;
         });
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
         const chunks = chunkInstanceForTesting(env.win.document);
-        env.sandbox.stub(chunks, 'executeAsap_', () => {
+        env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
           throw new Error('No calls expected: executeAsap_');
         });
         env.win.location.resetHref('test#visibilityState=hidden');
@@ -201,7 +200,7 @@ describe('chunk', () => {
       beforeEach(() => {
         deactivateChunking();
         const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
+        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return false;
         });
         env.win.requestIdleCallback = () => {
@@ -216,13 +215,13 @@ describe('chunk', () => {
     describe('invisible via document.hidden', () => {
       beforeEach(() => {
         const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible', () => {
+        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return false;
         });
         env.win.requestIdleCallback =
             resolvingIdleCallbackWithTimeRemaining(15);
         const chunks = chunkInstanceForTesting(env.win.document);
-        env.sandbox.stub(chunks, 'executeAsap_', () => {
+        env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
           throw new Error('No calls expected: executeAsap_');
         });
         env.win.document.hidden = true;
@@ -236,7 +235,7 @@ describe('chunk', () => {
         env.win.location.resetHref('test#visibilityState=hidden');
         const viewer = Services.viewerForDoc(env.win.document);
         let visible = false;
-        env.sandbox.stub(viewer, 'isVisible', () => {
+        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return visible;
         });
         env.win.requestIdleCallback = () => {
@@ -254,7 +253,7 @@ describe('chunk', () => {
         env.win.location.resetHref('test#visibilityState=prerender');
         const viewer = Services.viewerForDoc(env.win.document);
         let visible = false;
-        env.sandbox.stub(viewer, 'isVisible', () => {
+        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return visible;
         });
         env.win.requestIdleCallback = () => {
@@ -272,7 +271,7 @@ describe('chunk', () => {
         env.win.location.resetHref('test#visibilityState=hidden');
         const viewer = Services.viewerForDoc(env.win.document);
         let visible = false;
-        env.sandbox.stub(viewer, 'isVisible', () => {
+        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
           return visible;
         });
         env.win.requestIdleCallback = () => {
@@ -306,7 +305,7 @@ describe('chunk', () => {
       env.win.requestIdleCallback = null;
       expect(env.win.requestIdleCallback).to.be.null;
       const viewer = Services.viewerForDoc(env.win.document);
-      env.sandbox.stub(viewer, 'isVisible', () => {
+      env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
         return false;
       });
       Object.defineProperty(env.win.document, 'hidden', {
@@ -325,7 +324,7 @@ describe('onIdle', () => {
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     calls = [];
     callbackCalled = false;

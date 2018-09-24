@@ -30,6 +30,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>container, fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-call-tracking/">amp-call-tracking example</a>.</td>
+  </tr>
 </table>
 
 [TOC]
@@ -62,7 +66,7 @@ of a valid JSON object with the following fields:
 - `formattedPhoneNumber` (optional): Specifies the phone number to display. If not specified, the value in `phoneNumber` is used.
 
 {% call callout('Important', type='caution') %}
-Your XHR endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+Your XHR endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
 ## Validation

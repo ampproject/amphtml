@@ -17,8 +17,8 @@
 import {
   camelCaseToDash,
   dashToCamelCase,
-  expandTemplate,
   endsWith,
+  expandTemplate,
 } from '../../src/string';
 
 describe('dashToCamelCase', () => {

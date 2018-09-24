@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {toggleExperiment} from '../../../../src/experiments';
-import * as imaVideoObj from '../../../../ads/google/imaVideo';
 import '../amp-ima-video';
+import * as imaVideoObj from '../../../../ads/google/imaVideo';
+
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 
 
 describes.realWin('amp-ima-video', {
@@ -31,8 +32,8 @@ describes.realWin('amp-ima-video', {
 
   beforeEach(() => {
     win = env.win;
+    win.context = {};
     doc = win.document;
-    toggleExperiment(win, 'amp-ima-video', true);
   });
 
   it('adds ad container', () => {
@@ -88,6 +89,8 @@ describes.realWin('amp-ima-video', {
     const initSpy = sandbox.spy(adDisplayContainerMock, 'initialize');
     const videoPlayerMock = {load() {}};
     const loadSpy = sandbox.spy(videoPlayerMock, 'load');
+    const mockAdsLoader = {requestAds() {}};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     //const playAdsSpy = sandbox.spy(imaVideoObj, 'playAds');
     //const playAdsFunc = imaVideoObj.playAds;
     //const playAdsSpy = sandbox.spy(playAdsFunc);
@@ -767,5 +770,114 @@ describes.realWin('amp-ima-video', {
 
     expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
         .to.eql('none');
+  });
+
+  it('suppresses IMA load with unknown consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    win.context.initialConsentState = CONSENT_POLICY_STATE.UNKNOWN;
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    // TODO: When I can spy on internals, verify that onImaLoadSuccess() is not
+    // called, and that onImaLoadFail is called.
+    expect(imaVideoObj.getPropertiesForTesting().imaLoadAllowed).to.eql(false);
+  });
+
+
+  it('handles unknown consent with request ads call', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    imaVideoObj.imaLoadAllowed = true;
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.UNKNOWN);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().imaLoadAllowed).to.eql(false);
+  });
+
+  it('handles insufficient consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.INSUFFICIENT);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl&npa=1');
+  });
+
+  it('handles sufficient consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.SUFFICIENT);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl');
+  });
+
+  it('handles unknown_not_required consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(
+        CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl');
   });
 });

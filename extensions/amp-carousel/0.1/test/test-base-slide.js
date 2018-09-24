@@ -32,7 +32,6 @@
 
 import {BaseSlides} from '../base-slides';
 
-
 describes.fakeWin('BaseSlides', {amp: true}, env => {
   let win, doc;
   let buildSlidesSpy;
@@ -261,4 +260,64 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
     carousel.clearAutoplay();
     expect(carousel.autoplayTimeoutId_).to.be.null;
   });
+
+  it('toggle autoPlay status using speficied value & autoplay=true', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      delay: 300,
+    }));
+    carousel.buildCallback();
+    carousel.autoplay_();
+
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    const args = {'toggleOn': false};
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    args['toggleOn'] = true;
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+  });
+
+  it('toggle autoPlay status using speficied value & autoplay=false', () => {
+    const carousel = new TestCarousel(setElement({
+      delay: 300,
+    }));
+    carousel.buildCallback();
+
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    const args = {'toggleOn': true};
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    args['toggleOn'] = false;
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+  });
+
+  it('toggle autoPlay status without speficied value & autoplay=true', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      delay: 300,
+    }));
+    carousel.buildCallback();
+    carousel.autoplay_();
+
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    carousel.executeAction(
+        {method: 'toggleAutoplay', satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    carousel.executeAction(
+        {method: 'toggleAutoplay', satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+  });
+
 });

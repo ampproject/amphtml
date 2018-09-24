@@ -19,11 +19,16 @@ import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../src/intersection-observer-polyfill';
-import {VisibilityModel} from './visibility-model';
-import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {map} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
+import {VisibilityModel} from './visibility-model';
+import {dev, user} from '../../../src/log';
+import {getMinOpacity} from './opacity';
+import {getMode} from '../../../src/mode';
+import {isArray, isFiniteNumber} from '../../../src/types';
+import {layoutRectLtwh} from '../../../src/layout-rect';
+import {map} from '../../../src/utils/object';
+
+const TAG = 'amp-analytics/visibility-manager';
 
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
@@ -163,6 +168,14 @@ export class VisibilityManager {
   isBackgroundedAtStart() {}
 
   /**
+  * Returns the root's, root's parent's and root's children's
+  * lowest opacity value
+  * @return {number}
+  * @abstract
+  */
+  getRootMinOpacity() {}
+
+  /**
    * Returns the root's layout rect.
    * @return {!../../../src/layout-rect.LayoutRectDef}}
    * @abstract
@@ -210,11 +223,9 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
-    const model = new VisibilityModel(
-        spec,
-        this.getRootVisibility.bind(this));
-    return this.listen_(
-        model, spec, readyPromise, createReportPromiseFunc, callback);
+    const calcVisibility = this.getRootVisibility.bind(this);
+    return this.createModelAndListen_(calcVisibility, spec, readyPromise,
+        createReportPromiseFunc, callback);
   }
 
   /**
@@ -229,12 +240,74 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   listenElement(
-      element, spec, readyPromise, createReportPromiseFunc, callback) {
-    const model = new VisibilityModel(
-        spec,
-        this.getElementVisibility.bind(this, element));
-    return this.listen_(
-        model, spec, readyPromise, createReportPromiseFunc, callback, element);
+    element, spec, readyPromise, createReportPromiseFunc, callback) {
+    const calcVisibility = this.getElementVisibility.bind(this, element);
+    return this.createModelAndListen_(calcVisibility, spec, readyPromise,
+        createReportPromiseFunc, callback, element);
+  }
+
+  /**
+   * Create visibilityModel and listen to visible events.
+   * @param {function():number} calcVisibility
+   * @param {!Object<string, *>} spec
+   * @param {?Promise} readyPromise
+   * @param {?function():!Promise} createReportPromiseFunc
+   * @param {function(!Object<string, *>)} callback
+   * @param {!Element=} opt_element
+   * @return {!UnlistenDef}
+   */
+  createModelAndListen_(calcVisibility, spec,
+    readyPromise, createReportPromiseFunc, callback, opt_element) {
+    if (spec['visiblePercentageThresholds'] &&
+        spec['visiblePercentageMin'] == undefined &&
+        spec['visiblePercentageMax'] == undefined) {
+      const unlisteners = [];
+      const ranges = spec['visiblePercentageThresholds'];
+      if (!ranges || !isArray(ranges)) {
+        user().error(TAG, 'invalid visiblePercentageThresholds');
+        return () => {};
+      }
+      for (let i = 0; i < ranges.length; i++) {
+        const percents = ranges[i];
+        if (!isArray(percents) || percents.length != 2) {
+          user().error(TAG,
+              'visiblePercentageThresholds entry length is not 2');
+          continue;
+        }
+        if (!isFiniteNumber(percents[0]) || !isFiniteNumber(percents[1])) {
+          // not valid number
+          user().error(TAG,
+              'visiblePercentageThresholds entry is not valid number');
+          continue;
+        }
+        const min = Number(percents[0]);
+        const max = Number(percents[1]);
+        // Min and max must be valid percentages. Min may not be more than max.
+        // Max is inclusive. Min is usually exclusive, but there are two
+        // special cases: if min and max are both 0, or both 100, then both
+        // are inclusive. Otherwise it would not be possible to trigger an
+        // event on exactly 0% or 100%.
+        if (min < 0 || max > 100 || min > max ||
+            (min == max && min != 100 && max != 0)) {
+          user().error(TAG,
+              'visiblePercentageThresholds entry invalid min/max value');
+          continue;
+        }
+        const newSpec = spec;
+        newSpec['visiblePercentageMin'] = min;
+        newSpec['visiblePercentageMax'] = max;
+        const model = new VisibilityModel(newSpec, calcVisibility);
+        unlisteners.push(this.listen_(model, spec, readyPromise,
+            createReportPromiseFunc, callback, opt_element));
+      }
+      return () => {
+        unlisteners.forEach(unlistener => unlistener());
+      };
+    }
+
+    const model = new VisibilityModel(spec, calcVisibility);
+    return this.listen_(model, spec, readyPromise,
+        createReportPromiseFunc, callback, opt_element);
   }
 
   /**
@@ -248,7 +321,7 @@ export class VisibilityManager {
    * @private
    */
   listen_(model, spec,
-      readyPromise, createReportPromiseFunc, callback, opt_element) {
+    readyPromise, createReportPromiseFunc, callback, opt_element) {
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
@@ -265,7 +338,6 @@ export class VisibilityManager {
     model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
-      model.dispose();
 
       // Additional doc-level state.
       state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
@@ -275,15 +347,26 @@ export class VisibilityManager {
       // Optionally, element-level state.
       let layoutBox;
       if (opt_element) {
+        state['opacity'] = getMinOpacity(opt_element);
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
         layoutBox =
             resource ?
-            resource.getLayoutBox() :
-            Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+              resource.getLayoutBox() :
+              Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+        const intersectionRatio = this.getElementVisibility(opt_element);
+        const intersectionRect = this.getElementIntersectionRect(opt_element);
+        Object.assign(state, {
+          'intersectionRatio': intersectionRatio,
+          'intersectionRect': JSON.stringify(intersectionRect),
+        });
+
       } else {
+        state['opacity'] = this.getRootMinOpacity();
         layoutBox = this.getRootLayoutBox();
       }
+      model.maybeDispose();
+
       if (layoutBox) {
         Object.assign(state, {
           'elementX': layoutBox.left,
@@ -292,7 +375,6 @@ export class VisibilityManager {
           'elementHeight': layoutBox.height,
         });
       }
-
       callback(state);
     });
 
@@ -336,6 +418,13 @@ export class VisibilityManager {
    * @abstract
    */
   getElementVisibility(unusedElement) {}
+
+  /**
+   * @param {!Element} unusedElement
+   * @return {?JsonObject}
+   * @abstract
+   */
+  getElementIntersectionRect(unusedElement) {}
 }
 
 
@@ -421,6 +510,14 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /** @override */
+  getRootMinOpacity() {
+    const root = this.ampdoc.getRootNode();
+    const rootElement = dev().assertElement(
+        root.documentElement || root.body || root);
+    return getMinOpacity(rootElement);
+  }
+
+  /** @override */
   getRootLayoutBox() {
     // This code is the same for "in-a-box" and standalone doc.
     const root = this.ampdoc.getRootNode();
@@ -439,6 +536,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       trackedElement = {
         element,
         intersectionRatio: 0,
+        intersectionRect: null,
         listeners: [],
       };
       this.trackedElements_[id] = trackedElement;
@@ -470,7 +568,25 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     }
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
-    return trackedElement && trackedElement.intersectionRatio || 0;
+    return (trackedElement && trackedElement.intersectionRatio) || 0;
+  }
+
+  /**
+   * Gets the intersection element.
+   *
+   * @param {!Element} element
+   * @return {?JsonObject}
+   */
+  getElementIntersectionRect(element) {
+    if (this.getElementVisibility(element) <= 0) {
+      return null;
+    }
+    const id = getElementId(element);
+    const trackedElement = this.trackedElements_[id];
+    if (trackedElement) {
+      return /** @type {!JsonObject} */ (trackedElement.intersectionRect);
+    }
+    return null;
   }
 
   /**
@@ -490,7 +606,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    */
   createIntersectionObserver_() {
     // Native.
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     if (nativeIntersectionObserverSupported(win)) {
       return new win.IntersectionObserver(
           this.onIntersectionChanges_.bind(this),
@@ -516,7 +632,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @private
    */
   polyfillAmpElementIfNeeded_(element) {
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     if (nativeIntersectionObserverSupported(win)) {
       return;
     }
@@ -537,21 +653,33 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    */
   onIntersectionChanges_(entries) {
     entries.forEach(change => {
-      this.onIntersectionChange_(change.target, change.intersectionRatio);
+      let intersection = change.intersectionRect;
+      // IntersectionRect type now changed from ClientRect to DOMRectReadOnly.
+      // TODO(@zhouyx): Fix all InOb related type.
+      intersection = layoutRectLtwh(Number(intersection.left),
+          Number(intersection.top),
+          Number(intersection.width),
+          Number(intersection.height));
+      this.onIntersectionChange_(
+          change.target,
+          change.intersectionRatio,
+          intersection);
     });
   }
 
   /**
    * @param {!Element} target
    * @param {number} intersectionRatio
+   * @param {!../../../src/layout-rect.LayoutRectDef} intersectionRect
    * @private
    */
-  onIntersectionChange_(target, intersectionRatio) {
+  onIntersectionChange_(target, intersectionRatio, intersectionRect) {
     intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
     if (trackedElement) {
       trackedElement.intersectionRatio = intersectionRatio;
+      trackedElement.intersectionRect = intersectionRect;
       for (let i = 0; i < trackedElement.listeners.length; i++) {
         trackedElement.listeners[i](intersectionRatio);
       }
@@ -599,8 +727,26 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   }
 
   /** @override */
+  getRootMinOpacity() {
+    const rootElement = dev().assertElement(this.embed.iframe);
+    return getMinOpacity(rootElement);
+  }
+
+  /**
+   * Gets the layout box of the embedded document. Note that this may be
+   * smaller than the size allocated by the host. In that case, the document
+   * will be centered, and the unfilled space will not be reflected in this
+   * return value.
+   * embed.iframe is used to calculate the root layoutbox, since it is more
+   * important for the embedded document to know its own size, rather than
+   * the size of the host rectangle which it may or may not entirely fill.
+   * embed.host is used to calculate the root visibility, however, since
+   * the visibility of the host element directly determines the embedded
+   * document's visibility.
+   * @override
+   */
   getRootLayoutBox() {
-    const rootElement = dev().assertElement(this.embed.host);
+    const rootElement = dev().assertElement(this.embed.iframe);
     return Services.viewportForDoc(this.ampdoc).getLayoutRect(rootElement);
   }
 
@@ -616,4 +762,16 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     }
     return this.parent.getElementVisibility(element);
   }
+
+  /**
+   * Returns intersecting element.
+   * @override
+   */
+  getElementIntersectionRect(element) {
+    if (this.getRootVisibility() == 0) {
+      return null;
+    }
+    return this.parent.getElementIntersectionRect(element);
+  }
+
 }

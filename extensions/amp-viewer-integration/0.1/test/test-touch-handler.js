@@ -16,7 +16,6 @@
 
 import {Messaging} from '../messaging/messaging';
 import {TouchHandler} from '../touch-handler';
-import * as sinon from 'sinon';
 
 function fakeTouchEvent(type) {
   return {

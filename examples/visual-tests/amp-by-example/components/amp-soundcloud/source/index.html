@@ -1,0 +1,54 @@
+<!--
+  ## Introduction
+
+  Play soundcloud tracks from within AMP HTML files.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-soundcloud</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-soundcloud` component.
+  -->
+  <script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-soundcloud/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+  <!-- ## Classic Mode -->
+  <!--
+    You can find the trackid in the Soundcloud embed code. The only supported layout mode is `fixed-height`. Get the height from the Soundcloud embed code.
+  -->
+  <amp-soundcloud height="166"
+                layout="fixed-height"
+                data-trackid="89299804"></amp-soundcloud>
+  <!--
+    The classic mode allows setting a custom color via the `data-color` attribute.
+  -->
+  <amp-soundcloud height="166"
+                layout="fixed-height"
+                data-trackid="89299804"
+                data-color="448AFF"></amp-soundcloud>
+  <!-- ## Visual Mode -->
+  <!--
+    The visual mode doesn't allow changing the color. Make sure to use the same height as the Soundcloud embed code.
+  -->
+  <amp-soundcloud height="450"
+    layout="fixed-height"
+    data-trackid="89299804"
+    data-visual="true"></amp-soundcloud>
+  <!-- ## Playlist Mode -->
+  <!--
+    The playlist mode allows embedding a full Soundcloud playlist by its ID (found in the Soundcloud embed code). The only change is the substitution of `data-trackid` by `data-playlistid`
+  -->
+  <amp-soundcloud height="450"
+    layout="fixed-height"
+    data-playlistid="331919427"
+    data-visual="true"></amp-soundcloud>
+</body>
+</html>

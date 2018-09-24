@@ -15,7 +15,6 @@
  */
 
 import {Observable} from '../../src/observable';
-import * as sinon from 'sinon';
 
 describe('Observable', () => {
 
@@ -23,7 +22,7 @@ describe('Observable', () => {
   let observable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     observable = new Observable();
   });
 

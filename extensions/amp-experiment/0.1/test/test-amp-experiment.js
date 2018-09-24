@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
-import * as variant from '../variant';
+import {hasOwn} from '../../../../src/utils/object';
 
 
 describes.realWin('amp-experiment', {
@@ -67,7 +68,7 @@ describes.realWin('amp-experiment', {
 
   function expectBodyHasAttributes(attributes) {
     for (const attributeName in attributes) {
-      if (attributes.hasOwnProperty(attributeName)) {
+      if (hasOwn(attributes, attributeName)) {
         expect(doc.body.getAttribute(attributeName))
             .to.equal(attributes[attributeName]);
       }
@@ -82,31 +83,31 @@ describes.realWin('amp-experiment', {
   });
 
   it('should throw if it has no child element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       experiment.buildCallback();
-    }).to.throw(/should contain exactly one/);
+    }).to.throw(/should contain exactly one/); });
   });
 
   it('should throw if it has multiple child elements', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('script');
       addConfigElement('script');
       experiment.buildCallback();
-    }).to.throw(/should contain exactly one/);
+    }).to.throw(/should contain exactly one/); });
   });
 
   it('should throw if the child element is not a <script> element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('a');
       experiment.buildCallback();
-    }).to.throw(/script/);
+    }).to.throw(/script/); });
   });
 
   it('should throw if the child script element is not json typed', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('script', 'wrongtype');
       experiment.buildCallback();
-    }).to.throw(/application\/json/);
+    }).to.throw(/application\/json/); });
   });
 
   it('should throw if the child script element has non-JSON content', () => {
@@ -114,6 +115,9 @@ describes.realWin('amp-experiment', {
       addConfigElement('script', 'application/json', '{not json}');
       experiment.buildCallback();
     }).to.throw();
+    return Services.variantForOrNull(win).then(variants => {
+      expect(variants).to.be.null;
+    });
   });
 
   it('should add attributes to body element for the allocated variants', () => {

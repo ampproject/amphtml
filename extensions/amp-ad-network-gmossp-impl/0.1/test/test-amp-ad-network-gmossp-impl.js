@@ -21,8 +21,8 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
 
 
 describes.realWin('gmossp-a4a-config', {amp: false}, env => {
@@ -45,6 +45,14 @@ describes.realWin('gmossp-a4a-config', {amp: false}, env => {
       'data-use-a4a': 'true',
     });
     expect(gmosspIsA4AEnabled(win, element)).to.be.true;
+  });
+  it('should fail a4a config predicate due to useRemoteHtml', () => {
+    const element = createElementWithAttributes(doc, 'amp-ad', {
+      src: 'https://amp.sp.gmossp-sp.jp/_a4a/ads/ssp.ad?space_id=33303&is_a4a=1',
+      'data-use-a4a': 'true',
+    });
+    const useRemoteHtml = true;
+    expect(gmosspIsA4AEnabled(win, element, useRemoteHtml)).to.be.false;
   });
   it('should fail a4a config predicate due to missing use-a4a', () => {
     const element = createElementWithAttributes(doc, 'amp-ad', {
@@ -83,7 +91,8 @@ describes.realWin('amp-ad-network-gmossp-impl', {
     gmosspImplElem = doc.createElement('amp-ad');
     gmosspImplElem.setAttribute('type', 'gmossp');
     gmosspImplElem.setAttribute('data-use-a4a', 'true');
-    sandbox.stub(AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames',
+    sandbox.stub(
+        AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames').callsFake(
         () => {
           return ['google'];
         });

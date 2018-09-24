@@ -16,7 +16,6 @@
 
 import {JwtHelper} from '../jwt';
 import {pemToBytes} from '../../../../src/utils/pem';
-import * as sinon from 'sinon';
 
 
 describe('JwtHelper', () => {
@@ -35,7 +34,7 @@ describe('JwtHelper', () => {
   let helper;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     helper = new JwtHelper(window);
   });
 
@@ -117,7 +116,7 @@ describe('JwtHelper', () => {
     // TODO(aghassemi, 6292): Unskip for Safari after #6292
     it.configure().skipSafari().run('should decode and verify token correctly',
         () => {
-      // Skip on non-subtle browser.
+          // Skip on non-subtle browser.
           if (!helper.isVerificationSupported()) {
             return;
           }
@@ -214,20 +213,20 @@ describe('JwtHelper', () => {
       subtleMock.expects('importKey')
           .withExactArgs(
           /* format */ 'spki',
-          pemToBytes(PEM),
-          {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
-          /* extractable */ false,
-          /* uses */ ['verify']
-        )
+              pemToBytes(PEM),
+              {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
+              /* extractable */ false,
+              /* uses */ ['verify']
+          )
           .returns(Promise.resolve(key))
           .once();
       subtleMock.expects('verify')
           .withExactArgs(
-          {name: 'RSASSA-PKCS1-v1_5'},
-          key,
-          /* sig */ sinon.match(() => true),
-          /* verifiable */ sinon.match(() => true)
-        )
+              {name: 'RSASSA-PKCS1-v1_5'},
+              key,
+              /* sig */ sinon.match(() => true),
+              /* verifiable */ sinon.match(() => true)
+          )
           .returns(Promise.resolve(true))
           .once();
       return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {

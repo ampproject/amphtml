@@ -15,14 +15,13 @@
  */
 
 import {Curves, bezierCurve, getCurve} from '../../src/curve';
-import * as sinon from 'sinon';
 
 describe('Curve', () => {
 
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {

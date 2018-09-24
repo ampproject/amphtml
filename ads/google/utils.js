@@ -17,6 +17,34 @@
 import {user} from '../../src/log';
 
 /**
+ * Approved height for AdSense full-width responsive ads.
+ * @const {number}
+ */
+export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
+
+/**
+ * The attribute value for AdSense data-auto-format tag.
+ * For full-width responsive ad: data-auto-format='rspv'.
+ * For full-width matched content responsive ad: data-auto-format='mcrspv'
+ * @const {string}
+ */
+export const ADSENSE_RSPV_TAG = 'rspv';
+export const ADSENSE_MCRSPV_TAG = 'mcrspv';
+
+/**
+ * Required size to be sent with fluid requests.
+ * @const {string}
+ */
+export const DUMMY_FLUID_SIZE = '320x50';
+
+/**
+ * Required size to be sent with fluid requests in array format.
+ * @const {!Array<number>}
+ */
+const DUMMY_FLUID_SIZE_ARR =
+    DUMMY_FLUID_SIZE.split('x').map(dim => Number(dim));
+
+/**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
  * set of primary dimensions, this function will return all valid multi-size
  * [width, height] pairs in an array.
@@ -28,15 +56,16 @@ import {user} from '../../src/log';
  * @param {boolean} multiSizeValidation A flag that if set to true will enforce
  *   the rule that ensures multi-size dimensions are no less than 2/3rds of
  *   their primary dimension's counterpart.
- * @param {boolean=} isFluid Indicates whether this ad slot is Fluid-enabled.
+ * @param {boolean=} isFluidPrimary Indicates whether the ad slot's primary
+ *   size is fluid.
  * @return {?Array<!Array<number>>} An array of dimensions.
  */
 export function getMultiSizeDimensions(
-    multiSizeDataStr,
-    primaryWidth,
-    primaryHeight,
-    multiSizeValidation,
-    isFluid = false) {
+  multiSizeDataStr,
+  primaryWidth,
+  primaryHeight,
+  multiSizeValidation,
+  isFluidPrimary = false) {
 
   const dimensions = [];
   const arrayOfSizeStrs = multiSizeDataStr.split(',');
@@ -44,6 +73,14 @@ export function getMultiSizeDimensions(
   for (let i = 0; i < arrayOfSizeStrs.length; i++) {
 
     const sizeStr = arrayOfSizeStrs[i];
+    if (sizeStr.toLowerCase() == 'fluid') {
+      if (!isFluidPrimary) {
+        // If the primary size is fluid, then the dummy size will already be
+        // be included.
+        dimensions.push(DUMMY_FLUID_SIZE_ARR);
+      }
+      continue;
+    }
     const size = sizeStr.split('x');
 
     // Make sure that each size is specified in the form WxH.
@@ -60,17 +97,17 @@ export function getMultiSizeDimensions(
         w => isNaN(w) || w <= 0,
         h => isNaN(h) || h <= 0,
         badParams => badParams.map(badParam =>
-            `Invalid ${badParam.dim} of ${badParam.val} ` +
+          `Invalid ${badParam.dim} of ${badParam.val} ` +
             'given for secondary size.').join(' '))) {
       continue;
     }
 
     // Check that secondary size is not larger than primary size.
-    if (!isFluid && !validateDimensions(width, height,
+    if (!isFluidPrimary && !validateDimensions(width, height,
         w => w > primaryWidth,
         h => h > primaryHeight,
         badParams => badParams.map(badParam =>
-            `Secondary ${badParam.dim} ${badParam.val} ` +
+          `Secondary ${badParam.dim} ${badParam.val} ` +
             `can't be larger than the primary ${badParam.dim}.`).join(' '))) {
       continue;
     }
@@ -87,7 +124,7 @@ export function getMultiSizeDimensions(
           w => w < minWidth,
           h => h < minHeight,
           badParams => badParams.map(badParam =>
-              `Secondary ${badParam.dim} ${badParam.val} is ` +
+            `Secondary ${badParam.dim} ${badParam.val} is ` +
               `smaller than 2/3rds of the primary ${badParam.dim}.`)
               .join(' '))) {
         continue;
@@ -115,8 +152,8 @@ export function getMultiSizeDimensions(
  * @param {(number|string)} height
  * @param {function((number|string)): boolean} widthCond
  * @param {function((number|string)): boolean} heightCond
- * @param {function(!Array<{dim: string, val: (number|string)}>): string=}
- *   errorBuilder A function that will produce an informative error message.
+ * @param {function(!Array<{dim: string, val: (number|string)}>): string=} errorBuilder
+ * A function that will produce an informative error message.
  * @return {boolean}
  */
 function validateDimensions(width, height, widthCond, heightCond, errorBuilder)

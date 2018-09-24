@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import * as DocumentFetcher from '../../../../src/document-fetcher';
+import * as lolex from 'lolex';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
-import * as lolex from 'lolex';
 
 
 describes.realWin('AccessServerAdapter', {amp: true}, env => {
@@ -33,7 +34,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     win = env.win;
     document = win.document;
     ampdoc = env.ampdoc;
-    clock = lolex.install(win);
+    clock = lolex.install({target: win});
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -53,6 +54,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
   });
 
   afterEach(() => {
+    clock.uninstall();
     contextMock.verify();
   });
 
@@ -72,9 +74,9 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
 
     it('should fail if config is invalid', () => {
       delete validConfig['authorization'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessServerAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"authorization" URL must be specified/);
+      }).to.throw(/"authorization" URL must be specified/); });
     });
 
     it('should tolerate when i-amphtml-access-state is missing', () => {
@@ -90,13 +92,14 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     let clientAdapter;
     let clientAdapterMock;
     let xhrMock;
+    let docFetcherMock;
     let responseDoc;
     let targetElement1, targetElement2;
 
     beforeEach(() => {
       adapter = new AccessServerAdapter(ampdoc, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
-
+      docFetcherMock = sandbox.mock(DocumentFetcher);
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
         getAuthorizationTimeout: () => 3000,
@@ -138,7 +141,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
         clientAdapterMock.expects('authorize').returns(p).once();
-        xhrMock.expects('fetchDocument').never();
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
       });
@@ -147,7 +150,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
         clientAdapterMock.expects('authorize').returns(p).once();
-        xhrMock.expects('fetchDocument').never();
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
       });
@@ -156,8 +159,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-            'https://acme.com/a?rid=READER_ID',
-            /* useAuthData */ false)
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,
@@ -171,8 +174,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             'OTHER': '123',
           },
         };
-        xhrMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+        docFetcherMock.expects('fetchDocument')
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
               headers: {
@@ -182,10 +185,11 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             })
             .returns(Promise.resolve(responseDoc))
             .once();
-        const replaceSectionsStub = sandbox.stub(adapter, 'replaceSections_',
-            () => {
-              return Promise.resolve();
-            });
+        const replaceSectionsStub =
+            sandbox.stub(adapter, 'replaceSections_').callsFake(
+                () => {
+                  return Promise.resolve();
+                });
         return adapter.authorize().then(response => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');
@@ -197,8 +201,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-            'https://acme.com/a?rid=READER_ID',
-            /* useAuthData */ false)
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,
@@ -212,8 +216,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             'OTHER': '123',
           },
         };
-        xhrMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+        docFetcherMock.expects('fetchDocument')
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
               headers: {
@@ -234,8 +238,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-            'https://acme.com/a?rid=READER_ID',
-            /* useAuthData */ false)
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,
@@ -249,8 +253,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             'OTHER': '123',
           },
         };
-        xhrMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+        docFetcherMock.expects('fetchDocument')
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
               headers: {
@@ -258,7 +262,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
               },
               requireAmpResponseSourceOrigin: false,
             })
-            .returns(new Promise(() => {}))  // Never resolved.
+            .returns(new Promise(() => {})) // Never resolved.
             .once();
         const promise = adapter.authorize();
         return Promise.resolve().then(() => {

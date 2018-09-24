@@ -14,10 +14,10 @@
  * the License.
  */
 
-import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
+import {toggle} from '../../../src/style';
 
- /** @fileoverview
+/** @fileoverview
  * Wraps the creation of an invisible sandboxed IFrame. Exposes a load() method
  * that resolves a Promise when the iFrame has finished loading.
  */
@@ -62,7 +62,7 @@ export class IFrameHost {
   load() {
     return this.ampdoc_.whenReady().then(() => {
       this.domElement_ = this.ampdoc_.win.document.createElement('iframe');
-      setStyle(this.domElement_, 'display', 'none');
+      toggle(this.domElement_, false);
       this.domElement_.sandbox = 'allow-same-origin allow-scripts';
       this.domElement_.src = this.url_;
 

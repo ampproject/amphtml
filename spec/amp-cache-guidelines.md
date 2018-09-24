@@ -40,9 +40,9 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
 
-8. Supports a public Update ping mechanism which provides a mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
+8. Supports a public Update Cache mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
 
-    1. Equivalent to the [Google AMP Cache Update ping API](https://developers.google.com/amp/cache/update-ping#update-ping-format)
+    1. Equivalent to the [Google AMP Update Cache API](https://developers.google.com/amp/cache/update-cache)
 
 9. Supports a public AMP Cache URL API:
 
@@ -100,6 +100,8 @@ For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may no
 
 * Contact relevant publishers to make sure they update their CORS policies to include your origin.
   * For further information please refer to the [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+* Handle dynamically generated components:
+  * [`<amp-geo>`](../extensions/amp-geo/amp-geo.md) — at delivery time, the string `{{AMP_ISO_COUNTRY_HOTPATCH}}` in [`amp-geo.js`](../extensions/amp-geo/0.1/amp-geo.js) is replaced by a string consisting of the user's ISO country code followed by exactly 26 spaces (to avoid breaking map files).
 * Publicly announce your cache so people know where to find your documentation.
 * Examples of AMP Cache providers:
   * [Google AMP Cache](https://developers.google.com/amp/cache/)

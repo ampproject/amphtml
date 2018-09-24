@@ -119,13 +119,21 @@ export class Platform {
   }
 
   /**
+   * Whether the current platform matches a bot user agent.
+   * @return {boolean}
+   */
+  isBot() {
+    return /bot/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Returns the major version of the browser.
    * @return {number}
    */
   getMajorVersion() {
     if (this.isSafari()) {
       return this.isIos() ? (this.getIosMajorVersion() || 0) :
-          this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
+        this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
     }
     if (this.isChrome()) {
       return this.evalMajorVersion_(/(Chrome|CriOS)\/(\d+)/, 2);
@@ -166,7 +174,7 @@ export class Platform {
    * Returns the minor ios version in string.
    * The ios version can contain two numbers (10.2) or three numbers (10.2.1).
    * Direct string equality check is not suggested, use startWith instead.
-   * @returns {string}
+   * @return {string}
    */
   getIosVersionString() {
     if (!this.navigator_.userAgent) {
@@ -195,7 +203,7 @@ export class Platform {
     }
     return Number(currentIosVersion.split('.')[0]);
   }
-};
+}
 
 
 /**
@@ -203,4 +211,4 @@ export class Platform {
  */
 export function installPlatformService(window) {
   return registerServiceBuilder(window, 'platform', Platform);
-};
+}

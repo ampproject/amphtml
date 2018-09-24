@@ -1,0 +1,206 @@
+<link rel="import" href="../node_modules/@npm-polymer/examples/visual-tests/amp-by-example/polymer/polymer-element.html">
+<link rel="import" href="../node_modules/@npm-polymer/app-route/app-location.html">
+<link rel="import" href="../node_modules/@npm-polymer/app-route/app-route.html">
+<link rel="import" href="../node_modules/@npm-polymer/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../node_modules/@npm-polymer/iron-media-query/iron-media-query.html">
+<link rel="import" href="../node_modules/@npm-polymer/iron-ajax/iron-ajax.html">
+<link rel="import" href="../node_modules/@npm-polymer/iron-pages/iron-pages.html">
+<link rel="import" href="../node_modules/@npm-polymer/iron-selector/iron-selector.html">
+<link rel="import" href="../node_modules/@npm-polymer/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../node_modules/@npm-polymer/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../node_modules/@npm-polymer/app-layout/helpers/helpers.html">
+<link rel="import" href="sample-home.html">
+<link rel="import" href="sample-list.html">
+<link rel="import" href="sample-category-data.html">
+
+<dom-module id="abe-polymer-app">
+  <template>
+  <style>
+    :host {
+      display: block;
+      position: relative;
+      padding-top: 130px;
+      padding-bottom: 64px;
+      min-height: 100vh;
+      --app-primary-color: #202020;
+      --app-secondary-color: #757575;
+      --app-accent-color: #172C50;
+      --paper-button-ink-color: var(--app-accent-color);
+      --paper-icon-button-ink-color: var(--app-accent-color);
+      --paper-spinner-color: var(--app-accent-color);
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      color: var(--app-primary-color);
+    }
+
+    paper-icon-button {
+      color: var(--app-primary-color);
+    }
+
+    :host(:not([page=detail])) .back-btn {
+      display: none;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    iron-pages {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* small screen */
+    @media (max-width: 767px) {
+      :host {
+        padding-top: 64px;
+      }
+    }
+
+  </style>
+    <sample-category-data categories="{{categories}}"></sample-category-data>
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/examples/visual-tests/amp-by-example/polymer/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+
+  <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
+    <sample-home name="home" categories="[[categories]]"></sample-home>
+    <sample-list name="list" route="[[subroute]]" offline="[[offline]]"></sample-list>
+    <sample-detail name="detail" route="[[subroute]]" offline="[[offline]]"></sample-detail>
+  </iron-pages>
+  </template>
+
+  <script>
+
+    class AbePolymerApp extends Polymer.Element {
+      static get is() { return 'abe-polymer-app'; }
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged'
+          },
+          categories: {
+            type: Array,
+            notify: true
+          }
+        };
+      }
+
+      static get observers() { return [
+        '_routePageChanged(routeData.page)'
+      ]}
+
+      constructor() {
+        super();
+        window.performance && performance.mark && performance.mark('sample-app.created');
+      }
+
+      ready() {
+        super.ready();
+        // Custom elements polyfill safe way to indicate an element has been upgraded.
+        this.removeAttribute('unresolved');
+        // listen for custom events
+        this.addEventListener('show-invalid-url-warning', (e)=>this._onFallbackSelectionTriggered(e));
+        // listen for online/offline
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          window.addEventListener('online', (e)=>this._notifyNetworkStatus(e));
+          window.addEventListener('offline', (e)=>this._notifyNetworkStatus(e));
+        });
+      }
+
+      _routePageChanged(page) {
+        if (this.page === 'list') {
+          this._listScrollTop = window.pageYOffset;
+        }
+
+        this.page = page || 'home';
+      }
+
+      _pageChanged(page, oldPage) {
+        if (page !== null) {
+          // home route is eagerly loaded
+          if (page === 'home') {
+            this._pageLoaded(Boolean(oldPage));
+          // other routes are lazy loaded
+          } else {
+            // When a load failed, it triggered a 404 which means we need to
+            // eagerly load the 404 page definition
+            let cb = this._pageLoaded.bind(this, Boolean(oldPage));
+            Polymer.importHref(
+              this.resolveUrl('sample-' + page + '.html'),
+              cb, cb, true);
+        }
+      }
+    }
+
+      _pageLoaded(shouldResetLayout) {
+        this._ensureLazyLoaded();
+      }
+
+      _ensureLazyLoaded() {
+        // load lazy resources after render and set `loadComplete` when done.
+        if (!this.loadComplete) {
+          Polymer.RenderStatus.afterNextRender(this, () => {
+              // Register service worker if supported.
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js', {scope: '/examples/visual-tests/amp-by-example/polymer/'});
+              }
+              this._notifyNetworkStatus();
+              this.loadComplete = true;
+          });
+        }
+      }
+
+      _notifyNetworkStatus() {
+        let oldOffline = this.offline;
+        this.offline =  !navigator.onLine;
+        // Show the snackbar if the user is offline when starting a new session
+        // or if the network status changed.
+        if (this.offline || (!this.offline && oldOffline)) {
+          if (!this._networkSnackbar) {
+            this._networkSnackbar = document.createElement('sample-snackbar');
+            this.root.appendChild(this._networkSnackbar);
+          }
+          this._networkSnackbar.innerHTML = this.offline ?
+              'You are offline' : 'You are online';
+          this._networkSnackbar.open();
+        }
+      }
+
+      // Elements in the app can notify section changes.
+      // Response by a11y announcing the section and syncronizing the category.
+      _onChangeSection(event) {
+        let detail = event.detail;
+
+        // Scroll to the top of the page when navigating to a non-list page. For list view,
+        // scroll to the last saved position only if the category has not changed.
+        let scrollTop = 0;
+        if (this.page === 'list') {
+          if (this.categoryName === detail.category) {
+            scrollTop = this._listScrollTop;
+          } else {
+            // Reset the list view scrollTop if the category changed.
+            this._listScrollTop = 0;
+          }
+        }
+        // Use `Polymer.AppLayout.scroll` with `behavior: 'silent'` to disable header scroll
+        // effects during the scroll.
+        Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
+
+        this.categoryName = detail.category || '';
+
+        // Announce the page's title
+        if (detail.title) {
+          document.title = detail.title + ' - SAMPLE';
+          this._announce(detail.title + ', loaded');
+        }
+      }
+
+      _onFallbackSelectionTriggered() {
+        this.page = '404';
+      }
+    }
+
+    window.customElements.define(AbePolymerApp.is, AbePolymerApp);
+  </script>
+</dom-module>

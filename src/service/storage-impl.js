@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin} from '../url';
+import {Services} from '../services';
 import {dev} from '../log';
 import {dict} from '../utils/object';
+import {getSourceOrigin} from '../url';
 import {parseJson, recreateNonProtoObject} from '../json';
-import {Services} from '../services';
+import {registerServiceBuilderForDoc} from '../service';
 
 /** @const */
 const TAG = 'Storage';
@@ -391,8 +391,8 @@ export function installStorageServiceForDoc(ampdoc) {
         const viewer = Services.viewerForDoc(ampdoc);
         const overrideStorage = parseInt(viewer.getParam('storage'), 10);
         const binding = overrideStorage ?
-            new ViewerStorageBinding(viewer) :
-            new LocalStorageBinding(ampdoc.win);
+          new ViewerStorageBinding(viewer) :
+          new LocalStorageBinding(ampdoc.win);
         return new Storage(ampdoc, viewer, binding).start_();
       },
       /* opt_instantiate */ true);

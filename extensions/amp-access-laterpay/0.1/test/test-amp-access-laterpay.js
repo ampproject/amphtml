@@ -23,8 +23,9 @@ describes.fakeWin('LaterpayVendor', {
   location: 'https://pub.com/doc1',
 }, env => {
   let win, document, ampdoc;
+  let accessSource;
   let accessService;
-  let accessServiceMock;
+  let accessSourceMock;
   let xhrMock;
   let articleTitle;
   let laterpayConfig;
@@ -37,28 +38,35 @@ describes.fakeWin('LaterpayVendor', {
 
     laterpayConfig = {
       articleTitleSelector: '#laterpay-test-title',
+      region: 'us',
     };
-    accessService = {
-      ampdoc,
+
+    accessSource = {
       getAdapterConfig: () => { return laterpayConfig; },
       buildUrl: () => {},
       loginWithUrl: () => {},
       getLoginUrl: () => {},
     };
-    accessServiceMock = sandbox.mock(accessService);
+
+    accessService = {
+      ampdoc,
+      getSource: () => accessSource,
+    };
+
+    accessSourceMock = sandbox.mock(accessSource);
 
     articleTitle = document.createElement('h1');
     articleTitle.id = 'laterpay-test-title';
     articleTitle.textContent = 'test title';
     document.body.appendChild(articleTitle);
 
-    vendor = new LaterpayVendor(accessService);
+    vendor = new LaterpayVendor(accessService, accessSource);
     xhrMock = sandbox.mock(vendor.xhr_);
   });
 
   afterEach(() => {
     articleTitle.parentNode.removeChild(articleTitle);
-    accessServiceMock.verify();
+    accessSourceMock.verify();
     xhrMock.verify();
   });
 
@@ -69,13 +77,31 @@ describes.fakeWin('LaterpayVendor', {
       sandbox.stub(vendor, 'renderPurchaseOverlay_');
     });
 
+    it('uses a non default region', () => {
+      const buildUrl = accessSourceMock.expects('buildUrl')
+          .returns(Promise.resolve(''))
+          .once();
+      xhrMock.expects('fetchJson')
+          .returns(Promise.resolve({
+            json() {
+              return Promise.resolve({access: true});
+            },
+          }))
+          .once();
+      return vendor.authorize().then(() => {
+        expect(
+            /connector\.uselaterpay\.com/g.test(buildUrl.firstCall.args[0])
+        ).to.be.true;
+      });
+    });
+
     it('successful authorization', () => {
       vendor.purchaseConfigBaseUrl_ = 'https://baseurl?param';
-      accessServiceMock.expects('buildUrl')
+      accessSourceMock.expects('buildUrl')
           .withExactArgs('https://baseurl?param&article_title=test%20title', false)
           .returns(Promise.resolve('https://builturl'))
           .once();
-      accessServiceMock.expects('getLoginUrl')
+      accessSourceMock.expects('getLoginUrl')
           .returns(Promise.resolve('https://builturl'))
           .once();
       xhrMock.expects('fetchJson')
@@ -95,10 +121,10 @@ describes.fakeWin('LaterpayVendor', {
     });
 
     it('authorization fails due to lack of server config', () => {
-      accessServiceMock.expects('buildUrl')
+      accessSourceMock.expects('buildUrl')
           .returns(Promise.resolve('https://builturl'))
           .once();
-      accessServiceMock.expects('getLoginUrl')
+      accessSourceMock.expects('getLoginUrl')
           .returns(Promise.resolve('https://builturl'))
           .once();
       xhrMock.expects('fetchJson')
@@ -113,10 +139,10 @@ describes.fakeWin('LaterpayVendor', {
     });
 
     it('authorization response from server fails', () => {
-      accessServiceMock.expects('buildUrl')
+      accessSourceMock.expects('buildUrl')
           .returns(Promise.resolve('https://builturl'))
           .once();
-      accessServiceMock.expects('getLoginUrl')
+      accessSourceMock.expects('getLoginUrl')
           .returns(Promise.resolve('https://builturl'))
           .once();
       xhrMock.expects('fetchJson')
@@ -239,10 +265,10 @@ describes.fakeWin('LaterpayVendor', {
     it('sends request for purchase', done => {
       const changeEv = new Event('change');
       container.querySelector('input').dispatchEvent(changeEv);
-      accessServiceMock.expects('buildUrl')
+      accessSourceMock.expects('buildUrl')
           .returns(Promise.resolve('https://builturl'))
           .once();
-      accessServiceMock.expects('loginWithUrl')
+      accessSourceMock.expects('loginWithUrl')
           .once();
       const clickEv = new Event('click');
       container.querySelector('button').dispatchEvent(clickEv);
@@ -250,10 +276,10 @@ describes.fakeWin('LaterpayVendor', {
     });
 
     it('sends request for already purchased', done => {
-      accessServiceMock.expects('buildUrl')
+      accessSourceMock.expects('buildUrl')
           .returns(Promise.resolve('https://apllink'))
           .once();
-      accessServiceMock.expects('loginWithUrl')
+      accessSourceMock.expects('loginWithUrl')
           .once();
       const clickEv = new Event('click');
       container

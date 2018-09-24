@@ -16,13 +16,12 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
+  LocalStorageBinding,
   Storage,
   Store,
-  LocalStorageBinding,
   ViewerStorageBinding,
 } from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('Storage', () => {
@@ -37,7 +36,7 @@ describe('Storage', () => {
   let viewerBroadcastHandler;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     viewerBroadcastHandler = undefined;
     viewer = {
@@ -325,7 +324,7 @@ describe('Store', () => {
   let store;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     store = new Store({}, 2);
   });
@@ -413,12 +412,14 @@ describe('Store', () => {
   });
 
   it('should prohibit unsafe values', () => {
-    expect(() => {
-      store.set('__proto__', 'value1');
-    }).to.throw(/Name is not allowed/);
-    expect(() => {
-      store.set('prototype', 'value1');
-    }).to.throw(/Name is not allowed/);
+    allowConsoleError(() => {
+      expect(() => {
+        store.set('__proto__', 'value1');
+      }).to.throw(/Name is not allowed/);
+      expect(() => {
+        store.set('prototype', 'value1');
+      }).to.throw(/Name is not allowed/);
+    });
   });
 });
 
@@ -430,7 +431,7 @@ describe('LocalStorageBinding', () => {
   let binding;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     windowApi = {
       localStorage: {
         getItem: () => {},
@@ -570,7 +571,7 @@ describe('ViewerStorageBinding', () => {
   let binding;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     viewer = {
       sendMessageAwaitResponse: () => {},
     };

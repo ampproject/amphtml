@@ -15,9 +15,9 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {NETWORKS} from './vendors';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {startsWith} from '../../../src/string';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
@@ -80,7 +80,7 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
 
     const network = NETWORKS[el.getAttribute('data-cf-network')];
     const a4a = el.getAttribute('data-cf-a4a') !== 'false';
-    const base = network.base;
+    const {base} = network;
 
     // Get URL for ad creative
     let url = el.getAttribute('src') || network.src;

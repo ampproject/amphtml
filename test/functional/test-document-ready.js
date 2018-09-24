@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {isDocumentReady,
   onDocumentReady,
-  whenDocumentReady,
   whenDocumentComplete,
+  whenDocumentReady,
 } from '../../src/document-ready';
-import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
 describe('documentReady', () => {
@@ -31,7 +30,7 @@ describe('documentReady', () => {
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'loading',
@@ -211,7 +210,7 @@ describe('documentReady', () => {
           expect(callback).to.have.not.been.called;
           expect(eventListeners['readystatechange']).to.not.equal(undefined);
 
-            // Complete
+          // Complete
           testDoc.readyState = 'complete';
           eventListeners['readystatechange']();
 

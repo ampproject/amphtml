@@ -16,15 +16,12 @@
 
 import {FakeWindow} from '../../testing/fake-dom';
 import {
-  markElementScheduledForTesting,
-  resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
-import {
   getElementService,
-  getElementServiceIfAvailable,
   getElementServiceForDoc,
+  getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
   getElementServiceIfAvailableForDocInEmbedScope,
+  isExtensionScriptInNode,
 } from '../../src/element-service';
 import {
   installServiceInEmbedScope,
@@ -33,6 +30,10 @@ import {
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
+import {
+  markElementScheduledForTesting,
+  resetScheduledElementForTesting,
+} from '../../src/service/custom-element-registry';
 
 describe('getElementServiceIfAvailable()', () => {
   let doc;
@@ -41,9 +42,13 @@ describe('getElementServiceIfAvailable()', () => {
 
   beforeEach(() => {
     doc = {
+      head: {},
       body: {},
     };
     doc.documentElement = {ownerDocument: doc};
+    doc.getHeadNode = () => doc.head;
+    doc.head.querySelectorAll = () => [];
+
 
     win = {
       document: doc,
@@ -64,7 +69,7 @@ describe('getElementServiceIfAvailable()', () => {
   });
 
   it('should wait for body when not available', () => {
-    doc.body = null;  // Body not available
+    doc.body = null; // Body not available
     let resolvedService;
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1')
         .then(service => {
@@ -86,7 +91,7 @@ describe('getElementServiceIfAvailable()', () => {
   });
 
   it('should resolve with body when not available', () => {
-    doc.body = {};  // Body is available
+    doc.body = {}; // Body is available
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
     return Promise.resolve().then(() => {
       expect(setIntervalCallback).to.be.undefined;
@@ -97,7 +102,7 @@ describe('getElementServiceIfAvailable()', () => {
   });
 
   it('should wait for body when available', () => {
-    doc.body = null;  // Body not available
+    doc.body = null; // Body not available
     let resolvedService;
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1')
         .then(service => {
@@ -123,7 +128,7 @@ describe('getElementServiceIfAvailable()', () => {
   });
 
   it('should resolve with body when available', () => {
-    doc.body = {};  // Body is available
+    doc.body = {}; // Body is available
     markElementScheduledForTesting(win, 'element-1');
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
     return Promise.resolve().then(() => {
@@ -326,6 +331,17 @@ describes.realWin('in single ampdoc', {
         expect(service).to.deep.equal({str: 'fake1'});
       });
     });
+
+    it('isExtensionScriptInNode', () => {
+      const extension = document.createElement('script');
+      extension.setAttribute('custom-element', 'amp-form');
+      extension.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-form-0.1.js');
+      ampdoc.getHeadNode().appendChild(extension);
+      return isExtensionScriptInNode(ampdoc, 'amp-form')
+          .then(ampFormInstalled => {
+            expect(ampFormInstalled).to.equal(true);
+          });
+    });
   });
 });
 
@@ -362,8 +378,8 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     installServiceInEmbedScope(embedWin, 'foo', service);
     return getElementServiceIfAvailableForDocInEmbedScope(
         nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
-          expect(returned).to.equal(service);
-        });
+      expect(returned).to.equal(service);
+    });
   });
 
   it('should return service for scheduled element', () => {
@@ -382,8 +398,8 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
         /* opt_instantiate */ true);
     return getElementServiceIfAvailableForDocInEmbedScope(
         nodeInTopWin, 'foo', 'amp-foo').then(returned => {
-          expect(returned).to.equal(service);
-        });
+      expect(returned).to.equal(service);
+    });
   });
 
   it('should NOT return ampdoc-scope service if node in embed window', () => {
@@ -392,7 +408,7 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
         /* opt_instantiate */ true);
     return getElementServiceIfAvailableForDocInEmbedScope(
         nodeInEmbedWin, 'foo', 'amp-foo').then(returned => {
-          expect(returned).to.be.null;
-        });
+      expect(returned).to.be.null;
+    });
   });
 });

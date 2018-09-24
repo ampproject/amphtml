@@ -16,23 +16,26 @@
 'use strict';
 
 
+const babelify = require('babelify');
 const BBPromise = require('bluebird');
-const babel = require('babelify');
 const browserify = require('browserify');
+const colors = require('ansi-colors');
 const depCheckConfig = require('../dep-check-config');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
-const util = require('gulp-util');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
-const red = msg => util.log(util.colors.red(msg));
+const red = msg => log(colors.red(msg));
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
 /**
  * @typedef {{
@@ -54,6 +57,7 @@ let GlobsDef;
 
 /**
  * @constructor @final @struct
+ * @param {!RuleConfigDef} config
  */
 function Rule(config) {
   /** @private @const {!RuleConfigDef} */
@@ -172,7 +176,7 @@ function getGraph(entryModule) {
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
   const bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babel.configure({}));
+      .transform(babelify, {compact: false});
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({
@@ -210,7 +214,7 @@ function getEntryModule(extensionFolder) {
  * with nested dependencies. We flatten it so all we have are individual
  * modules and their imports as well as making the entries unique.
  *
- * @param {!ModuleDef} entryModule
+ * @param {!Array<!ModuleDef>} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {
@@ -220,7 +224,7 @@ function flattenGraph(entryPoints) {
   // Now make the graph have unique entries
   return flatten(entryPoints)
       .reduce((acc, cur) => {
-        const name = cur.name;
+        const {name} = cur;
         if (!acc[name]) {
           acc[name] = Object.keys(cur.deps)
               // Get rid of the absolute path for minimatch'ing
@@ -252,19 +256,17 @@ function runRules(modules) {
 }
 
 function depCheck() {
+  const handlerProcess = createCtrlcHandler('dep-check');
   return getSrcs().then(entryPoints => {
     // This check is for extension folders that actually dont have
     // an extension entry point module yet.
     entryPoints = entryPoints.filter(x => fs.existsSync(x));
     return BBPromise.all(entryPoints.map(getGraph));
-  })
-      .then(flattenGraph)
-      .then(runRules)
-      .then(errorsFound => {
-        if (errorsFound) {
-          process.exit(1);
-        }
-      });
+  }).then(flattenGraph).then(runRules).then(errorsFound => {
+    if (errorsFound) {
+      process.exit(1);
+    }
+  }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -287,7 +289,7 @@ function toArrayOrDefault(value, defaultValue) {
 /**
  * Flatten array of arrays.
  *
- * @type {!Array<!Array>}
+ * @param {!Array<!Array>} arr
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
@@ -296,5 +298,5 @@ function flatten(arr) {
 gulp.task(
     'dep-check',
     'Runs a dependency check on each module',
-    ['css'],  // Defined in gulpfile.js, and must be run before dep-check.
+    maybeUpdatePackages.concat(['css']),
     depCheck);

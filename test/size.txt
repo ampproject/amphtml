@@ -1,197 +1,120 @@
-      max   |         min   |        gzip   |   file
-      ---   |         ---   |         ---   |   ---
-<<<<<<< HEAD
-   290 kB   |    31.63 kB   |    12.49 kB   |   alp.js / alp.max.js
-324.95 kB   |     16.7 kB   |     6.53 kB   |   amp4ads-host-v0.js / amp-inabox-host.js
-  1.28 MB   |    229.7 kB   |     72.6 kB   |   amp4ads-v0.js / amp-inabox.js
-  2.32 kB   |       790 B   |       469 B   |   examiner.js / examiner.max.js
-  1.24 MB   |   232.06 kB   |    73.33 kB   |   shadow-v0.js / amp-shadow.js
-  5.82 kB   |       386 B   |       250 B   |   sw-kill.js / sw-kill.max.js
- 23.55 kB   |     1.79 kB   |       983 B   |   sw.js / sw.max.js
-  1.26 MB   |   225.73 kB   |    71.31 kB   |   v0.js / amp.js
-160.41 kB   |    37.04 kB   |    11.52 kB   |   ww.js / ww.max.js
-375.76 kB   |    30.79 kB   |    10.61 kB   |   v0/amp-3q-player-0.1.js
-408.56 kB   |    40.39 kB   |    13.56 kB   |   v0/amp-access-0.1.js
-227.31 kB   |    11.29 kB   |     4.38 kB   |   v0/amp-access-laterpay-0.1.js
-123.72 kB   |     3.31 kB   |     1.51 kB   |   v0/amp-accordion-0.1.js
-718.08 kB   |    52.54 kB   |    17.75 kB   |   v0/amp-ad-0.1.js
-201.81 kB   |     6.22 kB   |     2.62 kB   |   v0/amp-ad-exit-0.1.js
-659.75 kB   |    64.66 kB   |    22.41 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
-616.14 kB   |    51.01 kB   |    17.87 kB   |   v0/amp-ad-network-cloudflare-impl-0.1.js
-742.14 kB   |     78.5 kB   |    26.66 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
-616.24 kB   |    51.39 kB   |    17.95 kB   |   v0/amp-ad-network-fake-impl-0.1.js
-612.82 kB   |    49.87 kB   |    17.46 kB   |   v0/amp-ad-network-gmossp-impl-0.1.js
-612.66 kB   |    49.75 kB   |    17.44 kB   |   v0/amp-ad-network-triplelift-impl-0.1.js
-536.15 kB   |    81.62 kB   |    26.06 kB   |   v0/amp-analytics-0.1.js
- 77.34 kB   |     4.51 kB   |     2.12 kB   |   v0/amp-anim-0.1.js
-487.93 kB   |    99.53 kB   |    31.35 kB   |   v0/amp-animation-0.1.js
-211.74 kB   |     9.32 kB   |      2.7 kB   |   v0/amp-apester-media-0.1.js
-232.03 kB   |    10.18 kB   |        4 kB   |   v0/amp-app-banner-0.1.js
-104.82 kB   |     4.62 kB   |     1.99 kB   |   v0/amp-audio-0.1.js
-265.59 kB   |    11.58 kB   |     4.71 kB   |   v0/amp-auto-ads-0.1.js
-541.25 kB   |    76.85 kB   |    25.89 kB   |   v0/amp-bind-0.1.js
-378.31 kB   |    32.21 kB   |    11.02 kB   |   v0/amp-brid-player-0.1.js
-113.39 kB   |      3.1 kB   |     1.38 kB   |   v0/amp-brightcove-0.1.js
-217.97 kB   |     3.17 kB   |     1.55 kB   |   v0/amp-call-tracking-0.1.js
- 341.6 kB   |    24.88 kB   |     8.08 kB   |   v0/amp-carousel-0.1.js
- 64.83 kB   |       820 B   |       488 B   |   v0/amp-compare-slider-0.1.js
-134.52 kB   |     9.95 kB   |     4.54 kB   |   v0/amp-crypto-polyfill-0.1.js
-380.59 kB   |     32.6 kB   |    11.21 kB   |   v0/amp-dailymotion-0.1.js
-196.61 kB   |     2.09 kB   |     1.07 kB   |   v0/amp-dynamic-css-classes-0.1.js
-211.64 kB   |     5.03 kB   |     2.21 kB   |   v0/amp-experiment-0.1.js
-302.23 kB   |    11.18 kB   |     4.95 kB   |   v0/amp-facebook-0.1.js
-302.24 kB   |    11.16 kB   |     4.94 kB   |   v0/amp-facebook-comments-0.1.js
-302.25 kB   |    11.18 kB   |     4.95 kB   |   v0/amp-facebook-like-0.1.js
- 69.47 kB   |     3.23 kB   |     1.43 kB   |   v0/amp-fit-text-0.1.js
-   198 kB   |     4.33 kB   |     1.99 kB   |   v0/amp-font-0.1.js
-307.13 kB   |    24.88 kB   |     8.88 kB   |   v0/amp-form-0.1.js
-255.78 kB   |     4.87 kB   |     2.21 kB   |   v0/amp-fresh-0.1.js
- 82.53 kB   |     4.47 kB   |     1.82 kB   |   v0/amp-fx-flying-carpet-0.1.js
-246.53 kB   |     4.89 kB   |     2.27 kB   |   v0/amp-fx-parallax-0.1.js
-376.24 kB   |    31.33 kB   |    10.87 kB   |   v0/amp-gfycat-0.1.js
-301.77 kB   |    10.75 kB   |     4.78 kB   |   v0/amp-gist-0.1.js
-202.24 kB   |     4.87 kB   |     2.15 kB   |   v0/amp-google-vrview-image-0.1.js
- 93.11 kB   |     1.65 kB   |       866 B   |   v0/amp-hulu-0.1.js
- 304.9 kB   |    14.78 kB   |     6.08 kB   |   v0/amp-iframe-0.1.js
- 424.9 kB   |    37.57 kB   |    13.24 kB   |   v0/amp-ima-video-0.1.js
-347.57 kB   |    29.14 kB   |     9.53 kB   |   v0/amp-image-lightbox-0.1.js
-109.88 kB   |     2.46 kB   |     1.23 kB   |   v0/amp-imgur-0.1.js
-114.78 kB   |      4.3 kB   |     1.96 kB   |   v0/amp-instagram-0.1.js
-220.27 kB   |     7.91 kB   |      3.4 kB   |   v0/amp-install-serviceworker-0.1.js
-111.28 kB   |     2.27 kB   |     1.18 kB   |   v0/amp-izlesene-0.1.js
- 94.45 kB   |     2.42 kB   |     1.06 kB   |   v0/amp-jwplayer-0.1.js
-112.09 kB   |     3.17 kB   |     1.42 kB   |   v0/amp-kaltura-player-0.1.js
-272.88 kB   |    11.61 kB   |     4.59 kB   |   v0/amp-lightbox-0.1.js
- 323.5 kB   |    20.15 kB   |     6.94 kB   |   v0/amp-lightbox-viewer-0.1.js
-241.55 kB   |     6.94 kB   |     2.91 kB   |   v0/amp-list-0.1.js
-259.68 kB   |     9.97 kB   |     3.93 kB   |   v0/amp-live-list-0.1.js
-177.36 kB   |    38.29 kB   |    13.84 kB   |   v0/amp-mustache-0.1.js
-377.14 kB   |    31.46 kB   |    10.84 kB   |   v0/amp-nexxtv-player-0.1.js
- 67.14 kB   |     2.32 kB   |     1.01 kB   |   v0/amp-o2-player-0.1.js
-376.85 kB   |    31.25 kB   |    10.72 kB   |   v0/amp-ooyala-player-0.1.js
-246.55 kB   |    18.26 kB   |     5.23 kB   |   v0/amp-pinterest-0.1.js
-255.61 kB   |    12.05 kB   |     6.25 kB   |   v0/amp-playbuzz-0.1.js
-292.54 kB   |     8.38 kB   |     3.57 kB   |   v0/amp-position-observer-0.1.js
- 65.55 kB   |      1.4 kB   |       712 B   |   v0/amp-reach-player-0.1.js
-270.12 kB   |     9.38 kB   |     4.12 kB   |   v0/amp-reddit-0.1.js
-202.22 kB   |     5.76 kB   |     2.37 kB   |   v0/amp-selector-0.1.js
-257.85 kB   |     4.78 kB   |      2.2 kB   |   v0/amp-share-tracking-0.1.js
-270.75 kB   |    10.68 kB   |     4.15 kB   |   v0/amp-sidebar-0.1.js
-267.48 kB   |    10.36 kB   |     4.03 kB   |   v0/amp-sidebar-1.0.js
-231.81 kB   |     7.44 kB   |     3.12 kB   |   v0/amp-slides-0.1.js
- 235.7 kB   |    17.27 kB   |     6.57 kB   |   v0/amp-social-share-0.1.js
-  66.8 kB   |     1.92 kB   |       904 B   |   v0/amp-soundcloud-0.1.js
- 67.87 kB   |     2.95 kB   |     1.06 kB   |   v0/amp-springboard-player-0.1.js
-102.69 kB   |     6.24 kB   |     2.59 kB   |   v0/amp-sticky-ad-1.0.js
-102.11 kB   |    39.94 kB   |     7.41 kB   |   v0/amp-timeago-0.1.js
-302.51 kB   |    11.36 kB   |     4.98 kB   |   v0/amp-twitter-0.1.js
-216.88 kB   |     8.13 kB   |     3.28 kB   |   v0/amp-user-notification-0.1.js
-379.23 kB   |    32.32 kB   |    11.08 kB   |   v0/amp-video-0.1.js
-231.27 kB   |     7.21 kB   |     3.21 kB   |   v0/amp-viewer-integration-0.1.js
- 66.08 kB   |     1.57 kB   |       807 B   |   v0/amp-vimeo-0.1.js
- 65.56 kB   |     1.43 kB   |       763 B   |   v0/amp-vine-0.1.js
-762.52 kB   |    512.5 kB   |   167.92 kB   |   v0/amp-viz-vega-0.1.js
-297.07 kB   |    17.22 kB   |     6.02 kB   |   v0/amp-web-push-0.1.js
-384.21 kB   |       33 kB   |    11.39 kB   |   v0/amp-youtube-0.1.js
- 26.61 kB   |     3.32 kB   |     1.55 kB   |   v0/cache-service-worker-0.1.js
-119.66 kB   |    10.47 kB   |     3.99 kB   |   current-min/ampcontext-v0.js / current/ampcontext-lib.js
-492.31 kB   |   112.81 kB   |    36.74 kB   |   current-min/f.js / current/integration.js
-  83.2 kB   |     7.53 kB   |     2.95 kB   |   current-min/iframe-transport-client-v0.js / current/iframe-transport-client-lib.js
-=======
-300.14 kB   |    31.63 kB   |    12.49 kB   |   alp.js / alp.max.js
-   343 kB   |     16.7 kB   |     6.53 kB   |   amp4ads-host-v0.js / amp-inabox-host.js
-  1.47 MB   |   229.69 kB   |    72.59 kB   |   amp4ads-v0.js / amp-inabox.js
-  2.32 kB   |       790 B   |       469 B   |   examiner.js / examiner.max.js
-  1.42 MB   |   231.82 kB   |    73.26 kB   |   shadow-v0.js / amp-shadow.js
-  2.35 kB   |       386 B   |       250 B   |   sw-kill.js / sw-kill.max.js
- 23.89 kB   |     1.79 kB   |       983 B   |   sw.js / sw.max.js
-  1.44 MB   |   225.73 kB   |     71.3 kB   |   v0.js / amp.js
-170.93 kB   |    37.05 kB   |    11.53 kB   |   ww.js / ww.max.js
-418.54 kB   |    30.79 kB   |    10.61 kB   |   v0/amp-3q-player-0.1.js
-435.35 kB   |    40.41 kB   |    13.58 kB   |   v0/amp-access-0.1.js
-237.84 kB   |    11.29 kB   |     4.38 kB   |   v0/amp-access-laterpay-0.1.js
-138.93 kB   |     3.31 kB   |     1.51 kB   |   v0/amp-accordion-0.1.js
-808.88 kB   |    52.54 kB   |    17.75 kB   |   v0/amp-ad-0.1.js
-242.77 kB   |     6.22 kB   |     2.62 kB   |   v0/amp-ad-exit-0.1.js
-724.61 kB   |    63.93 kB   |    22.18 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
-678.71 kB   |    51.01 kB   |    17.87 kB   |   v0/amp-ad-network-cloudflare-impl-0.1.js
-817.48 kB   |     78.5 kB   |    26.66 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
-678.78 kB   |    51.39 kB   |    17.95 kB   |   v0/amp-ad-network-fake-impl-0.1.js
-675.36 kB   |    49.87 kB   |    17.46 kB   |   v0/amp-ad-network-gmossp-impl-0.1.js
- 675.2 kB   |    49.75 kB   |    17.44 kB   |   v0/amp-ad-network-triplelift-impl-0.1.js
-601.95 kB   |    81.62 kB   |    26.06 kB   |   v0/amp-analytics-0.1.js
- 90.86 kB   |     4.51 kB   |     2.12 kB   |   v0/amp-anim-0.1.js
-520.82 kB   |    99.54 kB   |    31.36 kB   |   v0/amp-animation-0.1.js
-228.22 kB   |     9.32 kB   |      2.7 kB   |   v0/amp-apester-media-0.1.js
-248.75 kB   |    10.18 kB   |        4 kB   |   v0/amp-app-banner-0.1.js
-120.18 kB   |     4.62 kB   |     1.99 kB   |   v0/amp-audio-0.1.js
-302.22 kB   |    11.58 kB   |     4.71 kB   |   v0/amp-auto-ads-0.1.js
-581.69 kB   |    76.86 kB   |    25.91 kB   |   v0/amp-bind-0.1.js
-421.09 kB   |    32.21 kB   |    11.02 kB   |   v0/amp-brid-player-0.1.js
- 124.3 kB   |      3.1 kB   |     1.38 kB   |   v0/amp-brightcove-0.1.js
-234.56 kB   |     3.17 kB   |     1.55 kB   |   v0/amp-call-tracking-0.1.js
-399.42 kB   |    24.88 kB   |     8.08 kB   |   v0/amp-carousel-0.1.js
- 75.68 kB   |       820 B   |       488 B   |   v0/amp-compare-slider-0.1.js
-137.29 kB   |     9.78 kB   |      4.5 kB   |   v0/amp-crypto-polyfill-0.1.js
-423.36 kB   |     32.6 kB   |    11.21 kB   |   v0/amp-dailymotion-0.1.js
-205.15 kB   |     2.09 kB   |     1.07 kB   |   v0/amp-dynamic-css-classes-0.1.js
-232.82 kB   |     5.03 kB   |     2.21 kB   |   v0/amp-experiment-0.1.js
-328.29 kB   |    11.18 kB   |     4.95 kB   |   v0/amp-facebook-0.1.js
- 328.3 kB   |    11.16 kB   |     4.94 kB   |   v0/amp-facebook-comments-0.1.js
- 328.3 kB   |    11.18 kB   |     4.95 kB   |   v0/amp-facebook-like-0.1.js
- 80.57 kB   |     3.23 kB   |     1.43 kB   |   v0/amp-fit-text-0.1.js
-214.78 kB   |     4.33 kB   |     1.99 kB   |   v0/amp-font-0.1.js
-326.63 kB   |    24.88 kB   |     8.88 kB   |   v0/amp-form-0.1.js
-279.27 kB   |     4.87 kB   |     2.21 kB   |   v0/amp-fresh-0.1.js
- 93.39 kB   |     4.47 kB   |     1.82 kB   |   v0/amp-fx-flying-carpet-0.1.js
- 263.1 kB   |     4.89 kB   |     2.27 kB   |   v0/amp-fx-parallax-0.1.js
- 76.61 kB   |     1.56 kB   |       796 B   |   v0/amp-gfycat-0.1.js
-327.87 kB   |    10.75 kB   |     4.78 kB   |   v0/amp-gist-0.1.js
-220.43 kB   |     4.87 kB   |     2.15 kB   |   v0/amp-google-vrview-image-0.1.js
-103.89 kB   |     1.65 kB   |       866 B   |   v0/amp-hulu-0.1.js
-330.77 kB   |    14.78 kB   |     6.08 kB   |   v0/amp-iframe-0.1.js
-470.36 kB   |    37.57 kB   |    13.24 kB   |   v0/amp-ima-video-0.1.js
-382.14 kB   |    29.14 kB   |     9.53 kB   |   v0/amp-image-lightbox-0.1.js
-124.98 kB   |     2.46 kB   |     1.23 kB   |   v0/amp-imgur-0.1.js
-129.79 kB   |      4.3 kB   |     1.96 kB   |   v0/amp-instagram-0.1.js
-236.69 kB   |     7.91 kB   |      3.4 kB   |   v0/amp-install-serviceworker-0.1.js
-122.17 kB   |     2.27 kB   |     1.18 kB   |   v0/amp-izlesene-0.1.js
-105.23 kB   |     2.42 kB   |     1.06 kB   |   v0/amp-jwplayer-0.1.js
-122.98 kB   |     3.17 kB   |     1.42 kB   |   v0/amp-kaltura-player-0.1.js
-305.05 kB   |    11.61 kB   |     4.59 kB   |   v0/amp-lightbox-0.1.js
-355.89 kB   |    20.15 kB   |     6.94 kB   |   v0/amp-lightbox-viewer-0.1.js
-262.87 kB   |     6.94 kB   |     2.91 kB   |   v0/amp-list-0.1.js
-276.35 kB   |     9.97 kB   |     3.93 kB   |   v0/amp-live-list-0.1.js
-191.49 kB   |    38.29 kB   |    13.84 kB   |   v0/amp-mustache-0.1.js
-419.89 kB   |    31.46 kB   |    10.84 kB   |   v0/amp-nexxtv-player-0.1.js
- 77.95 kB   |     2.32 kB   |     1.01 kB   |   v0/amp-o2-player-0.1.js
-419.64 kB   |    31.25 kB   |    10.72 kB   |   v0/amp-ooyala-player-0.1.js
-270.16 kB   |    18.26 kB   |     5.23 kB   |   v0/amp-pinterest-0.1.js
-278.09 kB   |    12.05 kB   |     6.25 kB   |   v0/amp-playbuzz-0.1.js
-318.27 kB   |     8.38 kB   |     3.57 kB   |   v0/amp-position-observer-0.1.js
- 76.36 kB   |      1.4 kB   |       712 B   |   v0/amp-reach-player-0.1.js
-293.67 kB   |     9.38 kB   |     4.12 kB   |   v0/amp-reddit-0.1.js
-218.47 kB   |     5.76 kB   |     2.37 kB   |   v0/amp-selector-0.1.js
-278.99 kB   |     4.78 kB   |      2.2 kB   |   v0/amp-share-tracking-0.1.js
-294.26 kB   |    10.68 kB   |     4.15 kB   |   v0/amp-sidebar-0.1.js
-291.01 kB   |    10.36 kB   |     4.03 kB   |   v0/amp-sidebar-1.0.js
-253.47 kB   |     7.44 kB   |     3.12 kB   |   v0/amp-slides-0.1.js
-252.29 kB   |    17.27 kB   |     6.57 kB   |   v0/amp-social-share-0.1.js
- 77.59 kB   |     1.92 kB   |       904 B   |   v0/amp-soundcloud-0.1.js
- 78.69 kB   |     2.95 kB   |     1.06 kB   |   v0/amp-springboard-player-0.1.js
-113.53 kB   |     6.24 kB   |     2.59 kB   |   v0/amp-sticky-ad-1.0.js
-112.93 kB   |    39.94 kB   |     7.41 kB   |   v0/amp-timeago-0.1.js
-328.57 kB   |    11.36 kB   |     4.98 kB   |   v0/amp-twitter-0.1.js
-228.79 kB   |     8.13 kB   |     3.28 kB   |   v0/amp-user-notification-0.1.js
-   422 kB   |    32.32 kB   |    11.08 kB   |   v0/amp-video-0.1.js
-251.03 kB   |     7.21 kB   |     3.21 kB   |   v0/amp-viewer-integration-0.1.js
- 76.87 kB   |     1.57 kB   |       807 B   |   v0/amp-vimeo-0.1.js
- 69.44 kB   |     1.43 kB   |       761 B   |   v0/amp-vine-0.1.js
-783.93 kB   |    512.5 kB   |   167.92 kB   |   v0/amp-viz-vega-0.1.js
-341.17 kB   |    17.22 kB   |     6.02 kB   |   v0/amp-web-push-0.1.js
-426.99 kB   |       33 kB   |    11.39 kB   |   v0/amp-youtube-0.1.js
- 23.17 kB   |     3.32 kB   |     1.55 kB   |   v0/cache-service-worker-0.1.js
-129.12 kB   |    10.47 kB   |     3.99 kB   |   current-min/ampcontext-v0.js / current/ampcontext-lib.js
- 524.9 kB   |    112.8 kB   |    36.73 kB   |   current-min/f.js / current/integration.js
- 91.75 kB   |     7.53 kB   |     2.95 kB   |   current-min/iframe-transport-client-v0.js / current/iframe-transport-client-lib.js
->>>>>>> new size.txt
+    max   |       min   |      gzip   |   file
+    ---   |       ---   |       ---   |   ---
+ 335 kB   |   31.5 kB   |   12.3 kB   |   alp.js / alp.max.js
+ 418 kB   |   18.8 kB   |   7.33 kB   |   amp4ads-host-v0.js / amp-inabox-host.js
+2.06 MB   |    254 kB   |   80.4 kB   |   amp4ads-v0.js / amp-inabox.js
+2.32 kB   |     790 B   |     469 B   |   examiner.js / examiner.max.js
+2.01 MB   |    255 kB   |   80.8 kB   |   shadow-v0.js / amp-shadow.js
+2.03 MB   |    249 kB   |   78.9 kB   |   v0.js / amp.js
+ 217 kB   |   37.8 kB   |   11.8 kB   |   ww.js / ww.max.js
+ 397 kB   |     14 kB   |   6.08 kB   |   v0/amp-3d-gltf-0.1.js
+ 607 kB   |   49.3 kB   |   15.4 kB   |   v0/amp-3q-player-0.1.js
+ 603 kB   |   48.8 kB   |   16.2 kB   |   v0/amp-access-0.1.js
+ 284 kB   |   11.5 kB   |   4.53 kB   |   v0/amp-access-laterpay-0.1.js
+ 285 kB   |   11.9 kB   |   4.61 kB   |   v0/amp-access-laterpay-0.2.js
+ 307 kB   |   9.82 kB   |   4.17 kB   |   v0/amp-access-scroll-0.1.js
+ 370 kB   |   10.6 kB   |   4.05 kB   |   v0/amp-accordion-0.1.js
+1.01 MB   |   59.9 kB   |   20.1 kB   |   v0/amp-ad-0.1.js
+ 367 kB   |   12.1 kB   |   4.88 kB   |   v0/amp-ad-exit-0.1.js
+ 926 kB   |   70.9 kB   |   24.8 kB   |   v0/amp-ad-network-adsense-impl-0.1.js
+ 848 kB   |   52.6 kB   |   18.5 kB   |   v0/amp-ad-network-adzerk-impl-0.1.js
+ 832 kB   |   51.5 kB   |   18.3 kB   |   v0/amp-ad-network-cloudflare-impl-0.1.js
+1.12 MB   |    102 kB   |   34.8 kB   |   v0/amp-ad-network-doubleclick-impl-0.1.js
+ 832 kB   |   51.6 kB   |   18.3 kB   |   v0/amp-ad-network-fake-impl-0.1.js
+ 828 kB   |   50.4 kB   |   17.9 kB   |   v0/amp-ad-network-gmossp-impl-0.1.js
+ 828 kB   |   50.2 kB   |   17.9 kB   |   v0/amp-ad-network-triplelift-impl-0.1.js
+ 433 kB   |   18.2 kB   |   7.32 kB   |   v0/amp-addthis-0.1.js
+ 969 kB   |    107 kB   |   33.4 kB   |   v0/amp-analytics-0.1.js
+ 112 kB   |   4.08 kB   |   1.99 kB   |   v0/amp-anim-0.1.js
+ 594 kB   |   99.8 kB   |   31.3 kB   |   v0/amp-animation-0.1.js
+ 399 kB   |   19.6 kB   |   6.76 kB   |   v0/amp-apester-media-0.1.js
+ 249 kB   |   9.05 kB   |   3.51 kB   |   v0/amp-app-banner-0.1.js
+ 322 kB   |   6.22 kB   |   2.67 kB   |   v0/amp-audio-0.1.js
+ 370 kB   |   13.2 kB   |   5.29 kB   |   v0/amp-auto-ads-0.1.js
+ 393 kB   |   12.2 kB   |   5.36 kB   |   v0/amp-beopinion-0.1.js
+ 804 kB   |   96.3 kB   |   33.8 kB   |   v0/amp-bind-0.1.js
+ 375 kB   |   13.3 kB   |   5.74 kB   |   v0/amp-bodymovin-animation-0.1.js
+ 611 kB   |   52.3 kB   |   16.4 kB   |   v0/amp-brid-player-0.1.js
+ 612 kB   |   51.5 kB   |   16.2 kB   |   v0/amp-brightcove-0.1.js
+ 361 kB   |   13.6 kB   |   4.91 kB   |   v0/amp-byside-content-0.1.js
+ 294 kB   |   3.73 kB   |   1.78 kB   |   v0/amp-call-tracking-0.1.js
+ 462 kB   |   25.5 kB   |   8.35 kB   |   v0/amp-carousel-0.1.js
+90.8 kB   |     809 B   |     478 B   |   v0/amp-compare-slider-0.1.js
+ 372 kB   |   18.6 kB   |   6.73 kB   |   v0/amp-consent-0.1.js
+ 152 kB   |   9.77 kB   |   4.49 kB   |   v0/amp-crypto-polyfill-0.1.js
+ 613 kB   |   51.2 kB   |     16 kB   |   v0/amp-dailymotion-0.1.js
+1.24 MB   |    650 kB   |    146 kB   |   v0/amp-date-picker-0.1.js
+ 227 kB   |   1.73 kB   |     895 B   |   v0/amp-dynamic-css-classes-0.1.js
+ 280 kB   |   5.23 kB   |   2.27 kB   |   v0/amp-experiment-0.1.js
+ 395 kB   |   12.9 kB   |   5.66 kB   |   v0/amp-facebook-0.1.js
+ 394 kB   |   12.9 kB   |   5.64 kB   |   v0/amp-facebook-comments-0.1.js
+ 394 kB   |   12.9 kB   |   5.65 kB   |   v0/amp-facebook-like-0.1.js
+ 394 kB   |   12.9 kB   |   5.65 kB   |   v0/amp-facebook-page-0.1.js
+95.6 kB   |   3.14 kB   |   1.42 kB   |   v0/amp-fit-text-0.1.js
+ 255 kB   |   4.31 kB   |      2 kB   |   v0/amp-font-0.1.js
+ 421 kB   |   25.8 kB   |   9.05 kB   |   v0/amp-form-0.1.js
+ 385 kB   |   17.5 kB   |   5.27 kB   |   v0/amp-fx-collection-0.1.js
+ 109 kB   |   4.29 kB   |   1.79 kB   |   v0/amp-fx-flying-carpet-0.1.js
+ 301 kB   |   5.13 kB   |   2.42 kB   |   v0/amp-geo-0.1.js
+ 603 kB   |   49.2 kB   |   15.4 kB   |   v0/amp-gfycat-0.1.js
+ 393 kB   |   11.6 kB   |   5.15 kB   |   v0/amp-gist-0.1.js
+ 177 kB   |    3.7 kB   |   1.75 kB   |   v0/amp-google-document-embed-0.1.js
+ 141 kB   |   5.36 kB   |   2.37 kB   |   v0/amp-google-vrview-image-0.1.js
+ 287 kB   |   6.71 kB   |   2.64 kB   |   v0/amp-gwd-animation-0.1.js
+ 127 kB   |   1.67 kB   |     869 B   |   v0/amp-hulu-0.1.js
+ 431 kB   |     19 kB   |   7.75 kB   |   v0/amp-iframe-0.1.js
+ 641 kB   |   56.1 kB   |   18.3 kB   |   v0/amp-ima-video-0.1.js
+ 456 kB   |   29.2 kB   |    9.6 kB   |   v0/amp-image-lightbox-0.1.js
+ 456 kB   |   24.3 kB   |   8.22 kB   |   v0/amp-image-viewer-0.1.js
+ 148 kB   |   2.48 kB   |   1.23 kB   |   v0/amp-imgur-0.1.js
+ 152 kB   |   4.29 kB   |   1.94 kB   |   v0/amp-instagram-0.1.js
+ 290 kB   |   6.36 kB   |   2.73 kB   |   v0/amp-install-serviceworker-0.1.js
+ 158 kB   |   2.34 kB   |   1.21 kB   |   v0/amp-izlesene-0.1.js
+ 129 kB   |   2.62 kB   |   1.13 kB   |   v0/amp-jwplayer-0.1.js
+ 159 kB   |   3.43 kB   |   1.51 kB   |   v0/amp-kaltura-player-0.1.js
+ 368 kB   |     13 kB   |    5.1 kB   |   v0/amp-lightbox-0.1.js
+ 516 kB   |   44.2 kB   |   13.6 kB   |   v0/amp-lightbox-gallery-0.1.js
+ 362 kB   |   12.1 kB   |   4.96 kB   |   v0/amp-list-0.1.js
+ 378 kB   |   12.7 kB   |   4.88 kB   |   v0/amp-live-list-0.1.js
+ 393 kB   |     12 kB   |   5.29 kB   |   v0/amp-mathml-0.1.js
+ 322 kB   |   55.4 kB   |   20.8 kB   |   v0/amp-mustache-0.1.js
+2.02 MB   |    173 kB   |   54.7 kB   |   v0/amp-next-page-0.1.js
+ 609 kB   |   51.2 kB   |   16.1 kB   |   v0/amp-nexxtv-player-0.1.js
+93.1 kB   |   2.34 kB   |   1.01 kB   |   v0/amp-o2-player-0.1.js
+ 608 kB   |   49.8 kB   |   15.5 kB   |   v0/amp-ooyala-player-0.1.js
+ 494 kB   |   21.9 kB   |   7.71 kB   |   v0/amp-pan-zoom-0.1.js
+ 350 kB   |   19.1 kB   |   5.58 kB   |   v0/amp-pinterest-0.1.js
+ 354 kB   |   13.1 kB   |   6.72 kB   |   v0/amp-playbuzz-0.1.js
+ 326 kB   |   7.06 kB   |   3.01 kB   |   v0/amp-position-observer-0.1.js
+91.5 kB   |   1.46 kB   |     730 B   |   v0/amp-reach-player-0.1.js
+ 393 kB   |   12.3 kB   |   5.34 kB   |   v0/amp-reddit-0.1.js
+ 138 kB   |   2.45 kB   |   1.21 kB   |   v0/amp-riddle-quiz-0.1.js
+ 265 kB   |   6.47 kB   |   2.61 kB   |   v0/amp-selector-0.1.js
+ 323 kB   |   4.79 kB   |    2.2 kB   |   v0/amp-share-tracking-0.1.js
+ 313 kB   |   8.95 kB   |   3.54 kB   |   v0/amp-sidebar-0.1.js
+  51 kB   |     745 B   |     463 B   |   v0/amp-slides-0.1.js
+ 311 kB   |   14.4 kB   |    5.8 kB   |   v0/amp-social-share-0.1.js
+92.7 kB   |   1.91 kB   |     897 B   |   v0/amp-soundcloud-0.1.js
+94.1 kB   |   3.15 kB   |   1.12 kB   |   v0/amp-springboard-player-0.1.js
+ 115 kB   |   6.27 kB   |   2.62 kB   |   v0/amp-sticky-ad-1.0.js
+1.46 MB   |    261 kB   |   72.1 kB   |   v0/amp-story-0.1.js
+1.81 MB   |    304 kB   |   78.8 kB   |   v0/amp-story-1.0.js
+ 327 kB   |   9.46 kB   |   3.58 kB   |   v0/amp-story-auto-ads-0.1.js
+ 663 kB   |   51.6 kB   |   17.2 kB   |   v0/amp-subscriptions-0.1.js
+ 567 kB   |   93.8 kB   |     25 kB   |   v0/amp-subscriptions-google-0.1.js
+ 128 kB   |     40 kB   |   7.42 kB   |   v0/amp-timeago-0.1.js
+ 394 kB   |   12.3 kB   |   5.41 kB   |   v0/amp-twitter-0.1.js
+ 294 kB   |   10.2 kB   |   4.01 kB   |   v0/amp-user-notification-0.1.js
+ 616 kB   |     53 kB   |   16.4 kB   |   v0/amp-video-0.1.js
+ 275 kB   |   3.99 kB   |   1.78 kB   |   v0/amp-video-service-0.1.js
+ 381 kB   |   13.9 kB   |   5.96 kB   |   v0/amp-viewer-integration-0.1.js
+ 610 kB   |     49 kB   |   15.5 kB   |   v0/amp-vimeo-0.1.js
+84.5 kB   |   1.45 kB   |     766 B   |   v0/amp-vine-0.1.js
+ 834 kB   |    513 kB   |    168 kB   |   v0/amp-viz-vega-0.1.js
+ 302 kB   |   4.73 kB   |   2.01 kB   |   v0/amp-vk-0.1.js
+ 420 kB   |     19 kB   |   6.74 kB   |   v0/amp-web-push-0.1.js
+ 609 kB   |   49.7 kB   |   15.5 kB   |   v0/amp-wistia-player-0.1.js
+ 618 kB   |   52.3 kB   |   16.5 kB   |   v0/amp-youtube-0.1.js
+ 165 kB   |   11.4 kB   |   4.35 kB   |   current-min/ampcontext-v0.js / current/ampcontext-lib.js
+ 670 kB   |    136 kB   |   44.1 kB   |   current-min/f.js / current/integration.js
+ 112 kB   |   7.97 kB   |   3.13 kB   |   current-min/iframe-transport-client-v0.js / current/iframe-transport-client-lib.js

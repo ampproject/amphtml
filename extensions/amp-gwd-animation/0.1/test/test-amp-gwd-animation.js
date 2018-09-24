@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 import {
-  EXPERIMENT,
+  ANIMATIONS_DISABLED_CLASS,
+  CURRENT_LABEL_ANIMATION_ATTR,
+  GOTO_COUNTER_PROP,
+  GWD_PAGE_WRAPPER_CLASS,
+  GWD_SERVICE_NAME,
+  GWD_TIMELINE_EVENT,
+  PlaybackCssClass,
+} from '../amp-gwd-animation-impl';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {
   GWD_PAGEDECK_ID,
   TAG,
   addAction,
 } from '../amp-gwd-animation';
-import {
-  ANIMATIONS_DISABLED_CLASS,
-  CURRENT_LABEL_ANIMATION_ATTR,
-  GWD_PAGE_WRAPPER_CLASS,
-  GWD_SERVICE_NAME,
-  PlaybackCssClass,
-  AmpGwdRuntimeService,
-} from '../amp-gwd-animation-impl';
-import {toggleExperiment} from '../../../../src/experiments';
-import {getServiceForDoc} from '../../../../src/service';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
+import {createCustomEvent} from '../../../../src/event-helper';
+import {getServiceForDoc} from '../../../../src/service';
 
-describes.sandboxed('AMP GWD Animation', {}, () => {
+describe('AMP GWD Animation', () => {
   /**
    * Creates a test amp-gwd-animation element in the given document.
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -57,14 +56,17 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
    * @param {!Object} invocation Action invocation to execute.
    */
   function invokeWithSomeArgsUndefined(impl, invocation) {
-    for (const argName in invocation.args) {
-      // Temporarily delete the arg and test that the function can be executed
-      // without errors.
-      const oldValue = invocation.args[argName];
-      delete invocation.args[argName];
-      impl.executeAction(invocation);
-      invocation.args[argName] = oldValue;
-    }
+    // These invocations are expected to generate console errors in most cases.
+    allowConsoleError(() => {
+      for (const argName in invocation.args) {
+        // Temporarily delete the arg and test that the function can be executed
+        // without errors.
+        const oldValue = invocation.args[argName];
+        delete invocation.args[argName];
+        impl.executeAction(invocation);
+        invocation.args[argName] = oldValue;
+      }
+    });
   }
 
   describes.repeated('in single and shadow doc', {
@@ -83,25 +85,9 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       let impl;
       let page1Elem;
       let sandbox;
-      let initializeSpy;
-
-      before(() => {
-        // The service's bodyAvailable callback will execute once the iframe is
-        // ready but before any beforEach hooks, so test that the service
-        // initializes by spying on the method here.
-        // TODO(sklobovskaya): initialize_() should remain private as it's not
-        // part of the service's public API, but stubbing it here is the only
-        // way to verify it is called. Revisit if another solution becomes
-        // available.
-        sandbox = sinon.sandbox.create();
-        initializeSpy =
-            sandbox.spy(AmpGwdRuntimeService.prototype, 'initialize_');
-      });
 
       beforeEach(() => {
-        // TODO(sklobovskaya): Remove experiment guard.
-        toggleExperiment(env.win, EXPERIMENT, true);
-
+        sandbox = sinon.sandbox;
         ampdoc = env.ampdoc;
 
         ampdoc.getBody().innerHTML =
@@ -110,6 +96,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               <div id="page1" class="${GWD_PAGE_WRAPPER_CLASS}">
                 <div>
                   <div id="not-an-event"></div>
+                  <div id="grandchild"></div>
                   <div id="event1" data-event-name="event-1"></div>
                   <div id="event2" data-event-name="event-2"></div>
                 </div>
@@ -125,6 +112,13 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
         impl = element.implementation_;
         page1Elem = ampdoc.getRootNode().getElementById('page1');
+
+        // Manually invoke initialize_(). This is normally done automatically on
+        // bodyAvailable, but bodyAvailable fires before beforeEach so it's
+        // necessary to call it a second time once the test DOM is actually
+        // ready so the initialization can perform setup on the DOM.
+        const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
+        runtime.initialize_();
       });
 
       afterEach(() => {
@@ -144,22 +138,8 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       });
       */
 
-      it('should initialize on bodyAvailable', () => {
-        // Waiting for bodyAvailable is only necessary here to avoid JS errors
-        // caused by beforeEach building the element after a test case
-        // environment has already been disposed.
-        return ampdoc.whenBodyAvailable().then(() => {
-          expect(initializeSpy).to.be.called;
-          sandbox.restore();
-        });
-      });
-
       it('should initially enable animations on GWD page 1', () => {
         return ampdoc.whenBodyAvailable().then(() => {
-          // Execute the initialize step (normally executed on bodyAvailable).
-          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
-          runtime.initialize_();
-
           // Page 1 should have been enabled.
           const page1 = ampdoc.getRootNode().getElementById('page1');
           expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
@@ -178,20 +158,95 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
-      it('should set a page as current', () => {
+      it('should change the current page on pagedeck slideChange', () => {
         return ampdoc.whenBodyAvailable().then(() => {
-          // Set page 1 as current.
+          const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
           const page1 = ampdoc.getRootNode().getElementById('page1');
-          page1.classList.add(PlaybackCssClass.PLAY);
+          const page2 = ampdoc.getRootNode().getElementById('page2');
 
-          // Change to page 2.
-          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
-          runtime.setCurrentPage(1);
+          // Verify the first page was activated on initialization.
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Trigger a setCurrentPage action as though it originated from a
+          // pagedeck slideChange event and verify that page 2 is activated.
+          const setCurrentPageInvocation = {
+            method: 'setCurrentPage',
+            args: {index: 1},
+            source: pagedeck,
+            caller: pagedeck,
+            satisfiesTrust: () => true,
+          };
+          impl.executeAction(setCurrentPageInvocation);
 
           expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
-
-          const page2 = ampdoc.getRootNode().getElementById('page2');
           expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Simulate setCurrentPage from a slideChange event which originated
+          // from some other carousel. There should be no page change.
+          const otherSetCurrentPageInvocation = {
+            method: 'setCurrentPage',
+            args: {index: 0},
+            source: null,
+            caller: pagedeck,
+            satisfiesTrust: () => true,
+          };
+          impl.executeAction(otherSetCurrentPageInvocation);
+
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Remove the pagedeck element and verify that triggering
+          // setCurrentPage does not throw errors. Set a null source on the
+          // dummy invocation to test the comparison to a null pagedeck
+          // reference.
+          pagedeck.remove();
+          otherSetCurrentPageInvocation.source = null;
+          impl.executeAction(otherSetCurrentPageInvocation);
+        });
+      });
+
+      it('should activate and deactivate pages', () => {
+        return ampdoc.whenBodyAvailable().then(() => {
+          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
+          const page1 = ampdoc.getRootNode().getElementById('page1');
+          const grandchild = page1.querySelector('#grandchild');
+          const page2 = ampdoc.getRootNode().getElementById('page2');
+
+          // Activate page 1.
+          runtime.setCurrentPage(0);
+
+          // Animations should be enabled on page1 only.
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+
+          // Set an active label animation, goto counters, and a pause on
+          // several descendant elements and the page element itself to test
+          // that this state is reset when the page is deactivated.
+          page1.classList.add(PlaybackCssClass.PAUSE);
+          grandchild.classList.add(PlaybackCssClass.PAUSE);
+          page1[GOTO_COUNTER_PROP] = {};
+          grandchild[GOTO_COUNTER_PROP] = {};
+          page1.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel1');
+          grandchild.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel2');
+
+          // Change to page 2.
+          runtime.setCurrentPage(1);
+
+          // Animations should be enabled on page2 only.
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Pause, goto counters, and current label animation data should have
+          // been cleared from all elements under page1, including the page
+          // itself.
+          expect(page1.classList.contains(PlaybackCssClass.PAUSE)).to.be.false;
+          expect(grandchild.classList.contains(PlaybackCssClass.PAUSE))
+              .to.be.false;
+          expect(page1).to.not.have.property(GOTO_COUNTER_PROP);
+          expect(grandchild).to.not.have.property(GOTO_COUNTER_PROP);
+          expect(page1.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR)).to.be.false;
+          expect(grandchild.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR))
+              .to.be.false;
         });
       });
 
@@ -340,22 +395,28 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
       it('should execute gotoAndPlayNTimes', () => {
         return ampdoc.whenBodyAvailable().then(() => {
+          const testEvent = createCustomEvent(
+              ampdoc.win, GWD_TIMELINE_EVENT, {'eventName': 'event-1'});
+
           // Invoking gotoAndPlayNTimes with a negative N value is a no-op.
           const invocationWithBadNValue = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: -5},
-            event: {eventName: 'event-1'},
+            event: testEvent,
             satisfiesTrust: () => true,
           };
 
-          impl.executeAction(invocationWithBadNValue);
+          allowConsoleError(() => {
+            impl.executeAction(invocationWithBadNValue);
+          });
           expect(page1Elem.classList.contains('foo')).to.be.false;
+
 
           // Initialize a valid gotoAndPlayNTimes invocation from some event.
           const invocation = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: 2},
-            event: {eventName: 'event-1'},
+            event: testEvent,
             satisfiesTrust: () => true,
           };
 
@@ -381,10 +442,12 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
           // gotoAndPlayNTimes invocations originating from a different timeline
           // event begin their own counters.
+          const testEvent2 = createCustomEvent(
+              ampdoc.win, GWD_TIMELINE_EVENT, {'eventName': 'event-2'});
           const invocationFromEvent2 = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: 1},
-            event: {eventName: 'event-2'},  // Different event.
+            event: testEvent2,
             satisfiesTrust: () => true,
           };
 
@@ -406,7 +469,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       it('should trigger timeline events', () => {
         const triggeredAmpEventNames = [];
         const triggeredEvents = [];
-        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger',
+        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger').callsFake(
             (target, name, event) => {
               triggeredAmpEventNames.push(name);
               triggeredEvents.push(event);
@@ -427,7 +490,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
           expect(triggeredAmpEventNames)
               .to.deep.equal(['tl_event-1', 'tl_event-2']);
-          expect(triggeredEvents.map(event => event.eventName))
+          expect(triggeredEvents.map(event => event.detail.eventName))
               .to.deep.equal(['event-1', 'event-2']);
         });
 

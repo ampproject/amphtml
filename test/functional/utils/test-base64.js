@@ -15,15 +15,16 @@
  */
 
 import {
-  base64UrlDecodeToBytes,
   base64DecodeToBytes,
-  base64UrlEncodeFromBytes,
   base64EncodeFromBytes,
+  base64UrlDecodeToBytes,
+  base64UrlEncodeFromBytes,
+  base64UrlEncodeFromString,
 } from '../../../src/utils/base64';
 import {
   stringToBytes,
-  utf8DecodeSync,
-  utf8EncodeSync,
+  utf8Decode,
+  utf8Encode,
 } from '../../../src/utils/bytes';
 
 describe('base64 <> utf-8 encode/decode', () => {
@@ -36,8 +37,10 @@ describe('base64 <> utf-8 encode/decode', () => {
 
   scenarios.forEach(scenario => {
     describe(scenario, () => {
-      const oldTextEncoder = window.TextEncoder;
-      const oldTextDecoder = window.TextDecoder;
+      const {
+        TextEncoder: oldTextEncoder,
+        TextDecoder: oldTextDecoder,
+      } = window;
       beforeEach(() => {
         // Forces use of the TextEncoding polyfill
         if (scenario == 'PolyfillTextEncoding') {
@@ -59,11 +62,11 @@ describe('base64 <> utf-8 encode/decode', () => {
       describe('base64Encode/base64Decode', () => {
         testCases.forEach(testCase => {
           it(testCase, () => {
-            const utf8Bytes = utf8EncodeSync(testCase);
+            const utf8Bytes = utf8Encode(testCase);
             const encoded = base64EncodeFromBytes(utf8Bytes);
             expect(encoded).not.to.equal(testCase);
             const decodedUtf8Bytes = base64DecodeToBytes(encoded);
-            const decoded = utf8DecodeSync(decodedUtf8Bytes);
+            const decoded = utf8Decode(decodedUtf8Bytes);
             expect(decoded).to.equal(testCase);
           });
         });
@@ -72,12 +75,12 @@ describe('base64 <> utf-8 encode/decode', () => {
       describe('base64UrlEncode/base64UrlDecode', () => {
         testCases.forEach(testCase => {
           it(testCase, () => {
-            const utf8Bytes = utf8EncodeSync(testCase);
+            const utf8Bytes = utf8Encode(testCase);
             const encoded = base64UrlEncodeFromBytes(utf8Bytes);
             expect(encoded).not.to.equal(testCase);
             expect(encoded).not.to.match(/[+/=]/g);
             const decodedUtf8Bytes = base64UrlDecodeToBytes(encoded);
-            const decoded = utf8DecodeSync(decodedUtf8Bytes);
+            const decoded = utf8Decode(decodedUtf8Bytes);
             expect(decoded).to.equal(testCase);
           });
         });
@@ -165,5 +168,23 @@ describe('base64EncodeFromBytes', () => {
         .to.equal('c3Vy');
     expect(base64EncodeFromBytes(new Uint8Array([255, 239])))
         .to.equal('/+8=');
+  });
+});
+
+describe('base64EncodeFromString', () => {
+  it('should handle unicode and non-unicode strings', () => {
+    expect(base64UrlEncodeFromString('')).to.equal('');
+    expect(base64UrlEncodeFromString('      ')).to.equal('ICAgICAg');
+    expect(base64UrlEncodeFromString('helloworld')).to
+        .equal('aGVsbG93b3JsZA..');
+    expect(base64UrlEncodeFromString('hello world')).to
+        .equal('aGVsbG8gd29ybGQ.');
+    expect(base64UrlEncodeFromString(' hello world ')).to
+        .equal('IGhlbGxvIHdvcmxkIA..');
+    expect(base64UrlEncodeFromString('✓ à la mode')).to
+        .equal('4pyTIMOgIGxhIG1vZGU.');
+    expect(base64UrlEncodeFromString('\n')).to.equal('Cg..');
+    expect(base64UrlEncodeFromString('$#!@#$%^&*()')).to
+        .equal('JCMhQCMkJV4mKigp');
   });
 });

@@ -31,10 +31,14 @@ limitations under the License.
 
 ## Configuration
 
-Required parameters:
-- id: site ID
-- plc: format ID (unique per page)
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
-Additional parameters:
-- section: tag list, separated by commas
-- s: dynamic sizing, allowed values: fixed, all, small (default), big
+### Required parameters
+
+- `data-id`: site ID
+- `data-plc`: format ID (unique per page)
+
+### Optional parameters
+
+- `data-section`: tag list, separated by commas
+- `data-s`: dynamic sizing, allowed values: fixed, all, small (default), big

@@ -24,7 +24,6 @@ import {
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
-import * as sinon from 'sinon';
 
 
 describes.realWin('MeasureScanner', {amp: 1}, env => {
@@ -38,7 +37,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    sandbox.stub(win, 'matchMedia', query => {
+    sandbox.stub(win, 'matchMedia').callsFake(query => {
       if (query == 'match') {
         return {matches: true};
       }
@@ -50,7 +49,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     if (!win.CSS) {
       win.CSS = {supports: () => {}};
     }
-    sandbox.stub(win.CSS, 'supports', condition => {
+    sandbox.stub(win.CSS, 'supports').callsFake(condition => {
       if (condition == 'supported: 1') {
         return true;
       }
@@ -62,7 +61,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     warnStub = sandbox.stub(user(), 'warn');
 
     vsync = win.services.vsync.obj;
-    sandbox.stub(vsync, 'measurePromise', callback => {
+    sandbox.stub(vsync, 'measurePromise').callsFake(callback => {
       return Promise.resolve(callback());
     });
     resources = win.services.resources.obj;
@@ -134,8 +133,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({duration: 'calc(10ms)'}).duration).to.equal(10);
     expect(scanTiming({duration: 'var(--unk)'}).duration).to.equal(0);
     expect(scanTiming({duration: 'var(--unk, 11ms)'}).duration).to.equal(11);
-    expect(() => scanTiming({duration: 'a'})).to.throw(/"duration" is invalid/);
-    expect(() => scanTiming({duration: -1})).to.throw(/"duration" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({duration: 'a'})).to.throw(
+          /"duration" is invalid/);
+      expect(() => scanTiming({duration: -1})).to.throw(
+          /"duration" is invalid/);
+    });
     expect(warnStub).to.not.be.calledWith(sinon.match.any, sinon.match(arg => {
       return /fractional/.test(arg);
     }));
@@ -153,7 +156,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({delay: 'var(--unk, 11ms)'}).delay).to.equal(11);
     // Note! The negative "delay" is allowed.
     expect(scanTiming({delay: -1}).delay).to.equal(-1);
-    expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
+    });
 
     expect(scanTiming({}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 0}).endDelay).to.equal(0);
@@ -162,8 +167,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({endDelay: '10s'}).endDelay).to.equal(10000);
     expect(scanTiming({endDelay: '10ms'}).endDelay).to.equal(10);
     expect(scanTiming({endDelay: 'calc(10ms)'}).endDelay).to.equal(10);
-    expect(() => scanTiming({endDelay: 'a'})).to.throw(/"endDelay" is invalid/);
-    expect(() => scanTiming({endDelay: -1})).to.throw(/"endDelay" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({endDelay: 'a'})).to.throw(
+          /"endDelay" is invalid/);
+      expect(() => scanTiming({endDelay: -1})).to.throw(
+          /"endDelay" is invalid/);
+    });
   });
 
   it('should parse/validate timing iterations', () => {
@@ -176,20 +185,24 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({iterations: 'Infinity'}).iterations).to.equal(Infinity);
     expect(scanTiming({iterations: 'infinite'}).iterations).to.equal(Infinity);
     expect(scanTiming({iterations: 'INFINITE'}).iterations).to.equal(Infinity);
-    expect(() => scanTiming({iterations: 'a'}))
-        .to.throw(/"iterations" is invalid/);
-    expect(() => scanTiming({iterations: -1}))
-        .to.throw(/"iterations" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({iterations: 'a'})).to.throw(
+          /"iterations" is invalid/);
+      expect(() => scanTiming({iterations: -1})).to.throw(
+          /"iterations" is invalid/);
+    });
 
     expect(scanTiming({}).iterationStart).to.equal(0);
     expect(scanTiming({iterationStart: 0}).iterationStart).to.equal(0);
     expect(scanTiming({iterationStart: 10}).iterationStart).to.equal(10);
     expect(scanTiming({iterationStart: 'calc(10)'}).iterationStart)
         .to.equal(10);
-    expect(() => scanTiming({iterationStart: 'a'}))
-        .to.throw(/"iterationStart" is invalid/);
-    expect(() => scanTiming({iterationStart: -1}))
-        .to.throw(/"iterationStart" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({iterationStart: 'a'})).to.throw(
+          /"iterationStart" is invalid/);
+      expect(() => scanTiming({iterationStart: -1})).to.throw(
+          /"iterationStart" is invalid/);
+    });
   });
 
   it('should warn if timing is fractional', () => {
@@ -217,8 +230,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({direction: 'reverse'}).direction).to.equal('reverse');
     expect(scanTiming({direction: 'var(--unk, reverse)'}).direction)
         .to.equal('reverse');
-    expect(() => scanTiming({direction: 'invalid'}))
-        .to.throw(/Unknown direction value/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({direction: 'invalid'})).to.throw(
+          /Unknown direction value/);
+    });
   });
 
   it('should parse/validate timing fill', () => {
@@ -226,8 +241,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({fill: 'both'}).fill).to.equal('both');
     expect(scanTiming({fill: 'var(--unk, backwards)'}).fill)
         .to.equal('backwards');
-    expect(() => scanTiming({fill: 'invalid'}))
-        .to.throw(/Unknown fill value/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({fill: 'invalid'})).to.throw(
+          /Unknown fill value/);
+    });
   });
 
   it('should merge timing', () => {
@@ -333,7 +350,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should propagate vars', () => {
-    sandbox.stub(win, 'getComputedStyle', target => {
+    sandbox.stub(win, 'getComputedStyle').callsFake(target => {
       if (target == target2) {
         return {
           getPropertyValue: prop => {
@@ -378,11 +395,11 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       animations: [{
         target: target1,
         '--child1': '21px',
-        '--parent2': '22px',  // Override parent.
+        '--parent2': '22px', // Override parent.
         '--child2': 'var(--child1)',
         '--child3': 'var(--parent1)',
         '--child4': 'var(--parent2)',
-        '--child5': 'var(--child6)',  // Reverse order dependency.
+        '--child5': 'var(--child6)', // Reverse order dependency.
         '--child6': '23px',
         keyframes: {
           transform: 'translate(var(--child3), var(--child4))',
@@ -411,11 +428,11 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       animations: [{
         selector: '.target',
         '--child1': '21px',
-        '--parent2': '22px',  // Override parent.
+        '--parent2': '22px', // Override parent.
         '--child2': 'var(--child1)',
         '--child3': 'var(--parent1)',
         '--child4': 'var(--parent2)',
-        '--child5': 'var(--child6)',  // Reverse order dependency.
+        '--child5': 'var(--child6)', // Reverse order dependency.
         '--child6': '23px',
         subtargets: [
           // By index.
@@ -452,12 +469,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(requests[0].vars).to.jsonEqual({
       '--parent1': '11px',
       '--parent2': '22px',
-      '--child1': '33px',  // Overriden via `#target1`
-      '--child2': '35px',  // Overriden via `div`
+      '--child1': '33px', // Overriden via `#target1`
+      '--child2': '35px', // Overriden via `div`
       '--child3': '11px',
       '--child4': '22px',
-      '--child5': '31px',  // Overriden via `index: 0`
-      '--child6': '31px',  // Overriden via `index: 0`
+      '--child5': '31px', // Overriden via `index: 0`
+      '--child6': '31px', // Overriden via `index: 0`
     });
     expect(requests[0].keyframes.transform[1]).to.equal('translate(31px,33px)');
 
@@ -465,12 +482,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(requests[1].vars).to.jsonEqual({
       '--parent1': '11px',
       '--parent2': '22px',
-      '--child1': '34px',  // Overriden via `#target2`
-      '--child2': '35px',  // Overriden via `div`
+      '--child1': '34px', // Overriden via `#target2`
+      '--child2': '35px', // Overriden via `div`
       '--child3': '11px',
       '--child4': '22px',
-      '--child5': '32px',  // Overriden via `index: 1`
-      '--child6': '32px',  // Overriden via `index: 1`
+      '--child5': '32px', // Overriden via `index: 1`
+      '--child6': '32px', // Overriden via `index: 1`
     });
     expect(requests[1].keyframes.transform[1]).to.equal('translate(32px,34px)');
   });
@@ -487,12 +504,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should parse object keyframe', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: [0, 1],
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
@@ -500,24 +517,24 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse object keyframe w/partial offsets', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: '1',
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
   });
 
   it('should parse object keyframe with parsing', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: ['0', 'calc(1)'],
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
@@ -525,36 +542,36 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse object w/partial keyframe with parsing', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: ['calc(1)'],
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(isArray(keyframes.opacity)).to.be.true;
     expect(keyframes.opacity).to.deep.equal(['0', '1']);
   });
 
   it('should passthrough service props in a partial object keyframe', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         easing: 'ease-in',
       },
-    })[0].keyframes;
+    })[0];
     expect(isObject(keyframes)).to.be.true;
     expect(keyframes.easing).to.equal('ease-in');
   });
 
   it('should parse array keyframe', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {opacity: '0'},
         {opacity: '1'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(isArray(keyframes)).to.be.true;
     expect(keyframes).to.deep.equal([
       {opacity: '0'},
@@ -564,12 +581,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse array keyframe w/partial offsets', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {opacity: '1'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(keyframes).to.deep.equal([
       {opacity: '0'},
       {opacity: '1'},
@@ -578,13 +595,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should parse array keyframe w/non-zero offset', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {offset: 0.1, opacity: '0.1'},
         {opacity: '1', easing: 'ease-in'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(keyframes).to.deep.equal([
       {opacity: '0'},
       {offset: 0.1, opacity: '0.1'},
@@ -594,13 +611,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should propagate partial properties into implicit 0-offset', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {easing: 'ease-in'},
         {opacity: '1'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(keyframes).to.deep.equal([
       {easing: 'ease-in', opacity: '0'},
       {opacity: '1'},
@@ -609,13 +626,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
   it('should propagate partial properties into explicit 0-offset', () => {
     target1.style.opacity = 0;
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {offset: 0, easing: 'ease-in'},
         {opacity: '1'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(keyframes).to.deep.equal([
       {offset: 0, easing: 'ease-in', opacity: '0'},
       {opacity: '1'},
@@ -623,13 +640,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should parse array keyframe with parsing', () => {
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: [
         {opacity: 'calc(0)'},
         {opacity: 'calc(1)'},
       ],
-    })[0].keyframes;
+    })[0];
     expect(isArray(keyframes)).to.be.true;
     expect(keyframes).to.deep.equal([
       {opacity: '0'},
@@ -640,7 +657,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   it('should parse width/height functions', () => {
     target2.style.width = '11px';
     target2.style.height = '22px';
-    const keyframes = scan({
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         transform: [
@@ -648,7 +665,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           'translateY(height("#target2"))',
         ],
       },
-    })[0].keyframes;
+    })[0];
     expect(keyframes.transform).to.jsonEqual([
       'translatex(11px)',
       'translatey(22px)',
@@ -656,8 +673,8 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should parse rand function', () => {
-    sandbox.stub(Math, 'random', () => 0.25);
-    const keyframes = scan({
+    sandbox.stub(Math, 'random').callsFake(() => 0.25);
+    const {keyframes} = scan({
       target: target1,
       keyframes: {
         opacity: [
@@ -665,20 +682,37 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           'rand(0.5, 0.6)',
         ],
       },
-    })[0].keyframes;
+    })[0];
     expect(keyframes.opacity).to.jsonEqual(['0', '0.525']);
   });
 
+  it('should parse num function', () => {
+    target2.style.width = '110px';
+    const request = scan({
+      target: target2,
+      duration: 'calc(1s * num(width()) / 10)',
+      delay: 'calc(1ms * num(width()) / 10)',
+      keyframes: {
+        transform: ['none', 'rotateX(calc(1rad * num(width()) / 20))'],
+      },
+    })[0];
+    expect(request.timing.duration).to.equal(11000);
+    expect(request.timing.delay).to.equal(11);
+    expect(request.keyframes.transform[1]).to.equal('rotatex(5.5rad)');
+  });
+
   it('should fail when cannot discover style keyframes', () => {
-    expect(() => scan({target: target1, keyframes: 'keyframes1'}))
-        .to.throw(/Keyframes not found/);
+    allowConsoleError(() => {
+      expect(() => scan({target: target1, keyframes: 'keyframes1'})).to.throw(
+          /Keyframes not found/);
+    });
   });
 
   it('should discover style keyframes', () => {
     const name = 'keyframes1';
     const css = 'from{opacity: 0} to{opacity: 1}';
     return writeAndWaitForStyleKeyframes(name, css).then(() => {
-      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      const {keyframes} = scan({target: target1, keyframes: name})[0];
       expect(keyframes).to.jsonEqual([
         {offset: 0, opacity: '0'},
         {offset: 1, opacity: '1'},
@@ -690,7 +724,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     const name = 'keyframes2';
     const css = 'to{opacity: 0}';
     return writeAndWaitForStyleKeyframes(name, css).then(() => {
-      const keyframes = scan({target: target1, keyframes: name})[0].keyframes;
+      const {keyframes} = scan({target: target1, keyframes: name})[0];
       expect(keyframes).to.jsonEqual([
         {opacity: '1'},
         {offset: 1, opacity: '0'},
@@ -839,16 +873,16 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should require any target spec', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       scan([{duration: 400, keyframes: {}}]);
-    }).to.throw(/No target specified/);
+    }).to.throw(/No target specified/); });
   });
 
   it('should not allow both selector and target spec', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       scan([{selector: '#target1', target: 'target1',
         duration: 400, keyframes: {}}]);
-    }).to.throw(/Both/);
+    }).to.throw(/Both/); });
   });
 
   it('should build keyframe for multiple targets', () => {
@@ -936,18 +970,18 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should fail when animation cannot be found', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         scanner.resolveRequests({animation: 'animation3'});
-      }).to.throw(/Animation not found/);
+      }).to.throw(/Animation not found/); });
     });
 
     it('should fail when animation reference is not an amp-animation', () => {
       const animation3 = env.createAmpElement('amp-other');
       animation3.id = 'animation3';
       doc.body.appendChild(animation3);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         scanner.resolveRequests({animation: 'animation3'});
-      }).to.throw(/Element is not an animation/);
+      }).to.throw(/Element is not an animation/); });
     });
 
     it('should fail the recursive animation', () => {
@@ -1223,8 +1257,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should require target for CSS that need element context', () => {
-      expect(() => css.resolveCss('calc(10em + 10px)'))
-          .to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.resolveCss('calc(10em + 10px)')).to.throw(
+            /target is specified/);
+      });
       target1.style.fontSize = '10px';
       expect(css.withTarget(target1, 0,
           () => css.resolveCss('calc(10em + 10px)')))
@@ -1276,8 +1312,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       expect(parseSpy).to.be.called;
     });
 
-    it('should read a var', () => {
-      const stub = sandbox.stub(css, 'measure', () => '10px');
+    // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
+    it.skip('should read a var', () => {
+      const stub = sandbox.stub(css, 'measure').callsFake(() => '10px');
       expect(css.getVar('--var1')).to.be.null;
       expect(warnStub).to.have.callCount(1);
       expect(warnStub.args[0][1]).to.match(/Variable not found/);
@@ -1316,10 +1353,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       }, () => {
         expect(css.getVar('--var1').num_).to.equal(11);
         expect(css.getVar('--var2').num_).to.equal(11);
-        expect(() => css.getVar('--rec1')).to.throw(/Recursive/);
-        expect(() => css.getVar('--rec2')).to.throw(/Recursive/);
-        expect(() => css.getVar('--rec3')).to.throw(/Recursive/);
-        expect(() => css.getVar('--rec4')).to.throw(/Recursive/);
+        allowConsoleError(() => {
+          expect(() => css.getVar('--rec1')).to.throw(/Recursive/);
+          expect(() => css.getVar('--rec2')).to.throw(/Recursive/);
+          expect(() => css.getVar('--rec3')).to.throw(/Recursive/);
+          expect(() => css.getVar('--rec4')).to.throw(/Recursive/);
+        });
       });
     });
 
@@ -1341,7 +1380,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should resolve current index', () => {
-      expect(() => css.getCurrentIndex()).to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.getCurrentIndex()).to.throw(/target is specified/);
+      });
       expect(css.withTarget(target1, 0, () => css.getCurrentIndex()))
           .to.equal(0);
       expect(css.withTarget(target1, 11, () => css.getCurrentIndex()))
@@ -1353,7 +1394,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       expect(css.getRootFontSize()).to.equal(12);
 
       target1.style.fontSize = '16px';
-      expect(() => css.getCurrentFontSize()).to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.getCurrentFontSize()).to.throw(/target is specified/);
+      });
       expect(css.withTarget(target1, 0, () => css.getCurrentFontSize()))
           .to.equal(16);
       expect(css.withTarget(target2, 0, () => css.getCurrentFontSize()))
@@ -1363,7 +1406,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     it('should resolve current element size', () => {
       target1.style.width = '11px';
       target1.style.height = '12px';
-      expect(() => css.getCurrentElementSize()).to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.getCurrentElementSize()).to.throw(
+            /target is specified/);
+      });
       expect(css.withTarget(target1, 0, () => css.getCurrentElementSize()))
           .to.deep.equal({width: 11, height: 12});
     });
@@ -1383,8 +1429,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           .to.deep.equal({width: 11, height: 12});
 
       // Closest selectors always need a context node.
-      expect(() => css.getElementSize('#target1', 'closest'))
-          .to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.getElementSize('#target1', 'closest')).to.throw(
+            /target is specified/);
+      });
       expect(css.withTarget(child, 0,
           () => css.getElementSize('.parent', 'closest')))
           .to.deep.equal({width: 11, height: 12});
@@ -1398,8 +1446,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should NOT resolve an invalid URL', () => {
-      expect(() => css.resolveUrl('http://acme.org/path'))
-          .to.throw(/https/);
+      allowConsoleError(() => {
+        expect(() => css.resolveUrl('http://acme.org/path')).to.throw(/https/);
+      });
     });
   });
 
@@ -1410,12 +1459,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     beforeEach(() => {
       amp1 = env.createAmpElement();
       amp2 = env.createAmpElement();
-      sandbox.stub(amp1, 'isUpgraded', () => true);
-      sandbox.stub(amp2, 'isUpgraded', () => true);
-      sandbox.stub(amp1, 'isBuilt', () => true);
-      sandbox.stub(amp2, 'isBuilt', () => true);
-      sandbox.stub(amp1, 'whenBuilt', () => Promise.resolve());
-      sandbox.stub(amp2, 'whenBuilt', () => Promise.resolve());
+      sandbox.stub(amp1, 'isUpgraded').callsFake(() => true);
+      sandbox.stub(amp2, 'isUpgraded').callsFake(() => true);
+      sandbox.stub(amp1, 'isBuilt').callsFake(() => true);
+      sandbox.stub(amp2, 'isBuilt').callsFake(() => true);
+      sandbox.stub(amp1, 'whenBuilt').callsFake(() => Promise.resolve());
+      sandbox.stub(amp2, 'whenBuilt').callsFake(() => Promise.resolve());
       resources.add(amp1);
       resources.add(amp2);
     });
@@ -1447,13 +1496,14 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       });
     });
 
-    it('should block AMP elements', () => {
+    // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+    it.skip('should block AMP elements', () => {
       const r1 = resources.getResourceForElement(amp1);
       const r2 = resources.getResourceForElement(amp2);
-      sandbox.stub(r1, 'whenBuilt', () => Promise.resolve());
-      sandbox.stub(r2, 'whenBuilt', () => Promise.resolve());
-      sandbox.stub(r1, 'isDisplayed', () => true);
-      sandbox.stub(r2, 'isDisplayed', () => true);
+      sandbox.stub(r1, 'whenBuilt').callsFake(() => Promise.resolve());
+      sandbox.stub(r2, 'whenBuilt').callsFake(() => Promise.resolve());
+      sandbox.stub(r1, 'isDisplayed').callsFake(() => true);
+      sandbox.stub(r2, 'isDisplayed').callsFake(() => true);
       let runner;
       createRunner([
         {target: amp1, keyframes: {}},
@@ -1495,17 +1545,25 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   let runner;
 
   class WebAnimationStub {
+    constructor() {
+      this.playState = WebAnimationPlayState.IDLE;
+    }
+
     play() {
+      this.playState = WebAnimationPlayState.RUNNING;
       return;
     }
     pause() {
+      this.playState = WebAnimationPlayState.PAUSED;
       return;
     }
     reverse() {
       throw new Error('not implemented');
     }
     finish() {
-      throw new Error('not implemented');
+      this.playState = WebAnimationPlayState.FINISHED;
+      this.onfinish();
+      return;
     }
     cancel() {
       throw new Error('not implemented');
@@ -1592,9 +1650,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
 
   it('should fail to init twice', () => {
     runner.init();
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       runner.init();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should set vars on start', () => {
@@ -1619,10 +1677,10 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1.onfinish();
+    anim1.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim2.onfinish();
+    anim2.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
 
     expect(playStateSpy).to.be.calledTwice;
@@ -1634,36 +1692,63 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock.expects('pause').once();
-    anim2Mock.expects('pause').once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.pause();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
   });
 
   it('should only allow pause when started', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       runner.pause();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should resume all animations', () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock.expects('pause').once();
-    anim2Mock.expects('pause').once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.pause();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
 
-    anim1Mock.expects('play').once();
-    anim2Mock.expects('play').once();
+    anim1Mock.expects('play').callThrough().once();
+    anim2Mock.expects('play').callThrough().once();
     runner.resume();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1.onfinish();
+    anim1.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim2.onfinish();
+    anim2.finish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
+
+    expect(playStateSpy.callCount).to.equal(4);
+    expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
+    expect(playStateSpy.args[1][0]).to.equal(WebAnimationPlayState.PAUSED);
+    expect(playStateSpy.args[2][0]).to.equal(WebAnimationPlayState.RUNNING);
+    expect(playStateSpy.args[3][0]).to.equal(WebAnimationPlayState.FINISHED);
+  });
+
+  it('should not resume partially finished animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1.finish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('pause').callThrough().never();
+    anim2Mock.expects('pause').callThrough().once();
+    runner.pause();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+
+    anim1Mock.expects('play').callThrough().never();
+    anim2Mock.expects('play').callThrough().once();
+    runner.resume();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim2.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
 
     expect(playStateSpy.callCount).to.equal(4);
@@ -1674,9 +1759,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   });
 
   it('should only allow resume when started', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       runner.resume();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should reverse all animations', () => {
@@ -1690,17 +1775,17 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   });
 
   it('should only allow reverse when started', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       runner.reverse();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should finish all animations', () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock.expects('finish').once();
-    anim2Mock.expects('finish').once();
+    anim1Mock.expects('finish').callThrough().once();
+    anim2Mock.expects('finish').callThrough().once();
     runner.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
   });
@@ -1729,8 +1814,8 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock.expects('pause').once();
-    anim2Mock.expects('pause').once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.seekTo(101);
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
     expect(anim1.currentTime).to.equal(101);
@@ -1742,8 +1827,8 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
     sandbox.stub(runner, 'getTotalDuration_').returns(500);
-    anim1Mock.expects('pause').once();
-    anim2Mock.expects('pause').once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.seekToPercent(0.5);
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
     expect(anim1.currentTime).to.equal(250);
@@ -1835,7 +1920,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
       const runner = new WebAnimationRunner([
         {target: target1, keyframes: keyframes1, timing},
       ]);
-      expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+      allowConsoleError(() => {
+        expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+      });
     });
 
     it('multiple requests - 0 total', () => {
@@ -1942,7 +2029,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
         {target: target1, keyframes: keyframes1, timing: timing2},
       ]);
 
-      expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+      allowConsoleError(() => {
+        expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+      });
     });
 
   });

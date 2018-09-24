@@ -14,32 +14,41 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
-import {getServiceForDoc} from '../../../src/service';
-import {Services} from '../../../src/services';
-import {createCustomEvent} from '../../../src/event-helper';
-import {isExperimentOn} from '../../../src/experiments';
-import {dev, user} from '../../../src/log';
-import {
-  RelativePositions,
-  layoutRectsRelativePos,
-  layoutRectLtwh,
-} from '../../../src/layout-rect';
-import {
-  Layout,
-  getLengthNumeral,
-  getLengthUnits,
-  assertLength,
-  parseLength,
-} from '../../../src/layout';
-import {
-  installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
+import {ActionTrust} from '../../../src/action-constants';
 import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
+import {
+  RelativePositions,
+  layoutRectLtwh,
+  layoutRectsRelativePos,
+} from '../../../src/layout-rect';
+import {Services} from '../../../src/services';
+import {
+  assertLength,
+  getLengthNumeral,
+  getLengthUnits,
+  parseLength,
+} from '../../../src/layout';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getServiceForDoc} from '../../../src/service';
+import {
+  installPositionObserverServiceForDoc,
+} from '../../../src/service/position-observer/position-observer-impl';
 
 const TAG = 'amp-position-observer';
+
+/**
+ * Minimum number of pixels in height that need to change before we consider
+ * a resize has happened.
+ * We have this threshold  because we do not want viewport height changes
+ * caused by hide/show of addressbar on mobile browsers cause jumps in
+ * scrollbound animations.
+ * 150 pixels accounts for most addressbar sizes on mobile browsers.
+ */
+const RESIZE_THRESHOLD = 150;
 
 export class AmpVisibilityObserver extends AMP.BaseElement {
 
@@ -50,28 +59,28 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.isVisible_ = false;
 
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.topRatio_ = 0;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.bottomRatio_ = 0;
 
-    /** @private {!string} */
+    /** @private {string} */
     this.topMarginExpr_ = '0';
 
-    /** @private {!string} */
+    /** @private {string} */
     this.bottomMarginExpr_ = '0';
 
-    /** @private {!number} */
+    /** @private {number} */
     this.resolvedTopMargin_ = 0;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.resolvedBottomMargin_ = 0;
 
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
@@ -80,23 +89,28 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?string} */
     this.targetId_ = null;
 
-    /** @private {!number} */
-    this.scrollProgress_ = 0;
-  }
+    /** @private {?number} */
+    this.initialViewportHeight_ = null;
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    /** @private {number} */
+    this.scrollProgress_ = 0;
+
+    /** @private {boolean} */
+    this.runOnce_ = false;
+
+    /** @private {boolean} */
+    this.firstIterationComplete_ = false;
   }
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), `${TAG} experiment is off.`);
     // Since this is a functional component and not visual,
     // layoutCallback is meaningless. We delay the heavy work until
     // we become visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.init_.bind(this));
+
+    this.runOnce_ = this.element.hasAttribute('once');
   }
 
   /**
@@ -120,7 +134,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerEnter_() {
     const name = 'enter';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -130,7 +144,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerExit_() {
     const name = 'exit';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -145,7 +159,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   triggerScroll_() {
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
-        {percent: this.scrollProgress_});
+        dict({'percent': this.scrollProgress_}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -156,8 +170,15 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   positionChanged_(entry) {
+
+    if (this.runOnce_ && this.firstIterationComplete_) {
+      return;
+    }
+
     const wasVisible = this.isVisible_;
     const prevViewportHeight = this.viewportRect_ && this.viewportRect_.height;
+
+    this.adjustForSmallViewportResize_(entry);
 
     this.viewportRect_ = entry.viewportRect;
 
@@ -168,7 +189,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     // Adjust viewport based on exclusion margins
     const adjViewportRect = this.applyMargins_(entry.viewportRect);
-    const positionRect = entry.positionRect;
+    const {positionRect} = entry;
 
     // Relative position of the element to the adjusted viewport.
     let relPos;
@@ -185,6 +206,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
       this.triggerScroll_();
       this.triggerExit_();
+      this.firstIterationComplete_ = true;
     }
 
     if (!wasVisible && this.isVisible_) {
@@ -213,7 +235,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
 
     const ratioToUse = relativePos == RelativePositions.TOP ?
-        this.topRatio_ : this.bottomRatio_;
+      this.topRatio_ : this.bottomRatio_;
 
     const offset = positionRect.height * ratioToUse;
     if (relativePos == RelativePositions.BOTTOM) {
@@ -253,7 +275,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         (adjustedViewportRect.height -
             (positionRect.height * this.bottomRatio_)
         )
-      );
+    );
 
     this.scrollProgress_ = topOffset / totalProgress;
   }
@@ -262,8 +284,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   parseAttributes_() {
-    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>"
-    // e.g, "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
+    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>" e.g,
+    // "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
     const ratios = this.element.getAttribute('intersection-ratios');
     if (ratios) {
       const topBottom = ratios.trim().split(' ');
@@ -274,8 +296,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       }
     }
 
-    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}> <bottom:{px,vh}>"
-    // e.g, "100px 10vh": exclude 100px from top and 10vh from bottom of viewport.
+    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}>
+    // <bottom:{px,vh}>" e.g, "100px 10vh": exclude 100px from top and 10vh from
+    // bottom of viewport.
     const margins = this.element.getAttribute('viewport-margins');
     if (margins) {
       const topBottom = margins.trim().split(' ');
@@ -291,7 +314,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Finds the container scene. Either parent of the component or specified by
-   * `target-id` attribute.
+   * `target` attribute.
    * @return {!Element} scene element.
    * @private
    */
@@ -316,7 +339,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * Parses and validates margins.
    * @private
    * @param {string} val
-   * @return {!number} resolved margin
+   * @return {number} resolved margin
    */
   validateAndResolveMargin_(val) {
     val = assertLength(parseLength(val));
@@ -337,7 +360,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   /**
    * Parses and validates ratios.
    * @param {string} val
-   * @return {!number} resolved ratio
+   * @return {number} resolved ratio
    * @private
    */
   validateAndResolveRatio_(val) {
@@ -379,6 +402,34 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     );
 
     return rect;
+  }
+
+  /**
+   * Detects whether viewport height has changed and if that change
+   * is within our acceptable threshold.
+   * If within, we offset calculation by the delta so that small viewport
+   * changes caused by hide/show of addressbar on mobile browsers do not
+   * cause jumps in scrollbond animations.
+   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} entry PositionObserver entry
+   */
+  adjustForSmallViewportResize_(entry) {
+    if (!this.initialViewportHeight_) {
+      this.initialViewportHeight_ = entry.viewportRect.height;
+    }
+    const viewportHeightChangeDelta = (this.initialViewportHeight_ -
+      entry.viewportRect.height);
+    let resizeOffset = 0;
+    if (Math.abs(viewportHeightChangeDelta) < RESIZE_THRESHOLD) {
+      resizeOffset = viewportHeightChangeDelta;
+    } else {
+      this.initialViewportHeight_ = null;
+    }
+    entry.viewportRect = layoutRectLtwh(
+        entry.viewportRect.left,
+        entry.viewportRect.top,
+        entry.viewportRect.width,
+        entry.viewportRect.height + resizeOffset
+    );
   }
 
   /**

@@ -16,8 +16,8 @@
 'use strict';
 
 
-const test = require('ava');
 const m = require('./');
+const test = require('ava');
 
 const result = {
   'test.css': {
@@ -32,7 +32,8 @@ const result = {
 
 test.cb('collects selectors', t => {
   const data = Object.create(null);
-  m.getZindex('./*.css')
+  const testFiles = `${__dirname}/*.css`;
+  m.getZindex(testFiles)
       .on('data', chunk => {
         data[chunk.name] = chunk.selectors;
       })

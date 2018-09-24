@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const jison = require('jison');
-const gulp = require('gulp');
 const fs = require('fs-extra');
+const gulp = require('gulp');
+const jison = require('jison');
 
 gulp.task('compile-bind-expr', function() {
   const path = 'extensions/amp-bind/0.1/';
@@ -32,7 +32,7 @@ gulp.task('compile-bind-expr', function() {
   const suppressCheckTypes = '/** @fileoverview ' +
       '@suppress {checkTypes, suspiciousCode, uselessCode} */';
   const imports = 'import {AstNode, AstNodeType} from \'./bind-expr-defines\';';
-  const jsExports = 'exports.parser = parser;';
+  const jsExports = 'export const bindParser = parser;';
 
   const out = [
     license,

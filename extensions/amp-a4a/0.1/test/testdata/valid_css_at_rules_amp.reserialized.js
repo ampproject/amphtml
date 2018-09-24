@@ -26,6 +26,77 @@ export const data = {
 }
 </script></body></html>`,
 
+  minifiedCreative: '<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>\n    amp-user-notification.amp-active {\n      opacity: 0;\n    }\n  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.\n\n</body></html>',
+
+
+  reserializedInvalidOffset: `<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
+    amp-user-notification.amp-active {
+      opacity: 0;
+    }
+  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.
+
+<script amp-ad-metadata type=application/json>
+{
+   "ampRuntimeUtf16CharOffsets" : [ '116', '281' ],
+   "customElementExtensions" : [ "amp-font" ],
+   "customStylesheets" : [
+      {
+         "href" : "https://fonts.googleapis.com/css?family=Questrial"
+      }
+   ],
+   "extensions" : [
+      {
+         "custom-element" : "amp-font",
+         "src" : "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+      }
+   ]
+}
+</script></body></html>`,
+
+  reserializedMissingScriptTag: `<!doctype html><html ⚡4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><link href=https://fonts.googleapis.com/css?family=Questrial rel=stylesheet type=text/css><style amp-custom>
+    amp-user-notification.amp-active {
+      opacity: 0;
+    }
+  </style><style amp4ads-boilerplate>body{visibility:hidden}</style></head><body>Hello, world.
+
+<script amp-ad-metadata type=application/json>
+{
+   "ampRuntimeUtf16CharOffsets" : [ 116, 281 ],
+   "customElementExtensions" : [ "amp-font" ],
+   "customStylesheets" : [
+      {
+         "href" : "https://fonts.googleapis.com/css?family=Questrial"
+      }
+   ],
+   "extensions" : [
+      {
+         "custom-element" : "amp-font",
+         "src" : "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+      }
+   ]
+}
+</body></html>`,
+
+  adTemplate: `<!doctype html><html ⚡><head><meta charset="utf-8"><link rel="canonical" href="self.html" /><meta name="viewport" content="width=device-width,minimum-scale=1"><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript><script async src="https://cdn.ampproject.org/v0.js"></script><script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  </head>
+  <body>
+    <template type="amp-mustache">
+      <p>ipsum lorem</p>
+      <a href="{{url}}">Click for ad!</a>
+    </template>
+    <script amp-ad-metadata type=application/json>
+    {
+       "ampRuntimeUtf16CharOffsets" : [ 922, 1094 ],
+       "customElementExtensions" : [],
+       "customStylesheets" : [],
+       "extensions" : []
+    }
+    </script>
+  </body>
+</html>`,
+
+  minifiedTemplateCreative: '<!doctype html><html ⚡><head><meta charset="utf-8"><link rel="canonical" href="self.html" /><meta name="viewport" content="width=device-width,minimum-scale=1"><style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>\n  </head>\n  <body>\n    <template type="amp-mustache">\n      <p>ipsum lorem</p>\n      <a href="{{url}}">Click for ad!</a>\n    </template>\n    \n  </body>\n</html>',
+
   original: `<!--
   Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -63,8 +134,6 @@ export const data = {
 </html>`,
 
   signatureHeader: 'google:1:vpiimZfnOmH+PjI8oTF9ujhrNyHYNrTW4nY8sP3CWtPIdlP/pxSJ/UeMFQznTCM12Cq56Qgz1mA0VQuPrgNBIp3olSkClQks5CpAuq43P/wXvs3yML8YhQRgUZMCdIpUSW75wW22fcXRtwfR30KRRj8kMjX/QvmWF3H3phah06HiCREl0ONGyxtgyjJkFkPHtfPGGK2vMYMHqHybnsIDsP+zsvyQBPsiMCku8H+i5KtHrjWvVXj/GdcnHL25wvJiyC4qHwkMEoW8ridsDYNQ3dWQD4bVNS1D7gIRvzAM9ZlCBpZcxVhoO5B+mMuIOqq0YTnfgXaT2QgVnHqavpbu9w==',
-
-  signature: 'AJZdXi4GA8z0rd1aOQ+ZvLP3boJDvxdpoyi0SMX5Ij4G14riOFMRSdMsEGqTRn5fVhzQrf3/nqMkrWLeBIbi28AiYwkmFr/IR12jtx4qiMKDxJA1ycxyIjiJ7OM9pKuxXGc2rD8qf5jL9alDznEH/rOch5icmRiavqXThBl1zUkxIDQuZxU43N2yxfARuVDrjgEhxW7TWqkGhtEd31+fUZ83IgTFltWUh3DDoZmM+3fXbNjsEx/jYkVlsBWQCEdx8Z6YFtwOQVXSg6kKg7pffudpzg5r62JJeb46+NsQQNPnVlyryP7mFTI/4l3aaElk03cmLRMCYIWmwNrNDG1tJQJBEujr',
 
   publicKeyset: '{"keys":[{"alg":"RS256","e":"AQAB","ext":true,"kid":"1","kty":"RSA","n":"z43rjaJ9PLk1FHMEL31_ILXGtUTN03rxJ9amD9y3BRDpbTA-GkUKiQM07xAd8OXPUZRqcjvXQfc7b1RCEtwrcfx9oBRdF78QMA4tLLCqSHP0tSuqYF0fA7-GyTFWDcYzey90jRFNNWxjzKrvSazacE0TvJ8S_AVP4EV67VdbByCC1tpBzLhhy7RFHp2cXGTpWYUqZUAVUdJoeBuCho_zQz2au7c6sDaLiF-uYL9Td9MrZ6tSLo3MeMIZia4WgWqjTDICR0h-zlbHUd0K9CoXbGTt5nvkebXHmbKd99ma6zRYVlYNJTuSqsRCBNYtCTFVHIZeBlkjHKsQ46HTZPexZw"}]}',
 };

@@ -15,6 +15,23 @@
  */
 'use strict';
 
+const COMMON_CHROME_FLAGS = [
+  // Dramatically speeds up iframe creation time.
+  '--disable-extensions',
+  // Allows simulating user actions (e.g unmute) which otherwise will be denied.
+  '--autoplay-policy=no-user-gesture-required',
+];
+
+// Reduces the odds of Sauce labs timing out during tests. See #16135.
+// Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
+const SAUCE_TIMEOUT_CONFIG = {
+  maxDuration: 10 * 60,
+  commandTimeout: 10 * 60,
+  idleTimeout: 5 * 60,
+};
+
+const preprocessors = ['browserify'];
+
 /**
  * @param {!Object} config
  */
@@ -25,29 +42,37 @@ module.exports = {
     'mocha',
     'sinon-chai',
     'chai',
+    'source-map-support',
   ],
 
   preprocessors: {
-    'test/fixtures/*.html': ['html2js'],
-    'src/**/*.js': ['browserify'],
-    'test/**/*.js': ['browserify'],
-    'ads/**/test/test-*.js': ['browserify'],
-    'extensions/**/test/**/*.js': ['browserify'],
-    'testing/**/*.js': ['browserify'],
+    './test/fixtures/*.html': ['html2js'],
+    './test/**/*.js': preprocessors,
+    './ads/**/test/test-*.js': preprocessors,
+    './extensions/**/test/**/*.js': preprocessors,
+    './testing/**/*.js': preprocessors,
   },
+
+  // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
+  // 'localhost' addresses. See #14848 for more info.
+  // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
+  hostname: 'localhost',
 
   browserify: {
     watch: true,
     debug: true,
+    basedir: __dirname + '/../../',
     transform: [
-      ['babelify'],
+      ['babelify', {compact: false, sourceMapsAbsolute: true}],
     ],
-    bundleDelay: 900,
+    // Prevent "cannot find module" errors on Travis. See #14166.
+    bundleDelay: process.env.TRAVIS ? 5000 : 1200,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
+    nbDotsPerLine: 100000,
     color: {
       success: 'green',
       failure: 'red',
@@ -65,7 +90,7 @@ module.exports = {
     suppressSkipped: true,
     suppressFailed: false,
     suppressErrorSummary: true,
-    maxLogLines: 10,
+    maxLogLines: 20,
   },
 
   mochaReporter: {
@@ -106,78 +131,86 @@ module.exports = {
     process.env.TRAVIS ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
   ],
 
-  // Number of sauce tests to start in parallel
-  concurrency: 6,
+  // Number of sauce platforms to start in parallel
+  concurrency: 4,
 
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
-      flags: ['--no-sandbox', '--disable-extensions'],
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     Chrome_no_extensions: {
       base: 'Chrome',
-      // Dramatically speeds up iframe creation time.
-      flags: ['--disable-extensions'],
+      flags: COMMON_CHROME_FLAGS,
+    },
+    Chrome_no_extensions_headless: {
+      base: 'ChromeHeadless',
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_android: {
-      base: 'SauceLabs',
-      browserName: 'android',
-      version: 'latest',
-    },
-    SL_Chrome_latest: {
+    SL_Chrome_67: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: 'latest',
-    },
-    SL_Chrome_45: {
+      platform: 'Windows 10',
+      version: '67.0',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Chrome_Android_7: Object.assign({
+      base: 'SauceLabs',
+      appiumVersion: '1.8.1',
+      deviceName: 'Android GoogleAPI Emulator',
+      browserName: 'Chrome',
+      platformName: 'Android',
+      platformVersion: '7.1',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Chrome_45: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
-      version: '45',
-    },
-    SL_iOS_8_4: {
+      platform: 'Windows 8',
+      version: '45.0',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Android_6: Object.assign({
       base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '8.4',
-    },
-    SL_iOS_9_1: {
+      appiumVersion: '1.8.1',
+      deviceName: 'Android Emulator',
+      browserName: 'Chrome',
+      platformName: 'Android',
+      platformVersion: '6.0',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_iOS_11: Object.assign({
       base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '9.1',
-    },
-    SL_iOS_10_0: {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '10.0',
-    },
-    SL_Firefox_latest: {
+      appiumVersion: '1.8.1',
+      deviceName: 'iPhone X Simulator',
+      browserName: 'Safari',
+      platformName: 'iOS',
+      platformVersion: '11.3',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Firefox_61: Object.assign({
       base: 'SauceLabs',
       browserName: 'firefox',
-      version: 'latest',
-    },
-    SL_IE_11: {
+      platform: 'Windows 10',
+      version: '61.0',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Safari_11: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.13',
+      version: '11.1',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Edge_17: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'MicrosoftEdge',
+      platform: 'Windows 10',
+      version: '17.17134',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_IE_11: Object.assign({
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      version: 11,
-    },
-    SL_Edge_latest: {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
-      version: 'latest',
-    },
-    SL_Safari_9: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 9,
-    },
-    SL_Safari_8: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 8,
-    },
+      platform: 'Windows 10',
+      version: '11.103',
+    }, SAUCE_TIMEOUT_CONFIG),
   },
 
   sauceLabs: {
@@ -185,8 +218,7 @@ module.exports = {
     tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
     startConnect: false,
     connectOptions: {
-      port: 5757,
-      logfile: 'sauce_connect.log',
+      noSslBumpDomains: 'all',
     },
   },
 
@@ -196,14 +228,18 @@ module.exports = {
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
-    captureConsole: false,
+    captureConsole: true,
+    verboseLogging: false,
   },
 
   singleRun: true,
   browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
   browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
+  failOnEmptyTestSuite: false,
+
+  // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
+  browserDisconnectTolerance: process.env.TRAVIS ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
@@ -211,8 +247,8 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
+    'karma-source-map-support',
     'karma-chrome-launcher',
-    'karma-coverage',
     'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',

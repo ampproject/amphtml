@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {getCurve} from './curve';
 import * as st from './style';
+import {assertNotDisplay, setStyle} from './style';
+import {getCurve} from './curve';
 
 
 
@@ -88,7 +89,7 @@ export function withCurve(transition, curve) {
 export function setStyles(element, styles) {
   return (time, complete) => {
     for (const k in styles) {
-      st.setStyle(element, k, styles[k](time, complete));
+      setStyle(element, assertNotDisplay(k), styles[k](time, complete));
     }
   };
 }
@@ -155,6 +156,21 @@ export function translateX(transition) {
       return `translateX(${res})`;
     }
     return `translateX(${res}px)`;
+  };
+}
+
+/**
+ * A transition for "translateY" of CSS "transform" property.
+ * @param {!TransitionDef<number|string>} transition
+ * @return {!TransitionDef<string>}
+ */
+export function translateY(transition) {
+  return time => {
+    const res = transition(time);
+    if (typeof res == 'string') {
+      return `translateY(${res})`;
+    }
+    return `translateY(${res}px)`;
   };
 }
 

@@ -19,7 +19,6 @@ import {
   stubCollapseFrameForTesting,
   stubExpandFrameForTesting,
 } from '../../../ads/inabox/frame-overlay-helper';
-import * as sinon from 'sinon';
 
 
 const NOOP = () => {};
@@ -104,7 +103,7 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
 
     stubCollapseFrameForTesting(collapseFrame);
     stubExpandFrameForTesting((win, iframe, onFinish) =>
-        onFinish(knownBoxRect, {}));
+      onFinish(knownBoxRect, {}));
 
     manager.expandFrame(iframe, NOOP);
     manager.collapseFrame(iframe, callback);

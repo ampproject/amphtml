@@ -17,7 +17,7 @@ import {
   AmpContext,
 } from '../../3p/ampcontext';
 import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
-import * as sinon from 'sinon';
+import {Platform} from '../../src/service/platform-impl';
 
 const NOOP = () => {};
 
@@ -28,7 +28,7 @@ describe('3p ampcontext.js', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     windowPostMessageSpy = sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {
@@ -66,7 +66,7 @@ describe('3p ampcontext.js', () => {
     expect(context).to.be.ok;
 
     // Resetting since a message is sent on construction.
-    windowPostMessageSpy.reset();
+    windowPostMessageSpy.resetHistory();
     context.report3pError(new Error('test'));
     expect(windowPostMessageSpy).to.be.called;
     expect(windowPostMessageSpy).to.be.calledWith(serializeMessage(
@@ -74,7 +74,7 @@ describe('3p ampcontext.js', () => {
         '1-291921',
         {'message': 'test'},
         '$internalRuntimeVersion$'
-      ));
+    ));
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
@@ -149,12 +149,16 @@ describe('3p ampcontext.js', () => {
 
   it('should throw error if sentinel invalid', () => {
     win.name = generateSerializedAttributes('foobar');
-    expect(() => new AmpContext(win)).to.throw('Incorrect sentinel format');
+    allowConsoleError(() => {
+      expect(() => new AmpContext(win)).to.throw('Incorrect sentinel format');
+    });
   });
 
   it('should throw error if metadata missing', () => {
     win.name = generateIncorrectAttributes();
-    expect(() => new AmpContext(win)).to.throw(/Cannot read property/);
+    const platform = new Platform(window);
+    expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
+      /undefined is not an object/ : /Cannot read property/);
   });
 
   it('should be able to send an intersection observer request', () => {
@@ -163,7 +167,7 @@ describe('3p ampcontext.js', () => {
     const callbackSpy = sandbox.spy();
 
     // Resetting since a message is sent on construction.
-    windowPostMessageSpy.reset();
+    windowPostMessageSpy.resetHistory();
 
     const stopObserving = context.observeIntersection(callbackSpy);
 
@@ -254,7 +258,7 @@ describe('3p ampcontext.js', () => {
     const context = new AmpContext(win);
 
     // Resetting since a message is sent on construction.
-    windowPostMessageSpy.reset();
+    windowPostMessageSpy.resetHistory();
 
     const successCallbackSpy = sandbox.spy();
     const deniedCallbackSpy = sandbox.spy();
@@ -300,7 +304,7 @@ describe('3p ampcontext.js', () => {
     const context = new AmpContext(win);
 
     // Resetting since a message is sent on construction.
-    windowPostMessageSpy.reset();
+    windowPostMessageSpy.resetHistory();
 
     const successCallbackSpy = sandbox.spy();
     const deniedCallbackSpy = sandbox.spy();

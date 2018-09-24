@@ -73,7 +73,7 @@ function manageWin_(win) {
  */
 function instrumentDocWrite(parent, win) {
   const doc = win.document;
-  const close = doc.close;
+  const {close} = doc;
   doc.close = function() {
     parent.ampManageWin = function(win) {
       manageWin(win);
@@ -178,7 +178,7 @@ function installObserver(win) {
  */
 function instrumentEntryPoints(win) {
   // Change setTimeout to respect a minimum timeout.
-  const setTimeout = win.setTimeout;
+  const {setTimeout} = win;
   win.setTimeout = function(fn, time) {
     time = minTime(time);
     arguments[1] = time;
@@ -189,23 +189,29 @@ function instrumentEntryPoints(win) {
   win.setInterval = function(fn) {
     const id = intervalId++;
     const args = Array.prototype.slice.call(arguments);
+    /**
+     * @return {*}
+     */
     function wrapper() {
       next();
       if (typeof fn == 'string') {
         // Handle rare and dangerous string arg case.
-        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn);
+        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn); // lgtm [js/useless-expression]
       } else {
         return fn.apply(this, arguments);
       }
     }
     args[0] = wrapper;
+    /**
+     *
+     */
     function next() {
       intervals[id] = win.setTimeout.apply(win, args);
     }
     next();
     return id;
   };
-  const clearInterval = win.clearInterval;
+  const {clearInterval} = win;
   win.clearInterval = function(id) {
     clearInterval(id);
     win.clearTimeout(intervals[id]);
@@ -219,6 +225,9 @@ function instrumentEntryPoints(win) {
  */
 function blockSyncPopups(win) {
   let count = 0;
+  /**
+   * Checks for security error.
+   */
   function maybeThrow() {
     // Prevent deep recursion.
     if (count++ > 2) {
@@ -257,8 +266,12 @@ function minTime(time) {
   return time;
 }
 
+/**
+ * Installs embed state listener.
+ */
 export function installEmbedStateListener() {
+  /** @suppress {deprecated} */
   listenParent(window, 'embed-state', function(data) {
     inViewport = data.inViewport;
   });
-};
+}

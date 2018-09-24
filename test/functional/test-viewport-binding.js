@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import {installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
+import {
+  ViewportBindingIosEmbedShadowRoot_,
+} from '../../src/service/viewport/viewport-binding-ios-embed-sd';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 import {
   ViewportBindingNatural_,
 } from '../../src/service/viewport/viewport-binding-natural';
-import {
-  ViewportBindingNaturalIosEmbed_,
-} from '../../src/service/viewport/viewport-binding-natural-ios-embed';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {whenDocumentReady} from '../../src/document-ready';
 
@@ -36,6 +35,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let win;
   let ampdoc;
   let viewer;
+  let child;
 
   beforeEach(() => {
     env.iframe.style.width = '100px';
@@ -43,7 +43,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     win = env.win;
     win.document.documentElement.classList.add('i-amphtml-singledoc');
 
-    const child = win.document.createElement('div');
+    child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
     win.document.body.appendChild(child);
@@ -104,7 +104,8 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(win.document.documentElement.style.paddingTop).to.equal('31px');
   });
 
-  it('should calculate size', () => {
+  // TODO(zhouyx, #11827): Make this test work on Safari.
+  it.configure().skipSafari().run('should calculate size', () => {
     const size = binding.getSize();
     expect(size.width).to.equal(100);
     expect(size.height).to.equal(200);
@@ -122,6 +123,18 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
   it('should calculate scrollHeight from scrollElement', () => {
     expect(binding.getScrollHeight()).to.equal(300);
+  });
+
+  it('should calculate contentHeight from body height', () => {
+    // Set content to be smaller than viewport.
+    child.style.height = '50px';
+    expect(binding.getContentHeight()).to.equal(50);
+  });
+
+  it('should include padding top in contentHeight', () => {
+    binding.updatePaddingTop(10);
+    binding.setScrollTop(20); // should have no effect on height
+    expect(binding.getContentHeight()).to.equal(310);
   });
 
   it('should update scrollTop on scrollElement', () => {
@@ -147,10 +160,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
       },
     };
     const rect = binding.getLayoutRect(el);
-    expect(rect.left).to.equal(12);  // round(0 + 11.5)
-    expect(rect.top).to.equal(213);  // round(200 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
+    expect(rect.left).to.equal(12); // round(0 + 11.5)
+    expect(rect.top).to.equal(213); // round(200 + 12.5)
+    expect(rect.width).to.equal(14); // round(13.5)
+    expect(rect.height).to.equal(15); // round(14.5)
   });
 
   it('should offset client rect for layout and position passed in', () => {
@@ -163,10 +176,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
       },
     };
     const rect = binding.getLayoutRect(el, 100, 200);
-    expect(rect.left).to.equal(112);  // round(100 + 11.5)
-    expect(rect.top).to.equal(213);  // round(200 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
+    expect(rect.left).to.equal(112); // round(100 + 11.5)
+    expect(rect.top).to.equal(213); // round(200 + 12.5)
+    expect(rect.width).to.equal(14); // round(13.5)
+    expect(rect.height).to.equal(15); // round(14.5)
   });
 
 
@@ -192,244 +205,6 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(htmlCss.overflowY).to.equal('auto');
   });
 });
-
-describes.realWin('ViewportBindingNaturalIosEmbed', {ampCss: true}, env => {
-  let binding;
-  let win;
-
-  beforeEach(() => {
-    env.iframe.style.width = '100px';
-    env.iframe.style.height = '200px';
-    win = env.win;
-    const child = win.document.createElement('div');
-    child.id = 'child';
-    child.style.width = '200px';
-    child.style.height = '300px';
-    win.document.body.appendChild(child);
-    installDocService(win, /* isSingleDoc */ true);
-    installDocumentStateService(win);
-    installVsyncService(win);
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-    installPlatformService(win);
-    installViewerServiceForDoc(ampdoc);
-
-    win.document.documentElement.classList.add('i-amphtml-singledoc');
-    binding = new ViewportBindingNaturalIosEmbed_(win, ampdoc);
-    return Promise.resolve();
-  });
-
-  it('should require fixed layer transferring', () => {
-    expect(binding.requiresFixedLayerTransfer()).to.be.true;
-  });
-
-  it('should subscribe to resize events on window, scroll on body', () => {
-    expect(win.eventListeners.count('resize')).to.equal(1);
-    expect(win.eventListeners.count('scroll')).to.equal(0);
-    expect(win.document.body.eventListeners.count('scroll')).to.equal(1);
-  });
-
-  it('should setup document for embed scrolling', () => {
-    const documentElement = win.document.documentElement;
-    const body = win.document.body;
-    expect(documentElement.style.overflowY).to.equal('auto');
-    expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
-    expect(win.getComputedStyle(documentElement).overflowY).to.equal('auto');
-
-    // Assigned styles.
-    expect(body.style.overflowX).to.equal('hidden');
-    expect(body.style.overflowY).to.equal('auto');
-    expect(body.style.webkitOverflowScrolling).to.equal('touch');
-    expect(body.style.position).to.equal('absolute');
-    expect(body.style.top).to.equal('0px');
-    expect(body.style.left).to.equal('0px');
-    expect(body.style.right).to.equal('0px');
-    expect(body.style.bottom).to.equal('0px');
-
-    // Resolved styles.
-    const resolvedBodyStyle = win.getComputedStyle(body);
-    expect(resolvedBodyStyle.overflowX).to.equal('hidden');
-    expect(resolvedBodyStyle.overflowY).to.equal('auto');
-    expect(resolvedBodyStyle.position).to.equal('absolute');
-    expect(resolvedBodyStyle.top).to.equal('0px');
-    expect(resolvedBodyStyle.left).to.equal('0px');
-    expect(resolvedBodyStyle.right).to.equal('0px');
-    expect(resolvedBodyStyle.bottom).to.equal('0px');
-
-    const scrollpos = body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos).to.be.ok;
-    expect(scrollpos.style.position).to.equal('absolute');
-    expect(scrollpos.style.top).to.equal('0px');
-    expect(scrollpos.style.left).to.equal('0px');
-    expect(scrollpos.style.width).to.equal('0px');
-    expect(scrollpos.style.height).to.equal('0px');
-    expect(scrollpos.style.visibility).to.equal('hidden');
-
-    const scrollmove = body.querySelector('#i-amphtml-scrollmove');
-    expect(scrollmove).to.be.ok;
-    expect(scrollmove.style.position).to.equal('absolute');
-    expect(scrollmove.style.top).to.equal('0px');
-    expect(scrollmove.style.left).to.equal('0px');
-    expect(scrollmove.style.width).to.equal('0px');
-    expect(scrollmove.style.height).to.equal('0px');
-    expect(scrollmove.style.visibility).to.equal('hidden');
-
-    const endpos = body.querySelector('#i-amphtml-endpos');
-    expect(endpos).to.be.ok;
-    expect(endpos.style.position).to.not.be.ok;
-    expect(endpos.style.top).to.not.be.ok;
-    expect(endpos.style.width).to.equal('0px');
-    expect(endpos.style.height).to.equal('0px');
-    expect(endpos.style.visibility).to.equal('hidden');
-    expect(endpos.getBoundingClientRect().top).to.equal(300);
-  });
-
-  it('should always have scrollWidth equal window.innerWidth', () => {
-    expect(binding.getScrollWidth()).to.equal(100);
-  });
-
-  it('should update border on BODY when updatePaddingTop', () => {
-    binding.updatePaddingTop(31);
-    expect(win.document.body.style.borderTop).to
-        .equal('31px solid transparent');
-    expect(win.document.body.style.paddingTop).to.not.be.ok;
-  });
-
-  it('should update border in lightbox mode when updateLightboxMode', () => {
-    binding.updatePaddingTop(31);
-    expect(win.document.body.style.borderTop).to
-        .equal('31px solid transparent');
-    expect(win.document.body.style.borderTopStyle).to.equal('solid');
-
-    return binding.updateLightboxMode(true).then(() => {
-      expect(win.document.body.style.borderTopStyle).to.equal('none');
-
-      return binding.updateLightboxMode(false);
-    }).then(() => {
-      expect(win.document.body.style.borderTopStyle).to.equal('solid');
-      expect(win.document.body.style.borderBottomStyle).to.not.equal('solid');
-      expect(win.document.body.style.borderLeftStyle).to.not.equal('solid');
-      expect(win.document.body.style.borderRightStyle).to.not.equal('solid');
-    });
-  });
-
-  it('should calculate size', () => {
-    const size = binding.getSize();
-    expect(size.width).to.equal(100);
-    expect(size.height).to.equal(200);
-  });
-
-  it('should calculate scrollTop from scrollpos element', () => {
-    binding.setScrollTop(17);
-    const scrollpos = win.document.body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(-17);
-    binding.onScrolled_();
-    expect(binding.getScrollTop()).to.equal(17);
-  });
-
-  it('should calculate scrollTop from scrollpos element with padding', () => {
-    binding.setScrollTop(17);
-    const scrollpos = win.document.body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(-17);
-    binding.updatePaddingTop(10);
-    binding.onScrolled_();
-    // scrollTop = - BCR.top + paddingTop
-    expect(binding.getScrollTop()).to.equal(27);
-  });
-
-  it('should calculate scrollHeight from scrollpos/endpos elements', () => {
-    binding.setScrollTop(17);
-    const scrollpos = win.document.body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(-17);
-    const endpos = win.document.body.querySelector('#i-amphtml-endpos');
-    expect(endpos.getBoundingClientRect().top).to.equal(283);  // 300 - 17
-    expect(binding.getScrollHeight()).to.equal(300);  // 283 - (-17)
-  });
-
-
-  it('should offset client rect for layout', () => {
-    binding.setScrollTop(100);
-    const scrollpos = win.document.body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(-100);
-    expect(scrollpos.getBoundingClientRect().left).to.equal(0);
-    binding.onScrolled_();
-    const el = {
-      getBoundingClientRect: () => {
-        return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
-      },
-    };
-    const rect = binding.getLayoutRect(el);
-    expect(rect.left).to.equal(12);  // round(0 + 11.5)
-    expect(rect.top).to.equal(113);  // round(100 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
-  });
-
-  it('should set scroll position via moving element', () => {
-    binding.setScrollTop(10);
-    const scrollmove = win.document.body.querySelector('#i-amphtml-scrollmove');
-    expect(scrollmove.style.transform).to.equal('translateY(10px)');
-  });
-
-  it('should set scroll position via moving element with padding', () => {
-    binding.updatePaddingTop(19);
-    binding.setScrollTop(10);
-    const scrollmove = win.document.body.querySelector('#i-amphtml-scrollmove');
-    // transform = scrollTop - paddingTop
-    expect(scrollmove.style.transform).to.equal('translateY(-9px)');
-  });
-
-  it('should adjust scroll position when scrolled to 0', () => {
-    const scrollpos = win.document.body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(0);
-    const scrollmove = win.document.body.querySelector('#i-amphtml-scrollmove');
-    const event = {preventDefault: sandbox.spy()};
-    binding.adjustScrollPos_(event);
-    expect(scrollmove.style.transform).to.equal('translateY(1px)');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(-1);
-    expect(event.preventDefault).to.be.calledOnce;
-  });
-
-  it('should adjust scroll position when scrolled to 0 w/padding', () => {
-    binding.updatePaddingTop(10);
-    const scrollpos = win.document.body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(10);
-    const scrollmove = win.document.body.querySelector('#i-amphtml-scrollmove');
-    const event = {preventDefault: sandbox.spy()};
-    binding.adjustScrollPos_(event);
-    // transform = 1 - updatePadding
-    expect(scrollmove.style.transform).to.equal('translateY(-9px)');
-    // scroll pos should not change
-    expect(scrollpos.getBoundingClientRect().top).to.equal(10);
-    expect(event.preventDefault).to.be.calledOnce;
-  });
-
-  it('should adjust scroll position when scrolled to 0; w/o event', () => {
-    const scrollpos = win.document.body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(0);
-    const scrollmove = win.document.body.querySelector('#i-amphtml-scrollmove');
-    binding.adjustScrollPos_();
-    expect(scrollmove.style.transform).to.equal('translateY(1px)');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(-1);
-  });
-
-  it('should NOT adjust scroll position when scrolled away from 0', () => {
-    binding.setScrollTop(10);
-    const scrollpos = win.document.body.querySelector('#i-amphtml-scrollpos');
-    expect(scrollpos.getBoundingClientRect().top).to.equal(-10);
-    const event = {preventDefault: sandbox.spy()};
-    binding.adjustScrollPos_(event);
-    expect(scrollpos.getBoundingClientRect().top).to.equal(-10);
-    expect(event.preventDefault).to.have.not.been.called;
-  });
-
-  it('should NOT adjust scroll position when overscrolled', () => {
-    binding.setScrollTop(310);
-    const event = {preventDefault: sandbox.spy()};
-    binding.adjustScrollPos_(event);
-    expect(event.preventDefault).to.have.not.been.called;
-  });
-});
-
 
 describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   let win;
@@ -559,7 +334,8 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(win.document.documentElement.style.paddingTop).to.equal('');
   });
 
-  it('should calculate size', () => {
+  // TODO(zhouyx, #11827): Make this test work on Safari.
+  it.configure().skipSafari().run('should calculate size', () => {
     const size = binding.getSize();
     expect(size.width).to.equal(100);
     expect(size.height).to.equal(100);
@@ -576,6 +352,18 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
 
   it('should calculate scrollHeight from wrapper', () => {
     expect(binding.getScrollHeight()).to.equal(301); // +1px for border-top.
+  });
+
+  it('should calculate contentHeight from body height', () => {
+    // Set content to be smaller than viewport.
+    child.style.height = '50px';
+    expect(binding.getContentHeight()).to.equal(51);
+  });
+
+  it('should include padding top in contentHeight', () => {
+    binding.updatePaddingTop(10);
+    binding.setScrollTop(20); // should have no effect on height
+    expect(binding.getContentHeight()).to.equal(311); // +1px for border-top.
   });
 
   it('should update scrollTop on wrapper', () => {
@@ -600,9 +388,9 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
       },
     };
     const rect = binding.getLayoutRect(el);
-    expect(rect.top).to.equal(213);  // round(200 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
+    expect(rect.top).to.equal(213); // round(200 + 12.5)
+    expect(rect.width).to.equal(14); // round(13.5)
+    expect(rect.height).to.equal(15); // round(14.5)
   });
 
   it('should offset client rect for layout and position passed in', () => {
@@ -613,10 +401,10 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
       },
     };
     const rect = binding.getLayoutRect(el, 100, 200);
-    expect(rect.left).to.equal(112);  // round(100 + 11.5)
-    expect(rect.top).to.equal(213);  // round(200 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
+    expect(rect.left).to.equal(112); // round(100 + 11.5)
+    expect(rect.top).to.equal(213); // round(200 + 12.5)
+    expect(rect.width).to.equal(14); // round(13.5)
+    expect(rect.height).to.equal(15); // round(14.5)
   });
 
   it('should call scroll event', () => {
@@ -647,5 +435,302 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     wrapperCss = win.getComputedStyle(binding.wrapper_);
     expect(wrapperCss.overflowX).to.equal('hidden');
     expect(wrapperCss.overflowY).to.equal('auto');
+  });
+});
+
+describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
+  let iframe;
+  let win;
+  let binding;
+  let vsync;
+  let child;
+
+  // Can only test when Shadow DOM is available.
+  describe.configure().if(() => Element.prototype.attachShadow).run('Viewport' +
+      'BindingIosEmbedShadowRoot_', function() {
+    beforeEach(function() {
+      iframe = env.iframe;
+      iframe.style.width = '100px';
+      iframe.style.height = '100px';
+      win = env.win;
+      win.document.documentElement.className = 'top i-amphtml-singledoc';
+      child = win.document.createElement('div');
+      child.style.width = '200px';
+      child.style.height = '300px';
+      child.textContent = 'test';
+      win.document.body.appendChild(child);
+
+      const styleEl = win.document.createElement('style');
+      styleEl.textContent = `
+          .flexed {display: flex}
+          @media (min-width: 150px) {
+            body {display: table}
+          }
+        `;
+      win.document.head.appendChild(styleEl);
+
+      installDocService(win, /* isSingleDoc */ true);
+      installDocumentStateService(win);
+      installVsyncService(win);
+      vsync = Services.vsyncFor(win);
+      binding = new ViewportBindingIosEmbedShadowRoot_(win);
+      binding.connect();
+    });
+
+    it('should NOT require fixed layer transferring', () => {
+      expect(binding.requiresFixedLayerTransfer()).to.be.true;
+    });
+
+    it('should start w/o overscroll and set it on doc ready', () => {
+      const root = binding.getScrollingElement();
+      expect(root).to.not.have.class('i-amphtml-ios-overscroll');
+      return whenDocumentReady(win.document).then(() => {
+        expect(root).to.have.class('i-amphtml-ios-overscroll');
+      });
+    });
+
+    it('should have UI setup', () => {
+      expect(binding.setupDone_).to.be.true;
+      expect(win.document.documentElement)
+          .to.have.class('i-amphtml-ios-embed-sd');
+      // Should preserve existing classes.
+      expect(win.document.documentElement).to.have.class('top');
+      expect(win.document.body).to.exist;
+      expect(win.document.body.parentNode)
+          .to.equal(win.document.documentElement);
+      expect(win.document.body.shadowRoot).to.exist;
+      expect(win.document.body.shadowRoot.firstElementChild)
+          .to.equal(binding.scroller_);
+      expect(binding.wrapper_.parentNode)
+          .to.equal(binding.scroller_);
+      expect(binding.wrapper_.firstElementChild.tagName)
+          .to.equal('SLOT');
+      expect(binding.wrapper_.tagName).to.equal('DIV');
+      expect(binding.wrapper_.id).to.equal('i-amphtml-body-wrapper');
+      expect(win.document.body.contains(child)).to.be.true;
+      expect(binding.wrapper_.contains(child)).to.be.false;
+      expect(win.document.contains(child)).to.be.true;
+      expect(child.textContent).to.equal('test');
+    });
+
+    it('should have CSS setup', () => {
+      const htmlCss = win.getComputedStyle(win.document.documentElement);
+      const scrollerCss = win.getComputedStyle(binding.scroller_);
+      const wrapperCss = win.getComputedStyle(binding.wrapper_);
+      const bodyCss = win.getComputedStyle(win.document.body);
+
+      // `<html>` must have `position: static` or layout is broken. It must
+      // not be scrollable.
+      expect(htmlCss.position).to.equal('static');
+      expect(htmlCss.overflowY).to.equal('hidden');
+      expect(htmlCss.overflowX).to.equal('hidden');
+
+      // Body takes full viewport and not scrollable.
+      expect(bodyCss.overflowY).to.equal('hidden');
+      expect(bodyCss.overflowX).to.equal('hidden');
+      expect(bodyCss.margin).to.equal('0px');
+      expect(bodyCss.position).to.equal('absolute');
+      expect(bodyCss.top).to.equal('0px');
+      expect(bodyCss.left).to.equal('0px');
+      expect(bodyCss.right).to.equal('0px');
+      expect(bodyCss.bottom).to.equal('0px');
+
+      // Scroller is full-viewport size and scrollable.
+      // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
+      expect(scrollerCss.overflowY).to.equal('auto');
+      expect(scrollerCss.overflowX).to.equal('hidden');
+      expect(wrapperCss.overflowY).to.equal('visible');
+      expect(wrapperCss.overflowX).to.equal('visible');
+
+      // Scroller must be a block and positioned absolute at 0/0/0/0.
+      expect(scrollerCss.display).to.equal('block');
+      expect(scrollerCss.boxSizing).to.equal('border-box');
+      expect(scrollerCss.position).to.equal('absolute');
+      expect(scrollerCss.top).to.equal('0px');
+      expect(scrollerCss.left).to.equal('0px');
+      expect(scrollerCss.right).to.equal('0px');
+      expect(scrollerCss.bottom).to.equal('0px');
+      expect(scrollerCss.margin).to.equal('0px');
+      // Scroler must have a 1px transparent border for two purposes:
+      // (1) to cancel out margin collapse in body's children;
+      // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
+      expect(scrollerCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent'))
+          .to.equal('1px solid transparent');
+
+      // Wrapper must additionally have `will-change: transform` to avoid iOS
+      // rendering bug where contents inside the `-webkit-overflow-scrolling`
+      // element would occasionally fail to paint. This bug appears to trigger
+      // more often when Shadow DOM is involved.
+      expect(wrapperCss.willChange).to.equal('transform');
+
+      // Preserve and inherit the customized body styles.
+      win.document.body.style.display = 'flex';
+      win.document.body.style.flexDirection = 'row';
+      win.document.body.style.alignItems = 'center';
+      return vsync.mutatePromise().then(() => {
+        expect(binding.wrapper_.style.display).to.equal('flex');
+        expect(binding.wrapper_.style.flexDirection).to.equal('row');
+        expect(binding.wrapper_.style.alignItems).to.equal('center');
+      });
+    });
+
+    it('should update body styles on class changes', () => {
+      // Body styles are moved to the wrapper.
+      return vsync.mutatePromise().then(() => {
+        expect(binding.wrapper_.style.display).to.equal('block');
+        win.document.body.classList.add('flexed');
+        return vsync.mutatePromise();
+      }).then(() => {
+        expect(binding.wrapper_.style.display).to.equal('flex');
+      });
+    });
+
+    it('should update body styles on style changes', () => {
+      // Body styles are moved to the wrapper.
+      return vsync.mutatePromise().then(() => {
+        expect(binding.wrapper_.style.display).to.equal('block');
+        win.document.body.style.display = 'table';
+        return vsync.mutatePromise();
+      }).then(() => {
+        expect(binding.wrapper_.style.display).to.equal('table');
+      });
+    });
+
+    it('should update body styles on resize', () => {
+      // Body styles are moved to the wrapper.
+      return vsync.mutatePromise().then(() => {
+        expect(binding.wrapper_.style.display).to.equal('block');
+        return new Promise(resolve => {
+          binding.onResize(resolve);
+          iframe.style.width = '200px';
+        });
+      }).then(() => {
+        return vsync.mutatePromise();
+      }).then(() => {
+        expect(binding.wrapper_.style.display).to.equal('table');
+      });
+    });
+
+    it('should be immediately scrolled to 1 to avoid freeze', () => {
+      expect(binding.scroller_.scrollTop).to.equal(1);
+    });
+
+    it('should connect events: subscribe to scroll and resize events', () => {
+      expect(win.eventListeners.count('resize')).to.equal(1);
+      // Note that scroll event is on the wrapper, and NOT on root or body.
+      expect(win.eventListeners.count('scroll')).to.equal(0);
+      expect(win.document.eventListeners.count('scroll')).to.equal(0);
+      expect(win.document.documentElement.eventListeners.count('scroll'))
+          .to.equal(0);
+      expect(win.document.body.eventListeners.count('scroll'))
+          .to.equal(0);
+    });
+
+    it('should disconnect events', () => {
+      // After disconnect, there are no more listeners on window.
+      binding.disconnect();
+      expect(win.eventListeners.count('resize')).to.equal(0);
+    });
+
+    it('should update padding', () => {
+      binding.updatePaddingTop(31);
+      expect(binding.scroller_.style.paddingTop).to.equal('31px');
+      // Notice, root is not touched.
+      expect(win.document.documentElement.style.paddingTop).to.equal('');
+    });
+
+    it('should calculate scrollTop from scroller', () => {
+      binding.scroller_.scrollTop = 17;
+      expect(binding.getScrollTop()).to.equal(17);
+    });
+
+    it('should calculate scrollWidth from scroller', () => {
+      expect(binding.getScrollWidth()).to.equal(200);
+    });
+
+    it('should calculate scrollHeight from scroller', () => {
+      expect(binding.getScrollHeight()).to.equal(300);
+    });
+
+    it('should calculate contentHeight from body height', () => {
+      // Set content to be smaller than viewport.
+      child.style.height = '50px';
+      expect(binding.getContentHeight()).to.equal(51);
+    });
+
+    it('should include padding top in contentHeight', () => {
+      binding.updatePaddingTop(10);
+      binding.setScrollTop(20); // should have no effect on height
+      expect(binding.getContentHeight()).to.equal(311); // +1px for border-top.
+    });
+
+    it('should update scrollTop on scroller', () => {
+      binding.setScrollTop(21);
+      expect(binding.scroller_.scrollTop).to.equal(21);
+    });
+
+    it('should adjust scrollTop to avoid scroll freeze', () => {
+      binding.setScrollTop(21);
+      expect(binding.scroller_.scrollTop).to.equal(21);
+
+      // `scrollTop=0` is normally not allowed.
+      binding.setScrollTop(0);
+      expect(binding.scroller_.scrollTop).to.equal(1);
+    });
+
+    it('should offset client rect for layout', () => {
+      binding.scroller_.scrollTop = 200;
+      const el = {
+        getBoundingClientRect: () => {
+          return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
+        },
+      };
+      const rect = binding.getLayoutRect(el);
+      expect(rect.top).to.equal(213); // round(200 + 12.5)
+      expect(rect.width).to.equal(14); // round(13.5)
+      expect(rect.height).to.equal(15); // round(14.5)
+    });
+
+    it('should offset client rect for layout and position passed in', () => {
+      binding.scroller_.scrollTop = 10;
+      const el = {
+        getBoundingClientRect: () => {
+          return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
+        },
+      };
+      const rect = binding.getLayoutRect(el, 100, 200);
+      expect(rect.left).to.equal(112); // round(100 + 11.5)
+      expect(rect.top).to.equal(213); // round(200 + 12.5)
+      expect(rect.width).to.equal(14); // round(13.5)
+      expect(rect.height).to.equal(15); // round(14.5)
+    });
+
+    it('should call scroll event', () => {
+      binding.scroller_.scrollTop = 1;
+      return new Promise(resolve => {
+        binding.onScroll(resolve);
+        binding.scroller_.scrollTop = 11;
+      }).then(() => {
+        expect(binding.getScrollTop()).to.equal(11);
+      });
+    });
+
+    it('should disable scroll temporarily and reset scroll', () => {
+      let scrollerCss = win.getComputedStyle(binding.scroller_);
+      expect(scrollerCss.overflowX).to.equal('hidden');
+      expect(scrollerCss.overflowY).to.equal('auto');
+
+      binding.disableScroll();
+
+      scrollerCss = win.getComputedStyle(binding.scroller_);
+      expect(scrollerCss.overflowX).to.equal('hidden');
+      expect(scrollerCss.overflowY).to.equal('hidden');
+
+      binding.resetScroll();
+
+      scrollerCss = win.getComputedStyle(binding.scroller_);
+      expect(scrollerCss.overflowX).to.equal('hidden');
+      expect(scrollerCss.overflowY).to.equal('auto');
+    });
   });
 });

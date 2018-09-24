@@ -39,6 +39,10 @@ This is only useful for development - e.g. when making changes to
 `engine/validator.js` or when authoring an AMP extension, and it's rough around
 the edges. Below are instructions for Linux Ubuntu 14.
 
+## Installation
+
+### Linux
+
 Install these packages using apt-get:
 
 * npm
@@ -51,6 +55,28 @@ In addition, install Node.js v4.4.2. E.g.,
   [by downloading](https://nodejs.org/en/download/) or
   [by using a package manager](https://nodejs.org/en/download/package-manager/) or
   [by using NVM](https://github.com/creationix/nvm).
+
+### OSX
+
+Dependencies:
+
+* npm
+* python 2.7 (should already be installed on OSX)
+* [homebrew](https://brew.sh/)
+  * protobuf
+    ```sh
+    brew install protobuf
+    mkdir -p /Users/USERNAME/Library/Python/2.7/lib/python/site-packages
+    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/USERNAME/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+    ```
+
+  * openjdk-7-jre
+    ```sh
+    brew tap caskroom/cask
+    brew install Caskroom/cask/java
+    ```
+
+### Usage
 
 Then, run `build.py`. This creates `dist/validator_minified.js`, which is
 equivalent to the validator deployed at cdn.ampproject.org. You may now
@@ -65,3 +91,21 @@ testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height'
 testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/amp-ad.html)
 ...
 ```
+
+### Building on MacOS
+* Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
+* Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
+* If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
+
+To verify that you have the necessary prerequisites, run and verify:
+```
+$ protoc --version
+libprotoc 3.5.1
+```
+and
+```
+$ python
+>>> import google.protobuf
+>>>
+```
+Now `cd amphtml/validator` and run `python build.py`.

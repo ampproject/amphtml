@@ -16,36 +16,43 @@
 
 /**
  * @fileoverview "Unit" test for bind-impl.js. Runs as an integration test
- *               because it requires building web-worker binary.
+ * because it requires building web-worker binary.
  */
 
-import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
+import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
+import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
+import {dev, user} from '../../../../../src/log';
 import {toArray} from '../../../../../src/types';
-import {user} from '../../../../../src/log';
 
 /**
  * @param {!Object} env
- * @param {!Element} container
+ * @param {?Element} container
  * @param {string} binding
- * @param {string=} opt_tagName
- * @param {boolean=} opt_amp
+ * @param {string=} opt_tag Tag name of element (default is <p>).
+ * @param {boolean=} opt_amp Is this an AMP element?
+ * @param {boolean=} opt_head Add element to document <head>?
  * @return {!Element}
  */
-function createElement(env, container, binding, opt_tagName, opt_amp) {
-  const tag = opt_tagName || 'p';
+function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
+  const tag = opt_tag || 'p';
   const div = env.win.document.createElement('div');
   div.innerHTML = `<${tag} ${binding}></${tag}>`;
-  const newElement = div.firstElementChild;
+  const element = div.firstElementChild;
   if (opt_amp) {
-    newElement.className = 'i-amphtml-foo -amp-foo amp-foo';
-    newElement.mutatedAttributesCallback = () => {};
+    element.className = 'i-amphtml-foo -amp-foo amp-foo';
+    element.mutatedAttributesCallback = () => {};
   }
-  container.appendChild(newElement);
-  return newElement;
+  if (opt_head) {
+    env.win.document.head.appendChild(element);
+  } else if (container) {
+    container.appendChild(element);
+  }
+  return element;
 }
 
 /**
@@ -84,7 +91,25 @@ function onBindReadyAndSetState(env, bind, state, opt_isAmpStateMutation) {
  * @return {!Promise}
  */
 function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
-  return bind.setStateWithExpression(expression, scope).then(() => {
+  return bind.initializePromiseForTesting().then(() => {
+    return bind.setStateWithExpression(expression, scope);
+  }).then(() => {
+    env.flushVsync();
+    return bind.setStatePromiseForTesting();
+  });
+}
+
+/**
+ * @param {!Object} env
+ * @param {!Bind} bind
+ * @param {!Array<!Element>} added
+ * @param {!Array<!Element>} removed
+ * @return {!Promise}
+ */
+function onBindReadyAndScanAndApply(env, bind, added, removed) {
+  return bind.initializePromiseForTesting().then(() => {
+    return bind.scanAndApply(added, removed);
+  }).then(() => {
     env.flushVsync();
   });
 }
@@ -96,7 +121,7 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
  */
 function waitForEvent(env, name) {
   return new Promise(resolve => {
-    function callback() {
+    const callback = () => {
       resolve();
       env.win.removeEventListener(name, callback);
     };
@@ -116,54 +141,72 @@ describe.configure().ifNewChrome().run('Bind', function() {
     },
     mockFetch: false,
   }, env => {
-    let bind;
-    let container;
+    let fieBind;
+    let fieBody;
+    let fieWindow;
+
+    let hostWindow;
 
     beforeEach(() => {
       // Make sure we have a chunk instance for testing.
       chunkInstanceForTesting(env.ampdoc);
 
-      bind = new Bind(env.ampdoc, env.win);
-      container = env.embed.getBodyElement();
+      fieWindow = env.embed.win;
+      fieBind = new Bind(env.ampdoc, fieWindow);
+      fieBody = env.embed.getBodyElement();
+
+      hostWindow = env.ampdoc.win;
     });
 
     it('should scan for bindings when ampdoc is ready', () => {
-      createElement(env, container, '[text]="1+1"');
-      expect(bind.numberOfBindings()).to.equal(0);
-      return onBindReady(env, bind).then(() => {
-        expect(bind.numberOfBindings()).to.equal(1);
+      createElement(env, fieBody, '[text]="1+1"');
+      expect(fieBind.numberOfBindings()).to.equal(0);
+      return onBindReady(env, fieBind).then(() => {
+        expect(fieBind.numberOfBindings()).to.equal(1);
       });
     });
 
-    describe('with Bind in parent window', () => {
-      let parentBind;
-      let parentContainer;
+    it('should not update host document title for <title> elements', () => {
+      createElement(env, fieBody, '[text]="\'bar\'"', 'title',
+          /* opt_amp */ false, /* opt_head */ true);
+      fieWindow.document.title = 'foo';
+      hostWindow.document.title = 'foo';
+      return onBindReadyAndSetState(env, fieBind, {}).then(() => {
+        // Make sure it does not update the host window's document title.
+        expect(fieWindow.document.title).to.equal('bar');
+        expect(hostWindow.document.title).to.equal('foo');
+      });
+    });
+
+    describe('with Bind in host window', () => {
+      let hostBind;
+      let hostBody;
 
       beforeEach(() => {
-        parentBind = new Bind(env.ampdoc);
-        parentContainer = env.ampdoc.getBody();
+        hostBind = new Bind(env.ampdoc);
+        hostBody = env.ampdoc.getBody();
       });
 
       it('should only scan elements in provided window', () => {
-        createElement(env, container, '[text]="1+1"');
-        createElement(env, parentContainer, '[text]="2+2"');
+        createElement(env, fieBody, '[text]="1+1"');
+        createElement(env, hostBody, '[text]="2+2"');
         return Promise.all([
-          onBindReady(env, bind),
-          onBindReady(env, parentBind),
+          onBindReady(env, fieBind),
+          onBindReady(env, hostBind),
         ]).then(() => {
-          expect(bind.numberOfBindings()).to.equal(1);
-          expect(parentBind.numberOfBindings()).to.equal(1);
+          expect(fieBind.numberOfBindings()).to.equal(1);
+          expect(hostBind.numberOfBindings()).to.equal(1);
         });
       });
 
       it('should not be able to access variables from other windows', () => {
         const element =
-            createElement(env, container, '[text]="foo + bar"');
+            createElement(env, fieBody, '[text]="foo + bar"');
         const parentElement =
-            createElement(env, parentContainer, '[text]="foo + bar"');
+            createElement(env, hostBody, '[text]="foo + bar"');
         const promises = [
-          onBindReadyAndSetState(env, bind, {foo: '123', bar: '456'}),
-          onBindReadyAndSetState(env, parentBind, {foo: 'ABC', bar: 'DEF'}),
+          onBindReadyAndSetState(env, fieBind, {foo: '123', bar: '456'}),
+          onBindReadyAndSetState(env, hostBind, {foo: 'ABC', bar: 'DEF'}),
         ];
         return Promise.all(promises).then(() => {
           // `element` only sees `foo` and `parentElement` only sees `bar`.
@@ -199,6 +242,16 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(bind.numberOfBindings()).to.equal(1);
       });
     });
+
+    it('should not update document title for <title> elements', () => {
+      createElement(env, container, '[text]="\'bar\'"', 'title',
+          /* opt_amp */ false, /* opt_head */ true);
+      env.win.document.title = 'foo';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        // Make sure does not update the host window's document title.
+        expect(env.win.document.title).to.equal('foo');
+      });
+    });
   }); // in shadow ampdoc
 
   describes.realWin('in single ampdoc', {
@@ -210,14 +263,35 @@ describe.configure().ifNewChrome().run('Bind', function() {
   }, env => {
     let bind;
     let container;
+    let viewer;
+    let clock;
 
     beforeEach(() => {
-      // Make sure we have a chunk instance for testing.
-      chunkInstanceForTesting(env.ampdoc);
+      const {ampdoc, win} = env;
 
-      bind = new Bind(env.ampdoc);
+      // Make sure we have a chunk instance for testing.
+      chunkInstanceForTesting(ampdoc);
+
+      viewer = Services.viewerForDoc(ampdoc);
+      sandbox.stub(viewer, 'sendMessage');
+      bind = new Bind(ampdoc);
       // Connected <div> element created by describes.js.
-      container = env.win.document.getElementById('parent');
+      container = win.document.getElementById('parent');
+
+      clock = lolex.install({target: win});
+    });
+
+    afterEach(() => {
+      clock.uninstall();
+    });
+
+    it('should send "bindReady" to viewer on init', () => {
+      expect(viewer.sendMessage).to.not.be.called;
+      return onBindReady(env, bind).then(() => {
+        expect(viewer.sendMessage).to.be.calledOnce;
+        expect(viewer.sendMessage)
+            .to.be.calledWithExactly('bindReady', undefined);
+      });
     });
 
     it('should scan for bindings when ampdoc is ready', () => {
@@ -225,6 +299,40 @@ describe.configure().ifNewChrome().run('Bind', function() {
       expect(bind.numberOfBindings()).to.equal(0);
       return onBindReady(env, bind).then(() => {
         expect(bind.numberOfBindings()).to.equal(1);
+      });
+    });
+
+    it('should scan fixed layer for bindings', () => {
+      // Mimic FixedLayer by creating a sibling <body> element.
+      const doc = env.win.document;
+      const pseudoFixedLayer = doc.body.cloneNode(false);
+      doc.documentElement.appendChild(pseudoFixedLayer);
+
+      // Make sure that the sibling <body> is scanned for bindings.
+      createElement(env, pseudoFixedLayer, '[text]="1+1"');
+      return onBindReady(env, bind).then(() => {
+        expect(bind.numberOfBindings()).to.equal(1);
+      });
+    });
+
+    it('should support data-amp-bind-* syntax', () => {
+      const element = createElement(env, container, 'data-amp-bind-text="1+1"');
+      expect(bind.numberOfBindings()).to.equal(0);
+      expect(element.textContent).to.equal('');
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(bind.numberOfBindings()).to.equal(1);
+        expect(element.textContent).to.equal('2');
+      });
+    });
+
+    it('should prefer [foo] over data-amp-bind-foo', () => {
+      const element = createElement(
+          env, container, '[text]="1+1" data-amp-bind-text="2+2"');
+      expect(bind.numberOfBindings()).to.equal(0);
+      expect(element.textContent).to.equal('');
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(bind.numberOfBindings()).to.equal(1);
+        expect(element.textContent).to.equal('2');
       });
     });
 
@@ -284,10 +392,10 @@ describe.configure().ifNewChrome().run('Bind', function() {
       createElement(env, container, '[class]="\'foo\'" class=" foo "');
       createElement(env, container, '[class]="\'\'"');
       createElement(env, container, '[class]="\'bar\'" class="qux"'); // Error
-      const errorSpy = env.sandbox.spy(user(), 'createError');
+      const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
-        expect(errorSpy).to.be.calledOnce;
-        expect(errorSpy).calledWithMatch(/bar/);
+        expect(warnSpy).to.be.calledOnce;
+        expect(warnSpy).calledWithMatch('amp-bind', /\[class\]/);
       });
     });
 
@@ -295,9 +403,10 @@ describe.configure().ifNewChrome().run('Bind', function() {
       window.AMP_MODE = {development: true, test: true};
       // Only the initial value for [a] binding does not match.
       createElement(env, container, '[text]="\'a\'" [class]="\'b\'" class="b"');
-      const errorSpy = env.sandbox.spy(user(), 'createError');
+      const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
-        expect(errorSpy).to.be.calledOnce;
+        expect(warnSpy).to.be.calledOnce;
+        expect(warnSpy).calledWithMatch('amp-bind', /\[text\]/);
       });
     });
 
@@ -306,9 +415,10 @@ describe.configure().ifNewChrome().run('Bind', function() {
       createElement(env, container, '[disabled]="true" disabled', 'button');
       createElement(env, container, '[disabled]="false"', 'button');
       createElement(env, container, '[disabled]="true"', 'button'); // Mismatch.
-      const errorSpy = env.sandbox.spy(user(), 'createError');
+      const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
-        expect(errorSpy).to.be.calledOnce;
+        expect(warnSpy).to.be.calledOnce;
+        expect(warnSpy).calledWithMatch('amp-bind', /\[disabled\]/);
       });
     });
 
@@ -343,12 +453,71 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should update values first, then attributes', () => {
+      const {sandbox} = env;
+      const spy = sandbox.spy();
+      const element = createElement(env, container, '[value]="foo"', 'input');
+      sandbox.stub(element, 'value').set(spy);
+      sandbox.stub(element, 'setAttribute').callsFake(spy);
+      return onBindReadyAndSetState(env, bind, {'foo': '2'}).then(() => {
+        // Note: This tests a workaround for a browser bug. There is nothing
+        // about the element itself we can verify. Only the order of operations
+        // matters.
+        expect(spy.firstCall).to.be.calledWithExactly('2');
+        expect(spy.secondCall).to.be.calledWithExactly('value', '2');
+      });
+    });
+
+    it('should update properties for empty strings', function* () {
+      const element = createElement(env, container, '[value]="foo"', 'input');
+      yield onBindReadyAndSetState(env, bind, {'foo': 'bar'});
+      expect(element.value).to.equal('bar');
+      yield onBindReadyAndSetState(env, bind, {'foo': ''});
+      expect(element.value).to.equal('');
+    });
+
     it('should support binding to Node.textContent', () => {
       const element = createElement(
           env, container, '[text]="\'a\' + \'b\' + \'c\'"');
       expect(element.textContent).to.equal('');
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         expect(element.textContent).to.equal('abc');
+      });
+    });
+
+    it('should update value in addition to textContent for TextArea', () => {
+      const element = createElement(
+          env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'textarea');
+      element.textContent = 'foo';
+      element.value = 'foo';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(element.textContent).to.equal('abc');
+        expect(element.value).to.equal('abc');
+      });
+    });
+
+    it('should update document title for <title> elements', () => {
+      const element = createElement(env, container, '[text]="\'bar\'"',
+          'title', /* opt_amp */ false, /* opt_head */ true);
+      element.textContent = 'foo';
+      env.win.document.title = 'foo';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(element.textContent).to.equal('bar');
+        expect(env.win.document.title).to.equal('bar');
+      });
+    });
+
+    it('should not update document title for <title> elements in body', () => {
+      // Add a <title> element to <head> because if we don't, setting
+      // `textContent` on a <title> element in the <body> will strangely update
+      // `document.title`.
+      const title = env.win.document.createElement('title');
+      title.textContent = 'foo';
+      env.win.document.head.appendChild(title);
+      // Add <title [text]="'bar'"> to <body>.
+      createElement(env, container, '[text]="\'bar\'"', 'title');
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(env.win.document.title).to.equal('foo');
       });
     });
 
@@ -368,6 +537,95 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should support binding to CSS classes with a null value', () => {
+      const element = createElement(env, container, '[class]="null"');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal([]);
+      });
+    });
+
+    it('should support binding to CSS classes for svg tags', () => {
+      const element = createElement(
+          env, container, '[class]="[\'abc\']"', 'svg');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal(['abc']);
+      });
+    });
+
+    it('supports binding to CSS classes for svg tags with a null value', () => {
+      const element = createElement(env, container, '[class]="null"', 'svg');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal([]);
+      });
+    });
+
+    it('should support handling actions with invoke()', () => {
+      const {sandbox} = env;
+      sandbox.stub(bind, 'setStateWithExpression');
+      sandbox.stub(bind, 'pushStateWithExpression');
+
+      const invocation = {
+        method: 'setState',
+        args: {
+          [RAW_OBJECT_ARGS_KEY]: '{foo: bar}',
+        },
+        event: {
+          detail: {bar: 123},
+        },
+        sequenceId: 0,
+      };
+
+      bind.invoke(invocation);
+      expect(bind.setStateWithExpression).to.be.calledOnce;
+      expect(bind.setStateWithExpression).to.be.calledWithExactly(
+          '{foo: bar}', sinon.match({event: {bar: 123}}));
+
+      invocation.method = 'pushState';
+      invocation.sequenceId++;
+      bind.invoke(invocation);
+      expect(bind.pushStateWithExpression).to.be.calledOnce;
+      expect(bind.pushStateWithExpression).to.be.calledWithExactly(
+          '{foo: bar}', sinon.match({event: {bar: 123}}));
+    });
+
+    // TODO(choumx, #16721): Causes browser crash for some reason.
+    it.skip('should only allow one action per event in invoke()', () => {
+      const {sandbox} = env;
+      sandbox.stub(bind, 'setStateWithExpression');
+      const userError = sandbox.stub(user(), 'error');
+
+      const invocation = {
+        method: 'setState',
+        args: {
+          [RAW_OBJECT_ARGS_KEY]: '{foo: bar}',
+        },
+        event: {
+          detail: {bar: 123},
+        },
+        sequenceId: 0,
+      };
+
+      bind.invoke(invocation);
+      expect(bind.setStateWithExpression).to.be.calledOnce;
+      expect(bind.setStateWithExpression).to.be.calledWithExactly(
+          '{foo: bar}', sinon.match({event: {bar: 123}}));
+
+      // Second invocation with the same sequenceId should fail.
+      bind.invoke(invocation);
+      expect(bind.setStateWithExpression).to.be.calledOnce;
+      expect(userError).to.be.calledWith('amp-bind',
+          'One state action allowed per event.');
+
+      // Invocation with the same sequenceid will be allowed after 5 seconds,
+      // which is how long it takes for stored sequenceIds to be purged.
+      clock.tick(5000);
+      bind.invoke(invocation);
+      expect(bind.setStateWithExpression).to.be.calledTwice;
+    });
+
     it('should support parsing exprs in setStateWithExpression()', () => {
       const element = createElement(env, container, '[text]="onePlusOne"');
       expect(element.textContent).to.equal('');
@@ -377,6 +635,19 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(element.textContent).to.equal('2');
       });
     });
+
+    it('should replace history state in setStateWithExpression()', () => {
+      const replaceHistorySpy =
+          env.sandbox.spy(bind.historyForTesting(), 'replace');
+      const promise = onBindReadyAndSetStateWithExpression(
+          env, bind, '{"onePlusOne": one + one}', {one: 1});
+      return promise.then(() => {
+        expect(replaceHistorySpy).calledOnce;
+        expect(replaceHistorySpy.firstCall.args[0].data['amp-bind'])
+            .to.deep.equal({onePlusOne: 2});
+      });
+    });
+
 
     it('should support pushStateWithExpression()', () => {
       const pushHistorySpy =
@@ -395,6 +666,30 @@ describe.configure().ifNewChrome().run('Bind', function() {
         return onPopCallback();
       }).then(() => {
         expect(element.textContent).to.equal('null');
+      });
+    });
+
+    it('pushStateWithExpression() should work with nested objects', () => {
+      const pushHistorySpy =
+        env.sandbox.spy(bind.historyForTesting(), 'push');
+
+      const element = createElement(env, container, '[text]="foo.bar"');
+      expect(element.textContent).to.equal('');
+      return bind.pushStateWithExpression('{foo: {bar: 0}}', {}).then(() => {
+        env.flushVsync();
+        expect(element.textContent).to.equal('0');
+
+        return bind.pushStateWithExpression('{foo: {bar: 1}}', {});
+      }).then(() => {
+        env.flushVsync();
+        expect(element.textContent).to.equal('1');
+
+        expect(pushHistorySpy).calledTwice;
+        // Pop callback should restore `foo.bar` to second pushed value (0).
+        const onPopCallback = pushHistorySpy.secondCall.args[0];
+        return onPopCallback();
+      }).then(() => {
+        expect(element.textContent).to.equal('0');
       });
     });
 
@@ -504,7 +799,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
 
     it('should stop scanning once max number of bindings is reached', () => {
       bind.setMaxNumberOfBindingsForTesting(2);
-      const errorStub = env.sandbox.stub(user(), 'error');
+      const errorStub = env.sandbox.stub(dev(), 'expectedError');
 
       const foo = createElement(env, container, '[text]="foo"');
       const bar = createElement(env, container, '[text]="bar" [class]="baz"');
@@ -522,6 +817,52 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(errorStub).to.have.been.calledWith('amp-bind',
             sinon.match(/Maximum number of bindings reached/));
       });
+    });
+
+    it('should update premutate keys that are overridable', () => {
+      bind.makeStateKeyOverridable('foo');
+      bind.makeStateKeyOverridable('bar');
+      const foo = createElement(env, container, '[text]="foo"');
+      const bar = createElement(env, container, '[text]="bar"');
+      const baz = createElement(env, container, '[text]="baz"');
+      const qux = createElement(env, container, '[text]="qux"');
+
+      return onBindReadyAndSetState(env, bind, {
+        foo: 1, bar: 2, baz: 3, qux: 4,
+      }).then(() => {
+        return viewer.receiveMessage('premutate', {
+          state: {
+            foo: 'foo',
+            bar: 'bar',
+            baz: 'baz',
+            qux: 'qux',
+          },
+        }).then(() => {
+          expect(foo.textContent).to.equal('foo');
+          expect(bar.textContent).to.equal('bar');
+          expect(baz.textContent).to.be.equal('3');
+          expect(qux.textContent).to.be.equal('4');
+        });
+      });
+    });
+
+    it('should scanAndApply()', function*() {
+      const foo = createElement(env, container, '[text]="foo"');
+      yield onBindReadyAndSetState(env, bind, {foo: 'foo'});
+      expect(foo.textContent).to.equal('foo');
+
+      // The new `onePlusOne` element should be scanned and evaluated despite
+      // not being attached to the DOM.
+      const onePlusOne = createElement(
+          env, /* container */ null, '[text]="1+1"');
+      yield onBindReadyAndScanAndApply(env, bind,
+          /* added */ [onePlusOne], /* removed */ [foo]);
+      expect(onePlusOne.textContent).to.equal('2');
+
+      // The binding for the `foo` element should have been removed, so
+      // performing AMP.setState({foo: ...}) should not change it.
+      yield onBindReadyAndSetState(env, bind, {foo: 'bar'});
+      expect(foo.textContent).to.not.equal('bar');
     });
   }); // in single ampdoc
 });

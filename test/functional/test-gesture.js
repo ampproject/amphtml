@@ -15,7 +15,6 @@
  */
 
 import {GestureRecognizer, Gestures} from '../../src/gesture';
-import * as sinon from 'sinon';
 
 
 describe('Gestures', () => {
@@ -42,7 +41,7 @@ describe('Gestures', () => {
   let onGesture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};
@@ -217,9 +216,9 @@ describe('Gestures', () => {
 
   it('should deny emit if another eventing', () => {
     gestures.eventing_ = {};
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       gestures.signalEmit_(recognizer, {}, null);
-    }).to.throw(/Recognizer is not currently allowed/);
+    }).to.throw(/Recognizer is not currently allowed/); });
     expect(onGesture).to.have.not.been.called;
   });
 
@@ -355,6 +354,16 @@ describe('Gestures', () => {
     expect(event.stopPropagation).to.have.not.been.called;
   });
 
+  it('should gesture recognizer on removeGesture', () => {
+    expect(gestures.recognizers_.length).to.equal(1);
+    expect(gestures.removeGesture(TestRecognizer)).to.equal(true);
+    expect(gestures.removeGesture(Test2Recognizer)).to.equal(false);
+    expect(gestures.recognizers_.length).to.equal(0);
+    expect(gestures.ready_.length).to.equal(0);
+    expect(gestures.tracking_.length).to.equal(0);
+    expect(gestures.pending_.length).to.equal(0);
+  });
+
   it('should remove listeners and shared cache instance on cleanup', () => {
     const eventNames = ['touchstart', 'touchend', 'touchmove', 'touchcancel'];
     const prop = '__AMP_Gestures';
@@ -381,7 +390,7 @@ describe('Gestures', () => {
     let onGesture;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
 
       eventListeners = {};

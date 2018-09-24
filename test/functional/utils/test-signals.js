@@ -45,10 +45,10 @@ describes.sandboxed('Signals', {}, () => {
     expect(signals.map_['sig']).to.equal(11);
 
     signals.signal('sig', 12);
-    expect(signals.map_['sig']).to.equal(11);  // Did not change.
+    expect(signals.map_['sig']).to.equal(11); // Did not change.
 
     signals.rejectSignal('sig', new Error());
-    expect(signals.map_['sig']).to.equal(11);  // Did not change.
+    expect(signals.map_['sig']).to.equal(11); // Did not change.
   });
 
   it('should override signal time', () => {
@@ -62,14 +62,14 @@ describes.sandboxed('Signals', {}, () => {
     expect(signals.promiseMap_['sig'].promise).to.equal(promise);
     expect(signals.promiseMap_['sig'].resolve).to.be.ok;
     expect(signals.promiseMap_['sig'].reject).to.be.ok;
-    expect(signals.whenSignal('sig')).to.equal(promise);  // Reuse promise.
+    expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
     signals.signal('sig', 11);
     return promise.then(time => {
       expect(time).to.equal(11);
       expect(signals.promiseMap_['sig'].promise).to.equal(promise);
       expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
       expect(signals.promiseMap_['sig'].reject).to.be.undefined;
-      expect(signals.whenSignal('sig')).to.equal(promise);  // Reuse promise.
+      expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
     });
   });
 
@@ -79,13 +79,13 @@ describes.sandboxed('Signals', {}, () => {
     expect(signals.promiseMap_['sig'].promise).to.equal(promise);
     expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
     expect(signals.promiseMap_['sig'].reject).to.be.undefined;
-    expect(signals.whenSignal('sig')).to.equal(promise);  // Reuse promise.
+    expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
     return promise.then(time => {
       expect(time).to.equal(11);
       expect(signals.promiseMap_['sig'].promise).to.equal(promise);
       expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
       expect(signals.promiseMap_['sig'].reject).to.be.undefined;
-      expect(signals.whenSignal('sig')).to.equal(promise);  // Reuse promise.
+      expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
     });
   });
 
@@ -101,7 +101,7 @@ describes.sandboxed('Signals', {}, () => {
       expect(signals.promiseMap_['sig'].promise).to.equal(promise);
       expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
       expect(signals.promiseMap_['sig'].reject).to.be.undefined;
-      expect(signals.whenSignal('sig')).to.equal(promise);  // Reuse promise.
+      expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
     });
   });
 
@@ -117,7 +117,7 @@ describes.sandboxed('Signals', {}, () => {
       expect(signals.promiseMap_['sig'].promise).to.equal(promise);
       expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
       expect(signals.promiseMap_['sig'].reject).to.be.undefined;
-      expect(signals.whenSignal('sig')).to.equal(promise);  // Reuse promise.
+      expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
     });
   });
 

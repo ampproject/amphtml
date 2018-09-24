@@ -1,0 +1,124 @@
+<!--
+  ## Introduction
+
+  Use [amp-iframe](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/layout/amp-iframe) for embedding content into AMP files via iframe. Useful for displaying content otherwise not (yet) supported by AMP.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-iframe</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!--  Import the amp-iframe component in the header. -->
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-iframe/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+<style amp-custom>
+div[overflow] {
+  text-align: center;
+  background: #f9f7f7;
+  line-height: 36px;
+}
+</style>
+</head>
+<body>
+
+  <!--
+    Iframes must be either 600px away from the top or not within the first 75% of the viewport when
+    scrolled to the top – whichever is smaller. This example might not work depending on your screen
+    width. In that case it will only show a loading indicator.
+  -->
+  <amp-iframe width="500" title="Netflix House of Cards branding: The Stack"
+                          height="281"
+                          layout="responsive"
+                          sandbox="allow-scripts allow-same-origin allow-popups"
+                          allowfullscreen
+                          frameborder="0"
+                          src="https://player.vimeo.com/examples/visual-tests/amp-by-example/video/140261016">
+  </amp-iframe>
+
+  <!-- ## Using Placeholders -->
+  <!-- The 600px away from the top constraint can be avoided by adding a placeholder image. -->
+  <amp-iframe width="500" title="Netflix House of Cards branding: The Stack"
+                          height="281"
+                          layout="responsive"
+                          sandbox="allow-scripts allow-same-origin allow-popups"
+                          allowfullscreen
+                          frameborder="0"
+                          src="https://player.vimeo.com/examples/visual-tests/amp-by-example/video/140261016">
+    <amp-img layout="fill" src="https://i.vimeocdn.com/examples/visual-tests/amp-by-example/video/536538454_640.webp" placeholder></amp-img>
+  </amp-iframe>
+
+  <!-- ## Vimeo -->
+  <!-- -->
+  <!-- If the video is 600px below the top, no placeholder image is required. -->
+  <amp-iframe width="500" title="Netflix House of Cards branding: The Stack"
+                          height="281"
+                          layout="responsive"
+                          sandbox="allow-scripts allow-same-origin allow-popups"
+                          allowfullscreen
+                          frameborder="0"
+                          src="https://player.vimeo.com/examples/visual-tests/amp-by-example/video/140261016">
+  </amp-iframe>
+
+  <!-- ## Giphy -->
+  <!-- Here is another iframe sample embedding an animated GIF from [Giphy](https://giphy.com). -->
+  <amp-iframe width="600" title="Animated dancing GIF from Giphy"
+                          height="400"
+                          layout="responsive"
+                          sandbox="allow-scripts allow-same-origin allow-popups"
+                          frameborder="0"
+                          src="https://giphy.com/embed/DKG1OhBUmxL4Q">
+  </amp-iframe>
+
+  <!-- ## Google Maps -->
+  <!--
+    Embedding Google Maps is possible via the [Google Maps Embed API](https://developers.google.com/maps/documentation/embed/guide) and requires
+    an [API Key](https://developers.google.com/maps/documentation/embed/guide#api_key). Make sure your API key allows requests from the ampproject.org domain.
+  -->
+  <amp-iframe width="600" title="Google map pin on Googleplex, Mountain View CA"
+                          height="400"
+                          layout="responsive"
+                          sandbox="allow-scripts allow-same-origin allow-popups"
+                          frameborder="0"
+                          src="https://www.google.com/maps/embed/v1/place?q=place_id:ChIJ2eUgeAK6j4ARbn5u_wAGqWA&key=AIzaSyCNCZ0Twm_HFRaZ5i-FuPDYs3rLwm4_848">
+  </amp-iframe>
+
+  <!-- ## Resizable Iframes -->
+  <!--
+    One important feature of `amp-iframe` is the ability to resize the iframe  at runtime. For this to work:
+
+    * The `amp-iframe` must set the `allow-same-origin` sandbox attribute.
+    * The `amp-iframe` must be defined with the `resizable` attribute.
+    * The `amp-iframe` must have an `overflow` child element.
+    * The iframe document must send an `embed-size` request:
+
+
+    ```html
+  window.parent.postMessage({
+    sentinel: 'amp',
+    type: 'embed-size',
+    height: document.body.scrollHeight
+  }, '*');
+    ```
+
+    The following example demonstrates two resizing use cases:
+
+    1. **Resize on load:** the iframe size is initially set to `150x150`px via the `amp-iframe` layout. On page load, the embedded iframe will resize itself to `200x200`px.
+    2. **Resize on user interaction:** pressing the button will resize the iframe to `300x300`px.
+
+  -->
+  <amp-iframe width="150" title="Resizable iframe example from 200x200 to 300x300 "
+                          height="150"
+                          sandbox="allow-scripts allow-same-origin"
+                          resizable
+                          frameborder="0"
+                          src="https://amp-by-example-api.appspot.com/iframe/resizable-iframe.html"
+                          class="m1">
+                          <div overflow tabindex="0" role="button" class="ampstart-card py1" aria-label="Show more">Click to show more</div>
+  </amp-iframe>
+
+</body>
+</html>

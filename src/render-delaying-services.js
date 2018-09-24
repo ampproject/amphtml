@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {dev} from './log';
 import {getServicePromise} from './service';
-import {Services} from './services';
 
 /**
  * A map of services that delay rendering. The key is the name of the service
@@ -49,11 +49,11 @@ const SERVICES = {
 const LOAD_TIMEOUT = 3000;
 
 /**
- * Detects any render delaying services that are required on the page,
- * and returns a promise with a timeout.
+ * Detects any render delaying services that are required on the page, and
+ * returns a promise with a timeout.
  * @param {!Window} win
- * @return {!Promise<!Array<*>>} resolves to an Array that has the same length as
- *     the detected render delaying services
+ * @return {!Promise<!Array<*>>} resolves to an Array that has the same length
+ *     as the detected render delaying services
  */
 export function waitForServices(win) {
   const promises = includedServices(win).map(service => {

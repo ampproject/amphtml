@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {DocumentState} from '../../src/service/document-state';
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
+import {DocumentState} from '../../src/service/document-state';
 
 
 describe('DocumentState', () => {
@@ -28,7 +27,7 @@ describe('DocumentState', () => {
   let docState;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'complete',

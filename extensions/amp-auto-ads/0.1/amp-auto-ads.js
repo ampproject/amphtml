@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import {AdTracker, getExistingAds} from './ad-tracker';
 import {AdStrategy} from './ad-strategy';
+import {
+  AdTracker,
+  getAdConstraintsFromConfigObj,
+  getExistingAds,
+} from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
-import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
-import {isExperimentOn} from '../../../src/experiments';
 import {getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
+import {isExperimentOn} from '../../../src/experiments';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -35,7 +39,8 @@ export class AmpAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), 'Experiment is off');
+    user().assert(isExperimentOn(this.win, 'amp-auto-ads'),
+        'Experiment is off');
 
     const type = this.element.getAttribute('type');
     user().assert(type, 'Missing type attribute');
@@ -60,14 +65,25 @@ export class AmpAutoAds extends AMP.BaseElement {
       if (!configObj) {
         return;
       }
+      const noConfigReason = configObj['noConfigReason'];
+      if (noConfigReason) {
+        this.user().warn(TAG, noConfigReason);
+        return;
+      }
 
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
       const attributes = /** @type {!JsonObject} */ (
-          Object.assign(adNetwork.getAttributes(),
-              getAttributesFromConfigObj(configObj)));
-      const adTracker =
-          new AdTracker(getExistingAds(ampdoc), adNetwork.getAdConstraints());
-      new AdStrategy(placements, attributes, adTracker).run();
+        Object.assign(adNetwork.getAttributes(),
+            getAttributesFromConfigObj(configObj)));
+      const sizing = adNetwork.getSizing();
+      const adConstraints = getAdConstraintsFromConfigObj(ampdoc, configObj) ||
+          adNetwork.getDefaultAdConstraints();
+      const adTracker = new AdTracker(getExistingAds(ampdoc), adConstraints);
+      new AdStrategy(placements,
+          attributes,
+          sizing,
+          adTracker,
+          adNetwork.isResponsiveEnabled(this.win)).run();
       new AnchorAdStrategy(ampdoc, attributes, configObj).run();
     });
   }

@@ -65,6 +65,10 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 </div>
 
+## Analytics
+
+`amp-video` supports analytics out of the box. See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md) for more information.
+
 ## Attributes
 
 ##### src
@@ -80,13 +84,9 @@ Alternatively, you can present a click-to-play overlay. For details, see the [Cl
 
 ##### autoplay
 
-If this attribute is present, and the browser supports autoplay:
-
-* the video is automatically muted before autoplay starts
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
 
 ##### controls
 
@@ -104,50 +104,59 @@ If present, the video will automatically loop back to the start upon reaching th
 
 Required if a `track` resource is hosted on a different origin than the document.
 
+##### disableremoteplayback
+
+Determines whether the media element is allowed to have a remote playback UI such as Chromecast or AirPlay.
+
 ##### muted (deprecated)
 
 The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
+
+##### noaudio
+
+Annotates the video as having no audio. This hides the equalizer icon that is displayed
+when the video has autoplay.
+
+##### rotate-to-fullscreen
+
+If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen).
 
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+## Media Session API attributes
 
-## Media Session API Attributes
-
-`amp-video` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the video file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
+The `amp-video` component implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session), which enables developers to specify more information about the video file. The additional information for the video displays in the notification center of the user's device (along with the play/pause controls).
 
 ##### artwork
 
-URL to a PNG/JPG/ICO image serving as the video's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.
+Specifies a URL to a PNG/JPG/ICO image serving as the video's artwork. If `artwork` is not present, the Media Session API helper uses either the `image` field in the `schema.org` definition, the `og:image`, or the website's `favicon`.
 
 ##### artist
 
-(string) indicates the author of the video file
+Indicates the author of the video file, specified as a string.
 
 ##### album
 
-(string) indicates the album/collection the video was taken from
+Indicates the album/collection the video was taken from, specified as a string.
 
 ##### title
 
-(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the video's name/title displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.
+Indicates the name/title of the video, specified as a string. If not provided, the Media Session API helper uses either the `aria-label` attribute or falls back to the page's title.
 
 Example:
 
-Note that this example has both the `poster` and `artwork` attributes, poster will be used as the
-placeholder before the video plays while `artwork` is the image that will be displayed in the
-notification throught the MediaSessionAPI.
+This example contains both the `poster` and `artwork` attributes. The `poster` serves as the placeholder image before the video plays, while `artwork` is the image that displays in the notification via the MediaSession API.
 
 ```html
-<amp-audio width="400" height="300"
-  src="https://yourhost.com/audios/myaudio.mp3"
+<amp-video width="720" height="305" layout="responsive"
+  src="https://yourhost.com/videos/myvideo.mp4"
   poster="https://yourhost.com/posters/poster.png"
   artwork="https://yourhost.com/artworks/artwork.png"
-  title="Awesome music" artist="Awesome singer"
+  title="Awesome video" artist="Awesome artist"
   album="Amazing album">
-  <source type="audio/mpeg" src="foo.mp3">
-</amp-audio>
+</amp-video>
 ```
 
 ## Click-to-Play overlay

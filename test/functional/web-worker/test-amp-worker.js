@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-import {
-  invokeWebWorker,
-  ampWorkerForTesting,
-} from '../../../src/web-worker/amp-worker';
-import {installXhrService} from '../../../src/service/xhr-impl';
 import {Services} from '../../../src/services';
-import * as sinon from 'sinon';
+import {
+  ampWorkerForTesting,
+  invokeWebWorker,
+} from '../../../src/web-worker/amp-worker';
+import {dev} from '../../../src/log';
+import {installXhrService} from '../../../src/service/xhr-impl';
 
 describe('invokeWebWorker', () => {
   let sandbox;
@@ -33,7 +32,7 @@ describe('invokeWebWorker', () => {
   let workerReadyPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
@@ -53,11 +52,12 @@ describe('invokeWebWorker', () => {
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    sandbox.stub(Services.xhrFor(fakeWin), 'fetchText', () => Promise.resolve({
-      text() {
-        return Promise.resolve();
-      },
-    }));
+    sandbox.stub(Services.xhrFor(fakeWin), 'fetchText').callsFake(
+        () => Promise.resolve({
+          text() {
+            return Promise.resolve();
+          },
+        }));
 
     ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();
@@ -189,13 +189,13 @@ describe('invokeWebWorker', () => {
       expect(errorStub).to.have.been.calledWith('web-worker');
 
       // Unexpected method at valid `id`.
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         fakeWorker.onmessage({data: {
           method: 'bar',
           returnValue: undefined,
           id: 0,
         }});
-      }).to.throw('mismatched method');
+      }).to.throw('mismatched method'); });
     });
   });
 

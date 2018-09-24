@@ -45,36 +45,29 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
 
     it('should require vendor name', () => {
       delete validConfig['vendor'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessVendorAdapter(ampdoc, validConfig);
-      }).to.throw(/"vendor" name must be specified/);
+      }).to.throw(/"vendor" name must be specified/); });
     });
 
-    it('should wait registration', () => {
+    it('should wait on registration', () => {
       const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorResolve_).to.exist;
       const vendor = {};
-      adapter.registerVendor('vendor1', vendor);
+      adapter.registerVendor(vendor);
       expect(adapter.vendorResolve_).to.not.exist;
       return adapter.vendorPromise_.then(v => {
         expect(v).to.equal(vendor);
       });
     });
 
-    it('should fail registration with a wrong name', () => {
-      const adapter = new AccessVendorAdapter(ampdoc, validConfig);
-      expect(() => {
-        adapter.registerVendor('vendor2', {});
-      }).to.throw(/match the configured vendor/);
-    });
-
     it('should fail re-registration', () => {
       const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorResolve_).to.exist;
       adapter.registerVendor('vendor1', {});
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         adapter.registerVendor('vendor2', {});
-      }).to.throw(/Vendor has already been registered/);
+      }).to.throw(/Vendor has already been registered/); });
     });
   });
 
@@ -87,7 +80,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
       adapter = new AccessVendorAdapter(ampdoc, validConfig);
       vendor = new AccessVendor();
       vendorMock = sandbox.mock(vendor);
-      adapter.registerVendor(validConfig['vendor'], vendor);
+      adapter.registerVendor(vendor);
     });
 
     afterEach(() => {

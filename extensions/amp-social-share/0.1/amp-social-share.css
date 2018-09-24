@@ -33,7 +33,7 @@ amp-social-share {
 
 /* Twitter Styling */
 .amp-social-share-twitter {
-  background-color: #55acee;
+  background-color: #1da1f2;
 }
 
 /* Facebook Styling */
@@ -69,6 +69,11 @@ amp-social-share {
 /* Whatsapp Styling */
 .amp-social-share-whatsapp {
   background-color: #25d366;
+}
+
+/* line Styling */
+.amp-social-share-line {
+  background-color: #52b448;
 }
 
 /* SMS Styling */

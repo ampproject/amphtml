@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
 import {Services} from '../../src/services';
-import {installDocumentInfoServiceForDoc} from
-    '../../src/service/document-info-impl';
+import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
+import {installDocumentInfoServiceForDoc} from
+  '../../src/service/document-info-impl';
 
 describe('document-info', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  function getWin(links) {
+  function getWin(links, metas) {
     return createIframePromise().then(iframe => {
       if (links) {
         for (const rel in links) {
@@ -45,9 +44,20 @@ describe('document-info', () => {
           }
         }
       }
-      const win = iframe.win;
+      if (metas) {
+        for (const name in metas) {
+          const contents = metas[name];
+          for (let i = 0; i < contents.length; i++) {
+            const meta = iframe.doc.createElement('meta');
+            meta.setAttribute('name', name);
+            meta.setAttribute('content', contents[i]);
+            iframe.doc.head.appendChild(meta);
+          }
+        }
+      }
+      const {win} = iframe;
       installDocService(win, /* isSingleDoc */ true);
-      sandbox.stub(win.Math, 'random', () => 0.123456789);
+      sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
       installDocumentInfoServiceForDoc(win.document);
       return iframe.win;
     });
@@ -206,4 +216,75 @@ describe('document-info', () => {
     });
   });
 
+  it('should provide the metaTags', () => {
+    return getWin({}, {
+      'theme-color': ['#123456'],
+    }).then(win => {
+      expect(Services.documentInfoForDoc(win.document).metaTags['theme-color'])
+          .to.equal('#123456');
+    });
+  });
+
+  it('should provide empty metaTags if there are no meta tags', () => {
+    return getWin().then(win => {
+      expect(Services.documentInfoForDoc(win.document).metaTags).to.be.empty;
+    });
+  });
+
+  it('should provide the replaceParams for an AMP landing page', () => {
+    const base = 'https://cdn.ampproject.org/a/www.origin.com/foo/';
+    const win = {
+      document: {
+        nodeType: /* document */ 9,
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
+      },
+      Math: {random() { return 0.123456789; }},
+      location: {
+        href: base + '?f=0&amp_r=test%3Dhello%20world',
+      },
+    };
+    win.document.defaultView = win;
+    installDocService(win, /* isSingleDoc */ true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
+        .to.deep.equal({'test': 'hello world'});
+  });
+
+  it('should not have replaceParams for non-AMP landing page', () => {
+    const base = 'https://cdn.ampproject.org/v/www.origin.com/foo/';
+    const win = {
+      document: {
+        nodeType: /* document */ 9,
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
+      },
+      Math: {random() { return 0.123456789; }},
+      location: {
+        href: base + '?f=0&amp_r=test%3Dhello%20world',
+      },
+    };
+    win.document.defaultView = win;
+    installDocService(win, /* isSingleDoc */ true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
+        .to.be.null;
+  });
+
+  it('should not provide the replaceParams if invalid', () => {
+    const base = 'https://cdn.ampproject.org/a/www.origin.com/foo/';
+    const win = {
+      document: {
+        nodeType: /* document */ 9,
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
+      },
+      Math: {random() { return 0.123456789; }},
+      location: {
+        href: base + '?f=0&amp_r=%3Dinvalid',
+      },
+    };
+    win.document.defaultView = win;
+    installDocService(win, /* isSingleDoc */ true);
+    installDocumentInfoServiceForDoc(win.document);
+    expect(Services.documentInfoForDoc(win.document).replaceParams)
+        .to.deep.equal({});
+  });
 });

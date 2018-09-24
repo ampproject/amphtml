@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-facebook-comments/">amp-facebook-comments example</a>.</td>
+  </tr>
 </table>
 
 [TOC]
@@ -51,6 +55,12 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
 ##### data-href (required)
 
 The URL of the comments page. For example, `http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html`.
+
+##### data-locale (optional)
+
+By default, the locale is set to user's system language; however, you can specify a locale as well.
+
+For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
 
 ##### data-numposts (optional)
 

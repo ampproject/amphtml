@@ -1,5 +1,7 @@
 # AMP Project open source governance
 
+**Note:** An [update to this policy is being discussed](https://amphtml.wordpress.com/2018/09/18/governance/).
+
 This document describes the governance model for the AMP open source project, and in particular the [AMP HTML GitHub project](https://github.com/ampproject/amphtml).
 
 Our governance model is as follows:
@@ -14,19 +16,17 @@ Our governance model is as follows:
 ### List of Core Committers:
 
 * **Tech Lead: Malte Ubl (@cramforce)**
+* Alan Orozco (@alanorozco)
 * Ali Ghassemi (@aghassemi)
-* Avi Mehta (@avimehta). Specialty: Analytics
-* Barb Paduch (@bpaduch). Specialty: Docs
-* Sriram Krishnan (@camelburrito)
+* Cathy Zhu (@cathyxz)
 * Chen Shay (@chenshay)
-* William Chou (@choumx)
+* David Sedano (@honeybadgerdontcare). Specialty: Validator
 * Dima Voytenko (@dvoytenko)
 * Erwin Mombay (@erwinmombay)
 * Greg Grothaus (@Gregable). Specialty: Validator
-* David Sedano (@honeybadgerdontcare). Specialty: Validator
-* Justin Ridgewell (@jridgewell)
 * Hongfei Ding (@lannka)
-* Yuxi Chen (@muxin)
 * Johannes Henkel (@powdercloud). Specialty: Validator
+* Justin Ridgewell (@jridgewell)
 * Wassim Gharbi (@wassgha)
+* William Chou (@choumx)
 * Yuxuan Zhou (@zhouyx)

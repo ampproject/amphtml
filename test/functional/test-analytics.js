@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -22,8 +23,6 @@ import {
 import {
   triggerAnalyticsEvent,
 } from '../../src/analytics';
-import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
 describes.realWin('analytics', {
@@ -43,7 +42,7 @@ describes.realWin('analytics', {
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       triggerEventSpy = sandbox.spy();

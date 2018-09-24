@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const jison = require('jison');
-const gulp = require('gulp');
 const fs = require('fs-extra');
+const gulp = require('gulp');
+const jison = require('jison');
 
 gulp.task('compile-css-expr', function() {
   const path = 'extensions/amp-animation/0.1/';
@@ -32,7 +32,7 @@ gulp.task('compile-css-expr', function() {
   const suppressCheckTypes = '/** @fileoverview ' +
       '@suppress {checkTypes, suspiciousCode, uselessCode} */';
   const imports = 'import * as ast from \'./css-expr-ast\';';
-  const jsExports = 'exports.parser = parser;';
+  const jsExports = 'export const cssParser = parser;';
 
   const out = [
     license,

@@ -1,0 +1,19 @@
+{
+ "items": [
+   {
+     "title": "Shopping websites with AMP",
+     "thumbnail": "/img/shopping_thumb.jpg",
+     "url": "/samples_templates/product/preview"
+   },
+   {
+     "title": "The tastiest recipes with AMP",
+     "thumbnail": "/img/recipe_thumb.jpg",
+     "url": "/samples_templates/recipe/preview"
+   },
+   {
+     "title": "News Articles with AMP",
+     "thumbnail": "/img/video_thumb.jpg",
+     "url": "/samples_templates/news_article/preview"
+   }
+ ]
+}

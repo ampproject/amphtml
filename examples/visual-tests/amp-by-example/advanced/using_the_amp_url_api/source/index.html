@@ -1,0 +1,52 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Using the AMP URL API</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/using_the_amp_url_api/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+<!--
+  ## Introduction
+
+  The [AMP URL API](https://developers.google.com/amp/cache/use-amp-url)
+  retrieves the matching AMP URLs for a given list of URLs. Apps can use
+  this if they want to load the fast AMPs instead of the original URL, for example,
+  when opening external links.
+
+  The URL API returns for a given URL with matchin AMP version three different URLs:
+
+  * `originalUrl`: the unmodified original URL.
+  * `ampUrl`: the URL of the AMP version.
+  * `cdnAmpUrl`: the URL of the cached AMP version in the [Google AMP Cache](https://developers.google.com/amp/cache/).
+
+  For [performance and security reasons](https://developers.google.com/amp/cache/overview#cache-optimizations-and-modifications) 
+  we recommend using the cached AMP version when displaying AMP content.
+
+  ## See how it works
+
+  Press execute to perform a live query against the AMP URL API. Change the input 
+  query and try different URLs. 
+
+  <amp-iframe title="Performs a live query against the AMP URL API"
+              width="auto" height="645"
+              layout="fixed-height"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+              allowfullscreen
+              frameborder="0"
+              src="https://amp-by-example-api.appspot.com/iframe/amp-url-api.html">
+   
+    <amp-img src="/examples/visual-tests/amp-by-example/img/amp-url-api-placeholder.png"
+             layout="fixed-height"
+             height="645"
+             placeholder>
+    </amp-img>
+   </amp-iframe>
+-->
+
+</body>
+</html>

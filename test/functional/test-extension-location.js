@@ -15,8 +15,9 @@
  */
 
 import {
-  calculateExtensionScriptUrl,
   calculateEntryPointScriptUrl,
+  calculateExtensionScriptUrl,
+  parseExtensionUrl,
 } from '../../src/service/extension-location';
 import {
   initLogConstructor,
@@ -40,7 +41,7 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', true);
+      }, 'amp-ad', /*opt_extensionVersion*/ undefined, true);
       expect(script).to.equal(
           'http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.js');
     });
@@ -51,9 +52,20 @@ describes.sandboxed('Extension Location', {}, () => {
         pathname: 'examples/ads.amp.html',
         host: 'localhost:8000',
         protocol: 'http:',
-      }, 'amp-ad', false);
+      }, 'amp-ad', /*opt_extensionVersion*/ undefined, false);
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
+    });
+
+    it('should allow no versions', () => {
+      window.AMP_MODE = {rtvVersion: '123'};
+      const script = calculateExtensionScriptUrl({
+        pathname: 'examples/ads.amp.html',
+        host: 'localhost:8000',
+        protocol: 'http:',
+      }, 'no-version', /* version is empty but defined */ '', true);
+      expect(script).to.equal(
+          'http://localhost:8000/dist/rtv/123/v0/no-version.js');
     });
   });
 
@@ -96,6 +108,22 @@ describes.sandboxed('Extension Location', {}, () => {
       }, 'ww', /* isLocalDev */ false, /* opt_rtv */ true);
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/ww.js');
+    });
+  });
+
+  describe('get correct URL parts', () => {
+    it('unversioned urls', () => {
+      const urlParts =
+          parseExtensionUrl('https://cdn.ampproject.org/v0/amp-ad-1.0.js');
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('1.0');
+    });
+
+    it('versioned urls', () => {
+      const urlParts = parseExtensionUrl('https://cdn.ampproject.org/rtv/123' +
+          '/v0/amp-ad-0.1.js');
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('0.1');
     });
   });
 });

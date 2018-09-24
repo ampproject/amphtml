@@ -22,10 +22,9 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 
-import {dev, user} from '../src/log';
+import {dev, rethrowAsync, user} from '../src/log';
+import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
-import {map} from '../src/utils/object';
-import {rethrowAsync} from '../src/log';
 
 
 /** @typedef {function(!Window, !Object)}  */
@@ -149,7 +148,7 @@ export function validateSrcPrefix(prefix, src) {
     prefix = [prefix];
   }
   if (src !== undefined) {
-    for (let p = 0; p <= prefix.length; p++) {
+    for (let p = 0; p < prefix.length; p++) {
       const protocolIndex = src.indexOf(prefix[p]);
       if (protocolIndex == 0) {
         return;
@@ -185,7 +184,7 @@ export function validateSrcContains(string, src) {
  *     done. The first argument is the result.
  */
 export function computeInMasterFrame(global, taskId, work, cb) {
-  const master = global.context.master;
+  const {master} = global.context;
   let tasks = master.__ampMasterTasks;
   if (!tasks) {
     tasks = master.__ampMasterTasks = {};
@@ -196,7 +195,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
   }
   cbs.push(cb);
   if (!global.context.isMaster) {
-    return;  // Only do work in master.
+    return; // Only do work in master.
   }
   work(result => {
     for (let i = 0; i < cbs.length; i++) {
@@ -244,21 +243,12 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
 
 /**
  * Throws an exception if data does not contains exactly one field
- * mentioned in the alternativeField array.
+ * mentioned in the alternativeFields array.
  * @param {!Object} data
  * @param {!Array<string>} alternativeFields
  */
 function validateExactlyOne(data, alternativeFields) {
-  let countFileds = 0;
-
-  for (let i = 0; i < alternativeFields.length; i++) {
-    const field = alternativeFields[i];
-    if (data[field]) {
-      countFileds += 1;
-    }
-  }
-
-  user().assert(countFileds === 1,
+  user().assert(alternativeFields.filter(field => data[field]).length === 1,
       '%s must contain exactly one of attributes: %s.',
       data.type,
       alternativeFields.join(', '));
@@ -281,13 +271,16 @@ function validateAllowedFields(data, allowedFields) {
     location: true,
     mode: true,
     consentNotificationId: true,
+    blockOnConsent: true,
     ampSlotIndex: true,
     adHolderText: true,
     loadingStrategy: true,
+    htmlAccessAllowed: true,
+    adContainerId: true,
   };
 
   for (const field in data) {
-    if (!data.hasOwnProperty(field) || field in defaultAvailableFields) {
+    if (!hasOwn(data, field) || field in defaultAvailableFields) {
       continue;
     }
     if (allowedFields.indexOf(field) < 0) {
@@ -308,7 +301,7 @@ let experimentToggles = {};
  * @return {boolean}
  */
 export function isExperimentOn(experimentId) {
-  return !!experimentToggles[experimentId];
+  return experimentToggles && !!experimentToggles[experimentId];
 }
 
 /**

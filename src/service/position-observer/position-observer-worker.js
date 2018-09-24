@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {
-  layoutRectEquals,
-  layoutRectsOverlap,
-  layoutRectsRelativePos,
-  layoutRectLtwh,
-} from '../../layout-rect';
 import {Services} from '../../services';
 import {dev} from '../../log';
+import {
+  layoutRectEquals,
+  layoutRectLtwh,
+  layoutRectsOverlap,
+  layoutRectsRelativePos,
+} from '../../layout-rect';
 
 /** @enum {number} */
 export const PositionObserverFidelity = {
@@ -50,13 +50,13 @@ export class PositionObserverWorker {
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @param {!PositionObserverFidelity} fidelity
-   * @param {!function(?PositionInViewportEntryDef)} handler
+   * @param {function(?PositionInViewportEntryDef)} handler
    */
   constructor(ampdoc, element, fidelity, handler) {
     /** @const {!Element} */
     this.element = element;
 
-    /** @const {!function(?PositionInViewportEntryDef)} */
+    /** @const {function(?PositionInViewportEntryDef)} */
     this.handler_ = handler;
 
     /** @type {!PositionObserverFidelity} */
@@ -64,7 +64,7 @@ export class PositionObserverWorker {
 
     /** @type {number} */
     this.turn = (fidelity == PositionObserverFidelity.LOW) ?
-        Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0;
+      Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0;
 
     /** @type {?PositionInViewportEntryDef} */
     this.prevPosition_ = null;
@@ -79,7 +79,7 @@ export class PositionObserverWorker {
    * @private
    */
   trigger_(position) {
-    const prevPos = this.prevPosition_ ;
+    const prevPos = this.prevPosition_;
     if (prevPos
         && layoutRectEquals(prevPos.positionRect, position.positionRect)
         && layoutRectEquals(prevPos.viewportRect, position.viewportRect)) {
@@ -90,7 +90,7 @@ export class PositionObserverWorker {
     dev().assert(position.positionRect,
         'PositionObserver should always trigger entry with clientRect');
     const positionRect =
-        /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
+    /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
     // Add the relative position of the element to its viewport
     position.relativePos = layoutRectsRelativePos(positionRect,
         position.viewportRect);
@@ -132,10 +132,10 @@ export class PositionObserverWorker {
     this.viewport_.getClientRectAsync(this.element).then(elementBox => {
       this.trigger_(
       /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
-        positionRect: elementBox,
-        viewportRect: viewportBox,
-        relativePos: '',
-      }));
+            positionRect: elementBox,
+            viewportRect: viewportBox,
+            relativePos: '',
+          }));
     });
   }
 }

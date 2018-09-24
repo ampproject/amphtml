@@ -1,0 +1,48 @@
+<!--
+  ## Introduction
+
+  Embed YouTube videos into your AMP HTML files.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-youtube</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the amp-youtube component -->
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-youtube/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!-- Embed YouTube videos via the video id. The id is found in every Youtube video page URL. -->
+  <amp-youtube width="480" height="270"
+                           layout="responsive"
+                           data-videoid="lBTCB7yLs8Y">
+  </amp-youtube>
+
+  <!-- ## Autoplay -->
+  <!--
+    Setting `autoplay` will automatically play/pause the YouTube video as it is
+    scrolled into/out of view on supported browsers.
+
+    The YouTube video is automatically muted before autoplay starts, when the
+    user taps the video, the video is unmuted.
+
+    If the user has interacted with the YouTube video
+    (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in
+    or out of view, the state of the video remains as how the user left it.
+  -->
+  <amp-youtube width="480" height="270"
+                           layout="responsive"
+                           data-videoid="lBTCB7yLs8Y"
+                           autoplay>
+  </amp-youtube>
+
+</body>
+</html>

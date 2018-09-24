@@ -16,8 +16,8 @@
 
 import {
   APP,
-  Messaging,
   MessageType,
+  Messaging,
   WindowPortEmulator,
 } from '../messaging/messaging';
 import {listen} from '../../../../src/event-helper';
@@ -41,7 +41,7 @@ export class AmpViewerHost {
    * looking at.
    */
   constructor(win, ampIframe, frameOrigin, messageHandler, opt_logsId,
-      opt_isWebview, opt_isHandshakePoll) {
+    opt_isWebview, opt_isHandshakePoll) {
     /** @const {!Window} */
     this.win = win;
     /** @private {!HTMLIFrameElement} */
@@ -98,6 +98,7 @@ export class AmpViewerHost {
     this.log('awaitHandshake_');
     let unlisten = null;
     const target = this.ampIframe_.contentWindow;
+
     const listener = function(event) {
       if (event.origin == targetOrigin &&
               this.isChannelOpen_(event.data) &&
@@ -134,7 +135,7 @@ export class AmpViewerHost {
       state: this.visibilityState_,
       prerenderSize: this.prerenderSize,
     }, true);
-  };
+  }
 
   /**
    * @param {*} eventData
@@ -143,7 +144,7 @@ export class AmpViewerHost {
    */
   isChannelOpen_(eventData) {
     return eventData.app == APP && eventData.name == CHANNEL_OPEN_MSG;
-  };
+  }
 
   /**
    * @param {string} type
@@ -157,8 +158,12 @@ export class AmpViewerHost {
       return;
     }
     return this.messaging_.sendRequest(type, data, awaitResponse);
-  };
+  }
 
+  /**
+   * Logs viewer arguments.
+   *
+   */
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
     var_args.unshift('[ViewerHost ' + this.logsId + ']');

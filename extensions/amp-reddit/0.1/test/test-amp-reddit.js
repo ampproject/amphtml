@@ -107,6 +107,6 @@ describes.realWin('amp-reddit', {
   it('requires data-embedtype', () => {
     return getReddit('https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed', '')
         .should.eventually.be.rejectedWith(
-        /The data-embedtype attribute is required for/);
+            /The data-embedtype attribute is required for/);
   });
 });

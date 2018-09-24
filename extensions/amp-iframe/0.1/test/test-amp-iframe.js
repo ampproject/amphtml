@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
+
+import {ActionTrust} from '../../../../src/action-constants';
 import {
   AmpIframe,
-  isAdLike,
   setTrackingIframeTimeoutForTesting,
 } from '../amp-iframe';
 import {CommonSignals} from '../../../../src/common-signals';
+import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
-import {poll} from '../../../../testing/iframe';
 import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
+import {isAdLike} from '../../../../src/iframe-helper';
+import {poll} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
+import {user} from '../../../../src/log';
 
+/** @const {number} */
+const IFRAME_MESSAGE_TIMEOUT = 50;
 
 describes.realWin('amp-iframe', {
   allowExternalResources: true,
@@ -63,7 +70,6 @@ describes.realWin('amp-iframe', {
         if (message.data == 'loaded-iframe') {
           ranJs++;
         }
-
         if (message.data.indexOf('content-iframe:') == 0) {
           content = message.data.replace('content-iframe:', '');
         }
@@ -71,10 +77,10 @@ describes.realWin('amp-iframe', {
       setTrackingIframeTimeoutForTesting(20);
     });
 
-    function waitForJsInIframe() {
+    function waitForJsInIframe(opt_ranJs = 1, opt_timeout = 300) {
       return poll('waiting for JS to run', () => {
-        return ranJs > 0;
-      }, undefined, 300);
+        return ranJs >= opt_ranJs;
+      }, undefined, opt_timeout);
     }
 
     function waitForAmpIframeLayoutPromise(doc, ampIframe) {
@@ -86,7 +92,7 @@ describes.realWin('amp-iframe', {
     }
 
     function createAmpIframe(env, opt_attributes, opt_top, opt_height,
-        opt_translateY, opt_container) {
+      opt_translateY, opt_container) {
       const doc = env.win.document;
       env.win.innerHeight = opt_height;
       const attributes = opt_attributes || {
@@ -123,7 +129,7 @@ describes.realWin('amp-iframe', {
       if (opt_top != undefined) {
         ampIframe.style.top = opt_top.toString() + 'px';
       }
-      const top = ampIframe.style.top;
+      const {top} = ampIframe.style;
       ampIframe.style.position = 'absolute'; //opt_position
       if (opt_translateY) {
         ampIframe.style.transform = `translateY(${opt_translateY}px)`;//'translateY(' + opt_translateY + ')';
@@ -163,10 +169,9 @@ describes.realWin('amp-iframe', {
           ampIframe.querySelector('i-amphtml-scroll-container');
       expect(iframe.parentNode).to.equal(scrollWrapper);
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
-      expect(impl.getPriority()).to.equal(0);
-      return timer.promise(50).then(() => {
-        expect(ranJs).to.equal(0);
-      });
+      expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+      yield timer.promise(IFRAME_MESSAGE_TIMEOUT);
+      expect(ranJs).to.equal(0);
     });
 
     it('should only propagate supported attributes', function* () {
@@ -177,6 +182,7 @@ describes.realWin('amp-iframe', {
         allowfullscreen: '',
         allowpaymentrequest: '',
         allowtransparency: '',
+        allow: 'microphone; camera',
         referrerpolicy: 'no-referrer',
         frameborder: 3,
         longdesc: 'foo',
@@ -187,6 +193,7 @@ describes.realWin('amp-iframe', {
       expect(iframe.getAttribute('allowfullscreen')).to.equal('');
       expect(iframe.getAttribute('allowpaymentrequest')).to.equal('');
       expect(iframe.getAttribute('allowtransparency')).to.equal('');
+      expect(iframe.getAttribute('allow')).to.equal('microphone; camera');
       expect(iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
       expect(iframe.getAttribute('frameborder')).to.equal('3');
       // unsupproted attributes
@@ -215,7 +222,8 @@ describes.realWin('amp-iframe', {
             scrolling: 'no',
           });
           yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-          expect(ampIframe.implementation_.getPriority()).to.equal(2);
+          expect(ampIframe.implementation_.getLayoutPriority()).to.equal(
+              LayoutPriority.ADS);
           expect(ampIframe.getAttribute('sandbox')).to.equal('allow-scripts');
           return waitForJsInIframe().then(() => {
             expect(ranJs).to.equal(1);
@@ -225,6 +233,7 @@ describes.realWin('amp-iframe', {
         });
 
     it('should not render at the top', function* () {
+      expectAsyncConsoleError(/position/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -233,17 +242,10 @@ describes.realWin('amp-iframe', {
       }, 599, 1000);
       yield whenUpgradedToCustomElement(ampIframe);
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
-      return new Promise(resolve => {
-        try {
-          ampIframe.implementation_.layoutCallback();
-        } catch (e) {
-          expect(e.message).to.match(/position/);
-          resolve();
-        }
-      });
     });
 
     it('should respect translations', function* () {
+      expectAsyncConsoleError(/position/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -252,14 +254,6 @@ describes.realWin('amp-iframe', {
       }, 650, 1000, -600);
       yield whenUpgradedToCustomElement(ampIframe);
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
-      return new Promise(resolve => {
-        try {
-          ampIframe.implementation_.layoutCallback();
-        } catch (e) {
-          expect(e.message).to.match(/position/);
-          resolve();
-        }
-      });
     });
 
     it('should render if further than 75% vh away from top', function* () {
@@ -300,9 +294,8 @@ describes.realWin('amp-iframe', {
       const scrollWrapper =
           ampIframe.querySelector('i-amphtml-scroll-container');
       expect(iframe.parentNode).to.equal(scrollWrapper);
-      return timer.promise(50).then(() => {
-        expect(ranJs).to.equal(0);
-      });
+      yield timer.promise(IFRAME_MESSAGE_TIMEOUT);
+      expect(ranJs).to.equal(0);
     });
 
     it('should support srcdoc', function* () {
@@ -376,51 +369,53 @@ describes.realWin('amp-iframe', {
     it('should deny same origin', () => {
       const ampIframe = createAmpIframe(env);
       const impl = ampIframe.implementation_;
-      expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin');
-      }).to.throw(/must not be equal to container/);
+      }).to.throw(/must not be equal to container/); });
 
-      expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'Allow-same-origin');
-      }).to.throw(/must not be equal to container/);
+      }).to.throw(/must not be equal to container/); });
 
-      expect(() => {
-        impl.assertSource('https://google.com/fpp', 'https://google.com/abc',
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin allow-scripts');
-      }).to.throw(/must not be equal to container/);
+      }).to.throw(/must not be equal to container/); });
       // Same origin, but sandboxed.
-      impl.assertSource('https://google.com/fpp', 'https://google.com/abc', '');
+      impl.assertSource_('https://google.com/fpp', 'https://google.com/abc', '');
 
-      expect(() => {
-        impl.assertSource('http://google.com/', 'https://foo.com', '');
-      }).to.throw(/Must start with https/);
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('http://google.com/', 'https://foo.com', '');
+      }).to.throw(/Must start with https/); });
 
-      expect(() => {
-        impl.assertSource('./foo', location.href, 'allow-same-origin');
-      }).to.throw(/must not be equal to container/);
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('./foo', location.href, 'allow-same-origin');
+      }).to.throw(/must not be equal to container/); });
 
-      impl.assertSource('http://iframe.localhost:123/foo',
+      impl.assertSource_('http://iframe.localhost:123/foo',
           'https://foo.com', '');
-      impl.assertSource('https://container.com', 'https://foo.com', '');
+      impl.assertSource_('https://container.com', 'https://foo.com', '');
       ampIframe.setAttribute('srcdoc', 'abc');
       ampIframe.setAttribute('sandbox', 'allow-same-origin');
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         impl.transformSrcDoc_('<script>try{parent.location.href}catch(e){' +
           'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
           '</script>', 'Allow-Same-Origin');
-      }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
+      }).to.throw(
+          /allow-same-origin is not allowed with the srcdoc attribute/);
+      });
 
-      expect(() => {
-        impl.assertSource('https://3p.ampproject.net:999/t',
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
-      }).to.throw(/not allow embedding of frames from ampproject\.\*/);
-      expect(() => {
-        impl.assertSource('https://3p.ampproject.net:999/t',
+      }).to.throw(/not allow embedding of frames from ampproject\.\*/); });
+      allowConsoleError(() => { expect(() => {
+        impl.assertSource_('https://3p.ampproject.net:999/t',
             'https://google.com/abc');
-      }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+      }).to.throw(/not allow embedding of frames from ampproject\.\*/); });
     });
 
     it('should transform source', () => {
@@ -506,6 +501,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should not resize amp-iframe if request height is small', function* () {
+      expectAsyncConsoleError(/resize height is less than 100px/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -521,6 +517,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should not resize amp-iframe if it is non-resizable', function* () {
+      expectAsyncConsoleError(/iframe is not resizable/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -546,10 +543,9 @@ describes.realWin('amp-iframe', {
       });
       yield waitForAmpIframeLayoutPromise(doc, ampIframe);
       const iframe = ampIframe.querySelector('iframe');
-      return timer.promise(100).then(() => {
-        expect(iframe.style.zIndex).to.equal('0');
-        expect(activateIframeSpy_).to.have.callCount(2);
-      });
+      yield timer.promise(100);
+      expect(iframe.style.zIndex).to.equal('0');
+      expect(activateIframeSpy_).to.have.callCount(2);
     });
 
     it('should detect non-tracking iframe', function* () {
@@ -566,6 +562,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should detect tracking iframes', function* () {
+      expectAsyncConsoleError(/Only 1 analytics\/tracking iframe allowed/);
       const ampIframe1 = createAmpIframe(env, {
         src: clickableIframeSrc,
         sandbox: 'allow-scripts allow-same-origin',
@@ -600,10 +597,10 @@ describes.realWin('amp-iframe', {
       expect(impl1.looksLikeTrackingIframe_()).to.be.true;
       // appended amp-iframe 10x10
       expect(impl2.looksLikeTrackingIframe_()).to.be.true;
-      expect(impl2.getPriority()).to.equal(1);
+      expect(impl2.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
       // appended amp-iframe 100x100
       expect(impl3.looksLikeTrackingIframe_()).to.be.false;
-      expect(impl3.getPriority()).to.equal(0);
+      expect(impl3.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
       yield Services.timerFor(env.win).promise(21);
       expect(doc.querySelectorAll('[amp-removed]')).to.have.length(1);
       expect(doc.querySelectorAll('iframe')).to.have.length(1);
@@ -611,6 +608,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should not detect traking iframe in amp container', function* () {
+      expectAsyncConsoleError(/Only 1 analytics\/tracking iframe allowed/);
       const ampIframeRealTracking = createAmpIframe(env, {
         src: iframeSrc,
         width: 5,
@@ -651,6 +649,7 @@ describes.realWin('amp-iframe', {
     });
 
     it('should not render fixed ad', function* () {
+      expectAsyncConsoleError(/not used for displaying fixed ad/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts allow-same-origin',
@@ -660,14 +659,6 @@ describes.realWin('amp-iframe', {
       }, 0);
       yield whenUpgradedToCustomElement(ampIframe);
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
-      return new Promise(resolve => {
-        try {
-          ampIframe.implementation_.layoutCallback();
-        } catch (e) {
-          expect(e.message).to.match(/not used for displaying fixed ad/);
-          resolve();
-        }
-      });
     });
 
     it('should not cache intersection box', function* () {
@@ -719,5 +710,140 @@ describes.realWin('amp-iframe', {
           expect(impl.iframeSrc).to.contain(newSrc);
           expect(iframe.getAttribute('src')).to.contain(newSrc);
         });
+
+    describe('throwIfCannotNavigate()', () => {
+      it('should do nothing if top navigation is allowed', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin allow-top-navigation',
+          width: 300,
+          height: 250,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        // Should be allowed if `allow-top-navigation` is set.
+        expect(() => impl.throwIfCannotNavigate()).to.not.throw();
+      });
+
+      it('should throw error if top navigation is not allowed', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin',
+          width: 300,
+          height: 250,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        // Should be allowed if `allow-top-navigation` is set.
+        expect(() => impl.throwIfCannotNavigate())
+            .to.throw(/allow-top-navigation/);
+      });
+    });
+
+    describe('two-way messaging', function() {
+      let messagingSrc;
+
+      beforeEach(() => {
+        messagingSrc = 'http://iframe.localhost:' + location.port +
+            '/test/fixtures/served/iframe-messaging.html';
+        toggleExperiment(win, 'iframe-messaging', true, true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'iframe-messaging', false, true);
+      });
+
+      it('should support "postMessage" action', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: messagingSrc,
+          sandbox: 'allow-scripts allow-same-origin',
+          width: 100,
+          height: 100});
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+
+        const impl = ampIframe.implementation_;
+        impl.executeAction({
+          method: 'postMessage',
+          args: 'foo-123',
+          satisfiesTrust: () => true,
+        });
+
+        yield waitForJsInIframe(1);
+        expect(content).to.equal('foo-123');
+      });
+
+      it('should not allow "postMessage" on srcdoc amp-iframe', function*() {
+        const ampIframe = createAmpIframe(env, {
+          srcdoc: '<script>addEventListener("message", e => {' +
+            '  parent./*OK*/postMessage("content-iframe:" + e.data, "*");' +
+            '  parent./*OK*/postMessage("loaded-iframe", "*");' +
+            '});</script>',
+          sandbox: 'allow-scripts',
+          width: 100,
+          height: 100});
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+
+        const userError = sandbox.stub(user(), 'error');
+        const addEventListener = sandbox.stub(win, 'addEventListener');
+        ampIframe.implementation_.executeAction({
+          method: 'postMessage',
+          args: 'foo-123',
+          satisfiesTrust: () => true,
+        });
+        expect(userError).to.be.calledOnce;
+        expect(userError).to.be.calledWithMatch('amp-iframe',
+            /"postMessage" action is only allowed with "src"/);
+
+        yield timer.promise(IFRAME_MESSAGE_TIMEOUT);
+        // The iframe's <script> will only post 'loaded-frame' on receipt of
+        // a message from the parent, which should be disallowed above.
+        expect(ranJs).to.equal(0);
+        // Normally, amp-iframe sets up a listener for "message" events
+        // for iframe -> host messaging, but not if targetOrigin_ is invalid.
+        expect(addEventListener).to.not.be.called;
+      });
+
+      it('should receive "message" events from <iframe>', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: messagingSrc,
+          sandbox: 'allow-scripts allow-same-origin',
+          width: 100,
+          height: 100});
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+
+        const userError = sandbox.stub(user(), 'error');
+        const actions = {trigger: sandbox.spy()};
+        sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+
+        const impl = ampIframe.implementation_;
+        impl.executeAction({
+          method: 'postMessage',
+          args: 'foo-123',
+          satisfiesTrust: () => true,
+        });
+
+        yield waitForJsInIframe(1);
+        expect(actions.trigger).to.not.be.called;
+        expect(userError).calledWithMatch('amp-iframe',
+            /may only be triggered from a user gesture/);
+
+        sandbox.stub(impl, 'isUserGesture_').returns(true);
+        impl.executeAction({
+          method: 'postMessage',
+          args: 'bar-456',
+          satisfiesTrust: () => true,
+        });
+
+        yield waitForJsInIframe(2);
+        // Once for 'loaded-iframe' and once for 'content-iframe'.
+        expect(actions.trigger).to.be.calledTwice;
+        const eventMatcher = sinon.match({
+          type: 'amp-iframe:message',
+          detail: sinon.match({data: 'content-iframe:bar-456'}),
+        });
+        expect(actions.trigger).to.be.calledWith(ampIframe, 'message',
+            eventMatcher, ActionTrust.HIGH);
+      });
+    });
   });
 });

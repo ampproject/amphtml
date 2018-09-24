@@ -1,0 +1,28 @@
+{
+ "items": [
+   {
+     "desc": "A stunning building in Richmond",
+     "address": "Richmond TW10 7RS",
+     "price": "£405.000",
+     "src": "/img/ham-house_960x720.jpg",
+     "attribution": "https://pixabay.com",
+     "alt": "Ham House"
+   },
+   {
+     "desc": "A truly royal residence",
+     "address": "Windsor SL4 1NJ",
+     "price": "£805.000",
+     "src": "/img/windsor-castle_960x642.jpg",
+     "attribution": "https://pixabay.com",
+     "alt": "Windsor Castle"
+   },
+   {
+     "desc": "The oldest royal palace",
+     "address": "London SW1A 1BS",
+     "price": "£705.000",
+     "src": "/img/st_james_palace_453x340.jpg",
+     "attribution": "https://pixabay.com",
+     "alt": "St James Palace"
+   }
+ ]
+}

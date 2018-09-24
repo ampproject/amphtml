@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
-import {parseUrl} from '../src/url';
+import {parseUrlDeprecated} from '../src/url';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -34,10 +34,10 @@ export function contentad(global, data) {
   window.document.body.appendChild(cadDiv);
 
   /* Pass Source URL */
-  let sourceUrl = window.context.sourceUrl;
+  let {sourceUrl} = window.context;
   if (data.url) {
     const domain = data.url || window.atob(data.d);
-    sourceUrl = sourceUrl.replace(parseUrl(sourceUrl).host, domain);
+    sourceUrl = sourceUrl.replace(parseUrlDeprecated(sourceUrl).host, domain);
   }
 
   /* Build API URL */

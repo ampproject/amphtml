@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../src/action-trust';
 import {
   ActionInvocation,
   ActionService,
   DeferredEvent,
-  OBJECT_STRING_ARGS_KEY,
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
+import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
+import {createElementWithAttributes} from '../../src/dom';
 import {setParentWindow} from '../../src/service';
-import * as sinon from 'sinon';
 
 
 /**
@@ -52,10 +51,12 @@ function createExecElement(id, enqueAction) {
 }
 
 
-function assertInvocation(inv, target, method, source, opt_event, opt_args) {
-  expect(inv.target).to.equal(target);
+function assertInvocation(inv, node, method, source, caller, opt_event,
+  child, opt_args) {
+
+  expect(inv.node).to.equal(node);
   expect(inv.method).to.equal(method);
-  expect(inv.source).to.equal(source);
+  expect(inv.caller).to.equal(caller);
 
   if (opt_event !== undefined) {
     expect(inv.event).to.equal(opt_event);
@@ -303,7 +304,7 @@ describe('ActionService parseAction', () => {
 
   it('should parse with object literal args', () => {
     const a = parseAction('e:t.m({"foo": {"bar": "qux"}})');
-    expect(a.args[OBJECT_STRING_ARGS_KEY])
+    expect(a.args[RAW_OBJECT_ARGS_KEY])
         .to.equal('{"foo": {"bar": "qux"}}');
   });
 
@@ -361,67 +362,73 @@ describe('ActionService parseAction', () => {
   });
 
   it('should fail parse without event', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       parseAction('target1.method1');
-    }).to.throw(/expected \[\:\]/);
+    }).to.throw(/expected \[\:\]/); });
   });
 
   it('should fail parse without target', () => {
-    expect(() => {
-      parseAction('event1:');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('.method1');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event1:.method1');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      expect(() => {
+        parseAction('event1:');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('.method1');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event1:.method1');
+      }).to.throw(/Invalid action/);
+    });
   });
 
   it('should fail parse with period in event or method', () => {
-    expect(() => {
-      parseAction('event.1:target1.method');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method.1');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      expect(() => {
+        parseAction('event.1:target1.method');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method.1');
+      }).to.throw(/Invalid action/);
+    });
   });
 
   it('should fail parse with invalid args', () => {
-    // No args allowed without explicit action.
-    expect(() => {
-      parseAction('event:target1()');
-    }).to.throw(/Invalid action/);
-    // Missing parens
-    expect(() => {
-      parseAction('event:target1.method(');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method(key = value');
-    }).to.throw(/Invalid action/);
-    // No arg value.
-    expect(() => {
-      parseAction('event:target1.method(key)');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method(key=)');
-    }).to.throw(/Invalid action/);
-    // Missing quote
-    expect(() => {
-      parseAction('event:target1.method(key = "value)');
-    }).to.throw(/Invalid action/);
-    // Broken quotes.
-    expect(() => {
-      parseAction('event:target1.method(key = "value"")');
-    }).to.throw(/Invalid action/);
-    // Missing comma.
-    expect(() => {
-      parseAction('event:target1.method(key = value key2 = value2)');
-    }).to.throw(/Invalid action/);
-    // Empty (2...n)nd target
-    expect(() => {
-      parseAction('event:target1,');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      // No args allowed without explicit action.
+      expect(() => {
+        parseAction('event:target1()');
+      }).to.throw(/Invalid action/);
+      // Missing parens
+      expect(() => {
+        parseAction('event:target1.method(');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method(key = value');
+      }).to.throw(/Invalid action/);
+      // No arg value.
+      expect(() => {
+        parseAction('event:target1.method(key)');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method(key=)');
+      }).to.throw(/Invalid action/);
+      // Missing quote
+      expect(() => {
+        parseAction('event:target1.method(key = "value)');
+      }).to.throw(/Invalid action/);
+      // Broken quotes.
+      expect(() => {
+        parseAction('event:target1.method(key = "value"")');
+      }).to.throw(/Invalid action/);
+      // Missing comma.
+      expect(() => {
+        parseAction('event:target1.method(key = value key2 = value2)');
+      }).to.throw(/Invalid action/);
+      // Empty (2...n)nd target
+      expect(() => {
+        parseAction('event:target1,');
+      }).to.throw(/Invalid action/);
+    });
   });
 });
 
@@ -503,7 +510,7 @@ describe('Action findAction', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -590,6 +597,46 @@ describe('Action findAction', () => {
   });
 });
 
+describe('Action hasAction', () => {
+  let sandbox;
+  let action;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox;
+    action = actionService();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('returns true if the target element has the target action', () => {
+    const element = document.createElement('div');
+    element.setAttribute('on', 'event1:action1');
+    expect(action.hasAction(element, 'event1')).to.equal(true);
+  });
+
+  it('returns true if an intermediate element has target action', () => {
+    const child = document.createElement('div');
+    const element = document.createElement('div');
+    element.appendChild(child);
+    element.setAttribute('on', 'event1:action1');
+    const parent = document.createElement('div');
+    parent.appendChild(element);
+    parent.setAttribute('on', 'event2:action2');
+    expect(action.hasAction(element, 'event1', parent)).to.equal(true);
+    expect(action.hasAction(element, 'event2', parent)).to.equal(false);
+  });
+
+  it('returns false if the target element does not have the target action',
+      () => {
+        const element = document.createElement('div');
+        element.setAttribute('on', 'event1:action1');
+        expect(action.hasAction(element, 'event2')).to.equal(false);
+      });
+
+});
+
 
 describe('Action method', () => {
   let sandbox;
@@ -598,7 +645,7 @@ describe('Action method', () => {
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
@@ -622,41 +669,43 @@ describe('Action method', () => {
 
   it('should invoke on the AMP element', () => {
     action.invoke_(new ActionInvocation(execElement, 'method1', /* args */ null,
-        'source1', 'event1'));
+        'source1', 'caller1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
+    expect(inv.caller).to.equal('caller1');
     expect(inv.event).to.equal('event1');
     expect(inv.args).to.be.null;
   });
 
   it('should invoke on the AMP element with args', () => {
     action.invoke_(new ActionInvocation(execElement, 'method1', {'key1': 11},
-        'source1', 'event1'));
+        'source1', 'caller1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
+    expect(inv.caller).to.equal('caller1');
     expect(inv.event).to.equal('event1');
     expect(inv.args['key1']).to.equal(11);
   });
 
   it('should not allow invoke on non-AMP and non-whitelisted element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       action.invoke_(new ActionInvocation(document.createElement('img'),
           'method1', /* args */ null, 'source1', 'event1'));
-    }).to.throw(/Target element does not support provided action/);
+    }).to.throw(/doesn't support "method1" action/); });
     expect(onEnqueue).to.have.not.been.called;
   });
 
   it('should not allow invoke on unresolved AMP element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       action.invoke_(new ActionInvocation(document.createElement('amp-foo'),
           'method1', /* args */ null, 'source1', 'event1'));
-    }).to.throw(/Unrecognized AMP element/);
+    }).to.throw(/Unrecognized AMP element/); });
     expect(onEnqueue).to.have.not.been.called;
   });
 
@@ -664,16 +713,17 @@ describe('Action method', () => {
     action.trigger(child, 'tap', null);
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
-    expect(inv.source).to.equal(targetElement);
+    expect(inv.source).to.equal(child);
+    expect(inv.caller).to.equal(targetElement);
   });
 
   it('should execute method', () => {
     action.execute(execElement, 'method1', {'key1': 11}, child, null);
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.args['key1']).to.equal(11);
     expect(inv.source).to.equal(child);
@@ -685,7 +735,7 @@ describe('installActionHandler', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -698,14 +748,16 @@ describe('installActionHandler', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy);
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.HIGH));
+        'button', 'button', 'tap', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
     const callArgs = handlerSpy.getCall(0).args[0];
-    expect(callArgs.target).to.be.equal(target);
+    expect(callArgs.node).to.be.equal(target);
     expect(callArgs.method).to.be.equal('submit');
     expect(callArgs.args).to.be.equal(null);
     expect(callArgs.source).to.be.equal('button');
+    expect(callArgs.caller).to.be.equal('button');
     expect(callArgs.event).to.be.equal('tap');
+    expect(callArgs.trust).to.be.equal(ActionTrust.HIGH);
   });
 
   it('should check trust level before invoking action', () => {
@@ -714,12 +766,14 @@ describe('installActionHandler', () => {
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
 
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.LOW));
-    expect(handlerSpy).to.not.be.called;
-
-    action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.HIGH));
+        'button', 'button', 'tapEvent', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
+
+    return allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+          'button', 'button', 'tapEvent', ActionTrust.LOW));
+      expect(handlerSpy).to.be.calledOnce;
+    });
   });
 });
 
@@ -730,7 +784,7 @@ describe('Multiple handlers action method', () => {
   let targetElement, parent, child, execElement1, execElement2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
@@ -758,9 +812,9 @@ describe('Multiple handlers action method', () => {
     action.trigger(child, 'tap', null);
     expect(onEnqueue1).to.be.calledOnce;
     assertInvocation(onEnqueue1.getCall(0).args[0], execElement1, 'method1',
-        targetElement);
+        child, targetElement);
     assertInvocation(onEnqueue2.getCall(0).args[0], execElement2, 'method2',
-        targetElement);
+        child, targetElement);
   });
 
   it('should chain asynchronous actions', () => {
@@ -816,7 +870,7 @@ describe('Action interceptor', () => {
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     action = actionService();
     target = document.createElement('target');
@@ -842,32 +896,34 @@ describe('Action interceptor', () => {
 
   it('should queue actions', () => {
     action.invoke_(new ActionInvocation(target, 'method1', /* args */ null,
-        'source1', 'event1'));
+        'source1', 'caller1', 'event1'));
     action.invoke_(new ActionInvocation(target, 'method2', /* args */ null,
-        'source2', 'event2'));
+        'source2', 'caller2', 'event2'));
 
     const queue = getQueue();
     expect(Array.isArray(queue)).to.be.true;
     expect(queue).to.have.length(2);
 
     const inv0 = queue[0];
-    expect(inv0.target).to.equal(target);
+    expect(inv0.node).to.equal(target);
     expect(inv0.method).to.equal('method1');
     expect(inv0.source).to.equal('source1');
+    expect(inv0.caller).to.equal('caller1');
     expect(inv0.event).to.equal('event1');
 
     const inv1 = queue[1];
-    expect(inv1.target).to.equal(target);
+    expect(inv1.node).to.equal(target);
     expect(inv1.method).to.equal('method2');
     expect(inv1.source).to.equal('source2');
+    expect(inv1.caller).to.equal('caller2');
     expect(inv1.event).to.equal('event2');
   });
 
   it('should dequeue actions after handler set', () => {
     action.invoke_(new ActionInvocation(target, 'method1', /* args */ null,
-        'source1', 'event1', ActionTrust.HIGH));
+        'source1', 'caller1', 'event1', ActionTrust.HIGH));
     action.invoke_(new ActionInvocation(target, 'method2', /* args */ null,
-        'source2', 'event2', ActionTrust.HIGH));
+        'source2', 'caller2', 'event2', ActionTrust.HIGH));
 
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getActionHandler()).to.be.undefined;
@@ -882,24 +938,27 @@ describe('Action interceptor', () => {
     expect(handler).to.have.callCount(2);
 
     const inv0 = handler.getCall(0).args[0];
-    expect(inv0.target).to.equal(target);
+    expect(inv0.node).to.equal(target);
     expect(inv0.method).to.equal('method1');
     expect(inv0.source).to.equal('source1');
+    expect(inv0.caller).to.equal('caller1');
     expect(inv0.event).to.equal('event1');
 
     const inv1 = handler.getCall(1).args[0];
-    expect(inv1.target).to.equal(target);
+    expect(inv1.node).to.equal(target);
     expect(inv1.method).to.equal('method2');
     expect(inv1.source).to.equal('source2');
+    expect(inv1.caller).to.equal('caller2');
     expect(inv1.event).to.equal('event2');
 
     action.invoke_(new ActionInvocation(target, 'method3', /* args */ null,
-        'source3', 'event3', ActionTrust.HIGH));
+        'source3', 'caller3', 'event3', ActionTrust.HIGH));
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
-    expect(inv2.target).to.equal(target);
+    expect(inv2.node).to.equal(target);
     expect(inv2.method).to.equal('method3');
     expect(inv2.source).to.equal('source3');
+    expect(inv2.caller).to.equal('caller3');
     expect(inv2.event).to.equal('event3');
   });
 });
@@ -911,7 +970,7 @@ describe('Action common handler', () => {
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
@@ -930,12 +989,12 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('action2', action2);
 
     action.invoke_(new ActionInvocation(target, 'action1', /* args */ null,
-        'source1', 'event1', ActionTrust.HIGH));
+        'source1', 'caller1', 'event1', ActionTrust.HIGH));
     expect(action1).to.be.calledOnce;
     expect(action2).to.have.not.been.called;
 
     action.invoke_(new ActionInvocation(target, 'action2', /* args */ null,
-        'source2', 'event2', ActionTrust.HIGH));
+        'source2', 'caller2', 'event2', ActionTrust.HIGH));
     expect(action2).to.be.calledOnce;
     expect(action1).to.be.calledOnce;
 
@@ -947,12 +1006,14 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
     action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-        'source1', 'event1', ActionTrust.LOW));
-    expect(handler).to.not.be.called;
-
-    action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-        'source1', 'event1', ActionTrust.HIGH));
+        'source1', 'caller1', 'event1', ActionTrust.HIGH));
     expect(handler).to.be.calledOnce;
+
+    return allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
+          'source1', 'caller1', 'event1', ActionTrust.LOW));
+      expect(handler).to.be.calledOnce;
+    });
   });
 });
 
@@ -976,8 +1037,8 @@ describes.sandboxed('Action global target', {}, () => {
     action.trigger(element, 'tap', event);
     expect(target2).to.not.be.called;
     expect(target1).to.be.calledOnce;
-    assertInvocation(target1.args[0][0], document, 'action1', element, event,
-        {a: 'b'});
+    assertInvocation(target1.args[0][0], document, 'action1', element, element,
+        event, {a: 'b'});
 
     const element2 = document.createElement('div');
     element2.setAttribute('on', 'tap:target2.action1');
@@ -996,8 +1057,8 @@ describes.sandboxed('Action global target', {}, () => {
     action.trigger(element4, 'tap', event);
     expect(target2).to.be.calledThrice;
     expect(target1).to.be.calledThrice;
-    assertInvocation(target2.args[2][0], document, 'action2', element4, event,
-        {x: 'y'});
+    assertInvocation(target2.args[2][0], document, 'action2', element4,
+        element4, event, {x: 'y'});
   });
 });
 
@@ -1014,11 +1075,11 @@ describes.fakeWin('Core events', {amp: true}, env => {
     document = window.document;
     sandbox = env.sandbox;
     sandbox.stub(window.document, 'addEventListener');
-    const ampdoc = env.ampdoc;
+    const {ampdoc} = env;
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
     triggerPromise = new Promise((resolve, reject) => {
-      sandbox.stub(action, 'trigger', () => {
+      sandbox.stub(action, 'trigger').callsFake(() => {
         try {
           originalTrigger.apply(action, action.trigger.getCall(0).args);
           resolve();
@@ -1041,10 +1102,27 @@ describes.fakeWin('Core events', {amp: true}, env => {
 
   it('should trigger tap event on key press if focused element has ' +
      'role=button', () => {
-    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    expect(window.document.addEventListener).to.have.been.calledWith(
+        'keydown');
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'button');
+    const event = {
+      target: element,
+      keyCode: KeyCodes.ENTER,
+      preventDefault: sandbox.stub()};
+    handler(event);
+    expect(event.preventDefault).to.have.been.called;
+    expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
+  });
+
+  it('should trigger tap event on key press if focused element has ' +
+     'role=option', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith(
+        'keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('div');
+    element.setAttribute('role', 'option');
     const event = {
       target: element,
       keyCode: KeyCodes.ENTER,
@@ -1060,6 +1138,16 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
+    const event = {target: element, keyCode: KeyCodes.ENTER};
+    handler(event);
+    expect(action.trigger).to.not.have.been.called;
+  });
+
+  it('should NOT trigger tap event on key press if focused element DOES NOT ' +
+     'have any role', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('input');
     const event = {target: element, keyCode: KeyCodes.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
@@ -1095,7 +1183,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object =>
-            object.detail.checked && object.detail.value == 'foo'));
+          object.detail.checked && object.detail.value == 'foo'));
   });
 
   it('should trigger change event for <input type="range"> elements', () => {
@@ -1145,7 +1233,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object => {
-          const detail = object.detail;
+          const {detail} = object;
           return detail.value == 'qux';
         }));
   });
@@ -1161,7 +1249,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object => {
-          const detail = object.detail;
+          const {detail} = object;
           return detail.value == 'foo';
         }));
   });
@@ -1182,7 +1270,29 @@ describes.fakeWin('Core events', {amp: true}, env => {
           element,
           'input-debounced',
           sinon.match(event => {
-            const value = event.target.value;
+            const {value} = event.target;
+            return value == 'foo bar baz';
+          }));
+    });
+  });
+
+  it('should trigger input-throttled event on input', () => {
+    sandbox.stub(action, 'invoke_');
+    const handler = window.document.addEventListener.getCall(5).args[1];
+    const element = document.createElement('input');
+    element.id = 'test';
+    element.setAttribute('on', 'input-throttled:test.hide');
+    element.value = 'foo bar baz';
+    const event = {target: element};
+    document.body.appendChild(element);
+    handler(event);
+
+    return triggerPromise.then(() => {
+      expect(action.trigger).to.have.been.calledWith(
+          element,
+          'input-throttled',
+          sinon.match(event => {
+            const {value} = event.target;
             return value == 'foo bar baz';
           }));
     });
@@ -1200,22 +1310,120 @@ describes.fakeWin('Core events', {amp: true}, env => {
       }
     });
 
-    it('should replace functions with throws', () => {
+    it('should replace functions with throws', function*() {
       const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
       const deferredEvent = new DeferredEvent(event);
       const errorText = 'cannot access native event functions';
 
       // Specifically test these commonly used functions
-      expect(() => deferredEvent.preventDefault()).to.throw(errorText);
-      expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+      yield allowConsoleError(() => {
+        expect(() => deferredEvent.preventDefault()).to.throw(errorText);
+      });
+      yield allowConsoleError(() => {
+        expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+      });
 
       // Test all functions
       for (const key in deferredEvent) {
         const value = deferredEvent[key];
         if (typeof value === 'function') {
-          expect(() => value()).to.throw(errorText);
+          yield allowConsoleError(() => {
+            expect(() => value()).to.throw(errorText);
+          });
         }
       }
     });
+  });
+});
+
+describes.realWin('Action whitelisting', {
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
+  let action;
+  let target;
+  let spy;
+
+  beforeEach(() => {
+    spy = env.sandbox.spy();
+    target = createExecElement('foo', spy);
+  });
+
+  describe('with non-empty whitelist', () => {
+    beforeEach(() => {
+      const meta = createElementWithAttributes(env.win.document, 'meta', {
+        name: 'amp-action-whitelist',
+        content: 'AMP.pushState, AMP.setState, *.show',
+      });
+      env.win.document.head.appendChild(meta);
+
+      action = new ActionService(env.ampdoc, env.win.document);
+    });
+
+    it('should allow whitelisted actions', () => {
+      const i = new ActionInvocation(target, 'setState', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should allow whitelisted actions with wildcard target', () => {
+      const i = new ActionInvocation(target, 'show', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'DIV');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should not allow non-whitelisted actions', () => {
+      const i = new ActionInvocation(target, 'print', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      sandbox.stub(action, 'error_');
+      expect(action.invoke_(i)).to.be.null;
+      expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
+          '[{"tagOrTarget":"AMP","method":"pushState"},' +
+          '{"tagOrTarget":"AMP","method":"setState"},' +
+          '{"tagOrTarget":"*","method":"show"}].');
+    });
+
+    it('should allow adding actions to the whitelist', () => {
+      const i = new ActionInvocation(target, 'print', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      action.addToWhitelist('AMP', 'print');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+  });
+
+  it('should not allow any action with empty string whitelist', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: '',
+    });
+    env.win.document.head.appendChild(meta);
+    action = new ActionService(env.ampdoc, env.win.document);
+
+    const i = new ActionInvocation(target, 'print', /* args */ null,
+        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+    sandbox.stub(action, 'error_');
+    expect(action.invoke_(i)).to.be.null;
+    expect(action.error_).to.be.calledWith(
+        '"AMP.print" is not whitelisted [].');
+  });
+
+  it('should ignore unparseable whitelist entries', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',
+    });
+    env.win.document.head.appendChild(meta);
+    allowConsoleError(() => {
+      action = new ActionService(env.ampdoc, env.win.document);
+    });
+
+    const i = new ActionInvocation(target, 'setState', /* args */ null,
+        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+    action.invoke_(i);
+    expect(spy).to.be.calledWithExactly(i);
   });
 });

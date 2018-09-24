@@ -38,7 +38,6 @@ import {
   setParentWindow,
 } from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
-import * as sinon from 'sinon';
 
 
 describe('service', () => {
@@ -46,7 +45,7 @@ describe('service', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -70,8 +69,10 @@ describe('service', () => {
 
     it('should assert disposable interface', () => {
       expect(assertDisposable(disposable)).to.equal(disposable);
-      expect(() => assertDisposable(nonDisposable))
-          .to.throw(/required to implement Disposable/);
+      allowConsoleError(() => {
+        expect(() => assertDisposable(nonDisposable)).to.throw(
+            /required to implement Disposable/);
+      });
     });
   });
 
@@ -140,15 +141,15 @@ describe('service', () => {
     });
 
     it('should throw before creation if factory is not provided', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         getService(window, 'c');
-      }).to.throw();
+      }).to.throw(); });
     });
 
     it('should fail without factory on initial setup', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         getService(window, 'not-present');
-      }).to.throw(/Expected service not-present to be registered/);
+      }).to.throw(/Expected service not-present to be registered/); });
     });
 
     it('should provide a promise that resolves when instantiated', () => {
@@ -401,9 +402,9 @@ describe('service', () => {
     });
 
     it('should fail without factory on initial setup', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         getServiceForDoc(node, 'not-present');
-      }).to.throw(/Expected service not-present to be registered/);
+      }).to.throw(/Expected service not-present to be registered/); });
     });
 
     it('should provide a promise that resolves when instantiated', () => {
@@ -601,15 +602,15 @@ describe('service', () => {
         });
 
         it('should refuse adopt of non-embeddable', () => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             adoptServiceForEmbed(embedWin, 'nonEmbeddable');
-          }).to.throw(/implement EmbeddableService/);
+          }).to.throw(/implement EmbeddableService/); });
         });
 
         it('should refuse adopt of unknown service', () => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             adoptServiceForEmbed(embedWin, 'unknown');
-          }).to.throw(/unknown/);
+          }).to.throw(/unknown/); });
         });
       });
 

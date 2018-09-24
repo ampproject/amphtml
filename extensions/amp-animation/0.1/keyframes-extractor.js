@@ -17,7 +17,6 @@
 import {endsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
-
 /**
  * Finds and extracts keyframes definition for Web Animations from CSS styles.
  * @param {!Document|!ShadowRoot} rootNode
@@ -25,7 +24,7 @@ import {toWin} from '../../../src/types';
  * @return {?./web-animation-types.WebKeyframesDef}
  */
 export function extractKeyframes(rootNode, name) {
-  const styleSheets = rootNode.styleSheets;
+  const {styleSheets} = rootNode;
   if (!styleSheets) {
     return null;
   }
@@ -135,13 +134,13 @@ function buildKeyframes(keyframesRule) {
   const array = [];
   for (let i = 0; i < keyframesRule.cssRules.length; i++) {
     const keyframeRule = /** @type {!CSSKeyframeRule} */ (
-        keyframesRule.cssRules[i]);
+      keyframesRule.cssRules[i]);
     const keyframe = {};
     keyframe['offset'] =
         keyframeRule.keyText == 'from' ? 0 :
-        keyframeRule.keyText == 'to' ? 1 :
-        parseFloat(keyframeRule.keyText) / 100;
-    const style = keyframeRule.style;
+          keyframeRule.keyText == 'to' ? 1 :
+            parseFloat(keyframeRule.keyText) / 100;
+    const {style} = keyframeRule;
     for (let j = 0; j < style.length; j++) {
       const styleName = style[j];
       let propName = styleName;

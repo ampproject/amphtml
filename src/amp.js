@@ -18,26 +18,32 @@
  * The entry point for AMP Runtime (v0.js) when AMP Runtime = AMP Doc.
  */
 
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {Services} from './services';
-import {startupChunk} from './chunk';
-import {fontStylesheetTimeout} from './font-stylesheet-timeout';
-import {installPerformanceService} from './service/performance-impl';
-import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {installStylesForDoc, makeBodyVisible} from './style-installer';
-import {installErrorReporting} from './error';
-import {installDocService} from './service/ampdoc-impl';
-import {installCacheServiceWorker} from './service-worker/install';
-import {stubElementsForDoc} from './service/custom-element-registry';
 import {
+  adopt,
   installAmpdocServices,
   installBuiltins,
   installRuntimeServices,
-  adopt,
 } from './runtime';
 import {cssText} from '../build/css';
-import {maybeValidate} from './validator-integration';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {installDocService} from './service/ampdoc-impl';
+import {installErrorReporting} from './error';
+import {installPerformanceService} from './service/performance-impl';
+import {installPlatformService} from './service/platform-impl';
+import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {
+  installStylesForDoc,
+  makeBodyVisible,
+  makeBodyVisibleRecovery,
+} from './style-installer';
 import {maybeTrackImpression} from './impression';
+import {maybeValidate} from './validator-integration';
+import {startupChunk} from './chunk';
+import {stubElementsForDoc} from './service/custom-element-registry';
 
 // Store the originalHash as early as possible. Trying to debug:
 // https://github.com/ampproject/amphtml/issues/6070
@@ -52,15 +58,15 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  installDocService(self,  /* isSingleDoc */ true);
+  installDocService(self, /* isSingleDoc */ true);
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(self.document);
+  makeBodyVisibleRecovery(self.document);
   throw e;
 }
 startupChunk(self.document, function initial() {
@@ -69,6 +75,10 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
+  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
+    perf.addEnabledExperiment('no-boilerplate');
+  }
+  installPlatformService(self);
   fontStylesheetTimeout(self);
   perf.tick('is');
   installStylesForDoc(ampdoc, cssText, () => {
@@ -80,12 +90,12 @@ startupChunk(self.document, function initial() {
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
     });
+    startupChunk(self.document, function adoptWindow() {
+      adopt(self);
+    });
     startupChunk(self.document, function builtins() {
       // Builtins.
       installBuiltins(self);
-    });
-    startupChunk(self.document, function adoptWindow() {
-      adopt(self);
     });
     startupChunk(self.document, function stub() {
       // Pre-stub already known elements.
@@ -95,8 +105,7 @@ startupChunk(self.document, function initial() {
       installPullToRefreshBlocker(self);
 
       maybeValidate(self);
-      makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
+      makeBodyVisible(self.document);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');

@@ -17,8 +17,10 @@
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
-} from '../../testing/iframe.js';
+} from '../../testing/iframe';
 import {getStyle} from '../../src/style';
+import {isAnimationNone} from '../../testing/test-helper';
+
 
 const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
@@ -27,8 +29,8 @@ describe.configure().retryOnSaucelabs().run('Old Opacity Boilerplate', () => {
   beforeEach(() => {
     return createFixtureIframe(
         'test/fixtures/boilerplate-old-opacity.html', 1000).then(f => {
-          fixture = f;
-        });
+      fixture = f;
+    });
   });
 
   it('should show the body when opacity boilerplate is used', () => {
@@ -45,22 +47,15 @@ describe.configure().run('New Visibility Boilerplate', () => {
   beforeEach(() => {
     return createFixtureIframe(
         'test/fixtures/boilerplate-new-visibility.html', 10000).then(f => {
-          fixture = f;
-        });
+      fixture = f;
+    });
   });
 
   it('should show the body in boilerplate test', () => {
     return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');
-      // Firefox spells out the values when assigning none.
-      const ffValue = '0s ease 0s normal none 1 running none';
-      const animation = getStyle(fixture.win.document.body, 'animation');
-      if (animation == ffValue) {
-        expect(animation).to.equal(ffValue);
-      } else {
-        expect(animation).to.equal('none');
-      }
+      expect(isAnimationNone(fixture.win.document.body)).to.be.true;
     });
   });
 });

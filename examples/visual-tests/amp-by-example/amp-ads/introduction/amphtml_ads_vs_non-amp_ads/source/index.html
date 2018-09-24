@@ -1,0 +1,43 @@
+<!--
+  ## Introduction
+
+  This sample compares the performance of an AMPHTML ad vs a regular ad. To best compare these two, either view [the demo page](https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/amp_ads/amphtml_ads_vs_non-amp_ads/preview/?exp=a4a:-1) on a mobile device with an active 3G connection or, on desktop, enable <a href="https://developers.google.com/web/tools/chrome-devtools/network-performance/network-conditions">network throttling</a> in Chrome Dev Tools (e.g. "Regular 3G").
+
+  An AMPHTML ad is an one where the ad is written in AMP HTML. A valid AMPHTML ad does not contain arbitrary JavaScript. All JavaScript in an AMPHTML ad comes from the open source AMP project which is blessed by the AMP project maintainers. As a result, when an ad is created in AMP, it is always guaranteed to do the right thing from a user experience standpoint.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Ads vs non-AMP Ads</title>
+  <link rel="canonical" href="https://ampbyexample.com/amp_ads/amp_ads_vs_non-amp_ads/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <p class="p4">This sample compares the performance of an AMPHTML ad vs a regular ad. To best compare these two, either view this page on a mobile device with active 3G connection or, if you are on Desktop, enable <a href="https://developers.google.com/web/tools/chrome-devtools/network-performance/network-conditions">network throttling</a> in Chrome Dev Tools (e.g. "Regular 3G").</p>
+
+  <div class="flex flex-wrap">
+    <div class="ampstart-card my1 mx-auto">
+      <h2 class="p1">AMPHTML ad</h2>
+
+      <!-- # AMPHTML ad -->
+      <!-- The ad unit serves an AMPHTML ad profiting from the optimized AMPHTML ad delivery. -->
+      <amp-ad data-slot="/30497360/a4a/a4a_native" height="250" type="doubleclick" width="300">
+      </amp-ad>
+    </div>
+
+    <div class="ampstart-card my1 mx-auto">
+      <h2 class="p1">Regular Ad</h2>
+      <!-- # Regular Ad -->
+      <!-- This ad unit serves a regular ad. -->
+      <amp-ad data-slot="/30497360/a4a/non_a4a_native" height="250" type="doubleclick" width="300">
+      </amp-ad>
+    </div>
+  </div>
+
+</body>
+</html>

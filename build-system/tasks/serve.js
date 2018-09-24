@@ -16,14 +16,17 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
+const log = require('fancy-log');
 const nodemon = require('nodemon');
 
 const host = argv.host || 'localhost';
 const port = argv.port || process.env.PORT || 8000;
 const useHttps = argv.https != undefined;
 const quiet = argv.quiet != undefined;
+const sendCachingHeaders = argv.cache != undefined;
+const noCachingExtensions = argv.noCachingExtensions != undefined;
 
 /**
  * Starts a simple http server at the repository root
@@ -32,16 +35,16 @@ function serve() {
   // Get the serve mode
   if (argv.compiled) {
     process.env.SERVE_MODE = 'compiled';
-    util.log(util.colors.green('Serving minified js'));
+    log(colors.green('Serving minified js'));
   } else if (argv.cdn) {
     process.env.SERVE_MODE = 'cdn';
-    util.log(util.colors.green('Serving current prod js'));
+    log(colors.green('Serving current prod js'));
   } else {
     process.env.SERVE_MODE = 'default';
-    util.log(util.colors.green('Serving unminified js'));
+    log(colors.green('Serving unminified js'));
   }
 
-  nodemon({
+  const config = {
     script: require.resolve('../server.js'),
     watch: [
       require.resolve('../app.js'),
@@ -54,17 +57,23 @@ function serve() {
       'SERVE_USEHTTPS': useHttps,
       'SERVE_PROCESS_ID': process.pid,
       'SERVE_QUIET': quiet,
+      'SERVE_CACHING_HEADERS': sendCachingHeaders,
+      'SERVE_EXTENSIONS_WITHOUT_CACHING': noCachingExtensions,
     },
     stdout: !quiet,
-  })
-      .once('quit', function() {
-        util.log(util.colors.green('Shutting down server'));
-      });
-  if (!quiet) {
-    util.log(util.colors.yellow('Run `gulp build` then go to '
-        + getHost() + '/examples/article.amp.html'
-    ));
+  };
+
+  if (argv.inspect) {
+    Object.assign(config, {
+      execMap: {
+        js: 'node --inspect',
+      },
+    });
   }
+
+  nodemon(config).once('quit', function() {
+    log(colors.green('Shutting down server'));
+  });
 }
 
 process.on('SIGINT', function() {
@@ -81,6 +90,9 @@ gulp.task(
         'port': '  Specifies alternative port (default: 8000)',
         'https': '  Use HTTPS server (default: false)',
         'quiet': '  Do not log HTTP requests (default: false)',
+        'cache': '  Make local resources cacheable by the browser ' +
+            '(default: false)',
+        'inspect': '  Run nodemon in `inspect` mode',
       },
     }
 );
@@ -89,3 +101,4 @@ function getHost() {
   return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
 
+exports.serve = serve;

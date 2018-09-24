@@ -15,9 +15,9 @@
  */
 
 
-import {exponentialBackoffClock, getJitter}
-    from '../../../src/exponential-backoff';
 import {Services} from '../../../src/services';
+import {exponentialBackoffClock, getJitter}
+  from '../../../src/exponential-backoff';
 
 
 /**
@@ -25,6 +25,13 @@ import {Services} from '../../../src/services';
  */
 export class Poller {
 
+  /**
+   * Creates an instance of Poller.
+   * @param {!Window} win
+   * @param {number} wait
+   * @param {!Function} work
+   * @memberof Poller
+   */
   constructor(win, wait, work) {
     /** @const {!Window} */
     this.win = win;

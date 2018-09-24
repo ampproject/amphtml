@@ -33,7 +33,7 @@ export function gumgum(global, data) {
       ggevents = global.ggevents || [];
 
   const
-      max = Math.max,
+      {max} = Math,
       slotId = parseInt(data.slot, 10),
       onLoad = function(type) {
         return function(evt) {
@@ -66,6 +66,7 @@ export function gumgum(global, data) {
       height: '100%',
     });
     ins.setAttribute('data-gg-slot', slotId);
+    ins.setAttribute('pl', 2);
     dom.appendChild(ins);
     // Events
     ggevents.push({

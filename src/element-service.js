@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
+import * as dom from './dom';
 import {
-  getExistingServiceForDocInEmbedScope,
-  getServicePromise,
-  getServicePromiseOrNull,
   getAmpdoc,
+  getExistingServiceForDocInEmbedScope,
+  getService,
+  getServicePromise,
   getServicePromiseForDoc,
+  getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
   getTopWindow,
 } from './service';
-import {user} from './log';
-import * as dom from './dom';
 import {toWin} from './types';
+import {user} from './log';
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * Services.viewportForDoc(...)) for type safety and because the factory should not be
- * passed around.
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. Services.viewportForDoc(...)) for type safety and because the
+ * factory should not be passed around.
  * @param {!Window} win
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an
- *     element, not the extension.
+ * @param {boolean=} opt_element Whether this service is provided by an element,
+ *     not the extension.
  * @return {!Promise<*>}
  */
 export function getElementService(win, id, extension, opt_element) {
@@ -81,30 +81,30 @@ function isElementScheduled(win, elementName) {
 
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * Services.viewportForDoc(...)) for type safety and because the factory should not be
- * passed around.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * Returns a promise for a service for the given id and window. Also expects an
+ * element that has the actual implementation. The promise resolves when the
+ * implementation loaded. Users should typically wrap this as a special purpose
+ * function (e.g. Services.viewportForDoc(...)) for type safety and because the
+ * factory should not be passed around.
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an
- *     element, not the extension.
+ * @param {boolean=} opt_element Whether this service is provided by an element,
+ *     not the extension.
  * @return {!Promise<*>}
  */
-export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
+export function getElementServiceForDoc(elementOrAmpDoc, id, extension,
+  opt_element) {
   return getElementServiceIfAvailableForDoc(
-      nodeOrDoc, id, extension, opt_element)
+      elementOrAmpDoc, id, extension, opt_element)
       .then(service => assertService(service, id, extension));
 }
 
 /**
  * Same as getElementService but produces null if the given element is not
  * actually available on the current page.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -113,52 +113,48 @@ export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDoc(
-    nodeOrDoc, id, extension, opt_element) {
-  const ampdoc = getAmpdoc(nodeOrDoc);
-  const s = getServicePromiseOrNullForDoc(nodeOrDoc, id);
+  elementOrAmpDoc, id, extension, opt_element) {
+  const ampdoc = getAmpdoc(elementOrAmpDoc);
+  const s = getServicePromiseOrNullForDoc(elementOrAmpDoc, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
-  // Microtask is necessary to ensure that window.ampExtendedElements has been
-  // initialized.
-  return Promise.resolve().then(() => {
-    if (!opt_element && isElementScheduled(ampdoc.win, extension)) {
-      return getServicePromiseForDoc(nodeOrDoc, id);
-    }
-    // Wait for HEAD to fully form before denying access to the service.
-    return ampdoc.whenBodyAvailable().then(() => {
-      // If this service is provided by an element, then we can't depend on the
-      // service (they may not use the element).
-      if (opt_element) {
-        return getServicePromiseOrNullForDoc(nodeOrDoc, id);
-      } else if (isElementScheduled(ampdoc.win, extension)) {
-        return getServicePromiseForDoc(nodeOrDoc, id);
-      }
-      return null;
-    });
-  });
+
+  return ampdoc.whenBodyAvailable()
+      .then(() => waitForExtensionIfPresent(
+          ampdoc.win, extension,
+          ampdoc.getHeadNode()))
+      .then(() => {
+        // If this service is provided by an element, then we can't depend on
+        // the service (they may not use the element).
+        if (opt_element) {
+          return getServicePromiseOrNullForDoc(elementOrAmpDoc, id);
+        } else if (isElementScheduled(ampdoc.win, extension)) {
+          return getServicePromiseForDoc(elementOrAmpDoc, id);
+        }
+        return null;
+      });
 }
 
 /**
  * Returns a promise for service for the given id in the embed scope of
  * a given node, if it exists. Otherwise, falls back to ampdoc scope IFF
  * the given node is in the top-level window.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom element that provides
  *     the implementation of this service.
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDocInEmbedScope(
-    nodeOrDoc, id, extension) {
-  const s = getExistingServiceForDocInEmbedScope(nodeOrDoc, id);
+  elementOrAmpDoc, id, extension) {
+  const s = getExistingServiceForDocInEmbedScope(elementOrAmpDoc, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
   }
   // Return embed-scope element service promise if scheduled.
-  if (nodeOrDoc.nodeType) {
-    const win = toWin(/** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
+  if (elementOrAmpDoc.nodeType) {
+    const win = toWin(elementOrAmpDoc.ownerDocument.defaultView);
     const topWin = getTopWindow(win);
     // In embeds, doc-scope services are window-scope. But make sure to
     // only do this for embeds (not the top window), otherwise we'd grab
@@ -167,7 +163,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
       return getElementServicePromiseOrNull(win, id, extension);
     } else {
       // Fallback to ampdoc IFF the given node is _not_ FIE.
-      return getElementServiceIfAvailableForDoc(nodeOrDoc, id, extension);
+      return getElementServiceIfAvailableForDoc(elementOrAmpDoc, id, extension);
     }
   }
   return /** @type {!Promise<?Object>} */ (Promise.resolve(null));
@@ -190,6 +186,78 @@ function assertService(service, id, extension) {
 }
 
 /**
+ * Get list of all the extension JS files
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
+ * @return {!Array<string>}
+ */
+export function extensionScriptsInNode(head) {
+  // ampdoc.getHeadNode() can return null
+  if (!head) {
+    return [];
+  }
+  const scripts = [];
+  const list = head.querySelectorAll('script[custom-element]');
+  for (let i = 0; i < list.length; i++) {
+    scripts.push(list[i].getAttribute('custom-element'));
+  }
+  return scripts;
+}
+
+/**
+ * Waits for body to be present then verifies that an extension script is
+ * present in head for installation.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} extensionId
+ * @return {!Promise<boolean>}
+ */
+export function isExtensionScriptInNode(ampdoc, extensionId) {
+  return ampdoc.whenBodyAvailable()
+      .then(() => {
+        return extensionScriptInNode(
+            ampdoc.getHeadNode(), extensionId);
+      });
+}
+
+/**
+ * Verifies that an extension script is present in head for
+ * installation.
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
+ * @param {string} extensionId
+ * @private
+ */
+function extensionScriptInNode(head, extensionId) {
+  return extensionScriptsInNode(head).includes(extensionId);
+}
+
+/**
+ * Waits for an extension if its script is present
+ * @param {!Window} win
+ * @param {string} extension
+ * @param {HTMLHeadElement|Element|ShadowRoot} head
+ * @return {!Promise}
+ * @private
+ */
+function waitForExtensionIfPresent(win, extension, head) {
+  /**
+   * If there is an extension script wait for it to load before trying
+   * to get the service. Prevents a race condition when everything but
+   * the extensions is in cache. If there is no script then it's either
+   * not present, or the service was defined by a test. In those cases
+   * we don't wait around for an extension that does not exist.
+   */
+
+  // TODO(jpettitt) investigate registerExtension to short circuit
+  // the dom call in extensionScriptsInNode()
+  if (!extensionScriptInNode(head, extension)) {
+    return Promise.resolve();
+  }
+
+  const extensions = getService(win, 'extensions');
+  return /** @type {!Promise<?Object>} */ (
+    extensions.waitForExtension(win, extension));
+}
+
+/**
  * Returns the promise for service with `id` on the given window if available.
  * Otherwise, resolves with null (service was not registered).
  * @param {!Window} win
@@ -200,22 +268,16 @@ function assertService(service, id, extension) {
  * @private
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
-  // Microtask is necessary to ensure that window.ampExtendedElements has been
-  // initialized.
-  return Promise.resolve().then(() => {
-    if (!opt_element && isElementScheduled(win, extension)) {
-      return getServicePromise(win, id);
-    }
-    // Wait for HEAD to fully form before denying access to the service.
-    return dom.waitForBodyPromise(win.document).then(() => {
-      // If this service is provided by an element, then we can't depend on the
-      // service (they may not use the element).
-      if (opt_element) {
-        return getServicePromiseOrNull(win, id);
-      } else if (isElementScheduled(win, extension)) {
-        return getServicePromise(win, id);
-      }
-      return null;
-    });
-  });
+  return dom.waitForBodyPromise(win.document)
+      .then(() => waitForExtensionIfPresent(win, extension, win.document.head))
+      .then(() => {
+        // If this service is provided by an element, then we can't depend on
+        // the service (they may not use the element).
+        if (opt_element) {
+          return getServicePromiseOrNull(win, id);
+        } else if (isElementScheduled(win, extension)) {
+          return getServicePromise(win, id);
+        }
+        return null;
+      });
 }

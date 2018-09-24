@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
 import {dev, user} from '../src/log';
+import {validateData} from '../3p/3p';
 
 /**
  * A fake ad network integration that is mainly used for testing
@@ -28,8 +28,8 @@ export function _ping_(global, data) {
   // for testing only. see #10628
   global.networkIntegrationDataParamForTesting = data;
 
-  validateData(data, [],
-      ['valid', 'adHeight', 'adWidth', 'enableIo', 'url', 'error']);
+  validateData(data, ['url'],
+      ['valid', 'adHeight', 'adWidth', 'enableIo']);
   user().assert(!data['error'], 'Fake user error!');
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
@@ -77,6 +77,16 @@ export function _ping_(global, data) {
         // store changes to global.lastIO for testing purpose
         global.ping.lastIO = changes[changes.length - 1];
       });
+    }
+    global.context.getHtml('a', ['href'], function(html) {
+      dev().info('GET-HTML', html);
+    });
+    global.context.getConsentState(function(consentState) {
+      dev().info('GET-CONSENT-STATE', consentState);
+    });
+    if (global.context.consentSharedData) {
+      const TAG = 'consentSharedData';
+      dev().info(TAG, global.context.consentSharedData);
     }
   } else {
     global.setTimeout(() => {

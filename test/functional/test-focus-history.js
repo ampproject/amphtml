@@ -16,7 +16,6 @@
 
 import {FocusHistory} from '../../src/focus-history';
 import {installTimerService} from '../../src/service/timer-impl';
-import * as sinon from 'sinon';
 
 
 describe('FocusHistory', () => {
@@ -30,7 +29,7 @@ describe('FocusHistory', () => {
   let focusHistory;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};
@@ -51,6 +50,7 @@ describe('FocusHistory', () => {
       },
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
+      Promise: window.Promise,
     };
     installTimerService(testWindow);
     focusHistory = new FocusHistory(testWindow, 10000);
@@ -122,9 +122,9 @@ describe('FocusHistory', () => {
     const el1 = document.createElement('div');
     const el2 = document.createElement('div');
     clock.tick(100);
-    eventListeners['focus']({target: el1});  // time=100
+    eventListeners['focus']({target: el1}); // time=100
     clock.tick(100);
-    eventListeners['focus']({target: el2});  // time=200
+    eventListeners['focus']({target: el2}); // time=200
 
     focusHistory.purgeBefore(50);
     expect(focusHistory.history_.length).to.equal(2);

@@ -17,10 +17,13 @@
 import {AmpEvents} from '../../../../../src/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
+import {
+  installGlobalSubmitListenerForDoc,
+} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from
-    '../../../../../src/service/template-impl';
+  '../../../../../src/service/template-impl';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;
@@ -48,11 +51,20 @@ describes.realWin('AmpForm Integration', {
   beforeEach(() => {
     sandbox = env.sandbox;
     doc = env.win.document;
-    const scriptElement = document.createElement('script');
-    scriptElement.setAttribute('custom-template', 'amp-mustache');
-    doc.body.appendChild(scriptElement);
+
+    const mustache = document.createElement('script');
+    mustache.setAttribute('custom-template', 'amp-mustache');
+    doc.body.appendChild(mustache);
     registerExtendedTemplate(env.win, 'amp-mustache', AmpMustache);
+
+    const form = document.createElement('script');
+    form.setAttribute('custom-element', 'amp-form');
+    doc.head.appendChild(form);
+
     new AmpFormService(env.ampdoc);
+
+    // Wait for submit listener to be installed before starting tests.
+    return installGlobalSubmitListenerForDoc(env.ampdoc);
   });
 
   function getForm(config) {
@@ -139,7 +151,6 @@ describes.realWin('AmpForm Integration', {
         // The second time in response to the `submit` event being triggered
         // and sameform.submit being invoked.
         expect(ampForm.handleSubmitAction_).to.have.been.calledTwice;
-
         // However, only the first invocation should be handled completely.
         // and any subsequent calls should be stopped early-on.
         expect(ampForm.handleXhrSubmit_).to.have.been.calledOnce;
@@ -180,7 +191,7 @@ describes.realWin('AmpForm Integration', {
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
       // xhr request using rethrowAsync.
-      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+      sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
       const form = getForm({
         id: 'form1',
@@ -246,7 +257,7 @@ describes.realWin('AmpForm Integration', {
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
       // xhr request using rethrowAsync.
-      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+      sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
       const form = getForm({
         id: 'form1',
@@ -283,7 +294,7 @@ describes.realWin('AmpForm Integration', {
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
       // xhr request using rethrowAsync.
-      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+      sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
       const form = getForm({
         id: 'form1',

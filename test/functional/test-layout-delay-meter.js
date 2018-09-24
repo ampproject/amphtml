@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {LayoutDelayMeter} from '../../src/layout-delay-meter';
 import {Services} from '../../src/services';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import * as lolex from 'lolex';
 
 describes.realWin('layout-delay-meter', {
   amp: {
@@ -36,11 +36,16 @@ describes.realWin('layout-delay-meter', {
     win = env.win;
     installPerformanceService(win);
     const perf = Services.performanceFor(win);
-    sandbox.stub(perf, 'isPerformanceTrackingOn', () => true);
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     tickSpy = sandbox.spy(perf, 'tickDelta');
 
     meter = new LayoutDelayMeter(win, 2);
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   it('should tick when there is a delay', () => {
@@ -53,7 +58,7 @@ describes.realWin('layout-delay-meter', {
     expect(tickSpy).to.be.calledWith('adld', 300);
 
     // should only tick once.
-    tickSpy.reset();
+    tickSpy.resetHistory();
     clock.tick(200);
     meter.startLayout();
     expect(tickSpy).to.not.be.called;
@@ -67,7 +72,7 @@ describes.realWin('layout-delay-meter', {
     expect(tickSpy).to.be.calledWith('adld', 0);
 
     // should only tick once.
-    tickSpy.reset();
+    tickSpy.resetHistory();
     clock.tick(200);
     meter.enterViewport();
     expect(tickSpy).to.not.be.called;

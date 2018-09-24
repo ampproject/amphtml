@@ -1,0 +1,9 @@
+{
+  "currentAnimal": "bird",
+  "bird": {
+    "imageUrl": "/img/bird.jpg",
+    "videoUrl": "/video/bird-video.mp4",
+    "style": "yellowBackground",
+    "iframeUrl": "https://player.vimeo.com/video/151358139"
+  }
+}

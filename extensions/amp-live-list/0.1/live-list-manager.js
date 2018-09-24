@@ -15,14 +15,16 @@
  */
 
 import {Poller} from './poller';
+import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
-import {Services} from '../../../src/services';
 
 const SERVICE_ID = 'liveListManager';
 
@@ -47,6 +49,9 @@ export class LiveListManager {
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
+
+    /** @private @const {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = Services.extensionsFor(this.ampdoc.win);
 
     /** @private {number} */
     this.interval_ = 15000;
@@ -126,11 +131,10 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
-    return Services.xhrFor(this.ampdoc.win)
-        // TODO(erwinm): add update time here when possible.
-        .fetchDocument(url, {
-          requireAmpResponseSourceOrigin: false,
-        }).then(this.getLiveLists_.bind(this));
+    // TODO(erwinm): add update time here when possible.
+    return fetchDocument(this.ampdoc.win, url, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(this.getLiveLists_.bind(this));
   }
 
   /**
@@ -139,6 +143,7 @@ export class LiveListManager {
    * @param {!Document} doc
    */
   getLiveLists_(doc) {
+    this.installExtensionsForDoc_(doc);
     const lists = Array.prototype.slice.call(
         doc.getElementsByTagName('amp-live-list'));
     const updateTimes = lists.map(this.updateLiveList_.bind(this));
@@ -210,6 +215,21 @@ export class LiveListManager {
       } else {
         this.poller_.stop();
       }
+    });
+  }
+
+  /**
+   * @param {!Document} doc
+   */
+  installExtensionsForDoc_(doc) {
+    const extensions = toArray(doc
+        .querySelectorAll('script[custom-element], script[custom-template]'));
+    extensions.forEach(script => {
+      const extensionName = script.getAttribute('custom-element') ||
+          script.getAttribute('custom-template');
+      // This is a cheap operation if extension is already installed so no need
+      // to over optimize checks.
+      this.extensions_.installExtensionForDoc(this.ampdoc, extensionName);
     });
   }
 

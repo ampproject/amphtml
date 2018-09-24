@@ -15,7 +15,6 @@
  */
 
 import {install} from '../../src/polyfills/document-contains';
-import * as sinon from 'sinon';
 
 
 describe('HTMLDocument.contains', () => {
@@ -31,7 +30,7 @@ describe('HTMLDocument.contains', () => {
   let disconnectedChild;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     fakeWinWithContains = {
       HTMLDocument: class {

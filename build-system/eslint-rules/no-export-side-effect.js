@@ -19,19 +19,25 @@ module.exports = function(context) {
   return {
     ExportNamedDeclaration: function(node) {
       if (node.declaration) {
-        var declaration = node.declaration;
+        const {declaration} = node;
         if (declaration.type === 'VariableDeclaration') {
           declaration.declarations
               .map(function(declarator) {
-                return declarator.init
+                return declarator.init;
               }).filter(function(init) {
                 return init && /(?:Call|New)Expression/.test(init.type);
               }).forEach(function(init) {
-                context.report(init, 'Cannot export side-effect');
+                context.report({
+                  node: init,
+                  message: 'Cannot export side-effect',
+                });
               });
         }
       } else if (node.specifiers) {
-        context.report(node, 'Side-effect linting not implemented');
+        context.report({
+          node,
+          message: 'Side-effect linting not implemented',
+        });
       }
     },
   };

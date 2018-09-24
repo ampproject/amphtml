@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -48,8 +48,8 @@ export function adhese(global, data) {
 }
 
 /**
- * @param {!Object} e
  * @param {!Window} global
+ * @param {!Object} e
  */
 function getAdInfo(global, e) {
   if (e.detail.isReady && e.detail.width == e.target.width &&

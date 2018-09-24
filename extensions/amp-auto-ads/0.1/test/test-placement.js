@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import '../../../amp-ad/0.1/amp-ad';
 import {AdTracker} from '../ad-tracker';
-import {Services} from '../../../../src/services';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
-
+import {Services} from '../../../../src/services';
 
 describes.realWin('placement', {
   amp: {
     runtimeOn: true,
     ampdoc: 'single',
+    extensions: ['amp-ad'],
   },
 }, env => {
   let win, doc, ampdoc;
@@ -62,18 +63,22 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
-          .then(() => {
-            expect(placements[0].getAdElement()).to.equal(anchor.childNodes[0]);
-          });
+
+      const result = placements[0].placeAd(attributes, sizing, adTracker);
+      env.flushVsync();
+      return result.then(() => {
+        expect(placements[0].getAdElement()).to.equal(anchor.childNodes[0]);
+      });
     });
 
     it('should throw an error if ad not placed', () => {
@@ -94,7 +99,9 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      expect(() => placements[0].getAdElement()).to.throw(/No ad element/);
+      allowConsoleError(() => {
+        expect(() => placements[0].getAdElement()).to.throw(/No ad element/);
+      });
     });
   });
 
@@ -224,21 +231,23 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const baseAttributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
         'data-custom-att-1': 'val-1',
         'data-custom-att-2': 'val-2',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(baseAttributes, adTracker)
+      return placements[0].placeAd(baseAttributes, sizing, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.getAttribute('data-custom-att-1'))
@@ -247,6 +256,58 @@ describes.realWin('placement', {
                 .to.equal('val-2');
           });
     });
+
+    it('should place an ad with fixed layouts', () => {
+      const anchor = doc.createElement('div');
+      anchor.id = 'anId';
+      container.appendChild(anchor);
+
+      const placements = getPlacementsFromConfigObj(ampdoc, {
+        placements: [
+          {
+            anchor: {
+              selector: 'DIV#anId',
+            },
+            pos: 2,
+            type: 1,
+          },
+        ],
+      });
+      expect(placements).to.have.lengthOf(1);
+
+      const baseAttributes = {
+        'type': '_ping_',
+        'data-custom-att-1': 'val-1',
+        'data-custom-att-2': 'val-2',
+      };
+
+      const sizing = {
+        width: '300',
+        height: '250',
+      };
+
+      const adTracker = new AdTracker([], {
+        initialMinSpacing: 0,
+        subsequentMinSpacing: [],
+        maxAdCount: 10,
+      });
+      return placements[0].placeAd(baseAttributes, sizing, adTracker)
+          .then(() => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
+            expect(adElement.getAttribute('layout')).to.equal('fixed');
+            expect(adElement.getAttribute('height')).to.equal('0');
+            expect(adElement.getAttribute('width')).to.equal('300');
+            expect(adElement.getAttribute('style'))
+                .to.equal('width: 300px; height: 250px;');
+            expect(adElement.getAttribute('data-custom-att-1'))
+                .to.equal('val-1');
+            expect(adElement.getAttribute('data-custom-att-2'))
+                .to.equal('val-2');
+          });
+    });
+
 
     it('should place an ad with the correct placement attributes', () => {
       const anchor = doc.createElement('div');
@@ -262,7 +323,7 @@ describes.realWin('placement', {
             pos: 2,
             type: 1,
             attributes: {
-              'type': 'ad-network-type2',
+              'type': 'adsense',
               'data-custom-att-1': 'val-1',
               'data-custom-att-2': 'val-2',
             },
@@ -272,21 +333,23 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const baseAttributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
         'data-custom-att-2': 'val-3',
         'data-custom-att-3': 'val-4',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(baseAttributes, adTracker)
+      return placements[0].placeAd(baseAttributes, sizing, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type2');
+            expect(adElement.getAttribute('type')).to.equal('adsense');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.getAttribute('data-custom-att-1'))
@@ -317,8 +380,10 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const baseAttributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
@@ -327,15 +392,15 @@ describes.realWin('placement', {
       });
 
       const resources = Services.resourcesForDoc(anchor);
-      sandbox.stub(resources, 'attemptChangeSize', () => {
+      sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
         return Promise.reject();
       });
 
-      return placements[0].placeAd(baseAttributes, adTracker)
+      return placements[0].placeAd(baseAttributes, sizing, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.classList.contains(
@@ -366,19 +431,21 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('5px');
@@ -410,19 +477,21 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('5px');
@@ -454,19 +523,21 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('');
@@ -496,19 +567,21 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
-            expect(adElement.getAttribute('type')).to.equal('ad-network-type');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.style.marginTop).to.equal('');
@@ -518,13 +591,155 @@ describes.realWin('placement', {
           });
     });
 
+    it('should not resize to full-width responsive if width exceeds limit',
+        () => {
+          const anchor = doc.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const resource = Services.resourcesForDoc(anchor);
+          sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(resource.viewport_, 'getWidth').callsFake(() => 2000);
+
+          const placements = getPlacementsFromConfigObj(ampdoc, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+
+          const attributes = {
+            'type': '_ping_',
+          };
+
+          const sizing = {};
+
+          const adTracker = new AdTracker([], {
+            initialMinSpacing: 0,
+            subsequentMinSpacing: [],
+            maxAdCount: 10,
+          });
+          return placements[0].placeAd(attributes, sizing, adTracker, true)
+              .then(placementState => {
+                expect(resource.attemptChangeSize).to.have.been.calledWith(
+                    anchor.firstChild, 250, undefined);
+                expect(placementState).to.equal(PlacementState.PLACED);
+              });
+        });
+
+    it('should resize to full-width responsive correctly in ltr',
+        () => {
+          const anchor = doc.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const resource = Services.resourcesForDoc(anchor);
+          sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(win, 'getComputedStyle').callsFake(() => {
+            return {direction: 'ltr'};
+          });
+          sandbox.stub(resource, 'getElementLayoutBox').callsFake(() => {
+            return Promise.resolve({left: 20});
+          });
+
+          const placements = getPlacementsFromConfigObj(ampdoc, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+
+          const attributes = {
+            'type': '_ping_',
+          };
+
+          const sizing = {};
+
+          const adTracker = new AdTracker([], {
+            initialMinSpacing: 0,
+            subsequentMinSpacing: [],
+            maxAdCount: 10,
+          });
+          return placements[0].placeAd(attributes, sizing, adTracker, true)
+              .then(placementState => {
+                expect(resource.attemptChangeSize).to.have.been.calledWith(
+                    anchor.firstChild, 150, 300, {left: -20});
+                expect(placementState).to.equal(PlacementState.PLACED);
+              });
+        });
+
+    it('should resize to full-width responsive correctly in rtl',
+        () => {
+          const anchor = doc.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const resource = Services.resourcesForDoc(anchor);
+          sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+            return Promise.resolve();
+          });
+          sandbox.stub(win, 'getComputedStyle').callsFake(() => {
+            return {direction: 'rtl'};
+          });
+          sandbox.stub(resource, 'getElementLayoutBox').callsFake(() => {
+            return Promise.resolve({left: 20});
+          });
+
+          const placements = getPlacementsFromConfigObj(ampdoc, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+
+          const attributes = {
+            'type': '_ping_',
+          };
+
+          const sizing = {};
+
+          const adTracker = new AdTracker([], {
+            initialMinSpacing: 0,
+            subsequentMinSpacing: [],
+            maxAdCount: 10,
+          });
+          return placements[0].placeAd(attributes, sizing, adTracker, true)
+              .then(placementState => {
+                expect(resource.attemptChangeSize).to.have.been.calledWith(
+                    anchor.firstChild, 150, 300, {right: 20});
+                expect(placementState).to.equal(PlacementState.PLACED);
+              });
+        });
+
     it('should report placement placed when resize allowed', () => {
       const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
       const resource = Services.resourcesForDoc(anchor);
-      sandbox.stub(resource, 'attemptChangeSize', () => {
+      sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
         return Promise.resolve();
       });
 
@@ -542,15 +757,17 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
-      });;
-      return placements[0].placeAd(attributes, adTracker)
+      });
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
                 anchor.firstChild, 250, undefined);
@@ -558,13 +775,56 @@ describes.realWin('placement', {
           });
     });
 
+    it('should report resize failed when resize not allowed - responsive',
+        () => {
+          const anchor = doc.createElement('div');
+          anchor.id = 'anId';
+          container.appendChild(anchor);
+
+          const resource = Services.resourcesForDoc(anchor);
+          sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+            return Promise.reject(new Error('Resize failed'));
+          });
+
+          const placements = getPlacementsFromConfigObj(ampdoc, {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
+              },
+            ],
+          });
+          expect(placements).to.have.lengthOf(1);
+
+          const attributes = {
+            'type': '_ping_',
+          };
+
+          const sizing = {};
+
+          const adTracker = new AdTracker([], {
+            initialMinSpacing: 0,
+            subsequentMinSpacing: [],
+            maxAdCount: 10,
+          });
+          return placements[0].placeAd(attributes, sizing, adTracker, true)
+              .then(placementState => {
+                expect(resource.attemptChangeSize).to.have.been.calledWith(
+                    anchor.firstChild, 150, 300, undefined);
+                expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
+              });
+        });
+
     it('should report resize failed when resize not allowed', () => {
       const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
 
       const resource = Services.resourcesForDoc(anchor);
-      sandbox.stub(resource, 'attemptChangeSize', () => {
+      sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
         return Promise.reject(new Error('Resize failed'));
       });
 
@@ -582,15 +842,17 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(
                 anchor.firstChild, 250, undefined);
@@ -625,11 +887,13 @@ describes.realWin('placement', {
         maxAdCount: 10,
       });
 
+      const sizing = {};
+
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
 
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(
                 PlacementState.TOO_NEAR_EXISTING_AD);
@@ -657,15 +921,17 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
@@ -692,15 +958,17 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
@@ -728,15 +996,17 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
@@ -764,15 +1034,17 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
@@ -804,15 +1076,17 @@ describes.realWin('placement', {
       expect(placements).to.have.lengthOf(1);
 
       const attributes = {
-        'type': 'ad-network-type',
+        'type': '_ping_',
       };
+
+      const sizing = {};
 
       const adTracker = new AdTracker([], {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
-      return placements[0].placeAd(attributes, adTracker)
+      return placements[0].placeAd(attributes, sizing, adTracker)
           .then(placementState => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(anchor1.childNodes).to.have.lengthOf(0);
@@ -1314,7 +1588,7 @@ describes.realWin('placement', {
         placements: [
           {
             anchor: {
-              selector: 'DIV.class2',
+              selector: 'body DIV.class2',
               sub: {
                 selector: 'DIV.class1 DIV.class3',
                 all: true,

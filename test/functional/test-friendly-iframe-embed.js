@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -23,13 +24,12 @@ import {
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
-import {Signals} from '../../src/utils/signals';
-import {getStyle} from '../../src/style';
 import {Services} from '../../src/services';
+import {Signals} from '../../src/utils/signals';
 import {installServiceInEmbedScope} from '../../src/service';
+import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import * as sinon from 'sinon';
 
 
 describe('friendly-iframe-embed', () => {
@@ -40,7 +40,7 @@ describe('friendly-iframe-embed', () => {
   let resourcesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     const extensions = Services.extensionsFor(window);
     const resources = Services.resourcesForDoc(window.document);
@@ -59,6 +59,12 @@ describe('friendly-iframe-embed', () => {
     setSrcdocSupportedForTesting(undefined);
     sandbox.restore();
   });
+
+  function stubViewportScrollTop(scrollTop) {
+    sandbox.stub(Services, 'viewportForDoc').returns({
+      getScrollTop: () => scrollTop,
+    });
+  }
 
   it('should follow main install steps', () => {
 
@@ -92,7 +98,9 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.visibility).to.equal('');
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
-      expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
+      expect(isAnimationNone(embed.win.document.body)).to.be.true;
+      expect(embed.win.document.documentElement.classList.contains(
+          'i-amphtml-fie')).to.be.true;
 
       // BASE element has been inserted.
       expect(embed.win.document.querySelector('base').href)
@@ -251,9 +259,9 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(arg =>
-                arg.left == 0 &&
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+              arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == iframe.contentWindow.innerWidth &&
                 arg.height == iframe.contentWindow.innerHeight))
@@ -269,7 +277,7 @@ describe('friendly-iframe-embed', () => {
       return embed.whenIniLoaded();
     }).then(() => {
       expect(embed.signals().get('ini-load')).to.be.ok;
-      return embed.whenReady();  // `whenReady` should also be complete.
+      return embed.whenReady(); // `whenReady` should also be complete.
     });
   });
 
@@ -285,9 +293,9 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(arg =>
-                arg.left == 10 &&
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+              arg.left == 10 &&
                 arg.top == 10 &&
                 arg.width == 100 &&
                 arg.height == 200))
@@ -304,7 +312,7 @@ describe('friendly-iframe-embed', () => {
       return embed.whenIniLoaded();
     }).then(() => {
       expect(embed.signals().get('ini-load')).to.be.ok;
-      return embed.whenReady();  // `whenReady` should also be complete.
+      return embed.whenReady(); // `whenReady` should also be complete.
     });
   });
 
@@ -327,6 +335,7 @@ describe('friendly-iframe-embed', () => {
     let blacklistedAd;
     let blacklistedAnalytics;
     let blacklistedPixel;
+    let blacklistedAmpAdExit;
 
     const context = document.createElement('div');
     document.body.appendChild(context);
@@ -339,6 +348,7 @@ describe('friendly-iframe-embed', () => {
           blacklistedAd = resource('amp-ad', 0),
           blacklistedAnalytics = resource('amp-analytics', 0),
           blacklistedPixel = resource('amp-pixel', 0),
+          blacklistedAmpAdExit = resource('amp-ad-exit', 0),
         ]))
         .once();
 
@@ -348,6 +358,7 @@ describe('friendly-iframe-embed', () => {
       expect(blacklistedAd.loadedComplete).to.be.false;
       expect(blacklistedAnalytics.loadedComplete).to.be.false;
       expect(blacklistedPixel.loadedComplete).to.be.false;
+      expect(blacklistedAmpAdExit.loadedComplete).to.be.false;
     });
   });
 
@@ -388,51 +399,74 @@ describe('friendly-iframe-embed', () => {
 
     it('should pre-pend to html', () => {
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal('<base href="https://acme.org/embed1"><a></a>');
+      expect(html).to.equal('<base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content='
+          + '"script-src \'none\';object-src \'none\';child-src \'none\'">'
+          + '<a></a>');
     });
 
     it('should insert into head', () => {
       spec.html = '<html><head>head</head><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html><head>'
-          + '<base href="https://acme.org/embed1">'
-          + 'head</head><body>body');
+      expect(html).to.equal('<html><head><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content='
+          + '"script-src \'none\';object-src \'none\';'
+          + 'child-src \'none\'">head</head><body>body');
     });
 
     it('should insert into head w/o html', () => {
       spec.html = '<head>head</head><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<head>'
-          + '<base href="https://acme.org/embed1">'
-          + 'head</head><body>body');
+      expect(html).to.equal('<head><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="'
+          + 'script-src \'none\';object-src \'none\';child-src \'none\'">head'
+          + '</head><body>body');
     });
 
     it('should insert before body', () => {
       spec.html = '<html><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html>'
-          + '<base href="https://acme.org/embed1">'
-          + '<body>body');
+      expect(html).to.equal('<html><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'"><body>body');
     });
 
     it('should insert before body w/o html', () => {
       spec.html = '<body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<base href="https://acme.org/embed1">'
-          + '<body>body');
+      expect(html).to.equal('<base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'"><body>body');
     });
 
     it('should insert after html', () => {
       spec.html = '<html>content';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html>'
-          + '<base href="https://acme.org/embed1">'
-          + 'content');
+      expect(html).to.equal('<html><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'">content');
+    });
+
+    it('should insert CSP', () => {
+      spec.html = '<html><head></head><body></body></html>';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<html><head><base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'">' +
+          '</head><body></body></html>');
+      spec.html = '<html>foo';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<html><base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'">foo');
+      spec.html = '<body>foo';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'"><body>foo');
     });
   });
 
@@ -477,6 +511,24 @@ describe('friendly-iframe-embed', () => {
       });
       return embedPromise.then(embed => {
         return embed.whenWindowLoaded();
+      });
+    });
+
+    it('should add violation listener', () => {
+      let eventListenerSpy;
+      const container = {
+        appendChild: child => {
+          document.body.appendChild(child);
+          eventListenerSpy =
+              sandbox.spy(child.contentWindow, 'addEventListener');
+        },
+      };
+      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
+        url: 'https://acme.org/url1',
+        html: '<a id="a1"></a>',
+      });
+      return embedPromise.then(() => {
+        expect(eventListenerSpy).to.be.calledOnce;
       });
     });
   });
@@ -536,7 +588,9 @@ describe('friendly-iframe-embed', () => {
         },
         removeEventListener: () => {},
       };
-      contentWindow = {};
+      contentWindow = {
+        addEventListener: () => {},
+      };
       contentDocument = {};
       contentBody = {nodeType: 1, style: {}};
       container = {
@@ -570,6 +624,7 @@ describe('friendly-iframe-embed', () => {
     });
 
     it('should poll until ready', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
@@ -618,6 +673,7 @@ describe('friendly-iframe-embed', () => {
     });
 
     it('should stop polling when loaded', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
@@ -631,7 +687,9 @@ describe('friendly-iframe-embed', () => {
       });
     });
 
-    it('should stop polling when loading failed', () => {
+    // TODO(#16916): Make this test work with synchronous throws.
+    it.skip('should stop polling when loading failed', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
@@ -655,53 +713,79 @@ describe('friendly-iframe-embed', () => {
     const winW = 600;
     const winH = 800;
 
-    const vsyncMock = {
-      measure: fn => fn(),
-    };
-
     const resourcesMock = {
-      mutateElement: (unusedEl, fn) => {
-        fn();
+      measureMutateElement: (unusedEl, measure, mutate) => {
+        if (measure) {
+          measure();
+        }
+        if (mutate) {
+          mutate();
+        }
         return Promise.resolve();
       },
     };
 
     let win;
-    let iframe;
-    let fie;
+
+    function createFie(bodyElementMock, parentType = 'amp-ad') {
+      const iframe = document.createElement('iframe');
+      const parent = document.createElement(parentType);
+
+      parent.appendChild(iframe);
+
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect')
+          .returns(layoutRectLtwh(x, y, w, h));
+
+      const fie = new FriendlyIframeEmbed(iframe, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      }, Promise.resolve());
+
+      sandbox.stub(fie, 'getResources_').returns(resourcesMock);
+      sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
+
+      fie.win = win;
+
+      return fie;
+    }
+
 
     beforeEach(() => {
       win = {
         innerWidth: winW,
         innerHeight: winH,
       };
-      iframe = document.createElement('iframe');
-
-      sandbox./*OK*/stub(iframe, 'getBoundingClientRect', () => ({
-        right: x + w,
-        left: x,
-        top: y,
-        bottom: y + h,
-        width: w,
-        height: h,
-      }));
-
-      fie = new FriendlyIframeEmbed(iframe, {
-        url: 'https://acme.org/url1',
-        html: '<body></body>',
-      }, Promise.resolve());
-
-      sandbox.stub(fie, 'getVsync', () => vsyncMock);
-      sandbox.stub(fie, 'getResources', () => resourcesMock);
-      sandbox.stub(fie, 'win', win);
     });
 
-    it('should resize body and fixed container when entering', function* () {
+    it('should not throw if inside an amp-ad', () => {
       const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'amp-ad');
 
-      const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
+      const scrollTop = 0;
+      stubViewportScrollTop(scrollTop);
 
-      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      expect(() => fie.enterFullOverlayMode()).to.not.throw();
+    });
+
+    it('should throw if not inside an amp-ad', () => {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'not-an-amp-ad');
+
+      const scrollTop = 0;
+      stubViewportScrollTop(scrollTop);
+
+      allowConsoleError(() => {
+        expect(() => fie.enterFullOverlayMode())
+            .to.throw(/Only .?amp-ad.? is allowed/);
+      });
+    });
+
+    it('resizes body and fixed container when entering', function* () {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock);
+
+      const scrollTop = 45;
+      stubViewportScrollTop(scrollTop);
 
       yield fie.enterFullOverlayMode();
 
@@ -709,10 +793,12 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.position).to.equal('absolute');
       expect(bodyElementMock.style.width).to.equal(`${w}px`);
       expect(bodyElementMock.style.height).to.equal(`${h}px`);
-      expect(bodyElementMock.style.top).to.equal(`${y}px`);
+      expect(bodyElementMock.style.top).to.equal(`${y - scrollTop}px`);
       expect(bodyElementMock.style.left).to.equal(`${x}px`);
       expect(bodyElementMock.style.right).to.equal('auto');
       expect(bodyElementMock.style.bottom).to.equal('auto');
+
+      const {iframe} = fie;
 
       expect(iframe.style.position).to.equal('fixed');
       expect(iframe.style.left).to.equal('0px');
@@ -721,18 +807,14 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.bottom).to.equal('0px');
       expect(iframe.style.width).to.equal('100vw');
       expect(iframe.style.height).to.equal('100vh');
-
-      // ensuring that the resource scheduler knows about the iframe change
-      expect(mutateElementSpy)
-          .to.have.been.calledWith(iframe, sinon.match.any);
     });
 
     it('should reset body and fixed container when leaving', function* () {
       const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock);
 
-      const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
-
-      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      const scrollTop = 19;
+      stubViewportScrollTop(scrollTop);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();
@@ -745,6 +827,8 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.right).to.be.empty;
       expect(bodyElementMock.style.bottom).to.be.empty;
 
+      const {iframe} = fie;
+
       expect(iframe.style.position).to.be.empty;
       expect(iframe.style.left).to.be.empty;
       expect(iframe.style.right).to.be.empty;
@@ -752,10 +836,6 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.bottom).to.be.empty;
       expect(iframe.style.width).to.be.empty;
       expect(iframe.style.height).to.be.empty;
-
-      // ensuring that the resource scheduler knows about the iframe change
-      expect(mutateElementSpy)
-          .to.have.been.calledWith(iframe, sinon.match.any);
     });
   });
 });

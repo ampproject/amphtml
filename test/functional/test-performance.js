@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {getMode} from '../../src/mode';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 
 
 describes.realWin('performance', {amp: true}, env => {
@@ -32,9 +31,14 @@ describes.realWin('performance', {amp: true}, env => {
     win = env.win;
     sandbox = env.sandbox;
     ampdoc = env.ampdoc;
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     installPerformanceService(env.win);
     perf = Services.performanceFor(env.win);
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   describe('when viewer is not ready', () => {
@@ -118,7 +122,7 @@ describes.realWin('performance', {amp: true}, env => {
 
       expect(perf.events_.length).to.equal(0);
 
-      for (let i = 0; i < 50 ; i++) {
+      for (let i = 0; i < 50; i++) {
         perf.tick(`start${i}`);
       }
 
@@ -268,7 +272,8 @@ describes.realWin('performance', {amp: true}, env => {
       beforeEach(() => {
         tickDeltaStub = sandbox.stub(perf, 'tickDelta');
         firstVisibleTime = null;
-        sandbox.stub(viewer, 'getFirstVisibleTime', () => firstVisibleTime);
+        sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(
+            () => firstVisibleTime);
       });
 
       it('should always be zero before viewer is set', () => {
@@ -460,13 +465,13 @@ describes.realWin('performance', {amp: true}, env => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        perf.win,
-        sinon.match(arg =>
-                arg.left == 0 &&
+            perf.win,
+            sinon.match(arg =>
+              arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == perf.win.innerWidth &&
                 arg.height == perf.win.innerHeight),
-        /* inPrerender */ true)
+            /* inPrerender */ true)
         .returns(Promise.resolve([res1, res2]))
         .once();
 
@@ -488,6 +493,10 @@ describes.realWin('performance', {amp: true}, env => {
     function stubHasBeenVisible(visibility) {
       sandbox.stub(viewer, 'hasBeenVisible')
           .returns(visibility);
+    }
+
+    function getPerformanceMarks() {
+      return win.performance.getEntriesByType('mark').map(entry => entry.name);
     }
 
     beforeEach(() => {
@@ -533,6 +542,9 @@ describes.realWin('performance', {amp: true}, env => {
           return perf.whenViewportLayoutComplete_().then(() => {
             expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
+
+            expect(getPerformanceMarks()).to.have.members(
+                ['ol', 'ofv', 'pc']);
           });
         });
       });
@@ -584,6 +596,8 @@ describes.realWin('performance', {amp: true}, env => {
           return whenFirstVisiblePromise.then(() => {
             expect(tickSpy.withArgs('pc')).to.be.calledOnce;
             expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
+            expect(getPerformanceMarks()).to.deep.equal(
+                ['ol', 'pc', 'ofv']);
           });
         });
       });
@@ -604,6 +618,7 @@ describes.realWin('performance', {amp: true}, env => {
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(viewerSendMessageStub.withArgs(
               'prerenderComplete').firstCall.args[1].value).to.equal(300);
+          expect(getPerformanceMarks()).to.deep.equal(['ol', 'pc']);
         });
       });
 
@@ -615,6 +630,7 @@ describes.realWin('performance', {amp: true}, env => {
           expect(tickSpy.withArgs('ol')).to.be.calledOnce;
           expect(tickSpy.withArgs('pc')).to.be.calledOnce;
           expect(tickSpy.withArgs('pc').args[0][2]).to.be.undefined;
+          expect(getPerformanceMarks()).to.deep.equal(['ol', 'pc']);
         });
       });
     });

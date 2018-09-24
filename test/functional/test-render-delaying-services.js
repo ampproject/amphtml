@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {
-  waitForServices,
-  hasRenderDelayingServices,
-} from '../../src/render-delaying-services';
-import {createIframePromise} from '../../testing/iframe';
-import * as service from '../../src/service';
-import * as sinon from 'sinon';
 import * as lolex from 'lolex';
+import * as service from '../../src/service';
+import {createIframePromise} from '../../testing/iframe';
+import {
+  hasRenderDelayingServices,
+  waitForServices,
+} from '../../src/render-delaying-services';
 
 describe('waitForServices', () => {
 
@@ -33,7 +32,7 @@ describe('waitForServices', () => {
   let variantResolve;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     const getService = sandbox.stub(service, 'getServicePromise');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
     experimentResolve = waitForService(getService, 'amp-experiment');
@@ -41,11 +40,12 @@ describe('waitForServices', () => {
 
     return createIframePromise().then(iframe => {
       win = iframe.win;
-      clock = lolex.install(iframe.win);
+      clock = lolex.install({target: win});
     });
   });
 
   afterEach(() => {
+    clock.uninstall();
     sandbox.restore();
   });
 

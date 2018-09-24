@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
+import {WindowInterface} from '../src/window-interface';
 import {
   getService,
   getServiceForDoc,
@@ -23,7 +22,9 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../src/service';
-import {WindowInterface} from '../src/window-interface';
+import {getStyle} from '../src/style';
+import {poll} from './iframe';
+import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
@@ -48,7 +49,7 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
 }
 
 export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
-  resetServiceForTesting(ampdoc.win, 'viewer');
+  resetServiceForTesting(ampdoc.win, serviceId);
   const impl = {};
   methods.forEach(method => {
     impl[method] = () => {};
@@ -82,6 +83,35 @@ export function whenCalled(spy, opt_callCount = 1) {
       () => spy.callCount === opt_callCount);
 }
 
+const noneValues = {
+  'animation-name': ['none', 'initial'],
+  'animation-duration': ['0s', 'initial'],
+  'animation-timing-function': ['ease', 'initial'],
+  'animation-delay': ['0s', 'initial'],
+  'animation-iteration-count': ['1', 'initial'],
+  'animation-direction': ['normal', 'initial'],
+  'animation-fill-mode': ['none', 'initial'],
+  'animation-play-state': ['running', 'initial'],
+};
+
+/**
+ * Browsers are inconsistent when accessing the value for 'animation: none'.
+ * Some return 'none', some return the full shorthand, some give the full
+ * shorthand in a different order.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isAnimationNone(element) {
+  for (const property in noneValues) {
+    const value = getStyle(element, property);
+    const expectedValues = noneValues[property];
+    if (!expectedValues.some(expectedValue => value == expectedValue)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Asserts that the given element is only visible to screen readers.
  * @param {!Element} node
@@ -94,8 +124,8 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
   expect(computedStyle.getPropertyValue('top')).to.equal('0px');
   expect(computedStyle.getPropertyValue('left')).to.equal('0px');
-  expect(computedStyle.getPropertyValue('width')).to.equal('2px');
-  expect(computedStyle.getPropertyValue('height')).to.equal('2px');
+  expect(computedStyle.getPropertyValue('width')).to.equal('4px');
+  expect(computedStyle.getPropertyValue('height')).to.equal('4px');
   expect(computedStyle.getPropertyValue('opacity')).to.equal('0');
   expect(computedStyle.getPropertyValue('overflow')).to.equal('hidden');
   expect(computedStyle.getPropertyValue('border')).to.contain('none');
@@ -132,4 +162,19 @@ export function withdrawRequest(win, id) {
     ampCors: false,
     credentials: 'omit',
   }).then(res => res.json());
+}
+
+export function createPointerEvent(type, x, y) {
+  const event = new /*OK*/CustomEvent(type);
+  event.clientX = x;
+  event.clientY = y;
+  event.pageX = x;
+  event.pageY = y;
+  event.touches = [{
+    clientX: x,
+    clientY: y,
+    pageX: x,
+    pageY: y,
+  }];
+  return event;
 }

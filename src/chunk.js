@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import PriorityQueue from './utils/priority-queue';
+import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {registerServiceBuilderForDoc, getServiceForDoc} from './service';
-import {makeBodyVisible} from './style-installer';
-import {Services} from './services';
+import {
+  getServiceForDocDeprecated,
+  registerServiceBuilderForDoc,
+} from './service';
+import {makeBodyVisibleRecovery} from './style-installer';
+import PriorityQueue from './utils/priority-queue';
 
 /**
  * @const {string}
@@ -43,7 +46,8 @@ const resolved = Promise.resolve();
  */
 function getChunkServiceForDoc_(nodeOrAmpDoc) {
   registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+  // Uses getServiceForDocDeprecated() since Chunks is a startup service.
+  return getServiceForDocDeprecated(nodeOrAmpDoc, 'chunk');
 }
 
 /**
@@ -62,7 +66,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     return;
   }
   const service = getChunkServiceForDoc_(nodeOrAmpDoc);
-  service.runForStartup_(fn);
+  service.runForStartup(fn);
 }
 
 /**
@@ -104,11 +108,14 @@ export function chunkInstanceForTesting(nodeOrAmpDoc) {
  */
 export function deactivateChunking() {
   deactivated = true;
-};
+}
 
+/**
+ * @visibleForTesting
+ */
 export function activateChunkingForTesting() {
   deactivated = false;
-};
+}
 
 /**
  * Runs all currently scheduled chunks.
@@ -155,7 +162,7 @@ const TaskState = {
  */
 class Task {
   /**
-   * @param {!function(?IdleDeadline)} fn
+   * @param {function(?IdleDeadline)} fn
    */
   constructor(fn) {
     /** @public {TaskState} */
@@ -169,7 +176,7 @@ class Task {
    * Executes the wrapped function.
    * @param {?IdleDeadline} idleDeadline
    * @throws {Error}
-   * @private
+   * @protected
    */
   runTask_(idleDeadline) {
     if (this.state == TaskState.RUN) {
@@ -186,7 +193,7 @@ class Task {
 
   /**
    * @return {string}
-   * @private
+   * @protected
    */
   getName_() {
     return this.fn_.displayName || this.fn_.name;
@@ -204,7 +211,7 @@ class Task {
   /**
    * Returns true if this task should be run without delay.
    * @return {boolean}
-   * @private
+   * @protected
    */
   immediateTriggerCondition_() {
     // By default, there are no immediate trigger conditions.
@@ -215,7 +222,7 @@ class Task {
    * Returns true if this task should be scheduled using `requestIdleCallback`.
    * Otherwise, task is scheduled as macro-task on next event loop.
    * @return {boolean}
-   * @private
+   * @protected
    */
   useRequestIdleCallback_() {
     // By default, always use requestIdleCallback.
@@ -229,7 +236,7 @@ class Task {
  */
 class StartupTask extends Task {
   /**
-   * @param {!function(?IdleDeadline)} fn
+   * @param {function(?IdleDeadline)} fn
    * @param {!Window} win
    * @param {!Promise<!./service/viewer-impl.Viewer>} viewerPromise
    */
@@ -259,7 +266,7 @@ class StartupTask extends Task {
   /** @override */
   onTaskError_(unusedError) {
     // Startup tasks run early in init. All errors should show the doc.
-    makeBodyVisible(self.document);
+    makeBodyVisibleRecovery(self.document);
   }
 
   /** @override */
@@ -305,8 +312,6 @@ class Chunks {
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
-    /** @private @const */
-    this.ampDoc_ = ampDoc;
     /** @private @const {!Window} */
     this.win_ = ampDoc.win;
     /** @private @const {!PriorityQueue<Task>} */
@@ -337,9 +342,8 @@ class Chunks {
   /**
    * Run a fn that's part of AMP's startup sequence as a "chunk".
    * @param {function(?IdleDeadline)} fn
-   * @private
    */
-  runForStartup_(fn) {
+  runForStartup(fn) {
     const t = new StartupTask(fn, this.win_, this.viewerPromise_);
     this.enqueueTask_(t, Number.POSITIVE_INFINITY);
   }
@@ -455,6 +459,9 @@ class Chunks {
  */
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();
+  /**
+   * @param {!IdleDeadline} info
+   */
   function rIC(info) {
     if (info.timeRemaining() < minimumTimeRemaining) {
       const remainingTimeout = timeout - (Date.now() - startTime);

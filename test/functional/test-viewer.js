@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {Viewer} from '../../src/service/viewer-impl';
 import {Services} from '../../src/services';
+import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from
+  '../../src/service/document-info-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {parseUrl, removeFragment} from '../../src/url';
-import * as sinon from 'sinon';
+import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 
 describe('Viewer', () => {
@@ -37,6 +38,10 @@ describe('Viewer', () => {
   let errorStub;
   let expectedErrorStub;
 
+  /**
+   * Change the current visibility state.
+   * @param {string} vis The visibility state.
+   */
   function changeVisibility(vis) {
     windowApi.document.hidden = vis !== 'visible';
     windowApi.document.visibilityState = vis;
@@ -51,12 +56,14 @@ describe('Viewer', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowApi = new WindowApi();
+    windowApi.Math = window.Math;
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
+    windowApi.Promise = window.Promise;
     windowApi.location = {
       hash: '#origin=g.com',
       href: '/test/viewer',
@@ -75,19 +82,22 @@ describe('Viewer', () => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
+      querySelector() { return parseUrlDeprecated('http://www.example.com/'); },
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
       replaceState: () => {},
     };
-    sandbox.stub(windowApi.history, 'replaceState', (state, title, url) => {
-      windowApi.location.href = url;
-    });
+    sandbox.stub(windowApi.history, 'replaceState').callsFake(
+        (state, title, url) => {
+          windowApi.location.href = url;
+        });
     installDocService(windowApi, /* isSingleDoc */ true);
     installDocumentStateService(windowApi);
     ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
+    installDocumentInfoServiceForDoc(windowApi.document);
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
     expectedErrorStub = sandbox.stub(dev(), 'expectedError');
@@ -142,13 +152,95 @@ describe('Viewer', () => {
     expect(viewer.hasCapability('foo')).to.be.false;
   });
 
-  it('should NOT clear fragment in embedded mode', () => {
+  it('should not clear fragment in embedded mode', () => {
     windowApi.parent = {};
     windowApi.location.href = 'http://www.example.com#test=1';
     windowApi.location.hash = '#origin=g.com&test=1';
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState).to.not.be.called;
     expect(viewer.getParam('test')).to.equal('1');
+  });
+
+  it('should set ampshare fragment within custom tab', function*() {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com/';
+    windowApi.location.hash = '';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
+  it('should merge fragments within custom tab', function*() {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com/#test=1';
+    windowApi.location.hash = '#test=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
+  it('should not duplicate ampshare when merging', function*() {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com/#test=1&ampshare=old';
+    windowApi.location.hash = '#test=1&ampshare=old';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
+  it('should remove multiple ampshares when merging', function*() {
+    windowApi.parent = windowApi;
+    windowApi.location.href =
+        'http://www.example.com/#test=1&ampshare=a&ampshare=b&ampshare=c';
+    windowApi.location.hash =
+        '#test=1&ampshare=a&ampshare=b&ampshare=c';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
+  it('should remove extra ampshare even when it\'s first', function*() {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com/#ampshare=old&test=1';
+    windowApi.location.hash = '#ampshare=old&test=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
+  });
+
+  it('should remove extra ampshare even when it\'s sandwiched', function*() {
+    windowApi.parent = windowApi;
+    windowApi.location.href =
+        'http://www.example.com/#note=ok&ampshare=old&test=1';
+    windowApi.location.hash =
+        '#note=ok&ampshare=old&test=1';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.getParam('note')).to.equal('ok');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    yield viewer.whenFirstVisible();
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#note=ok&ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
   });
 
   it('should clear fragment when click param is present', () => {
@@ -162,12 +254,42 @@ describe('Viewer', () => {
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
+  it('should restore fragment within custom tab with click param', function*() {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com#click=abc';
+    windowApi.location.hash = '#click=abc';
+    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    const viewer = new Viewer(ampdoc);
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        'http://www.example.com');
+    expect(viewer.getParam('click')).to.equal('abc');
+    yield viewer.whenFirstVisible();
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
   it('should configure visibilityState visible by default', () => {
     expect(viewer.getVisibilityState()).to.equal('visible');
     expect(viewer.isVisible()).to.equal(true);
     expect(viewer.getPrerenderSize()).to.equal(1);
     expect(viewer.getFirstVisibleTime()).to.equal(0);
     expect(viewer.getLastVisibleTime()).to.equal(0);
+  });
+
+  it('should return promise that resolve on visible', function* () {
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.isVisible()).to.be.true;
+    let promise = viewer.whenNextVisible();
+    yield promise;
+    viewer.receiveMessage('visibilitychange', {
+      state: 'hidden',
+    });
+    promise = viewer.whenNextVisible();
+    expect(viewer.isVisible()).to.be.false;
+    viewer.receiveMessage('visibilitychange', {
+      state: 'visible',
+    });
+    return promise;
   });
 
   it('should initialize firstVisibleTime for initially visible doc', () => {
@@ -233,8 +355,9 @@ describe('Viewer', () => {
   });
 
   describe('replaceUrl', () => {
+    /** @param {string} href */
     function setUrl(href) {
-      const url = parseUrl(href);
+      const url = parseUrlDeprecated(href);
       windowApi.location.href = url.href;
       windowApi.location.hash = url.hash;
     }
@@ -242,7 +365,8 @@ describe('Viewer', () => {
     it('should replace URL for the same non-proxy origin', () => {
       const fragment = '#replaceUrl=http://www.example.com/two%3Fa%3D1&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      new Viewer(ampdoc);
+      const viewer = new Viewer(ampdoc);
+      viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
           'http://www.example.com/two?a=1' + fragment);
@@ -255,7 +379,8 @@ describe('Viewer', () => {
     it('should ignore replacement fragment', () => {
       const fragment = '#replaceUrl=http://www.example.com/two%23b=2&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      new Viewer(ampdoc);
+      const viewer = new Viewer(ampdoc);
+      viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
           'http://www.example.com/two' + fragment);
@@ -266,7 +391,8 @@ describe('Viewer', () => {
     it('should replace relative URL for the same non-proxy origin', () => {
       const fragment = '#replaceUrl=/two&b=1';
       setUrl(removeFragment(window.location.href) + fragment);
-      new Viewer(ampdoc);
+      const viewer = new Viewer(ampdoc);
+      viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
           window.location.origin + '/two' + fragment);
@@ -277,7 +403,8 @@ describe('Viewer', () => {
     it('should fail to replace URL for a wrong non-proxy origin', () => {
       const fragment = '#replaceUrl=http://other.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      new Viewer(ampdoc);
+      const viewer = new Viewer(ampdoc);
+      viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.not.be.called;
       expect(windowApi.location.originalHref).to.be.undefined;
     });
@@ -286,11 +413,12 @@ describe('Viewer', () => {
       const fragment = '#replaceUrl=http://www.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
       windowApi.history.replaceState.restore();
-      sandbox.stub(windowApi.history, 'replaceState', () => {
+      sandbox.stub(windowApi.history, 'replaceState').callsFake(() => {
         throw new Error('intentional');
       });
+      const viewer = new Viewer(ampdoc);
       expect(() => {
-        new Viewer(ampdoc);
+        viewer.replaceUrl(viewer.getParam('replaceUrl'));
       }).to.not.throw();
       expect(windowApi.location.originalHref).to.be.undefined;
     });
@@ -299,7 +427,8 @@ describe('Viewer', () => {
       const fragment =
           '#replaceUrl=https://cdn.ampproject.org/c/www.example.com/two&b=1';
       setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
-      new Viewer(ampdoc);
+      const viewer = new Viewer(ampdoc);
+      viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith({}, '',
           'https://cdn.ampproject.org/c/www.example.com/two' + fragment);
@@ -312,7 +441,8 @@ describe('Viewer', () => {
       const fragment =
           '#replaceUrl=https://cdn.ampproject.org/c/other.example.com/two&b=1';
       setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
-      new Viewer(ampdoc);
+      const viewer = new Viewer(ampdoc);
+      viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.not.be.called;
       expect(windowApi.location.originalHref).to.be.undefined;
     });
@@ -320,8 +450,9 @@ describe('Viewer', () => {
     it('should NOT replace URL in shadow doc', () => {
       const fragment = '#replaceUrl=http://www.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      sandbox.stub(ampdoc, 'isSingleDoc', () => false);
-      new Viewer(ampdoc);
+      sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
+      const viewer = new Viewer(ampdoc);
+      viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.not.be.called;
     });
   });
@@ -380,11 +511,11 @@ describe('Viewer', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         viewer.receiveMessage('visibilitychange', {
           state: 'what is this',
         });
-      }).to.throw('Unknown VisibilityState value');
+      }).to.throw('Unknown VisibilityState value'); });
       expect(viewer.getVisibilityState()).to.equal('paused');
       expect(viewer.isVisible()).to.equal(false);
     });
@@ -514,7 +645,6 @@ describe('Viewer', () => {
 
     it('should not expect messaging', () => {
       expect(viewer.messagingReadyPromise_).to.be.null;
-      expect(viewer.messagingMaybePromise_).to.be.null;
     });
 
     it('should fail sendMessageAwaitResponse', () => {
@@ -561,7 +691,7 @@ describe('Viewer', () => {
       }, 'https://www.example.com');
       viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
-      return viewer.messagingMaybePromise_.then(() => {
+      return viewer.messagingReadyPromise_.then(() => {
         expect(delivered.length).to.equal(1);
         const m = delivered[0];
         expect(m.eventType).to.equal('broadcast');
@@ -570,16 +700,10 @@ describe('Viewer', () => {
     });
 
     it('should post broadcast event but not fail w/o messaging', () => {
-      viewer.broadcast({type: 'type1'});
+      const result = viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
       clock.tick(20001);
-      return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
-          .then(res => {
-            expect(res).to.equal('ERROR');
-            return viewer.messagingMaybePromise_;
-          }).then(() => {
-            expect(viewer.messageQueue_.length).to.equal(0);
-          });
+      return expect(result).eventually.to.be.false;
     });
 
     it('sendMessageAwaitResponse should wait for messaging channel', () => {
@@ -778,6 +902,12 @@ describe('Viewer', () => {
       windowApi.location.search = '?amp_js_v=1';
       expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
     });
+
+    it('should be embedded when isCctEmbedded', () => {
+      windowApi.parent = {};
+      windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+    });
   });
 
   describe('isWebviewEmbedded', () => {
@@ -804,6 +934,39 @@ describe('Viewer', () => {
       windowApi.location.hash = '#webview=1';
       expect(new Viewer(ampdoc).isEmbedded()).to.be.false;
     });
+  });
+
+  describe('isCctEmbedded', () => {
+    it('should be CCT embedded with "amp_gsa=1" and "amp_js_v=a\\d*"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.true;
+    });
+
+    it('should NOT be CCT embedded w/o "amp_gsa=1"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.search = '?amp_js_v=a0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+    });
+
+    it('should NOT be CCT embedded w/ "amp_gsa=0"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+    });
+
+    it('should NOT be CCT embedded w/ "amp_js_v" not starting with "a"', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.search = '?amp_gsa=1&amp_js_v=0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+    });
+
+    it('should NOT be CCT embedded if iframed regardless of "amp_gsa=1"',
+        () => {
+          windowApi.parent = {};
+          windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
+          expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+        });
   });
 
   describe('isTrustedViewer', () => {
@@ -891,7 +1054,7 @@ describe('Viewer', () => {
     describe('when in webview', () => {
       it('should decide trusted on connection with origin', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1&origin=other';
+        windowApi.location.hash = '#webview=1';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
@@ -900,21 +1063,9 @@ describe('Viewer', () => {
         });
       });
 
-      it('should decide non-trusted w/o origin param', () => {
-        // TODO(dvoytenko, #10991): Remove "origin" parameter check once all
-        // clients properly implement handshake.
-        windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1';
-        windowApi.location.ancestorOrigins = [];
-        const viewer = new Viewer(ampdoc);
-        return viewer.isTrustedViewer().then(res => {
-          expect(res).to.be.false;
-        });
-      });
-
       it('should NOT allow channel without origin', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1&origin=other';
+        windowApi.location.hash = '#webview=1';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
         expect(() => {
@@ -924,7 +1075,7 @@ describe('Viewer', () => {
 
       it('should decide non-trusted on connection with wrong origin', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1&origin=other';
+        windowApi.location.hash = '#webview=1';
         windowApi.location.ancestorOrigins = [];
         const viewer = new Viewer(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
@@ -935,7 +1086,7 @@ describe('Viewer', () => {
 
       it('should NOT give precedence to ancestor', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1&origin=other';
+        windowApi.location.hash = '#webview=1';
         windowApi.location.ancestorOrigins = ['https://google.com'];
         const viewer = new Viewer(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
@@ -943,6 +1094,52 @@ describe('Viewer', () => {
           expect(res).to.be.false;
         });
       });
+    });
+
+    describe('when isCctEmbedded', () => {
+      it('should decide trusted on connection with origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://google.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.true;
+        });
+      });
+
+      it('should NOT allow channel without origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        expect(() => {
+          viewer.setMessageDeliverer(() => {});
+        }).to.throw(/message channel must have an origin/);
+      });
+
+      it('should decide non-trusted on connection with wrong origin', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+        windowApi.location.ancestorOrigins = [];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
+      it('should NOT give precedence to ancestor', () => {
+        windowApi.parent = windowApi;
+        windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+        windowApi.location.ancestorOrigins = ['https://google.com'];
+        const viewer = new Viewer(ampdoc);
+        viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+        return viewer.isTrustedViewer().then(res => {
+          expect(res).to.be.false;
+        });
+      });
+
     });
 
     describe('when in a fake webview (a bad actor iframe)', () => {
@@ -1017,6 +1214,69 @@ describe('Viewer', () => {
       });
     });
 
+    /**
+     * Tests whether two URLs have the same origin according to our
+     * simple heuristic.
+     * @param {string} first The first URL.
+     * @param {string} second The second URL.
+     */
+    function testHasRoughlySameOrigin(first, second) {
+      it('should find ' + first + ' and ' + second + ' to match', () => {
+        const viewer = new Viewer(ampdoc);
+        expect(viewer.hasRoughlySameOrigin_(first, second)).to.be.true;
+      });
+    }
+
+    /**
+     * Tests whether two URLs have different origins according to our simple
+     * heuristic.
+     * @param {string} first The first URL.
+     * @param {string} second The second URL.
+     */
+    function testHasRoughlyDifferentOrigin(first, second) {
+      it('should NOT find ' + first + ' and ' + second + ' to match', () => {
+        const viewer = new Viewer(ampdoc);
+        expect(viewer.hasRoughlySameOrigin_(first, second)).to.be.false;
+      });
+    }
+
+    describe('should be able to roughly compare origins', () => {
+      testHasRoughlySameOrigin('http://google.com', 'http://google.com');
+      testHasRoughlySameOrigin('https://google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.google.net', 'https://google.net');
+      testHasRoughlySameOrigin('https://www.google.co.uk', 'https://google.co.uk');
+      testHasRoughlySameOrigin('https://www.google.co.uk:80', 'https://google.co.uk:80');
+      testHasRoughlySameOrigin('https://www.www.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.www.www.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('http://www.www.www.google.com:1337', 'http://google.com:1337');
+      testHasRoughlySameOrigin('https://amp.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.amp.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.www.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://mobile.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://m.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.m.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.mobile.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.mobile.google.co.uk', 'https://google.co.uk');
+      testHasRoughlySameOrigin('https://www1.www2.www3.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.xyz.google.com', 'https://xyz.google.com');
+      testHasRoughlySameOrigin('https://xyz.www.xyz.google.com', 'https://xyz.www.xyz.google.com');
+      testHasRoughlyDifferentOrigin('http://google.com', 'https://google.com');
+      testHasRoughlyDifferentOrigin('https://google.com', 'https://google.net');
+      testHasRoughlyDifferentOrigin('https://www.google.com', 'http://google.com');
+      testHasRoughlyDifferentOrigin('https://google.com:80', 'https://google.com:81');
+      testHasRoughlyDifferentOrigin('https://xyz.google.com', 'https://google.com');
+      testHasRoughlyDifferentOrigin('https://xyz.google.com', 'http://xyz.google.com');
+      testHasRoughlyDifferentOrigin('https://xyz.google.com:80', 'https://xyz.google.com:81');
+    });
+
+    /**
+     * Tests trust determination by origin.
+     *
+     * @param {string} origin URL under test.
+     * @param {boolean} toBeTrusted The expected outcome.
+     * @param {boolean=} opt_inWebView Whether doc is in a web view.
+     */
     function test(origin, toBeTrusted, opt_inWebView) {
       it('testing ' + origin, () => {
         const viewer = new Viewer(ampdoc);
@@ -1025,7 +1285,7 @@ describe('Viewer', () => {
       });
     }
 
-    describe('should trust domain variations', () => {
+    describe('should trust trusted viewer origins', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
@@ -1042,6 +1302,7 @@ describe('Viewer', () => {
       test('https://abc.www.google.com', true);
       test('https://google.cat', true);
       test('https://www.google.cat', true);
+      test('x-thread://', true);
     });
 
     describe('should not trust host as referrer with http', () => {
@@ -1058,21 +1319,9 @@ describe('Viewer', () => {
           test('https://google', false);
           test('https://www.google', false);
         });
-
-    describe('tests for b/32626673', () => {
-      test('www.google.com', true, true);
-      test('www.google.com', false, /* not in webview */ false);
-      test('www.google.de', true, true);
-      test('www.google.co.uk', true, true);
-      test(':www.google.de', false, true);
-      test('news.google.de', false, true);
-      test('www.google.de/', false, true);
-      test('www.acme.com', false, true);
-    });
   });
 
   describe('referrer', () => {
-
     it('should return document referrer if not overriden', () => {
       windowApi.parent = {};
       windowApi.location.hash = '#';
@@ -1376,45 +1625,6 @@ describe('Viewer', () => {
       });
       clock.tick(1010);
       return result;
-    });
-  });
-
-  describe('navigateTo', () => {
-    const ampUrl = 'https://cdn.ampproject.org/test/123';
-    it('should initiate a2a navigation', () => {
-      windowApi.location.hash = '#cap=a2a';
-      windowApi.top = {
-        location: {},
-      };
-      const viewer = new Viewer(ampdoc);
-      const send = sandbox.stub(viewer, 'sendMessage');
-      viewer.navigateTo(ampUrl, 'abc123');
-      expect(send.lastCall.args[0]).to.equal('a2a');
-      expect(send.lastCall.args[1]).to.jsonEqual({
-        url: ampUrl,
-        requestedBy: 'abc123',
-      });
-      expect(windowApi.top.location.href).to.be.undefined;
-    });
-
-    it('should fail for non-amp url', () => {
-      windowApi.location.hash = '#cap=a2a';
-      const viewer = new Viewer(ampdoc);
-      sandbox.stub(viewer, 'sendMessage');
-      expect(() => {
-        viewer.navigateTo('http://www.test.com', 'abc123');
-      }).to.throw(/Invalid A2A URL/);
-    });
-
-    it('should perform fallback navigation', () => {
-      windowApi.top = {
-        location: {},
-      };
-      const viewer = new Viewer(ampdoc);
-      const send = sandbox.stub(viewer, 'sendMessage');
-      viewer.navigateTo(ampUrl, 'abc123');
-      expect(send).to.have.not.been.called;
-      expect(windowApi.top.location.href).to.equal(ampUrl);
     });
   });
 });

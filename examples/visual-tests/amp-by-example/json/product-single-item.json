@@ -1,0 +1,32 @@
+{
+  "items": [{
+    "values": [{
+      "id": 1,
+      "img": "/img/product1_640x426.jpg",
+      "name": "Apple",
+      "price": "1.99",
+      "stars": "&#9733;&#9733;&#9733;&#9733;&#9733;",
+      "attribution": "visualhunt",
+      "url": "#",
+      "color": "green"
+    }, {
+      "id": 2,
+      "img": "/img/product2_640x426.jpg",
+      "name": "Orange",
+      "attribution": "visualhunt",
+      "price": "0.99",
+      "stars": "&#9733;&#9733;&#9733;&#9733;&#9734;",
+      "url": "#",
+      "color": "orange"
+    }, {
+      "id": 3,
+      "img": "/img/product3_640x426.jpg",
+      "name": "Pear",
+      "attribution": "visualhunt",
+      "price": "1.50",
+      "stars": "&#9733;&#9733;&#9733;&#9734;&#9734;",
+      "url": "#",
+      "color": "green"
+    }]
+  }]
+}

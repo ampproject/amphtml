@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseJson} from '../../../../src/json';
 import {getData} from '../../../../src/event-helper';
+import {parseJson} from '../../../../src/json';
 
 const TAG = 'amp-viewer-messaging';
 export const APP = '__AMPHTML__';
@@ -52,7 +52,7 @@ export function parseMessage(message) {
 
   try {
     return /** @type {?Message} */ (
-        /** @type {?} */ (parseJson(/** @type {string} */ (message))));
+    /** @type {?} */ (parseJson(/** @type {string} */ (message))));
   } catch (e) {
     return null;
   }
@@ -98,6 +98,10 @@ export class WindowPortEmulator {
   postMessage(data) {
     this.target_./*OK*/postMessage(data, this.origin_);
   }
+
+  /**
+   * Starts the sending of messages queued on the port.
+   */
   start() {
   }
 }
@@ -124,7 +128,7 @@ export class Messaging {
     this.port_ = port;
     /** @const @private */
     this.isWebview_ = !!opt_isWebview;
-    /** @private {!number} */
+    /** @private {number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};
@@ -254,12 +258,12 @@ export class Messaging {
   sendMessage_(message) {
     this.port_./*OK*/postMessage(
         this.isWebview_
-            ? JSON.stringify(message)
-            : message);
+          ? JSON.stringify(message)
+          : message);
   }
 
   /**
-   * I'm handing an incoming request from Bob. I'll either respond normally
+   * I'm handling an incoming request from Bob. I'll either respond normally
    * (ex: "got it Bob!") or with an error (ex: "I didn't get a word of what
    * you said!").
    * @param {Message} message
@@ -272,7 +276,7 @@ export class Messaging {
     }
     if (!handler) {
       const error = new Error(
-        'Cannot handle request because handshake is not yet confirmed!');
+          'Cannot handle request because handshake is not yet confirmed!');
       error.args = message.name;
       throw error;
     }
@@ -324,7 +328,7 @@ export class Messaging {
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
     this.win['viewerState'] = stateStr;
-  };
+  }
 
   /**
    * @param {*} err !Error most of time, string sometimes, * rarely.

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */
@@ -26,19 +27,19 @@ const TAG = 'amp-access-client';
 const DEFAULT_AUTHORIZATION_TIMEOUT = 3000;
 
 
-/** @implements {./amp-access.AccessTypeAdapterDef} */
+/** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessClientAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!./amp-access.AccessTypeAdapterContextDef} context
+   * @param {!./amp-access-source.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @const @private {string} */
@@ -143,11 +144,16 @@ export class AccessClientAdapter {
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: {
+        headers: dict({
           'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        }),
         body: '',
       });
     });
+  }
+
+  /** @override */
+  postAction() {
+    // Nothing to do.
   }
 }

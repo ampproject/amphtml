@@ -16,28 +16,18 @@
 
 
 /**
- * @fileoverview Embeds an instagram photo.
- * The data-shortcode attribute can be easily copied from a normal instagram
- * URL.
- * Example:
- * <code>
- * <amp-instagram
- *   data-shortcode="fBwFP"
- *   data-captioned
- *   data-default-framing
- *   alt="Fastest page in the west."
- *   width="320"
- *   height="392"
- *   layout="responsive">
- * </amp-instagram>
+ * @fileoverview Embeds an instagram photo. The data-shortcode attribute can be
+ * easily copied from a normal instagram URL. Example: <code> <amp-instagram
+ * data-shortcode="fBwFP" data-captioned data-default-framing alt="Fastest page
+ * in the west." width="320" height="392" layout="responsive"> </amp-instagram>
  * </code>
  *
- * For responsive embedding the width and height can be left unchanged from
- * the example above and should produce the correct aspect ratio. amp-instagram
- * will attempt to resize on load based on the height reported by the embedded
- * frame. If captions are specified (data-captioned) then a resize will be
- * requested every time due to the fact that it's not possible to know the height
- * of the caption in advance.
+ * For responsive embedding the width and height can be left unchanged from the
+ * example above and should produce the correct aspect ratio. amp-instagram will
+ * attempt to resize on load based on the height reported by the embedded frame.
+ * If captions are specified (data-captioned) then a resize will be requested
+ * every time due to the fact that it's not possible to know the height of the
+ * caption in advance.
  *
  * If captions are included it is stringly reccomended that an overflow element
  * is also included.  See description of overflow in amp-iframe.
@@ -47,24 +37,14 @@
  */
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {tryParseJson} from '../../../src/json';
-import {isObject} from '../../../src/types';
 import {getData, listen} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
+import {removeElement} from '../../../src/dom';
+import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
-
-/*
- * These padding values are specifc to intagram embeds with
- * ?cr=1&v=7 if you change to a different version of the embed
- * these will need to be recalculated.
- */
-const PADDING_LEFT = 0;
-const PADDING_RIGHT = 0;
-const PADDING_BOTTOM = 0;
-const PADDING_TOP = 64;
+import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 class AmpInstagram extends AMP.BaseElement {
 
@@ -75,9 +55,6 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
-    this.iframePromise_ = null;
-
     /** @private {?string} */
     this.shortcode_ = '';
 
@@ -86,8 +63,14 @@ class AmpInstagram extends AMP.BaseElement {
 
     /** @private {string}  */
     this.captioned_ = '';
+
+    /**
+    * @private {?Promise}
+    * @visibleForTesting
+    */
+    this.iframePromise_ = null;
   }
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -114,7 +97,7 @@ class AmpInstagram extends AMP.BaseElement {
         'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
     this.captioned_ = this.element.hasAttribute('data-captioned') ?
-        'captioned/' : '';
+      'captioned/' : '';
   }
 
   /** @override */
@@ -141,10 +124,10 @@ class AmpInstagram extends AMP.BaseElement {
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(image, {
-      'top': PADDING_TOP + 'px',
-      'bottom': PADDING_BOTTOM + 'px',
-      'left': PADDING_LEFT + 'px',
-      'right': PADDING_RIGHT + 'px',
+      'top': '0 px',
+      'bottom': '0 px',
+      'left': '0 px',
+      'right': '0 px',
     });
     placeholder.appendChild(image);
     return placeholder;
@@ -174,7 +157,7 @@ class AmpInstagram extends AMP.BaseElement {
         this.element.getAttribute('alt'));
     iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/embed/' +
-        this.captioned_ + '?cr=1&v=7';
+        this.captioned_ + '?cr=1&v=9';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     setStyles(iframe, {
@@ -189,7 +172,10 @@ class AmpInstagram extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleInstagramMessages_(event) {
     if (event.origin != 'https://www.instagram.com' ||
         event.source != this.iframe_.contentWindow) {
@@ -198,7 +184,7 @@ class AmpInstagram extends AMP.BaseElement {
     const eventData = getData(event);
     if (!eventData || !(isObject(eventData)
         || startsWith(/** @type {string} */ (eventData), '{'))) {
-      return;  // Doesn't look like JSON.
+      return; // Doesn't look like JSON.
     }
     const data = isObject(eventData) ? eventData : tryParseJson(eventData);
     if (data === undefined) {
@@ -208,10 +194,7 @@ class AmpInstagram extends AMP.BaseElement {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/offsetHeight !== height) {
-          // Height returned by Instagram includes header, so
-          // subtract 48px top padding
-          this.attemptChangeHeight(height - (PADDING_TOP + PADDING_BOTTOM))
-              .catch(() => {});
+          this./*OK*/changeHeight(height);
         }
       });
     }
@@ -232,7 +215,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 }
 

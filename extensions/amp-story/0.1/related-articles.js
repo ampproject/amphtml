@@ -13,11 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {
+  getSourceOrigin,
+  isProtocolValid,
+  parseUrlDeprecated,
+} from '../../../src/url';
+
+
+const TAG = 'amp-story';
 
 
 /**
- * @typedef {{title: string, url: string, image: (string|undefined)}}
+ * @typedef {{
+ *   title: string,
+ *   url: string,
+ *   domainName: string,
+ *   image: (string|undefined),
+ * }}
  */
 export let RelatedArticleDef;
 
@@ -30,20 +43,43 @@ export let RelatedArticleDef;
  */
 export let RelatedArticleSetDef;
 
+/** New bookend components only supported in amp-story 1.0. */
+const NEW_COMPONENTS =
+['landscape', 'portrait', 'cta-link', 'heading', 'textbox'];
 
 /**
  * @param {!JsonObject} articleJson
- * @return {!RelatedArticleDef}
+ * @return {?RelatedArticleDef}
  */
 function buildArticleFromJson_(articleJson) {
-  // TODO(alanorozco): Graceful errors.
+  if (!articleJson['title'] || !articleJson['url']) {
+    user().error(TAG,
+        'Articles must contain `title` and `url` fields, skipping invalid.');
+    return null;
+  }
+
+  const articleUrl = dev().assert(articleJson['url']);
+  user().assert(isProtocolValid(articleUrl),
+      `Unsupported protocol for article URL ${articleUrl}`);
+
+  let domain;
+  try {
+    domain = parseUrlDeprecated(getSourceOrigin(articleUrl)).hostname;
+  } catch (e) {
+    // Unknown path prefix in url.
+    domain = parseUrlDeprecated(articleUrl).hostname;
+  }
+
   const article = {
-    title: user().assert(articleJson['title']),
-    url: user().assert(articleJson['url']),
+    title: dev().assert(articleJson['title']),
+    url: articleUrl,
+    domainName: domain,
   };
 
   if (articleJson['image']) {
-    article.image = articleJson['image'];
+    user().assert(isProtocolValid(articleJson['image']),
+        `Unsupported protocol for article image URL ${articleJson['image']}`);
+    article.image = dev().assert(articleJson['image']);
   }
 
   return /** @type {!RelatedArticleDef} */ (article);
@@ -51,22 +87,48 @@ function buildArticleFromJson_(articleJson) {
 
 
 /**
- * @param {!JsonObject} articleSetsResponse
+ * @param {!JsonObject=} opt_articleSetsResponse
  * @return {!Array<!RelatedArticleSetDef>}
  */
-// TODO(alanorozco): domain name
-// TODO(alanorozco): Graceful errors.
-export function relatedArticlesFromJson(articleSetsResponse) {
+export function relatedArticlesFromJson(opt_articleSetsResponse) {
   return /** @type {!Array<!RelatedArticleSetDef>} */ (
-      Object.keys(articleSetsResponse).map(headingKey => {
-        const articleSet = {
-          articles: articleSetsResponse[headingKey].map(buildArticleFromJson_),
-        };
+    Object.keys(opt_articleSetsResponse || {}).map(headingKey => {
+      const articleSet = {
+        articles:
+              opt_articleSetsResponse[headingKey]
+                  .map(buildArticleFromJson_)
+                  .filter(valid => !!valid),
+      };
 
-        if (headingKey.trim().length) {
-          articleSet.heading = headingKey;
-        }
+      if (headingKey.trim().length) {
+        articleSet.heading = headingKey;
+      }
 
-        return /** @type {!RelatedArticleSetDef} */ (articleSet);
-      }));
+      return /** @type {!RelatedArticleSetDef} */ (articleSet);
+    }));
+}
+
+/**
+ * @param {!Array<!JsonObject>} bookendComponents
+ * @return {!Array<!RelatedArticleSetDef>}
+ */
+export function parseArticlesToClassicApi(bookendComponents) {
+  const articleSet = {};
+  articleSet.articles = [];
+
+  bookendComponents.forEach(component => {
+    if (component['type'] == 'small') {
+      articleSet.articles.push(buildArticleFromJson_(component));
+    } else if (NEW_COMPONENTS.includes(component['type'])) {
+      user().warn(TAG, component['type'] + ' is not supported in ' +
+      'amp-story-0.1, upgrade to v1.0 to use this feature.');
+    } else {
+      user().warn(TAG, component['type'] + ' is not valid, ' +
+      'skipping invalid.');
+    }
+  });
+
+  const articles = [];
+  articles.push(articleSet);
+  return articles;
 }

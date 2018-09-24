@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, computeInMasterFrame, validateData} from '../3p/3p';
+import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -73,4 +73,4 @@ export function imedia(global, data) {
       return used; // remove (filter) element filled with add
     });
   });
-};
+}

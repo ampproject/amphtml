@@ -31,8 +31,24 @@ export class AmpAdUIHandler {
     /** @private @const {!Document} */
     this.doc_ = baseInstance.win.document;
 
+    this.containerElement_ = null;
+
+    if (this.element_.hasAttribute('data-ad-container-id')) {
+      const id = this.element_.getAttribute('data-ad-container-id');
+      const container = this.doc_.getElementById(id);
+      if (container && container.tagName == 'AMP-LAYOUT' &&
+          container.contains(this.element_)) {
+        // Parent <amp-layout> component with reference id can serve as the
+        // ad container
+        this.containerElement_ = container;
+      }
+    }
+
     if (!baseInstance.getFallback()) {
-      this.addDefaultUiComponent_('fallback');
+      const fallback = this.addDefaultUiComponent_('fallback');
+      if (fallback) {
+        this.baseInstance_.element.appendChild(fallback);
+      }
     }
   }
 
@@ -54,9 +70,21 @@ export class AmpAdUIHandler {
       this.baseInstance_./*OK*/collapse();
       return;
     }
+
+    let attemptCollapsePromise;
+    if (this.containerElement_) {
+      // Collapse the container element if there's one
+      attemptCollapsePromise = this.element_.getResources().attemptCollapse(
+          this.containerElement_);
+      attemptCollapsePromise.then(() => {
+      });
+    } else {
+      attemptCollapsePromise = this.baseInstance_.attemptCollapse();
+    }
+
     // The order here is collapse > user provided fallback > default fallback
-    this.baseInstance_.attemptCollapse().then(() => {}, () => {
-      this.baseInstance_.deferMutate(() => {
+    attemptCollapsePromise.catch(() => {
+      this.baseInstance_.mutateElement(() => {
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
       });
@@ -68,7 +96,7 @@ export class AmpAdUIHandler {
    * Note: No need to togglePlaceholder here, unlayout show it by default.
    */
   applyUnlayoutUI() {
-    this.baseInstance_.deferMutate(() => {
+    this.baseInstance_.mutateElement(() => {
       this.baseInstance_.toggleFallback(false);
     });
   }
@@ -93,7 +121,6 @@ export class AmpAdUIHandler {
     content.setAttribute('data-ad-holder-text', 'Ad');
     uiComponent.appendChild(content);
 
-    this.baseInstance_.element.appendChild(uiComponent);
     return uiComponent;
   }
 
@@ -119,7 +146,7 @@ export class AmpAdUIHandler {
           width - iframeWidth, width);
     }
 
-    /** @type {!Object<!boolean, number|undefined, number|undefined>} */
+    /** @type {!Object<boolean, number|undefined, number|undefined>} */
     const resizeInfo = {
       success: true,
       newWidth,
@@ -137,11 +164,11 @@ export class AmpAdUIHandler {
     }
     return this.baseInstance_.attemptChangeSize(
         newHeight, newWidth).then(() => {
-          return resizeInfo;
-        }, () => {
-          resizeInfo.success = false;
-          return resizeInfo;
-        });
+      return resizeInfo;
+    }, () => {
+      resizeInfo.success = false;
+      return resizeInfo;
+    });
   }
 }
 

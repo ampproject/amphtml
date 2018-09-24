@@ -15,14 +15,13 @@
  */
 
 import {
+  DEFAULT_THRESHOLD,
   IntersectionObserverApi,
   IntersectionObserverPolyfill,
-  getThresholdSlot,
-  DEFAULT_THRESHOLD,
   getIntersectionChangeEntry,
+  getThresholdSlot,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 describe('IntersectionObserverApi', () => {
   let sandbox;
@@ -48,7 +47,7 @@ describe('IntersectionObserverApi', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     onScrollSpy = sandbox.spy();
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
@@ -147,8 +146,8 @@ describe('IntersectionObserverApi', () => {
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    sandbox.stub(performance, 'now', () => 100);
+    sandbox = sinon.sandbox;
+    sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
   afterEach(() => {
@@ -159,42 +158,42 @@ describe('getIntersectionChangeEntry', () => {
         layoutRectLtwh(0, 100, 50, 50),
         null,
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(0, 0, 50, 50),
-          intersectionRect: layoutRectLtwh(0, 0, 50, 50),
-          intersectionRatio: 1,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(0, 0, 50, 50),
+      intersectionRect: layoutRectLtwh(0, 0, 50, 50),
+      intersectionRatio: 1,
+    });
     expect(getIntersectionChangeEntry(
         layoutRectLtwh(50, 200, 150, 200),
         null,
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(50, 100, 150, 200),
-          intersectionRect: layoutRectLtwh(50, 100, 50, 0),
-          intersectionRatio: 0,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(50, 100, 150, 200),
+      intersectionRect: layoutRectLtwh(50, 100, 50, 0),
+      intersectionRatio: 0,
+    });
   });
   it('with owner', () => {
     expect(getIntersectionChangeEntry(
         layoutRectLtwh(50, 50, 150, 200),
         layoutRectLtwh(0, 50, 100, 100),
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(50, -50, 150, 200),
-          intersectionRect: layoutRectLtwh(50, 0, 50, 50),
-          intersectionRatio: 1 / 12,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(50, -50, 150, 200),
+      intersectionRect: layoutRectLtwh(50, 0, 50, 50),
+      intersectionRatio: 1 / 12,
+    });
   });
 });
 
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    sandbox.stub(performance, 'now', () => 100);
+    sandbox = sinon.sandbox;
+    sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
   afterEach(() => {
@@ -202,6 +201,35 @@ describe('IntersectionObserverPolyfill', () => {
   });
 
   describe('threshold', () => {
+    it('default threshold is "[0]"', () => {
+      const io = new IntersectionObserverPolyfill(() => {}, {});
+      expect(io.threshold_).to.jsonEqual([0]);
+    });
+
+    it('accept a single number threshold', () => {
+      const io = new IntersectionObserverPolyfill(() => {}, {
+        threshold: 0.3,
+      });
+      expect(io.threshold_).to.jsonEqual([0.3]);
+    });
+
+    it('threshold value must be finite number', () => {
+      const io1 = () => {
+        new IntersectionObserverPolyfill(() => {}, {
+          threshold: [0.5, '0.6'],
+        });
+      };
+      const io2 = () => {
+        new IntersectionObserverPolyfill(() => {}, {
+          threshold: Infinity,
+        });
+      };
+      allowConsoleError(() => { expect(io1).to.throw('Threshold should be a ' +
+          'finite number or an array of finite numbers'); });
+      allowConsoleError(() => { expect(io2).to.throw('Threshold should be a ' +
+          'finite number or an array of finite numbers'); });
+    });
+
     it('will be sorted', () => {
       const io = new IntersectionObserverPolyfill(() => {}, {
         threshold: [0, 0.9, 0.3, 1, 0.02],
@@ -220,10 +248,10 @@ describe('IntersectionObserverPolyfill', () => {
           threshold: [0, 1.1],
         });
       };
-      expect(io1).to.throw(
-          'Threshold should be in the range from "[0, 1]"');
-      expect(io2).to.throw(
-          'Threshold should be in the range from "[0, 1]"');
+      allowConsoleError(() => {
+        expect(io1).to.throw('Threshold should be in the range from "[0, 1]"');
+        expect(io2).to.throw('Threshold should be in the range from "[0, 1]"');
+      });
     });
 
     it('getThresholdSlot function', () => {
@@ -279,29 +307,29 @@ describe('IntersectionObserverPolyfill', () => {
       // 2nd tick with 0.1 does fire
       io.tick(layoutRectLtwh(0, 90, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 3rd tick with 0.9 doesn't fire
       io.tick(layoutRectLtwh(0, 10, 100, 100));
       expect(callbackSpy).to.not.be.called;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 4rd tick with 1 does fire
       io.tick(layoutRectLtwh(0, 0, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 5th tick with 1 doesn't fire
       io.tick(layoutRectLtwh(0, 0, 100, 100));
       expect(callbackSpy).to.not.be.called;
       // 6th tick with 0.9 does fire
       io.tick(layoutRectLtwh(0, 10, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 7th tick with 0.1 doesn't fire
       io.tick(layoutRectLtwh(0, 90, 100, 100));
       expect(callbackSpy).to.not.be.called;
       // 8th tick with 0 does fire
       io.tick(layoutRectLtwh(0, 100, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 9th tick with 0 doesn't fire
       io.tick(layoutRectLtwh(0, 100, 100, 100));
       expect(callbackSpy).to.not.be.called;
