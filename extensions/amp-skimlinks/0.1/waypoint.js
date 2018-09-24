@@ -33,13 +33,14 @@ export class Waypoint {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!./tracking.Tracking} tracking
+   * @param {string} referrer
    */
-  constructor(ampdoc, tracking) {
+  constructor(ampdoc, tracking, referrer) {
     /** @private {?./tracking.Tracking} */
     this.tracking_ = tracking;
 
     /** @private {string} */
-    this.documentReferrer_ = ampdoc.win.document.referrer;
+    this.documentReferrer_ = referrer;
 
     /** @private {string} */
     this.canonicalUrl_ = Services.documentInfoForDoc(ampdoc).canonicalUrl;

@@ -47,6 +47,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?../../../src/service/document-info-impl.DocumentInfoDef} */
     this.docInfo_ = null;
 
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = null;
+
     /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
     this.linkRewriterService_ = null;
 
@@ -65,6 +68,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?./link-rewriter/link-rewriter.LinkRewriter} */
     this.skimlinksLinkRewriter_ = null;
 
+    /** @private {?string} */
+    this.referrer_ = null;
   }
 
   /** @override */
@@ -72,6 +77,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.xhr_ = Services.xhrFor(this.win);
     this.ampDoc_ = this.getAmpDoc();
     this.docInfo_ = Services.documentInfoForDoc(this.ampDoc_);
+    this.viewer_ = Services.viewerForDoc(this.ampDoc_);
+
     /**
      * Only one instance of LinkRewriterManager
      * should be shared between all extensions. Since Skimlinks is the only
@@ -81,9 +88,14 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
 
-    return whenDocumentReady(
-        /** @type {!Document} */ (this.ampDoc_.getRootNode())
-    ).then(() => {
+    return Promise.all([
+      whenDocumentReady(
+          /** @type {!Document} */ (this.ampDoc_.getRootNode())
+      ),
+      this.viewer_.getReferrerUrl(),
+    ]).then(promiseResults => {
+      // Get second promise result.
+      this.referrer_ = promiseResults[1];
       this.startSkimcore_();
     });
   }
@@ -96,7 +108,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.waypoint_ = new Waypoint(
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
         (this.ampDoc_),
-        this.trackingService_
+        this.trackingService_,
+        this.referrer_
     );
     this.affiliateLinkResolver_ = new AffiliateLinkResolver(
         /** @type {!../../../src/service/xhr-impl.Xhr} */

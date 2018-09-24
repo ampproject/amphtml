@@ -48,7 +48,7 @@ describes.fakeWin(
 
       beforeEach(() => {
         trackingService = helpers.createTrackingWithStubAnalytics();
-        waypoint = new Waypoint(env.ampdoc, trackingService);
+        waypoint = new Waypoint(env.ampdoc, trackingService, 'referrer');
       });
 
       afterEach(() => {
