@@ -28,14 +28,14 @@ import {createCustomEvent} from '../../../../src/event-helper';
 import {createTwoStepsResponse} from '../link-rewriter/link-rewriter-helpers';
 
 describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
-  let iframeDoc, linkRewriterManager, win;
+  let rootDocument, linkRewriterManager, win;
   let sendEventHelper, registerLinkRewriterHelper, addPriorityMetaTagHelper;
 
   beforeEach(() => {
     win = env.win;
-    iframeDoc = env.ampdoc.getRootNode();
-    env.sandbox.spy(iframeDoc, 'addEventListener');
-    env.sandbox.spy(iframeDoc, 'querySelector');
+    rootDocument = env.ampdoc.getRootNode();
+    env.sandbox.spy(rootDocument, 'addEventListener');
+    env.sandbox.spy(rootDocument, 'querySelector');
 
     linkRewriterManager = new LinkRewriterManager(env.ampdoc);
 
@@ -53,7 +53,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
 
     sendEventHelper = (eventType, data) => {
       const event = createCustomEvent(win, eventType, data, {bubbles: true});
-      iframeDoc.dispatchEvent(event);
+      rootDocument.dispatchEvent(event);
     };
 
     addPriorityMetaTagHelper = priorityRule => {
@@ -71,7 +71,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
 
   describe('When starting service', () => {
     it('Should listen for DOM_UPDATE', () => {
-      const spy = iframeDoc.addEventListener.withArgs(AmpEvents.DOM_UPDATE);
+      const spy = rootDocument.addEventListener.withArgs(AmpEvents.DOM_UPDATE);
       expect(spy.calledOnce).to.be.true;
     });
 
@@ -227,7 +227,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       });
 
       it('Should only send click event to suitable link rewriters', () => {
-        linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
 
         expect(linkRewriterVendor1.events.send.calledOnce).to.be.true;
         expect(linkRewriterVendor2.events.send.called).to.be.false;
@@ -239,7 +239,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
         env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
         env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
 
-        linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
 
         expect(getEventData(linkRewriterVendor1).linkRewriterId).to.equal(
             'vendor1'
@@ -254,7 +254,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
 
       it('Should contain the target anchor', () => {
         env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
-        const anchor = iframeDoc.createElement('a');
+        const anchor = rootDocument.createElement('a');
 
         linkRewriterManager.maybeRewriteLink(anchor);
 
@@ -270,7 +270,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
             .stub(linkRewriterVendor3, 'rewriteAnchorUrl')
             .returns(false);
 
-        linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
 
         expect(getEventData(linkRewriterVendor1).linkRewriterId).to.be.null;
         // vendor2 has isWatchingLink to false therefore can not replace.
@@ -280,7 +280,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
 
       it('Should set the clickType', () => {
         linkRewriterManager.maybeRewriteLink(
-            iframeDoc.createElement('a'),
+            rootDocument.createElement('a'),
             'contextmenu'
         );
         expect(getEventData(linkRewriterVendor1).clickType).to.equal(
@@ -322,7 +322,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
               .stub(linkRewriterVendor2, 'rewriteAnchorUrl')
               .returns(false);
 
-          linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -339,7 +339,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
               .stub(linkRewriterVendor3, 'rewriteAnchorUrl')
               .returns(true);
 
-          linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -371,7 +371,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
               .stub(linkRewriterVendor3, 'rewriteAnchorUrl')
               .returns(true);
 
-          linkRewriterManager.maybeRewriteLink(iframeDoc.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.called).to.be.false;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -389,7 +389,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
               .stub(linkRewriterVendor3, 'rewriteAnchorUrl')
               .returns(true);
 
-          const anchor = iframeDoc.createElement('a');
+          const anchor = rootDocument.createElement('a');
           // Overwrite global priority
           anchor.setAttribute('data-link-rewriters', 'vendor1 vendor3');
 
@@ -405,11 +405,11 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
 });
 
 describes.fakeWin('Link Rewriter', {amp: true}, env => {
-  let iframeDoc;
+  let rootDocument;
   let createResolveResponseHelper, createLinkRewriterHelper;
 
   beforeEach(() => {
-    iframeDoc = env.ampdoc.getRootNode();
+    rootDocument = env.ampdoc.getRootNode();
 
     createResolveResponseHelper = (syncData, asyncData) => {
       const twoStepsResponse = createTwoStepsResponse(syncData, asyncData);
@@ -424,7 +424,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
           .stub(LinkRewriter.prototype, 'scanLinksOnPage_')
           .returns(Promise.resolve());
       const linkRewriter = new LinkRewriter(
-          iframeDoc,
+          rootDocument,
           'test',
           resolveFunction,
           options
@@ -438,8 +438,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     const replacementUrl = 'https://redirect.com';
 
     it('Should raise an error resolveUnknownLinks returns wrong object', () => {
-      const anchor1 = iframeDoc.createElement('a');
-      iframeDoc.body.appendChild(anchor1);
+      const anchor1 = rootDocument.createElement('a');
+      rootDocument.body.appendChild(anchor1);
       const resolveFunction = () => {};
       allowConsoleError(() =>
         expect(() => {
@@ -453,8 +453,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     });
 
     it('Should call resolveUnknownLinks if links on page', () => {
-      const anchor1 = iframeDoc.createElement('a');
-      iframeDoc.body.appendChild(anchor1);
+      const anchor1 = rootDocument.createElement('a');
+      rootDocument.body.appendChild(anchor1);
       const resolveFunction = createResolveResponseHelper();
       createLinkRewriterHelper(resolveFunction).scanLinksOnPage_();
 
@@ -468,8 +468,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     });
 
     it('Always update the anchor cache with unknown links', () => {
-      const anchor = iframeDoc.createElement('a');
-      iframeDoc.body.appendChild(anchor);
+      const anchor = rootDocument.createElement('a');
+      rootDocument.body.appendChild(anchor);
 
       // Make sure resolveFunction doesn't return sync nor async data.
       const resolveFunction = createResolveResponseHelper();
@@ -479,13 +479,13 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     });
 
     it('Update the anchor cache with synchronous response', () => {
-      const anchor1 = iframeDoc.createElement('a');
-      const anchor2 = iframeDoc.createElement('a');
-      const anchor3 = iframeDoc.createElement('a');
+      const anchor1 = rootDocument.createElement('a');
+      const anchor2 = rootDocument.createElement('a');
+      const anchor3 = rootDocument.createElement('a');
 
-      iframeDoc.body.appendChild(anchor1);
-      iframeDoc.body.appendChild(anchor2);
-      iframeDoc.body.appendChild(anchor3);
+      rootDocument.body.appendChild(anchor1);
+      rootDocument.body.appendChild(anchor2);
+      rootDocument.body.appendChild(anchor3);
       const replacementUrl = 'https://redirect.com';
       const syncData = [
         {anchor: anchor1, replacementUrl},
@@ -504,8 +504,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     });
 
     it('Update the anchor cache with asynchronous response', () => {
-      const anchor = iframeDoc.createElement('a');
-      iframeDoc.body.appendChild(anchor);
+      const anchor = rootDocument.createElement('a');
+      rootDocument.body.appendChild(anchor);
 
       const asyncData = Promise.resolve([{anchor, replacementUrl}]);
       const resolveFunction = createResolveResponseHelper([], asyncData);
@@ -522,13 +522,13 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
 
     describe('Find all links on page', () => {
       it('Should find all the links on the page by default', () => {
-        const anchor1 = iframeDoc.createElement('a');
-        const anchor2 = iframeDoc.createElement('a');
-        const anchor3 = iframeDoc.createElement('a');
+        const anchor1 = rootDocument.createElement('a');
+        const anchor2 = rootDocument.createElement('a');
+        const anchor3 = rootDocument.createElement('a');
 
-        iframeDoc.body.appendChild(anchor1);
-        iframeDoc.body.appendChild(anchor2);
-        iframeDoc.body.appendChild(anchor3);
+        rootDocument.body.appendChild(anchor1);
+        rootDocument.body.appendChild(anchor2);
+        rootDocument.body.appendChild(anchor3);
 
         const resolveFunction = createResolveResponseHelper();
         createLinkRewriterHelper(resolveFunction).scanLinksOnPage_();
@@ -541,14 +541,14 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       });
 
       it('Should find only the links matching linkSelector', () => {
-        const anchor1 = iframeDoc.createElement('a');
-        const anchor2 = iframeDoc.createElement('a');
+        const anchor1 = rootDocument.createElement('a');
+        const anchor2 = rootDocument.createElement('a');
         anchor2.classList.add('affiliate');
-        const anchor3 = iframeDoc.createElement('a');
+        const anchor3 = rootDocument.createElement('a');
 
-        iframeDoc.body.appendChild(anchor1);
-        iframeDoc.body.appendChild(anchor2);
-        iframeDoc.body.appendChild(anchor3);
+        rootDocument.body.appendChild(anchor1);
+        rootDocument.body.appendChild(anchor2);
+        rootDocument.body.appendChild(anchor3);
 
         const resolveFunction = createResolveResponseHelper();
         createLinkRewriterHelper(resolveFunction, {
@@ -571,7 +571,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
 
       it('Should remove detached anchor from internal cache', () => {
         // Anchor is not attached to the dom
-        const anchor = iframeDoc.createElement('a');
+        const anchor = rootDocument.createElement('a');
         const linkRewriter = createLinkRewriterHelper();
         linkRewriter.anchorReplacementCache_.updateLinkList([anchor]);
         linkRewriter.scanLinksOnPage_();
@@ -579,8 +579,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       });
 
       it('Should not call resolveUnknownLinks_ if no new links', () => {
-        const anchor = iframeDoc.createElement('a');
-        iframeDoc.body.appendChild(anchor);
+        const anchor = rootDocument.createElement('a');
+        rootDocument.body.appendChild(anchor);
         const linkRewriter = createLinkRewriterHelper();
         linkRewriter.scanLinksOnPage_();
         expect(linkRewriter.isWatchingLink(anchor)).to.be.true;
@@ -594,8 +594,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       });
 
       it('Should call resolveUnknownLinks_ if new links', () => {
-        const anchor1 = iframeDoc.createElement('a');
-        iframeDoc.body.appendChild(anchor1);
+        const anchor1 = rootDocument.createElement('a');
+        rootDocument.body.appendChild(anchor1);
         const linkRewriter = createLinkRewriterHelper();
         linkRewriter.scanLinksOnPage_();
         expect(linkRewriter.isWatchingLink(anchor1)).to.be.true;
@@ -604,8 +604,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         linkRewriter.resolveUnknownLinks_.resetHistory();
 
         //Introduce new link on the page
-        const anchor2 = iframeDoc.createElement('a');
-        iframeDoc.body.appendChild(anchor2);
+        const anchor2 = rootDocument.createElement('a');
+        rootDocument.body.appendChild(anchor2);
 
         return linkRewriter.onDomUpdated().then(() => {
           expect(linkRewriter.resolveUnknownLinks_.calledOnce).to.be.true;
@@ -631,7 +631,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       let anchor1, linkRewriter;
 
       beforeEach(() => {
-        anchor1 = iframeDoc.createElement('a');
+        anchor1 = rootDocument.createElement('a');
         linkRewriter = createLinkRewriterHelper();
       });
 
@@ -648,7 +648,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
       let anchor1, linkRewriter;
 
       beforeEach(() => {
-        anchor1 = iframeDoc.createElement('a');
+        anchor1 = rootDocument.createElement('a');
         linkRewriter = createLinkRewriterHelper();
       });
 
@@ -675,7 +675,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     let anchor1, linkRewriter;
 
     beforeEach(() => {
-      anchor1 = iframeDoc.createElement('a');
+      anchor1 = rootDocument.createElement('a');
       anchor1.setAttribute('href', initialUrl);
       linkRewriter = createLinkRewriterHelper();
     });
@@ -742,13 +742,13 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
 });
 
 describes.fakeWin('LinkReplacementCache', {amp: true}, env => {
-  let iframeDoc, cache, anchor1, anchor2, anchor3;
+  let rootDocument, cache, anchor1, anchor2, anchor3;
 
   beforeEach(() => {
-    iframeDoc = env.ampdoc.getRootNode();
-    anchor1 = iframeDoc.createElement('a');
-    anchor2 = iframeDoc.createElement('a');
-    anchor3 = iframeDoc.createElement('a');
+    rootDocument = env.ampdoc.getRootNode();
+    anchor1 = rootDocument.createElement('a');
+    anchor2 = rootDocument.createElement('a');
+    anchor3 = rootDocument.createElement('a');
     cache = new LinkReplacementCache();
   });
 
@@ -849,7 +849,7 @@ describes.fakeWin('LinkReplacementCache', {amp: true}, env => {
     });
 
     it('Should ignore anchors that are not in the cache', () => {
-      const unregisteredAnchor = iframeDoc.createElement('a');
+      const unregisteredAnchor = rootDocument.createElement('a');
       // Intialise with a value
       cache.updateReplacementUrls([
         {anchor: anchor1, replacementUrl: '/new-url1'},

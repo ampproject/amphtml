@@ -49,12 +49,12 @@ export let TwoStepsResponse;
  */
 export class LinkRewriter {
   /**
-   * @param {!Document} iframeDoc
+   * @param {!Document} ampPageDocument - Document of the iframe when loaded in viewer
    * @param {string} id
    * @param {function(Array<HTMLElement>):TwoStepsResponse} resolveUnknownLinks
    * @param {?{linkSelector: string}=} options
    */
-  constructor(iframeDoc, id, resolveUnknownLinks, options) {
+  constructor(ampPageDocument, id, resolveUnknownLinks, options) {
     /** @public {!./event-messenger.EventMessenger} */
     this.events = new EventMessenger();
 
@@ -62,7 +62,7 @@ export class LinkRewriter {
     this.id = id;
 
     /** @private {Document} */
-    this.iframeDoc_ = iframeDoc;
+    this.ampPageDocument_ = ampPageDocument;
 
 
     /** @private {function(Array<HTMLElement>):TwoStepsResponse} */
@@ -233,7 +233,7 @@ export class LinkRewriter {
    * @return {Array<HTMLElement>}
    */
   getLinksInDOM_() {
-    const q = this.iframeDoc_.querySelectorAll(this.linkSelector_);
+    const q = this.ampPageDocument_.querySelectorAll(this.linkSelector_);
     return [].slice.call(q);
   }
 }

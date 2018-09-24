@@ -56,7 +56,7 @@ export class LinkRewriterManager {
   constructor(ampdoc) {
 
     /** @private {!Document} */
-    this.iframeDoc_ = /** @type {!Document} */ (ampdoc.getRootNode());
+    this.ampPageDocument_ = /** @type {!Document} */ (ampdoc.getRootNode());
 
     /**
      * @private {Array<string>}
@@ -74,7 +74,7 @@ export class LinkRewriterManager {
      */
     this.linkRewriters_ = [];
 
-    this.installGlobalEventListener_(this.iframeDoc_);
+    this.installGlobalEventListener_(this.ampPageDocument_);
     const navigation = Services.navigationForDoc(ampdoc);
     navigation.registerAnchorMutator(
         this.maybeRewriteLink.bind(this), Priority.LINK_REWRITER_MANAGER);
@@ -100,7 +100,7 @@ export class LinkRewriterManager {
    */
   registerLinkRewriter(linkRewriterId, resolveUnknownLinks, options) {
     const linkRewriter = new LinkRewriter(
-        this.iframeDoc_,
+        this.ampPageDocument_,
         linkRewriterId,
         resolveUnknownLinks,
         options
@@ -180,10 +180,10 @@ export class LinkRewriterManager {
   /**
    * @private
    * Listen for DOM_UPDATE event.
-   * @param {*} iframeDoc
+   * @param {*} ampPageDocument
    */
-  installGlobalEventListener_(iframeDoc) {
-    iframeDoc.addEventListener(AmpEvents.DOM_UPDATE,
+  installGlobalEventListener_(ampPageDocument) {
+    ampPageDocument.addEventListener(AmpEvents.DOM_UPDATE,
         this.onDomChanged_.bind(this));
   }
 
