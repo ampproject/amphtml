@@ -89,10 +89,15 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page[distance="0"],
-[desktop] amp-story-page[distance="1"] {
+[desktop] amp-story-page[distance="1"]
+ {
   /* TODO(alanorozco): Enable transition for distance = 2.
    * For some reason, enabling it breaks layout scheduling. */
   transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+[desktop] amp-story-page[distance="2"] {
+  transition: opacity 300ms linear 300ms, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 [desktop] .i-amphtml-story-button-container {
