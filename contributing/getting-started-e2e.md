@@ -356,7 +356,7 @@ gulp test --local-changes
 
 By default, all tests are run on Chrome. Pass `--firefox` or `--safari` to run tests in Firefox and Safari, respectively.
 
-If you need help with fixing failing tests, please ask on the GitHub issue you're working on or reach out to the community as described in [ow to get help](#how-to-get-help).
+If you need help with fixing failing tests, please ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 
 ## Running Travis CI checks locally
 
