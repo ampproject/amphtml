@@ -568,11 +568,11 @@ This sample showcases how to build a product page in AMP HTML.
         </div>
       </amp-lightbox>
     <!-- ## Slides preview Gallery -->
-    <!--On desktop we've added a film strip like slide preview. Each product colour has its own image gallery and slide preview.
+    <!--On desktop we've added a film strip like slide preview. Each product color has its own image gallery and slide preview.
     We use [amp-bind](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-bind) to update the page selecting the gallery and image preview
-    corresponding to the selected colour. We realized the color selection by using `amp-selector`. Find more the doc and info in The Product Page section below.
+    corresponding to the selected color. We realized the color selection by using `amp-selector`. Find more the doc and info in The Product Page section below.
 
-    The green colour is the default color for the gallery when the page loads.
+    The green color is the default color for the gallery when the page loads.
     Clicking on a preview image will reveal the image in the gallery via the tap action `on="tap:AMP.setState({product: {selectedSlideForGreen: 0}})"`.
 
     See below for more informations on how we use`amp-bind`. -->
@@ -709,7 +709,7 @@ This sample showcases how to build a product page in AMP HTML.
   <!-- ## Product Configuration -->
   <!-- We use the `amp-state` component (part of [amp-bind](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-bind))
       to configure the product price depending on the color and the size. We also configure the `defaultSize`
-      for each product when you switch between colours and the size you previously selected is not available for the new color -->
+      for each product when you switch between colors and the size you previously selected is not available for the new color -->
   <amp-state id="product">
     <script type="application/json">
     {
@@ -750,7 +750,7 @@ This sample showcases how to build a product page in AMP HTML.
 
     <!-- ## Product price -->
     <!-- We use [amp-bind](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-bind) to update the price of the product
-      depending on the selected colour.
+      depending on the selected color.
 
     We bind the `text` attribute to the
       value of expression `product[product.selectedColor].sizes[product.selectedSize]`. `product` is the id `amp-state` json described in the Product Configuration section.
