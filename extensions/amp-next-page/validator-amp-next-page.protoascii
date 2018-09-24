@@ -88,7 +88,7 @@ tags: {  # <amp-next-page src>
 tags: {  # <amp-next-page type="adsense">
   html_format: AMP
   tag_name: "AMP-NEXT-PAGE"
-  spec_name: "amp-next-page with AdSense content recommendations"
+  spec_name: "amp-next-page [type=adsense]"
   unique: true
   requires_extension: "amp-next-page"
   attrs: {
