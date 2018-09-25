@@ -125,7 +125,8 @@ export class StandardActions {
         }
         return permission.then(() => {
           Services.navigationForDoc(this.ampdoc).navigateTo(
-              win, args['url'], `AMP.${method}`, args['target'] || null);
+              win, args['url'], `AMP.${method}`,
+              {target: args['target'], opener: args['opener']});
         }, /* onrejected */ e => {
           user().error(TAG, e.message);
         });
