@@ -53,6 +53,7 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {
   setupAMPCors,
   setupInit,
+  setupInput,
 } from '../../../src/utils/xhr-utils';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -526,8 +527,11 @@ export class AmpForm {
         }).then(() => {
           request = this.requestForFormFetch(
               dev().assertString(this.xhrAction_), this.method_);
-          setupInit(request.fetchOpt);
-          setupAMPCors(this.win_, request.xhrUrl, request.fetchOpt);
+          request.fetchOpt = setupInit(request.fetchOpt);
+          request.fetchOpt = setupAMPCors(
+              this.win_, request.xhrUrl, request.fetchOpt);
+          request.xhrUrl = setupInput(
+              this.win_, request.xhrUrl, request.fetchOpt);
           return this.ssrTemplateHelper_.fetchAndRenderTemplate(
               this.form_,
               request,

@@ -322,7 +322,7 @@ export class AmpList extends AMP.BaseElement {
       const attributes = dict({
         'ampListAttributes': {
           'items': this.element.getAttribute('items') || 'items',
-          'singleItem': this.element.getAttribute('single-item'),
+          'singleItem': this.element.hasAttribute('single-item'),
           'maxItems': this.element.getAttribute('max-items'),
         },
       });
