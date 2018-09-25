@@ -23,6 +23,7 @@ import {addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
+import {getUniqueId} from './utils';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
@@ -56,7 +57,11 @@ export class LinkerManager {
     /** @private {!JsonObject} */
     this.resolvedLinkers_ = dict();
 
+    /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
+
+    /** @private {?number} */
+    this.uid_ = getUniqueId(this.ampdoc_.win);
   }
 
 
@@ -265,31 +270,48 @@ export class LinkerManager {
     el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
   }
 
-
   /**
-   *
-   * @param {*} linkersFinalPromise
+   * Add data to any existing forms, and listen for any new forms that may be
+   * created.
+   * @param {Promise} linkersFinalPromise
    */
   enableFormSupport_(linkersFinalPromise) {
-    const doc = this.ampdoc_.getRootNode();
-
-    // TODO: find a way to listen to this and only add new info.
-    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
-      this.appendLinkerDataToForm_(doc.querySelectorAll('form'));
-    });
-
+    // Wait for all linker macros to finish resolving.
     linkersFinalPromise.then(() => {
+      const doc = this.ampdoc_.getRootNode();
+
+      // Maybe a new form has been added.
+      doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
+        this.maybeAddDataToForm_(doc.querySelectorAll('form'));
+      });
+
       const forms = this.ampdoc_.getRootNode().querySelectorAll('form');
       forms.forEach(form => {
-        this.appendLinkerDataToForm_(form);
-      })
+        this.addDataToForm_(form);
+      });
     });
   }
+
   /**
-   *
-   * @param {*} form
+   * Check to see if we have already added the linker kv pairs to this form,
+   * if not, add them.
+   * @param {Array<HTMLFormElement>} forms
    */
-  appendLinkerDataToForm_(form) {
+  maybeAddDataToForm_(forms) {
+    forms.forEach(form => {
+      if (form.linkerIds[this.uid_]) {
+        return;
+      }
+
+      this.addDataToForm_(form);
+    })
+  }
+
+  /**
+   * Add the linker pairs as <input> elements to form.
+   * @param {HTMLFormElement} form
+   */
+  addDataToForm_(form) {
     Object.keys(this.resolvedLinkers_).forEach(key => {
       const attrs = {
         type: 'hidden',
@@ -300,6 +322,11 @@ export class LinkerManager {
           'input', attrs);
       form.appendChild(inputEl);
     });
+
+    // Add unique id so that we are able to track which forms have already
+    // been modified.
+    form.linkerIds = form.linkerIds || {};
+    form.linkerIds[this.uid_] = true;
   }
 }
 

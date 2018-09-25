@@ -443,6 +443,37 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     sandbox.stub(platform, 'isSafari').returns(isSafari);
     sandbox.stub(platform, 'getMajorVersion').returns(version);
   }
+
+  describe('form support', () => {
+    it('should add linker data to form', () => {
+      const form = createForm();
+
+      const finished = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null).init();
+
+      return finished.then(() => {
+        const el = form.firstChild;
+        expect(el).to.be.ok;
+        expect(el.tagName).to.equal('INPUT');
+        expect(el.getAttribute('name')).to.equal('foo');
+        return expect(el.getAttribute('value')).to.equal('bar');
+      })
+    });
+
+    function createForm() {
+      const form = doc.createElement('form');
+      doc.body.appendChild(form);
+      return form;
+    }
+  });
 });
 
 describe('areFriendlyDomains', () => {
