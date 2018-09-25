@@ -37,7 +37,7 @@ limitations under the License.
 
 The `amp-image-slider` component requires exactly two `amp-img` elements as its children. The first child image displays on the left, the second child image displays on the right.
 
-The `amp-image-slider` component can also contain two `<div>` elements to use as labels for the images. The labels are overlayed on top of the images. The label on the left image requires the `first` attribute, while the right labels requires the `second` attribute. By default, the labels display at the top left corner of the image.
+The `amp-image-slider` component can also contain two `<div>` elements to use as labels for the images. The labels are overlaid on top of the images. The label on the left image requires the `first` attribute, while the right labels requires the `second` attribute. By default, the labels display at the top left corner of the image.
 
 *Example: Displays an image slider with labeled images*
 
