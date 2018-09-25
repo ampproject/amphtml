@@ -188,7 +188,7 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.js' ||
-          filename == 'visual-tests.js' ||
+          filename == 'visual-tests' ||
           filePath.startsWith('examples/visual-tests/'));
 }
 
