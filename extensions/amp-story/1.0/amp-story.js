@@ -46,10 +46,6 @@ import {AmpStoryPage, PageState} from './amp-story-page';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {
-  DoubletapRecognizer,
-  SwipeXYRecognizer,
-} from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
@@ -64,6 +60,7 @@ import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -570,12 +567,6 @@ export class AmpStory extends AMP.BaseElement {
   installGestureRecognizers_() {
     const {element} = this;
     const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
-
-    // Disables zoom on double-tap.
-    gestures.onGesture(DoubletapRecognizer, gesture => {
-      const {event} = gesture;
-      event.preventDefault();
-    });
 
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {

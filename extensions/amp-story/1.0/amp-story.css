@@ -57,6 +57,8 @@ amp-story {
   text-rendering: geometricPrecision !important;
   user-select: none !important;
   width: 100% !important;
+  /* Disables double tap to zoom, and ensures fast-tap is enabled on iOS. */
+  touch-action: manipulation !important;
 }
 
 html.i-amphtml-story-standalone,
