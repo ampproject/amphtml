@@ -95,7 +95,7 @@ export class AmpList extends AMP.BaseElement {
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
-        return this.fetchList_();
+        return this.fetchList_(/* opt_refresh */ true);
       }
     }, ActionTrust.HIGH);
 
@@ -256,23 +256,26 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Request list data from `src` and return a promise that resolves when
-   * the list has been populated with rendered list items. If the viewer is
-   * capable of rendering the templates, then the fetching of the list and
-   * transformation of the template is handled by the viewer.
+   * Fetches JSON from the endpoint at the `src` attribute and renders it.
+   * Returns a promise that resolves when rendering is complete.
+   *
+   * If the viewer has the 'ssrTemplate' capability, then both the JSON fetch
+   * and rendering of the template are delegated to the viewer.
+   *
+   * @param {boolean=} opt_refresh Forces refresh of browser cache.
    * @return {!Promise}
    * @private
    */
-  fetchList_() {
+  fetchList_(opt_refresh = false) {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
     let fetch;
     if (this.ssrTemplateHelper_.isSupported()) {
-      fetch = this.ssrTemplate_();
+      fetch = this.ssrTemplate_(opt_refresh);
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
-      fetch = this.fetch_(itemsExpr).then(items => {
+      fetch = this.fetch_(itemsExpr, opt_refresh).then(items => {
         if (this.element.hasAttribute('single-item')) {
           user().assert(typeof items !== 'undefined',
               'Response must contain an array or object at "%s". %s',
@@ -298,16 +301,18 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Proxies the template rendering to the viewer.
+   * @param {boolean} refresh
    * @return {!Promise}
    */
-  ssrTemplate_() {
+  ssrTemplate_(refresh) {
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
     return requestForBatchFetch(
         this.getAmpDoc(),
         this.element,
-        this.getPolicy_()).then(r => {
+        this.getPolicy_(),
+        refresh).then(r => {
       request = r;
 
       request.fetchOpt = setupAMPCors(
@@ -562,15 +567,16 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {string} itemsExpr
+   * @param {boolean} refresh
    * @private
    */
-  fetch_(itemsExpr) {
+  fetch_(itemsExpr, refresh) {
     return batchFetchJsonFor(
-        this.getAmpDoc(), this.element, itemsExpr, this.getPolicy_());
+        this.getAmpDoc(), this.element, itemsExpr, this.getPolicy_(), refresh);
   }
 
   /**
-   * return {!UrlReplacementPolicy}
+   * @return {!UrlReplacementPolicy}
    */
   getPolicy_() {
     const src = this.element.getAttribute('src');

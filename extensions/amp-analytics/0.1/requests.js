@@ -27,11 +27,11 @@ import {
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
-import {filterSplice} from '../../../src/utils/array';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {remove} from '../../../src/utils/array';
 
-const TAG = 'AMP-ANALYTICS/requests';
+const TAG = 'amp-analytics/requests';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -462,7 +462,7 @@ function getExtraUrlParamsString(variableService, params) {
  */
 function constructExtraUrlParamStrs(baseUrl, extraUrlParamStrsPromise) {
   return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
-    filterSplice(paramStrs, item => {return !!item;});
+    remove(paramStrs, item => !item);
     const extraUrlParamsStr = paramStrs.join('&');
     let requestUrl;
     if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
