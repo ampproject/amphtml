@@ -54,7 +54,7 @@
     "baconipsum": "0.1.2",
     "bluebird": "3.5.2",
     "body-parser": "1.18.3",
-    "browserify": "16.2.2",
+    "browserify": "16.2.3",
     "bundlesize": "0.17.0",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
