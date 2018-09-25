@@ -339,12 +339,12 @@ describe('amp-next-page config', () => {
       allowConsoleError(() => {
         expect(() => assertConfig(/*ctx*/ null, config1, documentUrl))
             .to.throw(
-                'pages must be from the same origin as the current document​​​');
+                'pages must be from the same origin as the current document');
       });
       allowConsoleError(() => {
         expect(() => assertConfig(/*ctx*/ null, config2, documentUrlCdn))
             .to.throw(
-                'pages must be from the same origin as the current document​​​');
+                'pages must be from the same origin as the current document');
       });
     });
   });
