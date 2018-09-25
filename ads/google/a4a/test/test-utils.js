@@ -586,11 +586,11 @@ describe('Google A4A utils', () => {
     });
   });
 
-  describes.fakeWin('#getIdentityTokenRequestUrl', {}, env => {
+  describes.fakeWin('#getIdentityTokenRequestUrl', {}, () => {
     let doc;
     let fakeWin;
     beforeEach(() => {
-      const documentInfoStub = env.sandbox.stub(Services, 'documentInfoForDoc');
+      const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
       doc = {};
       fakeWin = {location: {}};
       documentInfoStub.withArgs(doc)
@@ -637,7 +637,7 @@ describe('Google A4A utils', () => {
   describes.fakeWin('#getIdentityToken', {amp: true, mockFetch: true}, env => {
     beforeEach(() => {
       installXhrService(env.win);
-      const documentInfoStub = env.sandbox.stub(Services, 'documentInfoForDoc');
+      const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
       documentInfoStub.withArgs(env.win.document)
           .returns({canonicalUrl: 'http://f.blah.com?some_site'});
     });
@@ -874,7 +874,7 @@ describe('Google A4A utils', () => {
 
     it('should calculate correlator from PVID and CID if possible', () => {
       const pageViewId = '818181';
-      env.sandbox.stub(Services, 'documentInfoForDoc').callsFake(() => {
+      sandbox.stub(Services, 'documentInfoForDoc').callsFake(() => {
         return {pageViewId};
       });
       const cid = '12345678910';
@@ -908,7 +908,7 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
   it('should find amp-ad of only given type', () => {
     const resources = [createResource({type: 'doubleclick'}),
       createResource({type: 'blah'}), createResource({}, 'amp-foo')];
-    env.sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
         .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
@@ -930,7 +930,7 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     const ampAdResource =
       createResource({type: 'doubleclick'}, 'amp-ad', stickyResource.element);
     ampAdResource.element.createdCallback = true;
-    env.sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
         .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(
         result => {
@@ -955,7 +955,7 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     const ampAdResource = createResource({type: 'doubleclick', foo: 'bar'},
         'amp-ad', stickyResource.element);
     ampAdResource.element.createdCallback = true;
-    env.sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
         .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(
         win, 'doubleclick', element => element.getAttribute('foo')).then(

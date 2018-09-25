@@ -16,8 +16,7 @@
 import {Services} from '../../src/services';
 import {fetchDocument} from '../../src/document-fetcher';
 
-describes.realWin('DocumentFetcher', {amp: true}, function(env) {
-  let sandbox;
+describes.realWin('DocumentFetcher', {amp: true}, function() {
   let xhrCreated;
   let ampdocServiceForStub;
   let ampdocViewerStub;
@@ -28,7 +27,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
     xhrCreated = new Promise(resolve => mockXhr.onCreate = resolve);
   }
   beforeEach(() => {
-    sandbox = env.sandbox;
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({
@@ -44,6 +42,9 @@ describes.realWin('DocumentFetcher', {amp: true}, function(env) {
     const win = {location: {href: 'https://acme.com/path'}};
     beforeEach(() => {
       setupMockXhr();
+    });
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('should be able to fetch a document', () => {

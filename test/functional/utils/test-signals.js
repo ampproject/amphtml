@@ -17,12 +17,12 @@
 import {Signals} from '../../../src/utils/signals';
 
 
-describes.sandboxed('Signals', {}, env => {
+describes.sandboxed('Signals', {}, () => {
   let clock;
   let signals;
 
   beforeEach(() => {
-    clock = env.sandbox.useFakeTimers();
+    clock = sandbox.useFakeTimers();
     clock.tick(1);
     signals = new Signals();
   });
