@@ -408,6 +408,8 @@ describes.realWin('Platform store', {}, () => {
       const platform = new SubscriptionPlatform();
       sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
       sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
+      platformStore.reportPlatformFailure('service1');
+      expect(errorSpy).to.not.be.called;
       platformStore.reportPlatformFailure('local');
       expect(errorSpy).to.be.calledOnce;
       expect(platformStore.entitlements_['local'].json())
