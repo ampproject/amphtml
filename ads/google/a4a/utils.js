@@ -251,7 +251,7 @@ export function googlePageParameters(a4a, startTime) {
   const referrerPromise = Services.timerFor(win).timeoutPromise(
       1000, Services.viewerForDoc(ampDoc).getReferrerUrl())
       .catch(() => {
-        dev().error('AMP-A4A', 'Referrer timeout!');
+        dev().expectedError('AMP-A4A', 'Referrer timeout!');
         return '';
       });
   return Promise.all([
