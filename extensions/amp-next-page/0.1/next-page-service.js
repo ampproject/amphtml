@@ -20,7 +20,7 @@ import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
@@ -108,6 +108,12 @@ export class NextPageService {
 
     /** @private {function(!Element): !Promise} */
     this.appendPageHandler_ = () => {};
+
+    /** @private {?../../../src/service/url-impl.Url} */
+    this.urlService_ = null;
+
+    /** @private {string} */
+    this.origin_ = '';
   }
 
   /** Returns true if the service has already been initialized. */
@@ -148,6 +154,8 @@ export class NextPageService {
     this.multidocManager_ =
         new MultidocManager(win, Services.ampdocServiceFor(win),
             Services.extensionsFor(win), Services.timerFor(win));
+    this.urlService_ = Services.urlForDoc(dev().assertElement(this.element_));
+    this.origin_ = this.urlService_.parse(ampDoc.getUrl()).origin;
 
     installPositionObserverServiceForDoc(ampDoc);
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
@@ -259,6 +267,10 @@ export class NextPageService {
           .then(response => {
             // Update AMP URL in case we were redirected.
             documentRef.ampUrl = response.url;
+            const url = this.urlService_.parse(response.url);
+            user().assert(url.origin === this.origin_,
+                'ampUrl resolved to a different origin from the origin of the '
+                + 'current document');
             return response.text();
           })
           .then(html => {
@@ -461,9 +473,8 @@ export class NextPageService {
       return;
     }
 
-    const urlService = Services.urlForDoc(dev().assertElement(this.element_));
     const {title} = documentRef.amp;
-    const {pathname, search} = urlService.parse(documentRef.ampUrl);
+    const {pathname, search} = this.urlService_.parse(documentRef.ampUrl);
     this.win_.history.replaceState({}, title, pathname + search);
   }
 

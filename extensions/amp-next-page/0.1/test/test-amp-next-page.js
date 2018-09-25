@@ -206,13 +206,40 @@ env => {
       expect(shadowRoot.getElementById('analytics1')).to.be.null;
       expect(shadowRoot.getElementById('analytics2')).to.be.null;
     });
+
+    it('blocks documents which resolve to a different origin when fetched',
+        function* () {
+          expectAsyncConsoleError(/ampUrl resolved to a different origin/, 2);
+          env.fetchMock.get(/\/document1/, {
+            redirectUrl: 'https://othersite.com/article',
+            body: EXAMPLE_PAGE,
+          });
+
+          const nextPageService =
+              yield getServicePromiseForDoc(ampdoc, 'next-page');
+          const attachShadowDocSpy =
+              sandbox.spy(nextPageService.multidocManager_, 'attachShadowDoc');
+          sandbox.stub(viewport, 'getClientRectAsync')
+              .onFirstCall().callsFake(() => {
+                // 1x viewport away
+                return Promise.resolve(
+                    layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+              });
+          win.dispatchEvent(new Event('scroll'));
+          yield macroTask();
+
+          expect(env.fetchMock.done()).to.be.true;
+          expect(attachShadowDocSpy.notCalled).to.be.true;
+        });
   });
 
   describe('remote config', () => {
     it('errors when no config specified', () => {
-      return nextPage.buildCallback().should.be.rejectedWith(
+      const error =
           'amp-next-page should contain a <script> child, a URL specified in '
-          + '[src], or a [type]');
+          + '[src], or a [type]';
+      expectAsyncConsoleError(error);
+      return nextPage.buildCallback().should.be.rejectedWith(error);
     });
 
     it('fetches remote config when specified in src', function* () {
