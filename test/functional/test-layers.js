@@ -131,6 +131,26 @@ describes.realWin('Layers', {amp: true}, env => {
           expect(layer).to.equal(LayoutElement.for(parent));
         });
 
+        it('does not cause double references in layer tree', () => {
+          const layers = Services.layersForDoc(root);
+          const div = createElement();
+          root.appendChild(div);
+          layers.add(div);
+
+          const layout = LayoutElement.for(div);
+          const rootLayout = LayoutElement.for(scrollingElement);
+          expect(layout.getParentLayer()).to.equal(rootLayout);
+
+          layout.forgetParentLayer();
+          expect(layout.getParentLayer()).to.equal(rootLayout);
+
+          const spy = sinon.sandbox.spy(div, 'getBoundingClientRect');
+          rootLayout.dirtyMeasurements();
+          rootLayout.remeasure();
+
+          expect(spy).to.have.callCount(1);
+        });
+
         describe('inside FIE', () => {
           let iframe;
           let iframeBody;
