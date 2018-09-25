@@ -229,7 +229,8 @@
 }
 
 .i-amphtml-story-no-sharing .i-amphtml-story-share-control,
-.i-amphtml-story-no-sharing .i-amphtml-story-info-control {
+.i-amphtml-story-no-sharing .i-amphtml-story-info-control,
+.i-amphtml-story-no-sharing .i-amphtml-story-share-pill {
   display: none !important;
 }
 
