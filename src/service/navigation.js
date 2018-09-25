@@ -193,7 +193,7 @@ export class Navigation {
 
     const newWin = win.top.open(url, target, options);
     // For Chrome, since we cannot use noopener.
-    if (!opener) {
+    if (newWin && !opener) {
       newWin.opener = null;
     }
   }
