@@ -157,8 +157,8 @@
       "name": "AMP Article",
       "loading_complete_css": [
         ".article-body",
-        ".ad-one",
-        ".ad-two"
+        ".ad-one div[placeholder].amp-hidden",
+        ".ad-two div[placeholder].amp-hidden"
       ]
     },
     {
