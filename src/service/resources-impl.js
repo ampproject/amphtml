@@ -27,7 +27,6 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
 import {dev} from '../log';
 import {dict, hasOwn} from '../utils/object';
-import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
@@ -35,6 +34,7 @@ import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {remove} from '../utils/array';
 import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
@@ -2302,8 +2302,8 @@ export class Resources {
       this.exec_.purge(task => {
         return task.resource == resource;
       });
-      filterSplice(this.requestsChangeSize_, request => {
-        return request.resource != resource;
+      remove(this.requestsChangeSize_, request => {
+        return request.resource === resource;
       });
     }
 

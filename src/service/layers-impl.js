@@ -17,11 +17,11 @@
 import {Services} from '../services';
 import {computedStyle} from '../style';
 import {dev} from '../log';
-import {filterSplice} from '../utils/array';
 import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
 import {getMode} from '../mode';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {remove} from '../utils/array';
 import {rootNodeFor} from '../dom';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
@@ -823,7 +823,7 @@ export class LayoutElement {
     // everything in this layer.
     const contained = layer.contains(this);
 
-    filterSplice(this.children_, layout => {
+    remove(this.children_, layout => {
       if (contained || layer.contains(layout)) {
         // Mark the layout as needing a remeasure, since its offset position
         // has likely changed.
@@ -832,10 +832,10 @@ export class LayoutElement {
         // And transfer ownership to the new layer.
         layout.parentLayer_ = layer;
         layer.children_.push(layout);
-        return false;
+        return true;
       }
 
-      return true;
+      return false;
     });
   }
 
