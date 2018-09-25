@@ -495,12 +495,14 @@ describes.sandboxed('StandardActions', {}, () => {
       invocation.node = ampdoc;
       const elStub = sandbox.stub(ampdoc, 'getElementById')
           .returns('ElementFound');
-      const scrollStub = sandbox.stub(standardActions, 'handleScrollTo');
-      standardActions.handleAmpTarget(invocation);
+      const scrollStub = sandbox.stub(standardActions, 'handleScrollTo')
+          .returns('scrollToResponsePromise');
+      const result = standardActions.handleAmpTarget(invocation);
       expect(scrollStub).to.be.calledOnce;
       expect(elStub).to.be.calledWith('testIdElement');
       invocation.node = 'ElementFound';
       expect(scrollStub).to.be.calledWith(invocation);
+      expect(result).to.eql('scrollToResponsePromise');
     });
   });
 

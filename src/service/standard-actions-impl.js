@@ -136,8 +136,7 @@ export class StandardActions {
         user().assert(element,
             'AMP target scrollTo must provide element ID present on page');
         invocation.node = element;
-        this.handleScrollTo(invocation);
-        return null;
+        return this.handleScrollTo(invocation);
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
