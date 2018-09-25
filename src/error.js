@@ -491,7 +491,7 @@ export function getErrorReportData(message, filename, line, col, error,
 
   // Add our a4a id if we are inabox
   if (runtime === 'inabox') {
-    data['a4aId'] = getMode().a4aId;
+    data['adid'] = getMode().a4aId;
   }
 
   // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to

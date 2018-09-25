@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {createElementWithAttributes} from '../../../src/dom.js';
 import {Services} from '../../../src/services';
 import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';
 
@@ -27,10 +28,14 @@ describes.realWin('inabox-utils', {}, env => {
   let a4aIdMetaElement;
 
   function addA4AMetaTagToDocument() {
-    a4aIdMetaElement = env.win.document.createElement('meta');
-    a4aIdMetaElement.setAttribute('name', 'amp4ads-id');
-    a4aIdMetaElement.setAttribute('content',
-        'vendor=doubleclick,type=impression-id,value=12345');
+    a4aIdMetaElement = createElementWithAttributes(
+      env.win.document,
+      'meta',
+      {
+        name: 'amp4ads-id',
+        content: 'vendor=doubleclick,type=impression-id,value=12345'
+      }
+    );
     env.win.document.head.appendChild(a4aIdMetaElement);
   }
 
