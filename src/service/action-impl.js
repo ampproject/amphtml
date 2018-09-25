@@ -167,7 +167,7 @@ export class ActionInvocation {
    */
   constructor(node, method, args, source, caller, event, trust,
     actionEventType = '?', tagOrTarget = null, sequenceId = Math.random()) {
-    /** @const {!Node} */
+    /** @type {!Node} */
     this.node = node;
     /** @const {string} */
     this.method = method;
