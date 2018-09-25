@@ -41,8 +41,8 @@ const PORT = 8000;
 const BASE_URL = `http://${HOST}:${PORT}`;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
-const MAX_PARALLEL_PAGES = 10;
-const WAIT_FOR_PRODUCER_OR_CONSUMER_MS = 1000;
+const MAX_PARALLEL_TABS = 10;
+const WAIT_FOR_TABS_MS = 1000;
 const CSS_SELECTOR_RETRY_MS = 100;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
@@ -400,8 +400,8 @@ async function generateSnapshots(percy, webpages) {
 async function snapshotWebpages(percy, browser, webpages) {
   const pagePromises = {};
   for (const webpage of webpages) {
-    while (Object.keys(pagePromises).length >= MAX_PARALLEL_PAGES) {
-      await sleep(WAIT_FOR_PRODUCER_OR_CONSUMER_MS);
+    while (Object.keys(pagePromises).length >= MAX_PARALLEL_TABS) {
+      await sleep(WAIT_FOR_TABS_MS);
     }
 
     const page = await newPage(browser);
@@ -478,7 +478,7 @@ async function snapshotWebpages(percy, browser, webpages) {
   }
 
   while (Object.keys(pagePromises).length > 0) {
-    await sleep(WAIT_FOR_PRODUCER_OR_CONSUMER_MS);
+    await sleep(WAIT_FOR_TABS_MS);
   }
   log('travis', '\n');
 }
