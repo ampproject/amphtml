@@ -401,7 +401,7 @@ beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  sinon.sandbox = sinon.createSandbox();
+  window.sandbox = sinon.sandbox = sinon.createSandbox();
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();

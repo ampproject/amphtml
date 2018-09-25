@@ -31,11 +31,12 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {deepMerge, dict, map} from '../../../src/utils/object';
+import {deepMerge, dict, hasOwn, map} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
+
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
@@ -384,7 +385,7 @@ export class AmpConsent extends AMP.BaseElement {
       promptPromise =
           this.getConsentRemote_(instanceId).then(remoteConfigResponse => {
             if (!remoteConfigResponse ||
-                !remoteConfigResponse['promptIfUnknown']) {
+                !hasOwn(remoteConfigResponse, 'promptIfUnknown')) {
               this.user().error(TAG, 'Expecting promptIfUnknown from ' +
                 'checkConsentHref when promptIfUnknownForGeoGroup is not ' +
                 'specified');

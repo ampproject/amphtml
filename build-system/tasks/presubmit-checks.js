@@ -144,8 +144,8 @@ const forbiddenTerms = {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
       'extensions/amp-analytics/0.1/config.js',
+      'extensions/amp-analytics/0.1/requests.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -612,7 +612,6 @@ const forbiddenTerms = {
   'eslint no-unused-vars': {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
-      'viewer-api/swipe-api.js',
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
     ],
   },
