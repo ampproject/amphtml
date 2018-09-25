@@ -612,9 +612,11 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.buildRuntimeMinified(/* extensions */ false);
-      command.runBundleSizeCheck();
       command.runVisualDiffTests();
+      if (buildTargets.has('RUNTIME')) {
+        command.buildRuntimeMinified(/* extensions */ false);
+        command.runBundleSizeCheck();
+      }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');
