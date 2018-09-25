@@ -376,9 +376,6 @@ export function expandPostMessage(
       Services.urlReplacementsForDoc(baseInstance.element);
 
   const bindings = variableService.getMacros();
-  bindings['RESOURCE_TIMING'] = getResourceTiming(
-      this.win, trigger['resourceTimingSpec'], this.startTime_);
-
   expansionOption.freezeVar('extraUrlParams');
 
   const basePromise = variableService.expandTemplate(

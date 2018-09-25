@@ -292,16 +292,13 @@ function serializeResourceTiming(win, resourceTimingSpec) {
 
 /**
  * @param {!Window} win resource timing spec.
- * @param {!JsonObject} spec resource timing spec.
+ * @param {!JsonObject|undefined} spec resource timing spec.
  * @param {number} startTime start timestamp.
  * @return {!Promise<string>}
  */
 export function getResourceTiming(win, spec, startTime) {
-  // Check if we're done reporting resource timing metrics before binding
-  // before binding the resource timing variable.
-  if (spec && !spec['done'] &&
-      // Only allow collecting timing within 1s
-      Date.now() < (startTime + (60 * 1000))) {
+  // Only allow collecting timing within 1s
+  if (spec && (Date.now() < (startTime + 60 * 1000))) {
     return serializeResourceTiming(win, spec);
   } else {
     return Promise.resolve('');
