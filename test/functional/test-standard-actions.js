@@ -486,6 +486,22 @@ describes.sandboxed('StandardActions', {}, () => {
       standardActions.handleAmpTarget(invocation);
       expect(printStub).to.be.calledOnce;
     });
+
+    it('should implement scrollTo with element target', () => {
+      invocation.method = 'scrollTo';
+      invocation.args = {
+        id: 'testIdElement',
+      };
+      invocation.node = ampdoc;
+      const elStub = sandbox.stub(ampdoc, 'getElementById')
+          .returns('ElementFound');
+      const scrollStub = sandbox.stub(standardActions, 'handleScrollTo');
+      standardActions.handleAmpTarget(invocation);
+      expect(scrollStub).to.be.calledOnce;
+      expect(elStub).to.be.calledWith('testIdElement');
+      invocation.node = 'ElementFound';
+      expect(scrollStub).to.be.calledWith(invocation);
+    });
   });
 
   describes.fakeWin('adoptEmbedWindow', {}, env => {

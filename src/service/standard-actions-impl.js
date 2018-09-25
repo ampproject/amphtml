@@ -129,6 +129,16 @@ export class StandardActions {
           user().error(TAG, e.message);
         });
 
+      case 'scrollTo':
+        user().assert(args['id'],
+            'AMP target scrollTo must provide element ID');
+        const element = getAmpdoc(node).getElementById(args['id']);
+        user().assert(element,
+            'AMP target scrollTo must provide element ID present on page');
+        invocation.node = element;
+        this.handleScrollTo(invocation);
+        return null;
+
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
         return null;
