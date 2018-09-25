@@ -37,15 +37,25 @@ limitations under the License.
 </amp-ad>
 ```
 
-### AST for multiple sync ads on the page
+### AST single ad call with keywords
 
 Note: you should use either the basic setup or AST setup. Do not mix types on the same page.
+
+```html
+<amp-ad width="320" height="50"
+    type="appnexus"
+    data-target="apn_ad_40954389058"
+    json='{"pageOpts": {"member": 958,"invCode": "ast_guaranteed_prios_1","keywords": {"adSite":"mobile-smh","cat":"business","cat1":"bankingandfinance","ctype":"article","synd":"amp"}},"targetId": "apn_ad_40954389058","sizes": [[300, 50]],"adUnits": [{"invCode": "ast_guaranteed_prios_1","disablePsa": true,"sizes": [[320, 50],[300, 50]],"targetId": "apn_ad_5675675648","keywords": {"pos": 1}},{"invCode": "ast_guaranteed_prios_1","disablePsa": true,"sizes": [30, 250],"targetId": "apn_ad_5675675648","keywords": {"pos": 2}}]}'class="i-amphtml-element i-amphtml-layout-fixed i-amphtml-layout-size-defined i-amphtml-layout">
+</amp-ad>
+```
+
+### AST for multiple sync ads on the page
 
 ```html
 <amp-ad width="300" height="250"
     type="appnexus"
     data-target="apn_ad_40954389058"
-    json='{"pageOpts": {"member": 958},"adUnits": [{"disablePsa": true,"invCode": "ast_guaranteed_prios_1","tagId": 12345,"sizes": [300, 250],"targetId": "apn_ad_40954389058"}, {"invCode": "ast_guaranteed_prios_1","tagId": 456,"sizes": [160, 600],"targetId": "apn_ad_5675675648"}]}'>>
+    json='{"pageOpts": {"member": 958},"adUnits": [{"disablePsa": true,"invCode": "ast_guaranteed_prios_1","tagId": 12345,"sizes": [300, 250],"targetId": "apn_ad_40954389058"}, {"invCode": "ast_guaranteed_prios_1","tagId": 456,"sizes": [160, 600],"targetId": "apn_ad_5675675648"}]}'>
 </amp-ad>
 
 <amp-ad width="160" height="600"
