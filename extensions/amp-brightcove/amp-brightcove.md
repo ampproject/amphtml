@@ -82,6 +82,10 @@ The Video Cloud playlist id. For AMP HTML uses a video id will normally be used 
 
 This is not used for Perform players by default; use it if you have added a plugin that expects a `playlistId` param in the query string.
 
+##### data-referrer
+
+Sets the referrer to be used for the Video Cloud analytics within the player. Requires Brightcove Player version v6.25.0+. This supports AMP varables such as `EXTERNAL_REFERRER`.
+
 ##### data-param-*
 
 All `data-param-*` attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
