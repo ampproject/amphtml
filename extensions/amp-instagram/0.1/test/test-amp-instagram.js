@@ -73,20 +73,19 @@ describes.realWin('amp-instagram', {
     expect(image.getAttribute('layout')).to.equal('fill');
     expect(image.getAttribute('alt')).to.equal('Testing');
     expect(image.getAttribute('referrerpolicy')).to.equal('origin');
+    expect(image.getAttribute('alt')).to.start_with('Instagram:');
   }
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
     expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?cr=1&v=9');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
   function testIframeCaptioned(iframe) {
     expect(iframe).to.not.be.null;
     expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=9');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
   it('renders', () => {
