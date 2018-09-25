@@ -82,6 +82,7 @@ describes.realWin('amp-list component', {
     expr: 'items',
     maxItems: 0,
     singleItem: false,
+    refresh: false,
     resetOnRefresh: false,
   };
 
@@ -94,7 +95,7 @@ describes.realWin('amp-list component', {
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     // Mock the actual network request.
     listMock.expects('fetch_')
-        .withExactArgs(opts.expr || DEFAULT_LIST_OPTS.expr)
+        .withExactArgs(opts.expr || DEFAULT_LIST_OPTS.expr, !!opts.refresh)
         .returns(Promise.resolve(fetched))
         .atLeast(1);
 
@@ -292,7 +293,7 @@ describes.realWin('amp-list component', {
       return list.layoutCallback().then(() => {
         expect(list.container_.contains(foo)).to.be.true;
 
-        expectFetchAndRender(items, [foo]);
+        expectFetchAndRender(items, [foo], {refresh: true});
 
         return list.executeAction({
           method: 'refresh',
@@ -310,7 +311,8 @@ describes.realWin('amp-list component', {
       return list.layoutCallback().then(() => {
         expect(list.container_.contains(foo)).to.be.true;
 
-        expectFetchAndRender(items, [foo], {resetOnRefresh: true});
+        const opts = {refresh: true, resetOnRefresh: true};
+        expectFetchAndRender(items, [foo], opts);
 
         return list.executeAction({
           method: 'refresh',
