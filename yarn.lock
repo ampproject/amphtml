@@ -747,9 +747,9 @@ ansi-colors@1.1.0, ansi-colors@^1.0.1:
   dependencies:
     ansi-wrap "^0.1.0"
 
-ansi-colors@3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.0.5.tgz#cb9dc64993b64fd6945485f797fc3853137d9a7b"
+ansi-colors@3.0.6:
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.0.6.tgz#a0b9e00e8c1cc6685b1c3130dbeb9abed03ca6a4"
 
 ansi-cyan@^0.1.1:
   version "0.1.1"
