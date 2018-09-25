@@ -208,8 +208,8 @@ export class Navigation {
    * @param {string} url
    * @param {string=} opt_requestedBy
    * @param {!{
-   *   target: string=,
-   *   opener: boolean=,
+   *   target: (string|undefined),
+   *   opener: (boolean|undefined),
    * }=} opt_options
    */
   navigateTo(
@@ -221,8 +221,7 @@ export class Navigation {
     }
 
     user().assert(
-        TAG, VALID_TARGETS.includes(target),
-        `Target '${target}' not supported.`);
+        VALID_TARGETS.includes(target), `Target '${target}' not supported.`);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_self" should behave like it would on an anchor tag and
