@@ -285,7 +285,7 @@ export class LinkerManager {
         this.maybeAddDataToForm_(doc.querySelectorAll('form'));
       });
 
-      const forms = this.ampdoc_.getRootNode().querySelectorAll('form');
+      const forms = doc.querySelectorAll('form');
       forms.forEach(form => {
         this.addDataToForm_(form);
       });
@@ -299,12 +299,12 @@ export class LinkerManager {
    */
   maybeAddDataToForm_(forms) {
     forms.forEach(form => {
-      if (form.linkerIds[this.uid_]) {
+      if (form.linkerIds_ && form.linkerIds_[this.uid_]) {
         return;
       }
 
       this.addDataToForm_(form);
-    })
+    });
   }
 
   /**
@@ -317,7 +317,7 @@ export class LinkerManager {
         type: 'hidden',
         name: key,
         value: this.resolvedLinkers_[key],
-      }
+      };
       const inputEl = createElementWithAttributes(this.ampdoc_.getRootNode(),
           'input', attrs);
       form.appendChild(inputEl);
@@ -325,8 +325,8 @@ export class LinkerManager {
 
     // Add unique id so that we are able to track which forms have already
     // been modified.
-    form.linkerIds = form.linkerIds || {};
-    form.linkerIds[this.uid_] = true;
+    form.linkerIds_ = form.linkerIds_ || {};
+    form.linkerIds_[this.uid_] = true;
   }
 }
 

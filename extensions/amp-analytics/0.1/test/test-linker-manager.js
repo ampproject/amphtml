@@ -15,6 +15,7 @@
  */
 
 import * as experiments from '../../../../src/experiments';
+import {AmpEvents} from '../../../../src/amp-events';
 import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
@@ -463,9 +464,138 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         const el = form.firstChild;
         expect(el).to.be.ok;
         expect(el.tagName).to.equal('INPUT');
-        expect(el.getAttribute('name')).to.equal('foo');
-        return expect(el.getAttribute('value')).to.equal('bar');
-      })
+        expect(el.getAttribute('name')).to.equal('testLinker');
+        return expect(el.getAttribute('value')).to.contain('foo');
+      });
+    });
+
+    it('should not add duplicate linker data to existing form', () => {
+      const form = createForm();
+      const finished = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null).init();
+
+      return finished.then(() => {
+        const firstChild = form.children[0];
+        expect(firstChild).to.be.ok;
+        expect(firstChild.tagName).to.equal('INPUT');
+        expect(firstChild.getAttribute('name')).to.equal('testLinker');
+        expect(firstChild.getAttribute('value')).to.contain('foo');
+
+        const secondChild = form.children[1];
+        return expect(secondChild).to.be.undefined;
+      });
+    });
+
+    it('should add multiple linker data to one form', () => {
+      const form = createForm();
+      const p1 = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null).init();
+
+      const p2 = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker2: {
+            enabled: true,
+            ids: {
+              hello: 'world',
+            },
+          },
+        },
+      }, null).init();
+
+      return Promise.all([p1, p2]).then(() => {
+        const firstChild = form.children[0];
+        expect(firstChild).to.be.ok;
+        expect(firstChild.tagName).to.equal('INPUT');
+        expect(firstChild.getAttribute('name')).to.equal('testLinker');
+        expect(firstChild.getAttribute('value')).to.contain('foo');
+
+        const secondChild = form.children[1];
+        expect(secondChild).to.be.ok;
+        expect(secondChild.tagName).to.equal('INPUT');
+        expect(secondChild.getAttribute('name')).to.equal('testLinker2');
+        expect(secondChild.getAttribute('value')).to.contain('hello');
+      });
+    });
+
+    it('should add to multiple forms on page', () => {
+      const form1 = createForm();
+      const form2 = createForm();
+
+      const finished = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null).init();
+
+      return finished.then(() => {
+        const form1Child = form1.firstChild;
+        expect(form1Child).to.be.ok;
+        expect(form1Child.tagName).to.equal('INPUT');
+        expect(form1Child.getAttribute('name')).to.equal('testLinker');
+        expect(form1Child.getAttribute('value')).to.contain('foo');
+
+        const form2Child = form2.firstChild;
+        expect(form2Child).to.be.ok;
+        expect(form2Child.tagName).to.equal('INPUT');
+        expect(form2Child.getAttribute('name')).to.equal('testLinker');
+        return expect(form2Child.getAttribute('value')).to.contain('foo');
+      });
+    });
+
+    it('should add to new forms created after init', () => {
+      const form1 = createForm();
+
+      const finished = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null).init();
+
+      return finished.then(() => {
+        const form2 = createForm();
+        doc.dispatchEvent(new Event(AmpEvents.DOM_UPDATE), {bubbles: true});
+
+        const form1Child = form1.firstChild;
+        expect(form1Child).to.be.ok;
+        expect(form1Child.tagName).to.equal('INPUT');
+        expect(form1Child.getAttribute('name')).to.equal('testLinker');
+        expect(form1Child.getAttribute('value')).to.contain('foo');
+
+        const form1SecondChild = form1.children[1];
+        expect(form1SecondChild).to.be.undefined;
+
+        const form2Child = form2.firstChild;
+        expect(form2Child).to.be.ok;
+        expect(form2Child.tagName).to.equal('INPUT');
+        expect(form2Child.getAttribute('name')).to.equal('testLinker');
+        return expect(form2Child.getAttribute('value')).to.contain('foo');
+      });
     });
 
     function createForm() {
