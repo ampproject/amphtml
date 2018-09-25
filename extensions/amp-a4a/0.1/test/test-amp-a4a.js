@@ -412,7 +412,7 @@ describe('amp-a4a', () => {
 
     it('detachedCallback should destroy FIE and detach frame', () => {
       const fieDestroySpy =
-          sandbox.spy(FriendlyIframeEmbed.prototype, 'destroy');
+          sandbox./*OK*/spy(FriendlyIframeEmbed.prototype, 'destroy');
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
