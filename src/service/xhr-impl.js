@@ -33,14 +33,6 @@ import {isFormDataWrapper} from '../form-data-wrapper';
 import {user} from '../log';
 
 /**
- * @typedef {{
- *  xhrUrl: string,
- *  fetchOpt: !FetchInitDef
- * }}
- */
-export let FetchRequestDef;
-
-/**
  * A service that polyfills Fetch API for use within AMP.
  *
  * @package Visible for type.
