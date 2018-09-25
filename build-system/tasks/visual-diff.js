@@ -29,7 +29,7 @@ const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
 const {execScriptAsync} = require('../exec');
 const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
-const {gitBranchName, gitCommitterEmail} = require('../git');
+const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../git');
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
@@ -124,6 +124,22 @@ function setPercyBranch() {
     const branchName = process.env['TRAVIS'] ?
       process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
+  }
+}
+
+/**
+ * Set the branching point's SHA to an env variable.
+ *
+ * This will let Percy determine which build to use as the baseline for this new
+ * build.
+ *
+ * Does not do anything for --master builds, since master builds are always
+ * built on top of the previous commit (we use the squash and merge method for
+ * pull requests.)
+ */
+function setPercyTargetCommit() {
+  if (!argv.master) {
+    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint();
   }
 }
 
@@ -673,6 +689,7 @@ async function visualDiff() {
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
+  setPercyTargetCommit();
 
   if (argv.grep) {
     argv.grep = RegExp(argv.grep);
