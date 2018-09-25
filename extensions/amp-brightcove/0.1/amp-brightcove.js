@@ -78,6 +78,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /**@private {?string} */
     this.playerId_ = null;
+
+    /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = null;
   }
 
   /** @override */
@@ -99,8 +102,10 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const ampdoc = this.getAmpDoc();
     const deferred = new Deferred();
 
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
@@ -237,6 +242,7 @@ class AmpBrightcove extends AMP.BaseElement {
         'The data-account attribute is required for <amp-brightcove> %s',
         el);
     const embed = (el.getAttribute('data-embed') || 'default');
+    const customReferrer = el.getAttribute('data-referrer');
 
     this.playerId_ = (el.getAttribute('data-player') ||
       el.getAttribute('data-player-id') ||
@@ -249,7 +255,12 @@ class AmpBrightcove extends AMP.BaseElement {
         // These are encodeURIComponent'd in encodeId_().
         (el.getAttribute('data-playlist-id') ?
           '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id')) :
-          '?videoId=' + this.encodeId_(el.getAttribute('data-video-id')));
+          '?videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
+        ) +
+        (customReferrer ?
+          `&referrer=${this.urlReplacements_.expandUrlSync(customReferrer)}` :
+          ''
+        );
 
     el.setAttribute('data-param-playsinline', 'true');
 
