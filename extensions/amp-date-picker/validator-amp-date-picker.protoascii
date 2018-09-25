@@ -175,16 +175,20 @@ attr_lists: {
 
 attr_lists: {
   name: "amp-date-picker-range-type-attributes"
+  attrs: { name: "end-date" }
   attrs: { name: "end-input-selector" }
   attrs: {
     name: "minimum-nights"
     value_regex: "[0-9]+"
   }
+  attrs: { name: "start-date" }
   attrs: { name: "start-input-selector" }
+
 }
 
 attr_lists: {
   name: "amp-date-picker-single-type-attributes"
+  attrs: { name: "date" }
   attrs: { name: "input-selector" }
 }
 
