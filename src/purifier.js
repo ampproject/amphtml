@@ -23,8 +23,8 @@ import {
   resolveRelativeUrl,
 } from './url';
 import {dict} from './utils/object';
-import {filterSplice} from './utils/array';
 import {parseSrcset} from './srcset';
+import {remove} from './utils/array';
 import {startsWith} from './string';
 import {urls} from './config';
 import {user} from './log';
@@ -408,15 +408,15 @@ export function purifyHtml(dirty, diffing = false) {
 
     // Restore the `on` attribute which DOMPurify incorrectly flags as an
     // unknown protocol due to presence of the `:` character.
-    filterSplice(this.removed, r => {
+    remove(this.removed, r => {
       if (r.from === node && r.attribute) {
         const {name, value} = r.attribute;
         if (name.toLowerCase() === 'on') {
           node.setAttribute('on', value);
-          return false; // Delete from `removed` array once processed.
+          return true; // Delete from `removed` array once processed.
         }
       }
-      return true;
+      return false;
     });
   };
 

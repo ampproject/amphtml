@@ -27,8 +27,8 @@ import {
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
-import {filterSplice} from '../../../src/utils/array';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {remove} from '../../../src/utils/array';
 
 const TAG = 'amp-analytics/requests';
 
@@ -464,7 +464,7 @@ function getExtraUrlParamsString(variableService, params) {
  */
 function constructExtraUrlParamStrs(baseUrl, extraUrlParamStrsPromise) {
   return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
-    filterSplice(paramStrs, item => {return !!item;});
+    remove(paramStrs, item => !item);
     const extraUrlParamsStr = paramStrs.join('&');
     let requestUrl;
     if (baseUrl.indexOf('${extraUrlParams}') >= 0) {

@@ -18,9 +18,9 @@ import {addAttributesToElement, closestBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
+import {remove} from './utils/array';
 import {setStyle} from './style';
 import {tryParseJson} from './json';
 
@@ -449,7 +449,7 @@ export class SubscriptionApi {
    */
   send(type, data) {
     // Remove clients that have been removed from the DOM.
-    filterSplice(this.clientWindows_, client => !!client.win.parent);
+    remove(this.clientWindows_, client => !client.win.parent);
     postMessageToWindows(
         this.iframe_,
         this.clientWindows_,
