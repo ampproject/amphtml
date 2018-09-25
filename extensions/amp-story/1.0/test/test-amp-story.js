@@ -22,6 +22,7 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {EventType} from '../events';
@@ -692,39 +693,19 @@ describes.realWin('amp-story', {
       const sidebar = win.document.createElement('amp-sidebar');
       story.element.appendChild(sidebar);
 
+      const executeSpy = sandbox.spy();
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {},
             addToWhitelist: () => {},
-            execute: () => {sidebar.setAttribute('open', '');}});
-
-      story.buildCallback();
-      return story.layoutCallback()
-          .then(() => {
-            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
-            expect(story.sidebar_).to.have.attribute('open');
+            execute: executeSpy,
           });
-    });
-
-    it('should pause the story when the sidebar is opened', () => {
-      createPages(story.element, 2, ['cover', 'page-1']);
-
-      const sidebar = win.document.createElement('amp-sidebar');
-      story.element.appendChild(sidebar);
-
-      sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {},
-            addToWhitelist: () => {},
-            execute: () => {sidebar.setAttribute('open', '');}});
 
       story.buildCallback();
       return story.layoutCallback()
           .then(() => {
-            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
-                .to.be.false;
             story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
-          }).then(() => {
-            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
-                .to.be.true;
+            expect(executeSpy).to.have.been.calledWith(story.sidebar_, 'open',
+                null, null, null, null, ActionTrust.HIGH);
           });
     });
 
@@ -746,7 +727,7 @@ describes.realWin('amp-story', {
           }).then(() => {
             story.sidebar_.removeAttribute('open');
           }).then(() => {
-            expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+            expect(story.storeService_.get(StateProperty.SIDEBAR_STATE))
                 .to.be.false;
           });
     });

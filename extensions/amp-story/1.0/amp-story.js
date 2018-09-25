@@ -1343,8 +1343,8 @@ export class AmpStory extends AMP.BaseElement {
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
         this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {
-          if (mutationsList.some(mutation => mutation.attributeName === 'open'))
-          {
+          if (mutationsList.some(
+              mutation => mutation.attributeName === 'open')) {
             this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
                 this.sidebar_.hasAttribute('open'));
           }
@@ -1892,9 +1892,9 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
         !!this.sidebar_);
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
-    actions.addToWhitelist('AMP-SIDEBAR.open');
-    actions.addToWhitelist('AMP-SIDEBAR.close');
-    actions.addToWhitelist('AMP-SIDEBAR.toggle');
+    actions.addToWhitelist('AMP-SIDEBAR', 'open');
+    actions.addToWhitelist('AMP-SIDEBAR', 'close');
+    actions.addToWhitelist('AMP-SIDEBAR', 'toggle');
   }
 
   /** @private */
