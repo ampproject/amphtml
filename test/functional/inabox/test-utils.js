@@ -15,8 +15,8 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
-import {createElementWithAttributes} from '../../../src/dom.js';
 import {Services} from '../../../src/services';
+import {createElementWithAttributes} from '../../../src/dom.js';
 import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';
 
 describes.realWin('inabox-utils', {}, env => {
@@ -29,18 +29,14 @@ describes.realWin('inabox-utils', {}, env => {
 
   function addA4AMetaTagToDocument() {
     a4aIdMetaElement = createElementWithAttributes(
-      env.win.document,
-      'meta',
-      {
-        name: 'amp4ads-id',
-        content: 'vendor=doubleclick,type=impression-id,value=12345'
-      }
+        env.win.document,
+        'meta',
+        {
+          name: 'amp4ads-id',
+          content: 'vendor=doubleclick,type=impression-id,value=12345',
+        }
     );
     env.win.document.head.appendChild(a4aIdMetaElement);
-  }
-
-  function removeA4AMetaTagToDocument() {
-    env.win.document.head.removeChild(a4aIdMetaElement);
   }
 
   beforeEach(() => {
@@ -73,10 +69,10 @@ describes.realWin('inabox-utils', {}, env => {
     setTimeout(() => timeDeferred.resolve(), 10);
     return timeDeferred.promise.then(() => {
       expect(dispatchEventStub).to.be.calledOnce;
-      expect(initCustomEventStub.withArgs('amp-ini-load'))
-          .to.be.calledOnce;
-      expect(parentPostMessageStub.withArgs('amp-ini-load', '*'))
-          .to.be.calledOnce;
+      expect(initCustomEventStub)
+          .to.be.calledWith('amp-ini-load');
+      expect(parentPostMessageStub)
+          .to.be.calledWith('amp-ini-load', '*');
     });
   });
 
@@ -88,6 +84,5 @@ describes.realWin('inabox-utils', {}, env => {
   it('Should be able to get the a4aId if on the document', () => {
     addA4AMetaTagToDocument();
     expect(getA4AId(env.win)).to.be.ok;
-    removeA4AMetaTagToDocument();
   });
 });
