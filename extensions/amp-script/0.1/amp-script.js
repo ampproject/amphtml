@@ -15,17 +15,25 @@
  */
 import {isLayoutSizeDefined} from '../../../src/layout';
 
-import {upgradeElement} from './index.safe'; //'@ampproject/worker-dom/dist/index.safe';
+// TODO(choumx): Figure out how to import this.
+// import {upgradeElement} from './index.safe';
 
+// TODO(choumx): This requires changing line 1 to "module.exports = ...".
+import * as mainThread from '@ampproject/worker-dom/dist/index.safe';
+
+// TODO(choumx): Compiled output from worker-dom's TypeScript source is lacking
+// Closure type annotations. worker-dom needs tsickle integration.
 export class AmpScript extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return true;
+    return isLayoutSizeDefined(layout);
   }
 
   /** @override */
   layoutCallback() {
-    upgradeElement(this.element, '/extensions/amp-script/0.1/worker.safe.js');
+    // TODO(choumx): Copy node_modules/@ampproject/worker-dom/dist/worker.safe.(m)js
+    // to a temporary directory so it can be compiled by CC.
+    mainThread.upgradeElement(this.element, '/extensions/amp-script/0.1/worker.safe.js');
   }
 }
 
