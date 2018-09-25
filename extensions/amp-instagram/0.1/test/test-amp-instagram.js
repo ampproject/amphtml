@@ -73,7 +73,7 @@ describes.realWin('amp-instagram', {
     expect(image.getAttribute('layout')).to.equal('fill');
     expect(image.getAttribute('alt')).to.equal('Testing');
     expect(image.getAttribute('referrerpolicy')).to.equal('origin');
-    expect(image.getAttribute('alt')).to.start_with('Instagram:');
+    expect(image.getAttribute('alt')).to.startsWith('Instagram:');
   }
 
   function testIframe(iframe) {
