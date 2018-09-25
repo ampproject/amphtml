@@ -121,9 +121,7 @@ env => {
         });
 
     it('fetches the next document within 3 viewports away', function* () {
-      const xhrMock = sandbox.mock(Services.xhrFor(win));
-      xhrMock.expects('fetch').returns(Promise.resolve());
-
+      env.fetchMock.get('*', EXAMPLE_PAGE);
       sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
         // 1x viewport away
         return Promise.resolve(
@@ -132,6 +130,8 @@ env => {
 
       win.dispatchEvent(new Event('scroll'));
       yield macroTask();
+
+      expect(env.fetchMock.done(/\/document1/)).to.be.true;
     });
 
     it('only fetches the next document once', function*() {
