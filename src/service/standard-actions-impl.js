@@ -131,10 +131,10 @@ export class StandardActions {
 
       case 'scrollTo':
         user().assert(args['id'],
-            'AMP target scrollTo must provide element ID');
+            'AMP.scrollTo must provide element ID');
         invocation.node = dev().assertElement(
             getAmpdoc(node).getElementById(args['id']),
-            'AMP target scrollTo must provide element ID present on page'
+            'scrollTo element ID must exist on page'
         );
         return this.handleScrollTo(invocation);
 
