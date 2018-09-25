@@ -557,7 +557,7 @@ actions that apply to the whole document.
   </tr>
   <tr>
     <td>scrollTo(id=STRING)</td>
-    <td>Scrolls to the provided element ID on the current page. </td>
+    <td>Scrolls to the provided element ID on the current page.</td>
   </tr>
   <tr>
     <td>optoutOfCid</td>
