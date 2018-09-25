@@ -175,7 +175,7 @@ export const VideoAttributes = {
    * Whether the developer has configured autoplay on the component.
    * This is normally done by setting `autoplay` attribute on the component.
    *
-   * AMP runtime manages autoplay behaviour itself using methods such as `play`,
+   * AMP runtime manages autoplay behavior itself using methods such as `play`,
    * `pause`, `showControls`, `hideControls`, `mute`, etc.. therefore components
    * should not propagate the autoplay attribute to the underlying player
    * implementation.
