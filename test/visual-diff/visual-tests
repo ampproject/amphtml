@@ -80,13 +80,6 @@
    *   // allow CSS transitions or other effects to complete.
    *   "loading_complete_delay_ms": 1000,
    *
-   *   // [optional] Experiments that must be enabled via cookies.
-   *   "experiments": [
-   *     "amp-feature-one",
-   *     "amp-feature-two"
-   *   ],
-   *
-   *
    *   // [optional, EXPERIMENTAL] Allow running "dirty" JavaScript code on
    *   // on Percy in this AMP page. The code being executed *must* be inlined
    *   // inside a <script> tag, not be an externally loaded script via a
@@ -164,8 +157,8 @@
       "name": "AMP Article",
       "loading_complete_css": [
         ".article-body",
-        ".ad-one",
-        ".ad-two"
+        ".ad-one div[placeholder].amp-hidden",
+        ".ad-two div[placeholder].amp-hidden"
       ]
     },
     {
@@ -178,8 +171,7 @@
     },
     {
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
-      "name": "amp-lightbox-gallery - article",
-      "experiments": ["amp-lightbox-gallery"]
+      "name": "amp-lightbox-gallery - article"
     },
     {
       "url": "examples/visual-tests/video/rotate-to-fullscreen.html",
@@ -193,7 +185,7 @@
         "width": 400,
         "height": 600
       },
-      "loading_complete_css": ["amp-sticky-ad[visible]"],
+      "loading_complete_delay_ms": 500,
       "enable_percy_javascript": true
     },
     {
