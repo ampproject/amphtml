@@ -295,8 +295,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
     it('fails for inlined iframe transport config', () => {
       expectAsyncConsoleError(
-          '[analytics-config] Inline configs are not allowed ' +
-          'to specify transport iframe');
+          /Inline configs are not allowed to specify transport iframe/);
       expectAsyncConsoleError(
           '[AmpAnalytics <unknown id>] Inline or remote config ' +
           'should not overwrite vendor transport settings');
@@ -334,8 +333,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   describe('remote config', () => {
     it('fetches and merges remote config', () => {
       expectAsyncConsoleError(
-          '[analytics-config] Remote configs are not allowed ' +
-          'to specify transport iframe');
+          /Remote configs are not allowed to specify transport iframe/);
 
       const element = getAnalyticsTag({
         'vars': {'title': 'local'},

@@ -654,6 +654,41 @@ describes.realWin('amp-selector', {
       expect(setInputsSpy).to.have.callCount(4);
     });
 
+    it('should support `disabled` attribute mutation', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+
+      const impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+
+      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.false;
+
+      impl.clickHandler_({target: impl.options_[3]});
+
+      // When not disabled, clicking an option should select it.
+      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+
+      expect(ampSelector.hasAttribute('aria-disabled')).to.be.false;
+
+      ampSelector.setAttribute('disabled', '');
+      impl.mutatedAttributesCallback({disabled: true});
+
+      expect(ampSelector.getAttribute('aria-disabled')).to.equal('true');
+
+      impl.clickHandler_({target: impl.options_[0]});
+
+      // When disabled, clicking an option should not select it.
+      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+    });
+
     it('should trigger `toggle` action even when no `value` argument is' +
       ' provided to the function', () => {
       const ampSelector = getSelector({
