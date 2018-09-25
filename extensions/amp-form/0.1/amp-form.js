@@ -227,7 +227,7 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!../../../src/service/xhr-impl.FetchRequestDef}
+   * @return {!FetchRequestDef}
    */
   requestForFormFetch(url, method, opt_extraFields) {
     let xhrUrl, body;
@@ -642,7 +642,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject|string|undefined} response
-   * @param {!../../../src/service/xhr-impl.FetchRequestDef} request
+   * @param {!FetchRequestDef} request
    * @return {!Promise}
    * @private visible for testing
    */
@@ -652,8 +652,6 @@ export class AmpForm {
     this.ssrTemplateHelper_.verifySsrResponse(this.win_, response, request);
     return this.handleSubmitSuccess_(tryResolve(() => response['html']));
   }
-
-
 
   /**
    * Transition the form to the submit success state.
