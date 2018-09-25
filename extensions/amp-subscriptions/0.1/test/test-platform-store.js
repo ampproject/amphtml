@@ -403,12 +403,11 @@ describes.realWin('Platform store', {}, () => {
     beforeEach(() => {
       errorSpy = sandbox.spy(user(), 'warn');
     });
-    it('should report warning if all platforms fail and resolve '
+    it('should report warning if local fails and resolve '
         + 'local with fallbackEntitlement', () => {
       const platform = new SubscriptionPlatform();
       sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
       sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
-      platformStore.reportPlatformFailure('service1');
       platformStore.reportPlatformFailure('local');
       expect(errorSpy).to.be.calledOnce;
       expect(platformStore.entitlements_['local'].json())
