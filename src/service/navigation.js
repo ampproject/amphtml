@@ -187,7 +187,7 @@ export class Navigation {
     // window.
     // Note: for Safari, we need to use noopener instead of clearing the opener
     // property.
-    if ((this.platform_.isIos() || !this.platform_.isChrome()) && opener) {
+    if ((this.platform_.isIos() || !this.platform_.isChrome()) && !opener) {
       options += 'noopener';
     }
 
