@@ -102,6 +102,12 @@
   <!-- Valid: range amp-date-picker with minimum nights -->
   <amp-date-picker type="range" layout="fixed-height" height="360" minimum-nights="0">
   </amp-date-picker>
+  <!-- Valid: single amp-date-picker with date attribute -->
+  <amp-date-picker layout="fixed-height" height="360" date="2018-01-01">
+  </amp-date-picker>
+  <!-- Valid: range amp-date-picker with start-date and end-date attributes -->
+  <amp-date-picker layout="fixed-height" height="360" start-date="2018-01-01" end-date="2018-01-01">
+  </amp-date-picker>
 
   <!-- Invalid: single amp-date-picker with start-input-selector -->
   <amp-date-picker type="single" mode="static" start-input-selector="#a3" layout="fixed-height" height="360">
@@ -141,6 +147,12 @@
   </amp-date-picker>
   <!-- Invalid: single amp-date-picker with minimum nights -->
   <amp-date-picker layout="fixed-height" height="360" minimum-nights="0">
+  </amp-date-picker>
+  <!-- Invalid: single amp-date-picker with start-date attribute -->
+  <amp-date-picker layout="fixed-height" height="360" start-date="2018-01-01">
+  </amp-date-picker>
+  <!-- Invalid: range amp-date-picker with date attribute -->
+  <amp-date-picker layout="fixed-height" height="360" date="2018-01-01">
   </amp-date-picker>
 </body>
 </html>
