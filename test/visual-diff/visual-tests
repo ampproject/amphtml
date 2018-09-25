@@ -696,7 +696,7 @@
     },
     {
       "flaky": true,
-      // Embedded gfycat is occasionally overlayed with a 403 Error page
+      // Embedded gfycat is occasionally overlaid with a 403 Error page
       // https://percy.io/ampproject/amphtml/builds/797668/view/44814208/1400?mode=diff&browser=firefox&snapshot=44814208
       "url": "examples/visual-tests/amp-by-example/components/amp-gfycat/index.html",
       "name": "amp-gfycat - Amp By Example",
