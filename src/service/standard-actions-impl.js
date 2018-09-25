@@ -132,11 +132,11 @@ export class StandardActions {
       case 'scrollTo':
         user().assert(args['id'],
             'AMP target scrollTo must provide element ID');
-        const element = dev().assertElement(
+        invocation.node = dev().assertElement(
             getAmpdoc(node).getElementById(args['id']),
             'AMP target scrollTo must provide element ID present on page'
         );
-        return this.handleScrollTo(invocation, element);
+        return this.handleScrollTo(invocation);
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
@@ -160,14 +160,13 @@ export class StandardActions {
    * Handles the `scrollTo` action where given an element, we smooth scroll to
    * it with the given animation duraiton
    * @param {!./action-impl.ActionInvocation} invocation
-   * @param {?Node} overrideNode Node to scroll to. If not provided, uses invocation node
    * @return {?Promise}
    */
-  handleScrollTo(invocation, overrideNode) {
+  handleScrollTo(invocation) {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
     }
-    const node = dev().assertElement(overrideNode || invocation.node);
+    const node = dev().assertElement(invocation.node);
 
     // Duration for scroll animation
     const duration = invocation.args

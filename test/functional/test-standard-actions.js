@@ -290,14 +290,6 @@ describes.sandboxed('StandardActions', {}, () => {
       expectAmpElementToHaveBeenScrolledIntoView(element);
     });
 
-    it('should handle provided non-invocation element', () => {
-      const element = createElement();
-      const overrideElement = createElement();
-      const invocation = {node: element, satisfiesTrust: () => true};
-      standardActions.handleScrollTo(invocation, overrideElement);
-      expectAmpElementToHaveBeenScrolledIntoView(overrideElement);
-    });
-
     it('should handle AmpElement', () => {
       const element = createAmpElement();
       const invocation = {node: element, satisfiesTrust: () => true};
@@ -508,7 +500,8 @@ describes.sandboxed('StandardActions', {}, () => {
           .returns('scrollToResponsePromise');
       const result = standardActions.handleAmpTarget(invocation);
       expect(elStub).to.be.calledWith('testIdElement');
-      expect(scrollStub).to.be.calledWith(invocation, element);
+      invocation.node = element;
+      expect(scrollStub).to.be.calledWith(invocation);
       expect(result).to.eql('scrollToResponsePromise');
     });
   });
