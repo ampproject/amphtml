@@ -25,6 +25,8 @@
  */
 import {
   Action,
+  StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
@@ -80,6 +82,9 @@ const TAG = 'amp-story-page';
 
 /** @private @const {string} */
 const ADVERTISEMENT_ATTR_NAME = 'ad';
+
+/** @private @const {number} */
+const REWIND_TIMEOUT_MS = 300;
 
 /**
  * amp-story-page states.
@@ -143,6 +148,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win);
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
@@ -282,7 +290,16 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.stop();
 
     this.stopListeningToVideoEvents_();
-    this.pauseAllMedia_(true /** rewindToBeginning */);
+    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
+      // The rewinding is delayed on desktop so that it happens at a lower
+      // opacity instead of immediately jumping to the first frame. See #17985.
+      this.pauseAllMedia_(false /** rewindToBeginning */);
+      this.timer_.delay(() => {
+        this.rewindAllMedia_();
+      }, REWIND_TIMEOUT_MS);
+    } else {
+      this.pauseAllMedia_(true /** rewindToBeginning */);
+    }
 
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
@@ -549,6 +566,21 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Rewinds all media on this page.
+   * @return {!Promise} Promise that resolves after the callbacks are called.
+   * @private
+   */
+  rewindAllMedia_() {
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      if (this.isBotUserAgent_) {
+        mediaEl.currentTime = 0;
+      } else {
+        return mediaPool.rewindToBeginning(
+            /** @type {!HTMLMediaElement} */ (mediaEl));
+      }
+    });
+  }
 
   /**
    * Starts playing animations, if the animation manager is available.
