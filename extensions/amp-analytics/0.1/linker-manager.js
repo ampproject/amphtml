@@ -20,7 +20,7 @@ import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {addParamToUrl} from '../../../src/url';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes, iterateCursor} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
@@ -60,7 +60,7 @@ export class LinkerManager {
     /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
 
-    /** @private {?number} */
+    /** @private {string} */
     this.uid_ = getUniqueId(this.ampdoc_.win);
   }
 
@@ -282,11 +282,11 @@ export class LinkerManager {
 
       // Maybe a new form has been added.
       doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
-        this.maybeAddDataToForm_(doc.querySelectorAll('form'));
+        this.maybeAddDataToForms_(doc.querySelectorAll('form'));
       });
 
       const forms = doc.querySelectorAll('form');
-      forms.forEach(form => {
+      iterateCursor(forms, form => {
         this.addDataToForm_(form);
       });
     });
@@ -295,10 +295,10 @@ export class LinkerManager {
   /**
    * Check to see if we have already added the linker kv pairs to this form,
    * if not, add them.
-   * @param {Array<HTMLFormElement>} forms
+   * @param {!NodeList<!Element>} forms
    */
-  maybeAddDataToForm_(forms) {
-    forms.forEach(form => {
+  maybeAddDataToForms_(forms) {
+    iterateCursor(forms, form => {
       if (form.linkerIds_ && form.linkerIds_[this.uid_]) {
         return;
       }
@@ -309,16 +309,17 @@ export class LinkerManager {
 
   /**
    * Add the linker pairs as <input> elements to form.
-   * @param {HTMLFormElement} form
+   * @param {!Element} form
    */
   addDataToForm_(form) {
     Object.keys(this.resolvedLinkers_).forEach(key => {
-      const attrs = {
-        type: 'hidden',
-        name: key,
-        value: this.resolvedLinkers_[key],
-      };
-      const inputEl = createElementWithAttributes(this.ampdoc_.getRootNode(),
+      const attrs = dict({
+        'type': 'hidden',
+        'name': key,
+        'value': this.resolvedLinkers_[key],
+      });
+      const inputEl = createElementWithAttributes(
+          /** @type {!Document} */ (this.ampdoc_.getRootNode()),
           'input', attrs);
       form.appendChild(inputEl);
     });
