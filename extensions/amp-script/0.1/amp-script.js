@@ -15,9 +15,6 @@
  */
 import {isLayoutSizeDefined} from '../../../src/layout';
 
-// TODO(choumx): Figure out how to import this.
-// import {upgradeElement} from './index.safe';
-
 // TODO(choumx): This requires changing line 1 to "module.exports = ...".
 import * as mainThread from '@ampproject/worker-dom/dist/index.safe';
 
