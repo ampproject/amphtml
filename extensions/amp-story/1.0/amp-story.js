@@ -1344,7 +1344,7 @@ export class AmpStory extends AMP.BaseElement {
       if (!this.sidebarObserver_) {
         this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {
           if (mutationsList.some(
-              mutation => mutation.attributeName === 'open')) {
+            mutation => mutation.attributeName === 'open')) {
             this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
                 this.sidebar_.hasAttribute('open'));
           }
