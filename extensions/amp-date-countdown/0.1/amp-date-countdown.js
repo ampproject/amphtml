@@ -225,8 +225,9 @@ export class AmpDateCountdown extends AMP.BaseElement {
     }
 
     user().assert(!isNaN(epoch),
-        `One of end-date, timestamp-ms, timestamp-seconds,
-        timeleft-ms is required`);
+      `One of end-date, timestamp-ms, timestamp-seconds,
+      timeleft-ms is required`);
+
     return epoch;
   }
 
