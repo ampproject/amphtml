@@ -1,0 +1,88 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <title>Bad Video Test -- Inner Page</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      html, body {
+        border: 0;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+      }
+      amp-story-page {
+        background-color: #fff
+      }
+      amp-img {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid black;
+      }
+      button {
+        background: #ccc;
+        font-size: 16px;
+        margin: 8px;
+        padding: 8px;
+      }
+      header {
+        background: #000;
+        color: #fff;
+        height: 64px;
+        text-align: center;
+      }
+      amp-story[standalone] {
+        border: 0 !important;
+        height: calc(100% - 64px) !important;
+        width: 100% !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <button id="get-visibility-state-button">Get visibility state</button>
+      <button id="set-visibility-state-button">Make the story visible</button>
+    </header>
+
+    <amp-story standalone id="story">
+
+        <amp-story-page id="cover">
+          <amp-story-grid-layer template="fill">
+            <amp-video layout="fill" poster="https://picsum.photos/200/300?image=805">
+              <source src="https://nonexistent-url.cdn.ampproject.org/m/s/nonexistent.url/video.mp4"
+                  amp-orig-src="https://nonexistent.url/video.mp4"
+                  type="video/mp4">
+            </amp-video>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="vertical">
+            <p>This video in the bg does not even exist, just its poster!!!</p>
+            <p>But, the image below should load when `visible` :)</p>
+            <amp-img noprerender src="https://picsum.photos/200/300?random"
+                width="200" height="300" layout="responsive"></amp-img>
+          </amp-story-grid-layer>
+        </amp-story-page>
+
+    </amp-story>
+
+    <script>
+      const getButtonEl = document.getElementById('get-visibility-state-button');
+      getButtonEl.addEventListener('click', () => {
+        alert(`The visibility state is \`${window.getVisibilityState()}\`.`);
+      });
+
+      const setButtonEl = document.getElementById('set-visibility-state-button');
+      setButtonEl.addEventListener('click', () => {
+        window.setVisibilityState('visible');
+        setButtonEl.remove();
+      });
+    </script>
+  </body>
+</html>
