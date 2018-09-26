@@ -658,7 +658,7 @@ class AmpVideo extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
     if (placeholder) {
-      if (placeholder.classList.contains('i-amphtml-blur') &&
+      if (placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
         isExperimentOn(this.win, 'blurry-placeholder')) {
         setImportantStyles(placeholder, {'opacity': 0.0});
         return true;
