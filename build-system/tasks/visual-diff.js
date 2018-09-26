@@ -321,6 +321,10 @@ async function runVisualTests(visualTestsConfig) {
   const {buildId} = percy;
   fs.writeFileSync('PERCY_BUILD_ID', buildId);
   log('info', 'Started Percy build', colors.cyan(buildId));
+  if (process.env['PERCY_TARGET_COMMIT']) {
+    log('info', 'The Percy build is baselined on top of commit',
+        colors.cyan(process.env['PERCY_TARGET_COMMIT']));
+  }
 
   // Take the snapshots.
   await generateSnapshots(percy, visualTestsConfig.webpages);
