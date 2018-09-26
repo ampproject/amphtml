@@ -23,10 +23,15 @@ const {getStdout} = require('./exec');
 
 /**
  * Returns the branch point of the current branch off of master.
+ * @param {boolean} fromMerge true if this is a merge commit.
  * @return {string}
  */
-exports.gitBranchPoint = function() {
-  return getStdout('git merge-base master HEAD').trim();
+exports.gitBranchPoint = function(fromMerge = false) {
+  if (fromMerge) {
+    return getStdout('git merge-base HEAD^1 HEAD^2').trim();
+  } else {
+    return getStdout('git merge-base master HEAD').trim();
+  }
 };
 
 /**

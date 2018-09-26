@@ -133,13 +133,13 @@ function setPercyBranch() {
  * This will let Percy determine which build to use as the baseline for this new
  * build.
  *
- * Does not do anything for --master builds, since master builds are always
- * built on top of the previous commit (we use the squash and merge method for
- * pull requests.)
+ * Only does something on Travis, and for non-master branches, since master
+ * builds are always built on top of the previous commit (we use the squash and
+ * merge method for pull requests.)
  */
 function setPercyTargetCommit() {
-  if (!argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint();
+  if (process.env.TRAVIS && !argv.master) {
+    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint(true);
   }
 }
 
