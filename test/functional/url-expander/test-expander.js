@@ -139,7 +139,7 @@ describes.realWin('Expander', {
 
       expect(expander.expand(url, mockBindings,
           /* opt_collectVars */ undefined, /* opt_sync */ true,
-          /* opt_whitelist */ {RANDOM: true, ABC:true}))
+          /* opt_whitelist */ {RANDOM: true, ABC: true}))
           .to.equal('http://www.google.com/?test=0.1234&a=three');
     });
   });
