@@ -664,7 +664,7 @@ class VideoEntry {
     });
   }
 
-  /* Autoplay Behaviour */
+  /* Autoplay Behavior */
 
   /**
    * Called when an autoplay video is built.
