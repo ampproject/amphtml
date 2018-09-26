@@ -218,10 +218,6 @@ export class VariableSource {
       return this.buildExpr_(allKeys, isV2, opt_whiteList);
     }
 
-    if (!isV2) {
-      return this.buildExpr_(Object.keys(this.replacements_));
-    }
-
     return this.buildExpr_(
         Object.keys(this.replacements_), isV2, opt_whiteList);
   }
