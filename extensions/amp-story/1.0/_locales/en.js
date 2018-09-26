@@ -147,9 +147,9 @@ export default {
         'Twitter.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
     description: 'Button label for the share target that shares a link via ' +
-        'Whatsapp.',
+        'WhatsApp.',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Share',
