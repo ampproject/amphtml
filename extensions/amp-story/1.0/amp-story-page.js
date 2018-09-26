@@ -81,7 +81,7 @@ const TAG = 'amp-story-page';
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {number} */
-const rewindTimeout = 300;
+const REWIND_TIMEOUT_MS = 300;
 
 /**
  * amp-story-page states.
@@ -293,7 +293,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.pauseAllMedia_(false /** rewindToBeginning */);
       this.timer_.delay(() => {
         this.rewindAllMedia_();
-      }, rewindTimeout);
+      }, REWIND_TIMEOUT_MS);
     } else {
       this.pauseAllMedia_(true /** rewindToBeginning */);
     }
