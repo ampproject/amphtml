@@ -35,11 +35,9 @@ describes.realWin('amp-selector', {
       const attributes = options.attributes || {};
       const ampSelector = win.document.createElement('amp-selector');
       ampSelector.setAttribute('layout', 'container');
-      if (attributes) {
-        Object.keys(attributes).forEach(key => {
-          ampSelector.setAttribute(key, attributes[key]);
-        });
-      }
+      Object.keys(attributes).forEach(key => {
+        ampSelector.setAttribute(key, attributes[key]);
+      });
 
       const config = options.config || {};
       let noOfSelectables = 3;
@@ -75,6 +73,12 @@ describes.realWin('amp-selector', {
             disabledCount--;
           }
         }
+
+        const optionAttributes = options.optionAttributes || {};
+        Object.keys(optionAttributes).forEach(key => {
+          img.setAttribute(key, optionAttributes[key]);
+        });
+
         ampSelector.appendChild(img);
       }
       win.document.body.appendChild(ampSelector);
@@ -130,6 +134,25 @@ describes.realWin('amp-selector', {
       yield ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.be.calledOnce;
+    });
+
+    it('should retain existing roles', function* () {
+      const ampSelector = getSelector({
+        attributes: {
+          role: 'tablist',
+        },
+        optionAttributes: {
+          role: 'tab',
+        },
+        config: {
+          count: 4,
+          selectedCount: 2,
+        },
+      });
+      const impl = ampSelector.implementation_;
+      yield ampSelector.build();
+      expect(impl.element.getAttribute('role')).to.equal('tablist');
+      expect(impl.options_[0].getAttribute('role')).to.equal('tab');
     });
 
     it('should init properly for single select', function* () {
@@ -631,6 +654,41 @@ describes.realWin('amp-selector', {
       expect(setInputsSpy).to.have.callCount(4);
     });
 
+    it('should support `disabled` attribute mutation', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+
+      const impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+
+      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.false;
+
+      impl.clickHandler_({target: impl.options_[3]});
+
+      // When not disabled, clicking an option should select it.
+      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+
+      expect(ampSelector.hasAttribute('aria-disabled')).to.be.false;
+
+      ampSelector.setAttribute('disabled', '');
+      impl.mutatedAttributesCallback({disabled: true});
+
+      expect(ampSelector.getAttribute('aria-disabled')).to.equal('true');
+
+      impl.clickHandler_({target: impl.options_[0]});
+
+      // When disabled, clicking an option should not select it.
+      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+    });
+
     it('should trigger `toggle` action even when no `value` argument is' +
       ' provided to the function', () => {
       const ampSelector = getSelector({
@@ -942,7 +1000,7 @@ describes.realWin('amp-selector', {
             multiple: true,
           },
         });
-        allowConsoleError(() => {
+        return allowConsoleError(() => {
           return expect(ampSelector.build()).to.eventually.be.rejectedWith(
               /not supported for multiple selection amp-selector​​​/);
         });

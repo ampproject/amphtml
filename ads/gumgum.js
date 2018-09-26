@@ -33,7 +33,7 @@ export function gumgum(global, data) {
       ggevents = global.ggevents || [];
 
   const
-      max = Math.max,
+      {max} = Math,
       slotId = parseInt(data.slot, 10),
       onLoad = function(type) {
         return function(evt) {

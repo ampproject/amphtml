@@ -35,13 +35,10 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
   beforeEach(() => {
     context = {
       size: {width: '320', height: '50'},
-      requestUrl: 'http://www.google.com',
-      ampDoc: env.ampdoc,
-      applyFillContent: () => {},
-      isInViewport: () => true,
+      adUrl: 'http://www.google.com',
     };
     creativeData = {
-      creativeMetaData: {
+      creativeMetadata: {
         minifiedCreative,
         customElementExtensions: [],
         extensions: [],
@@ -57,6 +54,8 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
     containerElement.getLayoutBox = () => ({
       left: 0, top: 0, width: 0, height: 0,
     });
+    containerElement.isInViewport = () => true;
+    containerElement.getAmpDoc = () => env.ampdoc;
     document.body.appendChild(containerElement);
 
     renderPromise = renderer.render(context, containerElement, creativeData);

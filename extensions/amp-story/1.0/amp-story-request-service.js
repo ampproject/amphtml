@@ -15,15 +15,22 @@
  */
 
 import {Services} from '../../../src/services';
-import {getAmpdoc} from '../../../src/service';
+import {childElementByTag} from '../../../src/dom';
+import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
-export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
+export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
 
-
+/**
+ * Service to send XHRs.
+ */
 export class AmpStoryRequestService {
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyElement
+   */
   constructor(win, storyElement) {
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;
@@ -52,11 +59,14 @@ export class AmpStoryRequestService {
    * @private
    */
   loadJsonFromAttribute_(attributeName) {
-    if (!this.storyElement_.hasAttribute(attributeName)) {
+    const bookendEl = childElementByTag(this.storyElement_,
+        'amp-story-bookend');
+
+    if (!bookendEl || !bookendEl.hasAttribute(attributeName)) {
       return Promise.resolve(null);
     }
 
-    const rawUrl = this.storyElement_.getAttribute(attributeName);
+    const rawUrl = bookendEl.getAttribute(attributeName);
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
@@ -69,3 +79,22 @@ export class AmpStoryRequestService {
         });
   }
 }
+
+/**
+ * Util function to retrieve the request service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param  {!Window} win
+ * @param  {!Element} storyEl
+ * @return {!AmpStoryRequestService}
+ */
+export const getRequestService = (win, storyEl) => {
+  let service = Services.storyRequestService(win);
+
+  if (!service) {
+    service = new AmpStoryRequestService(win, storyEl);
+    registerServiceBuilder(win, 'story-request', () => service);
+  }
+
+  return service;
+};

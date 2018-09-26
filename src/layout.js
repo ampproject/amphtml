@@ -22,7 +22,7 @@
 import {dev, user} from './log';
 import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
-import {setStyle, setStyles} from './style';
+import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
 
 /**
@@ -98,7 +98,12 @@ export const naturalDimensions_ = {
 export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
+  'AMP-GOOGLE-DOCUMENT-EMBED': true,
   'AMP-EMBED': true,
+  'AMP-FACEBOOK': true,
+  'AMP-FACEBOOK-COMMENTS': true,
+  'AMP-FACEBOOK-LIKE': true,
+  'AMP-FACEBOOK-PAGE': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
@@ -165,7 +170,7 @@ export function isInternalElement(tag) {
 /**
  * Parses the CSS length value. If no units specified, the assumed value is
  * "px". Returns undefined in case of parsing error.
- * @param {string|undefined} s
+ * @param {string|undefined|null} s
  * @return {!LengthDef|undefined}
  */
 export function parseLength(s) {
@@ -287,7 +292,7 @@ export function getNaturalDimensions(element) {
  * Whether the loading can be shown for the specified elemeent. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
- * @param {!Element} element.
+ * @param {!Element} element
  * @return {boolean}
  */
 export function isLoadingAllowed(element) {
@@ -329,14 +334,14 @@ export function applyStaticLayout(element) {
       element.sizerElement =
           element.querySelector('i-amphtml-sizer') || undefined;
     } else if (layout == Layout.NODISPLAY) {
-      applyNoDisplayLayout(element);
+      toggle(element, false);
     }
     return layout;
   }
 
-  // If the layout was already done by server-side rendering (SSR), then the code
-  // below will not run. Any changes below will necessitate a change to SSR and must
-  // be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
+  // If the layout was already done by server-side rendering (SSR), then the
+  // code below will not run. Any changes below will necessitate a change to SSR
+  // and must be coordinated with caches that implement SSR. See bit.ly/amp-ssr.
 
   // Parse layout from the element.
   const layoutAttr = element.getAttribute('layout');
@@ -348,9 +353,11 @@ export function applyStaticLayout(element) {
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
   user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  /** @const {string|null|undefined} */
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
     parseLength(widthAttr) : widthAttr;
   user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  /** @const {string|null|undefined} */
   const inputHeight = (heightAttr && heightAttr != 'fluid') ?
     parseLength(heightAttr) : heightAttr;
   user().assert(inputHeight !== undefined, 'Invalid height value: %s',
@@ -425,7 +432,7 @@ export function applyStaticLayout(element) {
   if (layout == Layout.NODISPLAY) {
     // CSS defines layout=nodisplay automatically with `display:none`. Thus
     // no additional styling is needed.
-    applyNoDisplayLayout(element);
+    toggle(element, false);
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: dev().assertString(width),
@@ -436,15 +443,15 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     setStyles(sizer, {
-      display: 'block',
       paddingTop:
         ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
     });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
   } else if (layout == Layout.INTRINSIC) {
-    // Intrinsic uses an svg inside the sizer element rather than the padding trick
-    // Note a naked svg won't work becasue other thing expect the i-amphtml-sizer element
+    // Intrinsic uses an svg inside the sizer element rather than the padding
+    // trick Note a naked svg won't work becasue other thing expect the
+    // i-amphtml-sizer element
     const sizer = htmlFor(element)`
       <i-amphtml-sizer class="i-amphtml-sizer">
         <img class="i-amphtml-intrinsic-sizer" />
@@ -453,8 +460,7 @@ export function applyStaticLayout(element) {
     intrinsicSizer.setAttribute('src',
         `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     element.insertBefore(sizer, element.firstChild);
-    // TODO(jpettitt): sizer is leaked and can't be cleaned up.
-    element.sizerElement = intrinsicSizer;
+    element.sizerElement = sizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
@@ -478,16 +484,4 @@ export function applyStaticLayout(element) {
     setStyle(element, 'height', 0);
   }
   return layout;
-}
-
-
-/**
- * @param {!Element} element
- */
-function applyNoDisplayLayout(element) {
-  // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
-  // everywhere, switch all relevant elements to this API. In the meantime,
-  // simply unblock display toggling via `style="display: ..."`.
-  setStyle(element, 'display', 'none');
-  element.classList.add('i-amphtml-display');
 }

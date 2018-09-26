@@ -17,13 +17,11 @@
 import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
-import {poll} from '../../testing/iframe';
+import {createAmpElementForTesting} from '../../src/custom-element';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {
@@ -114,17 +112,16 @@ describes.realWin('CustomElement', {amp: true}, env => {
       container = doc.createElement('div');
       doc.body.appendChild(container);
 
-      ElementClass = doc.registerElement('amp-test', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-test', TestElement),
-      });
-      StubElementClass = doc.registerElement('amp-stub', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-stub', ElementStub),
-      });
+      ElementClass = createAmpElementForTesting(win, 'amp-test', TestElement);
+      StubElementClass = createAmpElementForTesting(win, 'amp-stub',
+          ElementStub);
+
+      win.customElements.define('amp-test', ElementClass);
+      win.customElements.define('amp-stub', StubElementClass);
+
       win.ampExtendedElements['amp-test'] = TestElement;
       win.ampExtendedElements['amp-stub'] = ElementStub;
-      ampdoc.declareExtension_('amp-stub');
+      ampdoc.declareExtension('amp-stub');
 
       testElementCreatedCallback = sandbox.spy();
       testElementPreconnectCallback = sandbox.spy();
@@ -323,7 +320,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.implementation_.layoutWidth_).to.equal(111);
     });
 
-    it('should tolerate erros in onLayoutMeasure', () => {
+    it('should tolerate errors in onLayoutMeasure', () => {
       const element = new ElementClass();
       sandbox.stub(element.implementation_, 'onLayoutMeasure').callsFake(() => {
         throw new Error('intentional');
@@ -331,10 +328,46 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const errorStub = sandbox.stub(element, 'dispatchCustomEventForTesting');
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
-        element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+        allowConsoleError(() => {
+          element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+          expect(element.layoutWidth_).to.equal(111);
+          expect(element.implementation_.layoutWidth_).to.equal(111);
+          expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+        });
+      });
+    });
+
+    it('should not call onMeasureChanged callback when element dimensions '
+        + 'have not changed', () => {
+      const element = new ElementClass();
+      const onMeasureChangeStub =
+          sandbox.stub(element.implementation_, 'onMeasureChanged');
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        element.updateLayoutBox(
+            {top: 0, left: 0, width: 111, height: 51},
+            /* opt_hasMeasurementsChanged */ false
+        );
         expect(element.layoutWidth_).to.equal(111);
         expect(element.implementation_.layoutWidth_).to.equal(111);
-        expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+        expect(onMeasureChangeStub).to.have.not.been.called;
+      });
+    });
+
+    it('should call onMeasureChanged callback when element dimensions '
+        + 'have changed', () => {
+      const element = new ElementClass();
+      const onMeasureChangeStub =
+          sandbox.stub(element.implementation_, 'onMeasureChanged');
+      container.appendChild(element);
+      return element.buildingPromise_.then(() => {
+        element.updateLayoutBox(
+            {top: 0, left: 0, width: 111, height: 51},
+            /* opt_hasMeasurementsChanged */ true
+        );
+        expect(element.layoutWidth_).to.equal(111);
+        expect(element.implementation_.layoutWidth_).to.equal(111);
+        expect(onMeasureChangeStub).to.have.been.called;
       });
     });
 
@@ -536,12 +569,12 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
           .callsFake(() => {
             return Promise.resolve({
-              whenPolicyResolved: () => {
-                return Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
+              whenPolicyUnblock: () => {
+                return Promise.resolve(true);
               },
             });
           });
-      sandbox.stub(element.implementation_, 'getConsentPolicy')
+      sandbox.stub(element, 'getConsentPolicy_')
           .callsFake(() => {
             return 'default';
           });
@@ -556,22 +589,29 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
           .callsFake(() => {
             return Promise.resolve({
-              whenPolicyResolved: () => {
-                return Promise.resolve(CONSENT_POLICY_STATE.INSUFFICIENT);
+              whenPolicyUnblock: () => {
+                return Promise.resolve(false);
               },
             });
           });
-      sandbox.stub(element.implementation_, 'getConsentPolicy')
+      sandbox.stub(element, 'getConsentPolicy_')
           .callsFake(() => {
             return 'default';
           });
 
       clock.tick(1);
       container.appendChild(element);
-      allowConsoleError(() => {
-        return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
-            /BLOCK_BY_CONSENT/);
-      });
+      return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
+          /BLOCK_BY_CONSENT/);
+    });
+
+    it('should respect user specified consent policy', () => {
+      const element = new ElementClass();
+      expect(element.getConsentPolicy_()).to.equal(null);
+      element.setAttribute('data-block-on-consent', '');
+      expect(element.getConsentPolicy_()).to.equal('default');
+      element.setAttribute('data-block-on-consent', '_none');
+      expect(element.getConsentPolicy_()).to.equal('_none');
     });
 
 
@@ -584,10 +624,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isBuilt()).to.be.false;
       expect(element).to.have.class('i-amphtml-notbuilt');
       expect(element).to.have.class('amp-notbuilt');
-      allowConsoleError(() => {
-        return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
-            /intentional/);
-      });
+      return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
+          /intentional/);
     });
 
     it('Element - build creates a placeholder if one does not exist' , () => {
@@ -1059,10 +1097,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element1.setAttribute('i-amphtml-layout', 'nodisplay');
       element1.setAttribute('layout', 'nodisplay');
       container.appendChild(element1);
-      // TODO(dvoytenko, #9353): cleanup once `toggleLayoutDisplay` API has been
-      // fully migrated.
-      expect(element1.style.display).to.equal('none');
-      expect(element1).to.have.class('i-amphtml-display');
+      expect(element1).to.have.display('none');
     });
 
     it('should change size without sizer', () => {
@@ -1429,10 +1464,10 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    StubElementClass = doc.registerElement('amp-stub2', {
-      prototype: createAmpElementProtoForTesting(win, 'amp-stub2', ElementStub),
-    });
-    env.ampdoc.declareExtension_('amp-stub2');
+    StubElementClass = createAmpElementForTesting(win, 'amp-stub2',
+        ElementStub);
+    win.customElements.define('amp-stub2', StubElementClass);
+    env.ampdoc.declareExtension('amp-stub2');
     element = new StubElementClass();
   });
 
@@ -1463,31 +1498,6 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     const elements = element.getRealChildren();
     expect(elements.length).to.equal(1);
     expect(elements[0].tagName.toLowerCase()).to.equal('content');
-  });
-
-  it('toggleLayoutDisplay should add/remove display class', () => {
-    element.setAttribute('layout', 'nodisplay');
-    win.document.body.appendChild(element);
-    return poll('wait for static layout',
-        () => element.classList.contains('i-amphtml-layout-nodisplay'))
-        .then(() => {
-          // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
-          // deployed this will start `false`.
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-
-          element.style.display = 'block';
-          element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-          expect(win.getComputedStyle(element).display).to.equal('block');
-
-          element.toggleLayoutDisplay(false);
-          expect(element.classList.contains('i-amphtml-display')).to.be.false;
-          expect(win.getComputedStyle(element).display).to.equal('none');
-
-          element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-          expect(win.getComputedStyle(element).display).to.equal('block');
-        });
   });
 
   it('getPlaceholder should return nothing', () => {
@@ -1607,10 +1617,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
       win = env.win;
       doc = win.document;
       clock = lolex.install({target: win});
-      ElementClass = doc.registerElement('amp-test-loader', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-test-loader', TestElement),
-      });
+      ElementClass = createAmpElementForTesting(win, 'amp-test-loader',
+          TestElement);
+      win.customElements.define('amp-test-loader', ElementClass);
       win.ampExtendedElements['amp-test-loader'] = TestElement;
       LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
       resources = Services.resourcesForDoc(doc);
@@ -1744,8 +1753,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should turn on already created', () => {
       stubInA4A(false);
       element.prepareLoading_();
-      const container = element.loadingContainer_;
-      const indicator = element.loadingElement_;
+      const {
+        loadingContainer_: container,
+        loadingElement_: indicator,
+      } = element;
       element.toggleLoading(true);
 
       expect(element.loadingContainer_).to.equal(container);
@@ -1944,10 +1955,9 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    ElementClass = doc.registerElement('amp-test-overflow', {
-      prototype: createAmpElementProtoForTesting(
-          win, 'amp-test-overflow', TestElement),
-    });
+    ElementClass = createAmpElementForTesting(win, 'amp-test-overflow',
+        TestElement);
+    win.customElements.define('amp-test-overflow', ElementClass);
     resources = Services.resourcesForDoc(doc);
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();

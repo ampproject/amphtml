@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {
   CryptographicValidator,
@@ -40,7 +39,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
 
   beforeEach(() => {
     validator = new CryptographicValidator();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     userErrorStub = sandbox.stub(user(), 'error');
   });
 
@@ -63,8 +62,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
               AdResponseType.CRYPTO);
           expect(validatorOutput.creativeData).to.be.ok;
 
-          const creativeMetadata =
-              validatorOutput.creativeData.creativeMetadata;
+          const {creativeMetadata} = validatorOutput.creativeData;
           expect(creativeMetadata.minifiedCreative).to.equal(
               data.minifiedCreative);
         });
@@ -83,8 +81,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
               AdResponseType.CRYPTO);
           expect(validatorOutput.creativeData).to.be.ok;
 
-          const creativeMetadata =
-              validatorOutput.creativeData.creativeMetadata;
+          const {creativeMetadata} = validatorOutput.creativeData;
           expect(creativeMetadata.minifiedCreative).to.equal(
               data.minifiedCreative);
           expect(userErrorStub).to.be.calledOnce;

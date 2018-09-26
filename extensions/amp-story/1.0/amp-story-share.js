@@ -22,6 +22,7 @@ import {
 } from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
+import {getRequestService} from './amp-story-request-service';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -61,6 +62,17 @@ const DEFAULT_BUTTON_PADDING = 16;
  */
 const MIN_BUTTON_PADDING = 10;
 
+/**
+ * Key for share providers in bookend config.
+ * @private @const {string}
+ */
+export const SHARE_PROVIDERS_KEY = 'shareProviders';
+
+/**
+ * Deprecated key for share providers in bookend config.
+ * @private @const {string}
+ */
+export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -110,6 +122,7 @@ function buildProviderParams(opt_params) {
 
   if (opt_params) {
     Object.keys(opt_params).forEach(field => {
+      if (field === 'provider') { return; }
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -176,13 +189,19 @@ function buildCopySuccessfulToast(doc, url) {
  * Social share widget for story bookend.
  */
 export class ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   */
+  constructor(win, storyEl) {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
     /** @protected @const {!Window} */
     this.win = win;
+
+    /** @protected @const {!Element} */
+    this.storyEl = storyEl;
 
     /** @protected {?Element} */
     this.root = null;
@@ -191,12 +210,16 @@ export class ShareWidget {
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(this.win);
+    this.requestService_ = getRequestService(this.win, storyEl);
   }
 
-  /** @param {!Window} win */
-  static create(win) {
-    return new ShareWidget(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   * @return {!ShareWidget}
+   */
+  static create(win, storyEl) {
+    return new ShareWidget(win, storyEl);
   }
 
   /**
@@ -247,7 +270,6 @@ export class ShareWidget {
   }
 
   /** @private */
-  // TODO(alanorozco): i18n for toast.
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
@@ -257,12 +279,12 @@ export class ShareWidget {
             'Could not retrieve LocalizationService.');
         const failureString = localizationService.getLocalizedString(
             LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
-        Toast.show(this.win, failureString);
+        Toast.show(this.storyEl, failureString);
       });
       return;
     }
 
-    Toast.show(this.win, buildCopySuccessfulToast(this.win.document, url));
+    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url));
   }
 
   /** @private */
@@ -307,7 +329,8 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config['share-providers'];
+      const providers = config && (config[SHARE_PROVIDERS_KEY] ||
+        config[DEPRECATED_SHARE_PROVIDERS_KEY]);
       if (!providers) {
         return;
       }
@@ -316,36 +339,26 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!Object|string>)} providers
    * @private
+   * TODO(alanorozco): Set story metadata in share config.
    */
-  // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
-    Object.keys(providers).forEach(type => {
-      if (type == 'system') {
+    providers.forEach(provider => {
+      if (isObject(provider)) {
+        this.add_(buildProvider(this.win.document,
+            provider['provider'], provider));
+        return;
+      }
+
+      if (provider == 'system') {
         user().warn('AMP-STORY',
             '`system` is not a valid share provider type. Native sharing is ' +
             'enabled by default and cannot be turned off.',
-            type);
+            provider);
         return;
       }
-
-      if (isObject(providers[type])) {
-        this.add_(buildProvider(this.win.document, type,
-            /** @type {!JsonObject} */ (providers[type])));
-        return;
-      }
-
-      // Bookend config API requires real boolean, not just truthy
-      if (providers[type] === true) {
-        this.add_(buildProvider(this.win.document, type));
-        return;
-      }
-
-      user().warn('AMP-STORY',
-          'Invalid amp-story bookend share configuration for %s. ' +
-          'Value must be `true` or a params object.',
-          type);
+      this.add_(buildProvider(this.win.document, provider));
     });
   }
 
@@ -379,9 +392,12 @@ export class ShareWidget {
  * This class is coupled to the DOM structure for ShareWidget, but that's ok.
  */
 export class ScrollableShareWidget extends ShareWidget {
-  /** @param {!Window} win */
-  constructor(win) {
-    super(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   */
+  constructor(win, storyEl) {
+    super(win, storyEl);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
@@ -394,9 +410,13 @@ export class ScrollableShareWidget extends ShareWidget {
     this.containerWidth_ = null;
   }
 
-  /** @param {!Window} win */
-  static create(win) {
-    return new ScrollableShareWidget(win);
+  /**
+   * @param {!Window} win
+   * @param {!Element} storyEl
+   * @return {!ScrollableShareWidget}
+   */
+  static create(win, storyEl) {
+    return new ScrollableShareWidget(win, storyEl);
   }
 
   /**
@@ -444,23 +464,24 @@ export class ScrollableShareWidget extends ShareWidget {
 
         // Total width that the buttons will occupy with minimum padding.
         const totalItemWidth =
-            (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
+            (iconWidth * items.length) + ((2 * MIN_BUTTON_PADDING) *
                 (items.length - 1));
 
         // If buttons don't fit within the available area, calculate padding so
         // that there will be an element cut-off.
-        if (totalItemWidth > (containerWidth - leftMargin * 2)) {
-          const availableWidth = containerWidth - leftMargin - iconWidth / 2;
+        if (totalItemWidth > (containerWidth - (leftMargin * 2))) {
+          const availableWidth = containerWidth - leftMargin - (iconWidth / 2);
           const amountVisible =
-              Math.floor(availableWidth / (iconWidth + MIN_BUTTON_PADDING * 2));
+              Math.floor(
+                  availableWidth / (iconWidth + (MIN_BUTTON_PADDING * 2)));
 
-          state.padding = 0.5 * (availableWidth / amountVisible - iconWidth);
+          state.padding = 0.5 * ((availableWidth / amountVisible) - iconWidth);
         } else {
           // Otherwise, calculate padding in from MIN_PADDING to DEFAULT_PADDING
           // so that all elements fit and take as much area as possible.
           const totalPadding =
-              ((containerWidth - leftMargin * 2) - iconWidth * items.length) /
-              (items.length - 1);
+              ((containerWidth - (leftMargin * 2)) -
+              (iconWidth * items.length)) / (items.length - 1);
 
           state.padding = Math.min(DEFAULT_BUTTON_PADDING, 0.5 * totalPadding);
         }

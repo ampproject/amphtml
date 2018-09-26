@@ -141,13 +141,14 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
   ],
   "score": {
     "supportsViewer": 10,
+    "anotherFactor": 5,
+    "negativeFactor": -10
   },
   "fallbackEntitlement": {
     "source": "fallback",
-    "service": "local",
-    "products": ["norcal_tribune.com:basic",...],
-    "subscriptionToken": "subscription-token",
-    "loggedIn": true/false,
+    "granted": true,
+    "grantReason": "SUBSCRIBER/METERING",
+    "data": {...}
   }
 }
 </script>
@@ -158,15 +159,21 @@ The `services` property contains an array of service configurations. There must 
 If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
 
 
-## Selecting platform
-So if no platforms are selected, we compete all the platforms based on platforms like
+## Selecting a Service
+If no service returns an entitlement that grants access, all services are compared by calculating a score for each and the highest scoring service is selected.
 
-1. Does the platform support the Viewer
+The score is calculated by taking the `baseScore` in the service configuration and adding or subtracting dynamically calculated weights from `score[factor name]` if the service indicates that `factor name` is true for this page view.
 
-You can add `"baseScore"` < 100 key in any service configuration in case you want to increase `"baseScore"` of any platform so that it wins over other score evaluation factors.
+Available scoring factors:
+
+1. `supportsViewer` Indicates that a service can cooperate with the current AMP viewer environment for this page view.
+
+In addition to the dynamic scoring factors, each service has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service.
+
+In the event of a tie the local service wins.
 
 ## Error fallback
-In case if all configured platforms fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` platform. The document's unblocking will be based on this fallback entitlement.
+If all configured services fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` service. The document's unblocking will be based on this fallback entitlement.
 
 ### The "local" service configuration
 
@@ -223,22 +230,16 @@ The Entitlement response returned by the authorization endpoint must conform to 
 
 ```
 {
-  "products": [string, ...],
-  "subscriptionToken": string,
-  "loggedIn": boolean,
-  "metering": {
-    "left": number,
-    "total": number,
-    "token": string
-  }
+  "granted": true/false,
+  "grantReason": "SUBSCRIBER/METERING",
+  "data" : {...}
 }
 ```
 
 The properties in the Entitlement response are:
- - "products" - a set of products that a user is entitled to view. E.g. "norcal_tribune.com:basic".
- - "subscriptionToken" - the string representation of the subscription token, if the reader is a subscriber. The token itself should reference the subscription and not directly the reader. If the reader is not a subscriber, this property should be absent.
- - "loggedIn" - an optional true/false value that indicates whether the user is currently logged in. If not specified, the system assumes that the logged in state is not known.
- - "metering" - an optional structure that indicates whether the user is granted the access via metering. The optional "left", "total" and "token" fields can be used to provide the metering details.
+ - "granted" - boolean stating if the access to the document is granted or not.
+ - "grantReason" - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
+ - "data" - any free form data which can be used for render templating.
 
 Notice, while it's not explicitly visible, all vendor services also implement authorization endpoints of their own and conform to the same response format.
 
@@ -249,8 +250,9 @@ Pingback is an endpoint provided by in the "local" service configuration and cal
 
 Pingback is optional. It's only enabled when the "pingbackUrl" property is specified.
 
-As the body, pingback POST request recieves the entitlement object returned by the "winning" authorization endpoint.
+As the body, pingback POST request receives the entitlement object returned by the "winning" authorization endpoint.
 
+**Important:** The pingback JSON object is sent with `Content-type: text/plain`.  This is intentional as it removes the need for a CORS preflight check.
 
 ## Actions
 
@@ -260,6 +262,28 @@ All actions work the same way: the popup window is opened for the specified URL.
 
 Notice, while not explicitly visible, any vendor service can also implement its own actions. Or it can delegate to the "login" service to execute "login" or "subscribe" action.
 
+### Action delegation
+
+In the markup the actions can be delegated to other services for them to execute the actions. This can be achieved by specifying `subscriptions-service` attribute.
+
+e.g. In order to ask google subscriptions to perform subscribe even when `local` service is selected:
+```
+  <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
+```
+
+### Action decoration
+
+In addition to delegation of the action to another service, you can also ask another service to decorate the element. Just add the attribute `subsciptions-decorate` to get the element decorated.
+
+```
+  <button
+    subscriptions-action='subscribe'
+    subscriptions-service='subscribe.google.com
+    subscriptions-decorate
+  >
+    Subscribe
+  </button>
+```
 
 ## Showing/hiding premium and fallback content
 
@@ -323,35 +347,60 @@ The first dialog with matching `subscriptions-display` is shown.
 
 The `subscriptions-display` uses expressions for actions and dialogs.
 
-The value of the `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in the [AMP Access Appendix 1][../amp-acccess/amp-access.md#appendix-a-amp-access-expression-grammar].
+The value of the `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in the [AMP Access Appendix 1](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
 
-The expression is executed against the object in the following form:
-
-```
-{
-  "granted": boolean,
-  "loggedIn": boolean,
-  "subscribed": boolean,
-  "metered": boolean,
-  "entitlement": {
-    "products": [],
-    ...
-  }
-}
-```
-
-The properties in this object are:
- - "granted" - whether the access to this document has been granted.
- - "loggedIn" - whether the user is currently logged in.
- - "subscribed" - whether the user is a subscriber.
- - "metered" - whether the user's access is metered.
- - "entitlement" - the entitlement object returned by the authorization endpoint.
+The expression is executed against the json representation of the entitlement object.
 
 For instance, to show a "subscribe" action to non-subscribers:
 
 ```
 <button subscriptions-display="NOT subscribed" subscriptions-action="subscribe">Become a subscriber</button>
 ```
+
+## Analytics
+
+The `amp-subscriptions` triggers seven types of analytics signals during the different lifecycle of various subscriptions.
+Following are the events and the conditions when the events are triggered.
+
+1. `subscriptions-service-activated`:
+ - This event is fired when one of the services configured is selected and activated to be used(see [Selecting a Service](#selecting-a-service)).
+ - This event is fired with `serviceId` of the selected service.
+2. `subscriptions-access-granted`:
+ - This event is fired when one of the configured services is selected and the entitlement from the selected service grants access to the document.
+ - This event is fired with `serviceId` of the selected service.
+3. `subscriptions-access-denied`:
+ - This event is fired when one of the configured services is selected and the entitlement from the selected service denies access to the document.
+ - This event is fired with `serviceId` of the selected service.
+4. `subscriptions-paywall-activated`:
+ - After selecting a service, if the entitlement of the service does not grant access to the document then `subscriptions-paywall-activated` is triggered.
+ - This event is fired with `serviceId` of the selected service.
+5. `subscriptions-service-registered`:
+ - Since a service is free to initialize itself at anytime on the page, `subscriptions-service-registered` event is triggered when `amp-subscriptions` is able to resolve the instance of the service.
+ - This event is fired with `serviceId` of the selected service.
+6. `subscriptions-service-re-authorized`:
+ - A service can request for re-authorizing itself after any action performed e.g. `Login`. Once the re-authorization is complete and new entitlement is fetched for the service ``subscriptions-service-re-authorized` is triggered.
+ - This event is fired with `serviceId` of the selected service.
+7. `subscriptions-action-delegated`:
+ - A service can request its action to be delegated to another service, in such scenario `subscriptions-action-delegated` is triggered just before handing over the event to the other service.
+ - This event is fired with `serviceId` and `action` of the selected service.
+8. `subscriptions-entitlement-resolved`:
+ - Once the service is registered, the entitlements from it are requested. `subscriptions-entitlement-resolved` event is triggered when the entitlement fetch from the service is completed.
+ - This event is fired with `serviceId` and `action` of the selected service.
+9. `subscriptions-started`:service
+ - This event is triggered when `amp-subscriptions` is initialized.
+ - This event does not contain any data.
+10. `subscriptions-action-ActionName-started`:
+ - Whenever any action execution starts, the event with `subscriptions-action-ActionName-started` is fired.
+ - This event does not contain any data.
+11. `subscriptions-action-ActionName-failed`:
+ - If the action execution fails due to any reason, an event with `subscriptions-action-ActionName-failed` is fired.
+ - This event does not contain any data.
+12. `subscriptions-action-ActionName-success`:
+ - If the event result reports a success, `subscriptions-action-ActionName-success` is triggered.
+ - This event does not contain any data.
+13. `subscriptions-action-ActionName-rejected`:
+ - If the event result reports a success, `subscriptions-action-ActionName-rejected` is triggered.
+ - This event does not contain any data.
 
 
 ## Available vendor services

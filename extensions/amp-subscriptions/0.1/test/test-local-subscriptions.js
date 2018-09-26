@@ -15,7 +15,7 @@
  */
 
 import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
@@ -32,32 +32,29 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   };
   const service = 'sample-service';
   const source = 'sample-source';
-  const products = ['scenic-2017.appspot.com:news',
-    'scenic-2017.appspot.com:product2'];
-  const subscriptionToken = 'token';
-  const loggedIn = true;
   const json = {
     service,
     source,
-    products,
-    subscriptionToken,
-    loggedIn,
+    granted: true,
+    grantReason: GrantReason.SUBSCRIBER,
   };
+  const readerId = 'reader1';
   const entitlement = Entitlement.parseFromJson(json);
-  entitlement.setCurrentProduct(products[0]);
-  const authUrl = 'https://lipsum.com/login/authorize';
-  const pingbackUrl = 'https://lipsum.com/login/pingback';
+  const configAuthUrl = 'https://lipsum.com/login/authorize?rid=READER_ID';
+  const configPingbackUrl = 'https://lipsum.com/login/pingback?rid=READER_ID';
   const serviceConfig = {
     'services': [
       {
         'serviceId': 'local',
-        'authorizationUrl': authUrl,
+        'authorizationUrl': configAuthUrl,
+        'pingbackUrl': configPingbackUrl,
         'actions': actionMap,
-        'pingbackUrl': pingbackUrl,
         'baseScore': 99,
       },
     ],
   };
+  const authUrl = configAuthUrl.replace('READER_ID', readerId);
+  const pingbackUrl = configPingbackUrl.replace('READER_ID', readerId);
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -66,6 +63,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         .callsFake(() => new PageConfig('example.org:basic', true));
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
+    sandbox.stub(serviceAdapter, 'getReaderId')
+        .callsFake(() => Promise.resolve('reader1'));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
         serviceConfig.services[0], serviceAdapter,
         new SubscriptionAnalytics(ampdoc.getRootNode()));
@@ -103,7 +102,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_,'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
     return localSubscriptionPlatform.getEntitlements().then(() => {
-      expect(urlBuildingStub).to.be.calledWith(authUrl, false);
+      expect(urlBuildingStub).to.be.calledWith(configAuthUrl, false);
       expect(fetchStub).to.be.calledWith(builtUrl, {credentials: 'include'});
     });
   });
@@ -137,6 +136,114 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     });
   });
 
+  describe('handleClick_', () => {
+    let element;
+    beforeEach(() => {
+      element = document.createElement('div');
+      element.setAttribute('subscriptions-action', 'subscribe');
+      element.setAttribute('subscriptions-service', 'local');
+    });
+
+    // This must be a sync call to avoid Safari popup blocker issues.
+    it('should call executeAction synchronosly when service is "auto"', () => {
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      element.setAttribute('subscriptions-service', 'auto');
+      localSubscriptionPlatform.handleClick_(element);
+      expect(executeStub).to.be.calledWith(
+          element.getAttribute('subscriptions-action'));
+    });
+
+    it('should call executeAction with subscriptions-action value', () => {
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      localSubscriptionPlatform.handleClick_(element);
+      expect(executeStub).to.be.calledWith(
+          element.getAttribute('subscriptions-action'));
+    });
+
+
+    it('should delegate action to service specified in '
+        + 'subscriptions-service', () => {
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      element.setAttribute('subscriptions-service', 'swg.google.com');
+      localSubscriptionPlatform.handleClick_(element);
+      expect(executeStub).to.not.be.called;
+      expect(delegateStub).to.be.called;
+    });
+
+    it('should delegate service selection to scoreBasedLogin if no service '
+        + 'name is specified for login', () => {
+      element.setAttribute('subscriptions-action', 'login');
+      element.removeAttribute('subscriptions-service');
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin'
+      ).callsFake(() => platform);
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.be.called;
+      expect(delegateStub).to.be.calledWith(
+          'login',
+          serviceId,
+      );
+    });
+
+    it('should delegate service selection to scoreBasedLogin '
+      + 'service specified is auto for login', () => {
+      element.setAttribute('subscriptions-action', 'login');
+      element.setAttribute('subscriptions-service', 'auto');
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin'
+      ).callsFake(() => platform);
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.be.called;
+      expect(delegateStub).to.be.calledWith(
+          'login',
+          serviceId,
+      );
+    });
+
+    it('should NOT delegate for scoreBasedLogin for non-login action', () => {
+      element.setAttribute('subscriptions-action', 'subscribe');
+      element.setAttribute('subscriptions-service', 'auto');
+      const loginStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'selectPlatformForLogin');
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService');
+      const platform = {};
+      const serviceId = 'serviceId';
+      platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
+      localSubscriptionPlatform.handleClick_(element);
+      expect(loginStub).to.not.be.called;
+      expect(delegateStub).to.not.be.called;
+      expect(executeStub).to.be.calledOnce.calledWith('subscribe');
+    });
+  });
+
   describe('executeAction', () => {
     it('should call executeAction on actions_', () => {
       const actionString = 'action';
@@ -158,7 +265,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     it('should call renderer\'s render method', () => {
       const renderStub =
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
-      localSubscriptionPlatform.activate({entitlement});
+      localSubscriptionPlatform.activate(entitlement);
       return localSubscriptionPlatform.actions_.build().then(() => {
         expect(renderStub).to.be.calledOnce;
       });
@@ -167,16 +274,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
   describe('pingback', () => {
     it('should call `sendSignal` to the pingback signal', () => {
-      const urlBuildStub =
-          sandbox.stub(localSubscriptionPlatform.urlBuilder_, 'buildUrl')
-              .callsFake(() => Promise.resolve(pingbackUrl));
       const sendSignalStub =
           sandbox.stub(localSubscriptionPlatform.xhr_, 'sendSignal');
       return localSubscriptionPlatform.pingback(entitlement).then(() => {
-        expect(urlBuildStub).to.be.calledOnce;
         expect(sendSignalStub).to.be.calledOnce;
         expect(sendSignalStub.getCall(0).args[0]).to.be.equal(
-            localSubscriptionPlatform.pingbackUrl_);
+            pingbackUrl);
         expect(sendSignalStub.getCall(0).args[1].body).to.equal(
             JSON.stringify(entitlement.jsonForPingback()));
       });

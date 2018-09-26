@@ -16,13 +16,30 @@
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {Services} from '../../../../src/services';
-import {installTimerService} from '../../../../src/service/timer-impl';
+import {
+  assertHttpsUrl,
+  getSourceOrigin,
+  isProxyOrigin,
+  isSecureUrlDeprecated,
+  parseUrlDeprecated,
+} from '../../../../src/url';
 import {loadPromise} from '../../../../src/event-helper';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
+
+
+function stubUrlService(sandbox) {
+  sandbox.stub(Services, 'urlForDoc').returns({
+    assertHttpsUrl,
+    getSourceOrigin,
+    isProxyOrigin,
+    isSecure: isSecureUrlDeprecated,
+    parse: parseUrlDeprecated,
+  });
+}
 
 
 describes.realWin('amp-install-serviceworker', {
@@ -34,19 +51,19 @@ describes.realWin('amp-install-serviceworker', {
 }, env => {
 
   let doc;
-  let clock;
   let sandbox;
   let container;
   let ampdoc;
   let maybeInstallUrlRewriteStub;
+  let whenVisible;
 
   beforeEach(() => {
     doc = env.win.document;
     sandbox = env.sandbox;
-    clock = sandbox.useFakeTimers();
     ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
     container = doc.createElement('div');
     env.win.document.body.appendChild(container);
+    stubUrlService(sandbox);
     maybeInstallUrlRewriteStub = sandbox.stub(
         AmpInstallServiceWorker.prototype,
         'maybeInstallUrlRewrite_');
@@ -55,6 +72,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should install for same origin', () => {
     const install = doc.createElement('div');
     container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
     install.setAttribute('src', 'https://example.com/sw.js');
     const implementation = new AmpInstallServiceWorker(install);
     let calledSrc;
@@ -74,13 +92,21 @@ describes.realWin('amp-install-serviceworker', {
         },
       },
     };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
+    });
     implementation.buildCallback();
     expect(calledSrc).to.be.undefined;
-    return loadPromise(implementation.win).then(() => {
-      expect(calledSrc).to.equal('https://example.com/sw.js');
-      // Should not be called before `register` resolves.
-      expect(maybeInstallUrlRewriteStub).to.not.be.called;
-    });
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          expect(calledSrc).to.equal('https://example.com/sw.js');
+          // Should not be called before `register` resolves.
+          expect(maybeInstallUrlRewriteStub).to.not.be.called;
+        });
   });
 
   it('should be ok without service worker.', () => {
@@ -117,7 +143,9 @@ describes.realWin('amp-install-serviceworker', {
         },
       },
     };
-    implementation.buildCallback();
+    allowConsoleError(() => {
+      implementation.buildCallback();
+    });
     expect(install.children).to.have.length(0);
   });
 
@@ -164,6 +192,7 @@ describes.realWin('amp-install-serviceworker', {
       calledSrc = undefined;
       const p = new Promise(() => {});
       const win = {
+        complete: true,
         location: {
           href: 'https://cdn.ampproject.org/c/s/www.example.com/path',
         },
@@ -182,7 +211,6 @@ describes.realWin('amp-install-serviceworker', {
           createElement: doc.createElement.bind(doc),
         },
       };
-      installTimerService(win);
       win.document.defaultView = win;
       implementation.win = win;
       docInfo = {
@@ -207,9 +235,8 @@ describes.realWin('amp-install-serviceworker', {
     function testIframe() {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
-      implementation.buildCallback();
       let iframe;
-      const appendChild = install.appendChild;
+      const {appendChild} = install;
       install.appendChild = child => {
         iframe = child;
         iframe.complete = true; // Mark as loaded.
@@ -217,26 +244,23 @@ describes.realWin('amp-install-serviceworker', {
         iframe.src = 'about:blank';
         appendChild.call(install, iframe);
       };
-      let deferredMutate;
-      implementation.mutateElement = fn => {
-        expect(deferredMutate).to.be.undefined;
-        deferredMutate = fn;
-      };
-      return whenVisible.then(() => {
-        clock.tick(9999);
-        expect(deferredMutate).to.be.undefined;
+      const mutateElement = sandbox.stub(implementation, 'mutateElement');
+      mutateElement.callsFake(fn => {
         expect(iframe).to.be.undefined;
-        clock.tick(1);
-        expect(deferredMutate).to.exist;
-        expect(iframe).to.be.undefined;
-        deferredMutate();
+        const returnedValue = fn();
         expect(iframe).to.exist;
         expect(calledSrc).to.undefined;
-        expect(install.style.display).to.equal('none');
+        expect(install).to.have.display('none');
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.getAttribute('sandbox')).to.equal(
             'allow-same-origin allow-scripts');
+        return returnedValue;
       });
+      implementation.buildCallback();
+      return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+          () => {
+            expect(mutateElement).to.have.been.calledOnce;
+          });
     }
 
     it('should inject iframe on proxy if provided (valid canonical)',
@@ -250,12 +274,15 @@ describes.realWin('amp-install-serviceworker', {
       testIframe();
     });
 
-    it('should reject bad iframe URLs', () => {
-      const iframeSrc = 'https://www2.example.com/install-sw.html';
-      install.setAttribute('data-iframe-src', iframeSrc);
+    it('should reject bad iframe URL (not same origin)', () => {
+      install.setAttribute('data-iframe-src',
+          'https://www2.example.com/install-sw.html');
       allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
       }).to.throw(/should be a URL on the same origin as the source/); });
+    });
+
+    it('should reject bad iframe URL (not https)', () => {
       install.setAttribute('data-iframe-src',
           'http://www.example.com/install-sw.html');
       allowConsoleError(() => { expect(() => {
@@ -282,6 +309,7 @@ describes.fakeWin('url rewriter', {
     win = env.win;
     ampdoc = env.ampdoc;
     viewer = win.services.viewer.obj;
+    stubUrlService(sandbox);
     element = win.document.createElement('amp-install-serviceworker');
     element.setAttribute('src', 'https://example.com/sw.js');
     // This is a RegExp string.
@@ -361,9 +389,9 @@ describes.fakeWin('url rewriter', {
     it('should fail when mask is an invalid expression', () => {
       element.setAttribute('data-no-service-worker-fallback-url-match',
           '?');
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/Invalid/); });
+      }).to.throw(/Invalid/);
     });
   });
 
@@ -411,7 +439,7 @@ describes.fakeWin('url rewriter', {
       const iframe = element.querySelector('iframe');
       expect(iframe).to.exist;
       expect(iframe.src).to.equal('https://example.com/shell#preload');
-      expect(iframe.style.display).to.equal('none');
+      expect(iframe).to.have.attribute('hidden');
       expect(iframe.getAttribute('sandbox'))
           .to.equal('allow-scripts allow-same-origin');
     });

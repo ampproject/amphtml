@@ -15,6 +15,7 @@
  */
 import {LogLevel, dev} from '../../../src/log';
 import {scopedQuerySelectorAll} from '../../../src/dom';
+import {tryResolve} from '../../../src/utils/promise';
 
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
@@ -75,6 +76,10 @@ export let AmpStoryLogEntryDef;
 const AMPPROJECT_DOCS = 'https://www.ampproject.org/docs';
 
 
+/**
+ * @param {!HTMLMediaElement} el
+ * @return {!Promise<Image>}
+ */
 function getPosterFromVideo(el) {
   return new Promise((resolve, reject) => {
     const poster = new Image();
@@ -173,7 +178,7 @@ function getLogType(logTypeKey) {
 function getLogEntry(rootElement, logType, element) {
   const predicate = logType.predicate || (unusedEl => false);
 
-  return Promise.resolve(predicate(element))
+  return tryResolve(() => predicate(element))
       .then(conforms => {
         return new Promise(resolve => {
           resolve({

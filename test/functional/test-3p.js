@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   computeInMasterFrame,
   loadScript,
@@ -30,7 +29,7 @@ describe('3p', () => {
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
   });
 
@@ -42,15 +41,15 @@ describe('3p', () => {
   describe('validateSrcPrefix()', () => {
 
     it('should throw when a string prefix does not match', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         validateSrcPrefix('https:', 'http://example.org');
-      }).to.throw(/Invalid src/); });
+      }).to.throw(/Invalid src/);
     });
 
     it('should throw when array prefixes do not match', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         validateSrcPrefix(['https:', 'ftp:'], 'http://example.org');
-      }).to.throw(/Invalid src/); });
+      }).to.throw(/Invalid src/);
     });
 
     it('should not throw when a string prefix matches', () => {
@@ -64,9 +63,9 @@ describe('3p', () => {
   });
 
   it('should throw an error if src does not contain addyn', () => {
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       validateSrcContains('/addyn/', 'http://adserver.adtechus.com/');
-    }).to.throw(/Invalid src/); });
+    }).to.throw(/Invalid src/);
   });
 
   it('should not throw if source contains /addyn/', () => {
@@ -138,23 +137,19 @@ describe('3p', () => {
         location: true,
         mode: true,
       }, /* mandatory */[], /* optional */[]);
-      clock.tick(1);
 
       validateData({
         width: '',
         foo: true,
         bar: true,
       }, /* mandatory */[], ['foo', 'bar']);
-      clock.tick(1);
-
-      validateData({
-        type: 'TEST',
-        foo: true,
-        'not-whitelisted': true,
-      }, [], ['foo']);
 
       allowConsoleError(() => { expect(() => {
-        clock.tick(1);
+        validateData({
+          type: 'TEST',
+          foo: true,
+          'not-whitelisted': true,
+        }, [], ['foo']);
       }).to.throw(/Unknown attribute for TEST: not-whitelisted./); });
     });
 

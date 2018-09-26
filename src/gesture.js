@@ -80,6 +80,7 @@ export class Gestures {
 
   /**
    * @param {!Element} element
+   * @param {boolean} shouldNotPreventDefault
    */
   constructor(element, shouldNotPreventDefault) {
     /** @private {!Element} */
@@ -324,6 +325,8 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {number} offset
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalReady_(recognizer, offset) {
     // Somebody got here first.
@@ -352,6 +355,8 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {number} timeLeft
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalPending_(recognizer, timeLeft) {
     // Somebody got here first.
@@ -373,6 +378,8 @@ export class Gestures {
    * emitting gestures.
    * @param {!GestureRecognizer} recognizer
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalEnd_(recognizer) {
     if (this.eventing_ == recognizer) {
@@ -388,6 +395,8 @@ export class Gestures {
    * @param {*} data
    * @param {?Event} event
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalEmit_(recognizer, data, event) {
     dev().assert(this.eventing_ == recognizer,
@@ -410,7 +419,7 @@ export class Gestures {
       const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
         if (this.ready_[i] ||
-                this.pending_[i] && this.pending_[i] >= now) {
+                (this.pending_[i] && this.pending_[i] >= now)) {
           cancelEvent = true;
           break;
         }

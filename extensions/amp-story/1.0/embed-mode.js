@@ -38,6 +38,19 @@ export const EmbedMode = {
    * - Unmutes audio in the story by default
    */
   NAME_TBD: 1,
+
+  /**
+   * This mode is intended for embedders that natively handle sharing the story,
+   * thereby rendering the sharing functionality within the amp-story extension
+   * redundant.
+   *
+   * This differs from the NOT_EMBEDDED embed mode in the following ways:
+   * - Removes "share" pill from desktop UI
+   * - Removes "share" icon from mobile UI
+   * - Removes sharing section from bookend
+   * - TODO(#14923): Removes the link information from embedded UIs.
+   */
+  NO_SHARING: 2,
 };
 
 

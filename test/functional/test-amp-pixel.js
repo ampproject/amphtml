@@ -67,7 +67,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('0px');
     expect(pixel.getAttribute('aria-hidden')).to.equal('true');
-    expect(win.getComputedStyle(pixel).display).to.equal('none');
+    expect(pixel).to.have.display('none');
   });
 
   it('should NOT trigger when src is empty', () => {
@@ -100,26 +100,20 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should disallow http URLs', () => {
     const url = 'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
-    allowConsoleError(() => {
-      return expect(trigger(url)).to.eventually.be.rejectedWith(
-          /src attribute must start with/);
-    });
+    return expect(trigger(url)).to.eventually.be.rejectedWith(
+        /src attribute must start with/);
   });
 
   it('should disallow relative URLs', () => {
     const url = '/activity;dc_iu=1/abc;ord=2';
-    allowConsoleError(() => {
-      return expect(trigger(url)).to.eventually.be.rejectedWith(
-          /src attribute must start with/);
-    });
+    return expect(trigger(url)).to.eventually.be.rejectedWith(
+        /src attribute must start with/);
   });
 
   it('should disallow fake-protocol URLs', () => {
     const url = 'https/activity;dc_iu=1/abc;ord=2';
-    allowConsoleError(() => {
-      return expect(trigger(url)).to.eventually.be.rejectedWith(
-          /src attribute must start with/);
-    });
+    return expect(trigger(url)).to.eventually.be.rejectedWith(
+        /src attribute must start with/);
   });
 
   it('should replace URL parameters', () => {
@@ -133,7 +127,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should throw for referrerpolicy with value other than ' +
       'no-referrer', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return createPixel(
           'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
           'origin')

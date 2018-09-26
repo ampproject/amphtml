@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../../src/services';
 import {
   ampWorkerForTesting,
@@ -33,7 +32,7 @@ describe('invokeWebWorker', () => {
   let workerReadyPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
@@ -70,10 +69,8 @@ describe('invokeWebWorker', () => {
 
   it('should check if Worker is supported', () => {
     fakeWin.Worker = undefined;
-    allowConsoleError(() => {
-      return expect(invokeWebWorker(fakeWin, 'foo'))
-          .to.eventually.be.rejectedWith('not supported');
-    });
+    return expect(invokeWebWorker(fakeWin, 'foo'))
+        .to.eventually.be.rejectedWith('not supported');
   });
 
   it('should send and receive a message', () => {

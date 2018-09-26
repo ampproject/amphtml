@@ -30,7 +30,8 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {matches, removeElement} from '../../../src/dom';
+import {addAttributesToElement, matches, removeElement} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 
 /**
@@ -39,34 +40,42 @@ import {user} from '../../../src/log';
  */
 const TAG = 'amp-story-cta-layer';
 
+/**
+ * Call to action button layer template.
+ *
+ * No pre-rendering to let more computing-intensive elements (like
+ * videos) get pre-rendered first. Since this layer will not contain
+ * computing-intensive resources such as videos, we can just risk rendering
+ * while the user is looking.
+ */
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
-
-  /** @override */
-  prerenderAllowed() {
-    /**
-     * Skip pre-rendering to let more computing-intensive elements (like
-     * videos) get pre-rendered first. Since this layer will not contain
-     * computing-intensive resources such as videos, we can just risk rendering
-     * while the user is looking.
-     */
-    return false;
-  }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.setOrOverwriteTargetAttribute_();
+    this.setOrOverwriteAttributes_();
     this.checkAndRemoveLayerIfOnFirstPage_();
   }
 
   /**
-   * Overwrite or set target attribute to _blank in call-to-action links.
+   * Overwrite or set target attributes that are cta-layer-specific.
    * @private
    */
-  setOrOverwriteTargetAttribute_() {
+  setOrOverwriteAttributes_() {
     const ctaLinks = this.element.querySelectorAll('a');
     for (let i = 0; i < ctaLinks.length; i++) {
-      ctaLinks[i].setAttribute('target', '_blank');
+      addAttributesToElement(ctaLinks[i], dict({'target': '_blank'}));
+
+      if (!ctaLinks[i].getAttribute('role')) {
+        addAttributesToElement(ctaLinks[i], dict({'role': 'link'}));
+      }
+    }
+
+    const ctaButtons = this.element.querySelectorAll('button');
+    for (let i = 0; i < ctaButtons.length; i++) {
+      if (!ctaButtons[i].getAttribute('role')) {
+        addAttributesToElement(ctaButtons[i], dict({'role': 'button'}));
+      }
     }
   }
 

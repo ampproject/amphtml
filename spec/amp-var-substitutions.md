@@ -70,7 +70,7 @@ The following table lists the features that enable variable substitutions, as we
       <ul>
         <li>Page’s source origin</li>
         <li>Page’s canonical origin</li>
-        <li>An origin whitelisted via the <code>amp-link-variable-allowed-origin</code> <code>meta</code> tag</li>
+        <li>An origin white listed via the <code>amp-link-variable-allowed-origin</code> <code>meta</code> tag</li>
       </ul>
     </td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
@@ -91,6 +91,9 @@ Variable substitutions that are dependent on a user action like links and form i
 Please take note of the following scenarios:
 * `CLIENT_ID` is available once it has been computed. This can be accomplished through use by another feature such as `amp-analytics` or `amp-pixel`. Note that `CLIENT_ID` may also be blocked on an `amp-user-notification` that is pending acceptance.
 * Asynchronously resolved variables are not available
+
+### Restrictions
+The `host` string of an URL does not accept variables. It fails on AMP cache.
 
 ## Variable substitution in links
 
@@ -115,13 +118,13 @@ If you need to append dynamic parameters to the href, specify the parameters by 
 <a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
 ```
 
-### Whitelisted domains for link substitution
+### White listed domains for link substitution
 
 Link substitutions are restricted and will only be fulfilled for URLs matching:
 
 * The page’s source origin
 * The page’s canonical origin
-* A whitelisted origin
+* A white listed origin
 
 To whitelist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
 
@@ -205,6 +208,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 |----------------|--------------------|------------------------|
 | [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `${horizontalScrollBoundary}` |
 | [Total Engaged Time](#total-engaged-time) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
+| [Incremental Engaged Time](#incremental-engaged-time) | `INCREMENTAL_ENGAGED_TIME` | `${incrementalEngagedTime}` |
 | [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `${verticalScrollBoundary}` |
 
 ### Visibility
@@ -244,6 +248,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 |  Variable Name | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
 | [AMP Version](#amp-version) | `AMP_VERSION` | `${ampVersion}` |
+| [AMP State](#amp-state) | `AMP_STATE` | `${ampState}` |
 | [Background State](#background-state) | `BACKGROUND_STATE` | `${backgroundState}` |
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
@@ -296,6 +301,19 @@ Provides the AMP document's URL. The URL contains the scheme, domain, port and f
   Makes a request to something like  `https://foo.com/pixel?ref=https%3A%2F%2Fexample.com%2F`.
 * **amp-analytics variable**: `${ampdocUrl}`
   * Example value: `http://example.com:8000/examples/analytics.amp.html`
+
+#### AMP State
+
+Pulls a value from the provided AMP state key.
+
+* **platform variable**: `AMP_STATE`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?bar=AMP_STATE(foo.bar)"</amp-pixel>
+  ```
+  If `foo.bar` exists in the AMP state, the corresponding value is inserted into the pixel src.
+* **amp-analytics variable**: `${ampState}`
+  * Example value: `${ampState(foo.bar)}`: If `foo.bar` is available, its associated value is returned; otherwise, null is returned.
 
 #### AMP Version
 
@@ -638,7 +656,7 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 
 #### HTML Attributes
 
-Provides values of attributes of HTML elements inside of an amp-ad tag which match a given CSS selector. 
+Provides values of attributes of HTML elements inside of an amp-ad tag which match a given CSS selector.
 This only allows an amp-analytics tag to query attributes of HTML elements loaded by that amp-analytics tag's parent
 amp-ad tag. It will not allow a publisher to obtain information about the content of an ad, nor will it allow metrics
 of one ad to be seen by the provider of another ad on the page.
@@ -655,14 +673,14 @@ Example:
 This will return the "src" and "decoding" attributes of img tags in the ad.
 
 Caveats:
-* If the CSS selector matches 20 or more elements, an empty array will be returned. This is because traversing a 
-large list of elements is inefficient. 
+* If the CSS selector matches 20 or more elements, an empty array will be returned. This is because traversing a
+large list of elements is inefficient.
 * Attributes of at most 10 elements will be returned.
-* If an element matches the CSS selector but has none of the requested attributes, that element will not be 
+* If an element matches the CSS selector but has none of the requested attributes, that element will not be
 represented in the returned array.
-* The returned values will be in the form of a URL encoded JSON array of objects wherein the object keys are the 
+* The returned values will be in the form of a URL encoded JSON array of objects wherein the object keys are the
 requested attribute names and the object values are the elements' values for those attributes.
-* The CSS selector may contain only letters (upper- and/or lower-case), numbers, hyphens, underscores, and periods. 
+* The CSS selector may contain only letters (upper- and/or lower-case), numbers, hyphens, underscores, and periods.
 [Issue #14252](https://github.com/ampproject/amphtml/issues/14252) has been created to address potential future demand for more complex CSS selectors.
 
 
@@ -1076,7 +1094,7 @@ Provides the user's IANA time-zone code (if available).
   ```
 * **amp-analytics variable**: `${timezoneCode}`
   * Example value: `Europe/Rome`.
- 
+
 #### Total Engaged Time
 
 Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
@@ -1085,9 +1103,17 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 * **amp-analytics variable**: `${totalEngagedTime}`
   * Example value: `36`
 
+#### Incremental Engaged Time
+
+Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (it is optional and defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+
+* **platform variable**: `INCREMENTAL_ENGAGED_TIME`
+* **amp-analytics variable**: `${incrementalEngagedTime(foo,false)}`
+  * Example value: `36`
+
 #### Total Time
 
-Provides the total time from the time page has become visible to the time a ping was sent out.
+Provides the total time from the time page has become visible to the time a ping was sent out. Only applicable to visible trigger events.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalTime}`

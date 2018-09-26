@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
@@ -24,7 +28,7 @@ import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {renderAsElement} from './simple-template';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 
 /** @const {string} Class to toggle the share menu. */
@@ -60,12 +64,15 @@ const AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE = {
 };
 
 
+/**
+ * Share menu UI.
+ */
 export class ShareMenu {
   /**
    * @param {!Window} win
-   * @param {!Element} parentEl Element where to append the component
+   * @param {!Element} storyEl Element where to append the component
    */
-  constructor(win, parentEl) {
+  constructor(win, storyEl) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -81,17 +88,14 @@ export class ShareMenu {
     /** @private {boolean} */
     this.isSystemShareSupported_ = false;
 
-    /** @private @const {!../../../src/service/platform-impl.Platform} */
-    this.platform_ = Services.platformFor(this.win_);
-
     /** @private @const {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(this.win_);
+    this.shareWidget_ = ShareWidget.create(this.win_, storyEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
-    this.parentEl_ = parentEl;
+    this.parentEl_ = storyEl;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -138,7 +142,7 @@ export class ShareMenu {
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      setStyle(this.element_, 'display', 'none');
+      toggle(dev().assertElement(this.element_), false);
       this.parentEl_.appendChild(this.element_);
     });
   }

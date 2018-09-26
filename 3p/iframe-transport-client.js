@@ -86,20 +86,20 @@ export class IframeTransportClient {
    * Retrieves/creates a context object to pass events pertaining to a
    * particular creative.
    * @param {string} creativeId The ID of the creative
-   * @returns {!IframeTransportContext}
+   * @return {!IframeTransportContext}
    * @private
    */
   contextFor_(creativeId) {
     return this.creativeIdToContext_[creativeId] ||
         (this.creativeIdToContext_[creativeId] =
             new IframeTransportContext(this.win_, this.iframeMessagingClient_,
-              creativeId, this.vendor_));
+                creativeId, this.vendor_));
   }
 
   /**
    * Gets the IframeMessagingClient.
-   * @returns {!IframeMessagingClient}
-   * @VisibleForTesting
+   * @return {!IframeMessagingClient}
+   * @visibleForTesting
    */
   getIframeMessagingClient() {
     return this.iframeMessagingClient_;

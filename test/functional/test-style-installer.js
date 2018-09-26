@@ -15,13 +15,13 @@
  */
 
 import * as rds from '../../src/render-delaying-services';
-import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {getStyle} from '../../src/style';
 import {installPerformanceService} from '../../src/service/performance-impl';
+import {isAnimationNone} from '../../testing/test-helper';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 
 
@@ -44,27 +44,28 @@ describe('Styles', () => {
       resources = Services.resourcesForDoc(ampdoc);
       schedulePassSpy = sandbox.spy(resources, 'schedulePass');
       waitForServicesStub = sandbox.stub(rds, 'waitForServices');
+      styles.setBodyMadeVisibleForTesting(false);
     });
 
-    it('should work with waitForService=false', () => {
+    it('should make visible in recovery call', () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');
       expect(getStyle(doc.body, 'animation')).to.equal('');
       expect(ampdoc.signals().get('render-start')).to.be.null;
 
-      styles.makeBodyVisible(doc);
+      styles.makeBodyVisibleRecovery(doc);
+
       expect(doc.body).to.exist;
       expect(getStyle(doc.body, 'opacity')).to.equal('1');
       expect(getStyle(doc.body, 'visibility')).to.equal('visible');
-      expect(getStyle(doc.body, 'animation')).to.equal('none');
-      expect(ampdoc.signals().get('render-start')).to.be.ok;
+      expect(isAnimationNone(doc.body)).to.be.true;
     });
 
     it('should ignore resources failures for render-start', () => {
       sandbox.stub(resources, 'renderStarted').callsFake(() => {
         throw new Error('intentional');
       });
-      styles.makeBodyVisible(doc);
+      styles.makeBodyVisibleRecovery(doc);
       expect(ampdoc.signals().get('render-start')).to.be.null;
     });
 
@@ -76,14 +77,13 @@ describe('Styles', () => {
 
       waitForServicesStub.withArgs(win)
           .returns(Promise.resolve(['service1', 'service2']));
-      styles.makeBodyVisible(doc, true);
-      styles.makeBodyVisible(doc, true); // 2nd call should make no difference
+      styles.makeBodyVisible(doc);
       return new Promise(resolve => {
         setTimeout(resolve, 0);
       }).then(() => {
         expect(getStyle(doc.body, 'opacity')).to.equal('1');
         expect(getStyle(doc.body, 'visibility')).to.equal('visible');
-        expect(getStyle(doc.body, 'animation')).to.equal('none');
+        expect(isAnimationNone(doc.body)).to.be.true;
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
         expect(schedulePassSpy.withArgs(1, true)).to.be.calledOnce;
         expect(ampdoc.signals().get('render-start')).to.be.ok;
@@ -92,7 +92,7 @@ describe('Styles', () => {
 
     it('should skip schedulePass if no render delaying services', () => {
       waitForServicesStub.withArgs(win).returns(Promise.resolve([]));
-      styles.makeBodyVisible(doc, true);
+      styles.makeBodyVisible(doc);
       return new Promise(resolve => {
         setTimeout(resolve, 0);
       }).then(() => {
@@ -206,7 +206,7 @@ describe('Styles', () => {
           return installStylesAsPromise('other{}', true);
         }).then(styleEl => {
           expect(styleEl).to.equal(firstStyleEl);
-          expect(styleEl.textContent).to.equal('');
+          expect(styleEl.textContent).to.equal('other{}');
           expect(head.querySelectorAll('style[amp-runtime]'))
               .to.have.length(1);
         });
@@ -219,7 +219,7 @@ describe('Styles', () => {
         return installStylesAsPromise('other{}', true).then(styleEl => {
           expect(head.__AMP_CSS_SM['amp-runtime']).to.equal(serverEl);
           expect(styleEl).to.equal(serverEl);
-          expect(styleEl.textContent).to.equal('');
+          expect(styleEl.textContent).to.equal('other{}');
           expect(head.querySelectorAll('style[amp-runtime]'))
               .to.have.length(1);
         });
@@ -242,7 +242,7 @@ describe('Styles', () => {
         return promise.then(styleEl => {
           expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
           expect(styleEl).to.equal(serverEl);
-          expect(styleEl.textContent).to.equal('');
+          expect(styleEl.textContent).to.equal('other{}');
           expect(head.querySelectorAll('style[amp-extension=amp-ext1]'))
               .to.have.length(1);
         });

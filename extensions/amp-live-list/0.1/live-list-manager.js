@@ -17,6 +17,7 @@
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
@@ -67,9 +68,6 @@ export class LiveListManager {
     /** @private {time} */
     this.latestUpdateTime_ = 0;
 
-    /** @private {time} */
-    this.lastCheckTime_ = 0;
-
     /** @private @const {function(): Promise} */
     this.work_ = this.fetchDocument_.bind(this);
 
@@ -83,7 +81,6 @@ export class LiveListManager {
           .map(key => this.liveLists_[key].getUpdateTime());
       this.latestUpdateTime_ = Math.max.apply(Math, initialUpdateTimes);
 
-      this.lastCheckTime_ = Number(new Date());
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
       if (getMode().localDev) {
@@ -134,17 +131,10 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
-    // This is important for cache busting as some environments force a
-    // cache-control: max-age header.
-    if (this.lastCheckTime_ > 0) {
-      url = addParamToUrl(url, 'amp_last_check_time',
-          String(this.lastCheckTime_));
-    }
-    return Services.xhrFor(this.ampdoc.win)
-        // TODO(erwinm): add update time here when possible.
-        .fetchDocument(url, {
-          requireAmpResponseSourceOrigin: false,
-        }).then(this.getLiveLists_.bind(this));
+    // TODO(erwinm): add update time here when possible.
+    return fetchDocument(this.ampdoc.win, url, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(this.getLiveLists_.bind(this));
   }
 
   /**
@@ -161,7 +151,6 @@ export class LiveListManager {
     if (latestUpdateTime > 0) {
       this.latestUpdateTime_ = latestUpdateTime;
     }
-    this.lastCheckTime_ = Number(new Date());
     // We need to do this after calling `updateLiveList` since that
     // would apply the disabled attribute if any exist from the server.
     if (!this.hasActiveLiveLists_()) {

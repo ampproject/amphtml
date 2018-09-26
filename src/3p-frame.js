@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrl} from './url';
+import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, user} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
@@ -67,11 +67,15 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {!AmpElement} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
+ * @param {!{
+ *   disallowCustom,
+ *   allowFullscreen,
+ * }=} opt_options Options for the created iframe.
  * @return {!Element} The iframe.
  */
 export function getIframe(
-  parentWindow, parentElement, opt_type, opt_context, opt_disallowCustom) {
+  parentWindow, parentElement, opt_type, opt_context,
+  {disallowCustom, allowFullscreen} = {}) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
@@ -88,8 +92,8 @@ export function getIframe(
   count[attributes['type']] += 1;
 
   const baseUrl = getBootstrapBaseUrl(
-      parentWindow, undefined, opt_type, opt_disallowCustom);
-  const host = parseUrl(baseUrl).hostname;
+      parentWindow, undefined, opt_type, disallowCustom);
+  const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
@@ -103,7 +107,7 @@ export function getIframe(
   }));
 
   iframe.src = baseUrl;
-  iframe.ampLocation = parseUrl(baseUrl);
+  iframe.ampLocation = parseUrlDeprecated(baseUrl);
   iframe.name = name;
   // Add the check before assigning to prevent IE throw Invalid argument error
   if (attributes['width']) {
@@ -114,6 +118,9 @@ export function getIframe(
   }
   if (attributes['title']) {
     iframe.title = attributes['title'];
+  }
+  if (allowFullscreen) {
+    iframe.setAttribute('allowfullscreen', 'true');
   }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
@@ -127,6 +134,9 @@ export function getIframe(
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
     iframe.setAttribute('allow', 'sync-xhr \'none\';');
+  }
+  if (isExperimentOn(parentWindow, 'sandbox-ads')) {
+    applySandbox(iframe);
   }
   iframe.setAttribute('data-amp-3p-sentinel',
       attributes['_context']['sentinel']);
@@ -143,7 +153,7 @@ export function getIframe(
  * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
-  const dataset = element.dataset;
+  const {dataset} = element;
   for (const name in dataset) {
     // data-vars- is reserved for amp-analytics
     // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
@@ -197,7 +207,7 @@ export function preloadBootstrap(
 export function getBootstrapBaseUrl(
   parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   // The value is cached in a global variable called `bootstrapBaseUrl`;
-  const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
+  const {bootstrapBaseUrl} = parentWindow;
   if (bootstrapBaseUrl) {
     return bootstrapBaseUrl;
   }
@@ -206,10 +216,16 @@ export function getBootstrapBaseUrl(
       getDefaultBootstrapBaseUrl(parentWindow);
 }
 
+/**
+ * @param {string} url
+ */
 export function setDefaultBootstrapBaseUrlForTesting(url) {
   overrideBootstrapBaseUrl = url;
 }
 
+/**
+ * @param {*} win
+ */
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
   win.defaultBootstrapSubDomain = undefined;
@@ -238,6 +254,10 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
       `${srcFileBasename}.html`;
 }
 
+/**
+ * @param {!Window} win
+ * @return {string}
+ */
 function getAdsLocalhost(win) {
   let adsUrl = urls.thirdParty; // local dev with a non-localhost server
   if (adsUrl.indexOf('ampproject.net') > -1) {
@@ -250,6 +270,7 @@ function getAdsLocalhost(win) {
  * Sub domain on which the 3p iframe will be hosted.
  * Because we only calculate the URL once per page, this function is only
  * called once and hence all frames on a page use the same URL.
+ * @param {!Window} win
  * @return {string}
  * @visibleForTesting
  */
@@ -303,14 +324,64 @@ function getCustomBootstrapBaseUrl(
   // This is not a security primitive, we just don't want this to happen in
   // practice. People could still redirect to the same origin, but they cannot
   // redirect to the proxy origin which is the important one.
-  const parsed = parseUrl(url);
+  const parsed = parseUrlDeprecated(url);
   user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
-      parsed.origin != parseUrl(parentWindow.location.href).origin,
+      parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
   '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
   parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';
+}
+
+/**
+ * Applies a sandbox to the iframe, if the required flags can be allowed.
+ * @param {!Element} iframe
+ * @visibleForTesting
+ */
+export function applySandbox(iframe) {
+  if (!iframe.sandbox || !iframe.sandbox.supports) {
+    return; // Can't feature detect support
+  }
+  // If these flags are not supported by the UA we don't apply any
+  // sandbox.
+  const requiredFlags = [
+    // This only allows navigation when user interacts and thus prevents
+    // ads from auto navigating the user.
+    'allow-top-navigation-by-user-activation',
+    // Crucial because otherwise even target=_blank opened links are
+    // still sandboxed which they may not expect.
+    'allow-popups-to-escape-sandbox',
+  ];
+  // These flags are not feature detected. Put stuff here where either
+  // they have always been supported or support is not crucial.
+  const otherFlags = [
+    'allow-forms',
+    // We should consider turning this off! But since the top navigation
+    // issue is the big one, we'll leave this allowed for now.
+    'allow-modals',
+    // Give access to raw mouse movements.
+    'allow-pointer-lock',
+    // This remains subject to popup blocking, it just makes it supported
+    // at all.
+    'allow-popups',
+    // This applies inside the iframe and is crucial to not break the web.
+    'allow-same-origin',
+    'allow-scripts',
+  ];
+  // Not allowed
+  // - allow-top-navigation
+  // - allow-orientation-lock
+  // - allow-pointer-lock
+  // - allow-presentation
+  for (let i = 0; i < requiredFlags.length; i++) {
+    const flag = requiredFlags[i];
+    if (!iframe.sandbox.supports(flag)) {
+      dev().info(TAG, `Iframe doesn't support ${flag}`);
+      return;
+    }
+  }
+  iframe.sandbox = requiredFlags.join(' ') + ' ' + otherFlags.join(' ');
 }
 
 /**

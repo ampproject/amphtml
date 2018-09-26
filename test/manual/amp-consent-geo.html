@@ -166,16 +166,22 @@
       <script type="application/json">{
         "consents": {
           "unknown": {
+            "checkConsentHref": "http://localhost:8000/get-consent-no-prompt",
             "promptIfUnknownForGeoGroup": "anz",
             "promptUI": "ui1"
           }
-        }
+        },
+        "postPromptUI": "postPromptUI"
       }</script>
       <div id="ui1">
         Can I load the image??
         <button on="tap:ABC.accept" role="button">Accept</button>
         <button on="tap:ABC.reject" role="button">Reject</button>
         <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+      </div>
+      <div id="postPromptUI">
+        Post Prompt UI
+        <button on="tap:ABC.prompt" role="button">Manage</button>
       </div>
     </amp-consent>
 

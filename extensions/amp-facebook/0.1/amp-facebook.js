@@ -94,7 +94,10 @@ class AmpFacebook extends AMP.BaseElement {
     return this.loadPromise(iframe);
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleFacebookMessages_(event) {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;
@@ -127,6 +130,9 @@ class AmpFacebook extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
     }
     return true;
   }

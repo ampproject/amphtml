@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 
 import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
@@ -23,27 +23,33 @@ import {user} from '../../../../src/log';
 describes.realWin('Platform store', {}, () => {
   let platformStore;
   const serviceIds = ['service1', 'service2'];
-  const currentProduct = 'currentProductId';
   const entitlementsForService1 = new Entitlement({source: serviceIds[0],
-    raw: '', service: serviceIds[0],
-    products: ['currentProductId'], subscriptionToken: '', loggedIn: false});
+    raw: '', service: serviceIds[0], granted: true});
   const entitlementsForService2 = new Entitlement({source: serviceIds[1],
-    raw: '', service: serviceIds[1],
-    products: ['product3'], subscriptionToken: '', loggedIn: false});
-  entitlementsForService1.setCurrentProduct(currentProduct);
-  entitlementsForService2.setCurrentProduct(currentProduct);
+    raw: '', service: serviceIds[1], granted: false});
   const fallbackEntitlement = new Entitlement({
     source: 'local',
     raw: 'raw',
     service: 'local',
-    products: [currentProduct],
-    subscriptionToken: 'token',
-    loggedIn: false,
+    granted: true,
+    grantReason: GrantReason.SUBSCRIBER,
   });
+
+  /**
+   * fake handler for getSupportedScoreFactor
+   * @param {string} factor
+   * @param {!Object} factorMap
+   * @return {number}
+   */
+  function fakeGetSupportedScoreFactor(factor, factorMap) {
+    return factorMap[factor] || 0;
+  }
 
   beforeEach(() => {
     platformStore = new PlatformStore(serviceIds, {
       supportsViewer: 9,
+      testFactor1: 10,
+      testFactor2: 10,
     }, fallbackEntitlement);
   });
 
@@ -51,12 +57,54 @@ describes.realWin('Platform store', {}, () => {
     expect(platformStore.serviceIds_).to.be.equal(serviceIds);
   });
 
+  it('should resolve entitlement', () => {
+    // Request entitlement promise even before it's resolved.
+    const p = platformStore.getEntitlementPromiseFor('service2');
+
+    // Resolve once.
+    const ent = new Entitlement({
+      service: 'service2',
+      granted: false,
+    });
+    platformStore.resolveEntitlement('service2', ent);
+    expect(platformStore.getResolvedEntitlementFor('service2')).to.equal(ent);
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+
+    // Additional resolution doesn't change anything without reset.
+    platformStore.resolveEntitlement('service2', new Entitlement({
+      service: 'service2',
+      granted: true,
+    }));
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+    return expect(p).to.eventually.equal(ent);
+  });
+
+  it('should reset entitlement', () => {
+    // Request entitlement promise even before it's resolved.
+    const p = platformStore.getEntitlementPromiseFor('service2');
+
+    // Resolve once.
+    platformStore.resolveEntitlement('service2', new Entitlement({
+      service: 'service2',
+      granted: false,
+    }));
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+
+    // Reset: new entitlement promise.
+    platformStore.resetEntitlementFor('service2');
+    expect(platformStore.getEntitlementPromiseFor('service2')).to.not.equal(p);
+  });
+
   it('should call onChange callbacks on every resolve', () => {
     const cb = sandbox.stub(platformStore.onEntitlementResolvedCallbacks_,
         'fire');
     platformStore.onChange(cb);
     platformStore.resolveEntitlement('service2',
-        new Entitlement('service2', ['product1'], ''));
+        new Entitlement({
+          service: 'service2',
+          granted: false,
+        })
+    );
     expect(cb).to.be.calledOnce;
   });
 
@@ -93,9 +141,7 @@ describes.realWin('Platform store', {}, () => {
       const negativeEntitlements = new Entitlement({source: serviceIds[0],
         raw: '',
         service: serviceIds[0],
-        products: ['product1'],
-        subscriptionToken: ''});
-      negativeEntitlements.setCurrentProduct(currentProduct);
+      });
       platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
       platformStore.getGrantStatus()
@@ -113,9 +159,7 @@ describes.realWin('Platform store', {}, () => {
       const negativeEntitlements = new Entitlement({source: serviceIds[0],
         raw: '',
         service: serviceIds[0],
-        products: ['product1'],
-        subscriptionToken: ''});
-      negativeEntitlements.setCurrentProduct(currentProduct);
+      });
       platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       platformStore.getGrantStatus()
           .then(entitlements => {
@@ -154,6 +198,40 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('getAllPlatformWeights_', () => {
+    let localPlatform;
+    let anotherPlatform;
+    const localPlatformBaseScore = 0;
+    const anotherPlatformBaseScore = 0;
+    beforeEach(() => {
+      localPlatform = new SubscriptionPlatform();
+      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(localPlatform, 'getBaseScore')
+          .callsFake(() => localPlatformBaseScore);
+      anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => anotherPlatformBaseScore);
+      platformStore.resolvePlatform('another', localPlatform);
+      platformStore.resolvePlatform('local', anotherPlatform);
+    });
+    it('should return sorted array of platforms and weights', () => {
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local'}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.getAllPlatformWeights_())
+          .to.deep.equal(
+              [{platform: localPlatform, weight: 0},
+                {platform: anotherPlatform, weight: 0}]);
+    });
+  });
+
   describe('selectPlatform', () => {
     it('should call selectApplicablePlatform_ if areAllPlatformsResolved_ '
         + 'is true', () => {
@@ -169,6 +247,7 @@ describes.realWin('Platform store', {}, () => {
       });
     });
   });
+
   describe('selectApplicablePlatform_', () => {
     let localPlatform;
     let anotherPlatform;
@@ -186,108 +265,136 @@ describes.realWin('Platform store', {}, () => {
       platformStore.resolvePlatform('local', localPlatform);
       platformStore.resolvePlatform('another', anotherPlatform);
     });
+
     it('should choose a platform based on subscription', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
       platformStore.resolveEntitlement('local', new Entitlement({
         source: 'local',
         raw: '',
         service: 'local',
-        products: ['product1'],
-        subscriptionToken: 'token',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
       }));
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another',
         raw: '',
         service: 'another',
-        products: ['product2'],
-        subscriptionToken: null,
       }));
-      expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
-          .equal(localPlatform.getServiceId());
-      platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local',
-        raw: '',
-        service: 'local',
-        products: ['product1'],
-        subscriptionToken: null,
-      }));
-      platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another',
-        raw: '',
-        service: 'another',
-        products: ['product2'],
-        subscriptionToken: 'token',
-      }));
-      expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
-          .equal(anotherPlatform.getServiceId());
-    });
-
-    it('should choose a platform based on if it supports current '
-        + 'viewer', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => true);
-      platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local', raw: '', service: 'local', products: ['product1'],
-        subscriptionToken: null}));
-      platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another', raw: '', service: 'another', products: ['product2'],
-        subscriptionToken: null}));
-      expect(platformStore.selectApplicablePlatform_(true).getServiceId()).to.be
-          .equal(anotherPlatform.getServiceId());
-    });
-
-    it('should not choose a platform based on supports for current '
-        + 'viewer, if prefer supportsViewer is 0', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => true);
-      platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local', raw: '', service: 'local', products: ['product1'],
-        subscriptionToken: null}));
-      platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another', raw: '', service: 'another', products: ['product2'],
-        subscriptionToken: null}));
-      platformStore.scoreConfig_ = {supportsViewer: 0};
       expect(platformStore.selectApplicablePlatform_().getServiceId())
-          .to.be.equal(localPlatform.getServiceId());
+          .to.equal(localPlatform.getServiceId());
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local',
+        raw: '',
+        service: 'local',
+      }));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another',
+        raw: '',
+        service: 'another',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      }));
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(anotherPlatform.getServiceId());
     });
 
-    it('should choose a local if all other conditions are same', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
+    it('should choose local platform if all other conditions are same', () => {
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+
       platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local', raw: '', service: 'local', products: ['product1'],
-        subscriptionToken: null}));
+        source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another', raw: '', service: 'another', products: ['product2'],
-        subscriptionToken: null}));
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
-          .equal(localPlatform.getServiceId());
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(localPlatform.getServiceId());
+    });
+
+    it('should chose platform based on score weight', () => {
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+      // +9
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
+              {'supportsViewer': 1}));
+
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local'}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(anotherPlatform.getServiceId());
+    });
+
+    it('should chose platform based on multiple factors', () => {
+      // +10
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
+              {'testFactor1': 1}));
+      // +9
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
+              {'supportsViewer': 1}));
+
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local'}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(localPlatform.getServiceId());
+    });
+
+    it('should chose platform specified factors', () => {
+      // +10
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
+              {'testFactor1': 1}));
+      // +9
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
+              {'supportsViewer': 1}));
+
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local'}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.selectApplicablePlatform_('supporsViewer')
+          .getServiceId())
+          .to.equal(localPlatform.getServiceId());
+    });
+
+    it('should chose platform handle negative factor values', () => {
+      // +10, -10
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
+              {testFactor1: 1, testFactor2: -1}));
+      // +9
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor,
+              {'supportsViewer': 1}));
+
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local'}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
+          .to.equal(anotherPlatform.getServiceId());
     });
 
     it('should use baseScore', () => {
-      sandbox.stub(localPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
-      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
-          .callsFake(() => false);
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
       localPlatformBaseScore = 1;
       anotherPlatformBaseScore = 10;
       platformStore.resolveEntitlement('local', new Entitlement({
-        source: 'local', raw: '', service: 'local', products: ['product1'],
-        subscriptionToken: null}));
+        source: 'local', raw: '', service: 'local'}));
       platformStore.resolveEntitlement('another', new Entitlement({
-        source: 'another', raw: '', service: 'another', products: ['product2'],
-        subscriptionToken: null}));
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
-          .equal(anotherPlatform.getServiceId());
+        source: 'another', raw: '', service: 'another'}));
+      expect(platformStore.selectApplicablePlatform_()
+          .getServiceId()).to.equal(anotherPlatform.getServiceId());
     });
   });
 
@@ -296,7 +403,6 @@ describes.realWin('Platform store', {}, () => {
     beforeEach(() => {
       errorSpy = sandbox.spy(user(), 'warn');
     });
-
     it('should report warning if all platforms fail and resolve '
         + 'local with fallbackEntitlement', () => {
       const platform = new SubscriptionPlatform();
@@ -310,13 +416,22 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('getPlatform', () => {
+    it('should return the platform for the serviceId', () => {
+      const platform = new SubscriptionPlatform();
+      platform.getServiceId = () => 'test';
+      platformStore.subscriptionPlatforms_['test'] = platform;
+      expect(platformStore.getPlatform('test').getServiceId())
+          .to.be.equal('test');
+    });
+  });
+
   describe('getGrantEntitlement', () => {
     const subscribedMeteredEntitlement = new Entitlement({
       source: 'local',
       service: 'local',
-      products: ['local', 'another-product'],
-      subscriptionToken: 'subscribed',
-      loggedIn: false,
+      granted: true,
+      grantReason: GrantReason.SUBSCRIBER,
     });
     it('should resolve with existing entitlement with subscriptions', () => {
       platformStore.grantStatusEntitlement_ = subscribedMeteredEntitlement;
@@ -330,13 +445,13 @@ describes.realWin('Platform store', {}, () => {
       const meteringEntitlement = new Entitlement({
         source: 'local',
         service: 'local',
-        products: ['local'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
+        granted: true,
+        data: {
+          metering: {
+            'left': 5,
+            'total': 10,
+            'token': 'token',
+          },
         },
       });
       platformStore.grantStatusEntitlement_ = meteringEntitlement;
@@ -352,14 +467,8 @@ describes.realWin('Platform store', {}, () => {
       const meteringEntitlement = new Entitlement({
         source: 'local',
         service: 'local',
-        products: ['local'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
-        },
+        granted: true,
+        grantReason: GrantReason.METERING,
       });
       sandbox.stub(platformStore, 'areAllPlatformsResolved_')
           .callsFake(() => true);
@@ -372,57 +481,41 @@ describes.realWin('Platform store', {}, () => {
   });
 
   describe('saveGrantEntitlement_', () => {
-    it('should save first entitlement', () => {
-      const entitlement = new Entitlement({
+    it('should save first entitlement to grant', () => {
+      const entitlementData = {
         source: 'local',
         service: 'local',
-        products: ['local'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
-        },
-      });
+        granted: false,
+        grantReason: GrantReason.METERING,
+      };
+      const entitlement = new Entitlement(entitlementData);
       platformStore.saveGrantEntitlement_(entitlement);
+      expect(platformStore.grantStatusEntitlement_).to.be.equal(null);
+      const anotherEntitlement = new Entitlement(
+          Object.assign({}, entitlementData, {granted: true}));
+      platformStore.saveGrantEntitlement_(anotherEntitlement);
       expect(platformStore.grantStatusEntitlement_.json())
-          .to.deep.equal(entitlement.json());
+          .to.deep.equal(anotherEntitlement.json());
     });
 
     it('should save further entitlement if new one has subscription '
         + 'and last one had metering', () => {
-      const entitlement = new Entitlement({
+      const entitlementData = {
         source: 'local',
         service: 'local',
-        products: ['local'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
-        },
-      });
-      const nextMeteredEntitlement = new Entitlement({
-        source: 'local',
-        service: 'local',
-        products: ['local', 'another-product'],
-        subscriptionToken: null,
-        loggedIn: false,
-        metering: {
-          'left': 5,
-          'total': 10,
-          'token': 'token',
-        },
-      });
-      const subscribedMeteredEntitlement = new Entitlement({
-        source: 'local',
-        service: 'local',
-        products: ['local', 'another-product'],
-        subscriptionToken: 'subscribed',
-        loggedIn: false,
-      });
+        granted: true,
+      };
+      const entitlement = new Entitlement(entitlementData);
+      const nextMeteredEntitlement = new Entitlement(
+          Object.assign({}, entitlementData, {
+            grantReason: GrantReason.METERING,
+          })
+      );
+      const subscribedMeteredEntitlement = new Entitlement(
+          Object.assign({}, entitlementData, {
+            grantReason: GrantReason.SUBSCRIBER,
+          })
+      );
       platformStore.saveGrantEntitlement_(entitlement);
       expect(platformStore.grantStatusEntitlement_.json())
           .to.deep.equal(entitlement.json());
@@ -435,5 +528,30 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('onPlatformResolves', () => {
+    let localPlatform;
+
+    beforeEach(() => {
+      localPlatform = new SubscriptionPlatform();
+      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+    });
+
+    it('should return a promise resolving the requested platform '
+      + 'if it is already registered', () => {
+      platformStore.resolvePlatform('local', localPlatform);
+      platformStore.onPlatformResolves('local', platform => {
+        expect(platform.getServiceId()).to.be.equal('local');
+      });
+    });
+
+    it('should return a promise resolving when the requested platform '
+      + 'gets registered', done => {
+      platformStore.onPlatformResolves('local', platform => {
+        expect(platform.getServiceId()).to.be.equal('local');
+        done();
+      });
+      platformStore.resolvePlatform('local', localPlatform);
+    });
+  });
 });
 

@@ -27,7 +27,14 @@
   </head>
 
   <body>
-    <amp-story standalone bookend-config-src="bookend.json">
+    <amp-story
+      title="Analytics amp-story example"
+      publisher="The AMP Team"
+      publisher-logo-src="https://example.com/logo/1x1.png"
+      poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+      poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+      poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
+      standalone>
 
       <amp-analytics id="analytics1">
         <script type="application/json">
@@ -35,9 +42,18 @@
             "requests": {
               "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
               "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
-              "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}"
+              "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
+              "click": "${base}?index=${storyPageIndex}&id=${storyPageId}"
             },
             "triggers": {
+              "trackAnchorClicks": {
+                "on": "click",
+                "selector": "amp-story-cta-layer a",
+                "request": "click",
+                "vars": {
+                  "eventId": "clickOnAnyAnchor"
+                }
+              },
               "trackPageview": {
                 "on": "story-page-visible",
                 "request": "pageView"
@@ -79,6 +95,9 @@
         <amp-story-grid-layer template="vertical">
           <h1>Page Three</h1>
         </amp-story-grid-layer>
+        <amp-story-cta-layer>
+          <a>click me</a>
+        </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="p4">
@@ -95,6 +114,8 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
+      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
     </amp-story>
   </body>
 </html>

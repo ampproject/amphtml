@@ -87,6 +87,7 @@ amp-lightbox-gallery .amp-carousel-button {
   width: 24px;
   height: 24px;
   padding: 16px;
+  box-sizing: content-box;
 }
 
 .i-amphtml-lbg {
@@ -134,6 +135,12 @@ amp-lightbox-gallery .amp-carousel-button {
   .i-amphtml-lbg-top-bar {
     height: 80px !important; /* Matches top of gallery */
   }
+}
+
+.i-amphtml-lbg-controls.i-amphtml-lbg-single .i-amphtml-lbg-button-prev,
+.i-amphtml-lbg-controls.i-amphtml-lbg-single .i-amphtml-lbg-button-next,
+.i-amphtml-lbg-controls.i-amphtml-lbg-single .i-amphtml-lbg-button-gallery {
+  display: none;
 }
 
 .i-amphtml-lbg-controls.i-amphtml-lbg-hidden {

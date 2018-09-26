@@ -19,7 +19,7 @@
  * Loading indicator.
  * Hide when `i-amphtml-subs-loading` class is not set.
  */
-html:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
+body:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
   display: none !important;
 }
 
@@ -28,7 +28,7 @@ html:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
  * Content section.
  * Hide when not known or denied.
  */
-html:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
+body:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
   display: none !important;
 }
 
@@ -37,7 +37,7 @@ html:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
  * Content-not-granted section.
  * Hide when not known or granted.
  */
-html:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"] {
+body:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"] {
   display: none !important;
 }
 
@@ -46,8 +46,8 @@ html:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"]
  * Actions sections.
  * Hide when not known or delegated.
  */
-html.i-amphtml-subs-grant-unk [subscriptions-section="actions"],
-html.i-amphtml-subs-delegated [subscriptions-section="actions"] {
+body.i-amphtml-subs-grant-unk [subscriptions-section="actions"],
+body.i-amphtml-subs-delegated [subscriptions-section="actions"] {
   display: none !important;
 }
 
@@ -57,7 +57,7 @@ html.i-amphtml-subs-delegated [subscriptions-section="actions"] {
  */
 
 /** Hide actions until state is known. */
-html.i-amphtml-subs-grant-unk [subscriptions-action] {
+body.i-amphtml-subs-grant-unk [subscriptions-action] {
   display: none !important;
 }
 
@@ -103,8 +103,36 @@ amp-subscriptions-dialog {
   cursor: pointer;
 }
 
-html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
+body:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
   display: none;
+}
+
+.i-amphtml-subs-progress {
+  height: 2px;
+  background-color: #ccc;
+  position: relative;
+  margin: 8px;
+  overflow: hidden;
+}
+
+.i-amphtml-subs-progress:after {
+  content: '';
+  background-color: #2196F3;
+  height: 2px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20%;
+  animation: i-amphtml-subs-loading-progress 1500ms ease-in-out infinite;
+}
+
+@keyframes i-amphtml-subs-loading-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(500%);
+  }
 }
 
 /**

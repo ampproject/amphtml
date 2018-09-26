@@ -25,7 +25,7 @@
 </head>
 <body>
   <h1>AMP #0</h1>
-  <amp-accordion>
+  <amp-accordion animate expand-single-section>
     <section>
       <h2 tabindex="0">Section 1</h2>
       <div>
@@ -63,32 +63,15 @@
     </section>
   </amp-accordion>
 
-<h1>amp-image-lightbox in accordion header test</h1>
-  <amp-accordion>
-    <section expanded>
-      <header>
-        <h4>Section 1</h4>
-        <amp-img
-           on="tap:lightbox1"
-           role="button"
-           tabindex="0"
-           src="https://picsum.photos/1600/900"
-           alt="Picture of a dog"
-           layout="fixed"
-           width="400" height="300">
-        </amp-img>
-      </header>
-      <div>
-        <p>Bunch of awesome content.</p>
-      </div>
-    </section>
+  <h1>AMP Accordion Media Query Test</h1>
+
+  <amp-accordion media="(min-width: 600px)">
     <section>
-      <div>
-        <h4>Section 2</h4>
-      </div>
-      <div>Bunch of even more awesome content. This time in a <code>&lt;div&gt;</code>.</div>
+      <h1>
+        Title
+      </h1>
+      <p>Bunch of awesome content</p>
     </section>
-   </amp-accordion>
-   <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+  </amp-accordion>
 </body>
 </html>

@@ -17,8 +17,11 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
-import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
-import {makeBodyVisible} from './style-installer';
+import {
+  getServiceForDocDeprecated,
+  registerServiceBuilderForDoc,
+} from './service';
+import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
 /**
@@ -43,7 +46,8 @@ const resolved = Promise.resolve();
  */
 function getChunkServiceForDoc_(nodeOrAmpDoc) {
   registerServiceBuilderForDoc(nodeOrAmpDoc, 'chunk', Chunks);
-  return getServiceForDoc(nodeOrAmpDoc, 'chunk');
+  // Uses getServiceForDocDeprecated() since Chunks is a startup service.
+  return getServiceForDocDeprecated(nodeOrAmpDoc, 'chunk');
 }
 
 /**
@@ -106,6 +110,9 @@ export function deactivateChunking() {
   deactivated = true;
 }
 
+/**
+ * @visibleForTesting
+ */
 export function activateChunkingForTesting() {
   deactivated = false;
 }
@@ -259,7 +266,7 @@ class StartupTask extends Task {
   /** @override */
   onTaskError_(unusedError) {
     // Startup tasks run early in init. All errors should show the doc.
-    makeBodyVisible(self.document);
+    makeBodyVisibleRecovery(self.document);
   }
 
   /** @override */
@@ -452,6 +459,9 @@ class Chunks {
  */
 export function onIdle(win, minimumTimeRemaining, timeout, fn) {
   const startTime = Date.now();
+  /**
+   * @param {!IdleDeadline} info
+   */
   function rIC(info) {
     if (info.timeRemaining() < minimumTimeRemaining) {
       const remainingTimeout = timeout - (Date.now() - startTime);

@@ -23,10 +23,13 @@ import {
 describes.fakeWin('amp-story-store-service', {amp: true}, env => {
   let requestService;
   let storyElement;
+  let bookendElement;
   let xhrMock;
 
   beforeEach(() => {
     storyElement = env.win.document.createElement('div');
+    bookendElement = env.win.document.createElement('amp-story-bookend');
+    storyElement.appendChild(bookendElement);
     env.win.document.body.appendChild(storyElement);
     requestService = new AmpStoryRequestService(env.win, storyElement);
     xhrMock = sandbox.mock(requestService.xhr_);
@@ -44,7 +47,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
   it('should use the URL provided in the attribute to load the config', () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
-    storyElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
     xhrMock.expects('fetchJson')
         .withExactArgs(
             bookendUrl,
@@ -67,7 +70,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     const bookendUrl = 'https://publisher.com/bookend';
     const fetchedConfig = 'amazingConfig';
 
-    storyElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
     xhrMock.expects('fetchJson')
         .resolves({
           ok: true,
@@ -86,7 +89,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
   it('should fetch the bookend config once if called multiple times', () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
-    storyElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
     xhrMock.expects('fetchJson')
         .resolves({
           ok: true,

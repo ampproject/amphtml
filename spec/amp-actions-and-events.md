@@ -28,7 +28,6 @@ eventName:targetId[.methodName[(arg1=value, arg2=value)]]
 
 See the table below for descriptions of each part of the syntax.
 
-
 <table>
   <tr>
     <th width="30%">Syntax</th>
@@ -233,6 +232,11 @@ event.index</pre></td>
     <th width="40%">Data</th>
   </tr>
   <tr>
+    <td><code>firstPlay</code>(low-trust)</td>
+    <td>Fired the first time the video is played by the user. On autoplay videos, this is fired as soon as the user interacts with the video. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td></td>
+  </tr>
+  <tr>
     <td><code>timeUpdate</code>(low-trust)</td>
     <td>Fired when the playing position of a video has changed. Frequency of the event is controlled by AMP and is currently set at 1 second intervals. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
     <td><code>{time, percent}</code><code>time</code> indicates the current time in seconds, <code>percent</code> is a number between 0 and 1 and indicates current position as percentage of total time.</td>
@@ -297,6 +301,10 @@ event.response</pre></td>
     <td>Toggles the visibility of the target element.</td>
   </tr>
   <tr>
+    <td><code>toggleClass(class=STRING, force=BOOLEAN)</code></td>
+    <td>Toggles class of the target element. <code>force</code> is optional, and if defined, it ensures that class would only be added but not removed if set to <code>true</code>, and only removed but not added if set to <code>false</code>.</td>
+  </tr>
+  <tr>
     <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>
     <td>Scrolls an element into view with a smooth animation. If defined,
     <code>duration</code> specifies the length of the animation in milliseconds
@@ -311,6 +319,22 @@ event.response</pre></td>
     on another element (usually parent element). We strongly advise against
     losing focus by focusing on <code>body</code>/<code>documentElement</code>
     for accessibility reasons.</td>
+  </tr>
+</table>
+
+### amp-audio
+<table>
+  <tr>
+    <th width="20%">Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
+  </tr>
+  <tr>
+    <td><code>pause</code></td>
+    <td>Pauses the audio. Is a no-op if the <code>&lt;amp-audio></code> element is a descendant of <code>&lt;amp-story></code>.</td>
   </tr>
 </table>
 
@@ -496,6 +520,10 @@ The actions below are supported in the following AMP video elements: `amp-video`
     <th>Description</th>
   </tr>
   <tr>
+    <td><code>clear</code></td>
+    <td>Clears any values in the form's inputs.</td>
+  </tr>
+  <tr>
     <td><code>submit</code></td>
     <td>Submits the form.</td>
   </tr>
@@ -526,6 +554,14 @@ actions that apply to the whole document.
   <tr>
     <td><code>print</code></td>
     <td>Opens the Print Dialog to print the current page.</td>
+  </tr>
+  <tr>
+    <td>scrollTo(id=STRING, duration=INTEGER, position=STRING)</td>
+    <td>Scrolls to the provided element ID on the current page.</td>
+  </tr>
+  <tr>
+    <td>optoutOfCid</td>
+    <td>Opts out of Client ID generation for all scopes.</td>
   </tr>
   <tr>
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>
