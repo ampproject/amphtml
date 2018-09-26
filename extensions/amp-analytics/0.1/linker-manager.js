@@ -113,10 +113,8 @@ export class LinkerManager {
           this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
 
-    const linkersFinalPromise = Promise.all(this.allLinkerPromises_);
-    this.enableFormSupport_(linkersFinalPromise);
-
-    return linkersFinalPromise;
+    return Promise.all(this.allLinkerPromises_)
+        .then(this.enableFormSupport_.bind(this));
   }
 
   /**
@@ -273,23 +271,16 @@ export class LinkerManager {
   /**
    * Add data to any existing forms, and listen for any new forms that may be
    * created.
-   * @param {Promise} linkersFinalPromise
    */
-  enableFormSupport_(linkersFinalPromise) {
-    // Wait for all linker macros to finish resolving.
-    linkersFinalPromise.then(() => {
-      const doc = this.ampdoc_.getRootNode();
+  enableFormSupport_() {
+    const doc = this.ampdoc_.getRootNode();
 
-      // Maybe a new form has been added.
-      doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
-        this.maybeAddDataToForms_(doc.querySelectorAll('form'));
-      });
-
-      const forms = doc.querySelectorAll('form');
-      iterateCursor(forms, form => {
-        this.addDataToForm_(form);
-      });
+    // Maybe a new form has been added.
+    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.maybeAddDataToForms_(doc.querySelectorAll('form'));
     });
+
+    this.maybeAddDataToForms_(doc.querySelectorAll('form'));
   }
 
   /**
@@ -299,7 +290,7 @@ export class LinkerManager {
    */
   maybeAddDataToForms_(forms) {
     iterateCursor(forms, form => {
-      if (form.linkerIds_ && form.linkerIds_[this.uid_]) {
+      if (form['linkerIds'] && form['linkerIds'][this.uid_]) {
         return;
       }
 
@@ -318,16 +309,17 @@ export class LinkerManager {
         'name': key,
         'value': this.resolvedLinkers_[key],
       });
+
       const inputEl = createElementWithAttributes(
-          /** @type {!Document} */ (this.ampdoc_.getRootNode()),
+          /** @type {!Document} */ (form.ownerDocument),
           'input', attrs);
       form.appendChild(inputEl);
     });
 
     // Add unique id so that we are able to track which forms have already
     // been modified.
-    form.linkerIds_ = form.linkerIds_ || {};
-    form.linkerIds_[this.uid_] = true;
+    form['linkerIds'] = form['linkerIds'] || {};
+    form['linkerIds'][this.uid_] = true;
   }
 }
 
