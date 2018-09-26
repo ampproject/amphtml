@@ -28,6 +28,7 @@ import {UMENGANALYTICS_CONFIG} from './vendors/umenganalytics';
 import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics';
 import {BURT_CONFIG} from './vendors/burt';
 import {BYSIDE_CONFIG} from './vendors/byside';
+import {CATCHPOINT_CONFIG} from './vendors/catchpoint';
 import {CHARTBEAT_CONFIG} from './vendors/chartbeat';
 import {CLICKY_CONFIG} from './vendors/clicky';
 import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
@@ -169,6 +170,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'baiduanalytics': BAIDUANALYTICS_CONFIG,
   'burt': BURT_CONFIG,
   'byside': BYSIDE_CONFIG,
+  'catchpoint': CATCHPOINT_CONFIG,
   'chartbeat': CHARTBEAT_CONFIG,
   'clicky': CLICKY_CONFIG,
   'colanalytics': COLANALYTICS_CONFIG,
