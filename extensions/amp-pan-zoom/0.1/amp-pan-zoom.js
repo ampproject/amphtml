@@ -891,15 +891,11 @@ export class AmpPanZoom extends AMP.BaseElement {
         this.posX_ = newPosX;
         this.posY_ = newPosY;
         this.updatePanZoom_();
-        this.triggerTransformEnd_(newScale, newPosX, newPosY);
       });
     } else {
       this.scale_ = newScale;
       this.posX_ = newPosX;
       this.posY_ = newPosY;
-      return this.updatePanZoom_().then(() => {
-        this.triggerTransformEnd_(newScale, newPosX, newPosY);
-      });
     }
   }
 
