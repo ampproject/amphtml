@@ -55,7 +55,7 @@ exports.exec = function(cmd, options) {
  * @param {<Object>} options
  */
 exports.execScriptAsync = function(script, options) {
-  return childProcess.spawn('sh', ['-c', script], options);
+  return childProcess.spawn(shellCmd, [shellFlag, script], options);
 };
 
 /**
