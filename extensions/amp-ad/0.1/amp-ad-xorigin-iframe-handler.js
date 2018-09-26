@@ -36,7 +36,7 @@ import {
 } from '../../../src/iframe-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getData, loadPromise} from '../../../src/event-helper';
+import {getData} from '../../../src/event-helper';
 import {
   getExperimentBranch,
   isExperimentOn,
@@ -181,7 +181,7 @@ export class AmpAdXOriginIframeHandler {
         }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
-    const iframeLoadPromise = loadPromise(this.iframe).then(() => {
+    const iframeLoadPromise = this.baseInstance_.loadPromise(this.iframe).then(() => {
       // Wait just a little to allow `no-content` message to arrive.
       if (this.iframe) {
         // Chrome does not reflect the iframe readystate.
