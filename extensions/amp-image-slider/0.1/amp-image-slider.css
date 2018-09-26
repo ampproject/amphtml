@@ -66,15 +66,25 @@ amp-image-slider amp-img > img {
   right: 0 !important;
   bottom: 0 !important;
   left: 0 !important;
-  z-index: 2 !important;
+  z-index: 3 !important;
 }
 
 .i-amphtml-image-slider-bar-stick {
-  width: 0 !important;
+  width: 20% !important;
   height: 100% !important;
+  cursor: col-resize !important;
+}
+.i-amphtml-image-slider-bar-stick::before {
+  content: '' !important;
+  position: absolute !important;
+  display: block !important;
+  top: 0 !important;
+  left: 50% !important;
+  bottom: 0 !important;
   border: 0.5px solid white !important;
   box-sizing: border-box !important;
-  opacity: 0.5;
+  opacity: 0.5 !important;
+  transform: translate(-50%, 0) !important;
 }
 
 .i-amphtml-image-slider-label-wrapper {
