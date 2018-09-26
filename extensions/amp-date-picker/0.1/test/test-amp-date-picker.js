@@ -392,5 +392,25 @@ describes.realWin('amp-date-picker', {
         });
       });
     });
+
+    describe('src attribute', () => {
+      it('should set highlighted and blocked dates', () => {
+        const {element} = createDatePicker({
+          src: 'http://localhost:9876/date-picker/src-data/get',
+        });
+
+        const impl = element.implementation_;
+
+        sandbox.stub(impl, 'fetchSrc_').resolves({
+          blocked: ['2018-01-03'],
+          highlighted: ['2018-01-04'],
+        });
+
+        return impl.setupSrcAttributes_().then(() => {
+          expect(impl.blocked_.contains('2018-01-03')).to.be.true;
+          expect(impl.highlighted_.contains('2018-01-04')).to.be.true;
+        });
+      });
+    });
   });
 });
