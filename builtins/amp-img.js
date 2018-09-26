@@ -50,6 +50,9 @@ export class AmpImg extends BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
+
+    /** @private {?Element} */
+    this.blurryPlaceholder_ = null;
   }
 
   /** @override */
@@ -134,6 +137,19 @@ export class AmpImg extends BaseElement {
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);
     this.element.appendChild(this.img_);
+
+    const placeholder = this.getPlaceholder();
+    if (placeholder &&
+      placeholder.classList.contains('i-amphtml-blur') &&
+      isExperimentOn(this.win, 'blurry-placeholder')) {
+      this.blurryPlaceholder_ = placeholder;
+    }
+
+    // The image must be hidden until it is fully loaded so it does not show up
+    // behind the transparent edges of the blurred placeholder. See #18113.
+    if (this.blurryPlaceholder_) {
+      setImportantStyles(this.img_, {'visibility': 'hidden'});
+    }
   }
 
   /** @override */
@@ -173,10 +189,9 @@ export class AmpImg extends BaseElement {
 
   /** @override **/
   firstLayoutCompleted() {
-    const placeholder = this.getPlaceholder();
-    if (placeholder && placeholder.classList.contains('i-amphtml-blur') &&
-      isExperimentOn(this.win, 'blurry-placeholder')) {
-      setImportantStyles(placeholder, {'opacity': 0});
+    if (this.blurryPlaceholder_) {
+      setImportantStyles(this.blurryPlaceholder_, {'opacity': 0});
+      setImportantStyles(this.img_, {'visibility': 'visible'});
     } else {
       this.togglePlaceholder(false);
     }
