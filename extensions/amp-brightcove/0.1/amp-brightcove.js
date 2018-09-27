@@ -192,6 +192,8 @@ class AmpBrightcove extends AMP.BaseElement {
 
     if (redispatch(element, eventType, {
       'ready': VideoEvents.LOAD,
+      'playing': VideoEvents.PLAYING,
+      'pause': VideoEvents.PAUSE,
       'ended': VideoEvents.ENDED,
       'ads-ad-started': VideoEvents.AD_START,
       'ads-ad-ended': VideoEvents.AD_END,
