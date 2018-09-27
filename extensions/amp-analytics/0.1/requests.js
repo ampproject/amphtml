@@ -238,11 +238,11 @@ export class RequestHandler {
   /**
    * Construct the final requestUrl by calling the batch plugin function
    * @param {string} baseUrl
-   * @param {!Array<!Promise<batchSegmentDef>>} batchSegmentsPromise
+   * @param {!Array<!Promise<batchSegmentDef>>} batchSegmentsPromises
    * @return {!Promise<string>}
    */
-  constructBatchSegments_(baseUrl, batchSegmentsPromise) {
-    return Promise.all(batchSegmentsPromise).then(batchSegments => {
+  constructBatchSegments_(baseUrl, batchSegmentsPromises) {
+    return Promise.all(batchSegmentsPromises).then(batchSegments => {
       try {
         return this.batchingPlugin_(baseUrl, batchSegments);
       } catch (e) {
@@ -371,7 +371,7 @@ export function expandPostMessage(
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
  * @param {!Object=} opt_whitelist
- * @return {!Promise<!JsonObject>}
+ * @return {!Promise<!Object>}
  * @private
  */
 function expandExtraUrlParams(
@@ -395,9 +395,7 @@ function expandExtraUrlParams(
       requestPromises.push(request);
     }
   }
-  return Promise.all(requestPromises).then(() => {
-    return params;
-  });
+  return Promise.all(requestPromises).then(() => params);
 }
 
 /**
@@ -406,6 +404,7 @@ function expandExtraUrlParams(
  * @param {string} baseUrl
  * @param {!Array<!batchSegmentDef>} batchSegments
  * @return {Promise<string>}
+ * @private
  */
 function defaultBatchPlugin(baseUrl, batchSegments) {
   const extraUrlParamsStr = batchSegments
