@@ -284,7 +284,8 @@ export class PlatformStore {
       this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
     } else {
       this.onGrantStateResolvedCallbacks_.add(() => {
-        if (this.grantStatusEntitlement_.granted
+        // Grant entitlement only if subscriber
+        if (this.grantStatusEntitlement_.isSubscriber()
             || this.areAllPlatformsResolved_()) {
           this.grantStatusEntitlementPromise_.resolve(
               this.grantStatusEntitlement_);
