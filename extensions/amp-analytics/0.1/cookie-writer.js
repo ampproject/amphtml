@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {isObject, toWin} from '../../../src/types';
-import {hasOwn, map} from '../../../src/utils/object';
-import {user} from '../../../src/log';
-import {Services} from '../../../src/services';
-import {setCookie} from '../../../src/cookies';
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
-import {isInFie} from '../../../src/friendly-iframe-embed';
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
+import {hasOwn} from '../../../src/utils/object';
+import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isObject} from '../../../src/types';
 import {isProxyOrigin} from '../../../src/url';
+import {setCookie} from '../../../src/cookies';
+import {user} from '../../../src/log';
 
 
 const TAG = 'amp-analytics/cookie-writer';
@@ -30,7 +30,7 @@ const TAG = 'amp-analytics/cookie-writer';
 const EXPAND_WHITELIST = {
   'QUERY_PARAM': true,
   // TODO: Add linker_param
-}
+};
 
 export class CookieWriter {
 
@@ -39,7 +39,7 @@ export class CookieWriter {
    * @param {!Element} element
    * @param {!JsonObject} config
    */
-  constructor (win, element, config) {
+  constructor(win, element, config) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -120,15 +120,15 @@ export class CookieWriter {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_.expandStringAsync(cookieStr,
-      /* TODO: Add opt_binding */ undefined, EXPAND_WHITELIST).then(
-      cookieValue => {
+        /* TODO: Add opt_binding */ undefined, EXPAND_WHITELIST).then(
+        cookieValue => {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
-        if (cookieValue) {
-          const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
-          setCookie(this.win_, cookieId, cookieValue, expireDate);
-        }
-    }).catch(e => {
+          if (cookieValue) {
+            const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
+            setCookie(this.win_, cookieId, cookieValue, expireDate);
+          }
+        }).catch(e => {
       user().error(TAG, 'Error expanding cookie string', e);
     });
   }

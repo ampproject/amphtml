@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CookieWriter} from '../cookie-writer';
 import * as cookie from '../../../../src/cookies';
+import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 
-const TAG = '[amp-analytics/cookie-writer]'
+const TAG = '[amp-analytics/cookie-writer]';
 
 describes.realWin('amp-analytics.cookie-writer', {
   amp: true,
@@ -30,18 +30,16 @@ describes.realWin('amp-analytics.cookie-writer', {
   let doc;
   let setCookieSpy;
   let element;
-  let ampdoc;
 
   beforeEach(() => {
     sandbox = env.sandbox;
     setCookieSpy = sandbox.spy();
     win = env.win;
-    ampdoc = env.ampdoc;
     doc = win.document;
     sandbox.stub(cookie, 'setCookie').callsFake(
-      (win, name, value, expirationTime) => {
-        setCookieSpy(name, value);
-    });
+        (win, name, value) => {
+          setCookieSpy(name, value);
+        });
     element = doc.createElement('div');
     doc.body.appendChild(element);
   });
@@ -89,7 +87,7 @@ describes.realWin('amp-analytics.cookie-writer', {
       });
       const mockWin = {
         location: 'https://www-example-com.cdn.ampproject.org',
-      }
+      };
       const cookieWriter = new CookieWriter(mockWin, element, config);
       expect(setCookieSpy).to.not.be.called;
       return cookieWriter.whenReady();
@@ -109,7 +107,7 @@ describes.realWin('amp-analytics.cookie-writer', {
     it('Write cookie', () => {
       const config = dict({
         'writeCookies': {
-          'testId': 'testValue'
+          'testId': 'testValue',
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
@@ -143,7 +141,7 @@ describes.realWin('amp-analytics.cookie-writer', {
       });
       const cookieWriter = new CookieWriter(win, element, config);
       return cookieWriter.whenReady().then(() => {
-        expect(setCookieSpy).to.be.calledTwice;;
+        expect(setCookieSpy).to.be.calledTwice;
         // QUERY_PARAM resolve to empty string
         expect(setCookieSpy).to.be.calledWith('testId', 'pre-');
         // Never try to resolve RANDOM
@@ -177,7 +175,7 @@ describes.realWin('amp-analytics.cookie-writer', {
           'Error: The first argument to QUERY_PARAM, ' +
           'the query string param is required​​​');
       expectAsyncConsoleError('The first argument to QUERY_PARAM, ' +
-          'the query string param is required')
+          'the query string param is required');
       return cookieWriter.whenReady().then(() => {
         // Both cookie value resolve to empty string
         expect(setCookieSpy).to.be.calledOnce;
