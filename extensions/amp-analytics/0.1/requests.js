@@ -216,7 +216,8 @@ export class RequestHandler {
 
     baseUrlTemplatePromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
-      Promise.all([baseUrlPromise, Promise.all(segmentPromises)]).then(results => {
+      Promise.all(
+          [baseUrlPromise, Promise.all(segmentPromises)]).then(results => {
         const baseUrl = results[0];
         const batchSegments = results[1];
         const request = this.batchingPlugin_(baseUrl, batchSegments);
