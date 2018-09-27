@@ -85,6 +85,9 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.endDate_ = '';
 
     /** @private {number} */
+    this.timeleftMs_ = 0;
+
+    /** @private {number} */
     this.timestampMs_ = 0;
 
     /** @private {number} */
@@ -92,9 +95,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     /** @private {number} */
     this.offsetSeconds_ = 0;
-
-    /** @private {number} */
-    this.timeleftMs_ = 0;
 
     /** @private {string} */
     this.locale_ = '';
@@ -123,15 +123,15 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.endDate_ = this.element.getAttribute('end-date');
 
     /** @private {number} */
+    this.timeleftMs_
+       = Number(this.element.getAttribute('timeleft-ms'));
+
+    /** @private {number} */
     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
 
     /** @private {number} */
     this.timestampSeconds_
        = Number(this.element.getAttribute('timestamp-seconds'));
-
-    /** @private {number} */
-    this.timeleftMs_
-       = Number(this.element.getAttribute('timeleft-ms'));
 
     /** @private {number} */
     this.offsetSeconds_
@@ -216,17 +216,17 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     if (this.endDate_) {
       epoch = Date.parse(this.endDate_);
+    } else if (this.timeleftMs_) {
+      epoch = Date.parse(new Date()) + this.timeleftMs_;
     } else if (this.timestampMs_) {
       epoch = this.timestampMs_;
     } else if (this.timestampSeconds_) {
       epoch = this.timestampSeconds_ * 1000;
-    } else if (this.timeleftMs_) {
-      epoch = Date.parse(new Date()) + this.timeleftMs_;
     }
 
     user().assert(!isNaN(epoch),
-        `One of end-date, timestamp-ms, timestamp-seconds,
-        timeleft-ms is required`);
+        `One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds
+         is required`);
     return epoch;
   }
 
