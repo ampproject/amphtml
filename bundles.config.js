@@ -268,6 +268,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-wistia-player', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-wordpress-embed', version: '0.1', type: TYPES.MISC},
   {name: 'amp-position-observer', version: '0.1', type: TYPES.MISC},
   {name: 'amp-orientation-observer', version: '0.1', type: TYPES.MISC},
   {
