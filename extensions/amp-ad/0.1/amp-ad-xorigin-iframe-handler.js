@@ -181,7 +181,8 @@ export class AmpAdXOriginIframeHandler {
         }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
-    const iframeLoadPromise = this.baseInstance_.loadPromise(this.iframe).then(() => {
+    const iframeLoadPromise = this.baseInstance_.loadPromise(this.iframe)
+      .then(() => {
       // Wait just a little to allow `no-content` message to arrive.
       if (this.iframe) {
         // Chrome does not reflect the iframe readystate.
