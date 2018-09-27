@@ -23,13 +23,12 @@ import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {
   appendEncodedParamStringToUrl,
-  parseQueryString,
+  serializeQueryString,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {remove} from '../../../src/utils/array';
 
 const TAG = 'amp-analytics/requests';
 
@@ -45,8 +44,11 @@ export class RequestHandler {
    */
   constructor(ampAnalyticsElement, request, preconnect, transport, isSandbox) {
 
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampAnalyticsElement.getAmpDoc();
+
     /** @const {!Window} */
-    this.win = ampAnalyticsElement.getAmpDoc().win;
+    this.win = this.ampdoc_.win;
 
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
@@ -66,11 +68,11 @@ export class RequestHandler {
     user().assert((this.batchPluginId_ ? this.batchInterval_ : true),
         'Invalid request: batchPlugin cannot be set on non-batched request');
 
-    /** @const {?function(string, !Array<!batchSegmentDef>)} */
+    /** @const {function(string, !Array<!batchSegmentDef>):!Promise<string>} */
     this.batchingPlugin_ = this.batchPluginId_
       ? user().assert(BatchingPluginFunctions[this.batchPluginId_],
           `Invalid request: unsupported batch plugin ${this.batchPluginId_}`)
-      : null;
+      : defaultBatchPlugin;
 
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
@@ -84,9 +86,6 @@ export class RequestHandler {
 
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
-
-    /** @private {!Array<!Promise<string>>}*/
-    this.extraUrlParamsPromise_ = [];
 
     /** @private {!Array<!Promise<!batchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
@@ -130,10 +129,7 @@ export class RequestHandler {
    * @param {!./variables.ExpansionOptions} expansionOption
    */
   send(configParams, trigger, expansionOption) {
-    const isImportant = trigger['important'];
-
-    const isImmediate =
-        (trigger['important'] === true) || (!this.batchInterval_);
+    const isImportant = (trigger['important'] === true);
     if (!this.reportRequest_ && !isImportant) {
       // Ignore non important trigger out reportWindow
       return;
@@ -141,8 +137,6 @@ export class RequestHandler {
 
     this.queueSize_++;
     this.lastTrigger_ = trigger;
-    const triggerParams = trigger['extraUrlParams'];
-
     const bindings = this.variableService_.getMacros();
     bindings['RESOURCE_TIMING'] = getResourceTiming(
         this.win, trigger['resourceTimingSpec'], this.startTime_);
@@ -157,32 +151,19 @@ export class RequestHandler {
       });
     }
 
-    const extraUrlParamsPromise = getExtraUrlParams(
-        this.variableService_, configParams, triggerParams, expansionOption)
-        .then(expandExtraUrlParams => {
-          // Construct the extraUrlParamsString: Remove null param and encode
-          // component
-          const expandedExtraUrlParamsStr = getExtraUrlParamsString(
-              this.variableService_, expandExtraUrlParams);
-          return this.urlReplacementService_.expandUrlAsync(
-              expandedExtraUrlParamsStr, bindings, this.whiteList_);
+    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    const timestamp = this.win.Date.now();
+    const batchSegmentPromise = expandExtraUrlParams(
+        this.ampdoc_, params, expansionOption, bindings, this.whiteList_)
+        .then(params => {
+          return dict({
+            'trigger': trigger['on'],
+            'timestamp': timestamp,
+            'extraUrlParams': params,
+          });
         });
-
-    if (this.batchingPlugin_) {
-      const batchSegment = dict({
-        'trigger': trigger['on'],
-        'timestamp': this.win.Date.now(),
-        'extraUrlParams': null,
-      });
-      this.batchSegmentPromises_.push(extraUrlParamsPromise.then(str => {
-        batchSegment['extraUrlParams'] =
-                parseQueryString(str);
-        return batchSegment;
-      }));
-    }
-
-    this.extraUrlParamsPromise_.push(extraUrlParamsPromise);
-    this.trigger_(isImmediate);
+    this.batchSegmentPromises_.push(batchSegmentPromise);
+    this.trigger_(isImportant || !this.batchInterval_);
   }
 
   /**
@@ -217,7 +198,6 @@ export class RequestHandler {
     if (isImmediate) {
       // If not batched, or batchInterval scheduler schedule trigger immediately
       this.fire_();
-      return;
     }
   }
 
@@ -227,7 +207,6 @@ export class RequestHandler {
    */
   fire_() {
     const {
-      extraUrlParamsPromise_: extraUrlParamsPromise,
       baseUrlTemplatePromise_: baseUrlTemplatePromise,
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: batchSegmentsPromise,
@@ -238,15 +217,8 @@ export class RequestHandler {
     baseUrlTemplatePromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
       baseUrlPromise.then(baseUrl => {
-        let requestUrlPromise;
-        if (this.batchingPlugin_) {
-          requestUrlPromise =
-              this.constructBatchSegments_(baseUrl, batchSegmentsPromise);
-        } else {
-          requestUrlPromise =
-              constructExtraUrlParamStrs(baseUrl, extraUrlParamsPromise);
-        }
-        requestUrlPromise.then(request => {
+        this.constructBatchSegments_(
+            baseUrl, batchSegmentsPromise).then(request => {
           if (!request) {
             user().error(TAG, 'Request not sent. Contents empty.');
             return;
@@ -267,12 +239,9 @@ export class RequestHandler {
    * Construct the final requestUrl by calling the batch plugin function
    * @param {string} baseUrl
    * @param {!Array<!Promise<batchSegmentDef>>} batchSegmentsPromise
+   * @return {!Promise<string>}
    */
   constructBatchSegments_(baseUrl, batchSegmentsPromise) {
-    dev().assert(this.batchingPlugin_ &&
-        typeof this.batchingPlugin_ == 'function', 'Should never call ' +
-        'constructBatchSegments_ with invalid batchingPlugin function');
-
     return Promise.all(batchSegmentsPromise).then(batchSegments => {
       try {
         return this.batchingPlugin_(baseUrl, batchSegments);
@@ -292,7 +261,6 @@ export class RequestHandler {
     this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
-    this.extraUrlParamsPromise_ = [];
     this.batchSegmentPromises_ = [];
     this.lastTrigger_ = null;
   }
@@ -362,7 +330,7 @@ export class RequestHandler {
 
 /**
  * Expand the postMessage string
- * @param {!AMP.BaseElement} baseInstance
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} msg
  * @param {?JsonObject} configParams
  * @param {!JsonObject} trigger
@@ -370,10 +338,9 @@ export class RequestHandler {
  * @return {Promise<string>}
  */
 export function expandPostMessage(
-  baseInstance, msg, configParams, trigger, expansionOption) {
-  const variableService = variableServiceFor(baseInstance.win);
-  const urlReplacementService =
-      Services.urlReplacementsForDoc(baseInstance.element);
+  ampdoc, msg, configParams, trigger, expansionOption) {
+  const variableService = variableServiceFor(ampdoc.win);
+  const urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
 
   const bindings = variableService.getMacros();
   expansionOption.freezeVar('extraUrlParams');
@@ -387,32 +354,32 @@ export function expandPostMessage(
     return basePromise;
   }
 
-  //return base url with the appended extra url params;
-  const extraUrlParamsStrPromise = getExtraUrlParams(
-      variableService, configParams, trigger['extraUrlParams'], expansionOption)
-      .then(params => {
-        const str = getExtraUrlParamsString(variableService, params);
-        return urlReplacementService.expandUrlAsync(str, bindings);
-      });
-
   return basePromise.then(expandedMsg => {
-    return constructExtraUrlParamStrs(expandedMsg, [extraUrlParamsStrPromise]);
+    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    //return base url with the appended extra url params;
+    return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
+        .then(extraUrlParams => {
+          return defaultBatchPlugin(expandedMsg, [{extraUrlParams}]);
+        });
   });
 }
 
 /**
  * Function that handler extraUrlParams from config and trigger.
- * @param {!./variables.VariableService} variableService
- * @param {?JsonObject} configParams
- * @param {?JsonObject} triggerParams
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Object} params
  * @param {!./variables.ExpansionOptions} expansionOption
+ * @param {!Object} bindings
+ * @param {!Object=} opt_whitelist
  * @return {!Promise<!JsonObject>}
  * @private
  */
-function getExtraUrlParams(
-  variableService, configParams, triggerParams, expansionOption) {
+function expandExtraUrlParams(
+  ampdoc, params, expansionOption, bindings, opt_whitelist) {
+  const variableService = variableServiceFor(ampdoc.win);
+  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
+
   const requestPromises = [];
-  const params = map();
   // Don't encode param values here,
   // as we'll do it later in the getExtraUrlParamsString call.
   const option = new ExpansionOptions(
@@ -420,14 +387,12 @@ function getExtraUrlParams(
       expansionOption.iterations,
       true /* noEncode */);
   // Add any given extraUrlParams as query string param
-  if (configParams || triggerParams) {
-    Object.assign(params, configParams, triggerParams);
-    for (const k in params) {
-      if (typeof params[k] == 'string') {
-        requestPromises.push(
-            variableService.expandTemplate(params[k], option)
-                .then(value => { params[k] = value; }));
-      }
+  for (const k in params) {
+    if (typeof params[k] == 'string') {
+      const request = variableService.expandTemplate(params[k], option)
+          .then(v => urlReplacements.expandUrlAsync(v, bindings, opt_whitelist))
+          .then(value => params[k] = value);
+      requestPromises.push(request);
     }
   }
   return Promise.all(requestPromises).then(() => {
@@ -436,40 +401,22 @@ function getExtraUrlParams(
 }
 
 /**
- * Handle the params map and form the final extraUrlParams string
- * @param {!./variables.VariableService} variableService
- * @param {!Object} params
- * @return {string}
- */
-function getExtraUrlParamsString(variableService, params) {
-  const s = [];
-  for (const k in params) {
-    const v = params[k];
-    if (v == null) {
-      continue;
-    } else {
-      const sv = variableService.encodeVars(k, v);
-      s.push(`${encodeURIComponent(k)}=${sv}`);
-    }
-  }
-  return s.join('&');
-}
-
-/**
- * Construct the final requestUrl with baseUrl and extraUrlParams
+ * The default way for merging batch segments
+ *
  * @param {string} baseUrl
- * @param {!Array<!Promise<string>>} extraUrlParamStrsPromise
+ * @param {!Array<!batchSegmentDef>} batchSegments
+ * @return {Promise<string>}
  */
-function constructExtraUrlParamStrs(baseUrl, extraUrlParamStrsPromise) {
-  return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
-    remove(paramStrs, item => !item);
-    const extraUrlParamsStr = paramStrs.join('&');
-    let requestUrl;
-    if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
-      requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
-    } else {
-      requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
-    }
-    return requestUrl;
-  });
+function defaultBatchPlugin(baseUrl, batchSegments) {
+  const extraUrlParamsStr = batchSegments
+      .map(item => serializeQueryString(item.extraUrlParams))
+      .filter(queryString => !!queryString)
+      .join('&');
+  let requestUrl;
+  if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
+    requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
+  } else {
+    requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
+  }
+  return Promise.resolve(requestUrl);
 }

@@ -442,16 +442,11 @@ describes.realWin('Requests', {amp: 1}, env => {
 
   describe('expandPostMessage', () => {
     let expansionOptions;
-    let analyticsInstanceMock;
     let params;
     beforeEach(() => {
       expansionOptions = new ExpansionOptions({
         'teste1': 'TESTE1',
       });
-      analyticsInstanceMock = {
-        win: env.win,
-        element: analyticsMock,
-      };
       params = {
         'e1': '${teste1}',
         'e2': 'teste2',
@@ -460,7 +455,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
     it('should expand', () => {
       return expandPostMessage(
-          analyticsInstanceMock,
+          ampdoc,
           'test foo 123 ... ${teste1}',
           undefined,
           {},
@@ -471,13 +466,13 @@ describes.realWin('Requests', {amp: 1}, env => {
 
     it('should replace not append ${extraUrlParams}', () => {
       const replacePromise = expandPostMessage(
-          analyticsInstanceMock,
+          ampdoc,
           'test ${extraUrlParams} foo',
           params, /* configParams */
           {}, /* trigger */
           expansionOptions);
       const appendPromise = expandPostMessage(
-          analyticsInstanceMock,
+          ampdoc,
           'test foo',
           params, /* configParams */
           {}, /* trigger */
