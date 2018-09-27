@@ -40,7 +40,6 @@ import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
-import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
@@ -100,13 +99,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
-
-    /**
-     * Maximum time (since epoch) to report resource timing metrics.
-     * We stop reporting after 1 minute.
-     * @private @const {number}
-     */
-    this.maxResourceTimingReportingTime_ = Date.now() + (60 * 1000);
   }
 
   /** @override */
@@ -521,30 +513,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JsonObject} trigger JSON config block that resulted in this event.
-   * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
-   * @private
-   */
-  getDynamicVariableBindings_(trigger, expansionOptions) {
-    const dynamicBindings = {};
-    const resourceTimingSpec = trigger['resourceTimingSpec'];
-    if (resourceTimingSpec) {
-      // Check if we're done reporting resource timing metrics before binding
-      // before binding the resource timing variable.
-      if (!resourceTimingSpec['done'] &&
-          Date.now() < this.maxResourceTimingReportingTime_) {
-        const binding = 'RESOURCE_TIMING';
-        const analyticsVar = 'resourceTiming';
-        dynamicBindings[binding] =
-            serializeResourceTiming(this.win, resourceTimingSpec);
-        expansionOptions.vars[analyticsVar] = binding;
-      }
-    }
-    return dynamicBindings;
-  }
-
-  /**
    * @param {RequestHandler} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
@@ -556,11 +524,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
-    const dynamicBindings =
-        this.getDynamicVariableBindings_(trigger, expansionOptions);
-    request.send(
-        this.config_['extraUrlParams'], trigger, expansionOptions,
-        dynamicBindings);
+    request.send(this.config_['extraUrlParams'], trigger, expansionOptions);
   }
 
   /**
@@ -577,12 +541,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
     expandPostMessage(
-        this,
-        msg,
-        this.config_['extraUrlParams'],
-        trigger['extraUrlParams'],
-        expansionOptions,
-        this.getDynamicVariableBindings_(trigger, expansionOptions))
+        this, msg, this.config_['extraUrlParams'], trigger, expansionOptions)
         .then(message => {
           if (isIframed(this.win)) {
             // Only post message with explict `parentPostMessage` to inabox host
